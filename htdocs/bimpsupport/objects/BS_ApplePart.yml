@@ -10,6 +10,9 @@ labels:
     is_female: 1
     
 fields: 
+    id_sav: 
+        label: SAV
+        type: id_parent
     label: 
         label: Libellé
     part_number:

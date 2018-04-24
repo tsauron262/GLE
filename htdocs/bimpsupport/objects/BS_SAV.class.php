@@ -1,5 +1,6 @@
 <?php
-require_once DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php";
+
+require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
 
 class BS_SAV extends BimpObject
 {
@@ -18,18 +19,6 @@ class BS_SAV extends BimpObject
     const BS_SAV_DEVIS_REFUSE = 6;
     const BS_SAV_A_RESTITUER = 9;
     const BS_SAV_FERME = 999;
-    
-    
-    public function __construct($db){
-        parent::__construct("bimpsupport", get_class($this));
-    }
-    public function getNomUrl($withpicto = true){
-        $statut = self::$status_list[$this->data["status"]];
-        return "<a href='".$this->getUrl()."'>".'<span class="'.implode(" ", $statut['classes']).'"><i class="fa fa-'.$statut['icon'].' iconLeft"></i>'.$this->ref.'</span></a>';
-    }
-    public function getRef(){
-        return $this->data["ref"];
-    }
 
     public static $status_list = array(
         self::BS_SAV_NEW           => array('label' => 'Nouveau', 'icon' => 'file-o', 'classes' => array('info')),
@@ -65,6 +54,21 @@ class BS_SAV extends BimpObject
         2 => array('label' => 'Bon état général', 'classes' => array('info')),
         3 => array('label' => 'Usagé', 'classes' => array('warning'))
     );
+
+    public function __construct($db)
+    {
+        parent::__construct("bimpsupport", get_class($this));
+    }
+
+    public function getNomUrl($withpicto = true)
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+        
+        $statut = self::$status_list[$this->data["status"]];
+        return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="fa fa-' . $statut['icon'] . ' iconLeft"></i>' . $this->ref . '</span></a>';
+    }
 
     public function getClient_contactsArray()
     {
@@ -291,7 +295,7 @@ class BS_SAV extends BimpObject
         }
 
         $object_data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: \'' . $this->id . '\'}';
-        $onclick = 'setObjectAction($(this), '.$object_data.', \'testAction\', {test: 1}, \'restitute\')';
+        $onclick = 'setObjectAction($(this), ' . $object_data . ', \'testAction\', {test: 1}, \'restitute\')';
         $buttons[] = array(
             'label'   => 'Test action',
             'icon'    => 'file-text',
@@ -967,10 +971,9 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         return $errors;
     }
 
-    // Action: 
-    
+    // Action:
     // Overrides: 
-    
+
     public function create()
     {
         $this->data['ref'] = $this->getNextNumRef();

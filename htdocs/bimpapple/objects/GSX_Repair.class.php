@@ -72,7 +72,15 @@ class GSX_Repair extends BimpObject
     public function import($id_sav, $number, $numberType)
     {
         $this->reset();
-        
+
+        if (is_null($this->gsx)) {
+            $this->gsx = new GSX($this->isIphone);
+        }
+
+        if (!$this->gsx->connect) {
+            return array('Echec de la connexion à GSX');
+        }
+
         switch ($numberType) {
             case 'repairConfirmationNumber':
                 $this->set('repair_confirm_number', $number);
@@ -91,20 +99,33 @@ class GSX_Repair extends BimpObject
                 $this->isIphone = true;
                 break;
         }
-        
+
         $this->set('id_sav', (int) $id_sav);
+
         $this->load();
-        
+
         if (!$this->isLoaded()) {
+            $this->set('id_sav', (int) $id_sav);
+            $errors = $this->lookup($number, $numberType);
+
+            if (count($errors)) {
+                return $errors;
+            }
+
             return $this->create();
         }
-        
-        return $this->lookup($number, $numberType);
+        $errors[] = 'Cette réparation est déjà enregistrée';
+        $this->lookup($number, $numberType);
+        return $errors;
     }
 
     public function loadPartsPending()
     {
         if (is_null($this->gsx)) {
+            $this->gsx = new GSX($this->isIphone);
+        }
+
+        if (!$this->gsx->connect) {
             return array('Echec de la connexion à GSX');
         }
 
@@ -206,7 +227,11 @@ class GSX_Repair extends BimpObject
     public function lookup($number = null, $number_type = null)
     {
         if (is_null($this->gsx)) {
-            return array('objet GSX absent');
+            $this->gsx = new GSX($this->isIphone);
+        }
+
+        if (!$this->gsx->connect) {
+            return array('Echec de la connexion à GSX');
         }
 
         $n_soap_errors = count($this->gsx->errors['soap']);
@@ -262,12 +287,13 @@ class GSX_Repair extends BimpObject
             $client = 'RepairLookup';
             $requestName = 'RepairLookupRequest';
         }
-        $request = $this->gsx->_requestBuilder($requestName, 'lookupRequestData', $datas);
+        $request = $this->gsx->_requestBuilder($requestName, 'lookupRequestData', $look_up_data);
         $response = $this->gsx->request($request, $client);
 
-        if ((count($this->gsx->errors['soap']) > $n_soap_errors) ||
-                !isset($response[$client . 'Response']['lookupResponseData'])) {
-            return array('Echec de la requête "lookup"');
+        if (count($this->gsx->errors['soap']) > $n_soap_errors) {
+            return $this->gsx->errors['soap'];
+        } else if (!isset($response[$client . 'Response']['lookupResponseData'])) {
+            return array('Echec de la requête "lookup" pour une raison inconnue');
         }
 
         $this->repairLookUp = $response[$client . 'Response']['lookupResponseData']['repairLookup'];
@@ -325,7 +351,7 @@ class GSX_Repair extends BimpObject
         }
 
         $total_from_order = (float) $this->getData('total_from_order');
-        if (is_null($total_from_order) || !$total_from_order) {
+        if ($this->isLoaded() && (is_null($total_from_order) || !$total_from_order)) {
             $this->updateTotalOrder($update);
         }
         if ($update && $this->isLoaded()) {
@@ -362,6 +388,10 @@ class GSX_Repair extends BimpObject
         }
 
         if (is_null($this->gsx)) {
+            $this->gsx = new GSX($this->isIphone);
+        }
+
+        if (!$this->gsx->connect) {
             return array('Echec de la connexion à GSX');
         }
 
@@ -446,6 +476,10 @@ class GSX_Repair extends BimpObject
         }
 
         if (is_null($this->gsx)) {
+            $this->gsx = new GSX($this->isIphone);
+        }
+
+        if (!$this->gsx->connect) {
             return array('Echec de la connexion à GSX');
         }
 
@@ -528,6 +562,10 @@ class GSX_Repair extends BimpObject
         }
 
         if (is_null($this->gsx)) {
+            $this->gsx = new GSX($this->isIphone);
+        }
+
+        if (!$this->gsx->connect) {
             return array('Echec de la connexion à GSX');
         }
 
@@ -607,17 +645,88 @@ class GSX_Repair extends BimpObject
 
         return $this->updateTotalOrder();
     }
-    
+
+    // Rendus HTML: 
+
+    public function renderPartsPendingReturn()
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $html = '';
+        if (!count($this->partsPrending)) {
+            $errors = $this->loadPartsPending();
+            if (count($errors)) {
+                $html .= BimpRender::renderAlerts($errors);
+            } else {
+                if (count($this->gsx->errors['soap'])) {
+                    $html .= '<p class="alert alert-info">Aucun composant en attente de retour n\'a été trouvé. <span class="displaySoapMsg" onclick="$(\'#partsPendingSoapMessages\').slideDown(250);">Voir le message soap</span></p>';
+                    $html .= '<div id="partsPendingSoapMessages" style="margin: 15px 0; padding: 10px; display: none">';
+                    $html .= $this->gsx->getGSXErrorsHtml();
+                    $html .= '</div>';
+                } elseif (!count($this->partsPrending)) {
+                    if ((string) $this->getData('serial_update_confirm_number')) {
+                        $html .= BimpRender::renderAlerts('Numéros de série des composants retournés à jour', 'success');
+                    }
+                    $html .= BimpRender::renderAlerts('Aucun composant en attente de retour', 'info');
+                }
+            }
+        } else {
+            $html .= '<pre>' . print_r($this->partsPrending, 1) . '</pre>';
+        }
+
+        return BimpRender::renderPanel('Composants en attente de retour', $html, '', array(
+                    'type'     => 'default',
+                    'foldable' => true
+        ));
+    }
+
+    // Actions: 
+
+    public function actionImportRepair($data, &$success)
+    {
+        $success = 'Réparation importée avec succès';
+
+        return $this->import($data['id_sav'], $data['import_number'], $data['import_number_type']);
+    }
+
     // Overrides: 
-    
+
     public function create()
     {
+        $serial = (string) $this->getData('serial');
+        if (!$serial) {
+            $sav = $this->getChildObject('sav');
+            if (!is_null($sav) && $sav->isLoaded()) {
+                $equipment = $sav->getChildObject('equipment');
+                if (!is_null($equipment) && $equipment->isLoaded()) {
+                    $serial = $equipment->getData('serial');
+                }
+            }
+        }
+
+        if (!$serial) {
+            return array('N° de série absent');
+        }
+
+        $this->setSerial($serial);
+
         $errors = parent::create();
-        
+
         if (!count($errors)) {
             $errors = $this->lookup();
         }
-        
+
         return $errors;
+    }
+
+    public function fetch($id)
+    {
+        if (parent::fetch($id)) {
+            $this->setSerial($this->getData('serial'));
+            return true;
+        }
+        return false;
     }
 }

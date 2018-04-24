@@ -48,11 +48,6 @@ class BimpObject
     protected $history = array();
     protected $parent = null;
     public $dol_object = null;
-    
-    
-    public function getRef(){
-        return get_class($this)."_".$this->id;
-    }
 
     public static function getInstance($module, $object_name, $id_object = null)
     {
@@ -299,6 +294,31 @@ class BimpObject
             }
         }
         return $property;
+    }
+
+    public function getRef()
+    {
+        if ($this->field_exists('ref')) {
+            return $this->getData('ref');
+        }
+
+        if ($this->field_exists('reference')) {
+            return $this->getData('reference');
+        }
+
+        return get_class($this) . "_" . $this->id;
+    }
+
+    public function getNomUrl($withpicto = true)
+    {
+        $html = '<a href="' . $this->getUrl() . '">';
+        if ($withpicto) {
+            $icon = $this->getIcon();
+            if ($icon) {
+                $html .= '<i class="fa fa-' . $icon . ' iconLeft"></i>';
+            }
+        }
+        $html .= $this->ref . '</a>';
     }
 
     public function getParentId()
@@ -614,6 +634,7 @@ class BimpObject
         $this->data = array();
         $this->associations = array();
         $this->id = null;
+        $this->ref = '';
     }
 
     public function getAssociatesList($association)
@@ -890,17 +911,22 @@ class BimpObject
         return $errors;
     }
 
-    public function setObjectAction($action, $extra_data = array(), &$success = '')
+    public function setObjectAction($action, $id_object = 0, $extra_data = array(), &$success = '')
     {
         $errors = array();
 
-        if ($this->isLoaded()) {
-            $method = 'action' . ucfirst($action);
-            if (method_exists($this, $method)) {
-                $this->{$method}($extra_data, $success);
-            } else {
-                $errors[] = 'Action invalide: "' . $action . '"';
+        if ($id_object) {
+            if (!$this->fetch($id_object)) {
+                $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+                return $errors;
             }
+        }
+
+        $method = 'action' . ucfirst($action);
+        if (method_exists($this, $method)) {
+            $errors = $this->{$method}($extra_data, $success);
+        } else {
+            $errors[] = 'Action invalide: "' . $action . '"';
         }
 
         return $errors;
@@ -2301,6 +2327,49 @@ class BimpObject
             if ($status) {
                 $html .= '<div class="header_status">';
                 $html .= $status;
+                $html .= '</div>';
+            }
+
+            if (count($this->params['header_btn'])) {
+                $header_buttons = array();
+
+                foreach ($this->params['header_btn'] as $header_btn) {
+                    $button = null;
+                    $label = isset($header_btn['label']) ? $header_btn['label'] : '';
+                    $onclick = isset($header_btn['onclick']) ? $header_btn['onclick'] : '';
+                    $icon = isset($header_btn['icon']) ? $header_btn['icon'] : '';
+                    $onclick = str_replace('component_id', $this->identifier, $onclick);
+                    if ($label && $onclick) {
+                        $button = array(
+                            'classes' => array('btn', 'btn-light-default'),
+                            'label'   => $label,
+                            'attr'    => array(
+                                'type'    => 'button',
+                                'onclick' => $onclick
+                            )
+                        );
+                        if ($icon) {
+                            $button['icon_before'] = $icon;
+                        }
+                    }
+
+                    if (!is_null($button)) {
+                        $header_buttons[] = BimpRender::renderButton($button, 'button');
+                    }
+                }
+
+                $html .= '<div class="header_buttons">';
+                if (count($items)) {
+                    if (count($items) > 4) {
+                        $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
+                                    'icon' => 'cogs'
+                        ));
+                    } else {
+                        foreach ($header_buttons as $btn) {
+                            $html .= str_replace('btn-light-default', 'btn-default', $btn);
+                        }
+                    }
+                }
                 $html .= '</div>';
             }
 

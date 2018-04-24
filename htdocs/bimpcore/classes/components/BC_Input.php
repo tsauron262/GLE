@@ -42,6 +42,9 @@ class BC_Input extends BimpComponent
         'custom'                      => array(
             'content' => array('default' => '')
         ),
+        'search_product'              => array(
+            'filter_type' => array('data_type' => 'any', 'default' => 0)
+        ),
         'search_societe'              => array(
             'societe_type' => array('default' => '')
         ),
@@ -201,6 +204,10 @@ class BC_Input extends BimpComponent
                 $options['items'] = isset($this->params['items']) ? $this->params['items'] : array();
                 break;
 
+            case 'search_product':
+                $options['filter_type'] = isset($this->params['filter_type']) ? $this->params['filter_type'] : 0;
+                break;
+
             case 'search_societe':
                 $options['type'] = isset($this->params['societe_type']) ? $this->params['societe_type'] : '';
                 break;
@@ -333,5 +340,4 @@ class BC_Input extends BimpComponent
 
         return BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path, $this->input_name, $this->value, $this->option);
     }
-    
 }

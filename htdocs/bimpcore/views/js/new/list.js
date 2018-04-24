@@ -817,6 +817,8 @@ function onListLoaded($list) {
         return;
     }
 
+//    bimp_msg($list.attr('id'));
+
     if (!parseInt($list.data('loaded_event_processed'))) {
         $list.data('loaded_event_processed', 1);
 
@@ -922,6 +924,7 @@ function onListLoaded($list) {
 
             if (!$('body').data($list.attr('id') + '_object_events_init')) {
                 $('body').on('objectChange', function (e) {
+//                    bimp_msg($list.attr('id') + ' => ' + e.module + ', ' + module + ', ' + e.object_name + ', ' + object_name);
                     if ((e.module === module) && (e.object_name === object_name)) {
                         reloadObjectList($list.attr('id'));
                     } else if (objects && objects.length) {

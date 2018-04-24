@@ -8,6 +8,7 @@ class BR_Reservation extends BimpObject
     const BR_RESERVATION_COMMANDE = 1;
     const BR_RESERVATION_TRANSFERT = 2;
     const BR_RESERVATION_TEMPORAIRE = 3;
+    const BR_RESERVATION_SAV = 4;
 
     public static $status_list = array(
         0   => array('label' => 'A traiter', 'icon' => 'exclamation-circle', 'classes' => array('info')),
@@ -27,11 +28,13 @@ class BR_Reservation extends BimpObject
     public static $commande_status = array(0, 2, 3, 100, 200, 250, 300, 303);
     public static $transfert_status = array(201, 301, 303);
     public static $temp_status = array(202, 302, 303);
+    public static $sav_status = array(202, 300, 303);
     public static $need_equipment_status = array(200, 201, 202, 250, 300);
     public static $types = array(
         1 => 'Commande',
         2 => 'Transfert',
-        3 => 'Réservation temporaire'
+        3 => 'Réservation temporaire',
+        4 => 'SAV'
     );
 
     public function isEquipment()
@@ -406,7 +409,7 @@ class BR_Reservation extends BimpObject
     {
         if ($this->isLoaded()) {
             if ((int) $this->getData('id_equipment')) {
-                return $this->displayData('id_equipment', 'nom_url'); exit;
+                return $this->displayData('id_equipment', 'nom_url');
             } else {
                 if (in_array((int) $this->getData('status'), self::$need_equipment_status)) {
                     if ($this->isProductSerialisable()) {
@@ -969,8 +972,48 @@ class BR_Reservation extends BimpObject
         $errors = array();
 
         $status = (int) $this->getData('status');
-        if (!in_array($status, self::$commande_status)) {
+        if (!in_array($status, self::$temp_status)) {
             $errors[] = 'Statut invalide pour ce type de réservation';
+        }
+
+        return $errors;
+    }
+
+    protected function validateSAV()
+    {
+        $errors = array();
+
+        $status = (int) $this->getData('status');
+        if (!in_array($status, self::$sav_status)) {
+            $errors[] = 'Statut invalide pour ce type de réservation';
+        }
+
+        $equipment = $this->getChildObject('equipment');
+        $id_product = 0;
+        if (!$id_product) {
+            $errors[] = 'Aucun produit sélectionné';
+        } else {
+            $product = $this->getChildObject('product');
+            if (is_null($product) || !$product->isLoaded()) {
+                $errors[] = 'Aucun produit spécifié';
+            } elseif ($product->isSerialisable()) {
+                if (!(int) $this->getData('id_equipment')) {
+                    $errors[] = 'Produit sérialisable: équipement obligatoire';
+                } else {
+                    $this->checkEquipment($equipment, $errors);
+                    $this->set('qty', 1);
+                }
+            } else {
+                $this->set('id_equipment', 0);
+            }
+        }
+
+        if (!(int) $this->getData('id_sav')) {
+            $errors[] = 'ID du SAV absent';
+        }
+
+        if (!(int) $this->getData('id_entrepot')) {
+            $errors[] = 'Entrepot absent';
         }
 
         return $errors;
@@ -1014,6 +1057,9 @@ class BR_Reservation extends BimpObject
 
                 case self::BR_RESERVATION_TEMPORAIRE:
                     $errors = $this->validateTemporaire();
+
+                case self::BR_RESERVATION_SAV:
+                    $errors = $this->validateSAV();
             }
         }
 
@@ -1041,6 +1087,9 @@ class BR_Reservation extends BimpObject
                     case self::BR_RESERVATION_TEMPORAIRE:
                         $ref = 'RES-TEMP-' . $this->id;
                         break;
+
+                    case self::BR_RESERVATION_SAV:
+                        $ref = 'RES-SAV-' . $this->id;
                 }
                 if ($ref) {
                     if (!$this->db->update($this->getTable(), array(

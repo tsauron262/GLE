@@ -1,0 +1,1321 @@
+/* line 1, ../scss/gsx_old.scss */
+span.button {
+  border-radius: 6px;
+  border: 1px solid #A0A0A0;
+  padding: 4px 6px;
+  color: #646464;
+  font-weight: normal;
+  font-size: 13px;
+  margin: 0 3px;
+  background: #fcfcfc;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #fcfcfc 0%, #e2e2e2 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fcfcfc), color-stop(100%, #e2e2e2));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #fcfcfc 0%, #e2e2e2 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #fcfcfc 0%, #e2e2e2 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #fcfcfc 0%, #e2e2e2 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #fcfcfc 0%, #e2e2e2 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fcfcfc', endColorstr='#e2e2e2',GradientType=0 );
+  /* IE6-9 */
+}
+
+/* line 19, ../scss/gsx_old.scss */
+span.button:hover {
+  cursor: pointer;
+  color: #282828;
+  border-color: #646464;
+  background: white;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, white 0%, #f6f6f6 65%, #e0e0e0 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, white), color-stop(65%, #f6f6f6), color-stop(100%, #e0e0e0));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, white 0%, #f6f6f6 65%, #e0e0e0 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, white 0%, #f6f6f6 65%, #e0e0e0 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, white 0%, #f6f6f6 65%, #e0e0e0 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #ffffff 0%, #f6f6f6 65%, #e0e0e0 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#e0e0e0',GradientType=0 );
+  /* IE6-9 */
+}
+
+/* line 34, ../scss/gsx_old.scss */
+span.button.redHover:hover {
+  color: #960000;
+  border-color: #960000;
+}
+
+/* line 38, ../scss/gsx_old.scss */
+span.button.greenHover:hover {
+  color: #199600;
+  border-color: #199600;
+}
+
+/* line 42, ../scss/gsx_old.scss */
+span.button.blueHover:hover {
+  color: #0050A0;
+  border-color: #0050A0;
+}
+
+/* line 47, ../scss/gsx_old.scss */
+span.button.deactivated,
+span.button.deactivated:hover {
+  color: #B4B4B4;
+  border-color: #B4B4B4;
+}
+
+/* line 51, ../scss/gsx_old.scss */
+label {
+  color: #505050;
+}
+
+/* line 54, ../scss/gsx_old.scss */
+.requestProcess {
+  font-weight: bold;
+  font-size: 14px;
+  color: #00468C;
+}
+
+/* line 59, ../scss/gsx_old.scss */
+.requestProcess:before {
+  font-family: 'FontAwesome';
+  content: '\f085';
+  margin-right: 10px;
+}
+
+/* line 64, ../scss/gsx_old.scss */
+.confirmation {
+  font-weight: bold;
+  font-size: 14px;
+  color: #209620;
+}
+
+/* line 69, ../scss/gsx_old.scss */
+.confirmation:before {
+  font-family: 'FontAwesome';
+  content: '\f00c';
+  margin-right: 10px;
+}
+
+/*.info {
+    font-weight: bold;
+    font-size: 12px;
+    color: #354C64;
+}
+.info:before {
+    font-family: 'FontAwesome';
+    content: '\f05a';
+    margin-right: 10px;
+    font-weight: normal;
+    font-size: 15px;
+}*/
+/*Blocs*/
+/* line 88, ../scss/gsx_old.scss */
+.container {
+  margin: 10px 0 20px 0;
+  max-width: 1000px;
+}
+
+/* line 92, ../scss/gsx_old.scss */
+.captionContainer {
+  border: 1px solid #828282;
+  padding: 8px 10px;
+  color: #505050;
+  cursor: pointer;
+  background: #fcfcfc;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #fcfcfc 0%, #e2e2e2 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fcfcfc), color-stop(100%, #e2e2e2));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #fcfcfc 0%, #e2e2e2 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #fcfcfc 0%, #e2e2e2 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #fcfcfc 0%, #e2e2e2 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #fcfcfc 0%, #e2e2e2 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#fcfcfc', endColorstr='#e2e2e2',GradientType=0 );
+  /* IE6-9 */
+}
+
+/* line 107, ../scss/gsx_old.scss */
+.captionContainer:hover {
+  background: white;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, white 0%, #f6f6f6 65%, #e0e0e0 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, white), color-stop(65%, #f6f6f6), color-stop(100%, #e0e0e0));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, white 0%, #f6f6f6 65%, #e0e0e0 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, white 0%, #f6f6f6 65%, #e0e0e0 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, white 0%, #f6f6f6 65%, #e0e0e0 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #ffffff 0%, #f6f6f6 65%, #e0e0e0 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#e0e0e0',GradientType=0 );
+  /* IE6-9 */
+}
+
+/* line 117, ../scss/gsx_old.scss */
+.captionTitle {
+  font-size: 16px;
+  font-weight: bold;
+  color: #292964;
+}
+
+/* line 122, ../scss/gsx_old.scss */
+.arrow.upArrow:after {
+  font-family: 'FontAwesome';
+  content: '\f0d8';
+  margin-left: 8px;
+}
+
+/* line 127, ../scss/gsx_old.scss */
+.arrow.downArrow:after {
+  font-family: 'FontAwesome';
+  content: '\f0d7';
+  margin-left: 8px;
+}
+
+/* line 132, ../scss/gsx_old.scss */
+.captionTitle:hover {
+  color: #2F2FA0;
+}
+
+/* line 135, ../scss/gsx_old.scss */
+.container .toolBar {
+  margin: 5px 0 15px 0;
+  text-align: right;
+}
+
+/* line 139, ../scss/gsx_old.scss */
+.container .toolBar span.button {
+  display: inline-block;
+  padding: 6px;
+}
+
+/* line 143, ../scss/gsx_old.scss */
+.blocContent {
+  margin: 10px 0;
+}
+
+/*Infos produit*/
+/* line 148, ../scss/gsx_old.scss */
+.productTile {
+  font-size: 18px;
+  font-weight: bold;
+  color: #2A2A50;
+  padding: 8px 20px;
+}
+
+/* line 154, ../scss/gsx_old.scss */
+.infosProdTitle:before {
+  font-family: 'FontAwesome';
+  content: '\f05a';
+  margin-right: 10px;
+  font-weight: normal;
+}
+
+/* line 163, ../scss/gsx_old.scss */
+.productContent {
+  border: 1px dotted #B4B4B4;
+  border-top: none;
+  padding: 10px 20px;
+  margin: 0;
+}
+
+/* line 169, ../scss/gsx_old.scss */
+.productContainer .productCaption {
+  background: #f2f2f2;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #f2f2f2 0%, #dbdbdb 50%, #e8e8e8 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #f2f2f2), color-stop(50%, #dbdbdb), color-stop(100%, #e8e8e8));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #f2f2f2 0%, #dbdbdb 50%, #e8e8e8 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #f2f2f2 0%, #dbdbdb 50%, #e8e8e8 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #f2f2f2 0%, #dbdbdb 50%, #e8e8e8 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #f2f2f2 0%, #dbdbdb 50%, #e8e8e8 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#f2f2f2', endColorstr='#e8e8e8',GradientType=0 );
+  /* IE6-9 */
+}
+
+/* line 180, ../scss/gsx_old.scss */
+#requestResult,
+#requestsResponsesContainer {
+  margin: 20px;
+}
+
+/* line 183, ../scss/gsx_old.scss */
+div.productDatasContainer {
+  display: none;
+  margin-top: 30px;
+  text-align: left;
+}
+
+/* line 188, ../scss/gsx_old.scss */
+img.productImg {
+  max-height: 200px;
+}
+
+/* line 191, ../scss/gsx_old.scss */
+.productName {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* line 195, ../scss/gsx_old.scss */
+a.productPdfLink {
+  background: url("./pdf.gif") no-repeat 0 0 transparent;
+  margin-left: 30px;
+  padding-left: 20px;
+}
+
+/* line 200, ../scss/gsx_old.scss */
+tr.oddRow {
+  background-color: #F0F0F0;
+}
+
+/* line 203, ../scss/gsx_old.scss */
+tr.evenRow {
+  background-color: #fff;
+}
+
+/* line 206, ../scss/gsx_old.scss */
+td.rowTitle {
+  font-weight: bold;
+}
+
+/* line 209, ../scss/gsx_old.scss */
+.productDatas {
+  border: 1px solid #DCDCDC;
+  background: white;
+}
+
+/* line 213, ../scss/gsx_old.scss */
+.productDatas td {
+  padding: 3px 8px;
+}
+
+/*Panier de commande*/
+/* line 218, ../scss/gsx_old.scss */
+.cartTitle:before {
+  font-family: 'FontAwesome';
+  content: '\f07a';
+  margin-right: 10px;
+}
+
+/* line 223, ../scss/gsx_old.scss */
+.cartTitle span.subtitle {
+  font-size: 12px;
+  color: #787878;
+}
+
+/* line 227, ../scss/gsx_old.scss */
+.cartContent {
+  display: none;
+}
+
+/* line 230, ../scss/gsx_old.scss */
+th.comptiaCodeTitle {
+  display: none;
+}
+
+/* line 233, ../scss/gsx_old.scss */
+.noProducts:before {
+  font-family: 'FontAwesome';
+  font-size: 18px;
+  margin-right: 10px;
+  content: '\f057';
+}
+
+/* line 239, ../scss/gsx_old.scss */
+.noProducts {
+  color: #8C1E1E;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* line 245, ../scss/gsx_old.scss */
+.cartProducts {
+  display: none;
+  border-collapse: collapse;
+}
+
+/* line 249, ../scss/gsx_old.scss */
+.cartProducts th {
+  font-weight: normal;
+  color: #292964;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #9999C8;
+}
+
+/* line 255, ../scss/gsx_old.scss */
+.cartProducts td {
+  vertical-align: middle;
+  padding: 2px 4px;
+  border-bottom: 1px dotted #B4B4B4;
+  font-weight: bold;
+  color: #323232;
+}
+
+/* line 262, ../scss/gsx_old.scss */
+.cartProducts td.ref {
+  font-weight: normal;
+  text-align: center;
+}
+
+/* line 266, ../scss/gsx_old.scss */
+.cartProducts td.price {
+  font-weight: normal;
+  color: #2F2FA0;
+  text-align: center;
+}
+
+/* line 272, ../scss/gsx_old.scss */
+.prodQtyDown.button,
+.prodQtyUp.button {
+  padding: 3px;
+  font-size: 10px;
+  font-family: 'FontAwesome';
+  margin: 0 2px;
+}
+
+/* line 278, ../scss/gsx_old.scss */
+.prodQtyDown:before {
+  content: '\f068';
+}
+
+/* line 281, ../scss/gsx_old.scss */
+.prodQtyUp:before {
+  content: '\f067';
+}
+
+/* line 284, ../scss/gsx_old.scss */
+span.removeCartProduct {
+  margin-left: 10px;
+  font-size: 14px;
+}
+
+/* line 288, ../scss/gsx_old.scss */
+.cartSave:before {
+  font-family: 'FontAwesome';
+  content: '\f0c7';
+  margin-right: 10px;
+}
+
+/* line 294, ../scss/gsx_old.scss */
+.cartLoad:before,
+.loadParts:before {
+  content: '\f090';
+  font-family: 'FontAwesome';
+  margin-right: 10px;
+}
+
+/* line 299, ../scss/gsx_old.scss */
+.addToPropal:before {
+  content: '\f055';
+  font-family: 'FontAwesome';
+  margin-right: 10px;
+}
+
+/* line 304, ../scss/gsx_old.scss */
+.cartRequestResults {
+  display: none;
+  text-align: center;
+  margin-top: 30px;
+}
+
+/* line 310, ../scss/gsx_old.scss */
+select.compTIACodeSelect,
+select.compTIAModifierSelect {
+  font-size: 11px;
+  width: 120px;
+  height: 20px;
+}
+
+/*Repairs*/
+/* line 317, ../scss/gsx_old.scss */
+span.repairsTitle:before {
+  font-family: 'FontAwesome';
+  content: '\f0ad';
+  margin-right: 8px;
+}
+
+/* line 322, ../scss/gsx_old.scss */
+span.importRepairDatas:before {
+  font-family: 'FontAwesome';
+  content: '\f0ed';
+  margin-right: 8px;
+}
+
+/* line 327, ../scss/gsx_old.scss */
+span.createNewRepair:before {
+  font-family: 'FontAwesome';
+  content: '\f055';
+  margin-right: 8px;
+}
+
+/* line 332, ../scss/gsx_old.scss */
+.repairsContent {
+  display: none;
+}
+
+/* line 335, ../scss/gsx_old.scss */
+.repairCaption {
+  padding: 10px 0;
+  margin: 10px 0;
+  border-top: 2px solid #DCDCDC;
+}
+
+/* line 340, ../scss/gsx_old.scss */
+.repairCaption .repairTitle {
+  font-size: 15px;
+  color: #323282;
+  font-weight: bold;
+}
+
+/* line 345, ../scss/gsx_old.scss */
+div.repairToolbar {
+  text-align: right;
+  display: inline-block;
+  float: right;
+}
+
+/* line 352, ../scss/gsx_old.scss */
+span.closeRepair:before {
+  font-family: 'FontAwesome';
+  margin-right: 10px;
+  content: '\f064';
+}
+
+/* line 357, ../scss/gsx_old.scss */
+.importRepairForm {
+  border: 1px solid #DCDCDC;
+  margin: 15px;
+  padding: 15px;
+  display: none;
+}
+
+/* line 363, ../scss/gsx_old.scss */
+.importRepairForm label {
+  font-weight: bold;
+}
+
+/* line 366, ../scss/gsx_old.scss */
+.importRepairForm select {
+  font-size: 11px;
+}
+
+/* line 369, ../scss/gsx_old.scss */
+input.importNumber {
+  width: 150px;
+}
+
+/* line 372, ../scss/gsx_old.scss */
+.repairImportClose:before {
+  font-family: 'FontAwesome';
+  margin-right: 10px;
+  content: '\f057';
+}
+
+/* line 377, ../scss/gsx_old.scss */
+.repairImportSubmit:after {
+  font-family: 'FontAwesome';
+  margin-left: 10px;
+  content: '\f0a9';
+}
+
+/* line 383, ../scss/gsx_old.scss */
+div.importRepairResult,
+div.partsPendingSerialUpdateResults {
+  padding: 10px;
+}
+
+/*Composants en attente de retour*/
+/* line 388, ../scss/gsx_old.scss */
+div.partsPendingBloc {
+  border: 1px solid #787878;
+  border-radius: 6px;
+  margin: 15px 0;
+}
+
+/* line 393, ../scss/gsx_old.scss */
+.partsPendingCaption {
+  margin: 0 0 10px 0;
+  padding: 10px;
+  border-bottom: 1px solid #DCDCDC;
+  background: #a2a9b2;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #a2a9b2 0%, #767f87 36%, #28343b 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #a2a9b2), color-stop(36%, #767f87), color-stop(100%, #28343b));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #a2a9b2 0%, #767f87 36%, #28343b 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #a2a9b2 0%, #767f87 36%, #28343b 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #a2a9b2 0%, #767f87 36%, #28343b 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #a2a9b2 0%, #767f87 36%, #28343b 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#a2a9b2', endColorstr='#28343b',GradientType=0 );
+  /* IE6-9 */
+}
+
+/* line 407, ../scss/gsx_old.scss */
+.partsPendingTitle {
+  font-size: 14px;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* line 412, ../scss/gsx_old.scss */
+span.updateSerials {
+  box-shadow: none;
+}
+
+/* line 415, ../scss/gsx_old.scss */
+span.updateSerials:before {
+  font-family: 'FontAwesome';
+  margin-right: 10px;
+  content: '\f14c';
+}
+
+/* line 421, ../scss/gsx_old.scss */
+.partsPendingTable {
+  border-collapse: collapse;
+}
+
+/* line 424, ../scss/gsx_old.scss */
+.partsPendingTable th {
+  font-weight: normal;
+  color: #292964;
+  margin-bottom: 5px;
+  border-bottom: 1px solid #9999C8;
+}
+
+/* line 430, ../scss/gsx_old.scss */
+.partsPendingTable td {
+  vertical-align: middle;
+  padding: 5px;
+  border-bottom: 1px dotted #B4B4B4;
+  font-weight: bold;
+  color: #323232;
+}
+
+/* line 437, ../scss/gsx_old.scss */
+.partsPendingTable td.ref {
+  font-weight: normal;
+  text-align: center;
+}
+
+/* line 442, ../scss/gsx_old.scss */
+a.getReturnLabel:before {
+  font-family: 'FontAwesome';
+  content: '\f02a';
+  margin-right: 8px;
+  font-weight: normal;
+  font-size: 14px;
+}
+
+/* line 450, ../scss/gsx_old.scss */
+div.serialUpdateFormContainer {
+  display: none;
+  margin: 10px 15px;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #DCDCDC;
+}
+
+/* line 457, ../scss/gsx_old.scss */
+span.closeSerialUpdateForm {
+  float: right;
+  color: #B4B4B4;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* line 463, ../scss/gsx_old.scss */
+span.closeSerialUpdateForm:hover {
+  color: #B40000;
+}
+
+/* line 466, ../scss/gsx_old.scss */
+span.closeSerialUpdateForm:before {
+  font-family: 'FontAwesome';
+  margin-right: 10px;
+  content: '\f057';
+}
+
+/* line 472, ../scss/gsx_old.scss */
+select.updateFormSelect {
+  margin: 30px;
+}
+
+/* line 475, ../scss/gsx_old.scss */
+div.updateSerialFormBlock {
+  padding: 20px;
+  display: none;
+}
+
+/* line 480, ../scss/gsx_old.scss */
+span.displaySoapMsg {
+  color: #A0A0A0;
+  font-weight: bold;
+  font-size: 11px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+/* line 487, ../scss/gsx_old.scss */
+span.displaySoapMsg:hover {
+  color: #0050A0;
+}
+
+/* line 490, ../scss/gsx_old.scss */
+span.displaySoapMsg:after {
+  font-family: 'FontAwesome';
+  margin-left: 10px;
+  content: '\f0a9';
+}
+
+/* line 495, ../scss/gsx_old.scss */
+div.soapMessageContainer {
+  display: none;
+}
+
+/*Liste des composants*/
+/* line 500, ../scss/gsx_old.scss */
+.partsRequestResult {
+  display: none;
+}
+
+/* line 503, ../scss/gsx_old.scss */
+.componentsListContainer div.searchBloc {
+  display: inline-block;
+  margin: 10px 20px;
+}
+
+/*Type filter*/
+/* line 509, ../scss/gsx_old.scss */
+.filterTitle:before {
+  font-family: 'FontAwesome';
+  font-size: 16px;
+  content: '\f0b0';
+  margin-right: 10px;
+}
+
+/* line 515, ../scss/gsx_old.scss */
+.filterTitle:after {
+  font-family: 'FontAwesome';
+  font-size: 16px;
+  content: '\f0d7';
+  margin-left: 10px;
+}
+
+/* line 521, ../scss/gsx_old.scss */
+.filterTitle:hover {
+  color: #282828;
+  cursor: pointer;
+}
+
+/* line 525, ../scss/gsx_old.scss */
+.typeFiltersContent {
+  position: absolute;
+  display: none;
+  z-index: 99;
+  padding: 20px;
+  background-color: #fff;
+  border: 1px solid #B4B4B4;
+  box-shadow: 0 0 4px #787878;
+  max-width: 480px;
+}
+
+/* line 535, ../scss/gsx_old.scss */
+.typeFiltersContent span {
+  color: #787878;
+  font-size: 11px;
+  padding: 0 10px;
+}
+
+/* line 540, ../scss/gsx_old.scss */
+.typeFiltersContent span:hover {
+  color: #282828;
+  cursor: pointer;
+}
+
+/* line 544, ../scss/gsx_old.scss */
+.filterCheckAll:before {
+  font-family: 'FontAwesome';
+  content: '\f046';
+  margin-right: 8px;
+}
+
+/* line 549, ../scss/gsx_old.scss */
+.filterHideAll:before {
+  font-family: 'FontAwesome';
+  content: '\f096';
+  margin-right: 5px;
+}
+
+/* line 554, ../scss/gsx_old.scss */
+.typeFiltersContent label {
+  margin-top: 10px;
+  display: inline-block;
+}
+
+/*Keywords Filter & Part search*/
+/* line 560, ../scss/gsx_old.scss */
+.keywordFilter {
+  width: 150px;
+}
+
+/* line 563, ../scss/gsx_old.scss */
+.addKeywordFilter:after {
+  font-family: 'FontAwesome';
+  margin-left: 8px;
+  content: '\f055';
+}
+
+/* line 569, ../scss/gsx_old.scss */
+.curKeywords,
+.searchResult {
+  margin: 0 20px;
+  font-size: 15px;
+  color: #282828;
+}
+
+/* line 575, ../scss/gsx_old.scss */
+.curKeywords div,
+.partSearchNum {
+  margin: 10px;
+  padding: 5px;
+  border-radius: 8px;
+  border: 1px solid #B4B4B4;
+  display: inline-block;
+  background-color: #fff;
+}
+
+/* line 583, ../scss/gsx_old.scss */
+span.keyword {
+  font-weight: bold;
+}
+
+/* line 586, ../scss/gsx_old.scss */
+span.keyword:before {
+  content: '\f0b0';
+  font-family: 'FontAwesome';
+  margin-right: 10px;
+  color: #505050;
+}
+
+/* line 592, ../scss/gsx_old.scss */
+span.kwType {
+  color: #646464;
+  font-size: 11px;
+}
+
+/* line 597, ../scss/gsx_old.scss */
+span.removeKeyWord,
+span.removeSearch {
+  margin-left: 12px;
+  color: #505050;
+}
+
+/* line 603, ../scss/gsx_old.scss */
+span.removeKeyWord:before,
+span.removeSearch:before,
+span.removeCartProduct:before {
+  content: '\f057';
+  font-family: 'FontAwesome';
+}
+
+/* line 609, ../scss/gsx_old.scss */
+span.removeCartProduct:hover,
+span.removeKeyWord:hover,
+span.removeSearch:hover {
+  color: #960000;
+  cursor: pointer;
+}
+
+/* line 613, ../scss/gsx_old.scss */
+.searchPartSubmit {
+  margin-left: 5px;
+}
+
+/* line 616, ../scss/gsx_old.scss */
+.searchPartSubmit:after {
+  font-family: 'FontAwesome';
+  margin-left: 8px;
+  content: '\f002';
+}
+
+/* line 621, ../scss/gsx_old.scss */
+span.searchNum:before {
+  font-family: 'FontAwesome';
+  margin-right: 8px;
+  content: '\f002';
+}
+
+/*parts*/
+/* line 628, ../scss/gsx_old.scss */
+.partsListTitle:before {
+  font-family: 'FontAwesome';
+  content: '\f039';
+  margin-right: 10px;
+  font-weight: normal;
+}
+
+/* line 634, ../scss/gsx_old.scss */
+.partsListContainer {
+  margin-top: 10px;
+}
+
+/* line 640, ../scss/gsx_old.scss */
+div.partGroupName {
+  font-size: 14px;
+  padding: 5px;
+  border-radius: 4px;
+  border: 1px solid #D2D2D2;
+  color: #2D2D50;
+  font-weight: bold;
+  margin: 2px 0;
+  background: white;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, white 0%, #e5e5e5 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, white), color-stop(100%, #e5e5e5));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, white 0%, #e5e5e5 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, white 0%, #e5e5e5 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, white 0%, #e5e5e5 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #ffffff 0%, #e5e5e5 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#e5e5e5',GradientType=0 );
+  /* IE6-9 */
+}
+
+/* line 658, ../scss/gsx_old.scss */
+div.partGroupName:before {
+  font-family: 'FontAwesome';
+  margin-right: 15px;
+}
+
+/* line 662, ../scss/gsx_old.scss */
+div.partGroupName.closed:before {
+  content: '\f0fe';
+}
+
+/* line 665, ../scss/gsx_old.scss */
+div.partGroupName.opened:before {
+  content: '\f146';
+}
+
+/* line 668, ../scss/gsx_old.scss */
+div.partGroupName:hover {
+  cursor: pointer;
+  color: #2F2FA0;
+  border-color: #A1A1D2;
+  background: white;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, white 0%, #e1e1f4 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, white), color-stop(100%, #e1e1f4));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, white 0%, #e1e1f4 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, white 0%, #e1e1f4 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, white 0%, #e1e1f4 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #ffffff 0%, #e1e1f4 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffff', endColorstr='#e1e1f4',GradientType=0 );
+  /* IE6-9 */
+}
+
+/* line 683, ../scss/gsx_old.scss */
+span.partsNbr {
+  font-size: 12px;
+  margin-left: 12px;
+  font-weight: normal;
+  color: #505050;
+}
+
+/* line 689, ../scss/gsx_old.scss */
+.partsList {
+  display: none;
+  margin-left: 10px;
+  padding-left: 20px;
+  border-left: 1px solid #C8C8C8;
+}
+
+/* line 695, ../scss/gsx_old.scss */
+.partsList table {
+  border: 1px solid #767F87;
+  border-collapse: collapse;
+}
+
+/* line 699, ../scss/gsx_old.scss */
+.partsLis tr.oddRow {
+  background-color: #D4D4DC;
+}
+
+/* line 702, ../scss/gsx_old.scss */
+.partsList th {
+  padding: 4px 0;
+  color: #fff;
+  font-weight: normal;
+  background: #a2a9b2;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #a2a9b2 0%, #767f87 36%, #28343b 100%);
+  /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #a2a9b2), color-stop(36%, #767f87), color-stop(100%, #28343b));
+  /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(top, #a2a9b2 0%, #767f87 36%, #28343b 100%);
+  /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(top, #a2a9b2 0%, #767f87 36%, #28343b 100%);
+  /* Opera 11.10+ */
+  background: -ms-linear-gradient(top, #a2a9b2 0%, #767f87 36%, #28343b 100%);
+  /* IE10+ */
+  background: linear-gradient(to bottom, #a2a9b2 0%, #767f87 36%, #28343b 100%);
+  /* W3C */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#a2a9b2', endColorstr='#28343b',GradientType=0 );
+  /* IE6-9 */
+}
+
+/* line 717, ../scss/gsx_old.scss */
+.partsList td {
+  font-size: 12px;
+  padding: 6px;
+  color: #464646;
+  border-bottom: 1px solid #A0A0A0;
+  text-align: center;
+}
+
+/* line 724, ../scss/gsx_old.scss */
+.partsList td.partName {
+  font-weight: bold;
+  text-align: left;
+}
+
+/* line 728, ../scss/gsx_old.scss */
+span.addToCart {
+  font-weight: bold;
+  margin: 0px 10px;
+  padding: 3px 5px;
+  margin: 0;
+  border-radius: 4px;
+}
+
+/* line 735, ../scss/gsx_old.scss */
+span.addToCart.activated {
+  color: #505050;
+}
+
+/* line 738, ../scss/gsx_old.scss */
+span.addToCart.deactivated {
+  color: #B4B4B4;
+}
+
+/* line 741, ../scss/gsx_old.scss */
+span.addToCart.activated:hover {
+  background-color: #00A000;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* line 746, ../scss/gsx_old.scss */
+span.addToCart:before {
+  font-family: 'FontAwesome';
+  content: '\f064';
+  margin-right: 10px;
+}
+
+/*Repair Satus*/
+/* line 753, ../scss/gsx_old.scss */
+div.repairStatus {
+  padding: 15px;
+}
+
+/*Repairs*/
+/* line 758, ../scss/gsx_old.scss */
+div.repairPopUp {
+  display: none;
+  position: absolute;
+  margin: auto;
+  max-width: 80%;
+  top: 150px;
+  box-shadow: 0 0 12px #505050;
+  border-radius: 12px;
+  z-index: 9999;
+  padding: 30px;
+  background: #FFFCF5;
+  right: 0;
+}
+
+/* line 772, ../scss/gsx_old.scss */
+.loadFormResults,
+.repairFormContainer {
+  display: none;
+}
+
+/* line 775, ../scss/gsx_old.scss */
+span.hidePopUp:before {
+  font-family: 'FontAwesome';
+  content: '\f057';
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+/* line 781, ../scss/gsx_old.scss */
+span.hidePopUp {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin: 20px;
+  color: #787878;
+  font-weight: bold;
+}
+
+/* line 789, ../scss/gsx_old.scss */
+span.hidePopUp:hover {
+  cursor: pointer;
+  color: #B40000;
+}
+
+/* line 793, ../scss/gsx_old.scss */
+.loadRepairForm:after {
+  font-family: 'FontAwesome';
+  content: '\f0a9';
+  margin-left: 10px;
+}
+
+/*formulaires*/
+/* line 800, ../scss/gsx_old.scss */
+div.requestTitle {
+  font-weight: bold;
+  font-size: 18px;
+  color: #003C78;
+  text-align: center;
+  margin-top: 20px;
+  padding-top: 20px;
+}
+
+/* line 808, ../scss/gsx_old.scss */
+p.requiredInfos {
+  text-align: right;
+  font-style: italic;
+  font-size: 11px;
+  color: #B40000;
+}
+
+/* line 815, ../scss/gsx_old.scss */
+p.requiredInfos span.required:before,
+div.requestFormInputs span.required:before {
+  font-family: 'FontAwesome';
+  color: #B40000;
+  content: '\f069';
+  font-size: 6px;
+  margin-left: 5px;
+}
+
+/* line 822, ../scss/gsx_old.scss */
+div.requestFormInputs div.dataBlock {
+  margin-bottom: 6px;
+  padding: 5px 0;
+}
+
+/* line 826, ../scss/gsx_old.scss */
+span.displayInfos:before {
+  color: #3574B4;
+  font-family: 'FontAwesome';
+  content: '\f059';
+  font-size: 16px;
+  margin: 0 10px;
+  cursor: pointer;
+}
+
+/* line 834, ../scss/gsx_old.scss */
+div.labelInfos {
+  position: absolute;
+  display: none;
+  background-color: #fff;
+  padding: 5px;
+  border-radius: 6px;
+  box-shadow: 0 0 8px #808080;
+  color: #1D4064;
+  font-weight: bold;
+}
+
+/* line 844, ../scss/gsx_old.scss */
+div.requestFormInputs label {
+  color: #505050;
+  margin-bottom: 5px;
+  margin-right: 20px;
+  display: inline-block;
+}
+
+/* line 850, ../scss/gsx_old.scss */
+div.requestFormInputs label.dataTitle:before {
+  content: '\f054';
+  font-family: 'FontAwesome';
+  margin-right: 5px;
+  font-size: 12px;
+}
+
+/* line 856, ../scss/gsx_old.scss */
+div.requestFormInputs span.dataCheck {
+  margin-left: 10px;
+  font-weight: bold;
+  font-size: 12px;
+}
+
+/* line 861, ../scss/gsx_old.scss */
+div.requestFormInputs span.dataCheck span.ok {
+  color: #00A000;
+}
+
+/* line 864, ../scss/gsx_old.scss */
+div.requestFormInputs span.dataCheck span.notOk {
+  color: #B40000;
+}
+
+/* line 867, ../scss/gsx_old.scss */
+div.requestFormInputs span.dataCheck span.notOk:before {
+  font-family: 'FontAwesome';
+  content: '\f00d';
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+/* line 873, ../scss/gsx_old.scss */
+div.requestFormInputs span.dataCheck span.ok:before {
+  font-family: 'FontAwesome';
+  content: '\f00c';
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+/* line 879, ../scss/gsx_old.scss */
+div.requestFormInputs input {
+  width: 250px;
+}
+
+/* line 882, ../scss/gsx_old.scss */
+div.requestFormInputs input[type="radio"] {
+  width: 34px;
+}
+
+/* line 885, ../scss/gsx_old.scss */
+div.requestFormInputs fieldset {
+  border: 1px solid #CDCDCD;
+  border-radius: 12px;
+  margin: 20px 10px;
+}
+
+/* line 891, ../scss/gsx_old.scss */
+div.repairsPartsInputsTemplate,
+div.repairPartsContainer {
+  display: none;
+}
+
+/* line 894, ../scss/gsx_old.scss */
+div.partDatasBlock {
+  margin: 10px 0;
+  border-top: 1px solid #969696;
+}
+
+/* line 898, ../scss/gsx_old.scss */
+div.partDatasBlockTitle {
+  padding: 5px 0;
+  font-size: 14px;
+  color: #646464;
+  font-weight: bold;
+}
+
+/* line 904, ../scss/gsx_old.scss */
+div.partDatasBlockTitle:hover {
+  cursor: pointer;
+  color: #505050;
+}
+
+/* line 908, ../scss/gsx_old.scss */
+div.partDatasBlockTitle.closed:before {
+  font-family: 'FontAwesome';
+  margin-right: 15px;
+  content: '\f0fe';
+}
+
+/* line 913, ../scss/gsx_old.scss */
+div.partDatasBlockTitle.open:before {
+  font-family: 'FontAwesome';
+  margin-right: 15px;
+  content: '\f146';
+}
+
+/* line 918, ../scss/gsx_old.scss */
+div.partDatasContent {
+  padding: 10px 20px;
+  border-left: 1px dotted #B4B4B4;
+}
+
+/* line 922, ../scss/gsx_old.scss */
+div.singleRequestFormContainer {
+  padding: 30px;
+  box-shadow: 0 0 12px #505050;
+  border-radius: 12px;
+  background: #FFFBF2;
+  width: 700px;
+}
+
+/* line 929, ../scss/gsx_old.scss */
+div.partsImportResults {
+  display: none;
+}
+
+/* line 932, ../scss/gsx_old.scss */
+div.dataInputTemplate {
+  display: none;
+}
+
+/* line 935, ../scss/gsx_old.scss */
+span.duplicateInput:before {
+  font-family: 'FontAwesome';
+  content: '\f055';
+  margin-right: 8px;
+}
+
+/* line 940, ../scss/gsx_old.scss */
+div.subInputsList {
+  margin: 15px 0;
+  border-bottom: 1px solid #DCDCDC;
+}
+
+/* line 944, ../scss/gsx_old.scss */
+div.yesNoBlock {
+  float: right;
+  display: inline-block;
+}

@@ -48,8 +48,6 @@ class BC_Panel extends BimpComponent
             $this->params['icon'] = $icon;
         }
 
-
-
         if (is_string($this->params['objects_change_reload'])) {
             $this->params['objects_change_reload'] = array($this->params['objects_change_reload']);
         }
@@ -245,5 +243,11 @@ class BC_Panel extends BimpComponent
             $this->params['objects_change_reload'][] = $object_name;
             $this->data['objects_change_reload'] = implode(',', $this->params['objects_change_reload']);
         }
+    }
+
+    public function addIdentifierSuffix($suffix)
+    {
+        $this->identifier .= '_' . $suffix;
+        $this->data['identifier'] = $this->identifier;
     }
 }

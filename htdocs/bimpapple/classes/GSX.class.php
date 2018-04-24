@@ -18,6 +18,9 @@ function _softErrorMessage($value, $key)
 
 class GSX
 {
+
+    public static $debug_mode = true;
+    
     protected $validRegionCodes = array(
         'am',
         'emea',
@@ -54,7 +57,6 @@ class GSX
         'ACDT', // Australian Central Daylight Time			UTC+10.5
         'NZST'  // New Zealand Standard Time				UTC+12
     );
-
     protected $validApiModes = array(
         'it',
         'ut',
@@ -87,7 +89,6 @@ class GSX
         'customerLastName',
         'customerEmailAddress'
     );
-
     protected $validRepairStatus = array(
         'New',
         'Saved',
@@ -96,19 +97,16 @@ class GSX
         'On Hold',
         'Closed'
     );
-
     protected $validRepairType = array(
         'ON',
         'WH',
         'CA'
     );
-
     protected $validWarrantyParams = array(
         'serialNumber',
         'unitReceivedDate',
         'partNumbers'
     );
-
     protected $gsxDetails = array(
         'apiMode'          => 'ut',
         'regionCode'       => 'apac',
@@ -120,81 +118,90 @@ class GSX
         'returnFormat'     => 'php',
         'gsxWsdl'          => '',
     );
-
-    protected $wsdlUrl;
-
-    protected $userSessionId;
-
-    protected $soapClient;
     
+    protected $wsdlUrl;
+    protected $userSessionId;
+    protected $soapClient;
+    public static $apiMode = 'production';
+    public $shipTo = '';
+    public $connect = false;
+    public $isIphone = false;
+    public $last_response = null;
     public $errors = array(
         'init' => array(),
         'soap' => array()
     );
 
-    public $isIphone = false;
-    public $last_response = null;
-
-    public function __construct($_gsxDetailsArray = array(), $isIphone = false, $apiMode)
+    public function __construct($isIphone)
     {
+        global $user;
+
         $this->isIphone = $isIphone;
-        $this->apiMode = $apiMode;
         
-        if (!isset($_gsxDetailsArray['apiMode'])) {
-            $_gsxDetailsArray['apiMode'] = 'production';
+        if (defined('PRODUCTION_APPLE') && PRODUCTION_APPLE) {
+            self::$apiMode = 'production';
         }
 
-        if (!in_array($_gsxDetailsArray['apiMode'], $this->validApiModes)) {
+//        $userId = 'sav@bimp.fr';
+//        $password = '@Savbimp2014#';
+//        $serviceAccountNo = '100520';
+        $userId = 'admin.gle@bimp.fr';
+//        $password = 'BIMP@gle69#';
+        $serviceAccountNo = '897316';
+        $this->shipTo = '897316';
+
+        if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_service']) &&
+                $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_service'] != "") {
+            $userId = $user->array_options['options_apple_id'];
+            $serviceAccountNo = $user->array_options['options_apple_service'];
+            $this->shipTo = $user->array_options['options_apple_shipto'];
+        }
+
+        if (isset($userId) && isset($serviceAccountNo)) {
+            $this->gsxDetails = array(
+                'apiMode'                => self::$apiMode,
+                'regionCode'             => 'emea',
+                'userId'                 => $userId,
+                'serviceAccountNo'       => $serviceAccountNo,
+                'serviceAccountNoShipTo' => $this->shipTo,
+                'languageCode'           => 'fr',
+                'userTimeZone'           => 'CEST',
+                'returnFormat'           => 'php',
+                'gsxWsdl'                => false
+            );
+
+            if (!count($this->gsx->errors['init']) && !count($this->gsx->errors['soap'])) {
+                $this->connect = true;
+            }
+        } else {
+            $this->errors['init'][] = 'Pas d\'identifiant apple&nbsp;&nbsp;<a href="' . DOL_URL_ROOT . '/user/card.php?id=' . $user->id . '"> Corriger</a>';
+        }
+
+        if (!in_array($this->gsxDetails['apiMode'], $this->validApiModes)) {
             $this->errors['init'][] = 'API Mode is invalid';
-        } else {
-            $this->gsxDetails['apiMode'] = $_gsxDetailsArray['apiMode'];
         }
 
-        if ($_gsxDetailsArray['regionCode'] == '') {
-            $this->errors['init'][] = 'User Region Code is blank';
-        } else if (!in_array($_gsxDetailsArray['regionCode'], $this->validRegionCodes)) {
+        if (!in_array($this->gsxDetails['regionCode'], $this->validRegionCodes)) {
             $this->errors['init'][] = 'User Region is invalid';
-        } else {
-            $this->gsxDetails['regionCode'] = $_gsxDetailsArray['regionCode'];
         }
 
-        if ($_gsxDetailsArray['userId'] == '') {
+        if ($this->gsxDetails['userId'] == '') {
             $this->errors['init'][] = 'User ID is blank';
-        } else {
-            $this->gsxDetails['userId'] = $_gsxDetailsArray['userId'];
         }
 
-//        if ($_gsxDetailsArray['password'] == '') {
-//            $this->errors['init'][] = 'Password is blank';
-//        } else {
-//            $this->gsxDetails['password'] = $_gsxDetailsArray['password'];
-//        }
-
-        if ($_gsxDetailsArray['serviceAccountNo'] == '') {
+        if ($this->gsxDetails['serviceAccountNo'] == '') {
             $this->errors['init'][] = 'Service Account Number is blank';
-        } else {
-            $this->gsxDetails['serviceAccountNo'] = $_gsxDetailsArray['serviceAccountNo'];
         }
 
-
-        if ($_gsxDetailsArray['serviceAccountNoShipTo'] == '') {
+        if ($this->gsxDetails['serviceAccountNoShipTo'] == '') {
             $this->gsxDetails['serviceAccountNoShipTo'] = $this->gsxDetails['serviceAccountNo']; //shipto = sold to si pas de soldto
-        } else {
-            $this->gsxDetails['serviceAccountNoShipTo'] = $_gsxDetailsArray['serviceAccountNoShipTo'];
         }
 
-// If user has left languageCode empty, we assign the GSX default.
-        $this->gsxDetails['languageCode'] = ( empty($_gsxDetailsArray['languageCode']) ) ? 'en' : $_gsxDetailsArray['languageCode'];
-
-// If user has left userTimeZone empty, we assign the GSX default.
-        $this->gsxDetails['userTimeZone'] = ( empty($_gsxDetailsArray['userTimeZone']) ) ? 'PST' : $_gsxDetailsArray['userTimeZone'];
-
-        $this->gsxDetails['returnFormat'] = $_gsxDetailsArray['returnFormat'];
-
-        $this->gsxDetails['gsxWsdl'] = ( empty($_gsxDetailsArray['wsdl']) ) ? false : $_gsxDetailsArray['wsdl'];
-
-        if (!count($this->errors['init']))
-            $this->authenticate();
+        if (!count($this->errors['init'])) {
+            if ($this->authenticate()) {
+                $this->connect = true;
+            }
+        }
     }
 
     public function __destruct()
@@ -660,15 +667,15 @@ class GSX
 //                dol_syslog("result GSX " . print_r($SOAPRequest, 1) . "<br/><br/>" . $clientLookup . print_r($requestData, 1), 3, 0, "_admin");
         } catch (SoapFault $f) {
             global $user;
-                if (in_array($user->id, array(1, 270, 271))) {
-                    $msg = "\n" . '***** Requête GSX SOAP: "' . $clientLookup . '" ***** ' . "\n" . "\n";
-                    $msg .= 'Données envoyées:' . "\n";
-                    $msg .= print_r($requestData, 1);
-                    $msg .= 'Erreur(s):' . "\n";
-                    $msg .= $f->faultstring;
-                    dol_syslog($msg, LOG_DEBUG);
-                }
-                
+            if (in_array($user->id, array(1, 270, 271))) {
+                $msg = "\n" . '***** Requête GSX SOAP: "' . $clientLookup . '" ***** ' . "\n" . "\n";
+                $msg .= 'Données envoyées:' . "\n";
+                $msg .= print_r($requestData, 1);
+                $msg .= 'Erreur(s):' . "\n";
+                $msg .= $f->faultstring;
+                dol_syslog($msg, LOG_DEBUG);
+            }
+
             if (stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);
@@ -725,7 +732,7 @@ class GSX
                 $add = "";
                 if (isset($f->detail) && isset($f->detail->errors) && isset($f->detail->errors->error))
                     $add = print_r($f->detail->errors->error, 1);
-                if (in_array($user->id, array(1, 270, 271))) {
+                if (self::$debug_mode && in_array($user->id, array(1, 270, 271))) {
                     $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . $add . print_r($SOAPRequest, true) . print_r($requestData, true));
                 } else {
                     $this->soap_error($f->faultcode, $f->faultstring);
@@ -910,7 +917,7 @@ class GSX
 
     protected function soap_error($code, $string)
     {
-        $string = (utf8_decode($string));
+//        $string = (utf8_decode($string));
         // The API is not very verbose with bad credentials… wrong credentials can throw the "expired session" error.
         $additionalInfo = ( $code == 'ATH.LOG.20' ) ? ' (You may have provided the wrong login credentials)' : '';
 
@@ -939,7 +946,7 @@ class GSX
         $html = '';
         $tab = ($log) ? $this->errors['log'] : $this->errors;
         if (count($tab['init'])) {
-            $html .= '<p class="error">Erreur(s) de connection: <br/>';
+            $html .= '<p class="alert alert-danger">Erreur(s) de connection: <br/>';
             $i = 1;
             foreach ($tab['init'] as $errorMsg) {
                 $html .= $i . '. ' . utf8_encode(str_replace("?????", "'", $errorMsg)) . '.<br/>' . "\n";
@@ -948,7 +955,7 @@ class GSX
             $html .= '</p>';
         }
         if (count($tab['soap'])) {
-            $html .= '<p class="error alertJs">Erreur(s) SOAP: <br/>';
+            $html .= '<p class="alert alert-danger">Erreur(s) SOAP: <br/>';
             $i = 1;
             foreach ($tab['soap'] as $errorMsg) {
                 $html .= $i . '. ' . utf8_encode(str_replace("??????", "'", $errorMsg)) . '.<br/>' . "\n";

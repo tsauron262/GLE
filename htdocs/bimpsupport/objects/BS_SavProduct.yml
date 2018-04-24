@@ -28,6 +28,7 @@ fields:
         object: product
         input: 
             type: search_product
+            filter_type: both
         required: 1
     qty: 
         label: Quantité

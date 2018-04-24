@@ -147,8 +147,6 @@ fields:
     warranty_type: 
         label: Type de garantie
         type: string
-        values: 
-            array: warranty_types
             
     prix_achat:
         label: Prix d'achat

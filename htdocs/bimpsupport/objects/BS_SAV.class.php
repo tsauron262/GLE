@@ -40,9 +40,9 @@ class BS_SAV extends BimpObject
     public static $save_options = array(
         1 => 'Dispose d\'une sauvegarde',
         2 => 'Désire une sauvegarde si nécessaire',
-        3 => 'Non applicable',
-        4 => 'Dispose d\'une sauvegarde Time machine',
-        5 => 'Ne dispose pas de sauvegarde et n\'en désire pas'
+        0 => 'Non applicable',
+        3 => 'Dispose d\'une sauvegarde Time machine',
+        4 => 'Ne dispose pas de sauvegarde et n\'en désire pas'
     );
     public static $contact_prefs = array(
         1 => 'E-mail',
@@ -976,7 +976,8 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
     public function create()
     {
-        $this->data['ref'] = $this->getNextNumRef();
+        if($this->data['ref'] == '')
+            $this->data['ref'] = $this->getNextNumRef();
         $errors = parent::create();
 
         if (!count($errors)) {

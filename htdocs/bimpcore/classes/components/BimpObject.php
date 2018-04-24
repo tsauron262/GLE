@@ -1416,6 +1416,8 @@ class BimpObject
                     return array('Fichier de configuration invalide (table non renseignée)');
                 }
 
+                unset($this->data[$primary]);
+                
                 $result = $this->db->update($table, $this->data, '`' . $primary . '` = ' . (int) $this->id);
             }
 

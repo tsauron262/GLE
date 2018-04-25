@@ -75,13 +75,13 @@ if ($loadEquip == true) {
 
 
 if ($loadSav) {
-    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id LIMIT 0,1000");
+    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id AND revisionNext < 1 LIMIT 0,10000000");
 
 
 
     while ($ligne = $db->fetch_object($sql)) {
 
-        $sav = BimpObject::getInstance('bimpsupport', 'BS_Sav');
+        $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
 
         $code_centre = "S";
         $idP = 17; //Prod par default

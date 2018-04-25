@@ -9,11 +9,11 @@ llxHeader();
 set_time_limit(5000000);
 ini_set('memory_limit', '1024M');
 
-$loadEquip = false;
-$loadSav = true;
+$loadEquip = true;
+$loadSav = false;
 
 if ($loadEquip == true) {
-    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,1000000");
+    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,1000");
 
     while ($ligne = $db->fetch_object($sql)) {
         if ($ligne->description == "")
@@ -92,7 +92,7 @@ if ($loadSav) {
         else
             echo("ERREUR FATAL Pas de correspondance pour le centre " . $ligne->Centre);
 
-        if ($ligne->idMat < 1) {
+        if ($ligne->idMat < 1) {//on cherche dans element_element
             echo "<br/><br/>ERR Pas de prod dans old SAV ";
             $tabT = getElementElement("sav", "productCli", $ligne->idS);
             if(isset($tabT[0])){

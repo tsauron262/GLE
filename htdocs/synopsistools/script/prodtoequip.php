@@ -95,8 +95,17 @@ if ($loadSav) {
         if ($ligne->idMat < 1) {
             echo "<br/><br/>ERR Pas de prod dans old SAV ";
             $tabT = getElementElement("sav", "productCli", $ligne->idS);
-            if(isset($tabT[0]))
-                $idP = $tabT[0]['d'];
+            if(isset($tabT[0])){
+                $sql2 = $db->query('SELECT id FROM `llx_be_equipment` WHERE note = CONCAT("OLD", "' . $tabT[0]['d']  . '")');
+                if ($db->num_rows($sql2) < 1)
+                    echo "<br/><br/>Pas de prod avec old id " . $tabT[0]['d'];
+                else {
+                    if ($db->num_rows($sql2) > 1)
+                        echo "<br/><br/>Plusieurs résultat pour prod old id " . $tabT[0]['d'];
+                    $ln = $db->fetch_object($sql2);
+                    $idP = $ln->id;
+                }
+            }
             else
                 echo "<br/><br/>ERREUR 2 Pas de prod dans old SAV element element ";
         } else {

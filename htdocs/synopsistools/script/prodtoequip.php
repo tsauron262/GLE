@@ -9,14 +9,14 @@ llxHeader();
 set_time_limit(5000000);
 ini_set('memory_limit', '1024M');
 
-$loadEquip = true;
-$loadSav = false;
+$loadEquip = false;
+$loadSav = true;
 
 if ($loadEquip == true) {
     $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,10000000");
 
     while ($ligne = $db->fetch_object($sql)) {
-        if ($ligne->description == "")
+        if ($ligne->description == "" && $ligne->Produit < 1)
             $ligne->description = "PROD N/C";
 
 
@@ -24,7 +24,6 @@ if ($loadEquip == true) {
         $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
 
         $arrayEquipment = array(
-            'id_product' => '', // ID du produit. 
             'type' => 1, // cf $types
             'serial' => $ligne->N__Serie, // num série
             'reserved' => 0, // réservé ou non
@@ -43,7 +42,7 @@ if ($loadEquip == true) {
         if ($ligne->Produit > 0)
             $arrayEquipment['id_product'] = $ligne->Produit;
 
-        $equipement->validateArray($arrayEquipment);
+        $newErrors = array_merge($newErrors, $equipement->validateArray($arrayEquipment));
 
         $newErrors = array_merge($newErrors, $equipement->create());
 
@@ -59,10 +58,10 @@ if ($loadEquip == true) {
                 'date' => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
             );
 
-            $emplacement->validateArray($arrayEmplacement);
+            $newErrors = array_merge($newErrors, $emplacement->validateArray($arrayEmplacement));
             $newErrors = array_merge($newErrors, $emplacement->create());
             if ($emplacement->id > 0) {
-                echo "<br/><br/>OK equipment " . $equipement->id;
+                //echo "<br/><br/>OK equipment " . $equipement->id;
             } else {
                 echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arrayEmplacement, 1);
             }
@@ -75,7 +74,7 @@ if ($loadEquip == true) {
 
 
 if ($loadSav) {
-    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id AND revisionNext < 1 LIMIT 0,10000000");
+    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id AND (revisionNext < 1 OR revisionNext IS NULL) LIMIT 0,10");
 
 
 
@@ -145,12 +144,12 @@ if ($loadSav) {
             'status' => $ligne->Etat
         ); //pas de system  login pass
 
-        $sav->validateArray($arraySav);
+        $newErrors = array_merge($newErrors, $sav->validateArray($arraySav));
         $newErrors = array_merge($newErrors, $sav->create());
         if ($sav->id > 0) {
-            echo "<br/><br/>OK sav " . $sav->id;
+            //echo "<br/><br/>OK sav " . $sav->id;
         } else {
-            echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arraySav, 1);
+            echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arraySav, 1) ;//. print_r($sav, 1);
         }
     }
 }
@@ -170,8 +169,9 @@ $db->query($req2);
 
 
 
-
-print_r($newErrors);
+if (count($errors)) {
+    BimpRender::renderAlerts($errors);
+}
 
 
 llxFooter();

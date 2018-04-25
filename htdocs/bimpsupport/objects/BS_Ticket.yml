@@ -1,0 +1,399 @@
+table: bs_ticket
+controller: ticket
+
+labels:
+    name: ticket
+
+objects:
+    contrat:
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: contrat
+            id_object:
+                field_value: id_contrat
+        card: 
+            title: 
+                object_prop: ref
+            view_btn: 1
+    
+    client:
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Societe
+            id_object:
+                field_value: id_client
+    
+    contact:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Contact
+            id_object:
+                field_value: id_contact
+                
+    user_resp: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_User
+            id_object: 
+                field_value: id_user_resp
+                
+    inters:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BS_Inter
+        
+    notes:
+        relation: hasMany
+        delete: 0
+        instance:
+            bimp_object: BS_Note
+
+    equipment: 
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+            
+associations:
+    equipments:
+        object: equipment
+        depends_on: id_contrat
+        label: Equipements concernés
+        display: 
+            default: 
+                type: callback
+        list: 
+            array: equipments
+
+fields:    
+    id_contrat:
+        label: Contrat
+        type: id_object
+        object: contrat
+        required: 1    
+        input: 
+            type: search_list
+            search_list:
+                table: contrat c
+                field_return_value: c.rowid
+                field_return_label: c.ref
+                join: societe s
+                join_on: c.fk_soc s.rowid
+                join_return_label: s.nom
+                options:    
+                    default:
+                        label: Recherche par référence contrat
+                        fields_search: c.ref,c.rowid
+                        join: societe s
+                        join_on: c.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez la référence ou l'ID d'un contrat
+                    by_client:
+                        label: Recherche par client
+                        fields_search: s.nom,s.code_client
+                        join: societe s
+                        join_on: c.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez le nom ou le code d'un client
+        sort_options:
+            by_ref: 
+                label: référence
+                value:
+                    join:
+                        table: contrat
+                        field_value: ref
+                        field_on: rowid
+    id_client:
+        label: Client
+        type: id_object
+        object: client
+        input: 
+            type: custom
+            content: 
+                callback: getClientFormInput
+        display_if:
+            field_name: id_contrat
+            hide_values: 0,
+        depends_on: id_contrat
+        search:
+            input: 
+                type: search_societe
+                societe_type: customer           
+    id_contact:
+        label: Contact
+        type: id_object
+        object: contact
+        values: 
+            array: client_contacts
+        depends_on: id_contrat
+        display_if:
+            field_name: id_contrat
+            hide_values: 0,
+        search:
+            input:
+                type: search_list
+                search_list:
+                    table: socpeople
+                    field_return_value: rowid
+                    field_return_label: lastname,firstname
+                    fields_search: lastname,firstname
+                    label_syntaxe: <label_1> <label_2>               
+    id_user_resp: 
+        label: Responsable
+        type: id_object
+        object: user_resp
+        input: 
+            type: hidden
+        default_value:
+            prop:
+                name: id
+                object: 
+                    global: user
+        search:
+            input: 
+                type: search_user
+    ticket_number:
+        label: N° ticket
+        type: string
+        required: 0
+        search:
+            input: 
+                type: text
+            type: value_part
+            search_on_key_up: 1
+        input: 
+            type: hidden
+    priorite: 
+        label: Priorité
+        type: int
+        default_value: 1
+        values: 
+            array: priorities
+        display: 
+            icon:
+                icon_only: 1
+        input: 
+            type: hidden
+        search:
+            input: 
+                type: select
+                options:
+                    array: priorities
+        sortable: 1
+    impact:
+        label: Impact
+        type: int
+        values: 
+            array: impacts
+        default_value: 1
+        display: 
+            icon:
+                icon_only: 1
+    cover:
+        label: Type de couverture
+        type: int
+        values: 
+            array: cover_types
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 1
+    appels_timer:
+        label: Durée totale des appels payants
+        type: time_last
+        input: 
+            type: timer
+        default_value: 0
+        display: 
+            default: 
+                type: timer
+        searchable: 0
+        
+forms: 
+    default:
+        rows: 
+            - field: id_contrat
+            - field: id_client
+              content: 
+                  callback: getClientFormInput
+              label: Client 
+              depends_on: id_contrat
+            - field: id_contact
+            - field: status
+            - field: impact
+            - field: cover
+            - association: equipments
+              label: Equipements concernés
+              display_if: 
+                  field_name: id_contrat
+                  hide_values: 0,
+              depends_on: id_contrat
+            - custom: 1
+              label: Notifier par e-mail
+              input: 
+                  name: mails_to
+                  type: check_list
+                  items: 
+                      callback:
+                          method: getNotificationsList
+                          params: 
+                              operation: create
+                  value: 
+                      array: comm,client,tech
+            - custom: 1
+              label: Appel payant du client en cours
+              input:
+                  name: start_timer
+                  type: toggle
+    
+    edit:
+        rows:
+            - field: id_contact
+            - field: status
+            - field: impact
+            - field: cover
+            - field: appels_timer
+            - association: equipments
+              label: Equipements concernés
+              display_if: 
+                  field_name: id_contrat
+                  hide_values: 0,
+              depends_on: id_contrat
+                      
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: info-circle
+        rows: 
+            - field: ticket_number
+            - label: Durée totale interventions
+              value:
+                  callback: displayDureeTotale
+            - field: appels_timer
+            - field: priorite
+            - field: impact
+              edit: 1
+            - field: cover
+              edit: 1
+            - field: status
+              edit: 1
+              
+    objects:
+        title: Elements liés
+        icon: share-alt
+        rows:
+            - field: id_user_resp
+              display: card
+            - field: id_contrat
+              display: card
+            - label: Client
+              field: id_client
+              display: card
+            - field: id_contact
+              display: card
+            - association: equipments
+              label: Equipements concernés
+              display: card
+              
+views: 
+    default:
+        delete_btn: 1
+        edit_form: edit
+        objects_change_reload: BS_Inter
+        rows:
+            - cols: 
+                  - type: rows
+                    col_lg: 5
+                    col_md: 6
+                    col_sm: 12
+                    rows: 
+                        - cols:
+                            - type: object_common_fields
+                              col_lg: 12
+                        - cols:
+                            - type: fields_table
+                              col_lg: 12
+                              fields_table: 
+                                  name: infos
+                        - cols: 
+                            - type: custom
+                              col_lg: 12
+                              custom:
+                                  callback: renderChronoView
+                  - type: fields_table
+                    col_lg: 7
+                    col_md: 6
+                    fields_table:
+                        name: objects
+                        
+lists:
+    default: 
+        title: Tickets Hotline
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les tickets sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        objects_change_reload: BS_Inter
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        add_btn_label: Nouveau ticket hotline
+        edit_btn: 1
+        edit_form: edit
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        cols:
+            ticket:
+                field: ticket_number
+            priorite:
+                label: Prio.
+                field: priorite
+                display: icon
+                max_width: 40px
+                min_width: 40px
+            impact:
+                label: Imp.
+                field: impact
+                display: icon
+                max_width: 40px
+                min_width: 40px
+            date_create:
+                label: Créé le
+                field: date_create
+            resp:
+                field: id_user_resp
+                display: nom_url
+            contrat:
+                field: id_contrat
+                display: nom_url
+            client: 
+                field: id_client
+                display: nom_url
+    
+cards:
+    default:
+        title: nom
+        fields: 
+            - label: Contrat
+              field: id_contrat
+              display: nom_url
+            - label: Client
+              field: id_client
+              display: nom_url
+        view_btn: 1

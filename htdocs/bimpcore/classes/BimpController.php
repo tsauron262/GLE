@@ -333,7 +333,7 @@ class BimpController
 
             if (isset($button['url'])) {
                 $tag = 'a';
-                $params['attr']['href'] = $this->makeUrlFromConfig($section_path . '/buttons/' . $idx . '/url');
+                $params['attr']['href'] = BimpTools::makeUrlFromConfig($this->config, $section_path . '/buttons/' . $idx . '/url', $this->module, $this->controller);
             } elseif (isset($button['onclick'])) {
                 $params['attr']['onclick'] = $this->getCurrentConf('onclick', '');
                 $tag = 'button';

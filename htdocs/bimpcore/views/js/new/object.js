@@ -1,13 +1,21 @@
-function saveObject(module, object_name, id_object, fields, $resultContainer, successCallback) {
+function saveObject(module, object_name, id_object, fields, $resultContainer, successCallback, display_success) {
     var data = {
         module: module,
         object_name: object_name,
         id_object: id_object,
-        fields: fields
     };
 
+    if (typeof (display_success) === 'undefined') {
+        display_success = true;
+    }
+
+    for (var i in fields) {
+        data[i] = fields[i]
+    }
+
     BimpAjax('saveObject', data, $resultContainer, {
-        success: function (result) {
+        display_success: display_success,
+        success: function (result, bimpAjax) {
             if (typeof (successCallback) === 'function') {
                 successCallback(result);
             }
@@ -20,7 +28,7 @@ function saveObject(module, object_name, id_object, fields, $resultContainer, su
     });
 }
 
-function saveObjectField(module, object_name, id_object, field, value, $resultContainer, successCallback) {
+function saveObjectField(module, object_name, id_object, field, value, $resultContainer, successCallback, display_success) {
     var data = {
         module: module,
         object_name: object_name,
@@ -29,7 +37,12 @@ function saveObjectField(module, object_name, id_object, field, value, $resultCo
         value: value
     };
 
+    if (typeof (display_success) === 'undefined') {
+        display_success = true;
+    }
+
     BimpAjax('saveObjectField', data, $resultContainer, {
+        display_success: display_success,
         success: function (result) {
             if (typeof (successCallback) === 'function') {
                 successCallback(result);
@@ -136,4 +149,114 @@ function loadObjectFieldValue(module, object_name, id_object, field, $resultCont
             }
         }
     });
+}
+
+function setObjectNewStatus(module, object_name, id_object, new_status, $resultContainer, successCallback, extra_data) {
+    if (typeof (extra_data) === 'undefined') {
+        extra_data = {};
+    }
+
+    var data = {
+        module: module,
+        object_name: object_name,
+        id_object: id_object,
+        new_status: new_status,
+        extra_data: extra_data
+    };
+
+    BimpAjax('setObjectNewStatus', data, $resultContainer, {
+        module: module,
+        object_name: object_name,
+        id_object: id_object,
+        success: function (result, bimpAjax) {
+            if (typeof (successCallback) === 'function') {
+                successCallback(result);
+            }
+            $('body').trigger($.Event('objectChange', {
+                module: bimpAjax.module,
+                object_name: bimpAjax.object_name,
+                id_object: bimpAjax.id_object
+            }));
+        }
+    });
+}
+
+function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback) {
+    if (typeof (extra_data) === 'undefined') {
+        extra_data = {};
+    }
+
+    if (typeof ($resultContainer) === 'undefined') {
+        $resultContainer = null;
+    }
+
+    if (typeof (form_name) === 'string') {
+        object_data.form_name = form_name;
+        var title = '';
+        if ($.isOk($button)) {
+            title = $button.text();
+        }
+        loadModalForm($button, object_data, title, function () {
+            var $modal = $('#page_modal');
+            if ($modal.length) {
+                var $form = $modal.find('.modal-ajax-content').find('.object_form');
+                if ($form.length) {
+                    for (var field_name in extra_data) {
+                        var $input = $form.find('[name="' + field_name + '"]');
+                        if ($input.length) {
+                            $input.val(extra_data[field_name]);
+                        }
+                    }
+                    $modal.find('.modal-footer').find('.save_object_button').remove();
+                    $modal.find('.modal-footer').find('.objectViewLink').remove();
+
+                    var button_html = '<button type="button" class="extra_button btn btn-primary set_action_button">';
+                    button_html += 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i></button>';
+                    $modal.find('.modal-footer').append(button_html);
+                    $modal.find('.modal-footer').find('.set_action_button').click(function () {
+                        $form.find('.inputContainer').each(function () {
+                            var field_name = $(this).data('field_name');
+                            if ($(this).find('.cke').length) {
+                                var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+                                $(this).find('[name="' + field_name + '"]').val(html_value);
+                            }
+                            extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
+                        });
+                        setObjectAction($(this), object_data, action, extra_data, null, $('#' + $form.attr('id') + '_result'), function () {
+                            $modal.modal('hide');
+                            if (typeof (successCallback) === 'function') {
+                                successCallback();
+                            }
+                        });
+                    });
+                }
+            }
+        });
+    } else {
+        var data = {
+            module: object_data.module,
+            object_name: object_data.object_name,
+            id_object: object_data.id_object,
+            object_action: action,
+            extra_data: extra_data
+        };
+
+        BimpAjax('setObjectAction', data, $resultContainer, {
+            display_success_in_popup_only: true,
+            module: object_data.module,
+            object_name: object_data.object_name,
+            id_object: object_data.id_object,
+            display_processing: true,
+            success: function (result, bimpAjax) {
+                if (typeof (successCallback) === 'function') {
+                    successCallback(result);
+                }
+                $('body').trigger($.Event('objectChange', {
+                    module: bimpAjax.module,
+                    object_name: bimpAjax.object_name,
+                    id_object: bimpAjax.id_object
+                }));
+            }
+        });
+    }
 }

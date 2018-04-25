@@ -14,6 +14,7 @@ objects:
         cards: 
             default: 
                 type: product_card
+                
     contrat:
         instance:
             dol_object: contrat
@@ -44,7 +45,6 @@ associations:
         display:
             default:
                 type: callback
-                
         label: Contrats
         input:
             type: search_list
@@ -72,8 +72,8 @@ fields:
     id_product: 
         label: Produit
         type: id_object
-        required: 1
         object: product
+        default_value: 0
         input:
             type: search_list
             search_list: 
@@ -107,6 +107,15 @@ fields:
                 label: nom
                 join_field: label
                 
+    product_label: 
+        label: Désignation produit
+        required_if: id_product=0
+        display_if: 
+            field_name: id_product
+            show_values: 0,
+        input: 
+            help: Utilisez ce champ si cet équipement ne correspond à aucun produit enregistré
+            
     type: 
         label: Type
         values: 
@@ -138,8 +147,6 @@ fields:
     warranty_type: 
         label: Type de garantie
         type: string
-        values: 
-            array: warranty_types
             
     prix_achat:
         label: Prix d'achat
@@ -225,8 +232,12 @@ fields_tables:
         title: Informations
         icon: info-circle
         rows:
-            - field: id_product
-              display: card
+            - label: Produit
+              value: 
+                  callback: 
+                      method: displayProduct
+                      params: 
+                          - card
             - field: serial
             - field: date_purchase
             - field: prix_achat
@@ -259,7 +270,6 @@ fields_tables:
             
 views:
     default:
-        title: nom
         edit_form: default
         delete_btn: 1
         rows:
@@ -295,6 +305,7 @@ forms:
     default:
         rows: 
             - field: id_product
+            - field: product_label
             - field: serial
             - field: type
             - field: date_purchase
@@ -304,7 +315,18 @@ forms:
             - field: origin_id_element
             - field: warranty_type
             - field: date_warranty_end
-            - association: contrats                  
+            - association: contrats        
+            
+    light:
+        rows:
+            - field: id_product
+            - field: product_label
+            - field: serial
+            - field: type
+            - field: date_purchase
+            - field: warranty_type
+            - field: date_warranty_end
+            - association: contrats     
             
 list:
 #    checkboxes: 1
@@ -324,8 +346,12 @@ list:
         type: 
             field: type
         product: 
-            field: id_product
-            display: nom_url
+            label: Produit
+            value: 
+                callback: 
+                    method: displayProduct
+                    params: 
+                        - nom_url
         serial:
             field: serial
         place: 
@@ -353,7 +379,11 @@ cards:
         view_btn: 1
         fields: 
             - icon: fa5_box
-              field: id_product
-              display: nom_url
+              label: Produit
+              value: 
+                  callback: 
+                      method: displayProduct
+                      params: 
+                          - nom_url
             - icon: barcode
               field: serial

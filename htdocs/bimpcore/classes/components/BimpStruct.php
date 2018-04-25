@@ -16,6 +16,14 @@ class BimpStruct
         }
 
         switch ($type) {
+            case 'object_header':
+                if ($config->isDefined($path . '/object_header')) {
+                    $html = self::renderObjectHeader($config, $path . '/object_header', $parent_component);
+                } else {
+                    // logError
+                }
+                break;
+
             case 'view':
                 if ($config->isDefined($path . '/view')) {
                     $html = self::renderView($config, $path . '/view', $parent_component);
@@ -96,6 +104,12 @@ class BimpStruct
                 }
                 break;
 
+            case 'notes':
+                if ($config->isDefined($path . '/notes')) {
+                    $html = self::renderNotes($config, $path . '/notes', $parent_component);
+                }
+                break;
+
             case 'button':
                 if ($config->isDefined($path . '/button')) {
                     $html = self::renderButton($config, $path . '/button', $parent_component);
@@ -113,6 +127,25 @@ class BimpStruct
                 break;
         }
         $config->setCurrentPath($prev_path);
+        return $html;
+    }
+
+    public static function renderObjectHeader(BimpConfig $config, $path, &$parent_component = null)
+    {
+        $html = '';
+        
+        if ($config->isDefined($path . '/object')) {
+            $object = $config->getObject($path . '/object');
+        } else {
+            $object = $config->instance;
+        }
+        
+        if (!is_null($object) && is_a($object, 'BimpObject')) {
+            $html .= $object->renderHeader();
+        } else {
+            $html .= BimpRender::renderAlerts('Objet non trouvé');
+        }
+        
         return $html;
     }
 
@@ -366,6 +399,17 @@ class BimpStruct
 
         $config->setCurrentPath($prev_path);
         return $html;
+    }
+
+    public static function renderNotes(BimpConfig $config, $path, &$parent_component = null)
+    {
+        $object = $config->getObject($path . '/object');
+        $visibility = $config->get($path . '/visibility', null);
+        if (!is_null($object) && is_a($object, 'BimpObject')) {
+            return $object->renderNotesList($visibility);
+        }
+
+        return BimpRender::renderAlerts('Erreur de configuration, impossible d\'afficher la liste des notes (objet invalide)');
     }
 
     public static function renderButton(BimpConfig $config, $path, &$parent_component = null)

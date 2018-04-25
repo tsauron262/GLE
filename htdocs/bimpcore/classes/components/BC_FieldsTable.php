@@ -54,11 +54,11 @@ class BC_FieldsTable extends BC_Panel
 
         foreach ($this->params['rows'] as $row) {
             $row_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
-            
+
             if (!(int) $row_params['show']) {
                 continue;
             }
-            
+
             $label = $row_params['label'];
             $content = '';
             if ($row_params['field']) {
@@ -77,7 +77,7 @@ class BC_FieldsTable extends BC_Panel
             } elseif ($row_params['association']) {
                 $asso = new BimpAssociation($this->object, $row_params['association']);
                 if (count($asso->errors)) {
-                    $content = BimpRender::renderAlerts($asso->errors);
+                    $content .= BimpRender::renderAlerts($asso->errors);
                 } else {
                     $config_path = 'associations/' . $row_params['association'] . '/';
                     if (!$label) {
@@ -97,7 +97,24 @@ class BC_FieldsTable extends BC_Panel
                             $content .= '</div>';
                         }
                     } else {
-                        // todo
+                        $items = $asso->getAssociatesList();
+                        $content .= '<div class="multiple_values_items_list">';
+                        if (count($items)) {
+                            foreach ($items as $id_item) {
+                                $content .= '<div class="multiple_values_item">';
+                                $content .= $this->object->displayAssociate($row_params['association'], $row_params['display'], $id_item);
+                                $content .= '</div>';
+                            }
+                        } else {
+                            if (is_a($asso->associate, 'BimpObject')) {
+                                $msg = 'Aucun' . ($asso->associate->isLabelFemale() ? 'e' : '');
+                                $msg .= ' ' . $asso->associate->getLabel('') . ' associé' . ($asso->associate->isLabelFemale() ? 'e' : '');
+                            } else {
+                                $msg = 'Aucun élément associé';
+                            }
+                            $content .= BimpRender::renderAlerts($msg, 'warning');
+                        }
+                        $content .= '</div>';
                     }
                 }
             } elseif (!is_null($row_params['value'])) {
@@ -147,6 +164,8 @@ class BC_FieldsTable extends BC_Panel
                     ),
                     'icon_before' => 'save'
                         ), 'button');
+
+        $html .= parent::renderFooterExtraBtn();
 
         $html .= '</div>';
 

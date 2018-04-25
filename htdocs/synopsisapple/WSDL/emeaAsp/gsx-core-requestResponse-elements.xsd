@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.0" xml:lang="en"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://gsxws.apple.com/elements/core"
+    xmlns:tns="http://gsxws.apple.com/elements/core"
+    xmlns:basic="http://gsxws.apple.com/types/basic"
+    xmlns:global="http://gsxws.apple.com/types/global">
+
+    <!-- 
+        //////////////////////////////////////////////////////////////////////////////////////
+        IMPORT SECTION: The Section that IMPORTs the other XSDs that are needed for the types
+        defined in this XSD.
+        \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    -->
+    <xs:import namespace="http://gsxws.apple.com/types/basic" schemaLocation="gsx-basic-types.xsd" />
+    <xs:import namespace="http://gsxws.apple.com/types/global" schemaLocation="gsx-global-schema.xsd" />
+    
+    <!-- 
+        //////////////////////////////////////////////////////////////////////////////////////
+        API SECTION: This defines the request/response/WSDL-element types that are used
+        for request/response data communication.
+        \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+    -->    
+    <!-- /////// API: Parts Lookup: START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="partsLookupRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookupRequestData" type="global:partsLookupInfoType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="partsLookupRequestWrapper">
+        <xs:sequence>
+            <xs:element name="PartsLookupRequest" type="tns:partsLookupRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="partsLookupResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="parts" type="global:partsLookupResponseType" minOccurs="1" maxOccurs="unbounded"  />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="partsLookupResponseWrapper">
+        <xs:sequence>
+            <xs:element name="PartsLookupResponse" type="tns:partsLookupResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="PartsLookup" type="tns:partsLookupRequestWrapper" />
+    <xs:element name="PartsLookupResponse" type="tns:partsLookupResponseWrapper" /> 
+    <!-- /////// API: Parts Lookup: END -->
+    
+    <!-- /////// API: Repair Details: START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="repairDetailsRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="dispatchId" type="basic:Token_15" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="repairDetailsRequestWrapper">
+        <xs:sequence>
+            <xs:element name="RepairDetailsRequest" type="tns:repairDetailsRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="repairDetailsResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="lookupResponseData" type="global:repairDetailsType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="repairDetailsResponseWrapper">
+        <xs:sequence>
+            <xs:element name="RepairDetailsResponse" type="tns:repairDetailsResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="RepairDetails" type="tns:repairDetailsRequestWrapper" />
+    <xs:element name="RepairDetailsResponse" type="tns:repairDetailsResponseWrapper" /> 
+    <!-- /////// API: Repair Details: END -->
+</xs:schema>

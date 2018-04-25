@@ -1,4 +1,5 @@
 <?php
+require_once DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php";
 
 class Equipment extends BimpObject
 {
@@ -11,11 +12,6 @@ class Equipment extends BimpObject
         5 => 'Matériel réseau',
         6 => 'Autre'
     );
-    public static $warranty_types = array(
-        0 => ' - ',
-        1 => 'Type 1',
-        2 => 'Type 2'
-    );
     public static $origin_elements = array(
         0 => '',
         1 => 'Fournisseur',
@@ -23,9 +19,21 @@ class Equipment extends BimpObject
         3 => 'Commande Fournisseur'
     );
     protected $current_place = null;
+    
+    public function __construct($db){
+        parent::__construct("bimpequipment", get_class($this));
+        $this->iconeDef = "fa-laptop";
+    }
+    public function getRef(){
+        return $this->getData("serial");
+    }
 
     public function equipmentExists($serial, $id_product)
     {
+        if (is_null($id_product)) {
+            $id_product = 0;
+        }
+
         $value = $this->db->getValue($this->getTable(), 'id', '`serial` = \'' . $serial . '\' AND `id_product` = ' . (int) $id_product);
         if (!is_null($value) && $value) {
             return true;
@@ -326,6 +334,15 @@ class Equipment extends BimpObject
         return '</span class="danger">NON</span>';
     }
 
+    public function displayProduct($display_name = 'default', $no_html = false)
+    {
+        if ((int) $this->getData('id_product')) {
+            return $this->displayData('id_product', $display_name, ($no_html ? 0 : 1), $no_html);
+        }
+
+        return $this->displayData('product_label', 'default', ($no_html ? 0 : 1), $no_html);
+    }
+
 //    Renders: 
     public function renderReservationsList()
     {
@@ -368,6 +385,10 @@ class Equipment extends BimpObject
             if (!is_null($value) && (int) $value) {
                 return array('Ce numéro de série pour ce même produit est déjà associé à l\'équipement ' . $value);
             }
+        }
+
+        if ($id_product) {
+            $this->set('product_label', '');
         }
 
         return parent::validate();

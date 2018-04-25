@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    ~ This schema contains types which will be used through out the XSDs. The types defined here
+    ~ are the extension/restrictions to XSD simple types.
+-->
+<xs:schema version="1.0" xml:lang="en"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://gsxws.apple.com/types/basic"
+    xmlns:tns="http://gsxws.apple.com/types/basic">
+    
+    <xs:simpleType name="yesNoType">        
+        <xs:restriction base="xs:token">
+            <xs:maxLength value="1" />
+            <xs:pattern value="[YN]" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+     <xs:simpleType name="coverageType">
+        <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="N" /> 
+            <xs:enumeration value="A1" /> 
+            <xs:enumeration value="A2" /> 
+            <xs:enumeration value="A3" />
+            <xs:enumeration value="A7" /> 
+            <xs:enumeration value="X" /> 
+            <xs:enumeration value="RPL" /> 
+            <xs:enumeration value="CL" /> 
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <!-- For Region Code -->
+    <xs:simpleType name="regionCodeType">
+        <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="002" /> <!-- Asia Pacific -->
+            <xs:enumeration value="003" /> <!-- Japan -->
+            <xs:enumeration value="004" /> <!-- Europe -->
+            <xs:enumeration value="005" /> <!-- United States -->
+            <xs:enumeration value="006" /> <!-- Canada -->
+            <xs:enumeration value="007" /> <!-- Latin America -->
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="reasonCodeType">
+        <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="A" /> <!-- Part Not Needed -->
+            <xs:enumeration value="B" /> <!-- Duplicated Part -->
+            <xs:enumeration value="C" /> <!-- Added Wrong Part -->
+            <xs:enumeration value="D" /> <!-- Tried to Cancel Order -->
+            <xs:enumeration value="E" /> <!-- Customer Refused Order -->
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <!-- Types that extend "xs:token" -->
+    <xs:simpleType name="Token_0_1">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="1" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_2">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="2" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_0_2">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="2" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_3">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="3" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+     <xs:simpleType name="Token_0_3">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="3" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_5">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="5" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_0_5">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="5" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_10">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="10" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+     <xs:simpleType name="Token_0_10">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="10" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_12">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="12" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_0_12">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="12" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_14">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="14" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_15">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="15" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_15_IMEI">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="15" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_18">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="18" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_18_LOANER">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="18" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_20">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="20" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_22">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="22" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_25">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="25" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_35">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="35" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_50">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="50" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="Token_96">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="96" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <!-- Types that extend <xs:string> -->
+    <xs:simpleType name="String_1">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="1" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_1_LOANER">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="1" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_2">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="2" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_3">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="3" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_3_LOANER">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="3" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_4">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="4" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_0_4">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="4" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_5">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="5" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+        <xs:simpleType name="String_7">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="1" />
+            <xs:maxLength value="7" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_10">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="10" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_0_10">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="10" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_12">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="12" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_14">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="14" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_15">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="15" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+        <xs:simpleType name="String_1_15">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="15" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_18">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="18" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_1_18">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="18" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_20">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="20" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_0_20">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="20" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_25">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="25" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_0_25">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="25" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_30">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="30" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_0_30">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="30" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_35">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="35" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_0_35">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="35" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_40">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="40" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+        <xs:simpleType name="String_1_40">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="40" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_50">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="50" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_60">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="60" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_70">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="70" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_80">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="80" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_100">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="100" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_200">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="200" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_241">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="241" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_1_241">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="241" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_250">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="250" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_0_250">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="250" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_256">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="256" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+  	<xs:simpleType name="String_0_256">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="256" />
+        </xs:restriction>
+   	 </xs:simpleType>
+    
+    <xs:simpleType name="String_360">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="360" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_0_500">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="500" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_800">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="800" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_0_800">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="800" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_1000">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="1000" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_1300">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="1300" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_1500">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="1500" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_1_1500">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="1500" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_2000">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="2000" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_4000">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="1" />
+            <xs:maxLength value="4000" />
+        </xs:restriction>
+    </xs:simpleType>
+    
+    <xs:simpleType name="String_0_4000">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="0" />
+            <xs:maxLength value="4000" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="String_0_3">
+        <xs:restriction base="xs:token">
+            <xs:minLength value="0" />
+            <xs:maxLength value="3" />
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

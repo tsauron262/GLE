@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.0" xml:lang="en"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://gsxws.apple.com/elements/core/asp/emea"
+    xmlns:tns="http://gsxws.apple.com/elements/core/asp/emea"
+    xmlns:basic="http://gsxws.apple.com/types/basic"
+    xmlns:base="http://gsxws.apple.com/types/base"
+    xmlns:global="http://gsxws.apple.com/types/global"
+    xmlns:asp="http://gsxws.apple.com/types/core/asp">
+    
+    <!-- 
+        //////////////////////////////////////////////////////////////////////////////////////
+        IMPORT SECTION: The Section that IMPORTs the other XSDs that are needed for the types
+        defined in this XSD.
+        \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    -->
+    <xs:import namespace="http://gsxws.apple.com/types/basic" schemaLocation="gsx-basic-types.xsd" />
+    <xs:import namespace="http://gsxws.apple.com/types/base" schemaLocation="gsx-base-types.xsd" />
+    <xs:import namespace="http://gsxws.apple.com/types/global" schemaLocation="gsx-global-schema.xsd" />
+    <xs:import namespace="http://gsxws.apple.com/types/core/asp" schemaLocation="gsx-coreAsp-schema.xsd" /> 
+    
+    <!-- 
+        //////////////////////////////////////////////////////////////////////////////////////
+        COMPLEX TYPES SECTION: This defines the COMPLEX-TYPES types that are used only 
+        within this Schema. 
+        \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+    -->
+    <!-- Customer Address that will be used in Create CarryIn. This has "emailAddress" as a mandatory field. -->
+    <xs:complexType name="emeaAspAddressType">
+        <xs:complexContent>
+            <xs:extension base="global:addressType" />
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <!-- Create Carry In Repair type -->
+    <xs:complexType name="emeaAspCreateCarryInRepairDataType">
+        <xs:complexContent>
+            <xs:extension base="asp:carryInRepairType">
+                <xs:sequence>
+                    <xs:element name="customerAddress" type="tns:emeaAspAddressType" minOccurs="1" />                
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <!-- 
+        //////////////////////////////////////////////////////////////////////////////////////
+        API SECTION: This defines the request/response/WSDL-element types that are used
+        for request/response data communication.
+        \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+    -->    
+    <!-- /////// API: Create Carry In: START  -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="carryInRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="tns:emeaAspCreateCarryInRepairDataType" minOccurs="1" />            
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="createCarryInRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateCarryInRequest" type="tns:carryInRequestType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="createCarryInResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1"/>
+            <xs:element name="repairConfirmation" type="asp:repairConfirmationType" minOccurs="1"/>
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>   
+    <xs:complexType name="createCarryInResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateCarryInResponse" type="tns:createCarryInResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="CreateCarryIn" type="tns:createCarryInRequestWrapper" /> 
+    <xs:element name="CreateCarryInResponse" type="tns:createCarryInResponseWrapper" />
+    <!-- /////// API: Create Carry In: END  -->
+
+</xs:schema>

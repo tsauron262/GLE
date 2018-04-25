@@ -42,6 +42,9 @@ class BC_Input extends BimpComponent
         'custom'                      => array(
             'content' => array('default' => '')
         ),
+        'search_product'              => array(
+            'filter_type' => array('data_type' => 'any', 'default' => 0)
+        ),
         'search_societe'              => array(
             'societe_type' => array('default' => '')
         ),
@@ -56,6 +59,10 @@ class BC_Input extends BimpComponent
         ),
         'search_commande_fournisseur' => array(
             'id_fournisseur' => array('data_type' => 'int', 'default' => 0)
+        ),
+        'select_payment'              => array(
+            'value_type'  => array('default' => 'id'),
+            'active_only' => array('data_type' => 'bool', 'default' => 1)
         )
     );
 
@@ -197,6 +204,10 @@ class BC_Input extends BimpComponent
                 $options['items'] = isset($this->params['items']) ? $this->params['items'] : array();
                 break;
 
+            case 'search_product':
+                $options['filter_type'] = isset($this->params['filter_type']) ? $this->params['filter_type'] : 0;
+                break;
+
             case 'search_societe':
                 $options['type'] = isset($this->params['societe_type']) ? $this->params['societe_type'] : '';
                 break;
@@ -215,6 +226,11 @@ class BC_Input extends BimpComponent
 
             case 'search_commande_fournisseur':
                 $options['id_fournisseur'] = isset($this->params['id_fournisseur']) ? $this->params['id_fournisseur'] : '';
+                break;
+
+            case 'select_payment':
+                $options['value_type'] = isset($this->params['value_type']) ? $this->params['value_type'] : 'id';
+                $options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
                 break;
         }
 

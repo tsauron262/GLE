@@ -50,22 +50,38 @@ echo '<script src="/test2/includes/jquery/js/jquery.min.js?version=6.0.4" type="
 echo '</head>';
 
 echo '<body>';
-BimpTools::loadDolClass('compta/facture', 'facture');
+//BimpTools::loadDolClass('compta/facture', 'facture');
+//
+//global $db;
+//
+//$facture = new Facture($db);
+//$facture->fetch(86073);
+//
+//$ticket = new BimpTicket($db, 370, $facture);
+//
+//echo $ticket->renderHtml();
+//
+//echo '<script>';
+//echo '$(document).ready(function() {';
+//echo 'window.print();';
+//echo '});';
+//echo '</script>';
 
-global $db;
+//$sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+//$errors = $sav->validateArray(array(
+//    'status'       => 3,
+//    'id_equipment' => 1,
+//    'id_client'    => 1
+//        ));
+//
+//if (!count($errors)) {
+//    $errors = $sav->create();
+//}
+//
+//echo '<pre>';
+//print_r($errors);
+//exit;
 
-$facture = new Facture($db);
-$facture->fetch(86073);
-
-$ticket = new BimpTicket($db, 370, $facture);
-
-echo $ticket->renderHtml();
-
-echo '<script>';
-echo '$(document).ready(function() {';
-echo 'window.print();';
-echo '});';
-echo '</script>';
 echo '</body></html>';
 
 

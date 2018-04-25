@@ -1760,6 +1760,11 @@ class User extends CommonObject
 
 			dol_syslog(get_class($this)."::send_password changelater is on, url=".$url);
 		}
+                
+                /*moddrsi*/
+                if(isset($this->array_options['options_mail_sec']) && $this->array_options['options_mail_sec'] != "")
+                    $this->email = $this->array_options['options_mail_sec'];
+                /*fmod drsi*/
 
         $mailfile = new CMailFile(
             $subject,

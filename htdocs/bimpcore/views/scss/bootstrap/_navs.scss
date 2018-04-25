@@ -75,6 +75,7 @@
 // Give the tabs something to sit on
 .nav-tabs {
     border-bottom: 1px solid $nav-tabs-border-color;
+    background-color: #fff;
     > li {
         float: left;
         // Make the list-items overlay the bottom border
@@ -226,8 +227,9 @@
 
 // Hide tabbable panes to start, show them when `.active`
 .tab-content {
-    padding-top: 10px;
-    
+    padding: 10px;
+    background-color: #fff;
+
     > .tab-pane {
         display: none;
     }

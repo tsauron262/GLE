@@ -1,0 +1,63 @@
+/* line 2, ../scss/gsx.scss */
+#partsListContainer .partsSearchContainer {
+  padding: 10px;
+  background-color: #F0F0F0;
+  margin-bottom: 15px;
+}
+/* line 8, ../scss/gsx.scss */
+#partsListContainer .searchBloc {
+  display: inline-block;
+  margin-right: 15px;
+  margin-bottom: 15px;
+}
+/* line 13, ../scss/gsx.scss */
+#partsListContainer .searchBloc input, #partsListContainer .searchBloc select {
+  margin: 0 8px;
+}
+/* line 16, ../scss/gsx.scss */
+#partsListContainer .searchBloc .btn {
+  margin: 0 15px;
+}
+
+/* line 23, ../scss/gsx.scss */
+#partsList .panel-title {
+  font-weight: bold;
+}
+/* line 27, ../scss/gsx.scss */
+#partsList .badge {
+  font-size: 11px;
+  margin: -3px 8px 0;
+}
+/* line 31, ../scss/gsx.scss */
+#partsList .badge.badge-danger {
+  background-color: #780000;
+}
+
+/* line 38, ../scss/gsx.scss */
+.curKeywords .curKeyword {
+  display: inline-block;
+  margin: 5px 12px;
+  padding: 8px 12px;
+  background-color: #fff;
+  border: 1px solid #A0A0A0;
+}
+/* line 45, ../scss/gsx.scss */
+.curKeywords .curKeyword:before {
+  font-family: 'FontAwesome';
+  margin-right: 8px;
+  content: '\f0b0';
+}
+/* line 51, ../scss/gsx.scss */
+.curKeywords .curKeyword .removeKeyWord {
+  cursor: pointer;
+}
+/* line 54, ../scss/gsx.scss */
+.curKeywords .curKeyword .removeKeyWord i {
+  font-size: 14px;
+  margin-left: 12px;
+  color: #505050;
+}
+/* line 59, ../scss/gsx.scss */
+.curKeywords .curKeyword .removeKeyWord i:hover {
+  color: #A00000;
+}

@@ -23,6 +23,7 @@ class BC_Panel extends BimpComponent
         $this->params_def['panel'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['objects_change_reload'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['no_reload'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['footer_extra_btn'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
 
         $this->content_only = (int) $content_only;
         $this->level = $level;
@@ -47,8 +48,6 @@ class BC_Panel extends BimpComponent
             $this->params['icon'] = $icon;
         }
 
-        
-        
         if (is_string($this->params['objects_change_reload'])) {
             $this->params['objects_change_reload'] = array($this->params['objects_change_reload']);
         }
@@ -146,7 +145,7 @@ class BC_Panel extends BimpComponent
         }
 
         $html .= '</div>';
-        
+
         return $html;
     }
 
@@ -157,6 +156,53 @@ class BC_Panel extends BimpComponent
 
     public function renderHtmlFooter()
     {
+        $html = '<div style="text-align: right">';
+        $html .= $this->renderFooterExtraBtn();
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public function renderFooterExtraBtn()
+    {
+        if (count($this->params['footer_extra_btn'])) {
+            $items = array();
+
+            foreach ($this->params['footer_extra_btn'] as $action_params) {
+                $button = null;
+                $label = isset($action_params['label']) ? $action_params['label'] : '';
+                $onclick = isset($action_params['onclick']) ? $action_params['onclick'] : '';
+                $icon = isset($action_params['icon']) ? $action_params['icon'] : '';
+                $onclick = str_replace('component_id', $this->identifier, $onclick);
+                if ($label && $onclick) {
+                    $button = array(
+                        'classes' => array('btn', 'btn-light-default'),
+                        'label'   => $label,
+                        'attr'    => array(
+                            'type'    => 'button',
+                            'onclick' => $onclick
+                        )
+                    );
+                    if ($icon) {
+                        $button['icon_before'] = $icon;
+                    }
+                }
+
+                if (!is_null($button)) {
+                    $items[] = BimpRender::renderButton($button, 'button');
+                }
+            }
+
+            if (count($items)) {
+                if (count($items) > 1) {
+                    return BimpRender::renderDropDownButton('Actions', $items, array(
+                                'icon' => 'cogs'
+                    ));
+                }
+                return str_replace('btn-light-default', 'btn-default', $items[0]);
+            }
+        }
+
         return '';
     }
 
@@ -189,5 +235,19 @@ class BC_Panel extends BimpComponent
             return $this->params['header_buttons'];
         }
         return array();
+    }
+
+    public function addObjectChangeReload($object_name)
+    {
+        if (!in_array($object_name, $this->params['objects_change_reload'])) {
+            $this->params['objects_change_reload'][] = $object_name;
+            $this->data['objects_change_reload'] = implode(',', $this->params['objects_change_reload']);
+        }
+    }
+
+    public function addIdentifierSuffix($suffix)
+    {
+        $this->identifier .= '_' . $suffix;
+        $this->data['identifier'] = $this->identifier;
     }
 }

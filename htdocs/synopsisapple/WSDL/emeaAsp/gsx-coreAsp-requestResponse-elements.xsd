@@ -1,0 +1,2129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.0" xml:lang="en"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://gsxws.apple.com/elements/core/asp"
+    xmlns:tns="http://gsxws.apple.com/elements/core/asp"
+    xmlns:base="http://gsxws.apple.com/types/base"
+    xmlns:basic="http://gsxws.apple.com/types/basic"
+    xmlns:global="http://gsxws.apple.com/types/global"
+    xmlns:asp="http://gsxws.apple.com/types/core/asp">
+    
+    <!-- 
+        //////////////////////////////////////////////////////////////////////////////////////
+        IMPORT SECTION: The Section that IMPORTs the other XSDs that are needed for the types
+        defined in this XSD.
+        \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    -->
+    <xs:import namespace="http://gsxws.apple.com/types/base" schemaLocation="gsx-base-types.xsd" />
+    <xs:import namespace="http://gsxws.apple.com/types/basic" schemaLocation="gsx-basic-types.xsd" />
+    <xs:import namespace="http://gsxws.apple.com/types/global" schemaLocation="gsx-global-schema.xsd" />
+    <xs:import namespace="http://gsxws.apple.com/types/core/asp" schemaLocation="gsx-coreAsp-schema.xsd" /> 
+    
+    <!-- 
+    //////////////////////////////////////////////////////////////////////////////////////
+    API SECTION: This defines the request/response/WSDL-element types that are used
+                 for request/response data communication.
+    \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\ 
+    -->    
+    <!-- /////// API: Update KGB Serial Number: START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="updateKGBSerialNumberRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairConfirmationNumber" type="xs:token" minOccurs="1" />
+            <xs:element name="serialNumber" type="basic:Token_18" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="updateKGBSerialNumberRequestWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateKGBSerialNumberRequest" type="tns:updateKGBSerialNumberRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="updateKGBSerialNumberResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="repairConfirmationNumber" type="xs:token" minOccurs="1" />
+            <xs:element name="updateStatus" type="basic:yesNoType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="UpdateKGBSerialNumber" type="tns:updateKGBSerialNumberRequestWrapper" />
+    <xs:element name="UpdateKGBSerialNumberResponse" type="tns:updateKGBSerialNumberResponseType" /> 
+    <!-- /////// API: Update KGB Serial Number: END -->
+    
+    <!-- /////// API: Mark Repair Complete: START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="markRepairCompleteRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairConfirmationNumbers" type="xs:token" minOccurs="1" maxOccurs="50" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="markRepairCompleteRequestWrapper">
+        <xs:sequence>
+            <xs:element name="MarkRepairCompleteRequest" type="tns:markRepairCompleteRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="markRepairCompleteResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="repairConfirmationNumbers" type="asp:markRepairCompleteConfirmationNumbers" minOccurs="0" maxOccurs="50" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="markRepairCompleteResponseWrapper">
+        <xs:sequence>
+            <xs:element name="MarkRepairCompleteResponse" type="tns:markRepairCompleteResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="MarkRepairComplete" type="tns:markRepairCompleteRequestWrapper" />
+    <xs:element name="MarkRepairCompleteResponse" type="tns:markRepairCompleteResponseWrapper" /> 
+    <!-- /////// API: Mark Repair Complete: END -->
+    
+    <!-- /////// API: Repair Lookup: START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="repairLookupRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookupRequestData" type="asp:repairLookupInfoType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="repairLookupRequestWrapper">
+        <xs:sequence>
+            <xs:element name="RepairLookupRequest" type="tns:repairLookupRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="repairLookupResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="lookupResponseData" type="asp:repairLookupResponseType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="repairLookupResponseWrapper">
+        <xs:sequence>
+            <xs:element name="RepairLookupResponse" type="tns:repairLookupResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- WSDL Element Type -->
+    <xs:element name="RepairLookup" type="tns:repairLookupRequestWrapper" />
+    <xs:element name="RepairLookupResponse" type="tns:repairLookupResponseWrapper" /> 
+    <!-- /////// API: Repair Lookup: END -->
+    
+    <!-- /////// API: Repair Status: START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="repairStatusRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairConfirmationNumbers" type="basic:Token_25" minOccurs="1" maxOccurs="100" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="repairStatusRequestWrapper">
+        <xs:sequence>
+            <xs:element name="RepairStatusRequest" type="tns:repairStatusRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="repairStatusResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="repairStatus" type="asp:repairStatusInfo" minOccurs="1" maxOccurs="100" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="repairStatusResponseWrapper">
+        <xs:sequence>
+            <xs:element name="RepairStatusResponse" type="tns:repairStatusResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="RepairStatus" type="tns:repairStatusRequestWrapper" />
+    <xs:element name="RepairStatusResponse" type="tns:repairStatusResponseWrapper" /> 
+    <!-- /////// API: Repair Status: END -->
+    
+    <!-- /////// API: Repair Details Lookup: START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="repairDetailsLookupRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairConfirmationNumber" type="basic:Token_25" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="repairDetailsLookupRequestWrapper">
+        <xs:sequence>
+            <xs:element name="RepairDetailsLookupRequest" type="tns:repairDetailsLookupRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="repairDetailsLookupResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="repairDetails" type="asp:repairDetailsLookupResponseType" minOccurs="0" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="repairDetailsLookupResponseWrapper">
+        <xs:sequence>
+            <xs:element name="RepairDetailsLookupResponse" type="tns:repairDetailsLookupResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="RepairDetailsLookup" type="tns:repairDetailsLookupRequestWrapper" />
+    <xs:element name="RepairDetailsLookupResponse" type="tns:repairDetailsLookupResponseWrapper" /> 
+    <!-- /////// API: Repair Details Lookup: END -->
+    
+    <!-- /////// API: Update Carry In: START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="updateCarryInRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:updateCarryInRepairType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="updateCarryInRequestWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateCarryInRequest" type="tns:updateCarryInRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="updateCarryInResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="repairConfirmation" type="asp:repairConfirmationType" minOccurs="0" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="updateCarryInResponseWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateCarryInResponse" type="tns:updateCarryInResponseType" />
+        </xs:sequence>
+    </xs:complexType>    
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="UpdateCarryIn" type="tns:updateCarryInRequestWrapper" />
+    <xs:element name="UpdateCarryInResponse" type="tns:updateCarryInResponseWrapper" /> 
+    <!-- /////// API: Update Carry In: END -->
+    
+    <!-- /////// API: Create Mail In: START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="createMailInRepairRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:mailInRepairType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="createMailInRepairRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateMailInRepairRequest" type="tns:createMailInRepairRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="createMailInRepairResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="repairConfirmation" type="asp:mailInRepairConfirmationType" minOccurs="0" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createMailInRepairResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateMailInRepairResponse" type="tns:createMailInRepairResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="CreateMailInRepair" type="tns:createMailInRepairRequestWrapper" />
+    <xs:element name="CreateMailInRepairResponse" type="tns:createMailInRepairResponseWrapper" /> 
+    <!-- /////// API: Create Mail In: END -->
+    
+    <!-- /////// API: New Onsite Dispatches: START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="newOnsiteDispatchesRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookupRequestData" type="asp:dsdOnsiteLookupType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="newOnsiteDispatchesRequestWrapper">
+        <xs:sequence>
+            <xs:element name="NewOnsiteDispatchesRequest" type="tns:newOnsiteDispatchesRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="newOnsiteDispatchesResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="newOnsiteDispatches" type="asp:dsdOnsiteResponseType" minOccurs="1" maxOccurs="1500" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="newOnsiteDispatchesResponseWrapper">
+        <xs:sequence>
+            <xs:element name="NewOnsiteDispatchesResponse" type="tns:newOnsiteDispatchesResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="NewOnsiteDispatches" type="tns:newOnsiteDispatchesRequestWrapper" />
+    <xs:element name="NewOnsiteDispatchesResponse" type="tns:newOnsiteDispatchesResponseWrapper" /> 
+    <!-- /////// API: New Onsite Dispatches: END -->
+    
+    <!-- /////// API: Onsite Dispatch Detail: START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="onsiteDispatchDetailRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookupRequestData" type="asp:onsiteDispatchLookupType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="onsiteDispatchDetailRequestWrapper">
+        <xs:sequence>
+            <xs:element name="OnsiteDispatchDetailRequest" type="tns:onsiteDispatchDetailRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="onsiteDispatchDetailResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="onsiteDispatchDetails" type="asp:onsiteDispatchResponseType" minOccurs="1"/>
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="onsiteDispatchDetailResponseWrapper">
+        <xs:sequence>
+            <xs:element name="OnsiteDispatchDetailResponse" type="tns:onsiteDispatchDetailResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="OnsiteDispatchDetail" type="tns:onsiteDispatchDetailRequestWrapper" />
+    <xs:element name="OnsiteDispatchDetailResponse" type="tns:onsiteDispatchDetailResponseWrapper" /> 
+    <!-- /////// API: Onsite Dispatch Detail: END -->
+    
+    <!-- /////// API: Parts Return Update : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="partsReturnUpdateRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:partsReturnUpdateInfoType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="partsReturnUpdateRequestWrapper">
+        <xs:sequence>
+            <xs:element name="PartsReturnUpdateRequest" type="tns:partsReturnUpdateRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="partsReturnUpdateResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="repairConfirmationNumber" type="basic:Token_25" minOccurs="0" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+            <xs:element name="outcome" type="xs:string" minOccurs="0" />
+            <xs:element name="messages" type="xs:string" minOccurs="0" maxOccurs="650"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="partsReturnUpdateResponseWrapper">
+        <xs:sequence>
+            <xs:element name="PartsReturnUpdateResponse" type="tns:partsReturnUpdateResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="PartsReturnUpdate" type="tns:partsReturnUpdateRequestWrapper" />
+    <xs:element name="PartsReturnUpdateResponse" type="tns:partsReturnUpdateResponseWrapper" /> 
+    <!-- /////// API: Parts Return Update: END -->
+    
+    <!-- /////// API: Create APP Order : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="createAPPOrderRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="orderData" type="asp:appOrderRequestInfoType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="createAPPOrderRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateAPPOrderRequest" type="tns:createAPPOrderRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="createAPPOrderResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="orderConfirmation" type="asp:appOrderResponseInfoType" minOccurs="0" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createAPPOrderResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateAPPOrderResponse" type="tns:createAPPOrderResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="CreateAPPOrder" type="tns:createAPPOrderRequestWrapper" />
+    <xs:element name="CreateAPPOrderResponse" type="tns:createAPPOrderResponseWrapper" /> 
+    <!-- /////// API: Create APP Order : END -->
+    
+    <!-- /////// API: Create Stocking Order : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="createStockingOrderRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="orderData" type="asp:stockingOrderRequestType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="createStockingOrderRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateStockingOrderRequest" type="tns:createStockingOrderRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="createStockingOrderResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="orderConfirmation" type="asp:orderResponseType" minOccurs="0" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createStockingOrderResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateStockingOrderResponse" type="tns:createStockingOrderResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="CreateStockingOrder" type="tns:createStockingOrderRequestWrapper" />
+    <xs:element name="CreateStockingOrderResponse" type="tns:createStockingOrderResponseWrapper" /> 
+    <!-- /////// API: Create Stocking Order : END -->
+    
+    <!-- /////// API: Create SRF Order : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="createSRFOrderRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="orderData" type="asp:srfOrderRequestType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="createSRFOrderRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateSRFOrderRequest" type="tns:createSRFOrderRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="createSRFOrderResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="orderConfirmation" type="asp:srfOrderResponseType" minOccurs="0" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createSRFOrderResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateSRFOrderResponse" type="tns:createSRFOrderResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="CreateSRFOrder" type="tns:createSRFOrderRequestWrapper" />
+    <xs:element name="CreateSRFOrderResponse" type="tns:createSRFOrderResponseWrapper" /> 
+    <!-- /////// API: Create SRF Order : END -->
+    
+    <!-- /////// API: View Pending APP Orders : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="viewPendingAPPOrdersRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookupRequestData" type="asp:pendingAPPOrdersRequestType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="viewPendingAPPOrdersRequestWrapper">
+        <xs:sequence>
+            <xs:element name="ViewPendingAPPOrdersRequest" type="tns:viewPendingAPPOrdersRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="viewPendingAPPOrdersResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="pendingAPPOrders" type="asp:pendingAPPOrdersResponseType" minOccurs="1" maxOccurs="unbounded" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="viewPendingAPPOrdersResponseWrapper">
+        <xs:sequence>
+            <xs:element name="ViewPendingAPPOrdersResponse" type="tns:viewPendingAPPOrdersResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="ViewPendingAPPOrders" type="tns:viewPendingAPPOrdersRequestWrapper" />
+    <xs:element name="ViewPendingAPPOrdersResponse" type="tns:viewPendingAPPOrdersResponseWrapper" /> 
+    <!-- /////// API: View Pending APP Orders : END -->
+    
+    <!-- /////// API: Parts Pending Return : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="partsPendingReturnRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:partsPendingReturnRequestType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="partsPendingReturnRequestWrapper">
+        <xs:sequence>
+            <xs:element name="PartsPendingReturnRequest" type="tns:partsPendingReturnRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="partsPendingReturnResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="partsPendingResponse" type="asp:partsPendingReturnResponseType" minOccurs="1" maxOccurs="unbounded" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="partsPendingReturnResponseWrapper">
+        <xs:sequence>
+            <xs:element name="PartsPendingReturnResponse" type="tns:partsPendingReturnResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="PartsPendingReturn" type="tns:partsPendingReturnRequestWrapper" />
+    <xs:element name="PartsPendingReturnResponse" type="tns:partsPendingReturnResponseWrapper" /> 
+    <!-- /////// API: Parts Pending Return : END -->
+    
+    <!-- /////// API: Update Serial Number : START -->
+    <xs:complexType name="updateSerialNumberRepairDataType">
+        <xs:sequence>
+            <xs:element name="repairConfirmationNumber" type="basic:Token_25" minOccurs="1"/>
+            <xs:element name="partInfo" type="asp:updateSerialNumberPartsInfoType" minOccurs="1" maxOccurs="100"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="updateSerialNumberRepairConfirmationType">
+        <xs:sequence>
+            <xs:element name="returnMessage" type="xs:string" minOccurs="0"/>
+            <xs:element name="repairConfirmationNumber" type="basic:Token_18" minOccurs="0"/>
+            <xs:element name="warrantyClaimsExceptionPdfData" type="xs:base64Binary" minOccurs="0"/>
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="updateSerialNumberRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="tns:updateSerialNumberRepairDataType" minOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="updateSerialNumberRequestWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateSerialNumberRequest" type="tns:updateSerialNumberRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="updateSerialNumberResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="repairConfirmation" type="tns:updateSerialNumberRepairConfirmationType" minOccurs="0"/>
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="updateSerialNumberResponseWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateSerialNumberResponse" type="tns:updateSerialNumberResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="UpdateSerialNumber" type="tns:updateSerialNumberRequestWrapper" />
+    <xs:element name="UpdateSerialNumberResponse" type="tns:updateSerialNumberResponseWrapper" /> 
+    <!-- /////// API: Update Serial Number : END -->
+    
+    <!-- /////// API: Submit Warranty Claims Exception (Submit Affidavit) : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="submitWarrantyClaimsExceptionRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="warrantyClaimsExceptionInfo" type="asp:warrantyClaimsExceptionRequestType" minOccurs="1" maxOccurs="25"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="submitWarrantyClaimsExceptionRequestWrapper">
+        <xs:sequence>
+            <xs:element name="SubmitWarrantyClaimsExceptionRequest" type="tns:submitWarrantyClaimsExceptionRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="submitWarrantyClaimsExceptionResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="warrantyClaimsExceptionInfo" type="asp:warrantyClaimsExceptionResponseType" minOccurs="1" maxOccurs="unbounded"/>
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="submitWarrantyClaimsExceptionResponseWrapper">
+        <xs:sequence>
+            <xs:element name="SubmitWarrantyClaimsExceptionResponse" type="tns:submitWarrantyClaimsExceptionResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="SubmitWarrantyClaimsException" type="tns:submitWarrantyClaimsExceptionRequestWrapper" />
+    <xs:element name="SubmitWarrantyClaimsExceptionResponse" type="tns:submitWarrantyClaimsExceptionResponseWrapper" /> 
+    <!-- /////// API: Submit Warranty Claims Exception (Submit Affidavit) : END -->
+    
+    <!-- /////// API: View Bulk Return Proforma : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="viewBulkReturnProformaRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="bulkReturnId" type="basic:Token_10" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="viewBulkReturnProformaRequestWrapper">
+        <xs:sequence>
+            <xs:element name="ViewBulkReturnProformaRequest" type="tns:viewBulkReturnProformaRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="viewBulkReturnProformaResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="bulkReturnProformaInfo" type="asp:viewBulkReturnProformaResponseType" minOccurs="1" maxOccurs="unbounded"/>
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="viewBulkReturnProformaResponseWrapper">
+        <xs:sequence>
+            <xs:element name="ViewBulkReturnProformaResponse" type="tns:viewBulkReturnProformaResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="ViewBulkReturnProforma" type="tns:viewBulkReturnProformaRequestWrapper" />
+    <xs:element name="ViewBulkReturnProformaResponse" type="tns:viewBulkReturnProformaResponseWrapper" /> 
+    <!-- /////// API: View Bulk Return Proforma : END -->
+    
+    <!-- /////// API: Download Return Label : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="returnLabelRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="dispatchId" type="xs:string" minOccurs="0" />
+            <xs:element name="returnOrderNumber" type="basic:Token_0_10" minOccurs="0" />
+            <xs:element name="partNumber" type="basic:Token_18" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="returnLabelRequestWrapper">
+        <xs:sequence>
+            <xs:element name="ReturnLabelRequest" type="tns:returnLabelRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="returnLabelResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="returnLabelData" type="asp:returnLabelResponseType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="returnLabelResponseWrapper">
+        <xs:sequence>
+            <xs:element name="ReturnLabelResponse" type="tns:returnLabelResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="ReturnLabel" type="tns:returnLabelRequestWrapper" />
+    <xs:element name="ReturnLabelResponse" type="tns:returnLabelResponseWrapper" /> 
+    <!-- /////// API: Download Return Label : END -->
+    
+    <!-- /////// API: Register Parts for Bulk Return : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="registerPartsForBulkReturnRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="bulkPartsRegistrationRequest" type="asp:bulkRegistrationRequestType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="registerPartsForBulkReturnRequestWrapper">
+        <xs:sequence>
+            <xs:element name="RegisterPartsForBulkReturnRequest" type="tns:registerPartsForBulkReturnRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="registerPartsForBulkReturnResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="bulkPartsRegistrationData" type="asp:bulkRegistrationResponseType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="registerPartsForBulkReturnResponseWrapper">
+        <xs:sequence>
+            <xs:element name="RegisterPartsForBulkReturnResponse" type="tns:registerPartsForBulkReturnResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="RegisterPartsForBulkReturn" type="tns:registerPartsForBulkReturnRequestWrapper" />
+    <xs:element name="RegisterPartsForBulkReturnResponse" type="tns:registerPartsForBulkReturnResponseWrapper" /> 
+    <!-- /////// API: Register Parts for Bulk Return : END -->
+    
+    <!-- /////// API: Create DSD Onsite Repair : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="createDSDOnsiteRepairRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:dsdOnsiteRepairRequestType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="createDSDOnsiteRepairRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateDSDOnsiteRepairRequest" type="tns:createDSDOnsiteRepairRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="createDSDOnsiteRepairResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="repairConfirmation" type="asp:dsdOnsiteRepairResponseType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createDSDOnsiteRepairResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateDSDOnsiteRepairResponse" type="tns:createDSDOnsiteRepairResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="CreateDSDOnsiteRepair" type="tns:createDSDOnsiteRepairRequestWrapper" />
+    <xs:element name="CreateDSDOnsiteRepairResponse" type="tns:createDSDOnsiteRepairResponseWrapper" /> 
+    <!-- /////// API: Create DSD Onsite Repair : END -->
+    
+    <!-- /////// API: Update DSD Onsite Repair : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="updateDSDOnsiteRepairRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:updateDSDOnsiteRepairRequestType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="updateDSDOnsiteRepairRequestWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateDSDOnsiteRepairRequest" type="tns:updateDSDOnsiteRepairRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="updateDSDOnsiteRepairResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="repairConfirmation" type="asp:updateDSDOnsiteRepairResponseType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="updateDSDOnsiteRepairResponseWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateDSDOnsiteRepairResponse" type="tns:updateDSDOnsiteRepairResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="UpdateDSDOnsiteRepair" type="tns:updateDSDOnsiteRepairRequestWrapper" />
+    <xs:element name="UpdateDSDOnsiteRepairResponse" type="tns:updateDSDOnsiteRepairResponseWrapper" /> 
+    <!-- /////// API: Update DSD Onsite Repair : END -->
+    
+    <!-- /////// API: Create Indirect Onsite Repair : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="createIndirectOnsiteRepairRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:indirectOnsiteRepairRequestType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="createIndirectOnsiteRepairRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateIndirectOnsiteRepairRequest" type="tns:createIndirectOnsiteRepairRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="createIndirectOnsiteRepairResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="repairConfirmation" type="asp:repairConfirmationType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createIndirectOnsiteRepairResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateIndirectOnsiteRepairResponse" type="tns:createIndirectOnsiteRepairResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="CreateIndirectOnsiteRepair" type="tns:createIndirectOnsiteRepairRequestWrapper" />
+    <xs:element name="CreateIndirectOnsiteRepairResponse" type="tns:createIndirectOnsiteRepairResponseWrapper" /> 
+    <!-- /////// API: Create Indirect Onsite Repair : END -->
+    
+    <!-- /////// API: Create Whole Unit Exchange : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="createWholeUnitExchangeRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:createWHUExchangeRequestType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="createWholeUnitExchangeRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateWholeUnitExchangeRequest" type="tns:createWholeUnitExchangeRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="createWholeUnitExchangeResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="repairConfirmation" type="asp:repairConfirmationType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createWholeUnitExchangeResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateWholeUnitExchangeResponse" type="tns:createWholeUnitExchangeResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="CreateWholeUnitExchange" type="tns:createWholeUnitExchangeRequestWrapper" />
+    <xs:element name="CreateWholeUnitExchangeResponse" type="tns:createWholeUnitExchangeResponseWrapper" /> 
+    <!-- /////// API: Create Whole Unit Exchange : END -->
+    
+    <!-- /////// API: Create RepairOrReplace : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="createRepairOrReplaceRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:repairOrReplaceRepairType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="createRepairOrReplaceRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateRepairOrReplaceRequest" type="tns:createRepairOrReplaceRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="createRepairOrReplaceResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="repairConfirmation" type="asp:repairOrReplaceRepairConfirmationType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createRepairOrReplaceResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateRepairOrReplaceResponse" type="tns:createRepairOrReplaceResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="CreateRepairOrReplace" type="tns:createRepairOrReplaceRequestWrapper" />
+    <xs:element name="CreateRepairOrReplaceResponse" type="tns:createRepairOrReplaceResponseWrapper" /> 
+    <!-- /////// API: Create RepairOrReplace : END -->
+    
+    <!-- /////// API: Create NRE Repair : START -->
+    <xs:complexType name="createNRERepairRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:createNRERepairRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="createNRERepairRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateNRERepairRequest" type="tns:createNRERepairRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="createNRERepairResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="repairConfirmation" type="asp:createNRERepairConfirmationType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createNRERepairResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateNRERepairResponse" type="tns:createNRERepairResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="CreateNRERepair" type="tns:createNRERepairRequestWrapper" />
+    <xs:element name="CreateNRERepairResponse" type="tns:createNRERepairResponseWrapper" /> 
+    <!-- /////// API: Create NRE Repair : END -->
+    
+    <!-- /////// API: Invoice ID Lookup : START -->
+    <xs:complexType name="invoiceIDLookupRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookupRequestData" type="asp:invoiceIDLookupRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="invoiceIDLookupRequestWrapper">
+        <xs:sequence>
+            <xs:element name="InvoiceIDLookupRequest" type="tns:invoiceIDLookupRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="invoiceIDLookupResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="lookupResponseData" type="asp:invoiceIDLookupResponseDataType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="invoiceIDLookupResponseWrapper">
+        <xs:sequence>
+            <xs:element name="InvoiceIDLookupResponse" type="tns:invoiceIDLookupResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="InvoiceIDLookup" type="tns:invoiceIDLookupRequestWrapper" />
+    <xs:element name="InvoiceIDLookupResponse" type="tns:invoiceIDLookupResponseWrapper" /> 
+    <!-- /////// API: Invoice ID Lookup : END -->
+    
+    <!-- /////// API: Invoice Details Lookup : START -->
+    <xs:complexType name="invoiceDetailsLookupRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookupRequestData" type="asp:invoiceDetailsLookupRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="invoiceDetailsLookupRequestWrapper">
+        <xs:sequence>
+            <xs:element name="InvoiceDetailsLookupRequest" type="tns:invoiceDetailsLookupRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="invoiceDetailsLookupResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="lookupResponseData" type="asp:invoiceDetailsLookupResponseDataType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="invoiceDetailsLookupResponseWrapper">
+        <xs:sequence>
+            <xs:element name="InvoiceDetailsLookupResponse" type="tns:invoiceDetailsLookupResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="InvoiceDetailsLookup" type="tns:invoiceDetailsLookupRequestWrapper" />
+    <xs:element name="InvoiceDetailsLookupResponse" type="tns:invoiceDetailsLookupResponseWrapper" /> 
+    <!-- /////// API: Invoice Details Lookup : END -->
+    
+    <!-- /////// API: Create General Escalation : START -->
+    <xs:complexType name="createGenEscRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="escalationRequest" type="asp:createGenEscRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="createGeneralEscalationRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateGeneralEscalationRequest" type="tns:createGenEscRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="createGenEscResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="escalationConfirmation" type="base:baseEscCreateResponseType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="createGeneralEscalationResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateGeneralEscalationResponse" type="tns:createGenEscResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="CreateGeneralEscalation" type="tns:createGeneralEscalationRequestWrapper" />
+    <xs:element name="CreateGeneralEscalationResponse" type="tns:createGeneralEscalationResponseWrapper" /> 
+    <!-- /////// API: Create General Escalation : END -->
+    
+    <!-- /////// API: Update General Escalation : START -->
+    <xs:complexType name="updateGeneralEscRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="escalationRequest" type="asp:updateGeneralEscRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="updateGeneralEscalationRequestWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateGeneralEscalationRequest" type="tns:updateGeneralEscRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="updateGeneralEscResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="escalationConfirmation" type="base:baseEscUpdateStatusType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="updateGeneralEscalationResponseWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateGeneralEscalationResponse" type="tns:updateGeneralEscResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="UpdateGeneralEscalation" type="tns:updateGeneralEscalationRequestWrapper" />
+    <xs:element name="UpdateGeneralEscalationResponse" type="tns:updateGeneralEscalationResponseWrapper" /> 
+    <!-- /////// API: Update General Escalation : END -->
+    
+    <!-- /////// API: Update Mail-in Requote Escalation : START -->
+    <xs:complexType name="updateMailInRequoteEscRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="escalationRequest" type="asp:updateMailInRequoteEscRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="updateMailInRequoteEscalationRequestWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateMailInRequoteEscalationRequest" type="tns:updateMailInRequoteEscRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="updateMailInRequoteEscResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="escalationConfirmation" type="base:baseEscUpdateStatusType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="updateMailInRequoteEscalationResponseWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateMailInRequoteEscalationResponse" type="tns:updateMailInRequoteEscResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="UpdateMailInRequoteEscalation" type="tns:updateMailInRequoteEscalationRequestWrapper" />
+    <xs:element name="UpdateMailInRequoteEscalationResponse" type="tns:updateMailInRequoteEscalationResponseWrapper" /> 
+    <!-- /////// API: Update Mail-in Requote Escalation : END -->
+    
+    <!-- /////// API: Update Whole Unit Requote Escalation : START -->
+    <xs:complexType name="updateWholeUnitRequoteEscRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="escalationRequest" type="asp:updateWHURequoteEscRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="updateWholeUnitRequoteEscalationRequestWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateWholeUnitRequoteEscalationRequest" type="tns:updateWholeUnitRequoteEscRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="updateWholeUnitRequoteEscResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="escalationConfirmation" type="base:baseEscUpdateStatusType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="updateWholeUnitRequoteEscalationResponseWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateWholeUnitRequoteEscalationResponse" type="tns:updateWholeUnitRequoteEscResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="UpdateWholeUnitRequoteEscalation" type="tns:updateWholeUnitRequoteEscalationRequestWrapper" />
+    <xs:element name="UpdateWholeUnitRequoteEscalationResponse" type="tns:updateWholeUnitRequoteEscalationResponseWrapper" /> 
+    <!-- /////// API: Update Whole Unit Requote Escalation : END -->
+    
+    <!-- /////// API: Requote Escalation Summary Lookup : START -->
+    <xs:complexType name="requoteEscSummaryLookupRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookupRequestData" type="asp:requoteEscSummaryLookupRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="requoteEscalationSummaryLookupRequestWrapper">
+        <xs:sequence>
+            <xs:element name="RequoteEscalationSummaryLookupRequest" type="tns:requoteEscSummaryLookupRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="requoteEscSummaryLookupResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="lookupResponseData" type="asp:requoteEscSummaryLookupResponseArrayType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="requoteEscalationSummaryLookupResponseWrapper">
+        <xs:sequence>
+            <xs:element name="RequoteEscalationSummaryLookupResponse" type="tns:requoteEscSummaryLookupResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="RequoteEscalationSummaryLookup" type="tns:requoteEscalationSummaryLookupRequestWrapper" />
+    <xs:element name="RequoteEscalationSummaryLookupResponse" type="tns:requoteEscalationSummaryLookupResponseWrapper" /> 
+    <!-- /////// API: Requote Escalation Summary Lookup : END -->
+    
+    <!-- /////// API: Requote Escalation Details Lookup : START -->
+    <xs:complexType name="requoteEscDetailsLookupRequestDataType">
+        <xs:sequence>
+            <xs:element name="escalationId" type="xs:string" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="requoteEscDetailsLookupRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookupRequestData" type="tns:requoteEscDetailsLookupRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="requoteEscalationDetailsLookupRequestWrapper">
+        <xs:sequence>
+            <xs:element name="RequoteEscalationDetailsLookupRequest" type="tns:requoteEscDetailsLookupRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="requoteEscDetailsLookupResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="lookupResponseData" type="asp:requoteEscDetailsLookupResponseDataType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="requoteEscalationDetailsLookupResponseWrapper">
+        <xs:sequence>
+            <xs:element name="RequoteEscalationDetailsLookupResponse" type="tns:requoteEscDetailsLookupResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="RequoteEscalationDetailsLookup" type="tns:requoteEscalationDetailsLookupRequestWrapper" />
+    <xs:element name="RequoteEscalationDetailsLookupResponse" type="tns:requoteEscalationDetailsLookupResponseWrapper" /> 
+    <!-- /////// API: Requote Escalation Details Lookup : END -->
+    
+    <!-- /////// API: General Escalation Summary Lookup : START -->
+    <xs:complexType name="generalEscLookupRequestDataType">
+    	<xs:sequence>
+    		<xs:element name="escalationId" type="xs:string" minOccurs="1" />
+    	</xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="generalEscSummaryLookupRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookupRequestData" type="tns:generalEscLookupRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="generalEscalationSummaryLookupRequestWrapper">
+        <xs:sequence>
+            <xs:element name="GeneralEscalationSummaryLookupRequest" type="tns:generalEscSummaryLookupRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="generalEscSummaryLookupResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="lookupResponseData" type="asp:generalEscSummaryLookupResponseDataType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="generalEscalationSummaryLookupResponseWrapper">
+        <xs:sequence>
+            <xs:element name="GeneralEscalationSummaryLookupResponse" type="tns:generalEscSummaryLookupResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="GeneralEscalationSummaryLookup" type="tns:generalEscalationSummaryLookupRequestWrapper" />
+    <xs:element name="GeneralEscalationSummaryLookupResponse" type="tns:generalEscalationSummaryLookupResponseWrapper" /> 
+    <!-- /////// API: General Escalation Summary Lookup : END -->
+    
+    <!-- /////// API: General Escalation Details Lookup : START -->
+    <xs:complexType name="generalEscDetailsLookupRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookupRequestData" type="tns:generalEscLookupRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="generalEscalationDetailsLookupRequestWrapper">
+        <xs:sequence>
+            <xs:element name="GeneralEscalationDetailsLookupRequest" type="tns:generalEscDetailsLookupRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="generalEscDetailsLookupResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="lookupResponseData" type="asp:generalEscDetailsLookupResponseDataType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="generalEscalationDetailsLookupResponseWrapper">
+        <xs:sequence>
+            <xs:element name="GeneralEscalationDetailsLookupResponse" type="tns:generalEscDetailsLookupResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="GeneralEscalationDetailsLookup" type="tns:generalEscalationDetailsLookupRequestWrapper" />
+    <xs:element name="GeneralEscalationDetailsLookupResponse" type="tns:generalEscalationDetailsLookupResponseWrapper" /> 
+    <!-- /////// API: General Escalation Details Lookup : END -->
+    
+    <!-- /////// API: Fetch Functional Areas : START -->
+    <xs:complexType name="fetchFunctionalAreasRequestDataType">
+        <xs:sequence>
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="100" />
+            <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+            <xs:element name="alternateDeviceId" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="fetchFunctionalAreasRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="troubleshootRequest" type="tns:fetchFunctionalAreasRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="fetchFunctionalAreasRequestWrapper">
+        <xs:sequence>
+            <xs:element name="FetchFunctionalAreasRequest" type="tns:fetchFunctionalAreasRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="fetchFunctionalAreasResponseDataType">
+        <xs:sequence>
+            <xs:element name="functionalArea" type="asp:tsFunctionalAreaDataType" minOccurs="1" maxOccurs="unbounded" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="fetchFunctionalAreasResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="troubleshootResponse" type="tns:fetchFunctionalAreasResponseDataType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="fetchFunctionalAreasResponseWrapper">
+        <xs:sequence>
+            <xs:element name="FetchFunctionalAreasResponse" type="tns:fetchFunctionalAreasResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="FetchFunctionalAreas" type="tns:fetchFunctionalAreasRequestWrapper" />
+    <xs:element name="FetchFunctionalAreasResponse" type="tns:fetchFunctionalAreasResponseWrapper" /> 
+    <!-- /////// API: Fetch Functional Areas : END -->
+    
+    <!-- /////// API: Fetch Issue List : START -->
+    <xs:complexType name="fetchIssueListRequestDataType">
+        <xs:sequence>
+            <xs:element name="functionalAreaID" type="xs:string" minOccurs="0" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="100" />
+            <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="fetchIssueListRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="troubleshootRequest" type="tns:fetchIssueListRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="fetchIssueListRequestWrapper">
+        <xs:sequence>
+            <xs:element name="FetchIssueListRequest" type="tns:fetchIssueListRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="fetchIssueListResponseDataType">
+        <xs:sequence>
+            <xs:element name="issue" type="base:issueType" minOccurs="1" maxOccurs="unbounded" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="fetchIssueListResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="troubleshootResponse" type="tns:fetchIssueListResponseDataType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="fetchIssueListResponseWrapper">
+        <xs:sequence>
+            <xs:element name="FetchIssueListResponse" type="tns:fetchIssueListResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="FetchIssueList" type="tns:fetchIssueListRequestWrapper" />
+    <xs:element name="FetchIssueListResponse" type="tns:fetchIssueListResponseWrapper" /> 
+    <!-- /////// API: Fetch Issue List : END -->
+    
+    <!-- /////// API: Fetch Quick Check : START -->
+    <xs:complexType name="fetchQuickCheckRequestDataType">
+        <xs:sequence>
+            <xs:element name="productCategoryID" type="xs:string" minOccurs="0" />
+            <xs:element name="issueCategoryID" type="xs:string" minOccurs="0" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="100" />
+            <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="fetchQuickCheckRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="troubleshootRequest" type="tns:fetchQuickCheckRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="fetchQuickCheckRequestWrapper">
+        <xs:sequence>
+            <xs:element name="FetchQuickCheckRequest" type="tns:fetchQuickCheckRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="fetchQuickCheckResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="troubleshootResponse" type="asp:tsQuickCheckResponseDataType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="fetchQuickCheckResponseWrapper">
+        <xs:sequence>
+            <xs:element name="FetchQuickCheckResponse" type="tns:fetchQuickCheckResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="FetchQuickCheck" type="tns:fetchQuickCheckRequestWrapper" />
+    <xs:element name="FetchQuickCheckResponse" type="tns:fetchQuickCheckResponseWrapper" /> 
+    <!-- /////// API: Fetch Quick Check : END -->
+    
+    <!-- /////// API: Fetch TS Node : START -->
+    <xs:complexType name="fetchTSNodeRequestDataType">
+        <xs:sequence>
+            <xs:element name="issueCategoryID" type="xs:string" minOccurs="0" /> 
+            <xs:element name="articleID" type="xs:string" minOccurs="0" /> 
+            <xs:element name="nodeID" type="xs:string" minOccurs="0" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="100" />
+            <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="fetchTSNodeRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="troubleshootRequest" type="tns:fetchTSNodeRequestDataType" minOccurs="1" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="fetchTSNodeRequestWrapper">
+        <xs:sequence>
+            <xs:element name="FetchTSNodeRequest" type="tns:fetchTSNodeRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="fetchTSNodeResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="troubleshootResponse" type="asp:fetchTSNodeResponseDataType" minOccurs="1" />
+            <!-- <xs:element name="communicationMessage" type="xs:string" minOccurs="0" /> -->
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="fetchTSNodeResponseWrapper">
+        <xs:sequence>
+            <xs:element name="FetchTSNodeResponse" type="tns:fetchTSNodeResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="FetchTSNode" type="tns:fetchTSNodeRequestWrapper" />
+    <xs:element name="FetchTSNodeResponse" type="tns:fetchTSNodeResponseWrapper" /> 
+    <!-- /////// API: Fetch TS Node : END -->
+    
+       <!-- /////// API: Update CarryIn Return Replace: START -->
+    <!-- REQUEST TYPES -->
+    
+    <xs:complexType name="updateCarryInReturnReplaceRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:updateCarryInReturnReplaceRepairType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+
+ <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="updateCarryInReturnReplaceRequestWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateCarryInReturnBeforeReplaceRequest" type="tns:updateCarryInReturnReplaceRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="updateCarryInReturnReplaceResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="repairConfirmation" type="asp:repairConfirmationType" minOccurs="0" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+   
+    <xs:complexType name="updateCarryInReturnReplaceResponseWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateCarryInReturnBeforeReplaceResponse" type="tns:updateCarryInReturnReplaceResponseType" />
+       </xs:sequence>
+    </xs:complexType>    
+
+    <!-- WSDL Element Type -->
+    <xs:element name="UpdateCarryInReturnBeforeReplace" type="tns:updateCarryInReturnReplaceRequestWrapper" />
+    <xs:element name="UpdateCarryInReturnBeforeReplaceResponse" type="tns:updateCarryInReturnReplaceResponseWrapper" />  
+        
+    <!-- /////// API: Update CarryIn Return Replace: END-->
+    
+    <!-- Create CarryIn Return Before Replace Repair Request Types -->
+  	<xs:complexType name="carryInReturnReplaceRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:carryInReturnBeforeReplaceRepairType" minOccurs="1" />            
+        </xs:sequence>
+    </xs:complexType>
+
+	<!-- Create CarryIn Return Before Replace Repair Response Types -->
+	<xs:complexType name="carryInReturnReplaceResponseType">
+		<xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1"/>
+            <xs:element name="repairConfirmation" type="asp:repairConfirmationType" minOccurs="1"/>
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>   
+
+    <!-- Request and response wrapper types for JAXB binding -->
+    <xs:complexType name="createCarryInReturnReplaceRequestWrapper">
+        <xs:sequence>
+            <xs:element name="CreateCarryInReturnBeforeReplaceRequest" type="tns:carryInReturnReplaceRequestType" />
+        </xs:sequence>
+    </xs:complexType>
+   
+    <xs:complexType name="createCarryInReturnReplaceResponseWrapper">
+        <xs:sequence>
+            <xs:element name="CreateCarryInReturnBeforeReplaceResponse" type="tns:carryInReturnReplaceResponseType" />
+        </xs:sequence>
+    </xs:complexType>   
+    
+    <!-- WSDL Elements -->
+    <xs:element name="CreateCarryInReturnBeforeReplace" type="tns:createCarryInReturnReplaceRequestWrapper" />
+    <xs:element name="CreateCarryInReturnBeforeReplaceResponse" type="tns:createCarryInReturnReplaceResponseWrapper" />
+    <!-- Carry In Return Before Replace END -->
+    
+        <!-- /////// API: Return Reporting : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="returnReportRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="returnRequestData" type="asp:reportingBulkReturnRequestType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="returnReportRequestWrapper">
+        <xs:sequence>
+            <xs:element name="ReturnReportRequest" type="tns:returnReportRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="returnReportResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="returnReportResponse" type="asp:reportingBulkReturnResponseType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="returnReportResponseWrapper">
+        <xs:sequence>
+            <xs:element name="ReturnReportResponse" type="tns:returnReportResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="ReturnReport" type="tns:returnReportRequestWrapper" />
+    <xs:element name="ReturnReportResponse" type="tns:returnReportResponseWrapper" /> 
+    <!-- /////// API: Return Reporting : END -->
+ 
+      
+        <!-- /////// API: Delete Repair: START -->
+    <!-- REQUEST TYPES -->
+    
+    <xs:complexType name="deleteRepairRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="confirmationNumber" type="xs:string" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+
+ <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="deleteRepairRequestWrapper">
+        <xs:sequence>
+            <xs:element name="DeleteRepairRequest" type="tns:deleteRepairRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="deleteRepairResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="confirmationNumber" type="xs:string"  minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+   
+    <xs:complexType name="deleteRepairResponseWrapper">
+        <xs:sequence>
+            <xs:element name="DeleteRepairResponse" type="tns:deleteRepairResponseType" />
+       </xs:sequence>
+    </xs:complexType>    
+
+    <!-- WSDL Element Type -->
+    <xs:element name="DeleteRepair" type="tns:deleteRepairRequestWrapper" />
+    <xs:element name="DeleteRepairResponse" type="tns:deleteRepairResponseWrapper" />  
+        
+    <!-- /////// API: Delete Repair: END-->
+    
+   <!-- /////// API: Consignment Increase Order LookUp API  START -->
+       
+        <!-- REQUEST TYPES -->
+        <xs:complexType name="consignmentIncreaseOrderLookUpRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookUpRequestData" type="asp:consignmentIncreaseOrderLookUpRequestInfoType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+     
+     <!-- REQUEST WRAPPER TYPES (For JAXB Binding) --> 
+    <xs:complexType name="consignmentIncreaseOrderLookUpRequestWrapper">
+        <xs:sequence>
+            <xs:element name="ConsignmentIncreaseOrderLookUpRequest" type="tns:consignmentIncreaseOrderLookUpRequestType" />
+       </xs:sequence>
+    </xs:complexType>  
+    
+     <!-- RESPONSE TYPE -->
+      <xs:complexType name="consignmentIncreaseOrderLookUpResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="lookupResponseData" type="asp:consignmentIncreaseOrderLookUpResponseInfoType" minOccurs="1" maxOccurs="unbounded"/>
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="consignmentIncreaseOrderLookUpResponseWrapper">
+        <xs:sequence>
+            <xs:element name="ConsignmentIncreaseOrderLookUpResponse" type="tns:consignmentIncreaseOrderLookUpResponseType" />
+       </xs:sequence>
+    </xs:complexType>      
+    
+    <!-- WSDL Elements -->
+    <xs:element name="ConsignmentIncreaseOrderLookUp" type="tns:consignmentIncreaseOrderLookUpRequestWrapper" />
+    <xs:element name="ConsignmentIncreaseOrderLookUpResponse" type="tns:consignmentIncreaseOrderLookUpResponseWrapper" />
+          
+     <!-- /////// API: Consignment Increase Order LookUp API: END -->    
+    
+     <!-- API : Component Check START -->
+    <xs:complexType name="componentCheckRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:componentCheckRequestType" minOccurs="1" />            
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="componentCheckResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1"/>
+            <xs:element name="componentCheckDetails" type="asp:componentCheckDetailsResponseType" minOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="componentCheckRequestWrapper">
+        <xs:sequence>
+            <xs:element name="ComponentCheckRequest" type="tns:componentCheckRequestType" />
+        </xs:sequence>
+    </xs:complexType>
+   
+    <xs:complexType name="componentCheckResponseWrapper">
+        <xs:sequence>
+            <xs:element name="ComponentCheckResponse" type="tns:componentCheckResponseType" />
+        </xs:sequence>
+    </xs:complexType>  
+    
+    <xs:element name="ComponentCheck" type="tns:componentCheckRequestWrapper" />
+    <xs:element name="ComponentCheckResponse" type="tns:componentCheckResponseWrapper" /> 
+     <!-- API : Component Check END --> 
+     
+      <!-- /////// API: Consignment Decrease Order LookUp API  START -->
+       
+        <!-- REQUEST TYPES -->
+        <xs:complexType name="consignmentDecreaseOrderLookUpRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="lookUpRequestData" type="asp:consignmentDecreaseOrderLookUpRequestInfoType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+     
+     <!-- REQUEST WRAPPER TYPES (For JAXB Binding) --> 
+    <xs:complexType name="consignmentDecreaseOrderLookUpRequestWrapper">
+        <xs:sequence>
+            <xs:element name="ConsignmentDecreaseOrderLookUpRequest" type="tns:consignmentDecreaseOrderLookUpRequestType" />
+       </xs:sequence>
+    </xs:complexType>  
+    
+     <!-- RESPONSE TYPE -->
+      <xs:complexType name="consignmentDecreaseOrderLookUpResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="orderData" type="asp:consignmentDecreaseOrderLookUpResponseInfoType" minOccurs="1" maxOccurs="unbounded"/>
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="consignmentDecreaseOrderLookUpResponseWrapper">
+        <xs:sequence>
+            <xs:element name="ConsignmentDecreaseOrderLookUpResponse" type="tns:consignmentDecreaseOrderLookUpResponseType" />
+       </xs:sequence>
+    </xs:complexType>      
+    
+    <!-- WSDL Elements -->
+    <xs:element name="ConsignmentDecreaseOrderLookUp" type="tns:consignmentDecreaseOrderLookUpRequestWrapper" />
+    <xs:element name="ConsignmentDecreaseOrderLookUpResponse" type="tns:consignmentDecreaseOrderLookUpResponseWrapper" />
+          
+     <!-- /////// API: Consignment Decrease Order LookUp API: END -->         
+     
+	<!-- /////// API: SubmitConsignmentDecreaseOrder: START -->   
+	<!-- REQUEST TYPES -->
+	<xs:complexType name="submitConsignmentDecreaseOrderRequestType">
+		<xs:sequence>
+			<xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+			<xs:element name="orderData" type="asp:submitConsignmentDecreaseOrderRequestInfoType" minOccurs="1" />
+		</xs:sequence>
+	</xs:complexType>
+	<!-- REQUEST WRAPPER TYPES (For JAXB Binding) --> 
+	<xs:complexType name="submitConsignmentDecreaseOrderRequestWrapper">
+		<xs:sequence>
+			<xs:element name="SubmitConsignmentDecreaseOrderRequest" type="tns:submitConsignmentDecreaseOrderRequestType" />
+		</xs:sequence>
+	</xs:complexType>  
+	
+	<!-- RESPONSE TYPE -->
+	<xs:complexType name="submitConsignmentDecreaseOrderResponseType">
+		<xs:sequence>
+			<xs:element name="operationId" type="xs:token" minOccurs="1" />
+			<xs:element name="orderConfirmation" type="asp:submitConsignmentDecreaseOrderResponseInfoType" minOccurs="1" />
+			<xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="submitConsignmentDecreaseOrderResponseWrapper">
+		<xs:sequence>
+			<xs:element name="SubmitConsignmentDecreaseOrderResponse" type="tns:submitConsignmentDecreaseOrderResponseType" />
+		</xs:sequence>
+	</xs:complexType>      
+	
+	<!-- WSDL Elements -->
+	<xs:element name="SubmitConsignmentDecreaseOrder" type="tns:submitConsignmentDecreaseOrderRequestWrapper" />
+	<xs:element name="SubmitConsignmentDecreaseOrderResponse" type="tns:submitConsignmentDecreaseOrderResponseWrapper" />          
+	<!-- /////// API: SubmitConsignmentDecreaseOrder: END -->
+     
+	<!-- /////// API: Acknowledge Consignment Increase Order: START -->   
+	<!-- REQUEST TYPES -->
+        <xs:complexType name="acknowledgeConsignmentIncreaseOrderRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+			<xs:element name="orderData" type="asp:acknowledgeConsignmentIncreaseOrderRequestInfoType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType> 
+      
+	<!-- REQUEST WRAPPER TYPES (For JAXB Binding) --> 
+    <xs:complexType name="acknowledgeConsignmentIncreaseOrderRequestWrapper">
+        <xs:sequence>
+            <xs:element name="AcknowledgeConsignmentIncreaseOrderRequest" type="tns:acknowledgeConsignmentIncreaseOrderRequestType" />
+       </xs:sequence>
+    </xs:complexType>  
+    
+	 <!-- RESPONSE TYPE -->
+      <xs:complexType name="acknowledgeConsignmentIncreaseOrderResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="acknowledgementResponse" type="asp:acknowledgeConsignmentIncreaseOrderResponseInfoType" minOccurs="1" />
+			<xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="acknowledgeConsignmentIncreaseOrderResponseWrapper">
+        <xs:sequence>
+            <xs:element name="AcknowledgeConsignmentIncreaseOrderResponse" type="tns:acknowledgeConsignmentIncreaseOrderResponseType" />
+       </xs:sequence>
+    </xs:complexType>      
+    
+    <!-- WSDL Elements -->
+    <xs:element name="AcknowledgeConsignmentIncreaseOrder" type="tns:acknowledgeConsignmentIncreaseOrderRequestWrapper" />
+    <xs:element name="AcknowledgeConsignmentIncreaseOrderResponse" type="tns:acknowledgeConsignmentIncreaseOrderResponseWrapper" />          
+	<!-- /////// API: Acknowledge Consignment Increase Order: END -->       
+     
+    <!-- /////// API: ValidateFromConsignedStock: START -->   
+    <xs:complexType name="validateFromConsignedStockRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="consignedStockRequest" type="asp:consignedStockValidationRequestInfoType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+      
+    <xs:complexType name="validateFromConsignedStockRequestWrapper">
+        <xs:sequence>
+            <xs:element name="ValidateFromConsignedStockRequest" type="tns:validateFromConsignedStockRequestType" />
+       </xs:sequence>
+    </xs:complexType>  
+    
+      <xs:complexType name="validateFromConsignedStockResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="consignedStockResponse" type="asp:consignedStockValidationResponseInfoType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="validateFromConsignedStockResponseWrapper">
+        <xs:sequence>
+            <xs:element name="ValidateFromConsignedStockResponse" type="tns:validateFromConsignedStockResponseType" />
+       </xs:sequence>
+    </xs:complexType>      
+    
+    <xs:element name="ValidateFromConsignedStock" type="tns:validateFromConsignedStockRequestWrapper" />
+    <xs:element name="ValidateFromConsignedStockResponse" type="tns:validateFromConsignedStockResponseWrapper" />      
+     <!-- /////// API: ValidateFromConsignedStock: END --> 
+     
+     <!-- /////// API: ViewConsignmentProforma: START --> 
+      <!-- REQUEST TYPES -->  
+        <xs:complexType name="viewConsignmentProformaRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="orderNumber" type="xs:string" minOccurs="1"/>
+            <xs:element name="shipmentNumber" type="xs:string" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->  
+    <xs:complexType name="viewConsignmentProformaRequestWrapper">
+        <xs:sequence>
+            <xs:element name="ViewConsignmentProformaRequest" type="tns:viewConsignmentProformaRequestType" />
+       </xs:sequence>
+    </xs:complexType>  
+    
+    <!-- RESPONSE TYPE -->
+     <xs:complexType name="viewConsignmentProformaResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="consignmentProformaInfo" type="asp:viewConsignmentProformaResponseType" minOccurs="1" maxOccurs="unbounded"/>
+             <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="viewConsignmentProformaResponseWrapper">
+        <xs:sequence>
+            <xs:element name="ViewConsignmentProformaResponse" type="tns:viewConsignmentProformaResponseType" />
+       </xs:sequence>
+    </xs:complexType>      
+    
+    <!-- WSDL Elements -->
+    <xs:element name="ViewConsignmentProforma" type="tns:viewConsignmentProformaRequestWrapper" />
+    <xs:element name="ViewConsignmentProformaResponse" type="tns:viewConsignmentProformaResponseWrapper" />          
+     <!-- /////// API: ViewConsignmentProforma: END -->   
+     
+    <!-- /////// API: Update Repair or Replace: START --> 
+      <!-- REQUEST TYPES -->  
+        <xs:complexType name="updateRepairOrReplaceRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:updateRepairOrReplaceRequestInfoType" minOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->  
+    <xs:complexType name="updateRepairOrReplaceRequestWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateRepairOrReplaceRequest" type="tns:updateRepairOrReplaceRequestType" />
+       </xs:sequence>
+    </xs:complexType>  
+    
+    <!-- RESPONSE TYPE -->
+     <xs:complexType name="updateRepairOrReplaceResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+           <xs:element name="repairConfirmation" type="asp:updateRepairOrReplaceResponseInfoType" minOccurs="1"/>
+             <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <!-- RESPONSE WRAPPER TYPES (For JAXB Binding) -->  
+    <xs:complexType name="updateRepairOrReplaceResponseWrapper">
+        <xs:sequence>
+            <xs:element name="UpdateRepairOrReplaceResponse" type="tns:updateRepairOrReplaceResponseType" />
+       </xs:sequence>
+    </xs:complexType>      
+    
+    <!-- WSDL Elements -->
+    <xs:element name="UpdateRepairOrReplaceRequest" type="tns:updateRepairOrReplaceRequestWrapper" />
+    <xs:element name="UpdateRepairOrReplaceResponse" type="tns:updateRepairOrReplaceResponseWrapper" />          
+     <!-- /////// API: Update Repair or Replace: END -->   
+ 
+	<!-- Apple Review PreCheck Start -->
+	<!-- APPLE Review PreCheck Request Types -->
+  	<xs:complexType name="appleReviewPreCheckRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="repairData" type="asp:viewAppleHoldRequestType" minOccurs="1" maxOccurs="100" />            
+        </xs:sequence>
+    </xs:complexType>
+
+	<!-- APPLE Review PreCheck Response Types -->
+	<xs:complexType name="appleReviewPreCheckResponseType">
+		<xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1"/>
+            <xs:element name="tspsHoldStatus" type="asp:viewAppleHoldResponseType" minOccurs="1" maxOccurs="100" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>   
+	<!-- Request and response wrapper types for JAXB binding -->
+    <xs:complexType name="appleReviewPreCheckRequestWrapper">
+        <xs:sequence>
+            <xs:element name="AppleReviewPreCheckRequest" type="tns:appleReviewPreCheckRequestType" />
+        </xs:sequence>
+    </xs:complexType>
+   
+    <xs:complexType name="appleReviewPreCheckResponseWrapper">
+        <xs:sequence>
+            <xs:element name="AppleReviewPreCheckResponse" type="tns:appleReviewPreCheckResponseType" />
+        </xs:sequence>
+    </xs:complexType>   
+    
+    <!-- WSDL Elements -->
+    <xs:element name="AppleReviewPreCheckRequest" type="tns:appleReviewPreCheckRequestWrapper" />
+    <xs:element name="AppleReviewPreCheckResponse" type="tns:appleReviewPreCheckResponseWrapper" />
+	<!-- Apple Review PreCheck END --> 
+	
+	 <!-- /////// API: Loaner Return: START --> 
+      <!-- REQUEST TYPES -->  
+        <xs:complexType name="loanerReturnRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="loanerReturnRequestData" type="asp:loanerReturnRequestType" minOccurs="1" maxOccurs="100"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->  
+    <xs:complexType name="loanerReturnRequestWrapper">
+        <xs:sequence>
+            <xs:element name="LoanerReturnRequest" type="tns:loanerReturnRequestType" />
+       </xs:sequence>
+    </xs:complexType>  
+    
+    <!-- RESPONSE TYPE -->
+     <xs:complexType name="loanerReturnResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="loanerReturnResponseData" type="asp:loanerReturnResponseType" minOccurs="1" maxOccurs="unbounded"/>
+             <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE WRAPPER TYPES (For JAXB Binding) -->  
+    <xs:complexType name="loanerReturnResponseWrapper">
+        <xs:sequence>
+            <xs:element name="LoanerReturnResponse" type="tns:loanerReturnResponseType" />
+       </xs:sequence>
+    </xs:complexType>      
+    
+    <!-- WSDL Elements -->
+    <xs:element name="LoanerReturn" type="tns:loanerReturnRequestWrapper" />
+    <xs:element name="LoanerReturnResponse" type="tns:loanerReturnResponseWrapper" />          
+    <!-- /////// API: Loaner Return: END -->
+    
+     <!-- WSDL Elements -->
+    <xs:element name="ReportedSymptomIssue" type="tns:reportedSymptomIssueRequestWrapper" />
+    <xs:element name="ReportedSymptomIssueResponse" type="tns:reportedSymptomIssueResponseWrapper" />
+    <!-- Reported Symptom/Issue END -->
+     
+      <!--Reported Symptom/Issue Start -->
+    <!-- Reported Symptom/Issue Request Types -->
+    <xs:complexType name="reportedSymptomIssueRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="requestData" type="asp:viewReportedSymptomIssueStatusRequestType" minOccurs="1" maxOccurs="unbounded" />            
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Reported Symptom/Issue Response Types -->
+    
+    <xs:complexType name="reportedSymptomIssueResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1"/>
+            <xs:element name="reportedSymptomIssueResponse" type="asp:viewReportedSymptomIssueResponseType" minOccurs="1" maxOccurs="unbounded" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Request and response wrapper types for JAXB binding -->
+    <xs:complexType name="reportedSymptomIssueRequestWrapper">
+        <xs:sequence>
+            <xs:element name="ReportedSymptomIssueRequest" type="tns:reportedSymptomIssueRequestType" />
+        </xs:sequence>
+    </xs:complexType>
+   
+    <xs:complexType name="reportedSymptomIssueResponseWrapper">
+        <xs:sequence>
+            <xs:element name="ReportedSymptomIssueResponse" type="tns:reportedSymptomIssueResponseType" />
+        </xs:sequence>
+    </xs:complexType>   
+    
+     <!-- /////// API: Register Parts for WHU Bulk Return : START -->
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="registerPartsForWHUBulkReturnRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="WHUBulkPartsRegistrationRequest" type="asp:WHUBulkRegistrationRequestType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="registerPartsForWHUBulkReturnRequestWrapper">
+        <xs:sequence>
+            <xs:element name="RegisterPartsForWHUBulkReturnRequest" type="tns:registerPartsForWHUBulkReturnRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="registerPartsForWHUBulkReturnResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="0" />
+            <xs:element name="WHUBulkPartsRegistrationData" type="asp:WHUBulkRegistrationResponseType" minOccurs="1" />
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="registerPartsForWHUBulkReturnResponseWrapper">
+        <xs:sequence>
+            <xs:element name="RegisterPartsForWHUBulkReturnResponse" type="tns:registerPartsForWHUBulkReturnResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- WSDL Element Type -->
+    <xs:element name="RegisterPartsForWHUBulkReturn" type="tns:registerPartsForWHUBulkReturnRequestWrapper" />
+    <xs:element name="RegisterPartsForWHUBulkReturnResponse" type="tns:registerPartsForWHUBulkReturnResponseWrapper" /> 
+    <!-- /////// API: Register Parts for WHU Bulk Return : END -->
+    <!-- /////// API: Depot Shipper Label : START -->
+    
+    <!-- REQUEST TYPES -->
+    <xs:complexType name="depotShipperLabelRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="dispatchId" type="xs:string" minOccurs="1" />            
+        </xs:sequence>
+    </xs:complexType>
+    
+     <!-- REQUEST WRAPPER TYPES (For JAXB Binding) -->
+    <xs:complexType name="depotShipperLabelRequestWrapper">
+        <xs:sequence>
+            <xs:element name="depotShipperLabelRequest" type="tns:depotShipperLabelRequestType"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE TYPE -->
+    <xs:complexType name="depotShipperLabelResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1" />
+            <xs:element name="dispatchId" type="xs:string" minOccurs="0" />
+            <xs:element name="fileName" type="xs:string" minOccurs="0" />
+            <xs:element name="fileData" type="xs:base64Binary" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- RESPONSE WRAPPER TYPES  -->
+    <xs:complexType name="depotShipperLabelResponseWrapper">
+        <xs:sequence>
+            <xs:element name="depotShipperLabelResponse" type="tns:depotShipperLabelResponseType" />
+        </xs:sequence>
+    </xs:complexType>
+    <!-- WSDL Element Type -->
+    <xs:element name="depotShipperLabelRequest" type="tns:depotShipperLabelRequestWrapper" />
+    <xs:element name="depotShipperLabelResponse" type="tns:depotShipperLabelResponseWrapper" /> 
+    <!-- /////// API: Depot Shipper Label : END -->
+	
+	     <!-- API : FetchQuestions  : Start -->
+     <xs:element name="FetchQuestions" type="tns:fetchQuestionsRequestWrapper" />
+     <xs:element name="FetchQuestionsResponse" type="tns:fetchQuestionsResponseWrapper" />
+    
+     <!-- FetchQuestions Request Types -->
+    <xs:complexType name="fetchQuestionsRequestType">
+        <xs:sequence>
+            <xs:element name="userSession" type="global:gsxUserSessionType" minOccurs="1" />
+            <xs:element name="questionsRequestData" type="asp:questionsRequestType" minOccurs="1"/>            
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- FetchQuestions Response Types -->
+    
+    <xs:complexType name="fetchQuestionsResponseType">
+        <xs:sequence>
+            <xs:element name="operationId" type="xs:token" minOccurs="1"/>
+            <xs:element name="fetchQuestionsResponseData" type="asp:questionsResponseType" minOccurs="1"/>
+            <xs:element name="communicationMessage" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Request and response wrapper types for JAXB binding -->
+    <xs:complexType name="fetchQuestionsRequestWrapper">
+        <xs:sequence>
+            <xs:element name="fetchQuestionsRequest" type="tns:fetchQuestionsRequestType" />
+        </xs:sequence>
+    </xs:complexType>
+   
+    <xs:complexType name="fetchQuestionsResponseWrapper">
+        <xs:sequence>
+            <xs:element name="fetchQuestionsResponse" type="tns:fetchQuestionsResponseType" />
+        </xs:sequence>
+    </xs:complexType>   
+    
+    <!-- API : FetchQuestions  : End -->
+    
+</xs:schema>

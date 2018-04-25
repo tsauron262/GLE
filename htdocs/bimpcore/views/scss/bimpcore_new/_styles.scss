@@ -22,7 +22,7 @@
 
 /*Styles génériques*/
 #id-right {
-    background-color: $gray-light;
+    background-color: #F0F0F0;
 }
 
 @media (max-width: $screen-sm-max) {
@@ -205,7 +205,17 @@ div.alert {
     }
 }
 
+.dropdown-title {
+    display: block;
+    margin: 10px 0;
+    padding: 0 10px 10px 10px;
+    border-bottom: 1px solid $gray;
+    color: $gray-darker;
+    font-weight: bold;
+    font-size: 12px;
+}
 /*Objects Components*/
+
 .object_component {
     @media (max-width: $screen-sm-max) {
         overflow-x: auto;
@@ -250,8 +260,8 @@ i.iconRight {
     margin-left: 8px;
 }
 .buttonsContainer {
-    margin: 15px 0;
-    padding: 10px 0;
+    margin: 10px 0;
+    padding: 5px 0;
     span, a, button, .button, .btn {
         margin: 5px 10px;
         display: inline-block;

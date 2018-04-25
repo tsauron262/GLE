@@ -1,0 +1,857 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema version="1.0" xml:lang="en"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://gsxws.apple.com/types/global"
+    xmlns:tns="http://gsxws.apple.com/types/global"
+    xmlns:basic="http://gsxws.apple.com/types/basic"
+    xmlns:base="http://gsxws.apple.com/types/base">
+    
+    <!-- 
+        //////////////////////////////////////////////////////////////////////////////////////
+        IMPORT SECTION: The Section that IMPORTs the other XSDs that are needed for the types
+        defined in this XSD.
+        \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+    -->
+    <xs:import namespace="http://gsxws.apple.com/types/basic" schemaLocation="gsx-basic-types.xsd" />
+    <xs:import namespace="http://gsxws.apple.com/types/base" schemaLocation="gsx-base-types.xsd" />
+    
+    <!-- User session type. Used in all request message. -->
+    <xs:complexType name="gsxUserSessionType">
+        <xs:sequence>
+            <xs:element name="userSessionId" type="xs:token" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    <!-- Restricted Unit Part Type -->
+    <xs:complexType name="restrictedUnitPartType">
+        <xs:complexContent>
+            <xs:restriction base="base:baseUnitPartType">
+                <xs:sequence>
+                    <xs:element name="partNumber" type="basic:Token_18" minOccurs="1" />
+                    <xs:element name="comptiaCode" type="basic:String_3_LOANER" minOccurs="0" />
+                </xs:sequence>
+            </xs:restriction>            
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <!-- Extended Unit Part Type -->
+    <xs:complexType name="extendedUnitPartType">
+        <xs:complexContent>
+            <xs:extension base="base:baseUnitPartType">
+                <xs:sequence>
+                    <xs:element name="comptiaModifier" type="basic:String_1_LOANER" minOccurs="0" />
+                    <xs:element name="partWarranty" type="basic:String_3_LOANER" minOccurs="0" />
+                    <xs:element name="partError" type="xs:string" minOccurs="0" />
+                    <xs:element name="coverageRefNo" type="xs:token" minOccurs="0" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <!-- Used in Warranty Detail lookup -->
+    <xs:complexType name="unitDetailType">
+        <xs:sequence>
+            <xs:element name="partNumbers" type="tns:restrictedUnitPartType" minOccurs="0" maxOccurs="25" />
+            <xs:element name="serialNumber" type="basic:Token_18" minOccurs="1" />
+            <xs:element name="unitReceivedDate" type="xs:string" minOccurs="0" />
+            <xs:element name="shipTo" type="basic:Token_10" minOccurs="1" />
+             <xs:element name="reportedSymptomCode" type="xs:string" minOccurs="0" />
+            <xs:element name="reportedIssueCode" type="xs:string" minOccurs="0" />
+             <xs:element name="questions" type="tns:questionDetailsRequest" minOccurs="0" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Used in Warranty Detail Response type -->
+    <xs:complexType name="warrantyDetailType">
+        <xs:sequence>
+            <xs:element name="serialNumber" type="basic:Token_18" minOccurs="0" />
+            <xs:element name="warrantyStatus" type="basic:String_35" minOccurs="0" />
+            <xs:element name="coverageEndDate" type="basic:String_50" minOccurs="0" />
+            <xs:element name="coverageStartDate" type="basic:String_50" minOccurs="0" />
+            <xs:element name="daysRemaining" type="basic:String_3" minOccurs="0" />
+            <xs:element name="estimatedPurchaseDate" type="basic:String_50" minOccurs="0" />
+            <xs:element name="globalWarranty" type="basic:yesNoType" minOccurs="0" />
+            <xs:element name="onsiteStartDate" type="basic:String_50" minOccurs="0" />
+            <xs:element name="onsiteEndDate" type="basic:String_50" minOccurs="0" />
+            <xs:element name="purchaseCountry" type="basic:String_40" minOccurs="0" />
+            <xs:element name="registrationDate" type="basic:String_50" minOccurs="0" />
+            <xs:element name="imageURL" type="basic:String_0_256" minOccurs="0" />
+            <xs:element name="explodedViewURL" type="basic:String_0_256" minOccurs="0" />
+            <xs:element name="manualURL" type="basic:String_0_256" minOccurs="0" />
+            <xs:element name="productDescription" type="basic:String_40" minOccurs="0" />
+            <xs:element name="configDescription" type="basic:String_100" minOccurs="0" />
+            <xs:element name="slaGroupDescription" type="basic:String_50" minOccurs="0" />
+            <xs:element name="ecorathFlag" type="basic:String_1" minOccurs="0" />
+            <xs:element name="powerTrainFlag" type="basic:String_1" minOccurs="0" />
+            <xs:element name="triCareFlag" type="basic:String_1" minOccurs="0" />
+            <xs:element name="contractCoverageEndDate" type="basic:String_50" minOccurs="0" />
+            <xs:element name="contractCoverageStartDate" type="basic:String_50" minOccurs="0" />
+            <xs:element name="contractType" type="basic:String_60" minOccurs="0" />
+            <xs:element name="laborCovered" type="basic:String_1" minOccurs="0" />
+            <xs:element name="limitedWarranty" type="basic:String_1" minOccurs="0" />
+            <xs:element name="partCovered" type="basic:String_1" minOccurs="0" />
+            <xs:element name="warrantyReferenceNo" type="basic:String_15" minOccurs="0" />
+            <xs:element name="isPersonalized" type="xs:string" minOccurs="0" /> <!-- For IPod Personalized -->
+            
+            <!-- iPhone/SMART Enhancement changes: START -->
+            <!--  "CS" stands for "Customer Satisfaction" -->
+            <xs:element name="csCode" type="xs:string" minOccurs="0" />
+            <xs:element name="csType" type="xs:string" minOccurs="0" />
+            <xs:element name="csNotes" type="xs:string" minOccurs="0" />
+            <xs:element name="notes" type="xs:string" minOccurs="0" />
+            <!-- iPhone/SMART Enhancement changes: END -->
+            
+            <xs:element name="parts" type="tns:extendedUnitPartType" minOccurs="0" maxOccurs="25"/>
+            <xs:element name="acPlusFlag" type="xs:string" minOccurs="0" />
+            <xs:element name="isLoaner" type="xs:string" minOccurs="0" />
+            <xs:element name="status" type="xs:string" minOccurs="0" />
+            <xs:element name="activationLockStatus" type="xs:string" minOccurs="0" />
+            <xs:element name="consumerLawInfo" type="tns:serviceTypeDetails" minOccurs="0" maxOccurs="25" />  
+            <xs:element name="messages" type="xs:string" minOccurs="0" maxOccurs="650"/>
+            <xs:element name="availableRepairStrategies" type="tns:availableRepairStrategy" minOccurs="0"/>
+            <xs:element name="eligibleAppleCareContract" type="tns:eligibleAppleCareContract" minOccurs="0"/>
+   
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Used in consumerLawEligible Response type -->
+    <xs:complexType name="serviceTypeDetails">
+        <xs:sequence>
+            <xs:element name="serviceType" type="xs:string" minOccurs="1"/>
+            <xs:element name="popMandatory" type="xs:string" minOccurs="1"/>
+           	<xs:element name="allowedPartType" type="xs:string" minOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+       <!-- Used in ApplicableRepairStrategy Response type -->
+    <xs:complexType name="availableRepairStrategy">
+        <xs:sequence>
+            <xs:element name="availableRepairStrategy" type="xs:string" minOccurs="0" maxOccurs="25"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+     <!-- Used in eligibleAppleCareContract Response type -->
+    <xs:complexType name="eligibleAppleCareContract">
+        <xs:sequence>
+            <xs:element name="appleCareContract" type="basic:String_0_250" minOccurs="0"/>
+            <xs:element name="eligibleAppleCareTiers" type="tns:eligibleAppleCareTiers" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="eligibleAppleCareTiers">
+        <xs:sequence>
+            <xs:element name="appleCareTier" type="tns:appleCareTier" minOccurs="0" maxOccurs="25"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="appleCareTier">
+        <xs:sequence>
+        	<xs:element name="tierDesc" type="basic:String_0_500" minOccurs="0"/>
+        	<xs:element name="tierPrice" type="basic:String_0_20" minOccurs="0"/>        
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Used in Parts Lookup Request -->
+    <xs:complexType name="partsLookupInfoType">
+        <xs:sequence>
+            <xs:element name="eeeCode" type="xs:token" minOccurs="0"/>
+            <xs:element name="partDescription" type="basic:String_100" minOccurs="0"/>
+            <xs:element name="partNumber" type="basic:Token_18" minOccurs="0"/>
+            <xs:element name="productName" type="basic:String_40" minOccurs="0"/>
+            <xs:element name="serialNumber" type="basic:Token_18" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Used in Parts Lookup Response -->
+    <xs:complexType name="partsLookupResponseType">
+        <xs:sequence>
+            <xs:element name="partDescription" type="basic:String_100" minOccurs="1" />
+            <xs:element name="eeeCode" type="xs:token" minOccurs="1" />
+            <xs:element name="exchangePrice" type="xs:string" minOccurs="1" />
+            <xs:element name="laborTier" type="xs:string" minOccurs="1" />
+            <xs:element name="partNumber" type="basic:Token_18" minOccurs="1" />
+            <xs:element name="partType" type="basic:String_4" minOccurs="1" />
+            <xs:element name="stockPrice" type="xs:string" minOccurs="1" />
+            <xs:element name="componentCode" type="xs:string" minOccurs="0" />
+            <xs:element name="originalPartNumber" type="basic:Token_18" minOccurs="0" />
+            <xs:element name="isSerialized" type="basic:String_1" minOccurs="0" />
+            <xs:element name="commodityType" type="basic:String_30" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Used in Comptia Code Response -->
+    <xs:complexType name="comptiaModifierType">
+        <xs:sequence>
+            <xs:element name="comptiaDescription" type="basic:String_100" minOccurs="1" />
+            <xs:element name="modifierCode" type="basic:String_1" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="comptiaCodeType">
+        <xs:sequence>
+            <xs:element name="comptiaCode" type="basic:String_4" minOccurs="1" />
+            <xs:element name="comptiaDescription" type="xs:string" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="comptiaGroupType">
+        <xs:sequence>
+            <xs:element name="componentId" type="basic:String_3" minOccurs="1" />
+            <xs:element name="componentName" type="basic:String_100" minOccurs="1" />
+            <xs:element name="comptiaCodeInfo" type="tns:comptiaCodeType" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="comptiaInfoType">
+        <xs:sequence>
+            <xs:element name="comptiaGroup" type="tns:comptiaGroupType" minOccurs="1" maxOccurs="unbounded" />
+            <xs:element name="comptiaModifier" type="tns:comptiaModifierType" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- For GSX Help -->
+    <xs:complexType name="gsxHelpRequestType">
+        <xs:sequence>
+            <xs:element name="requesterName" type="basic:String_100" minOccurs="1" />
+            <xs:element name="emailAddress" type="basic:String_241" minOccurs="1" />
+            <xs:element name="organization" type="basic:String_40" minOccurs="1" />
+            <xs:element name="shipToAccountNumber" type="basic:Token_10" minOccurs="1" />
+            <xs:element name="repairNumber" type="basic:Token_12" minOccurs="0" />
+            <xs:element name="invoiceNumber" type="basic:String_30" minOccurs="0" />
+            <xs:element name="caseNumber" type="basic:String_25" minOccurs="0" />
+            <xs:element name="issueCategory" type="basic:String_10" minOccurs="1" />
+            <xs:element name="issueDescription" type="basic:String_4000" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- The Address type is an extension to the baseAddress -->
+    <xs:complexType name="addressType">
+        <xs:complexContent>
+            <xs:extension base="base:baseAddressType">
+                <xs:sequence>
+                    <xs:element name="emailAddress" type="xs:string" minOccurs="1"/>
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <!-- Address type defines for New Onsite Dispatch and Onsite Dispatch Details API -->
+    <xs:complexType name="onsiteDisptchResponseAddressType">
+        <xs:sequence>
+            <xs:element name="addressLine1" type="xs:string" minOccurs="0"/>
+            <xs:element name="addressLine2" type="xs:string" minOccurs="0"/>
+            <xs:element name="addressLine3" type="xs:string" minOccurs="0"/>
+            <xs:element name="addressLine4" type="xs:string" minOccurs="0"/>
+            <xs:element name="country" type="xs:string" minOccurs="0"/>
+            <xs:element name="zipCode" type="xs:string" minOccurs="0"/>
+            <xs:element name="regionCode" type="xs:string" minOccurs="0"/>
+            <xs:element name="city" type="xs:string" minOccurs="0"/>
+            <xs:element name="state" type="xs:string" minOccurs="0"/>
+            <xs:element name="street" type="xs:string" minOccurs="0"/>
+            <xs:element name="firstName" type="xs:string" minOccurs="0"/>
+            <xs:element name="lastName" type="xs:string" minOccurs="0"/>
+            <xs:element name="middleInitial" type="xs:string" minOccurs="0"/>
+            <xs:element name="companyName" type="xs:string" minOccurs="0"/>
+            <xs:element name="primaryPhone" type="xs:string" minOccurs="0"/>
+            <xs:element name="secondaryPhone" type="xs:string" minOccurs="0"/>
+            <xs:element name="sendSMSOnPrimaryPhone" type="xs:string" minOccurs="0" />
+            <xs:element name="primarySMSProvider" type="xs:string" minOccurs="0" />
+            <xs:element name="sendSMSOnSecondaryPhone" type="xs:string" minOccurs="0" />
+            <xs:element name="secondarySMSProvider" type="xs:string" minOccurs="0" />
+            <xs:element name="emailAddress" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Vendor Address type -->
+    <xs:complexType name="vendorAddressType">
+        <xs:complexContent>
+            <xs:extension base="base:baseVendorAddressType" />
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <xs:complexType name="repairOrderDetailsType">
+        <xs:sequence>
+            <xs:element name="partNumber" type="basic:String_18" minOccurs="0"/>
+            <xs:element name="partDescription" type="basic:String_100" minOccurs="0"/>
+            <xs:element name="partType" type="basic:String_15" minOccurs="0"/>
+            <xs:element name="netPrice" type="xs:string" minOccurs="0"/>
+            <xs:element name="currency" type="basic:Token_0_5" minOccurs="0"/>
+            <xs:element name="partCoverageDescription" type="basic:String_35" minOccurs="0"/>
+            <xs:element name="comptiaCode" type="basic:String_3" minOccurs="0"/>
+            <xs:element name="comptiaModifier" type="basic:String_1" minOccurs="0"/>
+            <xs:element name="expectedShipDate" type="basic:String_25" minOccurs="0"/>
+            <xs:element name="orderStatus" type="basic:String_10" minOccurs="0"/>
+            <xs:element name="orderStatusCode" type="basic:String_5" minOccurs="0"/>
+            <xs:element name="orderStatusDate" type="basic:String_25" minOccurs="0"/>
+            <xs:element name="returnTrackingNumber" type="basic:String_35" minOccurs="0"/>
+            <xs:element name="returnOrderNumber" type="basic:String_10" minOccurs="0"/>
+            <xs:element name="returnStatus" type="basic:String_100" minOccurs="0"/>
+            <xs:element name="returnCode" type="basic:String_4" minOccurs="0"/>
+            <xs:element name="returnPartReceivedDate" type="basic:String_25" minOccurs="0"/>
+            <xs:element name="orderNumber" type="basic:String_25" minOccurs="0"/>
+            <xs:element name="orderLineNumber" type="basic:String_25" minOccurs="0"/>
+            <xs:element name="deliveryNumber" type="basic:String_25" minOccurs="0"/>
+            <xs:element name="deliveryTrackingNumber" type="basic:String_10" minOccurs="0"/>
+            <xs:element name="deliveryDate" type="basic:String_25" minOccurs="0"/>
+            <xs:element name="carrierCode" type="basic:String_18" minOccurs="0"/>
+            <xs:element name="carrierName" type="basic:String_100" minOccurs="0"/>
+            <xs:element name="carrierURL" type="basic:String_256" minOccurs="0"/>
+            <xs:element name="oldSerialNumber" type="basic:String_18" minOccurs="0"/>
+            <xs:element name="serialNumber" type="basic:String_18" minOccurs="0"/>
+            <xs:element name="isSerialized" type="basic:yesNoType" minOccurs="0"/>
+            <xs:element name="originalPartNumber" type="basic:String_18" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- The repair details type -->
+    <xs:complexType name="repairDetailsType">
+        <xs:complexContent>
+            <xs:extension base="base:baseRepairDetailsType">
+                <xs:sequence>
+                    <xs:element name="primaryAddress" type="tns:addressType" minOccurs="0"/>
+                    <xs:element name="secondaryAddress" type="tns:addressType" minOccurs="0"/>
+                    <xs:element name="assignedToLocationAddress" type="tns:addressType" minOccurs="0"/>
+                    <xs:element name="partsInfo" type="tns:repairOrderDetailsType" minOccurs="0" maxOccurs="25"/>
+                     <xs:element name="questions" type="tns:questionDetailsResponse" minOccurs="0" />
+                </xs:sequence>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+    
+    <!-- Used in Dispatch related APIs -->
+    <xs:complexType name="dispatchOrderLines">
+        <xs:sequence>
+            <xs:element name="oldSerialNumber" type="basic:Token_18" minOccurs="0" />
+            <xs:element name="serialNumber" type="basic:Token_18" minOccurs="0" />
+            <xs:element name="oldPartNumber" type="basic:Token_18" minOccurs="0" />
+            <xs:element name="oldPartDescription" type="basic:String_100" minOccurs="0" />
+            <xs:element name="partNumber" type="basic:Token_18" minOccurs="1" />
+            <xs:element name="partType" type="basic:String_4" minOccurs="1" />
+            <xs:element name="isBillable" type="basic:yesNoType" minOccurs="1" default="N" />
+            <xs:element name="comptiaCode" type="basic:Token_3" minOccurs="0" />
+            <xs:element name="comptiaModifier" type="basic:String_1" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="onsiteDispatchDetailOrderLines">
+        <xs:sequence>
+            <xs:element name="partNumber" type="basic:Token_18" minOccurs="1" />
+            <xs:element name="partDescription" type="basic:String_100" minOccurs="0" />
+            <xs:element name="partCoverageDescription" type="basic:String_0_35" minOccurs="0" />
+            <xs:element name="comptiaCode" type="basic:Token_0_3" minOccurs="0" />
+            <xs:element name="comptiaModifier" type="basic:String_1_LOANER" minOccurs="0" />
+            <xs:element name="returnOrderNumber" type="basic:Token_0_10" minOccurs="0" />
+            <xs:element name="returnTrackingNumber" type="basic:String_0_35" minOccurs="0" />
+            <xs:element name="orderStatus" type="basic:String_50" minOccurs="0" />
+            <xs:element name="returnStatus" type="basic:String_0_30" minOccurs="0" />
+            <xs:element name="expectedShipDate" type="basic:String_0_30" minOccurs="0" />
+            <xs:element name="oldSerialNumber" type="basic:Token_18_LOANER" minOccurs="0" />
+            <xs:element name="serialNumber" type="basic:Token_18_LOANER" minOccurs="0" />
+            <xs:element name="isSerialized" type="basic:yesNoType" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- Data types used for new API -->
+   
+    <xs:complexType name="fetchCommunicationArticleRequestDataType">
+        <xs:sequence>
+            <xs:element name="fromDate" type="xs:string" minOccurs="0" />
+            <xs:element name="toDate" type="xs:string" minOccurs="0" />
+            <xs:element name="readStatus" type="xs:string" minOccurs="0" />
+            <xs:element name="priority" type="xs:string" minOccurs="0" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="100" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="communicationMessageType">
+        <xs:sequence>
+            <xs:element name="articleID" type="xs:string" minOccurs="1" />
+            <xs:element name="articleTitle" type="xs:string" minOccurs="1" />
+            <xs:element name="articleSummary" type="xs:string" minOccurs="1" />
+            <xs:element name="priority" type="xs:string" minOccurs="1" />
+            <xs:element name="createdDate" type="xs:string" minOccurs="1" />
+            <xs:element name="readStatus" type="xs:string" minOccurs="1" />
+            <xs:element name="lastActedOn" type="xs:string" minOccurs="1" />
+            <xs:element name="acknowledgementRequired" type="basic:yesNoType" minOccurs="1" />
+            <xs:element name="functionalRole" type="xs:string" minOccurs="1" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="communicationArticleContentDataType">
+        <xs:sequence>
+            <xs:element name="articleTitle" type="xs:string" minOccurs="1" />
+            <xs:element name="articleSummary" type="xs:string" minOccurs="1" />
+            <xs:element name="articleContent" type="xs:string" minOccurs="1" />
+            <xs:element name="priority" type="xs:string" minOccurs="0" />
+            <xs:element name="trainingUrl" type="xs:string" minOccurs="1" />
+            <xs:element name="functionalRole" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="languageCode" type="xs:string" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="communicationAcknowledgementDataType">
+        <xs:sequence>
+            <xs:element name="articleID" type="xs:string" minOccurs="0" />
+            <xs:element name="acknowledgeType" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="communicationAcknowledgementStatusDataType">
+        <xs:sequence>
+            <xs:element name="articleID" type="xs:string" minOccurs="0" />
+            <xs:element name="acknowledgeStatus" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="fetchDiskImageArticleContentResponseDataType">
+        <xs:sequence>
+            <xs:element name="title" type="xs:string" minOccurs="0" />
+            <xs:element name="languageCode" type="xs:string" minOccurs="0" />
+            <xs:element name="description" type="xs:string" minOccurs="0" />
+            <xs:element name="diskImageUrl" type="xs:string" minOccurs="0" />
+            <xs:element name="diagnosticCodeLink" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="fetchOPArticleContentResponseDataType">
+        <xs:sequence>
+            <xs:element name="functionalRole" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="title" type="xs:string" minOccurs="0" />
+            <xs:element name="topic" type="xs:string" minOccurs="0" />
+            <xs:element name="languageCode" type="xs:string" minOccurs="0" />
+            <xs:element name="outline" type="xs:string" minOccurs="0" />
+            <xs:element name="body" type="xs:string" minOccurs="0" />
+            <xs:element name="recentChangeComments" type="xs:string" minOccurs="0" />
+            <xs:element name="trainingUrl" type="xs:string" minOccurs="0" />
+            <xs:element name="relatedArticle" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="fetchSelfHelpArticleContentResponseDataType">
+        <xs:sequence>
+            <xs:element name="title" type="xs:string" minOccurs="0" />
+            <xs:element name="body" type="xs:string" minOccurs="0" />
+            <xs:element name="relatedProcedureUrl" type="xs:string" minOccurs="0" />
+            <xs:element name="revisionComments" type="xs:string" minOccurs="0" />
+            <xs:element name="functionalRole" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="helpOnFunction" type="xs:string" minOccurs="0" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="fetchServiceVideoArticleContentResponseDataType">
+        <xs:sequence>
+            <xs:element name="articleID" type="xs:string" minOccurs="1" />
+            <xs:element name="title" type="xs:string" minOccurs="1" />
+            <xs:element name="shortDescription" type="xs:string" minOccurs="1" />
+            <xs:element name="fileUrl" type="xs:string" minOccurs="1" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="thumbnail" type="xs:string" minOccurs="0" />
+            <xs:element name="functionalRole" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="functionalArea" type="xs:string" minOccurs="0" />
+            <xs:element name="issue" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="fetchRepairProcessArticleContentResponseDataType">
+        <xs:sequence>
+            <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="commodity" type="xs:string" minOccurs="0" />
+            <xs:element name="functionalRole" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="title" type="xs:string" minOccurs="0" />
+            <xs:element name="firstSteps" type="xs:string" minOccurs="0" />
+            <xs:element name="tools" type="xs:string" minOccurs="0" />
+            <xs:element name="removalNode" type="xs:string" minOccurs="0" />
+            <xs:element name="assemblyNode" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="fetchOPArticleIDRequestDataType">
+        <xs:sequence>
+            <xs:element name="documentType" type="xs:string" minOccurs="0" />
+            <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+            <xs:element name="startDate" type="xs:string" minOccurs="0" />
+            <xs:element name="endDate" type="xs:string" minOccurs="0" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="100" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="fetchTPArticleIDRequestDataType">
+        <xs:sequence>
+            <xs:element name="technicalProcedure" type="xs:string" minOccurs="1" />
+            <xs:element name="startDate" type="xs:string" minOccurs="0" />
+            <xs:element name="endDate" type="xs:string" minOccurs="0" />
+            <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="100" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="fetchSelfHelpArticleIDRequestDataType">
+        <xs:sequence>
+            <xs:element name="helpOnFunction" type="xs:string" minOccurs="1" />
+            <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="100" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="fetchServiceVideoArticleIDRequestDataType">
+        <xs:sequence>
+            <xs:element name="title" type="xs:string" minOccurs="0" />
+            <xs:element name="shortDescription" type="xs:string" minOccurs="0" />
+            <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+            <xs:element name="productModel" type="base:productModelType" minOccurs="0" maxOccurs="100" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="initiateIOSDiagnosticRequestDataType">
+        <xs:sequence>
+            <xs:element name="serialNumber" type="basic:String_18" minOccurs="1" />
+            <xs:element name="shipTo" type="basic:String_10" minOccurs="1" />
+            <xs:element name="emailAddress" type="basic:String_241" minOccurs="0" />
+            <xs:element name="phoneNumber" type="basic:String_15" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="fetchIOSDTestDetailsRequestDataType">
+        <xs:sequence>
+            <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+            <xs:element name="alternateDeviceId" type="xs:string" minOccurs="0" />
+            <xs:element name="diagnosticEventNumber" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    
+    <xs:complexType name="testContextType">
+        <xs:sequence>
+            <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+            <xs:element name="captureId" type="xs:string" minOccurs="0" />
+            <xs:element name="diagnosticTimeStamp" type="xs:string" minOccurs="0" />
+            <xs:element name="channelID" type="xs:string" minOccurs="0" />
+            <xs:element name="diagnosticValidationResult" type="xs:string" minOccurs="0" />
+            <xs:element name="validationCode" type="xs:string" minOccurs="0" />
+            <xs:element name="serviceRestrictions" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="resultType">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" minOccurs="0" />
+            <xs:element name="value" type="xs:string" minOccurs="0" />
+            <xs:element name="information" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="testResultType">
+        <xs:sequence>
+            <xs:element name="result" type="tns:resultType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="diagnosticTestType">
+        <xs:sequence>
+            <xs:element name="testContext" type="tns:testContextType" minOccurs="0" />
+            <xs:element name="testResult" type="tns:testResultType" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="simpleKeyType">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" minOccurs="1" />
+            <xs:element name="value" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="keyArrayType">
+        <xs:sequence>
+            <xs:element name="key" type="tns:simpleKeyType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="profileType">
+        <xs:sequence>
+            <xs:element name="unit" type="tns:keyArrayType" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="data">
+        <xs:sequence>
+            <xs:element name="key" type="tns:simpleKeyType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="extendedValueType">
+        <xs:sequence>
+            <xs:element name="data" type="tns:data" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="extendedKeyType">
+        <xs:sequence>
+            <xs:element name="name" type="xs:string" minOccurs="1" />
+            <xs:element name="value" type="tns:extendedValueType" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="reportDataType">
+        <xs:sequence>
+            <xs:element name="type" type="xs:string" minOccurs="0" />
+            <xs:element name="extended-key" type="tns:extendedKeyType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="key" type="tns:simpleKeyType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="reportType">
+        <xs:sequence>
+            <xs:element name="reportData" type="tns:reportDataType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="diagnosticProfileType">
+        <xs:sequence>
+            <xs:element name="profile" type="tns:profileType" minOccurs="0" />
+            <xs:element name="report" type="tns:reportType" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="iosDiagnosisType">
+        <xs:sequence>
+            <xs:element name="issueType" type="xs:string" minOccurs="0" />
+            <xs:element name="helpDocText" type="xs:string" minOccurs="0" />
+            <xs:element name="articleLink" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+        <xs:complexType name="iosActivationDetailType">
+        <xs:sequence>
+            <xs:element name="serialNumber" type="basic:Token_18" minOccurs="0" />
+            <xs:element name="imeiNumber" type="basic:Token_15" minOccurs="0" />
+            <xs:element name="meid" type="xs:string" minOccurs="0" />
+            <xs:element name="iccID" type="xs:token" minOccurs="0" />
+            <xs:element name="firstUnbrickDate" type="xs:string" minOccurs="0" />
+            <xs:element name="lastUnbrickDate" type="xs:string" minOccurs="0" />
+            <xs:element name="lastRestoreDate" type="xs:string" minOccurs="0" />
+            <xs:element name="unbricked" type="basic:String_18" minOccurs="0" />
+            <xs:element name="unlocked" type="basic:String_18" minOccurs="0" />
+            <xs:element name="unlockDate" type="xs:string" minOccurs="0" />
+            <xs:element name="productVersion" type="basic:String_50" minOccurs="0" />
+            <xs:element name="initialActivationPolicyID" type="xs:token" minOccurs="0" />
+            <xs:element name="initialActivationPolicyDetails" type="basic:String_1300" minOccurs="0" />
+            <xs:element name="appliedActivationPolicyID" type="xs:token" minOccurs="0" />
+            <xs:element name="appliedActivationDetails" type="basic:String_1300" minOccurs="0" />
+            <xs:element name="nextTetherPolicyID" type="xs:token" minOccurs="0" />
+            <xs:element name="nextTetherPolicyDetails" type="basic:String_1300" minOccurs="0" />
+            <xs:element name="macAddress" type="basic:String_250" minOccurs="0" />
+            <xs:element name="bluetoothMacAddress" type="basic:String_250" minOccurs="0" />
+            <xs:element name="partDescription" type="basic:String_250" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+                        <!-- Stocking Order Lookup data types -->
+    <xs:complexType name="stockingOrderLookupInfoType">
+        <xs:sequence>
+            <xs:element name="orderConfirmationNumber" type="basic:String_25" minOccurs="0" />
+    		<xs:element name="orderNumber" type="basic:Token_12" minOccurs="0" />            
+            <xs:element name="createdByFirstName" type="basic:String_100" minOccurs="0" />
+            <xs:element name="createdByLastName" type="basic:String_100" minOccurs="0" />
+            <xs:element name="createdFromDate" type="basic:String_25" minOccurs="0" />
+            <xs:element name="createdToDate" type="basic:String_25" minOccurs="0" />
+            <xs:element name="purchaseOrderNumber" type="basic:Token_15" minOccurs="0" />
+            <xs:element name="shipToCode" type="basic:Token_10" minOccurs="0" />
+            <xs:element name="referenceNumber" type="basic:String_15" minOccurs="0" />            
+            <xs:element name="partNumber" type="basic:Token_18" minOccurs="0" /> 
+        </xs:sequence>
+    </xs:complexType>
+    
+        <xs:complexType name="stockingOrderLookupResponseType">
+        <xs:sequence>
+            <xs:element name="createdOn" type="basic:String_25" minOccurs="0" />
+            <xs:element name="createdByFirstName" type="basic:String_100" minOccurs="0" />
+            <xs:element name="createdByLastName" type="basic:String_100" minOccurs="0" />
+            <xs:element name="purchaseOrderNumber" type="basic:Token_35" minOccurs="0" />        
+            <xs:element name="orderConfirmationNumber" type="basic:String_25" minOccurs="0" />
+            <xs:element name="orderStatus" type="basic:Token_5" minOccurs="0" />
+    		<xs:element name="orderNumber" type="basic:Token_12" minOccurs="0" /> 
+    		<xs:element name="referenceNumber" type="basic:String_15" minOccurs="0" />                        
+            <xs:element name="shipToCode" type="basic:Token_10" minOccurs="0" />
+            <xs:element name="shipping" type="basic:yesNoType" minOccurs="0" />
+            <xs:element name="invoice" type="basic:yesNoType" minOccurs="0" />
+            <xs:element name="serialNumber" type="basic:Token_18" minOccurs="0" />           
+        </xs:sequence>
+    </xs:complexType>
+    
+    <!-- For Stocking Order Details Lookup: START -->
+    <xs:complexType name="orderLineDetailsType">
+    	<xs:sequence>
+    		<xs:element name="partNumber" type="xs:string" minOccurs="0" />
+    		<xs:element name="partDescription" type="xs:string" minOccurs="0" />
+    		<xs:element name="orderLineStatusDescription" type="xs:string" minOccurs="0" />
+    		<xs:element name="expectedGetWellDate" type="xs:string" minOccurs="0" />
+    		<xs:element name="netPrice" type="xs:string" minOccurs="0" />
+    		<xs:element name="partQuantity" type="xs:string" minOccurs="0" />
+    	</xs:sequence>
+    </xs:complexType>
+    
+     <xs:complexType name="shipToAddressDetailsType">
+        <xs:sequence>
+            <xs:element name="shipToCode" type="basic:Token_18" minOccurs="0" />
+            <xs:element name="street" type="basic:String_100" minOccurs="0" />
+            <xs:element name="city" type="basic:Token_5" minOccurs="0" />
+            <xs:element name="state" type="basic:yesNoType" minOccurs="0" />
+            <xs:element name="zipCode" type="basic:Token_3" minOccurs="0" />
+            <xs:element name="country" type="basic:String_1" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+    
+    
+     <xs:complexType name="shipmentPartDetailsType">
+        <xs:sequence>
+            <xs:element name="partNumber" type="basic:Token_12" minOccurs="0" />
+            <xs:element name="partDescription" type="basic:Token_25" minOccurs="0" />
+            <xs:element name="quantity" type="basic:Token_18" minOccurs="0" />
+            <xs:element name="shippedDate" type="basic:Token_18" minOccurs="0" />
+            <xs:element name="trackingNumber" type="basic:String_12" minOccurs="0" />
+        </xs:sequence>
+     </xs:complexType>
+     
+    <xs:complexType name="stockingOrderDetailsLookupResponseType">
+        <xs:sequence>
+            <xs:element name="createdOn" type="basic:String_25" minOccurs="0" />
+            <xs:element name="createdByFirstName" type="basic:String_25" minOccurs="0" />
+            <xs:element name="createdByLastName" type="basic:String_25" minOccurs="0" />
+            <xs:element name="purchaseOrderNumber" type="basic:String_25" minOccurs="0" />
+            <xs:element name="soConfirmationNumber" type="basic:String_25" minOccurs="0" />
+            <xs:element name="orderStatus" type="basic:String_25" minOccurs="0" />
+            <xs:element name="soNumber" type="basic:String_25" minOccurs="0" />
+            <xs:element name="orderLineDetails" type="tns:orderLineDetailsType" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element name="shipToAddressDetails" type="tns:shipToAddressDetailsType" minOccurs="0"/>
+            <xs:element name="subTotal" type="basic:String_25" minOccurs="0" />
+            <xs:element name="tax" type="basic:String_25" minOccurs="0" />
+            <xs:element name="total" type="basic:String_25" minOccurs="0" />
+            <xs:element name="shipmentPartDetails" type="tns:shipmentPartDetailsType" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    <!-- For Stocking Order Details Lookup: END -->
+    
+     
+    
+    <!-- For Run Diagnostic Test API: START -->   
+    <xs:complexType name="runDiagnosticTest">
+        <xs:sequence>
+            <xs:element name="runDiagnosticTest" type="xs:string" minOccurs="1" maxOccurs="unbounded" />                    
+        </xs:sequence>
+    </xs:complexType> 
+    
+    <!-- For Run Diagnostic Test API: END -->  
+    
+    <!-- For Fetch Diagnostic Suites API: START -->    
+    
+	<xs:complexType name="diagnosticSuitesResponseType">
+        <xs:sequence>
+            <xs:element name="diagnosticSuiteDetails" type="tns:diagnosticSuitesDetailResponseType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    
+    <xs:complexType name="diagnosticSuitesDetailResponseType">
+        <xs:sequence>
+        	<xs:element name="suiteId" type="basic:String_40" minOccurs="1" />
+            <xs:element name="suiteName" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType> 
+    <!-- For Fetch Diagnostic Suites API: END -->
+    <!--  For  Beats Product Details: Start  -->
+    <xs:complexType name="beatsProductRequestDataType">
+        <xs:sequence>
+             <xs:element name="languageCode" type="xs:string" minOccurs="1" />
+        </xs:sequence>
+    </xs:complexType> 
+    <xs:complexType name="beatsProductDetailsResponseType">
+        <xs:sequence>
+            <xs:element name= "products" type= "tns:productFamilyType" minOccurs= "0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType> 
+    <xs:complexType name="productFamilyType">
+        <xs:sequence>
+            <xs:element name= "productFamilyName" type= "xs:string" minOccurs= "0" />
+            <xs:element name= "descriptions" type= "tns:descriptionsType" minOccurs= "0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType> 
+    <xs:complexType name="descriptionsType">
+       <xs:sequence>
+           <xs:element name= "productDescription" type= "xs:string" minOccurs= "0" />
+           <xs:element name= "monsterBrandedDetails" type= "tns:monsterBrandedDetailsType" minOccurs= "0" maxOccurs="unbounded" />
+       </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="monsterBrandedDetailsType">
+        <xs:sequence>
+            <xs:element name= "monsterBranded" type= "xs:string" minOccurs= "0" />
+            <xs:element name= "productColors" type= "tns:productColorsType" minOccurs= "0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="productColorsType">
+        <xs:sequence>
+           <xs:element name= "color" type= "xs:string" minOccurs= "0" />
+           <xs:element name= "productDetails" type= "tns:configsType" minOccurs= "0" maxOccurs="unbounded"></xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="configsType">
+        <xs:sequence>
+            <xs:element name= "appleConfigCode" type= "xs:string" minOccurs= "0" />
+            <xs:element name= "productName" type= "xs:string" minOccurs= "0"  />
+            <xs:element name= "productID" type= "xs:string" minOccurs= "0"  />
+             <xs:element name= "sequenceNumber" type= "xs:string" minOccurs= "0" />
+             <xs:element name= "serialGenerationAllowed" type= "xs:string" minOccurs= "0" /> 
+        </xs:sequence>
+    </xs:complexType>
+    <!--  For  Beats Product Details: End  -->
+    <!-- For BeatsSerializer API: Start -->
+     <xs:complexType name="beatsSerializerRequestInfoType"> 
+        <xs:sequence>
+        <xs:element name="beatsSerialNumberPresent" type="xs:string" minOccurs="0" />
+        <xs:element name="serialNumber" type="xs:string" minOccurs="0" />
+            <xs:element name="beatsSerialNumber" type="xs:string" minOccurs="0"/>
+             <xs:element name="sequenceNo" type="xs:string" minOccurs="0" />
+            <xs:element name="dateOfPurchase" type="xs:string" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType> 
+     <xs:complexType name="multipleMatchProductsResponseType"> 
+        <xs:sequence>
+            <xs:element name="productName" type="xs:string" minOccurs="0"/>
+            <xs:element name="sequenceNumber" type="xs:string" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType> 
+    <!-- For BeatsSerializer API: End -->
+      <!-- Added for Triggers START -->
+    <xs:complexType name="questionDetailsResponse">
+        <xs:sequence>
+           <xs:element name="questionDetails" type="tns:questionDetails" minOccurs="1"  maxOccurs="200"/>
+       </xs:sequence>
+      </xs:complexType>
+    <xs:complexType name="questionDetails">
+        <xs:sequence>
+            <xs:element name="questionPhrase" type="xs:string" minOccurs="0"/>
+            <xs:element name="answerPhrase" type="xs:string" minOccurs="0"/>
+       </xs:sequence>
+     </xs:complexType>
+      <xs:complexType name="questionDetailsRequest">
+        <xs:sequence>
+            <xs:element name="questionDetails" type="tns:questionDetailsType" minOccurs="1" maxOccurs="200"/>
+       </xs:sequence>
+     </xs:complexType>  
+      <xs:complexType name="questionDetailsType">
+        <xs:sequence>
+            <xs:element name="templateId" type="xs:string" minOccurs="1"/>
+            <xs:element name="treeId" type="xs:string" minOccurs="1"/>
+            <xs:element name="questionId" type="xs:string" minOccurs="1"/>
+            <xs:element name="answer" type="tns:answerDetails" minOccurs="1" maxOccurs="50"/>
+       </xs:sequence>
+       </xs:complexType> 
+         <xs:complexType name="answerDetails">
+        <xs:sequence>
+            <xs:element name="answerId" type="xs:string" minOccurs="0"/>
+            <xs:element name="answerPhrase" type="xs:string" minOccurs="0"/>
+       </xs:sequence>
+     </xs:complexType> 
+      <!-- Added for Triggers END -->
+    
+</xs:schema>

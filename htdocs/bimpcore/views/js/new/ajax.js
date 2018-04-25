@@ -172,8 +172,12 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                     if (bimpAjax.append_html) {
                         if (bimpAjax.$resultContainer && typeof (result.html) === 'string') {
                             bimpAjax.$resultContainer.stop().slideUp(250, function () {
-                                bimpAjax.$resultContainer.html(result.html).slideDown(250);
+                                bimpAjax.$resultContainer.html(result.html).slideDown(250, function () {
+                                    setCommonEvents(bimpAjax.$resultContainer);
+                                    setInputsEvents(bimpAjax.$resultContainer);
+                                });
                                 bimpAjax.$resultContainer.css('height', 'auto').slideDown(250);
+
                                 if (typeof (bimpAjax.success) === 'function') {
                                     bimpAjax.success(result, bimpAjax);
                                 }

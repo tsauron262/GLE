@@ -8,6 +8,8 @@ class BimpObject
     public $object_name = '';
     public $config = null;
     public $id = null;
+    public $ref = "";
+    public static $status_list = array();
     public static $common_fields = array(
         'id',
         'date_create',
@@ -23,6 +25,9 @@ class BimpObject
         'controller'         => array('default' => ''),
         'primary'            => array('default' => 'id'),
         'common_fields'      => array('data_type' => 'bool', 'default' => 1),
+        'header_list_name'   => array('default' => 'default'),
+        'header_btn'         => array('data_type' => 'array', 'default' => array()),
+        'list_page_url'      => array('data_type' => 'array'),
         'parent_object'      => array('default' => ''),
         'parent_id_property' => array('defautl' => ''),
         'parent_module'      => array('default' => ''),
@@ -278,7 +283,7 @@ class BimpObject
 
     public function association_exists($association)
     {
-        return array_key_exists($association, $this->params['associations']);
+        return in_array($association, $this->params['associations']);
     }
 
     public function getParentIdProperty()
@@ -290,6 +295,32 @@ class BimpObject
             }
         }
         return $property;
+    }
+
+    public function getRef()
+    {
+        if ($this->field_exists('ref')) {
+            return $this->getData('ref');
+        }
+
+        if ($this->field_exists('reference')) {
+            return $this->getData('reference');
+        }
+
+        return get_class($this) . "_" . $this->id;
+    }
+
+    public function getNomUrl($withpicto = true)
+    {
+        $html = '<a href="' . $this->getUrl() . '">';
+        if ($this->params['icon']) {
+            $icon = $this->getIcon();
+            if ($icon) {
+                $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
+            }
+        }
+        $html .= $this->ref . '</a>';
+        return $html;
     }
 
     public function getParentId()
@@ -605,6 +636,7 @@ class BimpObject
         $this->data = array();
         $this->associations = array();
         $this->id = null;
+        $this->ref = '';
     }
 
     public function getAssociatesList($association)
@@ -844,12 +876,72 @@ class BimpObject
         return $return;
     }
 
+    public function setNewStatus($new_status, $extra_data = array())
+    {
+        $new_status = (int) $new_status;
+
+        if (!array_key_exists($new_status, static::$status_list)) {
+            return array('Erreur: ce statut n\'existe pas');
+        }
+
+        $status_label = is_array(static::$status_list[$new_status]) ? static::$status_list[$new_status]['label'] : static::$status_list[$new_status];
+        $object_label = $this->getLabel('the') . (isset($this->id) && $this->id ? ' ' . $this->id : '');
+
+        $error_msg = 'Impossible de passer ' . $object_label;
+        $error_msg .= ' au statut "' . $status_label . '"';
+
+        if (!$this->isLoaded()) {
+            return array($error_msg . ' ID ' . $this->getLabel('of_the') . ' absent');
+        }
+
+        $current_status = (int) $this->getSavedData('status');
+
+        if ($current_status === $new_status) {
+            return array($object_label . ' a déjà le statut "' . $status_label . '"');
+        }
+
+        $errors = array();
+        if (method_exists($this, 'onNewStatus')) {
+            $errors = $this->onNewStatus($new_status, $current_status, $extra_data);
+        }
+
+        if (!count($errors)) {
+            $this->set('status', $new_status);
+            $errors = $this->update();
+        }
+
+        return $errors;
+    }
+
+    public function setObjectAction($action, $id_object = 0, $extra_data = array(), &$success = '')
+    {
+        $errors = array();
+
+        if ($id_object) {
+            if (!$this->fetch($id_object)) {
+                $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+                return $errors;
+            }
+        }
+
+        $method = 'action' . ucfirst($action);
+        if (method_exists($this, $method)) {
+            $errors = $this->{$method}($extra_data, $success);
+        } else {
+            $errors[] = 'Action invalide: "' . $action . '"';
+        }
+
+        return $errors;
+    }
+
     // Affichage des données:
 
-    public function displayData($field, $display_name = 'default', $item = null)
+    public function displayData($field, $display_name = 'default', $display_input_value = true, $no_html = false)
     {
         $bc_field = new BC_Field($this, $field);
         $bc_field->display_name = $display_name;
+        $bc_field->display_input_value = $display_input_value;
+        $bc_field->no_html = $no_html;
 
         $display = $bc_field->renderHtml();
         unset($bc_field);
@@ -875,7 +967,11 @@ class BimpObject
                         $prev_path = $this->config->current_path;
                         $this->config->setCurrentPath('associations/' . $association . '/display/' . $display_name);
 
-                        $type = $this->getCurrentConf('type', 'object_prop');
+                        $type = $this->getCurrentConf('type', null);
+
+                        if (is_null($type)) {
+                            $type = $display_name;
+                        }
 
                         switch ($type) {
                             case 'card':
@@ -888,6 +984,10 @@ class BimpObject
 
                             case 'nom':
                                 $html .= self::getInstanceNom($instance);
+                                break;
+
+                            case 'nom_url':
+                                $html .= self::getInstanceNomUrl($instance);
                                 break;
 
                             case 'callback':
@@ -1027,7 +1127,7 @@ class BimpObject
             }
         }
         $this->config->setCurrentPath($prev_path);
-        
+
         return $errors;
     }
 
@@ -1242,7 +1342,8 @@ class BimpObject
             }
 
             if ($result > 0) {
-                $this->id = $result;
+                $this->id = (int) $result;
+                $this->set($this->getPrimary(), (int) $result);
 
                 if ($this->getConf('positions', false, false, 'bool')) {
                     $insert_mode = $this->getConf('position_insert', 'before');
@@ -1318,7 +1419,11 @@ class BimpObject
                     return array('Fichier de configuration invalide (table non renseignée)');
                 }
 
+                unset($this->data[$primary]);
+
                 $result = $this->db->update($table, $this->data, '`' . $primary . '` = ' . (int) $this->id);
+
+                $this->set($primary, $this->id);
             }
 
             if ($result <= 0) {
@@ -1438,6 +1543,7 @@ class BimpObject
                     $this->data[$field] = $value;
                 }
             }
+            $this->ref = $this->getRef();
             return true;
         }
         return false;
@@ -2075,7 +2181,224 @@ class BimpObject
         return 1;
     }
 
+    // Gestion des notes:
+
+    public function addNote($content, $visibility = null)
+    {
+        if (!$this->isLoaded()) {
+            return array('ID ' . $this->getLabel('of_the') . ' absent');
+        }
+        $note = BimpObject::getInstance('bimpcore', 'BimpNote');
+
+        if (is_null($visibility)) {
+            $visibility = BimpNote::BIMP_NOTE_MEMBERS;
+        }
+
+        $errors = $note->validateArray(array(
+            'obj_type'   => 'bimp_object',
+            'obj_module' => $this->module,
+            'obj_name'   => $this->object_name,
+            'id_obj'     => (int) $this->id,
+            'visibility' => (int) $visibility,
+            'content'    => $content
+        ));
+
+        if (!count($errors)) {
+            $errors = $note->create();
+        }
+
+        return $errors;
+    }
+
+    public function renderNotesList($visibility = null)
+    {
+        if ($this->isLoaded()) {
+            $note = BimpObject::getInstance('bimpcore', 'BimpNote');
+            $list = new BC_ListTable($note);
+            $list->addFieldFilterValue('obj_type', 'bimp_object');
+            $list->addFieldFilterValue('obj_module', $this->module);
+            $list->addFieldFilterValue('obj_name', $this->object_name);
+            $list->addFieldFilterValue('id_obj', $this->id);
+            $list->addObjectChangeReload($this->object_name);
+            if (!is_null($visibility)) {
+                $list->addFieldFilterValue('visibility', array(
+                    'operator' => '<=',
+                    'value'    => (int) $visibility
+                ));
+            }
+
+            return $list->renderHtml();
+        }
+
+        return BimpRender::renderAlerts('Impossible d\'afficher la liste des notes (ID ' . $this->getLabel('of_the') . ' absent)');
+    }
+
     // Rendus HTML
+
+    public function renderHeader($content_only = false)
+    {
+        $html = '';
+        if ($this->isLoaded()) {
+            $name = $this->getInstanceName();
+
+            if (!$content_only) {
+                $html .= '<div id="' . $this->object_name . '_' . $this->id . '_header" class="object_header container-fluid">';
+            }
+            $html .= '<div class="row">';
+
+            $html .= '<div class="col-lg-6 col-sm-8 col-xs-12">';
+            if (!is_null($this->params['header_list_name']) && $this->params['header_list_name']) {
+                $html .= '<div class="header_button">';
+                $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+                if ($url) {
+                    $items = array(
+                        '<span class="dropdown-title">Liste des ' . $this->getLabel('name_plur') . '</span>'
+                    );
+                    $items[] = BimpRender::renderButton(array(
+                                'label'       => 'Vue rapide',
+                                'icon_before' => 'eye',
+                                'classes'     => array(
+                                    'btn', 'btn-light-default'
+                                ),
+                                'attr'        => array(
+                                    'onclick' => 'loadModalList(\'' . $this->module . '\', \'' . $this->object_name . '\', \'' . $this->params['header_list_name'] . '\', 0, $(this))'
+                                )
+                                    ), 'button');
+                    $items[] = BimpRender::renderButton(array(
+                                'label'       => 'Afficher la page',
+                                'icon_before' => 'file-text-o',
+                                'classes'     => array(
+                                    'btn', 'btn-light-default'
+                                ),
+                                'attr'        => array(
+                                    'onclick' => 'window.location = \'' . $url . '\''
+                                )
+                                    ), 'button');
+                    $items[] = BimpRender::renderButton(array(
+                                'label'       => 'Afficher la page dans un nouvel onglet',
+                                'icon_before' => 'external-link',
+                                'classes'     => array(
+                                    'btn', 'btn-light-default'
+                                ),
+                                'attr'        => array(
+                                    'onclick' => 'window.open(\'' . $url . '\');'
+                                )
+                                    ), 'button');
+                    $html .= BimpRender::renderDropDownButton('', $items, array(
+                                'icon' => 'bars'
+                    ));
+                } else {
+                    $html .= BimpRender::renderButton(array(
+                                'icon_before' => 'bars',
+                                'classes'     => array(
+                                    'btn', 'btn-default', 'bs-popover'
+                                ),
+                                'attr'        => array(
+                                    'onclick'        => 'loadModalList(\'' . $this->module . '\', \'' . $this->object_name . '\', \'' . $this->params['header_list_name'] . '\', 0, $(this))',
+                                    'data-toggle'    => 'popover',
+                                    'data-trigger'   => 'hover',
+                                    'data-placement' => 'top',
+                                    'data-container' => 'body',
+                                    'data-content'   => 'Afficher la liste des ' . $this->getLabel('name_plur')
+                                )
+                                    ), 'button');
+                }
+                $html .= '</div>';
+            }
+
+            $html .= '<div style="display: inline-block">';
+            $html .= '<h1>' . $name . '</h1>';
+
+            if ($this->field_exists('reference')) {
+                $ref = $this->displayData('reference');
+            } elseif ($this->field_exists('ref')) {
+                $ref = $this->displayData('ref');
+            }
+
+            if ($ref) {
+                $html .= '<h2>';
+                $html .= $ref;
+                $html .= '</h2>';
+            }
+            $html .= '</div>';
+            $html .= '</div>';
+
+            $html .= '<div class="col-lg-6 col-sm-4 col-xs-12" style="text-align: right">';
+
+            $status = '';
+            if ($this->field_exists('status')) {
+                $status = $this->displayData('status');
+            } elseif ($this->field_exists('statut')) {
+                $status = $this->displayData('statut');
+            } elseif ($this->field_exists('fk_statut')) {
+                $status = $this->displayData('fk_statut');
+            }
+            if ($status) {
+                $html .= '<div class="header_status">';
+                $html .= $status;
+                $html .= '</div>';
+            }
+
+            $this->params['header_btn'] = $this->config->getCompiledParams('header_btn');
+            if (is_null($this->params['header_btn'])) {
+                $this->params['header_btn'] = array();
+            }
+
+            if (count($this->params['header_btn'])) {
+                $header_buttons = array();
+                foreach ($this->params['header_btn'] as $header_btn) {
+                    $button = null;
+                    $label = isset($header_btn['label']) ? $header_btn['label'] : '';
+                    $onclick = isset($header_btn['onclick']) ? $header_btn['onclick'] : '';
+                    $icon = isset($header_btn['icon']) ? $header_btn['icon'] : '';
+                    $onclick = str_replace('component_id', $this->identifier, $onclick);
+                    if ($label && $onclick) {
+                        $button = array(
+                            'classes' => array('btn', 'btn-light-default'),
+                            'label'   => $label,
+                            'attr'    => array(
+                                'type'    => 'button',
+                                'onclick' => $onclick
+                            )
+                        );
+                        if ($icon) {
+                            $button['icon_before'] = $icon;
+                        }
+                    }
+
+                    if (!is_null($button)) {
+                        $header_buttons[] = BimpRender::renderButton($button, 'button');
+                    }
+                }
+
+                $html .= '<div class="header_buttons">';
+                if (count($header_buttons)) {
+                    if (count($header_buttons) > 4) {
+                        $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
+                                    'icon' => 'cogs'
+                        ));
+                    } else {
+                        foreach ($header_buttons as $btn) {
+                            $html .= str_replace('btn-light-default', 'btn-default', $btn);
+                        }
+                    }
+                }
+                $html .= '</div>';
+            }
+
+            $html .= '</div>';
+
+            $html .= '</div>';
+            
+            $html .= '<div class="row header_bottom"></div>';
+
+            if (!$content_only) {
+                $html .= '</div>';
+            }
+        }
+
+        return $html;
+    }
 
     public function renderView($view_name = 'default', $panel = false, $level = 1)
     {

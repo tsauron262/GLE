@@ -28,7 +28,40 @@ table.objectlistTable {
         }
     }
 
-    & > tbody > tr.objectListItemRow {
+    & > tbody > tr {
+        & > th {
+            padding: 5px 12px 5px 6px;
+            background-color: $primary;
+            color: #fff;
+            border-bottom: 1px solid #fff;
+        }
+
+        & > td {
+            padding: 5px 6px;
+            border-bottom: 1px solid #ddd;
+
+            .inputContainer {
+                display: inline-block;
+                width: 100%;
+
+                input, textarea, select {
+                    width: 100%;
+                    color: $input-color;
+                    font-weight: normal;
+                }
+
+                .inputHelp {
+                    display: none;
+                }
+            }
+
+            .popover {
+                color: $gray-darker;
+            }
+        }
+    }
+
+    & > tbody > tr {
         @include transition(all 0.3s ease);
 
         background-color: #fff!important;
@@ -87,29 +120,6 @@ table.objectlistTable {
             & > td {
                 background-color: #CDEFFF!important;
             }
-        }
-    }
-
-    td {
-        padding: 5px 6px;
-
-        .inputContainer {
-            display: inline-block;
-            width: 100%;
-
-            input, textarea, select {
-                width: 100%;
-                color: $input-color;
-                font-weight: normal;
-            }
-
-            .inputHelp {
-                display: none;
-            }
-        }
-
-        .popover {
-            color: $gray-darker;
         }
     }
 
@@ -200,6 +210,10 @@ table.objectlistTable {
     }
     td.searchTools {
         text-align: right;
+        
+        .btn {
+            margin-right: 10px;
+        }
     }
 
     .searchInputContainer {
@@ -301,12 +315,12 @@ th.th_tools {
         height: 100%;
         opacity: 0;
         font-size: 16px;
-        
+
         &:before {
             font-family: 'FontAwesome';
             content: '\f110';
         }
-        
+
         &.visible {
             opacity: 1;
         }

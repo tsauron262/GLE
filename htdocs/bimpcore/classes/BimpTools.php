@@ -35,7 +35,7 @@ class BimpTools
     }
 
     // Gestion des objects Dolibarr:
-    
+
     public static function loadDolClass($module, $file = null, $class = null)
     {
         if (is_null($file)) {
@@ -74,6 +74,12 @@ class BimpTools
 
             case 'Facture':
                 return DOL_URL_ROOT . '/compta/facture/card.php?id=' . $id_object;
+
+            case 'Propal':
+                return DOL_URL_ROOT . '/comm/propal/card.php?id=' . $id_object;
+
+            case 'Entrepot':
+                return DOL_URL_ROOT . '/product/stock/card.php?id=' . $id_object;
 
             case 'Societe':
                 $primary = 'socid';
@@ -607,7 +613,7 @@ class BimpTools
                     } else {
                         $value = 0;
                     }
-                    
+
                     $value = (int) $value;
                 }
                 return is_int($value);
@@ -897,5 +903,40 @@ class BimpTools
                     . str_pad(dechex(max(0, min(255, $g))), 2, "0", STR_PAD_LEFT)
                     . str_pad(dechex(max(0, min(255, $b))), 2, "0", STR_PAD_LEFT);
         }
+    }
+
+    public static function makeUrlFromConfig(BimpConfig $config, $path, $default_module, $default_controller)
+    {
+        $url = DOL_URL_ROOT . '/';
+
+        $params = $config->get($path, null, true, 'array');
+
+        if (is_null($params)) {
+            return '';
+        }
+
+        if (isset($params['url'])) {
+            $url .= $config->get($path . '/url', '');
+        } else {
+            $module = $config->get($path . '/module', $default_module);
+            $controller = $config->get($path . '/controller', $default_controller);
+            if ((string) $module && (string) $controller) {
+                $url .= $module . '/index.php?fc=' . $controller;
+            }
+        }
+
+        if ($url && isset($params['url_params'])) {
+            $url_params = $config->getCompiledParams($path . '/url_params');
+            foreach ($url_params as $name => $value) {
+                if (!preg_match('/\?/', $url)) {
+                    $url .= '?';
+                } else {
+                    $url .= '&';
+                }
+                $url .= $name . '=' . $value;
+            }
+        }
+
+        return $url;
     }
 }

@@ -160,10 +160,51 @@ class BimpInput
                 }
                 break;
 
+            case 'select_payment':
+                if (!isset($options['value_type'])) {
+                    $option['value_type'] = 'id';
+                }
+                if (!isset($options['active_only'])) {
+                    $options['active_only'] = 1;
+                }
+                $form->load_cache_types_paiements();
+                $html .= '<select id="' . $input_id . '" name="' . $field_name . '">';
+                foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
+                    if (!(int) $options['active_only'] || ((int) $options['active_only'] && (int) $payment_data['active'])) {
+                        switch ($options['value_type']) {
+                            case 'code':
+                                $html .= '<option value="' . $payment_data['code'] . '" data-id_payment="' . $id_payment . '">' . $payment_data['label'] . '</option>';
+                                break;
+
+                            case 'id':
+                            default:
+                                $html .= '<option value="' . $id_payment . '" data-code="' . $payment_data['code'] . '">' . $payment_data['label'] . '</option>';
+                                break;
+                        }
+                    }
+                }
+                $html .= '</select>';
+                break;
+
             case 'search_product':
                 global $conf;
+                $filter_type = 0;
+                if (isset($options['filter_type'])) {
+                    switch ($options['filter_type']) {
+                        case 'both':
+                            $filter_type = '';
+                            break;
+
+                        case 'product':
+                            $filter_type = 0;
+                            break;
+
+                        case 'service':
+                            $filter_type = 1;
+                    }
+                }
                 ob_start();
-                $form->select_produits((int) $value, $field_name, 0, $conf->product->limit_size, 0, -1, 2, '', 1);
+                $form->select_produits((int) $value, $field_name, $filter_type, $conf->product->limit_size, 0, -1, 2, '', 1);
                 $html .= ob_get_clean();
                 break;
 

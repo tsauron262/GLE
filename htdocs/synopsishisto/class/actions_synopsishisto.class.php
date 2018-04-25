@@ -43,15 +43,43 @@ class ActionsSynopsisHisto {
             $return .= histoNavigation::getBlocHisto($context);
         }
         
+       if($user->pass_indatabase_crypted == ""){
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
+       }
+
+        
        if($user->array_options['options_mail_sec'] == "" || $user->office_phone == ""){
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
-            setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours et téléphone</a>", null, 'errors');
+            if($user->office_phone == ""){
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
+            }
+
+            if($user->array_options['options_mail_sec'] == ""){
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
+            }
        }
        
-       if($user->pass_indatabase_crypted == "")
-            setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 20 avril seront désactivés)</a>", null, 'errors');
        
 
         $this->resprints = $return;
@@ -66,7 +94,9 @@ class histoNavigation {
         global $db, $user, $conf, $langs;
         $langs->load("histo@synopsishisto");
 //        if ($conf->global->MAIN_MODULE_SYNOPSISHISTO && $user->rights->MiniHisto->all->Afficher) {
-        $return = '<div class="blockvmenufirst blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
+        $return = '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/bimpcore/views/css/bimpcore_bootstrap_new.css">';
+        
+        $return .= '<div class="blockvmenufirst blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
         $return .= '<div class="menu_titre">';
         $return .= '<a href="#" class="vmenu">' . $langs->trans("HISTONAV") . '</a>';
         $return .= "</div>";
@@ -168,20 +198,20 @@ class histoNavigation {
         if (isset($tabTypeObject[$type])) {
             $data = $tabTypeObject[$type];
             if(is_file(DOL_DOCUMENT_ROOT . $data['path'])){
-            require_once DOL_DOCUMENT_ROOT . $data['path'];
-            $nomObj = $data['obj'];
-            if(class_exists($nomObj)){
-                $obj = new $nomObj($db);
-                if(!method_exists($obj, "getNomUrl")){
-                    dol_syslog("Pas de methode getNomUrl dans la class ".$nomObj,3);
-                    $obj = false;
+                require_once DOL_DOCUMENT_ROOT . $data['path'];
+                $nomObj = $data['obj'];
+                if(class_exists($nomObj)){
+                    $obj = new $nomObj($db);
+                    if(!method_exists($obj, "getNomUrl")){
+                        dol_syslog("Pas de methode getNomUrl dans la class ".$nomObj,3);
+                        $obj = false;
+                    }
                 }
-            }
-            else{
-                dol_syslog("Impossible de charger l'object ".$nomObj,3);
-            }
-            $tabMenu[0] = $data['tabMenu1'];
-            $tabMenu[1] = $data['tabMenu2'];
+                else{
+                    dol_syslog("Impossible de charger l'object ".$nomObj,3);
+                }
+                $tabMenu[0] = $data['tabMenu1'];
+                $tabMenu[1] = $data['tabMenu2'];
             }
             else
                 dol_syslog("Impossible de chargger le fichier ".DOL_DOCUMENT_ROOT . $data['path'],3);

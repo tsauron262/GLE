@@ -10,21 +10,23 @@ ini_set('display_errors', 1);
 //echo DOL_DATA_ROOT.'/invoice.pdf';
 
 
-require_once './pdf/classes/LoyerPDF.php';
+//require_once './pdf/classes/LoyerPDF.php';
+require_once './pdf/classes/PropalSavPDF.php';
 
 global $db, $langs;
 
 //$pdf = new PropalPDF($db);
-$pdf = new LoyerPDF($db);
+//$pdf = new LoyerPDF($db);
+$pdf = new PropalSavPDF($db);
 
 $obj = new Propal($db);
-$obj->fetch(28);
+$obj->fetch(92704);
 
 $pdf->init($obj);
 $pdf->render(__DIR__. '/testPropal.pdf', true);
 
 //$pdf->write_file($propal, $langs);
 
-$pdf->render(DOL_DATA_ROOT . '/propal.pdf', true);
+//$pdf->render(DOL_DATA_ROOT . '/propal.pdf', true);
 
 

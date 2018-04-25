@@ -223,9 +223,9 @@ class BC_List extends BC_Panel
             $this->items = array();
             return;
         }
-
-        $primary = $this->object->getPrimary();
         
+        $primary = $this->object->getPrimary();
+
         // Jointures: 
         $joins = $this->params['joins'];
 

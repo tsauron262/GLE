@@ -1,3 +1,9 @@
+
+
+Changer X
+UPDATE `llx_be_equipment` SET serial = concat("renommer", now()) 
+WHERE serial LIKE '%ipad1%' OR serial LIKE '%ipad2%' OR serial LIKE '%ipad3%' OR serial LIKE '%DMPST1DSH1M9%' OR serial LIKE '%Mac1%' OR serial LIKE '%Mac2%'
+
 Synopsis_Tools/mailRequest.php?action=fusionCli&id="AVIDER"&id2=
 
 

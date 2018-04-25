@@ -18,7 +18,8 @@ class BC_Card extends BimpComponent
     public function __construct(BimpObject $object, $display_object_name = null, $name = '')
     {
         $this->params_def['type'] = array('default' => '');
-        $this->params_def['title'] = array('default' => 'nom');
+        $this->params_def['title'] = array('default' => 'nom', 'data_type' => 'any');
+        $this->params_def['status'] = array('default' => '');
         $this->params_def['image'] = array();
         $this->params_def['view_btn'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['fields'] = array('type' => 'keys');
@@ -67,6 +68,12 @@ class BC_Card extends BimpComponent
         }
 
         parent::__construct($object, $name, $path);
+
+        if ($this->display_object === 'Facture') {
+            echo '<pre>';
+            print_r($this->params);
+            exit;
+        }
     }
 
     public function renderHtml()
@@ -75,6 +82,10 @@ class BC_Card extends BimpComponent
 
         if (count($this->errors)) {
             return $html;
+        }
+
+        if (is_null($this->display_object) || !isset($this->display_object->id) || !(int) $this->display_object->id) {
+            return '';
         }
 
         switch ($this->object_type) {
@@ -93,7 +104,7 @@ class BC_Card extends BimpComponent
     public function renderBimpObjectCard()
     {
         $fields = array();
-        
+
         if ($this->display_object->isDolObject() && $this->params['type']) {
             $this->display_object = $this->display_object->dol_object;
             return $this->renderDolObjectCard();
@@ -136,8 +147,13 @@ class BC_Card extends BimpComponent
         if ($this->params['title'] === 'nom') {
             $this->params['title'] = $this->display_object->getInstanceName();
         }
+        
+        $status = null;
+        if ($this->params['status']) {
+            $status = $this->display_object->displayData($this->params['status']);
+        }
 
-        return self::renderCard($this->display_object, $this->params['title'], $this->params['image'], $fields, $this->params['view_btn']);
+        return self::renderCard($this->display_object, $this->params['title'], $this->params['image'], $fields, $this->params['view_btn'], $status);
     }
 
     public function renderDolObjectCard()
@@ -154,12 +170,21 @@ class BC_Card extends BimpComponent
 
             case 'product_card':
                 return $this->renderProductCard();
+
+            case 'propal_card':
+                return $this->renderPropalCard();
+
+            case 'facture_card':
+                return $this->renderFactureCard();
         }
 
-        if (is_null($this->params['title']) || !$this->params['title']) {
+        if (is_array($this->params['title'])) {
+            if (isset($this->params['title']['object_prop'])) {
+                
+            }
             $prop = $this->object->getConf($this->config_path . '/title/object_prop', null);
-            if (!is_null($prop) && property_exists($this->display_object, $prop)) {
-                $this->params['title'] = $this->display_object->{$prop};
+            if (property_exists($this->display_object, $this->params['title']['object_prop'])) {
+                $this->params['title'] = $this->display_object->{$this->params['title']['object_prop']};
             }
         }
 
@@ -499,7 +524,57 @@ class BC_Card extends BimpComponent
         return self::renderCard($this->display_object, $title, $img_url, $fields, true);
     }
 
-    public static function renderCard($object, $title, $img_url = '', $fields = array(), $view_btn = false)
+    public function renderPropalCard()
+    {
+        if (!is_a($this->display_object, 'Propal')) {
+            return BimpRender::renderAlerts('Erreur de configuration. Cet objet n\'est pas une proposition commerciale');
+        }
+
+        $fields = array();
+
+        $file = DOL_DATA_ROOT . '/propale/' . $this->display_object->ref . '/' . $this->display_object->ref . '.pdf';
+
+        if (file_exists($file)) {
+            $url = DOL_URL_ROOT . '/document.php?modulepart=propal&file=' . htmlentities($this->display_object->ref . '/' . $this->display_object->ref . '.pdf');
+            $onclick = 'window.open(\'' . $url . '\');';
+            $button = '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
+            $button .= '<i class="fas fa5-file-pdf iconLeft"></i>';
+            $button .= $this->display_object->ref . '.pdf</button>';
+            $fields[] = array(
+                'label' => 'Fichier PDF',
+                'value' => $button
+            );
+        }
+
+        return self::renderCard($this->display_object, $this->display_object->ref, null, $fields, true);
+    }
+
+    public function renderFactureCard()
+    {
+        if (!is_a($this->display_object, 'Facture')) {
+            return BimpRender::renderAlerts('Erreur de configuration. Cet objet n\'est pas une facture');
+        }
+
+        $fields = array();
+
+        $file = DOL_DATA_ROOT . '/facture/' . $this->display_object->ref . '/' . $this->display_object->ref . '.pdf';
+
+        if (file_exists($file)) {
+            $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities($this->display_object->ref . '/' . $this->display_object->ref . '.pdf');
+            $onclick = 'window.open(\'' . $url . '\');';
+            $button = '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
+            $button .= '<i class="fas fa5-file-pdf iconLeft"></i>';
+            $button .= $this->display_object->ref . '.pdf</button>';
+            $fields[] = array(
+                'label' => 'Fichier PDF',
+                'value' => $button
+            );
+        }
+
+        return self::renderCard($this->display_object, $this->display_object->ref, null, $fields, true);
+    }
+
+    public static function renderCard($object, $title, $img_url = '', $fields = array(), $view_btn = false, $status = null)
     {
         $html = '';
         $html .= '<div class="media object_card">';
@@ -510,7 +585,14 @@ class BC_Card extends BimpComponent
         }
         $html .= '<div class="media-body">';
         if (!is_null($title) && $title) {
+            $html .= '<div style="display: inline-block">'; 
             $html .= '<h4 class="media-heading">' . $title . '</h4>';
+            $html .= '</div>';
+        }
+        if (!is_null($status) && $status) {
+            $html .= '<div class="object_card_status">';
+            $html .= $status;
+            $html .= '</div>';
         }
         $html .= '<table class="object_card_table">';
         $html .= '<thead></thead>';

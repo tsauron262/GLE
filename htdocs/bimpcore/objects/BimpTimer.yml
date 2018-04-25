@@ -1,6 +1,6 @@
 table: bimp_timer
 
-label: 
+labels: 
     name: timer
     
 common_fields: 0
@@ -15,9 +15,11 @@ fields:
     field_name: 
         type: string
     time_session:
+        label: Durée de la session
         type: int
         default_value: 0
     session_start:
+        label: Début de la session
         type: int
     id_user:
         type: int

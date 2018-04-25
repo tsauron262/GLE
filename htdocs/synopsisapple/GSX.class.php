@@ -421,30 +421,8 @@ class GSX
 
         $opt = ($this->isIphone) ? "IPhone" : "Asp";
 
-
-//        return $this->wsdlUrl = "https://gle.synopsis-erp.com/test1/gsx-emeaAsp.wsdl";
-//        return $this->wsdlUrl = ' https://gsxwsut.apple.com/apidocs/' . $api_mode . '/html/WSArtifacts.html?user=asp';
         return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . $opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']) . $opt . '.wsdl';
 
-//        $type = "Asp";
-////        $type = "IPhone";
-//        if ($this->gsxDetails['gsxWsdl'] != '') {
-//            return $this->wsdlUrl = $this->gsxDetails['gsxWsdl'];
-//        } elseif ($api_mode == 'it') {
-//            return $this->wsdlUrl = 'https://gsxwsit.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
-//        } elseif ($api_mode == 'ut') {
-//            if ($this->isIphone) {
-//                return $this->wsdlUrl = 'https://gsxws2.apple.com/wsdl/emeaIPhone/gsx-emeaIPhone.wsdl';
-//            } else
-//                return $this->wsdlUrl = 'https://gsxapiut.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
-//        } else {
-//            if ($this->isIphone)
-//                return $this->wsdlUrl = 'https://gsxws2.apple.com/wsdl/emeaIPhone/gsx-emeaIPhone.wsdl';
-//            else
-//                $this->wsdlUrl = 'https://gsxws2' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
-//
-//            return $this->wsdlUrl;
-//        }
     }
 
     /**
@@ -485,6 +463,7 @@ class GSX
             , 'passphrase'         => $certif[1]
             , 'trace'              => TRUE
             , 'exceptions'         => TRUE
+            , 'cache_wsdl' => WSDL_CACHE_BOTH
                 //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
         );
 //print_r($connectionOptions);die;

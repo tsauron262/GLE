@@ -13,7 +13,7 @@ $loadEquip = false;
 $loadSav = true;
 
 if ($loadEquip == true) {
-    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,1000");
+    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,1000000");
 
     while ($ligne = $db->fetch_object($sql)) {
         if ($ligne->description == "")
@@ -75,7 +75,7 @@ if ($loadEquip == true) {
 
 
 if ($loadSav) {
-    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id LIMIT 0,1000000");
+    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id LIMIT 0,1000");
 
 
 

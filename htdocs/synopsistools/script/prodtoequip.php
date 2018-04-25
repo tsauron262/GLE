@@ -7,12 +7,13 @@ require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
 llxHeader();
 
 set_time_limit(5000000);
+ini_set('memory_limit', '1024M');
 
 $loadEquip = false;
 $loadSav = true;
 
 if ($loadEquip == true) {
-    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,1000000");
+    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,1000");
 
     while ($ligne = $db->fetch_object($sql)) {
         if ($ligne->description == "")
@@ -63,10 +64,10 @@ if ($loadEquip == true) {
             if ($emplacement->id > 0) {
                 echo "<br/><br/>OK equipment " . $equipement->id;
             } else {
-                echo "<br/><br/><pre>Impossible de validé " . print_r($arrayEmplacement, 1);
+                echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arrayEmplacement, 1);
             }
         } else {
-            echo "<br/><br/><pre>Impossible de validé " . print_r($arrayEquipment, 1);
+            echo "<br/><br/>ERREUR FATAL<pre>Impossible de validé " . print_r($arrayEquipment, 1);
         }
     }
 }
@@ -74,43 +75,44 @@ if ($loadEquip == true) {
 
 
 if ($loadSav) {
-    $sql = $db->query("SELECT *  FROM `llx_element_element`, `llx_synopsischrono_chrono_105` s, `llx_synopsischrono` c WHERE c.id = s.id AND `sourcetype` LIKE 'SAV' AND `targettype` LIKE 'productCli' AND `fk_source` = s.id LIMIT 0,1000");
+    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id LIMIT 0,1000000");
 
-    require_once DOL_DOCUMENT_ROOT . "/synopsisapple/centre.inc.php";
 
 
     while ($ligne = $db->fetch_object($sql)) {
 
         $sav = BimpObject::getInstance('bimpsupport', 'BS_Sav');
 
-        $code_centre = 0;
-        if (isset($tabCentre[$ligne->Centre]) && isset($tabCentre[$ligne->Centre][7]))
-            $code_centre = $ligne->Centre;
-
-        if ($code_centre == "")
-            die("Pas de correspondance pour le centre " . $ligne->Centre);
-
+        $code_centre = "S";
         $idP = 17; //Prod par default
-        if ($ligne->Materiel == "") {
-            echo "<br/><br/>Pas de prod dans old SAV ";
+        $idClient = 4674;
+        
+        if (isset($ligne->Centre) && $ligne->Centre != "")
+            $code_centre = $ligne->Centre;
+        else
+            echo("ERREUR FATAL Pas de correspondance pour le centre " . $ligne->Centre);
+
+        if ($ligne->idMat < 1) {
+            echo "<br/><br/>ERR Pas de prod dans old SAV ";
+            $tabT = getElementElement("sav", "productCli", $ligne->idS);
+            if(isset($tabT[0]))
+                $idP = $tabT[0]['d'];
+            else
+                echo "<br/><br/>ERREUR 2 Pas de prod dans old SAV element element ";
         } else {
-            $sql2 = $db->query('SELECT id FROM `llx_be_equipment` WHERE note = CONCAT("OLD", "' . $ligne->Materiel . '")');
-            if ($db->num_rows($sql2) < 1)
-                echo "<br/><br/>Pas de prod avec old id " . $ligne->Materiel;
-            else {
-                if ($db->num_rows($sql2) > 1)
-                    echo "<br/><br/>Plusieurs résultat pour prod old id " . $ligne->Materiel;
-                $ln = $db->fetch_object($sql2);
-                $idP = $ln->id;
-            }
+            $idP = $ligne->idMat;
         }
+        if($ligne->fk_soc < 1)
+            echo "<br/><br/>ERREUR Pas de client old sav";
+        else
+            $idClient = $ligne->fk_soc;
 
         $arraySav = array(
             'ref' => $ligne->ref,
             'id_equipment' => $idP, //TODO
             'code_centre' => $code_centre,
             'id_user_tech' => $ligne->Technicien,
-            'id_client' => $ligne->fk_soc,
+            'id_client' => $idClient,
             'id_contrat' => $ligne->Contract,
             'id_propal' => $ligne->propalid,
             'sav_pro' => $ligne->SAV_PRO,
@@ -138,22 +140,23 @@ if ($loadSav) {
         $newErrors = array_merge($newErrors, $sav->create());
         if ($sav->id > 0) {
             echo "<br/><br/>OK sav " . $sav->id;
-
-            //req en vrac
-            $req = "UPDATE `llx_bs_sav` SET "
-                    . "id_facture_acompte = (SELECT MAX(f.rowid) "
-                    . "FROM `llx_facture` f, llx_element_element "
-                    . "WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'AC%') "
-                    . "WHERE `id_propal` > 0 AND `id_facture_acompte` < 1";
-
-            $req2 = "UPDATE `llx_bs_sav` SET id_facture = (SELECT MAX(f.rowid) FROM `llx_facture` f, llx_element_element WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'FA%') WHERE `id_propal` > 0 AND `id_facture` < 1";
-            $db->query($req);
-            $db->query($req2);
         } else {
-            echo "<br/><br/><pre>Impossible de validé " . print_r($arraySav, 1);
+            echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arraySav, 1);
         }
     }
 }
+
+
+//req en vrac
+$req = "UPDATE `llx_bs_sav` SET "
+        . "id_facture_acompte = (SELECT MAX(f.rowid) "
+        . "FROM `llx_facture` f, llx_element_element "
+        . "WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'AC%') "
+        . "WHERE `id_propal` > 0 AND `id_facture_acompte` < 1";
+
+$req2 = "UPDATE `llx_bs_sav` SET id_facture = (SELECT MAX(f.rowid) FROM `llx_facture` f, llx_element_element WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'FA%') WHERE `id_propal` > 0 AND `id_facture` < 1";
+$db->query($req);
+$db->query($req2);
 
 
 

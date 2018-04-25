@@ -313,13 +313,14 @@ class BimpObject
     public function getNomUrl($withpicto = true)
     {
         $html = '<a href="' . $this->getUrl() . '">';
-        if ($withpicto) {
+        if ($this->params['icon']) {
             $icon = $this->getIcon();
             if ($icon) {
-                $html .= '<i class="fa fa-' . $icon . ' iconLeft"></i>';
+                $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
             }
         }
         $html .= $this->ref . '</a>';
+        return $html;
     }
 
     public function getParentId()

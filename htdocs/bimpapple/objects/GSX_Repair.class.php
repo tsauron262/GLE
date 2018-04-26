@@ -543,7 +543,7 @@ class GSX_Repair extends BimpObject
             $this->totalFromOrder = $totalFromOrder;
             $this->totalFromOrderChanged = true;
             $sav = $this->getChildObject('sav');
-            $sav->setAllStatutWarranty($this->totalFromOrder == 0);
+            $sav->setAllStatutWarranty($this->totalFromOrder == 0); 
             if ($this->isLoaded()) {
                 return $this->update();
             }

@@ -1365,7 +1365,6 @@ class BS_SAV extends BimpObject
     
     
     function generatePropal(){
-        $this->setAllStatutWarranty(false);
         global $user;
         if($this->getData('id_propal') < 1){
             $this->createPropal();

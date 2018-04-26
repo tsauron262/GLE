@@ -14,6 +14,22 @@ function createNewPropal($button, id_sav) {
     });
 }
 
+function generatePropal($button, id_sav) {
+    BimpAjax('generatePropal', {
+        id_sav: id_sav
+    }, null, {
+        id_sav: id_sav,
+        $button: $button,
+        success: function (result, bimpAjax) {
+            $('body').trigger($.Event('objectChange', {
+                module: 'bimpsupport',
+                object_name: 'BS_SAV',
+                id_object: bimpAjax.id_sav
+            }));
+        }
+    });
+}
+
 function setNewSavStatus($button, id_sav, new_status, send_msg, extra_data) {
     if (typeof (extra_data) === 'undefined') {
         extra_data = {};

@@ -253,6 +253,9 @@ fields:
         label: Facture d'acompte
         type: id_object
         object: facture_acompte
+    id_discount:
+        label: Id reduction
+        type: int
     id_facture: 
         label: Facture
         type: id_object

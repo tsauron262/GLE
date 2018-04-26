@@ -1352,8 +1352,20 @@ class BS_SAV extends BimpObject
         return $url;
     }
     
+    function setAllStatutWarranty($garantie = false){
+        foreach($this->getChildrenObjects("products") as $prod){
+            $prod->set("out_of_warranty", $garantie? "0":"1");
+            $prod->update();
+        }
+        foreach($this->getChildrenObjects("apple_parts") as $prod){
+            $prod->set("out_of_warranty", $garantie? "0":"1");
+            $prod->update();
+        }
+    }
+    
     
     function generatePropal(){
+        $this->setAllStatutWarranty(false);
         global $user;
         if($this->getData('id_propal') < 1){
             $this->createPropal();

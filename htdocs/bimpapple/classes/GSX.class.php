@@ -266,7 +266,7 @@ class GSX
             , 'passphrase'         => $certif[1]
             , 'trace'              => TRUE
             , 'exceptions'         => TRUE
-                //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
+            , 'cache_wsdl' => WSDL_CACHE_BOTH
         );
 //print_r($connectionOptions);die;
         try {

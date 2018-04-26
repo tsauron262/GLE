@@ -1042,6 +1042,18 @@ if (empty($reshook))
 							}
 						}
 					}
+					if ($object->origin == 'commande')
+					{
+						require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
+						$comm = new Commande($db);
+						$comm->fetch($object->origin_id);
+						$comm->fetchObjectLinked();
+						if (count($comm->linkedObjectsIds['propal']) > 0) {
+							foreach ($comm->linkedObjectsIds['propal'] as $key => $value){
+								$object->linked_objects['propal'] = $value;
+							}
+						}
+					}
 
 					if (is_array($_POST['other_linked_objects']) && ! empty($_POST['other_linked_objects']))
 					{

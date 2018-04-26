@@ -1023,7 +1023,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
         $errors = parent::create();
 
-        if (!count($errors)) {
+        if (!count($errors) && $this->getData("id_propal") < 1) {
             $this->createPropal();
         }
     }

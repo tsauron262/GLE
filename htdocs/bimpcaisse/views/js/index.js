@@ -152,27 +152,22 @@ function openCaisse($button, confirm_fonds) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var $form = $('#openCaisseForm');
 
     if (!$form.length) {
         bimp_msg('Une erreur est survenue (Formulaire absent). Opération impossible.', 'danger');
-        $button.removeClass('disabled');
         return;
     }
 
     var id_caisse = parseInt($form.find('[name="id_caisse"]').val());
     if (!id_caisse) {
         bimp_msg('Veuillez sélectionner une caisse', 'warning');
-        $button.removeClass('disabled');
         return;
     }
 
     var fonds = parseFloat($form.find('[name="fonds"]').val());
     if (!fonds) {
         bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning');
-        $button.removeClass('disabled');
         return;
     }
 
@@ -188,12 +183,9 @@ function openCaisse($button, confirm_fonds) {
             if (typeof (result.need_confirm_fonds) !== 'undefined' && result.need_confirm_fonds) {
                 bimpAjax.$button.html('<i class="fa fa-check iconLeft"></i>Confirmer');
                 bimpAjax.$button.attr('onclick', 'openCaisse($(this), 1);');
-                bimpAjax.$button.removeClass('disabled');
             } else {
                 window.location = document.location.href.replace(document.location.search, "");
             }
-        }, error: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
         }
     });
 }
@@ -203,27 +195,22 @@ function closeCaisse($button, confirm_fonds) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var $form = $('#closeCaisseForm');
 
     if (!$form.length) {
         bimp_msg('Une erreur est survenue (Formulaire absent). Opération impossible.', 'danger');
-        $button.removeClass('disabled');
         return;
     }
 
     var id_caisse = parseInt($('#current_params').find('[name="id_caisse"]').val());
     if (!id_caisse) {
         bimp_msg('Erreur: aucune caisse active', 'danger');
-        $button.removeClass('disabled');
         return;
     }
 
     var fonds = parseFloat($form.find('[name="fonds"]').val());
     if (!fonds) {
         bimp_msg('Veuillez indiquer le montant du fonds de caisse', 'warning');
-        $button.removeClass('disabled');
         return;
     }
 
@@ -239,12 +226,9 @@ function closeCaisse($button, confirm_fonds) {
             if (typeof (result.need_confirm_fonds) !== 'undefined' && result.need_confirm_fonds) {
                 bimpAjax.$button.html('<i class="fa fa-check iconLeft"></i>Confirmer');
                 bimpAjax.$button.attr('onclick', 'closeCaisse($(this), 1);');
-                bimpAjax.$button.removeClass('disabled');
             } else {
                 window.location = document.location.href.replace(document.location.search, "") + '?id_entrepot=' + result.id_entrepot;
             }
-        }, error: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
         }
     });
 }
@@ -254,40 +238,33 @@ function changeUser($button) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var $form = $('#changeUserForm');
 
     if (!$form.length) {
         bimp_msg('Une erreur est survenue (Formulaire absent). Opération impossible.', 'danger');
-        $button.removeClass('disabled');
         return;
     }
 
     var id_caisse = parseInt($('#current_params').find('[name="id_caisse"]').val());
     if (!id_caisse) {
         bimp_msg('Erreur: aucune caisse active', 'danger');
-        $button.removeClass('disabled');
         return;
     }
 
     var id_new_user = parseInt($form.find('[name="id_new_user"]').val());
     if (!id_new_user) {
         bimp_msg('Aucun nouvel utilisateur sélectionné', 'warning');
-        $button.removeClass('disabled');
         return;
     }
 
     var id_user = parseInt($('#current_params').find('[name="id_user"]').val());
     if (!id_user) {
         bimp_msg('Erreur: ID de l\'utilisateur actuel absent', 'danger');
-        $button.removeClass('disabled');
         return;
     }
 
     if (id_user === id_new_user) {
         bimp_msg('L\'utilisateur sélectionné est déjà assigné à cette caisse', 'warning');
-        $button.removeClass('disabled');
         return;
     }
 
@@ -311,13 +288,9 @@ function changeUser($button) {
             error: function (result, bimpAjax) {
                 if (!result || typeof (result.errors) === 'undefined') {
                     window.location = document.location.href.replace(document.location.search, "");
-                } else {
-                    bimpAjax.$button.removeClass('disabled');
                 }
             }
         });
-    } else {
-        $button.removeClass('disabled');
     }
 }
 
@@ -414,8 +387,6 @@ function loadVente($button, id_vente) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var id_caisse = parseInt($('#current_params').find('[name="id_caisse"]').val());
 
     if (!id_caisse) {
@@ -460,10 +431,8 @@ function loadVente($button, id_vente) {
             Vente.ajaxResult(result);
 
             onVenteLoaded();
-            bimpAjax.$button.removeClass('disabled');
         },
         error: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
             $('#newVenteButton').removeClass('disabled');
             bimpAjax.$listContainer.stop().slideDown(250);
             bimpAjax.$content.html('').hide();
@@ -503,6 +472,7 @@ function saveCurrentVente($button, status) {
         id_vente: Vente.id_vente,
         status: status
     }, null, {
+        $button: $button,
         id_vente: Vente.id_vente,
         display_success_in_popup_only: true,
         display_errors_in_popup_only: true,
@@ -544,25 +514,6 @@ function saveCurrentVente($button, status) {
             if ((status === 2) && result.validate) {
                 var url = ticket_url + '?id_vente=' + bimpAjax.id_vente;
                 window.open(url, 'Ticket de caisse', "menubar=no, status=no, width=370, height=600");
-
-//                if (result.ticket_errors.length) {
-//                    var errors_html = '<div class="alert alert-danger alert-dismissible">';
-//                    errors_html += '<button type="button" class="close" data-dismiss="alert" aria-label="Fermer"><span aria-hidden="true">&times;</span></button>';
-//                    errors_html += 'Des erreurs sont survenues lors de la création du ticket de caisse<br/>';
-//                    for (var j in result.ticket_errors) {
-//                        errors_html += ' - ' + result.ticket_errors[j] + '<br/>';
-//                    }
-//                    errors_html += '</div>';
-//                    if (result.validate) {
-//                        $('#venteErrors').append(errors_html).slideDown(250);
-//                    }
-//                } else if (result.ticket_html) {
-////                    $('#venteTicketContainer').html(result.ticket_html);
-//                    $('body').append('<div id="venteTicketContainer">' + result.ticket_html + '</div>');
-//                    window.print();
-//                } else {
-//                    bimp_msg('Echec de la création du ticket de caisse', 'danger');
-//                }
             }
         },
         error: function (result, bimpAjax) {
@@ -685,8 +636,6 @@ function saveClient() {
 
     var id_client = parseInt($container.find('[name="id_client"]').val());
 
-    $button.addClass('disabled');
-
     BimpAjax('saveClient', {
         id_vente: Vente.id_vente,
         id_client: id_client
@@ -699,10 +648,6 @@ function saveClient() {
                 $('#venteClientViewContainer').html(result.html).slideDown(250);
                 bimpAjax.$container.slideUp(250);
             }
-            $button.removeClass('disabled');
-        },
-        error: function (result, bimpAjax) {
-            $button.removeClass('disabled');
         }
     });
 }
@@ -805,8 +750,6 @@ function findProduct($button) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var $resultContainer = $('#findProductResult');
 
     BimpAjax('findProduct', {
@@ -829,11 +772,9 @@ function findProduct($button) {
             }
             Vente.ajaxResult(result);
             bimpAjax.$input.val('').focus();
-            bimpAjax.$button.removeClass('disabled');
         },
         error: function (result, bimpAjax) {
             bimpAjax.$input.focus().select();
-            bimpAjax.$button.removeClass('disabled');
         }
     });
 }
@@ -852,6 +793,7 @@ function selectArticle($button, id_object, object_name) {
         id_object: id_object,
         object_name: object_name
     }, null, {
+        $button: $button,
         display_success: false,
         display_errors_in_popup_only: true,
         success: function (result, bimpAjax) {
@@ -883,12 +825,11 @@ function removeArticle($button, id_article) {
         return;
     }
 
-    $button.addClass('disabled');
-
     BimpAjax('removeArticle', {
         id_vente: Vente.id_vente,
         id_article: id_article
     }, null, {
+        $button: $button,
         display_success: false,
         display_errors_in_popup_only: true,
         success: function (result, bimpAjax) {
@@ -896,9 +837,6 @@ function removeArticle($button, id_article) {
                 $(this).remove();
             });
             Vente.ajaxResult(result);
-        },
-        error: function (result, bimpAjax) {
-            $button.removeClass('disabled');
         }
     });
 }
@@ -980,8 +918,6 @@ function setVenteStatus($button, id_vente, status) {
         }
     }
 
-    $button.addClass('disabled');
-
     BimpAjax('saveVenteStatus', {
         id_vente: id_vente,
         status: status
@@ -990,11 +926,7 @@ function setVenteStatus($button, id_vente, status) {
         display_success_in_popup_only: true,
         display_errors_in_popup_only: true,
         success: function (result, bimpAjax) {
-            $button.removeClass('disabled');
             reloadObjectList('BC_Vente_default_list_table');
-        },
-        error: function (result, bimpAjax) {
-            $button.removeClass('disabled');
         }
     });
 }
@@ -1012,8 +944,6 @@ function deleteRemise($button, id_remise) {
         return;
     }
 
-    $button.addClass('disabled');
-
     BimpAjax('deleteRemise', {
         id_vente: Vente.id_vente,
         id_remise: id_remise
@@ -1024,10 +954,6 @@ function deleteRemise($button, id_remise) {
         success_msg: 'Remise supprimée avec succès',
         success: function (result, bimpAjax) {
             Vente.ajaxResult(result);
-            bimpAjax.$button.removeClass('disabled');
-        },
-        error: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
         }
     });
 }
@@ -1061,7 +987,6 @@ function addVentePaiement($button) {
     if ($button.hasClass('disabled')) {
         return;
     }
-    $button.addClass('disabled');
 
     var montant = parseFloat($('#ventePaiementMontant').val());
     if (!montant) {
@@ -1075,6 +1000,7 @@ function addVentePaiement($button) {
         code: $('#ventePaiementCode').val(),
         montant: montant
     }, $('#ventePaimentsLines'), {
+        $button: $button,
         display_success: false,
         display_errors_in_popup_only: true,
         append_html: true,
@@ -1086,10 +1012,6 @@ function addVentePaiement($button) {
                 $(this).removeClass('selected').removeClass('btn-primary').addClass('btn-default');
             });
             Vente.ajaxResult(result);
-            $button.removeClass('disabled');
-        },
-        error: function (result, bimpAjax) {
-            $button.removeClass('disabled');
         }
     });
 }
@@ -1099,21 +1021,16 @@ function deletePaiement($button, id_paiement) {
         return;
     }
 
-    $button.addClass('disabled');
-
     BimpAjax('deletePaiement', {
         id_vente: Vente.id_vente,
         id_paiement: id_paiement
     }, $('#ventePaimentsLines'), {
+        $button: $button,
         display_success: false,
         display_errors_in_popup_only: true,
         append_html: true,
         success: function (result, bimpAjax) {
             Vente.ajaxResult(result);
-            $button.removeClass('disabled');
-        },
-        error: function (result, bimpAjax) {
-            $button.removeClass('disabled');
         }
     });
 }

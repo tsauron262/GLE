@@ -85,6 +85,12 @@ fields_tables:
             - field: rapair_number
             - field: repair_confirm_number
             - field: serial_update_confirm_number
+            - label: Statut dans GSX
+              value: 
+                  callback: displayGsxStatus
+            - label: Sous garantie
+              value: 
+                  callback: displayGarantie
             - field: total_from_order
             - field: ready_for_pick_up
             - field: reimbursed
@@ -107,3 +113,7 @@ views:
                     col_md: 6
                     custom: 
                         callback: renderPartsPendingReturn
+            - cols: 
+                  - type: custom
+                    custom:
+                        callback: renderActions

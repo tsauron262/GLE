@@ -4,6 +4,13 @@ var bimp_nologged_requests = [];
 var bimp_is_logged = true;
 
 function BimpAjax(action, data, $resultContainer, params) {
+    if (typeof (params.$button) === 'object') {
+        if ($.isOk(params.$button)) {
+            if (params.$button.hasClass('disabled')) {
+                return;
+            }
+        }
+    }
     var request_id = bimp_requests.length;
     bimp_requests[request_id] = new BimpAjaxObject(request_id, action, data, $resultContainer, params);
 }
@@ -17,6 +24,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     }
 
     this.$resultContainer = $resultContainer;
+    this.$button = null;
 
     this.request_id = request_id;
     this.url = ajaxRequestsUrl;
@@ -50,6 +58,10 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         for (i in params) {
             bimpAjax[i] = params[i];
         }
+    }
+
+    if ($.isOk(bimpAjax.$button)) {
+        bimpAjax.$button.addClass('disabled')
     }
 
     if (!/\?/.test(bimpAjax.url)) {
@@ -170,7 +182,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                     bimpAjax.display_result_success(result);
 
                     if (bimpAjax.append_html) {
-                        if (bimpAjax.$resultContainer && typeof (result.html) === 'string') {
+                        if ($.isOk(bimpAjax.$resultContainer) && typeof (result.html) === 'string') {
                             bimpAjax.$resultContainer.stop().slideUp(250, function () {
                                 bimpAjax.$resultContainer.html(result.html).slideDown(250, function () {
                                     setCommonEvents(bimpAjax.$resultContainer);
@@ -189,6 +201,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                         }
                     }
                 }
+                if ($.isOk(bimpAjax.$button)) {
+                    bimpAjax.$button.removeClass('disabled');
+                }
                 delete bimp_requests[bimpAjax.request_id];
             },
             error: function () {
@@ -197,6 +212,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 }
                 if (typeof (bimpAjax.error) === 'function') {
                     bimpAjax.error(null, bimpAjax);
+                }
+                if ($.isOk(bimpAjax.$button)) {
+                    bimpAjax.$button.removeClass('disabled')
                 }
                 delete bimp_requests[bimpAjax.request_id];
             }

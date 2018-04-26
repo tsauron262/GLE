@@ -174,8 +174,6 @@ function saveObjectFromViewModalForm(view_id, $button) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var $modal = $('#' + view_id + '_modal');
     var $formContainer = $modal.find('.formContainer');
     if ($formContainer.length) {
@@ -189,27 +187,17 @@ function saveObjectFromViewModalForm(view_id, $button) {
             $button: $button,
             $view: $view,
             success: function (result, bimpAjax) {
-                bimpAjax.$button.removeClass('disabled');
                 $('body').trigger($.Event('objectChange', {
                     module: bimpAjax.$view.data('module'),
                     object_name: bimpAjax.$view.data('object_name'),
                     id_object: bimpAjax.$view.data('id_object')
                 }));
-            },
-            error: function (result, bimpAjax) {
-                bimpAjax.$button.removeClass('disabled');
             }
         });
     }
 }
 
 function saveObjectfromFieldsTable(fields_table_id, $button) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
     var $fieldsTable = $('#' + fields_table_id);
     if (!$fieldsTable.length) {
         bimp_msg('Erreur: liste des champs non trouvée', 'danger');
@@ -225,16 +213,13 @@ function saveObjectfromFieldsTable(fields_table_id, $button) {
     data['id_object'] = $fieldsTable.data('id_object');
 
     BimpAjax('saveObject', data, $resultContainer, {
+        $button: $button,
         success: function (result) {
-            $button.removeClass('disabled');
             $('body').trigger($.Event('objectChange', {
                 module: result.module,
                 object_name: result.object_name,
                 id_object: result.id_object
             }));
-        },
-        error: function (result) {
-            $button.removeClass('disabled');
         }
     });
 }

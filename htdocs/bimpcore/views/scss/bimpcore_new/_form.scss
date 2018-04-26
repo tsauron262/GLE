@@ -2,6 +2,32 @@
     color: #787878!important;
 }
 
+.formInputGroup {
+    padding-left: 25px;
+    border-left: 3px solid $gray-dark;
+    margin: 30px 0;
+    
+    .formGroupHeading {
+        margin-bottom: 5px;
+        
+        .formGroupTitle {
+            display: inline-block;
+            
+            h3 {
+                margin-top: 0;
+            }
+        }
+        .formGroupButtons {
+            display: inline-block;
+            float: right;
+            
+            .btn {
+                margin-left: 5px;
+            }
+        }
+    }
+}
+
 .fieldRow,
 .formRow {
     display: -webkit-box;
@@ -40,7 +66,7 @@
                 }
             }
             textarea {
-                width: 450px;
+                width: 100%;
             }
         }
     }
@@ -101,6 +127,10 @@
 .toolBar {
     padding: 15px 0;
     text-align: right;
+}
+
+.inputTemplate {
+    display: none;
 }
 
 /*Inputs*/

@@ -5,8 +5,6 @@ function insertEventMontantDetailsListRow(id_montant, $button) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var $row = $button.parent('td').parent('tr');
 
     if (!$row.length) {
@@ -29,17 +27,18 @@ function insertEventMontantDetailsListRow(id_montant, $button) {
     BimpAjax('loadEventMontantDetails', {
         id_event_montant: id_montant
     }, $resultContainer, {
+        $button: $button,
         display_success: false,
         display_processing: true,
         processing_msg: 'Chargement en cours',
         error_msg: 'Echec du chargement de la liste des détails',
         append_html: true,
-        success: function (result) {
-            $button.removeClass('disabled').hide();
-            $button.parent('td').find('.hideDetailsList').removeClass('hidden').show();
+        success: function (result, bimpAjax) {
+            bimpAjax.$button.hide();
+            bimpAjax.$button.parent('td').find('.hideDetailsList').removeClass('hidden').show();
         },
-        error: function () {
-            $button.hide();
+        error: function (result, bimpAjax) {
+            bimpAjax.$button.hide();
         }
     });
 }
@@ -86,8 +85,8 @@ $(document).ready(function () {
             }
         }
     });
-    
-    $('body').on('objectChange', function(e) {
+
+    $('body').on('objectChange', function (e) {
         if (e.object_name === 'BMP_Event') {
             bimp_msg_enable = false;
             e.stopPropagation();

@@ -23,6 +23,7 @@ class BimpObject
     public $params_defs = array(
         'table'              => array('default' => ''),
         'controller'         => array('default' => ''),
+        'icon'               => array('default' => ''),
         'primary'            => array('default' => 'id'),
         'common_fields'      => array('data_type' => 'bool', 'default' => 1),
         'header_list_name'   => array('default' => 'default'),
@@ -297,7 +298,7 @@ class BimpObject
         return $property;
     }
 
-    public function getRef()
+    public function getRef($withGeneric = true)
     {
         if ($this->field_exists('ref')) {
             return $this->getData('ref');
@@ -307,16 +308,19 @@ class BimpObject
             return $this->getData('reference');
         }
 
-        return get_class($this) . "_" . $this->id;
+        if ($withGeneric) {
+            return get_class($this) . "_" . $this->id;
+        }
+
+        return '';
     }
 
     public function getNomUrl($withpicto = true)
     {
         $html = '<a href="' . $this->getUrl() . '">';
         if ($withpicto) {
-            $icon = $this->getIcon();
-            if ($icon) {
-                $html .= '<i class="fa fa-' . $icon . ' iconLeft"></i>';
+            if ($this->params['icon']) {
+                $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
             }
         }
         $html .= $this->ref . '</a>';
@@ -2388,7 +2392,7 @@ class BimpObject
             $html .= '</div>';
 
             $html .= '</div>';
-            
+
             $html .= '<div class="row header_bottom"></div>';
 
             if (!$content_only) {

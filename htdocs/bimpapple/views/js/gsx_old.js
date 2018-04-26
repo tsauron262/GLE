@@ -1147,6 +1147,7 @@ function closeRepairImportForm(prodId) {
         return;
     $form.slideUp(250);
 }
+
 function endRepairSubmit($span, repairId, checkRepair) {
     if ($span.hasClass('deactivated'))
         return;
@@ -1165,7 +1166,7 @@ function endRepairSubmit($span, repairId, checkRepair) {
         }
         alert('Une erreur est survenue, opération impossible.');
     }
-}
+} //
 function closeRepairSubmit($span, repairId, checkRepair) {
     if ($span.hasClass('deactivated'))
         return;
@@ -1184,7 +1185,7 @@ function closeRepairSubmit($span, repairId, checkRepair) {
         }
         alert('Une erreur est survenue, opération impossible.');
     }
-}
+} //
 function markRepairAsReimbursed($span, repairId) {
     if ($span.hasClass('deactivated'))
         return;
@@ -1197,7 +1198,8 @@ function markRepairAsReimbursed($span, repairId) {
         return;
     }
     alert('Une erreur est survenue, opération impossible.');
-}
+} //
+
 function togglePartDatasBlockDisplay($div) {
     if ($div.hasClass('closed')) {
         $div.parent('div.partDatasBlock').find('div.partDatasContent').slideDown(250);
@@ -1299,6 +1301,7 @@ function checkInput($input, type) {
     assignInputCheckMsg($input, 'ok', '');
     return true;
 }
+
 function duplicateInput($span, inputName) {
     var $container = $span.parent('div.dataBlock');
     if ($container.length) {
@@ -1321,7 +1324,8 @@ function duplicateInput($span, inputName) {
         }
     }
     alert('Une erreur est survenue, opération impossible');
-}
+} //
+
 function duplicateDatasGroup($span, inputName) {
     var $container = $span.parent('legend').parent('fieldset');
     if ($container.length) {
@@ -1438,7 +1442,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
             displayRequestMsg('alert alert-danger', 'Une erreur technique est survenue. Ajax', $resultContainer);
         }
     });
-}
+} //
 function traiteCommandeRetour(html, $resultContainer) {
     if ($resultContainer.length) {
         $resultContainer.html(html);
@@ -1474,7 +1478,7 @@ function traiteCommandeRetour(html, $resultContainer) {
         }
     }
 
-}
+} //
 
 function reloadProductInfos(prod_id, serial) {
     var $container = $('#prod_' + prod_id);

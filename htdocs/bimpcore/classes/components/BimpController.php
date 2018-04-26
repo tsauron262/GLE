@@ -468,7 +468,7 @@ class BimpController
         if (!count($errors)) {
             $object = BimpObject::getInstance($object_module, $object_name);
 
-            if (!is_null($id_object)) {
+            if (!is_null($id_object) && (int) $id_object) {
                 $object->fetch($id_object);
             }
 

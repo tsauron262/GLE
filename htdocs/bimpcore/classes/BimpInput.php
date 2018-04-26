@@ -13,9 +13,11 @@ class BimpInput
             global $db;
             $form = new Form($db);
         }
+        $extra_class = isset($options['extra_class']) ? $options['extra_class'] : '';
+
         switch ($type) {
             case 'hidden':
-                $html .= '<input type="hidden" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '"/>';
+                $html .= '<input type="hidden" id="' . $field_name . '" name="' . $field_name . '" value="' . $value . '" class="' . $extra_class . '"/>';
                 break;
 
             case 'text':
@@ -42,6 +44,7 @@ class BimpInput
                         $html .= ' style="' . $options['style'] . '"';
                     }
                     $html .= $data;
+                    $html .= ' class="' . $extra_class . '"';
                     $html .= '/>';
 
                     if (isset($options['addon_right']) && $options['addon_right']) {
@@ -73,10 +76,18 @@ class BimpInput
                 if (!isset($options['note'])) {
                     $options['note'] = false;
                 }
+
+                if (isset($options['maxlength']) && $options['maxlength']) {
+                    $html .= '<p class="inputHelp" style="text-align: right">Caractères max: ' . $options['maxlength'] . '</p>';
+                }
+
                 $html .= '<textarea id="' . $input_id . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';
                 if ($options['auto_expand'] || $options['note']) {
-                    $html .= ' class="' . ($options['auto_expand'] ? 'auto_expand' : '') . ($options['note'] ? ' note' : '') . '"';
+                    $html .= ' class="' . ($options['auto_expand'] ? 'auto_expand' : '') . ($options['note'] ? ' note' : '') . ' ' . $extra_class . '"';
                     $html .= ' data-min_rows="' . $options['rows'] . '"';
+                }
+                if (isset($options['maxlength']) && $options['maxlength']) {
+                    $html .= ' maxlength="' . (int) $options['maxlength'] . '"';
                 }
                 $html .= '>' . $value . '</textarea>';
                 break;
@@ -90,7 +101,7 @@ class BimpInput
                 break;
 
             case 'switch':
-                $html .= '<select class="switch" id="' . $input_id . '" name="' . $field_name . '">';
+                $html .= '<select class="switch ' . $extra_class . '" id="' . $input_id . '" name="' . $field_name . '">';
                 $html .= '<option value="1"' . ($value ? ' selected' : '') . '>OUI</option>';
                 $html .= '<option value="0"' . (!$value ? ' selected' : '') . '>NON</option>';
                 $html .= '</select>';
@@ -109,7 +120,7 @@ class BimpInput
                 }
 
                 $input_id .= rand(0, 999999);
-                $html .= '<input type="hidden" class="toggle_value" value="' . ($value ? '1' : '0') . '" name="' . $field_name . '" id="' . $input_id . '"/>';
+                $html .= '<input type="hidden" class="toggle_value ' . $extra_class . '" value="' . ($value ? '1' : '0') . '" name="' . $field_name . '" id="' . $input_id . '"/>';
                 $html .= '<input type="checkbox" class="toggle" id="' . $input_id . '_toggle" ' . ($value ? ' checked' : '') . '/>';
                 if ($display_labels) {
                     $html .= '<span class="toggle-label-off">' . $options['toggle_off'] . '</span>';
@@ -126,7 +137,7 @@ class BimpInput
                 }
 
                 if (count($options['options'])) {
-                    $html .= '<select id="' . $input_id . '" name="' . $field_name . '">';
+                    $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '">';
                     foreach ($options['options'] as $option_value => $option) {
                         $color = null;
                         if (is_array($option)) {
@@ -168,7 +179,7 @@ class BimpInput
                     $options['active_only'] = 1;
                 }
                 $form->load_cache_types_paiements();
-                $html .= '<select id="' . $input_id . '" name="' . $field_name . '">';
+                $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '">';
                 foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
                     if (!(int) $options['active_only'] || ((int) $options['active_only'] && (int) $payment_data['active'])) {
                         switch ($options['value_type']) {

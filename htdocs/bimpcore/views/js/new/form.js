@@ -20,12 +20,6 @@ function addInputEvent(form_id, input_name, event, callback) {
 // Enregistrements ajax des objets: 
 
 function saveObjectFromForm(form_id, $button, successCallback, on_save) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
     var $resultContainer = $('#' + form_id + '_result');
     var $form = $('#' + form_id);
 
@@ -97,9 +91,6 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
             if (typeof (successCallback) === 'function') {
                 successCallback(result);
             }
-        },
-        error: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
         }
     });
 }
@@ -300,10 +291,6 @@ function submitForm(form_id) {
 }
 
 function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button, values) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
     var $form = $('#' + parent_form_id);
 
     if (!$form.length) {
@@ -432,14 +419,8 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                     });
                 });
             }
-            bimpAjax.$button.removeClass('disabled');
-        },
-        error: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
         }
     });
-
-    $button.addClass('disabled');
 }
 
 function addObjectMultipleValuesItem(module, object_name, id_object, field, item_value, $resultContainer, successCallback) {

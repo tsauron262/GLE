@@ -1,15 +1,27 @@
+#createRepairForm {
+    display: none;
+    text-align: center;
+
+    .createRepairFormContent {
+        text-align: left;
+        max-width: 600px;
+        margin: auto;
+        display: inline-block;
+    }
+}
+
 #partsListContainer {
     .partsSearchContainer {
         padding: 10px;
         background-color: #F0F0F0;
         margin-bottom: 15px;
     }
-    
+
     .searchBloc {
         display: inline-block;
         margin-right: 15px;
         margin-bottom: 15px;
-     
+
         input, select {
             margin: 0 8px;
         }
@@ -23,15 +35,22 @@
     .panel-title {
         font-weight: bold;
     }
-    
+
     .badge {
         font-size: 11px;
         margin: -3px 8px 0;
-        
+
         &.badge-danger {
             background-color: #780000;
         }
     }
+}
+
+.partsSearchResult {
+    display: none;
+    padding: 10px;
+    margin: 10px 0;
+    background-color: #F0F0F0;
 }
 
 .curKeywords {
@@ -41,25 +60,61 @@
         padding: 8px 12px;
         background-color: #fff;
         border: 1px solid #A0A0A0;
-        
+
         &:before {
             font-family: 'FontAwesome';
             margin-right: 8px;
             content: '\f0b0';
         }
-        
+
         .removeKeyWord {
             cursor: pointer;
-            
+
             i {
                 font-size: 14px;
                 margin-left: 12px;
                 color: #505050;
-                
+
                 &:hover {
                     color: #A00000;
                 }
             }
         }
     }
+}
+
+.partSearchNum {
+    display: inline-block;
+    margin: 5px 12px;
+    padding: 8px 12px;
+    background-color: #fff;
+    border: 1px solid #A0A0A0;
+
+    &:before {
+        font-family: 'FontAwesome';
+        margin-right: 8px;
+        content: '\f002';
+    }
+
+    .removeSearch {
+        cursor: pointer;
+
+        i {
+            font-size: 14px;
+            margin-left: 12px;
+            color: #505050;
+
+            &:hover {
+                color: #A00000;
+            }
+        }
+    }
+}
+
+.dataInputTemplate {
+    display: none;
+}
+
+.subInputsList {
+    margin-bottom: 15px;
 }

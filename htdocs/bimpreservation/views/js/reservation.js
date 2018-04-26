@@ -19,7 +19,6 @@ function setReservationStatus($button, id_reservation, status, doConfirm) {
         }
     }
 
-    $button.addClass('disabled');
 
     BimpAjax('setReservationStatus', {
         id_reservation: id_reservation,
@@ -28,7 +27,6 @@ function setReservationStatus($button, id_reservation, status, doConfirm) {
         $button: $button,
         id_reservation: id_reservation,
         success: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
             $('body').trigger($.Event('objectChange', {
                 module: 'bimpreservation',
                 object_name: 'BR_Reservation',
@@ -36,7 +34,6 @@ function setReservationStatus($button, id_reservation, status, doConfirm) {
             }));
         },
         error: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
             $('body').trigger($.Event('objectChange', {
                 module: 'bimpreservation',
                 object_name: 'BR_Reservation',
@@ -95,12 +92,9 @@ function findEquipmentToReceive($button, id_commande_client) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var serial = $('#findEquipmentSerial').val();
     if (!serial) {
         bimp_msg('Veuillez saisir un numéro de série', 'danger');
-        $button.removeClass('disabled');
         return;
     }
 
@@ -112,16 +106,12 @@ function findEquipmentToReceive($button, id_commande_client) {
     }, $resultContainer, {
         $button: $button,
         success: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
             $('#findEquipmentSerial').val('');
             $('body').trigger($.Event('objectChange', {
                 module: 'bimpreservation',
                 object_name: 'BR_Reservation',
                 id_object: result.id_reservation
             }));
-        },
-        error: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
         }
     });
 }
@@ -143,12 +133,11 @@ function removeFromCommandeFournisseur($button, id_reservation_cmd_fourn, force_
         }
     }
 
-    $button.addClass('disabled');
-
     BimpAjax('removeFromCommandeFournisseur', {
         'id_reservation_cmd_fourn': id_reservation_cmd_fourn,
         'force_remove': force_remove
     }, null, {
+        $button: $button,
         id_reservation_cmd_fourn: id_reservation_cmd_fourn,
         display_success_in_popup_only: true,
         display_errors_in_popup_only: true,
@@ -158,9 +147,6 @@ function removeFromCommandeFournisseur($button, id_reservation_cmd_fourn, force_
                 object_name: 'BR_ReservationCmdFourn',
                 id_object: bimpAjax.id_reservation_cmd_fourn
             }));
-        },
-        error: function (result, bimpAjax) {
-            $button.removeClass('disabled');
         }
     });
 }

@@ -1,39 +1,60 @@
-/* line 2, ../scss/gsx.scss */
+/* line 1, ../scss/gsx.scss */
+#createRepairForm {
+  display: none;
+  text-align: center;
+}
+/* line 5, ../scss/gsx.scss */
+#createRepairForm .createRepairFormContent {
+  text-align: left;
+  max-width: 600px;
+  margin: auto;
+  display: inline-block;
+}
+
+/* line 14, ../scss/gsx.scss */
 #partsListContainer .partsSearchContainer {
   padding: 10px;
   background-color: #F0F0F0;
   margin-bottom: 15px;
 }
-/* line 8, ../scss/gsx.scss */
+/* line 20, ../scss/gsx.scss */
 #partsListContainer .searchBloc {
   display: inline-block;
   margin-right: 15px;
   margin-bottom: 15px;
 }
-/* line 13, ../scss/gsx.scss */
+/* line 25, ../scss/gsx.scss */
 #partsListContainer .searchBloc input, #partsListContainer .searchBloc select {
   margin: 0 8px;
 }
-/* line 16, ../scss/gsx.scss */
+/* line 28, ../scss/gsx.scss */
 #partsListContainer .searchBloc .btn {
   margin: 0 15px;
 }
 
-/* line 23, ../scss/gsx.scss */
+/* line 35, ../scss/gsx.scss */
 #partsList .panel-title {
   font-weight: bold;
 }
-/* line 27, ../scss/gsx.scss */
+/* line 39, ../scss/gsx.scss */
 #partsList .badge {
   font-size: 11px;
   margin: -3px 8px 0;
 }
-/* line 31, ../scss/gsx.scss */
+/* line 43, ../scss/gsx.scss */
 #partsList .badge.badge-danger {
   background-color: #780000;
 }
 
-/* line 38, ../scss/gsx.scss */
+/* line 49, ../scss/gsx.scss */
+.partsSearchResult {
+  display: none;
+  padding: 10px;
+  margin: 10px 0;
+  background-color: #F0F0F0;
+}
+
+/* line 57, ../scss/gsx.scss */
 .curKeywords .curKeyword {
   display: inline-block;
   margin: 5px 12px;
@@ -41,23 +62,62 @@
   background-color: #fff;
   border: 1px solid #A0A0A0;
 }
-/* line 45, ../scss/gsx.scss */
+/* line 64, ../scss/gsx.scss */
 .curKeywords .curKeyword:before {
   font-family: 'FontAwesome';
   margin-right: 8px;
   content: '\f0b0';
 }
-/* line 51, ../scss/gsx.scss */
+/* line 70, ../scss/gsx.scss */
 .curKeywords .curKeyword .removeKeyWord {
   cursor: pointer;
 }
-/* line 54, ../scss/gsx.scss */
+/* line 73, ../scss/gsx.scss */
 .curKeywords .curKeyword .removeKeyWord i {
   font-size: 14px;
   margin-left: 12px;
   color: #505050;
 }
-/* line 59, ../scss/gsx.scss */
+/* line 78, ../scss/gsx.scss */
 .curKeywords .curKeyword .removeKeyWord i:hover {
   color: #A00000;
+}
+
+/* line 86, ../scss/gsx.scss */
+.partSearchNum {
+  display: inline-block;
+  margin: 5px 12px;
+  padding: 8px 12px;
+  background-color: #fff;
+  border: 1px solid #A0A0A0;
+}
+/* line 93, ../scss/gsx.scss */
+.partSearchNum:before {
+  font-family: 'FontAwesome';
+  margin-right: 8px;
+  content: '\f002';
+}
+/* line 99, ../scss/gsx.scss */
+.partSearchNum .removeSearch {
+  cursor: pointer;
+}
+/* line 102, ../scss/gsx.scss */
+.partSearchNum .removeSearch i {
+  font-size: 14px;
+  margin-left: 12px;
+  color: #505050;
+}
+/* line 107, ../scss/gsx.scss */
+.partSearchNum .removeSearch i:hover {
+  color: #A00000;
+}
+
+/* line 114, ../scss/gsx.scss */
+.dataInputTemplate {
+  display: none;
+}
+
+/* line 118, ../scss/gsx.scss */
+.subInputsList {
+  margin-bottom: 15px;
 }

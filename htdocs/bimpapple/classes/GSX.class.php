@@ -132,7 +132,7 @@ class GSX
         'soap' => array()
     );
 
-    public function __construct($isIphone)
+    public function __construct($isIphone = false)
     {
         global $user;
 

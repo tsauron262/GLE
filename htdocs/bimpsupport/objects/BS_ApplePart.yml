@@ -19,8 +19,13 @@ fields:
         label: Numéro
     comptia_code: 
         label: Code CompTIA
+        values: 
+            array: comptia_codes
     comptia_modifier: 
         label: Modificateur CompTIA
+        values: 
+            array: comptia_modifiers
+        default_value: A
     qty: 
         label: Quantité
         type: int
@@ -29,9 +34,22 @@ fields:
         default_value: 1
     component_code: 
         label: Code pièce
+        values: 
+            array: componentsTypes
     stock_price: 
-        label: Prix
+        label: Prix stock
         type: money
+    exchange_price: 
+        label: Prix d'échange
+        type: money
+    out_of_warranty:
+        label: Hors garantie
+        type: bool
+        default_value: 0
+    no_order: 
+        label: Commande de stock
+        type: bool
+        default_value: 0
     
 lists: 
     default: 
@@ -47,6 +65,7 @@ lists:
         sort_way: desc
         n: 25
         delete_btn: 1
+        update_btn: 1
         cols: 
             label: 
                 label: Nom
@@ -56,12 +75,26 @@ lists:
                 field: part_number
             compTIAcode: 
                 field: comptia_code
+                edit: 1
+                max_width: 180px
             compTIAmod: 
                 field: comptia_modifier
+                max_width: 180px
+                edit: 1
             qty: 
+                label: Qté
                 field: qty
-            code: 
-                field: component_code
-            price: 
+                edit: 1
+                min_width: 70px
+                max_width: 70px
+            stock_price: 
                 field: stock_price
+            exchange_price: 
+                field: exchange_price
+            out_of_warranty: 
+                field: out_of_warranty
+                edit: 1
+            order: 
+                field: no_order
+                edit: 1
                 

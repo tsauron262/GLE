@@ -273,10 +273,6 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
 }
 
 function updateObjectFromRow(list_id, id_object, $button) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
     var $list = $('#' + list_id);
 
     if (!$list.length) {
@@ -293,9 +289,7 @@ function updateObjectFromRow(list_id, id_object, $button) {
         bimp_msg('Erreur technique: liste non trouvée', 'danger');
         return;
     }
-
-    $button.addClass('disabled');
-
+    
     var data = {
         'list_name': $list.data('name'),
         'module': $list.data('module'),
@@ -316,15 +310,11 @@ function updateObjectFromRow(list_id, id_object, $button) {
 
     BimpAjax('saveObject', data, null, {
         success: function (result) {
-            $button.removeClass('disabled');
             $('body').trigger($.Event('objectChange', {
                 module: result.module,
                 object_name: result.object_name,
                 id_object: result.id_object
             }));
-        },
-        error: function (result) {
-            $button.removeClass('disabled');
         }
     });
 }
@@ -345,9 +335,6 @@ function saveAllRowsModifications(list_id, $button) {
 }
 
 function addObjectFromList(list_id, $button) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
     var $list = $('#' + list_id);
 
     if (!$list.length) {
@@ -365,8 +352,6 @@ function addObjectFromList(list_id, $button) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var data = {
         'list_name': $list.data('name'),
         'module': $list.data('module'),
@@ -383,17 +368,14 @@ function addObjectFromList(list_id, $button) {
     });
 
     BimpAjax('saveObject', data, null, {
+        $button: $button,
         success: function (result) {
             resetListAddObjectRow(list_id);
-            $button.removeClass('disabled');
             $('body').trigger($.Event('objectChange', {
                 module: result.module,
                 object_name: result.object_name,
                 id_object: result.id_object
             }));
-        },
-        error: function (result) {
-            $button.removeClass('disabled');
         }
     });
 }
@@ -430,7 +412,6 @@ function deleteObjects(list_id, objects_list, $button) {
 
     if (confirm(msg)) {
         var $resultContainer = $('#' + list_id + '_result');
-        $button.addClass('disabled');
         var data = {
             'module': $list.data('module'),
             'object_name': object_name,
@@ -438,8 +419,8 @@ function deleteObjects(list_id, objects_list, $button) {
         };
 
         BimpAjax('deleteObjects', data, null, {
+            $button: $button,
             success: function (result) {
-                $button.removeClass('disabled');
                 for (var i in result.objects_list) {
                     $('body').trigger($.Event('objectDelete', {
                         module: result.module,
@@ -447,9 +428,6 @@ function deleteObjects(list_id, objects_list, $button) {
                         id_object: result.objects_list[i]
                     }));
                 }
-            },
-            error: function (result) {
-                $button.removeClass('disabled');
             }
         });
     }

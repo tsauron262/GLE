@@ -539,6 +539,10 @@ $.fn.findParentByTag = function (tag) {
 };
 
 $.isOk = function (object) {
+    if (object === null) {
+        return false;
+    }
+    
     if (typeof (object) !== 'object') {
         return false;
     }

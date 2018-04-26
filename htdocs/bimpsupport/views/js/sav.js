@@ -1,10 +1,4 @@
 function createNewPropal($button, id_sav) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
     BimpAjax('createPropal', {
         id_sav: id_sav
     }, null, {
@@ -16,21 +10,11 @@ function createNewPropal($button, id_sav) {
                 object_name: 'BS_SAV',
                 id_object: bimpAjax.id_sav
             }));
-            bimpAjax.$button.removeClass('disabled');
-        },
-        error: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
         }
     });
 }
 
 function setNewSavStatus($button, id_sav, new_status, send_msg, extra_data) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
     if (typeof (extra_data) === 'undefined') {
         extra_data = {};
     }
@@ -59,26 +43,16 @@ function setNewSavStatus($button, id_sav, new_status, send_msg, extra_data) {
         id_sav: id_sav,
         $button: $button,
         success: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
             $('body').trigger($.Event('objectChange', {
                 module: 'bimpsupport',
                 object_name: 'BS_SAV',
                 id_object: bimpAjax.id_sav
             }));
-        },
-        error: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
         }
     });
 }
 
 function generatePDFFile($button, id_sav, file_type) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
     BimpAjax('generatePDFFile', {
         id_sav: id_sav,
         file_type: file_type
@@ -86,7 +60,6 @@ function generatePDFFile($button, id_sav, file_type) {
         id_sav: id_sav,
         $button: $button,
         success: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
             $('body').trigger($.Event('objectChange', {
                 module: 'bimpsupport',
                 object_name: 'BS_SAV',
@@ -95,20 +68,11 @@ function generatePDFFile($button, id_sav, file_type) {
             if (typeof (result.file_url) !== undefined && result.file_url) {
                 window.open(result.file_url);
             }
-        },
-        error: function (result, bimpAjax) {
-            bimpAjax.$button.removeClass('disabled');
         }
     });
 }
 
 function loadGSXView($button, id_sav) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
     var $gsxForm = $('#loadGSXForm');
     var $container = $('#gsxResultContainer');
     var serial = $gsxForm.find('#gsx_equipment_serial').val();
@@ -125,14 +89,10 @@ function loadGSXView($button, id_sav) {
             $gsxForm: $gsxForm,
             $button: $button,
             success: function (result, bimpAjax) {
-                bimpAjax.$button.removeClass('disabled');
                 bimpAjax.$gsxForm.slideUp(250);
                 $('body').trigger($.Event('controllerTabLoaded', {
                     $container: bimpAjax.$resultContainer
                 }));
-            },
-            error: function (result, bimpAjax) {
-                bimpAjax.$button.removeClass('disabled');
             }
         });
     } else {

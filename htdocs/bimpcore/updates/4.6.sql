@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_gsx_repair` (
   `repair_confirm_number` varchar(128) NOT NULL DEFAULT '',
   `serial_update_confirm_number` varchar(128) NOT NULL DEFAULT '',
   `repair_type` varchar(128) NOT NULL DEFAULT '',
-  `total_from_order` float NOT NULL DEFAULT '0',
+  `total_from_order` float DEFAULT NULL,
   `ready_for_pick_up` tinyint(1) NOT NULL DEFAULT '0',
   `reimbursed` tinyint(1) NOT NULL DEFAULT '0',
   `repair_complete` tinyint(1) NOT NULL DEFAULT '0',

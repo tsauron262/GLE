@@ -507,6 +507,7 @@ class BimpConfig
 
                 $method = 'get' . ucfirst($array) . 'Array';
                 if (method_exists($this->instance, $method)) {
+
                     $result = $this->instance->{$method}();
                     if (is_array($result)) {
                         return $result;

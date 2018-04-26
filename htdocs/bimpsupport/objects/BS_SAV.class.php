@@ -338,6 +338,7 @@ class BS_SAV extends BimpObject
 
     public function getInfosExtraBtn()
     {
+        //$this->generatePropal();
         $buttons = array();
 
         if ($this->isLoaded()) {
@@ -573,26 +574,6 @@ class BS_SAV extends BimpObject
                     $prop->add_contact($id_contact, 41);
                 }
 
-                $ref = $this->getData('ref');
-                $equipment = $this->getChildObject('equipment');
-                $serial = 'N/C';
-                if (!is_null($equipment) && $equipment->isLoaded()) {
-                    $serial = $equipment->getData('serial');
-                }
-
-                $client = $this->getChildObject('client');
-                if (!is_null($client) && !$client->isLoaded()) {
-                    $client = null;
-                }
-
-                $prop->addline("Prise en charge :  : " . $ref .
-                        "\n" . "S/N : " . $serial .
-                        "\n" . "Garantie :
-Pour du matériel couvert par Apple, la garantie initiale s'applique.
-Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
-Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.
-Une garantie de 30 jours est appliquée pour les réparations logicielles.
-", 0, 1, 0, 0, 0, 0, (!is_null($client) ? $client->dol_object->remise_percent : 0), 'HT', 0, 0, 3);
 
                 $this->set('id_propal', $prop->id);
 
@@ -1345,6 +1326,63 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         }
 
         return $url;
+    }
+    
+    
+    function generatePropal(){
+        if($this->getData('id_propal') < 1){
+            $this->createPropal();
+        }
+        
+        
+        
+        BimpTools::loadDolClass('comm/propal', 'propal');
+        $prop = new Propal($this->db->db);
+        $prop->fetch($this->getData('id_propal'));
+       
+        if($prop->statut > 0){
+            //revision si necessaire
+            require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpRevision.php");
+
+            $revision = new BimpRevisionPropal($prop);
+            $new_id_propal = $revision->reviserPropal(array(array('Diagnostic'), null), true, self::$propal_model_pdf, $errors);
+            $this->set('id_propal', $new_id_propal);
+        }
+        
+        $prop->fetch_lines();
+        foreach($prop->lines as $line){
+            $line->delete();
+        }
+        
+        
+        if(0){
+            $prop->addline("Acompte", -$discount->amount_ht, 1, 20, 0, 0, 0, 0, 'HT', -$acompte, 0, 1, 0, 0, 0, 0, -$discount->amount_ht, null, null, null, null, null, null, null, null, $discount->id);
+        }
+        
+        $ref = $this->getData('ref');
+        $equipment = $this->getChildObject('equipment');
+        $serial = 'N/C';
+        if (!is_null($equipment) && $equipment->isLoaded()) {
+            $serial = $equipment->getData('serial');
+        }
+
+        $client = $this->getChildObject('client');
+        if (!is_null($client) && !$client->isLoaded()) {
+            $client = null;
+        }
+
+        $prop->addline("Prise en charge :  : " . $ref .
+                        "\n" . "S/N : " . $serial .
+                        "\n" . "Garantie :
+Pour du matériel couvert par Apple, la garantie initiale s'applique.
+Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
+Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.
+Une garantie de 30 jours est appliquée pour les réparations logicielles.
+", 0, 1, 0, 0, 0, 0, (!is_null($client) ? $client->dol_object->remise_percent : 0), 'HT', 0, 0, 3);
+
+        $fa = $this->getChildObject("facture_acompte");
+        print_r($fa->dol_object);
+        die("ok".$prop->id);
     }
 }
 

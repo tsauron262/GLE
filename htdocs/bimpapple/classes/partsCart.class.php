@@ -30,45 +30,8 @@ class partsCart {
         return $html;
     }
 
-    public function addThisToPropal($propal) {
-        global $db, $langs;
 
-//        $this->fraisP = -1;
-
-        if($propal->socid > 0){
-            $soc = new Societe($db);
-            $soc->fetch($propal->socid);
-            $remise = $soc->remise_percent;
-        }
-        else {
-            $remise = 0;
-        }
-        
-        foreach ($this->partsCart as $part) {
-            $prix = $this->convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
-            $propal->addline($part['partNumber'] . " - " . $part['partDescription'], round($prix, 2), $part['qty'], "20", 0, 0, 0, $remise, 'HT', 0, 0, 0, 0, 0, 0, 0, round($part['stockPrice'],2));
-        }
-
-//        if ($this->fraisP > 0) {
-//            $qte = $this->fraisP;
-//            $prod = new Product($db);
-//            $prod->fetch(3436);
-//            require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
-//            $prodF = new ProductFournisseur($db);
-//            $prodF->find_min_price_product_fournisseur($prod->id, $qte);
-//            $propal->addline($prod->description, round($prod->price,2), $qte, ($prod->tva_tx > 0) ? $prod->tva_tx : 0, 0, 0, $prod->id, $remise, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, round($prodF->fourn_price, 2));
-//        }
-
-
-
-
-        $propal->fetch($propal->id);
-        require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
-        $propal->generateDocument("azurSAV", $langs);
-//        propale_pdf_create($db, $propal, null, $langs);
-    }
-
-    private function convertPrix($prix, $ref, $desc) {
+    public static function convertPrix($prix, $ref, $desc) {
         $coefPrix = 1;
         $constPrix = 0;
         $newPrix = 0;

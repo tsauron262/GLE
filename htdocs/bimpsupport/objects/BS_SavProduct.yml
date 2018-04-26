@@ -36,6 +36,10 @@ fields:
         unsigned: 1
         min: 1
         default_value: 1
+    out_of_warranty:
+        label: Hors garantie
+        type: bool
+        default_value: 0
         
 lists: 
     default: 
@@ -73,4 +77,7 @@ lists:
                 value: 
                     callback: displayTotal
             
+            out_of_warranty: 
+                field: out_of_warranty
+                edit: 1
             

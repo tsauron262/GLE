@@ -844,10 +844,6 @@ class gsxDatas
             $wrapper = $GSXRequest->wrapper;
 
 
-
-
-
-
             if ($this->isIphone) {
                 if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13) {//Si num imei echange des champ
                     $result['alternateDeviceId'] = $result['serialNumber'];

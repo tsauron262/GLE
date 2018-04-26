@@ -61,8 +61,6 @@ function saveObjectAssociations(id_object, object_name, association, $button) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var $resultContainer = $('#' + object_name + '_' + association + '_associatonsAjaxResult');
     if (!$resultContainer.length) {
         $resultContainer = null;
@@ -83,12 +81,7 @@ function saveObjectAssociations(id_object, object_name, association, $button) {
     };
 
     BimpAjax('saveObjectAssociations', data, $resultContainer, {
-        success: function (result) {
-            $button.removeClass('disabled');
-        },
-        error: function () {
-            $button.removeClass('disabled');
-        }
+        $button: $button
     });
 }
 
@@ -105,7 +98,6 @@ function deleteObject($button, module, object_name, id_object, $resultContainer,
     }
 
     if (confirm(msg)) {
-        $button.addClass('disabled');
         var data = {
             'module': module,
             'object_name': object_name,
@@ -113,8 +105,8 @@ function deleteObject($button, module, object_name, id_object, $resultContainer,
         };
 
         BimpAjax('deleteObjects', data, $resultContainer, {
+            $button: $button,
             success: function (result) {
-                $button.removeClass('disabled');
                 if (typeof (successCallBack) === 'function') {
                     successCallBack(result);
                 }
@@ -125,9 +117,6 @@ function deleteObject($button, module, object_name, id_object, $resultContainer,
                         id_object: result.objects_list[i]
                     }));
                 }
-            },
-            error: function () {
-                $button.removeClass('disabled');
             }
         });
     }
@@ -181,7 +170,13 @@ function setObjectNewStatus(module, object_name, id_object, new_status, $resultC
     });
 }
 
-function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback) {
+function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg) {
+    if (typeof (confirm_msg) === 'string') {
+        if (!confirm(confirm_msg.replace('&quotes;', '"'))) {
+            return;
+        }
+    }
+
     if (typeof (extra_data) === 'undefined') {
         extra_data = {};
     }
@@ -242,11 +237,13 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
         };
 
         BimpAjax('setObjectAction', data, $resultContainer, {
+            $button: $button,
             display_success_in_popup_only: true,
             module: object_data.module,
             object_name: object_data.object_name,
             id_object: object_data.id_object,
             display_processing: true,
+            processing_padding: 20,
             success: function (result, bimpAjax) {
                 if (typeof (successCallback) === 'function') {
                     successCallback(result);

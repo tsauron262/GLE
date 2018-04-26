@@ -268,7 +268,7 @@
                 </datas>
             </data>
             
-            
+            <data name="tierPart" required="0"></data>
 
             <data name="loanerOrderLines" required="0">
                 <datas>
@@ -396,7 +396,7 @@
         </datas>
     </request>-->
 
-        <request name="CreateIndirectOnsiteRepair" type="repair" request="CreateIndirectOnsiteRepairRequest" wrapper="repairData">
+<!--        <request name="CreateIndirectOnsiteRepair" type="repair" request="CreateIndirectOnsiteRepairRequest" wrapper="repairData">
         <label>Création d'une réparation indirecte sur place (indirect onsite repair)</label>
         <datas>
             <data name="technicianName" required="1"></data>
@@ -455,7 +455,7 @@
             <data name="fileData" required="0" donotprocess="1"></data>
             <data name="includeFiles" required="0" donotprocess="1" default="N"></data>
         </datas>
-    </request>
+    </request>-->
 
     <request name="UpdateSerialNumber" type="serialUpdate" request="UpdateSerialNumberRequest" wrapper="repairData">
         <label>Mise à jour des numéros de série</label>
@@ -473,8 +473,6 @@
             <data name="closeRepair" required="0" donotprocess="1" default="N"></data>
         </datas>
     </request>
-
-
 
     <request name="KGBSerialNumberUpdate" type="kgbSerialUpdate" request="UpdateKGBSerialNumberRequest" wrapper="">
         <label>Mise à jour du numéro de série de l'unité</label>

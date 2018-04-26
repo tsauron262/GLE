@@ -20,6 +20,9 @@ class GSX_Request
     public $wrapper = '';
     protected $requestOk = false;
     protected $comptiaCodes = null;
+    public $serial = '';
+    public $id_sav = 0;
+    public $id_repair = 0;
 
     public function __construct($gsx, $requestName, $comptiaCodes = null, $symptomesCodes = null)
     {
@@ -172,7 +175,7 @@ class GSX_Request
             $multiple = false;
 
         if (!$name) {
-            return '<p class="error">Erreur de syntaxe dans le fichier xml : 1 attribut "name" non-défini.</p>';
+            return '<p class="alert alert-danger">Erreur de syntaxe dans le fichier xml : 1 attribut "name" non-défini.</p>';
         }
 
         $inputName = $name . (isset($index) ? '_' . $index : '');
@@ -180,11 +183,12 @@ class GSX_Request
         $defs = $this->getDataDefinitionsArray($name);
 
         if (!isset($defs)) {
-            return '<p class="alert">Aucune définitions pour la donnée "' . $name . '"</p>';
+            return BimpRender::renderAlerts('Aucune définitions pour la donnée "' . $name . '"', 'warning');
         }
 
-        if (isset($defs['hidden']) && ($defs['hidden'] == '1'))
+        if (isset($defs['hidden']) && ($defs['hidden'] == '1')) {
             return '';
+        }
 
         $html = '';
 
@@ -198,17 +202,18 @@ class GSX_Request
             $default = $dataNode->getAttribute('default');
 
         if ($defs['type'] == 'datasGroup') {
-            $html .= '<fieldset id="' . $inputName . '">';
+            $html .= '<div id="' . $inputName . '" class="formInputGroup">';
             if (isset($defs['label'])) {
-                $html .= '<legend>' . $defs['label'];
-                if (isset($defs['infos'])) {
-                    $html .= '<span class="displayInfos" onmouseover="displayLabelInfos($(this))" onmouseout="hideLabelInfos($(this))">';
-                    $html .= '<div class="labelInfos">' . $defs['infos'] . '</div></span>';
-                }
+                $html .= '<div class="formGroupHeading">';
+                $html .= '<div class="formGroupTitle">';
+                $html .= '<h3>' . $defs['label'] . '</h3>';
+                $html .= '</div>';
                 if ($multiple) {
-                    $html .= '<span class="button blueHover duplicateInput" style="margin-left: 15px" onclick="duplicateDatasGroup($(this), \'' . $inputName . '\')">Ajouter</span>' . "\n";
+                    $html .= '<div class="formGroupButtons">';
+                    $html .= '<span class="btn btn-default" onclick="duplicateDatasGroup($(this), \'' . $inputName . '\')"><i class="fa fa-plus-circle iconLeft"></i>Ajouter</span>';
+                    $html .= '</div>';
                 }
-                $html .= '</legend>' . "\n";
+                $html .= '</div>';
             }
 
             $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
@@ -218,7 +223,6 @@ class GSX_Request
                     $values[$valuesName][0] = null;
                 } elseif (!isset($values[$valuesName][0]))
                     $values[$valuesName][0] = $values[$valuesName];
-
 
                 if ($multiple) {
                     $html .= '<div class="dataInputTemplate">' . "\n";
@@ -244,37 +248,38 @@ class GSX_Request
                     }
                 }
             } else {
-                $html .= '<p class="alert">Aucunes définitions pour ces données</p>' . "\n";
+                $html .= '<p class="alert alert-warning">Aucunes définitions pour ces données</p>' . "\n";
             }
-            $html .= '</fieldset>' . "\n";
+            $html .= '</div>';
         } else {
-            $html .= '<div class="dataBlock">' . "\n";
+            $html .= '<div class="row formRow">';
             if (isset($defs['label'])) {
-                $html .= '<label class="dataTitle" for="' . $inputName . '">' . $defs['label'];
-                $html .= ($required ? '<sup><span class="required"></span></sup>' : '');
-                if (isset($defs['infos'])) {
-                    $html .= '<span class="displayInfos" onmouseover="displayLabelInfos($(this))" onmouseout="hideLabelInfos($(this))">';
-                    $html .= '<div class="labelInfos">' . $defs['infos'] . '</div></span>';
-                }
-                $html .= '</label>';
-                if ($multiple) {
-                    $valuesArray = null;
-                    if (isset($values[$valuesName])) {
-                        if (is_array($values[$valuesName])) {
-                            $valuesArray = $values[$valuesName];
-                        } else {
-                            $valuesArray = array(
-                                0 => $values[$valuesName]
-                            );
-                        }
-                        $values[$valuesName] = null;
+                $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-3">';
+                $html .= $defs['label'];
+                $html .= '</div>';
+            }
+
+            $inputValue = (isset($values[$valuesName]) ? $values[$valuesName] : $default);
+
+            $html .= '<div class="formRowInput col-xs-12 col-sm-6 col-md-9">';
+            if ($multiple) {
+                $valuesArray = null;
+                if (isset($values[$valuesName])) {
+                    if (is_array($values[$valuesName])) {
+                        $valuesArray = $values[$valuesName];
+                    } else {
+                        $valuesArray = array(
+                            0 => $values[$valuesName]
+                        );
                     }
-                    $multipleIndex = 0;
-                    $html .= '<span class="button blueHover duplicateInput" onclick="duplicateInput($(this), \'' . $inputName . '\')">Ajouter</span>' . "\n";
-                    $html .= '<div class="dataInputTemplate">' . "\n";
+                    $values[$valuesName] = null;
                 }
+                $multipleIndex = 0;
+                $html .= '<span class="btn btn-default" onclick="duplicateInput($(this), \'' . $inputName . '\')"><i class="fa fa-plus-circle iconLeft"></i>Ajouter</span>';
+                $html .= '<div class="inputTemplate">' . "\n";
             }
             while (true) {
+                $html .= '<div class="inputContainer">';
                 switch ($defs['type']) {
                     case 'text':
                     case 'number':
@@ -282,85 +287,45 @@ class GSX_Request
                     case 'email':
                     case 'date':
                     case 'time':
-                        $html .= '<br/>' . "\n";
-                        $html .= '<input type="' . $defs['type'] . '" ';
+                        $html .= BimpInput::renderInput('text', $inputName, $inputValue, array());
+                        break;
+
                     case 'textarea':
-                        if ($defs['type'] == 'textarea') {
-                            if (isset($defs['max']))
-                                $html .= '<span style="font-size: 11px; color: #783131">(max ' . $defs['max'] . ' caractères)</span>';
-                            $html .= '<br/>' . "\n";
-                            $html .= '<textarea cols="80" rows="10" ';
-                        }
-                        $html .= ' class="' . $valuesName . '" id="' . $inputName . '" name="' . $inputName . '"' . ($required ? ' required' : '');
-
-                        if ($defs['type'] != 'textarea') {
-                            if (isset($values[$valuesName]))
-                                $html .= ' value="' . $values[$valuesName] . '"';
-                            else if (isset($default))
-                                $html .= ' value="' . $default . '"';
-                        }
-
-                        $html .= isset($defs['max']) ? ' maxlength="' . $defs['max'] . '"' : '';
-                        $html .= isset($defs['jsCheck']) ? ' onchange="checkInput($(this), \'' . $defs['jsCheck'] . '\')"' : '';
-
-                        if ($defs['type'] == 'textarea') {
-                            $html .= '>';
-                            if (isset($values[$valuesName]))
-                                $html .= $values[$valuesName];
-                            else if (isset($default))
-                                $html .= $default;
-                            $html .= '</textarea>' . "\n";
-                        } else
-                            $html .= '/>' . "\n";
+                        $html .= BimpInput::renderInput('textarea', $inputName, $inputValue, array(
+                                    'rows'        => '3',
+                                    'auto_expand' => true,
+                                    'maxlength'   => isset($defs['max']) ? $defs['max'] : ''
+                        ));
                         break;
 
                     case 'select':
-                        if (isset($defs['values'])) {
-                            $html .= '<select class="' . $valuesName . '" name="' . $inputName . '" id="' . $inputName . '"' . ($required ? ' required' : '' );
-                            if ($name == 'comptiaGroup')
-                                $html .= ' onchange="onComptiaGroupSelect($(this));"';
-                            $html .= '>';
-//                        $html .= '<option value="">&nbsp;&nbsp;---&nbsp;&nbsp;</option>';
-                            foreach ($defs['values'] as $v => $txt) {
-                                $html .= '<option value="' . $v . '"';
-                                if (isset($values[$valuesName])) {
-                                    if ($values[$valuesName] == $v)
-                                        $html .= ' selected';
-                                } else if (isset($default)) {
-                                    if ($default == $v)
-                                        $html .= ' selected';
-                                }
-                                $html .= '>' . $txt . '</option>' . "\n";
-                            }
-                            $html .= '</select>';
-                            break;
-                        }
-                        $html .= '<p class="alert">Aucune valeur défini pour la liste de choix "' . $name . '"</p>' . "\n";
+                        $html .= BimpInput::renderInput('select', $inputName, $inputValue, array(
+                                    'options' => (isset($defs['values']) ? $defs['values'] : array())
+                        ));
                         break;
 
                     case 'YesNo':
-                        $defVal = 'Y';
-                        if (isset($values[$valuesName]))
-                            $defVal = $values[$valuesName];
-                        else if (isset($default))
-                            $defVal = $default;
+                        if (is_null($inputValue)) {
+                            $inputValue = 1;
+                        }
+                        if ($inputValue === 'Y') {
+                            $inputValue = 1;
+                        } else {
+                            $inputValue = 0;
+                        }
 
-                        $html .= '<div class="yesNoBlock" onmouseover="onYesNoBlockMouseOver($(this))" onmouseout="onYesNoBlockMouseOut($(this))">' . "\n";
-                        $html .= '<input type="radio" id="' . $inputName . '_yes" name="' . $inputName . '" value="Y" ' . (($defVal == 'Y') ? 'checked' : '' ) . '/>' . "\n";
-                        $html .= '<label for="' . $inputName . '_yes">Oui</label>' . "\n";
-                        $html .= '<input type="radio" id="' . $inputName . '_no" name="' . $inputName . '" value="N" ' . (($defVal == 'N') ? 'checked' : '' ) . '/>' . "\n";
-                        $html .= '<label for="' . $inputName . '_no">Non</label>' . "\n";
-                        $html .= '</div>' . "\n";
+                        $html .= BimpInput::renderInput('toggle', $inputName, $inputValue, array());
                         break;
 
                     case 'fileSelect':
-                        $html .= '<input type="file" class="' . $valuesName . '" id="' . $inputName . '" name="' . $inputName . '"/>';
+                        $html .= BimpInput::renderInput('file_upload', $inputName);
                         break;
 
                     case 'partsList':
                         $useCart = false;
-                        if (isset($defs['useCart']) && $defs['useCart'] == '1')
+                        if (isset($defs['useCart']) && $defs['useCart'] == '1') {
                             $useCart = true;
+                        }
 
                         $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
                         if (count($subDatasNode) == 1) {
@@ -375,219 +340,202 @@ class GSX_Request
                                     }
                                 }
                                 if (!isset($orderLines) && $useCart) {
-                                    global $db;
-                                    $partsCart = new partsCart($db, $serial, isset($_GET['chronoId']) ? $_GET['chronoId'] : null);
-                                    if ($partsCart->loadCart()) {
-                                        $orderLines = array();
-                                        foreach ($partsCart->partsCart as $part) {
-                                            $orderLines[] = array(
-                                                'partNumber'      => $part['partNumber'],
-                                                'comptiaCode'     => $part['comptiaCode'],
-                                                'comptiaModifier' => $part['comptiaModifier'],
-                                                'partDescription' => $part['partDescription'],
-                                                'componentCode'   => $part['componentCode']
-                                            );
-                                        }
+                                    $orderLines = array();
+                                    $applePart = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
+                                    $list = $applePart->getList(array(
+                                        'id_sav'   => (int) $this->id_sav,
+                                        'no_order' => 0
+                                    ));
+                                    foreach ($list as $part) {
+                                        $orderLines[] = array(
+                                            'partNumber'      => $part['part_number'],
+                                            'comptiaCode'     => $part['comptia_code'],
+                                            'comptiaModifier' => $part['comptia_modifier'],
+                                            'partDescription' => $part['label'],
+                                            'componentCode'   => $part['component_code']
+                                        );
                                     }
                                 }
 
-                                if ($useCart) {
-                                    $html .= '<span class="button importParts blueHover"';
-                                    $html .= 'onclick="GSX.importPartsFromCartToRepair(\'' . $this->requestName . '\')">';
-                                    $html .= 'Importer la liste des composants depuis le panier</span><br/>' . "\n";
-                                    $html .= '<div class="partsImportResults"></div>' . "\n";
-                                }
-                                $html .= '<div class="repairsPartsInputsTemplate">' . "\n";
-                                foreach ($partsDataNodes as $partDataNode) {
-                                    $html .= $this->getDataInput($partDataNode, $serial);
-                                }
-                                $html .= '</div>';
-                                $html .= '<div class="repairPartsContainer"';
                                 $partCount = 0;
                                 if (isset($orderLines) && is_array($orderLines)) {
-                                    $html .= ' style="display: block;">' . "\n";
-
                                     $i = 1;
                                     foreach ($orderLines as $orderLine) {
                                         $partCount++;
-                                        $html .= '<div class="partDatasBlock">';
-                                        $html .= '<div class="partDatasBlockTitle open" onclick="togglePartDatasBlockDisplay($(this))">';
-                                        if (isset($orderLine['partDescription']))
+
+                                        $html .= '<div class="formInputGroup">';
+                                        $html .= '<div class="formGroupHeading">';
+                                        $html .= '<div class="formGroupTitle">';
+                                        $html .= '<h3>';
+                                        if (isset($orderLine['partDescription'])) {
                                             $html .= $orderLine['partDescription'];
-                                        else
+                                        } else {
                                             $html .= 'Composant ' . $i;
+                                        }
+                                        $html .= '</h3>';
                                         $html .= '</div>';
-                                        $html .= '<div class="partDatasContent partDatasContent_' . $i . '">';
+                                        $html .= '</div>';
+
                                         foreach ($partsDataNodes as $partDataNode) {
                                             $html .= $this->getDataInput($partDataNode, $serial, $orderLine, $i);
                                         }
-                                        $html .= '</div></div>';
+                                        $html .= '</div>';
                                         $i++;
                                     }
                                 } else {
-                                    $html .= '>';
+                                    $html .= BimpRender::renderAlerts('Aucun composant ajouté au panier de commande', 'warning');
                                 }
-
-                                if (!$partCount) {
-                                    $html .= '<script type="text/javascript">importCart = true;</script>';
-                                } else {
-                                    $html .= '<script type="text/javascript">importCart = false;</script>';
-                                }
-
-                                $html .= '</div>' . "\n";
                                 $html .= '<input type="hidden" id="partsCount" name="partsCount" value="' . $partCount . '"/>' . "\n";
                                 break;
                             }
                         }
-                        $html .= '<p class="alert">Aucune définition trouvée pour les données concernant les composants.</p>';
+                        $html .= BimpRender::renderAlerts('Aucune définition trouvée pour les données concernant les composants', 'danger');
+                        break;
+
+                    case 'tierPart':
+                        $tab2 = array();
+                        $contFile = file_get_contents(DOL_DOCUMENT_ROOT . "/bimpapple/TierParts.csv");
+                        $tab1 = explode("\n", $contFile);
+                        foreach ($tab1 as $ligne) {
+                            $champ = explode(";", $ligne);
+                            $tab2[$champ[0]][] = $champ;
+                        }
+
+                        global $db;
+                        $tab3 = $tab4 = array(array("", "Part", "Tier Part"));
+
+                        if ((int) $this->id_sav) {
+                            $sql = 'SELECT `label` as nom FROM ' . MAIN_DB_PREFIX . 'product p ';
+                            $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment ON p.rowid = e.id_product ';
+                            $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav s on s.id_equipment = e.id_equipment';
+                            $sql .= ' WHERE s.id = ' . (int) $this->id_sav . ' AND e.id_product != 0';
+
+                            $res = $db->query($sql);
+                            if ($db->num_rows($res) > 0) {
+                                $result = $db->fetch_object($res);
+                                foreach ($tab2[$result->nom] as $ln) {
+                                    if (stripos($ln[2], $result->nom) === 0)
+                                        $tab3[] = $ln;
+                                    if (stripos($ln[0], $result->nom) === 0)
+                                        $tab4[] = $ln;
+                                }
+//                    $tab3 = array_merge($tab3, $tab2[$result->nom]);
+                            }
+                        }
+                        if (count($tab3) < 2) {
+                            $tab3 = $tab4;
+                        }
+                        if (count($tab3) < 2) {
+                            foreach ($tab2 as $tabT)
+                                foreach ($tabT as $tabT2)
+                                    $tab3[] = $tabT2;
+                        }
+                        $i = 100;
+
+                        $parts = array();
+                        foreach ($tab3 as $ligne) {
+                            $parts[$ligne[1]] = $ligne[2];
+                        }
+
+                        $html .= BimpInput::renderInput('select', 'partNumber_' . $i, 'Part', array(
+                                    'options'     => $parts,
+                                    'extra_class' => 'tierPart'
+                        ));
                         break;
 
                     case 'comptiaCode':
-                        $html .= '<div class="comptiaCodeContainer">' . "\n";
                         $allComptia = false;
                         if ($dataNode->hasAttribute('allComptia')) {
                             if ($dataNode->getAttribute('allComptia') === '1')
                                 $allComptia = true;
                         }
+
                         if ($allComptia && isset($this->comptiaCodes) &&
                                 isset($this->comptiaCodes['grps'])) {
-                            $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
-                            $html .= '<option value="0">Code compTIA</option>' . "\n";
-                            foreach (gsxDatas::$componentsTypes as $compCode => $label) {
+                            foreach (BS_ApplePart::$componentsTypes as $compCode => $label) {
                                 foreach ($this->comptiaCodes['grps'][$compCode] as $code => $desc) {
-                                    $html .= '<option value="' . $code . '" class="comptiaGroup_' . $compCode . '"';
-                                    if (isset($values[$valuesName])) {
-                                        if ($values[$valuesName] == $code)
-                                            $html .= ' selected';
-                                    }
-                                    if ($compCode != '0') {
-                                        $html .= ' style="display: none"';
-                                    }
-                                    $html .= '>' . $code . ' - ' . $desc . '</option>';
+                                    $codes[$code] = $desc;
                                 }
                             }
-                            $html .= '</select>' . "\n";
+                            $html .= BimpInput::renderInput('select', $inputName, $inputValue, array(
+                                        'options' => $codes
+                            ));
                         } else {
-                            if (($values['componentCode'] === ' ') || ($values['componentCode'] == '')) {
+                            if (($values['componentCode'] === ' ') || !$values['componentCode'] || $values['componentCode'] === '000') {
                                 $html .= '<input type="hidden" id="' . $inputName . '" name="' . $inputName . '" value="000"/>' . "\n";
                                 $html .= '<span>Non-applicable</span>';
                             } else if (isset($values['componentCode']) &&
                                     isset($this->comptiaCodes) &&
                                     isset($this->comptiaCodes['grps'][$values['componentCode']])) {
-                                $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
-                                $html .= '<option value="0">Code compTIA</option>' . "\n";
-                                foreach ($this->comptiaCodes['grps'][$values['componentCode']] as $code => $desc) {
-                                    $html .= '<option value="' . $code . '"';
-                                    if (isset($values[$valuesName])) {
-                                        if ($values[$valuesName] == $code)
-                                            $html .= ' selected';
-                                    }
-                                    $html .= '>' . $code . ' - ' . $desc . '</option>';
-                                }
-                                $html .= '</select>' . "\n";
+                                $html .= BimpInput::renderInput('select', $inputName, $inputValue, array(
+                                            'options' => $this->comptiaCodes['grps'][$values['componentCode']]
+                                ));
                             } else if (isset($values[$valuesName])) {
-                                $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
-                                $html .= $values[$valuesName] . '"' . ($required ? ' required' : '') . '/>' . "\n";
+                                $html .= BimpInput::renderInput('text', $inputName, $inputValue);
                             }
                         }
-                        $html .= '</div>';
                         break;
 
                     case 'comptiaModifier':
-                        $html .= '<div class="comptiaModifierContainer">' . "\n";
-
                         if (isset($this->comptiaCodes['mods'])) {
-                            $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
-                            $html .= '<option value="0">Modificateur</option>' . "\n";
-                            foreach ($this->comptiaCodes['mods'] as $mod => $desc) {
-                                $html .= '<option value="' . $mod . '"';
-                                if (isset($values[$valuesName])) {
-                                    if ($values[$valuesName] == $mod)
-                                        $html .= ' selected';
-                                }
-                                $html .= '>' . $mod . ' - ' . $desc . '</option>';
-                            }
-                            $html .= '</select>' . "\n";
+                            $html .= BimpInput::renderInput('select', $inputName, $inputValue, array(
+                                        'options' => $this->comptiaCodes['mods']
+                            ));
                         } else if (isset($values[$valuesName])) {
-                            $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
-                            $html .= $values[$valuesName] . '"' . ($required ? ' required' : '') . '/>' . "\n";
+                            $html .= BimpInput::renderInput('text', $inputName, $inputValue);
                         }
-                        $html .= '</div>';
                         break;
-                    case 'reportedSymptomCode':
-                        $html .= '<div class="reportedSymptomCodeContainer">' . "\n";
-                        if (isset($this->symptomesCodes['sym'])) {
-                            $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
-//                            $html .= '<option value="0">Symtomes</option>' . "\n";
 
-                            foreach ($this->symptomesCodes['sym'] as $mod => $desc) {
-                                $html .= '<option value="' . $mod . '"';
-                                if (isset($values[$valuesName])) {
-                                    if ($values[$valuesName] == $mod)
-                                        $html .= ' selected';
-                                }
-                                $html .= '>' . $mod . ' - ' . $desc . '</option>';
-                            }
-                            $html .= '</select>' . "\n";
-                        }
-                        $html .= '</div>';
+                    case 'reportedSymptomCode':
+                        $html .= BimpInput::renderInput('select', $inputName, $inputValue, array(
+                                    'options' => $this->symptomesCodes['sym']
+                        ));
                         break;
                     case 'reportedIssueCode':
-                        $html .= '<div class="reportedSymptomCodeContainer">' . "\n";
-                        if (isset($this->symptomesCodes['issue'])) {
-                            $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
-                            $html .= '<option value="0">Symtomes</option>' . "\n";
-                            foreach ($this->symptomesCodes['issue'] as $mod => $desc) {
-                                $html .= '<option value="' . $mod . '"';
-                                if (isset($values[$valuesName])) {
-                                    if ($values[$valuesName] == $mod)
-                                        $html .= ' selected';
-                                }
-                                $html .= '>' . $mod . ' - ' . $desc . '</option>';
-                            }
-                            $html .= '</select>' . "\n";
-                        }
-                        $html .= '</div>';
+                        $html .= BimpInput::renderInput('select', $inputName, $inputValue, array(
+                                    'options' => $this->symptomesCodes['issue']
+                        ));
                         break;
 
                     default:
-                        $html .= '<p class="alert">Type inéxistant pour la donnée "' . $name . '"</p>';
+                        $html .= '<p class="alert alert-warning">Type inéxistant pour la donnée "' . $name . '"</p>';
                         break;
                 }
+                if (isset($defs['infos']) && $defs['infos']) {
+                    $html .= '<p class="inputHelp">' . $defs['infos'] . '</p>';
+                }
+                $html .= '</div>';
+
                 if (!$multiple)
                     break;
                 else {
                     if ($multipleIndex == 0) {
-                        $html .= '</div>' . "\n";
-                        $html .= '<div class="inputsList">' . "\n";
+                        $html .= '</div>';
+                        $html .= '<div class="inputsList">';
                     }
                     $inputName = $name . (isset($index) ? '_' . $index : '');
                     if (!isset($valuesArray[$multipleIndex])) {
                         $html .= '</div>' . "\n";
                         $html .= '<input type="hidden" id="' . $inputName . '_nextIdx" name="' . $inputName . '_nextIdx" value="' . $multipleIndex . '"/>' . "\n";
-                        break;
                     }
                     $values[$valuesName] = $valuesArray[$multipleIndex];
                     $multipleIndex++;
                     $inputName .= '_' . $multipleIndex;
                 }
             }
-            if (isset($defs['jsCheck']))
-                $html .= '<span class="dataCheck"></span>';
-
-            if ($inputName == "trackingNumber") {//Ajout lien création UPS
-                $html .= '<p><a class="button" target="_blank" href="https://row.ups.com/Default.aspx?Company=AppleDist&LoginId=aduser&Password=aduser">Création retour UPS</a></p>';
+            if ($inputName === "trackingNumber") {//Ajout lien création UPS
+                $html .= '<p><a class="btn btn-default" target="_blank" href="https://row.ups.com/Default.aspx?Company=AppleDist&LoginId=aduser&Password=aduser">Création retour UPS</a></p>';
             }
-
+            $html .= '</div>';
             $html .= '</div>';
         }
         return $html;
     }
 
-    public function generateRequestFormHtml($values, $prodId, $serial, $repairRowId = null)
+    public function generateRequestFormHtml($values, $serial, $id_sav = null, $id_repair = null)
     {
         if (count($this->errors)) {
-            $html = '<p class="error">Impossible d\'afficher le formulaire pour cette requête.<br/><br/>';
+            $html = '<p class="alert alert-danger">Impossible d\'afficher le formulaire pour cette requête.<br/><br/>';
             $html .= 'Erreurs:<br/><br/>';
             $i = 1;
             foreach ($this->errors as $error) {
@@ -598,71 +546,39 @@ class GSX_Request
         }
 
         if (!isset($this->defsDoc)) {
-            return '<p class="error">Erreur: les définitions  concernant les données à traiter n\'ont pas été chargée correctement.</p>';
+            return BimpRender::renderAlerts('Erreur: les définitions  concernant les données à traiter n\'ont pas été chargée correctement');
         }
 
-        $html .= '<form class="gsxRepairForm" id="repairForm_' . $this->requestName . '" method="POST"';
-        $html .= ' action="' . DOL_URL_ROOT . '/bimpapple/ajax/requestProcess.php?serial=' . $serial;
-        $html .= '&action=sendGSXRequest&prodId=' . $prodId . '&request=' . $this->requestName;
-        if (isset($repairRowId))
-            $html .= '&repairRowId=' . $repairRowId;
-        $html .= '" enctype="multipart/form-data">' . "\n";
+        $this->serial = $serial;
 
-        $html .= '<div class="requestTitle">' . $this->requestLabel . '</div>' . "\n";
-        $html .= '<p class="requiredInfos"><sup><span class="required"></span></sup>Champs requis</p>';
-        $html .= '<div class="requestFormInputs">' . "\n";
-        $html .= '<input type="hidden" id="requestName" name="requestName" value="' . $this->requestName . '"/>';
-        if (isset($_REQUEST['chronoId']))
-            $html .= '<input type="hidden" id="chronoId" name="chronoId" value="' . $_REQUEST['chronoId'] . '"/>';
+        $html .= '<div class="container-fluid">';
+        $html .= '<form id="repairForm_' . $this->requestName . '" class="request_form" enctype="multipart/form-data">';
+
+        $html .= '<input name="requestType" type="hidden" value="' . $this->requestName . '"/>';
+        $html .= '<input name="serial" type="hidden" value="' . $serial . '"/>';
+
+        if (!is_null($id_repair)) {
+            $this->id_repair = $id_repair;
+            $html .= '<input name="id_repair" type="hidden" value="' . $id_repair . '"/>';
+        }
+        if (!is_null($id_sav)) {
+            $this->id_sav = $id_sav;
+            $html .= '<input name="id_sav" type="hidden" value="' . $id_sav . '"/>';
+        }
+
         foreach ($this->datas['request'] as $dataNode) {
             $html .= $this->getDataInput($dataNode, $serial, $values);
         }
-        $html .= '</div>' . "\n";
+
         $html .= '<div class="formSus" id="formSus_' . $this->requestName . '"></div>';
 
-
-        if ($this->requestName == "CreateIPhoneRepairOrReplace") {
-            $contFile = file_get_contents(DOL_DOCUMENT_ROOT . "/bimpapple/TierParts.csv");
-            $tab1 = explode("\n", $contFile);
-            foreach ($tab1 as $ligne) {
-                $champ = explode(";", $ligne);
-                $tab2[$champ[0]][] = $champ;
-            }
-
-            global $db;
-            $tab3 = $tab4 = array(array("", "Part", "Tier Part"));
-            $sql = $db->query("SELECT `description` as nom FROM `" . MAIN_DB_PREFIX . "synopsischrono` c, " . MAIN_DB_PREFIX . "synopsischrono_chrono_101 cd WHERE c.id = cd.id AND cd.N__Serie = '" . $serial . "'");
-            if ($db->num_rows($sql) > 0) {
-                $result = $db->fetch_object($sql);
-                foreach ($tab2[$result->nom] as $ln) {
-                    if (stripos($ln[2], $result->nom) === 0)
-                        $tab3[] = $ln;
-                    if (stripos($ln[0], $result->nom) === 0)
-                        $tab4[] = $ln;
-                }
-//                    $tab3 = array_merge($tab3, $tab2[$result->nom]);
-            }
-            if (count($tab3) < 2) {
-                $tab3 = $tab4;
-            }
-            if (count($tab3) < 2) {
-                foreach ($tab2 as $tabT)
-                    foreach ($tabT as $tabT2)
-                        $tab3[] = $tabT2;
-            }
-            $i = 100;
-
-            $html .= "<div class='partDatasBlockHide'>";
-            $html .= "<select class='tierPart' name='partNumber_" . $i . "'>";
-            foreach ($tab3 as $ligne)
-                $html .= "<option value='" . $ligne[1] . "'>" . $ligne[2] . "</option>";
-            $html .= "</select></div>";
+        if ($this->requestName === "CreateIPhoneRepairOrReplace") {
+            
         }
 
-        $html .= '<div style="text-align: right; margin: 15px 30px"><span class="button submit greenHover"';
-        $html .= 'onclick="submitGsxRequestForm(' . $prodId . ', \'' . $this->requestName . '\'' . (isset($repairRowId) ? ', \'' . $repairRowId . '\'' : '') . ')">';
-        $html .= 'Envoyer</span></div>';
-        $html .= '</form>' . "\n";
+        $html .= '<div class="ajaxResultContainer" style="display: none"></div>';
+        $html .= '</form>';
+        $html .= '</div>';
         return $html;
     }
 
@@ -685,6 +601,15 @@ class GSX_Request
 
     public function checkInputData($defs, $value)
     {
+        if ($defs['type'] === 'YesNo') {
+            if (is_int($value)) {
+                if ((int) $value) {
+                    $value = 'Y';
+                } else {
+                    $value = 'N';
+                }
+            }
+        }
         return $value;
     }
 
@@ -805,11 +730,11 @@ class GSX_Request
         return $newData;
     }
 
-    public function processRequestForm($prodId, $serial)
+    public function processRequestForm()
     {
         $this->requestOk = false;
         if (count($this->errors)) {
-            $html = '<p class="error">Impossible d\'éxécuter la  requête.<br/><br/>';
+            $html = '<p class="alert alert-danger">Impossible d\'éxécuter la  requête.<br/><br/>';
             $html .= 'Erreurs:<br/><br/>';
             $i = 1;
             foreach ($this->errors as $error) {
@@ -819,13 +744,13 @@ class GSX_Request
             return $html;
         }
         if (!isset($this->defsDoc)) {
-            return '<p class="error">Erreur: les définitions concernant les données à traiter n\'ont pas été chargée correctement.</p>';
+            return '<p class="alert alert-danger">Erreur: les définitions concernant les données à traiter n\'ont pas été chargées correctement.</p>';
         }
 
         $requestDatas = $this->processRequestDatas($this->datas['request']);
 
         if (count($this->errors)) {
-            $html = '<p class="error">Des erreurs ont été détectées:<br/><br/>';
+            $html = '<p class="alert alert-danger">Des erreurs ont été détectées:<br/><br/>';
             $i = 1;
             foreach ($this->errors as $error) {
                 $html .= $i . '. ' . $error . '<br/>';

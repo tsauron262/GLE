@@ -472,8 +472,43 @@ forms:
                       pieceOk: Piéce reçue
                       
     diagnostic: 
-        
-              
+        rows: 
+            - field: status
+              hidden: 1
+              input: 
+                  type: hidden
+            - custom: 1
+              label: extra data
+              input_name: extra_data[devis_garantie]
+              hidden: 1
+              input: 
+                  type: hidden
+              value: 
+                  request: devis_garantie
+            - field: diagnostic
+            - custom: 1
+              data_type: bool
+              input: 
+                  type: toggle
+              label: Notifier le client
+              value: 1
+              input_name: extra_data[send_msg]
+            
+    resolution: 
+        rows: 
+            - field: status
+              hidden: 1
+              input: 
+                  type: hidden
+            - field: resolution
+            - custom: 1
+              data_type: bool
+              input: 
+                  type: toggle
+              label: Notifier le client
+              value: 1
+              input_name: extra_data[send_msg]
+                      
 fields_tables: 
     infos: 
         title: Informations
@@ -619,6 +654,8 @@ lists:
         cols:
             ref:
                 field: ref
+            centre: 
+                field: code_centre
             status: 
                 field: status
             prioritaire:
@@ -631,9 +668,6 @@ lists:
                 display: nom_url
             client: 
                 field: id_client
-                display: nom_url
-            contact:
-                field: id_contact
                 display: nom_url
     
 cards:

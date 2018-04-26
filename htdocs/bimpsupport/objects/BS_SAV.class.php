@@ -225,8 +225,15 @@ class BS_SAV extends BimpObject
                     break;
 
                 case self::BS_SAV_REP_EN_COURS:
-                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_A_RESTITUER . ', 1)';
                     if (!is_null($propal) && $propal_status > 1) {
+                        if ((string) $this->getData('resolution')) {
+                            $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_A_RESTITUER . ', 1)';
+                        } else {
+                            $title = 'Réparation terminée';
+                            $values = htmlentities('\'{"fields": {"status": ' . self::BS_SAV_A_RESTITUER . '}}\'');
+                            $data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: ' . $this->id . ', form_name: \'resolution\', param_values: ' . $values . '}';
+                            $onclick = 'loadModalForm($(this), ' . $data . ', \'' . $title . '\');';
+                        }
                         $buttons[] = array(
                             'label'   => 'Réparation terminée',
                             'icon'    => 'check',
@@ -290,7 +297,15 @@ class BS_SAV extends BimpObject
             }
 
             if (!is_null($propal) && $propal_status === 0) {
-                $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_CLIENT . ', 1)';
+                if ((string) $this->getData('diagnostic')) {
+                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_CLIENT . ', 1)';
+                } else {
+                    $title = 'Envoyer le devis';
+                    $values = htmlentities('\'{"fields": {"status": ' . self::BS_SAV_ATT_CLIENT . '}}\'');
+                    $data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: ' . $this->id . ', form_name: \'diagnostic\', param_values: ' . $values . '}';
+                    $onclick = 'loadModalForm($(this), ' . $data . ', \'' . $title . '\');';
+                }
+
                 $buttons[] = array(
                     'label'   => 'Envoyer devis',
                     'icon'    => 'arrow-circle-right',
@@ -299,9 +314,17 @@ class BS_SAV extends BimpObject
             }
 
             if (!is_null($propal) && in_array($propal_status, array(0, 1)) && $status !== self::BS_SAV_ATT_CLIENT) {
-                $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_CLIENT . ', 1, {devis_garantie: 1})';
+                if ((string) $this->getData('diagnostic')) {
+                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_CLIENT . ', 1, {devis_garantie: 1})';
+                } else {
+                    $title = 'Envoyer le devis garanti';
+                    $values = htmlentities('\'{"fields": {"status": ' . self::BS_SAV_ATT_CLIENT . '}}\'');
+                    $data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: ' . $this->id . ', form_name: \'diagnostic\', param_values: ' . $values . ', devis_garantie: 1}';
+                    $onclick = 'loadModalForm($(this), ' . $data . ', \'' . $title . '\');';
+                }
+
                 $buttons[] = array(
-                    'label'   => 'Devis garantie',
+                    'label'   => 'Devis garanti',
                     'icon'    => 'file-text',
                     'onclick' => $onclick
                 );
@@ -970,8 +993,9 @@ class BS_SAV extends BimpObject
 
     public function create()
     {
-        if ($this->data['ref'] == '')
-            $this->data['ref'] = $this->getNextNumRef();
+        if (!(string) $this->getData('ref')) {
+            $this->set('ref', $this->getNextNumRef());
+        }
 
         $centre = $this->getCentreData();
         if (!is_null($centre)) {
@@ -1030,6 +1054,15 @@ class BS_SAV extends BimpObject
             }
             return $errors;
         }
+
+        if (BimpTools::isSubmit('status')) {
+            $status = BimpTools::getValue('status');
+            unset($_POST['status']);
+            unset($_GET['status']);
+            unset($_REQUEST['status']);
+            return $this->setNewStatus((int) $status, BimpTools::getValue('extra_data', array()));
+        }
+
         if (!count($errors)) {
             $errors = parent::update();
         }

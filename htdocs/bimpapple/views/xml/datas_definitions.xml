@@ -279,7 +279,7 @@
         <label>Version de l'OS</label>
     </def>
     <def name="purchaseOrderNumber" type="text" max="35" jsCheck="text">
-        <label>Purchase order number</label>
+        <label>Numéro de commande</label>
     </def>
     <def name="ram" type="text" max="25" jsCheck="text">
         <label>RAM</label>
@@ -430,5 +430,8 @@
     </def>
     <def name="boxNumber" type="text">
         <label>Numéro boite</label>
+    </def>
+    <def name="tierPart" type="tierPart">
+        <label>Composant tiers</label>
     </def>
 </root>

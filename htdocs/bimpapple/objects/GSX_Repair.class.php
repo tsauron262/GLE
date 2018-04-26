@@ -62,7 +62,7 @@ class GSX_Repair extends BimpObject
             return array('Impossible de charger les données de la réparation (aucun identifiant disponible)');
         }
 
-        if (!$this->find($filters, true)) {
+        if (!$this->find($filters, false)) {
             return array('Réparation non trouvée');
         }
 
@@ -579,7 +579,8 @@ class GSX_Repair extends BimpObject
         }
 
         if ($sendRequest) {
-            if (!isset($this->confirmNumbers['repair']) || $this->confirmNumbers['repair'] == '') {
+            $confirm_number = $this->getData('repair_confirm_number');
+            if (is_null($confirm_number) || $confirm_number == '') {
                 $this->addError('Erreur: aucun numéro de confirmation enregistré pour cette réparation.');
                 return false;
             }
@@ -600,7 +601,7 @@ class GSX_Repair extends BimpObject
                         if (count($this->partsPending)) {
                             $html = 'La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour';
                             $html .= '<p style="text-align: center; padding: 30px">';
-                            $html .= '<span class="button redHover closeRepair" onclick="closeRepairSubmit($(this), \'';
+                            $html .= '<span class="btn btn-default closeRepair" onclick="closeRepairSubmit($(this), \'';
                             $html .= $this->rowId . '\', false)">Forcer la fermeture</span></p>';
                             return array($html);
                         } else {
@@ -646,7 +647,96 @@ class GSX_Repair extends BimpObject
         return $this->updateTotalOrder();
     }
 
+    // Affichages:
+
+    public function displayGsxStatus()
+    {
+        if (isset($this->repairLookUp['repairStatus'])) {
+            return $this->repairLookUp['repairStatus'];
+        }
+
+        return '<span class="danger">Inconnu</span>';
+    }
+
+    public function displayGarantie()
+    {
+        $total = $this->getData('total_from_order');
+        if (!is_null($total)) {
+            $html = '';
+            $msg = '';
+
+            if ((float) $total > 0) {
+                $html .= '<span class="danger">NON</span>';
+                $msg = 'Pas de garantie ';
+                if ((float) $total != 1) {
+                    $html .= ' (Montant : ' . BimpTools::displayMoneyValue($total, 'EUR') . ')';
+                    $msg .= $total . ' €';
+                }
+            } else {
+                $html .= '<span class="success">OUI</span>';
+                $msg .= 'Sous garantie';
+            }
+
+            if ($this->totalFromOrderChanged) {
+                $html .= '<script type="text/javascript">';
+                $html .= 'alert("' . $msg . '")';
+                $html .= '</script>';
+            }
+        }
+        return '<span class="danger">Inconnu</span>';
+    }
+
     // Rendus HTML: 
+
+    public function renderActions()
+    {
+        $buttons = array();
+
+        $id_sav = (int) $this->getData('id_sav');
+
+        $object_data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: ' . $this->id . '}';
+        $callback = 'function() {reloadRepairsViews(' . $id_sav . ');}';
+
+        if (!(int) $this->getData('ready_for_pick_up')) {
+            $confirm = 'Attention, la réparation va être marquée &quote;Ready For Pick up&quote; (prête pour enlèvement) auprès du service GSX d\\\'Apple. Veuillez confirmer';
+            $buttons[] = array(
+                'label'   => 'Terminer la réparation',
+                'classes' => array('btn', 'btn-danger'),
+                'attr'    => array(
+                    'onclick' => 'setObjectAction($(this), ' . $object_data . ', \'endRepair\', {}, null, $(\'#repair_' . $this->id . '_result\'), ' . $callback . ', \''. $confirm.'\')'
+                )
+            );
+        } elseif (!(int) $this->getData('repair_complete')) {
+            $confirm = 'Attention, la réparation va être indiquée comme complète auprès du service GSX d\\\'Apple. Veuillez confirmer';
+            $buttons[] = array(
+                'label'   => 'Restituer',
+                'classes' => array('btn', 'btn-danger'),
+                'attr'    => array(
+                    'onclick' => 'setObjectAction($(this), ' . $object_data . ', \'closeRepair\', {}, null, $(\'#repair_' . $this->id . '_result\'), ' . $callback . ', \''.  $confirm.'\')'
+                )
+            );
+        } elseif (!(int) $this->getData('reimbursed')) {
+            $confirm = 'Veuillez confirmer';
+            $buttons[] = array(
+                'label'   => 'Marquer comme remboursée',
+                'classes' => array('btn', 'btn-default'),
+                'attr'    => array(
+                    'onclick' => 'setObjectAction($(this), ' . $object_data . ', \'markRepairAsReimbursed\', {}, null, $(\'#repair_' . $this->id . '_result\'), ' . $callback . ', \''.  $confirm.'\')'
+                )
+            );
+        }
+
+        if (count($buttons)) {
+            $html .= '<div class="buttonsContainer align-right">';
+            foreach ($buttons as $button) {
+                $html .= BimpRender::renderButton($button);
+            }
+            $html .= '</div>';
+            $html .= '<div id="repair_' . $this->id . '_result" class="ajaxResultContainer" style="display: none"></div>';
+        }
+
+        return $html;
+    }
 
     public function renderPartsPendingReturn()
     {
@@ -692,6 +782,33 @@ class GSX_Repair extends BimpObject
         return $this->import($data['id_sav'], $data['import_number'], $data['import_number_type']);
     }
 
+    public function actionEndRepair($data, &$success)
+    {
+        $success = 'Le statut de la réparation a été mis à jour avec succès';
+
+        return $this->updateStatus();
+    }
+
+    public function actionMarkRepairAsReimbursed($data, &$success)
+    {
+        $success = 'La réparation a bien été marquée comme remboursée';
+
+        if ((int) $this->getData('reimbursed')) {
+            return array('Cette réparation est déjà marquée comme remboursée');
+        }
+
+        $this->set('reimbursed', 1);
+        return $this->update();
+    }
+
+    public function actionCloseRepair($data, &$success)
+    {
+        $checkRepair = isset($data['checkRepair']) ? $data['checkRepair'] : 0;
+        $success = 'Réparation fermée avec succès';
+
+        return $this->close(true, $checkRepair);
+    }
+
     // Overrides: 
 
     public function create()
@@ -726,6 +843,7 @@ class GSX_Repair extends BimpObject
     {
         if (parent::fetch($id)) {
             $this->setSerial($this->getData('serial'));
+            $this->lookup();
             return true;
         }
         return false;

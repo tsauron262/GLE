@@ -25,6 +25,16 @@ function getEvents() {
                 });
                 $(".chosen-select").chosen({no_results_text: 'Pas de résultat'});
                 initEvents();
+                $('select[name=event]').change(function () {
+                    changeEventSession($('select[name=event] > option:selected').val());
+                });
+                if (id_event_session > 0) {
+                    if (!$('select[name=event] > option[value=' + id_event_session + ']').prop('disabled')) {
+                        $('select[name=event] > option[value=' + id_event_session + ']').prop('selected', true);
+                        $(".chosen-select").trigger("chosen:updated");
+                        $('select[name=event]').trigger('change');
+                    }
+                }
             } else {
                 setMessage('alertSubmit', "Créer un évènement avant de réserver une place.", 'error');
                 $('button[name=create]').hide();
@@ -50,7 +60,7 @@ function getTariffsForEvent(id_event) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.tariffs.length !== 0) {
                 $('select[name=tariff]').empty();
-                $('select[name=tariff]').append('<option value="">Sélectionnez</option>');
+                $('select[name=tariff]').append('<option value="">Sélectionnez un tarif</option>');
                 out.tariffs.forEach(function (tariff) {
                     $('select[name=tariff]').append(
                             '<option value=' + tariff.id + '>'
@@ -61,7 +71,7 @@ function getTariffsForEvent(id_event) {
                 tariffs = out.tariffs;
                 initEventChangeTariff(tariffs);
             } else {
-                setMessage('alertSubmit', "Veuillez créer des tariffs avant de réserver des tickets.", 'error');
+                setMessage('alertSubmit', "Veuillez créer des tarifs avant de réserver des tickets.", 'error');
                 $('button[name=create]').hide();
             }
         }
@@ -123,28 +133,52 @@ function initEvents() {
 
     /* Create ticket */
     $('button[name=create]').click(function () {
-        createTicket($('select[name=event] > option:selected').val(),
-                $('select[name=tariff] > option:selected').val(),
-                $('input[name=price]').val(),
-                $('input[name=first_name]').val(),
-                $('input[name=last_name]').val(),
-                $('input[name=extra_1]').val(),
-                $('input[name=extra_2]').val(),
-                $('input[name=extra_3]').val(),
-                $('input[name=extra_4]').val(),
-                $('input[name=extra_5]').val(),
-                $('input[name=extra_6]').val());
+
+        var stop = false;
+        tariffs.forEach(function (tariff) {
+            if (parseInt(tariff.id) === parseInt($('select[name=tariff] > option:selected').val())
+                    && tariff.require_names === 1
+                    && ($('input[name=first_name]').val() === '' || $('input[name=last_name]').val() === ''))
+                stop = true;
+        });
+
+        if (stop === false)
+            createTicket($('select[name=event] > option:selected').val(),
+                    $('select[name=tariff] > option:selected').val(),
+                    $('input[name=price]').val(),
+                    $('input[name=first_name]').val(),
+                    $('input[name=last_name]').val(),
+                    $('input[name=extra_1]').val(),
+                    $('input[name=extra_2]').val(),
+                    $('input[name=extra_3]').val(),
+                    $('input[name=extra_4]').val(),
+                    $('input[name=extra_5]').val(),
+                    $('input[name=extra_6]').val());
+        else
+            setMessage('alertSubmit', 'Les champs prénom et nom sont obligatoires pour ce tariff.', 'error');
+
     });
 }
 
 
 function initEventChangeTariff(tariffs) {
     $('select[name=tariff]').change(function () {
+        $('label#label_first_name').empty();
+        $('label#label_last_name').empty();
         var id_tariff = parseInt($('select[name=tariff] > option:selected').val());
         tariffs.forEach(function (tariff) {
-            if (tariff.id === parseInt(id_tariff))
+            if (tariff.id === parseInt(id_tariff)) {
                 addExtras(tariff);
+                if (tariff.require_names === 0) {
+                    $('label#label_first_name').text('Prénom');
+                    $('label#label_last_name').text('Nom');
+                } else {
+                    $('label#label_first_name').text('Prénom (facultatif)');
+                    $('label#label_last_name').text('Nom (facultatif)');
+                }
+            }
         });
+
     });
 }
 

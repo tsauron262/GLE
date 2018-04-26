@@ -36,16 +36,16 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->reserve_ticket == 0) {
     print '<select class="chosen-select" name="event"><option value="">Sélectionnez un évènement</option></select><br/><br/>';
 
     print '<label for="tariff">Tarif </label><br/>';
-    print '<select class="chosen-select" name="tariff"><option value="">Sélectionnez un tariff</option></select><br/><br/>';
+    print '<select class="chosen-select" name="tariff"><option value="">Sélectionnez un tarif</option></select><br/><br/>';
 
     print '<label for="price">Prix (facultatif)</label>';
     print '<input class="form-control bfh-number" name="price" step=".01" type="number" min="0" style="width: 120px"/><br/>';
 
 
-    print '<label for="first_name">Prénom (facultatif)</label>';
+    print '<label id="label_first_name" for="first_name">Prénom (facultatif)</label>';
     print '<input class="form-control" placeholder="Prénom" name="first_name" maxlength=256 style="width: 300px"><br/>';
 
-    print '<label for="last_name">Nom (facultatif)</label>';
+    print '<label id="label_last_name" for="last_name">Nom (facultatif)</label>';
     print '<input class="form-control" placeholder="Nom" name="last_name" maxlength=256 style="width: 300px"><br/>';
 
     

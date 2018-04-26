@@ -27,6 +27,18 @@ function getEvents() {
                 });
                 $(".chosen-select").chosen({no_results_text: 'Pas de résultat'});
                 initEvents();
+                $('select[name=event]').change(function () {
+                    changeEventSession($('select[name=event] > option:selected').val());
+                });
+                if (id_event_session > 0) {
+                    if (!$('select[name=event] > option[value=' + id_event_session + ']').prop('disabled')) {
+                        $('select[name=event] > option[value=' + id_event_session + ']').prop('selected', true);
+                        $(".chosen-select").trigger("chosen:updated");
+                        setTimeout(function () {
+                            $('select[name=event]').trigger('change');
+                        }, 500);
+                    }
+                }
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 3716.', 'error');
             }
@@ -84,8 +96,9 @@ function displayStats(tab) {
     var tariff;
 
     var dataForGraphTariff = getTariffArray(tab.tariffs);
+    var dataForGraphTariffPrice = getTariffPriceArray(tab.tariffs, tab.tickets);
     var dataForGraphTicket = getTicketArray(tab.tickets);
-    
+
     $('#container_event').empty();
     var html = '<p>';
     html += 'Label : <strong>' + tab.event.label + '</strong><br/>';
@@ -96,12 +109,14 @@ function displayStats(tab) {
     html += '</p>';
     html += '<label>Tarifs </label>';
     html += '<div id="char_tariff"></div>';
+    html += '<div id="char_tariff_price"></div>';
     html += '<label>Tickets </label><br/>';
     html += 'Nombre de ticket vendu : <strong>' + (parseInt(dataForGraphTicket[1][1]) + parseInt(dataForGraphTicket[2][1])) + '</strong></br>';
     html += '<div id="char_ticket"></div>';
     $('#container_event').append(html);
 
     google.charts.setOnLoadCallback(drawChart(dataForGraphTariff, 'char_tariff', 'Répartition des tarifs dans les ventes'));
+    google.charts.setOnLoadCallback(drawChart(dataForGraphTariffPrice, 'char_tariff_price', 'Part des tarifs dans les ventes totale'));
     google.charts.setOnLoadCallback(drawChart(dataForGraphTicket, 'char_ticket', 'Validation des tickets'));
 }
 
@@ -126,6 +141,30 @@ function getTariffArray(tariffs) {
         couple = [];
         couple.push(tariff.label);
         couple.push(tariff.sold);
+        out.push(couple);
+    }
+    return out;
+}
+
+function getTariffPriceArray(tariffs, tickets) {
+    var out = [];
+    var couple;
+    var ticket;
+    var tariff;
+    out.push(['Label', 'Part des ventes']);
+
+    for (var id in tickets) {
+        ticket = tickets[id];
+        if (tariffs[ticket.id_tariff].total === undefined)
+            tariffs[ticket.id_tariff].total = 0;
+        tariffs[ticket.id_tariff].total += ticket.price;
+
+    }
+    for (var id in tariffs) {
+        tariff = tariffs[id];
+        couple = [];
+        couple.push(tariff.label);
+        couple.push(tariff.total);
         out.push(couple);
     }
     return out;

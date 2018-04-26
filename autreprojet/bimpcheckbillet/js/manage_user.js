@@ -149,7 +149,6 @@ function changeRightUser(new_status, id_user, id_checkbox) {
                     users[id_user][id_checkbox] = '1';
                 if (new_status === false)
                     users[id_user][id_checkbox] = '0';
-                console.log(users[id_user]);
 
                 $('input[type=checkbox]#' + id_checkbox + '+label').addClass('pulse');
                 setTimeout(function () {

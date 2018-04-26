@@ -31,7 +31,7 @@ switch ($_POST['action']) {
     case 'create_event': {
             $user = json_decode($_SESSION['user']);
             echo json_encode(array(
-                'code_return' => $event->create($_POST['label'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id, $_FILES['file']),
+                'code_return' => $event->create($_POST['label'], $_POST['description'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id, $_FILES['file']),
                 'errors' => $event->errors));
             break;
         }
@@ -41,7 +41,7 @@ switch ($_POST['action']) {
      */
     case 'create_tariff': {
             echo json_encode(array(
-                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['id_event'], $_FILES['file'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6']),
+                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['id_event'], $_FILES['file'], $_POST['require_names'], '', $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6']),
                 'errors' => $tariff->errors));
             break;
         }
@@ -178,19 +178,70 @@ switch ($_POST['action']) {
                 break;
             }
         }
-        
-        
+
+
     /**
      * modify_event.php
      */
     case 'modify_event': {
             $user = json_decode($_SESSION['user']);
             echo json_encode(array(
-                'code_return' => $event->update($_POST['id_event'], $_POST['label'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id),
+                'code_return' => $event->update($_POST['id_event'], $_POST['label'], $_POST['description'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id),
                 'errors' => $event->errors));
             break;
-    }
-        
+        }
+
+    case 'draft_event': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
+            if ($user->validate_event != 1) {
+                echo json_encode(array('errors' => "Vous n'avez pas le droit de définir comme bbrouillon un évènement."));
+                break;
+            } else {
+                echo json_encode(array(
+                    'code_return' => $event->updateStatus($_POST['id_event'], $event::STATUS_DRAFT),
+                    'errors' => $event->errors));
+                break;
+            }
+        }
+
+    case 'validate_event': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
+            if ($user->validate_event != 1) {
+                echo json_encode(array('errors' => "Vous n'avez pas le droit de valider un évènement."));
+                break;
+            } else {
+                echo json_encode(array(
+                    'code_return' => $event->updateStatus($_POST['id_event'], $event::STATUS_VALIDATE),
+                    'errors' => $event->errors));
+                break;
+            }
+        }
+
+    case 'close_event': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
+            if ($user->validate_event != 1) {
+                echo json_encode(array('errors' => "Vous n'avez pas le droit de fermer un évènement."));
+                break;
+            } else {
+                echo json_encode(array(
+                    'code_return' => $event->updateStatus($_POST['id_event'], $event::STATUS_CLOSED),
+                    'errors' => $event->errors));
+                break;
+            }
+        }
+
+    /**
+     * modify_tariff.php
+     */
+    case 'modify_tariff': {
+            echo json_encode(array(
+                'code_return' => $tariff->update($_POST['id_tariff'], $_POST['label'], $_POST['price'], $_POST['require_names'], /* $_FILES['file'], */ $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6']),
+                'errors' => $tariff->errors));
+            break;
+        }
 
     /**
      * stats_event.php
@@ -218,10 +269,19 @@ switch ($_POST['action']) {
                 'errors' => $tariff->errors));
             break;
         }
+    case 'change_event_session': {
+            $_SESSION['id_event'] = intVal($_POST['id_event']);
+            if ($_SESSION['id_event'] > 0)
+                echo json_encode(array('code_return' => 1));
+            else
+                echo json_encode(array('code_return' => -1));
+            break;
+        }
+
 
 //    case 'get_image': {
 //            $file = $_POST['folder'] . $_POST['name'] . '.png';
-            // A few settings
+    // A few settings
 // Read image path, convert to base64 encoding
 //            $imageData = base64_encode(file_get_contents($file));
 //

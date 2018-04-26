@@ -6,6 +6,7 @@ class Event {
     private $db;
     public $id;
     public $label;
+    public $description;
     public $date_creation;
     public $date_start;
     public $date_end;
@@ -27,7 +28,7 @@ class Event {
             return false;
         }
 
-        $sql = 'SELECT id, label, date_creation, date_start, date_end, status';
+        $sql = 'SELECT id, label, description, date_creation, date_start, date_end, status';
         $sql .= ' FROM event';
         $sql .= ' WHERE id=' . $id;
 
@@ -36,7 +37,8 @@ class Event {
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
                 $this->id = intVal($id);
-                $this->label = $obj->label;
+                $this->label = stripslashes($obj->label);
+                $this->description = stripslashes($obj->description);
                 $this->date_creation = $obj->date_creation;
                 $this->date_start = $obj->date_start;
                 $this->date_end = $obj->date_end;
@@ -50,7 +52,7 @@ class Event {
         return -1;
     }
 
-    public function create($label, $date_start, $time_start, $date_end, $time_end, $id_user, $file) {
+    public function create($label, $description, $date_start, $time_start, $date_end, $time_end, $id_user, $file) {
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
@@ -81,11 +83,13 @@ class Event {
 
         $sql = 'INSERT INTO `event` (';
         $sql.= '`label`';
+        $sql.= ', `description`';
         $sql.= ', `date_creation`';
         $sql.= ', `date_start`';
         $sql.= ', `date_end`';
         $sql.= ') ';
-        $sql.= 'VALUES ("' . $label . '"';
+        $sql.= 'VALUES ("' . addslashes($label) . '"';
+        $sql.= ', "' . addslashes($description) . '"';
         $sql.= ', now()';
         $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ', "' . $date_end_obj->format('Y-m-d H:i:s') . '"';
@@ -117,7 +121,7 @@ class Event {
         return -1;
     }
 
-    function update($id_event, $label, $date_start, $time_start, $date_end, $time_end, $id_user) {
+    function update($id_event, $label, $description, $date_start, $time_start, $date_end, $time_end, $id_user) {
         if ($id_event == '')
             $this->errors[] = "Le champ identifiant est obligatoire";
         if ($label == '')
@@ -149,11 +153,11 @@ class Event {
 
         $sql = 'UPDATE `event` SET';
         $sql.= ' `label`="' . $label . '"';
+        $sql.= ', `description`="' . $description . '"';
         $sql.= ', `date_start`="' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ', `date_end`="' . $date_end_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ' WHERE id=' . $id_event;
 
-        echo $sql;
         try {
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->db->beginTransaction();
@@ -178,13 +182,40 @@ class Event {
         return -1;
     }
 
+    public function updateStatus($id_event, $status) {
+
+        if ($status != $this::STATUS_DRAFT and $status != $this::STATUS_VALIDATE and $status != $this::STATUS_CLOSED)
+            $this->errors[] = "Status évènement invalde.";
+        if ($id_event == '')
+            $this->errors[] = "Le champ identifiant est obligatoire";
+        if (sizeof($this->errors) != 0)
+            return -3;
+
+        $sql = 'UPDATE `event` SET';
+        $sql.= ' `status`=' . $status;
+        $sql.= ' WHERE id=' . $id_event;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+            return 1;
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de modifier le statut de l'évènement. " . $e;
+            $this->db->rollBack();
+            return -2;
+        }
+        return -1;
+    }
+
     public function getEvents($id_user = null, $with_tariff = false, $is_super_admin = false) {
 
         $events = array();
         $tariff = new Tariff($this->db);
 
-        $sql = 'SELECT e.id as id, e.label as label, e.date_creation as date_creation,'
-                . ' e.date_start as date_start, e.date_end as date_end';
+        $sql = 'SELECT e.id as id, e.label as label, e.description as description, e.date_creation as date_creation,'
+                . ' e.date_start as date_start, e.date_end as date_end, e.status as status';
         $sql .= ' FROM event as e';
         if ($id_user != null and ! $is_super_admin) {
             $sql .= ' LEFT JOIN event_admin as e_a ON e_a.fk_event=e.id';
@@ -197,19 +228,23 @@ class Event {
                 if ($with_tariff)
                     $events[] = array(
                         'id' => $obj->id,
-                        'label' => $obj->label,
+                        'label' => stripslashes($obj->label),
+                        'description' => stripslashes($obj->description),
                         'date_creation' => $obj->date_creation,
                         'date_start' => $obj->date_start,
                         'date_end' => $obj->date_end,
+                        'status' => $obj->status,
                         'tariffs' => $tariff->getTariffsForEvent($obj->id),
                     );
                 else
                     $events[] = array(
                         'id' => $obj->id,
-                        'label' => $obj->label,
+                        'label' => stripslashes($obj->label),
+                        'description' => stripslashes($obj->description),
                         'date_creation' => $obj->date_creation,
                         'date_start' => $obj->date_start,
-                        'date_end' => $obj->date_end
+                        'date_end' => $obj->date_end,
+                        'status' => $obj->status
                     );
             }
             if ($with_tariff)
@@ -321,7 +356,8 @@ class Event {
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
                 $ticket = array();
-                $ticket['id'] = $obj->date_creation_ticket;
+                $ticket['id'] = $obj->id_ticket;
+                $ticket['id_tariff'] = $obj->id_tariff;
                 $ticket['date_creation'] = $obj->date_creation_ticket;
                 $ticket['date_scan'] = $obj->date_scan;
                 $ticket['price'] = ($obj->price_ticket != NULL) ? floatVal($obj->price_ticket) : floatVal($obj->price_tariff);

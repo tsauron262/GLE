@@ -4,8 +4,9 @@ include_once 'header.php';
 include_once 'footer.php';
 
 $arrayofjs = array('../js/home.js');
+$arrayofcss = array('../css/home.css');
 
-printHeader('Accueil', $arrayofjs);
+printHeader('Accueil', $arrayofjs, $arrayofcss);
 
 
 print '

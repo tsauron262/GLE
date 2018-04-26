@@ -11,6 +11,7 @@ class Tariff {
     private $fk_event;
     public $date_start;
     public $date_end;
+    public $require_names;
 
     public function __construct($db) {
         $this->db = $db;
@@ -24,7 +25,7 @@ class Tariff {
             return false;
         }
 
-        $sql = 'SELECT label, date_creation, date_start, date_end, price, type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6, name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6, id_prod_extern, fk_event';
+        $sql = 'SELECT label, date_creation, require_names, date_start, date_end, price, type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6, name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6, id_prod_extern, fk_event';
         $sql .= ' FROM tariff';
         $sql .= ' WHERE id=' . $id;
 
@@ -37,6 +38,7 @@ class Tariff {
                 $this->date_creation = $obj->date_creation;
                 $this->price = floatVal($obj->price);
                 $this->fk_event = $obj->fk_event;
+                $this->require_names = intVal($obj->require_names);
                 $this->date_start = $obj->date_start;
                 $this->date_end = $obj->date_end;
                 $this->type_extra_1 = intVal($obj->type_extra_1);
@@ -60,14 +62,7 @@ class Tariff {
         return -1;
     }
 
-    public function create($label, $price, $id_event, $file, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $type_extra_2, $name_extra_2, $type_extra_3, $name_extra_3, $type_extra_4, $name_extra_4, $type_extra_5, $name_extra_5, $type_extra_6, $name_extra_6) {
-
-//        $numargs = func_num_args();
-//        $arg_list = func_get_args();
-//        for ($i = 0; $i < $numargs; $i++) {
-//            $this->errors[] = "L'argument $i est : " . $arg_list[$i] . "\n";
-//        }
-//        return -1111;
+    public function create($label, $price, $id_event, $file, $require_names, $id_prod_extern, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $type_extra_2, $name_extra_2, $type_extra_3, $name_extra_3, $type_extra_4, $name_extra_4, $type_extra_5, $name_extra_5, $type_extra_6, $name_extra_6) {
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
@@ -77,6 +72,8 @@ class Tariff {
             $this->errors[] = "Le champ évènement est obligatoire";
         if ($file['error'] != 0)
             $this->errors[] = "Erreur lors du chargement de l'image";
+        if ($require_names == '')
+            $this->errors[] = "Le champ exiger nom et prénom est obligatoire";
         if (sizeof($this->errors) != 0)
             return -3;
 
@@ -99,6 +96,8 @@ class Tariff {
         $sql.= ', `date_creation`';
         $sql.= ', `price`';
         $sql.= ', `fk_event`';
+        $sql.= ', `require_names`';
+        $sql.= ', `require_names`';
         if ($date_start != '')
             $sql.= ', `date_start`';
         if ($date_end != '')
@@ -120,6 +119,9 @@ class Tariff {
         $sql.= ', now()';
         $sql.= ', "' . $price . '"';
         $sql.= ', "' . $id_event . '"';
+        $sql.= ', "' . $require_names . '"';
+        if ($id_prod_extern != '')
+            $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         if ($date_start != '')
             $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         if ($date_end != '')
@@ -160,6 +162,80 @@ class Tariff {
             return $last_insert_id;
         } catch (Exception $e) {
             $this->errors[] = "Impossible de créer le tarif. " . $e;
+            $this->db->rollBack();
+            return -2;
+        }
+        return -1;
+    }
+
+    public function update($id_tariff, $label, $price, $require_names, /* $file, */ $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $type_extra_2, $name_extra_2, $type_extra_3, $name_extra_3, $type_extra_4, $name_extra_4, $type_extra_5, $name_extra_5, $type_extra_6, $name_extra_6) {
+
+        if (!($id_tariff > 0))
+            $this->errors[] = "Le champ identifiant est obligatoire";
+        if ($label == '')
+            $this->errors[] = "Le champ label est obligatoire";
+        if ($price == '')
+            $this->errors[] = "Le champ prix est obligatoire";
+//        if ($file['error'] != 0)
+//            $this->errors[] = "Erreur lors du chargement de l'image";
+        if (sizeof($this->errors) != 0)
+            return -3;
+
+        if ($time_start == '')
+            $time_start = '00:00';
+        if ($time_end == '')
+            $time_end = '00:00';
+
+        $full_date_start = $date_start . ' ' . $time_start . ':00';
+        $full_date_end = $date_end . ' ' . $time_end . ':00';
+
+        if ($date_start != '')
+            $date_start_obj = DateTime::createFromFormat('d/m/Y H:i:s', $full_date_start);
+        if ($date_end != '')
+            $date_end_obj = DateTime::createFromFormat('d/m/Y H:i:s', $full_date_end);
+
+
+        $sql = 'UPDATE `tariff` SET';
+        $sql.= ' `label`="' . $label . '"';
+        $sql.= ', `price`=' . $price;
+        $sql.= ', `require_names`=' . $require_names;
+        if ($date_start != '')
+            $sql.= ', `date_start`="' . $date_start_obj->format('Y-m-d H:i:s') . '"';
+        if ($date_end != '')
+            $sql.= ', `date_end`="' . $date_end_obj->format('Y-m-d H:i:s') . '"';
+
+        $sql.= ($type_extra_1 != '' and $name_extra_1 != '') ? ', `type_extra_1`=' . $type_extra_1 . ', `name_extra_1`="' . $name_extra_1 . '"' : ', `type_extra_1`= NULL, `name_extra_1`= NULL';
+        $sql.= ($type_extra_2 != '' and $name_extra_2 != '') ? ', `type_extra_2`=' . $type_extra_2 . ', `name_extra_2`="' . $name_extra_2 . '"' : ', `type_extra_2`= NULL, `name_extra_2`= NULL';
+        $sql.= ($type_extra_3 != '' and $name_extra_3 != '') ? ', `type_extra_3`=' . $type_extra_3 . ', `name_extra_3`="' . $name_extra_3 . '"' : ', `type_extra_3`= NULL, `name_extra_3`= NULL';
+        $sql.= ($type_extra_4 != '' and $name_extra_4 != '') ? ', `type_extra_4`=' . $type_extra_4 . ', `name_extra_4`="' . $name_extra_4 . '"' : ', `type_extra_4`= NULL, `name_extra_4`= NULL';
+        $sql.= ($type_extra_5 != '' and $name_extra_5 != '') ? ', `type_extra_5`=' . $type_extra_5 . ', `name_extra_5`="' . $name_extra_5 . '"' : ', `type_extra_5`= NULL, `name_extra_5`= NULL';
+        $sql.= ($type_extra_6 != '' and $name_extra_6 != '') ? ', `type_extra_6`=' . $type_extra_6 . ', `name_extra_6`="' . $name_extra_6 . '"' : ', `type_extra_6`= NULL, `name_extra_6`= NULL';
+
+        $sql .= ' WHERE id=' . $id_tariff;
+
+//        $this->errors[] = $sql;
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+//            $last_insert_id = $this->db->lastInsertId();
+            $this->db->commit();
+            return 1;
+//            if ($last_insert_id > 0) {
+//                $source = $file['tmp_name'];
+//                $destination = PATH . '/img/event/' . $id_event . '_' . $last_insert_id . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
+//                if (move_uploaded_file($source, $destination) == true)
+//                    return $last_insert_id;
+//                else {
+//                    $this->errors[] = "Erreur lors du déplacement de l'image";
+//                    return -5;
+//                }
+//            } else {
+//                return -4;
+//            }
+//            return $last_insert_id;
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de modifier le tarif. " . $e;
             $this->db->rollBack();
             return -2;
         }

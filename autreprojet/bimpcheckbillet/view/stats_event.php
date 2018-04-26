@@ -3,7 +3,7 @@
 include_once 'header.php';
 include_once 'footer.php';
 
-$arrayofjs = array('../js/stats_event.js', '../lib/js/loader.js');
+$arrayofjs = array('../lib/js/loader.js', '../js/stats_event.js');
 
 printHeader('Statistique évènement', $arrayofjs);
 

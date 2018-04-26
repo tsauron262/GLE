@@ -17,8 +17,15 @@ function getEvents() {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.events.length !== 0) {
                 out.events.forEach(function (event) {
-                    $('select[name=event]').append(
-                            '<option value=' + event.id + '>' + event.label + '</option>');
+                    if (event.status === '1')
+                        $('select[name=event]').append(
+                                '<option value=' + event.id + ' disabled>' + event.label + ' (Brouillon)</option>');
+                    else if (event.status === '2')
+                        $('select[name=event]').append(
+                                '<option value=' + event.id + '>' + event.label + '</option>');
+                    else if (event.status === '3')
+                        $('select[name=event]').append(
+                                '<option value=' + event.id + ' disabled>' + event.label + ' (Terminé)</option>');
                 });
                 $(".chosen-select").chosen({
                     placeholder_text_single: 'Evènement',
@@ -29,6 +36,15 @@ function getEvents() {
                         $('#barcode').val("");
                     }
                 });
+                $('select[name=event]').change(function () {
+                    changeEventSession($('select[name=event] > option:selected').val());
+                });
+                if (id_event_session > 0) {
+                    if (!$('select[name=event] > option[value=' + id_event_session + ']').prop('disabled')) {
+                        $('select[name=event] > option[value=' + id_event_session + ']').prop('selected', true);
+                        $(".chosen-select").trigger("chosen:updated");
+                    }
+                }
             } else {
                 setMessage('alertSubmit', "Créer un évènement avant de définir un tarif.", 'error');
             }
@@ -66,7 +82,13 @@ function checkTicket(barcode, id_event) {
             } else if (out.errors === undefined) {
                 setMessage('alertSubmit', 'Erreur serveur 1495.', 'error');
             } else {
-                setMessage('alertSubmit', "Ticket OK", 'msg');
+                $('fieldset').addClass('back_green_gradient');
+                setTimeout(function () {
+                    $('fieldset').addClass('back_white_gradient');
+                    setTimeout(function () {
+                        $('fieldset').removeClass('back_green_gradient');
+                    }, 1000);
+                }, 1000);
             }
         }
     });

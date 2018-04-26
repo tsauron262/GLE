@@ -7,7 +7,7 @@ include_once 'footer.php';
 
 include_once '../class/user.class.php';
 
-$arrayofjs = array('../js/create_tariff.js');
+$arrayofjs = array('../js/modify_tariff.js');
 
 /**
  * Function
@@ -50,17 +50,21 @@ print '<body>';
 
 print '<fieldset class="container_form">';
 
-print '<legend><span>Créer tarif<span></legend>';
+print '<legend><span>Modifier tarif<span></legend>';
 
 if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff == 0) {
     print '<p>Vous n\'avez pas les droit requis pour créer un tariff</p>';
 } else {
 
-    print '<form id="create_form" action="../interface.php" method="post" enctype="multipart/form-data" >';
+//    print '<form id="create_form" action="../interface.php" method="post" enctype="multipart/form-data" >';
+    print '<form id="modify_form" method="post" >';
     print '<input name="action" value="create_tariff" style="display: none;"/>';
 
     print '<label for="event">Evènement </label><br/>';
     print '<select class="chosen-select" name="id_event"><option value="">Sélectionnez un évènement</option></select><br/><br/>';
+
+    print '<label for="tariff">Tarif </label><br/>';
+    print '<select class="chosen-select" name="tariff"><option value="">Sélectionnez un tarif</option></select><br/><br/>';
 
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
@@ -95,7 +99,7 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     printExtra(5);
     printExtra(6);
 
-    print '<button class="btn btn-primary" name="create">Créer</button>';
+    print '<button class="btn btn-primary" name="modify">Modifier</button>';
     print '</form>';
     print '<div id="alertSubmit"></div>';
 }

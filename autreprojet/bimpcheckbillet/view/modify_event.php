@@ -7,7 +7,7 @@ include_once 'footer.php';
 
 include_once '../class/user.class.php';
 
-$arrayofjs = array('../js/modify_event.js');
+$arrayofjs = array('https://cloud.tinymce.com/stable/tinymce.min.js?apiKey=gglt0munffmvpksck0da55o1orb3igbsr12rp5avkuba1q3u', '../js/modify_event.js');
 
 printHeader('Modifier évènement', $arrayofjs);
 
@@ -38,17 +38,20 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
 
     print '<label for="event">Evènement </label><br/>';
     print '<select class="chosen-select" name="id_event"><option value="">Sélectionnez un évènement</option></select><br/><br/>';
-    
+
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
 
+    print '<label for="description">Description </label>';
+    print '<textarea id="description" class="tinymce" placeholder="Description" name="description"></textarea><br/>';
+
     print '<label for="date_start">Date de début</label><br/>';
     print '<input class="form-control" placeholder="Date de début" type="text" name="date_start" style="display: inline ; width: 160px"/>';
-    print '<input class="form-control" type="time" value="00:00" name="time_start" style="display: inline ; width: 100px"/><br/>';
+    print '<input class="form-control" type="time" value="00:00" name="time_start" style="display: inline ; width: 100px"/><br/><br/>';
 
     print '<label for="date_end">Date de fin</label><br/>';
     print '<input class="form-control" placeholder="Date de fin" type="text" name="date_end" style="display: inline ; width: 160px"/>';
-    print '<input class="form-control" type="time" value="00:00" name="time_end" style="display: inline ; width: 100px"/><br/>';
+    print '<input class="form-control" type="time" value="00:00" name="time_end" style="display: inline ; width: 100px"/><br/><br/>';
 
     print '<label>Image</label><br/>';
 
@@ -56,13 +59,21 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<input id="file" type="file" name="file" style="display:none"/>Parcourir</label>';
 
     print '<span class="label label-info" id="name_file_display"></span>';
-    print '<img id="img_display" src="#" alt="Aucune image sélectionnée"/><br/><br/><br/>';
+    print '<img id="img_display" alt=" Aucune image sélectionnée"/>';
 //    print '<img id="img_display" src="../img/event/9.png"/><br/><br/><br/>';
+    print '<div id="alertSubmit"></div><br/><br/><br/>';
 
     print '<button class="btn btn-primary" name="modify">Modifier évènement</button>';
-    print '<div id="alertSubmit"></div>';
-    print '</form>';
+
+//    print '<button class="btn btn-danger" name="delete">Supprimer évènement</button>';
+
+    print '</form><br/>';
+    print '<label>Statut</label><br/>';
+    print '<button class="btn btn-primary" name="draft">Définir comme brouillon</button>';
+    print '<button class="btn btn-success" name="validate" style="margin-left: 20px;">Valider évènement</button>';
+    print '<button class="btn btn-danger" name="close" style="margin-left: 20px;">Fermer évènement</button>';
     print '</fieldset>';
+    
 }
 print '</body>';
 

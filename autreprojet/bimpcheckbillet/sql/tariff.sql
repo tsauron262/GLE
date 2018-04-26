@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS `tariff` (
     `date_creation`     DATETIME,
     `date_start`        DATETIME,
     `date_end`          DATETIME,
+    `require_names`     BOOLEAN NOT NULL DEFAULT 0,
     `price`             FLOAT NOT NULL,
     `type_extra_1`      INTEGER,
     `type_extra_2`      INTEGER,

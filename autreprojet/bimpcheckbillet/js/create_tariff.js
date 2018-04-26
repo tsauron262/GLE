@@ -28,6 +28,15 @@ function getEvents() {
                 $(".chosen-select").chosen({
                     placeholder_text_single: 'Evènement',
                     no_results_text: 'Pas de résultat'});
+                $('select[name=id_event]').change(function () {
+                    changeEventSession($('select[name=id_event] > option:selected').val());
+                });
+                if (id_event_session > 0) {
+                    if (!$('select[name=id_event] > option[value=' + id_event_session + ']').prop('disabled')) {
+                        $('select[name=id_event] > option[value=' + id_event_session + ']').prop('selected', true);
+                        $(".chosen-select").trigger("chosen:updated");
+                    }
+                }
             } else {
                 setMessage('alertSubmit', "Créer un évènement avant de définir un tarif.", 'error');
                 $('button[name=create]').hide();
@@ -56,7 +65,7 @@ function createTariff() {
                 $('input[name=date_start]').val('');
                 $('input[name=date_end]').val('');
                 $('#img_display').attr('src', '');
-                
+
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 1853.', 'error');
             }
@@ -94,7 +103,7 @@ function initEvents() {
         if (window.FormData !== undefined) {
             createTariff();
         } else {
-            alert('pas compatible avec navigateur');
+            alert('Navigateur non compatible');
         }
         return false;
     });

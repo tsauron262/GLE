@@ -34,6 +34,7 @@ function createEvent() {
 $(document).ready(function () {
     $('input[name=date_start]').datepicker({dateFormat: 'dd/mm/yy'});
     $('input[name=date_end]').datepicker({dateFormat: 'dd/mm/yy'});
+    tinymce.init({selector: 'textarea'});
     initEvents();
 });
 /**

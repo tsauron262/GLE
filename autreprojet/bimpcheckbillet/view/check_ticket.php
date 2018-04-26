@@ -3,7 +3,6 @@
 include_once 'header.php';
 include_once 'footer.php';
 
-//$arryofjs = array('../js/check_ticket');
 
 printHeader('Valider ticket'/*, $arryofjs */);
 
@@ -37,6 +36,7 @@ print '
         <script type="text/javascript" src="../js/check_ticket.js"></script>
         <script type="text/javascript" src="../js/annexes.js"></script>
         <link rel="stylesheet" type="text/css" href="../scan/scan.css">
+        <link rel="stylesheet" type="text/css" href="../css/check_ticket.css">
 
 
 <div id="input">

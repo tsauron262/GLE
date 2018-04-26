@@ -9,4 +9,4 @@ define('DB_PASS_WORD', '$mokinU2');
 define('DB_NAME', 'test_billet');
 
 define('PATH', realpath(dirname(__FILE__)));
-define('URL_ROOT', 'http://localhost/~tilito/bimp-erp/autreprojet/bimpcheckbillet/');
+define('IS_MAIN_SERVER', true);

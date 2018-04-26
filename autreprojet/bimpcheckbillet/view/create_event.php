@@ -7,7 +7,7 @@ include_once 'footer.php';
 
 include_once '../class/user.class.php';
 
-$arrayofjs = array('../js/create_event.js');
+$arrayofjs = array('https://cloud.tinymce.com/stable/tinymce.min.js?apiKey=gglt0munffmvpksck0da55o1orb3igbsr12rp5avkuba1q3u', '../js/create_event.js');
 
 printHeader('Créer évènement', $arrayofjs);
 
@@ -33,17 +33,19 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<form id="create_form" action="../interface.php" method="post" enctype="multipart/form-data" >';
     print '<input name="action" value="create_event" style="display: none;"/>';
 
-
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
 
+    print '<label for="description">Description </label>';
+    print '<textarea id="description" class="tinymce" placeholder="Description" rows="3" name="description" style="width: 500px"></textarea><br/>';
+
     print '<label for="date_start">Date de début</label><br/>';
     print '<input class="form-control" placeholder="Date de début" type="text" name="date_start" style="display: inline ; width: 160px"/>';
-    print '<input class="form-control" type="time" value="00:00" name="time_start" style="display: inline ; width: 100px"/><br/>';
+    print '<input class="form-control" type="time" value="00:00" name="time_start" style="display: inline ; width: 100px"/><br/><br/>';
 
     print '<label for="date_end">Date de fin</label><br/>';
     print '<input class="form-control" placeholder="Date de fin" type="text" name="date_end" style="display: inline ; width: 160px"/>';
-    print '<input class="form-control" type="time" value="00:00" name="time_end" style="display: inline ; width: 100px"/><br/>';
+    print '<input class="form-control" type="time" value="00:00" name="time_end" style="display: inline ; width: 100px"/><br/><br/>';
 
     print '<label>Image</label><br/>';
 

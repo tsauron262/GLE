@@ -706,7 +706,7 @@ class gsxController extends BimpController
             return $data;
         }
 
-        if (!self::$in_production) {
+        if (!self::$in_production && ($this->gsx->apiMode != "ut" || $this->gsx->apiMode != "it")) {
             return BimpRender::renderAlerts('Mode production non activé - Requête ignorée', 'warning');
         }
 

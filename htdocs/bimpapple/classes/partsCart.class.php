@@ -86,8 +86,10 @@ class partsCart {
         }
         
         foreach ($tabCas9 as $val)
-            if (stripos($ref, $val) === 0)
-                $newPrix = 32.5;
+            if (stripos($ref, $val) === 0){
+                $coefPrix = 1;
+                $constPrix = 28.15;
+            }
         
         
         

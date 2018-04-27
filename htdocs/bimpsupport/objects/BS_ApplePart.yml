@@ -87,13 +87,13 @@ lists:
                 edit: 1
                 min_width: 70px
                 max_width: 70px
+            out_of_warranty: 
+                field: out_of_warranty
+                edit: 1
             stock_price: 
                 field: stock_price
             exchange_price: 
                 field: exchange_price
-            out_of_warranty: 
-                field: out_of_warranty
-                edit: 1
             order: 
                 field: no_order
                 edit: 1

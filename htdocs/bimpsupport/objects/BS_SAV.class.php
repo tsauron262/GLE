@@ -10,6 +10,8 @@ class BS_SAV extends BimpObject
     public static $propal_model_pdf = 'azurSAV';
     public static $facture_model_pdf = 'crabeSav';
     public static $idProdPrio = 3422;
+    
+    private $allGarantie = true;
 
     const BS_SAV_NEW = 0;
     const BS_SAV_ATT_PIECE = 1;
@@ -174,7 +176,18 @@ class BS_SAV extends BimpObject
                     'onclick' => 'createNewPropal($(this), ' . $this->id . ');'
                 );
             }
-
+            if (!in_array($status, array(self::BS_SAV_FERME, self::BS_SAV_DEVIS_REFUSE))) {
+                if(in_array($status, array(self::BS_SAV_NEW, self::BS_SAV_EXAM_EN_COURS)))
+                    $label = "Générer Devis";
+                else
+                    $label = "Nouveau Devis";
+                $buttons[] = array(
+                    'label'   => $label,
+                    'icon'    => 'plus-circle',
+                    'onclick' => 'generatePropal($(this), ' . $this->id . ');'
+                );
+            }
+            
             if (!is_null($propal) && $propal_status === 1 && !in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_DEVIS_REFUSE))) {
                 $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_DEVIS_ACCEPTE . ', 0)';
                 $buttons[] = array(
@@ -313,7 +326,7 @@ class BS_SAV extends BimpObject
                 );
             }
 
-            if (!is_null($propal) && in_array($propal_status, array(0, 1)) && $status !== self::BS_SAV_ATT_CLIENT) {
+            /*if (!is_null($propal) && in_array($propal_status, array(0, 1)) && $status !== self::BS_SAV_ATT_CLIENT) {
                 if ((string) $this->getData('diagnostic')) {
                     $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_CLIENT . ', 1, {devis_garantie: 1})';
                 } else {
@@ -328,7 +341,7 @@ class BS_SAV extends BimpObject
                     'icon'    => 'file-text',
                     'onclick' => $onclick
                 );
-            }
+            }*/
         }
 
 //        $object_data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: \'' . $this->id . '\'}';
@@ -527,7 +540,7 @@ class BS_SAV extends BimpObject
             $onclick = 'createNewPropal($(this), ' . $this->id . ');';
             return '<button type="button" class="btn btn-default" onclick="' . $onclick . '"><i class="fa fa-plus-circle iconLeft"></i>Créer une nouvelle proposition comm.</button>';
         }
-
+        
         return '';
     }
 
@@ -553,8 +566,61 @@ class BS_SAV extends BimpObject
         }
         return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
     }
+    
+    
+    public function createAccompte($acompte, $update = true){// Prise en compte de l'acompte
+        global $user;
+        
+        $id_client = (int) $this->getData('id_client');
+        if (!$id_client) {
+            $errors[] = 'Aucun client sélectionné pour ce ticket';
+        }
+        if ($acompte > 0 && !count($errors)) {
+            BimpTools::loadDolClass('compta/facture', 'facture');
+            $factureA = new Facture($this->db->db);
+            $factureA->type = 3;
+            $factureA->date = dol_now();
+            $factureA->socid = $this->getData('id_client');
+            $factureA->modelpdf = self::$facture_model_pdf;
+            $factureA->array_options['options_type'] = "S";
+            $factureA->create($user);
+            $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte / 1.2);
+            $factureA->validate($user);
 
-    public function createPropal()
+            BimpTools::loadDolClass('compta/paiement', 'paiement');
+            $payement = new Paiement($this->db->db);
+            $payement->amounts = array($factureA->id => $acompte);
+            $payement->datepaye = dol_now();
+            $payement->paiementid = (int) BimpTools::getValue('mode_paiement_acompte', 0);
+            $payement->create($user);
+
+            $factureA->set_paid($user);
+
+            include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
+            $factureA->generateDocument(self::$facture_model_pdf, $langs);
+            $this->set('id_facture_acompte', $factureA->id);
+
+//                    link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
+
+            BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+            $discount = new DiscountAbsolute($this->db->db);
+            $discount->description = "Acompte";
+            $discount->fk_soc = $factureA->socid;
+            $discount->fk_facture_source = $factureA->id;
+            $discount->amount_ht = $acompte / 1.2;
+            $discount->amount_ttc = $acompte;
+            $discount->amount_tva = $acompte - ($acompte / 1.2);
+            $discount->tva_tx = 20;
+            $discount->create($user);
+
+            $this->set('id_discount', $discount->id);
+            if($update)
+                $this->update();
+        }
+        return $errors;
+    }
+
+    public function createPropal($update = true)
     {
         if (!$this->isLoaded()) {
             return array(
@@ -573,12 +639,6 @@ class BS_SAV extends BimpObject
         if (!count($errors)) {
             global $user, $langs;
 
-            $repDest = DOL_DATA_ROOT . "/bimpcore/sav/" . $this->id . "/";
-
-            if (!is_dir($repDest)) {
-                mkdir($repDest);
-            }
-
             BimpTools::loadDolClass('comm/propal', 'propal');
             $prop = new Propal($this->db->db);
             $prop->modelpdf = "azurSAV";
@@ -596,95 +656,14 @@ class BS_SAV extends BimpObject
                     $prop->add_contact($id_contact, 41);
                 }
 
-                $ref = $this->getData('ref');
-                $equipment = $this->getChildObject('equipment');
-                $serial = 'N/C';
-                if (!is_null($equipment) && $equipment->isLoaded()) {
-                    $serial = $equipment->getData('serial');
-                }
-
-                $client = $this->getChildObject('client');
-                if (!is_null($client) && !$client->isLoaded()) {
-                    $client = null;
-                }
-
-                $prop->addline("Prise en charge :  : " . $ref .
-                        "\n" . "S/N : " . $serial .
-                        "\n" . "Garantie :
-Pour du matériel couvert par Apple, la garantie initiale s'applique.
-Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
-Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.
-Une garantie de 30 jours est appliquée pour les réparations logicielles.
-", 0, 1, 0, 0, 0, 0, (!is_null($client) ? $client->dol_object->remise_percent : 0), 'HT', 0, 0, 3);
-
                 $this->set('id_propal', $prop->id);
-
-                // Prise en compte de l'acompte
-                $acompte = (int) BimpTools::getValue('acompte', 0);
-                if ($acompte > 0) {
-                    BimpTools::loadDolClass('compta/facture', 'facture');
-                    $factureA = new Facture($this->db->db);
-                    $factureA->type = 3;
-                    $factureA->date = dol_now();
-                    $factureA->socid = $this->getData('id_client');
-                    $factureA->modelpdf = self::$facture_model_pdf;
-                    $factureA->array_options['options_type'] = "S";
-                    $factureA->create($user);
-                    $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte / 1.2);
-                    $factureA->validate($user);
-                    addElementElement("propal", "facture", $prop->id, $factureA->id);
-
-                    BimpTools::loadDolClass('compta/paiement', 'paiement');
-                    $payement = new Paiement($this->db->db);
-                    $payement->amounts = array($factureA->id => $acompte);
-                    $payement->datepaye = dol_now();
-                    $payement->paiementid = (int) BimpTools::getValue('mode_paiement_acompte', 0);
-                    $payement->create($user);
-
-                    $factureA->set_paid($user);
-
-                    include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
-                    $factureA->generateDocument(self::$facture_model_pdf, $langs);
-                    $this->set('id_facture_acompte', $factureA->id);
-
-//                    link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
-
-                    BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-                    $discount = new DiscountAbsolute($this->db->db);
-                    $discount->description = "Acompte";
-                    $discount->fk_soc = $factureA->socid;
-                    $discount->fk_facture_source = $factureA->id;
-                    $discount->amount_ht = $acompte / 1.2;
-                    $discount->amount_ttc = $acompte;
-                    $discount->amount_tva = $acompte - ($acompte / 1.2);
-                    $discount->tva_tx = 20;
-                    $discount->create($user);
-
-                    $prop->addline("Acompte", -$discount->amount_ht, 1, 20, 0, 0, 0, 0, 'HT', -$acompte, 0, 1, 0, 0, 0, 0, -$discount->amount_ht, null, null, null, null, null, null, null, null, $discount->id);
-                }
-
-                // Ajout du service prioritaire:
-                if ((int) $this->getData('prioritaire')) {
-                    require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
-                    $prodF = new ProductFournisseur($this->db->db);
-                    $prodF->fetch(self::$idProdPrio);
-                    $prodF->tva_tx = ($prodF->tva_tx > 0) ? $prodF->tva_tx : 0;
-                    $prodF->find_min_price_product_fournisseur($prodF->id, 1);
-
-                    $prop->addline($prodF->description, $prodF->price, 1, $prodF->tva_tx, 0, 0, self::$idProdPrio, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
-                }
-
-                $prop->valid($user);
-                $prop->set_draft($user);
-                $prop->fetch($prop->id);
-
-                require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
-                $prop->generateDocument(self::$propal_model_pdf, $langs);
-//                link(DOL_DATA_ROOT . "/propale/" . $prop->ref . "/" . $prop->ref . ".pdf", $repDest . $prop->ref . ".pdf");
-//                require_once DOL_DOCUMENT_ROOT . "/bimpsupport/core/modules/bimpsupport/modules_bimpsupport.php";
-//                bimpsupport_pdf_create($db, $this, "pc");
+                
+                if($this->getData("id_facture_acompte"))
+                    addElementElement("propal", "facture", $prop->id, $this->getData("id_facture_acompte"));
+                
+                if($update)
+                    $this->update();
             }
-            $this->update();
         }
 
         return $errors;
@@ -736,6 +715,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
         switch ($new_status) {
             case self::BS_SAV_ATT_CLIENT:
+                $this->generatePropal();
                 if (is_null($propal)) {
                     $errors[] = $error_msg . ' (Proposition commerciale absente)';
                 } elseif ($propal_status !== 0) {
@@ -746,25 +726,13 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                     $errors[] = $errors[] = $error_msg . ' (statut actuel invalide)';
                 } else {
                     $this->addNote('Devis validé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
-                    $propal->dol_object->addline("Diagnostic : " . $this->getData('diagnostic'), 0, 1, 0, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 3);
 
-                    if (isset($extra_data['devis_garantie']) && $extra_data['devis_garantie']) {
-                        $totPa = 0;
-                        $totHt = 0;
-                        $totTtc = 0;
-                        foreach ($propal->dol_object->lines as $ligne) {
-                            if ($ligne->desc != "Acompte" && $ligne->ref != "SAV-PCU") {
-                                $totHt += $ligne->total_ht;
-                                $totTtc += $ligne->total_ttc;
-                                $totPa += $ligne->pa_ht;
-                            }
-                        }
-
+//                    if (isset($extra_data['devis_garantie']) && $extra_data['devis_garantie']) {
+                    if ($this->allGarantie) {
                         if ($propal->dol_object->statut === 1) {
                             $propal->dol_object->statut = 0;
                         }
 
-                        $propal->dol_object->addline("Garantie", -($totHt) / (100 - $client->dol_object->remise_percent) * 100, 1, (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100), 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
 
                         // Si on vient de commander les pieces sous garentie (On ne change pas le statut)
                         if ($current_status === self::BS_SAV_ATT_PIECE) {
@@ -1022,6 +990,10 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         }
 
         $errors = parent::create();
+        
+        if (!count($errors) && $this->getData("id_facture_acompte") < 1 && BimpTools::getValue('acompte', 0) > 0) {
+            $this->createAccompte(BimpTools::getValue('acompte', 0), false);
+        }
 
         if (!count($errors) && $this->getData("id_propal") < 1) {
             $this->createPropal();
@@ -1378,6 +1350,150 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         }
 
         return $url;
+    }
+    
+    function setAllStatutWarranty($garantie = false){
+        foreach($this->getChildrenObjects("products") as $prod){
+            $prod->set("out_of_warranty", $garantie? "0":"1");
+            $prod->update();
+        }
+        foreach($this->getChildrenObjects("apple_parts") as $prod){
+            $prod->set("out_of_warranty", $garantie? "0":"1");
+            $prod->update();
+        }
+    }
+    
+    
+    function generatePropal(){
+        global $user;
+        if($this->getData('id_propal') < 1){
+            $this->createPropal();
+        }
+        
+        
+        
+        BimpTools::loadDolClass('comm/propal', 'propal');
+        $prop = new Propal($this->db->db);
+        $prop->fetch($this->getData('id_propal'));
+       
+        if($prop->statut > 0){
+            //revision si necessaire
+            require_once(DOL_DOCUMENT_ROOT . "/bimpcore/classes/BimpRevision.php");
+
+            $revision = new BimpRevisionPropal($prop);
+            $new_id_propal = $revision->reviserPropal(array(array('Diagnostic'), null), true, self::$propal_model_pdf, $errors);
+            $this->set('id_propal', $new_id_propal);
+            $this->setNewStatus(self::BS_SAV_EXAM_EN_COURS);
+            $this->update();
+        }
+        
+        $prop->fetch_lines();
+        foreach($prop->lines as $line){
+            $line->delete();
+        }
+        
+        
+        if($this->getData('id_discount') > 0){
+            BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+            $discount = new DiscountAbsolute($this->db->db);
+            $discount->fetch($this->getData('id_discount'));
+            $prop->addline("Acompte", -$discount->amount_ht, 1, 20, 0, 0, 0, 0, 'HT', -$acompte, 0, 1, 0, 0, 0, 0, -$discount->amount_ht, null, null, null, null, null, null, null, null, $discount->id);
+        }
+        
+        $ref = $this->getData('ref');
+        $equipment = $this->getChildObject('equipment');
+        $serial = 'N/C';
+        if (!is_null($equipment) && $equipment->isLoaded()) {
+            $serial = $equipment->getData('serial');
+        }
+
+        $client = $this->getChildObject('client');
+        if (!is_null($client) && !$client->isLoaded()) {
+            $client = null;
+        }
+
+        $prop->addline("Prise en charge :  : " . $ref .
+                        "\n" . "S/N : " . $serial .
+                        "\n" . "Garantie :
+Pour du matériel couvert par Apple, la garantie initiale s'applique.
+Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
+Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.
+Une garantie de 30 jours est appliquée pour les réparations logicielles.
+", 0, 1, 0, 0, 0, 0, (!is_null($client) ? $client->dol_object->remise_percent : 0), 'HT', 0, 0, 3);
+
+        
+        // Ajout du service prioritaire:
+        if ((int) $this->getData('prioritaire')) {
+            require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
+            $prodF = new ProductFournisseur($this->db->db);
+            $prodF->fetch(self::$idProdPrio);
+            $prodF->tva_tx = ($prodF->tva_tx > 0) ? $prodF->tva_tx : 0;
+            $prodF->find_min_price_product_fournisseur($prodF->id, 1);
+
+            $prop->addline($prodF->description, $prodF->price, 1, $prodF->tva_tx, 0, 0, $prodF->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
+        }
+        
+        //Ajout diagnostique
+        if($this->getData('diagnostic') != ""){
+            $prop->addline("Diagnostic : " . $this->getData('diagnostic'), 0, 1, 0, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 3);
+        }
+        
+        $garantieHt = $garantieTtc = $garantiePa = 0;
+        //Ajuot des prod apple
+        foreach($this->getChildrenObjects("products") as $prod){
+            $prodG = new Product($this->db->db);
+            $prodG->fetch($prod->getData("id_product"));
+            require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
+            $prodF = new ProductFournisseur($this->db->db);
+            $prodF->find_min_price_product_fournisseur($prodG->id, $prod->getData("qty"));
+            $prop->addline($prodG->description, $prodG->price, $prod->getData("qty"), $prodG->tva_tx, 0, 0, $prodG->id, $client->dol_object->remise_percent, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
+            if(!$prod->getData("out_of_warranty")){
+                $garantieHt += $prodG->price * $prod->getData("qty");
+                $garantieTtc += $prodG->price * $prod->getData("qty") * ($prodG->tva_tx / 100);
+                $garantiePa += $prodG->fourn_price * $prod->getData("qty");
+            }
+            else
+                $this->allGarantie = false;
+        }
+        
+        
+        
+        //Ajout des Prod non Apple
+        foreach($this->getChildrenObjects("apple_parts") as $prod){
+            require_once(DOL_DOCUMENT_ROOT."/bimpapple/classes/partsCart.class.php");
+            $tva = 20;
+            $price = ($prod->getData("no_order") || $prod->getData("exchange_price") < 1)? $prod->getData("stock_price") : $prod->getData("exchange_price");
+            $price2 = partsCart::convertPrix($price, $prod->getData("part_number"), $prod->getData("label"));
+            $label = $prod->getData("part_number")." - ".$prod->getData("label");
+            $label .= ($prod->getData("no_order"))? " APPRO": "";
+            $prop->addline($label, $price2, $prod->getData("qty"), $tva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', null, null, null, null, null, null, null, $price);
+            if(!$prod->getData("out_of_warranty")){
+                $garantieHt += $price2 * $prod->getData("qty");
+                $garantieTtc += $price2 * $prod->getData("qty") * ($tva / 100);
+                $garantiePa += $price * $prod->getData("qty");
+            }
+            else
+                $this->allGarantie = false;
+        }
+        
+        
+        
+        
+        
+        //Ajout garantie
+        if($garantieHt > 0){
+            $tva = 100 * $garantieTtc / $garantieHt;
+            $prop->addline("Garantie", -($garantieHt), 1, $tva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
+        }
+
+//        $prop->valid($user);
+//        $prop->set_draft($user);
+//        $prop->fetch($prop->id);
+
+        require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
+        $prop->generateDocument(self::$propal_model_pdf, $langs);
+        
+        
     }
 }
 

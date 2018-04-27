@@ -76,19 +76,16 @@ class savController extends gsxController
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }
+  
 
-    protected function ajaxProcessGeneratePDFFile()
+    protected function ajaxProcessGeneratePropal()
     {
         $errors = array();
-        $success = 'PDF Généré avec succès';
+        $success = 'Propale Généré avec succès';
         $file_url = '';
 
         $id_sav = (int) BimpTools::getValue('id_sav', 0);
-        $file_type = BimpTools::getValue('file_type');
 
-        if (is_null($file_type)) {
-            $errors[] = 'Type de PDF absent';
-        }
         if (!$id_sav) {
             $errors[] = 'ID du SAV absent';
         }
@@ -98,14 +95,13 @@ class savController extends gsxController
             if (!$sav->isLoaded()) {
                 $errors[] = 'SAV d\'ID ' . $id_sav . ' non trouvé';
             } else {
-                $file_url = $sav->generatePDF($file_type, $errors);
+                $sav->generatePropal();
             }
         }
 
         die(json_encode(array(
             'errors'     => $errors,
             'success'    => $success,
-            'file_url'   => $file_url,
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }

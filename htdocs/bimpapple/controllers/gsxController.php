@@ -705,11 +705,6 @@ class gsxController extends BimpController
         if (!$GSXRequest->isLastRequestOk()) {
             return $data;
         }
-
-        if (!self::$in_production && ($this->gsx->apiMode != "ut" || $this->gsx->apiMode != "it")) {
-            return BimpRender::renderAlerts('Mode production non activé - Requête ignorée', 'warning');
-        }
-
         if (is_null($this->gsx)) {
             $errors = $this->initGsx();
             if (count($errors)) {
@@ -721,6 +716,12 @@ class gsxController extends BimpController
             $html .= BimpRender::renderAlerts('Echec de la connexion GSX');
             return $html;
         }
+
+        if (!self::$in_production && ($this->gsx->apiMode != "ut" || $this->gsx->apiMode != "it")) {
+            return BimpRender::renderAlerts('Mode production non activé - Requête ignorée', 'warning');
+        }
+
+        
 
         $filesError = false;
         if (in_array(BimpTools::getValue('includeFiles', ''), array('1', 1, 'Y')) && !is_null($id_sav)) {

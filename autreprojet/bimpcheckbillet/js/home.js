@@ -23,6 +23,9 @@ function getEvents() {
                 out.events.forEach(function (event) {
                     displayEvent(event);
                 });
+                if (id_event_session > 0) {
+                    $('div#collapse' + id_event_session).click();
+                }
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 3767.', 'error');
             }

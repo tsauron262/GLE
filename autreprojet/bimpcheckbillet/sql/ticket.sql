@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `ticket` (
     `extra_4`       TEXT,
     `extra_5`       TEXT,
     `extra_6`       TEXT,
+    `id_order`      INTEGER,
     FOREIGN KEY (`fk_event`)  REFERENCES `event` (`id`),
     FOREIGN KEY (`fk_tariff`) REFERENCES `tariff` (`id`),
     FOREIGN KEY (`fk_user`)   REFERENCES `user` (`id`)

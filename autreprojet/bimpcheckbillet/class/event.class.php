@@ -52,7 +52,7 @@ class Event {
         return -1;
     }
 
-    public function create($label, $description, $date_start, $time_start, $date_end, $time_end, $id_user, $file) {
+    public function create($label, $description, $date_start, $time_start, $date_end, $time_end, $id_user, $file, $id_categ = '') {
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
@@ -87,12 +87,14 @@ class Event {
         $sql.= ', `date_creation`';
         $sql.= ', `date_start`';
         $sql.= ', `date_end`';
+        $sql.= ', `id_categ`';
         $sql.= ') ';
         $sql.= 'VALUES ("' . addslashes($label) . '"';
         $sql.= ', "' . addslashes($description) . '"';
         $sql.= ', now()';
         $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ', "' . $date_end_obj->format('Y-m-d H:i:s') . '"';
+        $sql.= ', ' . ($id_categ != '' ? $id_categ : 'NULL');
         $sql.= ')';
 
         try {
@@ -376,6 +378,40 @@ class Event {
             return -3;
         }
         return -1;
+    }
+
+    public function getTicketList($id_event) {
+
+        if ($id_event < 0) {
+            $this->errors[] = "Identifiant invalide :" . $id;
+            return false;
+        }
+
+        $tariff = new Tariff($this->db);
+        $tariffs = $tariff->getTariffsForEvent($id_event);
+
+        foreach ($tariffs as $key => $tariff) {
+
+            $tickets = array();
+
+            $sql = 'SELECT id';
+            $sql .= ' FROM ticket';
+            $sql .= ' WHERE fk_tariff=' . $tariff->id;
+
+            $result = $this->db->query($sql);
+            if ($result and $result->rowCount() > 0) {
+                while ($obj = $result->fetchObject()) {
+                    $ticket = new Ticket($this->db);
+                    $ticket->fetch($obj->id);
+                    $tickets[] = $ticket;
+                }
+                $tariff->tickets = $tickets;
+            } elseif (!$result) {
+                $this->errors[] = "Erreur SQL 6567";
+                return -2;
+            }
+        }
+        return $tariffs;
     }
 
 }

@@ -1,4 +1,5 @@
 
+var tariffs;
 /**
  * Ajax call
  */
@@ -61,12 +62,16 @@ function getTariffsForEvent(id_event) {
             } else if (out.tariffs.length !== 0) {
                 $('select[name=tariff]').empty();
                 $('select[name=tariff]').append('<option value="">Sélectionnez un tarif</option>');
-                out.tariffs.forEach(function (tariff) {
-                    $('select[name=tariff]').append(
-                            '<option value=' + tariff.id + '>'
-                            + tariff.label + ' ' +
-                            +tariff.price + ' €</option>');
-                });
+                try {
+                    out.tariffs.forEach(function (tariff) {
+                        $('select[name=tariff]').append(
+                                '<option value=' + tariff.id + '>'
+                                + tariff.label + ' ' +
+                                +tariff.price + ' €</option>');
+                    });
+                } catch (e) {
+                    setMessage('alertSubmit', 'Pas de tarif pour cet évènement', 'warn');
+                }
                 $(".chosen-select").trigger("chosen:updated");
                 tariffs = out.tariffs;
                 initEventChangeTariff(tariffs);

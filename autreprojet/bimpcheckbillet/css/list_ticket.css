@@ -1,0 +1,26 @@
+
+.container_form {
+    left: 25%;
+}
+
+#displayTable > table {
+    border-collapse:separate; 
+    border-spacing:0;
+    border-top: solid black 1px;
+    border-bottom: solid black 1px;
+    border-left: solid black 1px;
+    z-index:900 !important;
+}
+
+#displayTable > table tr:nth-child(even){
+    background: #ccc;
+}
+
+#displayTable > table tr:hover {
+    background: #bdc3c7;
+}
+
+#displayTable > table th, #displayTable > table td {
+    padding: 3px 10px 3px 10px;
+    border-right: solid black 1px;
+}

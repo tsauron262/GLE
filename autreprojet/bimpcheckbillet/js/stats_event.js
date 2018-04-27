@@ -125,7 +125,8 @@ function drawChart(data_in, id_div, title) {
     var options = {
         'title': title,
         'width': 500,
-        'height': 250};
+        'height': 320
+    };
     var chart = new google.visualization.PieChart(document.getElementById(id_div));
     chart.draw(data, options);
 }
@@ -134,12 +135,14 @@ function getTariffArray(tariffs) {
     var out = [];
     var couple;
     var tariff;
+    var title;
     out.push(['Label', 'Nombre de vente']);
 
     for (var id in tariffs) {
         tariff = tariffs[id];
         couple = [];
-        couple.push(tariff.label);
+        title = tariff.label + ' nombre de ticket vendu: ' + tariff.sold;
+        couple.push(title);
         couple.push(tariff.sold);
         out.push(couple);
     }
@@ -151,6 +154,8 @@ function getTariffPriceArray(tariffs, tickets) {
     var couple;
     var ticket;
     var tariff;
+    var title;
+
     out.push(['Label', 'Part des ventes']);
 
     for (var id in tickets) {
@@ -163,7 +168,8 @@ function getTariffPriceArray(tariffs, tickets) {
     for (var id in tariffs) {
         tariff = tariffs[id];
         couple = [];
-        couple.push(tariff.label);
+        title = tariff.label + ' total tarif: ' + tariff.total + ' €'
+        couple.push(title);
         couple.push(tariff.total);
         out.push(couple);
     }
@@ -182,8 +188,10 @@ function getTicketArray(tickets) {
         else
             scanned++;
     }
-    out.push(['Validé', scanned]);
-    out.push(['Attendu', not_scanned]);
+    var title = 'Validé: ' + scanned;
+    out.push([title, scanned]);
+    var title = 'Attendu: ' + not_scanned;
+    out.push([title, not_scanned]);
 
     return out;
 }

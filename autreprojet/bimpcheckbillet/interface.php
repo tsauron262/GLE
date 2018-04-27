@@ -31,7 +31,7 @@ switch ($_POST['action']) {
     case 'create_event': {
             $user = json_decode($_SESSION['user']);
             echo json_encode(array(
-                'code_return' => $event->create($_POST['label'], $_POST['description'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id, $_FILES['file']),
+                'code_return' => $event->create($_POST['label'], $_POST['description'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id, $_FILES['file'], $_POST['id_categ ']),
                 'errors' => $event->errors));
             break;
         }
@@ -252,6 +252,18 @@ switch ($_POST['action']) {
                 'errors' => $event->errors));
             break;
         }
+        
+    /**
+     * list_ticket.php
+     */
+
+    case 'get_ticket_list': {
+            echo json_encode(array(
+                'tariffs' => $event->getTicketList($_POST['id_event']),
+                'errors' => $event->errors));
+            break;
+        }
+        
     /**
      * General
      */

@@ -4,20 +4,20 @@ class Ticket {
 
     public $errors;
     private $db;
-    private $id;
+    public $id;
     private $date_creation;
-    private $id_tariff;
-    private $id_user;
+    public $id_tariff;
+    public $id_user;
     private $id_event;
     // option
-    private $price;
+    public $price;
     // extra
-    private $extra_1;
-    private $extra_2;
-    private $extra_3;
-    private $extra_4;
-    private $extra_5;
-    private $extra_6;
+    public $extra_1;
+    public $extra_2;
+    public $extra_3;
+    public $extra_4;
+    public $extra_5;
+    public $extra_6;
     
     
     public function __construct($db) {
@@ -66,7 +66,7 @@ class Ticket {
         return -1;
     }
 
-    public function create($id_tariff, $id_user, $id_event, $price, $first_name, $last_name, $extra_1, $extra_2, $extra_3, $extra_4, $extra_5, $extra_6) {
+    public function create($id_tariff, $id_user, $id_event, $price, $first_name, $last_name, $extra_1, $extra_2, $extra_3, $extra_4, $extra_5, $extra_6, $id_order = '') {
 
         if ($id_tariff == '')
             $this->errors[] = "Le champ id tariff est obligatoire";
@@ -92,6 +92,7 @@ class Ticket {
         $sql.= ($extra_4 != '') ? ', `extra_4`' : '';
         $sql.= ($extra_5 != '') ? ', `extra_5`' : '';
         $sql.= ($extra_6 != '') ? ', `extra_6`' : '';
+        $sql.= ($id_order != '') ? ', `id_order`' : '';
         $sql.= ') ';
         $sql.= 'VALUES ("' . $id_tariff . '"';
         $sql.= ', now()';
@@ -107,6 +108,7 @@ class Ticket {
         $sql.= ($extra_4 != '') ? ', "' . $extra_4 . '"' : '';
         $sql.= ($extra_5 != '') ? ', "' . $extra_5 . '"' : '';
         $sql.= ($extra_6 != '') ? ', "' . $extra_6 . '"' : '';
+        $sql.= ($id_order != '') ? ', ' . $id_order . '' : '';
         $sql.= ')';
 
         try {

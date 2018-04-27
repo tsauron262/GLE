@@ -97,7 +97,7 @@ class Tariff {
         $sql.= ', `price`';
         $sql.= ', `fk_event`';
         $sql.= ', `require_names`';
-        $sql.= ', `require_names`';
+        $sql.= ', `id_prod_extern`';
         if ($date_start != '')
             $sql.= ', `date_start`';
         if ($date_end != '')
@@ -120,8 +120,7 @@ class Tariff {
         $sql.= ', "' . $price . '"';
         $sql.= ', "' . $id_event . '"';
         $sql.= ', "' . $require_names . '"';
-        if ($id_prod_extern != '')
-            $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
+        $sql.= ', ' . ($id_prod_extern != '' ? $id_prod_extern : 'NULL');
         if ($date_start != '')
             $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         if ($date_end != '')
@@ -141,6 +140,7 @@ class Tariff {
         $sql.= ')';
 
 
+//        echo $sql;
         try {
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->db->beginTransaction();
@@ -296,6 +296,17 @@ class Tariff {
 
     public function hasItsOwnDate() {
         return $this->date_start != NULL and $this->date_end != NULL;
+    }
+
+    private function getRandomString($length = 32) {
+        $str = "";
+        $characters = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
+        $max = count($characters) - 1;
+        for ($i = 0; $i < $length; $i++) {
+            $rand = mt_rand(0, $max);
+            $str .= $characters[$rand];
+        }
+        return $str;
     }
 
 }

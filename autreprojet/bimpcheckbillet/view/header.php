@@ -70,6 +70,7 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
         <div class="dropdown-menu nav-item" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="create_ticket.php">Réserver</a>
           <a class="dropdown-item" href="check_ticket.php">Valider</a>
+          <a class="dropdown-item" href="list_ticket.php">Liste</a>
         </div>
       </li>';
         print '</ul>

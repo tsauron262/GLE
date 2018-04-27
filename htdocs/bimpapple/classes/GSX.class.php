@@ -122,7 +122,7 @@ class GSX
     protected $wsdlUrl;
     protected $userSessionId;
     protected $soapClient;
-    public static $apiMode = 'production';
+    public static $apiMode = 'ut';
     public $shipTo = '';
     public $connect = false;
     public $isIphone = false;
@@ -138,9 +138,6 @@ class GSX
 
         $this->isIphone = $isIphone;
         
-        if (defined('PRODUCTION_APPLE') && PRODUCTION_APPLE) {
-            self::$apiMode = 'production';
-        }
 
 //        $userId = 'sav@bimp.fr';
 //        $password = '@Savbimp2014#';

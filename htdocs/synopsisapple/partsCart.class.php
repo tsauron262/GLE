@@ -81,7 +81,7 @@ class partsCart {
         $tabCas36 = array("Ipad Pro", "Ipad mini", "Apple Watc");//design contient
         
         
-        $tabCas9 = array("661-04479","661-04579","661-04580","661-04581","661-04582","661-05421","661-05755");//Prix a 29
+        $tabCas9 = array("661-02909", "661-04479","661-04579","661-04580","661-04581","661-04582","661-05421","661-05755");//Prix a 29
 
         $cas = 0;
         foreach ($tabCas1 as $val)

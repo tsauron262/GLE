@@ -252,7 +252,7 @@ class GSX
             echo "Pas de certif pour se soldTo " . $soldTo;
             return 0;
         }
-        $typeCertif = ($this->apiMode == 'ut') ? 0 : 1;
+        $typeCertif = (self::$apiMode == 'ut') ? 0 : 1;
         $certif = $tabCert[$soldTo][$typeCertif];
 
 
@@ -599,15 +599,17 @@ class GSX
             ),
         );
 
-        try {
-            $compTIAAnswer = $this->soapClient->CompTIACodes($compTIARequest);
-        } catch (SoapFault $fault) {
-            return $this->soap_error($fault->faultcode, $fault->faultstring);
+        if(is_object($this->soapClient)){
+            try {
+                $compTIAAnswer = $this->soapClient->CompTIACodes($compTIARequest);
+            } catch (SoapFault $fault) {
+                return $this->soap_error($fault->faultcode, $fault->faultstring);
+            }
+
+            $compTIAAnswer = $this->_objToArr($compTIAAnswer);
+
+            return $compTIAAnswer;
         }
-
-        $compTIAAnswer = $this->_objToArr($compTIAAnswer);
-
-        return $compTIAAnswer;
     }
 // HELPER FUNCTIONS
 

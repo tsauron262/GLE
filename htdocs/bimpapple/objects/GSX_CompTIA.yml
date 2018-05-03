@@ -1,0 +1,20 @@
+table: gsx_comptia
+common_fields: 0
+
+labels: 
+    name: Code CompTIA
+    name_plur: Codes CompTIA
+    
+fields: 
+    type: 
+        label: Type
+        values: 
+            array: 
+                code: Code
+                mod: Modificateur
+    grp: 
+        label: Groupe
+    code: 
+        label: Code
+    label: 
+        label: Libellé

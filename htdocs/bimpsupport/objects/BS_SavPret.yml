@@ -1,0 +1,164 @@
+table: bs_sav_pret
+icon: mobile
+
+parent_object: BS_SAV
+parent_id_property: id_sav
+
+labels: 
+    name: prêt
+    
+objects: 
+    pret: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BS_Pret
+            id_object: 
+                field_value: id_pret
+    client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Societe
+            id_object: 
+                field_value: id_client
+fields: 
+    id_sav: 
+        label: SAV
+        type: id_parent
+        input: 
+            type: search_list
+            search_list:
+                table: bs_sav s
+                field_return_value: s.id
+                field_return_label: s.ref
+                fields_search: s.id,s.ref
+    id_pret:
+        label: Matériel de prêt
+        type: id_object
+        object: pret
+        required: 1
+        input: 
+            type: search_list
+            search_list:
+                table: bs_pret p
+                field_return_value: p.id
+                field_return_label: p.ref
+                fields_search: p.serial,p.id,p.ref
+            help: Numéro de série,  Référence ou ID d'un matériel de prêt
+    ref: 
+        label: Référence
+        input: 
+            type: hidden
+    id_client: 
+        label: Client
+        type: id_object
+        object: client
+        input: 
+            type: hidden
+    date_begin: 
+        label: Début du prêt
+        type: datetime
+    date_end: 
+        label: Fin du prêt
+        type: datetime
+    returned: 
+        label: Restitué
+        type: bool
+        default_value: 0
+        
+fields_tables: 
+    default: 
+        rows: 
+            - field: id_sav
+              display: nom_url
+            - field: id_pret
+              display: nom_url
+            - field: id_client
+              display: nom_url
+            - field: date_begin
+              edit: 1
+            - field: date_end
+              edit: 1
+            - field: returned
+              edit: 1
+
+views: 
+    default:
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  fields_table: default
+                
+lists: 
+    default: 
+        title: Matériels prêtés
+        icon: mobile
+#        list_filters: 
+#            - name: returned
+#              filter: 0
+        checkboxes: 1
+        bulk_actions:
+            - label: Supprimer les prêts sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: desc
+        n: 25
+        delete_btn: 1
+        update_btn: 1
+        edit_btn: 1
+        modal_view: default
+        cols: 
+            ref: 
+                field: ref
+            sav: 
+                field: id_sav
+                display: nom_url
+            pret: 
+                field: id_pret
+                display: nom_url
+            client: 
+                field: id_client
+                display: nom_url
+            date_end: 
+                field: date_end
+            returned: 
+                field: returned
+                edit: 1
+                
+    sav: 
+        title: Matériels prêtés pour ce SAV
+        icon: mobile
+        checkboxes: 1
+        bulk_actions:
+            - label: Supprimer les prêts sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        enable_search: 0
+        sort_field: id
+        sort_way: desc
+        n: 25
+        delete_btn: 1
+        update_btn: 1
+        add_form_name: default
+        modal_view: default
+        edit_btn: 1
+        cols: 
+            ref: 
+                field: ref
+            pret: 
+                field: id_pret
+                display: nom_url
+            date_begin: 
+                field: date_begin
+            date_end: 
+                field: date_end
+            returned: 
+                field: returned
+                edit: 1
+    

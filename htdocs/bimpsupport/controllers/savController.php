@@ -77,7 +77,6 @@ class savController extends gsxController
         )));
     }
   
-
     protected function ajaxProcessGeneratePropal()
     {
         $errors = array();

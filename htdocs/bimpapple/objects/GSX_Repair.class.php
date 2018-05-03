@@ -3,7 +3,7 @@
 class GSX_Repair extends BimpObject
 {
 
-    public $partsPrending = array();
+    public $partsPending = array();
     public $repairLookUp = array();
     public $isIphone = false;
     public $majSerialOk = false;
@@ -178,7 +178,7 @@ class GSX_Repair extends BimpObject
             $id_sav = (int) $this->getData('id_sav');
             foreach ($partsPending as $part) {
                 $fileName = null;
-                $labelDir = '/bimpcore/sav/' . $id_sav . '';
+                $labelDir = '/bimpcore/bimpsupport/sav/' . $id_sav . '';
                 if (!is_dir(DOL_DATA_ROOT . $labelDir)) {
                     mkdir(DOL_DATA_ROOT . $labelDir);
                 }
@@ -204,10 +204,10 @@ class GSX_Repair extends BimpObject
                             if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']) === false)
                                 $fileName = null;
                         }
-                        $fileName2 = "/document.php?modulepart=bimpsupport&file=" . urlencode('sav/' . $id_sav . "/" . $fileNamePure);
+                        $fileName2 = "/document.php?modulepart=bimpcore&file=" . urlencode('bimpsupport/sav/' . $id_sav . "/" . $fileNamePure);
                     }
                 }
-                if (1 || $part['registeredForReturn'] == "Y") {
+                if ($part['registeredForReturn'] == "Y") {
                     $this->partsPending[] = array(
                         'partDescription'   => $part['partDescription'],
                         'partNumber'        => $part['partNumber'],
@@ -350,10 +350,11 @@ class GSX_Repair extends BimpObject
             }
         }
 
-        $total_from_order = (float) $this->getData('total_from_order');
-        if ($this->isLoaded() && (is_null($total_from_order) || !$total_from_order)) {
+//        $total_from_order = $this->getData('total_from_order');
+        if ($this->isLoaded()) {
             $this->updateTotalOrder($update);
         }
+
         if ($update && $this->isLoaded()) {
             $this->update();
         }
@@ -498,7 +499,7 @@ class GSX_Repair extends BimpObject
 
         $n_soap_errors = count($this->gsx->errors['soap']);
 
-        $request = $this->gsx->_requestBuilder($requestName, 'repairConfirmationNumber', $this->confirmNumbers['repair']);
+        $request = $this->gsx->_requestBuilder($requestName, 'repairConfirmationNumber', $this->getData('repair_confirm_number'));
         $response = $this->gsx->request($request, $client);
 
         if (count($this->gsx->errors['soap']) > $n_soap_errors) {
@@ -526,6 +527,8 @@ class GSX_Repair extends BimpObject
             $parts = array($parts);
         }
 
+
+
         $totalFromOrder = 0;
         foreach ($parts as $part) {
             if (isset($part['netPrice']) && $part['netPrice']) {
@@ -539,11 +542,11 @@ class GSX_Repair extends BimpObject
             }
         }
 
-        if ($totalFromOrder != (float) $this->getData('total_from_order')) {
-            $this->totalFromOrder = $totalFromOrder;
-            $this->totalFromOrderChanged = true;
+        if ((float) $totalFromOrder !== (float) $this->getData('total_from_order')) {
+            $this->set('total_from_order', (float) $totalFromOrder);
+            $this->set('total_from_order_changed', 1);
             $sav = $this->getChildObject('sav');
-            $sav->setAllStatutWarranty($this->totalFromOrder == 0); 
+            $sav->setAllStatutWarranty((float) $totalFromOrder == 0);
             if ($this->isLoaded()) {
                 return $this->update();
             }
@@ -632,7 +635,7 @@ class GSX_Repair extends BimpObject
             $response = $this->gsx->request($request, $client);
 
             if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {
-                return false;
+                return array('Echec de la requête de fermeture de la réparation');
             }
         }
 
@@ -662,30 +665,39 @@ class GSX_Repair extends BimpObject
 
     public function displayGarantie()
     {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+        $html = '';
+
         $total = $this->getData('total_from_order');
         if (!is_null($total)) {
-            $html = '';
+
             $msg = '';
 
             if ((float) $total > 0) {
                 $html .= '<span class="danger">NON</span>';
-                $msg = 'Pas de garantie ';
+                $msg = 'La réparation ' . $this->id . ' - ' . $this->getData('repair_confirm_number') . ' n\'est pas sous garantie. Montant: ';
                 if ((float) $total != 1) {
-                    $html .= ' (Montant : ' . BimpTools::displayMoneyValue($total, 'EUR') . ')';
+                    $html .= ' - Montant : ' . BimpTools::displayMoneyValue($total, 'EUR');
                     $msg .= $total . ' €';
                 }
             } else {
                 $html .= '<span class="success">OUI</span>';
-                $msg .= 'Sous garantie';
+                $msg .= 'Réparation ' . $this->id . ' - ' . $this->getData('repair_confirm_number') . ' sous garantie';
             }
 
-            if ($this->totalFromOrderChanged) {
+            if ((int) $this->getData('total_from_order_changed')) {
                 $html .= '<script type="text/javascript">';
                 $html .= 'alert("' . $msg . '")';
                 $html .= '</script>';
+
+                $this->updateField('total_from_order_changed', 0);
             }
+        } else {
+            $html .= '<span class="danger">Inconnu</span>';
         }
-        return '<span class="danger">Inconnu</span>';
+        return $html;
     }
 
     // Rendus HTML: 
@@ -705,7 +717,7 @@ class GSX_Repair extends BimpObject
                 'label'   => 'Terminer la réparation',
                 'classes' => array('btn', 'btn-danger'),
                 'attr'    => array(
-                    'onclick' => 'setObjectAction($(this), ' . $object_data . ', \'endRepair\', {}, null, $(\'#repair_' . $this->id . '_result\'), ' . $callback . ', \''. $confirm.'\')'
+                    'onclick' => 'setObjectAction($(this), ' . $object_data . ', \'endRepair\', {}, null, $(\'#repair_' . $this->id . '_result\'), ' . $callback . ', \'' . $confirm . '\')'
                 )
             );
         } elseif (!(int) $this->getData('repair_complete')) {
@@ -714,7 +726,7 @@ class GSX_Repair extends BimpObject
                 'label'   => 'Restituer',
                 'classes' => array('btn', 'btn-danger'),
                 'attr'    => array(
-                    'onclick' => 'setObjectAction($(this), ' . $object_data . ', \'closeRepair\', {}, null, $(\'#repair_' . $this->id . '_result\'), ' . $callback . ', \''.  $confirm.'\')'
+                    'onclick' => 'setObjectAction($(this), ' . $object_data . ', \'closeRepair\', {}, null, $(\'#repair_' . $this->id . '_result\'), ' . $callback . ', \'' . $confirm . '\')'
                 )
             );
         } elseif (!(int) $this->getData('reimbursed')) {
@@ -723,7 +735,7 @@ class GSX_Repair extends BimpObject
                 'label'   => 'Marquer comme remboursée',
                 'classes' => array('btn', 'btn-default'),
                 'attr'    => array(
-                    'onclick' => 'setObjectAction($(this), ' . $object_data . ', \'markRepairAsReimbursed\', {}, null, $(\'#repair_' . $this->id . '_result\'), ' . $callback . ', \''.  $confirm.'\')'
+                    'onclick' => 'setObjectAction($(this), ' . $object_data . ', \'markRepairAsReimbursed\', {}, null, $(\'#repair_' . $this->id . '_result\'), ' . $callback . ', \'' . $confirm . '\')'
                 )
             );
         }
@@ -747,7 +759,7 @@ class GSX_Repair extends BimpObject
         }
 
         $html = '';
-        if (!count($this->partsPrending)) {
+        if (!count($this->partsPending)) {
             $errors = $this->loadPartsPending();
             if (count($errors)) {
                 $html .= BimpRender::renderAlerts($errors);
@@ -757,18 +769,72 @@ class GSX_Repair extends BimpObject
                     $html .= '<div id="partsPendingSoapMessages" style="margin: 15px 0; padding: 10px; display: none">';
                     $html .= $this->gsx->getGSXErrorsHtml();
                     $html .= '</div>';
-                } elseif (!count($this->partsPrending)) {
-                    if ((string) $this->getData('serial_update_confirm_number')) {
-                        $html .= BimpRender::renderAlerts('Numéros de série des composants retournés à jour', 'success');
-                    }
-                    $html .= BimpRender::renderAlerts('Aucun composant en attente de retour', 'info');
                 }
             }
-        } else {
-            $html .= '<pre>' . print_r($this->partsPrending, 1) . '</pre>';
         }
 
-        return BimpRender::renderPanel('Composants en attente de retour', $html, '', array(
+        if (!count($this->partsPending)) {
+            if ((string) $this->getData('serial_update_confirm_number')) {
+                $html .= BimpRender::renderAlerts('Numéros de série des composants retournés à jour', 'success');
+            }
+            $html .= BimpRender::renderAlerts('Aucun composant en attente de retour', 'info');
+        } else {
+            $html .= '<table id="repair_' . $this->id . '_partsPendingTable" class="bimp_list_table">';
+            $html .= '<thead>';
+            $html .= '<th>Nom</th>';
+            $html .= '<th>Réf.</th>';
+            $html .= '<th>N° de retour</th>';
+            $html .= '<th></th>';
+            $html .= '</thead>';
+
+            $html .= '<tbody>';
+            foreach ($this->partsPending as $part) {
+                $html .= '<tr>';
+                $html .= '<td>' . $part['partDescription'] . '</td>';
+                $html .= '<td>' . $part['partNumber'] . '</td>';
+                $html .= '<td>' . $part['returnOrderNumber'] . '</td>';
+                $html .= '<td>';
+                if (file_exists(DOL_DATA_ROOT . '/bimpcore/bimpsupport/sav/' . (int) $this->getData('id_sav') . '/' . $part['fileName'])) {
+                    $html .= '<a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="btn btn-default">';
+                    $html .= '<i class="fa fa-file-o iconLeft"></i>Etiquette de retour</a>';
+                }
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+            $html .= '</tbody>';
+            $html .= '</table>';
+        }
+
+        $buttons = array();
+
+        $footer = '';
+        if (!(string) $this->getData('serial_update_confirm_number')) {
+            $title = 'Mise à jour des numéros de série des composants';
+            $buttons[] = BimpRender::renderButton(array(
+                        'label'   => 'Numéros de série des composant',
+                        'classes' => array('btn btn-light-default'),
+                        'attr'    => array(
+                            'onclick' => 'loadSerialUpdateForm($(this), ' . (string) $this->getData('serial') . ', ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'UpdateSerialNumber\', \'' . $title . '\')'
+                        )
+            ));
+        }
+
+        $title = 'Mise à jour des numéros de série de l\\\'unité';
+        $buttons[] = BimpRender::renderButton(array(
+                    'label'   => 'Numéro de série de l\'unité',
+                    'classes' => array('btn btn-light-default'),
+                    'attr'    => array(
+                        'onclick' => 'loadSerialUpdateForm($(this), ' . (string) $this->getData('serial') . ', ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'KGBSerialNumberUpdate\', \'' . $title . '\')'
+                    )
+        ));
+
+        if (count($buttons)) {
+            $footer = BimpRender::renderDropDownButton('Mettre à jour', $buttons, array(
+                        'icon' => 'edit'
+            ));
+        }
+
+        return BimpRender::renderPanel('Composants en attente de retour', $html, $footer, array(
                     'type'     => 'secondary',
                     'foldable' => true,
                     'icon'     => 'fas_box'

@@ -1,5 +1,6 @@
 table: bs_sav
 controller: sav
+icon: wrench
 
 list_page_url: 
     controller: index
@@ -129,6 +130,12 @@ objects:
         delete: 1
         instance: 
             bimp_object: BS_SavProduct
+            
+    prets: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BS_SavPret
             
 fields: 
     ref:
@@ -280,11 +287,6 @@ fields:
         label: Prioritaire
         type: bool
         default_value: 0
-    cover:
-        label: Type de couverture
-        type: int
-        values: 
-            array: cover_types
     save_option: 
         label: Sauvegarde
         type: int
@@ -336,6 +338,10 @@ fields:
         label: Login admin
     pword_admin: 
         label: Mot de passe admin
+    acompte: 
+        label: Acompte
+        type: money
+        default_value: 0
     
 forms: 
     default:
@@ -348,14 +354,7 @@ forms:
             - field: id_equipment
             - field: id_contrat
             - field: prioritaire
-            - label: Acompte
-              custom: 1
-              input_name: acompte
-              data_type: money
-              input: 
-                  type: text
-              min: 0
-              value: 0
+            - field: acompte
             - label: Mode de paiement de l'acompte
               custom: 1
               data_type: int
@@ -369,7 +368,6 @@ forms:
             - field: login_admin
             - field: pword_admin
             - field: contact_pref
-            - field: cover
             - field: accessoires
             - field: etat_materiel
             - field: etat_materiel_desc
@@ -391,16 +389,20 @@ forms:
             - field: login_admin
             - field: pword_admin
             
+    send_msg: 
+        title: Envoi de notification
+        rows: 
+            - custom: 1
+              label: Notifier le client
+              input_name: send_msg
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
+        
     restitute:
         title: Restituer
         rows: 
-            - custom: 1
-              label: Restituer
-              hidden: 1
-              input: 
-                  type: hidden
-              input_name: restitute
-              value: 1
             - custom: 1
               label: Mode de paiement
               input_name: mode_paiement
@@ -415,16 +417,9 @@ forms:
               value: 
                   callback: getFactureAmountToPay
                   
-    close: 
+    close_refused: 
         title: Fermeture
         rows: 
-            - custom: 1
-              label: Fermeture
-              input_name: close
-              input: 
-                  type: hidden
-              hidden: 1
-              value: 1
             - custom: 1
               label: Frais de gestion
               input_name: frais
@@ -454,12 +449,6 @@ forms:
         title: Recontacter
         rows: 
             - custom: 1
-              hidden: 1
-              input_name: recontact
-              input: 
-                  type: hidden
-              value: 1
-            - custom: 1
               label: Notification
               input_name: msg_type
               input: 
@@ -476,18 +465,6 @@ forms:
                       
     diagnostic: 
         rows: 
-            - field: status
-              hidden: 1
-              input: 
-                  type: hidden
-            - custom: 1
-              label: extra data
-              input_name: extra_data[devis_garantie]
-              hidden: 1
-              input: 
-                  type: hidden
-              value: 
-                  request: devis_garantie
             - field: diagnostic
             - custom: 1
               data_type: bool
@@ -495,23 +472,37 @@ forms:
                   type: toggle
               label: Notifier le client
               value: 1
-              input_name: extra_data[send_msg]
+              input_name: send_msg
             
     resolution: 
         rows: 
-            - field: status
-              hidden: 1
-              input: 
-                  type: hidden
             - field: resolution
+            - custom: 1
+              label: Dispo sous
+              input_name: nbJours
+              data_type: int
+              min: 0
+              value: 0
+              input: 
+                  addon_right: 
+                      text: jour(s)
             - custom: 1
               data_type: bool
               input: 
                   type: toggle
               label: Notifier le client
               value: 1
-              input_name: extra_data[send_msg]
-                      
+              input_name: send_msg
+              
+    equipment: 
+        rows: 
+            - custom: 1
+              data_type: string
+              input: 
+                  type: text
+              label: Numéro de série
+              input_name: serial
+                
 fields_tables: 
     infos: 
         title: Informations
@@ -528,8 +519,6 @@ fields_tables:
             - field: id_user_tech
               display: card
             - field: prioritaire
-            - field: cover
-              edit: 1
             - field: sav_pro
               edit: 1
             - field: id_propal
@@ -600,8 +589,7 @@ views:
         title: nom
         delete_btn: 1
         edit_form: edit
-#        footer_extra_btn:
-#            callback: getViewExtraBtn
+        objects_change_reload: BS_SavProduct
         rows:
             - cols: 
                   - type: fields_table
@@ -609,7 +597,6 @@ views:
                     col_md: 6
                     fields_table: 
                         name: infos
-                              
                   
                   - type: fields_table
                     col_lg: 6
@@ -618,8 +605,6 @@ views:
                         name: client
     materiel:
         panel: 0
-#        footer_extra_btn:
-#            callback: getViewExtraBtn
         rows:    
             - cols: 
                   - type: fields_table
@@ -654,6 +639,8 @@ lists:
         delete_btn: 1
         page_btn: 1
         modal_view: default
+        extra_btn: 
+            callback: getListExtraBtn
         cols:
             ref:
                 field: ref

@@ -28,7 +28,8 @@ if (!defined('EURO'))
 
 ini_set('max_execution_time', 600);
 
-class pdf_bimpsupport_destruction2 extends ModeleBimpSupport {
+class pdf_bimpsupport_destruction2 extends ModeleBimpSupport
+{
 
     public $emetteur;    // Objet societe qui emet
 
@@ -37,7 +38,8 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport {
       \param        db        Handler acces base de donnee
      */
 
-    function __construct($db) {
+    function __construct($db)
+    {
 
         global $conf, $langs, $mysoc;
 
@@ -90,6 +92,7 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport {
 
 
 
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -106,7 +109,8 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport {
       \param        outputlangs        Lang object for output language
       \return        int             1=ok, 0=ko
      */
-    function write_file($sav, $outputlangs = '') {
+    function write_file($sav, $outputlangs = '')
+    {
         global $user, $langs, $conf;
 
         global $tabCentre;
@@ -204,12 +208,12 @@ class pdf_bimpsupport_destruction2 extends ModeleBimpSupport {
 
 
 
-                $code_entrepot = $sav->getCodeEntrepot();
+                $code_entrepot = $sav->getData('code_centre');
                 //centre
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->SetXY('49', '171.4');
-                $pdf->MultiCell(100, 6, "BIMP ".$tabCentre[$code_entrepot][2], 0, 'L');
-                
+                $pdf->MultiCell(100, 6, "BIMP " . $tabCentre[$code_entrepot][2], 0, 'L');
+
                 $adresseDest = "Palais de justice «  Novarina »
 51 rue Sommeiller 
 BP 2321
@@ -217,7 +221,7 @@ BP 2321
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
                 $pdf->SetXY('100', '55');
                 $pdf->MultiCell(100, 6, $adresseDest, 0, 'L');
-                
+
                 //client
                 $contact = "";
                 $client = $sav->getChildObject('client')->dol_object;
@@ -254,7 +258,7 @@ BP 2321
                 $product_label = $equipment->displayProduct('default', true);
                 $pdf->SetXY('45', '154.4');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-                $pdf->MultiCell(100, 6, $product_label." - ".$equipment->getData('serial'), 0, 'L');
+                $pdf->MultiCell(100, 6, $product_label . " - " . $equipment->getData('serial'), 0, 'L');
 
 
 
@@ -287,10 +291,11 @@ BP 2321
         return 0;   // Erreur par defaut
     }
 
-    function _pagehead(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage = 0) {
+    function _pagehead(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage = 0)
+    {
         global $conf, $langs;
 //        if ($currentPage > 1) {
-            $showadress = 0;
+        $showadress = 0;
 //        }
 
         $outputlangs->load("main");
@@ -462,13 +467,13 @@ BP 2321
 
         $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 12);
     }
-
     /*
      *   \brief      Affiche le pied de page
      *   \param      pdf     objet PDF
      */
 
-    function _pagefoot(&$pdf, $sav, $outputlangs) {
+    function _pagefoot(&$pdf, $sav, $outputlangs)
+    {
 
 
         $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 9);
@@ -517,10 +522,10 @@ BP 2321
         $pdf->SetTextColor(255, 63, 50);
         $pdf->SetXY(192, $Y + 55);
         $pdf->MultiCell(19, 3, '' . $pdf->PageNo() . '/{:ptp:}', 0, 'R', 0);
-
     }
 
-    function hex2RGB($hexStr, $returnAsString = false, $seperator = ',') {
+    function hex2RGB($hexStr, $returnAsString = false, $seperator = ',')
+    {
         $hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
         $rgbArray = array();
         if (strlen($hexStr) == 6) { //If a proper hex code, convert using bitwise operation. No overhead... faster
@@ -537,20 +542,22 @@ BP 2321
         }
         return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
     }
-
 }
 
-function couperChaine($chaine, $nb) {
+function couperChaine($chaine, $nb)
+{
     if (strlen($chaine) > $nb)
         $chaine = substr($chaine, 0, $nb) . "...";
     return $chaine;
 }
 
-function traiteStr($str) {
+function traiteStr($str)
+{
     return utf8_encodeRien(utf8_encodeRien(htmlspecialchars($str)));
 }
 
-function max_size($chaine, $lg_max) {
+function max_size($chaine, $lg_max)
+{
     if (strlen($chaine) > $lg_max) {
         $chaine = substr($chaine, 0, $lg_max);
         $last_space = strrpos($chaine, " ");
@@ -559,5 +566,4 @@ function max_size($chaine, $lg_max) {
 
     return $chaine;
 }
-
 ?>

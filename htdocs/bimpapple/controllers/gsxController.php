@@ -332,9 +332,19 @@ class gsxController extends BimpController
         return $html;
     }
 
-    public function renderPartsList($serial, $id_sav)
+    public function renderPartsList($serial, $id_sav = null)
     {
         $this->setSerial($serial);
+
+        $add_btn = false;
+        if (!is_null($id_sav)) {
+            $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
+            if (!is_null($sav) && $sav->isLoaded()) {
+                if ($sav->isPropalEditable()) {
+                    $add_btn = true;
+                }
+            }
+        }
 
         $parts = $this->getPartsListArray();
         $html = '';
@@ -434,14 +444,19 @@ class gsxController extends BimpController
                     $content .= '<td>' . (isset($part['exchangePrice']) ? addslashes($part['exchangePrice']) : '0') . '</td>';
                     $content .= '<td>' . (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '0') . '</td>';
 
-                    $content .= '<td>' . BimpRender::renderButton(array(
-                                'label'       => 'Ajouter au panier',
-                                'icon_before' => 'shopping-basket',
-                                'classes'     => array('btn', 'btn-default'),
-                                'attr'        => array(
-                                    'onclick' => 'addPartToCart($(this), ' . $id_sav . ')'
-                                )
-                            )) . '</td>';
+                    $content .= '<td>';
+
+                    if ($add_btn) {
+                        $content .= BimpRender::renderButton(array(
+                                    'label'       => 'Ajouter au panier',
+                                    'icon_before' => 'shopping-basket',
+                                    'classes'     => array('btn', 'btn-default'),
+                                    'attr'        => array(
+                                        'onclick' => 'addPartToCart($(this), ' . $id_sav . ')'
+                                    )
+                        ));
+                    }
+                    $content .= '</td>';
                     $content .= '</tr>';
                     $i++;
                     $odd = !$odd;
@@ -1018,6 +1033,57 @@ class gsxController extends BimpController
         $symptomCode = BimpTools::getValue('symptomesCodes', '');
 
         $html = $this->renderRequestForm($id_sav, $serial, $requestType, $symptomCode, $id_repair, $errors);
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessLoadSerialUpdateForm()
+    {
+        $errors = array();
+        $html = '';
+
+        $id_sav = BimpTools::getValue('id_sav', 0);
+        $id_repair = BimpTools::getValue('id_repair', null);
+        $serial = BimpTools::getValue('serial', '');
+        $requestType = BimpTools::getValue('request_type', '');
+
+        $gsxRequest = new GSX_Request($this->gsx, $requestType);
+
+        $valDef = array();
+
+        $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair', $id_repair);
+        if (!$repair->isLoaded()) {
+            $errors[] = 'ID de la réparation absent ou invalide';
+        } else {
+            $valDef['repairConfirmationNumber'] = $repair->getData('repair_confirm_number');
+            switch ($requestType) {
+                case 'UpdateSerialNumber':
+                    $repair->loadPartsPending();
+                    if (!count($repair->partsPending)) {
+                        $errors[] = 'Aucun composant en attente de retour';
+                    } else {
+                        $valDef['partInfo'] = array();
+                        foreach ($repair->partsPending as $partPending) {
+                            $valDef['partInfo'][] = array(
+                                'partNumber'      => $partPending['partNumber'],
+                                'partDescription' => $partPending['partDescription'],
+                            );
+                        }
+                    }
+                    break;
+
+                case 'KGBSerialNumberUpdate':
+                    break;
+            }
+
+            if (!count($errors)) {
+                $html = $gsxRequest->generateRequestFormHtml($valDef, $serial, $id_sav, $id_repair);
+            }
+        }
 
         die(json_encode(array(
             'errors'     => $errors,

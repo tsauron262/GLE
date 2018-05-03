@@ -81,7 +81,7 @@ function generatePDFFile($button, id_sav, file_type) {
                 object_name: 'BS_SAV',
                 id_object: bimpAjax.id_sav
             }));
-            if (typeof (result.file_url) !== undefined && result.file_url) {
+            if (typeof (result.file_url) !== 'undefined' && result.file_url) {
                 window.open(result.file_url);
             }
         }

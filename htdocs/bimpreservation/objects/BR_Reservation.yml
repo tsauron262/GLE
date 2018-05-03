@@ -81,6 +81,25 @@ objects:
         cards: 
             default: 
                 type: commande_fournisseur_card
+    sav: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpsupport
+                name: BS_SAV
+            id_object: 
+                field_value: id_sav
+                
+    sav_product:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpsupport
+                name: BS_SavProduct
+            id_object: 
+                field_value: id_sav_product
                 
 fields: 
     ref: 
@@ -230,6 +249,26 @@ fields:
             field_name: type
             show_values: 2
             
+    id_sav: 
+        label: SAV
+        type: id_object
+        object: sav
+        input: 
+            type: hidden
+        display_if: 
+            field_name: type
+            show_values: 4
+            
+    id_sav_product:
+        label: Ligne produit SAV
+        type: id_object
+        object: sav_product
+        input: 
+            type: hidden
+        display_if: 
+            field_name: type
+            show_values: 4
+            
     qty: 
         label: Quantité
         type: int
@@ -375,6 +414,9 @@ lists:
                 field: ref
             entrepot: 
                 field: id_entrepot
+                display: nom_url
+            sav: 
+                field: id_sav
                 display: nom_url
             product: 
                 field: id_product

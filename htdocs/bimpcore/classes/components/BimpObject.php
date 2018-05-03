@@ -118,6 +118,21 @@ class BimpObject
         return false;
     }
 
+    public static function objectLoaded($object)
+    {
+        if (!is_null($object)) {
+            if (is_a($object, 'BimpObject')) {
+                if ($object->isLoaded()) {
+                    return 1;
+                }
+            } elseif (isset($object->id) && $object->id) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     public function __construct($module, $object_name)
     {
         global $db;
@@ -271,6 +286,60 @@ class BimpObject
         return $this->params['controller'];
     }
 
+    public function getJsObjectData()
+    {
+        $js = '{';
+        $js .= 'module: \'' . $this->module . '\'';
+        $js .= ', object_name: \'' . $this->object_name . '\'';
+        $js .= ', id_object: \'' . ($this->isLoaded() ? $this->id : 0) . '\'';
+        $js .= '}';
+
+        return $js;
+    }
+
+    public function getJsActionOnclick($action, $data = array(), $params = array())
+    {
+        $js = 'setObjectAction(';
+        $js .= '$(this), ' . $this->getJsObjectData();
+        $js .= ', \'' . $action . '\', {';
+        $fl = true;
+        foreach ($data as $key => $value) {
+            if (!$fl) {
+                $js .= ', ';
+            } else {
+                $fl = false;
+            }
+            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : '\'' . $value . '\'');
+        }
+        $js .= '}, ';
+        if (isset($params['form_name'])) {
+            $js .= '\'' . $params['form_name'] . '\'';
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', ';
+        if (isset($params['result_container'])) {
+            $js .= $params['result_container'];
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', ';
+        if (isset($params['success_callback'])) {
+            $js .= $params['success_callback'];
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', ';
+        if (isset($params['confirm_msg'])) {
+            $js .= '\'' . $params['confirm_msg'] . '\'';
+        } else {
+            $js .= 'null';
+        }
+        $js .= ');';
+
+        return $js;
+    }
+
     public function field_exists($field_name)
     {
         return ($this->use_commom_fields && in_array($field_name, self::$common_fields)) ||
@@ -319,10 +388,7 @@ class BimpObject
     {
         $html = '<a href="' . $this->getUrl() . '">';
         if ($this->params['icon']) {
-            $icon = $this->getIcon();
-            if ($icon) {
-                $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
-            }
+            $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
         }
         $html .= $this->ref . '</a>';
         return $html;
@@ -881,7 +947,7 @@ class BimpObject
         return $return;
     }
 
-    public function setNewStatus($new_status, $extra_data = array())
+    public function setNewStatus($new_status, $extra_data = array(), &$warnings = array())
     {
         $new_status = (int) $new_status;
 
@@ -907,7 +973,7 @@ class BimpObject
 
         $errors = array();
         if (method_exists($this, 'onNewStatus')) {
-            $errors = $this->onNewStatus($new_status, $current_status, $extra_data);
+            $errors = $this->onNewStatus($new_status, $current_status, $extra_data, $warnings);
         }
 
         if (!count($errors)) {
@@ -1479,6 +1545,26 @@ class BimpObject
         return $errors;
     }
 
+    public function updateField($field, $value)
+    {
+        $errors = array();
+        if ($this->field_exists($field)) {
+            $errors = $this->validateValue($field, $value);
+            if (!count($errors)) {
+                if ($this->db->update($this->getTable(), array(
+                            'total_from_order_changed' => 0
+                                ), '`' . $this->getPrimary() . '` = ' . (int) $this->id) <= 0) {
+                    $sqlError = $this->db->db->lasterror();
+                    $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');
+                }
+            }
+        } else {
+            $errors[] = 'Le champ "' . $field . '" n\'existe pas';
+        }
+
+        return $errors;
+    }
+
     public function find($filters, $return_first = false)
     {
         $this->reset();
@@ -1772,9 +1858,16 @@ class BimpObject
                     if ((int) $delete = $this->getCurrentConf('delete', 0, false, 'bool')) {
                         $instance = $this->config->getObject('', $name);
                         if (!is_null($instance)) {
-                            if (!$instance->deleteByParent($id)) {
-                                $msg = 'Des erreurs sont survenues lors de la tentative de suppresion des ';
+                            $del_errors = array();
+                            if (!$instance->deleteByParent($id, $del_errors)) {
+                                $msg = 'Des erreurs sont survenues lors de la tentative de suppression des ';
                                 $msg .= $this->getInstanceLabel($instance, 'name_plur');
+                                if (count($del_errors)) {
+                                    $msg .= ':';
+                                    foreach ($del_errors as $error) {
+                                        $msg .= '<br/> - ' . $error;
+                                    }
+                                }
                                 $errors[] = $msg;
                             }
                         }
@@ -1807,7 +1900,7 @@ class BimpObject
         return $errors;
     }
 
-    public function deleteByParent($id_parent)
+    public function deleteByParent($id_parent, &$errors = array())
     {
         if (is_null($id_parent) || !$id_parent) {
             return false;
@@ -1818,11 +1911,11 @@ class BimpObject
         if (!is_null($parent_id_property) && $parent_id_property) {
             return self::deleteBy(array(
                         $parent_id_property => (int) $id_parent
-            ));
+                            ), $errors);
         }
     }
 
-    public function deleteBy($filters)
+    public function deleteBy($filters, &$errors = array())
     {
         if (is_null($filters) || !count($filters)) {
             return false;
@@ -1851,6 +1944,7 @@ class BimpObject
                     $del_errors = $this->delete();
                     if (count($del_errors)) {
                         $check = false;
+                        $errors = array_merge($errors, $del_errors);
                     }
                 }
             }
@@ -2312,7 +2406,11 @@ class BimpObject
             }
 
             $html .= '<div style="display: inline-block">';
-            $html .= '<h1>' . $name . '</h1>';
+            $html .= '<h1>';
+            if ($this->params['icon']) {
+                $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
+            }
+            $html .= $name . '</h1>';
 
             if ($this->field_exists('reference')) {
                 $ref = $this->displayData('reference');
@@ -2324,6 +2422,17 @@ class BimpObject
                 $html .= '<h2>';
                 $html .= $ref;
                 $html .= '</h2>';
+            }
+
+            if ($this->use_commom_fields) {
+                $html .= '<div class="object_header_infos">';
+                $html .= 'Créé' . ($this->isLabelFemale() ? 'e' : '') . ' le <strong>' . $this->displayData('date_create') . '</strong>';
+                $html .= ' par ' . $this->displayData('user_create', 'nom_url');
+                $html .= '</div>';
+                $html .= '<div class="object_header_infos">';
+                $html .= 'Dernière mise à jour le <strong>' . $this->displayData('date_update') . '</strong>';
+                $html .= ' par ' . $this->displayData('user_update', 'nom_url');
+                $html .= '</div>';
             }
             $html .= '</div>';
             $html .= '</div>';

@@ -181,7 +181,7 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport {
 
 
                 
-                $code_entrepot = $sav->getCodeEntrepot();
+                $code_entrepot = $sav->getData('code_centre');
 
                 //centre
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);

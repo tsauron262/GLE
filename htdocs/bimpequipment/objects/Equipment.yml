@@ -1,5 +1,6 @@
 table: be_equipment
 controller: equipment
+icon: desktop
 
 labels:
     name: équipement

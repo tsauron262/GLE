@@ -1353,6 +1353,7 @@ class BimpController
     protected function ajaxProcessSetObjectNewStatus()
     {
         $errors = array();
+        $warnings = array();
         $success = '';
 
         $module = BimpTools::getValue('module', $this->module);
@@ -1379,13 +1380,14 @@ class BimpController
             if (is_null($object) || !$object->isLoaded()) {
                 $errors[] = 'ID de l\'objet invalide';
             } else {
-                $errors = $object->setNewStatus($status, $extra_data);
+                $errors = $object->setNewStatus($status, $extra_data, $warnings);
                 $success = 'Mise à jour du statut ' . $object->getLabel('of_the') . ' ' . $object->id . ' effectué avec succès';
             }
         }
 
         die(json_encode(array(
             'errors'     => $errors,
+            'warnings'   => $warnings,
             'success'    => $success,
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
@@ -1422,11 +1424,20 @@ class BimpController
 
         ini_set('display_errors', 1);
 
-        die(json_encode(array(
-            'errors'     => $errors,
+        $return = array(
             'success'    => $success,
             'request_id' => BimpTools::getValue('request_id', 0)
-        )));
+        );
+
+        if (array_key_exists('errors', $errors)) {
+            foreach ($errors as $key => $value) {
+                $return[$key] = $value;
+            }
+        } else {
+            $return['errors'] = $errors;
+        }
+
+        die(json_encode($return));
     }
 
     // Callbacks: 

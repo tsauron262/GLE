@@ -33,10 +33,12 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     this.display_success = true;
     this.display_errors = true;
+    this.display_warnings = true;
     this.display_processing = false;
 
     this.display_success_in_popup_only = false;
     this.display_errors_in_popup_only = false;
+    this.display_warnings_in_popup_only = false;
 
     this.append_html = false;
 
@@ -51,6 +53,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     this.success = function () {
     };
+    
     this.error = function () {
     };
 
@@ -122,6 +125,32 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             bimp_msg(msg, 'danger');
         } else {
             bimp_msg(msg, 'danger', bimpAjax.$resultContainer);
+        }
+    };
+
+    this.display_result_warnings = function (warnings) {
+        if (!bimpAjax.display_warnings) {
+            return;
+        }
+
+        var msg = '';
+
+        if (typeof (warnings) !== 'undefined') {
+            if (typeof (warnings) === 'string') {
+                msg = warnings;
+            } else if (typeof (warnings) === 'object') {
+                for (var i in warnings) {
+                    msg += '- ' + warnings[i] + '<br/>';
+                }
+            }
+        }
+
+        if (msg) {
+            if (bimpAjax.display_warnings_in_popup_only) {
+                bimp_msg(msg, 'warning');
+            } else {
+                bimp_msg(msg, 'warning', bimpAjax.$resultContainer);
+            }
         }
     };
 
@@ -201,6 +230,11 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                         }
                     }
                 }
+                
+                if ((typeof (result.warnings) !== 'undefined') && result.warnings && result.warnings.length) {
+                    bimpAjax.display_result_warnings(result.warnings);
+                }
+                
                 if ($.isOk(bimpAjax.$button)) {
                     bimpAjax.$button.removeClass('disabled');
                 }

@@ -272,6 +272,7 @@ function loadRepairForm($button, id_sav, serial) {
         symptomesCodes: symptomesCodes
     }, null, {
         repairType: repairType,
+        id_sav: id_sav,
         display_success: false,
         error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé',
         success: function (result, bimpAjax) {
@@ -287,7 +288,68 @@ function loadRepairForm($button, id_sav, serial) {
                         }
                     });
                     var button_html = '<button type="button" class="extra_button save_object_button btn btn-primary"';
-                    button_html += ' onclick="sendGsxRequestFromForm($(this), \'repairForm_' + bimpAjax.repairType + '\')">';
+                    button_html += ' onclick="sendGsxRequestFromForm($(this), \'repairForm_' + bimpAjax.repairType + '\', ' + bimpAjax.id_sav + ')">';
+                    button_html += 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i></button>';
+                    $modal.find('.modal-footer').append(button_html);
+                }
+                $modal.modal('handleUpdate');
+            }
+        },
+        error: function (result) {
+            $modal.find('.content-loading').hide();
+            $modal.modal('handleUpdate');
+        }
+    });
+}
+
+function loadSerialUpdateForm($button, serial, id_sav, id_repair, request_type, title) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $button.addClass('disabled');
+    var $modal = $('#page_modal');
+    var $resultContainer = $modal.find('.modal-ajax-content');
+    $resultContainer.html('').hide();
+
+    $modal.find('.modal-title').html(title);
+    $modal.find('.loading-text').text('Chargement du formulaire');
+    $modal.find('.content-loading').show();
+    $modal.modal('show');
+
+    var isCancelled = false;
+
+    $modal.on('hide.bs.modal', function (e) {
+        $modal.find('.extra_button').remove();
+        $modal.find('.content-loading').hide();
+        isCancelled = true;
+        $button.removeClass('disabled');
+    });
+
+    BimpAjax('loadSerialUpdateForm', {
+        serial: serial,
+        id_sav: id_sav,
+        id_repair: id_repair,
+        request_type: request_type
+    }, null, {
+        id_repair: id_repair,
+        request_type: request_type,
+        display_success: false,
+        error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé',
+        success: function (result, bimpAjax) {
+            var $modal = $('#page_modal');
+            var $resultContainer = $modal.find('.modal-ajax-content');
+            $modal.find('.content-loading').hide();
+            if (!isCancelled) {
+                if (typeof (result.html) !== 'undefined') {
+                    $resultContainer.html(result.html).slideDown(250, function () {
+                        var $form = $(this).find('.request_form');
+                        if ($form.length) {
+                            onRepairFormLoaded($form);
+                        }
+                    });
+                    var button_html = '<button type="button" class="extra_button save_object_button btn btn-primary"';
+                    button_html += ' onclick="sendGsxRequestFromForm($(this), \'repairForm_' + bimpAjax.request_type + '\', ' + bimpAjax.id_sav + ')">';
                     button_html += 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i></button>';
                     $modal.find('.modal-footer').append(button_html);
                 }
@@ -356,7 +418,7 @@ function addPartToCart($button, id_sav) {
     }
 }
 
-function sendGsxRequestFromForm($button, $form_id) {
+function sendGsxRequestFromForm($button, $form_id, id_sav) {
     var $form = $('#' + $form_id);
     if (!$form.length) {
         bimp_msg('Erreur - formulaire absent', 'danger');
@@ -367,11 +429,15 @@ function sendGsxRequestFromForm($button, $form_id) {
 
     BimpAjax('sendGSXRequest', data, $form.find('.ajaxResultContainer'), {
         $button: $button,
+        id_sav: id_sav,
         display_processing: true,
         processing_padding: 20,
         append_html: true,
         processData: false,
-        contentType: false
+        contentType: false,
+        success: function (result, bimpAjax) {
+            reloadRepairsViews(bimpAjax.id_sav);
+        }
     });
 }
 
@@ -383,7 +449,7 @@ function sendGsxRequest($button, data, $resultContainer, successCallback) {
         append_html: true,
         success: function (result, bimpAjax) {
             if (typeof (successCallback) === 'function') {
-                successCallback();
+                successCallback(result);
             }
         }
     });

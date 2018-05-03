@@ -15,6 +15,7 @@ objects:
                 name: BS_SAV
             id_object: 
                 field_value: id_sav
+                
 fields: 
     serial: 
         label: N° de série
@@ -52,6 +53,10 @@ fields:
     date_closed: 
         label: Date de fermeture
         type: date
+    total_from_order_changed: 
+        label: Total commande mis à jour
+        type: bool
+        default_value: 0
         
 forms: 
     import: 
@@ -74,8 +79,7 @@ forms:
                       prop: 
                           name: lookupNumbers
                           is_static: 1
-                          
-                
+            
 fields_tables:
     infos: 
         title: Informations

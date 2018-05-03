@@ -21,6 +21,11 @@ class Bimp_Product extends BimpObject
         return 0;
     }
 
+    public function isNotSerialisable()
+    {
+        return (int) !$this->isSerialisable();
+    }
+
     public function getDolObjectUpdateParams()
     {
         global $user;
@@ -65,7 +70,7 @@ class Bimp_Product extends BimpObject
 
             $stocks['dispo'] = $stocks['reel'] - $stocks['total_reserves'];
         }
-        
+
         return $stocks;
     }
 }

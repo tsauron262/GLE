@@ -30,6 +30,12 @@ sections:
                               name: default
                               panel: 1
                               object: sav
+                    - cols: 
+                        - type: list
+                          list:
+                              name: sav
+                              object: sav
+                              children: prets
                               
           - id: materiel
             title: Matériel
@@ -45,12 +51,12 @@ sections:
                         - type: list
                           list: 
                               object: sav
-                              children: apple_parts
+                              children: products          
                     - cols: 
                         - type: list
                           list: 
                               object: sav
-                              children: products          
+                              children: apple_parts
             
           - id: notes
             title: Notes

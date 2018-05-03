@@ -122,7 +122,7 @@ class GSX
     protected $wsdlUrl;
     protected $userSessionId;
     protected $soapClient;
-    public static $apiMode = 'production';
+    public static $apiMode = 'ut';
     public $shipTo = '';
     public $connect = false;
     public $isIphone = false;
@@ -138,9 +138,6 @@ class GSX
 
         $this->isIphone = $isIphone;
         
-        if (defined('PRODUCTION_APPLE') && PRODUCTION_APPLE) {
-            self::$apiMode = 'production';
-        }
 
 //        $userId = 'sav@bimp.fr';
 //        $password = '@Savbimp2014#';
@@ -255,7 +252,7 @@ class GSX
             echo "Pas de certif pour se soldTo " . $soldTo;
             return 0;
         }
-        $typeCertif = ($this->apiMode == 'ut') ? 0 : 1;
+        $typeCertif = (self::$apiMode == 'ut') ? 0 : 1;
         $certif = $tabCert[$soldTo][$typeCertif];
 
 
@@ -602,15 +599,17 @@ class GSX
             ),
         );
 
-        try {
-            $compTIAAnswer = $this->soapClient->CompTIACodes($compTIARequest);
-        } catch (SoapFault $fault) {
-            return $this->soap_error($fault->faultcode, $fault->faultstring);
+        if(is_object($this->soapClient)){
+            try {
+                $compTIAAnswer = $this->soapClient->CompTIACodes($compTIARequest);
+            } catch (SoapFault $fault) {
+                return $this->soap_error($fault->faultcode, $fault->faultstring);
+            }
+
+            $compTIAAnswer = $this->_objToArr($compTIAAnswer);
+
+            return $compTIAAnswer;
         }
-
-        $compTIAAnswer = $this->_objToArr($compTIAAnswer);
-
-        return $compTIAAnswer;
     }
 // HELPER FUNCTIONS
 

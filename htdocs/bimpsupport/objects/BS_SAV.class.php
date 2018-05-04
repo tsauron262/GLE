@@ -437,7 +437,7 @@ class BS_SAV extends BimpObject
         if ($this->isLoaded()) {
             $equipment = $this->getChildObject('equipment');
             if (!is_null($equipment) && $equipment->isLoaded()) {
-                return $equipment->displayProduct('default', true);
+                return $equipment->displayProduct('nom', true);
             }
         }
 
@@ -1074,13 +1074,13 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                 $mail_msg = "Merci d'avoir choisi BIMP en tant que Centre de Services Agréé Apple.\n";
                 $mail_msg .= 'La référence de votre dossier de réparation est : ' . $this->getData('ref') . ", ";
                 $mail_msg .= "si vous souhaitez communiquer d'autres informations merci de répondre à ce mail ou de contacter le " . $tel . ".\n";
-                $sms = "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre produit commence, nous vous recontacterons quand celui-ci sera fini.\nL'équipe BIMP";
+                $sms = "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre \"" . $nomMachine . "\" commence, nous vous recontacterons quand celui-ci sera fini.\nL'équipe BIMP";
                 break;
 
             case 'debDiago':
                 $subject = "Prise en charge " . $this->getData('ref');
-                $mail_msg = "Nous avons commencé le diagnostic de votre produit, vous aurez rapidement des nouvelles de notre part. ";
-                $sms = "Nous avons commencé le diagnostic de votre produit, vous aurez rapidement des nouvelles de notre part.\nVotre centre de services Apple.";
+                $mail_msg = "Nous avons commencé le diagnostic de votre \"$nomMachine\", vous aurez rapidement des nouvelles de notre part. ";
+                $sms = "Nous avons commencé le diagnostic de votre \" $nomMachine \", vous aurez rapidement des nouvelles de notre part.\nVotre centre de services Apple.";
                 break;
 
             case 'commOk':
@@ -1091,22 +1091,22 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
             case 'repOk':
                 $subject = $this->getData('ref') . " Reparation  terminee";
-                $mail_msg = "Nous avons le plaisir de vous annoncer que la réparation de votre produit est finie.\n";
+                $mail_msg = "Nous avons le plaisir de vous annoncer que la réparation de votre \"$nomMachine\" est finie.\n";
                 $mail_msg .= "Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel;
                 $sms = "Bonjour, la réparation de votre produit est finie. Vous pouvez le récupérer à " . $nomCentre . " " . $delai . ".\nL'Equipe BIMP.";
                 break;
 
             case 'revPropRefu':
                 $subject = "Prise en charge " . $this->getData('ref') . " terminée";
-                $mail_msg = "la réparation de votre produit est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . "\n";
+                $mail_msg = "la réparation de votre \"$nomMachine\" est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . "\n";
                 $mail_msg .= "Si vous souhaitez plus de renseignements, contactez le " . $tel;
-                $sms = "Bonjour, la réparation de votre produit  est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ".\nL'Equipe BIMP.";
+                $sms = "Bonjour, la réparation de votre \"$nomMachine\"  est refusée. Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ".\nL'Equipe BIMP.";
                 break;
 
             case 'pieceOk':
                 $subject = "Pieces recues " . $this->getData('ref');
-                $mail_msg = "La pièce/le produit que nous avions commandé pour votre Machine est arrivé aujourd'hui. Nous allons commencer la réparation de votre appareil.\n";
-                $mail_msg .= "Vous serez prévenu dès que l'appareil sera prêt.";
+                $mail_msg = "La pièce/le produit que nous avions commandé pour votre \"$nomMachine\" est arrivé aujourd'hui. Nous allons commencer la réparation de votre appareil.\n";
+                $mail_msg .= "Vous serez prévenu dès qu'il sera prêt.";
                 $sms = "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt.\nL'Equipe BIMP.";
                 break;
 
@@ -2014,6 +2014,10 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         }
 
         $this->generatePDF('pc', $errors);
+
+        if (BimpTools::getValue('send_msg', 0)) {
+            $this->sendMsg('debut');
+        }
 
         return $errors;
     }

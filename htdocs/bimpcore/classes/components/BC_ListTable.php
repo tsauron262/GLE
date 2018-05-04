@@ -45,6 +45,7 @@ class BC_ListTable extends BC_List
         $this->params_def['extra_cols'] = array('data_type' => 'array');
         $this->params_def['enable_search'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['enable_refresh'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['enable_edit'] = array('data_type' => 'bool', 'default' => 1);
 
         $path = null;
 
@@ -153,7 +154,7 @@ class BC_ListTable extends BC_List
 
 
                         if ($col_params['field']) {
-                            $field = new BC_Field($this->object, $col_params['field'], $col_params['edit']);
+                            $field = new BC_Field($this->object, $col_params['field'], ($this->params['enable_edit'] && $col_params['edit']));
                             $field->display_name = $col_params['display'];
 
                             if (isset($new_values[$col_params['field']])) {
@@ -728,7 +729,7 @@ class BC_ListTable extends BC_List
 
                 $this->setConfPath();
 
-                if ($item_params['update_btn']) {
+                if ($this->params['enable_edit'] && $item_params['update_btn']) {
                     $rowButtons[] = array(
                         'class'   => 'cancelModificationsButton hidden',
                         'icon'    => 'undo',

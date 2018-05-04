@@ -24,6 +24,7 @@ class Equipment extends BimpObject
         parent::__construct("bimpequipment", get_class($this));
         $this->iconeDef = "fa-laptop";
     }
+    
     public function getRef(){
         return $this->getData("serial");
     }

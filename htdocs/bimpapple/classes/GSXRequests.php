@@ -572,10 +572,6 @@ class GSX_Request
 
         $html .= '<div class="formSus" id="formSus_' . $this->requestName . '"></div>';
 
-        if ($this->requestName === "CreateIPhoneRepairOrReplace") {
-            
-        }
-
         $html .= '<div class="ajaxResultContainer" style="display: none"></div>';
         $html .= '</form>';
         $html .= '</div>';

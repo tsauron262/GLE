@@ -37,7 +37,6 @@ require_once("../main.inc.php");
 
 ini_set('display_errors', 1);
 require_once __DIR__ . '/Bimp_Lib.php';
-require_once __DIR__ . '/classes/BimpTicket.php';
 
 //llxHeader();
 
@@ -66,7 +65,6 @@ echo '<body>';
 //echo 'window.print();';
 //echo '});';
 //echo '</script>';
-
 //$sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
 //$errors = $sav->validateArray(array(
 //    'status'       => 3,
@@ -81,6 +79,15 @@ echo '<body>';
 //echo '<pre>';
 //print_r($errors);
 //exit;
+
+BimpObject::loadClass('bimpapple', 'GSX_CompTIA');
+
+GSX_CompTIA::updateCodesFromGSX();
+
+echo '<pre>';
+print_r(GSX_CompTIA::getCompTIACodes());
+print_r(GSX_CompTIA::getCompTIAModifiers());
+echo '</pre>';
 
 echo '</body></html>';
 

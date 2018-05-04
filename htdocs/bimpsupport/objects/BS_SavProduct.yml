@@ -18,6 +18,27 @@ objects:
                 name: Bimp_Product
             id_object: 
                 field_value: id_product
+                
+    equipment: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+            id_object: 
+                field_value: id_equipment
+                
+    reservation: 
+        relation: hasOne
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpreservation
+                name: BR_Reservation
+            id_object: 
+                field_value: id_reservation
+                
 fields: 
     id_sav: 
         label: SAV
@@ -29,7 +50,32 @@ fields:
         input: 
             type: search_product
             filter_type: both
+            help: Entrez la référence ou le nom d'un produit ou d'un service pour effectuer une recherche
         required: 1
+    id_equipment: 
+        label: Equipement
+        type: id_object
+        object: equipment
+        input: 
+            type: search_list
+            search_list:
+                table: be_equipment e
+                field_return_value: e.id
+                field_return_label: e.serial
+                fields_search: e.serial,e.id
+            help: Numéro de série ou ID d'un équipement<br/>Laissez vide pour attribuer un équipement ultérieurement
+        create_form: light
+        display: 
+            default: 
+                type: callback
+                method: displayEquipment
+    id_reservation: 
+        label: Réservation
+        type: id_object
+        object: reservation
+        input: 
+            type: hidden
+        default_value: 0
     qty: 
         label: Quantité
         type: int
@@ -40,23 +86,40 @@ fields:
         label: Hors garantie
         type: bool
         default_value: 0
-        
+    
+forms: 
+    equipment: 
+        rows: 
+            - field: id_equipment
+            
 lists: 
     default: 
         title: Produits / Services
         icon: bars
-        checkboxes: 1
+        checkboxes: 
+            callback: isPropalEditable
         bulk_actions:
             - label: Retirer les produits / services sélectionnés
               icon: trash
               onclick: deleteSelectedObjects('list_id', $(this))
         enable_search: 0
+        enable_edit: 
+            callback: isPropalEditable
         sort_field: id
         sort_way: desc
         n: 25
-        delete_btn: 1
+        delete_btn: 
+            callback: isPropalEditable
         update_btn: 1
+        add_btn: 
+            callback: isPropalEditable
         add_form_name: default
+        edit_btn: 
+            callback: 
+                object: product
+                method: isSerialisable
+        edit_form: equipment
+        objects_change_reload: BS_SAV
         cols: 
             product: 
                 field: id_product
@@ -65,13 +128,18 @@ lists:
                 label: Désignation
                 value: 
                     callback: displayProduct
+            equipement:
+                field: id_equipment
             unit_price: 
                 label: PU TTC
                 value: 
                     callback: displayUnitPrice
             qty: 
                 field: qty
-                edit: 1
+                edit:
+                    callback: 
+                        object: product
+                        method: isNotSerialisable
             price: 
                 label: Total TTC
                 value: 

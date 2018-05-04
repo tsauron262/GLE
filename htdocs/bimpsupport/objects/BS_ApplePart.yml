@@ -55,17 +55,22 @@ lists:
     default: 
         title: Panier de composants Apple
         icon: shopping-basket
-        checkboxes: 1
+        checkboxes:
+            callback: isCartEditable
         bulk_actions:
             - label: supprimer les composants sélectionnés
               icon: trash
               onclick: deleteSelectedObjects('list_id', $(this))
         enable_search: 0
+        enable_edit: 
+            callback: isCartEditable
         sort_field: id
         sort_way: desc
         n: 25
-        delete_btn: 1
-        update_btn: 1
+        delete_btn: 
+            callback: isCartEditable
+        update_btn: 
+            callback: isCartEditable
         cols: 
             label: 
                 label: Nom

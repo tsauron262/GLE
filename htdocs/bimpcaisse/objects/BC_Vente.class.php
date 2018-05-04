@@ -1426,6 +1426,7 @@ class BC_Vente extends BimpObject
             // Gestion des stocks et emplacements: 
 
             $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+            $id_client = (int) $this->getData('id_client');
             foreach ($articles as $article) {
                 $id_entrepot = (int) $this->getData('id_entrepot');
                 $equipment = $article->getChildObject('equipment');
@@ -1451,7 +1452,6 @@ class BC_Vente extends BimpObject
                     }
 
                     // Création du nouvel emplacement: 
-                    $id_client = (int) $this->getData('id_client');
                     if ($id_client) {
                         $place_errors = $place->validateArray(array(
                             'id_equipment' => (int) $equipment->id,

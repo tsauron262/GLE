@@ -278,6 +278,11 @@ function submitForm(form_id) {
         var $btn = $modal.find('.modal-footer').find('.save_object_button');
         if ($btn.length) {
             $btn.click();
+        } else {
+            $btn = $modal.find('.modal-footer').find('.set_action_button');
+            if ($btn.length) {
+                $btn.click();
+            }
         }
     } else {
         var $container = $('#' + form_id + '_container');
@@ -285,6 +290,11 @@ function submitForm(form_id) {
             var $btn = $container.find('.save_object_button');
             if ($btn.length) {
                 $btn.click();
+            } else {
+                $btn = $container.find('.set_action_button');
+                if ($btn.length) {
+                    $btn.click();
+                }
             }
         }
     }
@@ -985,14 +995,22 @@ function setFormEvents($form) {
         var field_name = $(this).data('field_name');
         var $input = $(this).find('[name="' + field_name + '"]');
         if ($input.length) {
-            $input.keyup(function (e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    submitForm($form.attr('id'));
-                }
-            });
+            if ($input.tagName() !== 'textarea') {
+                $input.keyup(function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        submitForm($form.attr('id'));
+                    }
+                });
+            }
         }
+    });
+
+    $form.submit(function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        submitForm($form.attr('id'));
     });
 }
 

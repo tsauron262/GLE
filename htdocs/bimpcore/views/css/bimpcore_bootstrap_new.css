@@ -15929,38 +15929,45 @@ tbody td.positionHandle {
   margin-top: 0;
 }
 /* line 109, ../scss/bimpcore_new/_view.scss */
+.object_header .object_header_infos {
+  margin: 3px 0 0 0;
+  font-style: italic;
+  color: #787878;
+  font-size: 11px;
+}
+/* line 116, ../scss/bimpcore_new/_view.scss */
 .object_header .header_status {
   display: inline-block;
   font-size: 15px;
   margin: 5px 10px;
 }
-/* line 115, ../scss/bimpcore_new/_view.scss */
+/* line 122, ../scss/bimpcore_new/_view.scss */
 .object_header .header_button {
   vertical-align: top;
   display: inline-block;
   margin: 2px 25px 0 0;
 }
-/* line 121, ../scss/bimpcore_new/_view.scss */
+/* line 128, ../scss/bimpcore_new/_view.scss */
 .object_header .header_buttons {
   text-align: right;
   margin-top: 10px;
 }
-/* line 125, ../scss/bimpcore_new/_view.scss */
+/* line 132, ../scss/bimpcore_new/_view.scss */
 .object_header .header_buttons .btn {
   margin: 3px 5px;
 }
-/* line 130, ../scss/bimpcore_new/_view.scss */
+/* line 137, ../scss/bimpcore_new/_view.scss */
 .object_header .header_bottom {
   margin-top: 10px;
   padding: 5px;
   border-top: 2px solid #636363;
 }
 
-/* line 137, ../scss/bimpcore_new/_view.scss */
+/* line 144, ../scss/bimpcore_new/_view.scss */
 .object_card {
   margin-top: 0;
 }
-/* line 140, ../scss/bimpcore_new/_view.scss */
+/* line 147, ../scss/bimpcore_new/_view.scss */
 .object_card .object_card_status {
   display: inline-block;
   text-align: right;
@@ -15968,17 +15975,17 @@ tbody td.positionHandle {
   margin-left: 15px;
 }
 
-/* line 147, ../scss/bimpcore_new/_view.scss */
+/* line 154, ../scss/bimpcore_new/_view.scss */
 .object_card_table {
   width: 100%;
   margin-top: 5px;
 }
-/* line 152, ../scss/bimpcore_new/_view.scss */
+/* line 159, ../scss/bimpcore_new/_view.scss */
 .object_card_table tbody tr th, .object_card_table tbody tr td {
   padding: 0 5px;
   border-bottom: 1px solid #fff;
 }
-/* line 157, ../scss/bimpcore_new/_view.scss */
+/* line 164, ../scss/bimpcore_new/_view.scss */
 .object_card_table tbody tr th {
   width: 20%;
   min-width: 120px;
@@ -15988,29 +15995,29 @@ tbody td.positionHandle {
   background-color: #fff;
   color: #282828;
 }
-/* line 167, ../scss/bimpcore_new/_view.scss */
+/* line 174, ../scss/bimpcore_new/_view.scss */
 .object_card_table tbody tr td {
   color: #282828;
   background-color: #fff;
 }
 
-/* line 173, ../scss/bimpcore_new/_view.scss */
+/* line 180, ../scss/bimpcore_new/_view.scss */
 .object_common_fields {
   margin: 5px 0;
   background-color: whitesmoke;
 }
-/* line 177, ../scss/bimpcore_new/_view.scss */
+/* line 184, ../scss/bimpcore_new/_view.scss */
 .object_common_fields table {
   width: 100%;
   border: none;
 }
-/* line 182, ../scss/bimpcore_new/_view.scss */
+/* line 189, ../scss/bimpcore_new/_view.scss */
 .object_common_fields table tbody tr th, .object_common_fields table tbody tr td {
   padding: 3px 5px;
   font-size: 12px;
   border-bottom: 1px solid #fff;
 }
-/* line 188, ../scss/bimpcore_new/_view.scss */
+/* line 195, ../scss/bimpcore_new/_view.scss */
 .object_common_fields table tbody tr th {
   font-weight: normal;
   color: gainsboro;
@@ -16021,18 +16028,18 @@ tbody td.positionHandle {
   vertical-align: top;
   background-color: #636363;
 }
-/* line 199, ../scss/bimpcore_new/_view.scss */
+/* line 206, ../scss/bimpcore_new/_view.scss */
 .object_common_fields table tbody tr td {
   color: #282828;
   border-bottom: 1px solid gainsboro;
   vertical-align: middle;
 }
 
-/* line 207, ../scss/bimpcore_new/_view.scss */
+/* line 214, ../scss/bimpcore_new/_view.scss */
 .multiple_values_items_list {
   padding: 5px;
 }
-/* line 210, ../scss/bimpcore_new/_view.scss */
+/* line 217, ../scss/bimpcore_new/_view.scss */
 .multiple_values_items_list .multiple_values_item {
   margin: 5px 0;
   border: 1px solid #b4b4b4;

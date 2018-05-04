@@ -26,6 +26,7 @@ class BC_List extends BC_Panel
         $this->params_def['association_filters'] = array('data_type' => 'array', 'default' => array(), 'request' => true, 'json' => true);
         $this->params_def['joins'] = array('type' => 'definitions', 'defs_type' => 'join', 'multiple' => true, 'request' => true, 'json' => true);
 
+        $this->params_def['add_btn'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['add_form_name'] = array();
         $this->params_def['add_form_values'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['add_form_title'] = array();
@@ -223,7 +224,7 @@ class BC_List extends BC_Panel
             $this->items = array();
             return;
         }
-        
+
         $primary = $this->object->getPrimary();
 
         // Jointures: 
@@ -424,7 +425,7 @@ class BC_List extends BC_Panel
     {
         $buttons = array();
 
-        if (!is_null($this->params['add_form_name']) && $this->params['add_form_name']) {
+        if ((int) $this->params['add_btn'] && !is_null($this->params['add_form_name']) && $this->params['add_form_name']) {
             $label = '';
             if ($this->object->config->isDefined('forms/' . $this->params['add_form_name'] . '/label')) {
                 $label = $this->object->getConf('forms/' . $this->params['add_form_name'] . '/label', '');

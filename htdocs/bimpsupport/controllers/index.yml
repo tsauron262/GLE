@@ -17,6 +17,14 @@ objects:
         instance: 
             bimp_object: BS_SAV
             
+    pret: 
+        instance: 
+            bimp_object: BS_Pret
+            
+    sav_pret: 
+        instance: 
+            bimp_object: BS_SavPret
+            
 sections:
     - type: tabs
       tabs: 
@@ -37,3 +45,15 @@ sections:
                 - type: list
                   list: 
                       object: sav
+        pret: 
+            label: Matériels de prêt
+            sections: 
+                - type: list
+                  list: 
+                      object: pret
+        sav_prets:
+            label: Prêts
+            sections: 
+                - type: list
+                  list: 
+                      object: sav_pret

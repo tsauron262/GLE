@@ -172,7 +172,7 @@ function setObjectNewStatus(module, object_name, id_object, new_status, $resultC
 
 function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg) {
     if (typeof (confirm_msg) === 'string') {
-        if (!confirm(confirm_msg.replace('&quotes;', '"'))) {
+        if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
             return;
         }
     }
@@ -217,8 +217,12 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                             }
                             extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
                         });
-                        setObjectAction($(this), object_data, action, extra_data, null, $('#' + $form.attr('id') + '_result'), function () {
-                            $modal.modal('hide');
+                        setObjectAction($(this), object_data, action, extra_data, null, $('#' + $form.attr('id') + '_result'), function (result) {
+                            if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
+                                $modal.find('.modal-footer').find('.set_action_button').remove();
+                            } else {
+                                $modal.modal('hide');
+                            }
                             if (typeof (successCallback) === 'function') {
                                 successCallback();
                             }

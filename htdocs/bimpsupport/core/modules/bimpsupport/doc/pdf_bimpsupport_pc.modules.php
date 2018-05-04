@@ -151,7 +151,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $pdf->MultiCell(100, 6, $ref, 0, 'L');
 
             //centre
-            $code_entrepot = $sav->getCodeEntrepot();
+            $code_entrepot = $sav->getData('code_centre');
 
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
             $pdf->SetXY('147', '32.5');

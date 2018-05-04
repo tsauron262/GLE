@@ -32,6 +32,7 @@
  *      Usage: $smsfile = new CSMSFile($subject,$sendto,$replyto,$message,$filepath,$mimetype,$filename,$cc,$ccc,$deliveryreceipt,$msgishtml,$errors_to);
  *             $smsfile->sendfile();
  */
+
 class CSMSFile
 {
     var $error='';

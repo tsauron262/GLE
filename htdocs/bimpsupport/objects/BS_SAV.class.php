@@ -1009,10 +1009,8 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             $tech = $user_tech->dol_object->getFullName($langs);
         }
 
-        // todo: page à refaire: 
-//        $textSuivie = "\n <a href='" . DOL_MAIN_URL_ROOT . "/synopsis_chrono_public/page.php?back_serial=" . $chrono->id . "&user_name=" . substr($chrono->societe->name, 0, 3) . "'>Vous pouvez suivre l'intervention ici.</a>";
+        $textSuivie = "\n <a href='" . DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $chrono->id . "&user_name=" . substr($chrono->societe->name, 0, 3) . "'>Vous pouvez suivre l'intervention ici.</a>";
 
-        $textSuivie = '';
 
         if (!$msg_type) {
             if (BimpTools::isSubmit('msg_type')) {

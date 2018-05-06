@@ -58,7 +58,6 @@ class ActionsSynopsisHisto {
        }
 
         
-       if($user->array_options['options_mail_sec'] == "" || $user->office_phone == ""){
             if($user->office_phone == ""){
                  setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
                  setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
@@ -78,7 +77,13 @@ class ActionsSynopsisHisto {
                  setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
                  setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours</a>", null, 'errors');
             }
-       }
+            elseif(stripos($user->array_options['options_mail_sec'], "@") === false){
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours valide</a>", null, 'errors');
+            }
+            elseif(stripos($user->array_options['options_mail_sec'], "@bimp.fr") > 0){
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours non bimp</a>", null, 'errors');
+            }
+       
        
        
 

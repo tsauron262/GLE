@@ -182,7 +182,6 @@ class synopsisHook {//FA1506-0369
             elseif(IP_ADMIN == $_SERVER['REMOTE_ADDR'])
                 $admin = true;
         }
-        echo $_SERVER['REMOTE_ADDR'];
 
         if (defined("CLOSE_DATE") && !stripos($_SERVER['REQUEST_URI'], 'close.php') && !$admin) {
             $langs->load("main");

@@ -603,7 +603,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
                 date("i", $date_paques),
                 date("s", $date_paques),
                 date("m", $date_paques),
-                date("d", $date_paques) + 39,
+                date("d", $date_paques) + 38,
                 date("Y", $date_paques)
             );
 			$jour_ascension = date("d", $date_ascension);

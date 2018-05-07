@@ -49,7 +49,7 @@ class GSX_Repair extends BimpObject
     {
         $filters = array();
 
-        $fields = array('id_sav', 'serial', 'rapair_number', 'repair_confirm_number', 'serial_update_confirm_number');
+        $fields = array('id_sav', 'serial', 'repair_number', 'repair_confirm_number', 'serial_update_confirm_number');
 
         foreach ($fields as $field_name) {
             $value = $this->getData($field_name);

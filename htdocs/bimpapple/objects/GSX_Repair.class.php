@@ -87,7 +87,7 @@ class GSX_Repair extends BimpObject
                 break;
 
             case 'repairNumber':
-                $this->set('repair_confirm_number', $number);
+                $this->set('repair_number', $number);
                 break;
 
             case 'serialNumber':

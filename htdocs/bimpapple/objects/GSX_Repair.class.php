@@ -182,7 +182,7 @@ class GSX_Repair extends BimpObject
                 if (!is_dir(DOL_DATA_ROOT . $labelDir)) {
                     mkdir(DOL_DATA_ROOT . $labelDir);
                 }
-                if (isset($part['returnOrderNumber']) && isset($part['partNumber'])) {
+                if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] != "" && isset($part['partNumber'])) {
                     if ($this->isIphone) {
                         $client2 = 'IPhoneReturnLabel';
                     } else {

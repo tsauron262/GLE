@@ -204,7 +204,7 @@ class GSX_Repair extends BimpObject
                             if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']) === false)
                                 $fileName = null;
                         }
-                        $fileName2 = "/document.php?modulepart=bimpcore&file=" . urlencode('bimpsupport/sav/' . $id_sav . "/" . $fileNamePure);
+                        $fileName2 = "/document.php?modulepart=bimpcore&file=" . 'bimpsupport/sav/' . $id_sav . "/" . $fileNamePure;
                     }
                 }
                 $this->partsPending[] = array(

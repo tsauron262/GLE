@@ -789,7 +789,7 @@ class GSX_Repair extends BimpObject
             $html .= '<th>Réf.</th>';
             $html .= '<th>N° de retour</th>';
             $html .= '<th>registeredForReturn</th>';
-            $html .= '<th>File</th>';
+            $html .= '<th>Etiquette</th>';
             $html .= '</thead>';
 
             $html .= '<tbody>';
@@ -799,7 +799,7 @@ class GSX_Repair extends BimpObject
                 $html .= '<td>' . $part['partNumber'] . '</td>';
                 $html .= '<td>' . $part['returnOrderNumber'] . '</td>';
                 $html .= '<td>' . $part['registeredForReturn'] . '</td>';
-                $html .= '<td>' . $part['fileName'] . '</td>';
+                $html .= '<td>' . ($part['fileName'] != ""? '<a href="'.DOL_URL_ROOT.$part['fileName'].'">Etiquette</a>': '') . '</td>';
                 if (file_exists(DOL_DATA_ROOT . '/bimpcore/bimpsupport/sav/' . (int) $this->getData('id_sav') . '/' . $part['fileName'])) {
                     $html .= '<a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="btn btn-default">';
                     $html .= '<i class="fa fa-file-o iconLeft"></i>Etiquette de retour</a>';

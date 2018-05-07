@@ -178,6 +178,7 @@ class GSX_Repair extends BimpObject
             }
             $id_sav = (int) $this->getData('id_sav');
             foreach ($partsPending as $part) {
+                dol_syslog(print_r($part,1),3);
                 $fileName = null;
                 $labelDir = '/bimpcore/bimpsupport/sav/' . $id_sav . '';
                 if (!is_dir(DOL_DATA_ROOT . $labelDir)) {
@@ -198,6 +199,7 @@ class GSX_Repair extends BimpObject
 
                     $labelResponse = $this->gsx->request($request, $client2);
 
+                dol_syslog(print_r($labelResponse,1),3);
                     if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
                         $fileNamePure = str_replace("/", "_", $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName']);
                         $fileName = $labelDir . "/" . $fileNamePure;

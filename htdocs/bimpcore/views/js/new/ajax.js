@@ -53,7 +53,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
     this.success = function () {
     };
-    
+
     this.error = function () {
     };
 
@@ -178,6 +178,11 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             bimpAjax.nologged(bimpAjax);
             return;
         }
+
+        $('body').find('.bs-popover').each(function () {
+            $(this).popover('hide');
+        });
+        
         $.ajax({
             url: bimpAjax.url,
             type: bimpAjax.type,
@@ -228,13 +233,16 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                         if (typeof (bimpAjax.success) === 'function') {
                             bimpAjax.success(result, bimpAjax);
                         }
+                        if (result.success_callback && typeof (result.success_callback) === 'string') {
+                            eval(result.success_callback);
+                        }
                     }
                 }
-                
+
                 if ((typeof (result.warnings) !== 'undefined') && result.warnings && result.warnings.length) {
                     bimpAjax.display_result_warnings(result.warnings);
                 }
-                
+
                 if ($.isOk(bimpAjax.$button)) {
                     bimpAjax.$button.removeClass('disabled');
                 }

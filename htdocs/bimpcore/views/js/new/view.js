@@ -90,6 +90,7 @@ function loadModalView(module, object_name, id_object, view_name, $button, title
 
     var $modal = $('#page_modal');
     var $resultContainer = $modal.find('.modal-ajax-content');
+    hidePopovers($resultContainer);
     $resultContainer.html('').hide();
 
     if (typeof (title) === 'undefined' || !title) {

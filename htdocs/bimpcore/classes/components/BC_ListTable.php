@@ -22,17 +22,19 @@ class BC_ListTable extends BC_List
         'td_style'        => array('default' => '')
     );
     public $col_params = array(
-        'show'      => array('data_type' => 'bool', 'default' => 1),
-        'field'     => array('default' => ''),
-        'edit'      => array('data_type' => 'bool', 'default' => 0),
-        'history'   => array('data_type' => 'bool', 'default' => 0),
-        'display'   => array('default' => ''),
-        'label'     => array('default' => ''),
-        'value'     => array('default' => ''),
-        'width'     => array('default' => null),
-        'min_width' => array('default' => null),
-        'max_width' => array('default' => null),
-        'hidden'    => array('data_type' => 'bool', 'default' => 0)
+        'show'        => array('data_type' => 'bool', 'default' => 1),
+        'field'       => array('default' => ''),
+        'edit'        => array('data_type' => 'bool', 'default' => 0),
+        'history'     => array('data_type' => 'bool', 'default' => 0),
+        'display'     => array('default' => ''),
+        'label'       => array('default' => ''),
+        'value'       => array('default' => ''),
+        'width'       => array('default' => null),
+        'min_width'   => array('default' => null),
+        'max_width'   => array('default' => null),
+        'hidden'      => array('data_type' => 'bool', 'default' => 0),
+        'search_list' => array('data_type' => 'array', 'compile' => true, 'default' => null),
+        'field_name'  => array()
     );
 
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
@@ -376,18 +378,32 @@ class BC_ListTable extends BC_List
         }
 
         foreach ($this->cols as $col_name) {
+            $html .= '<td>';
             if ($this->setConfPath('cols/' . $col_name)) {
                 $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params);
-                $html .= '<td>';
+
                 if (in_array($col_params['field'], BimpObject::$common_fields)) {
                     $html .= $this->object->getCommonFieldSearchInput($col_params['field']);
                 } elseif ($col_params['field']) {
                     $field = new BC_Field($this->object, $col_params['field'], true);
                     $html .= $field->renderSearchInput();
                     unset($field);
+                } elseif (!is_null($col_params['search_list']) && !is_null($col_params['field_name'])) {
+                    $input_name = 'search_' . $col_params['field_name'];
+
+                    $html .= '<div class="searchInputContainer"';
+                    $html .= ' data-field_name="' . $input_name . '"';
+                    $html .= ' data-search_type="field_input"';
+                    $html .= ' data-search_on_key_up="0"';
+                    $html .= ' data-min_chars="1"';
+                    $html .= '>';
+
+                    $html .= BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path . '/cols/' . $col_name, $input_name, '', null);
+
+                    $html .= '</div>';
                 }
-                $html .= '</td>';
             }
+            $html .= '</td>';
         }
 
         $html .= '<td class="searchTools">';

@@ -7,46 +7,47 @@ objects:
                 request: id
 
 sections:
-    - type: tabs
-      tabs:
-          default:
-              label: Fiche
-              url_params:
-                  id: 
-                      request: id
-              sections:
-                  - type: view
-                    view:
-                        panel: 1
-                        object: equipment
-                  - type: list
-                    list: 
-                        panel: 1
-                        object: equipment
-                        children: places
-          logiciels:
-              label: Logiciels / Réseaux
-              url_params:
-                  id: 
-                      request: id
-              sections:
-                  - type: list
-                    list: 
-                        object: equipment
-                        children: logiciels
+    - type: object_header
+      object_header:
+          object: equipment
+    - type: nav_tabs
+      nav_tabs:
+          - id: infos
+            title: Fiche
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view:
+                              panel: 1
+                              object: equipment
+                        - type: list
+                          list: 
+                              panel: 1
+                              object: equipment
+                              children: places
+          - id: logiciels
+            title: Logiciels / Réseaux
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: list
+                          list: 
+                              object: equipment
+                              children: logiciels
                         
-          reservations: 
-              label: Réservations
-              url_params:
-                  id: 
-                      request: id
-              sections: 
-                  - type: view
-                    view: 
-                        name: reservations
-                        object: equipment
-                        
-                
+          - id: reservations
+            title: Réservations
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: view
+                          view: 
+                              name: reservations
+                              object: equipment
     - type: buttons
       buttons:
           - label: Liste des équipements

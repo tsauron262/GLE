@@ -422,7 +422,6 @@ class GSX
         $opt = ($this->isIphone) ? "IPhone" : "Asp";
 
         return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . $opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']) . $opt . '.wsdl';
-
     }
 
     /**
@@ -463,7 +462,7 @@ class GSX
             , 'passphrase'         => $certif[1]
             , 'trace'              => TRUE
             , 'exceptions'         => TRUE
-            , 'cache_wsdl' => WSDL_CACHE_BOTH
+            , 'cache_wsdl'         => WSDL_CACHE_BOTH
                 //            ,'local_cert' => '/etc/apache2/ssl/Applecare-APP157-0000897316.Prod.apple.com.chain.pem'
         );
 //print_r($connectionOptions);die;
@@ -788,8 +787,13 @@ class GSX
         if (!is_null($sympCode))
             $compTIARequest['ReportedSymptomIssueRequest']['requestData']['reportedSymptomCode'] = $sympCode;
 
-        elseif (!is_null($serials))
-            $compTIARequest['ReportedSymptomIssueRequest']['requestData']['serialNumber'] = $serials;
+        elseif (!is_null($serials)) {
+            if ($this->isIphone) {
+                $compTIARequest['ReportedSymptomIssueRequest']['requestData']['alternateDeviceId'] = $serials;
+            } else {
+                $compTIARequest['ReportedSymptomIssueRequest']['requestData']['serialNumber'] = $serials;
+            }
+        }
 
         try {
             $compTIAAnswer = $this->soapClient->ReportedSymptomIssue($compTIARequest);
@@ -897,15 +901,15 @@ class GSX
 //                dol_syslog("result GSX " . print_r($SOAPRequest, 1) . "<br/><br/>" . $clientLookup . print_r($requestData, 1), 3, 0, "_admin");
         } catch (SoapFault $f) {
             global $user;
-                if (in_array($user->id, array(1, 270, 271))) {
-                    $msg = "\n" . '***** Requête GSX SOAP: "' . $clientLookup . '" ***** ' . "\n" . "\n";
-                    $msg .= 'Données envoyées:' . "\n";
-                    $msg .= print_r($requestData, 1);
-                    $msg .= 'Erreur(s):' . "\n";
-                    $msg .= $f->faultstring;
-                    dol_syslog($msg, LOG_DEBUG);
-                }
-                
+            if (in_array($user->id, array(1, 270, 271))) {
+                $msg = "\n" . '***** Requête GSX SOAP: "' . $clientLookup . '" ***** ' . "\n" . "\n";
+                $msg .= 'Données envoyées:' . "\n";
+                $msg .= print_r($requestData, 1);
+                $msg .= 'Erreur(s):' . "\n";
+                $msg .= $f->faultstring;
+                dol_syslog($msg, LOG_DEBUG);
+            }
+
             if (stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);

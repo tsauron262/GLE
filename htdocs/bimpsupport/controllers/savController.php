@@ -18,9 +18,7 @@ class savController extends gsxController
         if (!$id_equipment) {
             return BimpRender::renderAlerts('Aucun équipement associé à ce SAV');
         }
-
-        $items = array();
-
+        
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', $id_equipment);
 
         if (!$equipment->isLoaded()) {
@@ -30,7 +28,7 @@ class savController extends gsxController
         $html = '';
 
         $html .= '<div id="loadGSXForm">';
-        $html .= '<input type="hidden" value="' . $sav->getData('serial') . '" id="gsx_equipment_serial" name="gsx_equipment_serial"/>';
+        $html .= '<input type="hidden" value="' . $equipment->getData('serial') . '" id="gsx_equipment_serial" name="gsx_equipment_serial"/>';
 
         $rows = array(
             array(

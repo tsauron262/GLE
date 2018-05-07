@@ -20,7 +20,6 @@ class GSX
 {
 
     public static $debug_mode = true;
-    
     protected $validRegionCodes = array(
         'am',
         'emea',
@@ -118,11 +117,10 @@ class GSX
         'returnFormat'     => 'php',
         'gsxWsdl'          => '',
     );
-    
     protected $wsdlUrl;
     protected $userSessionId;
     protected $soapClient;
-    public static $apiMode = 'ut';
+    public static $apiMode = 'production';
     public $shipTo = '';
     public $connect = false;
     public $isIphone = false;
@@ -137,7 +135,7 @@ class GSX
         global $user;
 
         $this->isIphone = $isIphone;
-        
+
 
 //        $userId = 'sav@bimp.fr';
 //        $password = '@Savbimp2014#';
@@ -212,7 +210,6 @@ class GSX
 
         $opt = ($this->isIphone) ? "IPhone" : "Asp";
 
-
 //        return $this->wsdlUrl = "https://gle.synopsis-erp.com/test1/gsx-emeaAsp.wsdl";
 //        return $this->wsdlUrl = ' https://gsxwsut.apple.com/apidocs/' . $api_mode . '/html/WSArtifacts.html?user=asp';
         return $this->wsdlUrl = 'https://gsxapi' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . $opt . '/gsx-' . strtolower($this->gsxDetails['regionCode']) . $opt . '.wsdl';
@@ -263,7 +260,7 @@ class GSX
             , 'passphrase'         => $certif[1]
             , 'trace'              => TRUE
             , 'exceptions'         => TRUE
-            , 'cache_wsdl' => WSDL_CACHE_BOTH
+            , 'cache_wsdl'         => WSDL_CACHE_BOTH
         );
 //print_r($connectionOptions);die;
         try {
@@ -320,11 +317,11 @@ class GSX
                 $wrapperName = 'productModelRequest';
                 if ($this->isIphone) {
                     $details = array(
-                        'serialNumber' => $serial
+                        'alternateDeviceId' => $serial
                     );
                 } else {
                     $details = array(
-                        'alternateDeviceId' => $serial
+                        'serialNumber' => $serial
                     );
                 }
 
@@ -555,8 +552,13 @@ class GSX
         if (!is_null($sympCode))
             $compTIARequest['ReportedSymptomIssueRequest']['requestData']['reportedSymptomCode'] = $sympCode;
 
-        elseif (!is_null($serials))
-            $compTIARequest['ReportedSymptomIssueRequest']['requestData']['serialNumber'] = $serials;
+        elseif (!is_null($serials)) {
+            if ($this->isIphone) {
+                $compTIARequest['ReportedSymptomIssueRequest']['requestData']['alternateDeviceId'] = $serials;
+            } else {
+                $compTIARequest['ReportedSymptomIssueRequest']['requestData']['serialNumber'] = $serials;
+            }
+        }
 
         try {
             $compTIAAnswer = $this->soapClient->ReportedSymptomIssue($compTIARequest);
@@ -599,7 +601,7 @@ class GSX
             ),
         );
 
-        if(is_object($this->soapClient)){
+        if (is_object($this->soapClient)) {
             try {
                 $compTIAAnswer = $this->soapClient->CompTIACodes($compTIARequest);
             } catch (SoapFault $fault) {

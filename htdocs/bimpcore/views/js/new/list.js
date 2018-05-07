@@ -181,6 +181,7 @@ function loadModalList(module, object_name, list_name, id_parent, $button, title
 
     var $modal = $('#page_modal');
     var $resultContainer = $modal.find('.modal-ajax-content');
+    hidePopovers($resultContainer);
     $resultContainer.html('').hide();
 
     if (typeof (title) === 'undefined' || !title) {
@@ -289,7 +290,7 @@ function updateObjectFromRow(list_id, id_object, $button) {
         bimp_msg('Erreur technique: liste non trouvée', 'danger');
         return;
     }
-    
+
     var data = {
         'list_name': $list.data('name'),
         'module': $list.data('module'),

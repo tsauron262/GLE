@@ -33,12 +33,12 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 {
 
     public $emetteur;    // Objet societe qui emet
+    public $sav = null;
 
     /**
       \brief      Constructeur
       \param        db        Handler acces base de donnee
      */
-
     function __construct($db)
     {
 
@@ -67,6 +67,18 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
 
+
+
+
+
+
+
+
+
+
+
+
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -83,7 +95,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
       \param        outputlangs        Lang object for output language
       \return        int             1=ok, 0=ko
      */
-    function write_file($chrono, $outputlangs = '')
+    function write_file(BS_SAV $sav, $outputlangs = '')
     {
         global $user, $langs, $conf;
 
@@ -98,43 +110,45 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         $outputlangs->load("panier");
         $outputlangs->load("products");
         //$outputlangs->setPhpLang();
-        if ($conf->synopsischrono->dir_output) {
-            // Definition de $dir et $file
-            if (isset($chrono->specimen) && $chrono->specimen) {
-                $dir = $conf->synopsischrono->dir_output;
-                $file = $dir . "/SPECIMEN.pdf";
-            } else {
-                $propref = sanitize_string($chrono->ref);
-                $dir = $conf->synopsischrono->dir_output . "/" . $chrono->id;
-                $file = $dir . "/Pret-" . $propref . ".pdf";
+
+        $ref = sanitize_string($sav->getData('ref'));
+        $dir = DOL_DATA_ROOT . "/bimpcore/sav/" . $sav->id . '/';
+//        }
+        $this->sav = $sav;
+
+        if (!file_exists($dir)) {
+            if (dol_mkdir($dir) < 0) {
+                $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
+                return 0;
             }
-            $this->chrono = $chrono;
+        }
 
-            if (!file_exists($dir)) {
-                if (dol_mkdir($dir) < 0) {
-                    $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
-                    return 0;
-                }
+        // Definition de $dir et $file
+//        if (isset($chrono->specimen) && $chrono->specimen) {
+//            $dir = $conf->synopsischrono->dir_output;
+//            $file = $dir . "/SPECIMEN.pdf";
+//        } else {
+        $file = $dir . "/Pret-" . $ref . ".pdf";
+//        }
+
+        if (file_exists($dir)) {
+            $pdf = "";
+
+            $pdf = pdf_getInstance($this->format);
+            if (class_exists('TCPDF')) {
+                $pdf->setPrintHeader(false);
+                $pdf->setPrintFooter(false);
             }
 
-            if (file_exists($dir)) {
-                $pdf = "";
-
-                $pdf = pdf_getInstance($this->format);
-                if (class_exists('TCPDF')) {
-                    $pdf->setPrintHeader(false);
-                    $pdf->setPrintFooter(false);
-                }
-
-                $pdf1 = pdf_getInstance($this->format);
-                if (class_exists('TCPDF')) {
-                    $pdf1->setPrintHeader(false);
-                    $pdf1->setPrintFooter(false);
-                }
+            $pdf1 = pdf_getInstance($this->format);
+            if (class_exists('TCPDF')) {
+                $pdf1->setPrintHeader(false);
+                $pdf1->setPrintFooter(false);
+            }
 
 //
 //
-                $pdf->SetAutoPageBreak(1, 0);
+            $pdf->SetAutoPageBreak(1, 0);
 //                if (class_exists('TCPDF')) {
 //                    $pdf->setPrintHeader(false);
 //                    $pdf->setPrintFooter(false);
@@ -142,158 +156,153 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 //
 //
 
-                $chrono->getValuesPlus();
+            $pdf->Open();
+            $pdf1->Open();
+            $pdf->AddPage();
+            $pdf1->AddPage();
+            $pdf1->AddFont(pdf_getPDFFont($outputlangs));
+            $pdf->AddFont(pdf_getPDFFont($outputlangs));
+            $pdf1->SetFont(pdf_getPDFFont($outputlangs), '', 8);
+
+            // $pdf->SetDrawColor(128, 128, 128);
 
 
 
-                $pdf->Open();
-                $pdf1->Open();
-                $pdf->AddPage();
-                $pdf1->AddPage();
-                $pdf1->AddFont(pdf_getPDFFont($outputlangs));
-                $pdf->AddFont(pdf_getPDFFont($outputlangs));
-                $pdf1->SetFont(pdf_getPDFFont($outputlangs), '', 8);
+            $pdf->SetTitle('Prêt SAV : ' . $ref);
 
-                // $pdf->SetDrawColor(128, 128, 128);
+            $pdf->SetSubject($outputlangs->transnoentities("Panier"));
+            $pdf->SetCreator("BIMP-ERP " . DOL_VERSION);
+            $pdf->SetAuthor($user->getFullName($langs));
 
+            $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
+            $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
 
+            $tplidx = $pdf->importPage(1, "/MediaBox");
+            $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
 
-                $pdf->SetTitle($chrono->model->titre . ' : ' . $chrono->ref);
+            $totalTtc = 0;
+            $y = 98;
 
-                $pdf->SetSubject($outputlangs->transnoentities("Panier"));
-                $pdf->SetCreator("BIMP-ERP " . DOL_VERSION);
-                $pdf->SetAuthor($user->getFullName($langs));
-//
-                $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-                $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-// 
-//                
+            $sav_prets = $sav->getChildrenObjects('prets');
 
-
-
-                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsischrono/core/modules/synopsischrono/doc/pret.pdf');
-                $tplidx = $pdf->importPage(1, "/MediaBox");
-                $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-
-
-
-
-                $totalTtc = 0;
-                $y = 98;
-                $tabT = getElementElement("iphone", "pret", null, $chrono->id);
-                foreach ($tabT as $iphone) {
-                    if ($iphone['s'] < 1)
-                        die("Attention pas d'iphone lié");
-
-                    $chrono2 = new Chrono($this->db);
-                    $chrono2->fetch($iphone['s']);
-                    if ($chrono2->id > 0) {
-                        $chrono2->getValuesPlus();
-                        $idProd = $chrono2->valuesPlus[1083]->value;
-
-                        if ($idProd > 0) {
-                            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-                            $prod = new Product($this->db);
-                            $prod->fetch($idProd);
-                            $pdf->SetXY(5, $y);
-                            $pdf->MultiCell(28, 6, $prod->ref, 0, 'C');
-                            $pdf->SetXY(35, $y);
-                            $pdf->MultiCell(60, 6, $prod->label . " (" . $chrono2->valuesPlus[1073]->value . ")", 0, 'C');
-                            $pdf->SetXY(97, $y);
-                            $pdf->MultiCell(33, 6, price($prod->price), 0, 'C');
-                            $pdf->SetXY(127, $y);
-                            $pdf->MultiCell(15, 6, 1, 0, 'C');
-                            $pdf->SetXY(143, $y);
-                            $pdf->MultiCell(25, 6, price($prod->price), 0, 'C');
-                            $pdf->SetXY(169, $y);
-                            $pdf->MultiCell(35, 6, price($prod->price_ttc), 0, 'C');
-                            $totalTtc += $prod->price_ttc;
-                            $y += 8;
-                        }
+            foreach ($sav_prets as $sav_pret) {
+                $pret = $sav_pret->getChildObject('pret');
+                if (is_null($pret) || !$pret->isLoaded()) {
+                    die('Erreur: aucun matériel de prêt lié pour le prêt SAV d\'ID ' . $sav_pret->id);
+                } else {
+                    $product = $pret = $pret->getChildObject('product');
+                    if (is_null($product) || !$product->isLoaded()) {
+                        die('Erreur: aucun produit associé pour le matériel de prêt d\'ID ' . $pret->id);
+                    } else {
+                        $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
+                        $pdf->SetXY(5, $y);
+                        $pdf->MultiCell(28, 6, $product->getData('ref'), 0, 'C');
+                        $pdf->SetXY(35, $y);
+                        $pdf->MultiCell(60, 6, $product->getData('label') . " (" . $pret->getData('serial') . ")", 0, 'C');
+                        $pdf->SetXY(97, $y);
+                        $pdf->MultiCell(33, 6, price($product->getData('price')), 0, 'C');
+                        $pdf->SetXY(127, $y);
+                        $pdf->MultiCell(15, 6, 1, 0, 'C');
+                        $pdf->SetXY(143, $y);
+                        $pdf->MultiCell(25, 6, price($product->getData('price')), 0, 'C');
+                        $pdf->SetXY(169, $y);
+                        $pdf->MultiCell(35, 6, price($product->getData('price_ttc')), 0, 'C');
+                        $totalTtc += $product->getData('price_ttc');
+                        $y += 8;
                     }
                 }
+            }
 
+            $pdf->SetXY('47', '34');
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 14);
+            $pdf->MultiCell(100, 6, $ref, 0, 'L');
 
-//                echo "<pre>";print_r($chrono->valuesPlus);die;
-
-
-                $pdf->SetXY('47', '34');
-                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 14);
-                $pdf->MultiCell(100, 6, $chrono->ref, 0, 'L');
-
-
-
-                //centre
-                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-                $pdf->SetXY('147', '39.5');
-                $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1082]->valueStr, 0, 'L');
-                $pdf->SetXY('147', '45.5');
-                $pdf->MultiCell(100, 6, $tabCentre[$chrono2->valuesPlus[1082]->value][0], 0, 'L');
-                $pdf->SetXY('147', '51.3');
-                $pdf->MultiCell(100, 6, $tabCentre[$chrono2->valuesPlus[1082]->value][1], 0, 'L');
+            //centre
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
+            $pdf->SetXY('147', '39.5');
+            $pdf->MultiCell(100, 6, $tabCentre[$pret->getData('code_centre')][2], 0, 'L');
+            $pdf->SetXY('147', '45.5');
+            $pdf->MultiCell(100, 6, $tabCentre[$pret->getData('code_centre')][0], 0, 'L');
+            $pdf->SetXY('147', '51.3');
+            $pdf->MultiCell(100, 6, $tabCentre[$pret->getData('code_centre')][1], 0, 'L');
 //                $tabCentre
-                //client
-                $contact = "";
-                if ($chrono->contactid > 0) {
-                    $addr = $chrono->contact;
+            //client
+            $contact = "";
+            $addr = null;
+            $tel = '';
+            $mail = '';
+            if ($sav->getData('id_contact')) {
+                $contact_obj = $sav->getChildObject('contact');
+                if (!is_null($contact_obj) && $contact_obj->isLoaded()) {
+                    $addr = $contact->dol_object;
                     $contact = $addr->getFullName($langs, 0, 0);
                     $tel = ($addr->phone_mobile != "") ? $addr->phone_mobile : ($addr->phone_perso != "") ? $addr->phone_perso : ($addr->phone_pro != "") ? $addr->phone_pro : "";
                     $mail = $addr->mail;
-                } else {
-                    $addr = $chrono->societe;
-                    $tel = $addr->phone;
-                    $mail = $addr->email;
                 }
-                $address = $chrono->societe->name;
+            }
 
-                if ($contact != "" && $contact != $chrono->societe->name)
+            $client = $sav->getChildObject('client');
+
+            if (!is_null($client) && $client->isLoaded()) {
+                if (is_null($addr)) {
+                    $addr = $client->dol_object;
+                    if (!$tel) {
+                        $tel = $addr->phone;
+                    }
+                    if (!$mail) {
+                        $mail = $addr->email;
+                    }
+                }
+                $address = $client->dol_object->name;
+
+                if ($contact != "" && $contact != $client->dol_object->name) {
                     $address .= "\n" . $contact;
-
-                $address .= "\n" . $chrono->societe->address . "\n" . $chrono->societe->zip . " " . $chrono->societe->town;
-
-                $pdf->SetXY('20', '61');
-                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-                $pdf->MultiCell(300, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
-
-
-
-                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-                $tabT = explode(" ", $chrono->valuesPlus[1076]->value);
-                $datetime1 = new DateTime($tabT[0]);
-                $datetime2 = new DateTime($chrono->valuesPlus[1077]->value);
-                $interval = $datetime1->diff($datetime2);
-
-                $pdf->SetXY('32', '42.6');
-                $pdf->MultiCell(50, 6, $interval->format('%a') . " jours", 0, 'L');
-
-                $pdf->SetXY('32', '46.7');
-                $pdf->MultiCell(50, 6, dol_print_date($chrono->valuesPlus[1076]->value), 0, 'L');
-
-                $pdf->SetXY('32', '50.4');
-                $pdf->MultiCell(50, 6, dol_print_date($chrono->valuesPlus[1077]->value), 0, 'L');
-
-                if ($chrono->fk_user_author > 0) {
-                    $pdf->SetXY('57', '55.7');
-                    $pdf->MultiCell(100, 6, $chrono->user_author->getFullName($langs), 0, 'L');
-                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
-                    $pdf->SetXY('168', '64');
-                    $pdf->MultiCell(100, 6, $chrono->user_author->getFullName($langs), 0, 'L');
                 }
 
-                if ($chrono->valuesPlus[1066]->value != "") {
-                    $pdf->SetXY(12, 45);
-                    $pdf->MultiCell(100, 6, "N° de dossier prestataire : " . $chrono->valuesPlus[1066]->value, 0, 'L');
-                }
+                $address .= "\n" . $client->dol_object->address . "\n" . $client->dol_object->zip . " " . $client->dol_object->town;
+            }
 
+            $pdf->SetXY('20', '61');
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
+            $pdf->MultiCell(300, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
 
+            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
+            $tabT = explode(" ", $sav_pret->getData('date_begin'));
+            $datetime1 = new DateTime($tabT[0]);
+            $datetime2 = new DateTime($sav_pret->getData('date_end'));
+            $interval = $datetime1->diff($datetime2);
 
-                $pdf->SetXY(69, 230);
-                $pdf->MultiCell(35, 6, price($totalTtc) . "", 0, 'C');
+            $pdf->SetXY('32', '42.6');
+            $pdf->MultiCell(50, 6, $interval->format('%a') . " jours", 0, 'L');
 
-                if (is_object($chrono->societe)) {
-                    $pdf->SetXY(25, 188.8);
-                    $pdf->MultiCell(45, 4, $chrono->societe->getFullName($outputlangs), 0, 'C');
-                }
+            $pdf->SetXY('32', '46.7');
+            $pdf->MultiCell(50, 6, $sav_pret->displayData('date_begin', 'default', false, true), 0, 'L');
+
+            $pdf->SetXY('32', '50.4');
+            $pdf->MultiCell(50, 6, $sav_pret->displayData('date_end', 'default', false, true), 0, 'L');
+
+            $user_create = $sav->getChildObject('user_create');
+            
+            if (!is_null($user_create) && $user_create->isLoaded()) {
+                $pdf->SetXY('57', '55.7');
+                $pdf->MultiCell(100, 6, $user_create->dol_object->getFullName($langs), 0, 'L');
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
+                $pdf->SetXY('168', '64');
+                $pdf->MultiCell(100, 6, $user_create->dol_object->getFullName($langs), 0, 'L');
+            }
+
+            if ((string) $sav->getData('prestataire_number')) {
+                $pdf->SetXY(12, 45);
+                $pdf->MultiCell(100, 6, "N° de dossier prestataire : " . $sav->getData('prestataire_number'), 0, 'L');
+            }
+
+            $pdf->SetXY(69, 230);
+            $pdf->MultiCell(35, 6, price($totalTtc) . "", 0, 'C');
+
+            if (is_object($client->dol_object)) {
+                $pdf->SetXY(25, 188.8);
+                $pdf->MultiCell(45, 4, $client->dol_object>getFullName($outputlangs), 0, 'C');
+            }
 
 
 //                //le prod
@@ -389,40 +398,31 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 //                
 //                }
 
+            if (method_exists($pdf, 'AliasNbPages'))
+                $pdf->AliasNbPages();
+            $pdf->Close();
 
-
-
-
-
-
-                if (method_exists($pdf, 'AliasNbPages'))
-                    $pdf->AliasNbPages();
-                $pdf->Close();
-
-                $this->file = $file;
-                $pdf->Output($file, 'F');
+            $this->file = $file;
+            $pdf->Output($file, 'F');
 //
 ////                ////$langs->setPhpLang();    // On restaure langue session
 
-
-                return 1;   // Pas d'erreur
-            } else {
-                $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
-                ////$langs->setPhpLang();    // On restaure langue session
-                return 0;
-            }
+            return 1;   // Pas d'erreur
         } else {
-            $this->error = $langs->trans("ErrorConstantNotDefined", "CONTRACT_OUTPUTDIR");
+            $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
             ////$langs->setPhpLang();    // On restaure langue session
             return 0;
         }
+//            $this->error = $langs->trans("ErrorConstantNotDefined", "CONTRACT_OUTPUTDIR");
+//            ////$langs->setPhpLang();    // On restaure langue session
+//            return 0;
 
         $this->error = $langs->trans("ErrorUnknown");
         ////$langs->setPhpLang();    // On restaure langue session
         return 0;   // Erreur par defaut
     }
 
-    function _pagehead(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage = 0)
+    function _pagehead(&$pdf, $object, $showadress = 1, $outputlangs = '', $currentPage = 0)
     {
         global $conf, $langs;
         if ($currentPage > 1) {
@@ -465,12 +465,15 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         }
 
         $showaddress = $showadress;
-        $usecontact = ($object->model->hasContact && $object->contactid > 0);
-        $object->client = $object->societe;
+        $usecontact = (int) $object->getData('id_contact');
+        $client = $object->getChildObject('client');
+        if (BimpObject::objectLoaded($client)) {
+            $client = $client->dol_object;
+        } else {
+            die ('Erreur: Client Absent');
+        }
+        
         $default_font_size = 12;
-
-
-
         $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', $default_font_size);
 
         $posx = 100;
@@ -479,24 +482,22 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         $largCadre = 206 - $this->marge_gauche;
         $pdf->SetXY($posx, $posy);
         $pdf->SetTextColor(0, 0, 60);
-        $pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref") . " : " . $outputlangs->convToOutputCharset($object->ref), '', 'R');
+        $pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref") . " : " . $outputlangs->convToOutputCharset($object->getData('ref')), '', 'R');
 
         $posy+=1;
         $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 2);
         $pdf->SetTextColor(0, 0, 60);
 
 
-        if ($object->client->code_client) {
+        if (!is_null($client) && $client->code_client) {
             $posy+=5;
             $pdf->SetXY($posx, $posy);
-            $pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode") . " : " . $outputlangs->transnoentities($object->client->code_client), '', 'R');
+            $pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode") . " : " . $outputlangs->transnoentities($client->code_client), '', 'R');
         }
 
         $posy+=5;
         $pdf->SetXY($posx, $posy);
-        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Type ") . " : " . $outputlangs->transnoentities($object->model->titre), '', 'R');
-
-
+        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Type ") . " : " . $outputlangs->transnoentities($object->getLabel()), '', 'R');
 
         if ($showadress) {
 
@@ -531,23 +532,21 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', $default_font_size - 1);
             $pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
 
-
-
-
             // Recipient name
             if (!empty($usecontact)) {
+                $contact = $object->getChildObject('contact');
                 // On peut utiliser le nom de la societe du contact
                 if (!empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
-                    $socname = $object->contact->socname;
+                    $socname = $contact->dol_object->socname;
                 else
-                    $socname = $object->client->nom;
+                    $socname = $client->nom;
                 $carac_client_name = $outputlangs->convToOutputCharset($socname);
+                $carac_client = pdf_build_address($outputlangs, $this->emetteur, $client, $contact->dol_object, 1, 'target');
             }
             else {
-                $carac_client_name = $outputlangs->convToOutputCharset($object->client->nom);
+                $carac_client_name = $outputlangs->convToOutputCharset($client->nom);
+                $carac_client = pdf_build_address($outputlangs, $this->emetteur, $client, '', 0, 'target');
             }
-
-            $carac_client = pdf_build_address($outputlangs, $this->emetteur, $object->client, ($usecontact ? $object->contact : ''), $usecontact, 'target');
 
             // Show recipient
             $widthrecbox = 100;
@@ -585,9 +584,9 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
             //Société
             if ($this->marge_gauche > 45) {
                 $pdf->SetXY(3.5, 63);
-                $pdf->MultiCell(39, 4, "Code Client : " . $object->societe->code_client, 0, "L");
+                $pdf->MultiCell(39, 4, "Code Client : " . $client->code_client, 0, "L");
                 $pdf->SetXY(3.5, 54.5);
-                $pdf->MultiCell(39, 4, 'Client : ' . $object->societe->getFullName($outputlangs), 0, 'L');
+                $pdf->MultiCell(39, 4, 'Client : ' . $client->getFullName($outputlangs), 0, 'L');
             }
 
             $pdf->Rect($this->marge_gauche - 3, 39, $largCadre, 235);
@@ -603,7 +602,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
      *   \param      pdf     objet PDF
      */
 
-    function _pagefoot(&$pdf, $chrono, $outputlangs)
+    function _pagefoot(&$pdf, $sav, $outputlangs)
     {
 
 

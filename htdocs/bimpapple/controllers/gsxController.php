@@ -5,10 +5,11 @@ require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSXRequests.php';
 class gsxController extends BimpController
 {
 
-    public static $in_production = false;
+    public static $in_production = true;
     protected $userExchangePrice = true;
     public $gsx = null;
     protected $serial = null;
+    protected $serial2 = null;
     public $partsPending = null;
     protected $isIphone = false;
     protected $tabReqForceIphone = array("CreateIPhoneRepairOrReplace");
@@ -623,7 +624,7 @@ class gsxController extends BimpController
         return $gsxRequest->generateRequestFormHtml($valDef, $this->serial, $id_sav, $id_repair);
     }
 
-    // Requêtes GSX: 
+    // Requêtes GSX:
 
     public function getPartsListArray($partNumberAsKey = false)
     {
@@ -699,6 +700,7 @@ class gsxController extends BimpController
                 }
             }
         }
+
         return $newArray;
     }
 
@@ -714,6 +716,11 @@ class gsxController extends BimpController
         $data = array();
         $responseName = '';
 
+        if (isset($_POST['partsCount']) && isset($_POST['partNumber_100']) && $_POST['partNumber_100'] !== 'Part') {
+            $_POST['partsCount']++;
+            $_POST['partNumber_' . $_POST['partsCount']] = $_POST['partNumber_100'];
+        }
+        
         $GSXRequest = new GSX_Request($this->gsx, $requestType);
         $data = $GSXRequest->processRequestForm();
 
@@ -735,8 +742,6 @@ class gsxController extends BimpController
         if (!self::$in_production && ($this->gsx->apiMode != "ut" || $this->gsx->apiMode != "it")) {
             return BimpRender::renderAlerts('Mode production non activé - Requête ignorée', 'warning');
         }
-
-        
 
         $filesError = false;
         if (in_array(BimpTools::getValue('includeFiles', ''), array('1', 1, 'Y')) && !is_null($id_sav)) {
@@ -779,14 +784,16 @@ class gsxController extends BimpController
                 $data['alternateDeviceId'] = "";
             }
 
+            $responseNames = '';
+
             switch ($requestType) {
                 case 'CreateWholeUnitExchange':
-                    $responseName = array("CreateIPhoneWholeUnitExchangeResponse");
+                    $responseNames = array("CreateIPhoneWholeUnitExchangeResponse");
                     $client = "CreateIPhoneWholeUnitExchange";
                     $request = "CreateIPhoneWholeUnitExchangeRequest";
 
                 case 'CreateCarryInRepair':
-                    $responseName = array(
+                    $responseNames = array(
                         'IPhoneCreateCarryInResponse',
                         'IPhoneCreateCarryInRepairResponse',
                         'CreateIPhoneCarryInRepairResponse',
@@ -797,13 +804,13 @@ class gsxController extends BimpController
                     break;
 
                 case 'UpdateSerialNumber':
-                    $responseName = 'IPhoneUpdateSerialNumberResponse';
+                    $responseNames = 'IPhoneUpdateSerialNumberResponse';
                     $client = 'IPhoneUpdateSerialNumber';
                     $request = 'IPhoneUpdateSerialNumberRequest';
                     break;
 
                 case 'KGBSerialNumberUpdate':
-                    $responseName = array(
+                    $responseNames = array(
                         'UpdateIPhoneKGBSerialNumberResponse',
                         'IPhoneUpdateKGBSerialNumberResponse',
                         'IPhoneKGBSerialNumberUpdateResponse',
@@ -833,6 +840,10 @@ class gsxController extends BimpController
 
         $this->gsx->resetSoapErrors();
 
+        echo '<pre>';
+        print_r($data);
+        exit;
+
         $requestData = $this->gsx->_requestBuilder($request, $wrapper, $data);
         $response = $this->gsx->request($requestData, $client);
 
@@ -845,13 +856,21 @@ class gsxController extends BimpController
                     $requestData[$nomReq]['repairData']['fileData'] = "Fichier joint exclu du log";
             }
             if (count($this->gsx->errors['log']['soap']))
-                dol_syslog("Erreur GSX : " . $this->getGSXErrorsHtml() . "Requête :" . print_r($requestData, true) . " Réponse : " . print_r($response, true), 4, 0, "_apple");
+                dol_syslog("Erreur GSX : " . $this->gsx->getGSXErrorsHtml() . "Requête :" . print_r($requestData, true) . " Réponse : " . print_r($response, true), 4, 0, "_apple");
         } else {
-            if (is_array($responseName)) {
-                foreach ($responseName as $respName) {
-                    if (isset($response[$respName])) {
-                        $responseName = $respName;
-                        break;
+            $responseName = $requestType . "Response";
+
+            if (!isset($response[$responseName])) {
+                if (is_string($responseNames) && $responseNames) {
+                    if (isset($response[$responseNames])) {
+                        $responseName = $responseNames;
+                    }
+                } elseif (is_array($responseName)) {
+                    foreach ($responseName as $respName) {
+                        if (isset($response[$respName])) {
+                            $responseName = $respName;
+                            break;
+                        }
                     }
                 }
             }
@@ -958,7 +977,7 @@ class gsxController extends BimpController
                     $msg = 'Erreur lors de la requête "' . $client . '"';
                     dol_syslog($msg . " | " . print_r($response, 1), LOG_ERR, 0, "_apple");
                 } else {
-                    $html .= BimpRender::renderAlerts('Requête effectuéeavec succès', 'success');
+                    $html .= BimpRender::renderAlerts('Requête effectuée avec succès', 'success');
                 }
             }
         }

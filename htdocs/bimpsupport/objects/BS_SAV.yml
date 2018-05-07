@@ -320,6 +320,7 @@ fields:
         input:
             auto_expand: 1
             rows: 4
+        required: 1
     diagnostic: 
         label: Diagnostic
         type: text
@@ -352,6 +353,7 @@ forms:
             - field: id_client
             - field: id_contact
             - field: id_equipment
+            - field: symptomes
             - field: id_contrat
             - field: prioritaire
             - field: acompte
@@ -375,6 +377,13 @@ forms:
             - field: save_option
             - field: sav_pro
             - field: prestataire_number
+            - custom: 1
+              label: Notifier le client de la création du SAV
+              input_name: send_msg
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
             
     edit: 
         rows: 

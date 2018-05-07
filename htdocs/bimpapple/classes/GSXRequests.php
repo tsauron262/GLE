@@ -598,12 +598,10 @@ class GSX_Request
     public function checkInputData($defs, $value)
     {
         if ($defs['type'] === 'YesNo') {
-            if (is_int($value)) {
-                if ((int) $value) {
-                    $value = 'Y';
-                } else {
-                    $value = 'N';
-                }
+            if ((int) $value) {
+                $value = 'Y';
+            } else {
+                $value = 'N';
             }
         }
         return $value;
@@ -630,6 +628,9 @@ class GSX_Request
 
                         $defs = $this->getDataDefinitionsArray($dataName);
                         if (isset($defs)) {
+                            if ($defs['type'] == 'tierPart') {
+                                continue;
+                            }
                             if ($defs['type'] == 'partsList') {
                                 if (isset($_POST['partsCount'])) {
                                     $partCount = (int) $_POST['partsCount'];

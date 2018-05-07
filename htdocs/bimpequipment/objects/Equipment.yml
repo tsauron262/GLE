@@ -2,6 +2,9 @@ table: be_equipment
 controller: equipment
 icon: desktop
 
+list_page_url: 
+    controller: index
+            
 labels:
     name: équipement
 
@@ -353,6 +356,17 @@ list:
                     method: displayProduct
                     params: 
                         - nom_url
+            field_name: id_product
+            search_list: 
+                table: product p
+                field_return_value: p.rowid
+                field_return_label: p.label,p.ref
+                label_syntaxe: <label_2> - <label_1>
+                join: product_extrafields pe
+                join_on: p.rowid = pe.fk_object
+                fields_search: p.rowid,p.ref,p.label,p.barcode
+                filters: 
+                    pe.serialisable: 1
         serial:
             field: serial
         place: 

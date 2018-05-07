@@ -2416,6 +2416,8 @@ class BimpObject
                 $ref = $this->displayData('reference');
             } elseif ($this->field_exists('ref')) {
                 $ref = $this->displayData('ref');
+            } else {
+                $ref = $this->getRef();
             }
 
             if ($ref) {

@@ -92,7 +92,9 @@ views:
                 - type: object_header
             - cols: 
                 - type: fields_table
-                  fields_table: default
+                  fields_table: 
+                      name: default
+                      panel: 0
                 
 lists: 
     default: 

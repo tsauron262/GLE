@@ -157,6 +157,11 @@ function toggleFoldableSection($caption) {
     }
 }
 
+function hidePopovers($container) {
+    $container.find('.bs-popover').each(function () {
+        $(this).popover('hide');
+    });
+}
 // Evenements: 
 
 function setCommonEvents($container) {
@@ -542,7 +547,7 @@ $.isOk = function (object) {
     if (object === null) {
         return false;
     }
-    
+
     if (typeof (object) !== 'object') {
         return false;
     }

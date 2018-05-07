@@ -25,7 +25,7 @@ class Equipment extends BimpObject
         $this->iconeDef = "fa-laptop";
     }
     
-    public function getRef(){
+    public function getRef() {
         return $this->getData("serial");
     }
 

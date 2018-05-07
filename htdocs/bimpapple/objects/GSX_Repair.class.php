@@ -73,14 +73,6 @@ class GSX_Repair extends BimpObject
     {
         $this->reset();
 
-        if (is_null($this->gsx)) {
-            $this->gsx = new GSX($this->isIphone);
-        }
-
-        if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
-        }
-
         switch ($numberType) {
             case 'repairConfirmationNumber':
                 $this->set('repair_confirm_number', $number);
@@ -100,6 +92,14 @@ class GSX_Repair extends BimpObject
                 break;
         }
 
+        if (is_null($this->gsx)) {
+            $this->gsx = new GSX($this->isIphone);
+        }
+        
+        if (!$this->gsx->connect) {
+            return array('Echec de la connexion à GSX');
+        }
+        
         $this->set('id_sav', (int) $id_sav);
 
         $this->load();

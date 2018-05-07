@@ -537,5 +537,7 @@ function onRepairFormLoaded($form) {
         $("#" + champ + "_yes").click();
     });
 
+    $form.find("");
+    
     onFormLoaded($form);
 }

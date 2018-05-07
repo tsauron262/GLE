@@ -3,8 +3,13 @@
 class BS_SavPret extends BimpObject
 {
 
+    public function getCreateJsCallback()
+    {
+        return 'alert(\'Affichage PDF\');';
+    }
+
     // Overrides: 
-    
+
     public function create()
     {
         $sav = $this->getParentInstance();

@@ -17,11 +17,11 @@ class BimpStruct
 
         switch ($type) {
             case 'object_header':
-                if ($config->isDefined($path . '/object_header')) {
+//                if ($config->isDefined($path . '/object_header')) {
                     $html = self::renderObjectHeader($config, $path . '/object_header', $parent_component);
-                } else {
-                    // logError
-                }
+//                } else {
+//                    // logError
+//                }
                 break;
 
             case 'view':

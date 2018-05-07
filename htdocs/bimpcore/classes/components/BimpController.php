@@ -456,6 +456,7 @@ class BimpController
         $errors = array();
         $success = '';
         $url = '';
+        $success_callback = '';
 
         $id_object = BimpTools::getValue('id_object');
         $object_name = BimpTools::getValue('object_name');
@@ -479,12 +480,18 @@ class BimpController
                     $errors = $object->update();
                     if (!count($errors)) {
                         $success = 'Mise à jour ' . $object->getLabel('of_the') . ' effectuée avec succès';
+                        if (method_exists($object, 'getUpdateJsCallback')) {
+                            $success_callback = $object->getUpdateJsCallback();
+                        }
                     }
                 } else {
                     $errors = $object->create();
                     if (!count($errors)) {
                         $id_object = $object->id;
                         $success = 'Création ' . $object->getLabel('of_the') . ' effectuée avec succès';
+                        if (method_exists($object, 'getCreateJsCallback')) {
+                            $success_callback = $object->getCreateJsCallback();
+                        }
                     }
                 }
             }
@@ -527,6 +534,7 @@ class BimpController
             'module'          => $object_module,
             'object_name'     => $object_name,
             'id_object'       => $id_object,
+            'success_callback' => $success_callback,
             'request_id'      => BimpTools::getValue('request_id', 0)
         )));
     }

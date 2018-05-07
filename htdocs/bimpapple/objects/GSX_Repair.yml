@@ -23,7 +23,7 @@ fields:
         label: SAV
         type: id_object
         object: sav
-    rapair_number: 
+    repair_number: 
         label: N° de réparation
     repair_confirm_number: 
         label: N° de confirmation
@@ -86,7 +86,7 @@ fields_tables:
         icon: info-circle
         rows: 
             - field: date_create
-            - field: rapair_number
+            - field: repair_number
             - field: repair_confirm_number
             - field: serial_update_confirm_number
             - label: Statut dans GSX

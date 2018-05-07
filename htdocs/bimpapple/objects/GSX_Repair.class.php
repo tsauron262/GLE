@@ -49,7 +49,7 @@ class GSX_Repair extends BimpObject
     {
         $filters = array();
 
-        $fields = array('id_sav', 'serial', 'rapair_number', 'repair_confirm_number', 'serial_update_confirm_number');
+        $fields = array('id_sav', 'serial', 'repair_number', 'repair_confirm_number', 'serial_update_confirm_number');
 
         foreach ($fields as $field_name) {
             $value = $this->getData($field_name);
@@ -79,7 +79,7 @@ class GSX_Repair extends BimpObject
                 break;
 
             case 'repairNumber':
-                $this->set('repair_confirm_number', $number);
+                $this->set('repair_number', $number);
                 break;
 
             case 'serialNumber':
@@ -178,43 +178,44 @@ class GSX_Repair extends BimpObject
             $id_sav = (int) $this->getData('id_sav');
             foreach ($partsPending as $part) {
                 $fileName = null;
-                $labelDir = '/bimpcore/bimpsupport/sav/' . $id_sav . '';
+                $labelDir = '/bimpcore/sav/' . $id_sav . '';
                 if (!is_dir(DOL_DATA_ROOT . $labelDir)) {
                     mkdir(DOL_DATA_ROOT . $labelDir);
                 }
-                if (isset($part['returnOrderNumber']) && isset($part['partNumber'])) {
-                    if ($this->isIphone) {
-                        $client2 = 'IPhoneReturnLabel';
-                    } else {
-                        $client2 = 'ReturnLabel';
-                    }
-                    $requestName2 = $client2 . 'Request';
-
-                    $request = $this->gsx->_requestBuilder($requestName2, '', array(
-                        'returnOrderNumber' => $part['returnOrderNumber'],
-                        'partNumber'        => $part['partNumber']
-                    ));
-
-                    $labelResponse = $this->gsx->request($request, $client2);
-
-                    if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
-                        $fileNamePure = str_replace("/", "_", $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName']);
-                        $fileName = $labelDir . "/" . $fileNamePure;
-                        if (!file_exists(DOL_DATA_ROOT . $fileName)) {
-                            if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']) === false)
-                                $fileName = null;
+                $fileUrl = "";
+                if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] != "" && isset($part['partNumber'])) {
+                    $fileName = "label_".$part['returnOrderNumber'].".pdf";
+                    $fileNamePath = $labelDir . "/" . $fileName;
+                    $fileUrl = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileName;
+                    if (!file_exists(DOL_DATA_ROOT . $fileNamePath)) {
+                        if ($this->isIphone) {
+                            $client2 = 'IPhoneReturnLabel';
+                        } else {
+                            $client2 = 'ReturnLabel';
                         }
-                        $fileName2 = "/document.php?modulepart=bimpcore&file=" . urlencode('bimpsupport/sav/' . $id_sav . "/" . $fileNamePure);
+                        $requestName2 = $client2 . 'Request';
+
+                        $request = $this->gsx->_requestBuilder($requestName2, '', array(
+                            'returnOrderNumber' => $part['returnOrderNumber'],
+                            'partNumber'        => $part['partNumber']
+                        ));
+
+                        $labelResponse = $this->gsx->request($request, $client2);
+
+                        if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
+                                if (!file_put_contents(DOL_DATA_ROOT . $fileNamePath, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']))
+                                        $fileUrl = "";
+                        }
+                        
                     }
                 }
-                if ($part['registeredForReturn'] == "Y") {
-                    $this->partsPending[] = array(
-                        'partDescription'   => $part['partDescription'],
-                        'partNumber'        => $part['partNumber'],
-                        'returnOrderNumber' => $part['returnOrderNumber'],
-                        'fileName'          => $fileName2
-                    );
-                }
+                $this->partsPending[] = array(
+                    'partDescription'   => $part['partDescription'],
+                    'partNumber'        => $part['partNumber'],
+                    'returnOrderNumber' => $part['returnOrderNumber'],
+                    'fileName'          => $fileUrl,
+                    'registeredForReturn' => $part['registeredForReturn']
+                );
                 if (!count($this->partsPending)) {
                     $this->majSerialOk = true;
                 }
@@ -534,6 +535,8 @@ class GSX_Repair extends BimpObject
             if (isset($part['netPrice']) && $part['netPrice']) {
                 $totalFromOrder += (float) $part['netPrice'];
             }
+            if($totalFromOrder < 1 && $part['partAbused'] == "Y")
+                $totalFromOrder = 1.00;
         }
 
         if (!$totalFromOrder) {
@@ -689,7 +692,7 @@ class GSX_Repair extends BimpObject
 
             if ((int) $this->getData('total_from_order_changed')) {
                 $html .= '<script type="text/javascript">';
-                $html .= 'alert("' . $msg . '")';
+                $html .= 'alert("' . $msg . ' verifiez bien les paniers")';
                 $html .= '</script>';
 
                 $this->updateField('total_from_order_changed', 0);
@@ -784,7 +787,8 @@ class GSX_Repair extends BimpObject
             $html .= '<th>Nom</th>';
             $html .= '<th>Réf.</th>';
             $html .= '<th>N° de retour</th>';
-            $html .= '<th></th>';
+            $html .= '<th>registeredForReturn</th>';
+            $html .= '<th>Etiquette</th>';
             $html .= '</thead>';
 
             $html .= '<tbody>';
@@ -793,7 +797,8 @@ class GSX_Repair extends BimpObject
                 $html .= '<td>' . $part['partDescription'] . '</td>';
                 $html .= '<td>' . $part['partNumber'] . '</td>';
                 $html .= '<td>' . $part['returnOrderNumber'] . '</td>';
-                $html .= '<td>';
+                $html .= '<td>' . $part['registeredForReturn'] . '</td>';
+                $html .= '<td>' . ($part['fileName'] != ""? '<a href="'.DOL_URL_ROOT.$part['fileName'].'">Etiquette</a>': '') . '</td>';
                 if (file_exists(DOL_DATA_ROOT . '/bimpcore/bimpsupport/sav/' . (int) $this->getData('id_sav') . '/' . $part['fileName'])) {
                     $html .= '<a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="btn btn-default">';
                     $html .= '<i class="fa fa-file-o iconLeft"></i>Etiquette de retour</a>';

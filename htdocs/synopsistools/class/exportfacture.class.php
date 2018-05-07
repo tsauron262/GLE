@@ -16,6 +16,7 @@ class exportfacture {
     public $debug = false;
     public $output = "Rien";
     public $error = "";
+    public $tabIgnore = array();
     
     private $where = " AND fact.fk_statut > 0 AND close_code is null AND (fact.extraparams < 1 || fact.extraparams is NULL) AND fact.total != 0  AND facnumber NOT LIKE '%PROV%' GROUP BY fact.rowid";
 
@@ -61,6 +62,7 @@ class exportfacture {
             if ($ligne->id8Sens < 1 && isset($ligne->Centre) && $ligne->Centre != "") {
                 $this->id8sens = $this->getId8sensByCentreSav($ligne->Centre);
             }
+            $this->tabIgnore[] = $ligne->id;
             $this->extract($ligne->id);
         }
         
@@ -86,8 +88,10 @@ class exportfacture {
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe "
                 . "WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' ".$this->where);
         while ($ligne = $this->db->fetch_object($result)) {
-            $this->id8sens = $this->getId8sensByCentreSav($ligne->centre);
-            $this->extract($ligne->id);
+            if(!in_array($ligne->id, $this->tabIgnore)){
+                $this->id8sens = $this->getId8sensByCentreSav($ligne->centre);
+                $this->extract($ligne->id);
+            }
         }
         
     }

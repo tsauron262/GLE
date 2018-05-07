@@ -210,7 +210,7 @@ class GSX_Repair extends BimpObject
                         $fileName2 = "/document.php?modulepart=bimpcore&file=" . urlencode('bimpsupport/sav/' . $id_sav . "/" . $fileNamePure);
                     }
                 }
-                if ($part['registeredForReturn'] == "Y") {
+                if (1) {
                     $this->partsPending[] = array(
                         'partDescription'   => $part['partDescription'],
                         'partNumber'        => $part['partNumber'],

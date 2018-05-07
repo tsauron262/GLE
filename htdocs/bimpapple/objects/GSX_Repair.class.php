@@ -170,7 +170,6 @@ class GSX_Repair extends BimpObject
         if (count($this->gsx->errors['soap'])) {
             return $this->gsx->errors['soap'];
         }
-        dol_syslog(print_r($response[$client . 'Response'],1),3);
         if (isset($response[$client . 'Response']['partsPendingResponse'])) {
             $partsPending = $response[$client . 'Response']['partsPendingResponse'];
             if (isset($partsPending['returnOrderNumber'])) {
@@ -178,7 +177,6 @@ class GSX_Repair extends BimpObject
             }
             $id_sav = (int) $this->getData('id_sav');
             foreach ($partsPending as $part) {
-                dol_syslog(print_r($part,1),3);
                 $fileName = null;
                 $labelDir = '/bimpcore/bimpsupport/sav/' . $id_sav . '';
                 if (!is_dir(DOL_DATA_ROOT . $labelDir)) {
@@ -199,7 +197,6 @@ class GSX_Repair extends BimpObject
 
                     $labelResponse = $this->gsx->request($request, $client2);
 
-                dol_syslog(print_r($labelResponse,1),3);
                     if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
                         $fileNamePure = str_replace("/", "_", $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName']);
                         $fileName = $labelDir . "/" . $fileNamePure;
@@ -210,14 +207,13 @@ class GSX_Repair extends BimpObject
                         $fileName2 = "/document.php?modulepart=bimpcore&file=" . urlencode('bimpsupport/sav/' . $id_sav . "/" . $fileNamePure);
                     }
                 }
-                if (1) {
-                    $this->partsPending[] = array(
-                        'partDescription'   => $part['partDescription'],
-                        'partNumber'        => $part['partNumber'],
-                        'returnOrderNumber' => $part['returnOrderNumber'],
-                        'fileName'          => $fileName2
-                    );
-                }
+                $this->partsPending[] = array(
+                    'partDescription'   => $part['partDescription'],
+                    'partNumber'        => $part['partNumber'],
+                    'returnOrderNumber' => $part['returnOrderNumber'],
+                    'fileName'          => $fileName2,
+                    'registeredForReturn' => $part['registeredForReturn']
+                );
                 if (!count($this->partsPending)) {
                     $this->majSerialOk = true;
                 }
@@ -789,6 +785,7 @@ class GSX_Repair extends BimpObject
             $html .= '<th>Nom</th>';
             $html .= '<th>Réf.</th>';
             $html .= '<th>N° de retour</th>';
+            $html .= '<th>registeredForReturn</th>';
             $html .= '<th></th>';
             $html .= '</thead>';
 
@@ -798,6 +795,7 @@ class GSX_Repair extends BimpObject
                 $html .= '<td>' . $part['partDescription'] . '</td>';
                 $html .= '<td>' . $part['partNumber'] . '</td>';
                 $html .= '<td>' . $part['returnOrderNumber'] . '</td>';
+                $html .= '<td>' . $part['registeredForReturn'] . '</td>';
                 $html .= '<td>';
                 if (file_exists(DOL_DATA_ROOT . '/bimpcore/bimpsupport/sav/' . (int) $this->getData('id_sav') . '/' . $part['fileName'])) {
                     $html .= '<a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="btn btn-default">';

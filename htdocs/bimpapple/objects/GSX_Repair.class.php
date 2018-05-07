@@ -534,6 +534,8 @@ class GSX_Repair extends BimpObject
             if (isset($part['netPrice']) && $part['netPrice']) {
                 $totalFromOrder += (float) $part['netPrice'];
             }
+            if($totalFromOrder < 1 && $part['partAbused'] == "Y")
+                $totalFromOrder = 1.00;
         }
 
         if (!$totalFromOrder) {
@@ -689,7 +691,7 @@ class GSX_Repair extends BimpObject
 
             if ((int) $this->getData('total_from_order_changed')) {
                 $html .= '<script type="text/javascript">';
-                $html .= 'alert("' . $msg . '")';
+                $html .= 'alert("' . $msg . ' verifiez bien les paniers")';
                 $html .= '</script>';
 
                 $this->updateField('total_from_order_changed', 0);

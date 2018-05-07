@@ -78,7 +78,8 @@ class modBimpsupport extends DolibarrModules {
         $this->picto = 'generic';
         
         $this->module_parts = array(
-            'hooks' => array('printTopRightMenu', 'toprightmenu', "searchform")  // Set here all hooks context you want to support)
+            'hooks' => array('printTopRightMenu', 'toprightmenu', "searchform"),  // Set here all hooks context you want to support)
+            "models"=>1
         );
         // Defined all module parts (triggers, login, substitutions, menus, css, etc...)
 //        $this->module_parts = array('triggers' => 1);
@@ -282,6 +283,9 @@ class modBimpsupport extends DolibarrModules {
 //        $extrafields = new ExtraFields($this->db);
         //$result1=$extrafields->addExtraField('myattr1', "New Attr 1 label", 'boolean', 1, 3, 'thirdparty');
         //$result2=$extrafields->addExtraField('myattr2', "New Attr 2 label", 'string', 1, 10, 'project');
+        
+        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevissav', 1, 'propal', 'Devis SAV', NULL);";
+        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpinvoicesav', 1, 'invoice', 'Facture SAV', NULL);";
 
         return $this->_init($sql, $options);
     }
@@ -295,8 +299,10 @@ class modBimpsupport extends DolibarrModules {
      * @return     int             	1 if OK, 0 if KO
      */
     public function remove($options = '') {
-//        $sql = array();
-//
+        $sql = array();
+        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevissav';";
+        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpinvoicesav';";
+                
         return $this->_remove($sql, $options);
     }
 

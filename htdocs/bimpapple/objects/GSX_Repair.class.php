@@ -184,7 +184,7 @@ class GSX_Repair extends BimpObject
                 }
                 $fileUrl = "";
                 if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] != "" && isset($part['partNumber'])) {
-                    $fileName = $part['returnOrderNumber'].".pdf";
+                    $fileName = "label_".$part['returnOrderNumber'].".pdf";
                     $fileNamePath = $labelDir . "/" . $fileName;
                     $fileUrl = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileName;
                     if (!file_exists(DOL_DATA_ROOT . $fileNamePath)) {

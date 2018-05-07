@@ -170,6 +170,7 @@ class GSX_Repair extends BimpObject
         if (count($this->gsx->errors['soap'])) {
             return $this->gsx->errors['soap'];
         }
+        dol_syslog(print_r($response[$client . 'Response'],1),3);
         if (isset($response[$client . 'Response']['partsPendingResponse'])) {
             $partsPending = $response[$client . 'Response']['partsPendingResponse'];
             if (isset($partsPending['returnOrderNumber'])) {

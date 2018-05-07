@@ -200,7 +200,7 @@ class GSX_Repair extends BimpObject
                     if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
                         $fileNamePure = str_replace("/", "_", $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName']);
                         $fileName = $labelDir . "/" . $fileNamePure;
-                        dol_syslog($fileName,3);
+                        dol_syslog(DOL_DATA_ROOT .$fileName,3);
                         if (!file_exists(DOL_DATA_ROOT . $fileName)) {
                             if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']) === false)
                                 $fileName = null;

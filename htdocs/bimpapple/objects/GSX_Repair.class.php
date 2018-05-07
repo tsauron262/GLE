@@ -178,7 +178,7 @@ class GSX_Repair extends BimpObject
             $id_sav = (int) $this->getData('id_sav');
             foreach ($partsPending as $part) {
                 $fileName = null;
-                $labelDir = '/bimpcore/bimpsupport/sav/' . $id_sav . '';
+                $labelDir = '/bimpcore/sav/' . $id_sav . '';
                 if (!is_dir(DOL_DATA_ROOT . $labelDir)) {
                     mkdir(DOL_DATA_ROOT . $labelDir);
                 }
@@ -204,7 +204,7 @@ class GSX_Repair extends BimpObject
                             if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']) === false)
                                 $fileName = null;
                         }
-                        $fileName2 = "/document.php?modulepart=bimpcore&file=" . 'bimpsupport/sav/' . $id_sav . "/" . $fileNamePure;
+                        $fileName2 = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileNamePure;
                     }
                 }
                 $this->partsPending[] = array(

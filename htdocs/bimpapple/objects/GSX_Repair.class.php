@@ -202,8 +202,6 @@ class GSX_Repair extends BimpObject
                         $fileNamePath = $labelDir . "/" . $fileName;
                         $fileUrl = "";
                         //if (!file_exists(DOL_DATA_ROOT . $fileNamePath)) {
-                            dol_syslog(DOL_DATA_ROOT . $fileNamePath,3);
-                            dol_syslog($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData'],3);
                             if (file_put_contents(DOL_DATA_ROOT . $fileNamePath, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']))
                                 $fileUrl = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileName;
                         //}

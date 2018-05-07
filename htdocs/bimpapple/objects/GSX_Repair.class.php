@@ -214,7 +214,8 @@ class GSX_Repair extends BimpObject
                     'partNumber'        => $part['partNumber'],
                     'returnOrderNumber' => $part['returnOrderNumber'],
                     'fileName'          => $fileUrl,
-                    'registeredForReturn' => $part['registeredForReturn']
+                    'registeredForReturn' => $part['registeredForReturn'],
+                    'kbbSerialNumber'   => $part['kbbSerialNumber']
                 );
                 if (!count($this->partsPending)) {
                     $this->majSerialOk = true;
@@ -788,6 +789,7 @@ class GSX_Repair extends BimpObject
             $html .= '<th>Réf.</th>';
             $html .= '<th>N° de retour</th>';
             $html .= '<th>registeredForReturn</th>';
+            $html .= '<th>KBB</th>';
             $html .= '<th>Etiquette</th>';
             $html .= '</thead>';
 
@@ -798,6 +800,7 @@ class GSX_Repair extends BimpObject
                 $html .= '<td>' . $part['partNumber'] . '</td>';
                 $html .= '<td>' . $part['returnOrderNumber'] . '</td>';
                 $html .= '<td>' . $part['registeredForReturn'] . '</td>';
+                $html .= '<td>' . $part['kbbSerialNumber'] . '</td>';
                 $html .= '<td>' . ($part['fileName'] != ""? '<a href="'.DOL_URL_ROOT.$part['fileName'].'">Etiquette</a>': '') . '</td>';
                 if (file_exists(DOL_DATA_ROOT . '/bimpcore/bimpsupport/sav/' . (int) $this->getData('id_sav') . '/' . $part['fileName'])) {
                     $html .= '<a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="btn btn-default">';

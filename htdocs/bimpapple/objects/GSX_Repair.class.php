@@ -140,7 +140,7 @@ class GSX_Repair extends BimpObject
             'repairType'               => '',
             'repairStatus'             => '',
             'purchaseOrderNumber'      => '',
-            //'sroNumber'                => isset($repairNumber) ? $repairNumber : '',
+            'sroNumber'                => isset($repairNumber) ? $repairNumber : '',
             'repairConfirmationNumber' => isset($repairConfirmNumber) ? $repairConfirmNumber : '',
             'serialNumbers'            => array(
                 'serialNumber' => ''

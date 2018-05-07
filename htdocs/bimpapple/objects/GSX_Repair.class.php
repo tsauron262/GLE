@@ -188,7 +188,6 @@ class GSX_Repair extends BimpObject
                     $fileNamePath = $labelDir . "/" . $fileName;
                     $fileUrl = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileName;
                     if (!file_exists(DOL_DATA_ROOT . $fileNamePath)) {
-                        dol_syslog("telecharge file",3);
                         if ($this->isIphone) {
                             $client2 = 'IPhoneReturnLabel';
                         } else {

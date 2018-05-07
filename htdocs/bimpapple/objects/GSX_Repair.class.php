@@ -198,21 +198,24 @@ class GSX_Repair extends BimpObject
                     $labelResponse = $this->gsx->request($request, $client2);
 
                     if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
-                        $fileNamePure = str_replace("/", "_", $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName']);
-                        $fileName = $labelDir . "/" . $fileNamePure;
+                        $fileName = str_replace("/", "_", $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName']);
+                        $fileNamePath = $labelDir . "/" . $fileNamePure;
+                        $fileUrl = "";
                         dol_syslog($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData'],3);
-                        if (!file_exists(DOL_DATA_ROOT . $fileName)) {
-                            if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']) === false)
-                                $fileName = null;
-                        }
-                        $fileName2 = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileNamePure;
+                        //if (!file_exists(DOL_DATA_ROOT . $fileNamePath)) {
+                            dol_syslog(DOL_DATA_ROOT . $fileNamePath,3);
+                            dol_syslog($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData'],3);
+                            if (file_put_contents(DOL_DATA_ROOT . $fileNamePath, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']))
+                                $fileUrl = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileNamePure;
+                        //}
+                        
                     }
                 }
                 $this->partsPending[] = array(
                     'partDescription'   => $part['partDescription'],
                     'partNumber'        => $part['partNumber'],
                     'returnOrderNumber' => $part['returnOrderNumber'],
-                    'fileName'          => $fileName2,
+                    'fileName'          => $fileUrl,
                     'registeredForReturn' => $part['registeredForReturn']
                 );
                 if (!count($this->partsPending)) {

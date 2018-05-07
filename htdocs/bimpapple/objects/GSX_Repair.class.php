@@ -182,29 +182,30 @@ class GSX_Repair extends BimpObject
                 if (!is_dir(DOL_DATA_ROOT . $labelDir)) {
                     mkdir(DOL_DATA_ROOT . $labelDir);
                 }
+                $fileUrl = "";
                 if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] != "" && isset($part['partNumber'])) {
-                    if ($this->isIphone) {
-                        $client2 = 'IPhoneReturnLabel';
-                    } else {
-                        $client2 = 'ReturnLabel';
-                    }
-                    $requestName2 = $client2 . 'Request';
+                    $fileName = $part['returnOrderNumber'].".pdf";
+                    $fileNamePath = $labelDir . "/" . $fileName;
+                    $fileUrl = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileName;
+                    if (!file_exists(DOL_DATA_ROOT . $fileNamePath)) {
+                        if ($this->isIphone) {
+                            $client2 = 'IPhoneReturnLabel';
+                        } else {
+                            $client2 = 'ReturnLabel';
+                        }
+                        $requestName2 = $client2 . 'Request';
 
-                    $request = $this->gsx->_requestBuilder($requestName2, '', array(
-                        'returnOrderNumber' => $part['returnOrderNumber'],
-                        'partNumber'        => $part['partNumber']
-                    ));
+                        $request = $this->gsx->_requestBuilder($requestName2, '', array(
+                            'returnOrderNumber' => $part['returnOrderNumber'],
+                            'partNumber'        => $part['partNumber']
+                        ));
 
-                    $labelResponse = $this->gsx->request($request, $client2);
+                        $labelResponse = $this->gsx->request($request, $client2);
 
-                    if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
-                        $fileName = str_replace("/", "_", $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName']);
-                        $fileNamePath = $labelDir . "/" . $fileName;
-                        $fileUrl = "";
-                        //if (!file_exists(DOL_DATA_ROOT . $fileNamePath)) {
-                            if (file_put_contents(DOL_DATA_ROOT . $fileNamePath, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']))
-                                $fileUrl = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileName;
-                        //}
+                        if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
+                                if (!file_put_contents(DOL_DATA_ROOT . $fileNamePath, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']))
+                                        $fileUrl = "";
+                        }
                         
                     }
                 }

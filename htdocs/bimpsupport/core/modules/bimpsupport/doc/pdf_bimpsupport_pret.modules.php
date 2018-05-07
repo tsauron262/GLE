@@ -69,16 +69,6 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
 
 
-
-
-
-
-
-
-
-
-
-
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;

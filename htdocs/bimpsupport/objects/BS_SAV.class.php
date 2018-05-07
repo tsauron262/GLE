@@ -1201,6 +1201,14 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
         require_once DOL_DOCUMENT_ROOT . "/bimpsupport/core/modules/bimpsupport/modules_bimpsupport.php";
 
+        if ($file_type === 'pret') {
+            $prets = $this->getChildrenObjects('prets');
+            if (!count($prets)) {
+                $errors[] = 'Aucun pret enregistré pour ce sav';
+                return '';
+            }
+        }
+
         $errors = bimpsupport_pdf_create($this->db->db, $this, 'sav', $file_type);
 
         if (!count($errors)) {

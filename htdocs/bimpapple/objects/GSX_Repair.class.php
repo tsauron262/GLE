@@ -297,11 +297,6 @@ class GSX_Repair extends BimpObject
         $update = false;
         
         
-            dol_syslog($this->repairLookUp['repairStatus'],3);
-        if($this->repairLookUp['repairStatus'] == "Prêt pour enlèvement"){
-            $update = true;
-            $this->set('ready_for_pick_up', 1);
-        }
 
         if (is_array($this->repairLookUp) && !isset($this->repairLookUp['repairConfirmationNumber'])) {
             $this->repairLookUp = $this->repairLookUp[0];
@@ -325,6 +320,12 @@ class GSX_Repair extends BimpObject
 
         if (isset($this->repairLookUp['repairStatus']) && ($this->repairLookUp['repairStatus'] != '')) {
             $repairComplete = 0;
+            $ready_for_pick_up = 0;
+            
+            
+            if($this->repairLookUp['repairStatus'] == "Prêt pour enlèvement"){
+                $ready_for_pick_up = 1;
+            }
 
             if (in_array($this->repairLookUp['repairStatus'], array(
                         'Closed',
@@ -335,11 +336,18 @@ class GSX_Repair extends BimpObject
                         'Fermée et complétée par le système'
                     ))) {
                 $repairComplete = 1;
+                $ready_for_pick_up = 1;
             }
             if ((int) $this->getData('repair_complete') !== $repairComplete) {
                 $this->set('repair_complete', $repairComplete);
                 $update = true;
             }
+            
+            if ((int) $this->getData('ready_for_pick_up') !== $ready_for_pick_up) {
+                $this->set('ready_for_pick_up', $ready_for_pick_up);
+                $update = true;
+            }
+            
         }
 
         if (isset($this->repairLookUp['repairType'])) {

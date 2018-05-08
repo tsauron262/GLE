@@ -97,10 +97,10 @@ fields_tables:
                   callback: displayGarantie
             - field: total_from_order
             - field: ready_for_pick_up
-            - field: reimbursed
             - field: repair_complete
             - field: closed
             - field: date_closed
+            - field: reimbursed
             
 views: 
     default:

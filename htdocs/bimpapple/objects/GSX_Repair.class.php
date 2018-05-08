@@ -295,6 +295,12 @@ class GSX_Repair extends BimpObject
         $this->repairLookUp = $response[$client . 'Response']['lookupResponseData']['repairLookup'];
 
         $update = false;
+        
+        
+        if($this->repairLookup['repairStatus'] == "Prêt pour enlèvement"){
+            $update = true;
+            $this->setData('ready_for_pick_up', 1);
+        }
 
         if (is_array($this->repairLookUp) && !isset($this->repairLookUp['repairConfirmationNumber'])) {
             $this->repairLookUp = $this->repairLookUp[0];

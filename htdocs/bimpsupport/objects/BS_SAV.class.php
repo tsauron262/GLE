@@ -1009,7 +1009,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             $tech = $user_tech->dol_object->getFullName($langs);
         }
 
-        $textSuivie = "\n <a href='" . DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3) . "'>Vous pouvez suivre l'intervention ici.</a>";
+        $textSuivie = "\n <a href='" . DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=".$this->getChildObject("equipment")->getData("serial")."&id_sav=" . $this->id . "&user_name=" . substr($this->getChildObject("client")->dol_object->name, 0, 3) . "'>Vous pouvez suivre l'intervention ici.</a>";
 
 
         if (!$msg_type) {

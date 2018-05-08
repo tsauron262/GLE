@@ -795,7 +795,7 @@ class GSX_Repair extends BimpObject
                 $html .= '<td>' . $part['partNumber'] . '</td>';
                 $html .= '<td>' . $part['returnOrderNumber'] . '</td>';
                 $html .= '<td>' . $part['registeredForReturn'] . '</td>';
-                $html .= '<td>' . $part['vendorAddress'] . '</td>';
+                $html .= '<td><span title="'.$part['vendorName']." ".$part['vendorAddress']." ".$part['vendorState']." ".$part['vendorCity'].'">' . $part['vendorAddress'] . '</span></td>';
                 $html .= '<td><span title="' . $part['kbbSerialNumber'] . '">'. dol_trunc($part['kbbSerialNumber'],6).'</span></td>';
                 $html .= '<td>' . ($part['fileName'] != ""? '<a href="'.DOL_URL_ROOT.$part['fileName'].'">Etiquette</a>': '') . '</td>';
                 if (file_exists(DOL_DATA_ROOT . '/bimpcore/bimpsupport/sav/' . (int) $this->getData('id_sav') . '/' . $part['fileName'])) {

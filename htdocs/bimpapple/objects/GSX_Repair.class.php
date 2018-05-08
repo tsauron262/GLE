@@ -210,7 +210,7 @@ class GSX_Repair extends BimpObject
                     }
                 }
                 $part['fileName'] = $fileUrl;
-                $this->partsPending[] = $part['partDescription'];
+                $this->partsPending[] = $part;
                 if (!count($this->partsPending)) {
                     $this->majSerialOk = true;
                 }

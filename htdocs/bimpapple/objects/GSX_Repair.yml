@@ -38,21 +38,21 @@ fields:
         label: Prêt pour enlèvement
         type: bool
         default_value: 0
-    reimbursed: 
-        label: Remboursée
-        type: bool
-        default_value: 0
     repair_complete: 
         label: Réparation terminée
         type: bool
         default_value: 0
     closed: 
-        label: Fermée
+        label: Fermée par GLE
         type: bool
         default_value: 0
     date_closed: 
         label: Date de fermeture
         type: date
+    reimbursed: 
+        label: Remboursée
+        type: bool
+        default_value: 0
     total_from_order_changed: 
         label: Total commande mis à jour
         type: bool

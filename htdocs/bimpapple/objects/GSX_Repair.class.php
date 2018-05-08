@@ -298,6 +298,7 @@ class GSX_Repair extends BimpObject
         
         
         if($this->repairLookup['repairStatus'] == "Prêt pour enlèvement"){
+            dol_syslog($this->repairLookup['repairStatus'],3);
             $update = true;
             $this->set('ready_for_pick_up', 1);
         }

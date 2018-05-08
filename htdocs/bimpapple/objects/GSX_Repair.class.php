@@ -788,7 +788,7 @@ class GSX_Repair extends BimpObject
             $html .= '<th>Nom</th>';
             $html .= '<th>Réf.</th>';
             $html .= '<th>N° de retour</th>';
-            $html .= '<th>registeredForReturn</th>';
+            $html .= '<th>Inscrit pour le Retour</th>';
             $html .= '<th>KBB</th>';
             $html .= '<th>Etiquette</th>';
             $html .= '</thead>';

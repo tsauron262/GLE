@@ -863,8 +863,8 @@ class gsxController extends BimpController
                     if (isset($response[$responseNames])) {
                         $responseName = $responseNames;
                     }
-                } elseif (is_array($responseName)) {
-                    foreach ($responseName as $respName) {
+                } elseif (is_array($responseNames)) {
+                    foreach ($responseNames as $respName) {
                         if (isset($response[$respName])) {
                             $responseName = $respName;
                             break;

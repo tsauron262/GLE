@@ -374,17 +374,7 @@ class BS_SAV extends BimpObject
                     'success_callback' => $callback
                 ))
             );
-
-            $buttons[] = array(
-                'label'   => 'Générer Bon de prêt',
-                'icon'    => 'fas_file-pdf',
-                'onclick' => $this->getJsActionOnclick('generatePDF', array(
-                    'file_type' => 'pret'
-                        ), array(
-                    'success_callback' => $callback
-                ))
-            );
-
+            
             $onclick = 'generatePDFFile($(this), ' . $this->id . ', \'destruction\');';
             $buttons[] = array(
                 'label'   => 'Générer Bon de destruction client',

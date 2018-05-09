@@ -67,8 +67,6 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
 
-
-
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -428,9 +426,15 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
     function _pagehead(&$pdf, $object, $showadress = 1, $outputlangs = '', $currentPage = 0)
     {
+        $sav = null;
         if (BimpObject::objectLoaded($object) && is_a($object, 'BS_SavPret')) {
             $sav = $object->getParentInstance();
-            if (!BimpObject::objectLoaded($sav))
+        }
+
+
+        if (!BimpObject::objectLoaded($sav)) {
+            $this->errors[] = 'SAV absent ou invalide';
+            return;
         }
 
 

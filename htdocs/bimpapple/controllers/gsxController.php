@@ -536,7 +536,7 @@ class gsxController extends BimpController
             $valDef['soldToContact'] = $tech->dol_object->getFullName($langs);
             $valDef['technicianName'] = $tech->getData('apple_shipto');
 
-            $valDef['billTo'] = $tech->array_options['options_apple_service'];
+            $valDef['billTo'] = $tech->dol_object->array_options['options_apple_service'];
             $valDef['soldToContact'] = $tech->dol_object->getFullName($langs);
             $valDef['technicianName'] = $tech->getData('lastname');
             $phone = $tech->getData('office_phone');
@@ -717,10 +717,10 @@ class gsxController extends BimpController
         $responseName = '';
 
         if (isset($_POST['partsCount']) && isset($_POST['partNumber_100']) && $_POST['partNumber_100'] !== 'Part') {
-            $_POST['partsCount']++;
+            $_POST['partsCount'] ++;
             $_POST['partNumber_' . $_POST['partsCount']] = $_POST['partNumber_100'];
         }
-        
+
         $GSXRequest = new GSX_Request($this->gsx, $requestType);
         $data = $GSXRequest->processRequestForm();
 
@@ -840,12 +840,10 @@ class gsxController extends BimpController
 
         $this->gsx->resetSoapErrors();
 
-        echo '<pre>';
-        print_r($data);
-        exit;
-
         $requestData = $this->gsx->_requestBuilder($request, $wrapper, $data);
         $response = $this->gsx->request($requestData, $client);
+
+        dol_syslog("Requête " . $request . " | " . print_r($response, 1), LOG_ERR, 0, "_apple");
 
         if (count($this->gsx->errors['soap'])) {
             $html .= BimpRender::renderAlerts('Echec de l\'envoi de la requête "' . $request . '"');

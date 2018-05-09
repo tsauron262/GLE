@@ -78,6 +78,76 @@ class BS_SavPret extends BimpObject
         return $items;
     }
 
+    public function getListExtraBtn()
+    {
+        $buttons = array();
+
+        $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+
+        $buttons[] = array(
+            'label'   => 'Générer Bon de prêt',
+            'icon'    => 'fas_file-pdf',
+            'onclick' => $this->getJsActionOnclick('generatePDF', array(
+                'file_type' => 'pret'
+                    ), array(
+                'success_callback' => $callback
+            ))
+        );
+
+        return $buttons;
+    }
+
+    // Actions: 
+
+    public function actionGeneratePDF($data, &$success)
+    {
+        $success = 'Fichier PDF généré avec succès';
+
+        $errors = array();
+        $file_url = '';
+        
+        if (!in_array($file_type, array('pret'))) {
+            $errors[] = 'Type de fichier PDF invalide';
+        } else {
+            require_once DOL_DOCUMENT_ROOT . "/bimpsupport/core/modules/bimpsupport/modules_bimpsupport.php";
+
+        if ($file_type === 'pret') {
+            $prets = $this->getChildrenObjects('prets');
+            if (!count($prets)) {
+                $errors[] = 'Aucun pret enregistré pour ce sav';
+                return '';
+            }
+        }
+
+        $errors = bimpsupport_pdf_create($this->db->db, $this, 'sav', $file_type);
+
+        if (!count($errors)) {
+            $ref = '';
+            switch ($file_type) {
+                case 'pc':
+                    $ref = 'PC-' . $this->getData('ref');
+                    break;
+                case 'destruction':
+                    $ref = 'Destruction-' . $this->getData('ref');
+                    break;
+                case 'destruction2':
+                    $ref = 'Destruction2-' . $this->getData('ref');
+                    break;
+                case 'pret':
+                    $ref = 'Pret-' . $this->getData('ref');
+                    break;
+            }
+
+//            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
+        }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'file_url' => $file_url
+        );
+    }
+
     // Overrides: 
 
     public function create()

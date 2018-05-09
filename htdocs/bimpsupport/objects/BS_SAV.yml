@@ -191,7 +191,7 @@ fields:
         type: id_object
         object: user_tech
         input: 
-            type: hidden
+            type: search_user
         search:
             input: 
                 type: search_user
@@ -393,6 +393,7 @@ forms:
             - field: id_equipment
             - field: id_contrat
             - field: id_propal
+            - field: id_user_tech
             - field: date_problem
             - field: system
             - field: login_admin

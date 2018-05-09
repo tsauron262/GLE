@@ -160,6 +160,8 @@ lists:
         add_form_name: default
         modal_view: default
         edit_btn: 1
+        extra_btn: 
+            callback: getListExtraBtn
         cols: 
             ref: 
                 field: ref

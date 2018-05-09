@@ -11,6 +11,7 @@ class ModeleBimpSupport extends CommonDocGenerator
 {
 
     var $error = '';
+    public $errors = array();
 
     function pdferror()
     {
@@ -86,7 +87,13 @@ function bimpsupport_pdf_create($db, $object, $obj_type, $modele = '', $outputla
             bimpsupport_delete_preview($db, $object->getData('ref'), $pdf_dir);
         } else {
             dol_syslog("Erreur dans bimpsupport_pdf_create");
-            $errors[] = $obj->pdferror();
+            $error = $obj->pdferror();
+            if ($error) {
+                $errors[] = $error;
+            }
+            if (count($obj->errors)) {
+                $errors = array_merge($errors, $obj->errors);
+            }
         }
     } else {
         $errors[] = $langs->trans("Error") . " " . $langs->trans("ErrorFileDoesNotExists", $dir . $file);

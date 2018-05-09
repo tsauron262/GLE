@@ -7,8 +7,8 @@ class BS_SAV extends BimpObject
 {
 
     public static $ref_model = 'SAV{CENTRE}{00000}';
-    public static $propal_model_pdf = 'azurSAV';
-    public static $facture_model_pdf = 'crabeSav';
+    public static $propal_model_pdf = 'bimpdevissav';
+    public static $facture_model_pdf = 'bimpinvoicesav';
     public static $idProdPrio = 3422;
     private $allGarantie = true;
 

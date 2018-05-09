@@ -1,5 +1,7 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/bimpsupport/centre.inc.php';
+
 class BE_Place extends BimpObject
 {
 
@@ -39,6 +41,19 @@ class BE_Place extends BimpObject
         return $contacts;
     }
 
+    public function getCentresArray()
+    {
+        $centres = array(
+            '' => ''
+        );
+        global $tabCentre;
+        foreach ($tabCentre as $code => $centre) {
+            $centres[$code] = $centre[2];
+        }
+
+        return $centres;
+    }
+
     public function getTdStyle()
     {
         if ($this->isLoaded()) {
@@ -65,8 +80,10 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_ENTREPOT:
                 case self::BE_PLACE_PRESENTATION:
                 case self::BE_PLACE_VOL:
-                case self::BE_PLACE_PRET:
                     return $this->displayData('id_entrepot', 'nom_url');
+
+                case self::BE_PLACE_PRET:
+                    return $this->displayData('code_centre');
 
                 case self::BE_PLACE_USER:
                     return $this->displayData('id_user', 'nom_url');
@@ -95,16 +112,28 @@ class BE_Place extends BimpObject
                     $this->set('id_entrepot', 0);
                     $this->set('id_user', 0);
                     $this->set('place_name', '');
+                    $this->set('code_centre', '');
                     break;
 
                 case self::BE_PLACE_ENTREPOT:
                 case self::BE_PLACE_PRESENTATION:
                 case self::BE_PLACE_VOL:
-                case self::BE_PLACE_PRET:
                     $id_entrepot = $this->getData('id_entrepot');
                     if (is_null($id_entrepot) || !$id_entrepot) {
                         return array('Valeur obligatoire absente: "Entrepôt"');
                     }
+                    $this->set('id_client', 0);
+                    $this->set('id_user', 0);
+                    $this->set('place_name', '');
+                    $this->set('code_centre', '');
+                    break;
+
+                case self::BE_PLACE_PRET:
+                    if (!$this->getData('code_centre')) {
+                        return array('Valeur obligatoire absente: "Centre"');
+                    }
+                    global $tabCentre;
+                    $this->set('id_entrepot', (int) $tabCentre[$this->getData('code_centre')][8]);
                     $this->set('id_client', 0);
                     $this->set('id_user', 0);
                     $this->set('place_name', '');
@@ -118,6 +147,7 @@ class BE_Place extends BimpObject
                     $this->set('id_entrepot', 0);
                     $this->set('id_client', 0);
                     $this->set('place_name', '');
+                    $this->set('code_centre', '');
                     break;
 
                 case self::BE_PLACE_FREE:
@@ -128,6 +158,7 @@ class BE_Place extends BimpObject
                     $this->set('id_entrepot', 0);
                     $this->set('id_user', 0);
                     $this->set('id_client', 0);
+                    $this->set('code_centre', '');
                     break;
             }
 

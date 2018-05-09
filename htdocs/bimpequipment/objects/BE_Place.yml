@@ -94,11 +94,18 @@ fields:
             type: search_entrepot
         display_if:
             field_name: type
-            show_values: 2,5,6,7
+            show_values: 2,5,6
         display: 
             nom_url: 
                 type: nom_url
-    
+    code_centre:
+        label: Centre
+        values: 
+            array: centres
+        display_if:
+            field_name: type
+            show_values: 7
+        
     id_user: 
         label: Utilisateur
         type: id_object

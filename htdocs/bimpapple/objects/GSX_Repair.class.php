@@ -209,13 +209,8 @@ class GSX_Repair extends BimpObject
                         
                     }
                 }
-                $this->partsPending[] = array(
-                    'partDescription'   => $part['partDescription'],
-                    'partNumber'        => $part['partNumber'],
-                    'returnOrderNumber' => $part['returnOrderNumber'],
-                    'fileName'          => $fileUrl,
-                    'registeredForReturn' => $part['registeredForReturn']
-                );
+                $part['fileName'] = $fileUrl;
+                $this->partsPending[] = $part;
                 if (!count($this->partsPending)) {
                     $this->majSerialOk = true;
                 }
@@ -300,6 +295,8 @@ class GSX_Repair extends BimpObject
         $this->repairLookUp = $response[$client . 'Response']['lookupResponseData']['repairLookup'];
 
         $update = false;
+        
+        
 
         if (is_array($this->repairLookUp) && !isset($this->repairLookUp['repairConfirmationNumber'])) {
             $this->repairLookUp = $this->repairLookUp[0];
@@ -323,6 +320,12 @@ class GSX_Repair extends BimpObject
 
         if (isset($this->repairLookUp['repairStatus']) && ($this->repairLookUp['repairStatus'] != '')) {
             $repairComplete = 0;
+            $ready_for_pick_up = 0;
+            
+            
+            if($this->repairLookUp['repairStatus'] == "Prêt pour enlèvement"){
+                $ready_for_pick_up = 1;
+            }
 
             if (in_array($this->repairLookUp['repairStatus'], array(
                         'Closed',
@@ -333,11 +336,18 @@ class GSX_Repair extends BimpObject
                         'Fermée et complétée par le système'
                     ))) {
                 $repairComplete = 1;
+                $ready_for_pick_up = 1;
             }
             if ((int) $this->getData('repair_complete') !== $repairComplete) {
                 $this->set('repair_complete', $repairComplete);
                 $update = true;
             }
+            
+            if ((int) $this->getData('ready_for_pick_up') !== $ready_for_pick_up) {
+                $this->set('ready_for_pick_up', $ready_for_pick_up);
+                $update = true;
+            }
+            
         }
 
         if (isset($this->repairLookUp['repairType'])) {
@@ -787,7 +797,9 @@ class GSX_Repair extends BimpObject
             $html .= '<th>Nom</th>';
             $html .= '<th>Réf.</th>';
             $html .= '<th>N° de retour</th>';
-            $html .= '<th>registeredForReturn</th>';
+            $html .= '<th>Inscrit pour le Retour</th>';
+            $html .= '<th>Adresse retour</th>';
+            $html .= '<th>KBB</th>';
             $html .= '<th>Etiquette</th>';
             $html .= '</thead>';
 
@@ -798,6 +810,8 @@ class GSX_Repair extends BimpObject
                 $html .= '<td>' . $part['partNumber'] . '</td>';
                 $html .= '<td>' . $part['returnOrderNumber'] . '</td>';
                 $html .= '<td>' . $part['registeredForReturn'] . '</td>';
+                $html .= '<td><span title="'.$part['vendorName']." ".$part['vendorAddress']." ".$part['vendorState']." ".$part['vendorCity'].'">' . $part['vendorAddress'] . '</span></td>';
+                $html .= '<td><span title="' . $part['kbbSerialNumber'] . '">'. dol_trunc($part['kbbSerialNumber'],6).'</span></td>';
                 $html .= '<td>' . ($part['fileName'] != ""? '<a href="'.DOL_URL_ROOT.$part['fileName'].'">Etiquette</a>': '') . '</td>';
                 if (file_exists(DOL_DATA_ROOT . '/bimpcore/bimpsupport/sav/' . (int) $this->getData('id_sav') . '/' . $part['fileName'])) {
                     $html .= '<a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="btn btn-default">';

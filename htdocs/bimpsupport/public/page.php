@@ -228,45 +228,19 @@ if ($id_sav) {
                     
                     /*Si erreur*/
                     if (count($errors)) {
-                        echo '<div class="col-lg-9">';
+                        echo '</div>';
+                        echo '<div class="row">';
                         echo '<p class="error">';
                         foreach ($errors as $error) {
                             echo $error . '<br/>';
                         }
                         echo '</p>';
-                        echo '</div></div>';
+                        echo '</div>';
                         echo '<div class="row">';
                     }
 
                     /* si liste des SAV*/
-                    if (count($savsList)) {
-                        echo '<div class="pull-right">';
-                        echo '<a class="butAction" href="./' . $page . '"><i class="fa fa-search left"></i>Nouvelle recheche</a>';
-                        echo '</div></div>';
-                        echo '<div class="row">';
-
-                        echo '<p class="infos">Vous avez ' . count($savsList) . ' suivis SAV enregistrés pour le n° de série <strong>"' . $serial . '"</strong></p>';
-                        echo '<table><thead><tr>';
-                        echo '<th>Référence</th>';
-                        echo '<th>Date de création</th>';
-                        echo '<th>Symptômes</th>';
-                        echo '<th></th>';
-                        echo '</tr></thead><tbody>';
-                        foreach ($savsList as $savInfos) {
-                            echo '<tr>';
-                            echo '<td>' . $savInfos['ref'] . '</td>';
-                            echo '<td>' . $savInfos['date_create'] . '</td>';
-                            echo '<td>' . $savInfos['symptom'] . '</td>';
-                            echo '<td><a class="butAction" href="./' . $page . '?id_sav=' . $savInfos['id_sav'];
-                            if (!empty($savStr) && $serial) {
-                                echo '&savs_str=' . $savStr . '&serial=' . $serial;
-                            }
-                            echo '"><i class="fa fa-bars left"></i>Afficher</a></td>';
-                            echo '</tr>';
-                        }
-                        echo '</tbody></table></div>';
-                        echo '<div class="row">';
-                    } else if (count($savRows)) {//sinon si sav seul
+                    if (count($savRows)) {// si sav seul
                         if(isset($sav->societe) && is_object($sav->societe))
                             echo "<h2>".$sav->societe->getFullName($langs) . "</h2>";
                         echo "<h2>".$sav->ref . "</h2>";
@@ -311,9 +285,38 @@ if ($id_sav) {
                         echo '</tbody></table></div>';
                         echo '<div class="row">';
                     }
+                    else if (count($savsList)) {
+                        echo '<div class="pull-right">';
+                        echo '<a class="butAction" href="./' . $page . '"><i class="fa fa-search left"></i>Nouvelle recheche</a>';
+                        echo '</div></div>';
+                        echo '<div class="row">';
+
+                        echo '<p class="infos">Vous avez ' . count($savsList) . ' suivis SAV enregistrés pour le n° de série <strong>"' . $serial . '"</strong></p>';
+                        echo '<table><thead><tr>';
+                        echo '<th>Référence</th>';
+                        echo '<th>Date de création</th>';
+                        echo '<th>Symptômes</th>';
+                        echo '<th></th>';
+                        echo '</tr></thead><tbody>';
+                        foreach ($savsList as $savInfos) {
+                            echo '<tr>';
+                            echo '<td>' . $savInfos['ref'] . '</td>';
+                            echo '<td>' . $savInfos['date_create'] . '</td>';
+                            echo '<td>' . $savInfos['symptom'] . '</td>';
+                            echo '<td><a class="butAction" href="./' . $page . '?id_sav=' . $savInfos['id_sav'];
+                            if (!empty($savStr) && $serial) {
+                                echo '&savs_str=' . $savStr . '&serial=' . $serial;
+                            }
+                            echo '"><i class="fa fa-bars left"></i>Afficher</a></td>';
+                            echo '</tr>';
+                        }
+                        echo '</tbody></table></div>';
+                        echo '<div class="row">';
+                    }  
 
                     if (!count($savRows) && !count($savsList)) {
-                        echo '<div class="col-lg-9">';
+                        echo '</div>';
+                        echo '<div class="row">';
                         echo '<form method="POST" action="./' . $page . '" class="well">';
                         echo '<div class="form-group row">';
                         echo '<label class="col-lg-10 col-lg-offset-1" for="serial">Numéro de série du matériel: </label>';

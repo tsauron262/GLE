@@ -93,7 +93,8 @@ class BimpPDF extends TCPDF
             }
         }
 
-        return $this->Output($filename, $output);
+        $this->Output($filename, $output);
+        return 1;
     }
 
     // Outils: 

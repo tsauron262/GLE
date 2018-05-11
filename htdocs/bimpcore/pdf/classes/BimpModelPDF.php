@@ -89,7 +89,8 @@ Abstract class BimpModelPDF
         }
 
         if (count($this->errors)) {
-            $this->displayErrors();
+//            $this->displayErrors();
+            return 0;
             exit;
         }
 
@@ -236,8 +237,6 @@ Abstract class BimpModelPDF
         $file = $this->getFilePath() . $this->getFileName();
 
         $this->render($file, false);
-//        $this->render($file, true);
-
         return 1;
     }
 

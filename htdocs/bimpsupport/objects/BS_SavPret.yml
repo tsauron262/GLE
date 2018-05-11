@@ -26,6 +26,19 @@ objects:
                 name: Bimp_Societe
             id_object: 
                 field_value: id_client
+
+associations: 
+    equipments:
+        object: equipment
+        label: Equipements concernés
+        display: 
+            default: 
+                type: callback
+        input: 
+            type: select
+            options: 
+                array: equipments
+
 fields: 
     id_sav: 
         label: SAV
@@ -41,12 +54,6 @@ fields:
         label: Centre
         values: 
             array: centres
-    id_equipment:
-        label: Equipement
-        type: id_object
-        object: equipment
-        values: 
-            array: equipments
     ref: 
         label: Référence
     id_client: 
@@ -75,7 +82,7 @@ forms:
         rows: 
             - field: id_sav
               hidden: 1
-            - field: id_equipment
+            - association: equipments
             - field: date_begin
             - field: date_end
           
@@ -85,16 +92,12 @@ fields_tables:
             - field: id_sav
               display: nom_url
             - field: code_centre
-            - field: id_equipment
-              display: nom_url
+            - association: equipments
             - field: id_client
               display: nom_url
             - field: date_begin
-              edit: 1
             - field: date_end
-              edit: 1
             - field: returned
-              edit: 1
 
 views: 
     default:
@@ -131,9 +134,6 @@ lists:
             sav: 
                 field: id_sav
                 display: nom_url
-            equipment: 
-                field: id_equipment
-                display: nom_url
             client: 
                 field: id_client
                 display: nom_url
@@ -165,9 +165,6 @@ lists:
         cols: 
             ref: 
                 field: ref
-            equipment: 
-                field: id_equipment
-                display: nom_url
             date_begin: 
                 field: date_begin
             date_end: 

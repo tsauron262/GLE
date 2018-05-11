@@ -492,9 +492,10 @@ class BimpInput
 
         if (is_null($value)) {
             $value = '';
-        } elseif (preg_match('/^[0-9]{3}([0-9])\-[0-9]([0-9])\-[0-9]([0-9]).*$/', $value, $matches)) {
-            if (!(int) $matches[1] || !(int) $matches[2] || !(int) $matches[3])
+        } elseif (preg_match('/^([0-9]{4})\-([0-9][0-9])\-([0-9][0-9]).*$/', $value, $matches)) {
+            if (!(int) $matches[1] || !(int) $matches[2] || !(int) $matches[3]) {
                 $value = '';
+            }
         }
 
         $display_js_format = '';
@@ -838,7 +839,7 @@ class BimpInput
             }
         }
 
-        $html .= '<div class="inputMultipleValuesContainer"';
+        $html .= '<div class="inputMultipleValuesContainer" data-field_name="' . $field_name . '"';
         if ($autosave) {
             $html .= ' data-module="' . $object->module . '"';
             $html .= ' data-object_name="' . $object->object_name . '"';
@@ -863,22 +864,29 @@ class BimpInput
         $html .= '</tr>';
 
         foreach ($values as $value => $label) {
-            $html .= '<tr>';
+            $html .= '<tr class="itemRow">';
             $html .= '<td style="display: none">';
             $html .= '<input type="hidden" name="' . $field_name . '[]" value="' . $value . '"/>';
             $html .= '</td>';
             $html .= '<td>' . $label . '</td>';
-            $html .= '<td><button type="button" class="btn btn-light-danger iconBtn" onclick="';
+            $html .= '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn" onclick="';
             if ($autosave) {
                 $html .= 'var $button = $(this); deleteObjectMultipleValuesItem(\'' . $object->module . '\', \'' . $object->object_name . '\', ';
                 $html .= $object->id . ', \'' . $field_name . '\', \'' . $value . '\', null, function() {';
-                $html .= '$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove();});});';
+                $html .= '$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();});});';
             } else {
-                $html .= '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove();});"';
+                $html .= '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();});"';
             }
             $html .= '"><i class="fa fa-trash"></i></button></td>';
             $html .= '</tr>';
         }
+
+        $html .= '<tr class="noItemRow"' . (count($values) ? ' style="display: none"' : '') . '>';
+        $html .= '<td colspan="3">';
+        $html .= BimpRender::renderAlerts('Aucun élément sélectionné', 'warning');
+        $html .= '</td>';
+        $html .= '</tr>';
+
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';

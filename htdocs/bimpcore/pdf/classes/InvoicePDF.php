@@ -159,13 +159,22 @@ class InvoicePDF extends BimpDocumentPDF
 
         if (!empty($linkedObjects)) {
             foreach ($linkedObjects as $lo) {
-                $refObject = $lo['ref_title'] . ' : ' . $lo['ref_value'];
-                if (!empty($lo['date_value'])) {
-                    $refObject .= ' / ' . $lo['date_value'];
+                if (static::$type === 'sav') {
+                    $rows .= '<div class="row">' . $lo['ref_title'] . ' :</div>';
+                    $rows .= '<div class="row">' . $lo['ref_value'];
+                    if (!empty($lo['date_value'])) {
+                        $rows .= ' / ' . $lo['date_value'];
+                    }
+                    $rows .= '</div>';
+                    $nRows += 2;
+                } else {
+                    $refObject = $lo['ref_title'] . ' :' . $lo['ref_value'];
+                    if (!empty($lo['date_value'])) {
+                        $refObject .= ' / ' . $lo['date_value'];
+                    }
+                    $rows .= '<div class="row">' . $refObject . '</div>';
+                    $nRows++;
                 }
-
-                $rows .= '<div class="row">' . $refObject . '</div>';
-                $nRows++;
             }
         }
 

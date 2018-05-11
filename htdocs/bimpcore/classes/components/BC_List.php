@@ -126,6 +126,21 @@ class BC_List extends BC_Panel
         }
     }
 
+    public function addAssociateAssociationFilter($association, $id_associate, $type = 'in')
+    {
+        $bimpAsso = new BimpAssociation($this->object, $association);
+
+        if (!count($bimpAsso->errors)) {
+            $this->params['association_filters'][] = array(
+                'type'         => $type,
+                'association'  => $association,
+                'id_associate' => (int) $id_associate
+            );
+        } else {
+            $this->errors = array_merge($this->errors, $bimpAsso->errors);
+        }
+    }
+
     public function addBulkAssociation($association, $id_associate, $label = null)
     {
         if ($this->object->config->isDefined('associations/' . $association)) {

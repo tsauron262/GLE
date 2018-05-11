@@ -333,8 +333,6 @@ class GSX
 
                 return $this->outputFormat($modelData['FetchProductModelResponse']['productModelResponse'], $errorMessage, $returnFormat);
 
-                break;
-
             default :
             case 'warranty' :
                 if ($this->isIphone) {
@@ -366,8 +364,6 @@ class GSX
 //                print_r($requestData);
                 $errorMessage = $this->_obtainErrorMessage($warrantyDetails);
                 return $this->outputFormat($warrantyDetails[$clientLookup . 'Response'][$responseName], $errorMessage, $returnFormat);
-
-                break;
         }
     }
 
@@ -462,11 +458,7 @@ class GSX
 
                 $repairLookup = $this->request($requestData, $clientLookup);
 
-//$errorMessage = $this->_obtainErrorMessage ( $repairLookup );
-
                 return $this->outputFormat($repairLookup, $errorMessage, $returnFormat);
-
-                break;
 
             /* ! Repair Details */
             case 'details' :
@@ -486,8 +478,6 @@ class GSX
                 $errorMessage = $this->_obtainErrorMessage($repairLookup);
 
                 return $this->outputFormat($repairLookup[$clientLookup . 'Response']['lookupResponseData'], $errorMessage, $returnFormat);
-
-                break;
 
             /* ! Repair Details Lookup */
             case 'details-lookup' :
@@ -680,55 +670,20 @@ class GSX
             if (stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false) {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);
-                echo '<formSus>OK</formSus>' . $f->faultstring . '<fieldset id="componentCheckDetails"><legend>Détails du composant</legend>
-                    <div class="inputsList">
-<div class="subInputsList">
-<div class="dataBlock">';
-                foreach ($tabTmp as $i => $nom) {
-                    $i++;
-                    echo '
-                   <label class="dataTitle" for="component_' . $i . '">Composant</label><br><input type="text" id="component_' . $i . '" name="component_' . $i . '" value="' . $nom . '" maxlength="20" onchange="checkInput($(this), \'text\')">
-                   <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">
-                   <label class="dataTitle" for="componentSerialNumber_' . $i . '">Numéro de série du composant</label><br>
-                   <input type="text" id="componentSerialNumber_' . $i . '" name="componentSerialNumber_' . $i . '" maxlength="20" onchange="checkInput($(this), \'text\')">
-                   <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">';
-                }
-                echo "<input type='hidden' name='componentCheckDetails_nextIdx' value='" . ($i + 1) . "'/>";
-                echo '</div></div></div></fieldset>';
-
-                die;
-                return array();
+                return array(
+                    'error' => 'partInfos',
+                    'parts' => $tabTmp
+                );
             }
             if (stripos($f->faultstring, "Plusieurs pièces de niveau trouvées. Veuillez indiquer la pièce de niveau requise.") !== false) {
-//                echo '<formSus>OK</formSus>' . $f->faultstring . '<fieldset id="availableRepairStrategies"><legend>Type de réparation</legend>
-//                    <div class="inputsList">
-//<div class="subInputsList">
-//<div class="dataBlock">';
-//                $tabTmp = array("Carry-in"=>"Carry-in", "Mail-in" => "Mail-in");
-//                foreach ($tabTmp as $i => $nom) {
-//                    $i++;
-//                    echo '
-//                   <label class="dataTitle" for="component_' . $i . '">Composant</label><br><input type="text" id="component_' . $i . '" name="component_' . $i . '" value="' . $nom . '" maxlength="20" onchange="checkInput($(this), \'text\')">
-//                   <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">
-//                   <label class="dataTitle" for="componentSerialNumber_' . $i . '">Numéro de série du composant</label><br>
-//                   <input type="text" id="componentSerialNumber_' . $i . '" name="componentSerialNumber_' . $i . '" maxlength="20" onchange="checkInput($(this), \'text\')">
-//                   <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">';
-//                }
-//                echo "<input type='hidden' name='componentCheckDetails_nextIdx' value='" . ($i + 1) . "'/>";
-//                echo '</div></div></div></fieldset>';
-//                die;
-//                return array();
-
-                echo "<tierPart>OK</tierPart>";
-                die;
-                return array();
+                return array(
+                    'error' => 'tierPart'
+                );
             }
             if (stripos($f->faultstring, "La réparation est hors garantie") !== false) {
-                $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
-                $tabTmp = explode(",", $temp);
-                echo '<horsgarantie>OK</horsgarantie>';
-                die;
-                return array();
+                return array(
+                    'error' => 'horsgarantie'
+                );
             } else {
                 $add = "";
                 if (isset($f->detail) && isset($f->detail->errors) && isset($f->detail->errors->error))

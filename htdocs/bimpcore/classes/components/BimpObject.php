@@ -733,13 +733,20 @@ class BimpObject
 
     public function setAssociatesList($association, $list)
     {
+        $items = array();
+        
+        foreach ($list as $id_item) {
+            if ((int) $id_item && !in_array((int) $id_item, $items)) {
+                $items[] = (int) $id_item;
+            }
+        }
         if (isset($this->associations[$association])) {
-            $this->associations[$association] = $list;
+            $this->associations[$association] = $items;
             return true;
         }
 
         if ($this->config->isDefined('associations/' . $association)) {
-            $this->associations[$association] = $list;
+            $this->associations[$association] = $items;
             return true;
         }
         return false;
@@ -1552,7 +1559,7 @@ class BimpObject
             $errors = $this->validateValue($field, $value);
             if (!count($errors)) {
                 if ($this->db->update($this->getTable(), array(
-                            'total_from_order_changed' => 0
+                            $field => $value
                                 ), '`' . $this->getPrimary() . '` = ' . (int) $this->id) <= 0) {
                     $sqlError = $this->db->db->lasterror();
                     $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');

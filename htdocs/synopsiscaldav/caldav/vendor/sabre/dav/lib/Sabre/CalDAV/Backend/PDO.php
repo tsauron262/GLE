@@ -600,14 +600,13 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
             foreach($extraData as $clef => $val)
                 $extraData[$clef] = str_replace($tabR, "", $val);
             
-             $calendarData2['DESCRIPTION'] = str_replace("\\n","\n", $calendarData2['DESCRIPTION']);
 
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
                 $action->label = str_replace($tabR, "", $calendarData2['SUMMARY']);
             if (isset($calendarData2['DESCRIPTION']))
-                $action->note = str_replace($tabR, "", $calendarData2['DESCRIPTION']);
+                $action->note = str_replace($tabR, "", str_replace("\\n","\n", $calendarData2['DESCRIPTION']));
             if (isset($calendarData2['LOCATION']))
                 $action->location = $calendarData2['LOCATION'];
 
@@ -836,14 +835,13 @@ WHERE  `email` LIKE  '" . $mail . "'");
             else
                 $calendarData = str_replace($tabR, "", $calendarData);
             
-            $calendarData2['DESCRIPTION'] = str_replace("\\n","\n", $calendarData2['DESCRIPTION']);
             
             $action->datep = $extraData['firstOccurence'];
             $action->datef = $extraData['lastOccurence'];
             if (isset($calendarData2['SUMMARY']))
                 $action->label = str_replace($tabR, "", $calendarData2['SUMMARY']);
             if (isset($calendarData2['DESCRIPTION']))
-                $action->note = str_replace($tabR, "", $calendarData2['DESCRIPTION']);
+                $action->note = str_replace($tabR, "", str_replace("\\n","\n", $calendarData2['DESCRIPTION']));
             if (isset($calendarData2['LOCATION']))
                 $action->location = str_replace($tabR, "", $calendarData2['LOCATION']);
 

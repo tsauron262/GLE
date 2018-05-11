@@ -168,6 +168,8 @@ lists:
         td_style: 
             callback: getTdStyle
         cols:
+            type: 
+                field: type
             name: 
                 label: Emplacement
                 value: 

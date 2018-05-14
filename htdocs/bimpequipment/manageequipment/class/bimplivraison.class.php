@@ -52,7 +52,7 @@ class BimpLivraison {
                     $ligne->label = dol_trunc($obj->label, 25);
                     $ligne->remainingQty = $obj->qty;
                     $ligne->qty = $obj->qty;
-                    $ligne->price_unity = price($obj->total_ht / $obj->qty);
+                    $ligne->price_unity = str_replace(" ", "", price($obj->total_ht / $obj->qty));
                     $ligne->total_ht = $obj->total_ht;
                     $ligne->isEquipment = $ligne->isSerialisable();
                     $ligne->refurl = $doliProd->getNomUrl(1);

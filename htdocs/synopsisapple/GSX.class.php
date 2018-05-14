@@ -788,7 +788,7 @@ class GSX
             $compTIARequest['ReportedSymptomIssueRequest']['requestData']['reportedSymptomCode'] = $sympCode;
 
         elseif (!is_null($serials)) {
-            if ($this->isIphone) {
+            if ($this->isIphone && is_int($serials)) {
                 $compTIARequest['ReportedSymptomIssueRequest']['requestData']['alternateDeviceId'] = $serials;
             } else {
                 $compTIARequest['ReportedSymptomIssueRequest']['requestData']['serialNumber'] = $serials;

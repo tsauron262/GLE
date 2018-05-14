@@ -80,14 +80,12 @@ echo '<body>';
 //print_r($errors);
 //exit;
 
-BimpObject::loadClass('bimpapple', 'GSX_CompTIA');
-
-GSX_CompTIA::updateCodesFromGSX();
-
-echo '<pre>';
-print_r(GSX_CompTIA::getCompTIACodes());
-print_r(GSX_CompTIA::getCompTIAModifiers());
-echo '</pre>';
+$repair = BimpObject::getInstance('bimpapple', 'GSX_Repair', 11);
+if (BimpObject::objectLoaded($repair)) {
+    $repair->updateTotalOrder();
+} else {
+    echo 'KO';
+}
 
 echo '</body></html>';
 

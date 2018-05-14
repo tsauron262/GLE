@@ -49,7 +49,7 @@ class Bimp_Product extends BimpObject
         $stocks = array(
             'id_stock'       => 0,
             'reel'           => 0,
-            'dispo'          => 0, // Stock réel - total réservés
+            'dispo'          => 0, // Stock réel - réel réservés
             'total_reserves' => 0, // Stock réel réservé + réservés en attente de réception
             'reel_reserves'  => 0, // seulement réel réservé
         );
@@ -68,7 +68,7 @@ class Bimp_Product extends BimpObject
             $stocks['total_reserves'] = $reserved['total'];
             $stocks['reel_reserves'] = $reserved['reel'];
 
-            $stocks['dispo'] = $stocks['reel'] - $stocks['total_reserves'];
+            $stocks['dispo'] = $stocks['reel'] - $stocks['reel_reserves'];
         }
 
         return $stocks;

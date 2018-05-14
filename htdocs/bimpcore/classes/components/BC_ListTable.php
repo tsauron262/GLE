@@ -34,7 +34,8 @@ class BC_ListTable extends BC_List
         'max_width'   => array('default' => null),
         'hidden'      => array('data_type' => 'bool', 'default' => 0),
         'search_list' => array('data_type' => 'array', 'compile' => true, 'default' => null),
-        'field_name'  => array()
+        'field_name'  => array(),
+        'search'       => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null)
     );
 
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
@@ -388,6 +389,19 @@ class BC_ListTable extends BC_List
                     $field = new BC_Field($this->object, $col_params['field'], true);
                     $html .= $field->renderSearchInput();
                     unset($field);
+                } elseif (!is_null($col_params['search']) && !is_null($col_params['search'])) {
+//                    $input_name = 'search_' . $col_params['field_name'];
+                    $search_type = $col_params['search']['type'];
+                    $html .= '<div class="searchInputContainer"';
+                    $html .= ' data-field_name="' . $col_name . '"';
+                    $html .= ' data-search_type="' . $search_type . '"';
+                    $html .= ' data-search_on_key_up="' . $col_params['search']['search_on_key_up'] . '"';
+                    $html .= ' data-min_chars="1"';
+                    $html .= '>';
+
+                    $html .= BimpInput::renderInput($col_params['search']['input']['type'], $col_name, '', $col_params['search']['input']['options']);
+
+                    $html .= '</div>';
                 } elseif (!is_null($col_params['search_list']) && !is_null($col_params['field_name'])) {
                     $input_name = 'search_' . $col_params['field_name'];
 
@@ -603,7 +617,7 @@ class BC_ListTable extends BC_List
             $nb_Items .= '</div>';
 
             $nb_Items .= BimpInput::renderSwitchOptionsInput('select_n', array(
-                        10  => '10', 25  => '25', 50  => '50', 100 => '100', 250 => '250', 500 => '500', 0   => 'Tout'), $this->params['n'], $this->identifier . '_n');
+                        10  => '10', 25  => '25', 50  => '50', 100 => '100', 250 => '250', 500 => '500'), $this->params['n'], $this->identifier . '_n');
         }
 
         if ($nb_Items) {

@@ -1,5 +1,6 @@
 <?php
-require_once DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php";
+
+require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
 
 class Equipment extends BimpObject
 {
@@ -19,13 +20,15 @@ class Equipment extends BimpObject
         3 => 'Commande Fournisseur'
     );
     protected $current_place = null;
-    
-    public function __construct($db){
+
+    public function __construct($db)
+    {
         parent::__construct("bimpequipment", get_class($this));
         $this->iconeDef = "fa-laptop";
     }
-    
-    public function getRef() {
+
+    public function getRef()
+    {
         return $this->getData("serial");
     }
 
@@ -52,6 +55,15 @@ class Equipment extends BimpObject
         }
 
         return 0;
+    }
+
+    public function getHasReservationsArray()
+    {
+        return array(
+            '' => '',
+            1  => 'OUI',
+            0  => 'NON'
+        );
     }
 
     public function getReservationsList()
@@ -278,6 +290,42 @@ class Equipment extends BimpObject
         }
 
         return '';
+    }
+
+    public function getProductSearchFilters(&$filters, $value)
+    {
+        $where = 'p.ref LIKE \'%' . (string) $value . '%\' OR p.label LIKE \'%' . (string) $value . '%\' OR p.barcode = \'' . (string) $value . '\'';
+
+        if (preg_match('/^\d+$/', (string) $value)) {
+            $where .= ' OR p.rowid = ' . $value;
+        }
+
+        $filters['or_product'] = array(
+            'or' => array(
+                'product_label' => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'id_product'    => array(
+                    'in' => 'SELECT p.rowid FROM ' . MAIN_DB_PREFIX . 'product p WHERE ' . $where
+                )
+            )
+        );
+    }
+
+    public function getReservedSearchFilters(&$filters, $value)
+    {
+        $sql = '(SELECT COUNT(reservation.id) FROM ' . MAIN_DB_PREFIX . 'br_reservation reservation WHERE reservation.id_equipment = a.id';
+        $sql .= ' AND reservation.status < 300 AND reservation.status >= 200)';
+
+        if ((int) $value > 0) {
+            $filters[$sql] = array(
+                'operator' => '>',
+                'value'    => 0
+            );
+        } else {
+            $filters[$sql] = 0;
+        }
     }
 
     public function displayOriginElement()

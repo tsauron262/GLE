@@ -467,6 +467,21 @@ class BR_Reservation extends BimpObject
         return '';
     }
 
+    public function displayProductAvailableQty()
+    {
+        ini_set('display_errors', 1);
+
+        $product = $this->getChildObject('product');
+        if (BimpObject::objectLoaded($product)) {
+            $stocks = $product->getStocksForEntrepot((int) $this->getData('id_entrepot'));
+            if (isset($stocks['dispo'])) {
+                return $stocks['dispo'];
+            }
+            return '<span class="danger">inconnu</span>';
+        }
+        return '';
+    }
+
     // Gestion des réservations:
 
     public function createReservationsFromCommandeClient($id_entrepot, $id_commande_client)
@@ -1104,9 +1119,11 @@ class BR_Reservation extends BimpObject
 
                 case self::BR_RESERVATION_TEMPORAIRE:
                     $errors = $this->validateTemporaire();
+                    break;
 
                 case self::BR_RESERVATION_SAV:
                     $errors = $this->validateSAV();
+                    break;
             }
         }
 
@@ -1171,17 +1188,18 @@ class BR_Reservation extends BimpObject
             )
         );
 
-        if (!is_null($id_entrepot)) {
+        if ((int) $id_entrepot) {
             $filters['id_entrepot'] = (int) $id_entrepot;
         }
 
         $sql = 'SELECT qty, status';
-        $sql .= BimpTools::getSqlFrom($this->getTable());
-        $sql .= BimpTools::getSqlWhere(array(
-                    'id_entrepot' => (int) $id_entrepot
-        ));
+        $sql .= BimpTools::getSqlFrom('br_reservation');
+        $sql .= BimpTools::getSqlWhere($filters);
 
-        $rows = $this->db->executeS($sql, 'array');
+        global $db; 
+        $bdb = new BimpDb($db);
+        
+        $rows = $bdb->executeS($sql, 'array');
 
         if (!is_null($rows)) {
             foreach ($rows as $r) {
@@ -1192,6 +1210,8 @@ class BR_Reservation extends BimpObject
                 }
             }
         }
+        
+        return $counts;
     }
 
     public static function getShippedQuantities($id_commande, $num_bl = null, $num_bl_max = null)

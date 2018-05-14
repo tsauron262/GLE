@@ -130,11 +130,11 @@ if ($fk_entrepot == '')
 
 print '<select id="entrepot" class="select2 cust" style="width: 200px;">';
 print '<option></option>';
-foreach ($entrepots as $id => $name) {
-    if ($id == $fk_entrepot)
-        print '<option value="' . $id . '" selected>' . $name . '</option>';
+foreach ($entrepots as $id_entrepot => $name) {
+    if ($id_entrepot == $fk_entrepot)
+        print '<option value="' . $id_entrepot . '" selected>' . $name . '</option>';
     else
-        print '<option value="' . $id . '">' . $name . '</option>';
+        print '<option value="' . $id_entrepot . '">' . $name . '</option>';
 }
 print '</select> ';
 
@@ -178,7 +178,7 @@ echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpreservation/v
 $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
 $list = new BC_ListTable($reservation, 'commandes', 1, null, 'Statuts des produits');
 $list->addFieldFilterValue('rcf.id_commande_fournisseur', (int) $id);
-$list->addJoin('br_reservation_cmd_fourn', 'rcf.ref_reservation = a.ref', 'rcf');
+$list->addJoin('br_reservation_cmd_fourn', 'rcf.id_reservation = a.id', 'rcf');
 print $list->renderHtml();
 
 echo BimpRender::renderAjaxModal('page_modal');

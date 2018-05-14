@@ -831,7 +831,7 @@ class GSX_Repair extends BimpObject
                         'label'   => 'Numéros de série des composant',
                         'classes' => array('btn btn-light-default'),
                         'attr'    => array(
-                            'onclick' => 'loadSerialUpdateForm($(this), ' . (string) $this->getData('serial') . ', ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'UpdateSerialNumber\', \'' . $title . '\')'
+                            'onclick' => 'loadSerialUpdateForm($(this), \'' . (string) $this->getData('serial') . '\', ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'UpdateSerialNumber\', \'' . $title . '\')'
                         )
             ));
         }
@@ -841,7 +841,7 @@ class GSX_Repair extends BimpObject
                     'label'   => 'Numéro de série de l\'unité',
                     'classes' => array('btn btn-light-default'),
                     'attr'    => array(
-                        'onclick' => 'loadSerialUpdateForm($(this), ' . (string) $this->getData('serial') . ', ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'KGBSerialNumberUpdate\', \'' . $title . '\')'
+                        'onclick' => 'loadSerialUpdateForm($(this), \'' . (string) $this->getData('serial') . '\', ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'KGBSerialNumberUpdate\', \'' . $title . '\')'
                     )
         ));
 

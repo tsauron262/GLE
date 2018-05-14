@@ -344,6 +344,7 @@ function loadSerialUpdateForm($button, serial, id_sav, id_repair, request_type, 
         id_repair: id_repair,
         request_type: request_type
     }, null, {
+        id_sav: id_sav,
         id_repair: id_repair,
         request_type: request_type,
         display_success: false,

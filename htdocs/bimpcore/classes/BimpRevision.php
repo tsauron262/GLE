@@ -148,7 +148,7 @@ class BimpRevisionPropal extends BimpRevision
                 $ligne = $db->fetch_object($result);
                 $object->fetch($newId);
 //                propale_pdf_create($db, $object, null, $langs);
-                $object->generateDocument($pdfModel, $langs);
+//                $object->generateDocument($pdfModel, $langs);
 //                $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $ligne->id . "/";
 //                if(!is_dir($repDest))
 //                    mkdir($repDest); //die(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf". $repDest . $propal->ref . ".pdf");

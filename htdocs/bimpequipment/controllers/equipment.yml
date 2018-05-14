@@ -48,6 +48,21 @@ sections:
                           view: 
                               name: reservations
                               object: equipment
+                              
+          - id: prets
+            title: Prêts
+            struct: 
+                type: custom
+                custom: 
+                    callback: renderPretsList
+                    
+          - id: sav
+            title: SAV
+            struct: 
+                type: custom
+                custom: 
+                    callback: renderSavList
+           
     - type: buttons
       buttons:
           - label: Liste des équipements

@@ -172,6 +172,7 @@ class Equipment extends BimpObject
                     case BE_Place::BE_PLACE_PRESENTATION:
                     case BE_Place::BE_PLACE_VOL:
                     case BE_Place::BE_PLACE_PRET:
+                    case BE_Place::BE_PLACE_SAV:
                         $new_place_element = 'entrepot';
                         $new_place_id_element = (int) $new_place->getData('id_entrepot');
                         break;
@@ -194,6 +195,7 @@ class Equipment extends BimpObject
                         case BE_Place::BE_PLACE_PRESENTATION:
                         case BE_Place::BE_PLACE_VOL:
                         case BE_Place::BE_PLACE_PRET:
+                        case BE_Place::BE_PLACE_SAV:
                             $prev_place_element = 'entrepot';
                             $prev_place_id_element = (int) $prev_place->getData('id_entrepot');
                             if ((int) $prev_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
@@ -406,9 +408,9 @@ class Equipment extends BimpObject
         if (!is_null($current_place) && $current_place->isLoaded()) {
             if (in_array((int) $current_place->getData('type'), array(
                         BE_Place::BE_PLACE_ENTREPOT,
-                        BE_Place::BE_PLACE_PRESENTATION,
-                        BE_Place::BE_PLACE_VOL,
-                        BE_Place::BE_PLACE_PRET
+//                        BE_Place::BE_PLACE_PRESENTATION,
+//                        BE_Place::BE_PLACE_VOL,
+//                        BE_Place::BE_PLACE_PRET
                     ))) {
                 $product = $this->getChildObject('product');
                 $id_entrepot = (int) $current_place->getData('id_entrepot');

@@ -739,7 +739,20 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     var $label_input = $inputContainer.find('[name=' + label_input_name + ']');
     var value = $value_input.val();
     var label = $label_input.val();
-    if (typeof (value) !== 'undefined' && value !== '') {
+    if (value) {
+        var values_field_name = $inputContainer.data('values_field');
+        var check = true;
+        $container.find('.multipleValuesList').find('input[name="' + values_field_name + '[]"]').each(function () {
+            if ($(this).val() == value) {
+                bimp_msg('Cet élément a déjà été ajouté', 'warning');
+                check = false;
+            }
+        });
+        
+        if (!check) {
+            return;
+        }
+
         if (!label) {
             if ($value_input.get(0).tagName.toLowerCase() === 'select') {
                 label = $value_input.find('[value="' + value + '"]').text();
@@ -747,19 +760,19 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
                 label = value;
             }
         }
-        var values_field_name = $inputContainer.data('values_field');
-        var html = '<tr>';
+        
+        var html = '<tr class="itemRow">';
         html += '<td style="display: none"><input type="hidden" value="' + value + '" name="' + values_field_name + '[]"/></td>';
         html += '<td>' + label + '</td>';
-        html += '<td><button type="button" class="btn btn-light-danger iconBtn"';
+        html += '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn"';
         html += ' onclick="$(this).parent(\'td\').parent(\'tr\').remove();';
         if (ajax_save) {
             html += 'var $button = $(this); deleteObjectMultipleValuesItem(\'' + $container.data('module') + '\', ';
             html += '\'' + $container.data('object_name') + '\', ';
             html += $container.data('id_object') + ', \'' + values_field_name + '\', \'' + value + '\', null, ';
-            html += 'function(){$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove();})});';
+            html += 'function(){$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();})});';
         } else {
-            html += '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove()});';
+            html += '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();});';
         }
         html += '"><i class="fa fa-trash"></i></button></td>';
         html += '</tr>';
@@ -775,6 +788,17 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
             $container.find('table').find('tbody.multipleValuesList').append(html);
         }
     }
+    checkMultipleValues();
+}
+
+function checkMultipleValues() {
+    $('.inputMultipleValuesContainer').each(function() {
+        if ($(this).find('.itemRow').length) {
+            $(this).find('.noItemRow').hide();
+        } else {
+            $(this).find('.noItemRow').show();
+        }
+    });
 }
 
 function checkTextualInput($input) {

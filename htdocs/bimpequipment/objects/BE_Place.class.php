@@ -12,6 +12,7 @@ class BE_Place extends BimpObject
     const BE_PLACE_PRESENTATION = 5;
     const BE_PLACE_VOL = 6;
     const BE_PLACE_PRET = 7;
+    const BE_PLACE_SAV = 8;
 
     public static $types = array(
         1 => 'Client',
@@ -20,7 +21,8 @@ class BE_Place extends BimpObject
         4 => 'Champ libre',
         5 => 'En Présentation',
         6 => 'Vol',
-        7 => 'Matériel de prêt'
+        7 => 'Matériel de prêt',
+        8 => 'SAV'
     );
 
     public function getContactsArray()
@@ -80,6 +82,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_ENTREPOT:
                 case self::BE_PLACE_PRESENTATION:
                 case self::BE_PLACE_VOL:
+                case self::BE_PLACE_SAV:
                     return $this->displayData('id_entrepot', 'nom_url');
 
                 case self::BE_PLACE_PRET:
@@ -118,6 +121,7 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_ENTREPOT:
                 case self::BE_PLACE_PRESENTATION:
                 case self::BE_PLACE_VOL:
+                case self::BE_PLACE_SAV:
                     $id_entrepot = $this->getData('id_entrepot');
                     if (is_null($id_entrepot) || !$id_entrepot) {
                         return array('Valeur obligatoire absente: "Entrepôt"');

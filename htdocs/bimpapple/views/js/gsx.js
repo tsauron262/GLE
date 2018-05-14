@@ -223,7 +223,19 @@ function reloadRepairsViews(id_sav) {
         append_html: true,
         display_processing: true,
         processing_padding: 30,
-        processing_msg: 'Chargement en cours'
+        processing_msg: 'Chargement en cours',
+        success: function (result, bimpAjax) {
+            $('body').trigger($.Event('objectChange', {
+                module: 'bimpsupport',
+                object_name: 'BS_SavProduct',
+                id_object: 0
+            }));
+            $('body').trigger($.Event('objectChange', {
+                module: 'bimpsupport',
+                object_name: 'BS_ApplePart',
+                id_object: 0
+            }));
+        }
     });
 }
 
@@ -332,6 +344,7 @@ function loadSerialUpdateForm($button, serial, id_sav, id_repair, request_type, 
         id_repair: id_repair,
         request_type: request_type
     }, null, {
+        id_sav: id_sav,
         id_repair: id_repair,
         request_type: request_type,
         display_success: false,
@@ -537,7 +550,5 @@ function onRepairFormLoaded($form) {
         $("#" + champ + "_yes").click();
     });
 
-    $form.find("");
-    
     onFormLoaded($form);
 }

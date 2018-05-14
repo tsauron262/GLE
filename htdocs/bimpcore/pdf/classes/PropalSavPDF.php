@@ -8,7 +8,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/PropalPDF.php';
 class PropalSavPDF extends PropalPDF
 {
 
-    public static $type = 'propal_sav';
+    public static $type = 'sav';
     public $sav = null;
 
     public function init($object)

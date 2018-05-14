@@ -567,7 +567,6 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $this->calcTotaux();
 
-        $html = '<div>';
         $html .= '<table style="width: 100%" cellpadding="5">';
 
         // Total remises: 
@@ -766,7 +765,6 @@ class BimpDocumentPDF extends BimpModelPDF
         }
 
         $html .= '</table>';
-        $html .= '</div>';
         $html .= '<br/>';
 
         return $html;

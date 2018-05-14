@@ -265,6 +265,7 @@ class gsxController extends BimpController
         $serial = '';
         if (!is_null($equipment) && $equipment->isLoaded()) {
             $serial = $equipment->getData('serial');
+            $this->setSerial($serial);
         }
 
         $html .= '<div class="buttonsContainer align-right">';
@@ -329,6 +330,8 @@ class gsxController extends BimpController
         } else {
             $html .= BimpRender::renderAlerts('Aucune réparation enregistrée pour le moment', 'info');
         }
+        
+        $html .= '';
 
         return $html;
     }
@@ -841,8 +844,8 @@ class gsxController extends BimpController
         $this->gsx->resetSoapErrors();
 
         $requestData = $this->gsx->_requestBuilder($request, $wrapper, $data);
-        $response = $this->gsx->request($requestData, $client);
-
+//        $response = $this->gsx->request($requestData, $client);
+        
         dol_syslog("Requête " . $request . " | " . print_r($response, 1), LOG_ERR, 0, "_apple");
 
         if (count($this->gsx->errors['soap'])) {
@@ -855,6 +858,48 @@ class gsxController extends BimpController
             }
             if (count($this->gsx->errors['log']['soap']))
                 dol_syslog("Erreur GSX : " . $this->gsx->getGSXErrorsHtml() . "Requête :" . print_r($requestData, true) . " Réponse : " . print_r($response, true), 4, 0, "_apple");
+        } elseif (isset($response['error'])) {
+            switch ($response['error']) {
+                case 'partInfos':
+                    $html .= BimpRender::renderAlerts('Veuillez saisir les informations relatives au(x) composant(s) suivant(s)', 'warning');
+                    $i = 1;
+                    foreach ($response['parts'] as $part_name) {
+                        $html .= '<div class="formInputGroup">';
+                        $html .= '<div class="row formRow">';
+                        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-3">Nom</div>';
+                        $html .= '<div class="formRowInput col-xs-12 col-sm-6 col-md-9">';
+                        $html .= '<div class="inputContainer">';
+                        $html .= BimpInput::renderInput('text', 'component_' . $i, $part_name);
+                        $html .= '</div>';
+                        $html .= '</div>';
+                        $html .= '</div>';
+
+                        $html .= '<div class="row formRow">';
+                        $html .= '<div class="inputLabel col-xs-12 col-sm-4 col-md-3">Numéro de série</div>';
+                        $html .= '<div class="formRowInput col-xs-12 col-sm-6 col-md-9">';
+                        $html .= '<div class="inputContainer">';
+                        $html .= BimpInput::renderInput('text', 'componentSerialNumber_' . $i, '');
+                        $html .= '</div>';
+                        $html .= '</div>';
+                        $html .= '</div>';
+                        $html .= '</div>';
+                    }
+                    break;
+
+                case 'tierPart':
+                    $html .= BimpRender::renderAlerts('veuillez sélectionner un composant tiers');
+                    break;
+
+                case 'horsgarantie':
+                    $html .= BimpRender::renderAlerts('La réparation est hors garantie. Veuillez vérifier.', 'warning');
+                    $html .= '<script type="text/javascript">';
+                    $html .= 'if (confirm("La réparation est hors garantie, voulez vous continuer ?")) {';
+                    $html .= '$("input[name=checkIfOutOfWarrantyCoverage]").val(0).change();';
+                    $html .= '$(\'#page_modal\').find(\'.modal-footer\').find(\'.save_object_button\').click();';
+                    $html .= '}';
+                    $html .= '</script>';
+                    break;
+            }
         } else {
             $responseName = $requestType . "Response";
 
@@ -863,8 +908,8 @@ class gsxController extends BimpController
                     if (isset($response[$responseNames])) {
                         $responseName = $responseNames;
                     }
-                } elseif (is_array($responseName)) {
-                    foreach ($responseName as $respName) {
+                } elseif (is_array($responseNames)) {
+                    foreach ($responseNames as $respName) {
                         if (isset($response[$respName])) {
                             $responseName = $respName;
                             break;
@@ -901,13 +946,30 @@ class gsxController extends BimpController
                                 $prixTot = 0;
                             }
                             if ((int) $id_sav) {
-                                $repair->set('id_sav', (int) $id_sav);
-                                $repair->set('repair_confirm_number', $confirmNumber);
-                                $repair->set('total_from_order', $prixTot);
+                                $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', (int) $id_sav);
+                                if (!BimpObject::objectLoaded($sav)) {
+                                    $errors[] = 'Erreur: SAV invalide';
+                                } else {
+                                    $repair->set('id_sav', (int) $id_sav);
+                                    $repair->set('repair_confirm_number', $confirmNumber);
+                                    $repair->set('total_from_order', $prixTot);
 
-                                $errors = $repair->create();
+                                    $errors = $repair->create();
+
+                                    if (!count($errors)) {
+                                        if ($prixTot) {
+                                            $html .= '<script type="text/javascript">';
+                                            $html .= 'alert(\'Attention, la réparation n\\\'est pas prise sous garantie. Prix: ' . $prixTot . ' €\');';
+                                            $html .= '</script>';
+                                        }
+
+                                        $html .= '<script type="text/javascript">';
+                                        $html .= $sav->getJsActionOnclick('attentePiece', array(), array('form_name' => 'send_msg'));
+                                        $html .= '</script>';
+                                    }
+                                }
                             } else {
-                                $html .= BimpRender::renderAlerts('Une erreur est survenue (ID du SAV absent)');
+                                $errors[] = 'Une erreur est survenue (ID du SAV absent)';
                             }
                         } else {
                             $errors[] = 'Une Erreur est survenue: aucun numéro de confirmation retourné par Apple. Requete : ' . $client;

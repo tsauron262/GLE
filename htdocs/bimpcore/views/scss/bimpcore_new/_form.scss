@@ -362,7 +362,10 @@ select.switch {
 .inputMultipleValues {
     margin: 15px 0;
 
-    & > table > tbody > tr {
+    & > table {
+        width: 100%;
+    }
+    & > table > tbody > tr.itemRow {
         border: 1px solid $gray;
 
         & > td {

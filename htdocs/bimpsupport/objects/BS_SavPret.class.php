@@ -7,7 +7,16 @@ class BS_SavPret extends BimpObject
 
     public function getCreateJsCallback()
     {
-        return 'alert(\'Affichage PDF\');';
+        $result = $this->actionGeneratePDF(array(), $success);
+        if (count($result['errors'])) {
+            $msg = count($result['errors']) . ' erreur(s) détectée(s): <br/>';
+            foreach ($result['errors'] as $error) {
+                $msg .= ' - ' . $error . '<br/>';
+            }
+            return 'bimp_msg(\'' . addslashes($msg) . '\', \'danger\')';
+        }
+
+        return 'window.open("' . $result['file_url'] . '")';
     }
 
     public function getCentresArray()
@@ -70,10 +79,16 @@ class BS_SavPret extends BimpObject
         if ($code_centre) {
             $filters['code_centre'] = $code_centre;
         }
-        $list = $this->getList($filters, null, null, 'id', 'desc', 'array', array('id_equipment'));
+        $list = $this->getList($filters, null, null, 'id', 'desc', 'array', array('id'));
         $items = array();
+        $instance = BimpObject::getInstance($this->module, $this->object_name);
         foreach ($list as $item) {
-            $items[] = (int) $item['id_equipment'];
+            if ($instance->fetch((int) $item['id'])) {
+                $asso = new BimpAssociation($instance, 'equipments');
+                foreach ($asso->getAssociatesList() as $id_equipment) {
+                    $items[] = (int) $id_equipment;
+                }
+            }
         }
         return $items;
     }
@@ -85,7 +100,7 @@ class BS_SavPret extends BimpObject
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 
         $buttons[] = array(
-            'label'   => 'Générer Bon de prêt',
+            'label'   => 'Bon de prêt',
             'icon'    => 'fas_file-pdf',
             'onclick' => $this->getJsActionOnclick('generatePDF', array(
                 'file_type' => 'pret'
@@ -97,6 +112,29 @@ class BS_SavPret extends BimpObject
         return $buttons;
     }
 
+    public function defaultDisplayEquipmentsItem($id_equipment)
+    {
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+        if ($equipment->fetch($id_equipment)) {
+            $label = '';
+            $product = $equipment->getChildObject('product');
+            if (!is_null($product) && isset($product->id) && $product->id) {
+                $label = $product->label;
+            } else {
+                $label = $equipment->getData('product_label');
+            }
+
+            $label .= ' - N° série: ' . $equipment->getData('serial');
+
+            $url = $equipment->getUrl();
+            $html = BimpRender::renderIcon($equipment->params['icon']);
+            $html .= '&nbsp;&nbsp;<a href="' . $url . '">' . $label . '</a>';
+            $html .= BimpRender::renderObjectIcons($equipment, true, 'default', $url);
+            return $html;
+        }
+        return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
+    }
+
     // Actions: 
 
     public function actionGeneratePDF($data, &$success)
@@ -105,41 +143,15 @@ class BS_SavPret extends BimpObject
 
         $errors = array();
         $file_url = '';
-        
-        if (!in_array($file_type, array('pret'))) {
-            $errors[] = 'Type de fichier PDF invalide';
-        } else {
-            require_once DOL_DOCUMENT_ROOT . "/bimpsupport/core/modules/bimpsupport/modules_bimpsupport.php";
 
-        if ($file_type === 'pret') {
-            $prets = $this->getChildrenObjects('prets');
-            if (!count($prets)) {
-                $errors[] = 'Aucun pret enregistré pour ce sav';
-                return '';
-            }
-        }
+        require_once DOL_DOCUMENT_ROOT . "/bimpsupport/core/modules/bimpsupport/modules_bimpsupport.php";
 
-        $errors = bimpsupport_pdf_create($this->db->db, $this, 'sav', $file_type);
+        $errors = bimpsupport_pdf_create($this->db->db, $this, 'sav', 'pret');
 
         if (!count($errors)) {
-            $ref = '';
-            switch ($file_type) {
-                case 'pc':
-                    $ref = 'PC-' . $this->getData('ref');
-                    break;
-                case 'destruction':
-                    $ref = 'Destruction-' . $this->getData('ref');
-                    break;
-                case 'destruction2':
-                    $ref = 'Destruction2-' . $this->getData('ref');
-                    break;
-                case 'pret':
-                    $ref = 'Pret-' . $this->getData('ref');
-                    break;
-            }
-
-//            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
-        }
+            $sav = $this->getParentInstance();
+            $ref = 'Pret-' . $sav->getData('ref') . '-' . $this->getData('ref');
+            $file_url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $sav->id . '/' . $ref . '.pdf');
         }
 
         return array(
@@ -167,11 +179,16 @@ class BS_SavPret extends BimpObject
         } else {
             return array('SAV non spécifié');
         }
-        $errors = parent::create();
 
-        if ($this->isLoaded()) {
-            $this->set('ref', 'PRET' . $this->id);
-            $this->update();
+        if (!count($this->associations['equipments'])) {
+            $errors[] = 'Aucun équipement sélectionné';
+        } else {
+            $errors = parent::create();
+
+            if ($this->isLoaded()) {
+                $this->set('ref', 'PRET' . $this->id);
+                $this->update();
+            }
         }
 
         return $errors;

@@ -95,11 +95,11 @@ class GSX_Repair extends BimpObject
         if (is_null($this->gsx)) {
             $this->gsx = new GSX($this->isIphone);
         }
-        
+
         if (!$this->gsx->connect) {
             return array('Echec de la connexion à GSX');
         }
-        
+
         $this->set('id_sav', (int) $id_sav);
 
         $this->load();
@@ -184,7 +184,7 @@ class GSX_Repair extends BimpObject
                 }
                 $fileUrl = "";
                 if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] != "" && isset($part['partNumber'])) {
-                    $fileName = "label_".$part['returnOrderNumber'].".pdf";
+                    $fileName = "label_" . $part['returnOrderNumber'] . ".pdf";
                     $fileNamePath = $labelDir . "/" . $fileName;
                     $fileUrl = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileName;
                     if (!file_exists(DOL_DATA_ROOT . $fileNamePath)) {
@@ -203,10 +203,9 @@ class GSX_Repair extends BimpObject
                         $labelResponse = $this->gsx->request($request, $client2);
 
                         if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
-                                if (!file_put_contents(DOL_DATA_ROOT . $fileNamePath, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']))
-                                        $fileUrl = "";
+                            if (!file_put_contents(DOL_DATA_ROOT . $fileNamePath, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']))
+                                $fileUrl = "";
                         }
-                        
                     }
                 }
                 $part['fileName'] = $fileUrl;
@@ -295,8 +294,8 @@ class GSX_Repair extends BimpObject
         $this->repairLookUp = $response[$client . 'Response']['lookupResponseData']['repairLookup'];
 
         $update = false;
-        
-        
+
+
 
         if (is_array($this->repairLookUp) && !isset($this->repairLookUp['repairConfirmationNumber'])) {
             $this->repairLookUp = $this->repairLookUp[0];
@@ -321,9 +320,9 @@ class GSX_Repair extends BimpObject
         if (isset($this->repairLookUp['repairStatus']) && ($this->repairLookUp['repairStatus'] != '')) {
             $repairComplete = 0;
             $ready_for_pick_up = 0;
-            
-            
-            if($this->repairLookUp['repairStatus'] == "Prêt pour enlèvement"){
+
+
+            if ($this->repairLookUp['repairStatus'] == "Prêt pour enlèvement") {
                 $ready_for_pick_up = 1;
             }
 
@@ -342,12 +341,11 @@ class GSX_Repair extends BimpObject
                 $this->set('repair_complete', $repairComplete);
                 $update = true;
             }
-            
+
             if ((int) $this->getData('ready_for_pick_up') !== $ready_for_pick_up) {
                 $this->set('ready_for_pick_up', $ready_for_pick_up);
                 $update = true;
             }
-            
         }
 
         if (isset($this->repairLookUp['repairType'])) {
@@ -545,7 +543,7 @@ class GSX_Repair extends BimpObject
             if (isset($part['netPrice']) && $part['netPrice']) {
                 $totalFromOrder += (float) $part['netPrice'];
             }
-            if($totalFromOrder < 1 && $part['partAbused'] == "Y")
+            if ($totalFromOrder < 1 && $part['partAbused'] == "Y")
                 $totalFromOrder = 1.00;
         }
 
@@ -810,9 +808,9 @@ class GSX_Repair extends BimpObject
                 $html .= '<td>' . $part['partNumber'] . '</td>';
                 $html .= '<td>' . $part['returnOrderNumber'] . '</td>';
                 $html .= '<td>' . $part['registeredForReturn'] . '</td>';
-                $html .= '<td><span title="'.$part['vendorName']." ".$part['vendorAddress']." ".$part['vendorState']." ".$part['vendorCity'].'">' . $part['vendorAddress'] . '</span></td>';
-                $html .= '<td><span title="' . $part['kbbSerialNumber'] . '">'. dol_trunc($part['kbbSerialNumber'],6).'</span></td>';
-                $html .= '<td>' . ($part['fileName'] != ""? '<a target="_blank" href="'.DOL_URL_ROOT.$part['fileName'].'">Etiquette</a>': '') . '</td>';
+                $html .= '<td><span title="' . $part['vendorName'] . " " . $part['vendorAddress'] . " " . $part['vendorState'] . " " . $part['vendorCity'] . '">' . $part['vendorAddress'] . '</span></td>';
+                $html .= '<td><span title="' . $part['kbbSerialNumber'] . '">' . dol_trunc($part['kbbSerialNumber'], 6) . '</span></td>';
+                $html .= '<td>' . ($part['fileName'] != "" ? '<a class="btn btn-default" href="' . DOL_URL_ROOT . $part['fileName'] . '"><i class="fa fa-file-text iconLeft"></i>Etiquette</a>' : '') . '</td>';
                 if (file_exists(DOL_DATA_ROOT . '/bimpcore/bimpsupport/sav/' . (int) $this->getData('id_sav') . '/' . $part['fileName'])) {
                     $html .= '<a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="btn btn-default">';
                     $html .= '<i class="fa fa-file-o iconLeft"></i>Etiquette de retour</a>';
@@ -833,7 +831,7 @@ class GSX_Repair extends BimpObject
                         'label'   => 'Numéros de série des composant',
                         'classes' => array('btn btn-light-default'),
                         'attr'    => array(
-                            'onclick' => 'loadSerialUpdateForm($(this), ' . (string) $this->getData('serial') . ', ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'UpdateSerialNumber\', \'' . $title . '\')'
+                            'onclick' => 'loadSerialUpdateForm($(this), \'' . (string) $this->getData('serial') . '\', ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'UpdateSerialNumber\', \'' . $title . '\')'
                         )
             ));
         }
@@ -843,7 +841,7 @@ class GSX_Repair extends BimpObject
                     'label'   => 'Numéro de série de l\'unité',
                     'classes' => array('btn btn-light-default'),
                     'attr'    => array(
-                        'onclick' => 'loadSerialUpdateForm($(this), ' . (string) $this->getData('serial') . ', ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'KGBSerialNumberUpdate\', \'' . $title . '\')'
+                        'onclick' => 'loadSerialUpdateForm($(this), \'' . (string) $this->getData('serial') . '\', ' . (int) $this->getData('id_sav') . ', ' . (int) $this->id . ', \'KGBSerialNumberUpdate\', \'' . $title . '\')'
                     )
         ));
 

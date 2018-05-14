@@ -67,6 +67,12 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
 
+
+
+
+
+
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -127,7 +133,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 //            $dir = $conf->synopsischrono->dir_output;
 //            $file = $dir . "/SPECIMEN.pdf";
 //        } else {
-        $file = $dir . "/Pret-" . $ref . ".pdf";
+        $file = $dir . "Pret-" . $ref . "-" . $sav_pret->getData('ref') . ".pdf";
 //        }
 
         if (file_exists($dir)) {
@@ -183,31 +189,65 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
             $totalTtc = 0;
             $y = 98;
 
-            $equipment = $sav_pret->getChildObject('equipment');
-            if (!BimpObject::objectLoaded($equipment)) {
+            $asso = new BimpAssociation($sav_pret, 'equipments');
+
+            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+            $list = $asso->getAssociatesList();
+            if (!count($list)) {
                 $this->errors[] = 'Erreur: aucun équipement de prêt enregistré pour le prêt SAV d\'ID ' . $sav_pret->id;
                 return 0;
-            } else {
-                $product = $equipment->getChildObject('product');
-                if (!BimpObject::objectLoaded($product)) {
-                    $this->errors[] = 'Erreur: aucun produit associé pour l\'équipement d\'ID ' . $equipment->id;
+            }
+            foreach ($list as $id_equipment) {
+                if (!$equipment->fetch((int) $id_equipment)) {
+                    $this->errors[] = 'Equipement d\'ID ' . $id_equipment . ' non trouvé';
                     return 0;
                 } else {
-                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-                    $pdf->SetXY(5, $y);
-                    $pdf->MultiCell(28, 6, $product->getData('ref'), 0, 'C');
-                    $pdf->SetXY(35, $y);
-                    $pdf->MultiCell(60, 6, $product->getData('label') . " (" . $equipment->getData('serial') . ")", 0, 'C');
-                    $pdf->SetXY(97, $y);
-                    $pdf->MultiCell(33, 6, price($product->getData('price')), 0, 'C');
-                    $pdf->SetXY(127, $y);
-                    $pdf->MultiCell(15, 6, 1, 0, 'C');
-                    $pdf->SetXY(143, $y);
-                    $pdf->MultiCell(25, 6, price($product->getData('price')), 0, 'C');
-                    $pdf->SetXY(169, $y);
-                    $pdf->MultiCell(35, 6, price($product->getData('price_ttc')), 0, 'C');
-                    $totalTtc += $product->getData('price_ttc');
-                    $y += 8;
+                    if ((int) $equipment->getData('id_product')) {
+                        $product = $equipment->getChildObject('product');
+                        if (!BimpObject::objectLoaded($product)) {
+                            $this->errors[] = 'Erreur: aucun produit associé pour l\'équipement d\'ID ' . $equipment->id;
+                            return 0;
+                        } else {
+                            $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
+                            $pdf->SetXY(5, $y);
+                            $pdf->MultiCell(28, 6, $product->ref, 0, 'C');
+                            $pdf->SetXY(35, $y);
+                            $pdf->MultiCell(60, 6, $product->label . " (" . $equipment->getData('serial') . ")", 0, 'C');
+                            $pdf->SetXY(97, $y);
+                            $pdf->MultiCell(33, 6, price($product->price), 0, 'C');
+                            $pdf->SetXY(127, $y);
+                            $pdf->MultiCell(15, 6, 1, 0, 'C');
+                            $pdf->SetXY(143, $y);
+                            $pdf->MultiCell(25, 6, price($product->price), 0, 'C');
+                            $pdf->SetXY(169, $y);
+                            $pdf->MultiCell(35, 6, price($product->price_ttc), 0, 'C');
+                            $totalTtc += $product->price_ttc;
+                            $y += 8;
+                        }
+                    } else {
+                        $price_ttc = (float) $equipment->getData('prix_vente_except');
+                        if (!$price_ttc) {
+                            $this->errors[] = 'Erreur: aucun prix de vente exceptionnel enregistré pour l\'équipement "' . $equipment->getRef() . '"';
+                            return 0;
+                        }
+                        $price_ht = $price_ttc / 1.2;
+
+                        $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
+                        $pdf->SetXY(5, $y);
+                        $pdf->MultiCell(28, 6, $equipment->getData('serial'), 0, 'C');
+                        $pdf->SetXY(35, $y);
+                        $pdf->MultiCell(60, 6, $equipment->getData('product_label'), 0, 'C');
+                        $pdf->SetXY(97, $y);
+                        $pdf->MultiCell(33, 6, price($price_ht), 0, 'C');
+                        $pdf->SetXY(127, $y);
+                        $pdf->MultiCell(15, 6, 1, 0, 'C');
+                        $pdf->SetXY(143, $y);
+                        $pdf->MultiCell(25, 6, price($price_ht), 0, 'C');
+                        $pdf->SetXY(169, $y);
+                        $pdf->MultiCell(35, 6, price($price_ttc), 0, 'C');
+                        $totalTtc += $price_ttc;
+                        $y += 8;
+                    }
                 }
             }
 
@@ -236,7 +276,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
             if ($sav->getData('id_contact')) {
                 $contact_obj = $sav->getChildObject('contact');
                 if (!is_null($contact_obj) && $contact_obj->isLoaded()) {
-                    $addr = $contact->dol_object;
+                    $addr = $contact_obj->dol_object;
                     $contact = $addr->getFullName($langs, 0, 0);
                     $tel = ($addr->phone_mobile != "") ? $addr->phone_mobile : ($addr->phone_perso != "") ? $addr->phone_perso : ($addr->phone_pro != "") ? $addr->phone_pro : "";
                     $mail = $addr->mail;
@@ -266,7 +306,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
             $pdf->SetXY('20', '61');
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
-            $pdf->MultiCell(300, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
+            $pdf->MultiCell(300, 6, $address . "\n" . ($tel ? $tel . ' - ' : '') . $mail, 0, 'L');
 
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
             $tabT = explode(" ", $sav_pret->getData('date_begin'));
@@ -285,12 +325,12 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
             $user_create = $sav->getChildObject('user_create');
 
-            if (!is_null($user_create) && $user_create->isLoaded()) {
+            if (!is_null($user_create) && (int) $user_create->id) {
                 $pdf->SetXY('57', '55.7');
-                $pdf->MultiCell(100, 6, $user_create->dol_object->getFullName($langs), 0, 'L');
+                $pdf->MultiCell(100, 6, $user_create->getFullName($langs), 0, 'L');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
                 $pdf->SetXY('168', '64');
-                $pdf->MultiCell(100, 6, $user_create->dol_object->getFullName($langs), 0, 'L');
+                $pdf->MultiCell(100, 6, $user_create->getFullName($langs), 0, 'L');
             }
 
             if ((string) $sav->getData('prestataire_number')) {
@@ -303,7 +343,7 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
             if (is_object($client->dol_object)) {
                 $pdf->SetXY(25, 188.8);
-                $pdf->MultiCell(45, 4, $client->dol_object > getFullName($outputlangs), 0, 'C');
+                $pdf->MultiCell(45, 4, $client->dol_object->getFullName($outputlangs), 0, 'C');
             }
 
 

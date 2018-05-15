@@ -1,5 +1,11 @@
 <?php
 
+// pdf lib
+include_once 'billet/phpqrcode/qrlib.php';
+include_once 'billet/codebar/php-barcode.php';
+include_once 'billet/pdf/fpdf.php';
+include_once 'billet/pdf/PDF_Code128.php';
+
 class Ticket {
 
     public $errors;
@@ -18,8 +24,8 @@ class Ticket {
     public $extra_4;
     public $extra_5;
     public $extra_6;
-    
-    
+    private $pdf;
+
     public function __construct($db) {
         $this->db = $db;
         $this->errors = array();
@@ -36,7 +42,7 @@ class Ticket {
         $sql .= 'barcode, first_name, last_name, price, extra_1, extra_2, extra_3, extra_4, extra_5, extra_6';
         $sql .= ' FROM ticket';
         $sql .= ' WHERE id=' . $id;
-        
+
 
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
@@ -186,6 +192,29 @@ class Ticket {
         return -1;
     }
 
+    public function delete($id) {
+
+        if ($id == '')
+            $this->errors[] = "Le champ id est obligatoire";
+
+        $sql = 'DELETE';
+        $sql.= 'FROM ticket';
+        $sql.= 'WHERE id=' . $id;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+            return 1;
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de supprimer le ticket. " . $e;
+            $this->db->rollBack();
+            return -2;
+        }
+        return -1;
+    }
+
     public function setTicketByBarcode($barcode) {
 
         $sql = 'SELECT id';
@@ -239,6 +268,91 @@ class Ticket {
             $str .= $characters[$rand];
         }
         return $str;
+    }
+
+    public function addExtension($file_with_path) {
+        $exts = array('bmp', 'png', 'jpg');
+        foreach ($exts as $ext) {
+            if (file_exists($file_with_path . "." . $ext)) {
+                return $path = $file_with_path . "." . $ext;
+            }
+        }
+    }
+
+    public function createPdf($id_ticket, $x, $y, $is_first, $is_last, $set_to_left, $id_order) {
+
+        $ticket_width = 90;
+        $ticket_height = 40;
+        $margin = 5;
+
+        $ticket = new Ticket($this->db);
+        $ticket->fetch($id_ticket);
+
+        $tariff = new Tariff($this->db);
+        $tariff->fetch($ticket->id_tariff);
+
+        $event = new Event($this->db);
+        $event->fetch($ticket->id_event);
+
+        $file_name_qrcode = PATH . '/img/qrcode/qrcode' . $ticket->id . '.png';
+        $image_event = $this->addExtension(PATH . '/img/event/' . $ticket->id_event);
+        $image_tariff = $this->addExtension(PATH . '/img/event/' . $ticket->id_event . '_' . $ticket->id_tariff);
+
+        if ($is_first) {
+            $this->pdf = new PDF_Code128();
+            $this->pdf->AddPage();
+            $this->pdf->SetFont('Arial', 'B', 10);
+        }
+
+        $this->pdf->SetX($x);
+        $this->pdf->SetY($y);
+
+        $this->pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
+
+        try {   // set tariff image
+            @$this->pdf->Image($image_tariff, $x + $margin + 1, $y + $margin, 30, 30);
+        } catch (Exception $e) { // set event image
+            $this->pdf->Image($image_event, $x + $margin + 1, $y + $margin, 30, 30);
+        }
+
+        $this->pdf->Code128($x + 69, $y + 20, $ticket->barcode, 15, 15);
+
+        QRcode::png($ticket->barcode, $file_name_qrcode, 0, 3);
+        $this->pdf->Image($file_name_qrcode, $x + 69, $y + 5, 15, 15);
+
+        $this->pdf->SetY($y + 8);
+        $this->pdf->SetX($x + 39);
+
+        $this->pdf->MultiCell(40, 4, mb_strimwidth($event->label, 0, 20, "...") . "\n" .
+                mb_strimwidth($tariff->label, 0, 20, "...") . "\n" .
+                mb_strimwidth($ticket->first_name, 0, 20, "...") . "\n" .
+                mb_strimwidth($ticket->last_name, 0, 20, "..."));
+
+        if ($is_last)
+            $this->pdf->Output(PATH . '/img/tickets/ticket' . $id_order . '.pdf', 'F');
+
+        if ($set_to_left)
+            return array('x' => $x + $ticket_width + $margin, 'y' => $y);
+        else
+            return array('x' => $x - $ticket_width - $margin, 'y' => $y + $ticket_height + $margin);
+    }
+
+    public function getNumberTicketByOrder($id_order) {
+
+        $sql = 'SELECT COUNT(*) as nb_ticket_sold';
+        $sql.= ' FROM ticket';
+        $sql.= ' WHERE id_order=' . $id_order;
+
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                return intVal($obj->nb_ticket_sold);
+            }
+        } else {
+            $this->errors[] = "Id commande inconnu.";
+            return -3;
+        }
+        return -1;
     }
 
 }

@@ -61,6 +61,7 @@ function createTariff() {
                 setMessage('alertSubmit', 'Tariff créer.', 'msg');
                 $('input[name=label]').val('');
                 $('input[name=price]').val('');
+                $('input[name=number_place]').val('');
                 $('input[name=file]').val('');
                 $('input[name=date_start]').val('');
                 $('input[name=date_end]').val('');

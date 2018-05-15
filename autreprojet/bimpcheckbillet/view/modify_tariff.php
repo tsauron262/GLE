@@ -66,17 +66,22 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="tariff">Tarif </label><br/>';
     print '<select class="chosen-select" name="tariff"><option value="">Sélectionnez un tarif</option></select><br/><br/>';
 
+    print '<div class="btn btn-primary" name="create_prestashop_product">Creér produit prestashop</div><br/><br/>';
+
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
 
     print '<label for="price">Prix </label>';
     print '<input class="form-control bfh-number" name="price" step=".01" type="number" min="0" style="width: 120px"/><br/>';
 
-    print '<label class="btn btn-primary" for="file">';
-    print '<input id="file" type="file" name="file" style="display:none"/>Parcourir</label>';
+    print '<label for="number_place">Nombre de place </label>';
+    print '<input class="form-control bfh-number" name="number_place" step="1" type="number" min="0" style="width: 120px"/><br/>';
 
-    print '<span class="label label-info" id="name_file_display"></span>';
-    print '<img id="img_display" src="#" alt=" Aucune image sélectionnée"/><br/><br/><br/>';
+//    print '<label class="btn btn-primary" for="file">';
+//    print '<input id="file" type="file" name="file" style="display:none"/>Parcourir</label>';
+//
+//    print '<span class="label label-info" id="name_file_display"></span>';
+//    print '<img id="img_display" src="#" alt=" Aucune image sélectionnée"/><br/><br/><br/>';
 
     print '<label for="event">Exiger nom et prénom </label><br/>';
     print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';

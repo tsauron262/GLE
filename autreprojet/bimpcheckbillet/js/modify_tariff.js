@@ -1,3 +1,4 @@
+var URL_PRESTASHOP = 'http://localhost/~tilito/prestashop/modules/zoomdici/ajax.php';
 
 var tariffs;
 
@@ -88,7 +89,7 @@ function getTariffsForEvent(id_event) {
     });
 }
 
-function modifyTariff(id_tariff, label, price, require_names, date_start, time_start, date_end, time_end,
+function modifyTariff(id_tariff, label, price, number_place, require_names, date_start, time_start, date_end, time_end,
         type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6,
         name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6) {
 
@@ -99,6 +100,7 @@ function modifyTariff(id_tariff, label, price, require_names, date_start, time_s
             id_tariff: id_tariff,
             label: label,
             price: price,
+            number_place: number_place,
             require_names: require_names,
             date_start: date_start,
             time_start: time_start,
@@ -135,6 +137,71 @@ function modifyTariff(id_tariff, label, price, require_names, date_start, time_s
     });
 }
 
+function createPrestashopProduct(id_tariff) {
+
+    var tariff;
+
+    tariffs.forEach(function (tmp_tariff) {
+        if (tmp_tariff.id === parseInt(id_tariff))
+            tariff = tmp_tariff;
+    });
+
+    if (tariff.id_prod_extern === 0) {
+        $.ajax({
+            type: 'POST',
+            url: URL_PRESTASHOP,
+            data: {
+                label: tariff.label,
+                price: tariff.price,
+                number_place: tariff.number_place,
+                action: 'createPrestashopProduct'
+            },
+            error: function () {
+                setMessage('alertSubmit', 'Erreur serveur 1894.', 'error');
+            },
+            success: function (rowOut) {
+                var out = JSON.parse(rowOut);
+                if (out.errors.length !== 0) {
+                    printErrors(out.errors, 'alertSubmit');
+                } else if (parseInt(out.id_inserted) > 0) {
+                    alert('OK ' + out.id_inserted);
+                    addIdProdExtern(tariff.id, out.id_inserted);
+                } else {
+                    setMessage('alertSubmit', "Erreur inconnue.", 'error');
+                }
+            }
+        });
+    } else {
+        alert("Le produit prestashop a déjà été créer");
+    }
+}
+
+function addIdProdExtern(id_tariff, id_prod_extern) {
+
+
+    $.ajax({
+        type: "POST",
+        url: "../interface.php",
+        data: {
+            id_tariff: id_tariff,
+            id_prod_extern: id_prod_extern,
+            action: 'set_id_prod_extern'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 2586.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.code_return === 1) {
+                alert('insertion ok');
+            } else {
+                setMessage('alertSubmit', "Erreur serveur 1873.", 'error');
+            }
+        }
+    });
+}
 
 /**
  * Ready
@@ -157,6 +224,17 @@ function initEvents() {
             getTariffsForEvent(id_event);
     });
 
+    $('div[name=create_prestashop_product]').click(function (e) {
+        var id_tariff = $('select[name=tariff] > option:selected').val();
+        if (!id_tariff > 0) {
+            alert('Veuillez séléctionner un tariff avant de créer un produit dans prestashop');
+        } else {
+//            if (confirm("Vous êtes sur le point de modifier la base de donnée de prestashop, continuer ?")) {
+            createPrestashopProduct(id_tariff);
+//            }
+        }
+    });
+
 //    $("#file").change(function () {
 //        readURL(this, '#img_display');
 //    });
@@ -168,6 +246,7 @@ function initEvents() {
                 $('select[name=tariff]').val(),
                 $('input[name=label]').val(),
                 $('input[name=price]').val(),
+                $('input[name=number_place]').val(),
                 $('input[name=require_names]:checked').val(),
                 $('input[name=date_start]').val(),
                 $('input[name=time_start]').val(),
@@ -207,6 +286,7 @@ function autoFill(id_tariff) {
     $('input[name=date_end]').val(formatDate(tariff.date_end));
     $('input[name=time_end]').val(formatTime(tariff.date_end));
     $('input[name=price]').val(tariff.price);
+    $('input[name=number_place]').val(tariff.number_place);
 
     if (tariff.require_names === 0)
         $('input[name=require_names][value=0]').closest('.btn').button('toggle');

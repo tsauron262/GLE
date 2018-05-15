@@ -20,5 +20,6 @@ CREATE TABLE IF NOT EXISTS `tariff` (
     `name_extra_6`      VARCHAR(255),
     `id_prod_extern`    INTEGER,
     `fk_event`          INTEGER NOT NULL,
+    `number_place`      INTEGER DEFAULT 0,
     FOREIGN KEY (`fk_event`) REFERENCES `event` (`id`)
 ) ENGINE=innodb;

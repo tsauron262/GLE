@@ -1,6 +1,7 @@
 <?php
 
 session_start();
+include '../param.inc.php';
 
 function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     print '<!DOCTYPE html>';
@@ -36,12 +37,15 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
         $user = json_decode($_SESSION['user']);
 //        var_dump($user);
         print '<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-    <div class="navbar-header">
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">';
+        if (IS_MAIN_SERVER) {
+
+            print '<div class="navbar-header">
       <a class="navbar-brand" href="home.php">Billetterie</a>
-    </div>
-    <ul class="navbar-nav mr-auto">';
-        if ($user->status == 2)
+    </div>';
+        }
+        print'<ul class="navbar-nav mr-auto">';
+        if ($user->status == 2 && IS_MAIN_SERVER)
             print '<li><a class="nav-link" href="manage_user.php">Gestion</a></li>';
 //            print '<li><a class="nav-link" href="stats_event.php">Statistique évènement</a></li>';
 //            print '<li><a class="nav-link" href="create_event.php">Créer évènement</a></li>';
@@ -50,7 +54,8 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
 //            print '<li><a class="nav-link" href="modify_tariff.php">Modifier tarif</a></li>';
 //            print '<li><a class="nav-link" href="create_ticket.php">Réserver ticket</a></li>';
 //            print '<li><a class="nav-link" href="check_ticket.php">Valider ticket</a></li>';
-        print '<li class="nav-item dropdown">
+        if (IS_MAIN_SERVER) {
+            print '<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Évènement</a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="create_event.php">Créer</a>
@@ -58,14 +63,14 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
           <a class="dropdown-item" href="stats_event.php">Statistique</a>
         </div>
       </li>';
-        print '<li class="nav-item dropdown">
+            print '<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tariff</a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="create_tariff.php">Créer</a>
           <a class="dropdown-item" href="modify_tariff.php">Modifier</a>
         </div>
       </li>';
-        print '<li class="nav-item dropdown">
+            print '<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Ticket</a>
         <div class="dropdown-menu nav-item" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="create_ticket.php">Réserver</a>
@@ -73,6 +78,13 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
           <a class="dropdown-item" href="list_ticket.php">Liste</a>
         </div>
       </li>';
+        } else {
+            print '<ul class="nav navbar-nav navbar-right">
+      <li>
+        <a class="nav-link" href="check_ticket.php">Valider</a>
+      </li>
+    </ul>';
+        }
         print '</ul>
     <ul class="nav navbar-nav navbar-right">
       <li>

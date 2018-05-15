@@ -8,6 +8,7 @@ class Tariff {
     public $label;
     public $date_creation;
     public $price;
+    public $number_place;
     private $fk_event;
     public $date_start;
     public $date_end;
@@ -25,7 +26,7 @@ class Tariff {
             return false;
         }
 
-        $sql = 'SELECT label, date_creation, require_names, date_start, date_end, price, type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6, name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6, id_prod_extern, fk_event';
+        $sql = 'SELECT label, date_creation, require_names, date_start, date_end, price, number_place, type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6, name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6, id_prod_extern, fk_event';
         $sql .= ' FROM tariff';
         $sql .= ' WHERE id=' . $id;
 
@@ -37,6 +38,7 @@ class Tariff {
                 $this->label = $obj->label;
                 $this->date_creation = $obj->date_creation;
                 $this->price = floatVal($obj->price);
+                $this->number_place = floatVal($obj->number_place);
                 $this->fk_event = $obj->fk_event;
                 $this->require_names = intVal($obj->require_names);
                 $this->date_start = $obj->date_start;
@@ -53,6 +55,7 @@ class Tariff {
                 $this->name_extra_4 = $obj->name_extra_4;
                 $this->name_extra_5 = $obj->name_extra_5;
                 $this->name_extra_6 = $obj->name_extra_6;
+                $this->id_prod_extern = intVal($obj->id_prod_extern);
                 return 1;
             }
         } else {
@@ -62,12 +65,14 @@ class Tariff {
         return -1;
     }
 
-    public function create($label, $price, $id_event, $file, $require_names, $id_prod_extern, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $type_extra_2, $name_extra_2, $type_extra_3, $name_extra_3, $type_extra_4, $name_extra_4, $type_extra_5, $name_extra_5, $type_extra_6, $name_extra_6) {
+    public function create($label, $price, $number_place, $id_event, $file, $require_names, $id_prod_extern, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $type_extra_2, $name_extra_2, $type_extra_3, $name_extra_3, $type_extra_4, $name_extra_4, $type_extra_5, $name_extra_5, $type_extra_6, $name_extra_6) {
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
         if ($price == '')
             $this->errors[] = "Le champ prix est obligatoire";
+        if ($number_place == '')
+            $this->errors[] = "Le champ nombre de place";
         if ($id_event == '')
             $this->errors[] = "Le champ évènement est obligatoire";
         if ($file['error'] != 0)
@@ -95,6 +100,7 @@ class Tariff {
         $sql.= '`label`';
         $sql.= ', `date_creation`';
         $sql.= ', `price`';
+        $sql.= ', `number_place`';
         $sql.= ', `fk_event`';
         $sql.= ', `require_names`';
         $sql.= ', `id_prod_extern`';
@@ -118,6 +124,7 @@ class Tariff {
         $sql.= 'VALUES ("' . $label . '"';
         $sql.= ', now()';
         $sql.= ', "' . $price . '"';
+        $sql.= ', "' . $number_place . '"';
         $sql.= ', "' . $id_event . '"';
         $sql.= ', "' . $require_names . '"';
         $sql.= ', ' . ($id_prod_extern != '' ? $id_prod_extern : 'NULL');
@@ -153,6 +160,7 @@ class Tariff {
                 if (move_uploaded_file($source, $destination) == true)
                     return $last_insert_id;
                 else {
+                    $this->db->rollBack();
                     $this->errors[] = "Erreur lors du déplacement de l'image";
                     return -5;
                 }
@@ -168,7 +176,7 @@ class Tariff {
         return -1;
     }
 
-    public function update($id_tariff, $label, $price, $require_names, /* $file, */ $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $type_extra_2, $name_extra_2, $type_extra_3, $name_extra_3, $type_extra_4, $name_extra_4, $type_extra_5, $name_extra_5, $type_extra_6, $name_extra_6) {
+    public function update($id_tariff, $label, $price, $number_place, $require_names, /* $file, */ $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $type_extra_2, $name_extra_2, $type_extra_3, $name_extra_3, $type_extra_4, $name_extra_4, $type_extra_5, $name_extra_5, $type_extra_6, $name_extra_6) {
 
         if (!($id_tariff > 0))
             $this->errors[] = "Le champ identifiant est obligatoire";
@@ -176,6 +184,8 @@ class Tariff {
             $this->errors[] = "Le champ label est obligatoire";
         if ($price == '')
             $this->errors[] = "Le champ prix est obligatoire";
+        if ($number_place == '')
+            $this->errors[] = "Le champ nombre de places est obligatoire";
 //        if ($file['error'] != 0)
 //            $this->errors[] = "Erreur lors du chargement de l'image";
         if (sizeof($this->errors) != 0)
@@ -198,6 +208,7 @@ class Tariff {
         $sql = 'UPDATE `tariff` SET';
         $sql.= ' `label`="' . $label . '"';
         $sql.= ', `price`=' . $price;
+        $sql.= ', `number_place`=' . $number_place;
         $sql.= ', `require_names`=' . $require_names;
         if ($date_start != '')
             $sql.= ', `date_start`="' . $date_start_obj->format('Y-m-d H:i:s') . '"';
@@ -242,34 +253,6 @@ class Tariff {
         return -1;
     }
 
-//    public function getTariffsForEvent($id_event) {
-//
-//        $tariffs = array();
-//
-//        $sql = 'SELECT id, label, date_creation, price, fk_event';
-//        $sql .= ' FROM tariff';
-//        $sql .= ' WHERE fk_event=' . $id_event;
-//
-//
-//        $result = $this->db->query($sql);
-//        if ($result and $result->rowCount() > 0) {
-//            while ($obj = $result->fetchObject()) {
-//                $tariffs[] = array(
-//                    'id' => intVal($obj->id),
-//                    'label' => $obj->label,
-//                    'date_creation' => $obj->date_creation,
-//                    'price' => intVal($obj->price),
-//                    'fk_event' => intVal($obj->fk_event)
-//                );
-//            }
-//            return $tariffs;
-//        } elseif (!$result) {
-//            $this->errors[] = "Erreur SQL 1567.";
-//            return -2;
-//        }
-//        return -1;
-//    }
-
     public function getTariffsForEvent($id_event) {
 
         $tariffs = array();
@@ -307,6 +290,91 @@ class Tariff {
             $str .= $characters[$rand];
         }
         return $str;
+    }
+
+    public function getTariffByProdsExtern($ids_prods_extern) {
+        $tariffs = array();
+
+        $sql = 'SELECT id';
+        $sql .= ' FROM tariff';
+        $sql .= ' WHERE id_prod_extern  IN(' . implode(',', $ids_prods_extern) . ')';
+
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                $tariff = new Tariff($this->db);
+                $tariff->fetch($obj->id);
+                $tariffs[] = $tariff;
+            }
+            return $tariffs;
+        } elseif (!$result) {
+            $this->errors[] = "Id produit extern inconnu";
+            return -2;
+        }
+        return -1;
+    }
+
+    public function getIdsEventsByIdsTariffs($ids_tariff) {
+        $ids_events = array();
+
+        $sql = 'SELECT id, fk_event';
+        $sql .= ' FROM tariff';
+        $sql .= ' WHERE id  IN(' . implode(',', $ids_tariff) . ')';
+
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                $ids_events[intVal($obj->id)] = intVal($obj->fk_event);
+            }
+            return $ids_events;
+        } elseif (!$result) {
+            $this->errors[] = "Erreur SQL 1581.";
+            return -2;
+        }
+        return -1;
+    }
+
+    public function getRemainingPlace($id_tariff) {
+
+        $sql = 'SELECT ta.number_place as number_place, COUNT(ti.id) as number_ticket';
+        $sql .= ' FROM tariff as ta';
+        $sql .= ' LEFT JOIN ticket as ti ON ta.id = ti.fk_tariff';
+        $sql .= ' WHERE ta.id=' . $id_tariff;
+
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                return intVal($obj->number_place) - intVal($obj->number_ticket);
+            }
+        } elseif (!$result) {
+            $this->errors[] = "Erreur SQL 1581.";
+            return -2;
+        }
+        return -1;
+    }
+
+    public function setIdProdExtern($id_tariff, $id_prod_extern) {
+
+        if (!($id_tariff > 0))
+            $this->errors[] = "Le champ identifiant tariff est obligatoire";
+        if (!($id_prod_extern > 0))
+            $this->errors[] = "Le champ identifiant produit externe est obligatoire";
+
+
+        $sql = 'UPDATE `tariff` SET';
+        $sql.= ' `id_prod_extern`=' . $id_prod_extern;
+        $sql .= ' WHERE id=' . $id_tariff;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+            return 1;
+        } catch (Exception $e) {
+            $this->errors[] = "Erreur SQL 6788";
+        }
+        return -1;
     }
 
 }

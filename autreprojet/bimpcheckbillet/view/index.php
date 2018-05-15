@@ -16,6 +16,11 @@ print '<fieldset class="container_form">';
 
 print '<legend><span>Connection<span></legend>';
 
+if (IS_MAIN_SERVER)
+    print '<input id="url_after_login" value="home.php" style="display: none"/>';
+else
+    print '<input id="url_after_login" value="check_ticket.php" style="display: none"/>';
+
 print '<label for="login">Identifiant</label>';
 print '<input class="form-control" placeholder="Identifiant" name="login" maxlength=256 style="width: 300px"><br/>';
 

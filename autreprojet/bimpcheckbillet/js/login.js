@@ -24,7 +24,7 @@ function login(login, pass_word) {
             } else if (out.errors === undefined) {
                 setMessage('alertSubmit', 'Erreur serveur 3174.', 'error');
             } else {
-                window.location.replace('home.php');
+                window.location.replace($('input#url_after_login').val());
             }
         }
     });

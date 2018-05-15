@@ -68,6 +68,9 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="price">Prix </label>';
     print '<input class="form-control bfh-number" name="price" step=".01" type="number" min="0" style="width: 120px"/><br/>';
 
+    print '<label for="number_place">Nombre de place</label>';
+    print '<input class="form-control bfh-number" name="number_place" step="1" type="number" min="0" style="width: 120px"/><br/>';
+
     print '<label class="btn btn-primary" for="file">';
     print '<input id="file" type="file" name="file" style="display:none"/>Parcourir</label>';
 

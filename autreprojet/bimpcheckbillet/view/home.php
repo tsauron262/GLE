@@ -15,8 +15,8 @@ print '
     <legend><span>Evènements<span></legend>
     <div id="container_event" class="container">
   <div class="clearfix"></div>
-  <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+  <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true"></div>
   </div>
-  </div>
-</div>
+  <div id="alertSubmit"></div>
+</fieldset>
 </body>';

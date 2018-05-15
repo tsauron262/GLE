@@ -356,27 +356,27 @@ list:
                     method: displayProduct
                     params: 
                         - nom_url
-            field_name: id_product
-            search_list: 
-                table: product p
-                field_return_value: p.rowid
-                field_return_label: p.label,p.ref
-                label_syntaxe: <label_2> - <label_1>
-                join: product_extrafields pe
-                join_on: p.rowid = pe.fk_object
-                fields_search: p.rowid,p.ref,p.label,p.barcode
-                filters: 
-                    pe.serialisable: 1
+            search: 
+                type: value_part
         serial:
             field: serial
         place: 
             label: Emplacement
             value: 
                 callback: displayCurrentPlace
+            search: 
+                type: value_part
         reserved: 
             label: Réservé / transfert en cours
             value: 
                 callback: displayReserved
+            search: 
+                type: values
+                input: 
+                    type: select
+                    options: 
+                        options: 
+                            array: hasReservations
     add_form_name: default
     edit_btn: 1
 #    delete_btn: 1

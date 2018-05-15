@@ -421,6 +421,10 @@ lists:
             product: 
                 field: id_product
                 display: nom_url
+            stocks: 
+                label: Qté dispo
+                value: 
+                    callback: displayProductAvailableQty
             equipment: 
                 field: id_equipment
             date_from:
@@ -460,6 +464,10 @@ lists:
             product: 
                 field: id_product
                 display: nom_url
+            stocks: 
+                label: Qté dispo
+                value: 
+                    callback: displayProductAvailableQty
             equipment: 
                 field: id_equipment
             commercial: 
@@ -495,6 +503,10 @@ lists:
             product: 
                 field: id_product
                 display: nom_url
+            stocks: 
+                label: Qté dispo
+                value: 
+                    callback: displayProductAvailableQty
             equipment: 
                 field: id_equipment
             commande: 

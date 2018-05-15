@@ -844,7 +844,7 @@ class gsxController extends BimpController
         $this->gsx->resetSoapErrors();
 
         $requestData = $this->gsx->_requestBuilder($request, $wrapper, $data);
-//        $response = $this->gsx->request($requestData, $client);
+        $response = $this->gsx->request($requestData, $client);
         
         dol_syslog("Requête " . $request . " | " . print_r($response, 1), LOG_ERR, 0, "_apple");
 
@@ -994,7 +994,7 @@ class gsxController extends BimpController
                                 }
                             }
                         } else {
-                            $errors[] = 'Une Erreur est survenue: aucun documents retourné par Apple';
+                            $errors[] = 'Une Erreur est survenue: aucun document retourné par Apple';
                         }
                         break;
 
@@ -1004,8 +1004,7 @@ class gsxController extends BimpController
                             if ($response[$responseName]['updateStatus'] == "Y") {
                                 $confirmNumber = $response[$responseName]['repairConfirmationNumber'];
                                 if (!$repair->isLoaded()) {
-                                    $repair->set('serial_update_confirm_number', $confirmNumber);
-                                    $errors = $repair->update();
+                                    $repair->repairDetails();
                                 } else {
                                     $errors[] = 'Une erreur est survenue (ID de la réparation manquant)';
                                 }
@@ -1022,8 +1021,7 @@ class gsxController extends BimpController
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmation']['repairConfirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['repairConfirmationNumber'];
                             if ($repair->isLoaded()) {
-                                $repair->set('serial_update_confirm_number', $confirmNumber);
-                                $errors = $repair->update();
+                                $repair->repairDetails();
                             } else {
                                 $errors[] = 'Une erreur est survenue (ID de la réparation manquant)';
                             }

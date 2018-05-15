@@ -815,6 +815,11 @@ class BimpObject
                 if ($value === '') {
                     continue;
                 }
+                $method = 'get'.  ucfirst($field_name).'SearchFilters';
+                if (method_exists($this, $method)) {
+                    $this->{$method}($filters, $value);
+                    continue;
+                }
                 if (in_array($field_name, self::$common_fields)) {
                     switch ($field_name) {
                         case 'id':

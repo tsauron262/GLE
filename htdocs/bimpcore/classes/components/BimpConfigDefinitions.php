@@ -25,11 +25,17 @@ class BimpConfigDefinitions
         'data' => array('data_type' => 'array'),
         'styles' => array('data_type' => 'array')
     );
+    public static $input = array(
+        'type' => array('default' => 'text'),
+        'options' => array('data_type' => 'array', 'default' => array(), 'compile' => true)
+    );
+    
     public static $search = array(
         'type'             => array('default' => 'field_input'),
         'part_type'        => array('default' => 'middle'),
         'search_on_key_up' => array('data_type' => 'bool', 'default' => 1),
-        'option'           => array()
+        'option'           => array(),
+        'input' => array('type' => 'definitions', 'defs_type' => 'input')
     );
     public static $sort_option = array(
         'label'      => array('required' => true),

@@ -209,6 +209,10 @@ select.switch {
         margin: 0 5px;
     }
 }
+.toggleContainer {
+    margin-top: 6px;
+    display: inline-block;
+}
 .toggle {
     display: none;
 
@@ -240,6 +244,7 @@ select.switch {
         box-shadow:
             0 0.07em 0.1em -0.1em rgba(#000,.4) inset,
             0 0.05em 0.08em -0.01em rgba(#fff,.7);
+        margin-bottom: 0!important;
 
         &:after {
             position: absolute; 
@@ -358,7 +363,6 @@ select.switch {
         }
     }
 }
-
 .inputMultipleValues {
     margin: 15px 0;
 

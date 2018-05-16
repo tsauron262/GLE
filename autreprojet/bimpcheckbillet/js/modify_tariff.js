@@ -91,7 +91,8 @@ function getTariffsForEvent(id_event) {
 
 function modifyTariff(id_tariff, label, price, number_place, require_names, date_start, time_start, date_end, time_end,
         type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6,
-        name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6) {
+        name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6,
+        require_extra_1, require_extra_2, require_extra_3, require_extra_4, require_extra_5, require_extra_6) {
 
     $.ajax({
         type: "POST",
@@ -118,6 +119,12 @@ function modifyTariff(id_tariff, label, price, number_place, require_names, date
             name_extra_4: name_extra_4,
             name_extra_5: name_extra_5,
             name_extra_6: name_extra_6,
+            require_extra_1: require_extra_1,
+            require_extra_2: require_extra_2,
+            require_extra_3: require_extra_3,
+            require_extra_4: require_extra_4,
+            require_extra_5: require_extra_5,
+            require_extra_6: require_extra_6,
             action: 'modify_tariff'
         },
         error: function () {
@@ -292,7 +299,13 @@ function initEvents() {
                 $('input[name=name_extra_3]').val(),
                 $('input[name=name_extra_4]').val(),
                 $('input[name=name_extra_5]').val(),
-                $('input[name=name_extra_6]').val());
+                $('input[name=name_extra_6]').val(),
+                $('input[name=require_extra_1]:checked').val(),
+                $('input[name=require_extra_2]:checked').val(),
+                $('input[name=require_extra_3]:checked').val(),
+                $('input[name=require_extra_4]:checked').val(),
+                $('input[name=require_extra_5]:checked').val(),
+                $('input[name=require_extra_6]:checked').val());
 
         ////        } else {
 //            alert('pas compatible avec navigateur');
@@ -317,11 +330,15 @@ function autoFill(id_tariff) {
     $('input[name=price]').val(tariff.price);
     $('input[name=number_place]').val(tariff.number_place);
 
-    if (tariff.require_names === 0)
+    if (tariff.require_names === 0) {
+        $('input[name=require_names][value=0]').prop('checked', true);
         $('input[name=require_names][value=0]').closest('.btn').button('toggle');
-    else
+        $('input[name=require_names][value=1]').prop('checked', false);
+    } else {
+        $('input[name=require_names][value=1]').prop('checked', true);
         $('input[name=require_names][value=1]').closest('.btn').button('toggle');
-
+        $('input[name=require_names][value=0]').prop('checked', false);
+    }
 
     fillExtra(tariff, 6);
 
@@ -386,6 +403,16 @@ function fillExtra(tariff, max) {
         if (value_type !== 0) {
             $('select[name=' + name_type + '] > option[value=' + value_type + ']').prop('selected', true);
             $('input[name=' + name_name + ']').val(value_name);
+        }
+
+        var require_extra = 'require_extra_' + i;
+        var value_require_extra = tariff[require_extra];
+        if (value_require_extra === 1) {
+            $('input[name=require_extra_' + i + '][value=1]').prop('checked', true);
+            $('input[name=require_extra_' + i + '][value=1]').closest('.btn').button('toggle');
+        } else {
+            $('input[name=require_extra_' + i + '][value=0]').prop('checked', true);
+            $('input[name=require_extra_' + i + '][value=0]').closest('.btn').button('toggle');
         }
     }
 }

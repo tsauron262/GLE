@@ -51,7 +51,7 @@ switch ($action) {
      */
     case 'create_tariff': {
             echo json_encode(array(
-                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_POST['require_names'], '', $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6']),
+                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_POST['require_names'], '', $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
                 'errors' => $tariff->errors));
             break;
         }
@@ -257,7 +257,7 @@ switch ($action) {
      */
     case 'modify_tariff': {
             echo json_encode(array(
-                'code_return' => $tariff->update($_POST['id_tariff'], $_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['require_names'], /* $_FILES['file'], */ $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6']),
+                'code_return' => $tariff->update($_POST['id_tariff'], $_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['require_names'], /* $_FILES['file'], */ $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
                 'errors' => $tariff->errors));
             break;
         }

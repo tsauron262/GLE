@@ -26,10 +26,9 @@ class Tariff {
             return false;
         }
 
-        $sql = 'SELECT label, date_creation, require_names, date_start, date_end, price, number_place, type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6, name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6, id_prod_extern, fk_event';
+        $sql = 'SELECT label, date_creation, require_names, date_start, date_end, price, number_place, type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6, name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6, require_extra_1, require_extra_2, require_extra_3, require_extra_4, require_extra_5, require_extra_6, id_prod_extern, fk_event';
         $sql .= ' FROM tariff';
         $sql .= ' WHERE id=' . $id;
-
 
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
@@ -55,6 +54,12 @@ class Tariff {
                 $this->name_extra_4 = $obj->name_extra_4;
                 $this->name_extra_5 = $obj->name_extra_5;
                 $this->name_extra_6 = $obj->name_extra_6;
+                $this->require_extra_1 = intVal($obj->require_extra_1);
+                $this->require_extra_2 = intVal($obj->require_extra_2);
+                $this->require_extra_3 = intVal($obj->require_extra_3);
+                $this->require_extra_4 = intVal($obj->require_extra_4);
+                $this->require_extra_5 = intVal($obj->require_extra_5);
+                $this->require_extra_6 = intVal($obj->require_extra_6);
                 $this->id_prod_extern = intVal($obj->id_prod_extern);
                 return 1;
             }
@@ -65,7 +70,7 @@ class Tariff {
         return -1;
     }
 
-    public function create($label, $price, $number_place, $id_event, $file, $require_names, $id_prod_extern, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $type_extra_2, $name_extra_2, $type_extra_3, $name_extra_3, $type_extra_4, $name_extra_4, $type_extra_5, $name_extra_5, $type_extra_6, $name_extra_6) {
+    public function create($label, $price, $number_place, $id_event, $file, $require_names, $id_prod_extern, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
@@ -108,18 +113,18 @@ class Tariff {
             $sql.= ', `date_start`';
         if ($date_end != '')
             $sql.= ', `date_end`';
-        if ($type_extra_1 != '' and $name_extra_1 != '')
-            $sql .= ', `type_extra_1`, `name_extra_1`';
-        if ($type_extra_2 != '' and $name_extra_2 != '')
-            $sql .= ', `type_extra_2`, `name_extra_2`';
-        if ($type_extra_3 != '' and $name_extra_3 != '')
-            $sql .= ', `type_extra_3`, `name_extra_3`';
-        if ($type_extra_4 != '' and $name_extra_4 != '')
-            $sql .= ', `type_extra_4`, `name_extra_4`';
-        if ($type_extra_5 != '' and $name_extra_5 != '')
-            $sql .= ', `type_extra_5`, `name_extra_5`';
-        if ($type_extra_6 != '' and $name_extra_6 != '')
-            $sql .= ', `type_extra_6`, `name_extra_6`';
+        if ($type_extra_1 != '' and $name_extra_1 != '' and $require_extra_1 != '')
+            $sql .= ', `type_extra_1`, `name_extra_1`, `require_extra_1`';
+        if ($type_extra_2 != '' and $name_extra_2 != '' and $require_extra_2 != '')
+            $sql .= ', `type_extra_2`, `name_extra_2`, `require_extra_2`';
+        if ($type_extra_3 != '' and $name_extra_3 != '' and $require_extra_3 != '')
+            $sql .= ', `type_extra_3`, `name_extra_3`, `require_extra_3`';
+        if ($type_extra_4 != '' and $name_extra_4 != '' and $require_extra_4 != '')
+            $sql .= ', `type_extra_4`, `name_extra_4`, `require_extra_4`';
+        if ($type_extra_5 != '' and $name_extra_5 != '' and $require_extra_5 != '')
+            $sql .= ', `type_extra_5`, `name_extra_5`, `require_extra_5`';
+        if ($type_extra_6 != '' and $name_extra_6 != '' and $require_extra_6 != '')
+            $sql .= ', `type_extra_6`, `name_extra_6`, `require_extra_6`';
         $sql.= ') ';
         $sql.= 'VALUES ("' . $label . '"';
         $sql.= ', now()';
@@ -132,18 +137,18 @@ class Tariff {
             $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         if ($date_end != '')
             $sql.= ', "' . $date_end_obj->format('Y-m-d H:i:s') . '"';
-        if ($type_extra_1 != '' and $name_extra_1 != '')
-            $sql.= ', "' . $type_extra_1 . '", "' . $name_extra_1 . '"';
-        if ($type_extra_2 != '' and $name_extra_2 != '')
-            $sql.= ', "' . $type_extra_2 . '", "' . $name_extra_2 . '"';
-        if ($type_extra_3 != '' and $name_extra_3 != '')
-            $sql.= ', "' . $type_extra_3 . '", "' . $name_extra_3 . '"';
-        if ($type_extra_4 != '' and $name_extra_4 != '')
-            $sql.= ', "' . $type_extra_4 . '", "' . $name_extra_4 . '"';
-        if ($type_extra_5 != '' and $name_extra_5 != '')
-            $sql.= ', "' . $type_extra_5 . '", "' . $name_extra_5 . '"';
-        if ($type_extra_6 != '' and $name_extra_6 != '')
-            $sql.= ', "' . $type_extra_6 . '", "' . $name_extra_6 . '"';
+        if ($type_extra_1 != '' and $name_extra_1 != '' and $require_extra_1 != '')
+            $sql.= ', "' . $type_extra_1 . '", "' . $name_extra_1 . '", ' . $require_extra_1;
+        if ($type_extra_2 != '' and $name_extra_2 != '' and $require_extra_2 != '')
+            $sql.= ', "' . $type_extra_2 . '", "' . $name_extra_2 . '", ' . $require_extra_2;
+        if ($type_extra_3 != '' and $name_extra_3 != '' and $require_extra_3 != '')
+            $sql.= ', "' . $type_extra_3 . '", "' . $name_extra_3 . '", ' . $require_extra_3;
+        if ($type_extra_4 != '' and $name_extra_4 != '' and $require_extra_4 != '')
+            $sql.= ', "' . $type_extra_4 . '", "' . $name_extra_4 . '", ' . $require_extra_4;
+        if ($type_extra_5 != '' and $name_extra_5 != '' and $require_extra_5 != '')
+            $sql.= ', "' . $type_extra_5 . '", "' . $name_extra_5 . '", ' . $require_extra_5;
+        if ($type_extra_6 != '' and $name_extra_6 != '' and $require_extra_6 != '')
+            $sql.= ', "' . $type_extra_6 . '", "' . $name_extra_6 . '", ' . $require_extra_6;
         $sql.= ')';
 
 
@@ -176,7 +181,7 @@ class Tariff {
         return -1;
     }
 
-    public function update($id_tariff, $label, $price, $number_place, $require_names, /* $file, */ $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $type_extra_2, $name_extra_2, $type_extra_3, $name_extra_3, $type_extra_4, $name_extra_4, $type_extra_5, $name_extra_5, $type_extra_6, $name_extra_6) {
+    public function update($id_tariff, $label, $price, $number_place, $require_names, /* $file, */ $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
 
         if (!($id_tariff > 0))
             $this->errors[] = "Le champ identifiant est obligatoire";
@@ -215,12 +220,12 @@ class Tariff {
         if ($date_end != '')
             $sql.= ', `date_end`="' . $date_end_obj->format('Y-m-d H:i:s') . '"';
 
-        $sql.= ($type_extra_1 != '' and $name_extra_1 != '') ? ', `type_extra_1`=' . $type_extra_1 . ', `name_extra_1`="' . $name_extra_1 . '"' : ', `type_extra_1`= NULL, `name_extra_1`= NULL';
-        $sql.= ($type_extra_2 != '' and $name_extra_2 != '') ? ', `type_extra_2`=' . $type_extra_2 . ', `name_extra_2`="' . $name_extra_2 . '"' : ', `type_extra_2`= NULL, `name_extra_2`= NULL';
-        $sql.= ($type_extra_3 != '' and $name_extra_3 != '') ? ', `type_extra_3`=' . $type_extra_3 . ', `name_extra_3`="' . $name_extra_3 . '"' : ', `type_extra_3`= NULL, `name_extra_3`= NULL';
-        $sql.= ($type_extra_4 != '' and $name_extra_4 != '') ? ', `type_extra_4`=' . $type_extra_4 . ', `name_extra_4`="' . $name_extra_4 . '"' : ', `type_extra_4`= NULL, `name_extra_4`= NULL';
-        $sql.= ($type_extra_5 != '' and $name_extra_5 != '') ? ', `type_extra_5`=' . $type_extra_5 . ', `name_extra_5`="' . $name_extra_5 . '"' : ', `type_extra_5`= NULL, `name_extra_5`= NULL';
-        $sql.= ($type_extra_6 != '' and $name_extra_6 != '') ? ', `type_extra_6`=' . $type_extra_6 . ', `name_extra_6`="' . $name_extra_6 . '"' : ', `type_extra_6`= NULL, `name_extra_6`= NULL';
+        $sql.= ($type_extra_1 != '' and $name_extra_1 != '') ? ', `type_extra_1`=' . $type_extra_1 . ', `name_extra_1`="' . $name_extra_1 . '", `require_extra_1`=' . $require_extra_1 : ', `type_extra_1`= NULL, `name_extra_1`= NULL, `require_extra_1`= NULL';
+        $sql.= ($type_extra_2 != '' and $name_extra_2 != '') ? ', `type_extra_2`=' . $type_extra_2 . ', `name_extra_2`="' . $name_extra_2 . '", `require_extra_2`=' . $require_extra_2 : ', `type_extra_2`= NULL, `name_extra_2`= NULL, `require_extra_2`= NULL';
+        $sql.= ($type_extra_3 != '' and $name_extra_3 != '') ? ', `type_extra_3`=' . $type_extra_3 . ', `name_extra_3`="' . $name_extra_3 . '", `require_extra_3`=' . $require_extra_3 : ', `type_extra_3`= NULL, `name_extra_3`= NULL, `require_extra_3`= NULL';
+        $sql.= ($type_extra_4 != '' and $name_extra_4 != '') ? ', `type_extra_4`=' . $type_extra_4 . ', `name_extra_4`="' . $name_extra_4 . '", `require_extra_4`=' . $require_extra_4 : ', `type_extra_4`= NULL, `name_extra_4`= NULL, `require_extra_4`= NULL';
+        $sql.= ($type_extra_5 != '' and $name_extra_5 != '') ? ', `type_extra_5`=' . $type_extra_5 . ', `name_extra_5`="' . $name_extra_5 . '", `require_extra_5`=' . $require_extra_5 : ', `type_extra_5`= NULL, `name_extra_5`= NULL, `require_extra_5`= NULL';
+        $sql.= ($type_extra_6 != '' and $name_extra_6 != '') ? ', `type_extra_6`=' . $type_extra_6 . ', `name_extra_6`="' . $name_extra_6 . '", `require_extra_6`=' . $require_extra_6 : ', `type_extra_6`= NULL, `name_extra_6`= NULL, `require_extra_6`= NULL';
 
         $sql .= ' WHERE id=' . $id_tariff;
 

@@ -13,9 +13,12 @@ function createEvent() {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
-            } else if (out.code_return > 0) {
+            } else if (parseInt(out.code_return) > 0) {
+                changeEventSession(parseInt(out.code_return));
                 alert("L'évènement a été créée.");
-                window.location.replace('home.php');
+                setTimeout(function () {
+                    window.location.replace('home.php');
+                }, 500);
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 1853.', 'error');
             }
@@ -28,6 +31,7 @@ function createEvent() {
         processData: false
     });
 }
+
 /**
  * Ready
  */

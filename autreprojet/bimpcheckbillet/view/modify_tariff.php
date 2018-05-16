@@ -18,6 +18,7 @@ function printExtra($id) {
     print '<table><tr>';
     print '<th>Type</th>';
     print '<th>Nom</th>';
+    print '<th>Obligatoire</th>';
     print '</tr><tr>';
     print '<td><select class="chosen-select" name="type_extra_' . $id . '">';
     print '<option value="">Sélectionnez</option>';
@@ -25,7 +26,11 @@ function printExtra($id) {
     print '<option value=2>Réel</option>';
     print '<option value=3>Chaîne de charactère</option>';
     print '</select></td>';
-    print '<td><input class="form-control" placeholder="Nom extra ' . $id . '" name="name_extra_' . $id . '" maxlength=256 style="width: 300px"></td>';
+    print '<td><input class="form-control" placeholder="Nom extra ' . $id . '" name="name_extra_' . $id . '" maxlength=256 style="width: 300px"/></td>';
+    print '<td><div class="btn-group btn-group-toggle" data-toggle="buttons">';
+    print '<label class="btn btn-primary active"><input value=0 type="radio" name="require_extra_' . $id . '" checked/>Non</label>';
+    print '<label class="btn btn-primary">       <input value=1 type="radio" name="require_extra_' . $id . '"/>Oui</label>';
+    print '</div></td>';
     print '</tr></table>';
     print '</div>';
 }

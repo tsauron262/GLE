@@ -58,7 +58,6 @@ function getTicketList(id_event) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.tariffs !== undefined) {
-                console.log(out.tariffs);
                 displayTable(out.tariffs);
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 7255.', 'error');
@@ -99,7 +98,6 @@ function displayTable(tariffs) {
 }
 
 function addHeader(tariff) {
-    console.log(tariff);
     var html = '<tr>';
     html += '<th>Nom</th>';
     html += '<th>Prénom</th>';
@@ -125,9 +123,11 @@ function addHeader(tariff) {
 function addTickets(tariff) {
     var html = '';
     var tickets = tariff.tickets;
+    
+    if (tickets === undefined)
+        return html;
 
     tickets.forEach(function (ticket) {
-        console.log(ticket);
         html += '<tr>';
         html += '<td>' + ((ticket.last_name !== null) ? ticket.last_name : '') + '</td>';
         html += '<td>' + ((ticket.first_name !== null) ? ticket.first_name : '') + '</td>';

@@ -1,3 +1,5 @@
+var URL_PRESTASHOP = 'http://localhost/~tilito/prestashop/modules/zoomdici/ajax.php';
+
 var events;
 
 /**
@@ -102,6 +104,7 @@ function modifyEvent(id_event, label, description, date_start, time_start, date_
         }
     });
 }
+
 function draftEvent(id_event) {
 
     $.ajax({
@@ -176,6 +179,32 @@ function closeEvent(id_event) {
         }
     });
 }
+
+function createPrestashopCategory(label_event) {
+
+    $.ajax({
+        type: "POST",
+        url: URL_PRESTASHOP,
+        data: {
+            label: label_event,
+            action: 'createPrestashopCategory'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 2584.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.id_inserted > 0) {
+                alert('catg créer');
+            } else {
+                setMessage('alertSubmit', 'Erreur serveur 2476.', 'error');
+            }
+        }
+    });
+}
+
 
 /**
  * Ready
@@ -255,6 +284,16 @@ function initEvents() {
             closeEvent(id_event);
         else
             setMessage('alertSubmit', "Veuillez sélectionnez un évènement.", 'error');
+    });
+
+    $('div[name=create_prestashop_category]').click(function () {
+        var id_event = $('select[name=id_event] > option:selected').val();
+        var label_event = $('select[name=id_event] > option:selected').text();
+        if (id_event > 0)
+            createPrestashopCategory(label_event);
+        else
+            setMessage('alertSubmit', "Veuillez sélectionnez un évènement.", 'error');
+        createPrestashopCategory();
     });
 }
 

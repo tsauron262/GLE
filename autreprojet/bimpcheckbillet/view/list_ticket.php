@@ -27,6 +27,7 @@ print '<select class="chosen-select" name="event"><option value="">Sélectionnez
 print '<div id="displayTable"></div>';
 
 print '</fieldset>';
+print '<div id="alertSubmit"></div>';
 print '</body>';
 
 

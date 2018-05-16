@@ -137,7 +137,35 @@ function modifyTariff(id_tariff, label, price, number_place, require_names, date
     });
 }
 
-function createPrestashopProduct(id_tariff) {
+function getCategEvent(id_tariff) {
+    $.ajax({
+        type: 'POST',
+        url: "../interface.php",
+        data: {
+            id_tariff: id_tariff,
+            action: 'get_event_by_tariff_id'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 2564.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.event !== undefined) {
+                console.log(out.event);
+                if (parseInt(out.event.id_categ) > 0)
+                    createPrestashopProduct(id_tariff, out.event.id_categ);
+                else
+                    alert("Merci d'importer l'évènement associé à ce tarif avant d'importer le tarif");
+            } else {
+                setMessage('alertSubmit', 'Erreur serveur 7561.', 'error');
+            }
+        }
+    });
+}
+
+function createPrestashopProduct(id_tariff, id_categ_extern) {
 
     var tariff;
 
@@ -154,6 +182,7 @@ function createPrestashopProduct(id_tariff) {
                 label: tariff.label,
                 price: tariff.price,
                 number_place: tariff.number_place,
+                id_categ_extern: id_categ_extern,
                 action: 'createPrestashopProduct'
             },
             error: function () {
@@ -230,7 +259,7 @@ function initEvents() {
             alert('Veuillez séléctionner un tariff avant de créer un produit dans prestashop');
         } else {
 //            if (confirm("Vous êtes sur le point de modifier la base de donnée de prestashop, continuer ?")) {
-            createPrestashopProduct(id_tariff);
+            getCategEvent(id_tariff);
 //            }
         }
     });

@@ -39,6 +39,8 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="event">Evènement </label><br/>';
     print '<select class="chosen-select" name="id_event"><option value="">Sélectionnez un évènement</option></select><br/><br/>';
 
+    print '<div class="btn btn-primary" name="create_prestashop_category">Creér catégorie prestashop</div><br/><br/>';
+
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
 
@@ -53,13 +55,13 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<input class="form-control" placeholder="Date de fin" type="text" name="date_end" style="display: inline ; width: 160px"/>';
     print '<input class="form-control" type="time" value="00:00" name="time_end" style="display: inline ; width: 100px"/><br/><br/>';
 
-    print '<label>Image</label><br/>';
-
-    print '<label class="btn btn-primary" for="file">';
-    print '<input id="file" type="file" name="file" style="display:none"/>Parcourir</label>';
-
-    print '<span class="label label-info" id="name_file_display"></span>';
-    print '<img id="img_display" alt=" Aucune image sélectionnée"/>';
+//    print '<label>Image</label><br/>';
+//
+//    print '<label class="btn btn-primary" for="file">';
+//    print '<input id="file" type="file" name="file" style="display:none"/>Parcourir</label>';
+//
+//    print '<span class="label label-info" id="name_file_display"></span>';
+//    print '<img id="img_display" alt=" Aucune image sélectionnée"/>';
 //    print '<img id="img_display" src="../img/event/9.png"/><br/><br/><br/>';
     print '<div id="alertSubmit"></div><br/><br/><br/>';
 
@@ -73,7 +75,6 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<button class="btn btn-success" name="validate" style="margin-left: 20px;">Valider évènement</button>';
     print '<button class="btn btn-danger" name="close" style="margin-left: 20px;">Fermer évènement</button>';
     print '</fieldset>';
-    
 }
 print '</body>';
 

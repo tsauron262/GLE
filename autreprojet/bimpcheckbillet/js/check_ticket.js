@@ -78,6 +78,7 @@ function checkTicket(barcode, id_event) {
             decoder.stop();
             var out = JSON.parse(json);
             if (out.errors.length !== 0) {
+                $('#alertSubmit').empty();
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.errors === undefined) {
                 setMessage('alertSubmit', 'Erreur serveur 1495.', 'error');

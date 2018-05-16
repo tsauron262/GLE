@@ -330,6 +330,14 @@ switch ($action) {
                 'errors' => $tariff->errors));
             break;
         }
+    case 'get_event_by_tariff_id': {
+            $tariff->fetch($_POST['id_tariff']);
+            $event->fetch($tariff->fk_event);
+            echo json_encode(array(
+                'event' => $event,
+                'errors' => array_merge($tariff->errors, $event->errors)));
+            break;
+        }
 
     /**
      * Called from prestashop

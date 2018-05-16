@@ -9,7 +9,7 @@ class Tariff {
     public $date_creation;
     public $price;
     public $number_place;
-    private $fk_event;
+    public $fk_event;
     public $date_start;
     public $date_end;
     public $require_names;

@@ -11,6 +11,7 @@ class Event {
     public $date_start;
     public $date_end;
     public $status;
+    public $id_categ;
 
     const STATUS_DRAFT = 1;
     const STATUS_VALIDATE = 2;
@@ -28,7 +29,7 @@ class Event {
             return false;
         }
 
-        $sql = 'SELECT id, label, description, date_creation, date_start, date_end, status';
+        $sql = 'SELECT id, label, description, date_creation, date_start, date_end, status, id_categ';
         $sql .= ' FROM event';
         $sql .= ' WHERE id=' . $id;
 
@@ -43,6 +44,7 @@ class Event {
                 $this->date_start = $obj->date_start;
                 $this->date_end = $obj->date_end;
                 $this->status = $obj->status;
+                $this->id_categ = intVal($obj->id_categ);
                 return 1;
             }
         } else {

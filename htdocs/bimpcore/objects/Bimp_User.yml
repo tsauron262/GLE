@@ -108,6 +108,12 @@ fields:
     apple_shipto: 
         label: N° ShipTo Apple
         dol_extra_field: 1
+    id8sens: 
+        label: ID Comm 8Sens
+        dol_extra_field: 1
+    idtech8sens: 
+        label: ID Tech 8Sens
+        dol_extra_field: 1
     mail_sec: 
         label: E-Mail de secours
         dol_extra_field: 1
@@ -129,6 +135,8 @@ forms:
             - field: apple_shipto
             - field: apple_techid
             - field: gsxresa
+            - field: id8sens
+            - field: idtech8sens
             - field: comp
             - field: signature
             
@@ -222,6 +230,13 @@ fields_tables:
             - field: apple_techid
             - field: apple_shipto
             - field: gsxresa
+            
+    apple: 
+        title: Données 8sens
+        icon: file-tex
+        rows: 
+            - field: id8sens
+            - field: idtech8sens
         
 views: 
     default: 

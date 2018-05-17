@@ -30,6 +30,7 @@ class exportfacture {
         $this->exportFactureSav();
         $this->exportFactureSavSeul();
         $this->exportFactureReseau();
+        $this->exportFactureNormal();
         $this->getFactDontExport();
         if($this->error == ""){
             $this->output=trim($this->nbE." facture(s) exportée(s)");
@@ -94,6 +95,41 @@ class exportfacture {
             }
         }
         
+    }
+
+    public function exportFactureNormal() {
+        $this->type = "sav";
+        $result = $this->db->query("SELECT fact.rowid as id, fk_user_author, fe.centre "
+                . "FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe "
+                . "WHERE fe.fk_object = fact.rowid AND fe.`type` NOT IN ('S') ".$this->where);
+        while ($ligne = $this->db->fetch_object($result)) {
+            if(!in_array($ligne->id, $this->tabIgnore)){
+                $this->getId8sensByFact($ligne->id, $ligne->fk_user_author);
+                $this->extract($ligne->id);
+            }
+        }
+        
+    }
+    
+    public function getId8sensByFact($id, $userCr){
+        $this->id8sens = 0;
+        $sql = $this->db->query("SELECT * FROM `llx_element_contact` WHERE `element_id` = ".$id." AND `fk_c_type_contact` = 50 ORDER BY `rowid` DESC");
+        if($this->db->num_rows($sql) > 0){
+            $ligne = $this->db->fetch_object($sql);
+            $userC = new User($this->db);
+            $userC->fetch($ligne->fk_socpeople);
+            $this->id8sens = $userC->array_options['options_id8sens'];
+            if($this->id8sens < 1){
+                mailSyn2("Exportation facture", $userC->email, null, "Bonjour vos factures ne peuvent être exporté car vous n'avez pas d'identifiant 8Sens dans vottre profil <a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php?id=".$userC->id."'>Voir</a>");
+            }
+        }
+        else{
+            if($userCr < 1)
+                $userCr = 1;
+            $userM = new User($this->db);
+            $userM->fetch($userCr);
+            mailSyn2("Exportation facture", $userM->email, null, "Bonjour vos factures ne peuvent être exportées car il n'y a pas de commercial rataché <a href='".DOL_URL_ROOT."/compta/facture/card.php?facid=".$id."'>Voir</a>");
+        }
     }
 
     public function getFactDontExport() {

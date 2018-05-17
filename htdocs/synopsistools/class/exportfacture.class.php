@@ -120,6 +120,8 @@ class exportfacture {
             $userC->fetch($ligne->fk_socpeople);
             $this->id8sens = $userC->array_options['options_id8sens'];
             if($this->id8sens < 1){
+                if($this->debug)
+                    echo "<br/>Comm pas de comm<br/>";
                 mailSyn2("Exportation facture", $userC->email, null, "Bonjour vos factures ne peuvent être exporté car vous n'avez pas d'identifiant 8Sens dans vottre profil <a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php?id=".$userC->id."'>Voir</a>");
             }
         }
@@ -128,6 +130,8 @@ class exportfacture {
                 $userCr = 1;
             $userM = new User($this->db);
             $userM->fetch($userCr);
+            if($this->debug)
+                echo "<br/>Pas de comm<br/>";
             mailSyn2("Exportation facture", $userM->email, null, "Bonjour vos factures ne peuvent être exportées car il n'y a pas de commercial rataché <a href='".DOL_URL_ROOT."/compta/facture/card.php?facid=".$id."'>Voir</a>");
         }
     }

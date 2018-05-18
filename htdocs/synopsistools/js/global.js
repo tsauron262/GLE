@@ -55,7 +55,7 @@ $(window).on("load", function () {
     }
     
     
-$("td:contains('Email de secours')").each(function () {   ///plus de mdp apple
+$("td:contains('Email de secours'), td:contains('Mail de secours')").each(function () {   ///plus de mdp apple
         $(this).next("td").each(function () {
             if ($(this).find("input").length > 0) {
                 val = $(this).find("input").val();

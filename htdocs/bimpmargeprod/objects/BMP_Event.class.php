@@ -998,38 +998,43 @@ class BMP_Event extends BimpObject
         if ($nTarifs > 0) {
             $prix_total_ttc = 0;
             $prix_total_ht = 0;
-            $billets_loc_total_ttc = 0;
-            $billets_loc_total_ht = 0;
+            $prix_total_hors_loc_ht = 0;
+//            $billets_loc_total_ttc = 0;
+//            $billets_loc_total_ht = 0;
 
             $id_tax_billets = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) $this->getBilletsIdTypeMontant());
             $id_tax_billets_loc = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_billets_location_montant);
             $id_tax_bar = $this->db->getValue('bmp_type_montant', 'id_taxe', '`id` = ' . (int) self::$id_bar20_type_montant);
 
-            $nBillets = 0;
+            $nbTarifs = 0;
+            $nbBillets = 0;
 
             $sacem_secu_rate = (float) $calc_instance->getSavedData('percent', self::$id_calc_sacem_secu);
 
             foreach ($tarifs as $tarif) {
                 $prix_ttc = (float) $tarif->getData('amount');
                 $loc_ttc = (float) $tarif->getData('droits_loc');
+                $nbBillet = (float) $tarif->getData('previsionnel');
 
                 $prix_ht = BimpTools::calculatePriceTaxEx($prix_ttc, BimpTools::getTaxeRateById($id_tax_billets));
                 $loc_ht = BimpTools::calculatePriceTaxEx($loc_ttc, BimpTools::getTaxeRateById($id_tax_billets_loc));
 
                 if ($prix_ht > 0) {
-                    $prix_total_ttc += $prix_ttc;
-                    $prix_total_ht += $prix_ht;
-                    $nBillets++;
+                    $prix_total_ttc += $prix_ttc * $nbBillet;
+                    $prix_total_ht += $prix_ht * $nbBillet;
+                    $nbTarifs++;
+                    $nbBillets += $nbBillet;
+                    $prix_total_hors_loc_ht += ($prix_ht - $loc_ht) * $nbBillet;
                 }
 
-                $billets_loc_total_ttc += $loc_ttc;
-                $billets_loc_total_ht += $loc_ht;
+//                $billets_loc_total_ttc += $loc_ttc;
+//                $billets_loc_total_ht += $loc_ht;
             }
 
-            if ($nBillets) {
-                $prix_moyen_ttc = $prix_total_ttc / $nBillets;
-                $prix_moyen_ht = $prix_total_ht / $nBillets;
-                $prix_moyen_hors_loc_ht = ($prix_total_ht - $billets_loc_total_ht) / $nBillets;
+            if ($nbTarifs) {
+                $prix_moyen_ttc = $prix_total_ttc / $nbBillets;
+                $prix_moyen_ht = $prix_total_ht / $nbBillets;
+                $prix_moyen_hors_loc_ht = $prix_total_hors_loc_ht / $nbBillets;
             }
 
             if ($debug) {

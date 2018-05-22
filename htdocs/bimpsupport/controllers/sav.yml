@@ -27,7 +27,7 @@ sections:
                     - cols: 
                         - type: view
                           view:
-                              name: default
+                              name: infos
                               panel: 1
                               object: sav
                     - cols: 

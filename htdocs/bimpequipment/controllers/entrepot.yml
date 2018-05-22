@@ -1,5 +1,8 @@
 bootstrap: 1
 
+js:
+    - /bimpequipment/views/js/equipment.js
+    
 objects: 
     entrepot: 
         instance: 

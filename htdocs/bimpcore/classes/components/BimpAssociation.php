@@ -578,33 +578,34 @@ class BimpAssociation
 
     // Rendus HTML 
 
-    public function renderAddAssociateInput($item_display = 'default', $autosave = false)
+    public function renderAddAssociateInput($item_display = 'default', $autosave = false, $name_prefix = '')
     {
         if (count($this->errors)) {
             return BimpRender::renderAlerts($this->errors);
         }
-        
-        if (!$this->object->config->isDefined('associations/'.$this->association.'/input')) {
+
+        if (!$this->object->config->isDefined('associations/' . $this->association . '/input')) {
             return BimpRender::renderAlerts('Input non défini dans la configuration pour cette association');
         }
-        
+
         $html = '';
 
         $input_name = $this->association . '_add_value';
         $input = new BC_Input($this->object, 'int', $input_name, 'associations/' . $this->association . '/input');
+        $input->setNamePrefix($name_prefix);
         $input->extraClasses[] = 'no-modified';
-        $input->extraData['values_field'] = $this->association;
-        
+        $input->extraData['values_field'] = $name_prefix . $this->association;
+
         $html .= $input->renderHtml();
 
         if ($input->params['type'] === 'search_list') {
-            $label_input_name = $input_name . '_search';
+            $label_input_name = $name_prefix . $input_name . '_search';
         } else {
-            $label_input_name = $this->association;
+            $label_input_name = $name_prefix . $this->association;
         }
 
         $values = array();
-        
+
         if ($this->object->isLoaded()) {
             $items = $this->getAssociatesList();
         } else {
@@ -617,12 +618,12 @@ class BimpAssociation
             }
         }
 
-        $html .= BimpInput::renderMultipleValuesList($this->object, $this->association, $values, $label_input_name, $autosave);
+        $html .= BimpInput::renderMultipleValuesList($this->object, $name_prefix . $this->association, $values, $label_input_name, $autosave);
 
         return $html;
     }
 
-    public function renderAssociatesCheckList()
+    public function renderAssociatesCheckList($name_prefix = '')
     {
         $associates = $this->getAssociatesList();
 
@@ -639,7 +640,7 @@ class BimpAssociation
                 'label' => $this->object->displayAssociate($this->association, 'default', $id_item)
             );
         }
-        return BimpInput::renderInput('check_list', $this->association, $associates, array('items' => $items));
+        return BimpInput::renderInput('check_list', $name_prefix . $this->association, $associates, array('items' => $items));
     }
 
     // Gestion SQL : 

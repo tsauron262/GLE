@@ -333,10 +333,10 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
                 $pdf->MultiCell(100, 6, $user_create->getFullName($langs), 0, 'L');
             }
 
-            if ((string) $sav->getData('prestataire_number')) {
-                $pdf->SetXY(12, 45);
-                $pdf->MultiCell(100, 6, "N° de dossier prestataire : " . $sav->getData('prestataire_number'), 0, 'L');
-            }
+//            if ((string) $sav->getData('prestataire_number')) {
+//                $pdf->SetXY(12, 45);
+//                $pdf->MultiCell(100, 6, "N° de dossier prestataire : " . $sav->getData('prestataire_number'), 0, 'L');
+//            }
 
             $pdf->SetXY(69, 230);
             $pdf->MultiCell(35, 6, price($totalTtc) . "", 0, 'C');
@@ -729,28 +729,5 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
         }
         return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
     }
-}
-
-function couperChaine($chaine, $nb)
-{
-    if (strlen($chaine) > $nb)
-        $chaine = substr($chaine, 0, $nb) . "...";
-    return $chaine;
-}
-
-function traiteStr($str)
-{
-    return utf8_encodeRien(utf8_encodeRien(htmlspecialchars($str)));
-}
-
-function max_size($chaine, $lg_max)
-{
-    if (strlen($chaine) > $lg_max) {
-        $chaine = substr($chaine, 0, $lg_max);
-        $last_space = strrpos($chaine, " ");
-        $chaine = substr($chaine, 0, $last_space) . "...";
-    }
-
-    return $chaine;
 }
 ?>

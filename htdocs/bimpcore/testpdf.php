@@ -25,10 +25,14 @@ global $db, $langs;
 $pdf = new InvoiceSavPDF($db);
 
 $obj = new Facture($db);
-$obj->fetch(86629);
+$obj->fetch(86647);
 
 $pdf->init($obj);
 $pdf->render(__DIR__. '/testInvoice.pdf', true);
+
+if (count($pdf->errors)) {
+    $pdf->displayErrors();
+}
 
 //$pdf->write_file($propal, $langs);
 

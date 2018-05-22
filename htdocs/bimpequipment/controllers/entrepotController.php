@@ -1,6 +1,6 @@
 <?php
 
-class entrepotController extends BimpController
+class entrepotController extends equipmentController
 {
 
     public function displayHead()

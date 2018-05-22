@@ -48,8 +48,9 @@ class BimpObject
     protected $data = array();
     protected $associations = array();
     protected $history = array();
-    protected $parent = null;
+    public $parent = null;
     public $dol_object = null;
+    public $children = array();
 
     public static function getInstance($module, $object_name, $id_object = null)
     {
@@ -297,6 +298,42 @@ class BimpObject
         return $js;
     }
 
+    public function getJsNewStatusOnclick($new_status, $data = array(), $params = array())
+    {
+        $js = 'setObjectNewStatus(';
+        $js .= '$(this), ' . $this->getJsObjectData();
+        $js .= ', ' . $new_status . ', {';
+        $fl = true;
+        foreach ($data as $key => $value) {
+            if (!$fl) {
+                $js .= ', ';
+            } else {
+                $fl = false;
+            }
+            $js .= $key . ': ' . (BimpTools::isNumericType($value) ? $value : '\'' . $value . '\'');
+        }
+        $js .= '}, ';
+        if (isset($params['result_container'])) {
+            $js .= $params['result_container'];
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', ';
+        if (isset($params['success_callback'])) {
+            $js .= $params['success_callback'];
+        } else {
+            $js .= 'null';
+        }
+        $js .= ', ';
+        if (isset($params['confirm_msg'])) {
+            $js .= '\'' . $params['confirm_msg'] . '\'';
+        } else {
+            $js .= 'null';
+        }
+        $js .= ');';
+        return $js;
+    }
+
     public function getJsActionOnclick($action, $data = array(), $params = array())
     {
         $js = 'setObjectAction(';
@@ -349,6 +386,17 @@ class BimpObject
     public function object_exists($object_name)
     {
         return array_key_exists($object_name, $this->params['objects']);
+    }
+
+    public function isChild($instance)
+    {
+        if (is_a($instance, 'BimpObject')) {
+            if ($instance->getParentModule() === $this->module &&
+                    $instance->getParentObjectName() === $this->object_name) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function association_exists($association)
@@ -463,7 +511,9 @@ class BimpObject
                 if (is_a($instance, 'BimpObject')) {
                     if ($instance->getParentObjectName() === $this->object_name) {
                         $filters = $this->getConf('objects/' . $object_name . '/list/filters', array(), false, 'array');
-                        $filters[$instance->getParentIdProperty()] = $this->id;
+                        if ($this->isChild($instance)) {
+                            $filters[$instance->getParentIdProperty()] = $this->id;
+                        }
                         return ($instance->getListCount($filters) > 0);
                     }
                 }
@@ -524,16 +574,27 @@ class BimpObject
                 $instance = $this->config->getObject('', $object_name);
                 if (!is_null($instance)) {
                     if (is_a($instance, 'BimpObject')) {
-                        if ($instance->getParentObjectName() === $this->object_name) {
-                            $filters = $this->getConf('objects/' . $object_name . '/list/filters', array(), false, 'array');
+
+                        foreach ($this->getConf('objects/' . $object_name . '/list/filters', array(), false, 'array') as $field => $filter) {
+                            $filters = BimpTools::mergeSqlFilter($filters, $field, $filter);
+                        }
+                        if ($this->isChild($instance)) {
                             $filters[$instance->getParentIdProperty()] = $this->id;
-                            $primary = $instance->getPrimary();
-                            $list = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($primary));
-                            foreach ($list as $item) {
-                                $child = BimpObject::getInstance($instance->module, $instance->object_name);
-                                if ($child->fetch($item[$primary])) {
+                        }
+                        $primary = $instance->getPrimary();
+                        $list = $instance->getList($filters, null, null, 'id', 'asc', 'array', array($primary));
+                        if (!isset($this->children[$object_name])) {
+                            $this->children[$object_name] = array();
+                        }
+                        foreach ($list as $item) {
+                            if (!isset($this->children[$object_name][(int) $item[$primary]])) {
+                                $child = BimpObject::getInstance($instance->module, $instance->object_name, (int) $item[$primary]);
+                                if ($child->isLoaded()) {
+                                    $this->children[$object_name][(int) $item[$primary]] = $child;
                                     $children[] = $child;
                                 }
+                            } else {
+                                $children[] = $this->children[$object_name][(int) $item[$primary]];
                             }
                         }
                     }
@@ -704,6 +765,15 @@ class BimpObject
             $this->dol_object = $this->config->getObject('dol_object');
         }
 
+        foreach ($this->children as $object_name => $objects) {
+            foreach ($objects as $id_object => $object) {
+                if (is_object($object)) {
+                    unset($this->children[$object_name][$id_object]);
+                }
+            }
+        }
+
+        $this->children = array();
         $this->data = array();
         $this->associations = array();
         $this->id = null;
@@ -734,7 +804,7 @@ class BimpObject
     public function setAssociatesList($association, $list)
     {
         $items = array();
-        
+
         foreach ($list as $id_item) {
             if ((int) $id_item && !in_array((int) $id_item, $items)) {
                 $items[] = (int) $id_item;
@@ -750,6 +820,43 @@ class BimpObject
             return true;
         }
         return false;
+    }
+
+    public function saveAssociationsFromPost()
+    {
+        if (!$this->isLoaded()) {
+            return array();
+        }
+
+        $errors = array();
+
+        if (BimpTools::isSubmit('associations_params')) {
+            $assos = json_decode(BimpTools::getValue('associations_params'));
+            foreach ($assos as $params) {
+                if (isset($params->association)) {
+                    if (isset($params->object_name) && isset($params->object_module) && isset($params->id_object)) {
+                        $obj = BimpObject::getInstance($params->object_module, $params->object_name);
+                        $bimpAsso = new BimpAssociation($obj, $params->association);
+                        $assos_errors = $bimpAsso->addObjectAssociation($this->id, $params->id_object);
+                        if ($assos_errors) {
+                            $errors[] = 'Echec de l\'association ' . $this->getLabel('of_the') . ' avec ' . $obj->getLabel('the') . ' ' . $params->id_object;
+                            $errors = array_merge($errors, $assos_errors);
+                        }
+                        unset($bimpAsso);
+                    } elseif (isset($params->id_associate)) {
+                        $bimpAsso = new BimpAssociation($this, $params->association);
+                        $assos_errors = $bimpAsso->addObjectAssociation($params->id_associate, $this->id);
+                        if ($assos_errors) {
+                            $errors[] = 'Echec de l\'association ' . $this->getLabel('of_the') . ' avec ' . BimpObject::getInstanceLabel($bimpAsso->associate, 'the') . ' ' . $params->id_associate;
+                            $errors = array_merge($errors, $assos_errors);
+                        }
+                        unset($bimpAsso);
+                    }
+                }
+            }
+        }
+
+        return $errors;
     }
 
     public function checkFieldValueType($field, &$value)
@@ -815,7 +922,7 @@ class BimpObject
                 if ($value === '') {
                     continue;
                 }
-                $method = 'get'.  ucfirst($field_name).'SearchFilters';
+                $method = 'get' . ucfirst($field_name) . 'SearchFilters';
                 if (method_exists($this, $method)) {
                     $this->{$method}($filters, $value);
                     continue;
@@ -1382,7 +1489,55 @@ class BimpObject
 
     // Gestion SQL:
 
-    public function create()
+    public function saveFromPost()
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        $errors = $this->validatePost();
+
+        if (!count($errors)) {
+            if ($this->isLoaded()) {
+                $errors = $this->update($warnings);
+                if (!count($errors)) {
+                    $success = 'Mise à jour ' . $this->getLabel('of_the') . ' effectuée avec succès';
+                    if (method_exists($this, 'getUpdateJsCallback')) {
+                        $success_callback = $this->getUpdateJsCallback();
+                    }
+                }
+            } else {
+                $errors = $this->create($warnings);
+                if (!count($errors)) {
+                    $success = 'Création ' . $this->getLabel('of_the') . ' effectuée avec succès';
+                    if (method_exists($this, 'getCreateJsCallback')) {
+                        $success_callback = $this->getCreateJsCallback();
+                    }
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            $warnings = array_merge($warnings, $this->saveAssociationsFromPost());
+            $sub_result = $this->checkSubObjectsPost();
+            if (count($sub_result['errors'])) {
+                $warnings = array_merge($warnings, $sub_result['errors']);
+            }
+            if ($sub_result['success_callback']) {
+                $success_callback .= $sub_result['success_callback'];
+            }
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success'          => $success,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function create(&$warnings = array())
     {
         $errors = $this->validate();
 
@@ -1441,8 +1596,8 @@ class BimpObject
                     }
                 }
 
-                $errors = array_merge($errors, $this->updateAssociations());
-                $errors = array_merge($errors, $this->saveHistory());
+                $warnings = array_merge($warnings, $this->updateAssociations());
+                $warnings = array_merge($warnings, $this->saveHistory());
 
                 $parent = $this->getParentInstance();
                 if (!is_null($parent)) {
@@ -1463,7 +1618,7 @@ class BimpObject
         return $errors;
     }
 
-    public function update()
+    public function update(&$warnings = array())
     {
         $errors = array();
 
@@ -1519,8 +1674,8 @@ class BimpObject
             }
         }
 
-        $errors = array_merge($errors, $this->updateAssociations());
-        $errors = array_merge($errors, $this->saveHistory());
+        $warnings = array_merge($warnings, $this->updateAssociations());
+        $warnings = array_merge($warnings, $this->saveHistory());
 
         $parent = $this->getParentInstance();
 
@@ -1871,16 +2026,36 @@ class BimpObject
                         $instance = $this->config->getObject('', $name);
                         if (!is_null($instance)) {
                             $del_errors = array();
-                            if (!$instance->deleteByParent($id, $del_errors)) {
-                                $msg = 'Des erreurs sont survenues lors de la tentative de suppression des ';
-                                $msg .= $this->getInstanceLabel($instance, 'name_plur');
-                                if (count($del_errors)) {
-                                    $msg .= ':';
-                                    foreach ($del_errors as $error) {
-                                        $msg .= '<br/> - ' . $error;
+                            if ($instance->getParentModule() === $this->module && $instance->getParentObjectName() === $this->object_name) {
+                                if (!$instance->deleteByParent($id, $del_errors)) {
+                                    $msg = 'Des erreurs sont survenues lors de la tentative de suppression des ';
+                                    $msg .= $this->getInstanceLabel($instance, 'name_plur');
+                                    if (count($del_errors)) {
+                                        $msg .= ':';
+                                        foreach ($del_errors as $error) {
+                                            $msg .= '<br/> - ' . $error;
+                                        }
+                                    }
+                                    $errors[] = $msg;
+                                }
+                            } else {
+                                $relation = $this->getCurrentConf('relation', '');
+                                if ($relation === 'hasOne') {
+                                    $field_name = $this->getCurrentConf('instance/id_object/field_value', null);
+                                    if (!is_null($field_name) && $field_name) {
+                                        if ($instance->fetch((int) $this->getData($field_name))) {
+                                            $del_errors = $instance->delete();
+                                            if (count($del_errors)) {
+                                                $msg = 'Des erreurs sont survenues lors de la tentative de suppression ';
+                                                $msg .= $this->getInstanceLabel($instance, 'of_the') . ' d\'ID ' . $this->getData($field_name) . ':';
+                                                foreach ($del_errors as $error) {
+                                                    $msg .= '<br/> - ' . $error;
+                                                }
+                                                $errors[] = $msg;
+                                            }
+                                        }
                                     }
                                 }
-                                $errors[] = $msg;
                             }
                         }
                     }
@@ -1925,6 +2100,8 @@ class BimpObject
                         $parent_id_property => (int) $id_parent
                             ), $errors);
         }
+
+        $errors[] = 'Erreur technique: propriété contenant l\'ID du parent absente';
     }
 
     public function deleteBy($filters, &$errors = array())
@@ -2178,6 +2355,79 @@ class BimpObject
         return 1;
     }
 
+    public function checkSubObjectsPost()
+    {
+        $errors = array();
+        $success_callback = '';
+        if ($this->isLoaded()) {
+            $objects = explode(',', BimpTools::getValue('sub_objects', ''));
+            foreach ($objects as $object_name) {
+                $object = $this->getChildObject($object_name);
+                if (is_a($object, 'BimpObject')) {
+                    if ($object->getParentModule() === $this->module && $object->getParentObjectName() === $this->object_name) {
+                        $parent_id_property = $object->getParentIdProperty();
+                    }
+                    $multiple = BimpTools::getValue($object_name . '_multiple', 0);
+                    $post_temp = $_POST;
+                    if ($multiple) {
+                        $count = BimpTools::getValue($object_name . '_count', 0);
+                        for ($i = 1; $i <= $count; $i++) {
+                            $_POST = array();
+                            foreach ($post_temp as $key => $value) {
+                                if (preg_match('/^' . $object_name . '_' . $i . '_(.*)$/', $key, $matches)) {
+                                    $_POST[$matches[1]] = $value;
+                                }
+                            }
+                            if (count($_POST)) {
+                                if ($parent_id_property) {
+                                    $_POST[$parent_id_property] = $this->id;
+                                }
+                                $object->reset();
+                                $result = $object->saveFromPost();
+                                $sub_errors = array_merge($result['errors'], $result['warnings']);
+                                if ($sub_errors) {
+                                    $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Des erreurs sont survenues lors de la création ' . $object->getLabel('of_the') . ' n° ' . $i);
+                                }
+                                if ($result['success_callback']) {
+                                    $success_callback .= $result['success_callback'];
+                                }
+                            }
+                        }
+                    } else {
+                        $_POST = array();
+                        foreach ($post_temp as $key => $value) {
+                            if (preg_match('/^' . $object_name . '_(.*)$/', $key, $matches)) {
+                                $_POST[$matches[1]] = $value;
+                            }
+                        }
+                        if (count($_POST)) {
+                            if ($parent_id_property) {
+                                $_POST[$parent_id_property] = $this->id;
+                            }
+                            $object->reset();
+                            $result = $object->saveFromPost();
+                            $sub_errors = array_merge($result['errors'], $result['warnings']);
+                            if ($sub_errors) {
+                                $errors[] = BimpTools::getMsgFromArray($sub_errors, 'Des erreurs sont survenues lors de la création ' . $object->getLabel('of_the'));
+                            }
+                            if (count($result['warnings'])) {
+                                $errors = array_merge($errors, $result['warnings']);
+                            }
+                            if ($result['success_callback']) {
+                                $success_callback = $result['success_callback'];
+                            }
+                        }
+                    }
+                    $_POST = $post_temp;
+                }
+            }
+        }
+        return array(
+            'errors'           => $errors,
+            'success_callback' => $success_callback
+        );
+    }
+
     // Gestion des positions: 
 
     public function resetPositions()
@@ -2424,14 +2674,7 @@ class BimpObject
             }
             $html .= $name . '</h1>';
 
-            if ($this->field_exists('reference')) {
-                $ref = $this->displayData('reference');
-            } elseif ($this->field_exists('ref')) {
-                $ref = $this->displayData('ref');
-            } else {
-                $ref = $this->getRef();
-            }
-
+            $ref = $this->getRef(false);
             if ($ref) {
                 $html .= '<h2>';
                 $html .= $ref;
@@ -2439,14 +2682,18 @@ class BimpObject
             }
 
             if ($this->use_commom_fields) {
-                $html .= '<div class="object_header_infos">';
-                $html .= 'Créé' . ($this->isLabelFemale() ? 'e' : '') . ' le <strong>' . $this->displayData('date_create') . '</strong>';
-                $html .= ' par ' . $this->displayData('user_create', 'nom_url');
-                $html .= '</div>';
-                $html .= '<div class="object_header_infos">';
-                $html .= 'Dernière mise à jour le <strong>' . $this->displayData('date_update') . '</strong>';
-                $html .= ' par ' . $this->displayData('user_update', 'nom_url');
-                $html .= '</div>';
+                if ((int) $this->getData('user_create')) {
+                    $html .= '<div class="object_header_infos">';
+                    $html .= 'Créé' . ($this->isLabelFemale() ? 'e' : '') . ' le <strong>' . $this->displayData('date_create') . '</strong>';
+                    $html .= ' par ' . $this->displayData('user_create', 'nom_url');
+                    $html .= '</div>';
+                }
+                if ((int) $this->getData('user_update')) {
+                    $html .= '<div class="object_header_infos">';
+                    $html .= 'Dernière mise à jour le <strong>' . $this->displayData('date_update') . '</strong>';
+                    $html .= ' par ' . $this->displayData('user_update', 'nom_url');
+                    $html .= '</div>';
+                }
             }
             $html .= '</div>';
             $html .= '</div>';

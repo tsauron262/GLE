@@ -16,10 +16,11 @@ class InvoiceSavPDF extends InvoicePDF
         if (!is_null($object) && is_a($object, 'Facture') && (int) $object->id) {
             $this->sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
             if (!$this->sav->find(array('id_facture' => (int) $object->id))) {
-                if (!$this->sav->find(array('id_facture_acompte' => (int) $object->id)))
+                if (!$this->sav->find(array('id_facture_acompte' => (int) $object->id))) {
                     unset($this->sav);
-                $this->sav = null;
-                $this->errors[] = 'Aucun SAV associé à cette facture trouvé';
+                    $this->sav = null;
+                    $this->errors[] = 'Aucun SAV associé à cette facture trouvé';
+                }
             }
         }
 
@@ -29,7 +30,7 @@ class InvoiceSavPDF extends InvoicePDF
     protected function initHeader()
     {
         parent::initHeader();
-        
+
         $this->header_vars['apple_img'] = DOL_DOCUMENT_ROOT . "/synopsistools/img/agree.jpg";
         $this->header_vars['header_middle'] = '';
     }
@@ -37,7 +38,7 @@ class InvoiceSavPDF extends InvoicePDF
     public function getAfterTotauxHtml()
     {
         $html .= '<table style="width: 95%" cellpadding="3">';
-        
+
         $html .= '<tr>';
         $html .= '<td>Matériel récupéré le:</td>';
         $html .= '</tr>';

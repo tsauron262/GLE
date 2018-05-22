@@ -319,7 +319,9 @@ forms:
             - field: origin_id_element
             - field: warranty_type
             - field: date_warranty_end
+            - field: note
             - association: contrats        
+            - object: places
             
     light:
         rows:

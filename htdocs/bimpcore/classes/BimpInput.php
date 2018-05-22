@@ -1,5 +1,9 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formadmin.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
+
 class BimpInput
 {
 
@@ -90,6 +94,14 @@ class BimpInput
                     $html .= ' maxlength="' . (int) $options['maxlength'] . '"';
                 }
                 $html .= '>' . $value . '</textarea>';
+
+                if (isset($options['values']) && is_array($options['values']) && count($options['values'])) {
+                    $html .= '<ul class="texarea_values" data-input_id="' . $input_id . '" data-field_name="' . $field_name . '">';
+                    foreach ($options['values'] as $val) {
+                        $html .= '<li class="textarea_value">' . $val . '</li>';
+                    }
+                    $html .= '</ul>';
+                }
                 break;
 
             case 'html':
@@ -197,6 +209,15 @@ class BimpInput
                     }
                 }
                 $html .= '</select>';
+                break;
+
+            case 'search_ziptown':
+                if (!isset($options['linked_fields'])) {
+                    $options['linked_fields'] = array();
+                }
+                global $db;
+                $formCompany = new FormCompany($db);
+                $html .= $formCompany->select_ziptown($value, $field_name, $options['linked_fields'], 0, 0, '', 'maxwidth50onsmartphone');
                 break;
 
             case 'search_product':
@@ -761,7 +782,7 @@ class BimpInput
         $html .= ' data-filters="' . htmlentities(json_encode($filters)) . '"';
         $html .= '/>';
         $html .= '<i class="loading fa fa-spinner fa-spin"></i>';
-        $html .= '<div class="search_input_results"></div>';
+        $html .= '<div class="search_input_results hideOnClickOut"></div>';
         $html .= '<div class="search_input_selected_label"' . (!$search ? ' style="display: none"' : '') . '>';
         $html .= '<i class="fa fa-check iconLeft"></i>';
         $html .= '<span class="">' . $search . '</span>';
@@ -815,7 +836,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false)
+    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0)
     {
         if (!is_array($values)) {
             $value = $values;
@@ -847,6 +868,7 @@ class BimpInput
             $html .= ' data-object_name="' . $object->object_name . '"';
             $html .= ' data-id_object="' . $object->id . '"';
         }
+        $html .= ' data-required="' . $required . '"';
         $html .= '>';
 
         $html .= '<div style="text-align: right">';

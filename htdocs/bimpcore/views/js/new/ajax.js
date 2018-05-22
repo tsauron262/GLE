@@ -87,7 +87,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         }
     } else if ((bimpAjax.display_success || bimpAjax.display_errors)) {
         if (this.$resultContainer) {
-            this.$resultContainer.html('').slideUp();
+            this.$resultContainer.html('').slideUp(250);
         }
     }
 
@@ -182,7 +182,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         $('body').find('.bs-popover').each(function () {
             $(this).popover('hide');
         });
-        
+
         $.ajax({
             url: bimpAjax.url,
             type: bimpAjax.type,
@@ -221,12 +221,11 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                                 bimpAjax.$resultContainer.html(result.html).slideDown(250, function () {
                                     setCommonEvents(bimpAjax.$resultContainer);
                                     setInputsEvents(bimpAjax.$resultContainer);
+                                    bimpAjax.$resultContainer.css('height', 'auto');
+                                    if (typeof (bimpAjax.success) === 'function') {
+                                        bimpAjax.success(result, bimpAjax);
+                                    }
                                 });
-                                bimpAjax.$resultContainer.css('height', 'auto').slideDown(250);
-
-                                if (typeof (bimpAjax.success) === 'function') {
-                                    bimpAjax.success(result, bimpAjax);
-                                }
                             });
                         }
                     } else {

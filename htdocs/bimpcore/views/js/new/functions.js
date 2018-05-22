@@ -65,71 +65,11 @@ function bimp_display_element_popover($element, content, side) {
 //Modals:
 
 function loadModalIFrame($button, url, title) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
-    var $modal = $('#page_modal');
-    var $resultContainer = $modal.find('.modal-ajax-content');
-    $resultContainer.html('').hide();
-
-    $modal.find('.modal-title').html(title);
-    $modal.modal('show');
-    $modal.find('.content-loading').show().find('.loading-text').text('Chargement');
-
-    $modal.on('hide.bs.modal', function (e) {
-        $modal.find('.extra_button').remove();
-        $modal.find('.content-loading').hide();
-        $button.removeClass('disabled');
-    });
-
-    var html = '<div style="overflow: hidden"><iframe id="iframe" frameborder="0" src="' + url + '" width="100%" height="800px"></iframe></div>';
-    $resultContainer.html(html);
-
-    $('#iframe').on("load", function () {
-            var $head = $("iframe").contents().find("head");                
-            $head.append($("<link/>", {rel: "stylesheet", href: DOL_URL_ROOT + "/bimpcore/views/css/content_only.css", type: "text/css"}));
-        $modal.find('.content-loading').hide();
-        $resultContainer.slideDown(250);
-      });
+    bimpModal.loadIframe($button, url, title);
 }
 
 function loadImageModal($button, src, title) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
-    var $modal = $('#page_modal');
-    var $resultContainer = $modal.find('.modal-ajax-content');
-    $resultContainer.html('').hide();
-
-    $modal.find('.modal-title').html(title);
-    $modal.modal('show');
-    $modal.find('.content-loading').show().find('.loading-text').text('Chargement');
-
-    $modal.on('hide.bs.modal', function (e) {
-        $modal.find('.extra_button').remove();
-        $modal.find('.content-loading').hide();
-        $modal.children('.modal-dialog').removeAttr('style');
-        $button.removeClass('disabled');
-    });
-
-    var html = '<div class="align-center"><img id="modalImg" src="' + src + '" alt="' + title + '"/></div>';
-    $resultContainer.html(html);
-
-    $('#modalImg').on("load", function () {
-        var $img = $(this);
-
-        $modal.find('.content-loading').hide();
-        $resultContainer.slideDown(250, function () {
-            $modal.children('.modal-dialog').css('width', $img.width() + 30);
-            $modal.modal('handleUpdate');
-        });
-      });
+    bimpModal.loadImage($button, src, title);
 }
 
 // Actions: 
@@ -270,6 +210,11 @@ function setCommonEvents($container) {
             });
             $(this).data('event_init', 1);
         }
+    });
+    $container.find('.hideOnClickOut').each(function () {
+        $(this).click(function (e) {
+            e.stopPropagation();
+        });
     });
 }
 
@@ -572,6 +517,9 @@ function findParentByTag($element, tag) {
 }
 
 $(document).ready(function () {
+    $('body').click(function (e) {
+        $(this).find('.hideOnClickOut').hide();
+    });
     $('body').append('<div id="page_notifications"></div>');
     var $notifications = $('#page_notifications');
     $notifications.mouseover(function () {

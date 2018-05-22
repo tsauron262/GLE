@@ -29,7 +29,8 @@ if (!defined('EURO'))
 
 ini_set('max_execution_time', 600);
 
-class pdf_synopsischrono_ extends ModeleSynopsischrono {
+class pdf_synopsischrono_ extends ModeleSynopsischrono
+{
 
     public $emetteur;    // Objet societe qui emet
 
@@ -38,7 +39,8 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
       \param        db        Handler acces base de donnee
      */
 
-    function __construct($db) {
+    function __construct($db)
+    {
 
         global $conf, $langs, $mysoc;
 
@@ -88,6 +90,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 
 
 
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -104,7 +107,8 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
       \param        outputlangs        Lang object for output language
       \return        int             1=ok, 0=ko
      */
-    function write_file($chrono, $outputlangs = '') {
+    function write_file($chrono, $outputlangs = '')
+    {
         global $user, $langs, $conf;
 //        $this->marge_gauche = 55;
         $afficherPrix = false;
@@ -240,7 +244,8 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         return 0;   // Erreur par defaut
     }
 
-    function _pagehead(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage = 0) {
+    function _pagehead(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage = 0)
+    {
         global $conf, $langs;
         if ($currentPage > 1) {
             $showadress = 0;
@@ -282,7 +287,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         }
 
         $showaddress = $showadress;
-        $usecontact = ($object->model->hasContact && $object->contactid >0);
+        $usecontact = ($object->model->hasContact && $object->contactid > 0);
         $object->client = $object->societe;
         $default_font_size = 12;
 
@@ -415,13 +420,13 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 
         $pdf->SetFont('', 'B', 12);
     }
-
     /*
      *   \brief      Affiche le pied de page
      *   \param      pdf     objet PDF
      */
 
-    function _pagefoot(&$pdf, $chrono, $outputlangs) {
+    function _pagefoot(&$pdf, $chrono, $outputlangs)
+    {
 
 
         $pdf->SetFont('', 'B', 9);
@@ -474,7 +479,8 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         //return pdf_pagefoot($pdf, $chrono,$outputlangs,'CONTRAT_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche + 40,$this->page_hauteur);
     }
 
-    function hex2RGB($hexStr, $returnAsString = false, $seperator = ',') {
+    function hex2RGB($hexStr, $returnAsString = false, $seperator = ',')
+    {
         $hexStr = preg_replace("/[^0-9A-Fa-f]/", '', $hexStr); // Gets a proper hex string
         $rgbArray = array();
         if (strlen($hexStr) == 6) { //If a proper hex code, convert using bitwise operation. No overhead... faster
@@ -491,27 +497,6 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         }
         return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
     }
-
-}
-
-function couperChaine($chaine, $nb) {
-    if (strlen($chaine) > $nb)
-        $chaine = substr($chaine, 0, $nb) . "...";
-    return $chaine;
-}
-
-function traiteStr($str) {
-    return utf8_encodeRien(utf8_encodeRien(htmlspecialchars($str)));
-}
-
-function max_size($chaine, $lg_max) {
-    if (strlen($chaine) > $lg_max) {
-        $chaine = substr($chaine, 0, $lg_max);
-        $last_space = strrpos($chaine, " ");
-        $chaine = substr($chaine, 0, $last_space) . "...";
-    }
-
-    return $chaine;
 }
 
 ?>

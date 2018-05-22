@@ -425,7 +425,7 @@ class BimpRender
                     $html .= ' data-toggle="popover"';
                     $html .= ' data-trigger="hover" ';
                     $html .= ' data-content="Afficher dans une popup"';
-                    $html .= ' onclick="loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . htmlentities(addslashes($title)) . '\')">';
+                    $html .= ' onclick="loadModalObjectPage($(this), \'' . $url . '\', \'' . htmlentities(addslashes($title)) . '\')">';
                     $html .= '<i class="fa fa-file-o iconLeft"></i>';
                     $html .= 'Afficher</button>';
                 }
@@ -459,8 +459,21 @@ class BimpRender
         $html .= '<div class="modal-content">';
 
         $html .= '<div class="modal-header">';
-        $html .= '<h4 class="modal-title"></h4>';
-        $html .= '<button type="button" class="close" data-dismiss="modal" aria-label="Close">';
+        $html .= '<div class="modal-nav-buttons">';
+
+        $html .= '<div class="modal-nav-prev disabled" onclick="bimpModal.displayPrev();"><i class="fa fa-arrow-left"></i></div>';
+        $html .= '<div class="modal-nav-next disabled" onclick="bimpModal.displayNext();"><i class="fa fa-arrow-right"></i></div>';
+
+        $html .= '<div class="modal-nav-history btn-group">';
+        $html .= '<div class="dropdown-toggle disabled"';
+        $html .= ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
+        $html .= '</div>';
+        $html .= '<ul class="dropdown-menu"></ul>';
+        $html .= '</div>';
+
+        $html .= '</div>';
+        $html .= '<h4 class="modal-titles_container"></h4>';
+        $html .= '<button type="button" class="close" onclick="bimpModal.clearCurrentContent();" aria-label="Close">';
         $html .= '<span aria-hidden="true">&times;</span>';
         $html .= '</button>';
         $html .= '</div>';
@@ -469,12 +482,12 @@ class BimpRender
 
         $html .= self::rendercontentLoading();
 
-        $html .= '<div class="modal-ajax-content"></div>';
+        $html .= '<div class="modal-contents_container"></div>';
 
         $html .= '</div>';
 
         $html .= '<div class="modal-footer">';
-        $html .= '<button type="button" class="btn btn-secondary" data-dismiss="modal">';
+        $html .= '<button type="button" class="btn btn-secondary" onclick="bimpModal.clearCurrentContent();">';
         $html .= '<i class="fa fa-times iconLeft"></i>Fermer</button>';
         $html .= '</div>';
 
@@ -482,6 +495,11 @@ class BimpRender
         $html .= '</div>';
         $html .= '</div>';
 
+        $html .= '<div id="openModalBtn" onclick="bimpModal.show();" class="closed bs-popover"';
+        $html .= BimpRender::renderPopoverData('Afficher la fenêtre popup', 'top');
+        $html .= '>';
+        $html .= BimpRender::renderIcon('far_window-restore');
+        $html .= '</div>';
         return $html;
     }
 
@@ -567,7 +585,7 @@ class BimpRender
                 $html .= '<i class="fa fa-external-link"></i>';
                 $html .= '</span>';
                 if (!$modal_view) {
-                    $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . addslashes(BimpObject::getInstanceNom($object)) . '\')';
+                    $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . addslashes(BimpObject::getInstanceNom($object)) . '\')';
                     $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
                     $html .= '<i class="fa fa-eye"></i>';
                     $html .= '</span>';

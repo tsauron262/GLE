@@ -1,6 +1,9 @@
 title: Equipements
 bootstrap: 1
 
+js:
+    - /bimpequipment/views/js/equipment.js
+    
 objects: 
     equipment:
         instance: 

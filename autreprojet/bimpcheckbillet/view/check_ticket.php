@@ -4,18 +4,16 @@ include_once 'header.php';
 include_once 'footer.php';
 
 
+printHeader('Valider ticket'/*, $arryofjs */);
 
-//$arrayofjs = array('../scan/jquery.js', '../scan2/js/qrcodelib.js',
-//    '../scan2/js/webcodecamjs.js', '../js/check_ticket.js', '../js/annexes.js',
-//    '../scan2/js/initScan.js');
+print '<body>';
+print '<fieldset class="container_form">';
+print '<legend><span>Valider ticket</span></legend>';
 
-   
-//$arrayofcss = array('../scan/scan.css');
-
-printHeader('Valider ticket');
+print '<label for="event">Evènement </label><br/>';
+print '<select class="chosen-select" name="event"><option></option></select><br/><br/>';
 
 print '
-    <body>
         <canvas></canvas>
         <ul></ul>
         <script type="text/javascript" src="../scan/jquery.js"></script>
@@ -33,11 +31,13 @@ print '
             var decoder = new WebCodeCamJS("canvas").buildSelectMenu(document.createElement(\'select\'), \'environment|back\').init(arg).play();
              
         </script>
+        <link rel="stylesheet" type="text/css" href="../lib/css/chosen.min.css">
+        <script type="text/javascript" src="../lib/js/chosen.jquery.min.js"></script>
         <script type="text/javascript" src="../js/check_ticket.js"></script>
         <script type="text/javascript" src="../js/annexes.js"></script>
+        <link rel="stylesheet" type="text/css" href="../scan/scan.css">
+        <link rel="stylesheet" type="text/css" href="../css/check_ticket.css">
 
-    <link rel="stylesheet" type="text/css" href="../scan/scan.css">
-    
 
 <div id="input">
     <input type="text" id="barcode"/>
@@ -47,6 +47,7 @@ print '
 <br/>
 <div id="alertSubmit">
 </div>
+</fieldset>
 </body>';
 
 printFooter();

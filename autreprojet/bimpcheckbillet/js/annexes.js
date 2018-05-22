@@ -1,3 +1,25 @@
+function changeEventSession(id_event) {
+
+    if (parseInt(id_event) > 0) {
+        $.ajax({
+            type: "POST",
+            url: "../interface.php",
+            data: {
+                id_event: id_event,
+                action: 'change_event_session'
+            },
+            error: function () {
+                alert('Erreur lors de la définition de l\'évènement en cours');
+            },
+            success: function (rowOut) {
+                var out = JSON.parse(rowOut);
+                if (parseInt(out.code_return) < 0)
+                    alert('Erreur lors de la définition de l\'évènement en cours');
+            }
+        });
+    }
+}
+
 /**
  * 
  * @param {String} idElement id of the element to append the message in

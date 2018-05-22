@@ -1,32 +1,34 @@
 
-
 /**
  * Ajax call
  */
-function createEvent(label, date_start, date_end) {
+function createEvent() {
+    var formData = new FormData($('#create_form')[0]);
 
     $.ajax({
-        type: "POST",
-        url: "../interface.php",
-        data: {
-            label: label,
-            date_start: date_start,
-            date_end: date_end,
-            action: 'create_event'
-        },
-        error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 1895.', 'error');
-        },
+        url: '../interface.php',
+        type: 'POST',
+        data: formData,
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
-            } else if (out.code_return > 0) {
-                setMessage('alertSubmit', "L'évènement a été créée.", 'msg');
+            } else if (parseInt(out.code_return) > 0) {
+                changeEventSession(parseInt(out.code_return));
+                alert("L'évènement a été créée.");
+                setTimeout(function () {
+                    window.location.replace('home.php');
+                }, 500);
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 1853.', 'error');
             }
-        }
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 1895.', 'error');
+        },
+        cache: false,
+        contentType: false,
+        processData: false
     });
 }
 
@@ -34,22 +36,40 @@ function createEvent(label, date_start, date_end) {
  * Ready
  */
 $(document).ready(function () {
-    $('input[name=date_start]').datepicker({dateFormat: 'dd/mm/yy'})
-    $('input[name=date_end]').datepicker({dateFormat: 'dd/mm/yy'})
+    $('input[name=date_start]').datepicker({dateFormat: 'dd/mm/yy'});
+    $('input[name=date_end]').datepicker({dateFormat: 'dd/mm/yy'});
+    tinymce.init({selector: 'textarea'});
     initEvents();
 });
-
 /**
  * Function
  */
 
+
 function initEvents() {
-    $('button[name=create]').click(function () {
-        createEvent($('input[name=label]').val(),
-                $('input[name=date_start]').val(),
-                $('input[name=date_end]').val());
+    $("#file").change(function () {
+        readURL(this, '#img_display');
+    });
+
+    $('#create_form').submit(function (e) {
+        e.preventDefault();
+        if (window.FormData !== undefined) {
+            createEvent();
+        } else {
+            alert('pas compatible avec navigateur');
+        }
+
+        return false;
     });
 }
 
 
-
+function readURL(input, id_placeholder_img) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            $(id_placeholder_img).attr('src', e.target.result);
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}

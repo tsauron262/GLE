@@ -33,8 +33,8 @@ print '<input type="password" class="form-control" placeholder="Confirmation mot
 
 print '<button class="btn btn-primary" name="register"  style="margin-right: 40px">S\'inscrire</button>';
 print '<input type="button" class="btn btn-primary" value="Se connecter" onClick="document.location.href=\'index.php\'"/>';
-print '</fieldset>';
 print '<div id="alertSubmit"></div>';
+print '</fieldset>';
 print '</body>';
 
 printFooter();

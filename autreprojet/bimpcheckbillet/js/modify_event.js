@@ -37,13 +37,11 @@ function getEvents() {
                     $('select[name=id_event]').trigger("chosen:updated");
                     $('select[name=id_event]').trigger('change');
                 }
-                $('select[name=id_event]').change(function () {
-                    changeEventSession($('select[name=id_event] > option:selected').val());
-                });
                 if (id_event_session > 0) {
                     if (!$('select[name=id_event] > option[value=' + id_event_session + ']').prop('disabled')) {
                         $('select[name=id_event] > option[value=' + id_event_session + ']').prop('selected', true);
                         $(".chosen-select").trigger("chosen:updated");
+                        $('select[name=id_event]').trigger('change');
                     }
                 }
             } else {
@@ -180,7 +178,7 @@ function closeEvent(id_event) {
     });
 }
 
-function createPrestashopCategory(label_event) {
+function createPrestashopCategory(id_event, label_event) {
 
     $.ajax({
         type: "POST",
@@ -197,7 +195,7 @@ function createPrestashopCategory(label_event) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.id_inserted > 0) {
-                alert('catg créer');
+                addIdCateg(id_event, out.id_inserted);
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 2476.', 'error');
             }
@@ -205,6 +203,33 @@ function createPrestashopCategory(label_event) {
     });
 }
 
+function addIdCateg(id_event, id_categ) {
+
+    $.ajax({
+        type: "POST",
+        url: "../interface.php",
+        data: {
+            id_event: id_event,
+            id_categ: id_categ,
+            action: 'set_id_categ'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 1567.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.code_return > 0) {
+                alert("La catégorie a été créée dans prestashop.");
+                $('div[name=create_prestashop_category]').css('display', 'none');
+                $('p[name=categ_already_created]').css('display', 'inline');
+            } else {
+                setMessage('alertSubmit', 'Erreur serveur 2548.', 'error');
+            }
+        }
+    });
+}
 
 /**
  * Ready
@@ -232,28 +257,55 @@ function initEvents() {
 
     $('button[name=modify]').click(function (e) {
         e.preventDefault();
+        var id_event = $('select[name=id_event] > option:selected').val();
+        if (parseInt(id_event) > 0) {
 //        if (window.FormData !== undefined) {
-        modifyEvent($('select[name=id_event] > option:selected').val(),
-                $('input[name=label]').val(),
-                tinymce.get('description').getContent(),
-                $('input[name=date_start]').val(),
-                $('input[name=time_start]').val(),
-                $('input[name=date_end]').val(),
-                $('input[name=time_end]').val());
+            modifyEvent($('select[name=id_event] > option:selected').val(),
+                    $('input[name=label]').val(),
+                    tinymce.get('description').getContent(),
+                    $('input[name=date_start]').val(),
+                    $('input[name=time_start]').val(),
+                    $('input[name=date_end]').val(),
+                    $('input[name=time_end]').val());
 //        } else {
 //            alert('Pas compatible avec navigateur');
 //        }
 //        return false;
+        } else {
+            setMessage('alertSubmit', 'Veuillez sélectionner un évènement.', 'error');
+        }
     });
 
     $('select[name=id_event]').change(function () {
+        var id_categ;
         var id_event = $('select[name=id_event] > option:selected').val();
         if (id_event > 0) {
             var event = getEventById(id_event);
             autoFill(event);
-//            if (event.)
-        } else
-            setMessage('alertSubmit', "Veuillez sélectionnez un évènement.", 'error');
+        } else {
+            autoEmpty();
+        }
+
+        events.forEach(function (event) {
+            if (parseInt(event.id) === parseInt(id_event))
+                id_categ = parseInt(event.id_categ);
+        });
+
+        if (id_categ > 0) {
+            $('div[name=create_prestashop_category]').css('display', 'none');
+            $('p[name=categ_already_created]').css('display', 'inline');
+        } else {
+            $('p[name=categ_already_created]').css('display', 'none');
+            if (id_event > 0) {
+                $('p[name=select_event]').css('display', 'none');
+                $('div[name=create_prestashop_category]').css('display', 'inline');
+            } else {
+                $('p[name=select_event]').css('display', 'inline');
+                $('div[name=create_prestashop_category]').css('display', 'none');
+            }
+        }
+
+        changeEventSession(id_event);
     });
 
     $('button[name=draft]').click(function () {
@@ -290,10 +342,9 @@ function initEvents() {
         var id_event = $('select[name=id_event] > option:selected').val();
         var label_event = $('select[name=id_event] > option:selected').text();
         if (id_event > 0)
-            createPrestashopCategory(label_event);
+            createPrestashopCategory(id_event, label_event);
         else
             setMessage('alertSubmit', "Veuillez sélectionnez un évènement.", 'error');
-        createPrestashopCategory();
     });
 }
 
@@ -304,6 +355,16 @@ function autoFill(event) {
     $('input[name=time_start]').val(formatTime(event.date_start));
     $('input[name=date_end]').val(formatDate(event.date_end));
     $('input[name=time_end]').val(formatTime(event.date_end));
+//    setImage(event.id);   
+}
+
+function autoEmpty() {
+    $('input[name=label]').val('');
+    tinymce.get('description').setContent('');
+    $('input[name=date_start]').val(formatDate(''));
+    $('input[name=time_start]').val(formatTime(''));
+    $('input[name=date_end]').val(formatDate(''));
+    $('input[name=time_end]').val(formatTime(''));
 //    setImage(event.id);   
 }
 

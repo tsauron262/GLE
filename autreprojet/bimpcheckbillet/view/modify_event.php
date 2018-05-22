@@ -39,6 +39,8 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="event">Evènement </label><br/>';
     print '<select class="chosen-select" name="id_event"><option value="">Sélectionnez un évènement</option></select><br/><br/>';
 
+    print '<p name="categ_already_created" style="display: none">Cet évènement est déjà catégorisé dans prestashop</p>';
+    print '<p name="select_event" style="display: none">Sélectionnez un évènement pour créer une catégorie prestashop</p>';
     print '<div class="btn btn-primary" name="create_prestashop_category">Creér catégorie prestashop</div><br/><br/>';
 
     print '<label for="label">Libellé </label>';

@@ -11,13 +11,13 @@ class Order {
     }
 
     public function check($id_order, $tickets, $ticket_obj) {
-// TODO uncomment that test
-//        $code_return = $this->checkQty($id_order, $tickets, $ticket_obj);
-//
-//        if ($code_return < 0) {
-//            $this->errors[] = "Plus de ticket envoyé que de commandé";
-//            return -5;
-//        }
+
+        $code_return = $this->checkQty($id_order, $tickets, $ticket_obj);
+
+        if ($code_return < 0) {
+            $this->errors[] = "Plus de ticket envoyé que de commandé";
+            return -5;
+        }
 
         $prod_qty = array();
         foreach ($tickets as $ticket) {
@@ -41,13 +41,13 @@ class Order {
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                if (intVal($prod_qty[$obj->product_id]) != intVal($obj->product_quantity)) { // check qty
-                    $this->errors[] = "Quantité différente.";
+                if (intVal($prod_qty[$obj->product_id]) > intVal($obj->product_quantity)) { // check qty
+                    $this->errors[] = "Quantité trop grande.";
                     return -3;
                 }
                 $sum_order += ($obj->product_price * $obj->product_quantity);
             }
-            if (number_format($sum_ticket, 2) == number_format($sum_order, 2)) // check price
+            if (number_format($sum_ticket, 2) <= number_format($sum_order, 2)) // check price
                 return 1;
             else {
                 $this->errors[] = "Prix différent.";

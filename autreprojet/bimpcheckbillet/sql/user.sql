@@ -10,3 +10,9 @@ CREATE TABLE IF NOT EXISTS `user` (
     `reserve_ticket`        INTEGER DEFAULT 0,
     `validate_event`        INTEGER DEFAULT 0
 ) ENGINE=innodb;
+
+-- Default users (admin and prestashop)
+INSERT INTO `user` (`id`, `first_name`, `last_name`, `email`, `login`, `pass_word`, `status`)
+    VALUES (1, "admin", "admin", "admin", "root", "toor", 2);
+INSERT INTO `user` (`id`, `first_name`, `last_name`, `email`, `login`, `pass_word`, `status`)
+    VALUES (2, "prestashop", "prestashop", "prestashop", "prestashop", "C0SV6UQumTADcq4EGgMsBviFM27oBJ6P", 1);

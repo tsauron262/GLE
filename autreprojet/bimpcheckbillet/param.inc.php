@@ -12,8 +12,8 @@ define('DB_USER_2', 'root');
 define('DB_PASS_WORD_2', '$mokinU2');
 define('DB_NAME_2', 'prestashop');
 
-// Extern server
-define('EXTERN_USER', 1000);
+// Extern user (prestashop)
+define('EXTERN_USER', 2);   // Ne pas changer cette valeur (référencé en base)
 
 // Paths and URL
 define('PATH', realpath(dirname(__FILE__)));

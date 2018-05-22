@@ -286,17 +286,6 @@ class Tariff {
         return $this->date_start != NULL and $this->date_end != NULL;
     }
 
-    private function getRandomString($length = 32) {
-        $str = "";
-        $characters = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
-        $max = count($characters) - 1;
-        for ($i = 0; $i < $length; $i++) {
-            $rand = mt_rand(0, $max);
-            $str .= $characters[$rand];
-        }
-        return $str;
-    }
-
     public function getTariffByProdsExtern($ids_prods_extern) {
         $tariffs = array();
 
@@ -379,6 +368,29 @@ class Tariff {
         } catch (Exception $e) {
             $this->errors[] = "Erreur SQL 6788";
         }
+        return -1;
+    }
+
+    public function getImageName($id_tariff) {
+        $tariff = new Tariff($this->db);
+        $tariff->fetch($id_tariff);
+        $exts = array('bmp', 'png', 'jpg');
+
+        $file = $tariff->fk_event . '_' . $tariff->id;
+        foreach ($exts as $ext) {
+            if (file_exists(PATH . '/img/event/' . $file . "." . $ext)) {
+                return $file . "." . $ext;
+            }
+        }
+
+        $file = $tariff->fk_event;
+        foreach ($exts as $ext) {
+            if (file_exists(PATH . '/img/event/' . $file . "." . $ext)) {
+                return $file . "." . $ext;
+            }
+        }
+
+        $this->errors[] = "Aucune image trouvé";
         return -1;
     }
 

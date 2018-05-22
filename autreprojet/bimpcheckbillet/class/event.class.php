@@ -219,7 +219,7 @@ class Event {
         $tariff = new Tariff($this->db);
 
         $sql = 'SELECT e.id as id, e.label as label, e.description as description, e.date_creation as date_creation,'
-                . ' e.date_start as date_start, e.date_end as date_end, e.status as status';
+                . ' e.date_start as date_start, e.date_end as date_end, e.status as status, e.id_categ as id_categ';
         $sql .= ' FROM event as e';
         if ($id_user != null and ! $is_super_admin) {
             $sql .= ' LEFT JOIN event_admin as e_a ON e_a.fk_event=e.id';
@@ -238,7 +238,8 @@ class Event {
                         'date_start' => $obj->date_start,
                         'date_end' => $obj->date_end,
                         'status' => $obj->status,
-                        'tariffs' => $tariff->getTariffsForEvent($obj->id),
+                        'id_categ' => $obj->id_categ,
+                        'tariffs' => $tariff->getTariffsForEvent($obj->id)
                     );
                 else
                     $events[] = array(
@@ -248,7 +249,8 @@ class Event {
                         'date_creation' => $obj->date_creation,
                         'date_start' => $obj->date_start,
                         'date_end' => $obj->date_end,
-                        'status' => $obj->status
+                        'status' => $obj->status,
+                        'id_categ' => $obj->id_categ
                     );
             }
             if ($with_tariff)
@@ -414,6 +416,33 @@ class Event {
             }
         }
         return $tariffs;
+    }
+
+    public function setIdCateg($id_event, $id_categ) {
+
+        if ($id_event == '')
+            $this->errors[] = "Le champ identifiant est obligatoire";
+        if ($id_categ == '')
+            $this->errors[] = "Le champ identifiant de catégorie est obligatoire";
+        if (sizeof($this->errors) != 0)
+            return -3;
+
+        $sql = 'UPDATE `event` SET';
+        $sql.= ' `id_categ`=' . $id_categ;
+        $sql.= ' WHERE id=' . $id_event;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+            return 1;
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de modifier le la catégorie externe. ";
+            $this->db->rollBack();
+            return -2;
+        }
+        return -1;
     }
 
 }

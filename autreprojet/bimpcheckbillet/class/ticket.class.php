@@ -281,7 +281,7 @@ class Ticket {
 
     public function createPdf($id_ticket, $x, $y, $is_first, $is_last, $set_to_left, $id_order) {
 
-        $ticket_width = 90;
+        $ticket_width = 97;
         $ticket_height = 40;
         $margin = 5;
 
@@ -315,10 +315,10 @@ class Ticket {
             $this->pdf->Image($image_event, $x + $margin + 1, $y + $margin, 30, 30);
         }
 
-        $this->pdf->Code128($x + 69, $y + 20, $ticket->barcode, 15, 15);
+        $this->pdf->Code128($x + 75, $y + 20, $ticket->barcode, 15, 15);
 
         QRcode::png($ticket->barcode, $file_name_qrcode, 0, 3);
-        $this->pdf->Image($file_name_qrcode, $x + 69, $y + 5, 15, 15);
+        $this->pdf->Image($file_name_qrcode, $x + 75, $y + 5, 15, 15);
 
         $this->pdf->SetY($y + 8);
         $this->pdf->SetX($x + 39);
@@ -351,6 +351,29 @@ class Ticket {
         } else {
             $this->errors[] = "Id commande inconnu.";
             return -3;
+        }
+        return -1;
+    }
+
+    public function getTicketsByOrder($id_order) {
+
+        $tickets = array();
+
+        $sql = 'SELECT id';
+        $sql .= ' FROM ticket';
+        $sql .= ' WHERE id_order=' . $id_order;
+
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                $ticket = new Ticket($this->db);
+                $ticket->fetch($obj->id);
+                $tickets[] = $ticket;
+            }
+            return $tickets;
+        } elseif (!$result) {
+            $this->errors[] = "Erreur SQL 2567.";
+            return -2;
         }
         return -1;
     }

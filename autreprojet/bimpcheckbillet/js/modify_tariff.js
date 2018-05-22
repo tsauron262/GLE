@@ -160,9 +160,8 @@ function getCategEvent(id_tariff) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.event !== undefined) {
-                console.log(out.event);
                 if (parseInt(out.event.id_categ) > 0)
-                    createPrestashopProduct(id_tariff, out.event.id_categ);
+                    createPrestashopProduct(id_tariff, out.event.id_categ, out.image_name);
                 else
                     alert("Merci d'importer l'évènement associé à ce tarif avant d'importer le tarif");
             } else {
@@ -172,7 +171,7 @@ function getCategEvent(id_tariff) {
     });
 }
 
-function createPrestashopProduct(id_tariff, id_categ_extern) {
+function createPrestashopProduct(id_tariff, id_categ_extern, image_name) {
 
     var tariff;
 
@@ -181,6 +180,8 @@ function createPrestashopProduct(id_tariff, id_categ_extern) {
             tariff = tmp_tariff;
     });
 
+    var id_event = parseInt($('select[name=id_event]').val());
+
     if (tariff.id_prod_extern === 0) {
         $.ajax({
             type: 'POST',
@@ -188,8 +189,11 @@ function createPrestashopProduct(id_tariff, id_categ_extern) {
             data: {
                 label: tariff.label,
                 price: tariff.price,
+                id_event: id_event,
+                id_tariff: id_tariff,
                 number_place: tariff.number_place,
                 id_categ_extern: id_categ_extern,
+                image_name: image_name,
                 action: 'createPrestashopProduct'
             },
             error: function () {
@@ -200,7 +204,6 @@ function createPrestashopProduct(id_tariff, id_categ_extern) {
                 if (out.errors.length !== 0) {
                     printErrors(out.errors, 'alertSubmit');
                 } else if (parseInt(out.id_inserted) > 0) {
-                    alert('OK ' + out.id_inserted);
                     addIdProdExtern(tariff.id, out.id_inserted);
                 } else {
                     setMessage('alertSubmit', "Erreur inconnue.", 'error');
@@ -231,7 +234,7 @@ function addIdProdExtern(id_tariff, id_prod_extern) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return === 1) {
-                alert('insertion ok');
+                alert('Produit créée');
             } else {
                 setMessage('alertSubmit', "Erreur serveur 1873.", 'error');
             }
@@ -313,10 +316,31 @@ function initEvents() {
 //        return false;
     });
 
-    $('select[name=tariff]').change(function () {
-        var id_tariff = $('select[name=tariff] > option:selected').val();
+    $('select[name=tariff]').change(function (e) {
+        var id_prod_extern;
+        var id_tariff = parseInt($('select[name=tariff] > option:selected').val());
         if (id_tariff > 0)
             autoFill(id_tariff);
+
+        tariffs.forEach(function (tariff) {
+            if (tariff.id === id_tariff)
+                id_prod_extern = tariff.id_prod_extern;
+        });
+
+        if (id_prod_extern > 0) {
+            $('div[name=create_prestashop_product]').hide();
+            $('p[name=product_already_created]').css('display', 'inline');
+            $('p[name=select_tariff]').css('display', 'none');
+        } else {
+            $('p[name=product_already_created]').css('display', 'none');
+            if (id_tariff > 0) {
+                $('div[name=create_prestashop_product]').show();
+                $('p[name=select_tariff]').css('display', 'none');
+            } else {
+                $('p[name=select_tariff]').css('display', 'inline');
+                $('div[name=create_prestashop_product]').hide();
+            }
+        }
     });
 }
 
@@ -344,7 +368,6 @@ function autoFill(id_tariff) {
 
     $('.chosen-select').trigger('chosen:updated');
 
-//    setImage(event.id);   
 }
 
 

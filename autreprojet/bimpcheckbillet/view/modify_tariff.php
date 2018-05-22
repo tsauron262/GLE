@@ -38,7 +38,7 @@ function printExtra($id) {
 /**
  * View
  */
-printHeader('Créer tarif', $arrayofjs);
+printHeader('Modifier tarif', $arrayofjs);
 
 
 $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME;
@@ -71,6 +71,8 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="tariff">Tarif </label><br/>';
     print '<select class="chosen-select" name="tariff"><option value="">Sélectionnez un tarif</option></select><br/><br/>';
 
+    print '<p name="product_already_created" style="display: none">Ce tarif correspond déjà à un produit prestashop</p>';
+    print '<p name="select_tariff" style="display: none">Sélectionnez un tarif pour créer un produit prestashop</p>';
     print '<div class="btn btn-primary" name="create_prestashop_product">Creér produit prestashop</div><br/><br/>';
 
     print '<label for="label">Libellé </label>';

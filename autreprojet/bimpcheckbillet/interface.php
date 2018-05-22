@@ -251,6 +251,12 @@ switch ($action) {
                 break;
             }
         }
+    case 'set_id_categ': {
+            echo json_encode(array(
+                'code_return' => $event->setIdCateg($_POST['id_event'], $_POST['id_categ']),
+                'errors' => $event->errors));
+            break;
+        }
 
     /**
      * modify_tariff.php
@@ -267,17 +273,6 @@ switch ($action) {
                 'errors' => $tariff->errors));
             break;
         }
-//    case 'create_prestashop_product': {
-//            $dsn2 = 'mysql:host=' . DB_HOST_2 . ';dbname=' . DB_NAME_2;
-//            $db2 = new PDO($dsn2, DB_USER_2, DB_PASS_WORD_2)
-//                    or die("Impossible de se connecter à la base externe : " . mysql_error());
-//            $tariff->fetch($_POST['id_tariff']);
-//            echo json_encode(array(
-//                'id_inserted' => $tariff->createPrestashopProduct($db2),
-//                'errors' => $tariff->errors
-//            ));
-//            break;
-//        }
 
     /**
      * stats_event.php
@@ -335,6 +330,7 @@ switch ($action) {
             $event->fetch($tariff->fk_event);
             echo json_encode(array(
                 'event' => $event,
+                'image_name' => $tariff->getImageName($_POST['id_tariff']),
                 'errors' => array_merge($tariff->errors, $event->errors)));
             break;
         }
@@ -356,16 +352,14 @@ switch ($action) {
             break;
         }
 
-    case 'check_order_and_create_tickets': {
+    case 'check_order': {
             $dsn2 = 'mysql:host=' . DB_HOST_2 . ';dbname=' . DB_NAME_2;
             $db2 = new PDO($dsn2, DB_USER_2, DB_PASS_WORD_2)
                     or die("Impossible de se connecter à la base externe : " . mysql_error());
             $order = new Order($db2);
             $code_return = $order->check($_POST['id_order'], $_POST['tickets'], $ticket);
-            $str = array();
             if ($code_return == 1) {
                 $ids_inserted = array();
-                $position = array('x' => 5, 'y' => 5);
                 $i = 0;
                 foreach ($_POST['tickets'] as $t) {
                     $id_inserted = $ticket->create($t['id_tariff'], EXTERN_USER, $t['id_event'], $t['price'], $t['first_name'], $t['last_name'], $t['extra_1'], $t['extra_2'], $t['extra_3'], $t['extra_4'], $t['extra_5'], $t['extra_6'], $_POST['id_order']);
@@ -379,19 +373,12 @@ switch ($action) {
                             'errors' => $ticket->errors
                         ));
                         break;
-                    } else {
-                        $is_first = $i == 0;
-                        $is_last = ($i + 1 == sizeof($_POST['tickets']));
-                        $set_to_left = ($i % 2 == 0);
-                        $str[] = $is_first;
-                        $str[] = $is_last;
-                        $position = $ticket->createPdf($id_inserted, $position['x'], $position['y'], $is_first, $is_last, $set_to_left, $_POST['id_order']);
                     }
                     $i++;
                 }
                 echo json_encode(array(
                     'ids_inserted' => $ids_inserted,
-                    'str' => $str,
+//                    'str' => $str,
                     'errors' => array_merge($order->errors, $ticket->errors)
                 ));
             } else {
@@ -403,6 +390,24 @@ switch ($action) {
             break;
         }
 
+    case 'create_tickets': {
+            $tickets = $ticket->getTicketsByOrder($_POST['id_order']);
+            $position = array('x' => 5, 'y' => 5);
+            $i = 0;
+            foreach ($tickets as $t) {
+                $is_first = $i == 0;
+                $is_last = ($i + 1 == sizeof($tickets));
+                $set_to_left = ($i % 2 == 0);
+                $position = $ticket->createPdf($t->id, $position['x'], $position['y'], $is_first, $is_last, $set_to_left, $_POST['id_order']);
+                $i++;
+            }
+            echo json_encode(array(
+                'code_return' => 1,
+                'errors' => $ticket->errors
+            ));
+            break;
+        }
+
     case 'check_order_status': {
             $dsn2 = 'mysql:host=' . DB_HOST_2 . ';dbname=' . DB_NAME_2;
             $db2 = new PDO($dsn2, DB_USER_2, DB_PASS_WORD_2)
@@ -411,6 +416,13 @@ switch ($action) {
             echo json_encode(array(
                 'status' => $order->checkOrderStatus($_POST['id_order'], $ticket),
                 'errors' => $order->errors
+            ));
+            break;
+        }
+    case 'get_filled_tickets': {
+            echo json_encode(array(
+                'tickets' => $ticket->getTicketsByOrder($_POST['id_order']),
+                'errors' => $ticket->errors
             ));
             break;
         }

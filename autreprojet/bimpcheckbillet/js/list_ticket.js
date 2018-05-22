@@ -75,11 +75,14 @@ function getTicketList(id_event) {
 $(document).ready(function () {
     getEvents();
 });
+
 function initEvents() {
     $('select[name=event]').change(function () {
         var id_event = $('select[name=event] > option:selected').val();
         if (id_event > 0)
             getTicketList(id_event);
+        else
+            $('div#displayTable').empty();
     });
 }
 
@@ -123,7 +126,7 @@ function addHeader(tariff) {
 function addTickets(tariff) {
     var html = '';
     var tickets = tariff.tickets;
-    
+
     if (tickets === undefined)
         return html;
 

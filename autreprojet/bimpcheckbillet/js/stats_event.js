@@ -89,6 +89,8 @@ function initEvents() {
         var id_event = $('select[name=event] > option:selected').val();
         if (id_event > 0)
             getStats(id_event);
+        else
+            $('#container_event').empty();
     });
 }
 

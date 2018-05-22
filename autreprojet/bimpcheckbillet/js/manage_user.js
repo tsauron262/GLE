@@ -207,7 +207,9 @@ function initEvents() {
                 $('input[type=checkbox]').prop('disabled', true);
                 $('input[type=checkbox]').prop('checked', true);
             }
-
+        } else {
+            $('input[name=login]').val('');
+            $('input[name=pass_word]').val('');
         }
     });
 

@@ -1200,6 +1200,11 @@ class BMP_Event extends BimpObject
         $html .= '<tbody>';
 
         $html .= '<tr>';
+        $html .= '<th>Prix billet TOTAL TTC</th>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($prix_total_ttc, 'EUR') . '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
         $html .= '<th>Prix billet moyen TTC</th>';
         $html .= '<td>' . BimpTools::displayMoneyValue($prix_moyen_ttc, 'EUR') . '</td>';
         $html .= '</tr>';

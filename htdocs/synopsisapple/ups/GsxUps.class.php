@@ -493,7 +493,6 @@ class GsxUps
 
         $request = $this->gsx->_requestBuilder($requestName, 'bulkPartsRegistrationRequest', $datas);
         $response = $this->gsx->request($request, $soapClient);
-
         if (isset($response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'])) {
             $html = '<p class="confirmation">Enregistrement de l\'expédition effectuée avec succès</p>';
             $response = $response['RegisterPartsForBulkReturnResponse']['bulkPartsRegistrationData'];

@@ -53,6 +53,23 @@ $(window).on("load", function () {
                 return false
         });
     }
+    
+    
+    $("td:contains('Email de secours'), td:contains('Mail de secours')").each(function () {   ///plus de mdp apple
+        $(this).next("td").each(function () {
+            if ($(this).find("input").length > 0) {
+                val = $(this).find("input").val();
+                $(this).parent().append("<input type='password' name='options_apple_mdp' value='" + val + "'/>");
+                $(this).remove();
+            } else
+                $(this).html("*******");
+        });
+    });
+    $("th:contains('E-Mail de secours')").each(function () {   ///plus de mdp apple
+        $(this).next("td").each(function () {
+                $(this).html("*******");
+        });
+    });
 
 
 

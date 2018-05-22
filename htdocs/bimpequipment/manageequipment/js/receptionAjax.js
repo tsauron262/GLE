@@ -224,7 +224,7 @@ function setColors(id_tr, table_suffix, quantity_received, quantity_sent) {
         color = yellow;
     else if (quantity_received > quantity_sent)
         color = red;
-    $('#table_' + table_suffix + ' tr#' + id_tr).css('background', color);
+    $('#table_' + table_suffix + ' tr#' + id_tr + " td").attr('style', 'background-color:'+ color + "!important");
 }
 
 function addLineEquipment(equip) {
@@ -251,7 +251,7 @@ function addLineEquipment(equip) {
     $(line).appendTo('#table_' + table_suffix + ' tbody');
 
     if (parseInt(equip.quantity_received) === 1)
-        $('#table_' + table_suffix + ' tr#' + id_tr).css('background', green);
+        $('#table_' + table_suffix + ' tr#' + id_tr + ' td').attr('style', 'background-color:green!important');
 }
 
 
@@ -274,7 +274,8 @@ function initSetFullQty(id_tr, table_suffix) {
  * @param {String} ref can also be a barcode or a serial number
  */
 function validateProduct(ref) {
-//    console.log('déclenché ' + ref);
+    //console.log('déclenché ' + ref);
+    var ok =false;
     $('#table_pending tr ').each(function () {
         var tr = $(this);
         if (tr.attr('is_equipment') === 'true') { // Equipment
@@ -286,13 +287,19 @@ function validateProduct(ref) {
                 return false;
             } else if (ref === tr.attr('serial')) {
                 setScannedEquipment(tr);
+                ok = true;
             }
         } else if (tr.attr('is_equipment') === 'false') { // Product
             if (ref === tr.attr('barcode') || ref === tr.attr('ref')) {
                 setScannedProduct(tr, $('input#qty').val());
+                ok = true;
             }
         }
     });
+    if(!ok){
+        setMessage('alertTop', 'Aucune correpondance trouvée.', 'error');
+        return false;
+    }
 }
 
 function getNewStatus() {
@@ -344,7 +351,7 @@ function setScannedProduct(tr, qty_to_add) {
  */
 function setScannedEquipment(tr) {
     tr.attr('scanned_this_session', true);
-    tr.css('background', green);
+    tr.find('td').attr('style', 'background-color:green!important');
 }
 
 

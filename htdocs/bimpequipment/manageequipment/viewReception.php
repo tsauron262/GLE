@@ -57,7 +57,7 @@ if ($transfer->status != $transfer::STATUS_RECEIVED) {
     print '<tr><td style="text-align: right;"><strong> Quantité</strong></td>';
     print '<td><input id="qty" type="number" class="custInput" style="width: 60px" value=1 min=1></td></tr>';
     print '</table>';
-    print '<div id="alertTop" style="clear:left"></div>';
+    print '<div id="alertTop" style="clear:left"></div><div style="clear:both"></div>';
 
     printTable('En attente', 'pending');
 } else {

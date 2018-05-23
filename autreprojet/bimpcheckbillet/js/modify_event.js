@@ -1,6 +1,7 @@
-var URL_PRESTASHOP = 'http://localhost/~tilito/prestashop/modules/zoomdici/ajax.php';
+var URL_PRESTASHOP = URL_PRESTA+'/modules/zoomdici/ajax.php';
 
 var events;
+
 
 /**
  * Ajax call
@@ -350,7 +351,7 @@ function initEvents() {
 
 function autoFill(event) {
     $('input[name=label]').val(event.label);
-    tinymce.get('description').setContent(event.description);
+    $("#description").val(event.description);
     $('input[name=date_start]').val(formatDate(event.date_start));
     $('input[name=time_start]').val(formatTime(event.date_start));
     $('input[name=date_end]').val(formatDate(event.date_end));
@@ -360,7 +361,7 @@ function autoFill(event) {
 
 function autoEmpty() {
     $('input[name=label]').val('');
-    tinymce.get('description').setContent('');
+    $("#description").val('');
     $('input[name=date_start]').val(formatDate(''));
     $('input[name=time_start]').val(formatTime(''));
     $('input[name=date_end]').val(formatDate(''));

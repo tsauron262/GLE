@@ -7,7 +7,7 @@ include_once 'footer.php';
 
 include_once '../class/user.class.php';
 
-$arrayofjs = array('https://cloud.tinymce.com/stable/tinymce.min.js?apiKey=gglt0munffmvpksck0da55o1orb3igbsr12rp5avkuba1q3u', '../js/create_event.js');
+$arrayofjs = array('../js/create_event.js');
 
 printHeader('Créer évènement', $arrayofjs);
 

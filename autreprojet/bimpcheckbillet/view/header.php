@@ -23,6 +23,9 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     print '<script type="text/javascript" src="../lib/js/bootstrap.min.js"></script>';
     print '<script type="text/javascript" src="../lib/js/chosen.jquery.min.js"></script>';
     print '<script type="text/javascript" src="../js/annexes.js"></script>';
+    print '<script type="text/javascript" src="../lib/js/tinymce/tinymce.min.js"></script>';
+    
+    print '<script>var URL_PRESTA="'.PRESTA_URL.'";</script>';
 
     foreach ($arrayofjs as $jsfile)
         print '<script type="text/javascript" src="' . $jsfile . '"></script>';

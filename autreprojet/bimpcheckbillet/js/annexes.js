@@ -1,3 +1,5 @@
+var URL_PRESTASHOP = 'http://localhost/~tilito/prestashop/modules/zoomdici/ajax.php';
+
 function changeEventSession(id_event) {
 
     if (parseInt(id_event) > 0) {

@@ -294,8 +294,8 @@ if ($action == 'update') {
             $nbopenedday = num_open_day($date_debut_gmt, $date_fin_gmt, 0, 1, $halfday);
             // hack (si 1 seul jour : num_open_day() ne vérifie pas s'il s'agit d'un jour férié)
             if ($date_debut_gmt == $date_fin_gmt && $nbopenedday == 1) {
-            global $userHoliday;
-        $userHoliday = $userid;
+                global $userHoliday;
+                $userHoliday = $userid;
                 $nb_ferie = num_public_holiday($date_debut_gmt, $date_fin_gmt);
                 if ($nb_ferie)
                     $nbopenedday = 0;
@@ -457,12 +457,12 @@ if ($action == 'confirm_send') {
 
             // Si rdv durant la période et pas de remplacent
             $nbRdv = count($cp->fetchRDV());
-                if ($nbRdv > 0) {
-                    $message.= "\n";
-                    $message .= '' . $nbRdv . ' rdv sont prévus sur la période';
-                    $message.= "\n";
-                }
-            
+            if ($nbRdv > 0) {
+                $message.= "\n";
+                $message .= '' . $nbRdv . ' rdv sont prévus sur la période';
+                $message.= "\n";
+            }
+
             // Si l'option pour avertir le valideur en cas de solde inférieur à la demande
             if ($cp->getConfCP('AlertValidatorSolde')) {
                 if (empty($cp->type_conges) || !$cp->type_conges) {
@@ -747,16 +747,16 @@ if ($action == 'drh_group_valid') {
                 $societeName = $conf->global->MAIN_APPLICATION_TITLE;
 
             $subject = $societeName . " - Notification de " . str_replace('é', 'e', $typeCp);
-            $message = 'Des ' . $typeCp . ' vous ont été atttribuées pour la période du ' . $dateBegin . ' au ' . $dateEnd . ' par votre Directeur des Ressouces Humaines.' . "\n\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
-            $message.= "\n";
+            $base_message = 'Des ' . $typeCp . ' vous ont été atttribuées pour la période du ' . $dateBegin . ' au ' . $dateEnd . ' par votre Directeur des Ressouces Humaines.' . "\n\n";
+            $base_message .= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
+            $base_message .= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
+            $base_message .= "\n";
 
             $nErrors = 0;
             $nbHolidayDeducted = $cp->getConfCP('nbHolidayDeducted');
             $nbRttDeducted = $cp->getConfCP('nbRTTDeducted');
             $nbOpenDays = $cp->getCPforUser($user->id, $cp->date_debut, $cp->date_fin, $cp->halfday, true);
-            
+
             foreach ($cp->fk_user as $user_id) {
 //                echo 'User: '.$user_id.'<br/>';
                 $infos = $cp->verifUserConflictsForGroupHoliday($user, $user_id);
@@ -764,6 +764,8 @@ if ($action == 'drh_group_valid') {
 //                print_r($infos);
 //                echo '</pre>';
                 
+                $message = $base_message;
+
                 if (count($infos) == 1) {
                     $message .= "Un de vos congé existant a été modifié car il entrait en conflit avec ce nouveau congé. \n\n";
                 } else if (count($infos) > 1) {
@@ -785,7 +787,7 @@ if ($action == 'drh_group_valid') {
 
                         case 'begin_update':
                             $newBegin = new DateTime();
-                            $newBegin->setTimestamp((int)$curCp->date_debut);
+                            $newBegin->setTimestamp((int) $curCp->date_debut);
                             $message .= "date de début reculée au " . $newBegin->format('d / m / Y');
                             if ($curCp->halfday < 0 || $curCp->halfday == 2)
                                 $message .= " après-midi";
@@ -794,7 +796,7 @@ if ($action == 'drh_group_valid') {
 
                         case 'end_update':
                             $newEnd = new DateTime();
-                            $newEnd->setTimestamp((int)$curCp->date_fin);
+                            $newEnd->setTimestamp((int) $curCp->date_fin);
                             $message .= "date de fin avancée au " . $newEnd->format('d / m / Y');
                             if ($curCp->halfday > 0 || $curCp->halfday == 2)
                                 $message .= " matin";
@@ -1105,7 +1107,7 @@ if ($action == 'confirm_group_cancel' && GETPOST('confirm') == 'yes') {
         $cp->statut = 4;
         $agendaCheck = $cp->onStatusUpdate($user);
         $verif = $cp->update($user->id);
-        
+
         if ($result >= 0 && $oldstatus == 6 && $cp->type_conges != 1) { // holiday was already validated, status 6, so we must increase back sold
             $cp->recrediteSold();
         }
@@ -1889,7 +1891,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 print '<tr>';
                 print '<td>Nombre de rdv sur la période</td>';
                 $nb = count($cp->fetchRDV());
-                print '<td'.($nb > 0 ? ' class="redT"' : '').'>'.$nb.'</td>';
+                print '<td' . ($nb > 0 ? ' class="redT"' : '') . '>' . $nb . '</td>';
                 print '</tr>';
 
                 print '</tbody>';
@@ -2017,20 +2019,20 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                         print '<tr>';
                         print '<td width="50%">Remplaçant</td>' . "\n";
                         print '<td>' . "\n";
-                        
+
                         $tabExclude = array($cp->fk_user);
-                        $req = "SELECT DISTINCT(h2.`fk_user`) as idUser FROM `llx_holiday` h1, `llx_holiday` h2 WHERE h1.rowid = ".$cp->id." AND ("
+                        $req = "SELECT DISTINCT(h2.`fk_user`) as idUser FROM `llx_holiday` h1, `llx_holiday` h2 WHERE h1.rowid = " . $cp->id . " AND ("
                                 . "(h2.`date_debut` >= h1.`date_debut` AND h2.`date_debut` <= h1.`date_fin`) || "//date deb dans la periode
                                 . "(h2.`date_fin` <= h1.`date_fin` AND h2.`date_fin` >= h1.`date_debut`) || "//date fin dans la periode
                                 . "(h2.`date_debut` <= h1.`date_debut` AND h2.`date_fin` >= h1.`date_fin`)"//date a cheval
                                 . ") AND h2.`statut` = 6";
-                     
+
                         $sql = $db->query($req);
-                        while($ln = $db->fetch_object($sql))
-                                $tabExclude[] = $ln->idUser;
-                        
-                        
-                        print $form->select_dolusers((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id', 1, $tabExclude, null, null, null, null, null, null, null, null, null, null,1);
+                        while ($ln = $db->fetch_object($sql))
+                            $tabExclude[] = $ln->idUser;
+
+
+                        print $form->select_dolusers((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id', 1, $tabExclude, null, null, null, null, null, null, null, null, null, null, 1);
                         print '</td>' . "\n";
                         print '<td><input type="submit" value="Enregistrer" class="butAction"></td>';
                         print '</tr>' . "\n";

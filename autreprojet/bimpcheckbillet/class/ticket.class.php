@@ -329,7 +329,7 @@ class Ticket {
                 mb_strimwidth($ticket->last_name, 0, 20, "..."));
 
         if ($is_last)
-            $this->pdf->Output(PATH . '/img/tickets/ticket' . $id_order . '.pdf', 'F');
+            $this->pdf->Output(PATH . '/img/tickets/ticket' . base64_encode($id_order) . '.pdf', 'F');
 
         if ($set_to_left)
             return array('x' => $x + $ticket_width + $margin, 'y' => $y);

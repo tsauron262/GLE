@@ -1606,7 +1606,7 @@ INSERT INTO llx_synopsischrono_key SELECT  null as id, `nom`, `description`,
 
 
 sudo umount /mnt/8sens  -fl
-
+mount -t nfs -o _netdev,mountproto=tcp,soft 192.168.200.10:Volumes/XRaid/3_8sens_gle /mnt/8sens
 
 
 maj CAPSIM

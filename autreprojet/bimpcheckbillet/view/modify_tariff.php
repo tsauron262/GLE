@@ -84,11 +84,8 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="number_place">Nombre de place </label>';
     print '<input class="form-control bfh-number" name="number_place" step="1" type="number" min="0" style="width: 120px"/><br/>';
 
-//    print '<label class="btn btn-primary" for="file">';
-//    print '<input id="file" type="file" name="file" style="display:none"/>Parcourir</label>';
-//
-//    print '<span class="label label-info" id="name_file_display"></span>';
-//    print '<img id="img_display" src="#" alt=" Aucune image sélectionnée"/><br/><br/><br/>';
+    print '<label for="img_display">Image </label><br/>';
+    print '<img id="img_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
 
     print '<label for="event">Exiger nom et prénom </label><br/>';
     print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';

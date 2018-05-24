@@ -1,4 +1,4 @@
-var URL_PRESTASHOP = URL_PRESTA+'/modules/zoomdici/ajax.php';
+var URL_PRESTASHOP = URL_PRESTA + '/modules/zoomdici/ajax.php';
 
 function changeEventSession(id_event) {
 

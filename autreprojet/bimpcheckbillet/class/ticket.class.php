@@ -325,11 +325,13 @@ class Ticket {
 
         $this->pdf->MultiCell(40, 4, mb_strimwidth($event->label, 0, 20, "...") . "\n" .
                 mb_strimwidth($tariff->label, 0, 20, "...") . "\n" .
-                mb_strimwidth($ticket->first_name, 0, 20, "...") . "\n" .
-                mb_strimwidth($ticket->last_name, 0, 20, "..."));
+                mb_strimwidth(($ticket->first_name == null ? '' : $ticket->first_name), 0, 20, "...") . "\n" .
+                mb_strimwidth(($ticket->last_name == null ? '' : $ticket->last_name), 0, 20, "..."));
+        
+        echo "OK";
 
         if ($is_last)
-            $this->pdf->Output(PATH . '/img/tickets/ticket' . base64_encode($id_order) . '.pdf', 'F');
+            $this->pdf->Output(PATH.'/img/tickets/ticket' . base64_encode($id_order) . '.pdf', 'F');
 
         if ($set_to_left)
             return array('x' => $x + $ticket_width + $margin, 'y' => $y);

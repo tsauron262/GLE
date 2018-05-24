@@ -62,10 +62,10 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
 //    print '<label class="btn btn-primary" for="file">';
 //    print '<input id="file" type="file" name="file" style="display:none"/>Parcourir</label>';
 //
-//    print '<span class="label label-info" id="name_file_display"></span>';
-//    print '<img id="img_display" alt=" Aucune image sélectionnée"/>';
-//    print '<img id="img_display" src="../img/event/9.png"/><br/><br/><br/>';
-    print '<div id="alertSubmit"></div><br/><br/><br/>';
+    print '<label for="img_display">Image</label><br/>';
+    print '<img id="img_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
+    
+    print '<div id="alertSubmit"></div><br/>';
 
     print '<button class="btn btn-primary" name="modify">Modifier évènement</button>';
 

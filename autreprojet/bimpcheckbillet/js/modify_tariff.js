@@ -1,4 +1,4 @@
-var URL_PRESTASHOP = URL_PRESTA+'/modules/zoomdici/ajax.php';
+var URL_PRESTASHOP = URL_PRESTA + '/modules/zoomdici/ajax.php';
 
 var tariffs;
 
@@ -304,10 +304,14 @@ function initEvents() {
         var id_tariff = parseInt($('select[name=tariff] > option:selected').val());
         if (id_tariff > 0)
             autoFill(id_tariff);
+        
+        $('img#img_display').attr('src', '');
 
         tariffs.forEach(function (tariff) {
-            if (tariff.id === id_tariff)
+            if (tariff.id === id_tariff) {
                 id_prod_extern = tariff.id_prod_extern;
+                $('img#img_display').attr('src', URL_CHECK + '/img/event/' + tariff.filename);
+            }
         });
 
         if (id_prod_extern > 0) {

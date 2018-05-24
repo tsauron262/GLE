@@ -1,4 +1,4 @@
-var URL_PRESTASHOP = URL_PRESTA+'/modules/zoomdici/ajax.php';
+var URL_PRESTASHOP = URL_PRESTA + '/modules/zoomdici/ajax.php';
 
 var events;
 
@@ -24,9 +24,12 @@ function getEvents() {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.events.length !== 0) {
                 events = out.events;
+                var filename;
                 out.events.forEach(function (event) {
                     $('select[name=id_event]').append(
                             '<option value=' + event.id + '>' + event.label + '</option>');
+                    if (parseInt(event.id) === parseInt(id_event_session))
+                        filename = event.filename;
                 });
                 initEvents();
                 $(".chosen-select").chosen({
@@ -44,6 +47,7 @@ function getEvents() {
                         $(".chosen-select").trigger("chosen:updated");
                         $('select[name=id_event]').trigger('change');
                     }
+                    $('img#img_display').attr('src', URL_CHECK + '/img/event/' + filename);
                 }
             } else {
                 setMessage('alertSubmit', "Créer un évènement avant de définir un tarif.", 'error');
@@ -282,6 +286,7 @@ function initEvents() {
         var id_event = $('select[name=id_event] > option:selected').val();
         if (id_event > 0) {
             var event = getEventById(id_event);
+            $('img#img_display').attr('src', URL_CHECK + '/img/event/' + event.filename);
             autoFill(event);
         } else {
             autoEmpty();

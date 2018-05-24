@@ -61,6 +61,20 @@ class Tariff {
                 $this->require_extra_5 = intVal($obj->require_extra_5);
                 $this->require_extra_6 = intVal($obj->require_extra_6);
                 $this->id_prod_extern = intVal($obj->id_prod_extern);
+                $exts = array('bmp', 'png', 'jpg');
+                foreach ($exts as $ext) {
+                    if (file_exists(PATH . '/img/event/' . $obj->fk_event . '_' . $id . "." . $ext)) {
+                        $filename = $obj->fk_event . '_' . $id . "." . $ext;
+                    }
+                }
+                if ($filename == null) {
+                    foreach ($exts as $ext) {
+                        if (file_exists(PATH . '/img/event/' . $obj->fk_event . "." . $ext)) {
+                            $filename = $obj->fk_event . "." . $ext;
+                        }
+                    }
+                }
+                $this->filename = $filename;
                 return 1;
             }
         } else {
@@ -305,7 +319,7 @@ class Tariff {
             $this->errors[] = "Id produit extern inconnu";
             return -2;
         }
-        return -1;
+        return array();
     }
 
     public function getIdsEventsByIdsTariffs($ids_tariff) {

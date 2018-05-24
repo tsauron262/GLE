@@ -10,7 +10,8 @@ include_once 'class/tariff.class.php';
 include_once 'class/ticket.class.php';
 include_once 'class/order.class.php';
 
-$_POST['description'] = addslashes($_POST['description']);
+if (isset($_POST['description']))
+    $_POST['description'] = addslashes($_POST['description']);
 
 
 $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME;

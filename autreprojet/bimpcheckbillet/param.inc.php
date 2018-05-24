@@ -1,12 +1,23 @@
 <?php
 
-//define('LOGIN', 'a');
-//define('PASSWORD', 'z');
-
+// Database admin server
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASSWORD', '$mokinU2');
-define('DB_NAME', 'test_billet');
+define('DB_PASS_WORD', 'root');
+define('DB_NAME', 'test-billet');
 
+// Database customer server
+define('DB_HOST_2', 'localhost');
+define('DB_USER_2', 'root');
+define('DB_PASS_WORD_2', 'root');
+define('DB_NAME_2', 'BIMP_TEST_ZOOM');
+
+// Extern user (prestashop)
+define('EXTERN_USER', 2);   // Ne pas changer cette valeur (référencé en base)
+
+// Paths and URL
 define('PATH', realpath(dirname(__FILE__)));
-define('URL_ROOT', 'http://localhost/~tilito/bimp-erp/autreprojet/bimpcheckbillet/');
+define('IS_MAIN_SERVER', true);
+
+define('PRESTA_URL', "http://localhost/zoom");
+

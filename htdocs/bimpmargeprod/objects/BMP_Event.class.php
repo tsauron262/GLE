@@ -278,7 +278,7 @@ class BMP_Event extends BimpObject
             }
 
             if ($nTotal > 0) {
-                return (float) $nFree / ($nTotal - $nFree);
+                return (float) $nFree / ($nTotal - $nFree   );
             }
         }
 

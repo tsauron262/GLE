@@ -32,19 +32,24 @@ class BimpLivraison {
 
     function getLignesOrder() {
         $lignes = array();
+        $staticproduct = new Product($this->db);
 
-        $sql = 'SELECT rowid, fk_product, ref, label, qty, subprice, total_ht';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet';
-        $sql .= ' WHERE fk_commande=' . $this->orderId;
+        $sql = 'SELECT cf.rowid as rowid, cf.fk_product as fk_product,'
+                . ' cf.ref as ref, cf.label as label, cf.qty as qty,'
+                . ' cf.subprice as subprice, cf.total_ht as total_ht';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet as cf';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'product as p ON p.rowid=cf.fk_product';
+        $sql .= ' WHERE cf.fk_commande=' . $this->orderId;
+        $sql .= ' AND p.fk_product_type=' . $staticproduct::TYPE_PRODUCT;
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                /*if (isset($lignes[$obj->fk_product])) {
-                    $lignes[$obj->fk_product]->remainingQty += $obj->qty;
-                    $lignes[$obj->fk_product]->total_ht += $obj->total_ht;
-                    $lignes[$obj->fk_product]->price_unity = price($lignes[$obj->fk_product]->total_ht / $lignes[$obj->fk_product]->remainingQty);
-                } else*/if ($obj->fk_product > 0) {
+                /* if (isset($lignes[$obj->fk_product])) {
+                  $lignes[$obj->fk_product]->remainingQty += $obj->qty;
+                  $lignes[$obj->fk_product]->total_ht += $obj->total_ht;
+                  $lignes[$obj->fk_product]->price_unity = price($lignes[$obj->fk_product]->total_ht / $lignes[$obj->fk_product]->remainingQty);
+                  } else */if ($obj->fk_product > 0) {
                     $doliProd = new Product($this->db);
                     $doliProd->fetch($obj->fk_product);
                     $ligne = new LigneLivraison($this->db);
@@ -150,8 +155,8 @@ class BimpLivraison {
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment_place as e_place ON e.id = e_place.id_equipment';
         $sql .= ' WHERE e_place.infos="' . $this->getcodeMove() . '"';
         $sql .= ' AND e.id_product=' . $ligne->prodId;
-        $sql .= ' AND ROUND(e.prix_achat,2)  = ROUND(' . str_replace(',', '.', $ligne->price_unity).',2)';
-        
+        $sql .= ' AND ROUND(e.prix_achat,2)  = ROUND(' . str_replace(',', '.', $ligne->price_unity) . ',2)';
+
         //echo $sql."\n";
 
         $result = $this->db->query($sql);
@@ -276,7 +281,7 @@ class BimpLivraison {
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields as e';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur as cf ON cf.rowid = e.fk_object';
         $sql .= ' WHERE e.entrepot=' . $fk_warehouse;
-        $sql .= ' AND fk_statut >= '.$status_min." AND fk_statut <= ".$status_max;
+        $sql .= ' AND fk_statut >= ' . $status_min . " AND fk_statut <= " . $status_max;
 
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
@@ -285,7 +290,7 @@ class BimpLivraison {
                 $bl->fetch($obj->id);
                 $fourn = new Societe($this->db);
                 $fourn->fetch($bl->commande->socid);
-                
+
                 $status = $bl->commande->statut;
                 if ($status == 0)
                     $name_status = 'Brouillon';
@@ -299,7 +304,7 @@ class BimpLivraison {
                     $name_status = 'Reçu partiellement';
                 elseif ($status == 5)
                     $name_status = 'Reçu';
-                else 
+                else
                     $name_status = 'Inconnue';
 
                 $orders[] = array(

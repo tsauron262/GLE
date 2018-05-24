@@ -1856,7 +1856,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         $facture->array_options['options_type'] = "S";
                         $facture->createFromOrder($propal->dol_object);
                         $facture->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
-                        $facture->validate($user, '', (int) $this->getData('id_entrepot'));
+                        $facture->validate($user, '');//pas d'entrepot pour pas de destock
                         $facture->fetch($facture->id);
 
                         if (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56)) {

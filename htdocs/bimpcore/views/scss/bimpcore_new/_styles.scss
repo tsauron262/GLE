@@ -345,7 +345,7 @@ i.iconRight {
             }
 
             &.disabled {
-                cursor: normal;
+                cursor: default;
                 color: #787878;
 
                 &:hover {
@@ -380,7 +380,7 @@ i.iconRight {
 
                 &.disabled {
                     color: #787878;
-                    cursor: normal;
+                    cursor: default;
 
                     &:hover {
                         color: #787878;

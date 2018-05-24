@@ -1,8 +1,8 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formadmin.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formadmin.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 
 class BimpInput
 {
@@ -67,6 +67,75 @@ class BimpInput
                     }
                     $html .= $data;
                     $html .= '/>';
+                }
+                break;
+
+            case 'qty':
+                $data = '';
+                if (isset($options['data'])) {
+                    foreach ($options['data'] as $data_name => $data_value) {
+                        $data .= ' data-' . $data_name . '="' . $data_value . '"';
+                    }
+                }
+                $data .= ' data-step="' . (isset($options['step']) ? $options['step'] : 1) . '"';
+
+                if ((isset($options['addon_left']) && $options['addon_left']) ||
+                        (isset($options['addon_right']) && $options['addon_right'])) {
+                    $html .= '<div class="inputGroupContainer">';
+                    $html .= '<div class="input-group">';
+
+                    if (isset($options['addon_left']) && $options['addon_left']) {
+                        $html .= '<span class="input-group-addon">' . $options['addon_left'] . '</span>';
+                    }
+
+                    $html .= '<div class="qtyInputContainer">';
+                    $html .= '<span class="qtyDown">';
+                    $html .= '<i class="fa fa-minus"></i>';
+                    $html .= '</span>';
+
+                    $html .= '<input type="text" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"';
+                    if (isset($options['placeholder'])) {
+                        $html .= ' placeholder="' . $options['placeholder'] . '"';
+                    }
+                    if (isset($options['style'])) {
+                        $html .= ' style="' . $options['style'] . '"';
+                    }
+                    $html .= $data;
+                    $html .= ' class="qtyInput' . ($extra_class ? ' ' . $extra_class : '') . '"';
+                    $html .= '/>';
+
+                    $html .= '<span class="qtyUp">';
+                    $html .= '<i class="fa fa-plus"></i>';
+                    $html .= '</span>';
+                    $html .= '</div>';
+
+                    if (isset($options['addon_right']) && $options['addon_right']) {
+                        $html .= '<span class="input-group-addon">' . $options['addon_right'] . '</span>';
+                    }
+
+                    $html .= '</div>';
+                    $html .= '</div>';
+                } else {
+                    $html .= '<div class="qtyInputContainer">';
+                    $html .= '<span class="qtyDown">';
+                    $html .= '<i class="fa fa-minus"></i>';
+                    $html .= '</span>';
+
+                    $html .= '<input type="text" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"';
+                    if (isset($options['placeholder'])) {
+                        $html .= ' placeholder="' . $options['placeholder'] . '"';
+                    }
+                    if (isset($options['style'])) {
+                        $html .= ' style="' . $options['style'] . '"';
+                    }
+                    $html .= $data;
+                    $html .= ' class="qtyInput' . ($extra_class ? ' ' . $extra_class : '') . '"';
+                    $html .= '/>';
+
+                    $html .= '<span class="qtyUp">';
+                    $html .= '<i class="fa fa-plus"></i>';
+                    $html .= '</span>';
+                    $html .= '</div>';
                 }
                 break;
 

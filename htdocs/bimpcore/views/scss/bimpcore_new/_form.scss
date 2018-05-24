@@ -406,6 +406,43 @@ select.switch {
         }
     }
 }
+.qtyInputContainer {
+    display: inline-block;
+
+    .qtyDown,
+    .qtyUp {
+        @include transition(all 0.3s ease);
+        display: inline-block;
+        margin: 0 3px;
+        cursor: pointer;
+        border-radius: 50%;
+        text-align: center;
+        width: 25px;
+        height: 25px;
+        line-height: 23px;
+        color: $gray-dark;
+
+        i {
+            vertical-align: middle;
+            display: inline-block;
+        }
+
+        &:hover {
+            background-color: $gray-dark;
+            color: #fff;
+        }
+
+        &.disabled,
+        &.disabled:hover {
+            background-color: #fff;
+            color: #B4B4B4;
+        }
+    }
+    
+    .qtyInput {
+        max-width: 80px;
+    }
+}
 
 .check_list_container {
     max-height: 450px;

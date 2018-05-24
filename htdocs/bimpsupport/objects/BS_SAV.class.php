@@ -179,7 +179,7 @@ class BS_SAV extends BimpObject
         foreach ($tabCentre as $code => $centre) {
             $centres[$code] = $centre[2];
         }
-
+        
         return $centres;
     }
 
@@ -1796,13 +1796,12 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                     if (!is_null($list)) {
                         foreach ($list as $item) {
                             if ($repair->fetch((int) $item['id'])) {
-//                                $rep_errors = $repair->updateStatus();
+                                $rep_errors = $repair->updateStatus();
                             } else {
                                 $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
                             }
                             if (count($rep_errors)) {
-                                $warnings[] = 'Echec de la fermeture de la réparation d\'ID ' . $item['id'];
-                                $warnings = array_merge($warnings, $rep_errors);
+                                $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation d\'ID ' . $item['id']);
                             }
                         }
                     }
@@ -2027,13 +2026,12 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             if (!is_null($list)) {
                 foreach ($list as $item) {
                     if ($repair->fetch((int) $item['id'])) {
-//                            $rep_errors = $repair->close();
+                            $rep_errors = $repair->close();
                     } else {
                         $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
                     }
                     if (count($rep_errors)) {
-                        $warnings[] = 'Echec de la fermeture de la réparation d\'ID ' . $item['id'];
-                        $warnings = array_merge($warnings, $rep_errors);
+                        $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation d\'ID ' . $item['id']);
                     }
                 }
             }

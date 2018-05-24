@@ -16,6 +16,9 @@ class BC_Input extends BimpComponent
     public $extraData = array();
     public $name_prefix = '';
     public static $type_params_def = array(
+        'qty'                         => array(
+            'step' => array('data_type' => 'float', 'default' => 1)
+        ),
         'time'                        => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
@@ -109,6 +112,7 @@ class BC_Input extends BimpComponent
                         $this->params['type'] = 'toggle';
                         break;
 
+                    case 'qty':
                     case 'html':
                     case 'time':
                     case 'date':
@@ -161,7 +165,11 @@ class BC_Input extends BimpComponent
 
         switch ($this->params['type']) {
             case 'text':
+            case 'qty':
                 $options['data'] = array();
+                if ($this->params['type'] === 'qty') {
+                    $options['step'] = $this->params['step'];
+                }
                 $min = 'none';
                 $max = 'none';
                 $decimals = 0;
@@ -174,6 +182,7 @@ class BC_Input extends BimpComponent
                     case 'float':
                         $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
 
+                    case 'qty':
                     case 'int':
                         $options['data']['data_type'] = 'number';
                         $options['data']['decimals'] = $decimals;

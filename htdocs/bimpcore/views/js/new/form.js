@@ -959,7 +959,7 @@ function displayInputMsg($input, msg, className) {
         className = 'info';
     }
     var html = '<p class="alert alert-' + className + '">' + msg + '</p>';
-    bimp_display_element_popover($input, html, 'right');
+    bimp_display_element_popover($input, html, 'bottom');
     $input.unbind('blur').blur(function () {
         $input.popover('destroy');
     });
@@ -1167,16 +1167,54 @@ function setInputsEvents($container) {
         }
     });
     $container.find('.texarea_values').each(function () {
-        var field_name = $(this).data('field_name');
-        var $textarea = $(this).parent().find('textarea[name="' + field_name + '"]');
-        $(this).find('.textarea_value').click(function () {
-            var text = $textarea.val();
-            if (text) {
-                text += ', ';
-            }
-            text += $(this).text();
-            $textarea.val(text).change();
-        });
+        if (!parseInt($(this).data('event_init'))) {
+            var field_name = $(this).data('field_name');
+            var $textarea = $(this).parent().find('textarea[name="' + field_name + '"]');
+            $(this).find('.textarea_value').click(function () {
+                var text = $textarea.val();
+                if (text) {
+                    text += ', ';
+                }
+                text += $(this).text();
+                $textarea.val(text).change();
+            });
+            $(this).data('event_init', 1);
+        }
+    });
+    $container.find('.qtyInputContainer').each(function () {
+        if (!parseInt($(this).data('event_init'))) {
+            $(this).find('.qtyDown').click(function () {
+                var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
+                if ($.isOk($qtyInputcontainer)) {
+                    $qtyInputcontainer.find('input.qtyInput').focus();
+                    inputQtyDown($qtyInputcontainer);
+                }
+            });
+            $(this).find('.qtyUp').click(function () {
+                var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
+                if ($.isOk($qtyInputcontainer)) {
+                    $qtyInputcontainer.find('input.qtyInput').focus();
+                    inputQtyUp($qtyInputcontainer);
+                }
+            });
+            $(this).find('input.qtyInput').keyup(function (e) {
+                var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
+                if ($.isOk($qtyInputcontainer)) {
+                    if (e.key === 'Up') {
+                        inputQtyUp($qtyInputcontainer);
+                    } else if (e.key === 'Down') {
+                        inputQtyDown($qtyInputcontainer);
+                    } else if (e.key === 'End' || e.key === 'Right') {
+                        inputQtyMax($qtyInputcontainer);
+                    } else if (e.key === 'Home' || e.key === 'Left') {
+                        inputQtyMin($qtyInputcontainer);
+                    }
+                }
+
+            });
+
+            $(this).data('event_init', 1);
+        }
     });
 }
 

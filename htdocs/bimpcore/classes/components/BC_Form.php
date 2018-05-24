@@ -40,7 +40,9 @@ class BC_Form extends BC_Panel
         'form_values' => array('data_type' => 'array', 'default' => array()),
         'multiple'    => array('data_type' => 'bool', 'default' => 0),
         'display_if'  => array('data_type' => 'array'),
-        'depends_on'  => array()
+        'depends_on'  => array(),
+        'on_create'   => array('data_type' => 'bool', 'default' => 1),
+        'on_edit'     => array('data_type' => 'bool', 'default' => 0)
     );
 
     public function __construct(BimpObject $object, $id_parent = null, $name = '', $level = 1, $content_only = false, $on_save = null)
@@ -207,12 +209,16 @@ class BC_Form extends BC_Panel
                 } elseif ((int) $row_params['custom']) {
                     $html .= $this->renderCustomRow($row, $row_params);
                 } elseif ($row_params['object']) {
-                    if (!$this->object->isLoaded()) {
-                        $row_params = array_merge($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$object_params));
-                        $html .= '<div>';
-                        $html .= $this->renderObjectRow($row_params['object'], $row_params);
-                        $html .= '</div>';
+                    $row_params = array_merge($row_params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$object_params));
+                    if (!(int) $row_params['on_edit'] && $this->object->isLoaded()) {
+                        continue;
                     }
+                    if (!(int) $row_params['on_create'] && !$this->object->isLoaded()) {
+                        continue;
+                    }
+                    $html .= '<div>';
+                    $html .= $this->renderObjectRow($row_params['object'], $row_params);
+                    $html .= '</div>';
                 }
             }
         }
@@ -452,9 +458,14 @@ class BC_Form extends BC_Panel
             return BimpRender::renderAlerts('Erreur de configuration: sous-object "' . $object_name . '" invalide');
         }
 
+        $object_id_parent = 0;
+
         if ($object->getParentModule() === $this->object->module &&
                 $object->getParentObjectName() === $this->object->object_name) {
             $object->parent = $this->object;
+            if (BimpObject::objectLoaded($this->object)) {
+                $object_id_parent = $this->object->id;
+            }
         }
 
         $this->sub_objects[] = $this->fields_prefix . $object_name;
@@ -484,11 +495,19 @@ class BC_Form extends BC_Panel
         $form = new BC_Form($object, null, $params['form_name'], 1, true);
         $form->setValues($params['values']);
         $form->setFieldsPrefix($this->fields_prefix . $object_name . '_');
-        $form->identifier = $this->identifier;
 
+        $subFormIdentifier = '';
         if ((int) $params['multiple']) {
+            $subFormIdentifier = $this->fields_prefix . $object_name . '_sub_object_idx_sub_object_form';
+            $form->identifier = $subFormIdentifier;
             $html .= '<div class="subObjectFormTemplate">';
-            $html .= '<div class="formInputGroup subObjectForm">';
+            $html .= '<div id="' . $subFormIdentifier . '" class="formInputGroup subObjectForm"';
+            $html .= ' data-module="' . $object->module . '"';
+            $html .= ' data-object_name="' . $object->object_name . '"';
+            $html .= ' data-name="' . $params['form_name'] . '"';
+            $html .= ' data-id_object="' . (BimpObject::objectLoaded($object) ? $object->id : 0) . '"';
+            $html .= ' data-id_parent="' . $object_id_parent . '"';
+            $html .= '>';
             $html .= '<div class="formGroupHeading">';
             $html .= '<div class="formGroupTitle">';
             $html .= '<h4>' . BimpTools::ucfirst(BimpObject::getInstanceLabel($object)) . ' #sub_object_idx</h4>';
@@ -507,10 +526,20 @@ class BC_Form extends BC_Panel
             $html .= '</div>';
             $html .= '<div class="formGroupButtons">';
             $html .= '<span class="btn btn-default" onclick="addSubObjectForm($(this), \'' . $this->fields_prefix . $object_name . '\')">';
-            $html .= '<i class="fa fa-plus-circle iconLeft"></i>Ajouter</span>';
+            $html .= '<i class="fa fa-plus-circle iconLeft"></i>Ajouter ' . BimpObject::getInstanceLabel($object, 'a') . '</span>';
             $html .= '</div>';
         } else {
+            $subFormIdentifier = $this->fields_prefix . $object_name . '_sub_object_form';
+            $form->identifier = $subFormIdentifier;
+            $html .= '<div id="' . $subFormIdentifier . '" class="subObjectForm"';
+            $html .= ' data-module="' . $object->module . '"';
+            $html .= ' data-object_name="' . $object->object_name . '"';
+            $html .= ' data-name="' . $params['form_name'] . '"';
+            $html .= ' data-id_object="' . (BimpObject::objectLoaded($object) ? $object->id : 0) . '"';
+            $html .= ' data-id_parent="' . $object_id_parent . '"';
+            $html .= '>';
             $html .= $form->renderHtmlContent(false);
+            $html .= '</div>';
         }
 
         $html .= '<input type="hidden" name="' . $this->fields_prefix . $object_name . '_multiple" value="' . (int) $params['multiple'] . '"/>';

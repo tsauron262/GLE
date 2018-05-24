@@ -218,35 +218,6 @@ function setCommonEvents($container) {
     });
 }
 
-function setInputsEvents($container) {
-    $container.find('.switch').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
-            setSwitchInputEvents($(this));
-            $(this).data('event_init', 1);
-        }
-    });
-    $container.find('.toggle_value').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
-            setToggleInputEvent($(this));
-            $(this).data('event_init', 1);
-        }
-    });
-    $container.find('.searchListOptions').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
-            setSearchListOptionsEvents($(this));
-            $(this).data('event_init', 1);
-        }
-    });
-    $container.find('input[type="text"]').each(function () {
-        if (!$(this).data('check_event_init')) {
-            $(this).keyup(function () {
-                checkTextualInput($(this));
-            });
-            $(this).data('check_event_init', 1);
-        }
-    });
-}
-
 function setDisplayPopupButtonEvents($button) {
     if (!$button.length) {
         return;
@@ -320,6 +291,55 @@ function checkSelectColor($select) {
         $select.css({'color': '#' + color, 'font-weight': 'bold', 'border-bottom-color': '#' + color});
     } else {
         $select.css({'color': '#3C3C3C', 'font-weight': 'normal', 'border-bottom-color': 'rgba(0, 0, 0, 0.2)'});
+    }
+}
+
+function inputQtyUp($qtyInputContainer) {
+    var $input = $qtyInputContainer.find('input.qtyInput');
+    if ($input.length) {
+        var val = 0;
+        if (parseInt($input.data('decimals')) > 0) {
+            val = parseFloat($input.val());
+        } else {
+            val = parseInt($input.val());
+        }
+        if (typeof (val) === 'number') {
+            val++;
+            $input.val(val).change();
+            checkInputQty($qtyInputContainer);
+        }
+    }
+}
+
+function inputQtyDown($qtyInputContainer) {
+    var $input = $qtyInputContainer.find('input.qtyInput');
+    if ($input.length) {
+        var val = 0;
+        if (parseInt($input.data('decimals')) > 0) {
+            val = parseFloat($input.val());
+        } else {
+            val = parseInt($input.val());
+        }
+        if (typeof (val) === 'number') {
+            val--;
+            $input.val(val).change();
+            checkInputQty($qtyInputContainer);
+        }
+    }
+}
+
+function inputQtyMax($qtyInputcontainer) {
+
+}
+
+function inputQtyMin($qtyInputcontainer) {
+
+}
+
+function checkInputQty($qtyInputContainer) {
+    var $input = $qtyInputContainer.find('input.qtyInput');
+    if ($input.length) {
+        checkTextualInput($input);
     }
 }
 

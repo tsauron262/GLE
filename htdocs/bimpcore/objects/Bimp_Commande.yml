@@ -1,0 +1,42 @@
+dol_object: 
+    instance: 
+        dol_object: commande
+            
+table: commande
+primary: rowid
+
+labels: 
+    name: commande
+    is_female: 1
+    
+objects: 
+    order_lines: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpreservation
+                name: BR_OrderLine
+    facture: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Facture
+                
+associations: 
+    factures: 
+        object: facture
+        label: Factures
+        display: 
+            default: 
+                type: nom_url
+                
+forms: 
+    remove_lines: 
+        title: Retirer des produits / services
+        rows: 
+            - object: order_lines
+              label: Produits / Services
+              form_name: remove
+              multiple: 1
+              on_edit: 1

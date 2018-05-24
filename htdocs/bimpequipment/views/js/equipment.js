@@ -1,3 +1,4 @@
+var equipment_url = dol_url_root + '/bimpequipment/index.php';
 
 function onEquipmentFormLoaded($form) {
     $form.find('[name="product_label"]').removeClass('disabled');
@@ -18,6 +19,7 @@ function onEquipmentFormLoaded($form) {
                 BimpAjax('equipmentGgxLookup', {
                     serial: serial
                 }, $container, {
+                    url: equipment_url,
                     $form: $form,
                     display_processing: true,
                     display_success: false,

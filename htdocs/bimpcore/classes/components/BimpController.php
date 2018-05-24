@@ -912,6 +912,12 @@ class BimpController
         $field_prefix = BimpTools::getValue('field_prefix', '');
         $is_object = (int) BimpTools::getValue('is_object', 0);
 
+        if ($field_prefix) {
+            if (preg_match('/^' . $field_prefix . '(.*)$/', $field_name, $matches)) {
+                $field_name = $matches[1];
+            }
+        }
+
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type de l\'objet absent';
         }
@@ -936,113 +942,54 @@ class BimpController
             }
 
             if (!count($errors)) {
-                if ($field_prefix) {
-                    if (!$id_object) {
-                        $id_object = null;
-                    }
-                    if (preg_match('/^(.*)_(\d+_)?$/', $field_prefix, $matches)) {
-                        $sub_object_name = $matches[1];
-                        $sub_object = $object->getChildObject($sub_object_name);
-                        if (is_a($sub_object, 'BimpObject')) {
-                            $field_name = preg_replace('/^' . $field_prefix . '(.*)$/', '$1', $field_name);
-                            if ($value) {
-                                $sub_object->set($field_name, $value);
-                            }
-                            foreach ($fields as $field => $value) {
-                                $sub_object->set($field, $value);
-                            }
+                if ($value) {
+                    $object->set($field_name, $value);
+                }
 
-                            if (count($object->errors)) {
-                                $errors = $sub_object->errors;
-                            } else {
-                                if ($custom_field) {
-                                    $sub_form_name = '';
-                                    $path = 'forms/' . $form_name . '/rows';
-                                    $rows = $object->config->getCompiledParams($path);
-                                    if (is_array($rows)) {
-                                        foreach ($rows as $key => $row) {
-                                            if (isset($row['object']) && $row['object'] === $sub_object_name) {
-                                                $sub_form_name = $object->config->get($path . '/' . $key . '/form_name', 'default');
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    if ($sub_form_name) {
-                                        $form_row = BimpTools::getValue('form_row', '');
-                                        if ($form_row) {
-                                            $form = new BC_Form($sub_object, $id_object, $sub_form_name, 1, true);
-                                            $form->setFieldsPrefix($field_prefix);
-                                            $html = $form->renderCustomInput($form_row);
-                                        } else {
-                                            $html = BimpRender::renderAlerts('Erreur de configuration - contenu du champ personnalisé non défini');
-                                        }
-                                    }
-                                } elseif ($sub_object->field_exists($field_name)) {
-                                    $field = new BC_Field($sub_object, $field_name, true);
-                                    $field->name_prefix = $field_prefix;
-                                    if ($field->params['type'] === 'id_object' && $field->params['create_form']) {
-                                        $html .= BC_Form::renderCreateObjectButton($sub_object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], true);
-                                    }
-                                    $html .= $field->renderInput();
-                                    unset($field);
-                                } elseif ($sub_object->association_exists($field_name)) {
-                                    $bimpAsso = new BimpAssociation($object, $field_name);
-                                    if (count($bimpAsso->errors)) {
-                                        $html = BimpRender::renderAlerts($bimpAsso->errors);
-                                    } else {
-                                        $html = $bimpAsso->renderAssociatesCheckList($field_prefix);
+                foreach ($fields as $field => $value) {
+                    $object->set($field, $value);
+                }
+
+                if (count($object->errors)) {
+                    $errors = $object->errors;
+                } else {
+                    if ($is_object) {
+                        $form = new BC_Form($object, $id_parent, $form_name, 1, true);
+                        $form->fields_prefix = $field_prefix;
+                        if (!is_null($form->config_path)) {
+                            foreach ($form->params['rows'] as $row) {
+                                if ($object->config->isDefined($form->config_path . '/rows/' . $row . '/object')) {
+                                    $sub_object_name = $object->getConf($form->config_path . '/rows/' . $row . '/object', '');
+                                    if ($sub_object_name && $sub_object_name === $field_name) {
+                                        $row_params = BimpComponent::fetchParamsStatic($object->config, $form->config_path . '/rows/' . $row, BC_Form::$object_params);
+                                        $html = $form->renderObjectRow($field_name, $row_params);
                                     }
                                 }
                             }
                         }
-                    }
-                } else {
-                    if ($value) {
-                        $object->set($field_name, $value);
-                    }
-
-                    foreach ($fields as $field => $value) {
-                        $object->set($field, $value);
-                    }
-
-                    if (count($object->errors)) {
-                        $errors = $object->errors;
-                    } else {
-                        if ($is_object) {
+                    } elseif ($custom_field) {
+                        $form_row = BimpTools::getValue('form_row', '');
+                        if ($form_row) {
                             $form = new BC_Form($object, $id_parent, $form_name, 1, true);
-                            if (!is_null($form->config_path)) {
-                                foreach ($form->params['rows'] as $row) {
-                                    if ($object->config->isDefined($form->config_path . '/rows/' . $row . '/object')) {
-                                        $sub_object_name = $object->getConf($form->config_path . '/rows/' . $row . '/object', '');
-                                        if ($sub_object_name && $sub_object_name === $field_name) {
-                                            $row_params = BimpComponent::fetchParamsStatic($object->config, $form->config_path . '/rows/' . $row, BC_Form::$object_params);
-                                            $html = $form->renderObjectRow($field_name, $row_params);
-                                        }
-                                    }
-                                }
-                            }
-                        } elseif ($custom_field) {
-                            $form_row = BimpTools::getValue('form_row', '');
-                            if ($form_row) {
-                                $form = new BC_Form($object, $id_parent, $form_name, 1, true);
-                                $html = $form->renderCustomInput($form_row);
-                            } else {
-                                $html = BimpRender::renderAlerts('Erreur de configuration - contenu du champ personnalisé non défini');
-                            }
-                        } elseif ($object->config->isDefined('fields/' . $field_name)) {
-                            $field = new BC_Field($object, $field_name, true);
-                            if ($field->params['type'] === 'id_object' && $field->params['create_form']) {
-                                $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_name, $field->params['create_form'], $field->params['create_form_values'], true);
-                            }
-                            $html .= $field->renderInput();
-                            unset($field);
-                        } elseif ($object->config->isDefined('associations/' . $field_name)) {
-                            $bimpAsso = new BimpAssociation($object, $field_name);
-                            if (count($bimpAsso->errors)) {
-                                $html = BimpRender::renderAlerts($bimpAsso->errors);
-                            } else {
-                                $html = $bimpAsso->renderAssociatesCheckList();
-                            }
+                            $form->fields_prefix = $field_prefix;
+                            $html = $form->renderCustomInput($form_row);
+                        } else {
+                            $html = BimpRender::renderAlerts('Erreur de configuration - contenu du champ personnalisé non défini');
+                        }
+                    } elseif ($object->config->isDefined('fields/' . $field_name)) {
+                        $field = new BC_Field($object, $field_name, true);
+                        $field->name_prefix = $field_prefix;
+                        if ($field->params['type'] === 'id_object' && $field->params['create_form']) {
+                            $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], true);
+                        }
+                        $html .= $field->renderInput();
+                        unset($field);
+                    } elseif ($object->config->isDefined('associations/' . $field_name)) {
+                        $bimpAsso = new BimpAssociation($object, $field_name);
+                        if (count($bimpAsso->errors)) {
+                            $html = BimpRender::renderAlerts($bimpAsso->errors);
+                        } else {
+                            $html = $bimpAsso->renderAssociatesCheckList($field_prefix);
                         }
                     }
                 }

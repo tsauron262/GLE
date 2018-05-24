@@ -632,20 +632,18 @@ views:
                     col_md: 6
                     fields_table:
                         name: client
-                        
             - cols: 
                   - type: fields_table
                     col_lg: 6
                     col_md: 6
                     fields_table: 
-                        name: infos
+                        name: materiel
                   
                   - type: fields_table
                     col_lg: 6
                     col_md: 6
                     fields_table:
-                        name: client
-                        
+                        name: suivi
             - cols: 
                 - type: list
                   list: 

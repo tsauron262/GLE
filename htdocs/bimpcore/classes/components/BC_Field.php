@@ -362,6 +362,7 @@ class BC_Field extends BimpComponent
             case 'bool':
                 return 'toggle';
 
+            case 'qty':
             case 'html':
             case 'time':
             case 'date':

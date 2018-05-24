@@ -332,8 +332,7 @@ forms:
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end
-            - association: contrats     
-            - object: places
+            - association: contrats
             
 list:
 #    checkboxes: 1

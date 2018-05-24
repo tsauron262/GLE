@@ -114,6 +114,35 @@ if ($id > 0 || ! empty($ref)) {
 	$ret = $object->fetch($id, $ref, '', '', $conf->global->INVOICE_USE_SITUATION);
 }
 
+
+
+/*moddrsi   pour utilisé la mise en stock que si pas de commande  */
+if($object->id > 0){
+    $conf->global->STOCK_CALCULATE_ON_BILL = true;
+    $object->fetchObjectLinked();
+    if(isset($object->linkedObjects['commande']))
+        $conf->global->STOCK_CALCULATE_ON_BILL = false;
+    else{
+        if(isset($_REQUEST["idwarehouse"])){
+            $prod = new Product($db);
+            foreach($object->lines as $line){
+                if(isset($line->fk_product)){
+                    $prod->fetch($line->fk_product);
+                    if(isset($prod->array_options['options_serialisable']) && $prod->array_options['options_serialisable'] == 1){
+                        $action = "";
+                        setEventMessages("Produit serialisable commande requise", null, 'errors');
+                    }
+                }
+            }
+        }
+        if(isset($object->array_options['options_entrepot']))
+            $_POST['idwarehouse'] = $object->array_options['options_entrepot'];
+        $conf->global->STOCK_CALCULATE_ON_BILL = true;
+    }
+}
+
+/*fmoddrsi*/
+
 // Initialize technical object to manage hooks of page. Note that conf->hooks_modules contains array of hook context
 $hookmanager->initHooks(array('invoicecard','globalcard'));
 

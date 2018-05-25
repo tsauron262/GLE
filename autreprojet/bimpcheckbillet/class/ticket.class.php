@@ -309,29 +309,34 @@ class Ticket {
 
         $this->pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
 
-        try {   // set tariff image
-            @$this->pdf->Image($image_tariff, $x + $margin + 1, $y + $margin, 30, 30);
-        } catch (Exception $e) { // set event image
-            $this->pdf->Image($image_event, $x + $margin + 1, $y + $margin, 30, 30);
-        }
+//        try {   // set tariff image
+//            @$this->pdf->Image($image_tariff, $x + $margin + 1, $y + $margin, 30, 30);
+//        } catch (Exception $e) { // set event image
+//            $this->pdf->Image($image_event, $x + $margin + 1, $y + $margin, 30, 30);
+//        }
 
         $this->pdf->Code128($x + 75, $y + 20, $ticket->barcode, 15, 15);
 
-        QRcode::png($ticket->barcode, $file_name_qrcode, 0, 3);
+        $tariff = new tariff($this->db);
+        $tariff->fetch($ticket->id_tariff);
+        
+        QRcode::png($ticket->barcode . "\nhttps://www.google.fr/", $file_name_qrcode, 0, 3);
         $this->pdf->Image($file_name_qrcode, $x + 75, $y + 5, 15, 15);
 
         $this->pdf->SetY($y + 8);
-        $this->pdf->SetX($x + 39);
-
-        $this->pdf->MultiCell(40, 4, mb_strimwidth($event->label, 0, 20, "...") . "\n" .
-                mb_strimwidth($tariff->label, 0, 20, "...") . "\n" .
-                mb_strimwidth(($ticket->first_name == null ? '' : $ticket->first_name), 0, 20, "...") . "\n" .
-                mb_strimwidth(($ticket->last_name == null ? '' : $ticket->last_name), 0, 20, "..."));
+        $this->pdf->SetX($x + 20);
         
+        $max_width = 23;
+
+        $this->pdf->MultiCell(40, 4, mb_strimwidth($event->label, 0, $max_width, "...") . "\n" .
+                mb_strimwidth($tariff->label, 0, $max_width, "...") . "\n" .
+                mb_strimwidth(($ticket->first_name == null ? '' : $ticket->first_name), 0, $max_width, "...") . "\n" .
+                mb_strimwidth(($ticket->last_name == null ? '' : $ticket->last_name), 0, $max_width, "..."));
+
         echo "OK";
 
         if ($is_last)
-            $this->pdf->Output(PATH.'/img/tickets/ticket' . base64_encode($id_order) . '.pdf', 'F');
+            $this->pdf->Output(PATH . '/img/tickets/ticket' . base64_encode($id_order) . '.pdf', 'F');
 
         if ($set_to_left)
             return array('x' => $x + $ticket_width + $margin, 'y' => $y);

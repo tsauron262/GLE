@@ -13,6 +13,7 @@ class Tariff {
     public $date_start;
     public $date_end;
     public $require_names;
+    public $id_prod_extern;
 
     public function __construct($db) {
         $this->db = $db;
@@ -319,7 +320,7 @@ class Tariff {
             $this->errors[] = "Id produit extern inconnu";
             return -2;
         }
-        return array();
+        return -1;
     }
 
     public function getIdsEventsByIdsTariffs($ids_tariff) {

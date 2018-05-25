@@ -1114,7 +1114,7 @@ function onVenteLoaded() {
         setCartLineEvents($(this));
     });
 
-    $('#BC_Vente_client_form').find('input[name="id_client"]').change(function () {
+    $('#venteClientFormContainer').find('input[name="id_client"]').change(function () {
         saveClient();
     });
 

@@ -350,27 +350,28 @@
   font-size: 12px;
   color: #636363;
   padding-left: 30px;
+  margin-top: 10px;
 }
-/* line 344, ../scss/styles.scss */
+/* line 345, ../scss/styles.scss */
 #venteClientViewContainer .client_infos i {
   font-size: 14px;
   color: #282828;
   margin-left: -20px;
   float: left;
 }
-/* line 353, ../scss/styles.scss */
+/* line 354, ../scss/styles.scss */
 #venteClientViewContainer #contactSelect {
   width: 100%;
   padding: 7px 0;
 }
-/* line 358, ../scss/styles.scss */
+/* line 359, ../scss/styles.scss */
 #venteClientViewContainer .contactActions {
   display: inline-block;
   float: right;
   margin-right: -90px;
 }
 
-/* line 365, ../scss/styles.scss */
+/* line 366, ../scss/styles.scss */
 #venteSearchProduct {
   line-height: 28px;
   vertical-align: middle;
@@ -378,12 +379,12 @@
   font-weight: bold;
 }
 
-/* line 372, ../scss/styles.scss */
+/* line 373, ../scss/styles.scss */
 #addProductResult {
   display: none;
 }
 
-/* line 376, ../scss/styles.scss */
+/* line 377, ../scss/styles.scss */
 #venteRemises {
   display: none;
   padding: 10px;
@@ -392,13 +393,13 @@
   font-size: 15px;
   color: #8C0000;
 }
-/* line 384, ../scss/styles.scss */
+/* line 385, ../scss/styles.scss */
 #venteRemises .title {
   font-weight: bold;
   font-size: 16px;
   border-bottom: 1px solid #282828;
 }
-/* line 393, ../scss/styles.scss */
+/* line 394, ../scss/styles.scss */
 #venteRemises .remises_lines,
 #venteRemises .total_remises_vente,
 #venteRemises .total_remises_articles,
@@ -406,21 +407,21 @@
   text-align: right;
   padding: 4px 30px 4px 10px;
 }
-/* line 397, ../scss/styles.scss */
+/* line 398, ../scss/styles.scss */
 #venteRemises .remises_lines .remise,
 #venteRemises .total_remises_vente .remise,
 #venteRemises .total_remises_articles .remise,
 #venteRemises .total_remises .remise {
   margin-bottom: 4px;
 }
-/* line 400, ../scss/styles.scss */
+/* line 401, ../scss/styles.scss */
 #venteRemises .remises_lines span,
 #venteRemises .total_remises_vente span,
 #venteRemises .total_remises_articles span,
 #venteRemises .total_remises span {
   font-weight: bold;
 }
-/* line 404, ../scss/styles.scss */
+/* line 405, ../scss/styles.scss */
 #venteRemises .remises_lines i,
 #venteRemises .total_remises_vente i,
 #venteRemises .total_remises_articles i,
@@ -435,20 +436,20 @@
   font-size: 18px;
   cursor: pointer;
 }
-/* line 414, ../scss/styles.scss */
+/* line 415, ../scss/styles.scss */
 #venteRemises .remises_lines i:hover,
 #venteRemises .total_remises_vente i:hover,
 #venteRemises .total_remises_articles i:hover,
 #venteRemises .total_remises i:hover {
   color: #a00000;
 }
-/* line 419, ../scss/styles.scss */
+/* line 420, ../scss/styles.scss */
 #venteRemises .total_remises {
   font-weight: bold;
   font-size: 16px;
 }
 
-/* line 425, ../scss/styles.scss */
+/* line 426, ../scss/styles.scss */
 #ventePanierTotal {
   text-align: center;
   background-color: #DCDCDC;
@@ -459,7 +460,7 @@
   padding: 10px;
 }
 
-/* line 435, ../scss/styles.scss */
+/* line 436, ../scss/styles.scss */
 #venteNbArticles {
   display: inline-block;
   margin-bottom: 10px;
@@ -467,13 +468,13 @@
   color: #282828;
 }
 
-/* line 442, ../scss/styles.scss */
+/* line 443, ../scss/styles.scss */
 #loadRemiseFormButton {
   float: right;
   margin-top: -15px;
 }
 
-/* line 448, ../scss/styles.scss */
+/* line 449, ../scss/styles.scss */
 #venteToPay,
 #venteToReturn {
   text-align: center;
@@ -482,37 +483,37 @@
   padding: 10px;
 }
 
-/* line 455, ../scss/styles.scss */
+/* line 456, ../scss/styles.scss */
 #venteToPay {
   color: #282828;
   background-color: #DCDCDC;
   border: 1px solid #636363;
 }
 
-/* line 461, ../scss/styles.scss */
+/* line 462, ../scss/styles.scss */
 #venteToReturn {
   color: #fff;
   background-color: #348C41;
 }
 
-/* line 467, ../scss/styles.scss */
+/* line 468, ../scss/styles.scss */
 #ventePaiementButtons button {
   width: 100%;
   text-align: center;
 }
 
-/* line 473, ../scss/styles.scss */
+/* line 474, ../scss/styles.scss */
 #venteAddPaiementFormContainer {
   padding: 20px;
   text-align: center;
   display: none;
 }
-/* line 478, ../scss/styles.scss */
+/* line 479, ../scss/styles.scss */
 #venteAddPaiementFormContainer span {
   font-size: 16px;
   margin-right: 8px;
 }
-/* line 482, ../scss/styles.scss */
+/* line 483, ../scss/styles.scss */
 #venteAddPaiementFormContainer input {
   width: 160px;
   border: 1px solid #636363;
@@ -521,12 +522,12 @@
   font-weight: bold;
   vertical-align: middle;
 }
-/* line 490, ../scss/styles.scss */
+/* line 491, ../scss/styles.scss */
 #venteAddPaiementFormContainer input:focus {
   box-shadow: 0 0 4px #0087B4;
   border-color: #005A78;
 }
-/* line 495, ../scss/styles.scss */
+/* line 496, ../scss/styles.scss */
 #venteAddPaiementFormContainer .inputAddon {
   border-color: #636363;
   background-color: #636363;
@@ -534,17 +535,17 @@
   vertical-align: middle;
   padding: 7px 12px;
 }
-/* line 503, ../scss/styles.scss */
+/* line 504, ../scss/styles.scss */
 #venteAddPaiementFormContainer button {
   margin-left: 30px;
 }
 
-/* line 508, ../scss/styles.scss */
+/* line 509, ../scss/styles.scss */
 #ventePaimentsLines {
   max-width: 450px;
   margin: 20px 30px;
 }
-/* line 512, ../scss/styles.scss */
+/* line 513, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line {
   margin: 5px;
   padding: 5px;
@@ -553,23 +554,23 @@
   color: #282828;
   font-size: 16px;
 }
-/* line 520, ../scss/styles.scss */
+/* line 521, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line .paiement_label {
   display: inline-block;
   width: 59%;
 }
-/* line 524, ../scss/styles.scss */
+/* line 525, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line .paiement_label i {
   margin-right: 12px;
 }
-/* line 528, ../scss/styles.scss */
+/* line 529, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line .paiement_montant {
   display: inline-block;
   width: 39%;
   text-align: right;
   padding-right: 40px;
 }
-/* line 534, ../scss/styles.scss */
+/* line 535, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line .deletePaiementButton {
   float: right;
   margin-right: -40px;
@@ -580,11 +581,11 @@
   -o-transition: all 0.3s ease;
   transition: all 0.3s ease;
 }
-/* line 542, ../scss/styles.scss */
+/* line 543, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line .deletePaiementButton:hover {
   color: #a00000;
 }
-/* line 547, ../scss/styles.scss */
+/* line 548, ../scss/styles.scss */
 #ventePaimentsLines .paiements_total {
   color: #282828;
   padding: 8px;
@@ -593,33 +594,33 @@
   text-align: right;
 }
 
-/* line 556, ../scss/styles.scss */
+/* line 557, ../scss/styles.scss */
 .selectArticleLine {
   margin: 5px;
   padding: 10px;
   border: 1px solid #b4b4b4;
 }
-/* line 561, ../scss/styles.scss */
+/* line 562, ../scss/styles.scss */
 .selectArticleLine .product_price {
   font-weight: bold;
   font-size: 14px;
   text-align: right;
 }
 
-/* line 569, ../scss/styles.scss */
+/* line 570, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine {
   padding-top: 10px;
   margin-top: 10px;
   border-top: 1px solid #b4b4b4;
 }
-/* line 574, ../scss/styles.scss */
+/* line 575, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_title {
   color: #004264;
   font-size: 18px;
   padding-bottom: 8px;
   padding-right: 40px;
 }
-/* line 580, ../scss/styles.scss */
+/* line 581, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_title .removeArticle {
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -631,17 +632,17 @@
   font-size: 28px;
   cursor: pointer;
 }
-/* line 589, ../scss/styles.scss */
+/* line 590, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_title .removeArticle:hover {
   color: #a00000;
 }
-/* line 594, ../scss/styles.scss */
+/* line 595, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_info {
   color: #282828;
   font-size: 12px;
   padding-left: 15px;
 }
-/* line 600, ../scss/styles.scss */
+/* line 601, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises {
   display: none;
   margin: 3px 0;
@@ -649,20 +650,20 @@
   color: #8C0000;
   text-align: right;
 }
-/* line 607, ../scss/styles.scss */
+/* line 608, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .title {
   font-weight: bold;
 }
-/* line 612, ../scss/styles.scss */
+/* line 613, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise {
   font-size: 14px;
   padding: 6px 30px 6px 0;
 }
-/* line 615, ../scss/styles.scss */
+/* line 616, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise span {
   font-weight: bold;
 }
-/* line 619, ../scss/styles.scss */
+/* line 620, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise i {
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -674,22 +675,22 @@
   margin-right: -30px;
   cursor: pointer;
 }
-/* line 628, ../scss/styles.scss */
+/* line 629, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise i:hover {
   color: #a00000;
 }
-/* line 636, ../scss/styles.scss */
+/* line 637, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options {
   padding-top: 10px;
   padding-left: 15px;
   padding-right: 60px;
 }
-/* line 641, ../scss/styles.scss */
+/* line 642, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty {
   text-align: left;
   display: inline-block;
 }
-/* line 646, ../scss/styles.scss */
+/* line 647, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_down,
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_up {
   color: #636363;
@@ -700,12 +701,12 @@
   -o-transition: all 0.3s ease;
   transition: all 0.3s ease;
 }
-/* line 653, ../scss/styles.scss */
+/* line 654, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_down:hover,
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_up:hover {
   color: #ef7d00;
 }
-/* line 657, ../scss/styles.scss */
+/* line 658, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .article_qty_input {
   padding: 5px;
   font-weight: bold;
@@ -716,50 +717,50 @@
   width: 60px;
   vertical-align: middle;
 }
-/* line 667, ../scss/styles.scss */
+/* line 668, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .article_qty_input:focus {
   box-shadow: 0 0 4px #0087B4;
   border-color: #005A78;
 }
-/* line 673, ../scss/styles.scss */
+/* line 674, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .product_total_price {
   display: inline-block;
   float: right;
   margin-right: -60px;
   text-align: right;
 }
-/* line 679, ../scss/styles.scss */
+/* line 680, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .product_total_price .base_price {
   margin-right: 12px;
   color: #636363;
   font-size: 16px;
   text-decoration: line-through;
 }
-/* line 686, ../scss/styles.scss */
+/* line 687, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .product_total_price .final_price {
   color: #004264;
   font-weight: bold;
   font-size: 20px;
 }
-/* line 694, ../scss/styles.scss */
+/* line 695, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .placeAlert {
   margin-top: 10px;
 }
 
 @media print {
-  /* line 701, ../scss/styles.scss */
+  /* line 702, ../scss/styles.scss */
   body * {
     visibility: hidden !important;
   }
 
-  /* line 706, ../scss/styles.scss */
+  /* line 707, ../scss/styles.scss */
   #venteTicketContainer,
   #venteTicketContainer * {
     display: block;
     visibility: visible !important;
   }
 
-  /* line 711, ../scss/styles.scss */
+  /* line 712, ../scss/styles.scss */
   #venteTicketContainer {
     position: absolute;
     left: 0;

@@ -16,6 +16,7 @@ class BMP_Event extends BimpObject
     public static $id_sacem_bar_montant = 3;
     public static $id_sacem_billets_montant = 26;
     public static $id_sacem_autre_montant = 30;
+    public static $id_sacem_groupe = 62;
     public static $id_cnv_montant = 5;
     public static $id_sacem_secu_montant = 29;
     // Calculs:
@@ -757,8 +758,16 @@ class BMP_Event extends BimpObject
                             'id_montant' => (int) self::$id_sacem_autre_montant
                         ))) {
                     $sacem_autre = (float) $eventMontant->getData('amount');
-                    $sacem_autre += $sacem_autre * ($sacem_secu_rate / 100);
                 }
+                if ($eventMontant->find(array(
+                            'id_event'   => (int) $this->id,
+                            'id_montant' => (int) self::$id_sacem_groupe
+                        ))) {
+                    $sacem_autre += (float) $eventMontant->getData('amount');
+                }
+                
+                if($sacem_autre > 0)
+                $sacem_autre += $sacem_autre * ($sacem_secu_rate / 100);
 
                 $total_autre_net = $total_autre_brut - $sacem_autre;
 

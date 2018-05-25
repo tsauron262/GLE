@@ -470,6 +470,9 @@ lists:
                     callback: displayProductAvailableQty
             equipment: 
                 field: id_equipment
+            commande: 
+                field: id_commande_client
+                display: nom_url
             commercial: 
                 field: id_commercial
                 display: nom_url

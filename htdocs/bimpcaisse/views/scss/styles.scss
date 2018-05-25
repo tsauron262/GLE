@@ -25,6 +25,7 @@ $article_color: #004264;
 
     padding: 10px;
     background-color: #fff;
+    background-image: none!important;
 
     .bc_header {
         margin: 0!important;
@@ -187,6 +188,10 @@ $article_color: #004264;
     }
 }
 
+#curVenteGlobal {
+    background-color: #DCDCDC;
+}
+
 #currentVenteContainer {
     display: none;
 
@@ -335,6 +340,7 @@ $article_color: #004264;
         font-size: 12px;
         color: $gray-dark;
         padding-left: 30px;
+        margin-top: 10px;
 
         i {
             font-size: 14px;

@@ -69,9 +69,11 @@ fields:
     date_begin: 
         label: Début du prêt
         type: datetime
+        required: 1
     date_end: 
         label: Fin du prêt
         type: datetime
+        required: 1
     returned: 
         label: Restitué
         type: bool
@@ -83,6 +85,7 @@ forms:
             - field: id_sav
               hidden: 1
             - association: equipments
+              required: 1
             - field: date_begin
             - field: date_end
           

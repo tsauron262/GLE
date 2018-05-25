@@ -29,6 +29,10 @@ class BC_Panel extends BimpComponent
         $this->level = $level;
         $this->identifier = $object->object_name . '_' . ($name ? $name . '_' : '') . static::$type;
 
+        if (BimpObject::objectLoaded($object)) {
+            $this->identifier .= '_' . $object->id;
+        }
+        
         if (isset($this->id_parent) && !is_null($this->id_parent) && $this->id_parent) {
             if (!is_null($object)) {
                 $parent_object_name = $object->getParentObjectName();

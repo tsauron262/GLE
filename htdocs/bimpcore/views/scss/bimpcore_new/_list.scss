@@ -329,6 +329,11 @@ th.th_tools {
 td.buttons {
     text-align: right;
     min-width: 160px;
+    padding-right: 6px!important;
+    
+    .btn {
+        margin-right: 4px;
+    }
 }
 .rowButton {
     color: #636363;

@@ -28,7 +28,7 @@ fields:
     repair_confirm_number: 
         label: N° de confirmation
     new_serial:
-        label: Nouveau numéro de série
+        label: Nouveau n° de série
     repair_type: 
         label: Type de réparation
     total_from_order: 
@@ -88,6 +88,8 @@ fields_tables:
             - field: date_create
             - field: repair_number
             - field: repair_confirm_number
+            - field: serial
+              label: N° de série initial
             - field: new_serial
             - label: Statut dans GSX
               value: 

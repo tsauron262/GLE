@@ -244,8 +244,6 @@ function loadRepairForm($button, id_sav, serial) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var $createRepairForm = $('#createRepairForm');
 
     if (!$createRepairForm.length) {
@@ -256,61 +254,27 @@ function loadRepairForm($button, id_sav, serial) {
     var repairType = $createRepairForm.find('[name="repairType"]').val();
     var symptomesCodes = $createRepairForm.find('[name="symptomesCodes"]').val();
 
-    var $modal = $('#page_modal');
-    var $resultContainer = $modal.find('.modal-ajax-content');
-    $resultContainer.html('').hide();
-
     var title = $createRepairForm.find('[name="repairType"]').find('option[value="' + repairType + '"]').text();
 
-
-    $modal.find('.modal-title').html(title);
-    $modal.find('.loading-text').text('Chargement du formulaire');
-    $modal.find('.content-loading').show();
-    $modal.modal('show');
-
-    var isCancelled = false;
-
-    $modal.on('hide.bs.modal', function (e) {
-        $modal.find('.extra_button').remove();
-        $modal.find('.content-loading').hide();
-        isCancelled = true;
-        $button.removeClass('disabled');
-    });
-
-    BimpAjax('loadRepairForm', {
+    bimpModal.loadAjaxContent($button, 'loadRepairForm', {
         id_sav: id_sav,
         serial: serial,
         repairType: repairType,
         symptomesCodes: symptomesCodes
-    }, null, {
-        repairType: repairType,
-        id_sav: id_sav,
-        display_success: false,
-        error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé',
-        success: function (result, bimpAjax) {
-            var $modal = $('#page_modal');
-            var $resultContainer = $modal.find('.modal-ajax-content');
-            $modal.find('.content-loading').hide();
-            if (!isCancelled) {
-                if (typeof (result.html) !== 'undefined') {
-                    $resultContainer.html(result.html).slideDown(250, function () {
-                        var $form = $(this).find('.request_form');
-                        if ($form.length) {
-                            onRepairFormLoaded($form);
-                        }
-                    });
-                    var button_html = '<button type="button" class="extra_button save_object_button btn btn-primary"';
-                    button_html += ' onclick="sendGsxRequestFromForm($(this), \'repairForm_' + bimpAjax.repairType + '\', ' + bimpAjax.id_sav + ')">';
-                    button_html += 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i></button>';
-                    $modal.find('.modal-footer').append(button_html);
-                }
-                $modal.modal('handleUpdate');
-            }
-        },
-        error: function (result) {
-            $modal.find('.content-loading').hide();
-            $modal.modal('handleUpdate');
+    }, title, 'Chargement du formulaire', function (result, bimpAjax) {
+        var $form = bimpAjax.$resultContainer.find('.request_form');
+        if ($form.length) {
+            onRepairFormLoaded($form);
+            var modal_idx = parseInt(bimpAjax.$resultContainer.data('modal_idx'));
+            $form.data('modal_idx', modal_idx);
+            var label = 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>';
+            var onclick = 'sendGsxRequestFromForm($(this), \'repairForm_' + bimpAjax.repairType + '\', ' + bimpAjax.id_sav + ')';
+            bimpModal.addButton(label, onclick, 'primary', 'save_object_button', modal_idx);
         }
+    }, {
+        error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé',
+        repairType: repairType,
+        id_sav: id_sav
     });
 }
 
@@ -319,60 +283,26 @@ function loadSerialUpdateForm($button, serial, id_sav, id_repair, request_type, 
         return;
     }
 
-    $button.addClass('disabled');
-    var $modal = $('#page_modal');
-    var $resultContainer = $modal.find('.modal-ajax-content');
-    $resultContainer.html('').hide();
-
-    $modal.find('.modal-title').html(title);
-    $modal.find('.loading-text').text('Chargement du formulaire');
-    $modal.find('.content-loading').show();
-    $modal.modal('show');
-
-    var isCancelled = false;
-
-    $modal.on('hide.bs.modal', function (e) {
-        $modal.find('.extra_button').remove();
-        $modal.find('.content-loading').hide();
-        isCancelled = true;
-        $button.removeClass('disabled');
-    });
-
-    BimpAjax('loadSerialUpdateForm', {
+    bimpModal.loadAjaxContent($button, 'loadSerialUpdateForm', {
         serial: serial,
         id_sav: id_sav,
         id_repair: id_repair,
         request_type: request_type
-    }, null, {
+    }, title, 'Chargement du formulaire', function (result, bimpAjax) {
+        var $form = bimpAjax.$resultContainer.find('.request_form');
+        if ($form.length) {
+            onRepairFormLoaded($form);
+            var modal_idx = parseInt(bimpAjax.$resultContainer.data('modal_idx'));
+            $form.data('modal_idx', modal_idx);
+            var label = 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>';
+            var onclick = 'sendGsxRequestFromForm($(this), \'repairForm_' + bimpAjax.request_type + '\', ' + bimpAjax.id_sav + ')';
+            bimpModal.addButton(label, onclick, 'primary', 'save_object_button', modal_idx);
+        }
+    }, {
         id_sav: id_sav,
         id_repair: id_repair,
         request_type: request_type,
-        display_success: false,
-        error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé',
-        success: function (result, bimpAjax) {
-            var $modal = $('#page_modal');
-            var $resultContainer = $modal.find('.modal-ajax-content');
-            $modal.find('.content-loading').hide();
-            if (!isCancelled) {
-                if (typeof (result.html) !== 'undefined') {
-                    $resultContainer.html(result.html).slideDown(250, function () {
-                        var $form = $(this).find('.request_form');
-                        if ($form.length) {
-                            onRepairFormLoaded($form);
-                        }
-                    });
-                    var button_html = '<button type="button" class="extra_button save_object_button btn btn-primary"';
-                    button_html += ' onclick="sendGsxRequestFromForm($(this), \'repairForm_' + bimpAjax.request_type + '\', ' + bimpAjax.id_sav + ')">';
-                    button_html += 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i></button>';
-                    $modal.find('.modal-footer').append(button_html);
-                }
-                $modal.modal('handleUpdate');
-            }
-        },
-        error: function (result) {
-            $modal.find('.content-loading').hide();
-            $modal.modal('handleUpdate');
-        }
+        error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé'
     });
 }
 

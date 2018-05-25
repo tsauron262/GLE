@@ -25,8 +25,8 @@ $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray 
     
     );
 
-$tabCentre["GB"] = $tabCentre["GA"];
-$tabCentre["GB"]['2'] = "Grenoble boutique";
+//$tabCentre["GB"] = $tabCentre["GA"];
+//$tabCentre["GB"]['2'] = "Grenoble boutique";
 
 //$tabCentre["AB"] = $tabCentre["M"];
 //$tabCentre["AB"]['2'] = "Annecy Boutique";
@@ -34,9 +34,9 @@ $tabCentre["GB"]['2'] = "Grenoble boutique";
 //$tabCentre["CB"]['2'] = "Chambery boutique";
 
 
-$tabCentre["VB"] = $tabCentre["V"];
-$tabCentre["VB"]['2'] = "Valence Boutique";
+//$tabCentre["VB"] = $tabCentre["V"];
+//$tabCentre["VB"]['2'] = "Valence Boutique";
 
 
 
-$tabCentre["M"] = $tabCentre["AB"];
+//$tabCentre["M"] = $tabCentre["AB"];

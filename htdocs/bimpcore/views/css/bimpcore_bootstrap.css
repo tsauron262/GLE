@@ -11413,8 +11413,43 @@ a.label:hover, a.label:focus {
 .nav-pills > li > a > .badge {
   margin-left: 3px;
 }
+/* line 59, ../scss/bootstrap/_badges.scss */
+.badge.badge-danger {
+  background-color: #a00000;
+  color: #fff;
+}
+/* line 64, ../scss/bootstrap/_badges.scss */
+.badge.badge-success {
+  background-color: #348c41;
+  color: #fff;
+}
+/* line 69, ../scss/bootstrap/_badges.scss */
+.badge.badge-danger {
+  background-color: #a00000;
+  color: #fff;
+}
+/* line 74, ../scss/bootstrap/_badges.scss */
+.badge.badge-warning {
+  background-color: #e69900;
+  color: #fff;
+}
+/* line 79, ../scss/bootstrap/_badges.scss */
+.badge.badge-info {
+  background-color: #3b6ea0;
+  color: #fff;
+}
+/* line 84, ../scss/bootstrap/_badges.scss */
+.badge.badge-important {
+  background-color: #963e96;
+  color: #fff;
+}
+/* line 89, ../scss/bootstrap/_badges.scss */
+.badge.badge-primary {
+  background-color: #ef7d00;
+  color: #fff;
+}
 
-/* line 63, ../scss/bootstrap/_badges.scss */
+/* line 98, ../scss/bootstrap/_badges.scss */
 a.badge:hover, a.badge:focus {
   color: white;
   text-decoration: none;

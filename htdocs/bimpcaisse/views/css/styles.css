@@ -7,6 +7,7 @@
   transition: all 0.3s ease;
   padding: 10px;
   background-color: #fff;
+  background-image: none !important;
 }
 /* line 17, ../scss/styles.scss */
 #bc_main_container .container-fluid {
@@ -17,7 +18,7 @@
   /*        margin-left: 0!important;
           margin-right: 0!important;*/
 }
-/* line 29, ../scss/styles.scss */
+/* line 30, ../scss/styles.scss */
 #bc_main_container .bc_header {
   margin: 0 !important;
   width: 100%;
@@ -27,43 +28,43 @@
   padding: 5px;
   border-bottom: 3px solid #EF7D00;
 }
-/* line 38, ../scss/styles.scss */
+/* line 39, ../scss/styles.scss */
 #bc_main_container .bc_header .header_logo {
   display: inline-block;
   padding: 10px 30px;
   background-color: #fff;
   float: left;
 }
-/* line 43, ../scss/styles.scss */
+/* line 44, ../scss/styles.scss */
 #bc_main_container .bc_header .header_logo img {
   height: 50px;
   width: auto;
 }
-/* line 49, ../scss/styles.scss */
+/* line 50, ../scss/styles.scss */
 #bc_main_container .bc_header .headerBlock {
   display: inline-block;
   float: left;
   margin: 12px 30px 12px 60px;
   padding-left: 50px;
 }
-/* line 56, ../scss/styles.scss */
+/* line 57, ../scss/styles.scss */
 #bc_main_container .bc_header .headerBlock i {
   float: left;
   margin-left: -50px;
   font-size: 38px;
   color: #FFC587;
 }
-/* line 64, ../scss/styles.scss */
+/* line 65, ../scss/styles.scss */
 #bc_main_container .bc_header .headerBlock .headerBlockTitle {
   font-size: 14px;
   color: #FFC587;
 }
-/* line 68, ../scss/styles.scss */
+/* line 69, ../scss/styles.scss */
 #bc_main_container .bc_header .headerBlock .headerBlockContent {
   font-size: 16px;
   color: #fff;
 }
-/* line 74, ../scss/styles.scss */
+/* line 75, ../scss/styles.scss */
 #bc_main_container .bc_header .fullScreenButton,
 #bc_main_container .bc_header .windowMaximiseButton {
   display: inline-block;
@@ -72,7 +73,7 @@
   cursor: pointer;
   text-align: center;
 }
-/* line 81, ../scss/styles.scss */
+/* line 82, ../scss/styles.scss */
 #bc_main_container .bc_header .fullScreenButton i,
 #bc_main_container .bc_header .windowMaximiseButton i {
   -webkit-transition: all 0.3s ease;
@@ -82,73 +83,73 @@
   line-height: 32px;
   color: #FFA84B;
 }
-/* line 89, ../scss/styles.scss */
+/* line 90, ../scss/styles.scss */
 #bc_main_container .bc_header .fullScreenButton:hover i,
 #bc_main_container .bc_header .windowMaximiseButton:hover i {
   color: #fff;
 }
 @media (max-width: 1300px) {
-  /* line 96, ../scss/styles.scss */
+  /* line 97, ../scss/styles.scss */
   #bc_main_container .bc_header .headerBlock {
     margin: 12px 10px 12px 15px;
     padding-left: 30px;
   }
-  /* line 101, ../scss/styles.scss */
+  /* line 102, ../scss/styles.scss */
   #bc_main_container .bc_header .headerBlock i {
     float: left;
     margin-left: -30px;
     font-size: 24px;
   }
-  /* line 107, ../scss/styles.scss */
+  /* line 108, ../scss/styles.scss */
   #bc_main_container .bc_header .headerBlock .headerBlockTitle {
     font-size: 12px;
   }
-  /* line 110, ../scss/styles.scss */
+  /* line 111, ../scss/styles.scss */
   #bc_main_container .bc_header .headerBlock .headerBlockContent {
     font-size: 14px;
   }
 }
 @media (max-width: 800px) {
-  /* line 117, ../scss/styles.scss */
+  /* line 118, ../scss/styles.scss */
   #bc_main_container .bc_header .header_logo {
     display: none;
   }
-  /* line 122, ../scss/styles.scss */
+  /* line 123, ../scss/styles.scss */
   #bc_main_container .bc_header .fullScreenButton,
   #bc_main_container .bc_header .windowMaximiseButton {
     margin: 10px 10px 10px 5px;
   }
-  /* line 124, ../scss/styles.scss */
+  /* line 125, ../scss/styles.scss */
   #bc_main_container .bc_header .fullScreenButton i,
   #bc_main_container .bc_header .windowMaximiseButton i {
     font-size: 26px;
     line-height: 28px;
   }
 }
-/* line 132, ../scss/styles.scss */
+/* line 133, ../scss/styles.scss */
 #bc_main_container .bc_body {
   margin: 0 !important;
 }
-/* line 136, ../scss/styles.scss */
+/* line 137, ../scss/styles.scss */
 #bc_main_container .bc_footer {
   margin: 0 !important;
 }
 
-/* line 141, ../scss/styles.scss */
+/* line 142, ../scss/styles.scss */
 #venteTicketContainer {
   display: none;
   padding: 0;
   margin: 0;
 }
 
-/* line 149, ../scss/styles.scss */
+/* line 150, ../scss/styles.scss */
 #openCaisseForm,
 #closeCaisseForm,
 #changeUserForm {
   margin: 60px;
   text-align: center;
 }
-/* line 153, ../scss/styles.scss */
+/* line 154, ../scss/styles.scss */
 #openCaisseForm .freeForm,
 #closeCaisseForm .freeForm,
 #changeUserForm .freeForm {
@@ -158,14 +159,14 @@
   margin: auto;
 }
 
-/* line 162, ../scss/styles.scss */
+/* line 163, ../scss/styles.scss */
 #closeCaisseForm,
 #changeUserForm {
   display: none;
 }
 
 @media (min-width: 800px) {
-  /* line 168, ../scss/styles.scss */
+  /* line 169, ../scss/styles.scss */
   #closeCaisseButton,
   #changeUserButton,
   #caisseMvtButton {
@@ -173,12 +174,12 @@
   }
 }
 
-/* line 175, ../scss/styles.scss */
+/* line 176, ../scss/styles.scss */
 #venteErrors,
 #currentVenteErrors {
   display: none;
 }
-/* line 178, ../scss/styles.scss */
+/* line 179, ../scss/styles.scss */
 #venteErrors .alert,
 #currentVenteErrors .alert {
   border: 2px solid #a00000;
@@ -186,54 +187,59 @@
   font-size: 14px;
   font-weight: bold;
 }
-/* line 184, ../scss/styles.scss */
+/* line 185, ../scss/styles.scss */
 #venteErrors .alert button,
 #currentVenteErrors .alert button {
   font-size: 18px;
 }
 
-/* line 190, ../scss/styles.scss */
+/* line 191, ../scss/styles.scss */
+#curVenteGlobal {
+  background-color: #DCDCDC;
+}
+
+/* line 195, ../scss/styles.scss */
 #currentVenteContainer {
   display: none;
 }
-/* line 193, ../scss/styles.scss */
+/* line 198, ../scss/styles.scss */
 #currentVenteContainer .footer_buttons {
   margin-top: 30px;
   padding-top: 15px;
   border-top: 1px solid #DCDCDC;
 }
-/* line 199, ../scss/styles.scss */
+/* line 204, ../scss/styles.scss */
 #currentVenteContainer #saveCurrentVenteButton,
 #currentVenteContainer #validateCurrentVenteButton {
   float: right;
   margin-left: 15px;
 }
 
-/* line 205, ../scss/styles.scss */
+/* line 210, ../scss/styles.scss */
 #currenVenteContent {
   background-color: #dcdcdc;
   padding: 15px;
 }
 
-/* line 210, ../scss/styles.scss */
+/* line 215, ../scss/styles.scss */
 #bc_main_container.fullScreen {
   z-index: 11000 !important;
   padding: 0;
 }
-/* line 213, ../scss/styles.scss */
+/* line 218, ../scss/styles.scss */
 #bc_main_container.fullScreen span {
   float: none;
   margin: 0;
 }
-/* line 217, ../scss/styles.scss */
+/* line 222, ../scss/styles.scss */
 #bc_main_container.fullScreen span.objectIcon {
   margin-left: 10px;
 }
-/* line 223, ../scss/styles.scss */
+/* line 228, ../scss/styles.scss */
 #bc_main_container.fullScreen .bc_body {
   padding: 5px 15px 15px 15px;
 }
-/* line 227, ../scss/styles.scss */
+/* line 232, ../scss/styles.scss */
 #bc_main_container.fullScreen #currentVenteContainer {
   position: absolute;
   left: 0;
@@ -241,7 +247,7 @@
   top: 140px;
   bottom: 0;
 }
-/* line 235, ../scss/styles.scss */
+/* line 240, ../scss/styles.scss */
 #bc_main_container.fullScreen #currenVenteContent {
   position: absolute;
   top: 0;
@@ -253,7 +259,7 @@
   margin-bottom: 0;
   margin-top: 0;
 }
-/* line 247, ../scss/styles.scss */
+/* line 252, ../scss/styles.scss */
 #bc_main_container.fullScreen .footer_buttons {
   position: absolute;
   bottom: 0;
@@ -261,7 +267,7 @@
   right: 0;
   padding: 15px;
 }
-/* line 257, ../scss/styles.scss */
+/* line 262, ../scss/styles.scss */
 #bc_main_container.fullScreen #listVentesContainer,
 #bc_main_container.fullScreen #clients,
 #bc_main_container.fullScreen #stocks {
@@ -275,7 +281,7 @@
 }
 
 /*Vente: Sections*/
-/* line 271, ../scss/styles.scss */
+/* line 276, ../scss/styles.scss */
 .venteSection .venteSectionHeader {
   background-color: #636363;
   color: #fff;
@@ -283,46 +289,46 @@
   text-align: center;
   padding: 8px 12px;
 }
-/* line 278, ../scss/styles.scss */
+/* line 283, ../scss/styles.scss */
 .venteSection .venteSectionBody {
   padding: 30px;
   background-color: #fff;
 }
-/* line 283, ../scss/styles.scss */
+/* line 288, ../scss/styles.scss */
 .venteSection .formRow {
   margin: 0 !important;
 }
-/* line 286, ../scss/styles.scss */
+/* line 291, ../scss/styles.scss */
 .venteSection .formRow .inputLabel {
   color: #282828;
   background-color: #fff;
   border: none;
 }
-/* line 292, ../scss/styles.scss */
+/* line 297, ../scss/styles.scss */
 .venteSection .formRow .formRowInput {
   border: none;
 }
-/* line 295, ../scss/styles.scss */
+/* line 300, ../scss/styles.scss */
 .venteSection .formRow .formRowInput input, .venteSection .formRow .formRowInput select, .venteSection .formRow .formRowInput textarea {
   width: 100%;
 }
-/* line 299, ../scss/styles.scss */
+/* line 304, ../scss/styles.scss */
 .venteSection .formRow .formRowInput input {
   border: 1px solid #636363;
   padding: 5px;
 }
-/* line 303, ../scss/styles.scss */
+/* line 308, ../scss/styles.scss */
 .venteSection .formRow .formRowInput input:focus {
   box-shadow: 0 0 4px #0087B4;
   border-color: #005A78;
 }
 
-/* line 312, ../scss/styles.scss */
+/* line 317, ../scss/styles.scss */
 #curVenteGlobal {
   padding-bottom: 15px;
 }
 
-/* line 317, ../scss/styles.scss */
+/* line 322, ../scss/styles.scss */
 #venteClientViewContainer h3 {
   font-size: 16px;
   color: #282828;
@@ -331,40 +337,41 @@
   margin-bottom: 5px;
   border-bottom: 1px solid #282828;
 }
-/* line 326, ../scss/styles.scss */
+/* line 331, ../scss/styles.scss */
 #venteClientViewContainer h4 {
   color: #282828;
 }
-/* line 329, ../scss/styles.scss */
+/* line 334, ../scss/styles.scss */
 #venteClientViewContainer h4 span {
   color: #7d7d7d;
 }
-/* line 334, ../scss/styles.scss */
+/* line 339, ../scss/styles.scss */
 #venteClientViewContainer .client_infos {
   font-size: 12px;
   color: #636363;
   padding-left: 30px;
+  margin-top: 10px;
 }
-/* line 339, ../scss/styles.scss */
+/* line 345, ../scss/styles.scss */
 #venteClientViewContainer .client_infos i {
   font-size: 14px;
   color: #282828;
   margin-left: -20px;
   float: left;
 }
-/* line 348, ../scss/styles.scss */
+/* line 354, ../scss/styles.scss */
 #venteClientViewContainer #contactSelect {
   width: 100%;
   padding: 7px 0;
 }
-/* line 353, ../scss/styles.scss */
+/* line 359, ../scss/styles.scss */
 #venteClientViewContainer .contactActions {
   display: inline-block;
   float: right;
   margin-right: -90px;
 }
 
-/* line 360, ../scss/styles.scss */
+/* line 366, ../scss/styles.scss */
 #venteSearchProduct {
   line-height: 28px;
   vertical-align: middle;
@@ -372,12 +379,12 @@
   font-weight: bold;
 }
 
-/* line 367, ../scss/styles.scss */
+/* line 373, ../scss/styles.scss */
 #addProductResult {
   display: none;
 }
 
-/* line 371, ../scss/styles.scss */
+/* line 377, ../scss/styles.scss */
 #venteRemises {
   display: none;
   padding: 10px;
@@ -386,13 +393,13 @@
   font-size: 15px;
   color: #8C0000;
 }
-/* line 379, ../scss/styles.scss */
+/* line 385, ../scss/styles.scss */
 #venteRemises .title {
   font-weight: bold;
   font-size: 16px;
   border-bottom: 1px solid #282828;
 }
-/* line 388, ../scss/styles.scss */
+/* line 394, ../scss/styles.scss */
 #venteRemises .remises_lines,
 #venteRemises .total_remises_vente,
 #venteRemises .total_remises_articles,
@@ -400,21 +407,21 @@
   text-align: right;
   padding: 4px 30px 4px 10px;
 }
-/* line 392, ../scss/styles.scss */
+/* line 398, ../scss/styles.scss */
 #venteRemises .remises_lines .remise,
 #venteRemises .total_remises_vente .remise,
 #venteRemises .total_remises_articles .remise,
 #venteRemises .total_remises .remise {
   margin-bottom: 4px;
 }
-/* line 395, ../scss/styles.scss */
+/* line 401, ../scss/styles.scss */
 #venteRemises .remises_lines span,
 #venteRemises .total_remises_vente span,
 #venteRemises .total_remises_articles span,
 #venteRemises .total_remises span {
   font-weight: bold;
 }
-/* line 399, ../scss/styles.scss */
+/* line 405, ../scss/styles.scss */
 #venteRemises .remises_lines i,
 #venteRemises .total_remises_vente i,
 #venteRemises .total_remises_articles i,
@@ -429,20 +436,20 @@
   font-size: 18px;
   cursor: pointer;
 }
-/* line 409, ../scss/styles.scss */
+/* line 415, ../scss/styles.scss */
 #venteRemises .remises_lines i:hover,
 #venteRemises .total_remises_vente i:hover,
 #venteRemises .total_remises_articles i:hover,
 #venteRemises .total_remises i:hover {
   color: #a00000;
 }
-/* line 414, ../scss/styles.scss */
+/* line 420, ../scss/styles.scss */
 #venteRemises .total_remises {
   font-weight: bold;
   font-size: 16px;
 }
 
-/* line 420, ../scss/styles.scss */
+/* line 426, ../scss/styles.scss */
 #ventePanierTotal {
   text-align: center;
   background-color: #DCDCDC;
@@ -453,7 +460,7 @@
   padding: 10px;
 }
 
-/* line 430, ../scss/styles.scss */
+/* line 436, ../scss/styles.scss */
 #venteNbArticles {
   display: inline-block;
   margin-bottom: 10px;
@@ -461,13 +468,13 @@
   color: #282828;
 }
 
-/* line 437, ../scss/styles.scss */
+/* line 443, ../scss/styles.scss */
 #loadRemiseFormButton {
   float: right;
   margin-top: -15px;
 }
 
-/* line 443, ../scss/styles.scss */
+/* line 449, ../scss/styles.scss */
 #venteToPay,
 #venteToReturn {
   text-align: center;
@@ -476,37 +483,37 @@
   padding: 10px;
 }
 
-/* line 450, ../scss/styles.scss */
+/* line 456, ../scss/styles.scss */
 #venteToPay {
   color: #282828;
   background-color: #DCDCDC;
   border: 1px solid #636363;
 }
 
-/* line 456, ../scss/styles.scss */
+/* line 462, ../scss/styles.scss */
 #venteToReturn {
   color: #fff;
   background-color: #348C41;
 }
 
-/* line 462, ../scss/styles.scss */
+/* line 468, ../scss/styles.scss */
 #ventePaiementButtons button {
   width: 100%;
   text-align: center;
 }
 
-/* line 468, ../scss/styles.scss */
+/* line 474, ../scss/styles.scss */
 #venteAddPaiementFormContainer {
   padding: 20px;
   text-align: center;
   display: none;
 }
-/* line 473, ../scss/styles.scss */
+/* line 479, ../scss/styles.scss */
 #venteAddPaiementFormContainer span {
   font-size: 16px;
   margin-right: 8px;
 }
-/* line 477, ../scss/styles.scss */
+/* line 483, ../scss/styles.scss */
 #venteAddPaiementFormContainer input {
   width: 160px;
   border: 1px solid #636363;
@@ -515,12 +522,12 @@
   font-weight: bold;
   vertical-align: middle;
 }
-/* line 485, ../scss/styles.scss */
+/* line 491, ../scss/styles.scss */
 #venteAddPaiementFormContainer input:focus {
   box-shadow: 0 0 4px #0087B4;
   border-color: #005A78;
 }
-/* line 490, ../scss/styles.scss */
+/* line 496, ../scss/styles.scss */
 #venteAddPaiementFormContainer .inputAddon {
   border-color: #636363;
   background-color: #636363;
@@ -528,17 +535,17 @@
   vertical-align: middle;
   padding: 7px 12px;
 }
-/* line 498, ../scss/styles.scss */
+/* line 504, ../scss/styles.scss */
 #venteAddPaiementFormContainer button {
   margin-left: 30px;
 }
 
-/* line 503, ../scss/styles.scss */
+/* line 509, ../scss/styles.scss */
 #ventePaimentsLines {
   max-width: 450px;
   margin: 20px 30px;
 }
-/* line 507, ../scss/styles.scss */
+/* line 513, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line {
   margin: 5px;
   padding: 5px;
@@ -547,23 +554,23 @@
   color: #282828;
   font-size: 16px;
 }
-/* line 515, ../scss/styles.scss */
+/* line 521, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line .paiement_label {
   display: inline-block;
   width: 59%;
 }
-/* line 519, ../scss/styles.scss */
+/* line 525, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line .paiement_label i {
   margin-right: 12px;
 }
-/* line 523, ../scss/styles.scss */
+/* line 529, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line .paiement_montant {
   display: inline-block;
   width: 39%;
   text-align: right;
   padding-right: 40px;
 }
-/* line 529, ../scss/styles.scss */
+/* line 535, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line .deletePaiementButton {
   float: right;
   margin-right: -40px;
@@ -574,11 +581,11 @@
   -o-transition: all 0.3s ease;
   transition: all 0.3s ease;
 }
-/* line 537, ../scss/styles.scss */
+/* line 543, ../scss/styles.scss */
 #ventePaimentsLines .paiement_line .deletePaiementButton:hover {
   color: #a00000;
 }
-/* line 542, ../scss/styles.scss */
+/* line 548, ../scss/styles.scss */
 #ventePaimentsLines .paiements_total {
   color: #282828;
   padding: 8px;
@@ -587,33 +594,33 @@
   text-align: right;
 }
 
-/* line 551, ../scss/styles.scss */
+/* line 557, ../scss/styles.scss */
 .selectArticleLine {
   margin: 5px;
   padding: 10px;
   border: 1px solid #b4b4b4;
 }
-/* line 556, ../scss/styles.scss */
+/* line 562, ../scss/styles.scss */
 .selectArticleLine .product_price {
   font-weight: bold;
   font-size: 14px;
   text-align: right;
 }
 
-/* line 564, ../scss/styles.scss */
+/* line 570, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine {
   padding-top: 10px;
   margin-top: 10px;
   border-top: 1px solid #b4b4b4;
 }
-/* line 569, ../scss/styles.scss */
+/* line 575, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_title {
   color: #004264;
   font-size: 18px;
   padding-bottom: 8px;
   padding-right: 40px;
 }
-/* line 575, ../scss/styles.scss */
+/* line 581, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_title .removeArticle {
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -625,17 +632,17 @@
   font-size: 28px;
   cursor: pointer;
 }
-/* line 584, ../scss/styles.scss */
+/* line 590, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_title .removeArticle:hover {
   color: #a00000;
 }
-/* line 589, ../scss/styles.scss */
+/* line 595, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_info {
   color: #282828;
   font-size: 12px;
   padding-left: 15px;
 }
-/* line 595, ../scss/styles.scss */
+/* line 601, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises {
   display: none;
   margin: 3px 0;
@@ -643,20 +650,20 @@
   color: #8C0000;
   text-align: right;
 }
-/* line 602, ../scss/styles.scss */
+/* line 608, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .title {
   font-weight: bold;
 }
-/* line 607, ../scss/styles.scss */
+/* line 613, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise {
   font-size: 14px;
   padding: 6px 30px 6px 0;
 }
-/* line 610, ../scss/styles.scss */
+/* line 616, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise span {
   font-weight: bold;
 }
-/* line 614, ../scss/styles.scss */
+/* line 620, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise i {
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -668,22 +675,22 @@
   margin-right: -30px;
   cursor: pointer;
 }
-/* line 623, ../scss/styles.scss */
+/* line 629, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise i:hover {
   color: #a00000;
 }
-/* line 631, ../scss/styles.scss */
+/* line 637, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options {
   padding-top: 10px;
   padding-left: 15px;
   padding-right: 60px;
 }
-/* line 636, ../scss/styles.scss */
+/* line 642, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty {
   text-align: left;
   display: inline-block;
 }
-/* line 641, ../scss/styles.scss */
+/* line 647, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_down,
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_up {
   color: #636363;
@@ -694,12 +701,12 @@
   -o-transition: all 0.3s ease;
   transition: all 0.3s ease;
 }
-/* line 648, ../scss/styles.scss */
+/* line 654, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_down:hover,
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_up:hover {
   color: #ef7d00;
 }
-/* line 652, ../scss/styles.scss */
+/* line 658, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .article_qty_input {
   padding: 5px;
   font-weight: bold;
@@ -710,50 +717,50 @@
   width: 60px;
   vertical-align: middle;
 }
-/* line 662, ../scss/styles.scss */
+/* line 668, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .article_qty_input:focus {
   box-shadow: 0 0 4px #0087B4;
   border-color: #005A78;
 }
-/* line 668, ../scss/styles.scss */
+/* line 674, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .product_total_price {
   display: inline-block;
   float: right;
   margin-right: -60px;
   text-align: right;
 }
-/* line 674, ../scss/styles.scss */
+/* line 680, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .product_total_price .base_price {
   margin-right: 12px;
   color: #636363;
   font-size: 16px;
   text-decoration: line-through;
 }
-/* line 681, ../scss/styles.scss */
+/* line 687, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .product_total_price .final_price {
   color: #004264;
   font-weight: bold;
   font-size: 20px;
 }
-/* line 689, ../scss/styles.scss */
+/* line 695, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .placeAlert {
   margin-top: 10px;
 }
 
 @media print {
-  /* line 696, ../scss/styles.scss */
+  /* line 702, ../scss/styles.scss */
   body * {
     visibility: hidden !important;
   }
 
-  /* line 701, ../scss/styles.scss */
+  /* line 707, ../scss/styles.scss */
   #venteTicketContainer,
   #venteTicketContainer * {
     display: block;
     visibility: visible !important;
   }
 
-  /* line 706, ../scss/styles.scss */
+  /* line 712, ../scss/styles.scss */
   #venteTicketContainer {
     position: absolute;
     left: 0;

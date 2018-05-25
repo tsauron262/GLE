@@ -48,6 +48,9 @@ class gsxController extends BimpController
 
     public function setSerial($serial)
     {
+        if (preg_match('/^S([0-9A-Z]{11,12})$/', $serial, $matches)) {
+            $serial = $matches[1];
+        }
         if (preg_match('/^[0-9]{15,16}$/', $serial)) {
             $this->isIphone = true;
         }
@@ -330,7 +333,7 @@ class gsxController extends BimpController
         } else {
             $html .= BimpRender::renderAlerts('Aucune réparation enregistrée pour le moment', 'info');
         }
-        
+
         $html .= '';
 
         return $html;
@@ -845,7 +848,7 @@ class gsxController extends BimpController
 
         $requestData = $this->gsx->_requestBuilder($request, $wrapper, $data);
         $response = $this->gsx->request($requestData, $client);
-        
+
         dol_syslog("Requête " . $request . " | " . print_r($response, 1), LOG_ERR, 0, "_apple");
 
         if (count($this->gsx->errors['soap'])) {

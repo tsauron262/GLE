@@ -82,17 +82,6 @@ function loadModalFormFromView(view_id, form_name, $button, title) {
 }
 
 function loadModalView(module, object_name, id_object, view_name, $button, title) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
-    var $modal = $('#page_modal');
-    var $resultContainer = $modal.find('.modal-ajax-content');
-    hidePopovers($resultContainer);
-    $resultContainer.html('').hide();
-
     if (typeof (title) === 'undefined' || !title) {
         title = '<i class="fa fa-file-o iconLeft"></i>';
         if (typeof (object_labels[object_name].name) !== 'undefined') {
@@ -105,20 +94,6 @@ function loadModalView(module, object_name, id_object, view_name, $button, title
         }
     }
 
-    $modal.find('.modal-title').html(title);
-    $modal.find('.loading-text').text('Chargement');
-    $modal.find('.content-loading').show();
-    $modal.modal('show');
-
-    var isCancelled = false;
-
-    $modal.on('hide.bs.modal', function (e) {
-        $modal.find('.extra_button').remove();
-        $modal.find('.content-loading').hide();
-        isCancelled = true;
-        $button.removeClass('disabled');
-    });
-
     var data = {
         'module': module,
         'object_name': object_name,
@@ -127,26 +102,12 @@ function loadModalView(module, object_name, id_object, view_name, $button, title
         'content_only': 1
     };
 
-    BimpAjax('loadObjectView', data, null, {
-        $modal: $modal,
-        $resultContainer: $resultContainer,
-        display_success: false,
-        success: function (result, bimpAjax) {
-            bimpAjax.$modal.find('.content-loading').hide();
-            if (!isCancelled) {
-                if (typeof (result.html) !== 'undefined') {
-                    bimpAjax.$resultContainer.html(result.html).slideDown(250);
-                    var $new_view = bimpAjax.$resultContainer.find('#' + result.view_id);
-                    if ($new_view.length) {
-                        onViewLoaded($new_view);
-                    }
-                }
-                bimpAjax.$modal.modal('handleUpdate');
-            }
-        },
-        error: function (result, bimpAjax) {
-            bimpAjax.$modal.find('.content-loading').hide();
-            bimpAjax.$modal.modal('handleUpdate');
+    bimpModal.loadAjaxContent($button, 'loadObjectView', data, title, null, function (result, bimpAjax) {
+        var $new_view = bimpAjax.$resultContainer.find('#' + result.view_id);
+        if ($new_view.length) {
+            $new_view.data('modal_idx', bimpAjax.$resultContainer.data('idx'));
+            bimpModal.removeComponentContent($new_view.attr('id'));
+            onViewLoaded($new_view);
         }
     });
 }
@@ -259,39 +220,8 @@ function displayObjectView($container, module_name, object_name, view_name, id_o
     });
 }
 
-function loadModalObjectPage($button, url, modal_id, title) {
-    if ($button.hasClass('bs-popover')) {
-        $button.popover('hide');
-    }
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
-    var $modal = $('#' + modal_id);
-    var $resultContainer = $modal.find('.modal-ajax-content');
-    $resultContainer.html('').hide();
-
-    $modal.find('.modal-title').html(title);
-    $modal.modal('show');
-    $modal.find('.content-loading').show().find('.loading-text').text('Chargement');
-
-    $modal.on('hide.bs.modal', function (e) {
-        $modal.find('.extra_button').remove();
-        $modal.find('.content-loading').hide();
-        $button.removeClass('disabled');
-    });
-
-    var html = '<div style="overflow: hidden"><iframe id="iframe" frameborder="0" src="' + url + '" width="100%" height="800px"></iframe></div>';
-    $resultContainer.html(html);
-
-    $('#iframe').on("load", function () {
-            var $head = $("iframe").contents().find("head");                
-            $head.append($("<link/>", {rel: "stylesheet", href: DOL_URL_ROOT + "/bimpcore/views/css/content_only.css", type: "text/css"}));
-        $modal.find('.content-loading').hide();
-        $resultContainer.slideDown(250);
-      });
+function loadModalObjectPage($button, url, title) {
+    bimpModal.loadIframe($button, url, title);
 }
 
 // Actions 

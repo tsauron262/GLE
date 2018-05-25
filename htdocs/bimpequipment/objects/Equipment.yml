@@ -308,9 +308,9 @@ views:
 forms:
     default:
         rows: 
+            - field: serial
             - field: id_product
             - field: product_label
-            - field: serial
             - field: type
             - field: date_purchase
             - field: prix_achat
@@ -319,18 +319,20 @@ forms:
             - field: origin_id_element
             - field: warranty_type
             - field: date_warranty_end
+            - field: note
             - association: contrats        
+            - object: places
             
     light:
         rows:
+            - field: serial
             - field: id_product
             - field: product_label
-            - field: serial
             - field: type
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end
-            - association: contrats     
+            - association: contrats
             
 list:
 #    checkboxes: 1

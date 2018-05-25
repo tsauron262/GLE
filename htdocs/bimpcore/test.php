@@ -49,43 +49,7 @@ echo '<script src="/test2/includes/jquery/js/jquery.min.js?version=6.0.4" type="
 echo '</head>';
 
 echo '<body>';
-//BimpTools::loadDolClass('compta/facture', 'facture');
-//
-//global $db;
-//
-//$facture = new Facture($db);
-//$facture->fetch(86073);
-//
-//$ticket = new BimpTicket($db, 370, $facture);
-//
-//echo $ticket->renderHtml();
-//
-//echo '<script>';
-//echo '$(document).ready(function() {';
-//echo 'window.print();';
-//echo '});';
-//echo '</script>';
-//$sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-//$errors = $sav->validateArray(array(
-//    'status'       => 3,
-//    'id_equipment' => 1,
-//    'id_client'    => 1
-//        ));
-//
-//if (!count($errors)) {
-//    $errors = $sav->create();
-//}
-//
-//echo '<pre>';
-//print_r($errors);
-//exit;
 
-$repair = BimpObject::getInstance('bimpapple', 'GSX_Repair', 11);
-if (BimpObject::objectLoaded($repair)) {
-    $repair->updateTotalOrder();
-} else {
-    echo 'KO';
-}
 
 echo '</body></html>';
 

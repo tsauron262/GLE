@@ -51,6 +51,17 @@ class BS_SAV extends BimpObject
         2 => array('label' => 'Bon état général', 'classes' => array('info')),
         3 => array('label' => 'Usagé', 'classes' => array('warning'))
     );
+    public static $list_etats_materiel = array('Rayure', 'Écran cassé', 'Liquide');
+    public static $list_accessoires = array('Housse', 'Alim', 'Carton', 'Clavier', 'Souris', 'Dvd', 'Batterie', 'Boite complète');
+    public static $list_symptomes = array(
+        'Renouvellement anti virus et maintenance annuelle',
+        'Anti virus expiré',
+        'Virus ? Eradication? Nettoyage?',
+        'Machine lente',
+        'Formatage',
+        'Réinstallation système'
+    );
+    public static $systems_cache = null;
 
     // Getters:
 
@@ -67,6 +78,30 @@ class BS_SAV extends BimpObject
 
         $statut = self::$status_list[$this->data["status"]];
         return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->ref . '</span></a>';
+    }
+
+    public function getDefaultCodeCentre()
+    {
+//        $this->printData(); exit;
+
+        if (BimpTools::isSubmit('code_centre')) {
+            return BimpTools::getValue('code_centre');
+        } else {
+            $id_entrepot = (int) $this->getData('id_entrepot');
+            if (!$id_entrepot) {
+                $id_entrepot = BimpTools::getValue('id_entrepot', 0);
+            }
+            if ($id_entrepot) {
+                global $tabCentre;
+                foreach ($tabCentre as $code_centre => $centre) {
+                    if ((int) $centre[8] === $id_entrepot) {
+                        return $code_centre;
+                    }
+                }
+            }
+        }
+
+        return '';
     }
 
     public function getClient_contactsArray()
@@ -137,13 +172,52 @@ class BS_SAV extends BimpObject
     {
         global $tabCentre;
 
-        $centres = array();
+        $centres = array(
+            '' => ''
+        );
 
         foreach ($tabCentre as $code => $centre) {
             $centres[$code] = $centre[2];
         }
-
+        
         return $centres;
+    }
+
+    public function getSystemsArray()
+    {
+        if (is_null(self::$systems_cache)) {
+            $rows = $this->db->getRows('Synopsis_Process_form_list_members', '`list_refid` = 12');
+            if (!is_null($rows) && count($rows)) {
+                self::$systems_cache = array();
+                foreach ($rows as $r) {
+                    self::$systems_cache[(int) $r->valeur] = $r->label;
+                }
+            }
+        }
+        return self::$systems_cache;
+    }
+
+    public function getCreateJsCallback()
+    {
+        $js = '';
+        $ref = 'PC-' . $this->getData('ref');
+        if (file_exists(DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/' . $ref . '.pdf')) {
+            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
+            $js .= 'window.open("' . $url . '");';
+        }
+
+        $id_facture_account = (int) $this->getData('id_facture_acompte');
+        if ($id_facture_account) {
+            $facture = $this->getChildObject('facture_acompte');
+            if (BimpObject::objectLoaded($facture)) {
+                $ref = $facture->getData('facnumber');
+                if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities('/' . $ref . '/' . $ref . '.pdf');
+                    $js .= 'window.open("' . $url . '");';
+                }
+            }
+        }
+        return $js;
     }
 
     public function getViewExtraBtn()
@@ -486,12 +560,14 @@ class BS_SAV extends BimpObject
 
         if ($this->isLoaded()) {
             $ref = 'PC-' . $this->getData('ref');
-            $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
-            $buttons[] = array(
-                'label'   => 'Bon de prise en charge',
-                'icon'    => 'fas_file-pdf',
-                'onclick' => 'window.open(\'' . $url . '\')'
-            );
+            if (file_exists(DOL_DATA_ROOT . '/bimpcore/sav/' . $this->id . '/' . $ref . '.pdf')) {
+                $url = DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . htmlentities('sav/' . $this->id . '/' . $ref . '.pdf');
+                $buttons[] = array(
+                    'label'   => 'Bon de prise en charge',
+                    'icon'    => 'fas_file-pdf',
+                    'onclick' => 'window.open(\'' . $url . '\')'
+                );
+            }
         }
 
         return $buttons;
@@ -724,7 +800,7 @@ class BS_SAV extends BimpObject
     }
 
     public function createAccompte($acompte, $update = true)
-    {// Prise en compte de l'acompte
+    {
         global $user, $langs;
 
         $id_client = (int) $this->getData('id_client');
@@ -739,38 +815,50 @@ class BS_SAV extends BimpObject
             $factureA->socid = $this->getData('id_client');
             $factureA->modelpdf = self::$facture_model_pdf;
             $factureA->array_options['options_type'] = "S";
-            $factureA->create($user);
-            $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte / 1.2);
-            $factureA->validate($user);
+            if ($factureA->create($user) <= 0) {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
+            } else {
+                $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte / 1.2);
+                $factureA->validate($user);
 
-            BimpTools::loadDolClass('compta/paiement', 'paiement');
-            $payement = new Paiement($this->db->db);
-            $payement->amounts = array($factureA->id => $acompte);
-            $payement->datepaye = dol_now();
-            $payement->paiementid = (int) BimpTools::getValue('mode_paiement_acompte', 0);
-            $payement->create($user);
+                BimpTools::loadDolClass('compta/paiement', 'paiement');
+                $payement = new Paiement($this->db->db);
+                $payement->amounts = array($factureA->id => $acompte);
+                $payement->datepaye = dol_now();
+                $payement->paiementid = (int) BimpTools::getValue('mode_paiement_acompte', 0);
+                if ($payement->create($user) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
+                } else {
+                    $factureA->set_paid($user);
+                }
 
-            $factureA->set_paid($user);
+                BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
+                $discount = new DiscountAbsolute($this->db->db);
+                $discount->description = "Acompte";
+                $discount->fk_soc = $factureA->socid;
+                $discount->fk_facture_source = $factureA->id;
+                $discount->amount_ht = $acompte / 1.2;
+                $discount->amount_ttc = $acompte;
+                $discount->amount_tva = $acompte - ($acompte / 1.2);
+                $discount->tva_tx = 20;
+                if ($discount->create($user) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($discount), 'Des erreurs sont survenues lors de la création de la remise sur acompte');
+                } else {
+                    $this->set('id_discount', $discount->id);
+                }
 
-            include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
-            $factureA->generateDocument(self::$facture_model_pdf, $langs);
-            $this->set('id_facture_acompte', $factureA->id);
+                $this->set('id_facture_acompte', $factureA->id);
 
-            BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
-            $discount = new DiscountAbsolute($this->db->db);
-            $discount->description = "Acompte";
-            $discount->fk_soc = $factureA->socid;
-            $discount->fk_facture_source = $factureA->id;
-            $discount->amount_ht = $acompte / 1.2;
-            $discount->amount_ttc = $acompte;
-            $discount->amount_tva = $acompte - ($acompte / 1.2);
-            $discount->tva_tx = 20;
-            $discount->create($user);
-
-            $this->set('id_discount', $discount->id);
-            if ($update)
                 $this->update();
+
+                include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
+                if ($factureA->generateDocument(self::$facture_model_pdf, $langs) <= 0) {
+                    $fac_errors = BimpTools::getErrorsFromDolObject($factureA, null, $langs);
+                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création du fichier PDF de la facture d\'acompte');
+                }
+            }
         }
+
         return $errors;
     }
 
@@ -918,11 +1006,11 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         }
 
         //Ajout des Prod non Apple
+
         foreach ($this->getChildrenObjects("apple_parts") as $prod) {
-            require_once(DOL_DOCUMENT_ROOT . "/bimpapple/classes/partsCart.class.php");
             $tva = 20;
             $price = ($prod->getData("no_order") || $prod->getData("exchange_price") < 1) ? $prod->getData("stock_price") : $prod->getData("exchange_price");
-            $price2 = partsCart::convertPrix($price, $prod->getData("part_number"), $prod->getData("label"));
+            $price2 = BS_ApplePart::convertPrix($price, $prod->getData("part_number"), $prod->getData("label"));
             $label = $prod->getData("part_number") . " - " . $prod->getData("label");
             $label .= ($prod->getData("no_order")) ? " APPRO" : "";
             $prop->addline($label, $price2, $prod->getData("qty"), $tva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', null, null, null, null, null, null, null, $price);
@@ -938,6 +1026,11 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         if ($garantieHt > 0) {
             $tva = 100 * $garantieTtc / $garantieHt;
             $prop->addline("Garantie", -($garantieHt), 1, $tva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
+        }
+
+        // Ajout infos supplémentaires:
+        if ($this->getData('extra_infos') != "") {
+            $prop->addline($this->getData('extra_infos'), 0, 1, 0, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 3);
         }
 
         require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
@@ -1028,7 +1121,14 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                 $facture = null;
                 $tabFile = $tabFile2 = $tabFile3 = array();
                 if ((int) $this->getData('id_facture')) {
-                    $facture = (int) $this->getChildObject('facture');
+                    $facture = $this->getChildObject('facture');
+                    if (BimpObject::objectLoaded($facture)) {
+                        $facture = $facture->dol_object;
+                    } else {
+                        unset($facture);
+                        $facture = null;
+                        $errors[] = $error_msg . ' - Facture invalide ou absente';
+                    }
                 } elseif (!is_null($propal)) {
                     $tabT = getElementElement("propal", "facture", $propal->id);
                     if (count($tabT) > 0) {
@@ -1696,13 +1796,12 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                     if (!is_null($list)) {
                         foreach ($list as $item) {
                             if ($repair->fetch((int) $item['id'])) {
-//                                $rep_errors = $repair->updateStatus();
+                                $rep_errors = $repair->updateStatus();
                             } else {
                                 $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
                             }
                             if (count($rep_errors)) {
-                                $warnings[] = 'Echec de la fermeture de la réparation d\'ID ' . $item['id'];
-                                $warnings = array_merge($warnings, $rep_errors);
+                                $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation d\'ID ' . $item['id']);
                             }
                         }
                     }
@@ -1729,12 +1828,22 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
     public function actionClose($data, &$success)
     {
         global $user, $langs;
+        $errors = array();
+
+        $prets = $this->getChildrenObjects('prets');
+        foreach ($prets as $pret) {
+            if (!(int) $pret->getData('returned')) {
+                $errors[] = 'Le prêt "' . $pret->getData('ref') . '" n\'est pas restitué';
+            }
+        }
+
+        if (count($errors)) {
+            return array(BimpTools::getMsgFromArray($errors, 'Il n\'est pas possible de fermer ce SAV:'));
+        }
 
         $success = 'SAV Fermé avec succès';
 
         $current_status = (int) $this->getSavedData('status');
-
-        $errors = $this->setNewStatus(self::BS_SAV_FERME);
 
         if (count($errors)) {
             return $errors;
@@ -1762,10 +1871,15 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             }
 
             if (!count($errors)) {
+                $errors = $this->setNewStatus(self::BS_SAV_FERME);
+            }
+
+            if (!count($errors)) {
                 $propal_status = (int) $propal->getData('fk_statut');
 
                 if ($propal_status === 2) {
-                    $errors = $this->setReservationsStatus(304);
+                    $res_errors = $this->setReservationsStatus(304);
+                    $warnings = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour des réservations de produits:');
 
                     if (!count($errors)) {
                         // Gestion des stocks et emplacements: 
@@ -1812,8 +1926,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                                             } else {
                                                 $label = 'Erreur: cet équipment n\'existe plus';
                                             }
-                                            $warnings[] = 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $label . '"';
-                                            $warnings = array_merge($warnings, $place_errors);
+                                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $label . '"');
                                         }
                                     }
                                 } else {
@@ -1913,13 +2026,12 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             if (!is_null($list)) {
                 foreach ($list as $item) {
                     if ($repair->fetch((int) $item['id'])) {
-//                            $rep_errors = $repair->close();
+                            $rep_errors = $repair->close();
                     } else {
                         $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
                     }
                     if (count($rep_errors)) {
-                        $warnings[] = 'Echec de la fermeture de la réparation d\'ID ' . $item['id'];
-                        $warnings = array_merge($warnings, $rep_errors);
+                        $warnings[] = BimpTools::getMsgFromArray($rep_errors, 'Echec de la fermeture de la réparation d\'ID ' . $item['id']);
                     }
                 }
             }
@@ -2034,7 +2146,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
     // Overrides:
 
-    public function create()
+    public function create(&$warnings = array())
     {
         if (!(string) $this->getData('ref')) {
             $this->set('ref', $this->getNextNumRef());
@@ -2045,15 +2157,21 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             $this->set('id_entrepot', (int) $centre['id_entrepot']);
         }
 
-        $errors = parent::create();
+        $errors = parent::create($warnings);
 
         if (!count($errors)) {
             if ($this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
-                $this->createAccompte((float) $this->getData('acompte'), false);
+                $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
+                if (count($fac_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($fac_errors, 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
+                }
             }
 
             if ($this->getData("id_propal") < 1) {
-                $this->createPropal();
+                $prop_errors = $this->createPropal();
+                if (count($prop_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création de la proposition commerciale');
+                }
             }
 
             if ((int) $this->getData('id_equipment')) {
@@ -2067,20 +2185,22 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                 ));
                 if (!count($place_errors)) {
                     $place->create();
+                } else {
+                    $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
                 }
             }
 
-            $this->generatePDF('pc', $errors);
+            $this->generatePDF('pc', $warnings);
 
             if (BimpTools::getValue('send_msg', 0)) {
-                $this->sendMsg('debut');
+                $warnings = array_merge($warnings, $this->sendMsg('debut'));
             }
         }
 
         return $errors;
     }
 
-    public function update()
+    public function update(&$warnings = array())
     {
         $errors = array();
 
@@ -2091,7 +2211,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         }
 
         if (!count($errors)) {
-            $errors = parent::update();
+            $errors = parent::update($warnings);
         }
 
         return $errors;

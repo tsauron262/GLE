@@ -164,6 +164,8 @@ fields:
         values: 
             array: centres
         required: 1
+        default_value: 
+            callback: getDefaultCodeCentre
     id_equipment: 
         label: Equipement
         type: id_object
@@ -267,9 +269,9 @@ fields:
         label: Facture
         type: id_object
         object: facture
-    date_problem: 
-        label: Date problème
-        type: datetime
+#    date_problem: 
+#        label: Date problème
+#        type: datetime
     date_close: 
         label: Date / Heure Fin
         type: datetime
@@ -308,18 +310,24 @@ fields:
         input:
             auto_expand: 1
             rows: 1
+            values: 
+                array: list_etats_materiel
     accessoires: 
         label: Accessoires
         type: text
         input:
             auto_expand: 1
             rows: 2
+            values: 
+                array: list_accessoires
     symptomes: 
         label: Symptômes
         type: text
         input:
             auto_expand: 1
             rows: 4
+            values: 
+                array: list_symptomes
         required: 1
     diagnostic: 
         label: Diagnostic
@@ -333,8 +341,17 @@ fields:
         input:
             auto_expand: 1
             rows: 4
+    extra_infos:
+        label: Informations supplémentaires devis
+        type: text
+        input:
+            auto_expand: 1
+            rows: 4
     system: 
         label: Système
+        type: int
+        values: 
+            array: systems
     login_admin: 
         label: Login admin
     pword_admin: 
@@ -348,8 +365,6 @@ forms:
     default:
         rows: 
             - field: code_centre
-              value: 
-                  request: code_centre
             - field: id_client
             - field: id_contact
             - field: id_equipment
@@ -373,7 +388,7 @@ forms:
             - field: accessoires
             - field: etat_materiel
             - field: etat_materiel_desc
-            - field: date_problem
+#            - field: date_problem
             - field: save_option
             - field: sav_pro
             - field: prestataire_number
@@ -384,6 +399,9 @@ forms:
               input: 
                   type: toggle
               value: 1
+            - object: prets
+              multiple: 1
+              depends_on: code_centre
             
     edit: 
         rows: 
@@ -394,7 +412,7 @@ forms:
             - field: id_contrat
             - field: id_propal
             - field: id_user_tech
-            - field: date_problem
+#            - field: date_problem
             - field: system
             - field: login_admin
             - field: pword_admin
@@ -584,22 +602,59 @@ fields_tables:
         title: Suivi
         icon: file-text
         rows: 
-            - field: date_problem
-              show: 
-                  callback: isSAV
+#            - field: date_problem
             - field: symptomes
               edit: 1
             - field: diagnostic
               edit: 1
             - field: resolution
               edit: 1
+            - field: extra_infos
+              edit: 1
               
 views: 
-    default:
-        title: nom
+    default: 
+        title: 
+            callback: getRef
+        objects_change_reload: BS_SavProduct,BS_ApplePart
+        rows:
+            - cols: 
+                  - type: object_header
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: infos
+                  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: client
+            - cols: 
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table: 
+                        name: materiel
+                  
+                  - type: fields_table
+                    col_lg: 6
+                    col_md: 6
+                    fields_table:
+                        name: suivi
+            - cols: 
+                - type: list
+                  list: 
+                      name: default
+                      children: prets
+    infos:
+        title: 
+            callback: getRef
         delete_btn: 1
         edit_form: edit
-        objects_change_reload: BS_SavProduct
+        objects_change_reload: BS_SavProduct,BS_ApplePart
         rows:
             - cols: 
                   - type: fields_table
@@ -643,6 +698,10 @@ lists:
         sort_way: desc
         n: 10
         add_form_name: default
+        add_form_values: 
+            fields: 
+                id_entrepot: 
+                    request: id_entrepot
         add_btn_label: Nouveau SAV
         edit_btn: 1
         edit_form: default
@@ -685,3 +744,7 @@ cards:
               field: id_client
               display: nom_url
         view_btn: 1
+
+searches:
+    default: 
+        fields_search: a.ref

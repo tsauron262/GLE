@@ -168,6 +168,13 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->renderAfterLines();
         $this->renderBottom();
         $this->renderAfterBottom();
+
+        $cur_page = (int) $this->pdf->getPage();
+        $num_pages = (int) $this->pdf->getNumPages();
+        
+        if (($num_pages - $cur_page) === 1) {
+            $this->pdf->deletePage($num_pages);
+        }
     }
 
     public function getSenderInfosHtml()

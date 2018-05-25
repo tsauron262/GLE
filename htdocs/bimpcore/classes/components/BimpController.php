@@ -86,7 +86,7 @@ class BimpController
         }
     }
 
-    // Affichages :
+    // Affichages:
 
     public function display()
     {
@@ -399,7 +399,7 @@ class BimpController
         return '';
     }
 
-    // Traitements Ajax :
+    // Traitements Ajax:
 
     protected function ajaxProcess()
     {
@@ -454,9 +454,7 @@ class BimpController
     protected function ajaxProcessSaveObject()
     {
         $errors = array();
-        $success = '';
         $url = '';
-        $success_callback = '';
 
         $id_object = BimpTools::getValue('id_object');
         $object_name = BimpTools::getValue('object_name');
@@ -473,69 +471,26 @@ class BimpController
                 $object->fetch($id_object);
             }
 
-            $errors = $object->validatePost();
+            $result = $object->saveFromPost();
 
-            if (!count($errors)) {
-                if (isset($object->id) && $object->id) {
-                    $errors = $object->update();
-                    if (!count($errors)) {
-                        $success = 'Mise à jour ' . $object->getLabel('of_the') . ' effectuée avec succès';
-                        if (method_exists($object, 'getUpdateJsCallback')) {
-                            $success_callback = $object->getUpdateJsCallback();
-                        }
-                    }
-                } else {
-                    $errors = $object->create();
-                    if (!count($errors)) {
-                        $id_object = $object->id;
-                        $success = 'Création ' . $object->getLabel('of_the') . ' effectuée avec succès';
-                        if (method_exists($object, 'getCreateJsCallback')) {
-                            $success_callback = $object->getCreateJsCallback();
-                        }
-                    }
-                }
-            }
-
-            if (!count($errors)) {
+            if (!count($result['errors'])) {
+                $id_object = $object->id;
                 $url = BimpObject::getInstanceUrl($object);
-
-                if (BimpTools::isSubmit('associations_params')) {
-                    $assos = json_decode(BimpTools::getValue('associations_params'));
-                    foreach ($assos as $params) {
-                        if (isset($params->association)) {
-                            if (isset($params->object_name) && isset($params->object_module) && isset($params->id_object)) {
-                                $obj = BimpObject::getInstance($params->object_module, $params->object_name);
-                                $bimpAsso = new BimpAssociation($obj, $params->association);
-                                $assos_errors = $bimpAsso->addObjectAssociation($id_object, $params->id_object);
-                                if ($assos_errors) {
-                                    $errors[] = 'Echec de l\'association ' . $object->getLabel('of_the') . ' avec ' . $obj->getLabel('the') . ' ' . $params->id_object;
-                                    $errors = array_merge($errors, $assos_errors);
-                                }
-                                unset($bimpAsso);
-                            } elseif (isset($params->id_associate)) {
-                                $bimpAsso = new BimpAssociation($object, $params->association);
-                                $assos_errors = $bimpAsso->addObjectAssociation($params->id_associate, $id_object);
-                                if ($assos_errors) {
-                                    $errors[] = 'Echec de l\'association ' . $object->getLabel('of_the') . ' avec ' . BimpObject::getInstanceLabel($bimpAsso->associate, 'the') . ' ' . $params->id_associate;
-                                    $errors = array_merge($errors, $assos_errors);
-                                }
-                                unset($bimpAsso);
-                            }
-                        }
-                    }
-                }
+            } else {
+                $errors = $result['errors'];
             }
         }
 
         die(json_encode(array(
-            'errors'          => $errors,
-            'object_view_url' => $url,
-            'success'         => $success,
-            'module'          => $object_module,
-            'object_name'     => $object_name,
-            'id_object'       => $id_object,
-            'success_callback' => $success_callback,
-            'request_id'      => BimpTools::getValue('request_id', 0)
+            'errors'           => $errors,
+            'warnings'         => $result['warnings'],
+            'object_view_url'  => $url,
+            'success'          => $result['success'],
+            'module'           => $object_module,
+            'object_name'      => $object_name,
+            'id_object'        => $id_object,
+            'success_callback' => $result['success_callback'],
+            'request_id'       => BimpTools::getValue('request_id', 0)
         )));
     }
 
@@ -954,6 +909,14 @@ class BimpController
         $custom_field = BimpTools::getValue('custom_field', false);
         $id_object = BimpTools::getValue('id_object', 0);
         $value = BimpTools::getValue('value', '');
+        $field_prefix = BimpTools::getValue('field_prefix', '');
+        $is_object = (int) BimpTools::getValue('is_object', 0);
+
+        if ($field_prefix) {
+            if (preg_match('/^' . $field_prefix . '(.*)$/', $field_name, $matches)) {
+                $field_name = $matches[1];
+            }
+        }
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type de l\'objet absent';
@@ -979,7 +942,6 @@ class BimpController
             }
 
             if (!count($errors)) {
-
                 if ($value) {
                     $object->set($field_name, $value);
                 }
@@ -991,18 +953,34 @@ class BimpController
                 if (count($object->errors)) {
                     $errors = $object->errors;
                 } else {
-                    if ($custom_field) {
+                    if ($is_object) {
+                        $form = new BC_Form($object, $id_parent, $form_name, 1, true);
+                        $form->fields_prefix = $field_prefix;
+                        if (!is_null($form->config_path)) {
+                            foreach ($form->params['rows'] as $row) {
+                                if ($object->config->isDefined($form->config_path . '/rows/' . $row . '/object')) {
+                                    $sub_object_name = $object->getConf($form->config_path . '/rows/' . $row . '/object', '');
+                                    if ($sub_object_name && $sub_object_name === $field_name) {
+                                        $row_params = BimpComponent::fetchParamsStatic($object->config, $form->config_path . '/rows/' . $row, BC_Form::$object_params);
+                                        $html = $form->renderObjectRow($field_name, $row_params);
+                                    }
+                                }
+                            }
+                        }
+                    } elseif ($custom_field) {
                         $form_row = BimpTools::getValue('form_row', '');
                         if ($form_row) {
                             $form = new BC_Form($object, $id_parent, $form_name, 1, true);
+                            $form->fields_prefix = $field_prefix;
                             $html = $form->renderCustomInput($form_row);
                         } else {
                             $html = BimpRender::renderAlerts('Erreur de configuration - contenu du champ personnalisé non défini');
                         }
                     } elseif ($object->config->isDefined('fields/' . $field_name)) {
                         $field = new BC_Field($object, $field_name, true);
+                        $field->name_prefix = $field_prefix;
                         if ($field->params['type'] === 'id_object' && $field->params['create_form']) {
-                            $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_name, $field->params['create_form'], $field->params['create_form_values'], true);
+                            $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], true);
                         }
                         $html .= $field->renderInput();
                         unset($field);
@@ -1011,7 +989,7 @@ class BimpController
                         if (count($bimpAsso->errors)) {
                             $html = BimpRender::renderAlerts($bimpAsso->errors);
                         } else {
-                            $html = $bimpAsso->renderAssociatesCheckList();
+                            $html = $bimpAsso->renderAssociatesCheckList($field_prefix);
                         }
                     }
                 }
@@ -1448,7 +1426,7 @@ class BimpController
         die(json_encode($return));
     }
 
-    // Callbacks: 
+    // Callbacks:
 
     protected function getObjectIdFromPost($object_name)
     {

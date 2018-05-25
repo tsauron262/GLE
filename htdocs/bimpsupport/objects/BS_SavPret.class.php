@@ -13,10 +13,10 @@ class BS_SavPret extends BimpObject
             foreach ($result['errors'] as $error) {
                 $msg .= ' - ' . $error . '<br/>';
             }
-            return 'bimp_msg(\'' . addslashes($msg) . '\', \'danger\')';
+            return 'bimp_msg(\'' . addslashes($msg) . '\', \'danger\');';
         }
 
-        return 'window.open("' . $result['file_url'] . '")';
+        return 'window.open("' . $result['file_url'] . '");';
     }
 
     public function getCentresArray()
@@ -37,33 +37,30 @@ class BS_SavPret extends BimpObject
         $equipments = array();
 
         $sav = $this->getParentInstance();
-        if (BimpObject::objectLoaded($sav)) {
-            $code_centre = (string) $sav->getData('code_centre');
-            if ($code_centre) {
-//                echo $code_centre;
-                $unreturned = $this->getUnreturnedEquipments($code_centre);
-                $instance = BimpObject::getInstance('bimpequipment', 'Equipment');
-                $list = $instance->getList(array(
-                    'p.position'    => 1,
-                    'p.type'        => 7,
-                    'p.code_centre' => $code_centre
-                        ), null, null, 'id', 'desc', 'array', array(
-                    'a.id'
-                        ), array(
-                    array(
-                        'table' => 'be_equipment_place',
-                        'alias' => 'p',
-                        'on'    => 'p.id_equipment = a.id'
-                    )
-                ));
-                foreach ($list as $item) {
-                    if (in_array((int) $item['id'], $unreturned)) {
-                        continue;
-                    }
+        $code_centre = (string) $sav->getData('code_centre');
+        if ($code_centre) {
+            $unreturned = $this->getUnreturnedEquipments($code_centre);
+            $instance = BimpObject::getInstance('bimpequipment', 'Equipment');
+            $list = $instance->getList(array(
+                'p.position'    => 1,
+                'p.type'        => 7,
+                'p.code_centre' => $code_centre
+                    ), null, null, 'id', 'desc', 'array', array(
+                'a.id'
+                    ), array(
+                array(
+                    'table' => 'be_equipment_place',
+                    'alias' => 'p',
+                    'on'    => 'p.id_equipment = a.id'
+                )
+            ));
+            foreach ($list as $item) {
+                if (in_array((int) $item['id'], $unreturned)) {
+                    continue;
+                }
 
-                    if ($instance->fetch((int) $item['id'])) {
-                        $equipments[(int) $item['id']] = $instance->getData('serial') . ' - ' . $instance->displayProduct('nom', true);
-                    }
+                if ($instance->fetch((int) $item['id'])) {
+                    $equipments[(int) $item['id']] = $instance->getData('serial') . ' - ' . $instance->displayProduct('nom', true);
                 }
             }
         }

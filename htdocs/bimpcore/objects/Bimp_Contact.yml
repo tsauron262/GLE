@@ -24,8 +24,10 @@ fields:
             array: civilities
     lastname:
         label: Nom
+        required: 1
     firstname: 
         label: Prénom
+        required: 1
     address: 
         label: Adresse
     zip: 
@@ -60,6 +62,7 @@ fields:
         depends_on: fk_pays
     email: 
         label: E-mail
+        required: 1
     phone:
         label: Tél. pro
         dol_prop: phone_pro

@@ -543,15 +543,19 @@ function loadNewClientForm($button) {
         module: 'bimpcore',
         object_name: 'Bimp_Societe',
         form_name: 'client_light'
-    }, 'Ajout d\'un nouveau client', function () {
-        var $button = $('#page_modal').find('.modal-footer').find('.save_object_button');
+    }, 'Ajout d\'un nouveau client', function ($form) {
+        var modal_idx = parseInt($form.data('modal_idx'));
+        if (!modal_idx) {
+            bimp_msg('Erreur technique: index de la modale absent');
+            return;
+        }
+        var $button = bimpModal.$footer.find('.save_object_button.modal_' + modal_idx);
         if ($button.length) {
             $button.unbind('click').removeAttr('onclick').click(function () {
-                var $form = $('#page_modal').find('.modal-ajax-content').find('.Bimp_Societe_form');
                 if ($form.length) {
                     saveObjectFromForm($form.data('identifier'), $button, function (result) {
-                        var $modal = $('#page_modal');
-                        $modal.modal('hide');
+                        bimpModal.removeContent(modal_idx);
+                        bimpModal.hide();
                         $('#venteClientFormContainer').find('[name="id_client"]').val(result.id_object);
                         $('#venteClientFormContainer').find('[name="id_client_contact"]').val(0);
                         saveClient();
@@ -568,15 +572,19 @@ function loadNewContactForm($button, id_client) {
         object_name: 'Bimp_Contact',
         form_name: 'default',
         id_parent: id_client
-    }, 'Ajout d\'un nouveau contact', function () {
-        var $button = $('#page_modal').find('.modal-footer').find('.save_object_button');
+    }, 'Ajout d\'un nouveau contact', function ($form) {
+        var modal_idx = parseInt($form.data('modal_idx'));
+        if (!modal_idx) {
+            bimp_msg('Erreur technique: index de la modale absent');
+            return;
+        }
+        var $button = bimpModal.$footer.find('.save_object_button.modal_' + modal_idx);
         if ($button.length) {
             $button.unbind('click').removeAttr('onclick').click(function () {
-                var $form = $('#page_modal').find('.modal-ajax-content').find('.Bimp_Contact_form');
                 if ($form.length) {
                     saveObjectFromForm($form.data('identifier'), $button, function (result) {
-                        var $modal = $('#page_modal');
-                        $modal.modal('hide');
+                        bimpModal.removeContent(modal_idx);
+                        bimpModal.hide();
                         BimpAjax('saveContact', {
                             id_vente: Vente.id_vente,
                             id_contact: result.id_object
@@ -675,15 +683,19 @@ function editClient($button, id_client, client_name) {
         'object_name': 'Bimp_Societe',
         'id_object': id_client,
         'form_name': 'default'
-    }, title, function () {
-        var $button = $('#page_modal').find('.modal-footer').find('.save_object_button');
+    }, title, function ($form) {
+        var modal_idx = parseInt($form.data('modal_idx'));
+        if (!modal_idx) {
+            bimp_msg('Erreur technique: index de la modale absent');
+            return;
+        }
+        var $button = bimpModal.$footer.find('.save_object_button.modal_' + modal_idx);
         if ($button.length) {
             $button.unbind('click').removeAttr('onclick').click(function () {
-                var $form = $('#page_modal').find('.modal-ajax-content').find('.Bimp_Societe_form');
                 if ($form.length) {
                     saveObjectFromForm($form.data('identifier'), $button, function (result) {
-                        var $modal = $('#page_modal');
-                        $modal.modal('hide');
+                        bimpModal.removeContent(modal_idx);
+                        bimpModal.hide();
                         $('#venteClientFormContainer').find('[name="id_client"]').val(result.id_object);
                         saveClient();
                     });
@@ -700,15 +712,19 @@ function editContact($button, id_contact, contact_name) {
         'object_name': 'Bimp_Contact',
         'id_object': id_contact,
         'form_name': 'default'
-    }, title, function () {
+    }, title, function ($form) {
+        var modal_idx = parseInt($form.data('modal_idx'));
+        if (!modal_idx) {
+            bimp_msg('Erreur technique: index de la modale absent');
+            return;
+        }
         var $button = $('#page_modal').find('.modal-footer').find('.save_object_button');
         if ($button.length) {
             $button.unbind('click').removeAttr('onclick').click(function () {
-                var $form = $('#page_modal').find('.modal-ajax-content').find('.Bimp_Contact_form');
                 if ($form.length) {
                     saveObjectFromForm($form.data('identifier'), $button, function (result) {
-                        var $modal = $('#page_modal');
-                        $modal.modal('hide');
+                        bimpModal.removeContent(modal_idx);
+                        bimpModal.hide();
                         BimpAjax('saveContact', {
                             id_vente: Vente.id_vente,
                             id_contact: result.id_object
@@ -787,7 +803,7 @@ function selectArticle($button, id_object, object_name) {
     $('.selectArticleLine').each(function () {
         $(this).find('button').addClass('disabled');
     });
-    
+
     $button.removeClass('disabled');
 
     $button.removeClass('disabled');
@@ -1098,7 +1114,7 @@ function onVenteLoaded() {
         setCartLineEvents($(this));
     });
 
-    $('#BC_Vente_client_form').find('input[name="id_client"]').change(function () {
+    $('#venteClientFormContainer').find('input[name="id_client"]').change(function () {
         saveClient();
     });
 

@@ -638,7 +638,7 @@ class BC_Card extends BimpComponent
                 $html .= ' data-content="vue rapide"';
                 $html .= ' data-container="body"';
                 $html .= ' data-placement="top"';
-                $html .= 'onclick="loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . htmlentities(addslashes($title)) . '\')">';
+                $html .= 'onclick="loadModalObjectPage($(this), \'' . $url . '\', \'' . htmlentities(addslashes($title)) . '\')">';
                 $html .= '<i class="fa fa-eye"></i></button>';
 
                 $html .= '<a href="' . $url . '" class="btn btn-default bs-popover" target="_blank"';

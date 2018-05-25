@@ -561,6 +561,15 @@ class GSX_Repair extends BimpObject
             if ($response['newSerialNumber'] !== (string) $this->getData('serial') &&
                     $response['newSerialNumber'] !== (string) $this->getData('new_serial')) {
                 $this->set('new_serial', $response['newSerialNumber']);
+                $sav = $this->getChildObject('sav');
+                if (BimpObject::objectLoaded($sav)) {
+                    $equipment = $sav->getChildObject('equipment');
+                    if (BimpObject::objectLoaded($equipment)) {
+                        $equipment->set('serial', $response['newSerialNumber']);
+                        $equipment->update();
+                        $sav->addNote('Mise à jour du numéro de série de l\'équipement effectué le '.date('d / m / Y à H:i'));
+                    }
+                }
                 $force_repair_update = true;
             }
         }

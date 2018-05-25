@@ -89,8 +89,7 @@ Abstract class BimpModelPDF
         }
 
         if (count($this->errors)) {
-//            $this->displayErrors();
-            return 0;
+            $this->displayErrors();
             exit;
         }
 
@@ -134,7 +133,7 @@ Abstract class BimpModelPDF
         }
         $styles .= '</style>' . "\n";
 
-        $this->pdf->writeHTML($styles . $content, true, false, true, false, '');
+        $this->pdf->writeHTML($styles . $content, false, false, true, false, '');
     }
 
     // Rendus HTML: 

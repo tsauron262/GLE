@@ -43,7 +43,7 @@ class BC_ListTable extends BC_List
         $this->params_def['checkboxes'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['add_object_row'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['positions'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['bulk_actions'] = array('type' => 'definitions', 'defs_type' => 'button', 'multiple' => true);
+        $this->params_def['bulk_actions'] = array('data_type' => array(), 'compile' => true);
         $this->params_def['cols'] = array('type' => 'keys');
         $this->params_def['extra_cols'] = array('data_type' => 'array');
         $this->params_def['enable_search'] = array('data_type' => 'bool', 'default' => 1);
@@ -470,11 +470,11 @@ class BC_ListTable extends BC_List
 
                 $html .= '<td>';
                 if ($field && !in_array($field, BimpObject::$common_fields)) {
-                    $field = new BC_Field($this->object, $field, true);
-                    $default_value = $field->params['default_value'];
-                    $field->value = $default_value;
-                    if ($field->params['editable']) {
-                        $html .= $field->renderHtml();
+                    $bc_field = new BC_Field($this->object, $field, true);
+                    $default_value = $bc_field->params['default_value'];
+                    $bc_field->value = $default_value;
+                    if ($bc_field->params['editable']) {
+                        $html .= $bc_field->renderHtml();
                     }
                 }
                 $html .= '</td>';

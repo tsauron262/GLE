@@ -155,7 +155,7 @@ class BC_Display extends BimpComponent
                                             $html .= '<i class="fa fa-external-link"></i>';
                                             $html .= '</span>';
                                             if (is_null($this->params['modal_view'])) {
-                                                $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . addslashes(BimpObject::getInstanceNom($instance)) . '\')';
+                                                $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . addslashes(BimpObject::getInstanceNom($instance)) . '\')';
                                                 $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
                                                 $html .= '<i class="fa fa-eye"></i>';
                                                 $html .= '</span>';

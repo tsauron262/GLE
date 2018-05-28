@@ -1025,7 +1025,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         //Ajout garantie
         if ($garantieHt > 0) {
             $tva = 100 * $garantieTtc / $garantieHt;
-            $prop->addline("Garantie", -($garantieHt), 1, $tva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
+            $prop->addline("Garantie", -($garantieHt), 1, $tva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$garantiePa);
         }
 
         // Ajout infos supplémentaires:

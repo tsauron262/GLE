@@ -89,7 +89,7 @@ switch ($action) {
      * check_ticket.php
      */
     case 'check_ticket': {
-            $ticket->check($_POST['barcode'], $_POST['id_event']);
+            $ticket->check(substr($_POST['barcode'], 0, 32), $_POST['id_event']);
             echo json_encode(array('errors' => $ticket->errors));
             break;
         }

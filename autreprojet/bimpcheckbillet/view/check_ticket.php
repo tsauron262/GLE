@@ -37,16 +37,24 @@ print '
         <script type="text/javascript" src="../js/annexes.js"></script>
         <link rel="stylesheet" type="text/css" href="../scan/scan.css">
         <link rel="stylesheet" type="text/css" href="../css/check_ticket.css">
+        <link rel="stylesheet" type="text/css" href="../css/home.css.css">
 
 
 <div id="input">
     <input type="text" id="barcode"/>
 </div>
 <br/>
-<br/>
-<br/>
-<div id="alertSubmit">
-</div>
+<div style="width = 100%; text-align: center">
+    <img id="imgOk" src="../img/checked.png" style="width: 128px; height: 128px; display: none"/>
+    <img id="imgEr" src="../img/error.png"   style="width: 128px; height: 128px; display: none"/>
+    <br/>
+
+    <button id="showHistory" class="btn btn-primary" style="float: left">Voir l\'historique</button><br/><br/>
+
+    <div id="history" toggled="false" style="text-align: left; display: block; height: 100px; width: 520px; overflow: hidden; border: 1px solid black;">
+    </div>
+</div>    
+
 </fieldset>
 </body>';
 

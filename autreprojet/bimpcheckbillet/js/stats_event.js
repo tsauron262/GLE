@@ -117,7 +117,7 @@ function displayStats(tab) {
     html += '<div id="char_ticket"></div>';
     $('#container_event').append(html);
 
-    google.charts.setOnLoadCallback(drawChart(dataForGraphTariff, 'char_tariff', 'Répartition des tarifs dans les ventes'));
+    google.charts.setOnLoadCallback(drawChart(dataForGraphTariff, 'char_tariff', 'Nombre de ticket vendu par tariff'));
     google.charts.setOnLoadCallback(drawChart(dataForGraphTariffPrice, 'char_tariff_price', 'Part des tarifs dans les ventes totale'));
     google.charts.setOnLoadCallback(drawChart(dataForGraphTicket, 'char_ticket', 'Validation des tickets'));
 }

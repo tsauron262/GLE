@@ -1879,7 +1879,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
                 if ($propal_status === 2) {
                     $res_errors = $this->setReservationsStatus(304);
-                    $warnings = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour des réservations de produits:');
+                    $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour des réservations de produits:');
 
                     if (!count($errors)) {
                         // Gestion des stocks et emplacements: 

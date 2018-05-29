@@ -13,6 +13,12 @@ print '<legend><span>Valider ticket</span></legend>';
 print '<label for="event">Evènement </label><br/>';
 print '<select class="chosen-select" name="event"><option></option></select><br/><br/>';
 
+print '<label>Son</label><br/>
+<div class="btn-group btn-group-toggle" data-toggle="buttons">
+    <label name="sound" class="btn btn-primary">        <input name="sound" value=0 type="radio"/>Sans</label>
+    <label name="sound" class="btn btn-primary active"> <input name="sound" value=1 type="radio"/>Avec</label>
+</div>';
+        
 print '
         <canvas></canvas>
         <ul></ul>
@@ -54,7 +60,11 @@ print '
 
     <div id="history" toggled="false" style="text-align: left; display: block; height: 100px; width: 520px; overflow: hidden; border: 1px solid black;">
     </div>
-</div>    
+</div>
+       
+
+<audio id="beepSound" preload="auto"><source src="../sound/beep.wav" type="audio/mp3"/></audio>
+<audio id="errorSound" preload="auto"><source src="../sound/error.flac" type="audio/mp3"/></audio>
 
 </fieldset>
 </body>';

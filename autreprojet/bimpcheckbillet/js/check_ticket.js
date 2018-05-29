@@ -1,4 +1,4 @@
-//var decoder;
+var sound = 1;
 
 function getEvents() {
 
@@ -53,7 +53,7 @@ function getEvents() {
 }
 
 function checkTicket(barcode, id_event) {
-    
+
     $('div#alertSubmit').empty();
 
     if (barcode === '') {
@@ -81,10 +81,14 @@ function checkTicket(barcode, id_event) {
             decoder.stop();
             var out = JSON.parse(json);
             if (out.errors.length !== 0) {
+                if (sound === 1)
+                    document.querySelector("#errorSound").play();
                 displayErrors(out.errors, barcode);
             } else if (out.errors === undefined) {
                 setMessage('alertSubmit', 'Erreur serveur 1495.', 'error');
             } else {
+                if (sound === 1)
+                    document.querySelector("#beepSound").play();
                 displayNoErrors(barcode);
             }
         }
@@ -96,6 +100,11 @@ $(document).ready(function () {
     getEvents();
     $('button#showHistory').click(function () {
         toggleHistory();
+    });
+    $('label[name=sound]').click(function() {
+        var input = $(this).find('input');
+        sound = parseInt(input.val());
+        $(this).removeClass('focus');
     });
 });
 

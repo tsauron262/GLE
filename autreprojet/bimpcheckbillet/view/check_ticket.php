@@ -43,6 +43,7 @@ print '
 <div id="input">
     <input type="text" id="barcode"/>
 </div>
+<div id="alertSubmit"></div>
 <br/>
 <div style="width = 100%; text-align: center">
     <img id="imgOk" src="../img/checked.png" style="width: 128px; height: 128px; display: none"/>

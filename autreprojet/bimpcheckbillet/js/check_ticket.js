@@ -53,6 +53,8 @@ function getEvents() {
 }
 
 function checkTicket(barcode, id_event) {
+    
+    $('div#alertSubmit').empty();
 
     if (barcode === '') {
         setMessage('alertSubmit', 'Code barre vide.', 'error');

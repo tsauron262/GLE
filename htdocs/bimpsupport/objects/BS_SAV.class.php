@@ -853,7 +853,7 @@ class BS_SAV extends BimpObject
 
                 include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
                 if ($factureA->generateDocument(self::$facture_model_pdf, $langs) <= 0) {
-                    $fac_errors = BimpTools::getErrorsFromDolObject($factureA, null, $langs);
+                    $fac_errors = BimpTools::getErrorsFromDolObject($factureA, $error = null, $langs);
                     $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la création du fichier PDF de la facture d\'acompte');
                 }
             }
@@ -1000,7 +1000,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             if (!$prod->getData("out_of_warranty")) {
                 $garantieHt += $prodG->price * $prod->getData("qty");
                 $garantieTtc += $prodG->price * $prod->getData("qty") * ($prodG->tva_tx / 100);
-                $garantiePa += $prodG->fourn_price * $prod->getData("qty");
+                $garantiePa += $prodF->fourn_price * $prod->getData("qty");
             } else
                 $this->allGarantie = false;
         }

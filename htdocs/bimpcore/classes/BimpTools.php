@@ -154,12 +154,12 @@ class BimpTools
         return '/test2/public/theme/common/nophoto.png';
     }
 
-    public static function getErrorsFromDolObject($object, &$errors = null, $langs = null)
+    public static function getErrorsFromDolObject($object, $errors = null, $langs = null)
     {
         if (is_null($errors)) {
             $errors = array();
         }
-
+        
         if (isset($object->error)) {
             if (!is_null($langs)) {
                 $errors[] = $langs->trans($object->error);

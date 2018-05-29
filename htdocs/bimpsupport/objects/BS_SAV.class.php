@@ -1879,7 +1879,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
                 if ($propal_status === 2) {
                     $res_errors = $this->setReservationsStatus(304);
-                    $warnings = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour des réservations de produits:');
+                    $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour des réservations de produits:');
 
                     if (!count($errors)) {
                         // Gestion des stocks et emplacements: 
@@ -1948,7 +1948,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                             $place_errors = $place->validateArray(array(
                                 'id_equipment' => (int) $this->getData('id_equipment'),
                                 'type'         => BE_Place::BE_PLACE_CLIENT,
-                                'id_entrepot'  => (int) $this->getData('id_client'),
+                                'id_client'  => (int) $this->getData('id_client'),
                                 'infos'        => 'Restitution ' . $this->getData('ref'),
                                 'date'         => date('Y-m-d H:i:s')
                             ));

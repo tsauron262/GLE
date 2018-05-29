@@ -81,12 +81,6 @@ class ActionsBimpsupport {
 //        $groupSav->fetch('', "XX SAV");
         if (isset($conf->global->MAIN_MODULE_BIMPSUPPORT) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
             $hrefFin = "";
-            $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
-            $return .= '<div class="menu_titre">' . img_object("SAV", "drap0@synopsistools") . ' Fiche SAV</div>';
-            $return .= '<div class="menu_contenu">';
-            $return .= '<a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/bimpsupport/?tab=sav"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="" title=""> Acces SAV</a>';
-            $return .= '<br/><a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/synopsisapple/test.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/on.png" border="0" alt="" title=""> Garantie Apple</a>';
-            $return .= '</div>';
             
 
             require_once DOL_DOCUMENT_ROOT.'/bimpsupport/centre.inc.php';
@@ -107,9 +101,19 @@ class ActionsBimpsupport {
             
             
 
-
-            if(count($centreUser) > 1)
+            $urlAcces = DOL_URL_ROOT . '/bimpsupport/?tab=sav';
+            if(count($centreUser) > 1){
                 $tabGroupe = array(array('label' => "Tous", 'valeur' => 'Tous', 'forUrl' => implode($centreUser,"-")));
+                $urlAcces = DOL_URL_ROOT . "/bimpsupport/?fc=index&tab=sav&code_centre=".implode($centreUser,"-");
+            }
+            
+            
+            $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
+            $return .= '<div class="menu_titre">' . img_object("SAV", "drap0@synopsistools") . ' Fiche SAV</div>';
+            $return .= '<div class="menu_contenu">';
+            $return .= '<a class="vsmenu" title="Acces SAV" href="'.$urlAcces.'"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="" title=""> Acces SAV</a>';
+            $return .= '<br/><a class="vsmenu" title="Garantie Apple" href="' . DOL_URL_ROOT . '/synopsisapple/test.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/on.png" border="0" alt="" title=""> Garantie Apple</a>';
+            $return .= '</div>';
 
             foreach($tabCentre as $idGr => $tabOneCentr){
                 if(count($centreUser) == 0 || in_array($idGr, $centreUser))

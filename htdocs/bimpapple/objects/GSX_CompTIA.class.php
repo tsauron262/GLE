@@ -100,6 +100,10 @@ class GSX_CompTIA extends BimpObject
                 }
             }
         }
+
+        if (!count(self::$codes) || !count(self::$mods)) {
+            self::updateCodesFromGSX();
+        }
     }
 
     public static function getCompTIACodes($group = null)

@@ -45,7 +45,7 @@ fields:
     out_of_warranty:
         label: Hors garantie
         type: bool
-        default_value: 0
+        default_value: 1
     no_order: 
         label: Commande de stock
         type: bool

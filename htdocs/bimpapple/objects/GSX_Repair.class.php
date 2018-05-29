@@ -925,6 +925,7 @@ class GSX_Repair extends BimpObject
         }
 
         $this->setSerial($serial);
+        $this->set('total_from_order', '1,2');//Pour qu'il y est forcément un changement aprés
 
         $errors = parent::create();
 

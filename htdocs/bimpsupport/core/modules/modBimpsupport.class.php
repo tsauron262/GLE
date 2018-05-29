@@ -48,7 +48,7 @@ class modBimpsupport extends DolibarrModules {
 
         // Id for module (must be unique).
         // Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
-        $this->numero = 754381;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+        $this->numero = 754389;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
         // Key text used to identify module (for permissions, menus, etc...)
         $this->rights_class = 'BimpSupport';
 
@@ -165,21 +165,21 @@ class modBimpsupport extends DolibarrModules {
         //                                1=>array('label'=>'My label', 'jobtype'=>'command', 'command'=>'', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>1, 'unitfrequency'=>3600*24, 'status'=>0, 'test'=>true)
         // );
         // Permissions
-//        $this->rights = array();  // Permission array used by this module
-//        $r = 0;
-//        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-//        $this->rights[$r][1] = 'Voir toutes les factures'; // Permission label
-//        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
-//        $this->rights[$r][4] = 'facture';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//        $this->rights[$r][5] = 'read';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//        $r++;
-//        
-//        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-//        $this->rights[$r][1] = 'Voir les factures selon centre SAV'; // Permission label
-//        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
-//        $this->rights[$r][4] = 'factureCentre';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//        $this->rights[$r][5] = 'read';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2
-//        $r++;
+        $this->rights = array();  // Permission array used by this module
+        $r = 0;
+        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+        $this->rights[$r][1] = 'Créer modifié SAV'; // Permission label
+        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+        $this->rights[$r][4] = 'read';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $r++;
+        
+        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+        $this->rights[$r][1] = 'Supprimer les SAV'; // Permission label
+        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+        $this->rights[$r][4] = 'delete';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2
+        $r++;
 //        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 //        $this->rights[$r][1] = 'Delete objects of My Module'; // Permission label
 //        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)

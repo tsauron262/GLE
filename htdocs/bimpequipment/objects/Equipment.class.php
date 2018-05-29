@@ -7,11 +7,12 @@ class Equipment extends BimpObject
 
     public static $types = array(
         1 => 'Ordinateur',
-        2 => 'Accessoire',
-        3 => 'License',
-        4 => 'Serveur',
-        5 => 'Matériel réseau',
-        6 => 'Autre'
+        2 => 'Periph Mobile',
+        10 => 'Accessoire',
+        20 => 'License',
+        30 => 'Serveur',
+        13 => 'Matériel réseau',
+        50 => 'Autre'
     );
     public static $origin_elements = array(
         0 => '',

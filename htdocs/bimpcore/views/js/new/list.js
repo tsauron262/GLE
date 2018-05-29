@@ -590,37 +590,39 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                 module: $list.data('module'),
                 object_name: $list.data('object_name'),
                 id_object: 0,
-                form_name: form_name
-            }, title, function () {
-                var $modal = $('#page_modal');
-                if ($modal.length) {
-                    var $form = $modal.find('.modal-ajax-content').find('.object_form');
-                    if ($form.length) {
-                        for (var field_name in extra_data) {
-                            var $input = $form.find('[name="' + field_name + '"]');
-                            if ($input.length) {
-                                $input.val(extra_data[field_name]);
-                            }
-                        }
-                        $modal.find('.modal-footer').find('.save_object_button').remove();
-                        $modal.find('.modal-footer').find('.objectViewLink').remove();
-
-                        var button_html = '<button type="button" class="extra_button btn btn-primary set_action_button">';
-                        button_html += 'Envoyer<i class="fa fa-arrow-circle-right iconRight"></i></button>';
-                        $modal.find('.modal-footer').append(button_html);
-                        $modal.find('.modal-footer').find('.set_action_button').click(function () {
-                            $form.find('.inputContainer').each(function () {
-                                var field_name = $(this).data('field_name');
-                                if ($(this).find('.cke').length) {
-                                    var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
-                                    $(this).find('[name="' + field_name + '"]').val(html_value);
-                                }
-                                extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
-                            });
-                            $modal.modal('hide');
-                            setSelectedObjectsAction($button, list_id, action, extra_data, null, null);
-                        });
+                form_name: form_name,
+                extra_data: extra_data
+            }, title, function ($form) {
+                if ($.isOk($form)) {
+                    var modal_idx = parseInt($form.data('modal_idx'));
+                    if (!modal_idx) {
+                        bimp_msg('Erreur technique: index de la modale absent');
+                        return;
                     }
+                }
+                if ($form.length) {
+                    for (var field_name in extra_data) {
+                        var $input = $form.find('[name="' + field_name + '"]');
+                        if ($input.length) {
+                            $input.val(extra_data[field_name]);
+                        }
+                    }
+                    bimpModal.$footer.find('.save_object_button.modal_' + modal_idx).remove();
+                    bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
+                    bimpModal.addButton('Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
+                    
+                    bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
+                        $form.find('.inputContainer').each(function () {
+                            var field_name = $(this).data('field_name');
+                            if ($(this).find('.cke').length) {
+                                var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+                                $(this).find('[name="' + field_name + '"]').val(html_value);
+                            }
+                            extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
+                        });
+                        bimpModal.hide();
+                        setSelectedObjectsAction($button, list_id, action, extra_data, null, null);
+                    });
                 }
             });
         } else {

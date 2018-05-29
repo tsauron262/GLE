@@ -968,8 +968,8 @@ class BimpController
                             }
                         }
                     } elseif ($custom_field) {
-                        $form_row = BimpTools::getValue('form_row', '');
-                        if ($form_row) {
+                        $form_row = BimpTools::getValue('form_row');
+                        if (!is_null($form_row)) {
                             $form = new BC_Form($object, $id_parent, $form_name, 1, true);
                             $form->fields_prefix = $field_prefix;
                             $html = $form->renderCustomInput($form_row);

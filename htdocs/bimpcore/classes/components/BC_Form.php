@@ -565,6 +565,11 @@ class BC_Form extends BC_Panel
         }
 
         $html = '';
+
+        if ($params['data_type'] === 'id_object' && $params['object'] && $params['create_form']) {
+            $html .= self::renderCreateObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values']);
+        }
+
         if ($this->object->config->isDefined($this->config_path . '/rows/' . $row . '/input')) {
             $input = new BC_Input($this->object, $params['data_type'], $params['input_name'], $this->config_path . '/rows/' . $row . '/input', $params['value']);
             $input->setNamePrefix($this->fields_prefix);

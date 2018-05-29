@@ -87,6 +87,14 @@ class BS_SAV extends BimpObject
         if (BimpTools::isSubmit('code_centre')) {
             return BimpTools::getValue('code_centre');
         } else {
+            global $user;
+            $userCentres = explode(' ', $user->array_options['options_apple_centre']);
+            foreach ($userCentres as $code) {
+                if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
+                    return $matches[1];
+                }
+            }
+
             $id_entrepot = (int) $this->getData('id_entrepot');
             if (!$id_entrepot) {
                 $id_entrepot = BimpTools::getValue('id_entrepot', 0);
@@ -168,6 +176,36 @@ class BS_SAV extends BimpObject
         return $propals;
     }
 
+    public function getUserCentresArray()
+    {
+        global $tabCentre;
+
+        $centres = array(
+            '' => ''
+        );
+
+        global $user;
+        $userCentres = explode(' ', $user->array_options['options_apple_centre']);
+
+        if (count($userCentres)) {
+            foreach ($userCentres as $code) {
+                if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
+                    if (isset($tabCentre[$code])) {
+                        $centres[$matches[1]] = $tabCentre[$matches[1]][2];
+                    }
+                }
+            }
+        }
+
+        if (count($centres) <= 1) {
+            foreach ($tabCentre as $code => $centre) {
+                $centres[$code] = $centre[2];
+            }
+        }
+
+        return $centres;
+    }
+
     public function getCentresArray()
     {
         global $tabCentre;
@@ -179,7 +217,7 @@ class BS_SAV extends BimpObject
         foreach ($tabCentre as $code => $centre) {
             $centres[$code] = $centre[2];
         }
-        
+
         return $centres;
     }
 
@@ -1879,7 +1917,10 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
                 if ($propal_status === 2) {
                     $res_errors = $this->setReservationsStatus(304);
-                    $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour des réservations de produits:');
+
+                    if (count($res_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour des réservations de produits:');
+                    }
 
                     if (!count($errors)) {
                         // Gestion des stocks et emplacements: 
@@ -1948,7 +1989,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                             $place_errors = $place->validateArray(array(
                                 'id_equipment' => (int) $this->getData('id_equipment'),
                                 'type'         => BE_Place::BE_PLACE_CLIENT,
-                                'id_client'  => (int) $this->getData('id_client'),
+                                'id_client'    => (int) $this->getData('id_client'),
                                 'infos'        => 'Restitution ' . $this->getData('ref'),
                                 'date'         => date('Y-m-d H:i:s')
                             ));
@@ -1957,8 +1998,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                             }
 
                             if (count($place_errors)) {
-                                $warnings[] = 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV';
-                                $warnings = array_merge($warnings, $place_errors);
+                                $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
                             }
                         }
 
@@ -1969,7 +2009,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         $facture->array_options['options_type'] = "S";
                         $facture->createFromOrder($propal->dol_object);
                         $facture->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
-                        $facture->validate($user, '');//pas d'entrepot pour pas de destock
+                        $facture->validate($user, ''); //pas d'entrepot pour pas de destock
                         $facture->fetch($facture->id);
 
                         if (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56)) {
@@ -1993,8 +2033,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         $this->set('id_facture', $facture->id);
                         $up_errors = $this->update();
                         if (count($up_errors)) {
-                            $warnings[] = 'Echec de l\'enregistrement de l\'ID de la facture (' . $facture->id . ')';
-                            $warnings = array_merge($warnings, $up_errors);
+                            $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $facture->id . ')');
                         } else {
                             $facture->generateDocument(self::$facture_model_pdf, $langs);
                         }
@@ -2026,7 +2065,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             if (!is_null($list)) {
                 foreach ($list as $item) {
                     if ($repair->fetch((int) $item['id'])) {
-                            $rep_errors = $repair->close();
+                        $rep_errors = $repair->close();
                     } else {
                         $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
                     }

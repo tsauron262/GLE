@@ -76,7 +76,7 @@ class BC_Field extends BimpComponent
         $this->params['editable'] = 1; // Pour plus tard : prise en compte des droits user
         $this->params['viewable'] = 1;
 
-        if (in_array($this->params['type'], array('int', 'float', 'money', 'percent'))) {
+        if (in_array($this->params['type'], array('qty', 'int', 'float', 'money', 'percent'))) {
             $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['number']));
         }
     }

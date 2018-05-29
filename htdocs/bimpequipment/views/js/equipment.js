@@ -58,6 +58,14 @@ function onEquipmentFormLoaded($form) {
                 });
             }
         });
+
+        var $sav_form = $form.findParentByClass('BS_SAV_form');
+        if ($.isOk($sav_form)) {
+            var serial = $sav_form.find('form.BS_SAV_form').find('[name="id_equipment_search"]').val();
+            if (serial) {
+                $form.find('[name="serial"]').val(serial).change();
+            }
+        }
     }
 }
 

@@ -163,6 +163,9 @@ fields:
         label: Centre
         values: 
             array: centres
+        input: 
+            options: 
+                array: userCentres
         required: 1
         default_value: 
             callback: getDefaultCodeCentre

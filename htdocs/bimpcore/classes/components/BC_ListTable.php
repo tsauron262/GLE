@@ -35,7 +35,7 @@ class BC_ListTable extends BC_List
         'hidden'      => array('data_type' => 'bool', 'default' => 0),
         'search_list' => array('data_type' => 'array', 'compile' => true, 'default' => null),
         'field_name'  => array(),
-        'search'       => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null)
+        'search'      => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null)
     );
 
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
@@ -523,6 +523,11 @@ class BC_ListTable extends BC_List
                 $onclick = isset($action_params['onclick']) ? $action_params['onclick'] : '';
                 $icon = isset($action_params['icon']) ? $action_params['icon'] : '';
                 $onclick = str_replace('list_id', $this->identifier, $onclick);
+                foreach ($this->params['list_filters'] as $filter) {
+                    if (BimpTools::isNumericType($filter['filter']) || is_string($filter['filter'])) {
+                        $onclick = str_replace('list_filter_' . $filter['name'], $filter['filter'], $onclick);
+                    }
+                }
                 if ($label && $onclick) {
                     $button = array(
                         'classes' => array('btn', 'btn-light-default'),
@@ -593,6 +598,11 @@ class BC_ListTable extends BC_List
             if ($label && $onclick) {
                 $html .= '<div><span class="btn';
                 $onclick = str_replace('list_id', $this->identifier, $onclick);
+                foreach ($this->params['list_filters'] as $filter) {
+                    if (BimpTools::isNumericType($filter['filter']) || is_string($filter['filter'])) {
+                        $onclick = str_replace('list_filter_' . $filter['name'], $filter['filter'], $onclick);
+                    }
+                }
                 $html .= '" onclick="' . $onclick . '">';
                 if ($icon) {
                     $html .= '<i class="fa fa-' . $icon . ' left"></i>';

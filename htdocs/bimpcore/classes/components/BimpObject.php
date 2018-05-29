@@ -760,11 +760,6 @@ class BimpObject
             $this->parent = null;
         }
 
-        if (!is_null($this->dol_object)) {
-            unset($this->dol_object);
-            $this->dol_object = $this->config->getObject('dol_object');
-        }
-
         foreach ($this->children as $object_name => $objects) {
             foreach ($objects as $id_object => $object) {
                 if (is_object($object)) {
@@ -778,6 +773,11 @@ class BimpObject
         $this->associations = array();
         $this->id = null;
         $this->ref = '';
+
+        if (!is_null($this->dol_object)) {
+            unset($this->dol_object);
+            $this->dol_object = $this->config->getObject('dol_object');
+        }
     }
 
     public function getAssociatesList($association)
@@ -1723,6 +1723,8 @@ class BimpObject
                                 ), '`' . $this->getPrimary() . '` = ' . (int) $this->id) <= 0) {
                     $sqlError = $this->db->db->lasterror();
                     $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');
+                } else {
+                    $this->set($field, $value);
                 }
             }
         } else {

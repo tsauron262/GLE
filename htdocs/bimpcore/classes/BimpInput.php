@@ -280,6 +280,20 @@ class BimpInput
                 $html .= '</select>';
                 break;
 
+            case 'select_cond_reglement':
+                $bdb = new BimpDb($db);
+                $rows = $bdb->getRows('c_payment_term', '`active` > 0', null, 'array', array('rowid', 'libelle'), 'sortorder');
+
+                $conds = array();
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        $conds[(int) $r['rowid']] = $r['libelle'];
+                    }
+                }
+                unset($bdb);
+                $options['options'] = $conds;
+                return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
+
             case 'search_ziptown':
                 if (!isset($options['linked_fields'])) {
                     $options['linked_fields'] = array();

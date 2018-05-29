@@ -36,6 +36,12 @@ class BC_FieldsTable extends BC_Panel
         }
 
         parent::__construct($object, $name, $path, $content_only, $level, $title, $icon);
+
+        if (!count($this->errors)) {
+            if (!$this->object->canView()) {
+                $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('this');
+            }
+        }
     }
 
     public function setNewValues($new_values)

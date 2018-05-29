@@ -56,6 +56,11 @@ class BC_List extends BC_Panel
             if (is_null($this->params['icon']) || !$this->params['icon']) {
                 $this->params['icon'] = 'bars';
             }
+            
+            if (!$this->object->canCreate()) {
+                $this->params['add_btn'] = 0;
+                $this->params['add_form_name'] = null;
+            }
         }
 
         $this->setConfPath();

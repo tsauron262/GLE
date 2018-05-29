@@ -5,6 +5,12 @@ require_once DOL_DOCUMENT_ROOT . '/bimpapple/controllers/gsxController.php';
 class savController extends gsxController
 {
 
+    public function canView()
+    {
+        global $user;
+        return (int) $user->rights->BimpSupport->read;
+    }
+
     public function renderGsx()
     {
         $sav = BimpObject::getInstance($this->module, 'BS_SAV', (int) BimpTools::getValue('id'));
@@ -18,7 +24,7 @@ class savController extends gsxController
         if (!$id_equipment) {
             return BimpRender::renderAlerts('Aucun équipement associé à ce SAV');
         }
-        
+
         $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', $id_equipment);
 
         if (!$equipment->isLoaded()) {
@@ -74,7 +80,7 @@ class savController extends gsxController
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }
-  
+
     protected function ajaxProcessGeneratePropal()
     {
         $errors = array();

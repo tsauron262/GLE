@@ -2255,6 +2255,30 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
         return $errors;
     }
+
+    // Gestion des droits: 
+
+    public function canCreate()
+    {
+        return $this->canView();
+    }
+
+    public function canEdit()
+    {
+        return $this->canView();
+    }
+
+    public function canView()
+    {
+        global $user;
+        return (int) $user->rights->BimpSupport->read;
+    }
+
+    public function canDelete()
+    {
+        global $user;
+        return (int) $user->rights->BimpSupport->delete;
+    }
 }
 
 function testNumSms($to)

@@ -130,7 +130,9 @@ class BimpController
                     }
                 }
 
-                if (BimpTools::isSubmit('search')) {
+                if (!$this->canView()) {
+                    echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
+                } elseif (BimpTools::isSubmit('search')) {
                     echo $this->renderSearchResults();
                 } elseif (method_exists($this, 'renderHtml')) {
                     echo $this->renderHtml();
@@ -162,7 +164,10 @@ class BimpController
                 }
                 echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $jsFile . '"></script>';
             }
-            if (BimpTools::isSubmit('search')) {
+
+            if (!$this->canView()) {
+                echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
+            } elseif (BimpTools::isSubmit('search')) {
                 echo $this->renderSearchResults();
             } elseif (method_exists($this, 'renderHtml')) {
                 echo $this->renderHtml();
@@ -397,6 +402,11 @@ class BimpController
         }
 
         return '';
+    }
+
+    public function canView()
+    {
+        return 1;
     }
 
     // Traitements Ajax:

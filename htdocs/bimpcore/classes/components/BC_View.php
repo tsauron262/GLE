@@ -38,6 +38,12 @@ class BC_View extends BC_Panel
                 $this->params['title'] = BimpTools::ucfirst($this->object->getInstanceName());
             }
         }
+
+        if (!count($this->errors)) {
+            if (!$this->object->canView()) {
+                $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('this');
+            }
+        }
     }
 
     public function setNewValues($new_values)
@@ -71,13 +77,13 @@ class BC_View extends BC_Panel
         $html = '';
         if ($this->params['edit_form'] || $this->params['delete_btn']) {
             $html .= '<div style="text-align: right">';
-            if ($this->params['edit_form']) {
+            if ($this->params['edit_form'] && $this->object->canEdit()) {
                 $title = 'Edition ' . $this->object->getLabel('of_the') . ' ' . $this->object->getInstanceName();
                 $html .= '<button type="button" class="btn btn-primary"';
                 $html .= ' onclick="loadModalFormFromView(\'' . $this->identifier . '\', \'' . $this->params['edit_form'] . '\', $(this), \'' . addslashes($title) . '\');"';
                 $html .= '><i class="fa fa-edit iconLeft"></i>Editer</button>';
             }
-            if ($this->params['delete_btn']) {
+            if ($this->params['delete_btn'] && $this->object->canDelete()) {
                 $html .= '<button type="button" class="btn btn-danger"';
                 $html .= ' onclick="deleteObject($(this), \'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', $(\'#' . $this->identifier . '_result\'));"';
                 $html .= '><i class="fa fa-trash iconLeft"></i>Supprimer</button>';

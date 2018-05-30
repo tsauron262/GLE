@@ -130,7 +130,9 @@ class BimpController
                     }
                 }
 
-                if (BimpTools::isSubmit('search')) {
+                if (!$this->canView()) {
+                    echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
+                } elseif (BimpTools::isSubmit('search')) {
                     echo $this->renderSearchResults();
                 } elseif (method_exists($this, 'renderHtml')) {
                     echo $this->renderHtml();
@@ -162,7 +164,10 @@ class BimpController
                 }
                 echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $jsFile . '"></script>';
             }
-            if (BimpTools::isSubmit('search')) {
+
+            if (!$this->canView()) {
+                echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
+            } elseif (BimpTools::isSubmit('search')) {
                 echo $this->renderSearchResults();
             } elseif (method_exists($this, 'renderHtml')) {
                 echo $this->renderHtml();
@@ -397,6 +402,11 @@ class BimpController
         }
 
         return '';
+    }
+
+    public function canView()
+    {
+        return 1;
     }
 
     // Traitements Ajax:
@@ -968,8 +978,8 @@ class BimpController
                             }
                         }
                     } elseif ($custom_field) {
-                        $form_row = BimpTools::getValue('form_row', '');
-                        if ($form_row) {
+                        $form_row = BimpTools::getValue('form_row');
+                        if (!is_null($form_row)) {
                             $form = new BC_Form($object, $id_parent, $form_name, 1, true);
                             $form->fields_prefix = $field_prefix;
                             $html = $form->renderCustomInput($form_row);

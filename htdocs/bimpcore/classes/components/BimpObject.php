@@ -760,11 +760,6 @@ class BimpObject
             $this->parent = null;
         }
 
-        if (!is_null($this->dol_object)) {
-            unset($this->dol_object);
-            $this->dol_object = $this->config->getObject('dol_object');
-        }
-
         foreach ($this->children as $object_name => $objects) {
             foreach ($objects as $id_object => $object) {
                 if (is_object($object)) {
@@ -778,6 +773,11 @@ class BimpObject
         $this->associations = array();
         $this->id = null;
         $this->ref = '';
+
+        if (!is_null($this->dol_object)) {
+            unset($this->dol_object);
+            $this->dol_object = $this->config->getObject('dol_object');
+        }
     }
 
     public function getAssociatesList($association)
@@ -1077,6 +1077,10 @@ class BimpObject
         $status_label = is_array(static::$status_list[$new_status]) ? static::$status_list[$new_status]['label'] : static::$status_list[$new_status];
         $object_label = $this->getLabel('the') . (isset($this->id) && $this->id ? ' ' . $this->id : '');
 
+        if (!$this->canSetStatus($new_status)) {
+            return array('Vous n\'avez pas la permission de passer ' . $this->getLabel('this') . ' au statut "' . $status_label . '"');
+        }
+
         $error_msg = 'Impossible de passer ' . $object_label;
         $error_msg .= ' au statut "' . $status_label . '"';
 
@@ -1112,6 +1116,10 @@ class BimpObject
                 $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
                 return $errors;
             }
+        }
+
+        if (!$this->canSetAction($action)) {
+            return array('Vous n\'avez pas la permission d\'effectuer cette action');
         }
 
         $method = 'action' . ucfirst($action);
@@ -1354,6 +1362,11 @@ class BimpObject
     {
         $errors = array();
 
+        if (!$this->canEditField($field)) {
+            $errors[] = 'Vous n\'avez pas la permission de modifier ce champ';
+            return $errors;
+        }
+
         $prevPath = $this->config->current_path;
         if (!$this->config->setCurrentPath('fields/' . $field)) {
             $errors[] = 'Le champ "' . $field . '" n\'existe pas';
@@ -1539,6 +1552,9 @@ class BimpObject
 
     public function create(&$warnings = array())
     {
+        if (!$this->canCreate()) {
+            return array('Vous n\'avez pas la permission de créer ' . $this->getLabel('a'));
+        }
         $errors = $this->validate();
 
         if (!count($errors)) {
@@ -1620,6 +1636,9 @@ class BimpObject
 
     public function update(&$warnings = array())
     {
+        if (!$this->canEdit()) {
+            return array('Vous n\'avez pas la permission de modifier ' . $this->getLabel('this'));
+        }
         $errors = array();
 
         if (!$this->isLoaded()) {
@@ -1723,6 +1742,8 @@ class BimpObject
                                 ), '`' . $this->getPrimary() . '` = ' . (int) $this->id) <= 0) {
                     $sqlError = $this->db->db->lasterror();
                     $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');
+                } else {
+                    $this->set($field, $value);
                 }
             }
         } else {
@@ -1984,6 +2005,10 @@ class BimpObject
     {
         if (!$this->isLoaded()) {
             return array('ID absent');
+        }
+
+        if (!$this->canDelete()) {
+            return array('Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this'));
         }
 
         $errors = array();
@@ -2426,6 +2451,87 @@ class BimpObject
             'errors'           => $errors,
             'success_callback' => $success_callback
         );
+    }
+
+    // Gestion des droits: 
+
+    public function canCreate()
+    {
+        if ($this->params['parent_object']) {
+            $parent = $this->getParentInstance();
+            if (is_a($parent, 'BimpObject')) {
+                return (int) $parent->canCreateChild($this->object_name);
+            }
+        }
+        return 1;
+    }
+
+    public function canEdit()
+    {
+        if ($this->params['parent_object']) {
+            $parent = $this->getParentInstance();
+            if (is_a($parent, 'BimpObject')) {
+                return (int) $parent->canEditChild($this->object_name);
+            }
+        }
+        return 1;
+    }
+
+    public function canView()
+    {
+        if ($this->params['parent_object']) {
+            $parent = $this->getParentInstance();
+            if (is_a($parent, 'BimpObject')) {
+                return (int) $parent->canViewChild($this->object_name);
+            }
+        }
+        return 1;
+    }
+
+    public function canDelete()
+    {
+        if ($this->params['parent_object']) {
+            $parent = $this->getParentInstance();
+            if (is_a($parent, 'BimpObject')) {
+                return (int) $parent->canDeleteChild($this->object_name);
+            }
+        }
+        return 1;
+    }
+
+    public function canEditField($field_name)
+    {
+        return (int) $this->canEdit();
+    }
+
+    public function canCreateChild($child_name)
+    {
+        return (int) $this->canCreate();
+    }
+
+    public function canEditChild($child_name)
+    {
+        return (int) $this->canEdit();
+    }
+
+    public function canViewChild($child_name)
+    {
+        return (int) $this->canView();
+    }
+
+    public function canDeleteChild($child_name)
+    {
+        return (int) $this->canDelete();
+    }
+
+    public function canSetAction($action)
+    {
+        return 1;
+    }
+
+    public function canSetStatus($status)
+    {
+        return 1;
     }
 
     // Gestion des positions: 

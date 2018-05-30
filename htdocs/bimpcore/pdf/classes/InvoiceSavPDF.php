@@ -37,6 +37,9 @@ class InvoiceSavPDF extends InvoicePDF
 
     public function getAfterTotauxHtml()
     {
+        if ($this->object->type === 3) {
+            return '';
+        }
         $html .= '<table style="width: 95%" cellpadding="3">';
 
         $html .= '<tr>';

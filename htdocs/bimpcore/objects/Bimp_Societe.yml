@@ -321,6 +321,13 @@ forms:
                 client: 1
         rows: 
             - field: nom
+            - custom: 1
+              label: Prénom
+              input_name: prenom
+              data_type: string
+              input: 
+                  type: text
+                  help: A remplir si le client est un particulier
             - field: name_alias
             - field: status
               hidden: 1

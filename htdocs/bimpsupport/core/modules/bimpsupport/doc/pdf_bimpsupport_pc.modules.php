@@ -65,6 +65,8 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
 
 
+
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -154,19 +156,23 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $code_entrepot = $sav->getData('code_centre');
 
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-            $pdf->SetXY('147', '32.5');
+
             if ($code_entrepot) {
-                $pdf->MultiCell(100, 6, $code_entrepot, 0, 'L');
+                if (isset($tabCentre[$code_entrepot])) {
+                    $pdf->SetXY('147', '32.5');
+                    $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][2], 0, 'L');
+
+                    $pdf->SetXY('147', '38.5');
+                    $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][0], 0, 'L');
+
+                    $pdf->SetXY('147', '44.1');
+                    $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][1], 0, 'L');
+                } else {
+                    $pdf->SetXY('147', '32.5');
+                    $pdf->MultiCell(100, 6, $code_entrepot, 0, 'L');
+                }
             }
-            $pdf->SetXY('147', '38.5');
-            if ($code_entrepot && isset($tabCentre[$code_entrepot])) {
-                $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][0], 0, 'L');
-            }
-            $pdf->SetXY('147', '44.1');
-            if ($code_entrepot && isset($tabCentre[$code_entrepot])) {
-                $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][1], 0, 'L');
-            }
-//                $tabCentre
+
             //client
             $contact = "";
             $client = $sav->getChildObject('client');
@@ -267,7 +273,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $cgv.= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
 
             $prixRefusOrdi = "49";
-            if($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA")
+            if ($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA")
                 $prixRefusOrdi = "39";
 
             if (stripos($chrono2->description, "Iphone") !== false) {
@@ -276,7 +282,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
                 $cgv.="-Des frais de 29€ TTC seront automatiquement facturés, si lors de l'expertise il s'avère que des pièces de contre façon ont été installées.\n\n";
             } else {
                 $cgv .= "-Les problèmes logiciels, la récupératon de données ou la réparation matériel liée à une mauvaise utilisation (liquide, chute,etc...), ne sont pas couverts par la GARANTIE APPLE.\n\n";
-                $cgv.="-Les frais de prise en charge diagnostic de ".$prixRefusOrdi."€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
+                $cgv.="-Les frais de prise en charge diagnostic de " . $prixRefusOrdi . "€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
             }
 //                $pdf->SetX(6);
 //                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
@@ -618,4 +624,5 @@ en espèces (plafond maximun de 1000€), en carte bleue\n\n";
 //                , "L", 4, 2);
     }
 }
+
 ?>

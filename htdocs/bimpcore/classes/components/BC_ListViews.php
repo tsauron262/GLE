@@ -58,6 +58,12 @@ class BC_ListViews extends BC_List
                 $this->params['item_col_xs'] = 12;
             }
         }
+        
+        if (!count($this->errors)) {
+            if (!$this->object->canView()) {
+                $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
+            }
+        }
     }
 
     public function renderHtmlContent()

@@ -1,7 +1,8 @@
 <?php
 
 class Bimp_Societe extends BimpObject
-{    
+{
+
     public static $types_ent_list = null;
     public static $effectifs_list = null;
 
@@ -143,5 +144,25 @@ class Bimp_Societe extends BimpObject
     {
         global $user;
         return array($this->id, $user);
+    }
+
+    // Overrides: 
+
+    public function validatePost()
+    {
+        $errors = parent::validatePost();
+
+        if (!count($errors)) {
+            if (BimpTools::isSubmit('prenom')) {
+                $prenom = BimpTools::getValue('prenom', '');
+                if ($prenom) {
+                    $nom = strtoupper($this->getData('nom')) . ' ' . BimpTools::ucfirst($prenom);
+                    $this->set('nom', $nom);
+                    $this->set('fk_typent', 8);
+                }
+            }
+        }
+
+        return $errors;
     }
 }

@@ -1210,7 +1210,8 @@ function setInputsEvents($container) {
                         inputQtyMin($qtyInputcontainer);
                     }
                 }
-
+            }).focus(function() {
+                $(this).select();
             });
 
             $(this).data('event_init', 1);

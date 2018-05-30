@@ -31,6 +31,12 @@ class BC_Search extends BimpComponent
         if (is_null($this->search_value) || !$this->search_value) {
             $this->errors[] = 'Aucun terme de recherche spécifié';
         }
+        
+        if (!count($this->errors)) {
+            if (!$this->object->canView()) {
+                $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
+            }
+        }
     }
 
     public function searchItems()

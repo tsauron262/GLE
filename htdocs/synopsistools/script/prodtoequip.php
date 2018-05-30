@@ -9,8 +9,11 @@ llxHeader();
 set_time_limit(5000000);
 ini_set('memory_limit', '1024M');
 
-$loadEquip = false;
+$loadEquip = true;
 $loadSav = true;
+
+$reqP1 = "UPDATE `llx_synopsischrono_chrono_101` SET `N__Serie` = REPLACE(`N__Serie`, ' ', '') WHERE 1";
+$db->query($reqP1);
 
 $OK= 0;
 
@@ -77,7 +80,7 @@ if ($loadEquip == true) {
 
 
 if ($loadSav) {
-    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id AND (revisionNext < 1 OR revisionNext IS NULL) LIMIT 0,100");
+    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id AND (revisionNext < 1 OR revisionNext IS NULL) LIMIT 0,10000000");
 
 
 
@@ -95,7 +98,7 @@ if ($loadSav) {
             echo("ERREUR FATAL Pas de correspondance pour le centre " . $ligne->Centre);
 
         if ($ligne->idMat < 1) {//on cherche dans element_element
-            echo "<br/><br/>ERR Pas de prod dans old SAV ";
+            //echo "<br/><br/>ERR Pas de prod dans old SAV num ".$ligne->idS;
             $tabT = getElementElement("sav", "productCli", $ligne->idS);
             if(isset($tabT[0])){
                 $sql2 = $db->query('SELECT id FROM `llx_be_equipment` WHERE note = CONCAT("OLD", "' . $tabT[0]['d']  . '")');
@@ -109,7 +112,7 @@ if ($loadSav) {
                 }
             }
             else
-                echo "<br/><br/>ERREUR 2 Pas de prod dans old SAV element element ";
+                echo "<br/><br/>ERREUR 2 Pas de prod dans old SAV element element SAV num ".$ligne->idS;
         } else {
             $idP = $ligne->idMat;
         }
@@ -167,8 +170,10 @@ $req = "UPDATE `llx_bs_sav` SET "
         . "WHERE `id_propal` > 0 AND `id_facture_acompte` < 1";
 
 $req2 = "UPDATE `llx_bs_sav` SET id_facture = (SELECT MAX(f.rowid) FROM `llx_facture` f, llx_element_element WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'FA%') WHERE `id_propal` > 0 AND `id_facture` < 1";
+$req3 = "UPDATE `llx_bs_sav` SET `id_discount` = (SELECT rowid FROM `llx_societe_remise_except` WHERE `fk_facture_source` = id_facture_acompte) WHERE `id_facture_acompte` > 0;";
 $db->query($req);
 $db->query($req2);
+$db->query($req3);
 
 
 

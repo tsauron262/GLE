@@ -155,6 +155,14 @@ if ($loadSav) {
         if ($sav->id > 0) {
             //echo "<br/><br/>OK sav " . $sav->id;
             $OK++;
+            
+            $req11 = "SELECT * FROM llx_synopsis_apple_repair WHERE chronoId = ".$ligne->idS;
+            $sql11 = $db->query($req11);
+            while($ligne11 = $db->fetch_object($sql11)){
+                $req12 = 'INSERT INTO  `llx_bimp_gsx_repair` (id_sav, serial, repair_number, repair_confirm_number, repair_type, total_from_order, ready_for_pick_up, closed, reimbursed) VALUES ("'.$sav->id.'", "'.$ligne11->serial_number.'", "'.$ligne11->repairNumber.'", "'.$ligne11->repairConfirmNumber.'", "'.$ligne11->repairType.'", "'.$ligne11->totalFromOrder.'", "'.$ligne11->ready_for_pick_up.'", "'.$ligne11->closed.'", "'.$ligne11->is_reimbursed.'")';
+                $db->query($req12);
+            }
+            
         } else {
             echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arraySav, 1) ;//. print_r($sav, 1);
         }

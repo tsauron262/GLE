@@ -210,8 +210,8 @@ class ActionsBimpsupport {
 
 
 
-
-        $this->resprints = $return;
+echo $return;
+//        $this->resprints = $return;   Bug ???????
         return 0;
     }
 

@@ -34,6 +34,7 @@ class BS_SAV extends BimpObject
         self::BS_SAV_FERME         => array('label' => 'Fermé', 'icon' => 'times', 'classes' => array('danger'))
     );
     public static $need_propal_status = array(2, 3, 4, 5, 6, 9);
+    public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 9);
     public static $save_options = array(
         1 => 'Dispose d\'une sauvegarde',
         2 => 'Désire une sauvegarde si nécessaire',
@@ -70,6 +71,38 @@ class BS_SAV extends BimpObject
         parent::__construct("bimpsupport", get_class($this));
     }
 
+    public function isPropalEditable()
+    {
+        $propal = $this->getChildObject('propal');
+
+        if (!is_null($propal) && $propal->isLoaded()) {
+            if ((int) $propal->getData('fk_statut') !== 0) {
+                return 0;
+            }
+        }
+        return 1;
+    }
+
+    public function needEquipmentAttribution()
+    {
+        if ($this->isLoaded()) {
+            $sav_products = $this->getChildrenObjects('products');
+            foreach ($sav_products as $sav_product) {
+                if (!(int) $sav_product->getData('id_equipment')) {
+                    $product = $sav_product->getChildObject('product');
+                    if (!is_null($product) && $product->isLoaded()) {
+                        if ($product->getData('fk_product_type') === Product::TYPE_PRODUCT &&
+                                $product->isSerialisable()) {
+                            return 1;
+                        }
+                    }
+                }
+            }
+        }
+
+        return 0;
+    }
+
     public function getNomUrl($withpicto = true)
     {
         if (!$this->isLoaded()) {
@@ -78,6 +111,27 @@ class BS_SAV extends BimpObject
 
         $statut = self::$status_list[$this->data["status"]];
         return "<a href='" . $this->getUrl() . "'>" . '<span class="' . implode(" ", $statut['classes']) . '"><i class="' . BimpRender::renderIconClass($statut['icon']) . ' iconLeft"></i>' . $this->ref . '</span></a>';
+    }
+
+    protected function getNextNumRef()
+    {
+        require_once(DOL_DOCUMENT_ROOT . "/bimpsupport/classes/SAV_ModelNumRef.php");
+        $tmp = new SAV_ModelNumRef($this->db->db);
+        $objsoc = false;
+        $id_soc = (int) $this->getData('id_client');
+        if (!$id_soc) {
+            $id_soc = (int) BimpTools::getValue('id_client', 0);
+        }
+        if ($id_soc > 0) {
+            $objsoc = new Societe($this->db->db);
+            $objsoc->fetch($id_soc);
+        }
+
+        $mask = self::$ref_model;
+
+        $mask = str_replace('{CENTRE}', (string) $this->getData('code_centre'), $mask);
+
+        return($tmp->getNextValue($objsoc, $this, $mask));
     }
 
     public function getDefaultCodeCentre()
@@ -258,198 +312,6 @@ class BS_SAV extends BimpObject
         return $js;
     }
 
-    public function getViewExtraBtn()
-    {
-        $buttons = array();
-
-        if ($this->isLoaded()) {
-            $status = (int) $this->getData('status');
-            $propal = null;
-            $propal_status = null;
-
-            if ((int) $this->getData('id_propal')) {
-                $propal = $this->getChildObject('propal');
-                if (!$propal->isLoaded()) {
-                    unset($propal);
-                    $propal = null;
-                } else {
-                    $propal_status = (int) $propal->getData('fk_statut');
-                }
-            }
-
-            if (!is_null($propal) && $propal_status === 1 && !in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_DEVIS_REFUSE))) {
-                $buttons[] = array(
-                    'label'   => 'Devis accepté',
-                    'icon'    => 'check',
-                    'onclick' => $this->getJsActionOnclick('propalAccepted')
-                );
-
-                $buttons[] = array(
-                    'label'   => 'Devis refusé',
-                    'icon'    => 'times',
-                    'onclick' => $this->getJsActionOnclick('propalRefused')
-                );
-            }
-
-            switch ($status) {
-                case self::BS_SAV_NEW:
-                    $buttons[] = array(
-                        'label'   => 'Commencer diagnostic',
-                        'icon'    => 'arrow-circle-right',
-                        'onclick' => $this->getJsActionOnclick('start', array(), array(
-                            'form_name' => 'send_msg'
-                        ))
-                    );
-                    break;
-
-                case self::BS_SAV_ATT_PIECE:
-                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 1)';
-                    $buttons[] = array(
-                        'label'   => 'Pièce reçue',
-                        'icon'    => 'check',
-                        'onclick' => $onclick
-                    );
-                    break;
-
-                case self::BS_SAV_DEVIS_ACCEPTE:
-                    if (!is_null($propal) && $propal_status > 0) {
-                        $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 0)';
-                        $buttons[] = array(
-                            'label'   => 'Réparation en cours',
-                            'icon'    => 'wrench',
-                            'onclick' => $this->getJsActionOnclick('startRepair')
-                        );
-                    }
-                    break;
-
-                case self::BS_SAV_REP_EN_COURS:
-                    if (!is_null($propal) && $propal_status > 1) {
-                        $buttons[] = array(
-                            'label'   => 'Réparation terminée',
-                            'icon'    => 'check',
-                            'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
-                        );
-                    }
-                    break;
-
-                case self::BS_SAV_DEVIS_REFUSE:
-                    if (!is_null($propal)) {
-                        $frais = 0;
-                        foreach ($propal->dol_object->lines as $line) {
-                            if ($line->desc === 'Acompte') {
-                                $frais = -$line->total_ttc;
-                            }
-                        }
-
-                        $buttons[] = array(
-                            'label'   => 'Fermer le SAV',
-                            'icon'    => 'times-circle',
-                            'onclick' => $this->getJsActionOnclick('toRestitute', array(
-                                'frais' => $frais
-                                    ), array(
-                                'form_name' => 'close_refused'
-                            ))
-                        );
-                    }
-                    break;
-
-                case self::BS_SAV_A_RESTITUER:
-                    if (!is_null($propal)) {
-                        $buttons[] = array(
-                            'label'   => 'Restituer (Payer)',
-                            'icon'    => 'times-circle',
-                            'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1), array(
-                                'form_name' => 'restitute'
-                            ))
-                        );
-                    }
-                    break;
-            }
-
-            if (is_null($propal) && $status !== self::BS_SAV_FERME) {
-                $buttons[] = array(
-                    'label'   => 'Restituer',
-                    'icon'    => 'times-circle',
-                    'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1))
-                );
-            }
-
-            if (!is_null($propal) && $propal_status === 0 && $status !== self::BS_SAV_FERME) {
-                $buttons[] = array(
-                    'label'   => 'Générer devis',
-                    'icon'    => 'cogs',
-                    'onclick' => $this->getJsActionOnclick('generatePropal')
-                );
-            }
-
-            if ($this->needEquipmentAttribution()) {
-                $buttons[] = array(
-                    'label'   => 'Attribuer un équipement',
-                    'icon'    => 'arrow-circle-right',
-                    'onclick' => $this->getJsActionOnclick('attibuteEquipment', array(), array('form_name' => 'equipment'))
-                );
-            }
-
-            if (is_null($propal) && $status < 999) {
-                $buttons[] = array(
-                    'label'   => 'Créer Devis',
-                    'icon'    => 'plus-circle',
-                    'onclick' => 'createNewPropal($(this), ' . $this->id . ');'
-                );
-            }
-
-            if (!in_array($status, array(self::BS_SAV_FERME))) {
-                if (!is_null($propal_status) && $propal_status > 0) {
-                    $callback = 'function() {window.location.reload();}';
-                    $buttons[] = array(
-                        'label'   => 'Réviser Devis',
-                        'icon'    => 'edit',
-                        'onclick' => $this->getJsActionOnclick('reviewPropal', array(), array(
-                            'success_callback' => $callback,
-                            'confirm_msg'      => 'Veuillez confirmer la révision du devis'
-                        ))
-                    );
-                }
-            }
-
-            if (!is_null($propal) && $propal_status === 0) {
-                if ((string) $this->getData('diagnostic')) {
-                    $form_name = 'send_msg';
-                } else {
-                    $form_name = 'diagnostic';
-                }
-                $callback = 'function() {window.location.reload();}';
-                $buttons[] = array(
-                    'label'   => 'Valider devis',
-                    'icon'    => 'arrow-circle-right',
-                    'onclick' => $this->getJsActionOnclick('validatePropal', array(), array(
-                        'form_name'        => $form_name,
-                        'success_callback' => $callback
-                    ))
-                );
-            }
-
-//            if (!is_null($propal) && in_array($propal_status, array(0, 1)) && $status !== self::BS_SAV_ATT_CLIENT) {
-//                if ((string) $this->getData('diagnostic')) {
-//                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_CLIENT . ', 1, {devis_garantie: 1})';
-//                } else {
-//                    $title = 'Envoyer le devis garanti';
-//                    $values = htmlentities('\'{"fields": {"status": ' . self::BS_SAV_ATT_CLIENT . '}}\'');
-//                    $data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: ' . $this->id . ', form_name: \'diagnostic\', param_values: ' . $values . ', devis_garantie: 1}';
-//                    $onclick = 'loadModalForm($(this), ' . $data . ', \'' . $title . '\');';
-//                }
-//
-//                $buttons[] = array(
-//                    'label'   => 'Devis garanti',
-//                    'icon'    => 'file-text',
-//                    'onclick' => $onclick
-//                );
-//            }
-        }
-
-        return $buttons;
-    }
-
     public function getClientExtraBtn()
     {
         $buttons = array();
@@ -611,57 +473,196 @@ class BS_SAV extends BimpObject
         return $buttons;
     }
 
-    protected function getNextNumRef()
+    public function getViewExtraBtn()
     {
-        require_once(DOL_DOCUMENT_ROOT . "/bimpsupport/classes/SAV_ModelNumRef.php");
-        $tmp = new SAV_ModelNumRef($this->db->db);
-        $objsoc = false;
-        $id_soc = (int) $this->getData('id_client');
-        if (!$id_soc) {
-            $id_soc = (int) BimpTools::getValue('id_client', 0);
-        }
-        if ($id_soc > 0) {
-            $objsoc = new Societe($this->db->db);
-            $objsoc->fetch($id_soc);
-        }
+        $buttons = array();
 
-        $mask = self::$ref_model;
-
-        $mask = str_replace('{CENTRE}', (string) $this->getData('code_centre'), $mask);
-
-        return($tmp->getNextValue($objsoc, $this, $mask));
-    }
-
-    public function needEquipmentAttribution()
-    {
         if ($this->isLoaded()) {
-            $sav_products = $this->getChildrenObjects('products');
-            foreach ($sav_products as $sav_product) {
-                if (!(int) $sav_product->getData('id_equipment')) {
-                    $product = $sav_product->getChildObject('product');
-                    if (!is_null($product) && $product->isLoaded()) {
-                        if ($product->getData('fk_product_type') === Product::TYPE_PRODUCT &&
-                                $product->isSerialisable()) {
-                            return 1;
-                        }
-                    }
+            $status = (int) $this->getData('status');
+            $propal = null;
+            $propal_status = null;
+
+            if ((int) $this->getData('id_propal')) {
+                $propal = $this->getChildObject('propal');
+                if (!$propal->isLoaded()) {
+                    unset($propal);
+                    $propal = null;
+                } else {
+                    $propal_status = (int) $propal->getData('fk_statut');
                 }
             }
-        }
 
-        return 0;
-    }
+            if (!is_null($propal) && $propal_status === 1 && !in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_DEVIS_REFUSE))) {
+                $buttons[] = array(
+                    'label'   => 'Devis accepté',
+                    'icon'    => 'check',
+                    'onclick' => $this->getJsActionOnclick('propalAccepted')
+                );
 
-    public function isPropalEditable()
-    {
-        $propal = $this->getChildObject('propal');
-
-        if (!is_null($propal) && $propal->isLoaded()) {
-            if ((int) $propal->getData('fk_statut') !== 0) {
-                return 0;
+                $buttons[] = array(
+                    'label'   => 'Devis refusé',
+                    'icon'    => 'times',
+                    'onclick' => $this->getJsActionOnclick('propalRefused')
+                );
             }
+
+            switch ($status) {
+                case self::BS_SAV_NEW:
+                    $buttons[] = array(
+                        'label'   => 'Commencer diagnostic',
+                        'icon'    => 'arrow-circle-right',
+                        'onclick' => $this->getJsActionOnclick('start', array(), array(
+                            'form_name' => 'send_msg'
+                        ))
+                    );
+                    break;
+
+                case self::BS_SAV_ATT_PIECE:
+                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 1)';
+                    $buttons[] = array(
+                        'label'   => 'Pièce reçue',
+                        'icon'    => 'check',
+                        'onclick' => $onclick
+                    );
+                    break;
+
+                case self::BS_SAV_DEVIS_ACCEPTE:
+                    if (!is_null($propal) && $propal_status > 0) {
+                        $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_REP_EN_COURS . ', 0)';
+                        $buttons[] = array(
+                            'label'   => 'Réparation en cours',
+                            'icon'    => 'wrench',
+                            'onclick' => $this->getJsActionOnclick('startRepair')
+                        );
+                    }
+                    break;
+
+                case self::BS_SAV_REP_EN_COURS:
+                    if (!is_null($propal) && $propal_status > 1) {
+                        $buttons[] = array(
+                            'label'   => 'Réparation terminée',
+                            'icon'    => 'check',
+                            'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
+                        );
+                    }
+                    break;
+
+                case self::BS_SAV_DEVIS_REFUSE:
+                    if (!is_null($propal)) {
+                        $frais = 0;
+                        foreach ($propal->dol_object->lines as $line) {
+                            if ($line->desc === 'Acompte') {
+                                $frais = -$line->total_ttc;
+                            }
+                        }
+
+                        $buttons[] = array(
+                            'label'   => 'Fermer le SAV',
+                            'icon'    => 'times-circle',
+                            'onclick' => $this->getJsActionOnclick('toRestitute', array(
+                                'frais' => $frais
+                                    ), array(
+                                'form_name' => 'close_refused'
+                            ))
+                        );
+                    }
+                    break;
+
+                case self::BS_SAV_A_RESTITUER:
+                    if (!is_null($propal)) {
+                        $buttons[] = array(
+                            'label'   => 'Restituer (Payer)',
+                            'icon'    => 'times-circle',
+                            'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1), array(
+                                'form_name' => 'restitute'
+                            ))
+                        );
+                    }
+                    break;
+            }
+
+            if (is_null($propal) && $status !== self::BS_SAV_FERME) {
+                $buttons[] = array(
+                    'label'   => 'Restituer',
+                    'icon'    => 'times-circle',
+                    'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1))
+                );
+            }
+
+            if (!is_null($propal) && $propal_status === 0 && $status !== self::BS_SAV_FERME) {
+                $buttons[] = array(
+                    'label'   => 'Générer devis',
+                    'icon'    => 'cogs',
+                    'onclick' => $this->getJsActionOnclick('generatePropal')
+                );
+            }
+
+            if ($this->needEquipmentAttribution()) {
+                $buttons[] = array(
+                    'label'   => 'Attribuer un équipement',
+                    'icon'    => 'arrow-circle-right',
+                    'onclick' => $this->getJsActionOnclick('attibuteEquipment', array(), array('form_name' => 'equipment'))
+                );
+            }
+
+            if (is_null($propal) && $status < 999) {
+                $buttons[] = array(
+                    'label'   => 'Créer Devis',
+                    'icon'    => 'plus-circle',
+                    'onclick' => 'createNewPropal($(this), ' . $this->id . ');'
+                );
+            }
+
+            if (in_array($status, self::$propal_reviewable_status)) {
+                if (!is_null($propal_status) && $propal_status > 0) {
+                    $callback = 'function() {window.location.reload();}';
+                    $buttons[] = array(
+                        'label'   => 'Réviser Devis',
+                        'icon'    => 'edit',
+                        'onclick' => $this->getJsActionOnclick('reviewPropal', array(), array(
+                            'success_callback' => $callback,
+                            'confirm_msg'      => 'Veuillez confirmer la révision du devis'
+                        ))
+                    );
+                }
+            }
+
+            if (!is_null($propal) && $propal_status === 0) {
+                if ((string) $this->getData('diagnostic')) {
+                    $form_name = 'send_msg';
+                } else {
+                    $form_name = 'diagnostic';
+                }
+                $callback = 'function() {window.location.reload();}';
+                $buttons[] = array(
+                    'label'   => 'Valider devis',
+                    'icon'    => 'arrow-circle-right',
+                    'onclick' => $this->getJsActionOnclick('validatePropal', array(), array(
+                        'form_name'        => $form_name,
+                        'success_callback' => $callback
+                    ))
+                );
+            }
+
+//            if (!is_null($propal) && in_array($propal_status, array(0, 1)) && $status !== self::BS_SAV_ATT_CLIENT) {
+//                if ((string) $this->getData('diagnostic')) {
+//                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_CLIENT . ', 1, {devis_garantie: 1})';
+//                } else {
+//                    $title = 'Envoyer le devis garanti';
+//                    $values = htmlentities('\'{"fields": {"status": ' . self::BS_SAV_ATT_CLIENT . '}}\'');
+//                    $data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: ' . $this->id . ', form_name: \'diagnostic\', param_values: ' . $values . ', devis_garantie: 1}';
+//                    $onclick = 'loadModalForm($(this), ' . $data . ', \'' . $title . '\');';
+//                }
+//
+//                $buttons[] = array(
+//                    'label'   => 'Devis garanti',
+//                    'icon'    => 'file-text',
+//                    'onclick' => $onclick
+//                );
+//            }
         }
-        return 1;
+
+        return $buttons;
     }
 
     // Affichage:
@@ -777,7 +778,7 @@ class BS_SAV extends BimpObject
 
         switch ($new_status) {
             case self::BS_SAV_EXAM_EN_COURS:
-                if (!in_array($current_status, array(0, 1, 2, 3, 4, 6))) {
+                if (!in_array($current_status, self::$propal_reviewable_status)) {
                     $errors[] = $error_msg . ' (statut actuel invalide)';
                 }
                 break;
@@ -1681,7 +1682,9 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         $propal = $this->getChildObject('propal');
         $client = $this->getChildObject('client');
 
-        if (!(int) $this->getData('id_propal')) {
+        if (!in_array((int) $this->getData('status'), self::$propal_reviewable_status)) {
+            $errors[] = 'Le devis ne peux pas être révisé selon le statut actuel du SAV';
+        } elseif (!(int) $this->getData('id_propal')) {
             $errors[] = 'Proposition commerciale absente';
         } elseif (is_null($client) || !$client->isLoaded()) {
             $errors[] = 'Client absent';

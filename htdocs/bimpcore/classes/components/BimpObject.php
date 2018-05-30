@@ -464,16 +464,19 @@ class BimpObject
 
     public function getParentInstance()
     {
-        if (is_null($this->parent)) {
+        $id_property = $this->getParentIdProperty();
+        $id_parent = (int) $this->getData($id_property);
+        if (is_null($this->parent) || ($id_parent && (!$this->parent->id || $this->parent->id !== $id_parent))) {
+            unset($this->parent);
+            $this->parent = null;
             $id_property = $this->getParentIdProperty();
             $module = $this->getParentModule();
             $object = $this->getParentObjectName();
             if ($module && $object) {
                 $instance = self::getInstance($module, $object);
                 if (!is_null($instance) && $instance && !is_null($id_property)) {
-                    $id = $this->getData($id_property);
-                    if (!is_null($id) && $id) {
-                        $instance->fetch($id);
+                    if (!is_null($id_parent) && $id_parent) {
+                        $instance->fetch($id_parent);
                     }
                 }
                 $this->parent = $instance;

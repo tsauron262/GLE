@@ -250,7 +250,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             //Systeme
             $pdf->SetXY(126, 108.5);
-            $pdf->MultiCell(80, 6, $sav->getData('system'), 0, '');
+            $pdf->MultiCell(80, 6, $sav->displayData('system', 'default', false, true), 0, '');
 //            
             //symptom et sauv
             $symptomes = $sav->getData('symptomes');
@@ -338,12 +338,10 @@ en espèces (plafond maximun de 1000€), en carte bleue\n\n";
 //                
 //                }
             //QR suivie        
-//            $dir .= "/temp/";
-//            $data = DOL_MAIN_URL_ROOT . "/synopsis_chrono_public/page.php?back_serial=" . $chrono->id . "&user_name=" . substr($chrono->societe->name, 0, 3);
-//            $this->getQrCode($data, $dir, "suivie.png");
-//            $pdf->Image($dir . "/suivie.png", 100, 30, 0, 24);
-
-
+            $qr_dir = $dir. "temp";
+            $data = DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?id_sav=" . $sav->id . "&user_name=" . substr($client->name, 0, 3);
+            $this->getQrCode($data, $qr_dir, "suivie.png");
+            $pdf->Image($qr_dir . "/suivie.png", 100, 30, 0, 24);
 
             if (method_exists($pdf, 'AliasNbPages'))
                 $pdf->AliasNbPages();
@@ -615,13 +613,13 @@ en espèces (plafond maximun de 1000€), en carte bleue\n\n";
 
     function getQrCode($data, $dir, $file = "suivie.png")
     {
-//        require_once(DOL_DOCUMENT_ROOT . "/synopsisphpqrcode/qrlib.php");
-//        if (!is_dir($dir))
-//            mkdir($dir);
-//
-//        QRcode::png($data
-//                , $dir . "/" . $file
-//                , "L", 4, 2);
+        require_once(DOL_DOCUMENT_ROOT . "/synopsisphpqrcode/qrlib.php");
+        if (!is_dir($dir))
+            mkdir($dir);
+
+        QRcode::png($data
+                , $dir . "/" . $file
+                , "L", 4, 2);
     }
 }
 

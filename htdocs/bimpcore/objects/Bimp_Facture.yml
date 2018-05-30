@@ -31,6 +31,7 @@ lists:
         sort_field: id
         sort_way: asc
         n: 25
+        page_btn: 1
         cols: 
             ref: 
                 field: facnumber

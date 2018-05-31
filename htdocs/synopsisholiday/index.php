@@ -453,8 +453,9 @@ if (!empty($holiday->holiday)) {
         else
             print $groupstatic->name;
         print '</td>';
+        $tabColor = array("16"=>"green", "17"=>"blue", "18"=>"orange", "19"=>"purple");
         print '<td>' . $approbatorstatic->getNomUrl('1') . '</td>';
-        print '<td align="center">' . dol_print_date($infos_CP['date_debut'], 'day') . '</td>';
+        print '<td align="center" style=" color:'.$tabColor[dol_print_date($infos_CP['date_debut'], '%y')].'">' . dol_print_date($infos_CP['date_debut'], 'day') . '</td>';
         print '<td align="center">' . dol_print_date($infos_CP['date_fin'], 'day') . '</td>';
         print '<td align="right">';
         $nbopenedday = num_open_day($infos_CP['date_debut_gmt'], $infos_CP['date_fin_gmt'], 0, 1, $infos_CP['halfday']);

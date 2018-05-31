@@ -135,7 +135,7 @@ class BimpRevisionPropal extends BimpRevision
         if ($qteZeroSaufAccomte) {
             $newLine = array();
             foreach ($object->lines as $ligne) {
-                if ($ligne->desc != "Acompte" && $ligne->ref != "SAV-PCU")
+                if ($ligne->desc != "Acompte" && $ligne->ref != "SAV-PCU" && stripos($ligne->desc,"Urgence") === false)
                     $ligne->qty = 0;
             }
         }

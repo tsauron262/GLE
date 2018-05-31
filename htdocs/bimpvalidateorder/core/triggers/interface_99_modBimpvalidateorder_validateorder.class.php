@@ -55,7 +55,7 @@ class Interfacevalidateorder extends DolibarrTriggers {
                         }
                     }
                     $diff = $totalCom - $totalFact;
-                    if($diff < "0.02" && $diff > "-0.02"){
+                    if($diff < 0.02 && $diff > -0.02){
                         $facturee = true;
                         $comm->classifybilled($user);
                     }

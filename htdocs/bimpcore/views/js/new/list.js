@@ -118,8 +118,8 @@ function reloadObjectList(list_id, callback) {
     if ($list.find('input[name=param_list_filters]').length) {
         data['param_list_filters'] = $list.find('input[name=param_list_filters]').val();
     }
-    if ($list.find('input[name=param_associations_filters]').length) {
-        data['param_associations_filters'] = $list.find('input[name=param_associations_filters]').val();
+    if ($list.find('input[name=param_association_filters]').length) {
+        data['param_association_filters'] = $list.find('input[name=param_association_filters]').val();
     }
 
     // Envoi requête:
@@ -610,7 +610,7 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                     bimpModal.$footer.find('.save_object_button.modal_' + modal_idx).remove();
                     bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
                     bimpModal.addButton('Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
-                    
+
                     bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
                         $form.find('.inputContainer').each(function () {
                             var field_name = $(this).data('field_name');
@@ -924,6 +924,22 @@ function onListLoaded($list) {
 
     if (!parseInt($list.data('loaded_event_processed'))) {
         $list.data('loaded_event_processed', 1);
+
+        var $tbody = $list.find('tbody.listRows');
+
+        $tbody.find('a').each(function () {
+//        $(this).attr('target', '_blank');
+            var link_title = $(this).attr('title');
+            if (link_title) {
+                $(this).removeAttr('title');
+                $(this).popover({
+                    trigger: 'hover',
+                    content: link_title,
+                    placement: 'bottom',
+                    html: true
+                });
+            }
+        });
 
         $list.find('input[name="param_n"]').change(function () {
             reloadObjectList($list.attr('id'));

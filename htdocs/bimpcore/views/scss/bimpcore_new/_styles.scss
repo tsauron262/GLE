@@ -228,6 +228,7 @@ div.alert {
 /*Boutons*/
 
 .btn {
+    margin: 2px;
     i {
         font-size: 14px;
 
@@ -396,6 +397,7 @@ i.iconRight {
 
     .modal-body {
         max-height: 650px;
+        padding-bottom: 60px;
         overflow-y: auto;
     }
 }
@@ -422,11 +424,11 @@ i.iconRight {
         vertical-align: middle;
         margin-right: 1px;
     }
-    
+
     &:hover {
         background-color: $primary;
     }
-    
+
     &.closed {
         margin-right: -40px;
     }

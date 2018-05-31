@@ -514,6 +514,7 @@ class BimpStatsFacture {
 
             if (!isset($out[$filtre]['nb_facture'][$row['fac_id']])) {//La facture n'est pas encore traité sinon deuxieme paiement
                 $out[$filtre]['total_total'] += $row['factotal'];
+                $out[$filtre]['total_total_prop'] += $row['prop_total'];
                 $out[$filtre]['total_total_marge'] += $row['marge'];
                 $out[$filtre]['nb_facture'][$row['fac_id']] = 1;
             } else {//deuxieme paiement on vire les montant
@@ -542,6 +543,7 @@ class BimpStatsFacture {
 
         foreach ($out as $key => $inut) {
             $out[$key]['total_total'] = $this->formatPrice($out[$key]['total_total']);
+            $out[$key]['total_total_prop'] = $this->formatPrice($out[$key]['total_total_prop']);
             $out[$key]['total_total_marge'] = $this->formatPrice($out[$key]['total_total_marge']);
             $out[$key]['total_payer'] = $this->formatPrice($out[$key]['total_payer']);
             $out[$key]['nb_facture'] = count($out[$key]['nb_facture']);

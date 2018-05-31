@@ -272,7 +272,7 @@ function fillTable(facture, prevFactureId) {
 
 function addTotaux(groupe, key) {
     if (is_customer)
-        arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', '', '', '', '', ''];
+        arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '', '<strong>' + groupe.total_total_prop + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', '', '', '', '', '', ''];
     else
         arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', ''];
 

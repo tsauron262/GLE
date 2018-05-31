@@ -252,7 +252,7 @@ function fillTable(facture, prevFactureId) {
     var centre = facture.centre_url ? facture.centre_url : (facture.centre ? facture.centre : '');
     if (is_customer) {
         if (prevFactureId === facture.fac_id)
-            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
+            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, '- - -', '- - -', '- - -', '- - -', '- - -'];
         else
             arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.fact_date, facture.prop_total, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref, facture.ggsx];
     } else {

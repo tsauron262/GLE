@@ -635,7 +635,7 @@ class BS_SAV extends BimpObject
                 }
                 $callback = 'function() {window.location.reload();}';
                 $buttons[] = array(
-                    'label'   => 'Valider devis',
+                    'label'   => 'Envoyer devis',
                     'icon'    => 'arrow-circle-right',
                     'onclick' => $this->getJsActionOnclick('validatePropal', array(), array(
                         'form_name'        => $form_name,

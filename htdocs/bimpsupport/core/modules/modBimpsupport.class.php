@@ -216,7 +216,7 @@ class modBimpsupport extends DolibarrModules {
             'type' => 'top', // This is a Left menu entry
             'titre' => 'Support',
             'mainmenu' => 'bimpsupport',
-            'leftmenu' => '',
+            'leftmenu' => 'bimpsupport',
             'url' => '/bimpsupport',
             'langs' => '', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'position' => 100,
@@ -226,6 +226,34 @@ class modBimpsupport extends DolibarrModules {
             'user' => 2);    // 0=Menu for internal users,1=external users, 2=both
 
         $r++;
+
+
+        
+        $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=bimpsupport,fk_leftmenu=bimpsupport',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
+                                'type'=>'left',			// This is a Left menu entry
+                                'titre'=>'Retour groupés',
+                                'mainmenu'=>'',
+                                'leftmenu'=>'',
+                                'url'=>'/synopsisapple/ups/retour.php',
+                                'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+                                'position'=>304,
+                                'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+                                'perms'=>'$user->rights->BimpSupport->read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+                                'target'=>'',
+                                'user'=>2);
+        $r++;
+        $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=bimpsupport,fk_leftmenu=bimpsupport',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
+                                'type'=>'left',			// This is a Left menu entry
+                                'titre'=>'Remboursement',
+                                'mainmenu'=>'',
+                                'leftmenu'=>'',
+                                'url'=>'/synopsisapple/remboursement.php',
+                                'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+                                'position'=>305,
+                                'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+                                'perms'=>'$user->rights->BimpSupport->read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+                                'target'=>'',
+                                'user'=>0);
 
 //        $this->menu[$r] = array(
 //            'fk_menu' => 'fk_mainmenu=accountancy,fk_leftmenu=suppliers_bills', // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode of parent menu
@@ -286,6 +314,9 @@ class modBimpsupport extends DolibarrModules {
         
         $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevissav', 1, 'propal', 'Devis SAV', NULL);";
         $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpinvoicesav', 1, 'invoice', 'Facture SAV', NULL);";
+        
+        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette1', 1, 'product', 'Etiquette Stock', NULL);";
+        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette2', 1, 'product', 'Etiquette Client', NULL);";
 
         return $this->_init($sql, $options);
     }
@@ -302,6 +333,9 @@ class modBimpsupport extends DolibarrModules {
         $sql = array();
         $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevissav';";
         $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpinvoicesav';";
+        
+        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette1';";
+        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette2';";
                 
         return $this->_remove($sql, $options);
     }

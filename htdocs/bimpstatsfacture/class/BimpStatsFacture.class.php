@@ -310,7 +310,7 @@ class BimpStatsFacture {
     private function addSavURL($hash) {
         foreach ($hash as $ind => $h) {
             if (isset($h['sav_id'])) {
-                require_once DOL_DOCUMENT_ROOT."bimpsupport/objects/BS_SAV.class.php";
+                require_once DOL_DOCUMENT_ROOT."/bimpsupport/objects/BS_SAV.class.php";
                 $chrono = new BS_SAV($this->db);
                 $chrono->id = $h['sav_id'];
                 $chrono->ref = $h['sav_ref'];

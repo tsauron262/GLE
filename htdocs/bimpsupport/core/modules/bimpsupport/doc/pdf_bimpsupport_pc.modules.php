@@ -339,7 +339,7 @@ en espèces (plafond maximun de 1000€), en carte bleue\n\n";
 //                }
             //QR suivie        
             $qr_dir = $dir. "temp";
-            $data = DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?id_sav=" . $sav->id . "&user_name=" . substr($client->name, 0, 3);
+            $data = DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $sav->getChildObject("equipment")->getData("serial")."&id_sav=" . $sav->id . "&user_name=" . substr($client->name, 0, 3);
             $this->getQrCode($data, $qr_dir, "suivie.png");
             $pdf->Image($qr_dir . "/suivie.png", 100, 30, 0, 24);
 

@@ -170,6 +170,7 @@ class EquipmentManager {
             $doli_prod->fetch($id);
             $products[$id]['ref'] = $doli_prod->getNomUrl(1);
             $products[$id]['label'] = dol_trunc($doli_prod->label, 25);
+            $products[$id]['prixH'] = "999";
         }
 
         foreach ($equipments as $id => $equipment) {

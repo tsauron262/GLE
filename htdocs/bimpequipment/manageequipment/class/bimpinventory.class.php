@@ -335,6 +335,8 @@ class BimpInventory {
                 $doliProd->fetch($equipment['id_product']);
                 $allEqui[$id_equipment]['ref'] = $doliProd->getNomUrl(1);
                 $allEqui[$id_equipment]['label'] = $doliProd->label;
+                global $conf; $conf->global->PRODUCT_MINIMUM_RECOMMENDED_PRICE = 1;
+                $allEqui[$id_equipment]['prixH'] = $doliProd->min_recommended_price();
             }
 
             foreach ($allProd as $id => $inut) {
@@ -344,6 +346,8 @@ class BimpInventory {
                 $allProd[$id]['qtyScanned'] = $this->prodQty[$id];
                 $allProd[$id]['ref'] = $doliProd->getNomUrl(1);
                 $allProd[$id]['label'] = $doliProd->label;
+                global $conf; $conf->global->PRODUCT_MINIMUM_RECOMMENDED_PRICE = 1;
+                $allProd[$id]['prixH'] = $doliProd->min_recommended_price();
             }
         }
 

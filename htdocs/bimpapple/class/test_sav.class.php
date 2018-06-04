@@ -110,7 +110,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         while ($ligne = $db->fetch_object($sql)) {
                 if (!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->fetch($ligne->rid);
-                    if ($repair->lookup()) {
+                    if (count($repair->lookup()) == 0) {
                         echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->getData('repair_complete')) {
                             echo "Fermée dans GSX maj dans GLE.<br/>";
@@ -166,12 +166,9 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
         while ($ligne = $db->fetch_object($sql)) {
 die("a rest".print_r($ligne,1));
-            if ($GSXdatas->connect) {
                 if (!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->fetch($ligne->rid);
-                    $repair->rowId = $ligne->rid;
-                    $repair->load();
-                    if ($repair->lookup()) {
+                    if (count($repair->lookup()) == 0) {
                         echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement" || $repair->repairComplete) {
                             echo "Passage dans GLE a RFPU<br/>";
@@ -202,10 +199,7 @@ die("a rest".print_r($ligne,1));
                     }
                 } else
                     echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache)<br/>";
-            }
-            else {
-                echo "Connexion GSX impossible";
-            }
+            
         }
     }
 

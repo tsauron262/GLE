@@ -50,6 +50,11 @@ class BS_ApplePart extends BimpObject
         
         return $compTIACodes;
     }
+    public function canDelete()
+    {
+        global $user;
+        return (int) $user->rights->BimpSupport->read;
+    }
 
     public function getComptia_modifiersArray()
     {

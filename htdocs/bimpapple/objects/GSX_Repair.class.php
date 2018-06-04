@@ -620,7 +620,7 @@ class GSX_Repair extends BimpObject
                     'result_container' => '$(\'#repair_' . $this->id . '_result\')',
                     'success_callback' => $callback,
                 ));
-                if (count($this->partsPending)) {
+                if (count($this->partsPending) && $this->getData('new_serial') != 'part') {
                     $html = 'La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour';
                     $html .= '<p style="text-align: center; padding: 30px">';
                     $html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Forcer la fermeture</span></p>';
@@ -644,7 +644,7 @@ class GSX_Repair extends BimpObject
                 $client = 'MarkRepairComplete';
                 $requestName = 'MarkRepairCompleteRequest';
             }
-            $request = $this->gsx->_requestBuilder($requestName, '', array('repairConfirmationNumbers' => $this->confirmNumbers['repair']));
+            $request = $this->gsx->_requestBuilder($requestName, '', array('repairConfirmationNumbers' => $this->getData('repair_confirm_number')));
             $response = $this->gsx->request($request, $client);
 
             if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {

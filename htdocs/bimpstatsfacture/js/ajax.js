@@ -239,9 +239,9 @@ function initTable(taxesOrNot, facture, key) {
             .appendTo('#table' + key);
 
     if (is_customer)
-        var arrayOfField = ['Societe', 'Facture', taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', name_place, 'Type', 'Equipement', 'Type de garantie', 'Numéro de série', 'SAV'];
+        var arrayOfField = ['Societe', 'Facture', 'Date', 'Propal ' + taxesOrNot, 'Facture ' + taxesOrNot, 'Total marge', 'Statut', 'Paiement', 'Payé TTC', name_place, 'Type', 'Equipement', 'Type de garantie', 'Numéro de série', 'SAV', 'Num GSX'];
     else
-        var arrayOfField = ['Fournisseur', 'Facture', taxesOrNot, 'Statut', 'Paiement', 'Payé TTC', name_place];
+        var arrayOfField = ['Fournisseur', 'Facture', 'Facture ' + taxesOrNot, 'Statut', 'Paiement', 'Payé TTC', name_place];
 
     arrayOfField.forEach(function (field) {
         $('<th></th>').text(field).appendTo('#thead' + key);
@@ -252,9 +252,9 @@ function fillTable(facture, prevFactureId) {
     var centre = facture.centre_url ? facture.centre_url : (facture.centre ? facture.centre : '');
     if (is_customer) {
         if (prevFactureId === facture.fac_id)
-            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, '- - -', '- - -', '- - -', '- - -'];
+            arrayOfValue = ['- - -', '- - -', '- - -', '- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, '- - -', '- - -', '- - -', '- - -', '- - -'];
         else
-            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref];
+            arrayOfValue = [facture.nom_societe, facture.nom_facture, facture.fact_date, facture.prop_total, facture.factotal, facture.marge, facture.facstatut, facture.ref_paiement, facture.paipaye_ttc, centre, facture.type, facture.equip_ref, facture.type_garantie, facture.numero_serie, facture.sav_ref, facture.ggsx];
     } else {
         if (prevFactureId === facture.fac_id)
             arrayOfValue = ['- - -', '- - -', '- - -', '- - -', facture.ref_paiement, facture.paipaye_ttc, centre];
@@ -272,7 +272,7 @@ function fillTable(facture, prevFactureId) {
 
 function addTotaux(groupe, key) {
     if (is_customer)
-        arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', '', '', '', '', ''];
+        arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '', '<strong>' + groupe.total_total_prop + '</strong>', '<strong>' + groupe.total_total + '</strong>', '<strong>' + groupe.total_total_marge + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', '', '', '', '', '', '', ''];
     else
         arrayOfValue = ['', '<strong>Nb facture : ' + groupe.nb_facture + '</strong>', '<strong>' + groupe.total_total + '</strong>', '', '', '<strong>' + groupe.total_payer + '</strong>', ''];
 

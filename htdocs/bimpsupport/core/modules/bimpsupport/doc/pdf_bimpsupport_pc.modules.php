@@ -276,7 +276,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             if ($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA")
                 $prixRefusOrdi = "39";
 
-            if (stripos($chrono2->description, "Iphone") !== false) {
+            if (stripos($product_label, "Iphone") !== false) {
                 $cgv .= "-Les frais de prise en charge diagnostic de 29€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
                 $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation materiel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts parla GARANTIE APPLE. Un devis sera alors établi et des frais de 29€ TTC seront alors facturés en cas de refus de celui-ci." . "\n\n";
                 $cgv.="-Des frais de 29€ TTC seront automatiquement facturés, si lors de l'expertise il s'avère que des pièces de contre façon ont été installées.\n\n";
@@ -339,7 +339,7 @@ en espèces (plafond maximun de 1000€), en carte bleue\n\n";
 //                }
             //QR suivie        
             $qr_dir = $dir. "temp";
-            $data = DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?id_sav=" . $sav->id . "&user_name=" . substr($client->name, 0, 3);
+            $data = DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $sav->getChildObject("equipment")->getData("serial")."&id_sav=" . $sav->id . "&user_name=" . substr($client->name, 0, 3);
             $this->getQrCode($data, $qr_dir, "suivie.png");
             $pdf->Image($qr_dir . "/suivie.png", 100, 30, 0, 24);
 

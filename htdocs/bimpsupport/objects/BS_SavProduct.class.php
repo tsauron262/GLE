@@ -24,6 +24,12 @@ class BS_SavProduct extends BimpObject
 
         return 0;
     }
+    
+    public function canDelete()
+    {
+        global $user;
+        return (int) $user->rights->BimpSupport->read;
+    }
 
     public function getTotal()
     {

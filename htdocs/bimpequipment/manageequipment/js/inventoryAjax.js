@@ -35,11 +35,11 @@ function getAllProducts() {
             } else if (is_responsible) {
                 for (var id in out.products) {
                     var prod = out.products[id];
-                    addLineProduct(id, prod.ref, prod.label, prod.qty, prod.qtyScanned);
+                    addLineProduct(id, prod.ref, prod.label, prod.prixH, prod.qty, prod.qtyScanned);
                 }
                 for (var id in out.equipments) {
                     var eq = out.equipments[id];
-                    addLineEquipment(id, eq.id_product, eq.ref, eq.serial, eq.label, eq.scanned, eq.bad_entrepot);
+                    addLineEquipment(id, eq.id_product, eq.ref, eq.serial, eq.label, prod.prixH, eq.scanned, eq.bad_entrepot);
                 }
             }
         }
@@ -159,7 +159,7 @@ $(document).ready(function () {
  */
 
 /* Add a line in the table of equipments */
-function addLineEquipment(equipment_id, product_id, ref, serial, label, scanned, bad_entrepot) {
+function addLineEquipment(equipment_id, product_id, ref, serial, label, prixH, scanned, bad_entrepot) {
 
     cnt_product++;
 
@@ -174,6 +174,7 @@ function addLineEquipment(equipment_id, product_id, ref, serial, label, scanned,
     line += '<td>' + ref + '</td>';    // refUrl
     line += '<td>' + serial + '</td>';    // num série
     line += '<td>' + label + '</td>';    // label
+    line += '<td>' + prixH + '</td>';    // label
     line += '<td></td>';   // Quantité Totale
     line += '<td></td>';   // Quantité Manquante
     line += '<td></td>';   // Quantité Indiqué
@@ -181,7 +182,7 @@ function addLineEquipment(equipment_id, product_id, ref, serial, label, scanned,
 }
 
 /* Add a line in the table of product */
-function addLineProduct(product_id, ref, label, qty_totale, qty_scanned) {
+function addLineProduct(product_id, ref, label, prixH, qty_totale, qty_scanned) {
     cnt_product++;
 
     if (!inventory_closed) {
@@ -217,6 +218,7 @@ function addLineProduct(product_id, ref, label, qty_totale, qty_scanned) {
     line += '<td>' + ref + '</td>';
     line += '<td></td>';
     line += '<td>' + label + '</td>';
+    line += '<td>' + prixH + '</td>';
     line += '<td name="qtyTotale">' + qty_totale + '</td>';
     line += '<td name="qtyMissing">' + qty_missing + '</td>';
     line += '<td name="qtyGiven">' + qty_scanned + '</td>';

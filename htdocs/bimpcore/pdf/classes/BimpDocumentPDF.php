@@ -12,6 +12,8 @@ class BimpDocumentPDF extends BimpModelPDF
     public $total_remises = 0;
     public $localtax1 = array();
     public $localtax2 = array();
+    public $acompteHt = 0;
+    public $acompteTtc = 0;
     public $tva = array();
 
     public function __construct($db)
@@ -287,6 +289,14 @@ class BimpDocumentPDF extends BimpModelPDF
                     $product = null;
                 }
             }
+            
+            
+            
+            if($line->desc == "(DEPOSIT)"){
+                $this->acompteHt -= $line->total_ht;
+                $this->acompteTtc -= $line->total_ttc;
+                continue;
+            }
 
             $desc = $this->getLineDesc($line, $product);
 
@@ -488,7 +498,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if ($line->remise_percent) {
                 $this->total_remises += ((float) $pu_ht * ((float) $line->remise_percent / 100)) * (int) pdf_getlineqty($this->object, $i, $this->langs);
             }
-
+            
             $sign = 1;
             if (isset($this->object->type) && $this->object->type == 2 && !empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE))
                 $sign = -1;
@@ -588,7 +598,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $total_ht = ($conf->multicurrency->enabled && $this->object->mylticurrency_tx != 1 ? $this->object->multicurrency_total_ht : $this->object->total_ht);
         $html .= '<tr>';
         $html .= '<td style="">' . $this->langs->transnoentities("TotalHT") . '</td>';
-        $html .= '<td style="text-align: right;">' . price($total_ht + (!empty($this->object->remise) ? $this->object->remise : 0), 0, $this->langs) . '</td>';
+        $html .= '<td style="text-align: right;">' . price($total_ht + (!empty($this->object->remise) ? $this->object->remise : 0) + $this->acompteHt, 0, $this->langs) . '</td>';
         $html .= '</tr>';
 
         if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT)) {
@@ -714,7 +724,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $total_ttc = ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? $this->object->multicurrency_total_ttc : $this->object->total_ttc;
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
-                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($total_ttc, 0, $this->langs) . '</td>';
+                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($total_ttc+$this->acompteTtc, 0, $this->langs) . '</td>';
                 $html .= '</tr>';
             }
         }
@@ -765,6 +775,16 @@ class BimpDocumentPDF extends BimpModelPDF
                 $resteapayer = 0;
             }
 
+        }
+        
+        if ($this->acompteHt > 0) {
+            $html .= '<tr>';
+            $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("Acompte") . '</td>';
+            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->acompteTtc, 0, $this->langs) . '</td>';
+            $html .= '</tr>';
+        }
+        
+        if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0 || $this->acompteHt > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';
             $html .= '<td style="text-align: right; background-color: #DCDCDC;">' . price($resteapayer, 0, $this->langs) . '</td>';

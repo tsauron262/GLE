@@ -57,7 +57,7 @@ class test_sav {
 
 s.ref FROM `llx_bs_sav` s, `llx_bimp_gsx_repair` r
 
-WHERE r.`id_sav` = s.`id` AND `" . ($statut == "closed" ? "closed" : "ready_for_pick_up") . "` = 0
+WHERE r.`id_sav` = s.`id` AND `" . ($statut == "closed" ? "repair_complete" : "ready_for_pick_up") . "` = 0
 AND serial is not null
 AND DATEDIFF(now(), s.date_update) < 730 
 AND s.status = " . ($statut == "closed" ? "999" : "9");
@@ -103,20 +103,16 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         $sql = $db->query($this->getReq('closed', $iTribu));
 
 
-        $GSXdatas = new gsxDatas($ligne->serial);
-        $repair = new Repair($db, $GSXdatas->gsx, false);
+        $repair = new GSX_Repair($db);
 
 
 
         while ($ligne = $db->fetch_object($sql)) {
-die("ferm auto".print_r($ligne,1));
-            if ($GSXdatas->connect) {
                 if (!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
-                    $repair->rowId = $ligne->rid;
-                    $repair->load();
+                    $repair->fetch($ligne->rid);
                     if ($repair->lookup()) {
                         echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
-                        if ($repair->repairComplete) {
+                        if ($repair->getData('repair_complete')) {
                             echo "Fermée dans GSX maj dans GLE.<br/>";
                         } else {
                             $mailTech = "jc.cannet@bimp.fr";
@@ -155,10 +151,7 @@ die("ferm auto".print_r($ligne,1));
                     }
                 } else
                     echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache) " . $ligne->nbJ . " jours<br/>";
-            }
-            else {
-                echo "Connexion GSX impossible";
-            }
+            
         }
     }
 

@@ -555,13 +555,14 @@ class BC_Form extends BC_Panel
 
     public function renderCustomInput($row, $params = null)
     {
+        $row_path = $this->config_path . '/rows/' . $row;
         if (is_null($params)) {
-            if (!$this->object->config->isDefined($this->config_path . '/rows/' . $row)) {
+            if (!$this->object->config->isDefined($row_path)) {
                 return BimpRender::renderAlerts('Erreur de configuration: ligne ' . $row . ' non définie');
             }
 
-            $params = $this->fetchParams($this->config_path . '/rows/' . $row, self::$row_params);
-            $params = array_merge($params, $this->fetchParams($this->config_path . '/rows/' . $row, self::$custom_row_params));
+            $params = $this->fetchParams($row_path, self::$row_params);
+            $params = array_merge($params, $this->fetchParams($row_path, self::$custom_row_params));
         }
 
         $html = '';
@@ -570,8 +571,15 @@ class BC_Form extends BC_Panel
             $html .= self::renderCreateObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values']);
         }
 
-        if ($this->object->config->isDefined($this->config_path . '/rows/' . $row . '/input')) {
-            $input = new BC_Input($this->object, $params['data_type'], $params['input_name'], $this->config_path . '/rows/' . $row . '/input', $params['value']);
+        if ($this->object->config->isDefined($row_path . '/input')) {
+            $field_params = array();
+            if (in_array($params['data_type'], array('qty', 'int', 'float', 'money', 'percent'))) {
+                $field_params = BimpComponent::fetchParams($row_path, BC_Field::$type_params_def['number']);
+            } elseif (array_key_exists($params['data_type'], BC_Field::$type_params_def)) {
+                $field_params = BimpComponent::fetchParams($row_path, BC_Field::$type_params_def[$params['data_type']]);
+            }
+            $field_params['required'] = (int) $params['required'];
+            $input = new BC_Input($this->object, $params['data_type'], $params['input_name'], $row_path . '/input', $params['value'], $field_params);
             $input->setNamePrefix($this->fields_prefix);
             $input->extraClasses[] = 'customField';
             $input->extraData['form_row'] = $row;
@@ -587,7 +595,7 @@ class BC_Form extends BC_Panel
             $html .= ' data-required="' . (int) $params['required'] . '"';
             $html .= '>';
 
-            $html .= str_replace('name="' . $params['input_name'] . '"', 'name="' . $this->fields_prefix . $params['input_name'] . '"', $this->object->getConf($this->config_path . '/rows/' . $row . '/content', '', true));
+            $html .= str_replace('name="' . $params['input_name'] . '"', 'name="' . $this->fields_prefix . $params['input_name'] . '"', $this->object->getConf($row_path . '/content', '', true));
 
             $html .= '</div>';
         } else {

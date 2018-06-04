@@ -3,6 +3,7 @@
 class Bimp_Product extends BimpObject
 {
 
+    public $stocks = null;
     public static $sousTypes = array(
         0 => '',
         1 => 'Service inter',
@@ -49,10 +50,13 @@ class Bimp_Product extends BimpObject
         $stocks = array(
             'id_stock'       => 0,
             'reel'           => 0,
+            'commandes'      => 0, // qté en commande fournisseur
             'dispo'          => 0, // Stock réel - réel réservés
-            'total_reserves' => 0, // Stock réel réservé + réservés en attente de réception
-            'reel_reserves'  => 0, // seulement réel réservé
+            'virtuel'        => 0, // reel - reel_reserves + commandes
+            'total_reserves' => 0, // Réservations du statut 0 à - de 300
+            'reel_reserves'  => 0, // Réservations du statut 200 à - de 300
         );
+
         if ($this->isLoaded()) {
             $product = $this->dol_object;
 
@@ -62,6 +66,16 @@ class Bimp_Product extends BimpObject
                 $stocks['reel'] = $product->stock_warehouse[(int) $id_entrepot]->real;
             }
 
+            $sql = 'SELECT SUM(line.qty) as total_qty FROM ' . MAIN_DB_PREFIX . 'commande_fournisseurdet line';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur c ON c.rowid = line.fk_commande';
+            $sql .= ' WHERE line.fk_product = ' . (int) $this->id;
+            $sql .= ' AND c.billed = 0';
+
+            $result = $this->db->executeS($sql);
+            if (!is_null($result) && isset($result['total_qty'])) {
+                $stocks['commandes'] = (int) $result['total_qty'];
+            }
+
             BimpObject::loadClass('bimpreservation', 'BR_Reservation');
 
             $reserved = BR_Reservation::getProductCounts($this->id, (int) $id_entrepot);
@@ -69,8 +83,53 @@ class Bimp_Product extends BimpObject
             $stocks['reel_reserves'] = $reserved['reel'];
 
             $stocks['dispo'] = $stocks['reel'] - $stocks['reel_reserves'];
+            $stocks['virtuel'] = $stocks['reel'] - $stocks['total_reserves'] + $stocks['commandes'];
         }
 
         return $stocks;
+    }
+
+    public function fetchStocks()
+    {
+        $this->stocks = array();
+
+        $where = '`statut` > 0';
+        $rows = $this->db->getRows('entrepot', $where, null, 'array', array(
+            'rowid', 'label'
+        ));
+
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $stocks = $this->getStocksForEntrepot((int) $r['id']);
+                $this->stocks[(int) $r['id']] = array(
+                    'entrepot_label' => $r['label'],
+                    'reel'           => $stocks['reel'],
+                    'dispo'          => $stocks['dispo'],
+                    'virtuel'        => $stocks['virtuel'],
+                    'commandes'      => $stocks['commandes'],
+                    'total_reserves' => $stocks['total_reserves'],
+                    'reel_reserves'  => $stocks['reel_reserves']
+                );
+            }
+        }
+    }
+
+    public function renderStocksByEntrepots($id_entrepot = null)
+    {
+        if (!$this->isLoaded()) {
+            return BimpRender::renderAlerts('ID du produit absent');
+        }
+        
+        if (is_null($this->stocks)) {
+            $this->fetchStocks();
+        }
+
+        $html = '';
+        
+        $html .= '<div class="productStocksContainer" data-id_product="'.$this->id.'">';
+                
+        $html .= '</div>';
+        
+        return $html;
     }
 }

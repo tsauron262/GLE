@@ -221,24 +221,26 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                 bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
                 bimpModal.addButton('Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
                 bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
-                    $form.find('.inputContainer').each(function () {
-                        var field_name = $(this).data('field_name');
-                        if ($(this).find('.cke').length) {
-                            var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
-                            $(this).find('[name="' + field_name + '"]').val(html_value);
-                        }
-                        extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
-                    });
-                    setObjectAction($(this), object_data, action, extra_data, null, $('#' + $form.attr('id') + '_result'), function (result) {
-                        if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
-                            bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx')).remove();
-                        } else {
-                            bimpModal.hide();
-                        }
-                        if (typeof (successCallback) === 'function') {
-                            successCallback();
-                        }
-                    });
+                    if (validateForm($form)) {
+                        $form.find('.inputContainer').each(function () {
+                            var field_name = $(this).data('field_name');
+                            if ($(this).find('.cke').length) {
+                                var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+                                $(this).find('[name="' + field_name + '"]').val(html_value);
+                            }
+                            extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
+                        });
+                        setObjectAction($(this), object_data, action, extra_data, null, $('#' + $form.attr('id') + '_result'), function (result) {
+                            if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
+                                bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx')).remove();
+                            } else {
+                                bimpModal.hide();
+                            }
+                            if (typeof (successCallback) === 'function') {
+                                successCallback();
+                            }
+                        });
+                    }
                 });
             }
         });

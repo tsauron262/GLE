@@ -35,7 +35,8 @@ class BC_Input extends BimpComponent
             'values'      => array('data_type' => 'array', 'default' => array()),
         ),
         'select'                      => array(
-            'options' => array('data_type' => 'array', 'compile' => true)
+            'options'      => array('data_type' => 'array', 'compile' => true),
+            'select_first' => array('data_type' => 'bool', 'default_value' => 0)
         ),
         'toggle'                      => array(
             'toggle_on'  => array('default' => 'OUI'),
@@ -218,6 +219,7 @@ class BC_Input extends BimpComponent
 
             case 'select':
                 $options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
+                $options['select_first'] = isset($this->params['select_first']) ? $this->params['select_first'] : 0;
                 break;
 
             case 'toggle':
@@ -262,7 +264,7 @@ class BC_Input extends BimpComponent
                 $options['linked_fields'] = isset($this->params['linked_fields']) ? $this->params['linked_fields'] : array();
                 break;
         }
-
+        
         return $options;
     }
 

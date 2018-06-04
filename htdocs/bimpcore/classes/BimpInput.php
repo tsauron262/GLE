@@ -219,6 +219,13 @@ class BimpInput
                     $options['options'] = array();
                 }
 
+                if (isset($options['select_first']) && (int) $options['select_first']) {
+                    foreach ($options['options'] as $option_key => $option_val) {
+                        $value = $option_key;
+                        break;
+                    }
+                }
+
                 if (count($options['options'])) {
                     $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '">';
                     foreach ($options['options'] as $option_value => $option) {
@@ -241,7 +248,7 @@ class BimpInput
                         }
                         $html .= '<option value="' . $option_value . '"';
                         if ($value == $option_value) {
-                            $html .= ' selected';
+                            $html .= ' selected="1"';
                         }
                         if (!is_null($color)) {
                             $html .= ' data-color="' . $color . '" style="color: #' . $color . '"';

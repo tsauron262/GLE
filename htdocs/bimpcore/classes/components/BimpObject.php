@@ -1734,19 +1734,42 @@ class BimpObject
         return $errors;
     }
 
-    public function updateField($field, $value)
+    public function updateField($field, $value, $id_object = null)
     {
+        if (is_null($id_object) || !$id_object) {
+            if ($this->isLoaded()) {
+                $id_object = (int) $this->id;
+            }
+        }
         $errors = array();
+
+        if (is_null($id_object) || !$id_object) {
+            $errors[] = 'Impossible de mettre à jour le champ "' . $field . '" - ID ' . $this->getLabel('of_the') . ' absent';
+            return $errors;
+        }
+
         if ($this->field_exists($field)) {
             $errors = $this->validateValue($field, $value);
             if (!count($errors)) {
-                if ($this->db->update($this->getTable(), array(
-                            $field => $value
-                                ), '`' . $this->getPrimary() . '` = ' . (int) $this->id) <= 0) {
-                    $sqlError = $this->db->db->lasterror();
-                    $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');
+                $extra_field = (int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool');
+                if ($extra_field && $this->isDolObject()) {
+                    if ($this->db->update($this->getTable() . '_extrafields', array(
+                                $field => $value
+                                    ), '`fk_object` = ' . (int) $id_object) <= 0) {
+                        $sqlError = $this->db->db->lasterror();
+                        $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');
+                    } else {
+                        $this->set($field, $value);
+                    }
                 } else {
-                    $this->set($field, $value);
+                    if ($this->db->update($this->getTable(), array(
+                                $field => $value
+                                    ), '`' . $this->getPrimary() . '` = ' . (int) $id_object) <= 0) {
+                        $sqlError = $this->db->db->lasterror();
+                        $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');
+                    } else {
+                        $this->set($field, $value);
+                    }
                 }
             }
         } else {
@@ -2181,6 +2204,8 @@ class BimpObject
             return 0;
         }
 
+        $bimpObjectFields = array();
+
         foreach ($this->data as $field => $value) {
             if ($this->field_exists($field)) {
                 if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
@@ -2189,10 +2214,10 @@ class BimpObject
                     $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
                     if (is_null($prop)) {
                         $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-                    } elseif (!property_exists($this->dol_object, $prop)) {
-                        $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
-                    } else {
+                    } if (property_exists($this->dol_object, $prop)) {
                         $this->dol_object->{$prop} = $value;
+                    } else {
+                        $bimpObjectFields[$field] = $value;
                     }
                 }
             }
@@ -2221,6 +2246,13 @@ class BimpObject
                         $errors[] = 'Erreur: ' . $langs->trans($error);
                     }
                 }
+            } else {
+                if (count($bimpObjectFields)) {
+                    $this->id = $this->dol_object->id;
+                    foreach ($bimpObjectFields as $field_name => $value) {
+                        $this->updateField($field_name, $value);
+                    }
+                }
             }
 
             return $result;
@@ -2244,6 +2276,8 @@ class BimpObject
             return 0;
         }
 
+        $bimpObjectFields = array();
+
         foreach ($this->data as $field => $value) {
             if ($this->field_exists($field)) {
                 if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
@@ -2252,10 +2286,10 @@ class BimpObject
                     $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
                     if (is_null($prop)) {
                         $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-                    } elseif (!property_exists($this->dol_object, $prop)) {
-                        $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
-                    } else {
+                    } elseif (property_exists($this->dol_object, $prop)) {
                         $this->dol_object->{$prop} = $value;
+                    } else {
+                        $bimpObjectFields[$field] = $value;
                     }
                 }
             }
@@ -2274,6 +2308,10 @@ class BimpObject
             }
 
             $result = call_user_func_array(array($this->dol_object, 'update'), $params);
+
+            foreach ($bimpObjectFields as $field => $value) {
+                $this->updateField($field, $value);
+            }
 
             if ($result < 0) {
                 if (isset($this->dol_object->error) && $this->dol_object->error) {
@@ -2335,10 +2373,10 @@ class BimpObject
                 $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
                 if (is_null($prop)) {
                     $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-                } elseif (!property_exists($this->dol_object, $prop)) {
-                    $errors[] = 'Erreur de configuration pour le champ "' . $field . '": la propriété "' . $prop . '" n\'existe pas dans l\'objet Dolibarr "' . get_class($this->dol_object) . '"';
-                } else {
+                } elseif (property_exists($this->dol_object, $prop)) {
                     $value = $this->dol_object->{$prop};
+                } else {
+                    $value = $this->getSavedData($field);
                 }
             }
             if (!is_null($value)) {
@@ -2350,10 +2388,6 @@ class BimpObject
         if (!count($errors)) {
             return true;
         }
-
-        echo '<pre>';
-        print_r($errors);
-        exit;
         return false;
     }
 

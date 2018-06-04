@@ -1,0 +1,122 @@
+table: br_order_line
+common_fields: 0
+
+parent_module: bimpcore
+parent_object: Bimp_Commande
+parent_id_property: id_commande
+
+labels: 
+    name: produit / service
+    name_plur: produits / services
+objects: 
+    commande: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: commande
+            id_object: 
+                field_value: id_commande
+    product:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Product
+            id_object: 
+                field_value: id_product              
+              
+fields: 
+    id_commande: 
+        label: Commande
+        type: id_parent
+    id_order_line: 
+        label: Ligne de commande
+        type: id
+        required: 1
+    id_product: 
+        label: Produit
+        type: id_object
+        object: product
+    type: 
+        label: Type
+        type: int
+        input: 
+            type: hidden
+        values: 
+            array: types
+    qty: 
+        label: Qté totale
+        type: int
+        default_value: 0
+    qty_shipped: 
+        label: Qté livrée
+        type: int
+        default_value: 0
+        min: 0
+        max: 
+            field_value: qty
+    qty_billed: 
+        label: Qté facturée
+        type: int
+        default_value: 0
+        min: 0
+        max: 
+            field_value: qty
+    qty_returned: 
+        label: Qté retournée après facturation
+        type: int
+        default_value: 0
+        min: 0
+        max: 
+            field_value: qty_billed
+    
+forms: 
+    remove:
+        title: Produit / Services à retirer
+        rows: 
+            - custom: 1
+              label: Quantités à retirer
+              input_name: qty
+              data_type: qty
+              content: 
+                  callback: renderRemovableQtyInput
+            - custom: 1
+              label: Avoir
+              show: 
+                  callback: isOrderInvoiced
+              input_name: id_avoir
+              data_type: int
+              input: 
+                  type: select
+                  options: 
+                      array: avoirs
+                  select_first: 1
+              value: 
+                  callback: getLastAvoir
+    
+lists: 
+    default: 
+        sort_field: id
+        sort_way: asc
+        n: 0
+        enable_search: 0
+        objects_change_reload: BR_Reservation,BR_ReservationCmdFourn,BR_ServiceShipment,BR_ReservationShipment,BR_CommandeShipment
+        pagination: 0
+        extra_btn: 
+            callback: getListExtraBtn
+        cols:
+            type: 
+                field: type
+            product: 
+                field: id_product
+                display: nom_url
+            qty: 
+                field: qty
+            shipped: 
+                field: qty_shipped
+#            billed: 
+#                field: qty_billed
+#            returned: 
+#                field: qty_returned
+                    

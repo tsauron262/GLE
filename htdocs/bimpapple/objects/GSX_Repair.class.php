@@ -644,7 +644,7 @@ class GSX_Repair extends BimpObject
                 $client = 'MarkRepairComplete';
                 $requestName = 'MarkRepairCompleteRequest';
             }
-            $request = $this->gsx->_requestBuilder($requestName, '', array('repairConfirmationNumbers' => $this->confirmNumbers['repair']));
+            $request = $this->gsx->_requestBuilder($requestName, '', array('repairConfirmationNumbers' => $this->getData('repair_confirm_number')));
             $response = $this->gsx->request($request, $client);
 
             if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {

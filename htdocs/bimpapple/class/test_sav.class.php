@@ -23,14 +23,14 @@ if (isset($_GET['actionTest'])) {
 
 
 
-require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
 
 class test_sav {
     public $output = "";
     public $nbErr = 0;
     
     function __construct() {
-        require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
+        require_once DOL_DOCUMENT_ROOT . '/bimpapple/objects/GSX_Repair.class.php';
     }
 
     function testGlobal() {
@@ -103,7 +103,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         $sql = $db->query($this->getReq('closed', $iTribu));
 
 
-        $repair = new GSX_Repair($db);
+        $repair = new GSX_Repair('bimpapple', 'GSX_Repair');
 
 
 
@@ -160,8 +160,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         $sql = $db->query($this->getReq('ready', $iTribu));
 
 
-        $GSXdatas = new gsxDatas($ligne->serial);
-        $repair = new Repair($db, $GSXdatas->gsx, false);
+        $repair = new GSX_Repair('bimpapple', 'GSX_Repair');
 
 
 
@@ -169,6 +168,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 die("a rest".print_r($ligne,1));
             if ($GSXdatas->connect) {
                 if (!isset($_SESSION['idRepairIncc'][$ligne->rid])) {
+                    $repair->fetch($ligne->rid);
                     $repair->rowId = $ligne->rid;
                     $repair->load();
                     if ($repair->lookup()) {

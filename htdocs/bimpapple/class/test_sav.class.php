@@ -109,7 +109,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
 
         while ($ligne = $db->fetch_object($sql)) {
-                if ($this->useCache && !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
+                if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->fetch($ligne->rid);
                     if (count($repair->lookup()) == 0) {
                         echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
@@ -167,7 +167,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
         while ($ligne = $db->fetch_object($sql)) {
 die("a rest".print_r($ligne,1));
-                if ($this->useCache && !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
+                if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->fetch($ligne->rid);
                     if (count($repair->lookup()) == 0) {
                         echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";

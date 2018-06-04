@@ -281,6 +281,16 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
+            if($line->desc == "(DEPOSIT)"){
+                $this->acompteHt -= $line->total_ht;
+                $this->acompteTtc -= $line->total_ttc;
+                $i++;
+                continue;
+            }
+            
+            
+            
+            
             $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);
@@ -291,12 +301,6 @@ class BimpDocumentPDF extends BimpModelPDF
             }
             
             
-            
-            if($line->desc == "(DEPOSIT)"){
-                $this->acompteHt -= $line->total_ht;
-                $this->acompteTtc -= $line->total_ttc;
-                continue;
-            }
 
             $desc = $this->getLineDesc($line, $product);
 

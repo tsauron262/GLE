@@ -1024,6 +1024,7 @@ class gsxController extends BimpController
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmation']['repairConfirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['repairConfirmationNumber'];
                             $repair->set('new_serial', 'part');
+                            $repair->update();
                             if ($repair->isLoaded()) {
                                 $repair->repairDetails();
                             } else {

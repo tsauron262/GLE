@@ -125,7 +125,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                             }
 
                             if ($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement") {
-                                if ($repair->close(1, 0))
+                                if (count($repair->close(1, 0)) == 0)
                                     echo "Semble avoir été fermé en auto<br/>";
                                 else {
                                     $this->nbErr++;
@@ -135,7 +135,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 }
                             }
                             else {//tentative de passage a rfpu
-                                if ($repair->updateStatus('RFPU'))
+                                if (count($repair->updateStatus('RFPU')) == 0)
                                     echo "Semble avoir été passer dans GSX a RFPU<br/>";
                                 else {
                                     $this->nbErr++;
@@ -176,7 +176,7 @@ die("a rest".print_r($ligne,1));
                             $repair->readyForPickUp = 1;
                             $repair->update();
                         } else {
-                            if ($repair->updateStatus('RFPU'))
+                            if (count($repair->updateStatus('RFPU')) == 0)
                                 echo "Semble avoir été passer dans GSX a RFPU<br/>";
                             else {
                                 $this->nbErr++;

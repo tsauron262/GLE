@@ -1023,6 +1023,7 @@ class gsxController extends BimpController
                         dol_syslog("UpdateSerialNumber" . print_r($response, 1), 3);
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmation']['repairConfirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['repairConfirmationNumber'];
+                            dol_syslog("mise a jour num serie ok",3);
                             if ($repair->isLoaded()) {
                                 $repair->repairDetails();
                             } else {

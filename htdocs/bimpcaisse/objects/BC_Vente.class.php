@@ -753,6 +753,13 @@ class BC_Vente extends BimpObject
         $html .= '</button>';
         $html .= '</div>';
 
+        $html .= '<div class="col-lg-4">';
+        $html .= '<button id="ventePaiementCBButton" type="button" class="ventePaiementButton btn btn-default btn-large"';
+        $html .= ' onclick="displayNewPaiementForm($(this));" data-code="AE">';
+        $html .= '<i class="fa fa-pencil iconLeft"></i>Paiement American Express';
+        $html .= '</button>';
+        $html .= '</div>';
+
         $html .= '</div>';
 
         $html .= '<div id="venteAddPaiementFormContainer">';

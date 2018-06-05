@@ -203,7 +203,7 @@ function __construct($orientation='P', $unit='mm', $format='A4') {
 }
 
 //________________ Fonction encodage et dessin du code 128 _____________________
-function Code128($x, $y, $code, $w, $h) {
+function Code128($y, $x, $code, $w, $h) {
     $Aguid = "";                                                                      // Création des guides de choix ABC
     $Bguid = "";
     $Cguid = "";
@@ -276,7 +276,7 @@ function Code128($x, $y, $code, $w, $h) {
     for ($i=0; $i<strlen($crypt); $i++) {                                      // BOUCLE D'IMPRESSION
         $c = $this->T128[ord($crypt[$i])];
         for ($j=0; $j<count($c); $j++) {
-            $this->Rect($x,$y,$c[$j]*$modul,$h,"F");
+            $this->Rect($y,$x,$h,$c[$j]*$modul,"F");
             $x += ($c[$j++]+$c[$j])*$modul;
         }
     }

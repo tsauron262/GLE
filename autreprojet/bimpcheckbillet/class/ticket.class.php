@@ -260,7 +260,7 @@ class Ticket {
         return -1;
     }
 
-    private function getRandomString($length = 32) {
+    private function getRandomString($length = 9) {
         $str = "";
         $characters = array_merge(range('A', 'Z'), range('a', 'z'), range('0', '9'));
         $max = count($characters) - 1;
@@ -281,7 +281,7 @@ class Ticket {
     }
 
     public function createPdf($id_ticket, $x, $y, $is_first, $is_last, $set_to_left, $id_order) {
-        $this->$i++;
+        $this->i++;
         $ticket_width = 140;
         $ticket_height = 64;
         $margin = 5;
@@ -322,7 +322,7 @@ class Ticket {
         $this->pdf->SetY($y);
         
         if ($tariff->filename_custom != null) {
-            $this->pdf->Image($image_tariff_custom, $x + $margin - 2, $y + $margin - 4, 130, 60);
+            $this->pdf->Image($image_tariff_custom, $x + $margin + 2, $y + $margin - 1, 88, 57);
         } else {
             $this->pdf->Image($image_zoom, $x + $margin + 2, $y + $margin + 5, 50, 50);
         $this->pdf->SetY($y + 8);
@@ -336,9 +336,9 @@ class Ticket {
                 mb_strimwidth(($ticket->last_name == null ? '' : $ticket->last_name), 0, $max_width, "..."));
         }
 
-        $this->pdf->Code128($x + 105, $y + 33, $ticket->barcode, 30, 24);
+        $this->pdf->Code128($x + 98, $y + 3, $ticket->barcode, 58, 12);
         QRcode::png(PRESTA_URL . "/index.php?id_product=" . $tariff->id_prod_extern . "&id_product_attribute=0&rewrite=&controller=product&num=" . $ticket->barcode, $file_name_qrcode, 0, 3);
-        $this->pdf->Image($file_name_qrcode, $x + 103, $y + 5, 35, 35);
+        $this->pdf->Image($file_name_qrcode, $x + 110, $y + 17, 29, 29);
 
 
         $this->pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);

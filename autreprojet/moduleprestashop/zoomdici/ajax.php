@@ -18,13 +18,14 @@ switch ($action) {
             $product = new Product();
             $product->id_tax_rules_group = (int) $_POST['id_tax'];
             // définition du produit
-            $product->name = $_POST['label'];
+            $product->name = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['label']);
             $product->price = $_POST['price'];
             $product->category = array($_POST['id_categ_extern']);
             $product->id_category_default = $_POST['id_categ_extern'];
             $product->description_short = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['label']);
             $product->quantity = intVal($_POST['number_place']);
             $product->redirect_type = '404';
+            $product->link_rewrite = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['label']);
             $return = $product->add();
             $product->updateCategories($product->category, true);
             if ($product->id > 0) {

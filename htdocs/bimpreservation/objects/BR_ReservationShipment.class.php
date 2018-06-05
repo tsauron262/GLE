@@ -251,6 +251,47 @@ class BR_reservationShipment extends BimpObject
             return $errors;
         }
 
+        // Remise en stock:
+        if ((int) $shipment->getData('status') === 2) {
+            $ref_commande = $commande->dol_object->ref;
+
+            // Traitement des stocks et emplacement: 
+            if ((int) $this->getData('id_equipment')) {
+                $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                $place_errors = $place->validateArray(array(
+                    'id_equipment' => (int) $this->getData('id_equipment'),
+                    'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                    'id_entrepot'  => (int) $shipment->getData('id_entrepot'),
+                    'infos'        => 'Retrait de l\'expédition n°' . $shipment->getData('num_livraison') . ' pour la commande "' . $ref_commande . '"',
+                    'date'         => date('Y-m-d H:i:s'),
+                    'code_mvt'     => dol_print_date(dol_now(), '%y%m%d%H%M%S')
+                ));
+
+                if (!count($place_errors)) {
+                    $place_errors = $place->create();
+                }
+
+                if (count($place_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement d\'ID ' . $this->getData('id_equipment'));
+                }
+            } else {
+                $product = $this->getChildObject('product');
+                if (!BimpObject::objectLoaded($product)) {
+                    $errors[] = 'Aucun produit trouvé pour la ligne d\'expédition d\'ID ' . $this->id;
+                } else {
+                    if ($product->isSerialisable()) {
+                        $errors[] = 'Numéro de série obligatoire pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ')';
+                    } else {
+                        global $user;
+                        $stock_label = 'Retrait de l\'expédition n°' . $shipment->getData('num_livraison') . ' pour la commande "' . $ref_commande . '"';
+                        if ($product->dol_object->correct_stock($user, (int) $shipment->getData('id_entrepot'), $qty, 0, $stock_label, 0, dol_print_date(dol_now(), '%y%m%d%H%M%S'), 'commande', (int) $this->getData('id_commande_client')) <= 0) {
+                            $errors[] = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités à ajouter: ' . $qty . ')';
+                        }
+                    }
+                }
+            }
+        }
+
         if (!$removeFromOrder) {
             // Mise à jour des réservations: 
             $up_qty_errors = $this->updateReservationsQty(-$qty);
@@ -297,47 +338,6 @@ class BR_reservationShipment extends BimpObject
 
             if (count($avoir_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Echec de l\'ajout à l\'avoir');
-            }
-        }
-
-        // Remise en stock:
-        if ((int) $shipment->getData('status') === 2 && !$defective) {
-            $ref_commande = $commande->dol_object->ref;
-
-            // Traitement des stocks et emplacement: 
-            if ((int) $this->getData('id_equipment')) {
-                $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                $place_errors = $place->validateArray(array(
-                    'id_equipment' => (int) $this->getData('id_equipment'),
-                    'type'         => BE_Place::BE_PLACE_ENTREPOT,
-                    'id_entrepot'  => (int) $shipment->getData('id_entrepot'),
-                    'infos'        => 'Retrait de l\'expédition n°' . $shipment->getData('num_livraison') . ' pour la commande "' . $ref_commande . '"',
-                    'date'         => date('Y-m-d H:i:s'),
-                    'code_mvt'     => dol_print_date(dol_now(), '%y%m%d%H%M%S')
-                ));
-
-                if (!count($place_errors)) {
-                    $place_errors = $place->create();
-                }
-
-                if (count($place_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement d\'ID ' . $this->getData('id_equipment'));
-                }
-            } else {
-                $product = $this->getChildObject('product');
-                if (!BimpObject::objectLoaded($product)) {
-                    $errors[] = 'Aucun produit trouvé pour la ligne d\'expédition d\'ID ' . $this->id;
-                } else {
-                    if ($product->isSerialisable()) {
-                        $errors[] = 'Numéro de série obligatoire pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ')';
-                    } else {
-                        global $user;
-                        $stock_label = 'Retrait de l\'expédition n°' . $shipment->getData('num_livraison') . ' pour la commande "' . $ref_commande . '"';
-                        if ($product->dol_object->correct_stock($user, (int) $shipment->getData('id_entrepot'), $qty, 0, $stock_label, 0, dol_print_date(dol_now(), '%y%m%d%H%M%S'), 'commande', (int) $this->getData('id_commande_client')) <= 0) {
-                            $errors[] = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités à ajouter: ' . $qty . ')';
-                        }
-                    }
-                }
             }
         }
 

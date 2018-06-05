@@ -131,4 +131,6 @@ class Bimp_Facture extends BimpObject
         } else
             return -1;
     }
+    
+    
 }

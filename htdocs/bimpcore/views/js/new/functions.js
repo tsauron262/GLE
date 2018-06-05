@@ -219,6 +219,12 @@ function setCommonEvents($container) {
             e.stopPropagation();
         });
     });
+    $container.find('.displayProductStocksBtn').each(function () {
+        $(this).click(function (e) {
+            e.stopPropagation();
+            displayProductStocks($(this), $(this).data('id_product'), $(this).data('id_entrepot'));
+        });
+    });
 }
 
 function setDisplayPopupButtonEvents($button) {

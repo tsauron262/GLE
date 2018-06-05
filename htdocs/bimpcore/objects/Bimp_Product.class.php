@@ -52,7 +52,7 @@ class Bimp_Product extends BimpObject
             'reel'           => 0,
             'commandes'      => 0, // qté en commande fournisseur
             'dispo'          => 0, // Stock réel - réel réservés
-            'virtuel'        => 0, // reel - reel_reserves + commandes
+            'virtuel'        => 0, // reel - total_reserves + commandes
             'total_reserves' => 0, // Réservations du statut 0 à - de 300
             'reel_reserves'  => 0, // Réservations du statut 200 à - de 300
         );
@@ -98,10 +98,11 @@ class Bimp_Product extends BimpObject
             'rowid', 'label'
         ));
 
+
         if (!is_null($rows)) {
             foreach ($rows as $r) {
-                $stocks = $this->getStocksForEntrepot((int) $r['id']);
-                $this->stocks[(int) $r['id']] = array(
+                $stocks = $this->getStocksForEntrepot((int) $r['rowid']);
+                $this->stocks[(int) $r['rowid']] = array(
                     'entrepot_label' => $r['label'],
                     'reel'           => $stocks['reel'],
                     'dispo'          => $stocks['dispo'],
@@ -119,17 +120,89 @@ class Bimp_Product extends BimpObject
         if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('ID du produit absent');
         }
-        
+
         if (is_null($this->stocks)) {
             $this->fetchStocks();
         }
 
         $html = '';
-        
-        $html .= '<div class="productStocksContainer" data-id_product="'.$this->id.'">';
-                
+
+        $html .= '<div class="productStocksContent" data-id_product="' . $this->id . '">';
+        $html .= '<h3><i class="fas fa5-box-open iconLeft"></i>Stocks produit ' . $this->getData('ref') . '</h3>';
+        $html .= '<div class="stockSearchContainer">';
+        $html .= '<i class="fa fa-search iconLeft"></i>';
+        $html .= BimpInput::renderInput('text', 'stockSearch', '');
         $html .= '</div>';
-        
+        $html .= '<table class="productStockTable bimp_list_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>Entrepôt</th>';
+        $html .= '<th>Réel</th>';
+        $html .= '<th>Dispo</th>';
+        $html .= '<th>Virtuel</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $html .= '<tbody>';
+
+        if (!is_null($id_entrepot) && isset($this->stocks[(int) $id_entrepot])) {
+            $html .= '<tr class="currentEntrepot">';
+            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['entrepot_label'] . '</td>';
+            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['reel'] . '</td>';
+            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['dispo'] . '</td>';
+            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['virtuel'] . '</td>';
+            $html .= '</tr>';
+        }
+
+        foreach ($this->stocks as $id_ent => $stocks) {
+            if (!is_null($id_entrepot) && ((int) $id_entrepot === (int) $id_ent)) {
+                continue;
+            }
+            $html .= '<tr>';
+            $html .= '<td>' . $stocks['entrepot_label'] . '</td>';
+            $html .= '<td>' . $stocks['reel'] . '</td>';
+            $html .= '<td>' . $stocks['dispo'] . '</td>';
+            $html .= '<td>' . $stocks['virtuel'] . '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public function getNomExtraIcons($id_entrepot = null)
+    {
+        if ($this->isLoaded()) {
+            return self::getStockIconStatic($this->id, $id_entrepot);
+        }
+        return '';
+    }
+
+    public static function getStockIconStatic($id_product, $id_entrepot = null)
+    {
+        if (is_null($id_entrepot)) {
+            if (BimpTools::isSubmit('id_entrepot')) {
+                $id_entrepot = BimpTools::getValue('id_entrepot');
+            } elseif (BimpTools::isSubmit('param_list_filters')) {
+                $filters = json_decode(BimpTools::getValue('param_list_filters', array()));
+                foreach ($filters as $filter) {
+                    if ($filter->name === 'id_commande_client') {
+                        $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $filter->filter);
+                        if (BimpObject::objectLoaded($commande)) {
+                            $id_entrepot = (int) $commande->dol_object->array_options['options_entrepot'];
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        $html = '<span class="objectIcon displayProductStocksBtn" title="Stocks" data-id_product="' . $id_product . '" data-id_entrepot="' . (int) $id_entrepot . '"><i class="fas fa5-box-open"></i></span>';
+        $html .= '<div class="productStocksContainer hideOnClickOut" id="product_' . $id_product . '_stocks_popover_container"></div>';
+
         return $html;
     }
 }

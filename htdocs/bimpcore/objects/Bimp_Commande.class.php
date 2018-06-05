@@ -150,7 +150,7 @@ class Bimp_Commande extends BimpObject
                         $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des éléments de la logistique');
                     }
                 }
-                
+
                 $this->checkIsFullyShipped();
                 $this->checkIsFullyInvoiced();
             }
@@ -382,7 +382,6 @@ class Bimp_Commande extends BimpObject
             }
         }
 
-        $commande->array_options['options_entrepot'] = 0;
         $commande->array_options['options_type'] = 'R';
         if ($facture->createFromCommande($commande) <= 0) {
             $msg = 'Echec de la création de la facture';
@@ -404,7 +403,7 @@ class Bimp_Commande extends BimpObject
         $facture->dol_object->generateDocument('bimpfact', $langs);
 
         $this->fetch($this->id);
-        
+
         if ($id_shipment) {
             $shipment->set('id_facture', (int) $facture->id);
             if ((int) $shipment->getData('status') !== 2) {
@@ -449,12 +448,16 @@ class Bimp_Commande extends BimpObject
             $avoir->date = dol_now();
             $avoir->socid = $this->dol_object->socid;
             $avoir->type = Facture::TYPE_CREDIT_NOTE;
+            $avoir->origin = $this->dol_object->element;
+            $avoir->origin_id = $this->dol_object->id;
             $avoir->array_options['options_type'] = 'R';
-            $avoir->array_options['options_entrepot'] = 1;
+            $avoir->array_options['options_entrepot'] = $this->dol_object->array_options['options_entrepot'];
 
             if (!is_null($id_facture_source)) {
                 $avoir->fk_facture_source = $id_facture_source;
             }
+
+            $avoir->linked_objects[$avoir->origin] = $avoir->origin_id;
 
             if ($avoir->create($user) <= 0) {
                 $avoir_errors = BimpTools::getErrorsFromDolObject($avoir, null, $langs);
@@ -551,7 +554,7 @@ class Bimp_Commande extends BimpObject
         return $errors;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionRemoveOrderLines($data, &$success)
     {

@@ -227,6 +227,7 @@ lists:
         cols:
             commande: 
                 field: id_commande_client
+                display: nom_url
             num_livraison:
                 label: N°
                 field: num_livraison

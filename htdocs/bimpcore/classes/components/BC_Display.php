@@ -139,6 +139,9 @@ class BC_Display extends BimpComponent
                                         }
                                         unset($card);
                                     }
+                                    if (!$this->no_html && method_exists($instance, 'getNomExtraIcons')) {
+                                        $html .= $instance->getNomExtraIcons();
+                                    }
                                     break;
 
                                 case 'nom_url':
@@ -168,6 +171,9 @@ class BC_Display extends BimpComponent
                                         $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
                                         $html .= '<i class="fa fa-eye"></i>';
                                         $html .= '</span>';
+                                    }
+                                    if (!$this->no_html && method_exists($instance, 'getNomExtraIcons')) {
+                                        $html .= $instance->getNomExtraIcons();
                                     }
                                     break;
                             }

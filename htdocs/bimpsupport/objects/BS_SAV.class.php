@@ -1528,7 +1528,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             if (!count($errors)) {
                 global $user, $langs;
                 $this->addNote('Diagnostic commencé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
-                $this->set('id_user_tech', (int) $user->id);
+                $this->updateField('id_user_tech', (int) $user->id);
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
                     $warnings = array_merge($warnings, $this->sendMsg('debDiago'));
@@ -1601,7 +1601,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             }
 
             if (!(int) $this->getData('id_user_tech')) {
-                $this->set('id_user_tech', $user->id);
+                $this->updateField('id_user_tech', (int) $user->id);
             }
 
             if (isset($data['send_msg']) && (int) $data['send_msg']) {

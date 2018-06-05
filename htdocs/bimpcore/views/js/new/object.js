@@ -273,3 +273,44 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
         });
     }
 }
+
+function displayProductStocks($button, id_product, id_entrepot) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    $('.productStocksContainer').each(function () {
+        $(this).html('').hide();
+    });
+
+    var $container = $button.parent().find('#product_' + id_product + '_stocks_popover_container');
+
+    $container.show();
+
+    BimpAjax('loadProductStocks', {
+        id_product: id_product,
+        id_entrepot: id_entrepot
+    }, $container, {
+        url: dol_url_root + '/bimpcore/index.php',
+        $button: $button,
+        display_processing: true,
+        display_success: false,
+        processing_msg: 'Chargement',
+        processing_padding: 10,
+        append_html: true,
+        success: function (result, bimpAjax) {
+            bimpAjax.$resultContainer.find('input[name="stockSearch"]').keyup(function (e) {
+                var search = $(this).val();
+                var regex = new RegExp(search, 'i');
+                bimpAjax.$resultContainer.find('.productStockTable').children('tbody').children('tr').each(function () {
+                    var label = $(this).children('td:first-child').text();
+                    if (regex.test(label)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+        }
+    });
+}

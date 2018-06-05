@@ -29,6 +29,8 @@ class commandeController extends reservationController
             return BimpRender::renderAlerts('Cette commande doit etre validée pour accéder à cet onglet');
         }
 
+        $_GET['id_entrepot'] = (int) $commande->dol_object->array_options['options_entrepot'];
+
         $html = '';
 
         $html .= '<div class="page_content container-fluid">';

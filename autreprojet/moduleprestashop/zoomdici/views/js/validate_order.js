@@ -33,7 +33,7 @@ function getField(ids_prods, products) {
                         });
                         printFields(tariff, qty);
                     });
-                    $('<button class="btn btn-primary" name="validate_extra">Valider tous les tickets</button>').insertAfter('div[name=tariff]:last');
+                    $('<button class="btn btn-primary" name="validate_extra">Valider tous les tickets</button>').insertAfter('div#main_container');
                     fillTickets(out.tariffs);
                 } else
                     alert('Erreur serveur 4964');
@@ -269,12 +269,11 @@ function createTickets() {
  */
 
 $(document).ready(function () {
-
-    var id_order = parseInt($('p#order_id:first').text());
+    var id_order = parseInt(getUrlParameter('id_order'));
     if (id_order > 0) {
         checkOrderStatus(id_order);
     } else {
-        $('section#content-hook_order_confirmation').append(
+        $('#main_container').append(
                 '<div class="alert alert-danger"><strong style="font-size: 16px; text-aligne: center">' +
                 '<img src="img/admin/error2.png" style="width: 16px; height: 16px; margin-bottom: 4px"> ' +
                 'Les tickets ne seront disponibles qu\'une fois que le paiement sera effectué.</strong>' +
@@ -492,3 +491,16 @@ function addText(ticket, ticket_element) {
         }
     }
 }
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};

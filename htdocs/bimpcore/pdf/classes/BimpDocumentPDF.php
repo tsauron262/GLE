@@ -64,12 +64,11 @@ class BimpDocumentPDF extends BimpModelPDF
 
         if(method_exists($this->object, 'fetch_optionals')){
             $this->object->fetch_optionals();
-            if(isset($this->object->array_options['entrepot'])){
+            if(isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0){
                 $entrepot = new Entrepot($this->db);
-                $entrepot->fetch($this->object->array_options['entrepot']);
-                print_r($this->object);die;
+                $entrepot->fetch($this->object->array_options['options_entrepot']);
                 $mysoc->zip = $entrepot->zip;
-                $mysoc->adress = $entrepot->address;
+                $mysoc->address = $entrepot->address;
                 $mysoc->town = $entrepot->town;
             }
         }

@@ -295,37 +295,35 @@ class Ticket {
         $event->fetch($ticket->id_event);
 
         $file_name_qrcode = PATH . '/img/qrcode/qrcode' . $ticket->id . '.png';
-        $image_event = $this->addExtension(PATH . '/img/event/' . $ticket->id_event);
-        $image_tariff = $this->addExtension(PATH . '/img/event/' . $ticket->id_event . '_' . $ticket->id_tariff);
+//        $image_event = $this->addExtension(PATH . '/img/event/' . $ticket->id_event);
+//        $image_tariff = $this->addExtension(PATH . '/img/event/' . $ticket->id_event . '_' . $ticket->id_tariff);
+        $image_zoom = PATH . '/img/zoomdici.jpg';
+        $image_tariff_custom = $this->addExtension(PATH . '/img/tariff_custom/' . $ticket->id_event . '_' . $ticket->id_tariff);
 
         if ($is_first) {
             $this->pdf = new PDF_Code128();
             $this->pdf->AddPage();
-            $this->pdf->SetFont('Arial', 'B', 10);
+            $this->pdf->SetFont('times', '', 12);
         }
 
         $this->pdf->SetX($x);
         $this->pdf->SetY($y);
 
-        $this->pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
 
-//        try {   // set tariff image
-//            @$this->pdf->Image($image_tariff, $x + $margin + 1, $y + $margin, 30, 30);
-//        } catch (Exception $e) { // set event image
-//            $this->pdf->Image($image_event, $x + $margin + 1, $y + $margin, 30, 30);
-//        }
+        if ($tariff->filename_custom != null) {
+            $this->pdf->Image($image_tariff_custom, $x + $margin + 2, $y + $margin, 30, 30);
+        } else {
+            $this->pdf->Image($image_zoom, $x + $margin + 2, $y + $margin, 30, 30);
+        }
 
         $this->pdf->Code128($x + 75, $y + 20, $ticket->barcode, 15, 15);
 
-        $tariff = new tariff($this->db);
-        $tariff->fetch($ticket->id_tariff);
-        
-        QRcode::png($ticket->barcode . "\nhttps://www.google.fr/", $file_name_qrcode, 0, 3);
+        QRcode::png(URL_PRESTA . "/index.php?id_product=" . $tariff->id_prod_extern . "&id_product_attribute=0&rewrite=&controller=product&num=" . $ticket->barcode, $file_name_qrcode, 0, 3);
         $this->pdf->Image($file_name_qrcode, $x + 75, $y + 5, 15, 15);
 
         $this->pdf->SetY($y + 8);
-        $this->pdf->SetX($x + 20);
-        
+        $this->pdf->SetX($x + 40);
+
         $max_width = 23;
 
         $this->pdf->MultiCell(40, 4, mb_strimwidth($event->label, 0, $max_width, "...") . "\n" .
@@ -333,7 +331,7 @@ class Ticket {
                 mb_strimwidth(($ticket->first_name == null ? '' : $ticket->first_name), 0, $max_width, "...") . "\n" .
                 mb_strimwidth(($ticket->last_name == null ? '' : $ticket->last_name), 0, $max_width, "..."));
 
-        echo "OK";
+        $this->pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
 
         if ($is_last)
             $this->pdf->Output(PATH . '/img/tickets/ticket' . base64_encode($id_order) . '.pdf', 'F');

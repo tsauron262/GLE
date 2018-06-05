@@ -29,8 +29,8 @@ print '<input type="password" class="form-control" placeholder="Mot de passe" na
 
 print '<button class="btn btn-primary" name="connect" style="margin-right: 40px">Se connecter</button>';
 print '<input type="button" class="btn btn-primary" value="S\'inscrire" onClick="document.location.href=\'register.php\'"/>';
-print '</fieldset>';
 print '<div id="alertSubmit"></div>';
+print '</fieldset>';
 print '</body>';
 
 

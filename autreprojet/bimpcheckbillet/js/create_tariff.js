@@ -58,15 +58,8 @@ function createTariff() {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                setMessage('alertSubmit', 'Tariff créer.', 'msg');
-                $('input[name=label]').val('');
-                $('input[name=price]').val('');
-                $('input[name=number_place]').val('');
-                $('input[name=file]').val('');
-                $('input[name=date_start]').val('');
-                $('input[name=date_end]').val('');
-                $('#img_display').attr('src', '');
-
+                alert("Le tarif a été créée.");
+                window.location.replace('modify_tariff.php');
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 1853.', 'error');
             }
@@ -99,6 +92,11 @@ function initEvents() {
         readURL(this, '#img_display');
     });
 
+    $("#custom_img").change(function () {
+        readURL(this, '#custom_img_display');
+    });
+
+
     $('#create_form').submit(function (e) {
         e.preventDefault();
         if (window.FormData !== undefined) {
@@ -107,6 +105,14 @@ function initEvents() {
             alert('Navigateur non compatible');
         }
         return false;
+    });
+
+    $('input[name=input_cust_img]').change(function () {
+        if (parseInt($(this).val()) === 1) { // use custome image
+            $('div#div_custom_img').css('display', 'inline');
+        } else {
+            $('div#div_custom_img').css('display', 'none');
+        }
     });
 }
 

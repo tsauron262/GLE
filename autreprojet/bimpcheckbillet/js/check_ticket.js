@@ -32,11 +32,15 @@ function getEvents() {
                     no_results_text: 'Pas de résultat'});
                 $('#barcode').on('keyup', function (e) {
                     if (e.keyCode === 13) {
-                        checkTicket($('#barcode').val().substring(0, 32), $('select[name=event] > option:selected').val());
+                        var url_string = $('#barcode').val();
+                        var url = new URL(url_string);
+                        var barcode = url.searchParams.get('num');
+                        checkTicket(barcode, $('select[name=event] > option:selected').val());
                         $('#barcode').val("");
                     }
                 });
                 $('select[name=event]').change(function () {
+                    $('input#cntEntry').val(0);
                     changeEventSession($('select[name=event] > option:selected').val());
                 });
                 if (id_event_session > 0) {
@@ -89,6 +93,7 @@ function checkTicket(barcode, id_event) {
             } else {
                 if (sound === 1)
                     document.querySelector("#beepSound").play();
+                $('input#cntEntry').val(parseInt($('input#cntEntry').val()) + 1);
                 displayNoErrors(barcode);
             }
         }
@@ -101,7 +106,7 @@ $(document).ready(function () {
     $('button#showHistory').click(function () {
         toggleHistory();
     });
-    $('label[name=sound]').click(function() {
+    $('label[name=sound]').click(function () {
         var input = $(this).find('input');
         sound = parseInt(input.val());
         $(this).removeClass('focus');

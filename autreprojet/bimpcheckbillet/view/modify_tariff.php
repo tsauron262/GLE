@@ -60,7 +60,6 @@ print '<legend><span>Modifier tarif<span></legend>';
 if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff == 0) {
     print '<p>Vous n\'avez pas les droit requis pour créer un tariff</p>';
 } else {
-
 //    print '<form id="create_form" action="../interface.php" method="post" enctype="multipart/form-data" >';
     print '<form id="modify_form" method="post" >';
     print '<input name="action" value="create_tariff" style="display: none;"/>';
@@ -74,6 +73,23 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<p name="product_already_created" style="display: none">Ce tarif correspond déjà à un produit prestashop</p>';
     print '<p name="select_tariff" style="display: inline">Sélectionnez un tarif pour créer un produit prestashop</p>';
     print '<div class="btn btn-primary" name="create_prestashop_product" style="display: none">Creér produit prestashop</div><br/><br/>';
+    
+    print '<div class="btn btn-primary" name="toggle_active">Activer/désactiver produit </div><br/><br/>';
+
+    print '<br/><div id="div_tax" style="'
+            . 'display: none;'
+            . 'border: 1px solid #c2c2c2;'
+            . 'border-radius: 8px;'
+            . 'box-shadow: 0 1px 10px rgba(0,0,0,.5);'
+            . 'padding: 10px;">';
+    print '<label >Taxe </label><br/>';
+    print '<div id="container_tax" class="btn-group btn-group-toggle" data-toggle="buttons">';
+    print '<label class="btn btn-primary active"><input value=1 type="radio" name="tax">20%</label>';
+    print '<label class="btn btn-primary">       <input value=2 type="radio" name="tax">10%</label>';
+    print '<label class="btn btn-primary">       <input value=3 type="radio" name="tax">5.5%</label>';
+    print '</div><br/><br/>';
+    print '<div class="btn btn-primary" id="conf_create_prestashop_category">Confirmer création catégorie prestashop</div>';
+    print '</div><br/>';
 
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
@@ -84,8 +100,11 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="number_place">Nombre de place </label>';
     print '<input class="form-control bfh-number" name="number_place" step="1" type="number" min="0" style="width: 120px"/><br/>';
 
-    print '<label for="img_display">Image </label><br/>';
+    print '<label for="img_display">Image</label><br/>';
     print '<img id="img_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
+
+    print '<label for="img_display">Image sur les tickets</label><br/>';
+    print '<img id="img_custom_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
 
     print '<label for="event">Exiger nom et prénom </label><br/>';
     print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';

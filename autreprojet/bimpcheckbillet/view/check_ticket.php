@@ -13,12 +13,18 @@ print '<legend><span>Valider ticket</span></legend>';
 print '<label for="event">Evènement </label><br/>';
 print '<select class="chosen-select" name="event"><option></option></select><br/><br/>';
 
-print '<label>Son</label><br/>
+print '<table><tr>';
+print '<th>Son</th>';
+print '<th style="width: 150px"></th>';
+print '<th>Nombre de ticket scanné</th></tr>';
+print '<tr><td>
 <div class="btn-group btn-group-toggle" data-toggle="buttons">
     <label name="sound" class="btn btn-primary">        <input name="sound" value=0 type="radio"/>Sans</label>
     <label name="sound" class="btn btn-primary active"> <input name="sound" value=1 type="radio"/>Avec</label>
-</div>';
-        
+</div></td><td></td>';
+
+print '<td><input id="cntEntry" value=0 disabled style="width: 100px"/></td></tr></table>';
+
 print '
         <canvas></canvas>
         <ul></ul>
@@ -58,7 +64,7 @@ print '
 
     <button id="showHistory" class="btn btn-primary" style="float: left">Voir l\'historique</button><br/><br/>
 
-    <div id="history" toggled="false" style="text-align: left; display: block; height: 100px; width: 520px; overflow: hidden; border: 1px solid black;">
+    <div id="history" toggled="false" style="padding: 5px; text-align: left; display: block; height: 100px; width: 520px; overflow: hidden; border: 1px solid black;">
     </div>
 </div>
        

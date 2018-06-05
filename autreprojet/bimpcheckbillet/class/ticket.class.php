@@ -318,7 +318,7 @@ class Ticket {
 
         $this->pdf->Code128($x + 75, $y + 20, $ticket->barcode, 15, 15);
 
-        QRcode::png(URL_PRESTA . "/index.php?id_product=" . $tariff->id_prod_extern . "&id_product_attribute=0&rewrite=&controller=product&num=" . $ticket->barcode, $file_name_qrcode, 0, 3);
+        QRcode::png(PRESTA_URL . "/index.php?id_product=" . $tariff->id_prod_extern . "&id_product_attribute=0&rewrite=&controller=product&num=" . $ticket->barcode, $file_name_qrcode, 0, 3);
         $this->pdf->Image($file_name_qrcode, $x + 75, $y + 5, 15, 15);
 
         $this->pdf->SetY($y + 8);

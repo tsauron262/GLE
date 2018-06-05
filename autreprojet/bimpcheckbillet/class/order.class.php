@@ -35,7 +35,7 @@ class Order {
         }
 
         $sql = 'SELECT product_id, product_price, product_quantity';
-        $sql.= ' FROM ps_order_detail';
+        $sql.= ' FROM '.PRESTA_PREF.'order_detail';
         $sql.= ' WHERE id_order=' . $id_order;
 
         $result = $this->db->query($sql);
@@ -63,7 +63,7 @@ class Order {
     private function getNumberTicketSold($id_order) {
 
         $sql = 'SELECT SUM(product_quantity) as qty';
-        $sql.= ' FROM ps_order_detail';
+        $sql.= ' FROM '.PRESTA_PREF.'order_detail';
         $sql.= ' WHERE id_order=' . $id_order;
 
         $result = $this->db->query($sql);

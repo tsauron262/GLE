@@ -344,8 +344,8 @@ function initEvents() {
         tariffs.forEach(function (tariff) {
             if (tariff.id === id_tariff) {
                 id_prod_extern = tariff.id_prod_extern;
-                $('img#img_display').attr('src', URL_CHECK + '/img/event/' + tariff.filename);
-                $('img#img_custom_display').attr('src', URL_CHECK + '/img/tariff_custom/' + tariff.filename_custom);
+                $('img#img_display').attr('src', '../img/event/' + tariff.filename);
+                $('img#img_custom_display').attr('src', '../img/tariff_custom/' + tariff.filename_custom);
             }
         });
 

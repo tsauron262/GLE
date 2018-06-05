@@ -43,12 +43,19 @@ class ZoomDici extends Module {
     public function hookDisplayOrderConfirmation($params) {
         $this->context->controller->addJS($this->_path . 'views/js/validate_order.js');
         $this->context->controller->addCSS($this->_path . 'views/css/validate_order.css');
-        $products = $params['order']->getProducts();
+        if(isset($params['objOrder']))
+            $order = $params['objOrder'];
+        else
+            $order = $params['order'];
+         $products = $order->getProducts();
 
-        $html = '';
+        $script = '<script>var id_order = "'.$order->id.'"; var id_prods = new Array(); var products = new Array();';
+        $html = "<div id='zoneRetour'></div>";
 
         foreach ($products as $product) {
-            if (Db::getInstance()->getValue('SELECT valid FROM ps_orders WHERE id_order=' . $product['id_order']) == '1') {
+            $script .= "id_prods.push(".$product['product_id'].");";
+            $script .= "products.push({id: ".$product['product_id'].", qty: ".$product['product_quantity']."});";
+            if (!Db::getInstance()->getValue('SELECT valid FROM ps_orders WHERE id_order=' . $product['id_order']) == '1') {
                 $this->context->smarty->assign(
                         array(
                             'my_module_name' => Configuration::get('MYMODULE_NAME'),
@@ -65,7 +72,9 @@ class ZoomDici extends Module {
                 $html .= $this->display(__FILE__, 'zoomdici.tpl');
             }
         }
-        return $html;
+        $script .= "console.log(products);</script>";
+        
+        return $script . $html;
     }
 
     public function hookHeader() {

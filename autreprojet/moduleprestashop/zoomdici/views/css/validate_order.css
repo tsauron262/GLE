@@ -2,6 +2,7 @@ div[name=tariff] {
     margin-bottom: 10px;
     border: 1px solid #c2c2c2;
     padding: 20px;
+     background: white;
 }
 
 div[name=ticket] {

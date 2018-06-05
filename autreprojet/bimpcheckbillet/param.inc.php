@@ -21,3 +21,5 @@ define('IS_MAIN_SERVER', true);
 
 define('PRESTA_URL', "http://localhost/zoom");
 
+define('PRESTA_PREF', "ps_");
+

@@ -15,7 +15,7 @@ $tabProdJ = array("V" => array(15,16, 13),
 
 
 if(isset($_REQUEST['modeReset'])){
-		$sql = "UPDATE `ps_tickets` SET `dateEntreeV` = '0000-00-00', `dateEntreeS` = '0000-00-00';";
+		$sql = "UPDATE `".PRESTA_PREF."tickets` SET `dateEntreeV` = '0000-00-00', `dateEntreeS` = '0000-00-00';";
 
 		$result = $conn->query($sql);
 		die("RESET OK");
@@ -26,7 +26,7 @@ if(isset($_REQUEST['modeReset'])){
 $sql2 = "SELECT t.*, cli.firstname, cli.lastname , cli.email, c.reference, cd.product_name, 
 c.id_order, c.valid, c.current_state, cd.product_id, t.code, t.codeBar
 
-FROM ps_tickets t, ps_order_detail cd, ps_orders c, ps_customer cli
+FROM ".PRESTA_PREF."tickets t, ".PRESTA_PREF."order_detail cd, ".PRESTA_PREF."orders c, ".PRESTA_PREF."customer cli
 
 WHERE cli.id_customer = c.id_customer AND c.id_order = cd.id_order AND cd.id_order_detail = t.id_order_details
 
@@ -83,7 +83,7 @@ input{
 	}
 	elseif($dataSql2["dateEntree".$champDate] < "2017-01-01"){
 
-		$sql = "UPDATE `ps_tickets` SET `dateEntree".$champDate."` = now() WHERE `code` = '".$codeBill."';";
+		$sql = "UPDATE `".PRESTA_PREF."tickets` SET `dateEntree".$champDate."` = now() WHERE `code` = '".$codeBill."';";
 
 		$result = $conn->query($sql);
 	}

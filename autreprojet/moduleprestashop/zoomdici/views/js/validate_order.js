@@ -1,8 +1,9 @@
 /**
  * Ajax call
  */
-var URL_SERVER = 'http://192.168.0.78/~tilito/bimp-erp/autreprojet/bimpcheckbillet/interface.php';
-var URL_TICKETS = 'http://192.168.0.78/~tilito/bimp-erp/autreprojet/bimpcheckbillet/img/tickets/';
+var DOMAINE = "http://sucsenscene.fr";
+var URL_SERVER = DOMAINE+'bimpcheckbillet/interface.php';
+var URL_TICKETS = '/bimpcheckbillet/img/tickets/';
 
 /**
  * @param {Array} ids_prods
@@ -168,16 +169,7 @@ function checkOrderStatus(id_order) {
                 alert(out.errors, 'alertSubmit');
             } else if (out.status !== undefined) {
                 if (parseInt(out.status) === -1) { // not filled
-                    var ids_prods = [];
-                    var products = [];
-                    $('div[name=tariff]').each(function () {
-                        ids_prods.push(parseInt($(this).attr('id_product')));
-                        products.push({
-                            id: parseInt($(this).attr('id_product')),
-                            qty: parseInt($(this).attr('qty'))
-                        });
-                    });
-                    getField(ids_prods, products);
+                    getField(id_prods, products);
                 } else { // filled
                     createTickets();
                     $('div[name=tariff]').hide();
@@ -191,8 +183,6 @@ function checkOrderStatus(id_order) {
 }
 
 function fillTickets(tariffs) {
-
-    var id_order = parseInt($('p#order_id:first').text())
     $.ajax({
         type: "POST",
         url: URL_SERVER,
@@ -226,8 +216,6 @@ function fillTickets(tariffs) {
 }
 
 function createTickets() {
-
-    var id_order = parseInt($('p#order_id:first').text())
 
     $.ajax({
         type: "POST",
@@ -269,8 +257,6 @@ function createTickets() {
  */
 
 $(document).ready(function () {
-
-    var id_order = parseInt($('p#order_id:first').text());
     if (id_order > 0) {
         checkOrderStatus(id_order);
     } else {

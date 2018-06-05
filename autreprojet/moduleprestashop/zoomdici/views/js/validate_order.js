@@ -2,8 +2,8 @@
  * Ajax call
  */
 var DOMAINE = "http://192.168.0.78/~tilito/bimp-erp/autreprojet";
-var URL_SERVER = DOMAINE+'bimpcheckbillet/interface.php';
-var URL_TICKETS = '/bimpcheckbillet/img/tickets/';
+var URL_SERVER = DOMAINE+'/bimpcheckbillet/interface.php';
+var URL_TICKETS = DOMAINE+'/bimpcheckbillet/img/tickets/';
 
 /**
  * @param {Array} ids_prods
@@ -170,6 +170,7 @@ function checkOrderStatus(id_order) {
             } else if (out.status !== undefined) {
                 if (parseInt(out.status) === -1) { // not filled
                     getField(id_prods, products);
+                    createTickets();
                 } else { // filled
                     createTickets();
                     $('div[name=tariff]').hide();
@@ -203,8 +204,8 @@ function fillTickets(tariffs) {
                     fillPreviousTickets(tariffs, out.tickets);
                     var selector = $('div[name=ticket]').not('[previously_filled]');
                     selector.append('<button class="btn btn-primary" name="validate_one" style="margin-bottom: 10px;">Valider uniquement ce ticket</button><br/>');
-                    $('<button class="btn btn-primary" name="create_tickets" style="margin: 0px 20px 0px 20px;">Générer les tickets</button>').insertAfter('div[name=tariff]:last');
-                    $('<img id="loading" src="img/loader.gif" style="display: none; width: 40px; height: 40px;">').insertAfter('div[name=tariff]:last');
+                    //$('<button class="btn btn-primary" name="create_tickets" style="margin: 0px 20px 0px 20px;">Générer les tickets</button>').insertAfter('div[name=tariff]:last');
+                    $('<img id="loading" src="img/loader.gif" style="display: none; width: 40px; height: 40px;">').appendTo('div[name=tariff]:last');
                     initEvents();
                     $('div[name=tariff]:first').prev().prev().before('<p>Merci de remplir les champs suivants pour obtenir vos tickets.<p>');
                 }
@@ -239,11 +240,13 @@ function createTickets() {
         success: function (json) {
             try {
                 var out = JSON.parse(json);
-                if (out.errors.length !== 0) {
-                    alert(out.errors);
-                } else if (true) {
-                    $('a[name=downloadTickets]').remove();
-                    $('<a class="btn btn-primary" name="downloadTickets" href="' + URL_TICKETS + 'ticket' + $('input#ticket_identifier').val() + '.pdf' + '" download >Télécharger Billets</a>').insertAfter('div[name=tariff]:last');
+                if(out.code_return != 0){
+                    if (out.errors.length !== 0) {
+                        alert(out.errors);
+                    } else if (true) {
+                        $('a[name=downloadTickets]').parent().remove();
+                        $('<div class="box"><a class="btn btn-primary" name="downloadTickets" href="' + URL_TICKETS + 'ticket' + $('input#ticket_identifier').val() + '.pdf' + '" download >Télécharger Billets</a></div>').insertAfter('div[name=tariff]:last');
+                    }
                 }
             } catch (e) {
                 alert('Erreur serveur 3741');

@@ -55,7 +55,7 @@ class ZoomDici extends Module {
         foreach ($products as $product) {
             $script .= "id_prods.push(".$product['product_id'].");";
             $script .= "products.push({id: ".$product['product_id'].", qty: ".$product['product_quantity']."});";
-            if (!Db::getInstance()->getValue('SELECT valid FROM ps_orders WHERE id_order=' . $product['id_order']) == '1') {
+            if (Db::getInstance()->getValue('SELECT valid FROM ps_orders WHERE id_order=' . $product['id_order']) == '1') {
                 $this->context->smarty->assign(
                         array(
                             'my_module_name' => Configuration::get('MYMODULE_NAME'),

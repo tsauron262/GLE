@@ -58,10 +58,22 @@ class BimpDocumentPDF extends BimpModelPDF
 
     protected function initHeader()
     {
-        global $conf;
+        global $conf, $mysoc;
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
 
+        if(method_exists($this->object, 'fetch_optionals')){
+            $this->object->fetch_optionals();
+            if(isset($this->object->array_options['entrepot'])){
+                $entrepot = new Entrepot($this->db);
+                $entrepot->fetch($this->object->array_options['entrepot']);
+                print_r($this->object);die;
+                $mysoc->zip = $entrepot->zip;
+                $mysoc->adress = $entrepot->address;
+                $mysoc->town = $entrepot->town;
+            }
+        }
+        
         $logo_height = 0;
         if (!file_exists($logo_file)) {
             $logo_file = '';

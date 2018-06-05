@@ -16,9 +16,7 @@ function createEvent() {
             } else if (parseInt(out.code_return) > 0) {
                 changeEventSession(parseInt(out.code_return));
                 alert("L'évènement a été créée.");
-                setTimeout(function () {
-                    window.location.replace('home.php');
-                }, 500);
+                window.location.replace('modify_event.php');
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 1853.', 'error');
             }
@@ -58,7 +56,6 @@ function initEvents() {
         } else {
             alert('pas compatible avec navigateur');
         }
-
         return false;
     });
 }

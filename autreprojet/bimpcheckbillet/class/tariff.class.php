@@ -13,6 +13,9 @@ class Tariff {
     public $date_start;
     public $date_end;
     public $require_names;
+    public $id_prod_extern;
+    public $filename;
+    public $filename_custom;
 
     public function __construct($db) {
         $this->db = $db;
@@ -61,6 +64,26 @@ class Tariff {
                 $this->require_extra_5 = intVal($obj->require_extra_5);
                 $this->require_extra_6 = intVal($obj->require_extra_6);
                 $this->id_prod_extern = intVal($obj->id_prod_extern);
+                $exts = array('bmp', 'png', 'jpg');
+                foreach ($exts as $ext) {
+                    if (file_exists(PATH . '/img/event/' . $obj->fk_event . '_' . $id . "." . $ext)) {
+                        $filename = $obj->fk_event . '_' . $id . "." . $ext;
+                    }
+                }
+                if ($filename == null) {
+                    foreach ($exts as $ext) {
+                        if (file_exists(PATH . '/img/event/' . $obj->fk_event . "." . $ext)) {
+                            $filename = $obj->fk_event . "." . $ext;
+                        }
+                    }
+                }
+                foreach ($exts as $ext) {
+                    if (file_exists(PATH . '/img/tariff_custom/' . $obj->fk_event . '_' . $id . "." . $ext)) {
+                        $filename_custom = $obj->fk_event . '_' . $id . "." . $ext;
+                    }
+                }
+                @$this->filename = $filename;
+                $this->filename_custom = $filename_custom;
                 return 1;
             }
         } else {
@@ -70,7 +93,7 @@ class Tariff {
         return -1;
     }
 
-    public function create($label, $price, $number_place, $id_event, $file, $require_names, $id_prod_extern, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
+    public function create($label, $price, $number_place, $id_event, $file, $custom_img, $use_custom_img, $require_names, $id_prod_extern, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
@@ -162,11 +185,22 @@ class Tariff {
             if ($last_insert_id > 0) {
                 $source = $file['tmp_name'];
                 $destination = PATH . '/img/event/' . $id_event . '_' . $last_insert_id . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
-                if (move_uploaded_file($source, $destination) == true)
-                    return $last_insert_id;
-                else {
+                if (move_uploaded_file($source, $destination) == true) {
+                    if ($use_custom_img) {
+                        $source = $custom_img['tmp_name'];
+                        $destination = PATH . '/img/tariff_custom/' . $id_event . '_' . $last_insert_id . '.' . pathinfo($custom_img['name'], PATHINFO_EXTENSION);
+                        if (move_uploaded_file($source, $destination) == true) {
+                            return $last_insert_id;
+                        } else {
+                            $this->db->rollBack();
+                            $this->errors[] = "Erreur lors du déplacement de l'image personnalisée sur les tickets, création du tariff annulé";
+                            return -5;
+                        }
+                    } else
+                        return $last_insert_id;
+                } else {
                     $this->db->rollBack();
-                    $this->errors[] = "Erreur lors du déplacement de l'image";
+                    $this->errors[] = "Erreur lors du déplacement de l'image du tariff, création du tariff annulé";
                     return -5;
                 }
             } else {

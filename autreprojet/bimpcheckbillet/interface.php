@@ -10,7 +10,8 @@ include_once 'class/tariff.class.php';
 include_once 'class/ticket.class.php';
 include_once 'class/order.class.php';
 
-$_POST['description'] = addslashes($_POST['description']);
+if (isset($_POST['description']))
+    $_POST['description'] = addslashes($_POST['description']);
 
 
 $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME;
@@ -53,7 +54,7 @@ switch ($action) {
      */
     case 'create_tariff': {
             echo json_encode(array(
-                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_POST['require_names'], '', $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
+                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_FILES['custom_img'], $_POST['input_cust_img'], $_POST['require_names'], '', $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
                 'errors' => $tariff->errors));
             break;
         }
@@ -62,21 +63,12 @@ switch ($action) {
      * create_ticket.php
      */
     case 'create_ticket': {
-//            if ($_POST['id_order'] > 0) { // from presta
-//                // vérif limite entrée/tariff
-//                // test billet presta
-//                echo json_encode(array(
-//                    'code_return' => $ticket->create($_POST['id_tariff'], EXTERN_USER, $_POST['id_event'], $_POST['price'], $_POST['first_name'], $_POST['last_name'], $_POST['extra_1'], $_POST['extra_2'], $_POST['extra_3'], $_POST['extra_4'], $_POST['extra_5'], $_POST['extra_6'], $_POST['id_order'], $_POST['id_prod_extern']),
-//                    'errors' => $ticket->errors));
-//                break;
-//            } else {
             $user_session = json_decode($_SESSION['user']);
             $user->fetch($user_session->id);
             echo json_encode(array(
                 'code_return' => $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['first_name'], $_POST['last_name'], $_POST['extra_1'], $_POST['extra_2'], $_POST['extra_3'], $_POST['extra_4'], $_POST['extra_5'], $_POST['extra_6'], $_POST['id_order'], $_POST['id_prod_extern']),
                 'errors' => $ticket->errors));
             break;
-//            }
         }
 
     /**
@@ -380,7 +372,6 @@ switch ($action) {
                 }
                 echo json_encode(array(
                     'ids_inserted' => $ids_inserted,
-//                    'str' => $str,
                     'errors' => array_merge($order->errors, $ticket->errors)
                 ));
             } else {
@@ -396,17 +387,24 @@ switch ($action) {
             $tickets = $ticket->getTicketsByOrder($_POST['id_order']);
             $position = array('x' => 5, 'y' => 5);
             $i = 0;
-            foreach ($tickets as $t) {
-                $is_first = $i == 0;
-                $is_last = ($i + 1 == sizeof($tickets));
-                $set_to_left = ($i % 2 == 0);
-                $position = $ticket->createPdf($t->id, $position['x'], $position['y'], $is_first, $is_last, $set_to_left, $_POST['id_order']);
-                $i++;
+            if (sizeof($tickets > 0)) {
+                foreach ($tickets as $t) {
+                    $is_first = $i == 0;
+                    $is_last = ($i + 1 == sizeof($tickets));
+                    $set_to_left = ($i % 2 == 0);
+                    $position = $ticket->createPdf($t->id, $position['x'], $position['y'], $is_first, $is_last, $set_to_left, $_POST['id_order']);
+                    $i++;
+                }
+                echo json_encode(array(
+                    'code_return' => 1,
+                    'errors' => $ticket->errors
+                ));
+            } else {
+                echo json_encode(array(
+                    'code_return' => -1,
+                    'errors' => "Veuillez remplir au moins un ticket"
+                ));
             }
-            echo json_encode(array(
-                'code_return' => 1,
-                'errors' => $ticket->errors
-            ));
             break;
         }
 

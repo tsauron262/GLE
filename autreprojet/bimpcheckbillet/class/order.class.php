@@ -92,9 +92,12 @@ class Order {
      * @return int 1 => order fullfilled, -1 other
      */
     public function checkOrderStatus($id_order, $ticket_obj) {
+//        return 1;
         $qty_total = $this->getNumberTicketSold($id_order);
 
         $qty_sold = $ticket_obj->getNumberTicketByOrder($id_order);
+        
+//        echo $qty_total
 
         if ($qty_total == $qty_sold)
             return 1;

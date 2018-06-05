@@ -1,4 +1,4 @@
-//var decoder;
+var sound = 1;
 
 function getEvents() {
 
@@ -32,11 +32,15 @@ function getEvents() {
                     no_results_text: 'Pas de résultat'});
                 $('#barcode').on('keyup', function (e) {
                     if (e.keyCode === 13) {
-                        checkTicket($('#barcode').val(), $('select[name=event] > option:selected').val());
+                        var url_string = $('#barcode').val();
+                        var url = new URL(url_string);
+                        var barcode = url.searchParams.get('num');
+                        checkTicket(barcode, $('select[name=event] > option:selected').val());
                         $('#barcode').val("");
                     }
                 });
                 $('select[name=event]').change(function () {
+                    $('input#cntEntry').val(0);
                     changeEventSession($('select[name=event] > option:selected').val());
                 });
                 if (id_event_session > 0) {
@@ -54,12 +58,14 @@ function getEvents() {
 
 function checkTicket(barcode, id_event) {
 
+    $('div#alertSubmit').empty();
+
     if (barcode === '') {
         setMessage('alertSubmit', 'Code barre vide.', 'error');
         return;
     }
     if (id_event === '') {
-        setMessage('alertSubmit', 'Sélectionnez un évènement avant de vérifier des billet.', 'error');
+        setMessage('alertSubmit', 'Sélectionnez un évènement avant de vérifier des billets.', 'error');
         return;
     }
 
@@ -75,21 +81,20 @@ function checkTicket(barcode, id_event) {
             setMessage('alertSubmit', 'Erreur serveur 1895.', 'error');
         },
         success: function (json) {
+            $('#alertSubmit').empty();
             decoder.stop();
             var out = JSON.parse(json);
             if (out.errors.length !== 0) {
-                $('#alertSubmit').empty();
-                printErrors(out.errors, 'alertSubmit');
+                if (sound === 1)
+                    document.querySelector("#errorSound").play();
+                displayErrors(out.errors, barcode);
             } else if (out.errors === undefined) {
                 setMessage('alertSubmit', 'Erreur serveur 1495.', 'error');
             } else {
-                $('fieldset').addClass('back_green_gradient');
-                setTimeout(function () {
-                    $('fieldset').addClass('back_white_gradient');
-                    setTimeout(function () {
-                        $('fieldset').removeClass('back_green_gradient');
-                    }, 1000);
-                }, 1000);
+                if (sound === 1)
+                    document.querySelector("#beepSound").play();
+                $('input#cntEntry').val(parseInt($('input#cntEntry').val()) + 1);
+                displayNoErrors(barcode);
             }
         }
     });
@@ -98,9 +103,63 @@ function checkTicket(barcode, id_event) {
 
 $(document).ready(function () {
     getEvents();
-
-//    $("#result").click(function () {
-//        $(this).hide();
-//        decoder.play();
-//    });
+    $('button#showHistory').click(function () {
+        toggleHistory();
+    });
+    $('label[name=sound]').click(function () {
+        var input = $(this).find('input');
+        sound = parseInt(input.val());
+        $(this).removeClass('focus');
+    });
 });
+
+function toggleHistory() {
+    if ($('div#history').attr('toggled') === 'false') {
+        $('div#history').attr('toggled', 'true');
+        $('div#history').css('height', '');
+    } else {
+        $('div#history').attr('toggled', 'false');
+        $('div#history').css('height', '100px');
+    }
+}
+
+function displayErrors(errors, barcode) {
+    $('#imgEr').css('display', 'inline');
+    $('#imgOk').css('display', 'none');
+    $('fieldset').addClass('back_red_gradient');
+    setTimeout(function () {
+        $('fieldset').addClass('back_white_gradient');
+        $('fieldset').removeClass('back_red_gradient');
+    }, 800);
+    $('fieldset').removeClass('back_white_gradient');
+    addHistoryError(errors, barcode);
+}
+
+function displayNoErrors(barcode) {
+    $('#imgEr').css('display', 'none');
+    $('#imgOk').css('display', 'inline');
+    $('fieldset').addClass('back_green_gradient');
+    setTimeout(function () {
+        $('fieldset').addClass('back_white_gradient');
+        $('fieldset').removeClass('back_green_gradient');
+    }, 800);
+    $('fieldset').removeClass('back_white_gradient');
+    addHistorychecked(barcode);
+}
+
+function addHistoryError(errors, barcode) {
+    var html = '<img src="../img/error.png" style="height: 16px; width: 16px;"/> ';
+    html += barcode + ' : <br/>';
+    errors.forEach(function (error) {
+        html += '<text style="margin-left: 40px; margin-top: 0px;">- ';
+        html += error;
+        html += '</text><br/>';
+    });
+    $('div#history').prepend(html);
+}
+
+function addHistorychecked(barcode) {
+    var html = '<img src="../img/checked.png" style="height: 16px; width: 16px;"/> ';
+    html += barcode + '<br/>';
+    $('div#history').prepend(html);
+}

@@ -64,6 +64,7 @@ function addLineTransfer(transfer) {
 
     var id_tr = transfer.id;
     var line = '<tr id=' + id_tr + '>';
+    line += '<td>' + transfer.id + '</td>';
     line += '<td>' + transfer.url_user + '</td>';
     line += '<td>' + transfer.name_status + '</td>';
     line += '<td>' + transfer.date_opening + '</td>';
@@ -116,6 +117,7 @@ function diplayLinks(right_caisse, right_caisse_admin) {
         $('#ph_links').append('<input type="button" class="butAction" value="Accéder caisse" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/?id_entrepot=' + fk_warehouse + '\'"></td>');
     if (right_caisse_admin === 1)
         $('#ph_links').append('<input type="button" class="butAction" value="Accéder caisse admin" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/?fc=admin&id_entrepot=' + fk_warehouse + '\'">');
+    $('#ph_links').append('<input type="button" class="butAction" value="Tous les transferts" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewReceptionMain.php?entrepot_id=' + fk_warehouse + '\'">');
 }
 
 

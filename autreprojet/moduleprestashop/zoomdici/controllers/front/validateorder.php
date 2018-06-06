@@ -4,12 +4,18 @@ if (!defined('_PS_VERSION_'))
     exit;
 
 class zoomdiciValidateOrderModuleFrontController extends ModuleFrontController {
-
+//http://192.168.0.78/~tilito/prestashop/index.php?fc=module&module=zoomdici&controller=validateorder&id_order=18 TODO remove
     public function initContent() {
         parent::initContent();
         $this->setTemplate('module:zoomdici/views/templates/front/validateorder.tpl');
         global $smarty;
         $id_order = $_GET['id_order'];
+        $order = new Order((int) $id_order);
+        echo '<pre>';
+        print_r($order);
+        global $user;
+        print_r($this->context->customer->id);
+
         self::$smarty->assign('id_order', $id_order);
         $products = Db::getInstance()->executeS(''
                 . 'SELECT `product_id`, `product_quantity`'

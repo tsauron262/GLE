@@ -1,7 +1,8 @@
 /**
  * Ajax call
  */
-var URL_SERVER = 'http://192.168.0.78/~tilito/bimp-erp/autreprojet/bimpcheckbillet/interface.php';
+var DOMAINE = "http://192.168.0.78/~tilito/bimp-erp/autreprojet";
+var URL_SERVER = DOMAINE + '/bimpcheckbillet/interface.php';
 var URL_TICKETS = 'http://192.168.0.78/~tilito/bimp-erp/autreprojet/bimpcheckbillet/img/tickets/';
 
 /**
@@ -33,8 +34,13 @@ function getField(ids_prods, products) {
                         });
                         printFields(tariff, qty);
                     });
-                    $('<button class="btn btn-primary" name="validate_extra">Valider tous les tickets</button>').insertAfter('div#main_container');
-                    fillTickets(out.tariffs);
+                    var nb_input = $('.box').find('input').length;
+                    if (nb_input !== 0) {
+                        $('<button class="btn btn-primary" name="validate_extra">Valider tous les tickets</button>').insertAfter('div#main_container');
+                        fillTickets(out.tariffs);
+                    } else {
+                        createTickets();
+                    }
                 } else
                     alert('Erreur serveur 4964');
             } catch (e) {
@@ -168,16 +174,7 @@ function checkOrderStatus(id_order) {
                 alert(out.errors, 'alertSubmit');
             } else if (out.status !== undefined) {
                 if (parseInt(out.status) === -1) { // not filled
-                    var ids_prods = [];
-                    var products = [];
-                    $('div[name=tariff]').each(function () {
-                        ids_prods.push(parseInt($(this).attr('id_product')));
-                        products.push({
-                            id: parseInt($(this).attr('id_product')),
-                            qty: parseInt($(this).attr('qty'))
-                        });
-                    });
-                    getField(ids_prods, products);
+                    getField(id_prods, products);
                 } else { // filled
                     createTickets();
                     $('div[name=tariff]').hide();
@@ -191,8 +188,6 @@ function checkOrderStatus(id_order) {
 }
 
 function fillTickets(tariffs) {
-
-    var id_order = parseInt($('p#order_id:first').text())
     $.ajax({
         type: "POST",
         url: URL_SERVER,
@@ -226,8 +221,6 @@ function fillTickets(tariffs) {
 }
 
 function createTickets() {
-
-    var id_order = parseInt($('p#order_id:first').text())
 
     $.ajax({
         type: "POST",
@@ -269,15 +262,8 @@ function createTickets() {
  */
 
 $(document).ready(function () {
-    var id_order = parseInt(getUrlParameter('id_order'));
     if (id_order > 0) {
         checkOrderStatus(id_order);
-    } else {
-        $('#main_container').append(
-                '<div class="alert alert-danger"><strong style="font-size: 16px; text-aligne: center">' +
-                '<img src="img/admin/error2.png" style="width: 16px; height: 16px; margin-bottom: 4px"> ' +
-                'Les tickets ne seront disponibles qu\'une fois que le paiement sera effectué.</strong>' +
-                '</div>');
     }
 });
 
@@ -330,10 +316,12 @@ function printFields(tariff, qty) {
         html += '<h5>Ticket n°' + i + '</h5>';
         html += '<div name="ticket" cnt=' + cnt_ticket + ' id_tariff=' + tariff.id + '>';
         //names
-        html += '<label><strong>Prénom ' + returnStar(tariff.require_names === 1) + '</strong></label><br/>';
-        html += '<input class="form-control" name="first_name" require=' + tariff.require_names + ' maxlength=256 style="width: 300px"><br/>';
-        html += '<label><strong>Nom ' + returnStar(tariff.require_names === 1) + '</strong></label><br/>';
-        html += '<input class="form-control" name="last_name" require=' + tariff.require_names + ' maxlength=256 style="width: 300px"><br/>';
+        if (tariff.require_name === 1) {
+            html += '<label><strong>Prénom ' + returnStar(tariff.require_names === 1) + '</strong></label><br/>';
+            html += '<input class="form-control" name="first_name" require=' + tariff.require_names + ' maxlength=256 style="width: 300px"><br/>';
+            html += '<label><strong>Nom ' + returnStar(tariff.require_names === 1) + '</strong></label><br/>';
+            html += '<input class="form-control" name="last_name" require=' + tariff.require_names + ' maxlength=256 style="width: 300px"><br/>';
+        }
 
         // extra
         for (var j = 1; j <= 6; j++) {

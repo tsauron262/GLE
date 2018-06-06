@@ -53,8 +53,14 @@ fields:
         type: text
     zip: 
         label: Code postal
+#        input: 
+#            type: search_ziptown
+#            linked_fields: town,fk_pays,fk_departement
     town: 
         label: Ville
+#        input: 
+#            type: search_ziptown
+#            linked_fields: zip,fk_pays,fk_departement
     fk_pays:
         label: Pays
         dol_prop: country_id
@@ -84,6 +90,7 @@ fields:
         depends_on: fk_pays
     email: 
         label: E-mail
+        required: 1
     skype: 
         label: Skype
     url: 
@@ -314,6 +321,13 @@ forms:
                 client: 1
         rows: 
             - field: nom
+            - custom: 1
+              label: Prénom
+              input_name: prenom
+              data_type: string
+              input: 
+                  type: text
+                  help: A remplir si le client est un particulier
             - field: name_alias
             - field: status
               hidden: 1

@@ -154,12 +154,12 @@ class BimpTools
         return '/test2/public/theme/common/nophoto.png';
     }
 
-    public static function getErrorsFromDolObject($object, &$errors = null, $langs = null)
+    public static function getErrorsFromDolObject($object, $errors = null, $langs = null)
     {
         if (is_null($errors)) {
             $errors = array();
         }
-
+        
         if (isset($object->error)) {
             if (!is_null($langs)) {
                 $errors[] = $langs->trans($object->error);
@@ -393,7 +393,7 @@ class BimpTools
         return $sql;
     }
 
-    public static function getSqlFilter($field, $filter, $default_alias)
+    public static function getSqlFilter($field, $filter, $default_alias = 'a')
     {
         $sql = '';
 
@@ -938,5 +938,29 @@ class BimpTools
         }
 
         return $url;
+    }
+
+    public static function getMsgFromArray($msgs, $title = '')
+    {
+        $msg = '';
+        if ($title) {
+            $msg .= $title . '<br/>';
+        }
+
+        if (is_array($msgs)) {
+            $fl = true;
+            foreach ($msgs as $m) {
+                if (!$fl) {
+                    $msg .= '<br/>';
+                } else {
+                    $fl = false;
+                }
+                $msg .= '&nbsp;&nbsp;&nbsp;&nbsp;- ' . $m;
+            }
+        } else {
+            $msg .= $msgs;
+        }
+
+        return $msg;
     }
 }

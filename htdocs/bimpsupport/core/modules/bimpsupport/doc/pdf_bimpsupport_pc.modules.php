@@ -65,6 +65,8 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
 
 
+
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -154,19 +156,23 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $code_entrepot = $sav->getData('code_centre');
 
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-            $pdf->SetXY('147', '32.5');
+
             if ($code_entrepot) {
-                $pdf->MultiCell(100, 6, $code_entrepot, 0, 'L');
+                if (isset($tabCentre[$code_entrepot])) {
+                    $pdf->SetXY('147', '32.5');
+                    $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][2], 0, 'L');
+
+                    $pdf->SetXY('147', '38.5');
+                    $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][0], 0, 'L');
+
+                    $pdf->SetXY('147', '44.1');
+                    $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][1], 0, 'L');
+                } else {
+                    $pdf->SetXY('147', '32.5');
+                    $pdf->MultiCell(100, 6, $code_entrepot, 0, 'L');
+                }
             }
-            $pdf->SetXY('147', '38.5');
-            if ($code_entrepot && isset($tabCentre[$code_entrepot])) {
-                $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][0], 0, 'L');
-            }
-            $pdf->SetXY('147', '44.1');
-            if ($code_entrepot && isset($tabCentre[$code_entrepot])) {
-                $pdf->MultiCell(100, 6, $tabCentre[$code_entrepot][1], 0, 'L');
-            }
-//                $tabCentre
+
             //client
             $contact = "";
             $client = $sav->getChildObject('client');
@@ -244,7 +250,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             //Systeme
             $pdf->SetXY(126, 108.5);
-            $pdf->MultiCell(80, 6, $sav->getData('system'), 0, '');
+            $pdf->MultiCell(80, 6, $sav->displayData('system', 'default', false, true), 0, '');
 //            
             //symptom et sauv
             $symptomes = $sav->getData('symptomes');
@@ -267,16 +273,16 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $cgv.= "-La société BIMP ne peut pas être tenue responsable de la perte éventuelle de données, quelque soit le support.\n\n";
 
             $prixRefusOrdi = "49";
-            if($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA")
+            if ($conf->global->MAIN_INFO_SOCIETE_NOM == "MY-MULTIMEDIA")
                 $prixRefusOrdi = "39";
 
-            if (stripos($chrono2->description, "Iphone") !== false) {
+            if (stripos($product_label, "Iphone") !== false) {
                 $cgv .= "-Les frais de prise en charge diagnostic de 29€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
                 $cgv.="-Les problèmes logiciels, la récupération de données ou la réparation materiel liées à une mauvaise utilisation (liquide, chute, etc...), ne sont pas couverts parla GARANTIE APPLE. Un devis sera alors établi et des frais de 29€ TTC seront alors facturés en cas de refus de celui-ci." . "\n\n";
                 $cgv.="-Des frais de 29€ TTC seront automatiquement facturés, si lors de l'expertise il s'avère que des pièces de contre façon ont été installées.\n\n";
             } else {
                 $cgv .= "-Les problèmes logiciels, la récupératon de données ou la réparation matériel liée à une mauvaise utilisation (liquide, chute,etc...), ne sont pas couverts par la GARANTIE APPLE.\n\n";
-                $cgv.="-Les frais de prise en charge diagnostic de ".$prixRefusOrdi."€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
+                $cgv.="-Les frais de prise en charge diagnostic de " . $prixRefusOrdi . "€ TTC sont à régler à la dépose de votre materiel hors garantie. En cas d'acceptation du devis ces frais seront déduits.\n\n";
             }
 //                $pdf->SetX(6);
 //                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
@@ -332,12 +338,10 @@ en espèces (plafond maximun de 1000€), en carte bleue\n\n";
 //                
 //                }
             //QR suivie        
-//            $dir .= "/temp/";
-//            $data = DOL_MAIN_URL_ROOT . "/synopsis_chrono_public/page.php?back_serial=" . $chrono->id . "&user_name=" . substr($chrono->societe->name, 0, 3);
-//            $this->getQrCode($data, $dir, "suivie.png");
-//            $pdf->Image($dir . "/suivie.png", 100, 30, 0, 24);
-
-
+            $qr_dir = $dir. "temp";
+            $data = DOL_MAIN_URL_ROOT . "/bimpsupport/public/page.php?serial=" . $sav->getChildObject("equipment")->getData("serial")."&id_sav=" . $sav->id . "&user_name=" . substr($client->name, 0, 3);
+            $this->getQrCode($data, $qr_dir, "suivie.png");
+            $pdf->Image($qr_dir . "/suivie.png", 100, 30, 0, 24);
 
             if (method_exists($pdf, 'AliasNbPages'))
                 $pdf->AliasNbPages();
@@ -609,36 +613,14 @@ en espèces (plafond maximun de 1000€), en carte bleue\n\n";
 
     function getQrCode($data, $dir, $file = "suivie.png")
     {
-//        require_once(DOL_DOCUMENT_ROOT . "/synopsisphpqrcode/qrlib.php");
-//        if (!is_dir($dir))
-//            mkdir($dir);
-//
-//        QRcode::png($data
-//                , $dir . "/" . $file
-//                , "L", 4, 2);
+        require_once(DOL_DOCUMENT_ROOT . "/synopsisphpqrcode/qrlib.php");
+        if (!is_dir($dir))
+            mkdir($dir);
+
+        QRcode::png($data
+                , $dir . "/" . $file
+                , "L", 4, 2);
     }
 }
 
-function couperChaine($chaine, $nb)
-{
-    if (strlen($chaine) > $nb)
-        $chaine = substr($chaine, 0, $nb) . "...";
-    return $chaine;
-}
-
-function traiteStr($str)
-{
-    return utf8_encodeRien(utf8_encodeRien(htmlspecialchars($str)));
-}
-
-function max_size($chaine, $lg_max)
-{
-    if (strlen($chaine) > $lg_max) {
-        $chaine = substr($chaine, 0, $lg_max);
-        $last_space = strrpos($chaine, " ");
-        $chaine = substr($chaine, 0, $last_space) . "...";
-    }
-
-    return $chaine;
-}
 ?>

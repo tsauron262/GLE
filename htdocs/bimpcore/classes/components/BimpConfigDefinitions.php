@@ -14,28 +14,27 @@ class BimpConfigDefinitions
         'instance' => array('data_type' => 'array')
     );
     public static $button = array(
-        'id' => array(),
-        'label'   => array('required' => true),
-        'icon' => array(),
-        'onclick' => array(),
-        'icon_before'    => array(),
-        'icon_after'    => array(),
-        'classes' => array('data_type' => 'array'),
-        'attr' => array('data_type' => 'array'),
-        'data' => array('data_type' => 'array'),
-        'styles' => array('data_type' => 'array')
+        'id'          => array(),
+        'label'       => array('required' => true),
+        'icon'        => array(),
+        'onclick'     => array(),
+        'icon_before' => array(),
+        'icon_after'  => array(),
+        'classes'     => array('data_type' => 'array'),
+        'attr'        => array('data_type' => 'array'),
+        'data'        => array('data_type' => 'array'),
+        'styles'      => array('data_type' => 'array')
     );
     public static $input = array(
-        'type' => array('default' => 'text'),
+        'type'    => array('default' => 'text'),
         'options' => array('data_type' => 'array', 'default' => array(), 'compile' => true)
     );
-    
     public static $search = array(
         'type'             => array('default' => 'field_input'),
         'part_type'        => array('default' => 'middle'),
         'search_on_key_up' => array('data_type' => 'bool', 'default' => 1),
         'option'           => array(),
-        'input' => array('type' => 'definitions', 'defs_type' => 'input')
+        'input'            => array('type' => 'definitions', 'defs_type' => 'input')
     );
     public static $sort_option = array(
         'label'      => array('required' => true),

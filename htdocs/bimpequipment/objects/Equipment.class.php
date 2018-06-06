@@ -7,11 +7,12 @@ class Equipment extends BimpObject
 
     public static $types = array(
         1 => 'Ordinateur',
-        2 => 'Accessoire',
-        3 => 'License',
-        4 => 'Serveur',
-        5 => 'Matériel réseau',
-        6 => 'Autre'
+        2 => 'Periph Mobile',
+        10 => 'Accessoire',
+        20 => 'License',
+        30 => 'Serveur',
+        13 => 'Matériel réseau',
+        50 => 'Autre'
     );
     public static $origin_elements = array(
         0 => '',
@@ -144,100 +145,6 @@ class Equipment extends BimpObject
             return $label;
         }
         return BimpRender::renderAlerts('Le contrat d\'ID ' . $id_contrat . ' semble ne plus exister');
-    }
-
-    public function onNewPlace()
-    {
-        if ($this->isLoaded()) {
-            $product = $this->getChildObject('product');
-            if (!is_null($product) && isset($product->id) && $product->id) {
-                $place = BimpObject::getInstance($this->module, 'BE_Place');
-                $items = $place->getList(array(
-                    'id_equipment' => $this->id
-                        ), 2, 1, 'id', 'desc', 'array', array(
-                    'id'
-                ));
-
-                global $user;
-
-                $prev_place_element = '';
-                $prev_place_id_element = null;
-
-                $new_place_element = '';
-                $new_place_id_element = null;
-
-                $new_place = BimpObject::getInstance($this->module, 'BE_Place', $items[0]['id']);
-                $codemove = $new_place->getData('code_mvt');
-                if (is_null($codemove) || !$codemove) {
-                    $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
-                }
-                $new_place_infos = $new_place->getData('infos');
-                $label = ($new_place_infos ? $new_place_infos . ' - ' : '') . 'Produit "' . $product->ref . '" - serial: "' . $this->getData('serial') . '"';
-
-                switch ((int) $new_place->getData('type')) {
-                    case BE_Place::BE_PLACE_CLIENT:
-                        $new_place_element = 'societe';
-                        $new_place_id_element = (int) $new_place->getData('id_client');
-                        break;
-
-                    case BE_Place::BE_PLACE_ENTREPOT:
-                    case BE_Place::BE_PLACE_PRESENTATION:
-                    case BE_Place::BE_PLACE_VOL:
-                    case BE_Place::BE_PLACE_PRET:
-                    case BE_Place::BE_PLACE_SAV:
-                        $new_place_element = 'entrepot';
-                        $new_place_id_element = (int) $new_place->getData('id_entrepot');
-                        break;
-
-                    case BE_Place::BE_PLACE_USER:
-                        $new_place_element = 'user';
-                        $new_place_id_element = (int) $new_place->getData('id_user');
-                        break;
-                }
-
-                if (isset($items[1])) {
-                    $prev_place = BimpObject::getInstance($this->module, 'BE_Place', $items[1]['id']);
-                    switch ((int) $prev_place->getData('type')) {
-                        case BE_Place::BE_PLACE_CLIENT:
-                            $prev_place_element = 'societe';
-                            $prev_place_id_element = (int) $prev_place->getData('id_client');
-                            break;
-
-                        case BE_Place::BE_PLACE_ENTREPOT:
-                        case BE_Place::BE_PLACE_PRESENTATION:
-                        case BE_Place::BE_PLACE_VOL:
-                        case BE_Place::BE_PLACE_PRET:
-                        case BE_Place::BE_PLACE_SAV:
-                            $prev_place_element = 'entrepot';
-                            $prev_place_id_element = (int) $prev_place->getData('id_entrepot');
-                            if ((int) $prev_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                                $product->correct_stock($user, $prev_place_id_element, 1, 1, $label, 0, $codemove, $new_place_element, $new_place_id_element);
-                            }
-                            break;
-
-                        case BE_Place::BE_PLACE_USER:
-                            $prev_place_element = 'user';
-                            $prev_place_id_element = (int) $prev_place->getData('id_user');
-                            break;
-                    }
-                } else {
-                    $prev_place_element = $this->getData('origin_element');
-                    if (in_array($prev_place_element, array(1, 2))) {
-                        $prev_place_element = 'societe';
-                    }
-                    $prev_place_id_element = $this->getData('origin_id_element');
-                    if (!$prev_place_id_element) {
-                        $prev_place_id_element = null;
-                    }
-                }
-
-                if ((int) $new_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
-                    $product->correct_stock($user, $new_place_id_element, 1, 0, $label, 0, $codemove, $prev_place_element, $prev_place_id_element);
-                }
-            }
-
-            $this->current_place = $new_place;
-        }
     }
 
     public function getCurrentPlace()
@@ -394,7 +301,158 @@ class Equipment extends BimpObject
         return $this->displayData('product_label', 'default', ($no_html ? 0 : 1), $no_html);
     }
 
+//    Traitements: 
+
+    public function onNewPlace()
+    {
+        if ($this->isLoaded()) {
+            $product = $this->getChildObject('product');
+            if (!is_null($product) && isset($product->id) && $product->id) {
+                $place = BimpObject::getInstance($this->module, 'BE_Place');
+                $items = $place->getList(array(
+                    'id_equipment' => $this->id
+                        ), 2, 1, 'id', 'desc', 'array', array(
+                    'id'
+                ));
+
+                global $user;
+
+                $prev_place_element = '';
+                $prev_place_id_element = null;
+
+                $new_place_element = '';
+                $new_place_id_element = null;
+
+                $new_place = BimpObject::getInstance($this->module, 'BE_Place', $items[0]['id']);
+                $codemove = $new_place->getData('code_mvt');
+                if (is_null($codemove) || !$codemove) {
+                    $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+                }
+                $new_place_infos = $new_place->getData('infos');
+                $label = ($new_place_infos ? $new_place_infos . ' - ' : '') . 'Produit "' . $product->ref . '" - serial: "' . $this->getData('serial') . '"';
+
+                switch ((int) $new_place->getData('type')) {
+                    case BE_Place::BE_PLACE_CLIENT:
+                        $new_place_element = 'societe';
+                        $new_place_id_element = (int) $new_place->getData('id_client');
+                        break;
+
+                    case BE_Place::BE_PLACE_ENTREPOT:
+                    case BE_Place::BE_PLACE_PRESENTATION:
+                    case BE_Place::BE_PLACE_VOL:
+                    case BE_Place::BE_PLACE_PRET:
+                    case BE_Place::BE_PLACE_SAV:
+                        $new_place_element = 'entrepot';
+                        $new_place_id_element = (int) $new_place->getData('id_entrepot');
+                        break;
+
+                    case BE_Place::BE_PLACE_USER:
+                        $new_place_element = 'user';
+                        $new_place_id_element = (int) $new_place->getData('id_user');
+                        break;
+                }
+
+                if (isset($items[1])) {
+                    $prev_place = BimpObject::getInstance($this->module, 'BE_Place', $items[1]['id']);
+                    switch ((int) $prev_place->getData('type')) {
+                        case BE_Place::BE_PLACE_CLIENT:
+                            $prev_place_element = 'societe';
+                            $prev_place_id_element = (int) $prev_place->getData('id_client');
+                            break;
+
+                        case BE_Place::BE_PLACE_ENTREPOT:
+                        case BE_Place::BE_PLACE_PRESENTATION:
+                        case BE_Place::BE_PLACE_VOL:
+                        case BE_Place::BE_PLACE_PRET:
+                        case BE_Place::BE_PLACE_SAV:
+                            $prev_place_element = 'entrepot';
+                            $prev_place_id_element = (int) $prev_place->getData('id_entrepot');
+                            if ((int) $prev_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
+                                $product->correct_stock($user, $prev_place_id_element, 1, 1, $label, 0, $codemove, $new_place_element, $new_place_id_element);
+                            }
+                            break;
+
+                        case BE_Place::BE_PLACE_USER:
+                            $prev_place_element = 'user';
+                            $prev_place_id_element = (int) $prev_place->getData('id_user');
+                            break;
+                    }
+                } else {
+                    $prev_place_element = $this->getData('origin_element');
+                    if (in_array($prev_place_element, array(1, 2))) {
+                        $prev_place_element = 'societe';
+                    }
+                    $prev_place_id_element = $this->getData('origin_id_element');
+                    if (!$prev_place_id_element) {
+                        $prev_place_id_element = null;
+                    }
+                }
+
+                if ((int) $new_place->getData('type') === BE_Place::BE_PLACE_ENTREPOT) {
+                    $product->correct_stock($user, $new_place_id_element, 1, 0, $label, 0, $codemove, $prev_place_element, $prev_place_id_element);
+                }
+            }
+
+            $this->current_place = $new_place;
+        }
+    }
+
+    public function gsxLookup($serial, &$errors)
+    {
+        if (preg_match('/^[0-9]{15,16}$/', $serial)) {
+            $isIphone = true;
+        } else {
+            $isIphone = false;
+        }
+        $gsx = new GSX($isIphone);
+
+        $errors = array();
+
+        $result = array(
+            'product_label'     => '',
+            'date_purchase'     => '',
+            'date_warranty_end' => '',
+            'warranty_type'     => '',
+//            'note'              => ''
+        );
+
+        if (!$gsx->connect) {
+            $errors = BimpTools::getMsgFromArray($gsx->errors['init'], 'Echec de la connexion GSX');
+        } else {
+            $response = $gsx->lookup($serial);
+            if (isset($response) && count($response)) {
+                if (isset($response['ResponseArray']) && count($response['ResponseArray'])) {
+                    if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
+                        $data = $response['ResponseArray']['responseData'];
+                        if (isset($data['productDescription']) && $data['productDescription']) {
+                            $result['product_label'] = $data['productDescription'];
+                        }
+                        if (isset($data['estimatedPurchaseDate']) && $data['estimatedPurchaseDate']) {
+                            if (preg_match('/^(\d{2})\/(\d{2})\/(\d{2})$/', $data['estimatedPurchaseDate'], $matches)) {
+                                $result['date_purchase'] = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+                            }
+                        }
+                        if (isset($data['coverageEndDate']) && $data['coverageEndDate']) {
+                            if (preg_match('/^(\d{2})\/(\d{2})\/(\d{2})$/', $data['coverageEndDate'], $matches)) {
+                                $result['date_warranty_end'] = '20' . $matches[3] . '-' . $matches[2] . '-' . $matches[1];
+                            }
+                        }
+                        if (isset($data['warrantyStatus']) && $data['warrantyStatus']) {
+                            $result['warranty_type'] = $data['warrantyStatus'];
+                        }
+//                        if (isset($data['activationLockStatus']) && $data['activationLockStatus']) {
+//                            $result['note'] = $data['activationLockStatus'];
+//                        }
+                    }
+                }
+            }
+        }
+
+        return $result;
+    }
+
 //    Renders: 
+
     public function renderReservationsList()
     {
         $html = '';

@@ -528,24 +528,4 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport {
 
 }
 
-function couperChaine($chaine, $nb) {
-    if (strlen($chaine) > $nb)
-        $chaine = substr($chaine, 0, $nb) . "...";
-    return $chaine;
-}
-
-function traiteStr($str) {
-    return utf8_encodeRien(utf8_encodeRien(htmlspecialchars($str)));
-}
-
-function max_size($chaine, $lg_max) {
-    if (strlen($chaine) > $lg_max) {
-        $chaine = substr($chaine, 0, $lg_max);
-        $last_space = strrpos($chaine, " ");
-        $chaine = substr($chaine, 0, $last_space) . "...";
-    }
-
-    return $chaine;
-}
-
 ?>

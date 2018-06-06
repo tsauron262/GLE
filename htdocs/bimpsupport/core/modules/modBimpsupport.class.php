@@ -48,7 +48,7 @@ class modBimpsupport extends DolibarrModules {
 
         // Id for module (must be unique).
         // Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
-        $this->numero = 754381;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+        $this->numero = 754389;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
         // Key text used to identify module (for permissions, menus, etc...)
         $this->rights_class = 'BimpSupport';
 
@@ -165,21 +165,21 @@ class modBimpsupport extends DolibarrModules {
         //                                1=>array('label'=>'My label', 'jobtype'=>'command', 'command'=>'', 'parameters'=>'', 'comment'=>'Comment', 'frequency'=>1, 'unitfrequency'=>3600*24, 'status'=>0, 'test'=>true)
         // );
         // Permissions
-//        $this->rights = array();  // Permission array used by this module
-//        $r = 0;
-//        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-//        $this->rights[$r][1] = 'Voir toutes les factures'; // Permission label
-//        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
-//        $this->rights[$r][4] = 'facture';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//        $this->rights[$r][5] = 'read';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//        $r++;
-//        
-//        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-//        $this->rights[$r][1] = 'Voir les factures selon centre SAV'; // Permission label
-//        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
-//        $this->rights[$r][4] = 'factureCentre';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
-//        $this->rights[$r][5] = 'read';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2
-//        $r++;
+        $this->rights = array();  // Permission array used by this module
+        $r = 0;
+        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+        $this->rights[$r][1] = 'Créer modifié SAV'; // Permission label
+        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+        $this->rights[$r][4] = 'read';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $r++;
+        
+        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+        $this->rights[$r][1] = 'Supprimer les SAV'; // Permission label
+        $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
+        $this->rights[$r][4] = 'delete';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2
+        $r++;
 //        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
 //        $this->rights[$r][1] = 'Delete objects of My Module'; // Permission label
 //        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
@@ -216,7 +216,7 @@ class modBimpsupport extends DolibarrModules {
             'type' => 'top', // This is a Left menu entry
             'titre' => 'Support',
             'mainmenu' => 'bimpsupport',
-            'leftmenu' => '',
+            'leftmenu' => 'bimpsupport',
             'url' => '/bimpsupport',
             'langs' => '', // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
             'position' => 100,
@@ -226,6 +226,34 @@ class modBimpsupport extends DolibarrModules {
             'user' => 2);    // 0=Menu for internal users,1=external users, 2=both
 
         $r++;
+
+
+        
+        $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=bimpsupport,fk_leftmenu=bimpsupport',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
+                                'type'=>'left',			// This is a Left menu entry
+                                'titre'=>'Retour groupés',
+                                'mainmenu'=>'',
+                                'leftmenu'=>'',
+                                'url'=>'/synopsisapple/ups/retour.php',
+                                'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+                                'position'=>304,
+                                'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+                                'perms'=>'$user->rights->BimpSupport->read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+                                'target'=>'',
+                                'user'=>2);
+        $r++;
+        $this->menu[$r]=array(	'fk_menu'=>'fk_mainmenu=bimpsupport,fk_leftmenu=bimpsupport',		// Use r=value where r is index key used for the parent menu entry (higher parent must be a top menu entry)
+                                'type'=>'left',			// This is a Left menu entry
+                                'titre'=>'Remboursement',
+                                'mainmenu'=>'',
+                                'leftmenu'=>'',
+                                'url'=>'/synopsisapple/remboursement.php',
+                                'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+                                'position'=>305,
+                                'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+                                'perms'=>'$user->rights->BimpSupport->read',			// Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+                                'target'=>'',
+                                'user'=>0);
 
 //        $this->menu[$r] = array(
 //            'fk_menu' => 'fk_mainmenu=accountancy,fk_leftmenu=suppliers_bills', // Use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode of parent menu
@@ -286,6 +314,9 @@ class modBimpsupport extends DolibarrModules {
         
         $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevissav', 1, 'propal', 'Devis SAV', NULL);";
         $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpinvoicesav', 1, 'invoice', 'Facture SAV', NULL);";
+        
+        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette1', 1, 'product', 'Etiquette Stock', NULL);";
+        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette2', 1, 'product', 'Etiquette Client', NULL);";
 
         return $this->_init($sql, $options);
     }
@@ -302,6 +333,9 @@ class modBimpsupport extends DolibarrModules {
         $sql = array();
         $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevissav';";
         $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpinvoicesav';";
+        
+        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette1';";
+        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette2';";
                 
         return $this->_remove($sql, $options);
     }

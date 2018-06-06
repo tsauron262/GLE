@@ -11,16 +11,16 @@ class BC_Field extends BimpComponent
     public $container_id = null;
     public $display_input_value = true;
     public $no_html = false;
-    
+    public $name_prefix = '';
     public static $type_params_def = array(
         'id_parent' => array(
-            'object'      => array('default' => ''),
-            'create_form' => array('default' => ''),
+            'object'             => array('default' => ''),
+            'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array')
         ),
         'id_object' => array(
-            'object'      => array('required' => true),
-            'create_form' => array('default' => ''),
+            'object'             => array('required' => true),
+            'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array')
         ),
         'number'    => array(
@@ -73,10 +73,14 @@ class BC_Field extends BimpComponent
             $this->value = $this->params['default_value'];
         }
 
-        $this->params['editable'] = 1; // Pour plus tard : prise en compte des droits user
+        $this->params['editable'] = 1;
         $this->params['viewable'] = 1;
+        
+        if ($this->isObjectValid()) {
+            $this->params['editable'] = (int) $this->object->canEditField($name);
+        }
 
-        if (in_array($this->params['type'], array('int', 'float', 'money', 'percent'))) {
+        if (in_array($this->params['type'], array('qty', 'int', 'float', 'money', 'percent'))) {
             $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['number']));
         }
     }
@@ -117,6 +121,7 @@ class BC_Field extends BimpComponent
         }
 
         $input = new BC_Input($this->object, $this->params['type'], $this->name, $input_path, $this->value, $this->params);
+        $input->setNamePrefix($this->name_prefix);
 
         if (!is_null($this->new_value)) {
             $input->new_value = $this->new_value;
@@ -124,7 +129,7 @@ class BC_Field extends BimpComponent
 
         $history_html = '';
         if ($this->params['history']) {
-            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name);
+            $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name);
         }
 
         if ($history_html) {
@@ -242,12 +247,12 @@ class BC_Field extends BimpComponent
         }
 
         if ($this->display_input_value) {
-            $html .= '<input type="hidden" name="' . $this->name . '" value="' . htmlentities($this->value) . '">';
+            $html .= '<input type="hidden" name="' . $this->name_prefix . $this->name . '" value="' . htmlentities($this->value) . '">';
         }
 
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $this->params, $this->value);
         $display->no_html = $this->no_html;
-        
+
         $html .= $display->renderHtml();
 
         if ($history_html) {
@@ -261,10 +266,10 @@ class BC_Field extends BimpComponent
 
     public function renderDependsOnScript($form_identifier)
     {
-        return self::renderDependsOnScriptStatic($this->object, $form_identifier, $this->name, $this->params['depends_on']);
+        return self::renderDependsOnScriptStatic($this->object, $form_identifier, $this->name, $this->params['depends_on'], $this->name_prefix);
     }
 
-    public static function renderDependsOnScriptStatic(BimpObject $object, $form_identifier, $field_name, $depends_on)
+    public static function renderDependsOnScriptStatic(BimpObject $object, $form_identifier, $field_name, $depends_on, $name_prefix = '')
     {
         $script = '';
         if (!is_null($depends_on) && $depends_on) {
@@ -284,16 +289,16 @@ class BC_Field extends BimpComponent
             if (count($dependances)) {
                 $script .= '<script type="text/javascript">' . "\n";
                 foreach ($dependances as $dependance) {
-                    $script .= 'addInputEvent(\'' . $form_identifier . '\', \'' . $dependance . '\', \'change\', function() {' . "\n";
+                    $script .= 'addInputEvent(\'' . $form_identifier . '\', \'' . $name_prefix . $dependance . '\', \'change\', function() {' . "\n";
                     $script .= '  var data = {};' . "\n";
                     $script .= '  var $form = $(\'#' . $form_identifier . '\');';
 //                    $script.= ' bimp_msg(\'HERE: ' . $dependance . '\');';
                     foreach ($dependances as $dep) {
-                        $script .= '  if ($form.find(\'[name=' . $dep . ']\').length) {' . "\n";
-                        $script .= '      data[\'' . $dep . '\'] = getFieldValue($form, \'' . $dep . '\');' . "\n";
+                        $script .= '  if ($form.find(\'[name=' . $name_prefix . $dep . ']\').length) {' . "\n";
+                        $script .= '      data[\'' . $dep . '\'] = getFieldValue($form, \'' . $name_prefix . $dep . '\');' . "\n";
                         $script .= '  }' . "\n";
                     }
-                    $script .= '  reloadObjectInput(\'' . $form_identifier . '\', \'' . $field_name . '\', data);' . "\n";
+                    $script .= '  reloadObjectInput(\'' . $form_identifier . '\', \'' . $name_prefix . $field_name . '\', data);' . "\n";
                     $script .= '});' . "\n";
                 }
                 $script .= '</script>' . "\n";
@@ -304,14 +309,14 @@ class BC_Field extends BimpComponent
 
     public function renderDisplayIfData()
     {
-        return self::renderDisplayifDataStatic($this->params['display_if']);
+        return self::renderDisplayifDataStatic($this->params['display_if'], $this->name_prefix);
     }
 
-    public static function renderDisplayifDataStatic($params)
+    public static function renderDisplayifDataStatic($params, $name_prefix = '')
     {
         $html = '';
         if (isset($params['field_name']) && $params['field_name']) {
-            $html .= ' data-input_name="' . $params['field_name'] . '"';
+            $html .= ' data-input_name="' . $name_prefix . $params['field_name'] . '"';
 
             if (isset($params['show_values']) && !is_null($params['show_values'])) {
                 $show_values = $params['show_values'];
@@ -361,6 +366,7 @@ class BC_Field extends BimpComponent
             case 'bool':
                 return 'toggle';
 
+            case 'qty':
             case 'html':
             case 'time':
             case 'date':

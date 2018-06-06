@@ -561,6 +561,15 @@ class GSX_Repair extends BimpObject
             if ($response['newSerialNumber'] !== (string) $this->getData('serial') &&
                     $response['newSerialNumber'] !== (string) $this->getData('new_serial')) {
                 $this->set('new_serial', $response['newSerialNumber']);
+                $sav = $this->getChildObject('sav');
+                if (BimpObject::objectLoaded($sav)) {
+                    $equipment = $sav->getChildObject('equipment');
+                    if (BimpObject::objectLoaded($equipment)) {
+                        $equipment->set('serial', $response['newSerialNumber']);
+                        $equipment->update();
+                        $sav->addNote('Mise à jour du numéro de série de l\'équipement effectué le '.date('d / m / Y à H:i'));
+                    }
+                }
                 $force_repair_update = true;
             }
         }
@@ -611,7 +620,7 @@ class GSX_Repair extends BimpObject
                     'result_container' => '$(\'#repair_' . $this->id . '_result\')',
                     'success_callback' => $callback,
                 ));
-                if (count($this->partsPending)) {
+                if (count($this->partsPending) && $this->getData('new_serial') != 'part') {
                     $html = 'La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour';
                     $html .= '<p style="text-align: center; padding: 30px">';
                     $html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Forcer la fermeture</span></p>';
@@ -635,7 +644,7 @@ class GSX_Repair extends BimpObject
                 $client = 'MarkRepairComplete';
                 $requestName = 'MarkRepairCompleteRequest';
             }
-            $request = $this->gsx->_requestBuilder($requestName, '', array('repairConfirmationNumbers' => $this->confirmNumbers['repair']));
+            $request = $this->gsx->_requestBuilder($requestName, '', array('repairConfirmationNumbers' => $this->getData('repair_confirm_number')));
             $response = $this->gsx->request($request, $client);
 
             if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {
@@ -810,7 +819,7 @@ class GSX_Repair extends BimpObject
                 $html .= '<td>' . $part['registeredForReturn'] . '</td>';
                 $html .= '<td><span title="' . $part['vendorName'] . " " . $part['vendorAddress'] . " " . $part['vendorState'] . " " . $part['vendorCity'] . '">' . $part['vendorAddress'] . '</span></td>';
                 $html .= '<td><span title="' . $part['kbbSerialNumber'] . '">' . dol_trunc($part['kbbSerialNumber'], 6) . '</span></td>';
-                $html .= '<td>' . ($part['fileName'] != "" ? '<a class="btn btn-default" href="' . DOL_URL_ROOT . $part['fileName'] . '"><i class="fa fa-file-text iconLeft"></i>Etiquette</a>' : '') . '</td>';
+                $html .= '<td>' . ($part['fileName'] != "" ? '<a class="btn btn-default" target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '"><i class="fa fa-file-text iconLeft"></i>Etiquette</a>' : '') . '</td>';
                 if (file_exists(DOL_DATA_ROOT . '/bimpcore/bimpsupport/sav/' . (int) $this->getData('id_sav') . '/' . $part['fileName'])) {
                     $html .= '<a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="btn btn-default">';
                     $html .= '<i class="fa fa-file-o iconLeft"></i>Etiquette de retour</a>';
@@ -916,6 +925,7 @@ class GSX_Repair extends BimpObject
         }
 
         $this->setSerial($serial);
+        $this->set('total_from_order', '1,2');//Pour qu'il y est forcément un changement aprés
 
         $errors = parent::create();
 

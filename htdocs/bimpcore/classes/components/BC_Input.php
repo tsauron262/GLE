@@ -14,7 +14,11 @@ class BC_Input extends BimpComponent
     public $option = null;
     public $extraClasses = array();
     public $extraData = array();
+    public $name_prefix = '';
     public static $type_params_def = array(
+        'qty'                         => array(
+            'step' => array('data_type' => 'float', 'default' => 1)
+        ),
         'time'                        => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
@@ -28,6 +32,7 @@ class BC_Input extends BimpComponent
             'rows'        => array('data_type' => 'int', 'default' => 3),
             'auto_expand' => array('data_type' => 'bool', 'default' => 0),
             'note'        => array('data_type' => 'bool', 'default' => 0),
+            'values'      => array('data_type' => 'array', 'default' => array()),
         ),
         'select'                      => array(
             'options' => array('data_type' => 'array', 'compile' => true)
@@ -63,6 +68,9 @@ class BC_Input extends BimpComponent
         'select_payment'              => array(
             'value_type'  => array('default' => 'id'),
             'active_only' => array('data_type' => 'bool', 'default' => 1)
+        ),
+        'search_ziptown'              => array(
+            'linked_fields' => array('data_type' => 'array', 'default' => array())
         )
     );
 
@@ -104,6 +112,7 @@ class BC_Input extends BimpComponent
                         $this->params['type'] = 'toggle';
                         break;
 
+                    case 'qty':
                     case 'html':
                     case 'time':
                     case 'date':
@@ -135,9 +144,19 @@ class BC_Input extends BimpComponent
 
         $this->input_id = $this->object->object_name;
         if ($this->object->isLoaded()) {
-            $this->input_id .= '_' . $this->object->id . '_';
+            $this->input_id .= '_' . $this->object->id;
         }
-        $this->input_id .= $input_name;
+        $this->input_id .= '_' . $input_name;
+    }
+
+    public function setNamePrefix($prefix)
+    {
+        $this->name_prefix = $prefix;
+        $this->input_id = $this->object->object_name;
+        if ($this->object->isLoaded()) {
+            $this->input_id .= '_' . $this->object->id;
+        }
+        $this->input_id .= '_' . $prefix . $this->input_name;
     }
 
     public function getOptions()
@@ -146,7 +165,11 @@ class BC_Input extends BimpComponent
 
         switch ($this->params['type']) {
             case 'text':
+            case 'qty':
                 $options['data'] = array();
+                if ($this->params['type'] === 'qty') {
+                    $options['step'] = $this->params['step'];
+                }
                 $min = 'none';
                 $max = 'none';
                 $decimals = 0;
@@ -159,6 +182,7 @@ class BC_Input extends BimpComponent
                     case 'float':
                         $decimals = isset($this->field_params['decimals']) ? $this->field_params['decimals'] : 2;
 
+                    case 'qty':
                     case 'int':
                         $options['data']['data_type'] = 'number';
                         $options['data']['decimals'] = $decimals;
@@ -189,6 +213,7 @@ class BC_Input extends BimpComponent
                 $options['rows'] = isset($this->params['rows']) ? $this->params['rows'] : 3;
                 $options['auto_expand'] = isset($this->params['auto_expand']) ? $this->params['auto_expand'] : 0;
                 $options['note'] = isset($this->params['note']) ? $this->params['note'] : 0;
+                $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
                 break;
 
             case 'select':
@@ -231,6 +256,10 @@ class BC_Input extends BimpComponent
             case 'select_payment':
                 $options['value_type'] = isset($this->params['value_type']) ? $this->params['value_type'] : 'id';
                 $options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
+                break;
+
+            case 'search_ziptown':
+                $options['linked_fields'] = isset($this->params['linked_fields']) ? $this->params['linked_fields'] : array();
                 break;
         }
 
@@ -283,21 +312,27 @@ class BC_Input extends BimpComponent
             $this->new_value = $this->value;
         }
 
-        $html .= '<div class="inputContainer ' . $this->input_name . '_inputContainer';
+        $html .= '<div class="inputContainer ' . $this->name_prefix . $this->input_name . '_inputContainer';
         if (count($this->extraClasses)) {
             foreach ($this->extraClasses as $extraClass) {
                 $html .= ' ' . $extraClass;
             }
         }
+
+        $required = isset($this->field_params['required']) ? (int) $this->field_params['required'] : 0;
+
         $html .= '"';
-        $html .= ' data-field_name="' . $this->input_name . '"';
+        $html .= ' data-field_name="' . $this->name_prefix . $this->input_name . '"';
         $html .= ' data-initial_value="' . htmlentities($this->value) . '"';
         $html .= ' data-multiple="' . ((int) $this->params['multiple'] ? 1 : 0) . '"';
+        $html .= ' data-required="' . $required . '"';
+        $html .= ' data-data_type="' . $this->data_type . '"';
         if (count($this->extraData)) {
             foreach ($this->extraData as $data_name => $data_value) {
                 $html .= ' data-' . $data_name . '="' . $data_value . '"';
             }
         }
+        $html .= ' data-field_prefix="' . $this->name_prefix . '"';
         $html .= '>';
 
         switch ($this->params['type']) {
@@ -310,7 +345,7 @@ class BC_Input extends BimpComponent
                 break;
 
             default:
-                $html .= BimpInput::renderInput($this->params['type'], $this->input_name, $this->new_value, $options, null, $option, $this->input_id);
+                $html .= BimpInput::renderInput($this->params['type'], $this->name_prefix . $this->input_name, $this->new_value, $options, null, $option, $this->input_id);
                 break;
         }
 
@@ -320,11 +355,11 @@ class BC_Input extends BimpComponent
 
         if ((int) $this->params['multiple']) {
             if ($this->params['type'] === 'search_list') {
-                $label_field_name = $this->input_name . '_add_value_search';
+                $label_field_name = $this->name_prefix . $this->input_name . '_add_value_search';
             } else {
-                $label_field_name = $this->input_name;
+                $label_field_name = $this->name_prefix . $this->input_name;
             }
-            $html .= BimpInput::renderMultipleValuesList($this->object, $this->input_name, $this->value, $label_field_name);
+            $html .= BimpInput::renderMultipleValuesList($this->object, $this->name_prefix . $this->input_name, $this->value, $label_field_name);
         }
 
         $html .= '</div>';
@@ -338,6 +373,6 @@ class BC_Input extends BimpComponent
             $this->value = '';
         }
 
-        return BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path, $this->input_name, $this->value, $this->option);
+        return BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path, $this->name_prefix . $this->input_name, $this->value, $this->option);
     }
 }

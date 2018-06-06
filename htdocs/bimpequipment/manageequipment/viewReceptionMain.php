@@ -37,6 +37,7 @@ function printTableReception($db) {
     print '<th>Date de réception</th>';
     print '<th>Nombre de produit envoyés</th>';
     print '<th>Entrepot de départ</th>';
+    print '<th>Entrepot arrivé</th>';
     print '<th>Lien</th>';
     print '</thead>';
     print '<tbody>';
@@ -44,7 +45,7 @@ function printTableReception($db) {
     $obj_transfer = new BimpTransfer($db);
 
 //$transfers = $obj_transfer->getTransfers(GETPOST('entrepot_id'), $obj_transfer::STATUS_SENT);
-    $transfers = $obj_transfer->getTransfers(GETPOST('entrepot_id'));
+    $transfers = $obj_transfer->getTransfers(null, null, null, GETPOST('entrepot_id'));
 
 
     foreach ($transfers as $transfer) {
@@ -54,6 +55,8 @@ function printTableReception($db) {
         $obj_transfer->id = $transfer['id'];
         $doli_warehouse = new Entrepot($db);
         $doli_warehouse->fetch($transfer['fk_warehouse_source']);
+        $doli_warehouse2 = new Entrepot($db);
+        $doli_warehouse2->fetch($transfer['fk_warehouse_dest']);
 
         print '<tr>';
         print '<td>' . $transfer['id'] . '</td>';
@@ -71,6 +74,7 @@ function printTableReception($db) {
         print '<td>' . $transfer['date_closing'] . '</td>';
         print '<td>' . $obj_transfer->getProductSent() . '</td>';
         print '<td>' . $doli_warehouse->getNomUrl() . '</td>';
+        print '<td>' . $doli_warehouse2->getNomUrl() . '</td>';
         print '<td><input type="button" class="butAction" value="Voir" onclick="location.href=\'' . DOL_URL_ROOT . '/bimpequipment/manageequipment/viewReception.php?id=' . $transfer['id'] . '\'" style="margin-top: 5px"></td>';
         print '</tr>';
     }

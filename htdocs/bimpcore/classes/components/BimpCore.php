@@ -30,6 +30,7 @@ class BimpCore
             '/bimpcore/views/js/new/functions.js',
             '/bimpcore/views/js/new/ajax.js',
 //            '/bimpcore/views/js/new/component.js',
+            '/bimpcore/views/js/new/modal.js', 
             '/bimpcore/views/js/new/object.js',
             '/bimpcore/views/js/new/form.js',
             '/bimpcore/views/js/new/list.js',

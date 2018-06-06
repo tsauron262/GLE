@@ -84,12 +84,6 @@ div.tabBar {
     margin: 15px;
 }
 
-.modal {
-    .modal-dialog {
-        margin-top: 5%;
-    }
-}
-
 .ui-autocomplete,
 .select2-drop {
     z-index: 10250!important;
@@ -227,9 +221,14 @@ div.alert {
     }
 }
 
+.object_component_content {
+    background-color: #fff;
+}
+
 /*Boutons*/
 
 .btn {
+    margin: 2px;
     i {
         font-size: 14px;
 
@@ -305,6 +304,133 @@ i.iconRight {
                 margin-left: 12px;
             }
         }
+    }
+}
+
+/*Modales*/
+
+.modal {
+    .modal-dialog {
+        margin-top: 5%;
+    }
+
+    .modal-nav-buttons {
+        display: inline-block;
+        padding-right: 20px;
+        margin-right: 20px;
+        border-right: 1px solid #969696;
+
+        .modal-nav-prev,
+        .modal-nav-next {
+            display: inline-block;
+            margin: 0 2px;
+            cursor: pointer;
+            font-size: 18px;
+            background-color: #636363;
+            color: #B4B4B4;
+            border-radius: 50%;
+            @include transition(all 0.3s ease);
+            text-align: center;
+            width: 32px;
+            height: 32px;
+
+            i {
+                display: inline-block;
+                vertical-align: middle;
+                line-height: 32px;
+            }
+
+            &:hover {
+                color: #636363;
+                background-color: #fff;
+            }
+
+            &.disabled {
+                cursor: default;
+                color: #787878;
+
+                &:hover {
+                    background-color: #636363;
+                    color: #787878;
+                }
+            }
+        }
+
+        .modal-nav-prev i {
+            margin-right: 2px;
+        }
+
+        .modal-nav-history {
+            display: inline-block;
+            margin-left: 10px;
+
+            .dropdown-toggle {
+                display: inline-block;
+                color: #B4B4B4;
+                font-size: 16px;
+                cursor: pointer;
+
+                &:before {
+                    font-family: 'FontAwesome';
+                    content: '\f0d7';
+                }
+
+                &:hover {
+                    color: #fff;
+                }
+
+                &.disabled {
+                    color: #787878;
+                    cursor: default;
+
+                    &:hover {
+                        color: #787878;
+                    }
+                }
+            }
+        }
+    }
+
+    .modal-titles_container {
+        display: inline-block;
+    }
+
+    .modal-body {
+        max-height: 650px;
+        padding-bottom: 60px;
+        overflow-y: auto;
+    }
+}
+
+#openModalBtn {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    margin-bottom: 15px;
+    margin-right: 15px;
+    display: inline-block;
+    border-radius: 50%;
+    text-align: center;
+    width: 38px;
+    height: 38px;
+    line-height: 38px;
+    background-color: $secondary;
+    cursor: pointer;
+    @include transition(all 0.3s ease);
+
+    i {
+        color: #fff;
+        font-size: 16px;
+        vertical-align: middle;
+        margin-right: 1px;
+    }
+
+    &:hover {
+        background-color: $primary;
+    }
+
+    &.closed {
+        margin-right: -40px;
     }
 }
 

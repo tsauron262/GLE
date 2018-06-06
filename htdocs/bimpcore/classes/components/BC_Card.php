@@ -69,10 +69,10 @@ class BC_Card extends BimpComponent
 
         parent::__construct($object, $name, $path);
 
-        if ($this->display_object === 'Facture') {
-            echo '<pre>';
-            print_r($this->params);
-            exit;
+        if (!count($this->errors)) {
+            if (!$this->object->canView()) {
+                $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('this');
+            }
         }
     }
 
@@ -147,7 +147,7 @@ class BC_Card extends BimpComponent
         if ($this->params['title'] === 'nom') {
             $this->params['title'] = $this->display_object->getInstanceName();
         }
-        
+
         $status = null;
         if ($this->params['status']) {
             $status = $this->display_object->displayData($this->params['status']);
@@ -585,7 +585,7 @@ class BC_Card extends BimpComponent
         }
         $html .= '<div class="media-body">';
         if (!is_null($title) && $title) {
-            $html .= '<div style="display: inline-block">'; 
+            $html .= '<div style="display: inline-block">';
             $html .= '<h4 class="media-heading">' . $title . '</h4>';
             $html .= '</div>';
         }
@@ -638,7 +638,7 @@ class BC_Card extends BimpComponent
                 $html .= ' data-content="vue rapide"';
                 $html .= ' data-container="body"';
                 $html .= ' data-placement="top"';
-                $html .= 'onclick="loadModalObjectPage($(this), \'' . $url . '\', \'page_modal\', \'' . htmlentities(addslashes($title)) . '\')">';
+                $html .= 'onclick="loadModalObjectPage($(this), \'' . $url . '\', \'' . htmlentities(addslashes($title)) . '\')">';
                 $html .= '<i class="fa fa-eye"></i></button>';
 
                 $html .= '<a href="' . $url . '" class="btn btn-default bs-popover" target="_blank"';

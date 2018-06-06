@@ -173,6 +173,8 @@ if(stripos($search_boxvalue, "pr") === 0)
 	$arrayresult=array_merge(array($arrayresult["searchintopropal"]), $arrayresult);
 if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintochrono"]))
 	$arrayresult=array_merge(array($arrayresult["searchintochrono"]), $arrayresult);
+if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintosav"]))
+	$arrayresult=array_merge(array($arrayresult["searchintosav"]), $arrayresult);
 /*fmod drsi*/
     
     

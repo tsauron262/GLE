@@ -2,6 +2,7 @@ bootstrap: 1
 js:
     - /bimpapple/views/js/gsx.js
     - /bimpsupport/views/js/sav.js
+    - /bimpequipment/views/js/equipment.js
 css:
     - /bimpapple/views/css/gsx.css
     - /bimpsupport/views/css/sav.css
@@ -27,7 +28,7 @@ sections:
                     - cols: 
                         - type: view
                           view:
-                              name: default
+                              name: infos
                               panel: 1
                               object: sav
                     - cols: 

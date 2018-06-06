@@ -1,6 +1,9 @@
 <?php
+require_once DOL_DOCUMENT_ROOT."/bimpequipment/controllers/equipmentController.php";
 
-class entrepotController extends BimpController
+require_once DOL_DOCUMENT_ROOT.'/bimpequipment/controllers/equipmentController.php';
+
+class entrepotController extends equipmentController
 {
 
     public function displayHead()

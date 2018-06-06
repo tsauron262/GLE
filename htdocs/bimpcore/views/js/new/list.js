@@ -118,8 +118,8 @@ function reloadObjectList(list_id, callback) {
     if ($list.find('input[name=param_list_filters]').length) {
         data['param_list_filters'] = $list.find('input[name=param_list_filters]').val();
     }
-    if ($list.find('input[name=param_associations_filters]').length) {
-        data['param_associations_filters'] = $list.find('input[name=param_associations_filters]').val();
+    if ($list.find('input[name=param_association_filters]').length) {
+        data['param_association_filters'] = $list.find('input[name=param_association_filters]').val();
     }
 
     // Envoi requête:
@@ -173,17 +173,6 @@ function reloadObjectList(list_id, callback) {
 }
 
 function loadModalList(module, object_name, list_name, id_parent, $button, title) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
-    var $modal = $('#page_modal');
-    var $resultContainer = $modal.find('.modal-ajax-content');
-    hidePopovers($resultContainer);
-    $resultContainer.html('').hide();
-
     if (typeof (title) === 'undefined' || !title) {
         title = '<i class="fa fa-bars iconLeft"></i>Liste des ';
         if (typeof (object_labels[object_name].name_plur) !== 'undefined') {
@@ -192,20 +181,6 @@ function loadModalList(module, object_name, list_name, id_parent, $button, title
             title += 'Objet "' + object_name + '"';
         }
     }
-
-    $modal.find('.modal-title').html(title);
-    $modal.find('.loading-text').text('Chargement');
-    $modal.find('.content-loading').show();
-    $modal.modal('show');
-
-    var isCancelled = false;
-
-    $modal.on('hide.bs.modal', function (e) {
-        $modal.find('.extra_button').remove();
-        $modal.find('.content-loading').hide();
-        isCancelled = true;
-        $button.removeClass('disabled');
-    });
 
     if (typeof (id_parent) === 'undefined') {
         id_parent = 0;
@@ -217,26 +192,12 @@ function loadModalList(module, object_name, list_name, id_parent, $button, title
         'id_parent': id_parent
     };
 
-    BimpAjax('loadObjectListFullPanel', data, null, {
-        $modal: $modal,
-        $resultContainer: $resultContainer,
-        display_success: false,
-        success: function (result, bimpAjax) {
-            bimpAjax.$modal.find('.content-loading').hide();
-            if (!isCancelled) {
-                if (typeof (result.html) !== 'undefined') {
-                    bimpAjax.$resultContainer.html(result.html).slideDown(250);
-                    var $new_list = bimpAjax.$resultContainer.find('#' + result.list_id);
-                    if ($new_list.length) {
-                        onListLoaded($new_list);
-                    }
-                }
-                bimpAjax.$modal.modal('handleUpdate');
-            }
-        },
-        error: function (result, bimpAjax) {
-            bimpAjax.$modal.find('.content-loading').hide();
-            bimpAjax.$modal.modal('handleUpdate');
+    bimpModal.loadAjaxContent($button, 'loadObjectListFullPanel', data, title, '', function (result, bimpAjax) {
+        var $new_list = bimpAjax.$resultContainer.find('#' + result.list_id);
+        if ($new_list.length) {
+            $new_list.data('modal_idx', bimpAjax.$resultContainer.data('idx'));
+            bimpModal.removeComponentContent($new_list.attr('id'));
+            onListLoaded($new_list);
         }
     });
 }
@@ -528,6 +489,169 @@ function toggleSelectedItemsAssociation(list_id, operation, association, id_asso
     }
 }
 
+function setSelectedObjectsNewStatus($button, list_id, new_status, extra_data, confirm_msg) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        return;
+    }
+
+    if (typeof (extra_data) === 'undefined') {
+        extra_data = {};
+    }
+
+    var $selected = $list.find('tbody').find('input.item_check:checked');
+    var object_name = $list.data('object_name');
+
+    if (!$selected.length) {
+        var msg = '';
+        if (object_labels[object_name]['is_female']) {
+            msg = 'Aucune ' + object_labels[object_name]['name'] + ' sélectionnée';
+        } else {
+            msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
+        }
+        bimp_msg(msg, 'danger');
+    } else {
+        if (typeof (confirm_msg) === 'string') {
+            if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
+                return;
+            }
+        }
+        $button.addClass('disabled');
+        var i = 1;
+        $selected.each(function () {
+            var id_object = $(this).data('id_object');
+            if (id_object) {
+                setObjectNewStatus(null, {
+                    module: $list.data('module'),
+                    object_name: object_name,
+                    id_object: id_object
+                }, new_status, extra_data, null, null, null);
+            } else {
+                var msg = '';
+                if (object_labels[object_name]['is_female']) {
+                    msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionnée n° ' + i + ' absent';
+                } else {
+                    msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionné n° ' + i + ' absent';
+                }
+                bimp_msg(msg, 'danger');
+            }
+            i++;
+        });
+        $button.removeClass('disabled');
+    }
+}
+
+function setSelectedObjectsAction($button, list_id, action, extra_data, form_name, confirm_msg) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (typeof (confirm_msg) === 'string') {
+        if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
+            return;
+        }
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        return;
+    }
+
+    if (typeof (extra_data) === 'undefined') {
+        extra_data = {};
+    }
+
+    var $selected = $list.find('tbody').find('input.item_check:checked');
+    var object_name = $list.data('object_name');
+
+    if (!$selected.length) {
+        var msg = '';
+        if (object_labels[object_name]['is_female']) {
+            msg = 'Aucune ' + object_labels[object_name]['name'] + ' sélectionnée';
+        } else {
+            msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
+        }
+        bimp_msg(msg, 'danger');
+    } else {
+        if (typeof (form_name) === 'string' && form_name) {
+            var title = '';
+            if ($.isOk($button)) {
+                title = $button.text();
+            }
+            loadModalForm($button, {
+                module: $list.data('module'),
+                object_name: $list.data('object_name'),
+                id_object: 0,
+                form_name: form_name,
+                extra_data: extra_data
+            }, title, function ($form) {
+                if ($.isOk($form)) {
+                    var modal_idx = parseInt($form.data('modal_idx'));
+                    if (!modal_idx) {
+                        bimp_msg('Erreur technique: index de la modale absent');
+                        return;
+                    }
+                }
+                if ($form.length) {
+                    for (var field_name in extra_data) {
+                        var $input = $form.find('[name="' + field_name + '"]');
+                        if ($input.length) {
+                            $input.val(extra_data[field_name]);
+                        }
+                    }
+                    bimpModal.$footer.find('.save_object_button.modal_' + modal_idx).remove();
+                    bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
+                    bimpModal.addButton('Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
+
+                    bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
+                        $form.find('.inputContainer').each(function () {
+                            var field_name = $(this).data('field_name');
+                            if ($(this).find('.cke').length) {
+                                var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+                                $(this).find('[name="' + field_name + '"]').val(html_value);
+                            }
+                            extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
+                        });
+                        bimpModal.hide();
+                        setSelectedObjectsAction($button, list_id, action, extra_data, null, null);
+                    });
+                }
+            });
+        } else {
+            $button.addClass('disabled');
+            var i = 1;
+            $selected.each(function () {
+                var id_object = $(this).data('id_object');
+                if (id_object) {
+                    setObjectAction(null, {
+                        module: $list.data('module'),
+                        object_name: object_name,
+                        id_object: id_object
+                    }, action, extra_data, null, null, null, null);
+                } else {
+                    var msg = '';
+                    if (object_labels[object_name]['is_female']) {
+                        msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionnée n° ' + i + ' absent';
+                    } else {
+                        msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionné n° ' + i + ' absent';
+                    }
+                    bimp_msg(msg, 'danger');
+                }
+                i++;
+            });
+            $button.removeClass('disabled');
+        }
+    }
+}
+
 // Actions:
 
 function cancelObjectRowModifications(list_id, id_object, $button) {
@@ -800,6 +924,22 @@ function onListLoaded($list) {
 
     if (!parseInt($list.data('loaded_event_processed'))) {
         $list.data('loaded_event_processed', 1);
+
+        var $tbody = $list.find('tbody.listRows');
+
+        $tbody.find('a').each(function () {
+//        $(this).attr('target', '_blank');
+            var link_title = $(this).attr('title');
+            if (link_title) {
+                $(this).removeAttr('title');
+                $(this).popover({
+                    trigger: 'hover',
+                    content: link_title,
+                    placement: 'bottom',
+                    html: true
+                });
+            }
+        });
 
         $list.find('input[name="param_n"]').change(function () {
             reloadObjectList($list.attr('id'));

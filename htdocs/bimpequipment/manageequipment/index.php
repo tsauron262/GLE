@@ -66,6 +66,7 @@ print '<div id="alertPlaceHolder" style="clear : left"></div>';
 print '<div class="object_list_table">';
 print '<table id="table_transfer" class="noborder objectlistTable" style="margin-top:10px">';
 print '<thead>';
+print '<th>Ref</th>';
 print '<th>Responsable</th>';
 print '<th>Statut</th>';
 print '<th>Date d\'ouverture</th>';

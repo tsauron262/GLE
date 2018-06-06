@@ -2,6 +2,7 @@ bootstrap: 1
 js:
     - /bimpcore/views/js/BimpTimer.js
     - /bimpsupport/views/js/ticket.js
+    - /bimpequipment/views/js/equipment.js
     
 title: Support
 

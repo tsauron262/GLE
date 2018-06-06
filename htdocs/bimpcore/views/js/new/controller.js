@@ -85,4 +85,8 @@ $(document).ready(function () {
     window.onhashchange = function (e) {
         onUrlHashChange(e.newURL);
     };
+
+    $('#openModalBtn').popover().click(function () {
+        $(this).popover('hide');
+    });
 });

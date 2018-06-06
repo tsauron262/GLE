@@ -56,11 +56,20 @@ class BC_List extends BC_Panel
             if (is_null($this->params['icon']) || !$this->params['icon']) {
                 $this->params['icon'] = 'bars';
             }
+            
+            if (!$this->object->canCreate()) {
+                $this->params['add_btn'] = 0;
+                $this->params['add_form_name'] = null;
+            }
         }
 
         $this->setConfPath();
 
         $this->filters = $this->object->getSearchFilters();
+        
+//        echo '<pre>';
+//        print_r($this->params);
+//        exit;
     }
 
     // Gestion des filtres: 
@@ -277,13 +286,13 @@ class BC_List extends BC_Panel
                     $bimp_asso = new BimpAssociation($object, $asso_filter['association']);
                     if (!count($bimp_asso->errors)) {
                         $alias = 'asso_' . $asso_filter['association'];
-                        $sql = BimpTools::getSqlSelect(array('src_id_object'), $alias);
+                        $sql = BimpTools::getSqlSelect(array($return_field), $alias);
                         $sql .= BimpTools::getSqlFrom(BimpAssociation::$table, null, $alias);
                         $sql .= BimpTools::getSqlWhere($bimp_asso->getSqlFilters($id_object, $id_associate, $alias));
-                        $this->mergeFilter('id', array($asso_filter['type'] => $sql));
+                        $this->mergeFilter($this->object->getPrimary(), array($asso_filter['type'] => $sql));
                     } else {
                         $this->errors[] = array_merge($this->errors, $bimp_asso->errors);
-                        $filters['id'] = 0;
+                        $filters[$this->object->getPrimary()] = 0;
                     }
                 }
             }

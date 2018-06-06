@@ -37,6 +37,36 @@ class Interfacevalidateorder extends DolibarrTriggers {
             setEventMessages("Impossible de dévalidé", null, 'errors');
             return -2;
         }
+        
+        
+        //Classé facturé
+        if ($action == "BILL_VALIDATE"){
+            $facturee = true;
+            $object->fetchObjectLinked();
+            if(isset($object->linkedObjects['commande'])){
+                foreach($object->linkedObjects['commande'] as $comm){
+                    $facturee = false;
+                    $totalCom = $comm->total_ttc;
+                    $totalFact = 0;
+                    $comm->fetchObjectLinked();
+                    if(isset($comm->linkedObjects['facture'])){
+                        foreach($comm->linkedObjects['facture'] as $fact){
+                            $totalFact += $fact->total_ttc;
+                        }
+                    }
+                    $diff = $totalCom - $totalFact;
+                    if($diff < 0.02 && $diff > -0.02){
+                        $facturee = true;
+                        $comm->classifybilled($user);
+                    }
+                }
+            }
+            if(isset($object->linkedObjects['propal']) && $facturee){
+                foreach($object->linkedObjects['propal'] as $prop)
+                    $prop->classifybilled($user);
+            }
+        }
+        
         return 0;
     }
 

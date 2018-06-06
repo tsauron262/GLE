@@ -434,7 +434,8 @@ if (!empty($holiday->holiday)) {
 
         $date = $infos_CP['date_create'];
 
-        print '<tr ' . $bc[$var] . '>';
+        $tabColor = array("16"=>"green", "17"=>"blue", "18"=>"orange", "19"=>"purple");
+        print '<tr ' . $bc[$var] . '  style=" color:'.$tabColor[dol_print_date($infos_CP['date_debut'], '%y')].'">';
         print '<td>';
         $holidaystatic->id = $infos_CP['rowid'];
         $holidaystatic->ref = $infos_CP['rowid'];

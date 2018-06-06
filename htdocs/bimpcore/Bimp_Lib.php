@@ -24,6 +24,7 @@ if (!defined('BIMP_LIB')) {
         require_once $dir . 'BimpCore.php';
         require_once $dir . 'BimpController.php';
     } else {
+        require_once $dir . 'components/BimpCache.php';
         require_once $dir . 'components/BimpConfigDefinitions.php';
         require_once $dir . 'components/BimpComponent.php';
         require_once $dir . 'components/BC_Field.php';

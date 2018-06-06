@@ -381,7 +381,7 @@ class Product extends CommonObject
         	$error=0;
 
 		// Clean parameters
-		$this->ref = dol_string_nospecial(trim($this->ref));
+		$this->ref = $this->ref;
 		$this->label = trim($this->label);
 		$this->price_ttc=price2num($this->price_ttc);
 		$this->price=price2num($this->price);

@@ -97,7 +97,7 @@ class BimpStatsFacture {
         $sql = 'SELECT f.rowid as facid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture as f';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e ON f.rowid = e.fk_object';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_factSAV as fs ON f.rowid = fs.idFact';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON (f.rowid = fs.id_facture || f.rowid = fs.id_facture_acompte)';
         $sql .= ' WHERE f.datef >= ' . $this->db->idate($dateStart);
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
 
@@ -111,13 +111,14 @@ class BimpStatsFacture {
         $sql .= " AND (";
         if (!empty($centres) and $placeType == 'c') {
             $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';
-            $sql .= ' OR fs.centre IN (\'' . implode("','", $centres) . '\'))';
+            $sql .= ' OR fs.code_centre IN (\'' . implode("','", $centres) . '\'))';
             if (in_array('NRS', $centres)) {
                 $sql .= " OR ((e.centre IS NULL OR e.centre = '1')";
-                $sql .= " AND (fs.centre IS NULL OR fs.centre = '1'))";
+                $sql .= " AND (fs.code_centre IS NULL OR fs.code_centre = '1'))";
             }
         } elseif (!empty($centres) and $placeType == 'e') {
-            $sql .= 'e.entrepot IN (\'' . implode("','", $centres) . '\')';
+            $sql .= '(e.entrepot IN (\'' . implode("','", $centres) . '\')';
+            $sql .= ' OR fs.id_entrepot IN (\'' . implode("','", $centres) . '\'))';
             if (in_array('NRS', $centres)) {
                 $sql .= " OR e.entrepot IS NULL OR e.entrepot = '1'";
             }
@@ -159,27 +160,30 @@ class BimpStatsFacture {
         $sql = 'SELECT f.rowid as fac_id, f.facnumber as fac_number, f.fk_statut as fac_statut,';
         $sql .= ' s.rowid as soc_id, s.nom as soc_nom,';
         $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
-        $sql .= ' e.centre as centre2, e.type as type, e.entrepot as fk_entrepot,';
-        $sql .= ' fs.centre as centre1, fs.idSav as sav_id, fs.refSav as sav_ref,';
+        $sql .= ' e.centre as centre2, e.type as type, e.entrepot as fk_entrepot2,';
+        $sql .= ' fs.code_centre as centre1, fs.id_entrepot as fk_entrepot1, fs.id as sav_id, fs.ref as sav_ref,';
         $sql .= ' pf.amount as pai_paye_ttc,';
-        $sql .= ' sy.description as description, sy.model_refid as saf_refid,';
-        $sql .= ' sy_101.N__Serie as numero_serie, sy_101.Type_garantie as type_garantie,';
+        $sql .= ' eq.product_label as description, ';
+        $sql .= ' eq.serial as numero_serie, eq.warranty_type as type_garantie,';
+        $sql .= ' re.repair_confirm_number as ggsx, f.datef as fact_date, ';
 
         if ($taxes == 'ttc')
-            $sql.= ' f.total_ttc as fac_total';
+            $sql.= ' f.total_ttc as fac_total, SUM(prop.total) as prop_total';
         else    // ht
-            $sql.= ' f.total as fac_total';
+            $sql.= ' f.total as fac_total, SUM(prop.total_ht) as prop_total';
         $sql .= ' FROM      ' . MAIN_DB_PREFIX . 'facture as f';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe             as s  ON f.fk_soc        = s.rowid';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture    as pf ON f.rowid         = pf.fk_facture';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement            as p  ON pf.fk_paiement  = p.rowid';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e  ON f.rowid         = e.fk_object';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_factSAV as fs ON f.rowid = fs.idFact';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'synopsischrono     as sy     ON fs.equipmentId = sy.id';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'synopsischrono_chrono_101 as sy_101 ON fs.equipmentId = sy_101.id';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON (f.rowid = fs.id_facture || f.rowid = fs.id_facture_acompte)';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment as eq ON eq.id = fs.id_equipment';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_gsx_repair as re ON re.id_sav = fs.id';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as elel ON `sourcetype` LIKE "propal" AND `fk_target` = f.rowid AND `targettype` LIKE "facture"';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propal as prop ON `fk_source` = prop.rowid AND prop.fk_statut != 3';
 
         $sql .= ' WHERE f.rowid IN (\'' . implode("','", $facids) . '\')';
-        $sql .= ' ORDER BY f.rowid';
+        $sql .= ' GROUP BY p.rowid ORDER BY f.rowid';
 
         dol_syslog(get_class($this) . "::getFields sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);
@@ -204,12 +208,19 @@ class BimpStatsFacture {
                     $hash[$ind]['ct'] = 0;
                 $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '' and $obj->type != false) ? $obj->type : 0;
                 $hash[$ind]['equip_ref'] = (isset($obj->description)) ? $obj->description : '';
-                $hash[$ind]['fk_entrepot'] = (isset($obj->fk_entrepot)) ? $obj->fk_entrepot : '';
+                if ($obj->fk_entrepot1 != "0" and $obj->fk_entrepot1 != '' and $obj->fk_entrepot1 != false)
+                    $hash[$ind]['fk_entrepot'] = $obj->fk_entrepot1;
+                elseif ($obj->fk_entrepot2 != "0" and $obj->fk_entrepot2 != '' and $obj->fk_entrepot2 != false)
+                    $hash[$ind]['fk_entrepot'] = $obj->fk_entrepot2;
+                else
+                    $hash[$ind]['fk_entrepot'] = 0;
                 $hash[$ind]['numero_serie'] = (isset($obj->numero_serie)) ? $obj->numero_serie : '';
                 $hash[$ind]['type_garantie'] = (isset($obj->type_garantie)) ? $obj->type_garantie : '';
                 $hash[$ind]['sav_id'] = (isset($obj->sav_id)) ? $obj->sav_id : '';
                 $hash[$ind]['sav_ref'] = (isset($obj->sav_ref)) ? $obj->sav_ref : '';
-                $hash[$ind]['saf_refid'] = (isset($obj->saf_refid)) ? $obj->saf_refid : '';
+                $hash[$ind]['ggsx'] = (isset($obj->ggsx)) ? $obj->ggsx : '';
+                $hash[$ind]['prop_total'] = (isset($obj->prop_total)) ? $obj->prop_total : '';
+                $hash[$ind]['fact_date'] = (isset($obj->fact_date)) ? dol_print_date($obj->fact_date) : '';
                 $ind++;
             }
         }
@@ -298,11 +309,11 @@ class BimpStatsFacture {
 
     private function addSavURL($hash) {
         foreach ($hash as $ind => $h) {
-            if (isset($h['sav_id'])/* and $h['saf_refid'] == 105 */) {
-                $chrono = new Chrono($this->db);
+            if (isset($h['sav_id'])) {
+                require_once DOL_DOCUMENT_ROOT."/bimpsupport/objects/BS_SAV.class.php";
+                $chrono = new BS_SAV($this->db);
                 $chrono->id = $h['sav_id'];
                 $chrono->ref = $h['sav_ref'];
-//                $chrono->model_refid = 105;
                 $hash[$ind]['sav_ref'] = $chrono->getNomUrl(1, '', '');
             }
         }
@@ -503,6 +514,7 @@ class BimpStatsFacture {
 
             if (!isset($out[$filtre]['nb_facture'][$row['fac_id']])) {//La facture n'est pas encore traité sinon deuxieme paiement
                 $out[$filtre]['total_total'] += $row['factotal'];
+                $out[$filtre]['total_total_prop'] += $row['prop_total'];
                 $out[$filtre]['total_total_marge'] += $row['marge'];
                 $out[$filtre]['nb_facture'][$row['fac_id']] = 1;
             } else {//deuxieme paiement on vire les montant
@@ -518,11 +530,11 @@ class BimpStatsFacture {
             unset($row['ty']);
             unset($row['sav_id']);
             unset($row['fk_entrepot']);
-            unset($row['saf_refid']);
 
             if ($this->mode != 'r') {
                 //Formatage des données
                 $row['factotal'] = $this->formatPrice($row['factotal']);
+                $row['prop_total'] = $this->formatPrice($row['prop_total']);
                 $row['marge'] = $this->formatPrice($row['marge']);
                 $row['paipaye_ttc'] = $this->formatPrice($row['paipaye_ttc']);
                 $out[$filtre]['factures'][] = $row;
@@ -531,6 +543,7 @@ class BimpStatsFacture {
 
         foreach ($out as $key => $inut) {
             $out[$key]['total_total'] = $this->formatPrice($out[$key]['total_total']);
+            $out[$key]['total_total_prop'] = $this->formatPrice($out[$key]['total_total_prop']);
             $out[$key]['total_total_marge'] = $this->formatPrice($out[$key]['total_total_marge']);
             $out[$key]['total_payer'] = $this->formatPrice($out[$key]['total_payer']);
             $out[$key]['nb_facture'] = count($out[$key]['nb_facture']);

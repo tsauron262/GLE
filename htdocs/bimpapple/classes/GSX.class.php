@@ -306,7 +306,7 @@ class GSX
     {
         if (!preg_match($this->_regex('serialNumber'), $serial)) {
             $this->error(__METHOD__, __LINE__, 'Numéro de série invalide.');
-            echo 'Numéro de série invalide.';
+//            echo 'Numéro de série invalide.';
             return false;
         }
 

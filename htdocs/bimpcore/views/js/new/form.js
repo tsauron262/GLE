@@ -39,14 +39,9 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
         return;
     }
 
-    // Patch: (problème avec l'éditeur html => le textarea n'es pas alimenté depuis l'éditeur) 
-    $form.find('.inputContainer').each(function () {
-        if ($(this).find('.cke').length) {
-            var field_name = $(this).data('field_name');
-            var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
-            $(this).find('[name="' + field_name + '"]').val(html_value);
-        }
-    });
+    if (!validateForm($form)) {
+        return;
+    }
 
     var data = new FormData($formular.get(0));
 
@@ -55,33 +50,42 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
     }
 
     BimpAjax('saveObject', data, $resultContainer, {
+        $form: $form,
         form_id: form_id,
         $button: $button,
         on_save: on_save,
         processData: false,
         contentType: false,
         display_success_in_popup_only: true,
+        display_processing: true,
+        processing_padding: 10,
         success: function (result, bimpAjax) {
-            bimpAjax.$resultContainer.slideUp(250, function () {
-                $(this).html('');
-            });
-            switch (bimpAjax.on_save) {
-                case 'reload':
-                    if ((typeof (result.object_view_url) !== 'undefined') && result.object_view_url) {
-                        var $link = bimpAjax.$button.parent().find('.objectViewLink');
-                        if ($link.length) {
-                            $link.removeClass('hidden').attr('href', result.object_view_url);
+            if (!result.warnings.length) {
+                bimpAjax.$resultContainer.slideUp(250, function () {
+                    $(this).html('');
+                });
+                switch (bimpAjax.on_save) {
+                    case 'reload':
+                        if ((typeof (result.object_view_url) !== 'undefined') && result.object_view_url) {
+                            var $link = bimpAjax.$button.parent().find('.objectViewLink');
+                            if ($link.length) {
+                                $link.removeClass('hidden').attr('href', result.object_view_url);
+                            }
                         }
-                    }
-                    reloadForm(bimpAjax.form_id);
-                    break;
+                        reloadForm(bimpAjax.form_id);
+                        break;
 
-                case 'close':
-                    closeForm(bimpAjax.form_id);
-                    break;
+                    case 'close':
+                        closeForm(bimpAjax.form_id);
+                        break;
 
-                case 'none':
-                    break;
+                    case 'none':
+                        break;
+                }
+            } else {
+                bimpAjax.display_warnings_in_popup_only = true;
+                bimpAjax.display_result_warnings(result.warnings);
+                bimpAjax.display_warnings_in_popup_only = false;
             }
             $('body').trigger($.Event('objectChange', {
                 module: result.module,
@@ -96,20 +100,6 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
 }
 
 function loadModalForm($button, data, title, successCallback) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
-    if (typeof (data.id_object) === 'undefined') {
-        data.id_object = 0;
-    }
-
-    var $modal = $('#page_modal');
-    var $resultContainer = $modal.find('.modal-ajax-content');
-    $resultContainer.html('').hide();
-
     if (typeof (title) === 'undefined' || !title) {
         if (data.id_object) {
             title = '<i class="fa fa-edit iconLeft"></i>Edition ';
@@ -128,60 +118,31 @@ function loadModalForm($button, data, title, successCallback) {
             }
         }
     }
-    $modal.find('.modal-title').html(title);
-    $modal.find('.loading-text').text('Chargement du formulaire');
-    $modal.find('.content-loading').show();
-    $modal.modal('show');
 
-    var isCancelled = false;
-
-    $modal.on('hide.bs.modal', function (e) {
-        $modal.find('.extra_button').remove();
-        $modal.find('.content-loading').hide();
-        isCancelled = true;
-        $button.removeClass('disabled');
-    });
-
+    if (typeof (data.id_object) === 'undefined') {
+        data.id_object = 0;
+    }
     data.full_panel = 0;
 
-    BimpAjax('loadObjectForm', data, null, {
-        display_success: false,
-        error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé',
-        success: function (result) {
-            var $modal = $('#page_modal');
-            var $resultContainer = $modal.find('.modal-ajax-content');
-            $modal.find('.content-loading').hide();
-            if (!isCancelled) {
-                if (typeof (result.html) !== 'undefined') {
-                    $resultContainer.html(result.html).slideDown(250);
+    bimpModal.loadAjaxContent($button, 'loadObjectForm', data, title, 'Chargement du formulaire', function (result, bimpAjax) {
+        var $form = bimpAjax.$resultContainer.find('.object_form');
+        var modal_idx = parseInt(bimpAjax.$resultContainer.data('idx'));
+        $form.data('modal_idx', modal_idx);
+        bimpModal.removeComponentContent($form.attr('id'));
+        bimpModal.addButton('<i class="fa fa-save iconLeft"></i>Enregistrer', 'saveObjectFromForm(\'' + result.form_id + '\', $(this));', 'primary', 'save_object_button', modal_idx);
+        bimpModal.addlink('<i class="fa fa-file-o iconLeft"></i>Afficher', '', 'primary', 'hidden objectViewLink', modal_idx);
 
-                    var button_html = '<button type="button" class="extra_button btn btn-primary save_object_button"';
-                    button_html += ' onclick="saveObjectFromForm(\'' + result.form_id + '\', $(this));">';
-                    button_html += '<i class="fa fa-save iconLeft"></i>Enregistrer</button>';
-                    $modal.find('.modal-footer').append(button_html);
-
-                    button_html = '<a class="hidden objectViewLink extra_button btn btn-primary" href="">';
-                    button_html += '<i class="fa fa-file-o iconLeft"></i>Afficher</a>';
-                    $modal.find('.modal-footer').append(button_html);
-
-                    var $form = $resultContainer.find('.object_form');
-                    if ($form.length) {
-                        $form.each(function () {
-                            onFormLoaded($form);
-                        });
-                    }
-
-                    if (typeof (successCallback) === 'function') {
-                        successCallback();
-                    }
-                }
-                $modal.modal('handleUpdate');
-            }
-        },
-        error: function (result) {
-            $modal.find('.content-loading').hide();
-            $modal.modal('handleUpdate');
+        if ($form.length) {
+            $form.each(function () {
+                onFormLoaded($form);
+            });
         }
+
+        if (typeof (successCallback) === 'function') {
+            successCallback($form);
+        }
+    }, {
+        error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé'
     });
 }
 
@@ -212,10 +173,12 @@ function reloadForm(form_id) {
     var $panel = $('#' + form_id + '_panel');
     var $modal = $();
     if (!$.isOk($panel)) {
-        $modal = $form.findParentByClass('modal');
-        if ($modal.length) {
-            $modal.find('.loading-text').text('Chargement du formulaire');
-            $modal.find('.content-loading').show();
+        if ($form.data('modal_idx')) {
+            $modal = $form.findParentByClass('modal');
+            if ($modal.length) {
+                $modal.find('.loading-text').text('Chargement du formulaire');
+                $modal.find('.content-loading').show();
+            }
         }
     }
 
@@ -227,17 +190,20 @@ function reloadForm(form_id) {
         error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être rechargé',
         success: function (result, bimpAjax) {
             if (result.form_id && result.html) {
-                if ($.isOk(bimpAjax.$panel)) {
-                    bimpAjax.$panel.find('.panel-footer').find('.save_object_button').removeClass('disabled');
-                }
-
-                if ($.isOk(bimpAjax.$modal)) {
-                    bimpAjax.$modal.find('.content-loading').hide();
-                    bimpAjax.$modal.find('.loading-text').text('');
-                    bimpAjax.$modal.find('.modal-footer').find('.save_object_button').removeClass('disabled');
-                }
-
                 if ($.isOk(bimpAjax.$form)) {
+                    if ($.isOk(bimpAjax.$panel)) {
+                        bimpAjax.$panel.find('.panel-footer').find('.save_object_button').removeClass('disabled');
+                    }
+
+                    if ($.isOk(bimpAjax.$modal)) {
+                        bimpAjax.$modal.find('.content-loading').hide();
+                        bimpAjax.$modal.find('.loading-text').text('');
+                        var modal_idx = parseInt(bimpAjax.$form.data('modal_idx'));
+                        if (modal_idx) {
+                            bimpAjax.$modal.find('.modal-footer').find('.save_object_button.modal_' + modal_idx).removeClass('disabled');
+                        }
+                    }
+
                     bimpAjax.$form.find('.object_form_content').html(result.html).slideDown(function () {
                         setFormEvents(bimpAjax.$form);
                         setCommonEvents(bimpAjax.$form);
@@ -256,7 +222,11 @@ function closeForm(form_id) {
 
     var $modal = $form.findParentByClass('modal');
     if ($.isOk($modal)) {
-        $modal.modal('hide');
+        var modal_idx = parseInt($form.data('modal_idx'));
+        if (modal_idx) {
+            bimpModal.removeContent(modal_idx);
+        }
+        bimpModal.hide();
     } else {
         var $container = $('#' + form_id + '_container');
         if ($container.length) {
@@ -275,11 +245,12 @@ function submitForm(form_id) {
 
     var $modal = $form.findParentByClass('modal');
     if ($.isOk($modal)) {
-        var $btn = $modal.find('.modal-footer').find('.save_object_button');
+        var modal_idx = parseInt($form.data('modal_idx'));
+        var $btn = $modal.find('.modal-footer').find('.save_object_button.modal_' + modal_idx);
         if ($btn.length) {
             $btn.click();
         } else {
-            $btn = $modal.find('.modal-footer').find('.set_action_button');
+            $btn = $modal.find('.modal-footer').find('.set_action_button.modal_' + modal_idx);
             if ($btn.length) {
                 $btn.click();
             }
@@ -323,9 +294,9 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
     if ($panel && $panel.length) {
         $parentFormSubmit = $panel.find('.panel-footer').find('.save_object_button');
     } else {
-        var $modal = $form.findParentByClass('modal-content');
-        if ($modal && $modal.length) {
-            $parentFormSubmit = $modal.find('.modal-footer').find('.save_object_button');
+        var modal_idx = $form.data('modal_idx');
+        if (modal_idx) {
+            $parentFormSubmit = bimpModal.$footer.find('.save_object_button.modal_' + modal_idx);
         }
     }
 
@@ -505,26 +476,116 @@ function saveAssociations(operation, associations, $resultContainer, successCall
 
 // Gestion des formulaires objets:
 
+function validateForm($form) {
+
+    var data_missing = false;
+    $form.find('.inputContainer').each(function () {
+        var $template = $(this).findParentByClass('subObjectFormTemplate');
+        if (!$.isOk($template)) {
+            var field_name = $(this).data('field_name');
+
+            if (field_name) {
+                // Patch: (problème avec l'éditeur html => le textarea n'est pas alimenté depuis l'éditeur) 
+                if ($(this).find('.cke').length) {
+                    var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+                    $(this).find('[name="' + field_name + '"]').val(html_value);
+                }
+
+                if (parseInt($(this).data('required'))) {
+                    if (parseInt($(this).data('multiple'))) {
+                        if ($(this).find('.check_list_container').length) {
+                            var check = false;
+                            $(this).find('.check_list_container').find('.check_list_item').each(function () {
+                                if ($(this).find('[name="' + field_name + '[]"]').prop('checked')) {
+                                    check = true;
+                                }
+                            });
+                            if (!check) {
+//                                bimp_msg($(this).data('field_name'));
+                                $(this).addClass('value_required');
+                                data_missing = true;
+                            } else {
+                                $(this).removeClass('value_required');
+                            }
+                        }
+                    } else {
+                        var $input = $(this).find('[name="' + field_name + '"]');
+                        if ($input.length) {
+                            var data_type = $(this).data('data_type');
+                            if (data_type && (data_type === 'id_object')) {
+                                if (!parseInt($input.val())) {
+//                                    bimp_msg($input.attr('name'));
+                                    data_missing = true;
+                                    $(this).addClass('value_required');
+                                } else {
+                                    $(this).removeClass('value_required');
+                                }
+                            } else {
+                                if ($input.val() === '') {
+//                                    bimp_msg($input.attr('name'));
+                                    data_missing = true;
+                                    $(this).addClass('value_required');
+                                } else {
+                                    $(this).removeClass('value_required');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+    $form.find('.inputMultipleValuesContainer').each(function () {
+        var $template = $(this).findParentByClass('subObjectFormTemplate');
+        if (!$.isOk($template)) {
+            if (parseInt($(this).data('required'))) {
+                if (!$(this).find('.inputMultipleValues').find('tr.itemRow').length) {
+                    data_missing = true;
+//                    bimp_msg($(this).data('field_name'));
+                    $(this).addClass('value_required');
+                } else {
+                    $(this).removeClass('value_required');
+                }
+            }
+        }
+    });
+    var check = true;
+    if (data_missing) {
+        check = false;
+        bimp_msg('Certains champs obligatoires ne sont pas renseignés', 'danger');
+    }
+
+    return check;
+}
+
 function reloadObjectInput(form_id, input_name, fields) {
     var $form = $('#' + form_id);
     if (!$form.length) {
         return;
     }
 
+    var custom = 0;
+    var is_object = 0;
+    var value = '';
+
     var $container = $form.find('.' + input_name + '_inputContainer');
 
-    if (!$container.length) {
-        return;
-    }
+    if ($container.length) {
+        if ($container.hasClass('customField')) {
+            custom = 1;
+        }
 
-    var custom = 0;
-    if ($container.hasClass('customField')) {
-        custom = 1;
-    }
-
-    var value = $container.find('[name="' + input_name + '"]').val();
-    if (typeof (value) === 'undefined') {
-        value = '';
+        value = $container.find('[name="' + input_name + '"]').val();
+        if (typeof (value) === 'undefined') {
+            value = '';
+        }
+    } else {
+        $container = $form.find('#' + input_name + '_subObjectsContainer');
+        if ($container.length) {
+            is_object = 1;
+        } else {
+            bimp_msg('Erreur: champ "' + input_name + '" non trouvé');
+        }
     }
 
     var data = {
@@ -537,7 +598,9 @@ function reloadObjectInput(form_id, input_name, fields) {
         field_name: input_name,
         fields: fields,
         custom_field: custom,
-        value: value
+        value: value,
+        field_prefix: $container.data('field_prefix'),
+        is_object: is_object
     };
 
     if (custom) {
@@ -545,17 +608,20 @@ function reloadObjectInput(form_id, input_name, fields) {
     }
 
     BimpAjax('loadObjectInput', data, $container, {
+        $form: $form,
+        $container: $container,
+        input_name: input_name,
         error_msg: 'Echec du chargement du champ',
         display_success: false,
-        success: function (result) {
+        success: function (result, bimpAjax) {
             if (typeof (result.html) !== 'undefined') {
                 var $form = $('#' + result.form_id);
-                var $container = $form.find('.' + result.field_name + '_inputContainer').parent();
-                $container.html(result.html).slideDown(250, function () {
-                    $container.removeAttr('style');
-                    setCommonEvents($container);
-                    setInputsEvents($container);
-                    var $input = $form.find('[name=' + result.field_name + ']');
+                var $parent = bimpAjax.$container.parent();
+                $parent.html(result.html).slideDown(250, function () {
+                    $parent.removeAttr('style');
+                    setCommonEvents($parent);
+                    setInputsEvents($parent);
+                    var $input = bimpAjax.$form.find('[name=' + bimpAjax.input_name + ']');
                     if ($input.length) {
                         setInputEvents($form, $input);
                         $input.change();
@@ -657,13 +723,13 @@ function searchObjectList($input) {
                         }
                     });
                     bimpAjax.$result.show();
-                    bimpAjax.$result.off('mouseleave');
-                    bimpAjax.$result.mouseenter(function () {
-                        $(this).off('mouseenter');
-                        $(this).mouseleave(function () {
-                            $(this).slideUp(250);
-                        });
-                    });
+//                    bimpAjax.$result.off('mouseleave');
+//                    bimpAjax.$result.mouseenter(function () {
+//                        $(this).off('mouseenter');
+//                        $(this).mouseleave(function () {
+//                            $(this).slideUp(250);
+//                        });
+//                    });
                 }
             }
         }, error: function (result, bimpAjax) {
@@ -748,7 +814,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
                 check = false;
             }
         });
-        
+
         if (!check) {
             return;
         }
@@ -760,7 +826,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
                 label = value;
             }
         }
-        
+
         var html = '<tr class="itemRow">';
         html += '<td style="display: none"><input type="hidden" value="' + value + '" name="' + values_field_name + '[]"/></td>';
         html += '<td>' + label + '</td>';
@@ -792,7 +858,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 }
 
 function checkMultipleValues() {
-    $('.inputMultipleValuesContainer').each(function() {
+    $('.inputMultipleValuesContainer').each(function () {
         if ($(this).find('.itemRow').length) {
             $(this).find('.noItemRow').hide();
         } else {
@@ -893,10 +959,41 @@ function displayInputMsg($input, msg, className) {
         className = 'info';
     }
     var html = '<p class="alert alert-' + className + '">' + msg + '</p>';
-    bimp_display_element_popover($input, html, 'right');
+    bimp_display_element_popover($input, html, 'bottom');
     $input.unbind('blur').blur(function () {
         $input.popover('destroy');
     });
+}
+
+function addSubObjectForm($button, object_name) {
+    var $container = $button.findParentByClass('subObjects');
+    if (!$.isOk($container)) {
+        bimp_msg('Erreur technique (container absent)', 'danger');
+        return;
+    }
+
+    if ($container.attr('id') !== object_name + '_subObjectsContainer') {
+        bimp_msg('Erreur technique (container invalide)', 'danger');
+        return;
+    }
+
+    var $template = $container.find('.subObjectFormTemplate');
+    if (!$.isOk($template)) {
+        bimp_msg('Erreur technique (template absent)', 'danger');
+        return;
+    }
+
+    var idx = parseInt($container.find('[name="' + object_name + '_count"]').val());
+    idx++;
+    var html = $template.html();
+    html = html.replace(/sub_object_idx/g, idx);
+    $container.find('.subObjectsMultipleForms').append(html);
+    $container.find('[name="' + object_name + '_count"]').val(idx);
+    var $subForm = $container.find('.subObjectsMultipleForms').find('.subObjectForm').last();
+    if ($subForm.length) {
+        setFormEvents($subForm);
+        setCommonEvents($subForm);
+    }
 }
 
 // Gestion de l'affichage conditionnel des champs: 
@@ -974,6 +1071,10 @@ function onFormLoaded($form) {
 
         setFormEvents($form);
         setCommonEvents($form);
+
+        $('body').trigger($.Event('formLoaded', {
+            $form: $form
+        }));
     }
 }
 
@@ -1031,7 +1132,7 @@ function setFormEvents($form) {
         }
     });
 
-    $form.submit(function (e) {
+    $form.find('form').first().submit(function (e) {
         e.preventDefault();
         e.stopPropagation();
         submitForm($form.attr('id'));
@@ -1063,6 +1164,57 @@ function setInputsEvents($container) {
                 checkTextualInput($(this));
             });
             $(this).data('check_event_init', 1);
+        }
+    });
+    $container.find('.texarea_values').each(function () {
+        if (!parseInt($(this).data('event_init'))) {
+            var field_name = $(this).data('field_name');
+            var $textarea = $(this).parent().find('textarea[name="' + field_name + '"]');
+            $(this).find('.textarea_value').click(function () {
+                var text = $textarea.val();
+                if (text) {
+                    text += ', ';
+                }
+                text += $(this).text();
+                $textarea.val(text).change();
+            });
+            $(this).data('event_init', 1);
+        }
+    });
+    $container.find('.qtyInputContainer').each(function () {
+        if (!parseInt($(this).data('event_init'))) {
+            $(this).find('.qtyDown').click(function () {
+                var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
+                if ($.isOk($qtyInputcontainer)) {
+                    $qtyInputcontainer.find('input.qtyInput').focus();
+                    inputQtyDown($qtyInputcontainer);
+                }
+            });
+            $(this).find('.qtyUp').click(function () {
+                var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
+                if ($.isOk($qtyInputcontainer)) {
+                    $qtyInputcontainer.find('input.qtyInput').focus();
+                    inputQtyUp($qtyInputcontainer);
+                }
+            });
+            $(this).find('input.qtyInput').keyup(function (e) {
+                var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
+                if ($.isOk($qtyInputcontainer)) {
+                    if (e.key === 'Up') {
+                        inputQtyUp($qtyInputcontainer);
+                    } else if (e.key === 'Down') {
+                        inputQtyDown($qtyInputcontainer);
+                    } else if (e.key === 'End' || e.key === 'Right') {
+                        inputQtyMax($qtyInputcontainer);
+                    } else if (e.key === 'Home' || e.key === 'Left') {
+                        inputQtyMin($qtyInputcontainer);
+                    }
+                }
+            }).focus(function() {
+                $(this).select();
+            });
+
+            $(this).data('event_init', 1);
         }
     });
 }

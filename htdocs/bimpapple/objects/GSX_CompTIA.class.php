@@ -84,6 +84,11 @@ class GSX_CompTIA extends BimpObject
         self::$codes = array();
         self::$mods = array();
 
+        if (is_null($list) || !count($list)) {
+            self::updateCodesFromGSX();
+            $list = $intance->getList();
+        }
+        
         if (!is_null($list)) {
             foreach ($list as $item) {
                 switch ($item['type']) {

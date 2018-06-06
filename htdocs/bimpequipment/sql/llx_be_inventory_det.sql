@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS `llx_be_inventory_det` (
     `tms`             TIMESTAMP,
     `date_creation`   DATETIME,
     `quantity`        INTEGER DEFAULT 1,
+    `difference`      INTEGER,
     `fk_inventory`    INTEGER NOT NULL,
     `fk_user`         INTEGER NOT NULL,
     `fk_product`      INTEGER NOT NULL,

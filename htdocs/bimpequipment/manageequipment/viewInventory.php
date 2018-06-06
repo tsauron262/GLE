@@ -44,6 +44,7 @@ if ($user->rights->bimpequipment->inventory->read) {
     print '<th>Référence</th>';
     print '<th>Numéro de série</th>';
     print '<th>Label</th>';
+    print '<th>Prix Achat</th>';
     print '<th>Quantité Totale</th>';
     print '<th>Quantité Manquante</th>';
     print '<th>Quantité Scanné</th>';

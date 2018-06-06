@@ -144,7 +144,7 @@ function addProduct(ligne) {
     line += '<td>' + ligne.refurl + '</td>';    // refUrl
     line += '<td></td>';    // num série
     line += '<td>' + ligne.label + '</td>';    // label
-    if (ligne.deliveredQty === null)
+    if (ligne.deliveredQty === null || ligne.deliveredQty == 0)
         line += '<td>' + ligne.remainingQty + '</td>';
     else
         line += '<td>' + (parseInt(ligne.remainingQty) + parseInt(ligne.deliveredQty)) + '</td>';

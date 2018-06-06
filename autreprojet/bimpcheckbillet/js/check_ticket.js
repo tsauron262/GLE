@@ -32,11 +32,13 @@ function getEvents() {
                     no_results_text: 'Pas de résultat'});
                 $('#barcode').on('keyup', function (e) {
                     if (e.keyCode === 13) {
-                        var url_string = $('#barcode').val();
-                        var url = new URL(url_string);
-                        var barcode = url.searchParams.get('num');
-                        checkTicket(barcode, $('select[name=event] > option:selected').val());
-                        $('#barcode').val("");
+                        var barcode = $('#barcode').val();
+                        if(barcode.indexOf("?") > 0){
+                            var url = new URL(barcode);
+                            barcode = url.searchParams.get('num');
+                        }
+                            checkTicket(barcode, $('select[name=event] > option:selected').val());
+                            $('#barcode').val("");
                     }
                 });
                 $('select[name=event]').change(function () {

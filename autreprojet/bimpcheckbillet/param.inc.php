@@ -24,3 +24,5 @@ define('URL_CHECK', "http://192.168.0.78/~tilito/bimp-erp/autreprojet/bimpcheckb
 
 define('PRESTA_PREF', "ps_");
 
+define('PRESTA_PREF', "ps_");
+

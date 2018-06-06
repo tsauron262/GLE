@@ -387,7 +387,7 @@ switch ($action) {
             $tickets = $ticket->getTicketsByOrder($_POST['id_order']);
             $position = array('x' => 5, 'y' => 5);
             $i = 0;
-            if (sizeof($tickets > 0)) {
+            if (is_array($tickets)) {
                 foreach ($tickets as $t) {
                     $is_first = $i == 0;
                     $is_last = ($i + 1 == sizeof($tickets));
@@ -401,7 +401,7 @@ switch ($action) {
                 ));
             } else {
                 echo json_encode(array(
-                    'code_return' => -1,
+                    'code_return' => 0,
                     'errors' => "Veuillez remplir au moins un ticket"
                 ));
             }
@@ -414,6 +414,7 @@ switch ($action) {
                     or die("Impossible de se connecter à la base externe : " . mysql_error());
             $order = new Order($db2);
             echo json_encode(array(
+                'generated_tickets' => $order->generateTicket($_POST['id_order'], $ticket, $tariff),
                 'status' => $order->checkOrderStatus($_POST['id_order'], $ticket),
                 'errors' => $order->errors
             ));

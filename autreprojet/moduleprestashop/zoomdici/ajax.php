@@ -3,9 +3,15 @@
 // Allow cross-domain requests
 header("Access-Control-Allow-Origin: *");
 
-require_once(dirname(__FILE__) . '../../../config/config.inc.php');
-require_once(dirname(__FILE__) . '../../../init.php');
-require_once(dirname(__FILE__) . '/param.inc.php');
+require_once('./param.inc.php');
+
+//var_dump(PATH_TO_MODULE);
+
+//require_once(PATH_TO_MODULE . '../../config/config.inc.php');
+//require_once(PATH_TO_MODULE . '../../init.php');
+
+require_once(PATH_TO_PRESTA . 'config/config.inc.php');
+require_once(PATH_TO_PRESTA . 'init.php');
 
 
 $action = Tools::getValue('action');
@@ -17,14 +23,21 @@ switch ($action) {
             $defaultLanguage = new Language((int) (Configuration::get('PS_LANG_DEFAULT')));
             $product = new Product();
             $product->id_tax_rules_group = (int) $_POST['id_tax'];
-            // définition du produit
-            $product->name = $_POST['label'];
             $product->price = $_POST['price'];
+            
+            $tabTaxe = TaxRuleCore::getTaxRulesByGroupId(Configuration::get('PS_LANG_DEFAULT'),$product->id_tax_rules_group);
+            if(isset($tabTaxe[0])){
+                $product->price = number_format ($product->price / (100 + $tabTaxe[0]['rate']) *100, 5);
+            }
+            // définition du produit
+            $product->name = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['label']);
+            
             $product->category = array($_POST['id_categ_extern']);
             $product->id_category_default = $_POST['id_categ_extern'];
             $product->description_short = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['label']);
             $product->quantity = intVal($_POST['number_place']);
             $product->redirect_type = '404';
+            $product->link_rewrite = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['id_tariff']);
             $return = $product->add();
             $product->updateCategories($product->category, true);
             if ($product->id > 0) {

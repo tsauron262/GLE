@@ -22,7 +22,7 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
         print '<link rel="stylesheet" type="text/css" href="' . $cssfile . '">';
 
 // JS
-    print '<script>var URL_PRESTA="' . URL_PRESTA . '";'
+    print '<script>var URL_PRESTA="' . PRESTA_URL . '";'
             . '    var URL_CHECK ="' . URL_CHECK . '";</script>';
 
     print '<script src="../lib/js/jquery-3.3.1.min.js"></script>';

@@ -205,4 +205,55 @@ class Bimp_Product extends BimpObject
 
         return $html;
     }
+
+    public static function getFournisseursPriceArray($id_product, $id_fournisseur = 0, $id_price = 0)
+    {
+        if (!(int) $id_product) {
+            return array();
+        }
+
+        $prices = array(
+            0 => ''
+        );
+
+        $filters = array(
+            'fp.fk_product' => (int) $id_product
+        );
+
+        if ((int) $id_fournisseur) {
+            $filters['fp.fk_soc'] = (int) $id_fournisseur;
+        }
+
+        if ((int) $id_price) {
+            $filters['fp.rowid'] = (int) $id_price;
+        }
+
+        $sql = 'SELECT fp.rowid as id, fp.unitprice as price, fp.quantity as qty, fp.tva_tx as tva, s.nom, s.code_fournisseur as ref';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe s ON fp.fk_soc = s.rowid';
+        $sql .= BimpTools::getSqlWhere($filters);
+        $sql .= ' ORDER BY fp.unitprice ASC';
+        
+        global $db;
+        $bdb = new BimpDb($db);
+        
+        $rows = $bdb->executeS($sql, 'array');
+
+        if (!is_null($rows) && count($rows)) {
+            foreach ($rows as $r) {
+                $label = $r['nom'] . ($r['ref'] ? ' - Réf. ' . $r['ref'] : '') . ' (';
+                $label .= BimpTools::displayMoneyValue((float) $r['price'], 'EUR');
+                $label .= ' - TVA: ' . BimpTools::displayFloatValue((float) $r['tva']) . '%';
+                $label .= ' - Qté min: ' . $r['qty'] . ')';
+                $prices[(int) $r['id']] = $label;
+            }
+        }
+
+        return $prices;
+    }
+
+    public function getProductFournisseursPricesArray()
+    {
+        
+    }
 }

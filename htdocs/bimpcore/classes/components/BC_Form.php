@@ -589,7 +589,7 @@ class BC_Form extends BC_Panel
             $html .= '<div class="inputContainer ' . $this->fields_prefix . $params['input_name'] . '_inputContainer customField"';
             $html .= ' data-field_name="' . $this->fields_prefix . $params['input_name'] . '"';
             $html .= ' data-initial_values="' . $params['value'] . '"';
-            $html .= ' data-multiple="1"';
+            $html .= ' data-multiple="0"';
             $html .= ' data-form_row="' . $row . '"';
             $html .= ' data-field_prefix="' . $this->fields_prefix . '"';
             $html .= ' data-required="' . (int) $params['required'] . '"';

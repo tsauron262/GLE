@@ -679,12 +679,18 @@ class BR_CommandeShipment extends BimpObject
             $errors[] = $label . ': une facture a déjà été créée pour cette expédition';
         }
 
+        $id_account = (int) (isset($data['id_account']) ? (int) $data['id_account'] : 0);
+
+        if (!$id_account) {
+            $errors[] = 'Compte financier absent';
+        }
+
         if (!count($errors)) {
             $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = $label . ': ID de la commande client absent ou invalide';
             } else {
-                $create_errors = $commande->createFacture((int) $this->id, (int) $data['cond_reglement']);
+                $create_errors = $commande->createFacture((int) $this->id, (int) $data['cond_reglement'], $id_account);
                 if (count($create_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($create_errors, $label . ': des erreurs sont survenues lors de la création de la facture');
                 }
@@ -697,7 +703,7 @@ class BR_CommandeShipment extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = array())
     {

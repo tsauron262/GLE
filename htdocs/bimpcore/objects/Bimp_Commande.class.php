@@ -93,9 +93,32 @@ class Bimp_Commande extends BimpObject
         return 0;
     }
 
+    public function getCustomerCreditNotesArray()
+    {
+        
+    }
+
+    public function getProductFournisseursPricesArray()
+    {
+        if (BimpTools::isSubmit('id_product')) {
+            $id_product = (int) BimpTools::getValue('id_product', 0);
+        } elseif (BimpTools::isSubmit('fields')) {
+            $fields = BimpTools::getValue('fields', array());
+            if (isset($fields['id_product'])) {
+                $id_product = (int) $fields['id_product'];
+            }
+        }
+        if ($id_product) {
+            BimpObject::loadClass('bimpcore', 'Bimp_Product');
+            return Bimp_Product::getFournisseursPriceArray($id_product);
+        }
+
+        return array();
+    }
+
     // Traitements: 
 
-    public function addOrderLine($id_product, $qty = 1, $desc = '', $remise_percent = 0, $date_start = '', $date_end = '')
+    public function addOrderLine($id_product, $qty = 1, $desc = '', $id_fournisseur_price = 0, $remise_percent = 0, $date_start = '', $date_end = '')
     {
         $errors = array();
 
@@ -124,11 +147,21 @@ class Bimp_Commande extends BimpObject
                 $fk_remise_except = 0;
                 $price_base_type = 'HT';
                 $pu_ttc = $product->price_ttc;
+                $pa_ht = 0;
+                if ($id_fournisseur_price) {
+                    $fournPrice = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $id_fournisseur_price);
+                    if (BimpObject::objectLoaded($fournPrice)) {
+                        $pa_ht = (float) $fournPrice->getData('price');
+                    } else {
+                        $errors[] = 'Prix fournisseur d\'ID ' . $id_fournisseur_price . ' inexistant';
+                        return $errors;
+                    }
+                }
 
                 $current_status = $this->dol_object->statut;
                 $this->dol_object->statut = Commande::STATUS_DRAFT;
 
-                $id_line = $this->dol_object->addline($desc, $pu_ht, (int) $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, (float) $remise_percent, $info_bits, $fk_remise_except, $price_base_type, $pu_ttc, $date_start, $date_end);
+                $id_line = $this->dol_object->addline($desc, $pu_ht, (int) $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, (float) $remise_percent, $info_bits, $fk_remise_except, $price_base_type, $pu_ttc, $date_start, $date_end, 0, -1, 0, 0, null, $pa_ht);
 
                 $this->dol_object->statut = $current_status;
                 $this->update();
@@ -240,7 +273,7 @@ class Bimp_Commande extends BimpObject
         return $errors;
     }
 
-    public function createFacture($id_shipment = null, $cond_reglement = null)
+    public function createFacture($id_shipment = null, $cond_reglement = null, $id_account = null, $remises = array())
     {
         $errors = array();
 
@@ -335,10 +368,6 @@ class Bimp_Commande extends BimpObject
             if (count($errors)) {
                 return $errors;
             }
-
-            if (!is_null($cond_reglement) && $cond_reglement) {
-                $commande->cond_reglement_id = (int) $cond_reglement;
-            }
             if ($shipment->getData('date_shipped')) {
                 $commande->date_livraison = $shipment->getData('date_shipped');
             }
@@ -382,8 +411,12 @@ class Bimp_Commande extends BimpObject
             }
         }
 
+        if (!is_null($cond_reglement) && $cond_reglement) {
+            $commande->cond_reglement_id = (int) $cond_reglement;
+        }
+
         $commande->array_options['options_type'] = 'R';
-        if ($facture->createFromCommande($commande) <= 0) {
+        if ($facture->createFromCommande($commande, (int) $id_account) <= 0) {
             $msg = 'Echec de la création de la facture';
             if ($facture->dol_object->error) {
                 $msg .= ' - "' . $langs->trans($facture->dol_object->error) . '"';
@@ -394,6 +427,17 @@ class Bimp_Commande extends BimpObject
 
         unset($commande);
         $commande = null;
+
+        if (count($remises)) {
+            foreach ($remises as $id_remise) {
+                $facture->dol_object->error = '';
+                $facture->dol_object->errors = array();
+
+                if ($facture->dol_object->insert_discount((int) $id_remise) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), 'Echec de l\'insertion de la remise client d\'ID ' . $id_remise);
+                }
+            }
+        }
 
         // Validation de la facture: 
         if ($facture->dol_object->validate($user) <= 0) {
@@ -577,12 +621,18 @@ class Bimp_Commande extends BimpObject
 
         $id_shipment = (isset($data['id_shipment']) ? (int) $data['id_shipment'] : null);
         $cond_reglement = (isset($data['cond_reglement']) ? (int) $data['cond_reglement'] : 0);
+        $id_account = (isset($data['id_account']) ? (int) $data['id_account'] : 0);
+        $remises = (isset($data['id_remises_list']) ? $data['id_remises_list'] : array());
+
+        if ((is_null($id_account) || !$id_account)) {
+            $errors[] = 'Compte financier absent';
+        }
 
         if ((is_null($id_shipment) || !$id_shipment) && !(int) $this->getData('id_facture')) {
             $success_callback = 'location.reload();';
         }
 
-        $errors = $this->createFacture($id_shipment, $cond_reglement);
+        $errors = $this->createFacture($id_shipment, $cond_reglement, $id_account, $remises);
 
         return array(
             'errors'           => $errors,
@@ -603,6 +653,12 @@ class Bimp_Commande extends BimpObject
             $errors[] = 'Produit absent';
         } else {
             $id_product = (int) $data['id_product'];
+        }
+
+        if (!isset($data['id_fournisseur_price']) || !$data['id_fournisseur_price']) {
+            $errors[] = 'Prix fournisseur absent';
+        } else {
+            $id_fournisseur_price = (int) $data['id_fournisseur_price'];
         }
 
         if (isset($data['qty'])) {
@@ -628,7 +684,7 @@ class Bimp_Commande extends BimpObject
             $data['date_end'] = '';
         }
 
-        $errors = $this->addOrderLine($id_product, $qty, $desc, $remise_percent, $data['date_start'], $data['date_end']);
+        $errors = $this->addOrderLine($id_product, $qty, $desc, $id_fournisseur_price, $remise_percent, $data['date_start'], $data['date_end']);
 
         return array(
             'errors'           => $errors,

@@ -1304,7 +1304,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                 $to = $client->dol_object->phone;
 
             $sms .= "\n" . $this->getData('ref');
-            $to = "0686691814";
+            //$to = "0686691814";
             $fromsms = 'SAV BIMP';
 
             $to = traiteNumMobile($to);
@@ -1343,7 +1343,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             }
         }
 
-        $errors = bimpsupport_pdf_create($this->db->db, $this, 'sav', $file_type);
+        $errors = array_merge($errors, bimpsupport_pdf_create($this->db->db, $this, 'sav', $file_type));
 
         if (!count($errors)) {
             $ref = '';
@@ -2220,18 +2220,20 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                 $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                 $place_errors = $place->validateArray(array(
                     'id_equipment' => (int) $this->getData('id_equipment'),
-                    'type'         => BE_Place::BE_PLACE_CLIENT,
+                    'type'         => BE_Place::BE_PLACE_SAV,
                     'id_entrepot'  => (int) $this->getData('id_entrepot'),
-                    'infos'        => $this->getData('ref'),
+                    'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
                     'date'         => date('Y-m-d H:i:s')
                 ));
                 if (!count($place_errors)) {
-                    $place->create();
-                } else {
+                    $place_errors = $place->create();
+                }
+
+                if (count($place_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
                 }
             }
-
+            
             $this->generatePDF('pc', $warnings);
 
             if (BimpTools::getValue('send_msg', 0)) {

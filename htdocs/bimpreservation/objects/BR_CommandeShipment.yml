@@ -135,7 +135,6 @@ forms:
             - field: signed
             - field: info
             
-            
     validation: 
         rows: 
             - custom: 1
@@ -165,6 +164,13 @@ forms:
                   callback: getCommandeCondReglement
               input: 
                   type: select_cond_reglement
+            - custom: 1
+              label: Compte financier
+              input_name: id_account
+              data_type: id_object
+              input: 
+                  type: select_mysoc_account
+              required: 1
                   
 fields_tables: 
     data: 

@@ -39,7 +39,7 @@ class Bimp_Facture extends BimpObject
         return $button;
     }
 
-    public function createFromCommande(Commande $commande)
+    public function createFromCommande(Commande $commande, $id_account = 0)
     {
         global $user, $hookmanager;
         $this->reset();
@@ -62,6 +62,8 @@ class Bimp_Facture extends BimpObject
         $this->dol_object->origin = $commande->element;
         $this->dol_object->origin_id = $commande->id;
 
+        $this->dol_object->fk_account = (int) $id_account;
+
         // get extrafields from original line
         $commande->fetch_optionals($commande->id); // todo: suppr.
 
@@ -76,10 +78,10 @@ class Bimp_Facture extends BimpObject
 
         $ret = $this->dol_object->create($user);
 
-        foreach ($commande->lines as $i => $line) {            
+        foreach ($commande->lines as $i => $line) {
             $marginInfos = getMarginInfos($line->subprice, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, $line->fk_fournprice, $line->pa_ht);
             $tva_rate = ((float) $line->tva_tx / 100);
-            
+
             $fk_product = $line->fk_product;
             $desc = $line->desc;
             $qty = $line->qty;
@@ -131,6 +133,4 @@ class Bimp_Facture extends BimpObject
         } else
             return -1;
     }
-    
-    
 }

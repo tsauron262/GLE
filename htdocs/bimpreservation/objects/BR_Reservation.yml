@@ -378,8 +378,7 @@ forms:
                   type: select
                   options: 
                       array: avoirs
-                  select_first: 1
-                      
+                  select_first: 1 
     shipment: 
         title: Ajouter à une expédition
         rows: 

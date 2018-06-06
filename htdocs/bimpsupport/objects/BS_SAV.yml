@@ -707,7 +707,50 @@ lists:
                     request: id_entrepot
         add_btn_label: Nouveau SAV
         edit_btn: 1
-        edit_form: default
+        edit_form: edit
+        delete_btn: 1
+        page_btn: 1
+        modal_view: default
+        extra_btn: 
+            callback: getListExtraBtn
+        cols:
+            ref:
+                field: ref
+            centre: 
+                field: code_centre
+            status: 
+                field: status
+            prioritaire:
+                field: prioritaire
+            date_create:
+                label: Créé le
+                field: date_create
+            tech:
+                field: id_user_tech
+                display: nom_url
+            client: 
+                field: id_client
+                display: nom_url
+                
+    client: 
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les SAV sélectionnés
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        list_filters: 
+            callback: getListFilters
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        add_form_values: 
+            fields: 
+                id_entrepot: 
+                    request: id_entrepot
+        add_btn_label: Nouveau SAV
+        edit_btn: 1
+        edit_form: edit
         delete_btn: 1
         page_btn: 1
         modal_view: default

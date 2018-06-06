@@ -1681,4 +1681,12 @@ class BR_Reservation extends BimpObject
 
         return $serials;
     }
+    
+    // Gestion des droits: 
+    
+    public function canDelete()
+    {
+        global $user;
+        return (int) $user->admin;
+    }
 }

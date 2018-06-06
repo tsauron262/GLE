@@ -222,6 +222,7 @@ class Equipment extends BimpObject
     
 //    public function getPlaceSearchFilters(&$filters, $value)
 //    {
+//        $filters['place.position'] = 1;
 //        
 //    }
 

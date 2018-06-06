@@ -344,9 +344,10 @@ list:
     sort_field: id_product
     sort_way: asc
     n: 10
-    joins: 
-        - table: be_equipment_place
-          alias: place
+#    joins: 
+#        - table: be_equipment_place
+#          alias: place
+#          on: place.id_equipment = a.id_equipment
     cols:
         id:
             label: ID

@@ -6,35 +6,35 @@ require("init.php");
 
 
 
-$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `ps_order_detail` pso, ps_orders ps WHERE `product_id` IN (16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
+$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `".PRESTA_PREF."order_detail` pso, ".PRESTA_PREF."orders ps WHERE `product_id` IN (16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
 $nb1 = $dataSql2['nb'];
 
 
-$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `ps_order_detail` pso, ps_orders ps WHERE `product_id` IN (15 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
+$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `".PRESTA_PREF."order_detail` pso, ".PRESTA_PREF."orders ps WHERE `product_id` IN (15 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
 $nb2 = $dataSql2['nb'];
 
 
-$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `ps_order_detail` pso, ps_orders ps WHERE `product_id` IN (14 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
+$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `".PRESTA_PREF."order_detail` pso, ".PRESTA_PREF."orders ps WHERE `product_id` IN (14 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
 $nb3= $dataSql2['nb'];
 
 
-$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `ps_order_detail` pso, ps_orders ps WHERE `product_id` IN (13 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
+$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `".PRESTA_PREF."order_detail` pso, ".PRESTA_PREF."orders ps WHERE `product_id` IN (13 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
 $nb4 = $dataSql2['nb'];
 
 
-$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `ps_order_detail` pso, ps_orders ps WHERE `product_id` IN (13,15,16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
+$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `".PRESTA_PREF."order_detail` pso, ".PRESTA_PREF."orders ps WHERE `product_id` IN (13,15,16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
@@ -44,7 +44,7 @@ $nbVend = $dataSql2['nb'];
 
 
 
-$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `ps_order_detail` pso, ps_orders ps WHERE `product_id` IN (14,15,16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
+$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `".PRESTA_PREF."order_detail` pso, ".PRESTA_PREF."orders ps WHERE `product_id` IN (14,15,16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
@@ -52,9 +52,9 @@ $nbSam = $dataSql2['nb'];
 
 
 $sql2 = "SELECT COUNT(code) as nb
-FROM `ps_tickets` 
+FROM `".PRESTA_PREF."tickets` 
 
-WHERE `id_order_details` IN (SELECT `id_order_detail` as nb FROM `ps_order_detail` pso, ps_orders ps WHERE `product_id` IN (13,14,15,16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1)";
+WHERE `id_order_details` IN (SELECT `id_order_detail` as nb FROM `".PRESTA_PREF."order_detail` pso, ".PRESTA_PREF."orders ps WHERE `product_id` IN (13,14,15,16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1)";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
@@ -62,7 +62,7 @@ $tele = $dataSql2['nb'];
 
 
 $sql2 = "SELECT COUNT(c.reference) as nb
-FROM  ps_order_detail cd, ps_orders c, ps_customer cli WHERE cli.id_customer = c.id_customer AND c.id_order = cd.id_order AND cd.id_order_detail NOT IN (SELECT id_order_details FROM ps_tickets)  AND valid = 1 AND product_id IN (13,14,15,16) ORDER BY cli.lastname, cli.firstname;";
+FROM  ".PRESTA_PREF."order_detail cd, ".PRESTA_PREF."orders c, ".PRESTA_PREF."customer cli WHERE cli.id_customer = c.id_customer AND c.id_order = cd.id_order AND cd.id_order_detail NOT IN (SELECT id_order_details FROM ".PRESTA_PREF."tickets)  AND valid = 1 AND product_id IN (13,14,15,16) ORDER BY cli.lastname, cli.firstname;";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
@@ -76,7 +76,7 @@ $tele2 = $dataSql2['nb'];
 
 
 
-$sql2 = "SELECT SUM(`product_quantity`) as nb, COUNT(DISTINCT ps.id_order) as nb1 FROM `ps_order_detail` pso, ps_orders ps WHERE `product_id` IN (13,14,15,16 ) AND pso.`id_order` = ps.`id_order` AND current_state = 1";
+$sql2 = "SELECT SUM(`product_quantity`) as nb, COUNT(DISTINCT ps.id_order) as nb1 FROM `".PRESTA_PREF."order_detail` pso, ".PRESTA_PREF."orders ps WHERE `product_id` IN (13,14,15,16 ) AND pso.`id_order` = ps.`id_order` AND current_state = 1";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
@@ -85,7 +85,7 @@ $nbCheque = $dataSql2['nb1'];
 
 
 
-$sql2 = "SELECT SUM(`product_quantity`) as nb, COUNT(DISTINCT ps.id_order) as nb1 FROM `ps_order_detail` pso, ps_orders ps WHERE `product_id` IN (13,14,15,16 ) AND pso.`id_order` = ps.`id_order` AND current_state = 10";
+$sql2 = "SELECT SUM(`product_quantity`) as nb, COUNT(DISTINCT ps.id_order) as nb1 FROM `".PRESTA_PREF."order_detail` pso, ".PRESTA_PREF."orders ps WHERE `product_id` IN (13,14,15,16 ) AND pso.`id_order` = ps.`id_order` AND current_state = 10";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
@@ -94,14 +94,14 @@ $nbCheque2 = $dataSql2['nb1'];
 
 
 
-$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `ps_order_detail` pso, ps_orders ps WHERE `product_id` IN (13,15,16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1 AND id_customer = 379";
+$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `".PRESTA_PREF."order_detail` pso, ".PRESTA_PREF."orders ps WHERE `product_id` IN (13,15,16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1 AND id_customer = 379";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
 $nbInvitV = $dataSql2['nb'];
 
 
-$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `ps_order_detail` pso, ps_orders ps WHERE `product_id` IN (14,15,16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1 AND id_customer = 379";
+$sql2 = "SELECT SUM(`product_quantity`) as nb FROM `".PRESTA_PREF."order_detail` pso, ".PRESTA_PREF."orders ps WHERE `product_id` IN (14,15,16 ) AND pso.`id_order` = ps.`id_order` AND valid = 1 AND id_customer = 379";
 $result2 = $conn->query($sql2);
 $dataSql2 = $result2->fetch_assoc();
 
@@ -146,7 +146,7 @@ if(isset($_REQUEST['envoieMail'])){
 
 	$sql2 = 'SELECT cli.firstname, cli.lastname , cli.email, c.reference, cd.product_name, c.id_order, c.valid, c.current_state, cd.product_id, cd.product_quantity 
 	, concat("http://sucsenscene.fr/billets/telechargement.php?cm=", c.reference) as lien
-	FROM  ps_order_detail cd, ps_orders c, ps_customer cli WHERE cli.id_customer = c.id_customer AND c.id_order = cd.id_order AND cd.id_order_detail NOT IN (SELECT id_order_details FROM ps_tickets)  AND valid = 1 AND product_id IN (13,14,15,16) ORDER BY cli.lastname, cli.firstname;';
+	FROM  ".PRESTA_PREF."order_detail cd, ".PRESTA_PREF."orders c, ".PRESTA_PREF."customer cli WHERE cli.id_customer = c.id_customer AND c.id_order = cd.id_order AND cd.id_order_detail NOT IN (SELECT id_order_details FROM ".PRESTA_PREF."tickets)  AND valid = 1 AND product_id IN (13,14,15,16) ORDER BY cli.lastname, cli.firstname;';
 	$result2 = $conn->query($sql2);
 	echo "<pre>";
 	while($dataSql2 = $result2->fetch_assoc()){
@@ -175,7 +175,7 @@ if(isset($_REQUEST['envoieMail2'])){
 
 	$sql2 = 'SELECT t.*, cli.firstname, cli.lastname , cli.email, c.reference, cd.product_name, c.id_order, c.valid, c.current_state, cd.product_id
 
-FROM ps_tickets t, ps_order_detail cd, ps_orders c, ps_customer cli 
+FROM ".PRESTA_PREF."tickets t, ".PRESTA_PREF."order_detail cd, ".PRESTA_PREF."orders c, ".PRESTA_PREF."customer cli 
 
 WHERE cli.id_customer = c.id_customer AND c.id_order = cd.id_order AND cd.id_order_detail = t.id_order_details
 

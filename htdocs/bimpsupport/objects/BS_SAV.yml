@@ -359,6 +359,7 @@ fields:
         label: Login admin
     pword_admin: 
         label: Mot de passe admin
+        required: 1
     acompte: 
         label: Acompte
         type: money

@@ -55,10 +55,16 @@ class BS_SAV extends BimpObject
     public static $list_etats_materiel = array('Rayure', 'Écran cassé', 'Liquide');
     public static $list_accessoires = array('Housse', 'Alim', 'Carton', 'Clavier', 'Souris', 'Dvd', 'Batterie', 'Boite complète');
     public static $list_symptomes = array(
+        'Ecran cassé',
+        'Dégât liquide',
+        'roblème batterie',
+        'Ne démarre pas électriquement',
+        'Machine lente',
+        'Démarre électriquement mais ne boot pas',
+        'Extinction inopinée',
         'Renouvellement anti virus et maintenance annuelle',
         'Anti virus expiré',
         'Virus ? Eradication? Nettoyage?',
-        'Machine lente',
         'Formatage',
         'Réinstallation système'
     );

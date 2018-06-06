@@ -11,10 +11,10 @@ class zoomdiciValidateOrderModuleFrontController extends ModuleFrontController {
         global $smarty;
         $id_order = $_GET['id_order'];
         $order = new Order((int) $id_order);
-        echo '<pre>';
-        print_r($order);
+//        echo '<pre>';
+//        print_r($order);
         global $user;
-        print_r($this->context->customer->id);
+//        print_r($this->context->customer->id);
 
         self::$smarty->assign('id_order', $id_order);
         $products = Db::getInstance()->executeS(''

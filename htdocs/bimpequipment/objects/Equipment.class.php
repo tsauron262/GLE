@@ -219,12 +219,39 @@ class Equipment extends BimpObject
             )
         );
     }
-    
-//    public function getPlaceSearchFilters(&$filters, $value)
-//    {
-//        $filters['place.position'] = 1;
-//        
-//    }
+
+    public function getPlaceSearchFilters(&$filters, $value)
+    {
+        $filters['place.position'] = 1;
+        $filters['or_place'] = array(
+            'or' => array(
+                'place.place_name'    => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'place_entrepot.label'     => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'place_user.firstname'     => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'place_user.lastname'      => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'place_client.nom'         => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'place_client.code_client' => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+            )
+        );
+    }
 
     public function getReservedSearchFilters(&$filters, $value)
     {
@@ -410,7 +437,7 @@ class Equipment extends BimpObject
         } elseif (preg_match('/^S[0-9]{15,16}$/', $serial, $matches)) {
             $serial = $matches[1];
         }
-        
+
         if (preg_match('/^[0-9]{15,16}$/', $serial)) {
             $isIphone = true;
         } else {
@@ -550,9 +577,9 @@ class Equipment extends BimpObject
 
         return $errors;
     }
-    
+
     // Gestion des droits: 
-    
+
     public function canDelete()
     {
         global $user;

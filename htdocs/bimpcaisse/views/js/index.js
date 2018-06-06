@@ -1208,7 +1208,7 @@ $(document).ready(function () {
         if ($mainContainer.hasClass('fullScreen')) {
             $('#id-left').show();
             $mainContainer.removeClass('fullScreen');
-            $(this).attr('data-content', 'Plein écran').find('i').attr('class', 'fa5 fa5-expand-arrows-alt');
+            $(this).attr('data-content', 'Plein écran').find('i').attr('class', 'fas fa5-expand-arrows-alt');
             $(this).popover('destroy');
             $(this).popover();
             if (document.exitFullscreen) {

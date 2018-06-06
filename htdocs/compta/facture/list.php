@@ -431,7 +431,7 @@ if ($search_montant_ttc != '') $sql.= natural_search('f.total_ttc', $search_mont
 if ($search_status != '' && $search_status >= 0)
 {
     if ($search_status == '0') $sql.=" AND f.fk_statut = 0";  // draft
-    if ($search_status == '1') $sql.=" AND f.fk_statut = 1";  // unpayed
+    if ($search_status == '1') $sql.=" AND f.fk_statut = 1 AND paye = 0";  // unpayed
     if ($search_status == '2') $sql.=" AND f.fk_statut = 2";  // payed     Not that some corrupted data may contains f.fk_statut = 1 AND f.paye = 1 (it means payed too but should not happend. If yes, reopen and reclassify billed)
     if ($search_status == '3') $sql.=" AND f.fk_statut = 3";  // abandonned
 }

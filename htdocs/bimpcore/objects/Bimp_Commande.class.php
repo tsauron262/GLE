@@ -598,6 +598,94 @@ class Bimp_Commande extends BimpObject
         return $errors;
     }
 
+    public function checkIntegrity()
+    {
+        $errors = array();
+        if ($this->isLoaded() && $this->dol_object->statut > 0) {
+            $nCommandeProducts = 0;
+            $nCommandeServices = 0;
+            $nBrOrderProducts = 0;
+            $nBrOrderServices = 0;
+            $nToShipProducts = 0;
+            $nToShipServices = 0;
+            $nShippedProducts = 0;
+            $nShippedServices = 0;
+            $nOrderLineProductsShipped = 0;
+            $nOrderLineServicesShipped = 0;
+
+            $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+
+            foreach ($this->dol_object->lines as $line) {
+                if (isset($line->fk_product) && (int) $line->fk_product) {
+                    $type = (int) $product->getSavedData('fk_product_type', (int) $line->fk_product);
+                    if ($type === Product::TYPE_PRODUCT) {
+                        $nCommandeProducts += (int) $line->qty;
+                    } else {
+                        $nCommandeServices += (int) $line->qty;
+                    }
+                }
+            }
+
+            foreach ($this->getChildrenObjects('order_lines') as $brOrderLine) {
+                $qty = (int) $brOrderLine->getData('qty');
+                $qtyShipped = (int) $brOrderLine->getData('qty_shipped');
+                switch ((int) $brOrderLine->getData('type')) {
+                    case BR_OrderLine::PRODUIT:
+                        $nBrOrderProducts += $qty;
+                        $nOrderLineProductsShipped += $qtyShipped;
+                        break;
+
+                    case BR_OrderLine::SERVICE:
+                        $nBrOrderServices += $qty;
+                        $nOrderLineServicesShipped += $qtyShipped;
+                        break;
+                }
+            }
+
+            foreach ($this->getChildrenObjects('shipments') as $shipment) {
+                if ((int) $shipment->getData('status') === 2) {
+                    $nShippedProducts += (int) $shipment->getNbArticles();
+                    $nShippedServices += (int) $shipment->getNbServices();
+                } else {
+                    $nToShipProducts += (int) $shipment->getNbArticles();
+                    $nToShipServices += (int) $shipment->getNbServices();
+                }
+            }
+
+            if ((int) $nCommandeProducts !== (int) $nBrOrderProducts) {
+                $errors[] = 'Le nombre de produits enregistrés pour la commande ne correspond pas au nombre de produits enregistrés pour la logistique';
+            }
+
+            if ((int) $nCommandeServices !== (int) $nBrOrderServices) {
+                $errors[] = 'Le nombre de services enregistrés pour la commande ne correspond pas au nombre de services enregistrés pour la logistique';
+            }
+            if (((int) $nToShipProducts + (int) $nShippedProducts) !== $nOrderLineProductsShipped) {
+                $errors[] = 'Le nombre de produits expédiés ne correspond pas à la quantité enregistrée';
+            }
+            if (((int) $nToShipServices + (int) $nShippedServices) !== $nOrderLineServicesShipped) {
+                $errors[] = 'Le nombre de services expédiés ne correspond pas à la quantité enregistrée';
+            }
+
+            BimpObject::loadClass('bimpreservation', 'BR_Reservation');
+
+            $sql = 'SELECT SUM(`qty`) as qty FROM ' . MAIN_DB_PREFIX . 'br_reservation WHERE `id_commande_client` = ' . (int) $this->id;
+            $result = $this->db->executeS($sql . ' AND `status` = 250');
+            if ((int) $result[0]->qty !== (int) $nToShipProducts) {
+                $errors[] = 'Le nombre de réservations au statut "' . BR_Reservation::$status_list[250]['label'] . '" est incorrect';
+            }
+            $result = $this->db->executeS($sql . ' AND `status` = 300');
+            if ((int) $result[0]->qty !== (int) $nShippedProducts) {
+                $errors[] = 'Le nombre de réservations au statut "' . BR_Reservation::$status_list[300]['label'] . '" est incorrect';
+            }
+            $result = $this->db->executeS($sql . ' AND `status` < 250');
+            if ((int) $result[0]->qty !== (int) ($nCommandeProducts - $nToShipProducts - $nShippedProducts)) {
+                $errors[] = 'Le nombre de réservations non expédiées ou en attente d\'expédition est incorrect';
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions:
 
     public function actionRemoveOrderLines($data, &$success)

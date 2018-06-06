@@ -326,6 +326,7 @@ class Tariff {
         $sql = 'SELECT id';
         $sql .= ' FROM tariff';
         $sql .= ' WHERE id_prod_extern  IN(' . implode(',', $ids_prods_extern) . ')';
+        
 
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {

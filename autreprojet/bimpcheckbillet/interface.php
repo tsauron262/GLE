@@ -409,12 +409,12 @@ switch ($action) {
         }
 
     case 'check_order_status': {
-//            $dsn2 = 'mysql:host=' . DB_HOST_2 . ';dbname=' . DB_NAME_2;
-//            $db2 = new PDO($dsn2, DB_USER_2, DB_PASS_WORD_2)
-//                    or die("Impossible de se connecter à la base externe : " . mysql_error());
+            $dsn2 = 'mysql:host=' . DB_HOST_2 . ';dbname=' . DB_NAME_2;
+            $db2 = new PDO($dsn2, DB_USER_2, DB_PASS_WORD_2)
+                    or die("Impossible de se connecter à la base externe : " . mysql_error());
             $order = new Order($db2);
             echo json_encode(array(
-                'status' => 1,//$order->checkOrderStatus($_POST['id_order'], $ticket),
+                'status' => $order->checkOrderStatus($_POST['id_order'], $ticket),
                 'errors' => $order->errors
             ));
             break;

@@ -22,3 +22,5 @@ define('IS_MAIN_SERVER', true);
 define('URL_PRESTA', "http://192.168.0.78/~tilito/prestashop");
 define('URL_CHECK', "http://192.168.0.78/~tilito/bimp-erp/autreprojet/bimpcheckbillet/");
 
+define('PRESTA_PREF', "ps_");
+

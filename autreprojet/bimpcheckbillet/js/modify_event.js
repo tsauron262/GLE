@@ -47,7 +47,7 @@ function getEvents() {
                         $(".chosen-select").trigger("chosen:updated");
                         $('select[name=id_event]').trigger('change');
                     }
-                    $('img#img_display').attr('src', URL_CHECK + '/img/event/' + filename);
+                    $('img#img_display').attr('src',  + '../img/event/' + filename);
                 }
             } else {
                 setMessage('alertSubmit', "Erreur 1286.", 'error');
@@ -312,7 +312,7 @@ function initEvents() {
         var id_event = $('select[name=id_event] > option:selected').val();
         if (id_event > 0) {
             var event = getEventById(id_event);
-            $('img#img_display').attr('src', URL_CHECK + '/img/event/' + event.filename);
+            $('img#img_display').attr('src', '..//img/event/' + event.filename);
             autoFill(event);
         } else {
             autoEmpty();

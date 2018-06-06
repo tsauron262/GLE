@@ -34,8 +34,13 @@ function getField(ids_prods, products) {
                         });
                         printFields(tariff, qty);
                     });
-                    $('<button class="btn btn-primary" name="validate_extra">Valider tous les tickets</button>').insertAfter('div[name=tariff]:last');
-                    fillTickets(out.tariffs);
+                    var nb_input = $('.box').find('input').length;
+                    if (nb_input !== 0) {
+                        $('<button class="btn btn-primary" name="validate_extra">Valider tous les tickets</button>').insertAfter('div#main_container');
+                        fillTickets(out.tariffs);
+                    } else {
+                        createTickets();
+                    }
                 } else
                     alert('Erreur serveur 4964');
             } catch (e) {
@@ -262,12 +267,6 @@ function createTickets() {
 $(document).ready(function () {
     if (id_order > 0) {
         checkOrderStatus(id_order);
-    } else {
-        $('section#content-hook_order_confirmation').append(
-                '<div class="alert alert-danger"><strong style="font-size: 16px; text-aligne: center">' +
-                '<img src="img/admin/error2.png" style="width: 16px; height: 16px; margin-bottom: 4px"> ' +
-                'Les tickets ne seront disponibles qu\'une fois que le paiement sera effectué.</strong>' +
-                '</div>');
     }
 });
 
@@ -289,8 +288,8 @@ function initEvents() {
     });
 
     $('button[name=validate_one]').click(function () {
-        $('button[name=validate_extra]').hide();
-        $('button[name=validate_one]').hide();
+//        $('button[name=validate_extra]').hide();
+//        $('button[name=validate_one]').hide();
         $('.p_error').remove();
         $('.error_submit').removeClass('error_submit');
         var stop = checkInput($(this).parent());
@@ -310,7 +309,7 @@ function initEvents() {
  */
 
 function printFields(tariff, qty) {
-
+    
     var html = '';
     var cnt_ticket = 0;
 
@@ -320,10 +319,12 @@ function printFields(tariff, qty) {
         html += '<h5>Ticket n°' + i + '</h5>';
         html += '<div name="ticket" cnt=' + cnt_ticket + ' id_tariff=' + tariff.id + '>';
         //names
-        html += '<label><strong>Prénom ' + returnStar(tariff.require_names === 1) + '</strong></label><br/>';
-        html += '<input class="form-control" name="first_name" require=' + tariff.require_names + ' maxlength=256 style="width: 300px"><br/>';
-        html += '<label><strong>Nom ' + returnStar(tariff.require_names === 1) + '</strong></label><br/>';
-        html += '<input class="form-control" name="last_name" require=' + tariff.require_names + ' maxlength=256 style="width: 300px"><br/>';
+        if (tariff.require_names == 1) {
+            html += '<label><strong>Prénom ' + returnStar(tariff.require_names === 1) + '</strong></label><br/>';
+            html += '<input class="form-control" name="first_name" require=' + tariff.require_names + ' maxlength=256 style="width: 300px"><br/>';
+            html += '<label><strong>Nom ' + returnStar(tariff.require_names === 1) + '</strong></label><br/>';
+            html += '<input class="form-control" name="last_name" require=' + tariff.require_names + ' maxlength=256 style="width: 300px"><br/>';
+        }
 
         // extra
         for (var j = 1; j <= 6; j++) {
@@ -481,3 +482,16 @@ function addText(ticket, ticket_element) {
         }
     }
 }
+
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : sParameterName[1];
+        }
+    }
+};

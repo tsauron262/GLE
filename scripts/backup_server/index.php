@@ -14,13 +14,23 @@ print '<div class="greyBorder">';
 print "<h3>Restaurer une sauvegarde</h3>";
 $files = glob('dump_*/*.sql');
 usort($files, function($a, $b) {
-    return filectime($a) < filectime($b);
+    
+    $tms1 = array();
+    preg_match('/([0-9]+)/', $a, $tms1);
+    
+    $tms2 = array();
+    preg_match('/([0-9]+)/', $b, $tms2);
+
+    return $tms1 < $tms2;
 });
 
 
 foreach ($files as $ind => $file) {
+    $tms = array();
+    preg_match('/([0-9]+)/', $file, $tms);
+
     if (strpos($file, 'monthly') !== false)
-        $class= 'day';
+        $class = 'day';
     else
         $class = '';
 
@@ -28,7 +38,7 @@ foreach ($files as $ind => $file) {
         print '<input id="' . $file . '" name="file" type="radio" value="' . $file . '" checked>';
     else
         print '<input id="' . $file . '" name="file" type="radio" value="' . $file . '">';
-    print '<label class="' . $class . '" for="' . $file . '">Sauvegarde du ' . date("d/m/Y G:i:s", filectime($file)) . '</label ><br/><br/>';
+    print '<label class="' . $class . '" for="' . $file . '">Sauvegarde du ' . date("d/m/Y G:i:s", $tms[0]) . '</label ><br/><br/>';
 }
 
 print '<button style="width:200px" type="submit">Valider</button>';

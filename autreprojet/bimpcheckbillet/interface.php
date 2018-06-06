@@ -414,6 +414,7 @@ switch ($action) {
                     or die("Impossible de se connecter à la base externe : " . mysql_error());
             $order = new Order($db2);
             echo json_encode(array(
+                'generated_tickets' => $order->generateTicket($_POST['id_order'], $ticket, $tariff),
                 'status' => $order->checkOrderStatus($_POST['id_order'], $ticket),
                 'errors' => $order->errors
             ));

@@ -43,19 +43,20 @@ class ZoomDici extends Module {
     public function hookDisplayOrderConfirmation($params) {
         $this->context->controller->addJS($this->_path . 'views/js/validate_order.js');
         $this->context->controller->addCSS($this->_path . 'views/css/validate_order.css');
-        if(isset($params['objOrder']))
+        if (isset($params['objOrder']))
             $order = $params['objOrder'];
         else
             $order = $params['order'];
-         $products = $order->getProducts();
+        $products = $order->getProducts();
 
-        $script = '<script>var id_order = "'.$order->id.'"; var id_prods = new Array(); var products = new Array();';
+        $script = '<script>var id_order = 0; var id_prods = new Array(); var products = new Array();';
         $html = "<div id='zoneRetour'></div>";
 
         foreach ($products as $product) {
-            $script .= "id_prods.push(".$product['product_id'].");";
-            $script .= "products.push({id: ".$product['product_id'].", qty: ".$product['product_quantity']."});";
+            $script .= "id_prods.push(" . $product['product_id'] . ");";
+            $script .= "products.push({id: " . $product['product_id'] . ", qty: " . $product['product_quantity'] . "});";
             if (Db::getInstance()->getValue('SELECT valid FROM ps_orders WHERE id_order=' . $product['id_order']) == '1') {
+                $script .='id_order = ' . $order->id . ';';
                 $this->context->smarty->assign(
                         array(
                             'my_module_name' => Configuration::get('MYMODULE_NAME'),
@@ -70,10 +71,15 @@ class ZoomDici extends Module {
                 );
 
                 $html .= $this->display(__FILE__, 'zoomdici.tpl');
+            } else {
+                $html .= '<div class="alert alert-danger"><strong style="font-size: 16px; text-aligne: center">' .
+                        '<img src="img/admin/error2.png" style="width: 16px; height: 16px; margin-bottom: 4px"> ' .
+                        'Les tickets ne seront disponibles qu\'une fois que le paiement sera effectué.</strong>' .
+                        '</div>';
             }
         }
-        $script .= "console.log(products);</script>";
-        
+        $script .= "</script>";
+
         return $script . $html;
     }
 

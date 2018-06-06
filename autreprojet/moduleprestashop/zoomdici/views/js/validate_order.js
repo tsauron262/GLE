@@ -2,8 +2,8 @@
  * Ajax call
  */
 var DOMAINE = "http://192.168.0.78/~tilito/bimp-erp/autreprojet";
-var URL_SERVER = DOMAINE+'/bimpcheckbillet/interface.php';
-var URL_TICKETS = DOMAINE+'/bimpcheckbillet/img/tickets/';
+var URL_SERVER = DOMAINE + '/bimpcheckbillet/interface.php';
+var URL_TICKETS = DOMAINE + '/bimpcheckbillet/img/tickets/';
 
 /**
  * @param {Array} ids_prods
@@ -245,7 +245,7 @@ function createTickets() {
         success: function (json) {
             try {
                 var out = JSON.parse(json);
-                if(out.code_return != 0){
+                if (out.code_return != 0) {
                     if (out.errors.length !== 0) {
                         alert(out.errors);
                     } else if (true) {
@@ -309,7 +309,7 @@ function initEvents() {
  */
 
 function printFields(tariff, qty) {
-    
+
     var html = '';
     var cnt_ticket = 0;
 

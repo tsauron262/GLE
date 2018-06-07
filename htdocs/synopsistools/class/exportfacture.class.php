@@ -51,21 +51,21 @@ class exportfacture {
     }
 
     public function exportTout() {
-        $this->importFact();
+//        $this->importFact();
 
 
-//        $this->exportFactureSav();
-//        $this->exportFactureSavSeul();
-//        $this->exportFactureReseau();
-//        $this->exportFactureNormal();
-//        $this->getFactDontExport();
-//        if ($this->error == "") {
-//            $this->output = trim($this->nbE . " facture(s) exportée(s)");
-//            return 0;
-//        } else {
-//            $this->output = trim($this->error);
-//            return 1;
-//        }
+        $this->exportFactureSav();
+        $this->exportFactureSavSeul();
+        $this->exportFactureReseau();
+        $this->exportFactureNormal();
+        $this->getFactDontExport();
+        if ($this->error == "") {
+            $this->output = trim($this->nbE . " facture(s) exportée(s)");
+            return 0;
+        } else {
+            $this->output = trim($this->error);
+            return 1;
+        }
     }
 
     private function getId8sensByCentreSav($centre) {

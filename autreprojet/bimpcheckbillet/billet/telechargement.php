@@ -104,11 +104,11 @@ if (isset($_REQUEST['co']))
 if ($cm != "") {
 
 
-    $sql = "SELECT *  FROM `ps_orders` o
-	LEFT JOIN ps_order_detail od ON od.`id_order` = o.`id_order` WHERE  ";
+    $sql = "SELECT *  FROM `".PRESTA_PREF."orders` o
+	LEFT JOIN ".PRESTA_PREF."order_detail od ON od.`id_order` = o.`id_order` WHERE  ";
 
     if ($modeTest) {
-        $sql .= "od.id_order_detail IN (SELECT id_order_details FROM ps_tickets);";
+        $sql .= "od.id_order_detail IN (SELECT id_order_details FROM ".PRESTA_PREF."tickets);";
     } else {
         $sql.= "o.`reference` = '" . $cm . "'";
     }
@@ -145,14 +145,14 @@ if ($cm != "") {
 
                 $codeBill = $dataSql['reference'] . "-" . $dataSql['product_id'] . "-" . ($i + 1);
 
-                $sql2 = "SELECT *  FROM `ps_tickets` WHERE  `code` = '" . $codeBill . "'";
+                $sql2 = "SELECT *  FROM `".PRESTA_PREF."tickets` WHERE  `code` = '" . $codeBill . "'";
                 $result2 = $conn->query($sql2);
                 if ($result2->num_rows < 1) {
                     $codeBar = rand(100000000000, 999999999999);
 
 
 
-                    $sql3 = "INSERT INTO `ps_tickets` (`code`, `codeBar`, `id_order_details`) VALUES ('" . $codeBill . "', " . $codeBar . ", " . $dataSql['id_order_detail'] . ");";
+                    $sql3 = "INSERT INTO `".PRESTA_PREF."tickets` (`code`, `codeBar`, `id_order_details`) VALUES ('" . $codeBill . "', " . $codeBar . ", " . $dataSql['id_order_detail'] . ");";
 
                     $result3 = $conn->query($sql3);
 

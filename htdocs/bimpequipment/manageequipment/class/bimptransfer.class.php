@@ -213,20 +213,24 @@ class BimpTransfer {
      * @param type $human_readable url name and explicit status
      * @return array of transfer
      */
-    public function getTransfers($fk_warehouse_dest = null, $status = null, $human_readable = false) {
+    public function getTransfers($fk_warehouse_dest = null, $status = null, $human_readable = false, $fk_warehouse = null) {
 
         $transfers = array();
 
         $sql = 'SELECT rowid, status, fk_warehouse_source, fk_warehouse_dest, fk_user_create, date_opening, date_closing';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'be_transfer WHERE 1';
 
         if ($fk_warehouse_dest != null) {
-            $sql .= ' WHERE fk_warehouse_dest=' . $fk_warehouse_dest;
+            $sql .= ' AND fk_warehouse_dest=' . $fk_warehouse_dest;
             if ($status != null)
                 $sql .= ' AND status IN (\'' . implode("','", $status) . '\')';
         } elseif ($status != null) {
-            $sql .= ' WHERE status IN (\'' . implode("','", $status) . '\')';
+            $sql .= ' AND status IN (\'' . implode("','", $status) . '\')';
         }
+        
+       if($fk_warehouse != null){
+            $sql .= ' AND (fk_warehouse_dest=' . $fk_warehouse.' || fk_warehouse_source=' . $fk_warehouse.")";
+       }
 
 //        echo $sql;
 
@@ -251,7 +255,7 @@ class BimpTransfer {
                         $name_status = 'Reçu';
                     }
                     $transfers[] = array(
-                        'id' => $obj->rowid,
+                        'id' => 'TR'.$obj->rowid,
                         'status' => $obj->status,
                         'name_status' => $name_status,
                         'fk_warehouse_source' => $obj->fk_warehouse_source,
@@ -264,7 +268,7 @@ class BimpTransfer {
                         'date_closing' => ($obj->date_closing != null) ? $obj->date_closing : '');
                 } else {
                     $transfers[] = array(
-                        'id' => $obj->rowid,
+                        'id' => 'TR'.$obj->rowid,
                         'status' => $obj->status,
                         'fk_warehouse_source' => $obj->fk_warehouse_source,
                         'fk_warehouse_dest' => $obj->fk_warehouse_dest,

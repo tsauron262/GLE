@@ -1,7 +1,11 @@
 <?php
 
 session_start();
-include '../param.inc.php';
+include_once '../param.inc.php';
+
+header('Access-Control-Allow-Origin: *');  
+header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Content-Range, Content-Disposition, Content-Description');
 
 function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     print '<!DOCTYPE html>';
@@ -18,14 +22,15 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
         print '<link rel="stylesheet" type="text/css" href="' . $cssfile . '">';
 
 // JS
+    print '<script>var URL_PRESTA="' . URL_PRESTA . '";'
+            . '    var URL_CHECK ="' . URL_CHECK . '";</script>';
+
     print '<script src="../lib/js/jquery-3.3.1.min.js"></script>';
     print '<script src="../lib/js/jquery-ui.js"></script>';
     print '<script type="text/javascript" src="../lib/js/bootstrap.min.js"></script>';
     print '<script type="text/javascript" src="../lib/js/chosen.jquery.min.js"></script>';
     print '<script type="text/javascript" src="../js/annexes.js"></script>';
     print '<script type="text/javascript" src="../lib/js/tinymce/tinymce.min.js"></script>';
-    
-    print '<script>var URL_PRESTA="'.PRESTA_URL.'";</script>';
 
     foreach ($arrayofjs as $jsfile)
         print '<script type="text/javascript" src="' . $jsfile . '"></script>';
@@ -38,7 +43,6 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     if (isset($_SESSION['user'])) {
         global $user;
         $user = json_decode($_SESSION['user']);
-//        var_dump($user);
         print '<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <div class="collapse navbar-collapse" id="navbarSupportedContent">';
         if (IS_MAIN_SERVER) {
@@ -50,13 +54,6 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
         print'<ul class="navbar-nav mr-auto">';
         if ($user->status == 2 && IS_MAIN_SERVER)
             print '<li><a class="nav-link" href="manage_user.php">Gestion</a></li>';
-//            print '<li><a class="nav-link" href="stats_event.php">Statistique évènement</a></li>';
-//            print '<li><a class="nav-link" href="create_event.php">Créer évènement</a></li>';
-//            print '<li><a class="nav-link" href="modify_event.php">Modifier évènement</a></li>';
-//            print '<li><a class="nav-link" href="create_tariff.php">Créer tarif</a></li>';
-//            print '<li><a class="nav-link" href="modify_tariff.php">Modifier tarif</a></li>';
-//            print '<li><a class="nav-link" href="create_ticket.php">Réserver ticket</a></li>';
-//            print '<li><a class="nav-link" href="check_ticket.php">Valider ticket</a></li>';
         if (IS_MAIN_SERVER) {
             print '<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Évènement</a>

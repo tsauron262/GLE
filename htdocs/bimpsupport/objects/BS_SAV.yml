@@ -359,6 +359,7 @@ fields:
         label: Login admin
     pword_admin: 
         label: Mot de passe admin
+        required: 1
     acompte: 
         label: Acompte
         type: money
@@ -413,6 +414,7 @@ forms:
             - field: id_contact
             - field: id_equipment
             - field: id_contrat
+            - field: prestataire_number
             - field: id_propal
             - field: id_user_tech
 #            - field: date_problem
@@ -552,6 +554,7 @@ fields_tables:
             - field: prioritaire
             - field: sav_pro
               edit: 1
+            - field: prestataire_number
             - field: id_propal
               display: card
             - field: id_facture_acompte

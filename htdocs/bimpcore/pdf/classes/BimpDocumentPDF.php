@@ -58,10 +58,21 @@ class BimpDocumentPDF extends BimpModelPDF
 
     protected function initHeader()
     {
-        global $conf;
+        global $conf, $mysoc;
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
 
+        if(method_exists($this->object, 'fetch_optionals')){
+            $this->object->fetch_optionals();
+            if(isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0){
+                $entrepot = new Entrepot($this->db);
+                $entrepot->fetch($this->object->array_options['options_entrepot']);
+                $mysoc->zip = $entrepot->zip;
+                $mysoc->address = $entrepot->address;
+                $mysoc->town = $entrepot->town;
+            }
+        }
+        
         $logo_height = 0;
         if (!file_exists($logo_file)) {
             $logo_file = '';
@@ -281,6 +292,16 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
+            if($line->desc == "(DEPOSIT)"){
+                $this->acompteHt -= $line->total_ht;
+                $this->acompteTtc -= $line->total_ttc;
+                $i++;
+                continue;
+            }
+            
+            
+            
+            
             $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);
@@ -291,12 +312,6 @@ class BimpDocumentPDF extends BimpModelPDF
             }
             
             
-            
-            if($line->desc == "(DEPOSIT)"){
-                $this->acompteHt -= $line->total_ht;
-                $this->acompteTtc -= $line->total_ttc;
-                continue;
-            }
 
             $desc = $this->getLineDesc($line, $product);
 

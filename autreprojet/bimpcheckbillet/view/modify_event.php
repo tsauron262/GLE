@@ -39,9 +39,11 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="event">Evènement </label><br/>';
     print '<select class="chosen-select" name="id_event"><option value="">Sélectionnez un évènement</option></select><br/><br/>';
 
-    print '<p name="categ_already_created" style="display: none">Cet évènement est déjà catégorisé dans prestashop</p>';
-    print '<p name="select_event" style="display: none">Sélectionnez un évènement pour créer une catégorie prestashop</p>';
-    print '<div class="btn btn-primary" name="create_prestashop_category">Creér catégorie prestashop</div><br/><br/>';
+    print '<div class="btn btn-primary" name="create_prestashop_category">Créer catégorie prestashop</div><br/>';
+    print '<p id="categ_already_created" style="display: none">Cet évènement est déjà catégorisé dans prestashop</p>';
+    print '<p id="select_event"          style="display: none">Sélectionnez un évènement pour créer une catégorie prestashop</p><br/>';
+
+    print '<div class="btn btn-primary" name="toggle_active">Activer/désactiver catégorie</div><br/><br/>';
 
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
@@ -62,16 +64,17 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
 //    print '<label class="btn btn-primary" for="file">';
 //    print '<input id="file" type="file" name="file" style="display:none"/>Parcourir</label>';
 //
-//    print '<span class="label label-info" id="name_file_display"></span>';
-//    print '<img id="img_display" alt=" Aucune image sélectionnée"/>';
-//    print '<img id="img_display" src="../img/event/9.png"/><br/><br/><br/>';
-    print '<div id="alertSubmit"></div><br/><br/><br/>';
+    print '<label for="img_display">Image</label><br/>';
+    print '<img id="img_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
+
+    print '<div id="alertSubmit"></div><br/>';
 
     print '<button class="btn btn-primary" name="modify">Modifier évènement</button>';
 
 //    print '<button class="btn btn-danger" name="delete">Supprimer évènement</button>';
 
     print '</form><br/>';
+
     print '<label>Statut</label><br/>';
     print '<button class="btn btn-primary" name="draft">Définir comme brouillon</button>';
     print '<button class="btn btn-success" name="validate" style="margin-left: 20px;">Valider évènement</button>';

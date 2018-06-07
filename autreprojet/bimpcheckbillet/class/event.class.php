@@ -229,6 +229,12 @@ class Event {
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
+                $exts = array('bmp', 'png', 'jpg');
+                foreach ($exts as $ext) {
+                    if (file_exists(PATH . '/img/event/' . $obj->id . "." . $ext)) {
+                        $filename = $obj->id . "." . $ext;
+                    }
+                }
                 if ($with_tariff)
                     $events[] = array(
                         'id' => $obj->id,
@@ -239,6 +245,7 @@ class Event {
                         'date_end' => $obj->date_end,
                         'status' => $obj->status,
                         'id_categ' => $obj->id_categ,
+                        'filename' => $filename,
                         'tariffs' => $tariff->getTariffsForEvent($obj->id)
                     );
                 else
@@ -250,7 +257,8 @@ class Event {
                         'date_start' => $obj->date_start,
                         'date_end' => $obj->date_end,
                         'status' => $obj->status,
-                        'id_categ' => $obj->id_categ
+                        'id_categ' => $obj->id_categ,
+                        'filename' => $filename
                     );
             }
             if ($with_tariff)

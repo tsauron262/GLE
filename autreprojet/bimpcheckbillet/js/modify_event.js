@@ -1,4 +1,4 @@
-var URL_PRESTASHOP = URL_PRESTA+'/modules/zoomdici/ajax.php';
+var URL_PRESTASHOP = URL_PRESTA + '/modules/zoomdici/ajax.php';
 
 var events;
 
@@ -24,9 +24,12 @@ function getEvents() {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.events.length !== 0) {
                 events = out.events;
+                var filename;
                 out.events.forEach(function (event) {
                     $('select[name=id_event]').append(
                             '<option value=' + event.id + '>' + event.label + '</option>');
+                    if (parseInt(event.id) === parseInt(id_event_session))
+                        filename = event.filename;
                 });
                 initEvents();
                 $(".chosen-select").chosen({
@@ -44,9 +47,10 @@ function getEvents() {
                         $(".chosen-select").trigger("chosen:updated");
                         $('select[name=id_event]').trigger('change');
                     }
+                    $('img#img_display').attr('src',  + '../img/event/' + filename);
                 }
             } else {
-                setMessage('alertSubmit', "Créer un évènement avant de définir un tarif.", 'error');
+                setMessage('alertSubmit', "Erreur 1286.", 'error');
                 $('button[name=create]').hide();
             }
         }
@@ -189,13 +193,14 @@ function createPrestashopCategory(id_event, label_event) {
             action: 'createPrestashopCategory'
         },
         error: function () {
+
             setMessage('alertSubmit', 'Erreur serveur 2584.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
-            } else if (out.id_inserted > 0) {
+            } else if (parseInt(out.id_inserted) > 0) {
                 addIdCateg(id_event, out.id_inserted);
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 2476.', 'error');
@@ -227,6 +232,31 @@ function addIdCateg(id_event, id_categ) {
                 $('p[name=categ_already_created]').css('display', 'inline');
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 2548.', 'error');
+            }
+        }
+    });
+}
+
+function toggleActiveCategory(id_categ) {
+
+    $.ajax({
+        type: 'POST',
+        url: URL_PRESTASHOP,
+        data: {
+            id_categ: id_categ,
+            action: 'toggleCategActive'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 5761.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (parseInt(out.toggled) === 1) {
+                alert("Changement de statut effectué");
+            } else {
+                setMessage('alertSubmit', "Erreur inconnue 2349.", 'error');
             }
         }
     });
@@ -282,6 +312,7 @@ function initEvents() {
         var id_event = $('select[name=id_event] > option:selected').val();
         if (id_event > 0) {
             var event = getEventById(id_event);
+            $('img#img_display').attr('src', '..//img/event/' + event.filename);
             autoFill(event);
         } else {
             autoEmpty();
@@ -342,10 +373,40 @@ function initEvents() {
     $('div[name=create_prestashop_category]').click(function () {
         var id_event = $('select[name=id_event] > option:selected').val();
         var label_event = $('select[name=id_event] > option:selected').text();
-        if (id_event > 0)
-            createPrestashopCategory(id_event, label_event);
-        else
-            setMessage('alertSubmit', "Veuillez sélectionnez un évènement.", 'error');
+        $('p#categ_already_created').css('display', 'none');
+        $('p#select_event').css('display', 'none');
+
+        if (id_event > 0) {
+            var stop = false;
+            events.forEach(function (event) {
+                if (parseInt(event.id) === parseInt(id_event) && parseInt(event.id_categ) > 0) {
+                    $('p#categ_already_created').css('display', 'inline');
+                    stop = true;
+                }
+            });
+            if (stop === false)
+                createPrestashopCategory(id_event, label_event);
+        } else {
+            $('p#select_event').css('display', 'inline');
+        }
+    });
+
+    $('div[name=toggle_active]').click(function () {
+        var id_event = parseInt($('select[name=id_event] > option:selected').val());
+        if (id_event > 0) {
+            events.forEach(function (event) {
+                if (parseInt(event.id) === id_event) {
+                    if (parseInt(event.id_categ) > 0) {
+                        toggleActiveCategory(parseInt(event.id_categ));
+                    } else {
+                        alert("Veuillez importer la catégorie sur prestashop avant de changer son status.");
+                    }
+                }
+            });
+        } else {
+            alert("Veuillez sélectionner un évènement avant de changer son status.");
+        }
+
     });
 }
 

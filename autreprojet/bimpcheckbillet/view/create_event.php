@@ -47,10 +47,10 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<input class="form-control" placeholder="Date de fin" type="text" name="date_end" style="display: inline ; width: 160px"/>';
     print '<input class="form-control" type="time" value="00:00" name="time_end" style="display: inline ; width: 100px"/><br/><br/>';
 
-    print '<label>Image</label><br/>';
+    print '<label>Image (.bmp, .jpg ou .png)</label><br/>';
 
     print '<label class="btn btn-primary" for="file">';
-    print '<input id="file" type="file" name="file" style="display:none"/>Parcourir</label>';
+    print '<input id="file" accept=".bmp,.jpg,.png" type="file" name="file" style="display:none"/>Parcourir</label>';
 
     print '<span class="label label-info" id="name_file_display"></span>';
     print '<img id="img_display" src="#" alt=" Aucune image sélectionnée"/><br/><br/><br/>';

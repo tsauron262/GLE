@@ -65,9 +65,22 @@ switch ($action) {
     case 'create_ticket': {
             $user_session = json_decode($_SESSION['user']);
             $user->fetch($user_session->id);
-            echo json_encode(array(
-                'code_return' => $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['first_name'], $_POST['last_name'], $_POST['extra_1'], $_POST['extra_2'], $_POST['extra_3'], $_POST['extra_4'], $_POST['extra_5'], $_POST['extra_6'], $_POST['id_order'], $_POST['id_prod_extern']),
-                'errors' => $ticket->errors));
+            if ($user->id == EXTERN_USER) {
+                echo json_encode(array(
+                    'code_return' => $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['first_name'], $_POST['last_name'], $_POST['extra_1'], $_POST['extra_2'], $_POST['extra_3'], $_POST['extra_4'], $_POST['extra_5'], $_POST['extra_6'], $_POST['id_order'], $_POST['id_prod_extern']),
+                    'errors' => $ticket->errors));
+            } else {
+
+                $id_order = -$user->id;
+
+                $id_ticket = $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['first_name'], $_POST['last_name'], $_POST['extra_1'], $_POST['extra_2'], $_POST['extra_3'], $_POST['extra_4'], $_POST['extra_5'], $_POST['extra_6'], $id_order, $_POST['id_prod_extern']);
+                $ticket->createPdf($id_ticket, 5, 5, true, true, true, $id_order);
+
+                echo json_encode(array(
+                    'code_return' => $id_ticket,
+                    'url' => URL_CHECK . 'img/tickets/ticket' . base64_encode($id_order) . '.pdf',
+                    'errors' => $ticket->errors));
+            }
             break;
         }
 

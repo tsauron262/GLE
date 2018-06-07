@@ -111,7 +111,8 @@ function createTicket(id_event, id_tariff, price, first_name, last_name, extra_1
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                setMessage('alertSubmit', "Le ticket a été créée.", 'msg');
+                alert("Le ticket a été créée, veuillez le télécharger avant d'en créer un autre (un seul ticket sera stocké par utilisateur)");
+                $('fieldset.container_form').append('<br/><a class="btn btn-primary" href="' + out.url + '" download >Télécharger Ticket</a>');
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 3885.', 'error');
             }

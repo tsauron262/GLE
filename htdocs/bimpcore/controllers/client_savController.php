@@ -5,6 +5,12 @@ class client_savController extends BimpController
 
     public function displayHead()
     {
+        global $db, $langs; 
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
+        $soc = new Societe($db);
+        $soc->fetch($_REQUEST['id']);
+        $head = societe_prepare_head($soc);
+        dol_fiche_head($head, 'supportsav', $langs->trans("SAV"));
 //        global $langs;
 //        $commande = $this->config->getObject('', 'commande');
 //        require_once DOL_DOCUMENT_ROOT . '/core/lib/order.lib.php';

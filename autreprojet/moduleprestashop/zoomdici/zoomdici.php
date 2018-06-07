@@ -30,8 +30,7 @@ class ZoomDici extends Module {
     public function install() {
         return parent::install() &&
                 $this->registerHook('orderConfirmation') &&
-//                $this->registerHook('actionOrderHistoryAddAfter') &&
-                $this->registerHook('header') &&
+                $this->registerHook('orderDetailDisplayed') &&
                 Configuration::updateValue('ZOOM_DICI', 'zoomdici');
     }
 
@@ -83,12 +82,16 @@ class ZoomDici extends Module {
         return $script . $html;
     }
 
-    public function hookHeader() {
-        $this->context->controller->addJS(($this->_path) . 'js/zoomdici.js');
-    }
+    public function hookDisplayOrderDetail($params) {
 
-    public function hookDisplayHeader() {
-        $this->context->controller->addCSS($this->_path . 'css/zoomdici.css', 'all');
+        $order = $params['order'];
+
+        $html .= $this->display(__FILE__, 'orderdetail.tpl');
+
+        var_dump($params);
+        echo "OK";
+        $html = '<script>alert(1)</script>';
+        return $html;
     }
 
 }

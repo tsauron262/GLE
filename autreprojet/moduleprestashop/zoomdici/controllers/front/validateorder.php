@@ -55,6 +55,7 @@ class zoomdiciValidateOrderModuleFrontController extends ModuleFrontController {
     public function setMedia() {
         parent::setMedia();
         $this->addJS(getcwd() . '/modules/zoomdici/views/js/validate_order.js');
+        $this->addCSS(getcwd() . '/modules/zoomdici/views/css/validate_order.css');
     }
 
 }

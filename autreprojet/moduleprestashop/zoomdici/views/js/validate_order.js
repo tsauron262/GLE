@@ -246,7 +246,7 @@ function createTickets() {
         success: function (json) {
             try {
                 var out = JSON.parse(json);
-                if(out.code_return != 0){
+                if (out.code_return != 0) {
                     if (out.errors.length !== 0) {
                         alert(out.errors);
                     } else if (true) {
@@ -310,7 +310,7 @@ function initEvents() {
  */
 
 function printFields(tariff, qty) {
-    
+
     var html = '';
     var cnt_ticket = 0;
 

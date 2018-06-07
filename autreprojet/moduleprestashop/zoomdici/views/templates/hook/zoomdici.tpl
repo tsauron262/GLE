@@ -1,4 +1,4 @@
-<h5>{$product['name']}</h5>
+<h5>test{$product['name']}</h5>
 <p id="order_id" style="display: none">{$order_id}</p>
 <input id="ticket_identifier" style="display: none" value="{base64_encode($order_id)}"/>
 <div
@@ -10,5 +10,5 @@
     price="{$product['price']}">
 </div>
 <div>
-    <br/><br/>
+<br/><br/>
 </div>

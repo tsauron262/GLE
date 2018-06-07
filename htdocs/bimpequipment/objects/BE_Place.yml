@@ -98,6 +98,7 @@ fields:
         display: 
             nom_url: 
                 type: nom_url
+                
     code_centre:
         label: Centre
         values: 
@@ -158,7 +159,7 @@ lists:
     default: 
         title: Emplacements
         icon: map-marker
-        objects_change_reload: BE_Place
+        objects_change_reload: BE_Place,BS_SAV
         add_form_name: default
         add_btn_label: Nouvel emplacement
         sort_field: id

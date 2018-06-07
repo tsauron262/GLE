@@ -101,6 +101,10 @@ objects:
             id_object: 
                 field_value: id_sav_product
                 
+    shipment: 
+        instance: 
+            bimp_object: BR_CommandeShipment
+        
 fields: 
     ref: 
         label: Référence
@@ -321,7 +325,6 @@ forms:
             - field: origin_element
             - field: origin_id_element
             - field: note
-            
     new_status: 
         rows: 
             - custom: 1
@@ -335,7 +338,12 @@ forms:
             - field: id_equipment
               show: 
                   callback: isProductSerialisable
-            - field: qty
+            - custom: 1
+              label: Quantité
+              input_name: qty
+              data_type: qty
+              content: 
+                  callback: renderNewStatusQtyInput
               show:
                   callback: isProductNotSerialisable
             - custom: 1
@@ -343,6 +351,58 @@ forms:
               input_name: new_status
               data_type: bool
               content: <input type="hidden" name="new_status" value="1"/>
+    remove: 
+        rows: 
+            - custom: 1
+              label: Quantité à retirer
+              input_name: qty
+              data_type: qty
+              content: 
+                  callback: renderRemoveQtyInput
+              show:
+                  callback: isProductNotSerialisable
+            - custom: 1
+              label: Produit(s) défectueux
+              data_type: bool
+              input_name: defective
+              value: 0
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Avoir
+              show: 
+                  callback: isOrderInvoiced
+              input_name: id_avoir
+              data_type: int
+              input: 
+                  type: select
+                  options: 
+                      array: avoirs
+                  select_first: 1 
+    shipment: 
+        title: Ajouter à une expédition
+        rows: 
+            - custom: 1
+              label: Expédition
+              input_name: id_shipment
+              data_type: id_object
+              object: shipment
+              create_form: default
+              create_form_values: 
+                  fields: 
+                      id_commande_client: 
+                          callback: getIdCommandeforShipment
+              input: 
+                  type: select
+                  options: 
+                      array: shipments
+            - custom: 1
+              label: Grouper les articles par ligne de commande
+              input_name: group_articles
+              data_type: bool
+              value: 0
+              input: 
+                  help: Si oui, une seule étiquette sera générée pour toutes les unités d'une ligne de commande
             
 fields_tables: 
     default: 
@@ -442,12 +502,7 @@ lists:
         checkboxes: 1
         pagination: 0
         bulk_actions: 
-#            - label: Prêt pour expédition
-#              icon: sign-out
-#              onclick: setSelectedReservationStatus($(this), 'list_id', 250);
-            - label: Réinitialiser
-              icon: undo
-              onclick: setSelectedReservationStatus($(this), 'list_id', 0);
+            callback: getCommandesListBulkActions
         objects_change_reload: BR_ReservationCmdFourn,BR_ReservationShipment,BR_CommandeShipment
         modal_view: default
         sort_field: id_product
@@ -457,10 +512,11 @@ lists:
             callback: getListExtraBtn
         cols:
             ref: 
+                label: Ref. logistique
                 field: ref
-            date_from:
-                label: Date de début
-                field: date_from
+#            date_from:
+#                label: Date de début
+#                field: date_from
             product: 
                 field: id_product
                 display: nom_url
@@ -470,12 +526,12 @@ lists:
                     callback: displayProductAvailableQty
             equipment: 
                 field: id_equipment
-            commande: 
-                field: id_commande_client
-                display: nom_url
-            commercial: 
-                field: id_commercial
-                display: nom_url
+#            commande: 
+#                field: id_commande_client
+#                display: nom_url
+#            commercial: 
+#                field: id_commercial
+#                display: nom_url
             qty: 
                 field: qty
             status:

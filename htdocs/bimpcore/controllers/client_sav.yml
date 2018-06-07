@@ -1,0 +1,14 @@
+bootstrap: 1
+
+js: 
+    - /bimpsupport/views/js/sav.js
+    - /bimpequipment/views/js/equipment.js
+    
+objects: 
+    client: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Societe
+            id_object: 
+                request: id

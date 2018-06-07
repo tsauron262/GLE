@@ -3458,6 +3458,9 @@ class Product extends CommonObject
 			if ($this->type == Product::TYPE_SERVICE) $result.=($linkstart.img_object(($notooltip?'':$label), 'service',  ($notooltip?'':'class="classfortooltip"'), 0, 0, $notooltip?0:1).$linkend.' ');
 		}
 		$result.=$linkstart.$newref.$linkend;
+                
+                BimpObject::loadClass('bimpcore', 'Bimp_Product');
+                $result .= Bimp_Product::getStockIconStatic($this->id); // $id_entrepôt facultatif, peut être null.
 		return $result;
 	}
 

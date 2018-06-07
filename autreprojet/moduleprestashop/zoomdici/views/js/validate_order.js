@@ -2,8 +2,9 @@
  * Ajax call
  */
 var DOMAINE = "http://192.168.0.78/~tilito/bimp-erp/autreprojet";
-var URL_SERVER = DOMAINE + '/bimpcheckbillet/interface.php';
-var URL_TICKETS = DOMAINE + '/bimpcheckbillet/img/tickets/';
+var DOMAINE = "http://sucsenscene.fr";
+var URL_SERVER = DOMAINE+'/bimpcheckbillet/interface.php';
+var URL_TICKETS = DOMAINE+'/bimpcheckbillet/img/tickets/';
 
 /**
  * @param {Array} ids_prods

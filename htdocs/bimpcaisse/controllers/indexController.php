@@ -44,7 +44,7 @@ class indexController extends BimpController
         $html .= '<span class="fullScreenButton bs-popover" ';
         $html .= BimpRender::renderPopoverData('Plein écran', 'bottom');
         $html .= '>';
-        $html .= '<i class="fa5 fa5-expand-arrows-alt"></i>';
+        $html .= '<i class="fas fa5-expand-arrows-alt"></i>';
         $html .= '</span>';
 
         $html .= '<span class="windowMaximiseButton bs-popover" ';

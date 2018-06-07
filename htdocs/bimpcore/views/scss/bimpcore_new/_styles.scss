@@ -714,3 +714,56 @@ i.iconRight {
         height: 80%;
     }
 }
+
+/*Product Stocks*/
+
+.productStocksContainer {
+    display: none;
+    position: absolute;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 1px 1px 4px #505050;
+    min-width: 300px;
+    max-height: 500px;
+    overflow-y: auto;
+    z-index: 10101;
+
+    h3 {
+        margin-top: 0;
+        font-size: 17px;
+    }
+
+    .stockSearchContainer {
+        margin: 10px 0;
+        color: $gray-dark;
+    }
+
+    .productStockTable > thead > tr > th {
+        background-color: #fff;
+        color: $gray-darker;
+        padding: 5px;
+        border-bottom: 2px solid $gray-darker;
+        text-align: center;
+
+        &:first-child {
+            text-align: left;
+        }
+    }
+
+    .productStockTable > tbody > tr > td {
+        text-align: center;
+
+        &:first-child {
+            text-align: left;
+        }
+    }
+
+    tr.currentEntrepot {
+        font-weight: bold;
+
+        td {
+            background-color: #E6E6E6!important;
+        }
+    }
+}

@@ -72,7 +72,7 @@ class Order {
                 return intVal($obj->qty);
             }
         } else {
-            $this->errors[] = "Id commande inconnu.";
+            $this->errors[] = "Id commande inconnu : ".$id_order;
             return -2;
         }
     }

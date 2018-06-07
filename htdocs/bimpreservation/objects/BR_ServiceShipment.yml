@@ -1,28 +1,27 @@
 table: br_service_shipment
 common_fields: 0
 
+parent_object: BR_CommandeShipment
+parent_id_property: id_shipment
+
 labels: 
     name: service délivré
     name_plur: services délivrés
 
 objects: 
-    service: 
+    service_order_line: 
         relation: hasOne
         delete: 0
         instance: 
-            bimp_object: BR_Service
+            bimp_object: BR_OrderLine
             id_object: 
-                field_value: id_service
-                
-    shipment: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BR_CommandeShipment
-            id_object: 
-                field_value: id_shipment
+                field_value: id_br_order_line
                 
 fields: 
+    id_shipment:
+        label: Expédition
+        type: id_parent
+        
     id_commande_client: 
         label: Commande client
         type: int
@@ -35,18 +34,83 @@ fields:
         unsigned: 1
         required: 1
     
-    id_service: 
+    id_br_order_line: 
         label: Service
         type: id_object
-        object: service
-        
-    id_shipment:
-        label: Expédition
-        type: id_object
-        object: shipment
+        object: service_order_line
         
     qty: 
-        label: Quantité totale
-        type: int
-        default_value: 1
-    
+        label: Quantité
+        type: qty
+        default_value: 0
+        min: 0
+        unsigned: 1
+        max: 
+            callback: getAvailableQty
+            
+forms: 
+    remove: 
+        title: Retrait de l\'expédition
+        rows: 
+            - custom: 1
+              label: Qté à retirer
+              input_name: qty
+              data_type: qty
+              content: 
+                  callback: renderRemoveQtyInput
+            - custom: 1
+              label: Retirer de la commande client
+              data_type: bool
+              input_name: remove_from_order
+              value: 0
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Afficher sélection avoirs
+              input_name: show_avoirs
+              hidden: 1
+              input: 
+                  type: hidden
+              value: 
+                  callback: doAddToCreditNoteOnRemove    
+              depends_on: remove_from_order
+            - custom: 1
+              label: Avoir
+              input_name: id_avoir
+              data_type: int
+              input: 
+                  type: select
+                  options: 
+                      array: avoirs
+                  select_first: 1
+              display_if: 
+                  field_name: show_avoirs
+                  show_values: 1
+                      
+lists: 
+    default: 
+        title: Liste des services inclus dans l'expédition
+        checkboxes: 1
+        enable_search: 0
+        sort_field: id
+        sort_way: asc
+        n: 10
+        update_btn: 1
+        extra_btn: 
+            callback: getListExtraBtn
+        cols:
+            product: 
+                label: Service
+                value: 
+                    callback: 
+                        method: displayService
+                        params: 
+                            - nom_url
+            available_qty: 
+                label: Qté disponible
+                value: 
+                    callback: getAvailableQty
+            qty:
+                field: qty
+                edit: 
+                    callback: isQtyEditable

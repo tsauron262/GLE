@@ -248,7 +248,6 @@ class BimpConfig
         if (is_string($value)) {
             return $value;
         }
-
         if (is_array($value)) {
             if (array_key_exists('prop', $value)) {
                 return $this->getProp($value['prop'], $path . '/prop');
@@ -285,8 +284,7 @@ class BimpConfig
                 }
             }
             if (array_key_exists('request', $value)) {
-                $request = $this->getvalue($value['request'], $path . '/request');
-                return BimpTools::getValue($request);
+                return $this->getRequestValue($value['request'], $path . '/request');
             }
         }
         return $value;
@@ -442,11 +440,13 @@ class BimpConfig
 
     protected function getProp($prop, $path)
     {
+        $object = null;
         $prop_name = null;
         $is_static = 0;
 
         if (is_string($prop)) {
             $prop_name = $prop;
+            $object = $this->instance;
         } elseif (is_array($prop)) {
             $prop_name = $this->get($path . '/name', null, true);
             if ($this->isDefined($path . '/object')) {
@@ -603,6 +603,30 @@ class BimpConfig
         return null;
     }
 
+    protected function getRequestValue($request, $path)
+    {
+        $request_name = $this->getvalue($request, $path);
+
+        if (!is_null($request_name) && is_string($request_name)) {
+            $requests = explode('/', $request_name);
+            $value = BimpTools::getValue($requests[0], null);
+            if (!is_null($value)) {
+                foreach ($requests as $i => $key) {
+                    if ($i === 0) {
+                        continue;
+                    }
+
+                    if (isset($value[$key])) {
+                        $value = $value[$key];
+                    }
+                }
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
     protected function processCallback($callback, $path)
     {
         if (is_string($callback)) {
@@ -665,6 +689,7 @@ class BimpConfig
             }
 
             $object = $this->get($path, null, true, 'any');
+
             if (is_object($object)) {
                 return $object;
             } elseif (is_string($object)) {

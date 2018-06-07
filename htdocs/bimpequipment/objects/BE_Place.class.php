@@ -83,10 +83,8 @@ class BE_Place extends BimpObject
                 case self::BE_PLACE_PRESENTATION:
                 case self::BE_PLACE_VOL:
                 case self::BE_PLACE_SAV:
-                    return $this->displayData('id_entrepot', 'nom_url');
-
                 case self::BE_PLACE_PRET:
-                    return $this->displayData('code_centre');
+                    return $this->displayData('id_entrepot', 'nom_url');
 
                 case self::BE_PLACE_USER:
                     return $this->displayData('id_user', 'nom_url');

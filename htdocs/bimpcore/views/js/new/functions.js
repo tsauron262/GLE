@@ -164,10 +164,13 @@ function setCommonEvents($container) {
     });
     // bootstrap popover:
     $container.find('.bs-popover').each(function () {
-        $(this).popover();
-        $(this).click(function () {
-            $(this).popover('hide');
-        });
+        if (!parseInt($(this).data('event_init'))) {
+            $(this).popover();
+            $(this).click(function () {
+                $(this).popover('hide');
+            });
+            $(this).data('event_init', 1);
+        }
     });
     // Auto-expand: 
     $container.on('input.auto_expand', 'textarea.auto_expand', function () {
@@ -214,6 +217,12 @@ function setCommonEvents($container) {
     $container.find('.hideOnClickOut').each(function () {
         $(this).click(function (e) {
             e.stopPropagation();
+        });
+    });
+    $container.find('.displayProductStocksBtn').each(function () {
+        $(this).click(function (e) {
+            e.stopPropagation();
+            displayProductStocks($(this), $(this).data('id_product'), $(this).data('id_entrepot'));
         });
     });
 }

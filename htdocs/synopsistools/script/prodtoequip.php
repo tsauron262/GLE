@@ -179,9 +179,11 @@ $req = "UPDATE `llx_bs_sav` SET "
 
 $req2 = "UPDATE `llx_bs_sav` SET id_facture = (SELECT MAX(f.rowid) FROM `llx_facture` f, llx_element_element WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'FA%') WHERE `id_propal` > 0 AND `id_facture` < 1";
 $req3 = "UPDATE `llx_bs_sav` SET `id_discount` = (SELECT rowid FROM `llx_societe_remise_except` WHERE `fk_facture_source` = id_facture_acompte) WHERE `id_facture_acompte` > 0;";
+$req4 = 'UPDATE `llx_bs_sav` SET `pword_admin`="x" WHERE `pword_admin` = ""';
 $db->query($req);
 $db->query($req2);
 $db->query($req3);
+$db->query($req4);
 
 
 

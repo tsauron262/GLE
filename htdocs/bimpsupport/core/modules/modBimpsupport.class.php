@@ -132,9 +132,9 @@ class modBimpsupport extends DolibarrModules {
         // 'stock'            to add a tab in stock view
         // 'thirdparty'       to add a tab in third party view
         // 'user'             to add a tab in user view
-//        $this->tabs = array(
-//            'thirdparty:+contratauto:Contrat:@bimpcontratauto:$user->rights->contrat->lire:/bimpcontratauto/contrat.php?socid=__ID__'
-//        );
+        $this->tabs = array(
+            'thirdparty:+supportsav:Sav:@bimpsupport:$user->rights->BimpSupport->read:/bimpcore/index.php?fc=client_sav&id=__ID__'
+        );
 //            'categories_0:+restreindre:Restreindre:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/browse.php?id=__ID__',
 
 

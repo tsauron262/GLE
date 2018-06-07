@@ -232,9 +232,10 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                         if (typeof (bimpAjax.success) === 'function') {
                             bimpAjax.success(result, bimpAjax);
                         }
-                        if (result.success_callback && typeof (result.success_callback) === 'string') {
-                            eval(result.success_callback);
-                        }
+                    }
+
+                    if (result.success_callback && typeof (result.success_callback) === 'string') {
+                        eval(result.success_callback);
                     }
                 }
 

@@ -56,7 +56,7 @@ class BC_List extends BC_Panel
             if (is_null($this->params['icon']) || !$this->params['icon']) {
                 $this->params['icon'] = 'bars';
             }
-            
+
             if (!$this->object->canCreate()) {
                 $this->params['add_btn'] = 0;
                 $this->params['add_form_name'] = null;
@@ -66,7 +66,6 @@ class BC_List extends BC_Panel
         $this->setConfPath();
 
         $this->filters = $this->object->getSearchFilters();
-        
 //        echo '<pre>';
 //        print_r($this->params);
 //        exit;
@@ -229,8 +228,16 @@ class BC_List extends BC_Panel
             $this->params['add_form_values'] = array();
         }
 
-        foreach ($values as $field_name => $value) {
-            $this->params['add_form_values'][$field_name] = $value;
+        if (isset($values['fields'])) {
+            foreach ($values['fields'] as $field_name => $value) {
+                $this->params['add_form_values']['fields'][$field_name] = $value;
+            }
+        }
+
+        if (isset($values['associations'])) {
+            foreach ($values['associations'] as $asso_name => $value) {
+                $this->params['add_form_values']['associations'][$asso_name] = $value;
+            }
         }
     }
 
@@ -362,7 +369,7 @@ class BC_List extends BC_Panel
         }
 
         $this->items = $this->object->getList($filters, $this->params['n'], $this->params['p'], $order_by, $this->params['sort_way'], 'array', array(
-            $primary
+            'DISTINCT (a.' . $primary . ')'
                 ), $joins, $extra_order_by, $extra_order_way);
 
         if (method_exists($this->object, 'listItemsOverride')) {

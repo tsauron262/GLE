@@ -513,7 +513,7 @@ function validateForm($form) {
                         if ($input.length) {
                             var data_type = $(this).data('data_type');
                             if (data_type && (data_type === 'id_object')) {
-                                if (!parseInt($input.val())) {
+                                if (!parseInt($input.val()) || parseInt($input.val()) <= 0) {
 //                                    bimp_msg($input.attr('name'));
                                     data_missing = true;
                                     $(this).addClass('value_required');
@@ -803,9 +803,22 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     }
     var $value_input = $inputContainer.find('[name=' + value_input_name + ']');
     var $label_input = $inputContainer.find('[name=' + label_input_name + ']');
-    var value = $value_input.val();
-    var label = $label_input.val();
-    if (value) {
+
+    var value = '';
+    var label = '';
+
+    if ($value_input.length) {
+        value = $value_input.val();
+    }
+    if ($label_input.length) {
+        if ($label_input.tagName() === 'select') {
+            label = $label_input.find('[value="' + value + '"]').text();
+        } else {
+            label = $label_input.val();
+        }
+    }
+
+    if (value || value === 0) {
         var values_field_name = $inputContainer.data('values_field');
         var check = true;
         $container.find('.multipleValuesList').find('input[name="' + values_field_name + '[]"]').each(function () {
@@ -853,6 +866,8 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         } else {
             $container.find('table').find('tbody.multipleValuesList').append(html);
         }
+    } else {
+        bimp_msg('Une erreur est survenue. opération impossible', 'danger');
     }
     checkMultipleValues();
 }
@@ -1210,7 +1225,7 @@ function setInputsEvents($container) {
                         inputQtyMin($qtyInputcontainer);
                     }
                 }
-            }).focus(function() {
+            }).focus(function () {
                 $(this).select();
             });
 

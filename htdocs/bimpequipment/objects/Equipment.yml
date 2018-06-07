@@ -335,15 +335,28 @@ forms:
             - association: contrats
             
 list:
-#    checkboxes: 1
-#    bulk_actions: 
-#        - label: Supprimer les équipements sélectionnés
-#          icon: trash
-#          onclick: deleteSelectedObjects('list_id', $(this));
-#          btn_class: deleteSelectedObjects
-    sort_field: id_product
-    sort_way: asc
+    checkboxes: 1
+    bulk_actions: 
+        - label: Supprimer les équipements sélectionnés
+          icon: trash
+          onclick: deleteSelectedObjects('list_id', $(this));
+          btn_class: deleteSelectedObjects
+    sort_field: date_create
+    sort_way: desc
     n: 10
+    joins: 
+        - table: be_equipment_place
+          alias: place
+          on: place.id_equipment = a.id
+        - table: entrepot
+          alias: place_entrepot
+          on: place_entrepot.rowid = place.id_entrepot
+        - table: user
+          alias: place_user
+          on: place_user.rowid = place.id_user
+        - table: societe
+          alias: place_client
+          on: place_client.rowid = place.id_client
     cols:
         id:
             label: ID
@@ -381,7 +394,7 @@ list:
                             array: hasReservations
     add_form_name: default
     edit_btn: 1
-#    delete_btn: 1
+    delete_btn: 1
     view_btn: 1
     page_btn: 1
     modal_view: default

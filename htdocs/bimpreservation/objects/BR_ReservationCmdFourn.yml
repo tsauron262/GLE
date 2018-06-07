@@ -205,6 +205,7 @@ lists:
             callback: getListExtraBtn
         cols:
             refres: 
+                label: Réf. logistique
                 field: ref_reservation
             type: 
                 field: type

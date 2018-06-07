@@ -106,7 +106,6 @@ class BimpController
             $id_object = BimpTools::getValue('id');
 
             echo '<script type="text/javascript">';
-            echo ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
             echo ' ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
             echo '</script>';
 
@@ -1436,6 +1435,32 @@ class BimpController
         die(json_encode($return));
     }
 
+    protected function ajaxProcessLoadProductStocks()
+    {
+        $errors = array();
+        $html = '';
+        
+        $id_product = (int) BimpTools::getValue('id_product', 0);
+        $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
+        
+        if (!$id_product) {
+            $errors[] = 'ID du produit absent';
+        } else {
+            $product = BimpObject::getInstance('bimpcore', 'Bimp_Product', $id_product);
+            if (!BimpObject::objectLoaded($product)) {
+                $errors[] = 'Produit d\'ID '.$id_product.' inexistant';
+            } else {
+                $html = $product->renderStocksByEntrepots($id_entrepot);
+            }
+        }
+        
+        
+        die(json_encode(array(
+            'errors' => $errors,
+            'html' => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
     // Callbacks:
 
     protected function getObjectIdFromPost($object_name)

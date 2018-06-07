@@ -53,5 +53,13 @@ echo '<body>';
 
 echo '</body></html>';
 
+// A mettre plutôt en début de fichier:
+require_once __DIR__ . '/Bimp_Lib.php';
+BimpCore::displayHeaderFiles();
+
+// Ajout icône stock: 
+BimpObject::loadClass('bimpcore', 'Bimp_Product');
+$icon_html = Bimp_Product::getStockIconStatic($id_product, $id_entrepot);
+
 
 //llxFooter();

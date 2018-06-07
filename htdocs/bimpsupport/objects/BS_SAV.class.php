@@ -37,7 +37,7 @@ class BS_SAV extends BimpObject
     public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 9);
     public static $save_options = array(
         1 => 'Dispose d\'une sauvegarde',
-        2 => 'Désire une sauvegarde si nécessaire',
+        2 => 'Désire une sauvegarde si celle-ci est possible',
         0 => 'Non applicable',
         3 => 'Dispose d\'une sauvegarde Time machine',
         4 => 'Ne dispose pas de sauvegarde et n\'en désire pas'
@@ -57,7 +57,7 @@ class BS_SAV extends BimpObject
     public static $list_symptomes = array(
         'Ecran cassé',
         'Dégât liquide',
-        'roblème batterie',
+        'Problème batterie',
         'Ne démarre pas électriquement',
         'Machine lente',
         'Démarre électriquement mais ne boot pas',
@@ -958,7 +958,7 @@ class BS_SAV extends BimpObject
 
     public function generatePropal()
     {
-        global $langs;
+        global $langs, $user;
 
         $errors = array();
 
@@ -982,6 +982,8 @@ class BS_SAV extends BimpObject
 
         $prop = new Propal($this->db->db);
         $prop->fetch($this->getData('id_propal'));
+        
+        $prop->set_ref_client($user, $this->getData('prestataire_number'));
 
         if ($prop->statut > 0) {
             return array('Cette propale doit être révisée pour pouvoir être re-générée');
@@ -1310,7 +1312,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                 $to = $client->dol_object->phone;
 
             $sms .= "\n" . $this->getData('ref');
-            $to = "0686691814";
+            //$to = "0686691814";
             $fromsms = 'SAV BIMP';
 
             $to = traiteNumMobile($to);
@@ -1349,7 +1351,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             }
         }
 
-        $errors = bimpsupport_pdf_create($this->db->db, $this, 'sav', $file_type);
+        $errors = array_merge($errors, bimpsupport_pdf_create($this->db->db, $this, 'sav', $file_type));
 
         if (!count($errors)) {
             $ref = '';
@@ -1534,7 +1536,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             if (!count($errors)) {
                 global $user, $langs;
                 $this->addNote('Diagnostic commencé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
-                $this->set('id_user_tech', (int) $user->id);
+                $this->updateField('id_user_tech', (int) $user->id);
 
                 if (isset($data['send_msg']) && (int) $data['send_msg']) {
                     $warnings = array_merge($warnings, $this->sendMsg('debDiago'));
@@ -1583,7 +1585,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
             $propal = $this->getChildObject('propal');
 
-            $this->addNote('Devis validé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+            $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
 
             $new_status = null;
             if ($this->allGarantie) { // Déterminé par $this->generatePropal()
@@ -1607,7 +1609,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             }
 
             if (!(int) $this->getData('id_user_tech')) {
-                $this->set('id_user_tech', $user->id);
+                $this->updateField('id_user_tech', (int) $user->id);
             }
 
             if (isset($data['send_msg']) && (int) $data['send_msg']) {
@@ -2226,18 +2228,20 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                 $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                 $place_errors = $place->validateArray(array(
                     'id_equipment' => (int) $this->getData('id_equipment'),
-                    'type'         => BE_Place::BE_PLACE_CLIENT,
+                    'type'         => BE_Place::BE_PLACE_SAV,
                     'id_entrepot'  => (int) $this->getData('id_entrepot'),
-                    'infos'        => $this->getData('ref'),
+                    'infos'        => 'Ouverture du SAV ' . $this->getData('ref'),
                     'date'         => date('Y-m-d H:i:s')
                 ));
                 if (!count($place_errors)) {
-                    $place->create();
-                } else {
+                    $place_errors = $place->create();
+                }
+
+                if (count($place_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
                 }
             }
-
+            
             $this->generatePDF('pc', $warnings);
 
             if (BimpTools::getValue('send_msg', 0)) {

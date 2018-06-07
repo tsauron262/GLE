@@ -23,9 +23,32 @@ class equipmentController extends BimpController
             return BimpRender::renderAlerts('ID de l\'équipement absent');
         }
 
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', (int) BimpTools::getValue('id', 0));
+
+        if (!BimpObject::objectLoaded($equipment)) {
+            return BimpRender::renderAlerts('ID de l\'équipement invalide');
+        }
+
         $instance = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-        $list = new BC_ListTable($instance, 'default', 1, null, 'SAV enresgitrés pour cet équipement', 'wrench');
+        $list = new BC_ListTable($instance, 'default', 1, null, 'SAV enregistrés pour cet équipement', 'wrench');
         $list->addFieldFilterValue('id_equipment', BimpTools::getValue('id', 0));
+
+        $place = $equipment->getCurrentPlace();
+        if (BimpObject::objectLoaded($place)) {
+            if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT) {
+                $values = array();
+                $id_client = (int) $place->getData('id_client');
+                if ($id_client) {
+                    $values['fields']['id_client'] = $id_client;
+                }
+                $id_contact = (int) $place->getData('id_contact');
+                if ($id_contact) {
+                    $values['fields']['id_contact'] = $id_contact;
+                }
+                $list->setAddFormValues($values);
+            }
+        }
+
         return $list->renderHtml();
     }
 
@@ -36,7 +59,7 @@ class equipmentController extends BimpController
         $serial = (string) BimpTools::getValue('serial', '');
 
         $data = array();
-        
+
         if (!$serial) {
             $errors[] = 'Numéro de série absent';
         } else {
@@ -51,6 +74,44 @@ class equipmentController extends BimpController
         die(json_encode(array(
             'errors'     => $errors,
             'data'       => $data,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessGetEquipmentGsxInfos()
+    {
+        $errors = array();
+        $sucess = '';
+        $html = '';
+
+        $id_equipment = (int) BimpTools::getValue('id_equipment', 0);
+        if ($id_equipment) {
+            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+            if (BimpObject::objectLoaded($equipment)) {
+
+                $data = $equipment->gsxLookup($equipment->getData('serial'), $errors);
+
+                if (isset($data['warning']) && $data['warning']) {
+                    $html .= BimpRender::renderAlerts($data['warning'], 'warning');
+                }
+                if (isset($data['date_warranty_end']) && $data['date_warranty_end']) {
+                    if ($data['date_warranty_end'] < date('Y-m-d')) {
+                        $class = 'danger';
+                    } else {
+                        $class = 'info';
+                    }
+
+                    $DT = new DateTime($data['date_warranty_end']);
+                    $msg = 'Date de fin de garantie: ' . $DT->format('d / m / Y');
+                    $html .= BimpRender::renderAlerts($msg, $class);
+                }
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'success'    => $sucess,
+            'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }

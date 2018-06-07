@@ -219,6 +219,13 @@ class BimpInput
                     $options['options'] = array();
                 }
 
+                if (isset($options['select_first']) && (int) $options['select_first']) {
+                    foreach ($options['options'] as $option_key => $option_val) {
+                        $value = $option_key;
+                        break;
+                    }
+                }
+
                 if (count($options['options'])) {
                     $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '">';
                     foreach ($options['options'] as $option_value => $option) {
@@ -241,7 +248,7 @@ class BimpInput
                         }
                         $html .= '<option value="' . $option_value . '"';
                         if ($value == $option_value) {
-                            $html .= ' selected';
+                            $html .= ' selected="1"';
                         }
                         if (!is_null($color)) {
                             $html .= ' data-color="' . $color . '" style="color: #' . $color . '"';
@@ -293,6 +300,22 @@ class BimpInput
                 unset($bdb);
                 $options['options'] = $conds;
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
+
+            case 'select_mysoc_account':
+                ob_start();
+                $form->select_comptes((int) $value, $field_name, 0, '', 1);
+                $html .= ob_get_clean();
+                break;
+
+            case 'select_remises':
+                if (!isset($options['id_client'])) {
+                    $options['id_client'] = 0;
+                }
+                $filter = 'fk_facture IS NULL AND fk_facture_line IS NULL';
+                ob_start();
+                $form->select_remises((int) $value, $field_name, $filter, (int) $options['id_client']);
+                $html .= ob_get_clean();
+                break;
 
             case 'search_ziptown':
                 if (!isset($options['linked_fields'])) {
@@ -921,6 +944,9 @@ class BimpInput
 
     public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0)
     {
+        if (is_null($values) || $values === '') {
+            $values = array();
+        }
         if (!is_array($values)) {
             $value = $values;
             $values = array();

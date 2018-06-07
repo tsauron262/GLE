@@ -6,8 +6,8 @@ class Equipment extends BimpObject
 {
 
     public static $types = array(
-        1 => 'Ordinateur',
-        2 => 'Periph Mobile',
+        1  => 'Ordinateur',
+        2  => 'Periph Mobile',
         10 => 'Accessoire',
         20 => 'License',
         30 => 'Serveur',
@@ -220,6 +220,39 @@ class Equipment extends BimpObject
         );
     }
 
+    public function getPlaceSearchFilters(&$filters, $value)
+    {
+        $filters['place.position'] = 1;
+        $filters['or_place'] = array(
+            'or' => array(
+                'place.place_name'    => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'place_entrepot.label'     => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'place_user.firstname'     => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'place_user.lastname'      => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'place_client.nom'         => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'place_client.code_client' => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+            )
+        );
+    }
+
     public function getReservedSearchFilters(&$filters, $value)
     {
         $sql = '(SELECT COUNT(reservation.id) FROM ' . MAIN_DB_PREFIX . 'br_reservation reservation WHERE reservation.id_equipment = a.id';
@@ -399,6 +432,12 @@ class Equipment extends BimpObject
 
     public function gsxLookup($serial, &$errors)
     {
+        if (preg_match('/^S([A-Z0-9]{11,12})$/', $serial, $matches)) {
+            $serial = $matches[1];
+        } elseif (preg_match('/^S[0-9]{15,16}$/', $serial, $matches)) {
+            $serial = $matches[1];
+        }
+
         if (preg_match('/^[0-9]{15,16}$/', $serial)) {
             $isIphone = true;
         } else {
@@ -413,13 +452,14 @@ class Equipment extends BimpObject
             'date_purchase'     => '',
             'date_warranty_end' => '',
             'warranty_type'     => '',
-//            'note'              => ''
+            'warning'           => ''
         );
 
         if (!$gsx->connect) {
             $errors = BimpTools::getMsgFromArray($gsx->errors['init'], 'Echec de la connexion GSX');
         } else {
             $response = $gsx->lookup($serial);
+
             if (isset($response) && count($response)) {
                 if (isset($response['ResponseArray']) && count($response['ResponseArray'])) {
                     if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
@@ -440,9 +480,9 @@ class Equipment extends BimpObject
                         if (isset($data['warrantyStatus']) && $data['warrantyStatus']) {
                             $result['warranty_type'] = $data['warrantyStatus'];
                         }
-//                        if (isset($data['activationLockStatus']) && $data['activationLockStatus']) {
-//                            $result['note'] = $data['activationLockStatus'];
-//                        }
+                        if (isset($data['activationLockStatus']) && $data['activationLockStatus']) {
+                            $result['warning'] = $data['activationLockStatus'];
+                        }
                     }
                 }
             }
@@ -536,5 +576,13 @@ class Equipment extends BimpObject
         }
 
         return $errors;
+    }
+
+    // Gestion des droits: 
+
+    public function canDelete()
+    {
+        global $user;
+        return (int) $user->admin;
     }
 }

@@ -6,6 +6,8 @@ js:
 objects: 
     commande: 
         instance: 
-            dol_object: commande
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Commande
             id_object: 
                 request: id

@@ -30,7 +30,7 @@ class BimpCore
             '/bimpcore/views/js/new/functions.js',
             '/bimpcore/views/js/new/ajax.js',
 //            '/bimpcore/views/js/new/component.js',
-            '/bimpcore/views/js/new/modal.js', 
+            '/bimpcore/views/js/new/modal.js',
             '/bimpcore/views/js/new/object.js',
             '/bimpcore/views/js/new/form.js',
             '/bimpcore/views/js/new/list.js',
@@ -62,10 +62,14 @@ class BimpCore
                     echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
                 }
             }
+
+            echo '<script type="text/javascript">';
+            echo ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
+            echo '</script>';
             self::$filesInit = true;
         }
     }
-    
+
     public static function getConf($name)
     {
         global $db;

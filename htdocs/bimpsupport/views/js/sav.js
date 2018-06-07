@@ -116,7 +116,40 @@ function loadGSXView($button, id_sav) {
 
 }
 
+function onSavFormLoaded($form) {
+    var $input = $form.find('[name="id_equipment"]');
+    if ($input.length) {
+        $input.change(function () {
+            var $container = $input.findParentByClass('inputContainer');
+            if ($container.length) {
+                $container.find('div.equipmentAjaxInfos').remove();
+                var html = '<div class="equipmentAjaxInfos" style="display: none"></div>';
+                $container.append(html);
+                BimpAjax('getEquipmentGsxInfos', {
+                    id_equipment: $input.val()
+                }, $container.find('.equipmentAjaxInfos'), {
+                    url: dol_url_root + '/bimpequipment/index.php',
+                    $container: $container,
+                    display_success: false,
+                    display_errors: false,
+                    display_processing: true,
+                    processing_padding: 0,
+                    append_html: true,
+                    processing_msg: ''
+                });
+            }
+        });
+    }
+}
+
 $(document).ready(function () {
+    $('body').on('formLoaded', function (e) {
+        if ($.isOk(e.$form)) {
+            if (e.$form.hasClass('BS_SAV_form')) {
+                onSavFormLoaded(e.$form);
+            }
+        }
+    });
 
 //    var $gsxForm = $('#loadGSXForm');
 //    if ($.isOk($gsxForm)) {

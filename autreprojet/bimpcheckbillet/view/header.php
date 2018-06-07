@@ -3,7 +3,7 @@
 session_start();
 include_once '../param.inc.php';
 
-header('Access-Control-Allow-Origin: *');  
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Content-Range, Content-Disposition, Content-Description');
 
@@ -12,6 +12,7 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     print '<html>';
 
     print '<head>';
+    print '<meta name="viewport" content="width=device-width, initial-scale=1">';
     print '<title>' . $title . '</title>';
 // CSS
     print '<link rel="stylesheet" href="../lib/css/jquery-ui.css">';
@@ -39,11 +40,14 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
 
     print '<link rel="icon" href="../img/logo.png">';
     print '</head>';
-
+    
     if (isset($_SESSION['user'])) {
         global $user;
         $user = json_decode($_SESSION['user']);
         print '<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+              <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
   <div class="collapse navbar-collapse" id="navbarSupportedContent">';
         if (IS_MAIN_SERVER) {
 
@@ -96,7 +100,7 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     } else {
         $page = basename($_SERVER['PHP_SELF']);
         if ($page != 'index.php' && $page != 'register.php') {
-            print '<fieldset class="container_form">';
+            print '<fieldset class="container_form" style="text-align: center;">';
             print '<h4>Veuillez vous connecter</h4>';
             print '<input type="button" class="btn btn-primary" value="Accéder à la page de connection" onClick="document.location.href=\'index.php\'"/>';
             print '</fieldset>';

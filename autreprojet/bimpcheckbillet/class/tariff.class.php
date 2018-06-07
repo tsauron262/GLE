@@ -83,7 +83,7 @@ class Tariff {
                     }
                 }
                 @$this->filename = $filename;
-                $this->filename_custom = $filename_custom;
+                @$this->filename_custom = $filename_custom;
                 return 1;
             }
         } else {

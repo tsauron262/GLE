@@ -1,0 +1,116 @@
+dol_object: 
+    instance: 
+        dol_object: 
+            module: compta/paiement
+            file: paiement
+            
+table: paiement
+primary: rowid
+
+label: paiement
+
+fields: 
+    ref: 
+        label: Référence
+    statut: 
+        label: Statut
+        type: int
+    datep: 
+        label: Date
+        type: date
+        dol_prop: date
+    amount: 
+        label: Montant
+        type: money
+        required: 1
+    num_paiement: 
+        label: Num.
+        dol_prop: numero
+    fk_bank: 
+        label: Opération sur compte
+        type: int
+        dol_prop: bank_line
+    note: 
+        label: Note
+        type: text
+    
+forms: 
+    default: 
+        rows: 
+            - custom: 1
+              label: Client
+              data_type: id_object
+              input_name: id_client
+              input: 
+                  type: search_societe
+                  societe_type: customer
+              required: 1
+            - custom: 1
+              label: Caisse
+              data_type: id_object
+              input_name: id_caisse
+              content: 
+                  callback: renderCaisseInput
+              required: 1
+            - custom: 1
+              label: Mode de paiement
+              data_type: int
+              input_name: id_mode_paiement
+              input: 
+                  type: select_payment
+              required: 1
+            - custom: 1
+              label: Compte
+              data_type: id_object
+              input_name: id_account
+              input: 
+                  type: select_mysoc_account
+            - field: note
+            - custom: 1
+              label: Factures à payer
+              depends_on: id_client
+              input_name: factures
+              display_if: 
+                  field_name: id_client
+                  hide_values: 0,
+              content: 
+                  callback: renderFacturesAmountsInputs
+#            - custom: 1
+#              label: Facture
+#              data_type: id_object
+#              input_name: id_facture
+#              required: 1
+#              input: 
+#                  type: search_list
+#                  search_list: 
+#                      table: facture f
+#                      field_return_label: f.facnumber
+#                      field_return_value: f.rowid
+#                      options: 
+#                          default: 
+#                              label: Recherche par référence facture
+#                              fields_search: f.facnumber,f.rowid
+#                              join: societe s
+#                              join_on: f.fk_soc = s.rowid
+#                              join_return_label: s.nom
+#                              help: Entrez la référence ou l'ID d'une facture
+#                          ny_client: 
+#                              label: Recherche par client
+#                              fields_search: s.nom,s.code_client
+#                              join: societe s
+#                              join_on: f.fk_soc = s.rowid
+#                              join_return_label: s.nom
+#                              help: Entrez le nom ou le code d'un client
+#            - custom: 1
+#              label: Montant
+#              data_type: money
+#              input_name: amount
+#              input: 
+#                  type: text
+#              depends_on: id_facture
+#              value: 
+#                  callback: getAmountFromFacture
+          
+          
+                  
+        

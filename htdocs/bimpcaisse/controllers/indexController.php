@@ -434,18 +434,27 @@ class indexController extends BimpController
         $html .= '<div id="listVentesContainer" class="col-lg-12">';
 
         $html .= '<div id="venteToolbar" class="buttonsContainer">';
+        // Bouton nouvelle vente: 
         $html .= '<button id="newVenteButton" class="btn btn-primary btn-large" type="button">';
         $html .= '<i class="fa fa-plus iconLeft"></i>Nouvelle vente';
         $html .= '</button>';
+        
+        // Bouton paiement factures:
+        $html .= '<button id="newPaymentButton" class="btn btn-default btn-large" type="button">';
+        $html .= '<i class="fa fa-euro iconLeft"></i>Paiement factures';
+        $html .= '</button>';
 
+        // Bouton Ferme caisse:
         $html .= '<button id="closeCaisseButton" class="btn btn-danger btn-large" type="button">';
         $html .= '<i class="fa fa-times iconLeft"></i>Fermer la caisse';
         $html .= '</button>';
 
+        // Bouton changer utilisateur:
         $html .= '<button id="changeUserButton" class="btn btn-default btn-large" type="button">';
         $html .= '<i class="fa fa-exchange iconLeft"></i>Changer d\'utilisateur';
         $html .= '</button>';
 
+        // Bouton Mouvement de fonds:
         $html .= '<button id="caisseMvtButton" class="btn btn-default btn-large" type="button">';
         $html .= '<i class="fa fa-money iconLeft"></i>Mouvement de fonds';
         $html .= '</button>';

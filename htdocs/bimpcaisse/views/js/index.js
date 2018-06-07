@@ -1184,6 +1184,14 @@ $(document).ready(function () {
         loadNewVente();
     });
 
+    $('#newPaymentButton').click(function () {
+        loadModalForm($(this), {
+            module: 'bimpcore',
+            object_name: 'Bimp_Paiement',
+            form_name: 'default'
+        }, 'Paiement facture');
+    });
+
     $('.windowMaximiseButton').click(function () {
         if ($mainContainer.hasClass('fullScreen')) {
             $('#id-left').show();

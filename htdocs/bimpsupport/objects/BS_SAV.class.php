@@ -279,20 +279,30 @@ class BS_SAV extends BimpObject
         }
 
         return $centres;
-    }
+    }         
 
     public function getSystemsArray()
     {
-        if (is_null(self::$systems_cache)) {
-            $rows = $this->db->getRows('Synopsis_Process_form_list_members', '`list_refid` = 12');
-            if (!is_null($rows) && count($rows)) {
-                self::$systems_cache = array();
-                foreach ($rows as $r) {
-                    self::$systems_cache[(int) $r->valeur] = $r->label;
-                }
-            }
-        }
-        return self::$systems_cache;
+        return array(
+            300  => "iOs",
+            1013  => "MAC OS 10.13",
+            1012  => "MAC OS 10.12",
+            1011  => "MAC OS 10.11",
+            1010  => "MAC OS 10.10",
+            1075  => "MAC OS 10.7.5",
+            106  => "MAC OS 10.6",
+            107  => "MAC OS 10.7",
+            109  => "MAC OS 10.9",
+            108  => "MAC OS 10.8",
+            9911  => "Windows 10",
+            203  => "Windows 8",
+            204  => "Windows 7",
+            202  => "Windows Vista",
+            201  => "Windows XP",
+            8801  => "Linux",
+            2  => "Indéterminé",
+            1  => "Autre"
+        );
     }
 
     public function getCreateJsCallback()

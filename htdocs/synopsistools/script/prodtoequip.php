@@ -1,6 +1,6 @@
 <?php
 
-if (! defined('NOLOGIN'))        define('NOLOGIN','1');
+//if (! defined('NOLOGIN'))        define('NOLOGIN','1');
 require("../../main.inc.php");
 
 require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
@@ -13,8 +13,6 @@ ini_set('memory_limit', '1024M');
 $loadEquip = true;
 $loadSav = false;
 
-$reqP1 = "UPDATE `llx_synopsischrono_chrono_101` SET `N__Serie` = REPLACE(`N__Serie`, ' ', '') WHERE 1";
-$db->query($reqP1);
 
 $OK= 0;
 
@@ -33,7 +31,9 @@ define('DONT_CHECK_SERIAL', true);
  */
 
 if ($loadEquip == true) {
-    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,2000000000");
+    $reqP1 = "UPDATE `llx_synopsischrono_chrono_101` SET `N__Serie` = REPLACE(`N__Serie`, ' ', '') WHERE 1";
+    $db->query($reqP1);
+    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,10000");
 
 //        $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
 //            $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
@@ -53,11 +53,11 @@ if ($loadEquip == true) {
             'reserved' => 0, // réservé ou non
 //            'date_purchase' => '2010-10-10', // date d'achat TODO remove
 //            'date_warranty_end' => '2010-10-10', // TODO remove
-            'warranty_type' => $ligne->Type_garantie, // type de garantie (liste non définie actuellement)
-            'admin_login' => $ligne->Login_Admin,
-            'admin_pword' => $ligne->Mdp_Admin,
-            'date_purchase' => $ligne->Date_Achat,
-            'date_warranty_end' => $ligne->Date_fin_SAV,
+            'warranty_type' => addslashes($ligne->Type_garantie), // type de garantie (liste non définie actuellement)
+            'admin_login' => addslashes($ligne->Login_Admin),
+            'admin_pword' => addslashes($ligne->Mdp_Admin),
+            'date_purchase' => addslashes($ligne->Date_Achat),
+            'date_warranty_end' => addslashes($ligne->Date_fin_SAV),
 //            'date_vente' => '2999-01-01 00:00:00',
 //            'date_update' => '2999-01-01 00:00:00',
             'product_label' => addslashes($ligne->description),
@@ -109,9 +109,9 @@ $OK++;
 
 
 if ($loadSav) {
-    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id AND (revisionNext < 1 OR revisionNext IS NULL) LIMIT 0,10000000");
+    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id AND (revisionNext < 1 OR revisionNext IS NULL) LIMIT 0,300");
 
-
+$savok = 0;
 
     while ($ligne = $db->fetch_object($sql)) {
 
@@ -176,9 +176,12 @@ if ($loadSav) {
             'id_contact' => $ligne->fk_socpeople,
             'date_update' => $ligne->tms,
             'user_update' => $ligne->fk_user_modif,
-            'status' => $ligne->Etat
+            'status' => $ligne->Etat,
+            'pword_admin' => "x"
         ); //pas de system  login pass
-
+        
+        
+        
         $newErrors = array_merge($newErrors, $sav->validateArray($arraySav));
         $newErrors = array_merge($newErrors, $sav->create());
         if ($sav->id > 0) {
@@ -191,7 +194,7 @@ if ($loadSav) {
                 $req12 = 'INSERT INTO  `llx_bimp_gsx_repair` (id_sav, serial, repair_number, repair_confirm_number, repair_type, total_from_order, ready_for_pick_up, closed, reimbursed) VALUES ("'.$sav->id.'", "'.$ligne11->serial_number.'", "'.$ligne11->repairNumber.'", "'.$ligne11->repairConfirmNumber.'", "'.$ligne11->repairType.'", "'.$ligne11->totalFromOrder.'", "'.$ligne11->ready_for_pick_up.'", "'.$ligne11->closed.'", "'.$ligne11->is_reimbursed.'")';
                 $db->query($req12);
             }
-            
+            $savok++;
         } else {
             echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arraySav, 1).print_r($newErrors,1) ;//. print_r($sav, 1);
         }
@@ -212,18 +215,18 @@ if ($loadSav) {
     $db->query($req2);
     $db->query($req3);
     $db->query($req4);
-    
+    echo "OK SAV : ".$savok."<br/>";
 }
 
 
 
 
 
+echo "OK ".$OK;
 
 if (count($newErrors)) {
     BimpRender::renderAlerts($newErrors);
 }
 
-echo "OK ".$OK;
 
 llxFooter();

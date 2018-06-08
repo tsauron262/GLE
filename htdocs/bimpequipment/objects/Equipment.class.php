@@ -338,7 +338,7 @@ class Equipment extends BimpObject
 
     public function onNewPlace()
     {
-        if ($this->isLoaded()) {
+        if ($this->isLoaded() && !defined('DONT_CHECK_SERIAL')) {
             $product = $this->getChildObject('product');
             if (!is_null($product) && isset($product->id) && $product->id) {
                 $place = BimpObject::getInstance($this->module, 'BE_Place');

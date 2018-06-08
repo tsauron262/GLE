@@ -1,6 +1,5 @@
 table: be_equipment_place
 common_fields: 1
-positions: 1
 
 parent_object: Equipment
 parent_id_property: id_equipment

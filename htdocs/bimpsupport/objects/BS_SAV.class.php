@@ -2219,7 +2219,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
         $errors = parent::create($warnings);
 
-        if (!count($errors)) {
+        if (!count($errors) && !defined('DONT_CHECK_SERIAL')) {
             if ($this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
                 $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
                 if (count($fac_errors)) {

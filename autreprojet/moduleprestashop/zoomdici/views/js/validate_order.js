@@ -2,7 +2,7 @@
  * Ajax call
  */
 var DOMAINE = "http://192.168.0.78/~tilito/bimp-erp/autreprojet";
-var DOMAINE = "http://sucsenscene.fr";
+//var DOMAINE = "http://sucsenscene.fr";
 var URL_SERVER = DOMAINE+'/bimpcheckbillet/interface.php';
 var URL_TICKETS = DOMAINE+'/bimpcheckbillet/img/tickets/';
 
@@ -174,7 +174,7 @@ function checkOrderStatus(id_order) {
             if (out.errors.length !== 0) {
                 alert(out.errors, 'alertSubmit');
             } else if (out.status !== undefined) {
-                if (parseInt(out.status) === -1) { // not filled
+                if (parseInt(out.status) === 1) { // not filled
                     getField(id_prods, products);
                     createTickets();
                 } else { // filled

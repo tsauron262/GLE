@@ -45,7 +45,14 @@ function initEvents() {
     $('button[name=connect]').click(function () {
         login($('input[name=login]').val(), $('input[name=pass_word]').val());
     });
-}
 
+    $('input[name=pass_word]').keyup(function (e) {
+        var code = e.which;
+        if (code === 13) {
+            e.preventDefault();
+            login($('input[name=login]').val(), $('input[name=pass_word]').val());
+        }
+    });
+}
 
 

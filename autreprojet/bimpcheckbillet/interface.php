@@ -70,12 +70,9 @@ switch ($action) {
                     'code_return' => $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['first_name'], $_POST['last_name'], $_POST['extra_1'], $_POST['extra_2'], $_POST['extra_3'], $_POST['extra_4'], $_POST['extra_5'], $_POST['extra_6'], $_POST['id_order'], $_POST['id_prod_extern']),
                     'errors' => $ticket->errors));
             } else {
-
                 $id_order = -$user->id;
-
                 $id_ticket = $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['first_name'], $_POST['last_name'], $_POST['extra_1'], $_POST['extra_2'], $_POST['extra_3'], $_POST['extra_4'], $_POST['extra_5'], $_POST['extra_6'], $id_order, $_POST['id_prod_extern']);
                 $ticket->createPdf($id_ticket, 5, 5, true, true, true, $id_order);
-
                 echo json_encode(array(
                     'code_return' => $id_ticket,
                     'url' => URL_CHECK . 'img/tickets/ticket' . base64_encode($id_order) . '.pdf',
@@ -426,11 +423,19 @@ switch ($action) {
             $db2 = new PDO($dsn2, DB_USER_2, DB_PASS_WORD_2)
                     or die("Impossible de se connecter à la base externe : " . mysql_error());
             $order = new Order($db2);
-            echo json_encode(array(
-                'generated_tickets' => $order->generateTicket($_POST['id_order'], $ticket, $tariff),
-                'status' => $order->checkOrderStatus($_POST['id_order'], $ticket),
-                'errors' => $order->errors
-            ));
+            $status = $order->checkOrderStatus($_POST['id_order'], $ticket);
+            if ($status == 1) {
+                echo json_encode(array(
+                    'status' => $status,
+                    'generated_tickets' => $order->generateTicket($_POST['id_order'], $ticket, $tariff),
+                    'errors' => $order->errors
+                ));
+            } else {
+                echo json_encode(array(
+                    'status' => $status,
+                    'errors' => $order->errors
+                ));
+            }
             break;
         }
     case 'get_filled_tickets': {

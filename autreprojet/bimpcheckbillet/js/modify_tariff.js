@@ -227,9 +227,9 @@ function addIdProdExtern(id_tariff, id_prod_extern) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return === 1) {
 //                $('#div_tax').css('display', 'none');
-                $('p[name=product_already_created]').css('display', 'inline');
-                $('div[name=create_prestashop_product]').hide();
-                $('p[name=select_tariff]').css('display', 'none');
+//                $('p[name=product_already_created]').css('display', 'inline');
+                $('div[name=create_prestashop_product]').css('display', 'none');
+//                $('p[name=select_tariff]').css('display', 'none');
                 alert('Produit créée');
             } else {
                 setMessage('alertSubmit', "Erreur serveur 1873.", 'error');
@@ -255,7 +255,10 @@ function toggleActiveProduct(id_prod_extern) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (parseInt(out.toggled) === 1) {
-                alert("Changement de statut effectué");
+                if (out.active == true)
+                    alert("Ce produit est maintenant activé.");
+                else
+                    alert("Ce produit est maintenant désactivé.");
             } else {
                 setMessage('alertSubmit', "Erreur inconnue 2538.", 'error');
             }
@@ -336,9 +339,11 @@ function initEvents() {
 
         var id_prod_extern;
         var id_tariff = parseInt($('select[name=tariff] > option:selected').val());
-        if (id_tariff > 0)
+        if (id_tariff > 0) {
             autoFill(id_tariff);
-
+        } else {
+            
+        }
         $('img#img_display').attr('src', '');
 
         tariffs.forEach(function (tariff) {
@@ -350,17 +355,19 @@ function initEvents() {
         });
 
         if (id_prod_extern > 0) {
-            $('div[name=create_prestashop_product]').hide();
-            $('p[name=product_already_created]').css('display', 'inline');
-            $('p[name=select_tariff]').css('display', 'none');
+            $('div[name=create_prestashop_product]').css('display', 'none');
+//            $('p[name=product_already_created]').css('display', 'inline');
+//            $('p[name=select_tariff]').css('display', 'none');
+            $('div[name=toggle_active]').css('display', 'inline')
         } else {
-            $('p[name=product_already_created]').css('display', 'none');
+            $('div[name=toggle_active]').css('display', 'none')
+//            $('p[name=product_already_created]').css('display', 'none');
             if (id_tariff > 0) {
-                $('div[name=create_prestashop_product]').show();
-                $('p[name=select_tariff]').css('display', 'none');
+                $('div[name=create_prestashop_product]').css('display', 'inline');
+//                $('p[name=select_tariff]').css('display', 'none');
             } else {
-                $('p[name=select_tariff]').css('display', 'inline');
-                $('div[name=create_prestashop_product]').hide();
+//                $('p[name=select_tariff]').css('display', 'inline');
+                $('div[name=create_prestashop_product]').css('display', 'none');
             }
         }
     });

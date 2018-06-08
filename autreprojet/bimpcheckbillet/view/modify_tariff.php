@@ -70,13 +70,20 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="tariff">Tarif </label><br/>';
     print '<select class="chosen-select" name="tariff"><option value="">Sélectionnez un tarif</option></select><br/><br/>';
 
-    print '<p name="product_already_created" style="display: none">Ce tarif correspond déjà à un produit prestashop</p>';
-    print '<p name="select_tariff" style="display: inline">Sélectionnez un tarif pour créer un produit prestashop</p>';
-    print '<div class="btn btn-primary" name="create_prestashop_product" style="display: none">Creér produit prestashop</div><br/><br/>';
-    
-    print '<div class="btn btn-primary" name="toggle_active">Activer/désactiver produit </div><br/><br/>';
+    print '<div style="'
+            . 'border: 1px solid #c2c2c2;'
+            . 'border-radius: 8px;'
+            . 'box-shadow: 0 1px 10px rgba(0,0,0,.5);'
+            . 'padding: 10px;">';
+    print '<label>Prestashop</label><br/>';
 
-    print '<br/><div id="div_tax" style="'
+//    print '<p name="product_already_created" style="display: none">Ce tarif correspond déjà à un produit prestashop</p>';
+//    print '<p name="select_tariff" style="display: inline">Sélectionnez un tarif pour créer un produit prestashop</p>';
+    print '<div class="btn btn-primary" name="create_prestashop_product" style="display: none">Creér produit prestashop</div><br/><br/>';
+
+    print '<div class="btn btn-primary" name="toggle_active" style="display: none;">Activer/désactiver produit </div><br/><br/>    ';
+
+    print '<div id="div_tax" style="'
             . 'display: none;'
             . 'border: 1px solid #c2c2c2;'
             . 'border-radius: 8px;'
@@ -89,6 +96,7 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label class="btn btn-primary">       <input value=3 type="radio" name="tax">5.5%</label>';
     print '</div><br/><br/>';
     print '<div class="btn btn-primary" id="conf_create_prestashop_category">Confirmer création catégorie prestashop</div>';
+    print '</div>';
     print '</div><br/>';
 
     print '<label for="label">Libellé </label>';

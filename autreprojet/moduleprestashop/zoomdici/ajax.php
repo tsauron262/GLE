@@ -6,7 +6,6 @@ header("Access-Control-Allow-Origin: *");
 require_once('./param.inc.php');
 
 //var_dump(PATH_TO_MODULE);
-
 //require_once(PATH_TO_MODULE . '../../config/config.inc.php');
 //require_once(PATH_TO_MODULE . '../../init.php');
 
@@ -24,14 +23,14 @@ switch ($action) {
             $product = new Product();
             $product->id_tax_rules_group = (int) $_POST['id_tax'];
             $product->price = $_POST['price'];
-            
-            $tabTaxe = TaxRuleCore::getTaxRulesByGroupId(Configuration::get('PS_LANG_DEFAULT'),$product->id_tax_rules_group);
-            if(isset($tabTaxe[0])){
-                $product->price = number_format ($product->price / (100 + $tabTaxe[0]['rate']) *100, 5);
+
+            $tabTaxe = TaxRuleCore::getTaxRulesByGroupId(Configuration::get('PS_LANG_DEFAULT'), $product->id_tax_rules_group);
+            if (isset($tabTaxe[0])) {
+                $product->price = number_format($product->price / (100 + $tabTaxe[0]['rate']) * 100, 5);
             }
             // définition du produit
             $product->name = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['label']);
-            
+
             $product->category = array($_POST['id_categ_extern']);
             $product->id_category_default = $_POST['id_categ_extern'];
             $product->description_short = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['label']);
@@ -72,10 +71,10 @@ switch ($action) {
             else
                 $product->active = true;
             $res = $product->update();
-            die(Tools::jsonEncode(array('toggled' => $res, 'errors' => array())));
+            die(Tools::jsonEncode(array('toggled' => $res, 'active' => $product->active, 'errors' => array())));
             break;
         }
-        
+
     case 'toggleCategActive' : {
             $categ = new Category((int) $_POST['id_categ']);
             if ($categ->active == true)
@@ -83,7 +82,7 @@ switch ($action) {
             else
                 $categ->active = true;
             $res = $categ->update();
-            die(Tools::jsonEncode(array('toggled' => $res, 'errors' => array())));
+            die(Tools::jsonEncode(array('toggled' => $res, 'active' => $categ->active, 'errors' => array())));
             break;
         }
 

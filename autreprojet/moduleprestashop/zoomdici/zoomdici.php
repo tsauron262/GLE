@@ -29,8 +29,8 @@ class ZoomDici extends Module {
 
     public function install() {
         return parent::install() &&
+                $this->registerHook('orderDetail') &&
                 $this->registerHook('orderConfirmation') &&
-                $this->registerHook('orderDetailDisplayed') &&
                 Configuration::updateValue('ZOOM_DICI', 'zoomdici');
     }
 
@@ -83,14 +83,16 @@ class ZoomDici extends Module {
     }
 
     public function hookDisplayOrderDetail($params) {
+        
+        die('Dans le hook');
 
         $order = $params['order'];
 
-        $html .= $this->display(__FILE__, 'orderdetail.tpl');
+        echo $this->display(__FILE__, 'orderdetail.tpl');
 
         var_dump($params);
-        echo "OK";
-        $html = '<script>alert(1)</script>';
+        echo "Dans le hook";
+        $html = '<script>alert("Dans le hook")</script>';
         return $html;
     }
 

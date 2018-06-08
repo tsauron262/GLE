@@ -47,7 +47,7 @@ function getEvents() {
                         $(".chosen-select").trigger("chosen:updated");
                         $('select[name=id_event]').trigger('change');
                     }
-                    $('img#img_display').attr('src',  + '../img/event/' + filename);
+                    $('img#img_display').attr('src', +'../img/event/' + filename);
                 }
             } else {
                 setMessage('alertSubmit', "Erreur 1286.", 'error');
@@ -254,7 +254,10 @@ function toggleActiveCategory(id_categ) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (parseInt(out.toggled) === 1) {
-                alert("Changement de statut effectué");
+                if (out.active == true)
+                    alert("Cette catégorie est maintenant activée.");
+                else
+                    alert("Cette catégorie est maintenant désactivée.");
             } else {
                 setMessage('alertSubmit', "Erreur inconnue 2349.", 'error');
             }
@@ -326,7 +329,9 @@ function initEvents() {
         if (id_categ > 0) {
             $('div[name=create_prestashop_category]').css('display', 'none');
             $('p[name=categ_already_created]').css('display', 'inline');
+            $('div[name=toggle_active]').css('display', 'inline');
         } else {
+            $('div[name=toggle_active]').css('display', 'none');
             $('p[name=categ_already_created]').css('display', 'none');
             if (id_event > 0) {
                 $('p[name=select_event]').css('display', 'none');

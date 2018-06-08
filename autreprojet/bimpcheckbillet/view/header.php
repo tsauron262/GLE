@@ -3,10 +3,6 @@
 session_start();
 include_once '../param.inc.php';
 
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Content-Range, Content-Disposition, Content-Description');
-
 function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     print '<!DOCTYPE html>';
     print '<html>';
@@ -50,7 +46,6 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
   </button>
   <div class="collapse navbar-collapse" id="navbarSupportedContent">';
         if (IS_MAIN_SERVER) {
-
             print '<div class="navbar-header">
       <a class="navbar-brand" href="home.php">Billetterie</a>
     </div>';

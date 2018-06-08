@@ -39,6 +39,8 @@ if ($loadEquip == true) {
             $ligne->description = "PROD N/C";
 
 
+        if($ligne->fk_soc < 1)
+            $ligne->fk_soc = 4674;
 
         $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
 

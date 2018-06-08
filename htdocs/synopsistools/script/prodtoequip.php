@@ -10,7 +10,7 @@ set_time_limit(5000000);
 ini_set('memory_limit', '1024M');
 
 $loadEquip = true;
-$loadSav = true;
+$loadSav = false;
 
 $reqP1 = "UPDATE `llx_synopsischrono_chrono_101` SET `N__Serie` = REPLACE(`N__Serie`, ' ', '') WHERE 1";
 $db->query($reqP1);
@@ -18,7 +18,7 @@ $db->query($reqP1);
 $OK= 0;
 
 if ($loadEquip == true) {
-    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,10000000");
+    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,10");
 
     while ($ligne = $db->fetch_object($sql)) {
         if ($ligne->description == "" && $ligne->Produit < 1)
@@ -167,23 +167,26 @@ if ($loadSav) {
             echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arraySav, 1).print_r($newErrors,1) ;//. print_r($sav, 1);
         }
     }
+    
+    
+    //req en vrac
+    $req = "UPDATE `llx_bs_sav` SET "
+            . "id_facture_acompte = (SELECT MAX(f.rowid) "
+            . "FROM `llx_facture` f, llx_element_element "
+            . "WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'AC%') "
+            . "WHERE `id_propal` > 0 AND `id_facture_acompte` < 1";
+
+    $req2 = "UPDATE `llx_bs_sav` SET id_facture = (SELECT MAX(f.rowid) FROM `llx_facture` f, llx_element_element WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'FA%') WHERE `id_propal` > 0 AND `id_facture` < 1";
+    $req3 = "UPDATE `llx_bs_sav` SET `id_discount` = (SELECT rowid FROM `llx_societe_remise_except` WHERE `fk_facture_source` = id_facture_acompte) WHERE `id_facture_acompte` > 0;";
+    $req4 = 'UPDATE `llx_bs_sav` SET `pword_admin`="x" WHERE `pword_admin` = ""';
+    $db->query($req);
+    $db->query($req2);
+    $db->query($req3);
+    $db->query($req4);
+    
 }
 
 
-//req en vrac
-$req = "UPDATE `llx_bs_sav` SET "
-        . "id_facture_acompte = (SELECT MAX(f.rowid) "
-        . "FROM `llx_facture` f, llx_element_element "
-        . "WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'AC%') "
-        . "WHERE `id_propal` > 0 AND `id_facture_acompte` < 1";
-
-$req2 = "UPDATE `llx_bs_sav` SET id_facture = (SELECT MAX(f.rowid) FROM `llx_facture` f, llx_element_element WHERE sourcetype = 'propal' AND targettype = 'facture' AND fk_source = id_propal AND fk_target = f.rowid AND f.`facnumber` LIKE 'FA%') WHERE `id_propal` > 0 AND `id_facture` < 1";
-$req3 = "UPDATE `llx_bs_sav` SET `id_discount` = (SELECT rowid FROM `llx_societe_remise_except` WHERE `fk_facture_source` = id_facture_acompte) WHERE `id_facture_acompte` > 0;";
-$req4 = 'UPDATE `llx_bs_sav` SET `pword_admin`="x" WHERE `pword_admin` = ""';
-$db->query($req);
-$db->query($req2);
-$db->query($req3);
-$db->query($req4);
 
 
 

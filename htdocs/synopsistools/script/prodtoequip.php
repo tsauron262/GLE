@@ -19,6 +19,8 @@ $OK= 0;
 
 $newErrors = array("pas d'erreur");
 
+define('DONT_CHECK_SERIAL', true);
+
 if ($loadEquip == true) {
     $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,10");
 

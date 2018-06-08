@@ -524,7 +524,7 @@ class Equipment extends BimpObject
         $serial = $this->getData('serial');
         $id_product = (int) $this->getData('id_product');
 
-        if (!is_null($serial) && $serial && $id_product) {
+        if (!is_null($serial) && $serial && $id_product && !defined('DONT_CHECK_SERIAL')) {
             $where = '`serial` = \'' . $serial . '\' AND `id_product` = ' . $id_product;
             if ($this->isLoaded()) {
                 $where .= ' AND `id` != ' . (int) $this->id;

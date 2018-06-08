@@ -1,11 +1,13 @@
 <?php
 
+session_start() ;
+session_destroy() ;
+
 include_once 'header.php';
 include_once 'footer.php';
 
 $arrayofjs = array('../js/login.js', '../js/annexes.js');
 
-session_destroy();
 
 printHeader('Billetterie', $arrayofjs);
 

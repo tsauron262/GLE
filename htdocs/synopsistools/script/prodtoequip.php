@@ -69,10 +69,10 @@ if ($loadEquip == true) {
                 //echo "<br/><br/>OK equipment " . $equipement->id;
                 $OK++;
             } else {
-                echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arrayEmplacement, 1);
+                echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arrayEmplacement, 1).print_r($newErrors,1);
             }
         } else {
-            echo "<br/><br/>ERREUR FATAL<pre>Impossible de validé " . print_r($arrayEquipment, 1);
+            echo "<br/><br/>ERREUR FATAL<pre>Impossible de validé " . print_r($arrayEquipment, 1).print_r($newErrors,1);
         }
     }
 }
@@ -164,7 +164,7 @@ if ($loadSav) {
             }
             
         } else {
-            echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arraySav, 1) ;//. print_r($sav, 1);
+            echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arraySav, 1).print_r($newErrors,1) ;//. print_r($sav, 1);
         }
     }
 }

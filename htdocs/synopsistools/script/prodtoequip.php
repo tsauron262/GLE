@@ -10,7 +10,7 @@ set_time_limit(5000000);
 ini_set('memory_limit', '1024M');
 
 $loadEquip = true;
-$loadSav = true;
+$loadSav = false;
 
 $reqP1 = "UPDATE `llx_synopsischrono_chrono_101` SET `N__Serie` = REPLACE(`N__Serie`, ' ', '') WHERE 1";
 $db->query($reqP1);
@@ -21,8 +21,17 @@ $newErrors = array("pas d'erreur");
 
 define('DONT_CHECK_SERIAL', true);
 
+/*
+ * TOTU
+ * Ajouter index note a equipement
+ * Activé valid commande
+ * support
+ * des   chrono    prosses
+ * 
+ */
+
 if ($loadEquip == true) {
-    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,100000000");
+    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,100");
 
     while ($ligne = $db->fetch_object($sql)) {
         if ($ligne->description == "" && $ligne->Produit < 1)

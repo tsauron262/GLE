@@ -33,8 +33,11 @@ define('DONT_CHECK_SERIAL', true);
  */
 
 if ($loadEquip == true) {
-    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,10000000");
+    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,2000000000");
 
+//        $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
+//            $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
+//            $emplacement->config->params['positions'] = 0;
     while ($ligne = $db->fetch_object($sql)) {
         if ($ligne->description == "" && $ligne->Produit < 1)
             $ligne->description = "PROD N/C";
@@ -43,7 +46,6 @@ if ($loadEquip == true) {
         if($ligne->fk_soc < 1)
             $ligne->fk_soc = 4674;
 
-        $equipement = BimpObject::getInstance('bimpequipment', 'Equipment');
 
         $arrayEquipment = array(
             'type' => 1, // cf $types
@@ -58,40 +60,45 @@ if ($loadEquip == true) {
             'date_warranty_end' => $ligne->Date_fin_SAV,
 //            'date_vente' => '2999-01-01 00:00:00',
 //            'date_update' => '2999-01-01 00:00:00',
-            'product_label' => $ligne->description,
-            'note' => "OLD" . $ligne->id
+            'product_label' => addslashes($ligne->description),
+            'note' => "OLD" . $ligne->id,
+            'id_product' => ($ligne->Produit > 0)? $ligne->Produit : "0"
         );
-        if ($ligne->Produit > 0)
-            $arrayEquipment['id_product'] = $ligne->Produit;
+        
+        $db->query('INSERT INTO llx_be_equipment(id_product,product_label,type,serial,date_purchase,warranty_type,prix_achat,prix_vente_except,prix_vente,origin_element,origin_id_element,id_facture,admin_login,admin_pword,note,id,date_create,user_create,user_update) '
+                . 'VALUES ("'.$arrayEquipment['id_product'].'", "'.$arrayEquipment['product_label'].'", "1", "'.$arrayEquipment['serial'].'", "'.$arrayEquipment['date_purchase'].'", "'.$arrayEquipment['warranty_type'].'", "0", "0", "0", "", 0, 0, "'.$arrayEquipment['admin_login'].'", "'.$arrayEquipment['admin_pword'].'", "'.$arrayEquipment['note'].'", 0, "2018-06-08 14:33:41", 1, 1)');
+        $idE = $db->last_insert_id('llx_be_equipment');
+//        $newErrors = array_merge($newErrors, $equipement->validateArray($arrayEquipment));
+//
+//        $newErrors = array_merge($newErrors, $equipement->create());
 
-        $newErrors = array_merge($newErrors, $equipement->validateArray($arrayEquipment));
-
-        $newErrors = array_merge($newErrors, $equipement->create());
-
-        if ($equipement->id > 0) {
-            $emplacement = BimpObject::getInstance('bimpequipment', 'BE_Place');
+        if ($idE > 0) {
 
             $arrayEmplacement = array(
-                'id_equipment' => $equipement->id,
+                'id_equipment' => $idE,
                 'type' => 1, // cf $types
                 'id_client' => $ligne->fk_soc, // si type = 2
                 'infos' => 'Import old Module',
-                'position' => 2,
 //            'date_update' => '2999-01-01 00:00:00',
                 'date' => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
             );
-
-            $newErrors = array_merge($newErrors, $emplacement->validateArray($arrayEmplacement));
-            $newErrors = array_merge($newErrors, $emplacement->create());
-            if ($emplacement->id > 0) {
-                //echo "<br/><br/>OK equipment " . $equipement->id;
-                $OK++;
-            } else {
-                echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arrayEmplacement, 1).print_r($newErrors,1);
-            }
+            
+            $db->query('INSERT INTO llx_be_equipment_place(id_equipment,type,id_client,id_contact,id_entrepot,code_centre,id_user,place_name,infos,date,code_mvt,id,date_create,user_create,user_update, position) '
+                    . '     VALUES ('.$idE.', "1", '.$arrayEmplacement['id_client'].', 0, 0, "", 0, "", "Import old Module", "'.dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S').'", "", 0, "'.dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S').'", 1, 1,1)');
+$OK++;
+//            $newErrors = array_merge($newErrors, $emplacement->validateArray($arrayEmplacement));
+//            $newErrors = array_merge($newErrors, $emplacement->create());
+//            if ($emplacement->id > 0) {
+//                //echo "<br/><br/>OK equipment " . $equipement->id;
+//                $OK++;
+//            } else {
+//                echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arrayEmplacement, 1).print_r($newErrors,1);
+//            }
         } else {
             echo "<br/><br/>ERREUR FATAL<pre>Impossible de validé " . print_r($arrayEquipment, 1).print_r($newErrors,1);
         }
+//        $equipement->reset();
+//        $emplacement->reset();
     }
     $db->query("UPDATE `llx_be_equipment_place` SET `position` = '1' WHERE position = 0;");
     

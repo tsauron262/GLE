@@ -49,7 +49,7 @@ if ($loadEquip == true) {
 
         $arrayEquipment = array(
             'type' => 1, // cf $types
-            'serial' => $ligne->N__Serie, // num série
+            'serial' => addslashes($ligne->N__Serie), // num série
             'reserved' => 0, // réservé ou non
 //            'date_purchase' => '2010-10-10', // date d'achat TODO remove
 //            'date_warranty_end' => '2010-10-10', // TODO remove

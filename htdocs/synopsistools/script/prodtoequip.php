@@ -1,6 +1,6 @@
 <?php
 
-if (! defined('NOLOGIN'))        define('NOLOGIN','1');
+//if (! defined('NOLOGIN'))        define('NOLOGIN','1');
 require("../../main.inc.php");
 
 require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";
@@ -25,6 +25,7 @@ define('DONT_CHECK_SERIAL', true);
 /*
  * TOTU
  * Ajouter index note a equipement
+ * aj index id_equipment in place
  * Activé valid commande
  * support
  * des   chrono    prosses
@@ -32,7 +33,7 @@ define('DONT_CHECK_SERIAL', true);
  */
 
 if ($loadEquip == true) {
-    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,1000000");
+    $sql = $db->query("SELECT * FROM `llx_synopsischrono_chrono_101` ce, llx_synopsischrono c WHERE c.id = ce.id AND concat('OLD', ce.id) NOT IN (SELECT note FROM `llx_be_equipment` WHERE 1) AND `N__Serie` NOT LIKE '% %' AND `N__Serie` NOT LIKE '' ORDER BY c.id LIMIT  0,10000000");
 
     while ($ligne = $db->fetch_object($sql)) {
         if ($ligne->description == "" && $ligne->Produit < 1)
@@ -75,6 +76,7 @@ if ($loadEquip == true) {
                 'type' => 1, // cf $types
                 'id_client' => $ligne->fk_soc, // si type = 2
                 'infos' => 'Import old Module',
+                'position' => 2,
 //            'date_update' => '2999-01-01 00:00:00',
                 'date' => dol_print_date(dol_now(), '%Y-%m-%d %H:%M:%S') // date et heure d'arrivée
             );
@@ -91,6 +93,10 @@ if ($loadEquip == true) {
             echo "<br/><br/>ERREUR FATAL<pre>Impossible de validé " . print_r($arrayEquipment, 1).print_r($newErrors,1);
         }
     }
+    $db->query("UPDATE `llx_be_equipment_place` SET `position` = '1' WHERE position = 0;");
+    
+    
+    
 }
 
 

@@ -191,8 +191,8 @@ if ($loadSav) {
 
 
 
-if (count($errors)) {
-    BimpRender::renderAlerts($errors);
+if (count($newErrors)) {
+    BimpRender::renderAlerts($newErrors);
 }
 
 echo "OK ".$OK;

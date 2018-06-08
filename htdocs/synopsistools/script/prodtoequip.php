@@ -1,5 +1,6 @@
 <?php
 
+if (! defined('NOLOGIN'))        define('NOLOGIN','1');
 require("../../main.inc.php");
 
 require_once DOL_DOCUMENT_ROOT . "/bimpcore/Bimp_Lib.php";

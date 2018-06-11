@@ -225,7 +225,7 @@ class Equipment extends BimpObject
         $filters['place.position'] = 1;
         $filters['or_place'] = array(
             'or' => array(
-                'place.place_name'    => array(
+                'place.place_name'         => array(
                     'part_type' => 'middle',
                     'part'      => $value
                 ),
@@ -489,6 +489,53 @@ class Equipment extends BimpObject
         }
 
         return $result;
+    }
+
+    public static function findEquipments($serial = '', $id_client = 0)
+    {
+        global $db;
+        $bdb = new BimpDb($db);
+        BimpObject::loadClass('bimpequipment', 'BE_Place');
+
+        $joins = array();
+        $filters = array();
+
+        if ((string) $serial) {
+            $filters['or_serial'] = array(
+                'or' => array(
+                    'a.serial'              => $db->escape($serial),
+                    'concat("S", a.serial)' => $db->escape($serial)
+                )
+            );
+        }
+
+        if ((int) $id_client) {
+            $joins[] = array(
+                'table' => 'be_equipment_place',
+                'alias' => 'place',
+                'on'    => 'place.id_equipment = a.id'
+            );
+
+            $filters['place.position'] = 1;
+            $filters['place.type'] = BE_Place::BE_PLACE_CLIENT;
+            $filters['place.id_client'] = (int) $id_client;
+        }
+
+        $sql = BimpTools::getSqlSelect(array('DISTINCT(a.id)'));
+        $sql .= BimpTools::getSqlFrom('be_equipment', $joins);
+        $sql .= BimpTools::getSqlWhere($filters);
+
+        $rows = $bdb->executeS($sql, 'array');
+
+        $equipments = array();
+
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $equipments[] = (int) $r['id'];
+            }
+        }
+
+        return $equipments;
     }
 
 //    Renders: 

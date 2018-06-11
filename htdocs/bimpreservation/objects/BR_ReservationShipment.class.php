@@ -214,7 +214,7 @@ class BR_reservationShipment extends BimpObject
         return $avoirs;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function removeFromShipment($qty, $removeFromOrder = false, $defective = false, $id_avoir = 0)
     {
@@ -336,7 +336,7 @@ class BR_reservationShipment extends BimpObject
         $new_qty = ((int) $this->getData('qty')) - $qty;
 
         if ($new_qty <= 0) {
-            $del_errors = $this->delete();
+            $del_errors = $this->delete(true);
             if (count($del_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression de la ligne d\'expédition');
             }
@@ -450,7 +450,7 @@ class BR_reservationShipment extends BimpObject
         return $errors;
     }
 
-    // Rendus: 
+    // Rendus:
 
     public function renderRemoveQtyInput()
     {
@@ -465,7 +465,7 @@ class BR_reservationShipment extends BimpObject
         ));
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionRemoveFromShipment($data, &$success)
     {
@@ -502,7 +502,7 @@ class BR_reservationShipment extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function create(&$warnings = array())
     {
@@ -608,7 +608,7 @@ class BR_reservationShipment extends BimpObject
             }
 
             if ((int) $this->getData('qty') === 0) {
-                $this->delete();
+                $this->delete(true);
             }
         }
 

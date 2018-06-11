@@ -199,70 +199,58 @@ class Bimp_Commande extends BimpObject
         if ($this->isLoaded()) {
             $orderLine = BimpObject::getInstance('bimpreservation', 'BR_OrderLine');
             if ($orderLine->find(array('id_order_line' => (int) $id_line))) {
-                // Vérification de la quantité: 
-                $removable_qty = $orderLine->getRemovableQty();
-                if ($qty > $removable_qty) {
-                    if (!$removable_qty) {
-                        $errors[] = 'Aucune unité ne peut être retirée de la commande actuellement';
-                    } elseif ($removable_qty > 1) {
-                        $errors[] = 'Seules ' . $removable_qty . ' peuvent être retirées de la commande';
+                $current_qty = (int) $orderLine->getData('qty');
+                $new_qty = $current_qty - $qty;
+                if ($new_qty < 0) {
+                    $errors[] = 'Quantité à retirer invalide (nouvelles quantités négatives)';
+                    return $errors;
+                }
+
+                if ((int) $this->getData('id_facture')) {
+                    // Ajout à l'avoir:
+                    $avoir_errors = $this->addLineToCreditNote($id_line, $qty, $id_avoir, null, $id_equipment);
+                    if (count($avoir_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Echec de l\'ajout à l\'avoir');
+                    }
+                }
+                global $user;
+                $current_status = $this->dol_object->statut;
+                $this->dol_object->statut = Commande::STATUS_DRAFT;
+                $this->dol_object->update($user);
+                $this->dol_object->fetch($this->id);
+
+                if ($new_qty > 0) {
+                    // Mise à jour des quantités de la ligne de commande: 
+
+                    global $db;
+                    $line = new OrderLine($db);
+                    if ($line->fetch((int) $id_line) <= 0) {
+                        $errors[] = 'Ligne de commande d\'ID ' . $id_line . ' non trouvée';
                     } else {
-                        $errors[] = 'Seule une unité peut être retirée de la commande';
+                        if ($this->dol_object->updateline((int) $id_line, $line->desc, $line->subprice, $new_qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, 'HT') <= 0) {
+                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour des quantités pour la ligne de commande d\'ID ' . $id_line);
+                        } else {
+                            $up_errors = $orderLine->updateField('qty', $new_qty);
+                            if (count($up_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des quantités pour la ligne de commande d\'ID ' . $id_line);
+                            }
+                        }
                     }
                 } else {
-                    $current_qty = (int) $orderLine->getData('qty');
-                    $new_qty = $current_qty - $qty;
-                    if ($new_qty < 0) {
-                        $errors[] = 'Quantité à retirer invalide (nouvelles quantités négatives)';
-                        return $errors;
-                    }
-
-                    if ((int) $this->getData('id_facture')) {
-                        // Ajout à l'avoir:
-                        $avoir_errors = $this->addLineToCreditNote($id_line, $qty, $id_avoir, null, $id_equipment);
-                        if (count($avoir_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Echec de l\'ajout à l\'avoir');
-                        }
-                    }
-                    global $user;
-                    $current_status = $this->dol_object->statut;
-                    $this->dol_object->statut = Commande::STATUS_DRAFT;
-                    $this->dol_object->update($user);
-                    $this->dol_object->fetch($this->id);
-
-                    if ($new_qty > 0) {
-                        // Mise à jour des quantités de la ligne de commande: 
-
-                        global $db;
-                        $line = new OrderLine($db);
-                        if ($line->fetch((int) $id_line) <= 0) {
-                            $errors[] = 'Ligne de commande d\'ID ' . $id_line . ' non trouvée';
-                        } else {
-                            if ($this->dol_object->updateline((int) $id_line, $line->desc, $line->subprice, $new_qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, 'HT') <= 0) {
-                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour des quantités pour la ligne de commande d\'ID ' . $id_line);
-                            } else {
-                                $up_errors = $orderLine->updateField('qty', $new_qty);
-                                if (count($up_errors)) {
-                                    $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des quantités pour la ligne de commande d\'ID ' . $id_line);
-                                }
-                            }
-                        }
+                    // Suppression de la ligne de commande (quantités = 0) 
+                    if ($this->dol_object->deleteline($user, $id_line) <= 0) {
+                        $errors = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la suppression de la ligne de commande');
                     } else {
-                        // Suppression de la ligne de commande (quantités = 0) 
-                        if ($this->dol_object->deleteline($user, $id_line) <= 0) {
-                            $errors = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la suppression de la ligne de commande');
-                        } else {
-                            $del_errors = $orderLine->delete();
-                            if (count($del_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression de la ligne de commande');
-                            }
+                        $del_errors = $orderLine->delete(true);
+                        if (count($del_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression de la ligne de commande');
                         }
                     }
-
-                    $this->dol_object->statut = $current_status;
-                    $this->dol_object->update($user);
-                    $this->dol_object->fetch($this->id);
                 }
+
+                $this->dol_object->statut = $current_status;
+                $this->dol_object->update($user);
+                $this->dol_object->fetch($this->id);
             } else {
                 $errors[] = 'ID de la ligne de commande absent ou invalide';
             }

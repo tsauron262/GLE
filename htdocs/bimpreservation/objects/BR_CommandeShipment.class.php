@@ -485,7 +485,7 @@ class BR_CommandeShipment extends BimpObject
 //                foreach ($list as $item) {
 //                    if ($serviceShipment->fetch((int) $item['id'])) {
 //                        $qty = (int) $serviceShipment->getData('qty');
-//                        $serviceShipment->delete();
+//                        $serviceShipment->delete(true);
 //                        if ($qty > 0 && $serviceShipment->fetch((int) $item['id_service'])) {
 //                            $shipped = (int) $serviceShipment->getData('shipped');
 //                            $service->set('shipped', $shipped - $qty);

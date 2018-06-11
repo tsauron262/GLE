@@ -202,7 +202,7 @@ class BR_ServiceShipment extends BimpObject
             // Retrait de l'expédition: 
             $new_qty = (int) $this->getData('qty') - $qty;
             if ($removeFromOrder && ($new_qty === 0)) {
-                $del_errors = $this->delete();
+                $del_errors = $this->delete(true);
                 if (count($del_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression de la ligne d\'expédition');
                 }

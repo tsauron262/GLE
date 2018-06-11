@@ -220,7 +220,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $equipment = $sav->getChildObject('equipment');
             $product_label = '';
             if (!is_null($equipment) && $equipment->isLoaded()) {
-                $product_label = $equipment->displayProduct('default', true);
+                $product_label = $equipment->displayProduct('nom', true);
                 $pdf->SetXY('121', '71.2');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(100, 6, $product_label, 0, 'L');

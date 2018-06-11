@@ -255,7 +255,7 @@ BP 2321
 
 
 //                //le prod
-                $product_label = $equipment->displayProduct('default', true);
+                $product_label = $equipment->displayProduct('nom', true);
                 $pdf->SetXY('45', '154.4');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(100, 6, $product_label . " - " . $equipment->getData('serial'), 0, 'L');

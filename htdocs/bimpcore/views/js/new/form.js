@@ -1159,14 +1159,11 @@ function setFormEvents($form) {
         if ($input.length) {
             if ($input.tagName() !== 'textarea') {
                 $input.keyup(function (e) {
-                    bimp_msg('la');
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         e.stopPropagation();
                         if (typeof (e.no_submit) === 'undefined' || !e.no_submit) {
                             submitForm($form.attr('id'));
-                        } else {
-                            bimp_msg('here');
                         }
                     }
                 });

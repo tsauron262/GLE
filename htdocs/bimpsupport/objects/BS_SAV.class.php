@@ -1050,13 +1050,15 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         foreach ($this->getChildrenObjects("products") as $prod) {
             $prodG = new Product($this->db->db);
             $prodG->fetch($prod->getData("id_product"));
+            $remise = $prod->getData("remise");
+            $coefRemise = (100 - $remise) / 100;
             require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
             $prodF = new ProductFournisseur($this->db->db);
             $prodF->find_min_price_product_fournisseur($prodG->id, $prod->getData("qty"));
-            $prop->addline($prodG->description, $prodG->price, $prod->getData("qty"), $prodG->tva_tx, 0, 0, $prodG->id, $client->dol_object->remise_percent, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
+            $prop->addline($prodG->description, $prodG->price, $prod->getData("qty"), $prodG->tva_tx, 0, 0, $prodG->id, $client->dol_object->remise_percent + $remise, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
             if (!$prod->getData("out_of_warranty")) {
-                $garantieHt += $prodG->price * $prod->getData("qty");
-                $garantieTtc += $prodG->price * $prod->getData("qty") * ($prodG->tva_tx / 100);
+                $garantieHt += $prodG->price * $prod->getData("qty")*$coefRemise;
+                $garantieTtc += $prodG->price * $prod->getData("qty") * ($prodG->tva_tx / 100)*$coefRemise;
                 $garantiePa += $prodF->fourn_price * $prod->getData("qty");
             } else
                 $this->allGarantie = false;

@@ -82,6 +82,11 @@ fields:
         unsigned: 1
         min: 1
         default_value: 1
+    remise: 
+        label: Remise
+        type: int
+        max: 100
+        default_value: 0
     out_of_warranty:
         label: Hors garantie
         type: bool
@@ -140,6 +145,9 @@ lists:
                     callback: 
                         object: product
                         method: isNotSerialisable
+            remise: 
+                field: remise
+                edit: 1
             price: 
                 label: Total TTC
                 value: 

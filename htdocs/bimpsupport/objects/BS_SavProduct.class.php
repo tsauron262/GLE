@@ -35,7 +35,7 @@ class BS_SavProduct extends BimpObject
     {
         $qty = (int) $this->getData('qty');
         $price = (float) $this->getUnitPrice();
-        return (float) $qty * $price;
+        return (float) $qty * $price * (100 - $this->getData('remise')) / 100;
     }
 
     public function displayUnitPrice()

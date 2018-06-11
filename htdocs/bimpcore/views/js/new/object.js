@@ -226,7 +226,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                             if ($(this).data('multiple')) {
                                 var field_name = $(this).data('values_field');
                                 var $valuesContainer = $(this).parent().find('.inputMultipleValuesContainer');
-                                if ($valuesContainer.length) {
+                                if (!$valuesContainer.length) {
                                     bimp_msg('Erreur: liste de valeurs absente pour le champ "' + field_name + '"', 'danger');
                                     return;
                                 } else {

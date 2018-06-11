@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS `llx_be_reservation` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 CREATE TABLE IF NOT EXISTS `llx_bc_vente_remise` (
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `llx_bc_vente_remise` (
   `type` int(10) UNSIGNED NOT NULL DEFAULT '1',
   `percent` float NOT NULL DEFAULT '0',
   `montant` float NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bc_caisse_mvt` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -42,4 +42,4 @@ CREATE TABLE IF NOT EXISTS `llx_bc_caisse_mvt` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

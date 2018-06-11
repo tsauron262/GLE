@@ -4,4 +4,4 @@ CREATE TABLE IF NOT EXISTS `llx_bs_sav_product` (
   `id_sav` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `id_product` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `qty` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

@@ -4,4 +4,4 @@ CREATE TABLE IF NOT EXISTS `llx_br_services` (
   `id_commande_client` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `id_commande_client_line` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `shipped` float NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

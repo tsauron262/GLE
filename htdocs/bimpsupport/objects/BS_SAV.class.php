@@ -1454,11 +1454,12 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         if ($this->isLoaded()) {
             $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
 
+            $delete_errors = array();
             if (!$reservation->deleteBy(array(
                         'id_sav' => (int) $this->id,
                         'type'   => BR_Reservation::BR_RESERVATION_SAV
-                    ))) {
-                $errors[] = 'Echec de la suppression des réservations actuelles';
+                    ), $delete_errors, true)) {
+                $errors[] = BimpTools::getMsgFromArray($delete_errors, 'Echec de la suppression des réservations actuelles');
             }
 
             $this->db->update('bs_sav_product', array(
@@ -1578,8 +1579,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         $warnings = array();
 
         if (isset($data['diagnostic'])) {
-            $this->set('diagnostic', $data['diagnostic']);
-            $this->update();
+            $this->updateField('diagnostic', $data['diagnostic']);
         }
 
         if (!(string) $this->getData('diagnostic')) {

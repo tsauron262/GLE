@@ -118,6 +118,7 @@ fields:
         values: 
             array: signed_values
         default_value: 0
+        
     info: 
         label: Informations
         type: text        
@@ -131,6 +132,11 @@ forms:
         rows: 
             - field: id_commande_client
               hidden: 1
+            - field: id_contact
+            - field: info
+            
+    edit: 
+        rows: 
             - field: id_contact
             - field: signed
             - field: info
@@ -171,6 +177,20 @@ forms:
               input: 
                   type: select_mysoc_account
               required: 1
+            - custom: 1
+              label: Avoirs client à utiliser
+              input_name: id_remises_list
+              input: 
+                  multiple: 1
+                  type: select_remises
+                  id_client:
+                      prop:
+                          name: socid
+                          object:
+                              prop: 
+                                name: dol_object
+                                object: 
+                                    callback: getParentInstance                  
                   
 fields_tables: 
     data: 
@@ -225,7 +245,7 @@ lists:
         n: 25
         edit_btn: 1
         update_btn: 1
-        edit_form: default
+        edit_form: edit
         modal_view: default
         objects_change_reload: BR_Reservation,BR_ReservationShipment,BR_Service,BR_ServiceShipment
         extra_btn: 

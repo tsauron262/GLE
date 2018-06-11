@@ -19,7 +19,7 @@ class BC_Field extends BimpComponent
             'create_form_values' => array('data_type' => 'array')
         ),
         'id_object' => array(
-            'object'             => array('required' => true),
+            'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array')
         ),

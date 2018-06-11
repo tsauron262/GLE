@@ -1,9 +1,18 @@
 function onFacturePaymentChange($container) {
     var total_payments = 0;
-    var total_to_pay = parseFloat($container.find('[name="total_to_pay"]').val());
+    var total_to_pay = $container.find('[name="total_to_pay"]').val();
+
+    if (total_to_pay === '') {
+        total_to_pay = 0;
+    } else {
+        total_to_pay = parseFloat(total_to_pay);
+    }
 
     $container.find('input.facture_payment_input').each(function () {
-        total_payments += parseFloat($(this).val());
+        var value = $(this).val();
+        if (value !== '') {
+            total_payments += parseFloat(value);
+        }
     });
 
     var diff = total_to_pay - total_payments;
@@ -24,8 +33,18 @@ function onFacturePaymentChange($container) {
 }
 
 function onClientTotalPaidAmountChange($container) {
-    var total_paid = parseFloat($container.find('[name="total_paid_amount"]').val());
-    var total_to_pay = parseFloat($container.find('[name="total_to_pay"]').val());
+    var total_paid = $container.find('[name="total_paid_amount"]').val();
+    if (total_paid === '') {
+        total_paid = 0;
+    } else {
+        total_paid = parseFloat(total_paid);
+    }
+    var total_to_pay = $container.find('[name="total_to_pay"]').val();
+    if (total_to_pay === '') {
+        total_to_pay = 0;
+    } else {
+        total_to_pay = parseFloat(total_to_pay);
+    }
     var rest = total_paid;
     var rest_to_pay = total_to_pay;
 

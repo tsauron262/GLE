@@ -22,7 +22,6 @@ fields:
     amount: 
         label: Montant
         type: money
-        required: 1
     num_paiement: 
         label: Num.
         dol_prop: numero
@@ -54,7 +53,7 @@ forms:
               required: 1
             - custom: 1
               label: Mode de paiement
-              data_type: int
+              data_type: id_object
               input_name: id_mode_paiement
               input: 
                   type: select_payment
@@ -65,6 +64,7 @@ forms:
               input_name: id_account
               input: 
                   type: select_mysoc_account
+              required: 1
             - field: note
             - custom: 1
               label: Factures à payer

@@ -1,5 +1,8 @@
 bootstrap: 1
 
+js: 
+    - /bimpcore/views/js/paiement.js
+    
 css: 
     - /bimpcaisse/views/css/styles.css
     - /bimpcore/views/css/ticket.css

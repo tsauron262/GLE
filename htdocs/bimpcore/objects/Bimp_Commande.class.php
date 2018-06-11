@@ -415,7 +415,7 @@ class Bimp_Commande extends BimpObject
             $commande->cond_reglement_id = (int) $cond_reglement;
         }
 
-        $commande->array_options['options_type'] = 'R';
+        $commande->array_options['options_type'] = 'C';
         if ($facture->createFromCommande($commande, (int) $id_account) <= 0) {
             $msg = 'Echec de la création de la facture';
             if ($facture->dol_object->error) {

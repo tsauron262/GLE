@@ -65,7 +65,7 @@ class Bimp_Facture extends BimpObject
         $this->dol_object->fk_account = (int) $id_account;
 
         // get extrafields from original line
-        $commande->fetch_optionals($commande->id); // todo: suppr.
+//        $commande->fetch_optionals($commande->id);
 
         foreach ($commande->array_options as $options_key => $value)
             $this->dol_object->array_options[$options_key] = $value;

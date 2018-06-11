@@ -122,6 +122,13 @@ table.objectlistTable {
             }
         }
     }
+    
+    & > tfoot > tr > td {
+        background-color: #E6E6E6;
+        font-weight: bold;
+        color: $gray-darker;
+        padding: 8px 6px;
+    }
 
     .objectSubList {
         width: 100%;
@@ -141,6 +148,10 @@ table.objectlistTable {
             background-color: #fff;
             color: $gray-dark;
         }
+    }
+    
+    & > tfoot > tr.paginationContainer > td {
+        background-color: #fff;
     }
 }
 

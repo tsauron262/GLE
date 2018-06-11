@@ -158,9 +158,14 @@ class BR_ServiceShipment extends BimpObject
     public function removeFromShipment($qty, $removeFromOrder = false, $id_avoir = 0)
     {
         $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        $id_order_line = (int) $this->getData('id_commande_client_line');
 
         if (!BimpObject::objectLoaded($commande)) {
             return array('ID de la commande client absent');
+        }
+
+        if (!$id_order_line) {
+            return array('ID de la ligne de commande client absent');
         }
 
         $qty = (int) $qty;
@@ -174,10 +179,28 @@ class BR_ServiceShipment extends BimpObject
         // Mise à jour des qtés livrées: 
         $errors = $this->updateOrderLineShippedQty(-$qty);
 
+        // Ajout à un avoir: 
+        if (!$this->isOrderInvoiced() && $this->isShipmentInvoiced()) {
+            $avoir_errors = array();
+            $orderLine = BimpObject::getInstance($this->module, 'BR_OrderLine');
+            $orderLine->find(array('id_order_line' => $id_order_line));
+            if (BimpObject::objectLoaded($orderLine)) {
+                $avoir_errors = $orderLine->addToCreditNote($qty, $id_avoir);
+            } else {
+                $avoir_errors[] = 'ID de la ligne de commande absent ou invalide';
+            }
+
+            if (count($avoir_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Echec de l\'ajout à l\'avoir');
+            }
+
+            unset($orderLine);
+            $orderLine = null;
+        }
+
         if (!count($errors)) {
             // Retrait de l'expédition: 
             $new_qty = (int) $this->getData('qty') - $qty;
-            $id_order_line = (int) $this->getData('id_commande_client_line');
             if ($removeFromOrder && ($new_qty === 0)) {
                 $del_errors = $this->delete();
                 if (count($del_errors)) {
@@ -201,24 +224,6 @@ class BR_ServiceShipment extends BimpObject
                     }
                 } else {
                     $errors[] = 'ID de la ligne de commande absent ou invalide';
-                }
-            }
-
-            // Ajout à un avoir: 
-            if (!$this->isOrderInvoiced() && $this->isShipmentInvoiced()) {
-                $avoir_errors = array();
-                if (is_null($orderLine)) {
-                    $orderLine = BimpObject::getInstance($this->module, 'BR_OrderLine');
-                    $orderLine->find(array('id_order_line' => $id_order_line));
-                }
-                if (BimpObject::objectLoaded($orderLine)) {
-                    $avoir_errors = $orderLine->addToCreditNote($qty, $id_avoir);
-                } else {
-                    $avoir_errors[] = 'ID de la ligne de commande absent ou invalide';
-                }
-
-                if (count($avoir_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Echec de l\'ajout à l\'avoir');
                 }
             }
         }

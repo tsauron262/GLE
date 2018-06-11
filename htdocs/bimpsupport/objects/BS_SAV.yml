@@ -118,7 +118,6 @@ objects:
         cards: 
             default: 
                 type: facture_card
-            
     apple_parts: 
         relation: hasMany
         delete: 1

@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_objects_associations` (
   `dest_object_name` varchar(128) NOT NULL,
   `dest_object_type` varchar(128) NOT NULL,
   `dest_id_object` int(10) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

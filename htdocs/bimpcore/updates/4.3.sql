@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `llx_be_user_account` (
   `id_client` INT UNSIGNED NOT NULL DEFAULT '0',
   `login` varchar(128) NOT NULL DEFAULT '',
   `pword` varchar(128) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 ALTER TABLE `llx_bh_ticket` RENAME TO llx_bs_ticket;
 ALTER TABLE `llx_bh_inter` RENAME TO llx_bs_inter;
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `llx_bs_sav` (
   `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 ALTER TABLE `llx_be_equipment` ADD `product_label` VARCHAR(256) NOT NULL DEFAULT '' AFTER `id_product`;
 
@@ -62,4 +62,4 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_note` (
   `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

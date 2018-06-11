@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `llx_bc_caisse` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bc_caisse_session` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `llx_bc_caisse_session` (
   `date_closed` datetime DEFAULT NULL,
   `id_user_open` int(11) NOT NULL DEFAULT '0',
   `id_user_closed` int(11) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bc_vente` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `llx_bc_vente` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bc_vente_article` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -47,11 +47,11 @@ CREATE TABLE IF NOT EXISTS `llx_bc_vente_article` (
   `id_equipment` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `qty` int(10) UNSIGNED NOT NULL DEFAULT '1',
   `unit_price_tax_in` float NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bc_vente_paiement` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_vente` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `code` varchar(12) NOT NULL DEFAULT '',
   `montant` float NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

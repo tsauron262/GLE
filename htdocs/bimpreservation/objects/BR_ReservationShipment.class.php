@@ -226,16 +226,6 @@ class BR_reservationShipment extends BimpObject
 
         $errors = array();
 
-        // mise à jour des qtés livrées: 
-        $up_qty_errors = $this->updateOrderLineShippedQty(-$qty);
-        if (count($up_qty_errors)) {
-            $errors[] = BimpTools::getMsgFromArray($up_qty_errors, 'Des erreurs sont survenues lors de la mise à jour des quantités livrées pour la ligne de commande');
-        }
-
-        if (count($errors)) {
-            return $errors;
-        }
-
         $shipment = $this->getParentInstance();
         $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
 
@@ -251,6 +241,23 @@ class BR_reservationShipment extends BimpObject
             return $errors;
         }
 
+         // Ajout à l'avoir: 
+        if (!$this->isOrderInvoiced() && $this->isShipmentInvoiced()) {
+            $avoir_errors = array();
+            $orderLine = BimpObject::getInstance($this->module, 'BR_OrderLine');
+            $orderLine->find(array('id_order_line' => (int) $this->getData('id_commande_client_line')));
+
+            if (BimpObject::objectLoaded($orderLine)) {
+                $avoir_errors = $orderLine->addToCreditNote($qty, $id_avoir, (int) $this->getData('id_equipment'));
+            } else {
+                $avoir_errors[] = 'ID de la ligne de commande absent ou invalide';
+            }
+
+            if (count($avoir_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Echec de l\'ajout à l\'avoir');
+            }
+        }
+        
         // Remise en stock:
         if ((int) $shipment->getData('status') === 2) {
             $ref_commande = $commande->dol_object->ref;
@@ -299,7 +306,7 @@ class BR_reservationShipment extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray($up_qty_errors, 'Des erreurs sont survenues lors de la mise à jour des statuts des réservations correspondantes');
             }
         } else {
-            // Retrait des commandes: - L'ajout à l'avoir sera fait par Bimp_Commande::removeOrderLine() si la commande a été facturée hors expéditions. 
+            // Retrait des commandes: - L'ajout à l'avoir sera fait par Bimp_Commande::removeOrderLine() si le protduit a été facturé hors expéditions. 
             $reservation = BimpObject::getInstance($this->module, 'BR_Reservation');
             if (in_array($shipment->getData('status'), array(1, 4))) {
                 $status = 250;
@@ -320,29 +327,10 @@ class BR_reservationShipment extends BimpObject
             }
         }
 
-        if (count($errors)) {
-            return $errors;
-        }
-
-        // Ajout à l'avoir: 
-        if (!$this->isOrderInvoiced() && $this->isShipmentInvoiced()) {
-            $avoir_errors = array();
-            $orderLine = BimpObject::getInstance($this->module, 'BR_OrderLine');
-            $orderLine->find(array('id_order_line' => (int) $this->getData('id_commande_client_line')));
-
-            if (BimpObject::objectLoaded($orderLine)) {
-                $avoir_errors = $orderLine->addToCreditNote($qty, $id_avoir, (int) $this->getData('id_equipment'));
-            } else {
-                $avoir_errors[] = 'ID de la ligne de commande absent ou invalide';
-            }
-
-            if (count($avoir_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Echec de l\'ajout à l\'avoir');
-            }
-        }
-
-        if (count($errors)) {
-            return $errors;
+        // mise à jour des qtés livrées: 
+        $up_qty_errors = $this->updateOrderLineShippedQty(-$qty);
+        if (count($up_qty_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($up_qty_errors, 'Des erreurs sont survenues lors de la mise à jour des quantités livrées pour la ligne de commande');
         }
 
         $new_qty = ((int) $this->getData('qty')) - $qty;

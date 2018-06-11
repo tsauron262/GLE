@@ -999,16 +999,16 @@ class BimpInput
         foreach ($values as $value => $label) {
             $html .= '<tr class="itemRow">';
             $html .= '<td style="display: none">';
-            $html .= '<input type="hidden" name="' . $field_name . '[]" value="' . $value . '"/>';
+            $html .= '<input class="item_value" type="hidden" name="' . $field_name . '[]" value="' . $value . '"/>';
             $html .= '</td>';
             $html .= '<td>' . $label . '</td>';
             $html .= '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn" onclick="';
             if ($autosave) {
                 $html .= 'var $button = $(this); deleteObjectMultipleValuesItem(\'' . $object->module . '\', \'' . $object->object_name . '\', ';
                 $html .= $object->id . ', \'' . $field_name . '\', \'' . $value . '\', null, function() {';
-                $html .= '$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();});});';
+                $html .= 'removeMultipleInputValue($button, \'' . $value_input_name . '\');});';
             } else {
-                $html .= '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();});"';
+                $html .= 'removeMultipleInputValue($(this), \'' . $value_input_name . '\');';
             }
             $html .= '"><i class="fa fa-trash"></i></button></td>';
             $html .= '</tr>';

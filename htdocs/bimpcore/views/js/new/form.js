@@ -813,6 +813,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     if ($label_input.length) {
         if ($label_input.tagName() === 'select') {
             label = $label_input.find('[value="' + value + '"]').text();
+            $label_input.find('[value="' + value + '"]').hide();
         } else {
             label = $label_input.val();
         }
@@ -835,23 +836,24 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         if (!label) {
             if ($value_input.get(0).tagName.toLowerCase() === 'select') {
                 label = $value_input.find('[value="' + value + '"]').text();
+                $value_input.find('[value="' + value + '"]').hide();
             } else {
                 label = value;
             }
         }
 
         var html = '<tr class="itemRow">';
-        html += '<td style="display: none"><input type="hidden" value="' + value + '" name="' + values_field_name + '[]"/></td>';
+        html += '<td style="display: none"><input class="item_value" type="hidden" value="' + value + '" name="' + values_field_name + '[]"/></td>';
         html += '<td>' + label + '</td>';
         html += '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn"';
-        html += ' onclick="$(this).parent(\'td\').parent(\'tr\').remove();';
+        html += ' onclick="';
         if (ajax_save) {
             html += 'var $button = $(this); deleteObjectMultipleValuesItem(\'' + $container.data('module') + '\', ';
             html += '\'' + $container.data('object_name') + '\', ';
             html += $container.data('id_object') + ', \'' + values_field_name + '\', \'' + value + '\', null, ';
-            html += 'function(){$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();})});';
+            html += 'function(){removeMultipleInputValue($button, \'' + value_input_name + '\');});';
         } else {
-            html += '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();});';
+            html += 'removeMultipleInputValue($(this), \'' + value_input_name + '\');';
         }
         html += '"><i class="fa fa-trash"></i></button></td>';
         html += '</tr>';
@@ -870,6 +872,26 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         bimp_msg('Une erreur est survenue. opération impossible', 'danger');
     }
     checkMultipleValues();
+}
+
+function removeMultipleInputValue($button, value_input_name) {
+    var $multipleValues = $button.findParentByClass('inputMultipleValuesContainer');
+
+    if ($multipleValues.length) {
+        var $inputContainer = $multipleValues.parent().find('.inputContainer');
+        if ($inputContainer.length) {
+            var $input = $inputContainer.find('[name="' + value_input_name + '"]');
+            if ($input.length && $input.tagName() === 'select') {
+                var value = $button.parent('td').parent('tr').find('input.item_value').val();
+                $input.find('[value="' + value + '"]').show();
+            }
+        }
+    }
+
+    $button.parent('td').parent('tr').fadeOut(250, function () {
+        $(this).remove();
+        checkMultipleValues();
+    });
 }
 
 function checkMultipleValues() {
@@ -1140,7 +1162,9 @@ function setFormEvents($form) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         e.stopPropagation();
-                        submitForm($form.attr('id'));
+                        if (typeof (e.no_submit) === 'undefined' || !e.no_submit) {
+                            submitForm($form.attr('id'));
+                        }
                     }
                 });
             }

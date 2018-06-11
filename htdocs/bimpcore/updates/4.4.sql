@@ -10,4 +10,4 @@ CREATE TABLE IF NOT EXISTS `llx_bs_apple_part` (
   `qty` int(10) UNSIGNED NOT NULL DEFAULT '1',
   `component_code` varchar(128) NOT NULL DEFAULT '',
   `stock_price` float NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

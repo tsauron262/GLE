@@ -26,4 +26,4 @@ CREATE TABLE IF NOT EXISTS `llx_br_service_shipment` (
   `id_shipment` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `qty` int(10) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

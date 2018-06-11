@@ -5,6 +5,36 @@ class indexController extends BimpController
 
     protected $caisse = null;
 
+    public function isCaisseValide(BC_Caisse $caisse, &$errors = array())
+    {
+        global $user;
+
+        if (!isset($user->id) || !$user->id) {
+            $errors[] = 'Aucun utilisateur connecté. Veuillez vous authentifier';
+        } else {
+
+            if (!$caisse->isLoaded()) {
+                $errors[] = 'ID de la caisse invalide. Cette caisse n\'existe pas';
+            } elseif (!(int) $caisse->getData('status')) {
+                $errors[] = 'Caisse fermée';
+            } else {
+                $id_caisse_user = (int) $caisse->getData('id_current_user');
+                if (!$id_caisse_user) {
+                    $errors[] = 'Aucun utilisateur assigné à cette caisse';
+                } elseif ((int) $user->id !== $id_caisse_user) {
+                    $errors[] = 'Utilisateur invalide. L\'utilisateur assigné à cette caisse doit se reconnecter';
+                }
+
+                $id_current_session = (int) $caisse->getData('id_current_session');
+                if (!$id_current_session) {
+                    $errors[] = 'Aucun ID de session enregistré pour cette caisse';
+                }
+            }
+        }
+
+        return (count($errors) ? false : true);
+    }
+
     public function getUserCaisse()
     {
         if (is_null($this->caisse)) {
@@ -25,6 +55,8 @@ class indexController extends BimpController
     }
 
     // Rendus HTML:
+
+
 
     public function renderHtml()
     {
@@ -129,11 +161,11 @@ class indexController extends BimpController
                     'title'   => 'Clients',
                     'content' => $this->renderClientsTabHtml()
                 ),
-//                array(
-//                    'id'      => 'stocks',
-//                    'title'   => 'Stocks produits',
-//                    'content' => 'Ici, pourquoi pas: consulter les stocks produits'
-//                )
+                array(
+                    'id'      => 'mvt_fonds',
+                    'title'   => 'Mouvements de fonds',
+                    'content' => $this->renderMvtFondsTabHtml($caisse)
+                )
             );
 
 
@@ -434,20 +466,24 @@ class indexController extends BimpController
         $html .= '<div id="listVentesContainer" class="col-lg-12">';
 
         $html .= '<div id="venteToolbar" class="buttonsContainer">';
+        // Bouton nouvelle vente: 
         $html .= '<button id="newVenteButton" class="btn btn-primary btn-large" type="button">';
         $html .= '<i class="fa fa-plus iconLeft"></i>Nouvelle vente';
         $html .= '</button>';
 
+        // Bouton paiement factures:
+        $html .= '<button id="newPaymentButton" class="btn btn-default btn-large" type="button">';
+        $html .= '<i class="fa fa-euro iconLeft"></i>Paiement factures';
+        $html .= '</button>';
+
+        // Bouton Ferme caisse:
         $html .= '<button id="closeCaisseButton" class="btn btn-danger btn-large" type="button">';
         $html .= '<i class="fa fa-times iconLeft"></i>Fermer la caisse';
         $html .= '</button>';
 
+        // Bouton changer utilisateur:
         $html .= '<button id="changeUserButton" class="btn btn-default btn-large" type="button">';
         $html .= '<i class="fa fa-exchange iconLeft"></i>Changer d\'utilisateur';
-        $html .= '</button>';
-
-        $html .= '<button id="caisseMvtButton" class="btn btn-default btn-large" type="button">';
-        $html .= '<i class="fa fa-money iconLeft"></i>Mouvement de fonds';
         $html .= '</button>';
         $html .= '</div>';
 
@@ -479,34 +515,21 @@ class indexController extends BimpController
         return $list->renderHtml();
     }
 
-    public function isCaisseValide(BC_Caisse $caisse, &$errors)
+    public function renderMvtFondsTabHtml(BC_Caisse $caisse)
     {
-        global $user;
+        $errors = array();
 
-        if (!isset($user->id) || !$user->id) {
-            $errors[] = 'Aucun utilisateur connecté. Veuillez vous authentifier';
-        } else {
-
-            if (!$caisse->isLoaded()) {
-                $errors[] = 'ID de la caisse invalide. Cette caisse n\'existe pas';
-            } elseif (!(int) $caisse->getData('status')) {
-                $errors[] = 'Caisse fermée';
-            } else {
-                $id_caisse_user = (int) $caisse->getData('id_current_user');
-                if (!$id_caisse_user) {
-                    $errors[] = 'Aucun utilisateur assigné à cette caisse';
-                } elseif ((int) $user->id !== $id_caisse_user) {
-                    $errors[] = 'Utilisateur invalide. L\'utilisateur assigné à cette caisse doit se reconnecter';
-                }
-
-                $id_current_session = (int) $caisse->getData('id_current_session');
-                if (!$id_current_session) {
-                    $errors[] = 'Aucun ID de session enregistré pour cette caisse';
-                }
-            }
+        if (!$this->isCaisseValide($caisse, $errors)) {
+            return BimpRender::renderAlerts($errors);
         }
+        
+        $caisseMvt = BimpObject::getInstance('bimpcaisse', 'BC_CaisseMvt');
+        $list = new BC_ListTable($caisseMvt, 'caisse', 1, null, 'Mouvements de fonds pour la caisse "' . $caisse->getData('name') . '"', 'exchange');
+        $list->addFieldFilterValue('id_entrepot', (int) $caisse->getData('id_entrepot'));
+        $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
+        $html .= $list->renderHtml();
 
-        return (count($errors) ? false : true);
+        return $html;
     }
 
     // Traitements Ajax:

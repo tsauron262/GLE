@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS `llx_br_reservation_shipment` (
   `date` date DEFAULT NULL,
   `qty` int(10) UNSIGNED NOT NULL DEFAULT '1',
   `id_user` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

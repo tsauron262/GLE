@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `llx_gsx_comptia` (
   `grp` varchar(24) DEFAULT NULL,
   `code` varchar(24) NOT NULL DEFAULT '',
   `label` varchar(256) NOT NULL DEFAULT ''
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 ALTER TABLE `llx_bimp_gsx_repair` ADD `total_from_order_changed` BOOLEAN NOT NULL DEFAULT FALSE AFTER `date_closed`;
 
@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `llx_bs_pret` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 CREATE TABLE IF NOT EXISTS `llx_bs_sav_pret` (
@@ -46,4 +46,4 @@ CREATE TABLE IF NOT EXISTS `llx_bs_sav_pret` (
   `user_update` int(11) NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

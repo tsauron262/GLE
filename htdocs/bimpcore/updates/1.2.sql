@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_demande` (
   `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bf_comment` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_comment` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bf_refinanceur` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_refinanceur` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bf_rent` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_rent` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bf_rent_except` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_rent_except` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bf_frais_divers` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_frais_divers` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bf_frais_fournisseur` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_frais_fournisseur` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bh_equipment` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -116,13 +116,13 @@ CREATE TABLE IF NOT EXISTS `llx_bh_equipment` (
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bh_equipment_contrat` (
   `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_object` int(10) UNSIGNED NOT NULL,
   `id_associate` int(10) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bh_inter` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS `llx_bh_inter` (
   `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bh_note` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -148,7 +148,7 @@ CREATE TABLE IF NOT EXISTS `llx_bh_note` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED DEFAULT NULL,
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bh_ticket` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -158,7 +158,7 @@ CREATE TABLE IF NOT EXISTS `llx_bh_ticket` (
   `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bimp_timer` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -169,4 +169,4 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_timer` (
   `time_session` int(11) NOT NULL,
   `session_start` int(11) DEFAULT NULL,
   `id_user` int(10) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

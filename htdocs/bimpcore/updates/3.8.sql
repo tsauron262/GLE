@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS `llx_br_commande_shipment` (
   `num_livraison` int(10) UNSIGNED NOT NULL DEFAULT '1',
   `qty` int(10) UNSIGNED NOT NULL DEFAULT '1',
   `date` datetime DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 ALTER TABLE `llx_br_reservation_cmd_fourn` ADD `id_reservation` int(10) UNSIGNED NOT NULL DEFAULT '0';
 

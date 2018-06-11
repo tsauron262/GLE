@@ -62,9 +62,9 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
 
-        if(method_exists($this->object, 'fetch_optionals')){
+        if (method_exists($this->object, 'fetch_optionals')) {
             $this->object->fetch_optionals();
-            if(isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0){
+            if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
                 $entrepot = new Entrepot($this->db);
                 $entrepot->fetch($this->object->array_options['options_entrepot']);
                 $mysoc->zip = $entrepot->zip;
@@ -72,7 +72,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $mysoc->town = $entrepot->town;
             }
         }
-        
+
         $logo_height = 0;
         if (!file_exists($logo_file)) {
             $logo_file = '';
@@ -184,7 +184,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $cur_page = (int) $this->pdf->getPage();
         $num_pages = (int) $this->pdf->getNumPages();
-        
+
         if (($num_pages - $cur_page) === 1) {
             $this->pdf->deletePage($num_pages);
         }
@@ -292,16 +292,13 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
-            if($line->desc == "(DEPOSIT)"){
+            if($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte') {
                 $this->acompteHt -= $line->total_ht;
                 $this->acompteTtc -= $line->total_ttc;
                 $i++;
                 continue;
             }
-            
-            
-            
-            
+
             $product = null;
             if (!is_null($line->fk_product) && $line->fk_product) {
                 $product = new Product($this->db);
@@ -310,8 +307,6 @@ class BimpDocumentPDF extends BimpModelPDF
                     $product = null;
                 }
             }
-            
-            
 
             $desc = $this->getLineDesc($line, $product);
 
@@ -513,7 +508,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if ($line->remise_percent) {
                 $this->total_remises += ((float) $pu_ht * ((float) $line->remise_percent / 100)) * (int) pdf_getlineqty($this->object, $i, $this->langs);
             }
-            
+
             $sign = 1;
             if (isset($this->object->type) && $this->object->type == 2 && !empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE))
                 $sign = -1;
@@ -739,7 +734,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $total_ttc = ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? $this->object->multicurrency_total_ttc : $this->object->total_ttc;
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
-                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($total_ttc+$this->acompteTtc, 0, $this->langs) . '</td>';
+                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($total_ttc + $this->acompteTtc, 0, $this->langs) . '</td>';
                 $html .= '</tr>';
             }
         }
@@ -789,16 +784,15 @@ class BimpDocumentPDF extends BimpModelPDF
                 $html .= '</tr>';
                 $resteapayer = 0;
             }
-
         }
-        
+
         if ($this->acompteHt > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #F0F0F0;">' . $this->langs->transnoentities("Acompte") . '</td>';
             $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->acompteTtc, 0, $this->langs) . '</td>';
             $html .= '</tr>';
         }
-        
+
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0 || $this->acompteHt > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("RemainderToPay") . '</td>';

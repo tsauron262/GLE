@@ -228,8 +228,7 @@ function addIdCateg(id_event, id_categ) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
                 alert("La catégorie a été créée dans prestashop.");
-                $('div[name=create_prestashop_category]').css('display', 'none');
-                $('p[name=categ_already_created]').css('display', 'inline');
+                location.reload();
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 2548.', 'error');
             }
@@ -326,19 +325,21 @@ function initEvents() {
                 id_categ = parseInt(event.id_categ);
         });
 
+        $('div[name=select_event]').css('display', 'none');
+        $('div[name=create_prestashop_category]').css('display', 'none');
+        $('div[name=categ_already_created]').css('display', 'none');
+        $('div[name=toggle_active]').css('display', 'none');
+        $('div[name=categ_not_created]').css('display', 'none');
+
         if (id_categ > 0) {
-            $('div[name=create_prestashop_category]').css('display', 'none');
-            $('p[name=categ_already_created]').css('display', 'inline');
-            $('div[name=toggle_active]').css('display', 'inline');
+            $('div[name=categ_already_created]').css('display', 'block');
+            $('div[name=toggle_active]').css('display', 'block');
         } else {
-            $('div[name=toggle_active]').css('display', 'none');
-            $('p[name=categ_already_created]').css('display', 'none');
             if (id_event > 0) {
-                $('p[name=select_event]').css('display', 'none');
-                $('div[name=create_prestashop_category]').css('display', 'inline');
+                $('div[name=create_prestashop_category]').css('display', 'block');
+                $('div[name=categ_not_created]').css('display', 'block');
             } else {
-                $('p[name=select_event]').css('display', 'inline');
-                $('div[name=create_prestashop_category]').css('display', 'none');
+                $('div[name=select_event]').css('display', 'block');
             }
         }
 

@@ -45,15 +45,19 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
             . 'box-shadow: 0 1px 10px rgba(0,0,0,.5);'
             . 'padding: 10px;">';
     print '<label>Prestashop</label><br/>';
-    
+
+    print '<div class="alert alert-info" role="alert" name="select_event" style = "display: none"><strong>Information</strong>: Sélectionnez un évènement pour créer une catégorie prestashop ou activer une catégorie</div>';
+
     print '<div class="btn btn-primary" name="create_prestashop_category">Créer catégorie prestashop</div><br/>';
-//    print '<p id="categ_already_created" style="display: none">Cet évènement est déjà catégorisé dans prestashop</p>';
-//    print '<p id="select_event"          style="display: none">Sélectionnez un évènement pour créer une catégorie prestashop</p><br/>';
+
+    print '<div class="alert alert-info" role="alert" name="categ_already_created" style = "display: none"><strong>Information</strong>: Cet évènement est déjà catégorisé dans prestashop</div>';
 
     print '<div class="btn btn-primary" name="toggle_active" style="display: none;">Activer/désactiver catégorie</div><br/>';
 
+    print '<div class="alert alert-info" role="alert" name="categ_not_created" style = "display: none"><strong>Information</strong>: Créer la catégorie pour pouvoir l\'activer</div>';
+
     print '</div><br/>';
-    
+
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
 

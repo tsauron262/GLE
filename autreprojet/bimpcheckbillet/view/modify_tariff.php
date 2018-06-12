@@ -77,12 +77,23 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
             . 'padding: 10px;">';
     print '<label>Prestashop</label><br/>';
 
-//    print '<p name="product_already_created" style="display: none">Ce tarif correspond déjà à un produit prestashop</p>';
-//    print '<p name="select_tariff" style="display: inline">Sélectionnez un tarif pour créer un produit prestashop</p>';
-    print '<div class="btn btn-primary" name="create_prestashop_product" style="display: none">Creér produit prestashop</div><br/><br/>';
+    
+    
+    
+    
+    print '<div class="alert alert-info" role="alert" name="select_tariff" style="display: block"><strong>Information</strong>: Sélectionnez un tarif pour créer un produit prestashop.</div>';
 
-    print '<div class="btn btn-primary" name="toggle_active" style="display: none;">Activer/désactiver produit </div><br/><br/>    ';
+    print '<div class="btn btn-primary" name="create_prestashop_product" style="display: none">Creér produit prestashop</div><br/>';
 
+    print '<div class="alert alert-info" role="alert" name="product_already_created" style="display: none"><strong>Information</strong>: Ce tarif correspond déjà à un produit prestashop</div>';
+
+    print '<div class="btn btn-primary" name="toggle_active" style="display: none;">Activer/désactiver produit </div><br/>';
+
+    print '<div class="alert alert-info" role="alert" name="product_not_created" style="display: none"><strong>Information</strong>: Créez le produit prestashop pour pouvoir l\'activer.</div>';
+    
+    
+    
+    
     print '<div id="div_tax" style="'
             . 'display: none;'
             . 'border: 1px solid #c2c2c2;'

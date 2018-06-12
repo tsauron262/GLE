@@ -226,11 +226,8 @@ function addIdProdExtern(id_tariff, id_prod_extern) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return === 1) {
-//                $('#div_tax').css('display', 'none');
-//                $('p[name=product_already_created]').css('display', 'inline');
-                $('div[name=create_prestashop_product]').css('display', 'none');
-//                $('p[name=select_tariff]').css('display', 'none');
                 alert('Produit créée');
+                location.reload();
             } else {
                 setMessage('alertSubmit', "Erreur serveur 1873.", 'error');
             }
@@ -342,7 +339,7 @@ function initEvents() {
         if (id_tariff > 0) {
             autoFill(id_tariff);
         } else {
-            
+
         }
         $('img#img_display').attr('src', '');
 
@@ -354,20 +351,22 @@ function initEvents() {
             }
         });
 
+
+        $('div[name=select_tariff]').css('display', 'none');
+        $('div[name=create_prestashop_product]').css('display', 'none');
+        $('div[name=product_already_created]').css('display', 'none');
+        $('div[name=toggle_active]').css('display', 'none');
+        $('div[name=product_not_created]').css('display', 'none');
+
         if (id_prod_extern > 0) {
-            $('div[name=create_prestashop_product]').css('display', 'none');
-//            $('p[name=product_already_created]').css('display', 'inline');
-//            $('p[name=select_tariff]').css('display', 'none');
-            $('div[name=toggle_active]').css('display', 'inline')
+            $('div[name=product_already_created]').css('display', 'block');
+            $('div[name=toggle_active]').css('display', 'block');
         } else {
-            $('div[name=toggle_active]').css('display', 'none')
-//            $('p[name=product_already_created]').css('display', 'none');
             if (id_tariff > 0) {
-                $('div[name=create_prestashop_product]').css('display', 'inline');
-//                $('p[name=select_tariff]').css('display', 'none');
+                $('div[name=create_prestashop_product]').css('display', 'block');
+                $('div[name=product_not_created]').css('display', 'block');
             } else {
-//                $('p[name=select_tariff]').css('display', 'inline');
-                $('div[name=create_prestashop_product]').css('display', 'none');
+                $('div[name=select_tariff]').css('display', 'block');
             }
         }
     });

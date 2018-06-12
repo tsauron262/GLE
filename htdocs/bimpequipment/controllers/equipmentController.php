@@ -106,7 +106,7 @@ class equipmentController extends BimpController
                     $html .= BimpRender::renderAlerts($msg, $class);
                 }
                 else{
-                    $html .= BimpRender::renderAlerts("'Date de fin de garantie: inconnue", 'danger');
+                    $html .= BimpRender::renderAlerts("Date de fin de garantie: inconnue", 'danger');
                 }
             }
         }

@@ -319,6 +319,9 @@ function printFields(tariff, qty) {
             html += '<br/>';
         html += '<h5>Ticket n°' + i + '</h5>';
         html += '<div name="ticket" cnt=' + cnt_ticket + ' id_tariff=' + tariff.id + '>';
+        
+        var length_befor_add_field = html.length;
+
         //names
         if (tariff.require_names == 1) {
             html += '<label><strong>Prénom ' + returnStar(tariff.require_names === 1) + '</strong></label><br/>';
@@ -347,6 +350,12 @@ function printFields(tariff, qty) {
                 }
             }
         }
+        
+        if (length_befor_add_field === html.length) {
+            html += '<p>Tous les champs de ce ticket sont remplis par défaut, il est donc directement téléchargeable.</p>';
+//            $('div[name="ticket"][cnt="' + cnt_ticket + '"][id_tariff="' + tariff.id + '"]').css('background', 'white');
+        }
+        
         html += '</div>';
         cnt_ticket++;
     }

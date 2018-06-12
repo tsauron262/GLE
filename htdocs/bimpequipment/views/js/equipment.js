@@ -45,7 +45,7 @@ function onEquipmentFormLoaded($form) {
                             bimpAjax.$form.find('[name="warranty_type"]').val(result.data.warranty_type).change();
                         }
                         if (typeof (result.data.warning) === 'string' && result.data.warning) {
-                            bimpAjax.$form.find('[name="serial').append(result.data.warning);
+                            bimpAjax.$form.find('[name="serial"]').append(result.data.warning);
                         }
 //                        if (typeof (result.data.note) === 'string' && result.data.note) {
 //                            bimpAjax.$form.find('[name="note"]').val(result.data.note).change();

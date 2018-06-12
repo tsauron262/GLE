@@ -28,10 +28,10 @@ class ZoomDici extends Module {
     }
 
     public function install() {
-        return parent::install() &&
-                $this->registerHook('orderDetail') &&
-                $this->registerHook('orderConfirmation') &&
-                Configuration::updateValue('ZOOM_DICI', 'zoomdici');
+        return
+                $this->registerHook('displayOrderDetail') &&
+                $this->registerHook('displayOrderConfirmation') &&
+                Configuration::updateValue('ZOOM_DICI', 'zoomdici') && parent::install();
     }
 
     public function uninstall() {
@@ -83,17 +83,12 @@ class ZoomDici extends Module {
     }
 
     public function hookDisplayOrderDetail($params) {
-        
-        die('Dans le hook');
-
-        $order = $params['order'];
-
-        echo $this->display(__FILE__, 'orderdetail.tpl');
-
-        var_dump($params);
-        echo "Dans le hook";
-        $html = '<script>alert("Dans le hook")</script>';
-        return $html;
+        $script = 'var base_url ="' . _PS_BASE_URL_ . __PS_BASE_URI__ . '";';
+        $script .= 'var id_order ="' . $_GET['id_order'] . '";';
+        $this->context->controller->addJS($this->_path . 'views/js/add_link.js');
+//        echo $this->display(__FILE__, 'orderdetail.tpl');
+        return '<script>' . $script . '</script>';
+//        return '';
     }
 
 }

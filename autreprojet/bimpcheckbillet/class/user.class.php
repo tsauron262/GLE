@@ -144,19 +144,31 @@ class User {
 
     public function connect($login, $pass_word) {
 
-        $sql = 'SELECT id';
-        $sql .= ' FROM user';
-        $sql .= ' WHERE login="' . $login . '"';
-        $sql .= ' AND pass_word="' . $pass_word . '"';
+        $loginOK = false;
+        $passOK = false;
 
+        $sql = 'SELECT id, login, pass_word';
+        $sql .= ' FROM user';
 
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                return $obj->id;
+                if ($obj->login == $login and $obj->pass_word == $pass_word)
+                    return $obj->id;
+                elseif ($obj->login == $login)
+                    $loginOK = true;
+                elseif ($obj->pass_word == $pass_word)
+                    $passOK = true;
             }
+        }
+        if ($loginOK) {
+            $this->errors[] = "Mot de passe incorrect.";
+            return -4;
+        } elseif ($passOK) {
+            $this->errors[] = "Login incorrect.";
+            return -3;
         } else {
-            $this->errors[] = "Login ou mot de passe incorrect.";
+            $this->errors[] = "Login et mot de passe incorrect.";
             return -2;
         }
         return -1;

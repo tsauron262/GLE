@@ -35,6 +35,7 @@ function login(login, pass_word) {
  */
 $(document).ready(function () {
     initEvents();
+    $('input[name=login]').focus();
 });
 
 /**

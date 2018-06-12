@@ -90,13 +90,17 @@ function initEvents() {
 function displayTable(tariffs) {
     $('div#displayTable').empty();
     var html = '';
-    tariffs.forEach(function (tariff) {
-        html += '<h5><strong>' + tariff.label + '</strong></h5>';
-        html += '<table>';
-        html += addHeader(tariff);
-        html += addTickets(tariff);
-        html += '</table><br/><br/>';
-    });
+    if (tariffs !== -1) {
+        tariffs.forEach(function (tariff) {
+            html += '<h5><strong>' + tariff.label + '</strong></h5>';
+            html += '<table>';
+            html += addHeader(tariff);
+            html += addTickets(tariff);
+            html += '</table><br/><br/>';
+        });
+    } else {
+        html += 'Il n\'y a aucun tariff définit pour ce évènement';
+    }
     $('div#displayTable').append(html);
 }
 

@@ -68,7 +68,7 @@ class equipmentController extends BimpController
             if (!count($errors)) {
                 $data = $equipment->gsxLookup($serial, $errors);
                 
-                if(issset($data['warning']) && $data['warning'] != "")
+                if(isset($data['warning']) && $data['warning'] != "")
                     $data['warning'] = BimpRender::renderAlerts($data['warning'], 'danger');
             }
         }

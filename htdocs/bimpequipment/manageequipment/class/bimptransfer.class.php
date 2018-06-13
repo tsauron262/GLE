@@ -269,7 +269,8 @@ class BimpTransfer {
                         'date_closing' => ($obj->date_closing != null) ? $obj->date_closing : '');
                 } else {
                     $transfers[] = array(
-                        'id' => 'TR'.$obj->rowid,
+                        'id' => $obj->rowid,
+                        'ref' => 'TR'.$obj->rowid,
                         'status' => $obj->status,
                         'fk_warehouse_source' => $obj->fk_warehouse_source,
                         'fk_warehouse_dest' => $obj->fk_warehouse_dest,

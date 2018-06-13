@@ -10,7 +10,7 @@ class reservationController extends BimpController
         $rows = array(
             array(
                 'label' => 'Numéro de série d\'un équipement à attribuer',
-                'input' => '<input type="text" class="large_input" name="serial" id="findEquipmentSerial" value=""/>'
+                'input' => '<input type="text" class="large_input" name="serial" id="findEquipmentSerial" value="" autocomplete="off"/>'
             )
         );
 

@@ -80,9 +80,9 @@ class BimpStatsFacture {
             $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
             $hash = $this->convertCenter($hash, $c_to_centres);
         } else { // entrepot
-            die("aventrept");
             $hash = $this->addEntrepotURL($hash);
         }
+        die("avsort");
         $out = $this->sortHash($hash, $sortBy, $placeType);
         if ($this->mode == 'c') {
             $this->putCsv($out, $nomFichier);

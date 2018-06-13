@@ -72,7 +72,7 @@ class BimpStatsFacture {
             $hash = $this->addFactureURL($hash);
             $hash = $this->addPaiementURL($hash);
             $hash = $this->addSavURL($hash);
-        }die('apd');
+        }
         $hash = $this->addStatut($hash);
         $t_to_types = $this->getExtrafieldArray('facture', 'type');
         $hash = $this->convertType($hash, $t_to_types);
@@ -80,6 +80,7 @@ class BimpStatsFacture {
             $c_to_centres = $this->getExtrafieldArray('facture', 'centre');
             $hash = $this->convertCenter($hash, $c_to_centres);
         } else { // entrepot
+            die("aventrept");
             $hash = $this->addEntrepotURL($hash);
         }
         $out = $this->sortHash($hash, $sortBy, $placeType);

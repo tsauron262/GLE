@@ -82,7 +82,6 @@ class BimpStatsFacture {
         } else { // entrepot
             $hash = $this->addEntrepotURL($hash);
         }
-        die("avsort");
         $out = $this->sortHash($hash, $sortBy, $placeType);
         if ($this->mode == 'c') {
             $this->putCsv($out, $nomFichier);

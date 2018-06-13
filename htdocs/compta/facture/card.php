@@ -2402,7 +2402,7 @@ if ($action == 'create')
 
 	// Standard invoice
 	print '<div class="tagtr listofinvoicetype"><div class="tagtd listofinvoicetype">';
-	$tmp='<input type="radio" id="radio_standard" name="type" value="0"' . (GETPOST('type') == 0 ? ' checked' : '') . '> ';
+	$tmp='<input type="radio" id="radio_standard" name="type" value="0"' . (GETPOST('type') == 0 && $origin != 'commande' ? ' checked' : '') .($origin == 'commande' ? ' disabled' : '') . '> ';
 	$desc = $form->textwithpicto($tmp.$langs->trans("InvoiceStandardAsk"), $langs->transnoentities("InvoiceStandardDesc"), 1, 'help', '', 0, 3);
 	print $desc;
 	print '</div></div>';
@@ -2413,7 +2413,7 @@ if ($action == 'create')
 		if (empty($conf->global->INVOICE_DISABLE_DEPOSIT))
    		{
     	    print '<div class="tagtr listofinvoicetype"><div class="tagtd listofinvoicetype">';
-    		$tmp='<input type="radio" id="radio_deposit" name="type" value="3"' . (GETPOST('type') == 3 ? ' checked' : '') . '> ';
+    		$tmp='<input type="radio" id="radio_deposit" name="type" value="3"' . (GETPOST('type') == 3 || $origin == 'commande' ? ' checked' : '') . '> ';
     		print '<script type="text/javascript" language="javascript">
     		jQuery(document).ready(function() {
     			jQuery("#typedeposit, #valuedeposit").click(function() {

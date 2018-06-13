@@ -65,7 +65,7 @@ class BimpStatsFacture {
         // TODO MAJ BDD
         $this->mode = $format;
         $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType);    // apply filter
-        $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
+        die;$hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
         $hash = $this->addMargin($hash);
         if ($this->mode == 'd') {
             $hash = $this->addSocieteURL($hash);
@@ -320,9 +320,9 @@ class BimpStatsFacture {
     }
 
     private function addPaiementURL($hash) {
+        $pai = new Paiement($this->db);
         foreach ($hash as $ind => $h) {
             if (isset($h['pai_id']) && $h['pai_id'] != '') {
-                $pai = new Paiement($this->db);
                 $pai->id = $h['pai_id'];
                 $pai->ref = $h['ref_paiement'];
                 $hash[$ind]['ref_paiement'] = $pai->getNomUrl(1, '', '');

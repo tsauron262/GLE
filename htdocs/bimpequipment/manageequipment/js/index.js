@@ -61,10 +61,8 @@ function initEvents() {
 }
 
 function addLineTransfer(transfer) {
-
-    var id_tr = transfer.id;
-    var line = '<tr id=' + id_tr + '>';
-    line += '<td>' + transfer.id + '</td>';
+    var line = '<tr id=' + transfer.id + '>';
+    line += '<td>' + transfer.ref + '</td>';
     line += '<td>' + transfer.url_user + '</td>';
     line += '<td>' + transfer.name_status + '</td>';
     line += '<td>' + transfer.date_opening + '</td>';

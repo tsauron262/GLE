@@ -256,7 +256,7 @@ class BimpTransfer {
                     }
                     $transfers[] = array(
                         'id' => $obj->rowid,
-                        'REF' => 'TR'.$obj->rowid,
+                        'ref' => 'TR'.$obj->rowid,
                         'status' => $obj->status,
                         'name_status' => $name_status,
                         'fk_warehouse_source' => $obj->fk_warehouse_source,

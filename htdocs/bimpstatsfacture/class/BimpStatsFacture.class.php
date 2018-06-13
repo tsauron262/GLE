@@ -66,7 +66,7 @@ class BimpStatsFacture {
         $this->mode = $format;
         $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType);    // apply filter
         $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
-        die;$hash = $this->addMargin($hash);
+        $hash = $this->addMargin($hash);die("apmarge");
         if ($this->mode == 'd') {
             $hash = $this->addSocieteURL($hash);
             $hash = $this->addFactureURL($hash);

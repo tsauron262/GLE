@@ -228,7 +228,6 @@ class BimpStatsFacture {
     }
 
     private function addMargin($hash) {
-
         foreach ($hash as $id => $h) {
             $sql = 'SELECT buy_price_ht, total_ht, qty';
             $sql.= ' FROM ' . MAIN_DB_PREFIX . 'facturedet';
@@ -260,8 +259,8 @@ class BimpStatsFacture {
     }
 
     private function addSocieteURL($hash) {
+        $soc = new Societe($this->db);
         foreach ($hash as $ind => $h) {
-            $soc = new Societe($this->db);
             $soc->id = $h['soc_id'];
             $soc->name = $h['nom_societe'];
             $hash[$ind]['nom_societe'] = $soc->getNomUrl(1);
@@ -298,8 +297,8 @@ class BimpStatsFacture {
     }
 
     private function addFactureURL($hash) {
+        $facture = new Facture($this->db);
         foreach ($hash as $ind => $h) {
-            $facture = new Facture($this->db);
             $facture->id = $h['fac_id'];
             $facture->ref = $h['nom_facture'];
             $hash[$ind]['nom_facture'] = $facture->getNomUrl(1);
@@ -308,10 +307,10 @@ class BimpStatsFacture {
     }
 
     private function addSavURL($hash) {
+        require_once DOL_DOCUMENT_ROOT."/bimpsupport/objects/BS_SAV.class.php";
+        $chrono = new BS_SAV($this->db);
         foreach ($hash as $ind => $h) {
             if (isset($h['sav_id'])) {
-                require_once DOL_DOCUMENT_ROOT."/bimpsupport/objects/BS_SAV.class.php";
-                $chrono = new BS_SAV($this->db);
                 $chrono->id = $h['sav_id'];
                 $chrono->ref = $h['sav_ref'];
                 $hash[$ind]['sav_ref'] = $chrono->getNomUrl(1, '', '');
@@ -334,10 +333,9 @@ class BimpStatsFacture {
 
     private function addEntrepotURL($hash) {
         $allEntrepots = $this->getAllEntrepots();
-
+        $entrepot = new Entrepot($this->db);
         foreach ($hash as $ind => $h) {
             if (isset($h['fk_entrepot']) && $h['fk_entrepot'] != '') {
-                $entrepot = new Entrepot($this->db);
                 $entrepot->id = $h['fk_entrepot'];
                 $entrepot->libelle = $allEntrepots[$h['fk_entrepot']];
                 if ($this->mode == 'd')

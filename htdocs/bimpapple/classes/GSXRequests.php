@@ -410,7 +410,7 @@ class GSX_Request
                                 LEFT JOIN llx_product p ON p.rowid = e.id_product AND e.id_product != 0
                                 WHERE s.id = ' . (int) $this->id_sav . ' AND s.id_equipment = e.id';
                             
-
+echo "debut";
                             $res = $db->query($sql);
                             if ($db->num_rows($res) > 0) {
                                 $result = $db->fetch_object($res);

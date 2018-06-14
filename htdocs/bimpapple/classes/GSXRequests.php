@@ -423,7 +423,7 @@ echo "debut";
                                 foreach ($tab2[$result->nom2] as $ln) {
                                     if (stripos($ln[0], $result->nom2) === 0 && stripos($ln[2], str_replace("S", "", $result->nom2)) === 0)
                                         $tab3[] = $ln;
-                                    elseif(stripos($ln[0], $result->nom) === 0)
+                                    elseif(stripos($ln[0], $result->nom2) === 0)
                                             echo "<br/>NON : ".str_replace("S", "", $result->nom2)."  |   ".$ln[2];
                                     if (stripos($ln[0], $result->nom2) === 0)
                                         $tab4[] = $ln;

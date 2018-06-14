@@ -417,6 +417,8 @@ class GSX_Request
                                 foreach ($tab2[$result->nom] as $ln) {
                                     if (stripos($ln[0], $result->nom) === 0 && stripos($ln[2], str_replace("S", "", $result->nom)) === 0)
                                         $tab3[] = $ln;
+                                    elseif(stripos($ln[0], $result->nom) === 0)
+                                            echo "<br/>NON : ".$ln[2];
                                     if (stripos($ln[0], $result->nom) === 0)
                                         $tab4[] = $ln;
                                 }

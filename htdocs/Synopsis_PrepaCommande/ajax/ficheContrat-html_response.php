@@ -91,6 +91,7 @@ if ($id > 0) {
 
     $sql = $db->query($requete);
     $touCreer = false;
+    $tabLigneIdS = array();
     while ($res = $db->fetch_object($sql)) {
         $prodTmp = new Product($db);
         $prodTmp->fetch($res->fk_product);

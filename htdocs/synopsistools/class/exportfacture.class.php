@@ -55,7 +55,6 @@ class exportfacture {
         if(defined("MODE_TEST")){
             $this->path = "/data/DOCUMENTS/test/2/synchro/export/factures/";
             $this->pathI = "/data/DOCUMENTS/test/2/synchro/import/factures/";
-            $this->importFact();
         }
 
 
@@ -79,7 +78,8 @@ class exportfacture {
         global $tabCentre;
         if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
             return $tabCentre[$centre][3];
-        mailSyn2("Impossible de trouvé un id8sens", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
+        if(!defined("MODE_TEST"))
+            mailSyn2("Impossible de trouvé un id8sens", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
         return 0;
     }
 
@@ -88,7 +88,8 @@ class exportfacture {
         global $tabCentre;
         if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
             return $tabCentre[$centre][3];
-        mailSyn2("Impossible de trouvé un id8sens", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
+        if(!defined("MODE_TEST"))
+            mailSyn2("Impossible de trouvé un id8sens", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
         return 0;
     }
 
@@ -174,7 +175,8 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
             if ($this->id8sens < 1) {
                 if ($this->debug)
                     echo "<br/>Comm pas de comm<br/>";
-                mailSyn2("Exportation facture", $userC->email, null, "Bonjour vos factures ne peuvent être exporté car vous n'avez pas d'identifiant 8Sens dans vottre profil <a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php?id=" . $userC->id . "'>Voir</a>");
+                if(!defined("MODE_TEST"))
+                    mailSyn2("Exportation facture", $userC->email, null, "Bonjour vos factures ne peuvent être exporté car vous n'avez pas d'identifiant 8Sens dans vottre profil <a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php?id=" . $userC->id . "'>Voir</a>");
             }
         }
         else {
@@ -184,7 +186,8 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
             $userM->fetch($userCr);
             if ($this->debug)
                 echo "<br/>Pas de comm<br/>";
-            mailSyn2("Exportation facture", $userM->email, null, "Bonjour vos factures ne peuvent être exportées car il n'y a pas de commercial rataché <a href='" . DOL_URL_ROOT . "/compta/facture/card.php?facid=" . $id . "'>Voir</a>");
+            if(!defined("MODE_TEST"))
+                mailSyn2("Exportation facture", $userM->email, null, "Bonjour vos factures ne peuvent être exportées car il n'y a pas de commercial rataché <a href='" . DOL_URL_ROOT . "/compta/facture/card.php?facid=" . $id . "'>Voir</a>");
         }
     }
 
@@ -198,7 +201,8 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
             $facts .= $ligne->facnumber . " - ";
         }
         if ($facts != "")
-            mailSyn2("Facture non export", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour voici les facture non exporté " . $facts);
+            if(!defined("MODE_TEST"))
+                mailSyn2("Facture non export", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour voici les facture non exporté " . $facts);
     }
 
     function getTxt($tab1, $tab2) {
@@ -355,7 +359,8 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
             $to = "tommy@bimp.fr";
         }
         if ($to != "")
-            mailSyn2("Produit non catégorisé", $to, "admin@bimp.fr", "Bonjour ceci est un message automatique des export vers 8sens <br/>" . $msg);
+            if(!defined("MODE_TEST"))
+                mailSyn2("Produit non catégorisé", $to, "admin@bimp.fr", "Bonjour ceci est un message automatique des export vers 8sens <br/>" . $msg);
         if ($this->debug)
             echo "<span class='red'>" . $msg . "</span><br/>";
     }

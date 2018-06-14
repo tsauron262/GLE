@@ -23,11 +23,12 @@ class exportfacture {
     public function __construct($db, $sortie = 'html') {
         $this->db = $db;
         $this->path = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/extractFactGle/";
+        $this->pathI = "";
     }
 
     public function importFact() {
         global $db;
-        $dir = "/Users/tommy/Desktop/testimport/export/";
+        $dir = $this->pathI;
         if (is_dir($dir)) {
             if ($dh = opendir($dir)) {
                 while (($file = readdir($dh)) !== false) {
@@ -51,7 +52,11 @@ class exportfacture {
     }
 
     public function exportTout() {
-//        $this->importFact();
+        if(defined("MODE_TEST")){
+            $this->path = "/data/DOCUMENTS/test/2/synchro/export/factures/";
+            $this->pathI = "/data/DOCUMENTS/test/2/synchro/import/factures/";
+            $this->importFact();
+        }
 
 
         $this->exportFactureNewSav();

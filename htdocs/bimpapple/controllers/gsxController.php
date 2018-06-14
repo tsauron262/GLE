@@ -1002,7 +1002,6 @@ class gsxController extends BimpController
                         break;
 
                     case 'KGBSerialNumberUpdate':
-                        dol_syslog("KGBSerialNumberUpdate" . print_r($response, 1), 3);
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmationNumber'])) {
                             if ($response[$responseName]['updateStatus'] == "Y") {
                                 $confirmNumber = $response[$responseName]['repairConfirmationNumber'];
@@ -1020,7 +1019,6 @@ class gsxController extends BimpController
                         break;
 
                     case 'UpdateSerialNumber':
-                        dol_syslog("UpdateSerialNumber" . print_r($response, 1), 3);
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmation']['repairConfirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['repairConfirmationNumber'];
                             $repair->set('new_serial', 'part');

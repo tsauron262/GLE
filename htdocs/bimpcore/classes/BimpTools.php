@@ -471,6 +471,9 @@ class BimpTools
             } else {
                 $sql .= '`' . $field . '`';
             }
+            
+            if(isset($filter['IN']))
+                $filter['in'] = $filter['IN'];
 
             if (is_array($filter)) {
                 if (isset($filter['min']) && isset($filter['max'])) {
@@ -498,6 +501,8 @@ class BimpTools
                 } elseif (isset($filter['in'])) {
                     if (is_array($filter['in'])) {
                         $sql .= ' IN (' . implode(',', $filter['in']) . ')';
+                    } elseif($filter['in'] == "") {
+                        $sql .= ' = 0 AND 0';
                     } else {
                         $sql .= ' IN (' . $filter['in'] . ')';
                     }

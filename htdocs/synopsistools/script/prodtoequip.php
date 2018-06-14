@@ -11,7 +11,7 @@ set_time_limit(5000000);
 ini_set('memory_limit', '1024M');
 
 $loadEquip = true;
-$loadSav = true;
+$loadSav = false;
 
 
 $OK= 0;
@@ -28,6 +28,12 @@ define('DONT_CHECK_SERIAL', true);
  * support
  * des   chrono    prosses
  * 
+ * 
+ * 
+ * maj bimp conf
+ * Aj droit modif sav au xx sav
+ * Aj droit toute les outiques 
+ * Aj droit logistique
  */
 
 if ($loadEquip == true) {
@@ -168,7 +174,7 @@ $savok = 0;
             'etat_materiel' => $ligne->Etat_Materiel,
             'etat_materiel_desc' => $ligne->description,
             'accessoires' => $ligne->Accessoires_joints,
-            'symptomes' => $ligne->Symptomes,
+            'symptomes' => ($ligne->Symptomes != "")? $ligne->Symptomes : "Symptomes inc",
             'diagnostic' => $ligne->Diagnostic,
             'resolution' => $ligne->Resolution,
             'date_create' => $ligne->date_create,

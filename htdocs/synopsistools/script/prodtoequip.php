@@ -11,7 +11,7 @@ set_time_limit(5000000);
 ini_set('memory_limit', '1024M');
 
 $loadEquip = true;
-$loadSav = false;
+$loadSav = true;
 
 
 $OK= 0;

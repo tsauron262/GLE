@@ -15,6 +15,7 @@ div.divButAction, div.butActionDelete{
 }
 .butAction{
     font-size: 12px;
+    margin: 0.4em 0.9em;
 }
 
 div.deconnect{

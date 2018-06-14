@@ -415,9 +415,15 @@ class GSX_Request
                             if ($db->num_rows($res) > 0) {
                                 $result = $db->fetch_object($res);
                                 foreach ($tab2[$result->nom] as $ln) {
-                                    if (stripos($ln[2], $result->nom) === 0 || stripos($ln[2], $result->nom2) === 0)
+                                    if (stripos($ln[2], $result->nom) === 0)
                                         $tab3[] = $ln;
-                                    if (stripos($ln[0], $result->nom) === 0 || stripos($ln[0], $result->nom2) === 0)
+                                    if (stripos($ln[0], $result->nom) === 0)
+                                        $tab4[] = $ln;
+                                }
+                                foreach ($tab2[$result->nom2] as $ln) {
+                                    if (stripos($ln[2], $result->nom2) === 0)
+                                        $tab3[] = $ln;
+                                    if (stripos($ln[0], $result->nom2) === 0)
                                         $tab4[] = $ln;
                                 }
 //                    $tab3 = array_merge($tab3, $tab2[$result->nom]);

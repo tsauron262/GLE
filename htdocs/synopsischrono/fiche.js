@@ -238,14 +238,14 @@ jQuery(document).ready(function () {
         date = $(this).attr("value");
         if ((date == "0000-00-00 00:00:00" || date == "") && $(this).hasClass("now")) {
             date = new Date();
-            $(this).datetimepicker({showTime: true}).datepicker("setDate", date);
+            $(this).datetimepicker({format: 'YYYY/MM/DD HH:mm:ss', defaultDate: date}).datepicker("setDate", "");
         }
         else if($(this).val() != ""){
             date = new Date($(this).val());
-             $(this).datetimepicker({showTime: true}).datepicker("setDate", date);
+             $(this).datetimepicker({format: 'YYYY/MM/DD HH:mm:ss', defaultDate: date}).datepicker("setDate", date);
         }
         else{
-            $(this).datetimepicker({showTime: true}).datepicker("setDate", "");
+            $(this).datetimepicker({format: 'YYYY/MM/DD HH:mm:ss'}).datepicker("setDate", "");
         }
     });
 

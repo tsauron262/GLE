@@ -47,6 +47,16 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<input class="form-control" placeholder="Date de fin" type="text" name="date_end" style="display: inline ; width: 160px"/>';
     print '<input class="form-control" type="time" value="00:00" name="time_end" style="display: inline ; width: 100px"/><br/><br/>';
 
+
+    print '<label>Catégorie mère</label><br/>';
+    print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';
+    print '<label class="btn btn-primary active"><input value=' . ID_CATEG_FESTIVAL . ' type="radio" name="categ_parent" checked>Festival</label>';
+    print '<label class="btn btn-primary">       <input value=' . ID_CATEG_CONCERT . ' type="radio" name="categ_parent">Concert</label>';
+    print '<label class="btn btn-primary">       <input value=' . ID_CATEG_SPECTACLE . ' type="radio" name="categ_parent">Spectacle</label>';
+    print '<label class="btn btn-primary">       <input value=' . ID_CATEG_AUTRE . ' type="radio" name="categ_parent">Autre</label>';
+    print '</div><br/><br/>';
+
+
     print '<label>Image (.bmp, .jpg ou .png)</label><br/>';
 
     print '<label class="btn btn-primary" for="file">';
@@ -57,8 +67,8 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
 
     print '<button class="btn btn-primary" name="create">Créer évènement</button>';
     print '</form>';
-    print '</fieldset>';
     print '<div id="alertSubmit"></div>';
+    print '</fieldset>';
 }
 print '</body>';
 

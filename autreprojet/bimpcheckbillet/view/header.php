@@ -66,7 +66,9 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tariff</a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="create_tariff.php">Créer</a>
-          <a class="dropdown-item" href="modify_tariff.php">Modifier</a>
+          <a class="dropdown-item" href="modify_tariff.php">Modifier</a>';
+          if (USE_COMBINATION)
+              '<a class="dropdown-item" href="create_combination.php">Créer combinaison</a>
         </div>
       </li>';
             print '<li class="nav-item dropdown">

@@ -9,6 +9,7 @@ include_once 'class/event.class.php';
 include_once 'class/tariff.class.php';
 include_once 'class/ticket.class.php';
 include_once 'class/order.class.php';
+include_once 'class/combination.class.php';
 
 if (isset($_POST['description']))
     $_POST['description'] = addslashes($_POST['description']);
@@ -26,6 +27,7 @@ $user = new User($db);
 $event = new Event($db);
 $tariff = new Tariff($db);
 $ticket = new Ticket($db);
+$combination = new Combination($db);
 
 $action = $_POST['action'];
 
@@ -44,7 +46,7 @@ switch ($action) {
     case 'create_event': {
             $user = json_decode($_SESSION['user']);
             echo json_encode(array(
-                'code_return' => $event->create($_POST['label'], $_POST['description'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id, $_FILES['file'], $_POST['id_categ ']),
+                'code_return' => $event->create($_POST['label'], $_POST['description'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id, $_FILES['file'], $_POST['categ_parent'], $_POST['id_categ ']),
                 'errors' => $event->errors));
             break;
         }
@@ -54,7 +56,7 @@ switch ($action) {
      */
     case 'create_tariff': {
             echo json_encode(array(
-                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_FILES['custom_img'], $_POST['input_cust_img'], $_POST['require_names'], '', $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
+                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_FILES['custom_img'], $_POST['input_cust_img'], $_POST['require_names'], '', $_POST['date_stop_sale'], $_POST['time_end_sale'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
                 'errors' => $tariff->errors));
             break;
         }
@@ -298,6 +300,16 @@ switch ($action) {
             break;
         }
 
+    /**
+     * create_combination.php
+     */
+    case 'create_combination': {
+            echo json_encode(array(
+                'id_inserted' => $combination->create($_POST['label']),
+                'errors' => $combination->errors));
+            break;
+        }
+        
     /**
      * General
      */

@@ -10,6 +10,7 @@ class Tariff {
     public $price;
     public $number_place;
     public $fk_event;
+    public $date_stop_sale;
     public $date_start;
     public $date_end;
     public $require_names;
@@ -29,10 +30,11 @@ class Tariff {
             return false;
         }
 
-        $sql = 'SELECT label, date_creation, require_names, date_start, date_end, price, number_place, type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6, name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6, require_extra_1, require_extra_2, require_extra_3, require_extra_4, require_extra_5, require_extra_6, id_prod_extern, fk_event';
+        $sql = 'SELECT label, date_creation, require_names, date_stop_sale, date_start, date_end, price, number_place, type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6, name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6, require_extra_1, require_extra_2, require_extra_3, require_extra_4, require_extra_5, require_extra_6, id_prod_extern, fk_event';
         $sql .= ' FROM tariff';
         $sql .= ' WHERE id=' . $id;
 
+//        echo $sql;
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
@@ -43,6 +45,7 @@ class Tariff {
                 $this->number_place = floatVal($obj->number_place);
                 $this->fk_event = $obj->fk_event;
                 $this->require_names = intVal($obj->require_names);
+                $this->date_stop_sale = $obj->date_stop_sale;
                 $this->date_start = $obj->date_start;
                 $this->date_end = $obj->date_end;
                 $this->type_extra_1 = intVal($obj->type_extra_1);
@@ -93,8 +96,10 @@ class Tariff {
         return -1;
     }
 
-    public function create($label, $price, $number_place, $id_event, $file, $custom_img, $use_custom_img, $require_names, $id_prod_extern, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
+    public function create($label, $price, $number_place, $id_event, $file, $custom_img, $use_custom_img, $require_names, $id_prod_extern, $date_stop_sale, $time_end_sale, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
 
+        if ($date_stop_sale == '')
+            $this->errors[] = "Le champ date de fin de vente est obligatoire";
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
         if ($price == '')
@@ -115,9 +120,12 @@ class Tariff {
         if ($time_end == '')
             $time_end = '00:00';
 
+        $full_date_stop_sale = $date_stop_sale . ' ' . $time_end_sale . ':00';
         $full_date_start = $date_start . ' ' . $time_start . ':00';
         $full_date_end = $date_end . ' ' . $time_end . ':00';
 
+        if ($date_stop_sale != '')
+            $date_stop_sale_obj = DateTime::createFromFormat('d/m/Y H:i:s', $full_date_stop_sale);
         if ($date_start != '')
             $date_start_obj = DateTime::createFromFormat('d/m/Y H:i:s', $full_date_start);
         if ($date_end != '')
@@ -132,6 +140,7 @@ class Tariff {
         $sql.= ', `fk_event`';
         $sql.= ', `require_names`';
         $sql.= ', `id_prod_extern`';
+        $sql.= ', `date_stop_sale`';
         if ($date_start != '')
             $sql.= ', `date_start`';
         if ($date_end != '')
@@ -156,6 +165,7 @@ class Tariff {
         $sql.= ', "' . $id_event . '"';
         $sql.= ', "' . $require_names . '"';
         $sql.= ', ' . ($id_prod_extern != '' ? $id_prod_extern : 'NULL');
+        $sql.= ', "' . $date_stop_sale_obj->format('Y-m-d H:i:s') . '"';
         if ($date_start != '')
             $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         if ($date_end != '')
@@ -326,7 +336,7 @@ class Tariff {
         $sql = 'SELECT id';
         $sql .= ' FROM tariff';
         $sql .= ' WHERE id_prod_extern  IN(' . implode(',', $ids_prods_extern) . ')';
-        
+
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {

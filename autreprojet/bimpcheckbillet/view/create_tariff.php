@@ -82,15 +82,15 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
 
     print '<span class="label label-info" id="name_file_display"></span>';
     print '<img id="img_display" src="#" alt=" Aucune image sélectionnée" style="max-height: 600px ; max-width: 800px"/><br/><br/><br/>';
-    
+
     // custom image
     print '<label for="event">Image sur ticket (.bmp, .jpg ou .png)</label><br/>';
     print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';
     print '<label class="btn btn-primary active"><input value=0 type="radio" name="input_cust_img" checked>Logo Zoomdici</label>';
     print '<label class="btn btn-primary">       <input value=1 type="radio" name="input_cust_img">Image personnalisée</label>';
     print '</div><br/><br/>';
-    
-   
+
+
     print '<div id="div_custom_img" style="display: none;">';
     print '<label>Image sur les tickets</label><br/>';
     print '<label class="btn btn-primary" for="custom_img">';
@@ -104,7 +104,12 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';
     print '<label class="btn btn-primary active"><input value=0 type="radio" name="require_names" checked>Non</label>';
     print '<label class="btn btn-primary">       <input value=1 type="radio" name="require_names">Oui</label>';
-    print '</div><br/><br/>';    
+    print '</div><br/><br/>';
+
+
+    print '<label for="date_stop_sale">Date de fin de vente</label><br/>';
+    print '<input class="form-control" placeholder="Date de fin de vente" type="text" name="date_stop_sale" style="display: inline ; width: 160px"/>';
+    print '<input class="form-control" type="time" value="00:00" name="time_end_sale" style="display: inline ; width: 100px"/><br/><br/>';
 
     print '<label for="date_start">Date de début (facultatif)</label><br/>';
     print '<input class="form-control" placeholder="Date de début" type="text" name="date_start" style="display: inline ; width: 160px"/>';

@@ -1,6 +1,7 @@
 var URL_PRESTASHOP = URL_PRESTA + '/modules/zoomdici/ajax.php';
 
 var tariffs;
+var events;
 
 /**
  * Ajax call
@@ -22,6 +23,7 @@ function getEvents() {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.events.length !== 0) {
+                events = out.events;
                 out.events.forEach(function (event) {
                     $('select[name=id_event]').append(
                             '<option value=' + event.id + '>' + event.label + '</option>');
@@ -165,13 +167,27 @@ function getCategEvent(id_tariff, id_tax) {
 function createPrestashopProduct(id_tariff, id_categ_extern, image_name, id_tax) {
 
     var tariff;
+    var event_for_tariff;
+    var date_start;
+    var date_end;
 
     tariffs.forEach(function (tmp_tariff) {
         if (tmp_tariff.id === parseInt(id_tariff))
             tariff = tmp_tariff;
     });
 
-    var id_event = parseInt($('select[name=id_event]').val());
+    events.forEach(function (tmp_event) {
+        if (parseInt(tmp_event.id) === parseInt(tariff.fk_event))
+            event_for_tariff = tmp_event;
+    });
+
+    if (tariff.date_start === null && tariff.date_end === null) {
+        date_start = event_for_tariff.date_start;
+        date_end = event_for_tariff.date_end;
+    } else {
+        date_start = tariff.date_start;
+        date_end = tariff.date_end;
+    }
 
     if (tariff.id_prod_extern === 0) {
         $.ajax({
@@ -180,12 +196,15 @@ function createPrestashopProduct(id_tariff, id_categ_extern, image_name, id_tax)
             data: {
                 label: tariff.label,
                 price: tariff.price,
-                id_event: id_event,
+                date_start: date_start,
+                date_end: date_end,
+                id_event: event_for_tariff.id,
                 id_tariff: id_tariff,
                 number_place: tariff.number_place,
                 id_categ_extern: id_categ_extern,
                 image_name: image_name,
                 id_tax: id_tax,
+                date_stop_sale: tariff.date_stop_sale,
                 action: 'createPrestashopProduct'
             },
             error: function () {
@@ -196,7 +215,7 @@ function createPrestashopProduct(id_tariff, id_categ_extern, image_name, id_tax)
                 if (out.errors.length !== 0) {
                     printErrors(out.errors, 'alertSubmit');
                 } else if (parseInt(out.id_inserted) > 0) {
-                    addIdProdExtern(tariff.id, out.id_inserted);
+//                    addIdProdExtern(tariff.id, out.id_inserted);
                 } else {
                     setMessage('alertSubmit', "Erreur inconnue.", 'error');
                 }
@@ -258,6 +277,30 @@ function toggleActiveProduct(id_prod_extern) {
                     alert("Ce produit est maintenant désactivé.");
             } else {
                 setMessage('alertSubmit', "Erreur inconnue 2538.", 'error');
+            }
+        }
+    });
+}
+
+function getCombinations(id_prod_extern) {
+    $.ajax({
+        type: 'POST',
+        url: URL_PRESTASHOP,
+        data: {
+            id_prod_extern: id_prod_extern,
+            action: 'getCombinations'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 3645.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.combinations != undefined) {
+                console.log(out.combinations);
+            } else {
+                setMessage('alertSubmit', "Erreur inconnue 2948.", 'error');
             }
         }
     });
@@ -388,6 +431,24 @@ function initEvents() {
             alert("Veuillez sélectionner un produit avant de changer un status.");
         }
     });
+
+    $('div[name=get_combinations]').click(function () {
+        var id_prod_extern;
+        var id_tariff = parseInt($('select[name=tariff] > option:selected').val());
+        if (id_tariff > 0) {
+            tariffs.forEach(function (tariff) {
+                if (tariff.id === id_tariff) {
+                    id_prod_extern = parseInt(tariff.id_prod_extern);
+                }
+            });
+            if (id_prod_extern > 0)
+                getCombinatoons(id_prod_extern);
+            else
+                alert("Veillez importer le tariff dans prestashop avant de modifier son status.");
+        } else {
+            alert("Veuillez sélectionner un produit avant de changer un status.");
+        }
+    })
 }
 
 function autoFill(id_tariff) {

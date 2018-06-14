@@ -27,5 +27,6 @@ CREATE TABLE IF NOT EXISTS `tariff` (
     `id_prod_extern`    INTEGER,
     `fk_event`          INTEGER NOT NULL,
     `number_place`      INTEGER DEFAULT 0,
+    `date_stop_sale`    DATETIME,
     FOREIGN KEY (`fk_event`) REFERENCES `event` (`id`)
 ) ENGINE=innodb;

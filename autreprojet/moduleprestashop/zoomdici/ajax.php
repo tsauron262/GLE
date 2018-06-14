@@ -18,6 +18,16 @@ $action = Tools::getValue('action');
 
 switch ($action) {
     case 'createPrestashopProduct' : {
+            // Pre-processing
+            $date_start_simple = substr($_POST['date_start'], 0, -9);
+            $date_end_simple = substr($_POST['date_end'], 0, -9);
+            $description = 'Du <strong>' . $date_start_simple . '</strong> au <strong>' . $date_end_simple . '</strong>';
+            // features date start
+            $month_start = (int) substr($_POST['date_start'], 5, 7);
+            $id_start_feature_value = ARRAY_MONTH[$month_start];
+            // features date end
+            $month_end = (int) substr($_POST['date_end'], 5, 7);
+            $id_end_feature_value = ARRAY_MONTH[$month_end];
 
             $defaultLanguage = new Language((int) (Configuration::get('PS_LANG_DEFAULT')));
             $product = new Product();
@@ -30,17 +40,19 @@ switch ($action) {
             }
             // définition du produit
             $product->name = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['label']);
-
+            $product->description = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $description);
             $product->category = array($_POST['id_categ_extern']);
             $product->id_category_default = $_POST['id_categ_extern'];
-            $product->description_short = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['label']);
+            $product->description_short = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $description);
             $product->quantity = intVal($_POST['number_place']);
             $product->redirect_type = '404';
             $product->link_rewrite = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['id_tariff']);
             $return = $product->add();
             $product->updateCategories($product->category, true);
             if ($product->id > 0) {
+                // Qty
                 StockAvailable::setQuantity((int) $product->id, 0, intVal($_POST['number_place']));
+                // Image
                 $image = new Image();
                 $image->id_product = (int) $product->id;
                 $image->position = Image::getHighestPosition($product->id) + 1;
@@ -49,6 +61,10 @@ switch ($action) {
                 if (!copyImg($product->id, $image->id, URL_CHECK . 'img/event/' . $_POST['image_name'], 'products', !Tools::getValue('regenerate'))) {
                     $image->delete();
                 }
+                // Feature
+                $product::addFeatureProductImport($product->id, ID_FEATURE_MONTH, $id_start_feature_value);
+                if ($id_start_feature_value != $id_end_feature_value) // if product (tariff) overlap 2 months
+                    $product::addFeatureProductImport($product->id, ID_FEATURE_MONTH, $id_end_feature_value);
             }
             die(Tools::jsonEncode(array('id_inserted' => $product->id, 'errors' => array())));
             break;
@@ -57,8 +73,8 @@ switch ($action) {
     case 'createPrestashopCategory' : {
             $category = new Category();
             $category->name = array((int) Configuration::get('PS_LANG_DEFAULT') => $_POST['label']);
-            $category->id_parent = Configuration::get('PS_HOME_CATEGORY');
             $category->link_rewrite = array((int) Configuration::get('PS_LANG_DEFAULT') => str_replace(' ', '_', $_POST['label']));
+            $category->id_parent = (int) $_POST['id_categ_parent'];
             $category->add();
             die(Tools::jsonEncode(array('id_inserted' => $category->id, 'errors' => array())));
             break;
@@ -83,6 +99,13 @@ switch ($action) {
                 $categ->active = true;
             $res = $categ->update();
             die(Tools::jsonEncode(array('toggled' => $res, 'active' => $categ->active, 'errors' => array())));
+            break;
+        }
+
+    case 'getCombinations' : {
+            $product = new Product((int) $_POST['id_prod_extern']);
+            $combinations = $product->getAttributeCombinationsById(5, Context::getContext()->language->id);
+            die(Tools::jsonEncode(array('combinations' => $combinations, 'errors' => array())));
             break;
         }
 

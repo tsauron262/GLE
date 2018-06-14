@@ -78,6 +78,7 @@ function createTariff() {
  * Ready
  */
 $(document).ready(function () {
+    $('input[name=date_stop_sale]').datepicker({dateFormat: 'dd/mm/yy'})
     $('input[name=date_start]').datepicker({dateFormat: 'dd/mm/yy'})
     $('input[name=date_end]').datepicker({dateFormat: 'dd/mm/yy'})
     getEvents();

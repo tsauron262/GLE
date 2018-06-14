@@ -183,13 +183,14 @@ function closeEvent(id_event) {
     });
 }
 
-function createPrestashopCategory(id_event, label_event) {
+function createPrestashopCategory(id_event, label_event, id_categ_parent) {
 
     $.ajax({
         type: "POST",
         url: URL_PRESTASHOP,
         data: {
             label: label_event,
+            id_categ_parent: id_categ_parent,
             action: 'createPrestashopCategory'
         },
         error: function () {
@@ -377,6 +378,7 @@ function initEvents() {
     });
 
     $('div[name=create_prestashop_category]').click(function () {
+        var id_categ_parent;
         var id_event = $('select[name=id_event] > option:selected').val();
         var label_event = $('select[name=id_event] > option:selected').text();
         $('p#categ_already_created').css('display', 'none');
@@ -385,13 +387,16 @@ function initEvents() {
         if (id_event > 0) {
             var stop = false;
             events.forEach(function (event) {
-                if (parseInt(event.id) === parseInt(id_event) && parseInt(event.id_categ) > 0) {
-                    $('p#categ_already_created').css('display', 'inline');
-                    stop = true;
+                if (parseInt(event.id) === parseInt(id_event)) {
+                    id_categ_parent = event.id_categ_parent;
+                    if (parseInt(event.id_categ) > 0) {
+                        $('p#categ_already_created').css('display', 'inline');
+                        stop = true;
+                    }
                 }
             });
             if (stop === false)
-                createPrestashopCategory(id_event, label_event);
+                createPrestashopCategory(id_event, label_event, id_categ_parent);
         } else {
             $('p#select_event').css('display', 'inline');
         }

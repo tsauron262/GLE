@@ -12,6 +12,7 @@ class Event {
     public $date_end;
     public $status;
     public $id_categ;
+    public $id_categ_parent;
 
     const STATUS_DRAFT = 1;
     const STATUS_VALIDATE = 2;
@@ -29,7 +30,7 @@ class Event {
             return false;
         }
 
-        $sql = 'SELECT id, label, description, date_creation, date_start, date_end, status, id_categ';
+        $sql = 'SELECT id, label, description, date_creation, date_start, date_end, status, id_categ, id_categ_parent';
         $sql .= ' FROM event';
         $sql .= ' WHERE id=' . $id;
 
@@ -45,6 +46,7 @@ class Event {
                 $this->date_end = $obj->date_end;
                 $this->status = $obj->status;
                 $this->id_categ = intVal($obj->id_categ);
+                $this->id_categ_parent = intVal($obj->id_categ_parent);
                 return 1;
             }
         } else {
@@ -54,10 +56,12 @@ class Event {
         return -1;
     }
 
-    public function create($label, $description, $date_start, $time_start, $date_end, $time_end, $id_user, $file, $id_categ = '') {
+    public function create($label, $description, $date_start, $time_start, $date_end, $time_end, $id_user, $file, $categ_parent, $id_categ = '') {
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
+        if ($categ_parent == '')
+            $this->errors[] = "Le champ catégorie parent est obligatoire";
         if ($date_start == '')
             $this->errors[] = "Le champ date de début est obligatoire";
         if ($date_end == '')
@@ -90,6 +94,7 @@ class Event {
         $sql.= ', `date_start`';
         $sql.= ', `date_end`';
         $sql.= ', `id_categ`';
+        $sql.= ', `id_categ_parent`';
         $sql.= ') ';
         $sql.= 'VALUES ("' . addslashes($label) . '"';
         $sql.= ', "' . addslashes($description) . '"';
@@ -97,6 +102,7 @@ class Event {
         $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ', "' . $date_end_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ', ' . ($id_categ != '' ? $id_categ : 'NULL');
+        $sql.= ', ' . $categ_parent;
         $sql.= ')';
 
         try {
@@ -219,7 +225,7 @@ class Event {
         $tariff = new Tariff($this->db);
 
         $sql = 'SELECT e.id as id, e.label as label, e.description as description, e.date_creation as date_creation,'
-                . ' e.date_start as date_start, e.date_end as date_end, e.status as status, e.id_categ as id_categ';
+                . ' e.date_start as date_start, e.date_end as date_end, e.status as status, e.id_categ as id_categ, e.id_categ_parent as id_categ_parent';
         $sql .= ' FROM event as e';
         if ($id_user != null and ! $is_super_admin) {
             $sql .= ' LEFT JOIN event_admin as e_a ON e_a.fk_event=e.id';
@@ -245,6 +251,7 @@ class Event {
                         'date_end' => $obj->date_end,
                         'status' => $obj->status,
                         'id_categ' => $obj->id_categ,
+                        'id_categ_parent' => $obj->id_categ_parent,
                         'filename' => $filename,
                         'tariffs' => $tariff->getTariffsForEvent($obj->id)
                     );
@@ -258,6 +265,7 @@ class Event {
                         'date_end' => $obj->date_end,
                         'status' => $obj->status,
                         'id_categ' => $obj->id_categ,
+                        'id_categ_parent' => $obj->id_categ_parent,
                         'filename' => $filename
                     );
             }

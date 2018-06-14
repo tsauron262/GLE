@@ -119,13 +119,13 @@ if ($loadSav) {
 
 $savok = 0;
 
+        $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
     while ($ligne = $db->fetch_object($sql)) {
 
-        $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
 
         $code_centre = "S";
-        $idP = 17; //Prod par default
-        $idClient = 4674;
+        $idP = 74729; //Prod par default
+        $idClient = 144582;
         
         if (isset($ligne->Centre) && $ligne->Centre != "")
             $code_centre = $ligne->Centre;
@@ -204,6 +204,7 @@ $savok = 0;
         } else {
             echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arraySav, 1).print_r($newErrors,1) ;//. print_r($sav, 1);
         }
+        $sav->reset();
     }
     
     

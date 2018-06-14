@@ -32,4 +32,6 @@ if (isset($_REQUEST['shipId']) && !empty($_REQUEST['shipId'])) {
 if (isset($_REQUEST['shipId']) && !empty($_REQUEST['shipId'])) {
     echo '<input id="shipmentToLoad" type="hidden" value="' . $_REQUEST['shipId'] . '">';
 }
+
+llxFooter();
 ?>

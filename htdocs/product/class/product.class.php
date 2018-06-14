@@ -3459,8 +3459,14 @@ class Product extends CommonObject
 		}
 		$result.=$linkstart.$newref.$linkend;
                 
-                BimpObject::loadClass('bimpcore', 'Bimp_Product');
-                $result .= Bimp_Product::getStockIconStatic($this->id); // $id_entrepôt facultatif, peut être null.
+                /*moddrsi*/
+                if(class_exists("BimpObject")){
+                    BimpObject::loadClass('bimpcore', 'Bimp_Product');
+                    $result .= Bimp_Product::getStockIconStatic($this->id); // $id_entrepôt facultatif, peut être null.
+                }
+                /*fmoddrsi*/
+                
+                
 		return $result;
 	}
 

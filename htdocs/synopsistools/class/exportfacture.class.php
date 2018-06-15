@@ -273,8 +273,13 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
                 if ($line->subprice < 0)
                     $line->pa_ht = -$line->pa_ht;
 
-
-                $tabFactDet[] = array("L" => "L", "ref" => $ref, "product_type" => $type, "qty" => $line->qty, "subprice" => price($line->subprice), "description" => $line->desc, "buy_price_ht" => price($line->pa_ht), "tva_tx" => $line->tva_tx, "remise_percent" => $line->remise_percent);
+                $tabCodeTva = array(
+                    "20" => 1,
+                    "5.5" => 7,
+                    "0" => 0
+                );
+                $tvaCode = $tabCodeTva[$line->tva_tx];
+                $tabFactDet[] = array("L" => "L", "ref" => $ref, "product_type" => $type, "qty" => $line->qty, "subprice" => price($line->subprice), "description" => $line->desc, "buy_price_ht" => price($line->pa_ht), "tva_tx" => $line->tva_tx, "remise_percent" => $line->remise_percent, "tva_code" => $tvaCode);
             }
 
 

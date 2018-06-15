@@ -56,6 +56,9 @@ class exportfacture {
             $this->path = "/data/synchro/export/factures/";
             $this->pathI = "/data/synchro/import/factures/";
             $this->importFact();
+            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportpaiement.class.php");
+            $exp = new exportpaiement($this->db);
+            $exp->exportTout();
         }
 
 

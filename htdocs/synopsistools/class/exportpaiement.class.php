@@ -62,8 +62,8 @@ class exportpaiement {
             $credit = str_replace(".", ",", ($ligne->amount < 0) ? 0 : $ligne->amount);
             $debit = str_replace(".", ",", ($ligne->amount < 0) ? -$ligne->amount : 0);
             $solde = -$ligne->amount;
-            $libOp = suppr_accents($ligne->libP." Paiement " . $ligne->facnumber);
-            $tabPaiement[] = array("EcrPiece" => "", "JorCode" => $ligne->labB, "EcrRef" => $ligne->code_client, "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => $ligne->compte, /* "EcrCpt" => "remise de paiement", */ "EcrLib" => $ligne->name." ".$libOp, "EcrDebit" => $credit, "EcrCredit" => $debit, /* "EcrSolde" => -$solde, */ "EcrLettrage" => "", "PcvGpriID" => "");
+            $libOp = suppr_accents($ligne->name." ".$ligne->libP." Paiement " . $ligne->facnumber);
+            $tabPaiement[] = array("EcrPiece" => "", "JorCode" => $ligne->labB, "EcrRef" => $ligne->code_client, "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => $ligne->compte, /* "EcrCpt" => "remise de paiement", */ "EcrLib" => $libOp, "EcrDebit" => $credit, "EcrCredit" => $debit, /* "EcrSolde" => -$solde, */ "EcrLettrage" => "", "PcvGpriID" => "");
             $tabPaiement[] = array("EcrPiece" => $ligne->facnumber, "JorCode" => $ligne->labB, "EcrRef" => $ligne->code_client, "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => "411" . $ligne->codeCli8Sens, /* "EcrCpt" => "411071719-GD", */ "EcrLib" => $libOp, "EcrDebit" => $debit, "EcrCredit" => $credit, /* "EcrSolde" => $solde, */ "EcrLettrage" => $ligne->facnumber, "PcvGpriID" => $ligne->Collab8sens);
             $tabPfId[] = $ligne->pfid;
         }

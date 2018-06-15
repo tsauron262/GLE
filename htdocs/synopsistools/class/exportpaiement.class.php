@@ -60,7 +60,7 @@ class exportpaiement {
         }
         if (count($tabPaiement) > 0) {
             $txt = $this->getTxt($tabPaiement, array());
-            if (file_put_contents($this->path . "Pai" . dol_print_date(dol_now(), "%d-%m-%Y--%H:%M:%S") . ".txt", $txt)) {
+            if (file_put_contents($this->path . "Pai" . dol_print_date(dol_now(), "%d%m%Y%H%M%S") . ".txt", $txt)) {
                 echo "ok";
                 if (count($tabPfId) > 0) {
                     $this->db->query("UPDATE llx_paiement_facture SET exported = 1 WHERE rowid IN ('" . implode("','", $tabPfId) . "')");

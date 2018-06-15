@@ -275,7 +275,7 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
 
                 $tabCodeTva = array(
                     "20" => 1,
-                    "5.5" => 7,
+                    "5.500" => 7,
                     "0" => 0
                 );
                 $tvaCode = $tabCodeTva[$line->tva_tx];

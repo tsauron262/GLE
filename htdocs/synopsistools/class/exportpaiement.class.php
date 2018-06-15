@@ -4,6 +4,14 @@ require_once (DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
 require_once (DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once (DOL_DOCUMENT_ROOT . "/categories/class/categorie.class.php");
 
+
+/*
+ * Manque
+ * 
+ * code et lib banque
+ * moyen de paiement
+ * 
+ */
 class exportpaiement {
 
 //    var $sep = "    -   ";
@@ -47,14 +55,14 @@ class exportpaiement {
       } */
 
     public function exportPaiementNormal() {
-        $result = $this->db->query("SELECT p.*, s.nom as name, facnumber, codeCli8Sens, Collab8sens, pf.rowid as pfid FROM `llx_paiement` p, llx_facture f, llx_paiement_facture pf, llx_societe s WHERE s.rowid = f.fk_soc AND pf.`fk_paiement` = p.rowid AND pf.`fk_facture` = f.rowid " . $this->where);
+        $result = $this->db->query("SELECT p.*, s.nom as name, cp.libelle as libP, facnumber, codeCli8Sens, Collab8sens, pf.rowid as pfid FROM `llx_paiement` p, llx_facture f, llx_paiement_facture pf, llx_societe s, `llx_c_paiement` cp WHERE cp.id = p.fk_paiement AND s.rowid = f.fk_soc AND pf.`fk_paiement` = p.rowid AND pf.`fk_facture` = f.rowid " . $this->where);
         $tabPaiement = $tabPfId = array();
         //$tabPaiement[] = array("JorCode" => "Code journal", "EcrRef" => "Référence", "EcrDate" => "Date", "EcrCpt" => "Compte écriture", "EcrLib" => "Libellé Ecriture", "EcrDebit" => "Débit", "EcrCredit" => "Crédit", "EcrSolde" => "Solde", "EcrLettrage" => "Lettrage/Pointage", "EcrIsMark" => "Lettrée");
         while ($ligne = $this->db->fetch_object($result)) {
             $credit = str_replace(".", ",", ($ligne->amount < 0) ? 0 : $ligne->amount);
             $debit = str_replace(".", ",", ($ligne->amount < 0) ? -$ligne->amount : 0);
             $solde = -$ligne->amount;
-            $tabPaiement[] = array("EcrPiece" => "", "JorCode" => "LCL", "EcrRef" => $ligne->codeCli8Sens, "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => "5128000000", /* "EcrCpt" => "remise de paiement", */ "EcrLib" => $ligne->name." Paiement " . $ligne->facnumber, "EcrDebit" => $credit, "EcrCredit" => $debit, /* "EcrSolde" => -$solde, */ "EcrLettrage" => "", "PcvGpriID" => "");
+            $tabPaiement[] = array("EcrPiece" => "", "JorCode" => "LCL", "EcrRef" => $ligne->codeCli8Sens, "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => "5128000000", /* "EcrCpt" => "remise de paiement", */ "EcrLib" => $ligne->name." ".$ligne->libP." Paiement " . $ligne->facnumber, "EcrDebit" => $credit, "EcrCredit" => $debit, /* "EcrSolde" => -$solde, */ "EcrLettrage" => "", "PcvGpriID" => "");
             $tabPaiement[] = array("EcrPiece" => $ligne->facnumber, "JorCode" => "LCL", "EcrRef" => $ligne->codeCli8Sens, "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => "411" . $ligne->codeCli8Sens, /* "EcrCpt" => "411071719-GD", */ "EcrLib" => $ligne->name." Paiement " . $ligne->facnumber, "EcrDebit" => $debit, "EcrCredit" => $credit, /* "EcrSolde" => $solde, */ "EcrLettrage" => $ligne->facnumber, "PcvGpriID" => $ligne->Collab8sens);
             $tabPfId[] = $ligne->pfid;
         }

@@ -53,8 +53,8 @@ class exportfacture {
 
     public function exportTout() {
         if(defined("MODE_TEST")){
-            $this->path = "/data/DOCUMENTS/test/2/synchro/export/factures/";
-            $this->pathI = "/data/DOCUMENTS/test/2/synchro/import/factures/";
+            $this->path = "/data/synchro/export/factures/";
+            $this->pathI = "/data/synchro/import/factures/";
         }
 
 

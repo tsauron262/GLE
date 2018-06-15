@@ -621,7 +621,7 @@ views:
     default: 
         title: 
             callback: getRef
-        objects_change_reload: BS_SavProduct,BS_ApplePart
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
         rows:
             - cols: 
                   - type: object_header
@@ -659,7 +659,7 @@ views:
             callback: getRef
         delete_btn: 1
         edit_form: edit
-        objects_change_reload: BS_SavProduct,BS_ApplePart
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
         rows:
             - cols: 
                   - type: fields_table

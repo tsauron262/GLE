@@ -298,6 +298,25 @@ class BimpObject
         return $js;
     }
 
+    public function getJsLoadModalForm($form_name = 'default', $title = '', $values = array(), $success_callback = '')
+    {
+        $data = '{';
+        $data .= 'module: "' . $this->module . '", ';
+        $data .= 'object_name: "' . $this->object_name . '", ';
+        $data .= 'id_object: "' . ($this->isLoaded() ? $this->id : 0) . '", ';
+        $data .= 'id_parent: "' . (int) $this->getParentId() . '", ';
+        $data .= 'form_name: "' . $form_name . '", ';
+
+        if (count($values)) {
+            $data .= 'param_values: ' . json_encode($values);
+        }
+
+        $data .= '}';
+
+        $js = 'loadModalForm($(this), ' . htmlentities($data) . ', \'' . htmlentities($title) . '\', \'' . htmlentities($success_callback) . '\')';
+        return $js;
+    }
+
     public function getJsNewStatusOnclick($new_status, $data = array(), $params = array())
     {
         $js = 'setObjectNewStatus(';

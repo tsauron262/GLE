@@ -3,6 +3,41 @@
 class Bimp_Paiement extends BimpObject
 {
 
+    // Getters: 
+
+    public function getClient()
+    {
+        if (BimpTools::isSubmit('fields/id_client')) {
+            return BimpTools::getValue('fields/id_client', 0);
+        }
+        if (BimpTools::isSubmit('param_values/fields/id_client')) {
+            return BimpTools::getValue('param_values/fields/id_client', 0);
+        }
+        return 0;
+    }
+
+    public function getAmountFromFacture()
+    {
+        $id_facture = (int) BimpTools::getValue('fields/id_facture', 0);
+
+        if ($id_facture) {
+            $facture = BimpObject::getInstance('bimpcore', 'Bimp_Facture', $id_facture);
+            if (BimpObject::objectLoaded($facture)) {
+                return (float) round(($facture->dol_object->total_ttc - $facture->dol_object->getSommePaiement()), 2);
+            }
+        }
+
+        return 0;
+    }
+
+    public function getDolObjectCreateParams()
+    {
+        global $user;
+        return array($user, 1);
+    }
+
+    // Rendus: 
+
     public function renderCaisseInput()
     {
         global $user;
@@ -33,39 +68,33 @@ class Bimp_Paiement extends BimpObject
         return $html;
     }
 
-    public function getAmountFromFacture()
-    {
-        $id_facture = (int) BimpTools::getValue('fields/id_facture', 0);
-
-        if ($id_facture) {
-            $facture = BimpObject::getInstance('bimpcore', 'Bimp_Facture', $id_facture);
-            if (BimpObject::objectLoaded($facture)) {
-                return (float) round(($facture->dol_object->total_ttc - $facture->dol_object->getSommePaiement()), 2);
-            }
-        }
-
-        return 0;
-    }
-
     public function renderFacturesAmountsInputs()
     {
-        $id_client = (int) BimpTools::getValue('fields/id_client');
+        $id_client = (int) $this->getClient();
+
+
         if (!$id_client) {
             return BimpRender::renderAlerts('Client absent');
         }
+
         $facture = BimpObject::getInstance('bimpcore', 'Bimp_Facture');
-        $list = $facture->getList(array(
-            'fk_soc'    => $id_client,
-            'paye'      => 0,
-            'fk_statut' => array(
-                'operator' => '>',
-                'value'    => 0
-            )
-                ), null, null, 'id', 'asc', 'array', array('rowid'));
+        if (BimpTools::isSubmit('param_values/fields/id_facture')) {
+            $list[] = array('rowid' => (int) BimpTools::getValue('param_values/fields/id_facture', 0));
+        } else {
+            $list = $facture->getList(array(
+                'fk_soc'    => $id_client,
+                'paye'      => 0,
+                'fk_statut' => array(
+                    'operator' => '>',
+                    'value'    => 0
+                )
+                    ), null, null, 'id', 'asc', 'array', array('rowid'));
+        }
+
         if (!count($list)) {
             return BimpRender::renderAlerts('Aucune facture à payer trouvée pour ce client');
         }
-        
+
         $rand = rand(111111, 999999);
 
         $options = array(
@@ -78,7 +107,7 @@ class Bimp_Paiement extends BimpObject
             'style'       => 'max-width: 90px'
         );
 
-        $html .= '<div id="factures_payments_' . $rand . '">';
+        $html .= '<div id="factures_payments_' . $rand . '" class="factures_payment_container">';
 
         $html .= '<div style="margin: 15px 0; text-align: right">';
         $html .= '<span style="font-weight: bold;">Somme totale versée:&nbsp;&nbsp;</span>';
@@ -86,6 +115,7 @@ class Bimp_Paiement extends BimpObject
         $html .= '</div>';
 
         $options['extra_class'] = 'facture_payment_input';
+        $options['avoirs'] = 0;
 
         $html .= '<table class="bimp_list_table">';
         $html .= '<thead>';
@@ -94,6 +124,7 @@ class Bimp_Paiement extends BimpObject
         $html .= '<th style="text-align: center;">Montant TTC</th>';
         $html .= '<th style="text-align: center;">Payé</th>';
         $html .= '<th style="text-align: center;">Reste à régler</th>';
+        $html .= '<th style="text-align: center;">Avoirs utilisés</th>';
         $html .= '<th style="text-align: center;">Montant règlement</th>';
         $html .= '</thead>';
 
@@ -109,8 +140,10 @@ class Bimp_Paiement extends BimpObject
             if ($facture->fetch((int) $item['rowid'])) {
                 $montant_ttc = round((float) $facture->dol_object->total_ttc, 2);
                 $paid = round((float) $facture->dol_object->getSommePaiement(), 2);
+                $paid += round((float) $facture->dol_object->getSumCreditNotesUsed(), 2);
+                $paid += round((float) $facture->dol_object->getSumDepositsUsed(), 2);
                 $to_pay = $montant_ttc - $paid;
-                if ($to_pay > -0.01 && $to_pay < 0.01) {
+                if ($to_pay < 0.01) {
                     continue;
                 }
 
@@ -130,12 +163,13 @@ class Bimp_Paiement extends BimpObject
 
                 $DT = new DateTime($this->db->db->iDate($facture->dol_object->date));
 
-                $html .= '<tr>';
+                $html .= '<tr class="facture_payment_row">';
                 $html .= '<td>' . $facture->dol_object->getNomUrl(1) . '</td>';
                 $html .= '<td>' . $DT->format('d / m / Y') . '</td>';
                 $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($montant_ttc, 'EUR') . '</td>';
                 $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($paid, 'EUR') . '</td>';
                 $html .= '<td style="text-align: center; font-weight: bold">' . BimpTools::displayMoneyValue($to_pay, 'EUR') . '</td>';
+                $html .= '<td class="facture_avoirs" style="text-align: center; font-weight: bold"></td>';
                 $html .= '<td style="text-align: right;">';
                 $html .= '<input type="hidden" name="amount_' . $i . '_id_facture" value="' . $facture->id . '"/>';
                 $html .= BimpInput::renderInput('text', 'amount_' . $i, '', $options);
@@ -157,6 +191,7 @@ class Bimp_Paiement extends BimpObject
             $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($total_paid, 'EUR') . '</td>';
             $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($total_to_pay, 'EUR') . '</td>';
             $html .= '<td></td>';
+            $html .= '<td></td>';
             $html .= '</tr>';
             $html .= '</tfoot>';
         }
@@ -164,9 +199,14 @@ class Bimp_Paiement extends BimpObject
         $html .= '</table>';
 
         $html .= '<input type="hidden" name="total_to_pay" value="' . $total_to_pay . '"/>';
+        $html .= '<input type="hidden" name="total_avoirs" value="0"/>';
+        $html .= '<input type="hidden" name="avoirs_amounts" value=""/>';
 
         $html .= '<div class="total_payments_container" style="font-weight: bold; margin: 20px 0 5px; padding: 8px 12px; color: #3C3C3C; font-size: 14px; text-align: center; background-color: #D8D8D8">';
         $html .= 'Total paiements:&nbsp;<span class="total_payments">0,00 &euro;</span>';
+        $html .= '</div>';
+        $html .= '<div class="total_avoirs_container" style="display: none; font-weight: bold; margin: 5px 0; padding: 8px 12px; color: #fff; font-size: 14px; text-align: center; background-color: #D2AF00">';
+        $html .= 'Total avoirs utilisés:&nbsp;<span class="total_avoirs">0,00 &euro;</span>';
         $html .= '</div>';
         $html .= '<div class="rest_to_pay_container" style="font-weight: bold; margin: 5px 0; padding: 8px 12px; color: #fff; font-size: 14px; text-align: center; background-color: #A00000">';
         $html .= 'Reste à régler:&nbsp;<span class="rest_to_pay">' . BimpTools::displayMoneyValue($total_to_pay, 'EUR') . '</span>';
@@ -182,6 +222,8 @@ class Bimp_Paiement extends BimpObject
 
         return $html;
     }
+
+    // Overrides: 
 
     public function validatePost()
     {
@@ -226,6 +268,7 @@ class Bimp_Paiement extends BimpObject
         }
 
         $total_paid = (float) BimpTools::getValue('total_paid_amount');
+        $avoirs = json_decode(BimpTools::getValue('avoirs_amounts', ''), true);
         $total_factures = 0;
 
         if (is_null($total_paid) || !$total_paid) {
@@ -258,13 +301,29 @@ class Bimp_Paiement extends BimpObject
                 if ($facture->fetch($id_facture) <= 0) {
                     $errors[] = 'Facture d\'ID ' . $id_facture . ' inexistante';
                 } else {
-                    $diff = $facture->total_ttc - $amount;
+                    // Insertion des avoirs éventuels: 
+                    foreach ($avoirs as $avoir) {
+                        if ($avoir['input_name'] === 'amount_' . $i) {
+                            $facture->error = '';
+                            $facture->errors = array();
+
+                            if ($facture->insert_discount((int) $avoir['id_discount']) <= 0) {
+                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de l\'insertion de l\'avoir client d\'ID ' . $avoir['id_discount']);
+                            }
+                        }
+                    }
+
+                    $paid = round((float) $facture->getSommePaiement(), 2);
+                    $paid += round((float) $facture->getSumCreditNotesUsed(), 2);
+                    $paid += round((float) $facture->getSumDepositsUsed(), 2);
+
+                    $diff = $facture->total_ttc - $paid - $amount;
                     if ($diff > -0.01 && $diff < 0.01) {
-                        $amount = $facture->total_ttc; // Eviter les problèmes d'arrondis
+                        $amount = ($facture->total_ttc - $paid); // Eviter les problèmes d'arrondis
                     }
 
                     $this->dol_object->amounts[$id_facture] = $amount;
-                    $total_factures += $amount;
+                    $total_factures += round($amount, 2);
                 }
             }
             $i++;
@@ -316,11 +375,5 @@ class Bimp_Paiement extends BimpObject
         }
 
         return $errors;
-    }
-    
-    public function getDolObjectCreateParams()
-    {
-        global $user;
-        return array($user, 1);
     }
 }

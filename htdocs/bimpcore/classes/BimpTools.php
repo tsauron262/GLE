@@ -809,6 +809,10 @@ class BimpTools
         if (!is_float($value)) {
             return $value;
         }
+        
+        if ($value > -0.01 && $value < 0.01) {
+            $value = 0;
+        }
 
         $value = round($value, 2);
 

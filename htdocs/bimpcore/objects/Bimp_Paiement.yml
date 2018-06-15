@@ -7,7 +7,8 @@ dol_object:
 table: paiement
 primary: rowid
 
-label: paiement
+labels: 
+    name: paiement
 
 fields: 
     ref: 
@@ -44,6 +45,8 @@ forms:
                   type: search_societe
                   societe_type: customer
               required: 1
+              value: 
+                  callback: getClient
             - custom: 1
               label: Caisse
               data_type: id_object
@@ -67,6 +70,18 @@ forms:
               required: 1
             - field: note
             - custom: 1
+              label: Avoirs client
+              depends_on: id_client
+              input_name: avoirs
+              input: 
+                  type: select_remises
+                  id_client: 
+                      callback: getClient
+                  multiple: 1
+              display_if: 
+                  field_name: id_client
+                  hide_values: 0,
+            - custom: 1
               label: Factures à payer
               depends_on: id_client
               input_name: factures
@@ -75,41 +90,6 @@ forms:
                   hide_values: 0,
               content: 
                   callback: renderFacturesAmountsInputs
-#            - custom: 1
-#              label: Facture
-#              data_type: id_object
-#              input_name: id_facture
-#              required: 1
-#              input: 
-#                  type: search_list
-#                  search_list: 
-#                      table: facture f
-#                      field_return_label: f.facnumber
-#                      field_return_value: f.rowid
-#                      options: 
-#                          default: 
-#                              label: Recherche par référence facture
-#                              fields_search: f.facnumber,f.rowid
-#                              join: societe s
-#                              join_on: f.fk_soc = s.rowid
-#                              join_return_label: s.nom
-#                              help: Entrez la référence ou l'ID d'une facture
-#                          ny_client: 
-#                              label: Recherche par client
-#                              fields_search: s.nom,s.code_client
-#                              join: societe s
-#                              join_on: f.fk_soc = s.rowid
-#                              join_return_label: s.nom
-#                              help: Entrez le nom ou le code d'un client
-#            - custom: 1
-#              label: Montant
-#              data_type: money
-#              input_name: amount
-#              input: 
-#                  type: text
-#              depends_on: id_facture
-#              value: 
-#                  callback: getAmountFromFacture
           
           
                   

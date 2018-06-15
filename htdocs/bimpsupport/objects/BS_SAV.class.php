@@ -279,29 +279,29 @@ class BS_SAV extends BimpObject
         }
 
         return $centres;
-    }         
+    }
 
     public function getSystemsArray()
     {
         return array(
             300  => "iOs",
-            1013  => "MAC OS 10.13",
-            1012  => "MAC OS 10.12",
-            1011  => "MAC OS 10.11",
-            1010  => "MAC OS 10.10",
-            1075  => "MAC OS 10.7.5",
+            1013 => "MAC OS 10.13",
+            1012 => "MAC OS 10.12",
+            1011 => "MAC OS 10.11",
+            1010 => "MAC OS 10.10",
+            1075 => "MAC OS 10.7.5",
             106  => "MAC OS 10.6",
             107  => "MAC OS 10.7",
             109  => "MAC OS 10.9",
             108  => "MAC OS 10.8",
-            9911  => "Windows 10",
+            9911 => "Windows 10",
             203  => "Windows 8",
             204  => "Windows 7",
             202  => "Windows Vista",
             201  => "Windows XP",
-            8801  => "Linux",
-            2  => "Indéterminé",
-            1  => "Autre"
+            8801 => "Linux",
+            2    => "Indéterminé",
+            1    => "Autre"
         );
     }
 
@@ -660,22 +660,23 @@ class BS_SAV extends BimpObject
                 );
             }
 
-//            if (!is_null($propal) && in_array($propal_status, array(0, 1)) && $status !== self::BS_SAV_ATT_CLIENT) {
-//                if ((string) $this->getData('diagnostic')) {
-//                    $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_CLIENT . ', 1, {devis_garantie: 1})';
-//                } else {
-//                    $title = 'Envoyer le devis garanti';
-//                    $values = htmlentities('\'{"fields": {"status": ' . self::BS_SAV_ATT_CLIENT . '}}\'');
-//                    $data = '{module: \'' . $this->module . '\', object_name: \'' . $this->object_name . '\', id_object: ' . $this->id . ', form_name: \'diagnostic\', param_values: ' . $values . ', devis_garantie: 1}';
-//                    $onclick = 'loadModalForm($(this), ' . $data . ', \'' . $title . '\');';
-//                }
-//
-//                $buttons[] = array(
-//                    'label'   => 'Devis garanti',
-//                    'icon'    => 'file-text',
-//                    'onclick' => $onclick
-//                );
-//            }
+            if ((int) $this->getData('id_facture')) {
+                $facture = $this->getChildObject('facture');
+                if (!(int) $facture->dol_object->paye) {
+                    $paiement = BimpObject::getInstance('bimpcore', 'Bimp_Paiement');
+                    $values = array(
+                        'fields' => array(
+                            'id_client'  => (int) $this->getData('id_client'),
+                            'id_facture' => (int) $this->getData('id_facture')
+                        )
+                    );
+                    $buttons[] = array(
+                        'label'   => 'Payer facture',
+                        'icon'    => 'euro',
+                        'onclick' => $paiement->getJsLoadModalForm('default', 'Paiement de la facture ' . $facture->dol_object->ref, $values)
+                    );
+                }
+            }
         }
 
         return $buttons;
@@ -992,7 +993,7 @@ class BS_SAV extends BimpObject
 
         $prop = new Propal($this->db->db);
         $prop->fetch($this->getData('id_propal'));
-        
+
         $prop->set_ref_client($user, $this->getData('prestataire_number'));
 
         if ($prop->statut > 0) {
@@ -1057,8 +1058,8 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             $prodF->find_min_price_product_fournisseur($prodG->id, $prod->getData("qty"));
             $prop->addline($prodG->description, $prodG->price, $prod->getData("qty"), $prodG->tva_tx, 0, 0, $prodG->id, $client->dol_object->remise_percent + $remise, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
             if (!$prod->getData("out_of_warranty")) {
-                $garantieHt += $prodG->price * $prod->getData("qty")*$coefRemise;
-                $garantieTtc += $prodG->price * $prod->getData("qty") * ($prodG->tva_tx / 100)*$coefRemise;
+                $garantieHt += $prodG->price * $prod->getData("qty") * $coefRemise;
+                $garantieTtc += $prodG->price * $prod->getData("qty") * ($prodG->tva_tx / 100) * $coefRemise;
                 $garantiePa += $prodF->fourn_price * $prod->getData("qty");
             } else
                 $this->allGarantie = false;
@@ -1460,7 +1461,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             if (!$reservation->deleteBy(array(
                         'id_sav' => (int) $this->id,
                         'type'   => BR_Reservation::BR_RESERVATION_SAV
-                    ), $delete_errors, true)) {
+                            ), $delete_errors, true)) {
                 $errors[] = BimpTools::getMsgFromArray($delete_errors, 'Echec de la suppression des réservations actuelles');
             }
 
@@ -2253,7 +2254,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                     $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création de l\'emplacement de l\'équipement');
                 }
             }
-            
+
             $this->generatePDF('pc', $warnings);
 
             if (BimpTools::getValue('send_msg', 0)) {

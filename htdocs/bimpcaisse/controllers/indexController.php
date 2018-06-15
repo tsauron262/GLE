@@ -56,8 +56,6 @@ class indexController extends BimpController
 
     // Rendus HTML:
 
-
-
     public function renderHtml()
     {
         global $conf, $mysoc;
@@ -522,7 +520,7 @@ class indexController extends BimpController
         if (!$this->isCaisseValide($caisse, $errors)) {
             return BimpRender::renderAlerts($errors);
         }
-        
+
         $caisseMvt = BimpObject::getInstance('bimpcaisse', 'BC_CaisseMvt');
         $list = new BC_ListTable($caisseMvt, 'caisse', 1, null, 'Mouvements de fonds pour la caisse "' . $caisse->getData('name') . '"', 'exchange');
         $list->addFieldFilterValue('id_entrepot', (int) $caisse->getData('id_entrepot'));
@@ -1003,10 +1001,11 @@ class indexController extends BimpController
     {
         $errors = array();
 
-        $id_vente = BimpTools::getValue('id_vente', 0);
-        $id_client = BimpTools::getValue('id_client', 0);
+        $id_vente = (int) BimpTools::getValue('id_vente', 0);
+        $id_client = (int) BimpTools::getValue('id_client', 0);
 
         $html = '';
+        $discounts_html = '';
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1024,20 +1023,25 @@ class indexController extends BimpController
                 if ($vente->getData('status') === 2) {
                     $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
                 } else {
-                    $vente->set('id_client', (int) $id_client);
-                    $vente->set('id_client_contact', 0);
-                    $errors = $vente->update();
-                    if (!count($errors)) {
-                        $html = $vente->renderClientView();
+                    $current_client = (int) $vente->getData('id_client');
+                    if ($current_client !== $id_client) {
+                        $vente->set('id_client', (int) $id_client);
+                        $vente->set('id_client_contact', 0);
+                        $errors = $vente->update();
+                        if (!count($errors)) {
+                            $html = $vente->renderClientView();
+                            $discounts_html = $vente->renderDiscountsAssociation();
+                        }
                     }
                 }
             }
         }
 
         die(json_encode(array(
-            'errors'     => $errors,
-            'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'errors'         => $errors,
+            'html'           => $html,
+            'discounts_html' => $discounts_html,
+            'request_id'     => BimpTools::getValue('request_id', 0),
         )));
     }
 
@@ -1395,6 +1399,131 @@ class indexController extends BimpController
         die(json_encode(array(
             'html'       => $this->renderCaisseSelect(),
             'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessSearchEquipmentToReturn()
+    {
+        $errors = array();
+        $warnings = array();
+        $equipments = array();
+
+        $serial = BimpTools::getValue('serial', '');
+        $id_vente = (int) BimpTools::getValue('id_vente', 0);
+
+        if (!$serial) {
+            $errors[] = 'Aucun numéro de série spécifié';
+        }
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        }
+
+        $vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente', $id_vente);
+        if (!BimpObject::objectLoaded($vente)) {
+            $errors[] = 'ID de la vente invalide';
+        }
+
+        $id_client = (int) $vente->getData('id_client');
+
+        if (!count($errors)) {
+            BimpObject::loadClass('bimpequipment', 'Equipment');
+            BimpObject::loadClass('bimpequipment', 'BE_Place');
+
+            $currentReturnedEquipments = array();
+
+            $returns = $vente->getChildrenObjects('returns');
+
+            foreach ($returns as $return) {
+                $id_equipment = (int) $return->getData('id_equipment');
+                if ($id_equipment) {
+                    $currentReturnedEquipments[] = $id_equipment;
+                }
+            }
+
+            $list = Equipment::findEquipments($serial, $id_client);
+
+            if (count($list)) {
+                $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+                $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe');
+                foreach ($list as $id_equipment) {
+                    if (in_array($id_equipment, $currentReturnedEquipments)) {
+                        $warnings[] = 'Un équipement correspondant à ce numéro de série a déjà été ajouté aux retours';
+                        continue;
+                    }
+                    if ($equipment->fetch((int) $id_equipment)) {
+                        $place = $equipment->getCurrentPlace();
+                        if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT &&
+                                (int) $place->getData('id_client')) {
+                            if ($client->fetch((int) $place->getData('id_client'))) {
+                                $equipments[] = array(
+                                    'id'        => (int) $id_equipment,
+                                    'label'     => $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . ' (' . $client->getData('nom') . ')',
+                                    'id_client' => (int) $place->getData('id_client')
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!count($equipments)) {
+                $msg = 'Aucun équipement elligible au retour trouvé pour ce numéro de série';
+                if ($id_client) {
+                    $msg .= ' et le client sélectionné';
+                }
+                $errors[] = $msg;
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'warnings'   => $warnings,
+            'equipments' => $equipments,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessRemoveReturn()
+    {
+        $errors = array();
+
+        $id_vente = BimpTools::getValue('id_vente', 0);
+        $id_return = BimpTools::getValue('id_return', 0);
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        }
+
+        if (!$id_return) {
+            $errors[] = 'Aucun article retourné spécifié';
+        }
+
+        $vente_data = array();
+
+        if (!count($errors)) {
+            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            if (!$vente->isLoaded()) {
+                $errors[] = 'Cette vente n\'existe plus';
+            } else {
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $return = BimpObject::getInstance($this->module, 'BC_VenteReturn', (int) $id_return);
+                    if (!$return->isLoaded()) {
+                        $errors[] = 'Article non trouvé';
+                    } else {
+                        $errors = $return->delete();
+                    }
+                }
+                $vente_data = $vente->getAjaxData();
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'vente_data' => $vente_data,
+            'request_id' => BimpTools::getValue('request_id', 0),
         )));
     }
 }

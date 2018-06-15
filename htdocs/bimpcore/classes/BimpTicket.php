@@ -74,8 +74,6 @@ class BimpTicket
 
             $html .= $this->renderHeader();
 
-
-
             if ($this->town) {
                 $html .= '<span class="bold" style="font-size: 17px">' . BimpTools::ucfirst($this->town) . ', le ' . date('d / m / Y') . '</span>';
             }
@@ -109,9 +107,9 @@ class BimpTicket
                     $desc = $line->desc;
                 }
 
-                if (strlen($desc) > 40) {
-                    $desc = substr($desc, 0, 38);
-                }
+//                if (strlen($desc) > 40) {
+//                    $desc = substr($desc, 0, 38);
+//                }
 
                 $html .= '<td colspan="5">' . $desc . '</td>';
                 $html .= '</tr>';

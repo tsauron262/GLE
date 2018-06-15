@@ -78,14 +78,16 @@ fields:
         default_value: 0
     qty: 
         label: Quantité
-        type: int
+        type: qty
         unsigned: 1
         min: 1
         default_value: 1
     remise: 
         label: Remise
-        type: int
+        type: percent
+        decimals: 0
         max: 100
+        min: 0
         default_value: 0
     out_of_warranty:
         label: Hors garantie

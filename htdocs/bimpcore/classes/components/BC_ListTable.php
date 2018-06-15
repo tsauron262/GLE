@@ -409,7 +409,7 @@ class BC_ListTable extends BC_List
                     $field = new BC_Field($this->object, $col_params['field'], true);
                     $html .= $field->renderSearchInput();
                     unset($field);
-                } elseif (!is_null($col_params['search']) && !is_null($col_params['search'])) {
+                } elseif (!is_null($col_params['search']) && method_exists($this->object, 'get' . ucfirst($col_name) . 'SearchFilters')) {
 //                    $input_name = 'search_' . $col_params['field_name'];
                     $search_type = $col_params['search']['type'];
                     $html .= '<div class="searchInputContainer"';

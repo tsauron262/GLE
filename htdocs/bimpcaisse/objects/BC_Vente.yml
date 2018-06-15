@@ -68,6 +68,12 @@ objects:
         instance: 
             bimp_object: BC_VenteRemise
             
+    returns: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BC_VenteReturn
+            
     facture: 
         relation: hasOne
         delete: 0
@@ -77,7 +83,40 @@ objects:
                 file: facture
             id_object: 
                 field_value: id_facture
+        cards: 
+            default: 
+                type: facture_card
                 
+    avoir:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: compta/facture
+                file: facture
+            id_object: 
+                field_value: id_avoir
+        cards: 
+            default: 
+                type: facture_card
+                
+    discount: 
+        instance: 
+            dol_object: 
+                module: core
+                file: discount
+                class: DiscountAbsolute
+associations: 
+    discounts: 
+        object: discount
+        label: Avoirs client
+        display: 
+            default: 
+                type: callback
+        input: 
+            type: select
+            options: 
+                array: availableCustomerDiscounts
 fields:
     status: 
         label: Statut
@@ -162,6 +201,18 @@ fields:
                 type: nom_url
         input: 
             type: hidden
+        default_value: 0
+            
+    id_avoir: 
+        label: Avoir
+        type: id_object
+        object: avoir
+        display: 
+            default: 
+                type: nom_url
+        input: 
+            type: hidden        
+        default_value: 0
         
 fields_tables: 
     infos: 
@@ -179,7 +230,13 @@ fields_tables:
               display: nom_url
             - field: id_cond_reglement
             - field: id_facture
-              display: nom_url
+              display: card
+              show: 
+                  field_value: id_facture
+            - field: id_avoir
+              display: card
+              show: 
+                  field_value: id_avoir
             
     montants:
         title: Montants
@@ -194,6 +251,12 @@ fields_tables:
             - label: Total remises
               value: 
                   callback: displayTotalRemises
+            - label: Total Retours produits
+              value: 
+                  callback: displayTotalRetours
+            - label: Total avoirs client utilisés
+              value: 
+                  callback: displayTotalDiscounts
             - label: Montant final TTC
               field: total_ttc   
 
@@ -237,6 +300,15 @@ views:
                       icon: euro
                       name: default
                       children: paiements
+                      
+            - cols: 
+                - type: list
+                  col_lg: 12
+                  list: 
+                      title: Retours produits
+                      icon: reply
+                      name: default
+                      children: returns
     creation: 
         panel: 0
         no_reload: 1
@@ -272,6 +344,8 @@ lists:
                 field: total_ttc
             facture: 
                 field: id_facture   
+            avoir: 
+                field: id_avoir
         extra_btn:
             callback: getDefaultListExtraButtons
             
@@ -314,6 +388,8 @@ lists:
                     callback: displayNbArticles
             facture: 
                 field: id_facture   
+            avoir: 
+                field: id_avoir
             total_ttc: 
                 field: total_ttc
         extra_btn:

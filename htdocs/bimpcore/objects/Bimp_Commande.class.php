@@ -92,12 +92,7 @@ class Bimp_Commande extends BimpObject
 
         return 0;
     }
-
-    public function getCustomerCreditNotesArray()
-    {
-        
-    }
-
+    
     public function getProductFournisseursPricesArray()
     {
         if (BimpTools::isSubmit('id_product')) {
@@ -300,7 +295,6 @@ class Bimp_Commande extends BimpObject
         global $user, $langs;
 
         $commande = $this->dol_object;
-
 
         $langs->load('errors');
         $langs->load('bills');

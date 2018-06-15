@@ -813,7 +813,6 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     if ($label_input.length) {
         if ($label_input.tagName() === 'select') {
             label = $label_input.find('[value="' + value + '"]').text();
-            $label_input.find('[value="' + value + '"]').hide();
         } else {
             label = $label_input.val();
         }
@@ -836,7 +835,6 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         if (!label) {
             if ($value_input.get(0).tagName.toLowerCase() === 'select') {
                 label = $value_input.find('[value="' + value + '"]').text();
-                $value_input.find('[value="' + value + '"]').hide();
             } else {
                 label = value;
             }
@@ -863,43 +861,74 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
         if (ajax_save) {
             addObjectMultipleValuesItem($container.data('module'), $container.data('object_name'), $container.data('id_object'), values_field_name, value, null, function () {
-                $container.find('div.inputMultipleValuesContainer').find('table').find('tbody').append(html);
+                $container.find('table').find('tbody.multipleValuesList').append(html);
+                checkMultipleValues();
+                $('body').trigger($.Event('inputMultipleValuesChange', {
+                    input_name: values_field_name,
+                    $container: $container
+                }));
             });
         } else {
             $container.find('table').find('tbody.multipleValuesList').append(html);
+            checkMultipleValues();
+            $('body').trigger($.Event('inputMultipleValuesChange', {
+                input_name: values_field_name,
+                $container: $container
+            }));
         }
     } else {
         bimp_msg('Une erreur est survenue. opération impossible', 'danger');
     }
-    checkMultipleValues();
 }
 
 function removeMultipleInputValue($button, value_input_name) {
     var $multipleValues = $button.findParentByClass('inputMultipleValuesContainer');
 
-    if ($multipleValues.length) {
-        var $inputContainer = $multipleValues.parent().find('.inputContainer');
-        if ($inputContainer.length) {
-            var $input = $inputContainer.find('[name="' + value_input_name + '"]');
-            if ($input.length && $input.tagName() === 'select') {
-                var value = $button.parent('td').parent('tr').find('input.item_value').val();
-                $input.find('[value="' + value + '"]').show();
-            }
-        }
-    }
-
     $button.parent('td').parent('tr').fadeOut(250, function () {
         $(this).remove();
         checkMultipleValues();
+        $('body').trigger($.Event('inputMultipleValuesChange', {
+            input_name: $multipleValues.data('field_name'),
+            $container: $multipleValues
+        }));
     });
 }
 
 function checkMultipleValues() {
     $('.inputMultipleValuesContainer').each(function () {
+        var $container = $(this);
         if ($(this).find('.itemRow').length) {
             $(this).find('.noItemRow').hide();
         } else {
             $(this).find('.noItemRow').show();
+        }
+        var $inputContainer = $container.parent().find('.inputContainer');
+        if ($inputContainer.length) {
+            var input_name = $inputContainer.data('field_name');
+            if (input_name) {
+                var $input = $inputContainer.find('[name="' + input_name + '"]');
+                if ($input.length) {
+                    if ($input.tagName() === 'select') {
+                        $input.find('option').show();
+                        $container.find('.itemRow').each(function () {
+                            $input.find('option[value="' + $(this).find('.item_value').val() + '"]').hide();
+                        });
+                        var show_input = false;
+                        $input.find('option').each(function () {
+                            if ($(this).css('display') !== 'none') {
+                                show_input = true;
+                            }
+                        });
+                        if (show_input) {
+                            $input.show();
+                            $container.find('.addValueBtn').parent('div').show();
+                        } else {
+                            $input.hide();
+                            $container.find('.addValueBtn').parent('div').hide();
+                        }
+                    }
+                }
+            }
         }
     });
 }

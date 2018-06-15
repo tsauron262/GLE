@@ -22,7 +22,8 @@ class exportpaiement {
 
     public function __construct($db, $sortie = 'html') {
         $this->db = $db;
-        $this->path = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/extractPaiGle/";
+//        $this->path = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/extractPaiGle/";
+        $this->path = "/data/synchro/export/paiement/";
     }
 
     public function exportTout() {

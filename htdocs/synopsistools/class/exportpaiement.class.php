@@ -62,7 +62,7 @@ class exportpaiement {
             $credit = str_replace(".", ",", ($ligne->amount < 0) ? 0 : $ligne->amount);
             $debit = str_replace(".", ",", ($ligne->amount < 0) ? -$ligne->amount : 0);
             $solde = -$ligne->amount;
-            $ligne->libP = utf8_encode($ligne->libP);
+            $ligne->libP = suppr_accents($ligne->libP);
             $tabPaiement[] = array("EcrPiece" => "", "JorCode" => $ligne->labB, "EcrRef" => $ligne->code_client, "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => $ligne->compte, /* "EcrCpt" => "remise de paiement", */ "EcrLib" => $ligne->name." ".$ligne->libP." Paiement " . $ligne->facnumber, "EcrDebit" => $credit, "EcrCredit" => $debit, /* "EcrSolde" => -$solde, */ "EcrLettrage" => "", "PcvGpriID" => "");
             $tabPaiement[] = array("EcrPiece" => $ligne->facnumber, "JorCode" => $ligne->labB, "EcrRef" => $ligne->code_client, "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => "411" . $ligne->codeCli8Sens, /* "EcrCpt" => "411071719-GD", */ "EcrLib" => $ligne->name." Paiement " . $ligne->facnumber, "EcrDebit" => $debit, "EcrCredit" => $credit, /* "EcrSolde" => $solde, */ "EcrLettrage" => $ligne->facnumber, "PcvGpriID" => $ligne->Collab8sens);
             $tabPfId[] = $ligne->pfid;
@@ -133,4 +133,22 @@ class exportpaiement {
       if ($this->debug)
       echo "<span class='red'>" . $msg . "</span><br/>";
       } */
+}
+
+function suppr_accents($str, $encoding='utf-8')
+{
+    // transformer les caractères accentués en entités HTML
+    $str = htmlentities($str, ENT_NOQUOTES, $encoding);
+ 
+    // remplacer les entités HTML pour avoir juste le premier caractères non accentués
+    // Exemple : "&ecute;" => "e", "&Ecute;" => "E", "à" => "a" ...
+    $str = preg_replace('#&([A-za-z])(?:acute|grave|cedil|circ|orn|ring|slash|th|tilde|uml);#', '\1', $str);
+ 
+    // Remplacer les ligatures tel que : , Æ ...
+    // Exemple "œ" => "oe"
+    $str = preg_replace('#&([A-za-z]{2})(?:lig);#', '\1', $str);
+    // Supprimer tout le reste
+    $str = preg_replace('#&[^;]+;#', '', $str);
+ 
+    return $str;
 }

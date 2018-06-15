@@ -1,3 +1,19 @@
+
+/*
+*BIMP CORE
+*/
+body.modal-open ul.ui-autocomplete{
+    overflow: scroll;
+    max-height: 400px;
+}
+
+
+
+
+
+
+
+
 div.clear{
     clear: both;
 }

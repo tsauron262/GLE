@@ -58,7 +58,7 @@ class exportpaiement {
             $tabPaiement[] = array("EcrPiece" => $ligne->facnumber, "JorCode" => "LCL", "EcrRef" => "Paiement GLE", "EcrDate" => dol_print_date($ligne->datec, "%d/%m/%Y"), "EcrGCptCode" => "411" . $ligne->codeCli8Sens, /* "EcrCpt" => "411071719-GD", */ "EcrLib" => "Paiement " . $ligne->facnumber, "EcrDebit" => $debit, "EcrCredit" => $credit, /* "EcrSolde" => $solde, */ "EcrLettrage" => $ligne->facnumber, "PcvGpriID" => $ligne->Collab8sens);
             $tabPfId[] = $ligne->pfid;
         }
-        if (count($tabPaiement > 0)) {
+        if (count($tabPaiement) > 0) {
             $txt = $this->getTxt($tabPaiement, array());
             if (file_put_contents($this->path . "Pai" . dol_print_date(dol_now(), "%d-%m-%Y--%H:%M:%S") . ".txt", $txt)) {
                 echo "ok";

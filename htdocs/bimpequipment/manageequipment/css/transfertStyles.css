@@ -2,6 +2,10 @@ div.cust.select2-container {
     border: solid #5897fb 1px;
 }
 
+table.titre td{
+    padding: 0 20px;
+}
+
 .serialNumber {
     width: 120px;
     border: solid gray 1px;

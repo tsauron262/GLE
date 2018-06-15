@@ -1,6 +1,7 @@
 <?php
 
 global $tabCentre;
+if(defined('MODE_TEST')){
 $tabCentre = array("V"     => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray (valence)", 19, "1000566", "07130", "Saint-Peray", "739 Avenue Gross Umstadt", 25),
     "M"     => array("04 50 22 15 55", "sav74@bimp.fr", "Meythet", 58, "462140", "74960", "Meythet", "3 RUE DU VIEUX MOULIN", 21),
     "CB"    => array("09 70 72 12 32", "sav73@bimp.fr", "Chambéry", 213, "1139941", "73000", "Chambéry", "150 rue croix d'or", 36),
@@ -21,6 +22,12 @@ $tabCentre = array("V"     => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Pe
     "MAU"   => array("04 67 222 143", "sav341@bimp.fr", "Mauguio", 221, "1187560", "34130", "Mauguio", "39 Rue René Fonck", 37),
     "BB"    => array("09 53 01 39 84", "sav01@bimp.fr", "Bourg-en-Bresse", 351, "1046075", "01000", "Bourg-en-Bresse", "11 Avenue de la Victoire", 2)
 );
+}
+else{
+$tabCentre = array(
+    "AB"    => array("04 50 22 15 55", "sav74@bimp.fr", "Annecy Boutique", 60, "1046075", "74000", "Annecy", "7 rue de la poste", 34),
+);
+}
 
 //$tabCentre["GB"] = $tabCentre["GA"];
 //$tabCentre["GB"]['2'] = "Grenoble boutique";

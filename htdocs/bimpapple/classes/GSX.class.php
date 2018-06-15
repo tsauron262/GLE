@@ -694,7 +694,7 @@ class GSX
                     $this->soap_error($f->faultcode, $f->faultstring);
                 }
 
-            dol_syslog("".print_r($requestData,true)."\n\n".print_r($SOAPRequest, true)."\n\n".$f->faultcode ." | ". $f->faultstring."\n\n".$this->wsdlUrl,3);
+            //dol_syslog("".print_r($requestData,true)."\n\n".print_r($SOAPRequest, true)."\n\n".$f->faultcode ." | ". $f->faultstring."\n\n".$this->wsdlUrl,3);
                 return array();
             }
         }
@@ -885,10 +885,10 @@ class GSX
 
         if (!in_array($code, $codeIgnore)) {
             dol_syslog('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo, LOG_ERR, 0, "_apple");
-            if (!in_array($code, $codeIgnore2))
-                $this->errors['log']['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
 //        echo('<p class="error">SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo . "</p>");
         }
+        if (!in_array($code, $codeIgnore2))
+            $this->errors['log']['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
     }
 
     public function resetSoapErrors()

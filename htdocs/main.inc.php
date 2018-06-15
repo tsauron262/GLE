@@ -1379,8 +1379,10 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
             
             
             /*modrsi*/
-            require_once DOL_DOCUMENT_ROOT. '/bimpcore/Bimp_Lib.php';
-            BimpCore::displayHeaderFiles();
+            if(stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1){
+                require_once DOL_DOCUMENT_ROOT. '/bimpcore/Bimp_Lib.php';
+                BimpCore::displayHeaderFiles();
+            }
             /*fmoddrsi*/
         }
 

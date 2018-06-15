@@ -405,18 +405,25 @@ class GSX_Request
                         $tab3 = $tab4 = array(array("", "Part", "Tier Part"));
 
                         if ((int) $this->id_sav) {
-                            $sql = 'SELECT `label` as nom FROM ' . MAIN_DB_PREFIX . 'product p ';
-                            $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment ON p.rowid = e.id_product ';
-                            $sql .= 'LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav s on s.id_equipment = e.id_equipment';
-                            $sql .= ' WHERE s.id = ' . (int) $this->id_sav . ' AND e.id_product != 0';
+                            $sql = 'SELECT `label` as nom, product_label as nom2
+                                FROM llx_bs_sav s, llx_be_equipment e
+                                LEFT JOIN llx_product p ON p.rowid = e.id_product AND e.id_product != 0
+                                WHERE s.id = ' . (int) $this->id_sav . ' AND s.id_equipment = e.id';
+                            
 
                             $res = $db->query($sql);
                             if ($db->num_rows($res) > 0) {
                                 $result = $db->fetch_object($res);
                                 foreach ($tab2[$result->nom] as $ln) {
-                                    if (stripos($ln[2], $result->nom) === 0)
+                                    if (stripos($ln[0], $result->nom) === 0 && stripos($ln[2], str_ireplace("S", "", $result->nom)) === 0)
                                         $tab3[] = $ln;
                                     if (stripos($ln[0], $result->nom) === 0)
+                                        $tab4[] = $ln;
+                                }
+                                foreach ($tab2[$result->nom2] as $ln) {
+                                    if (stripos($ln[0], $result->nom2) === 0 && stripos($ln[2], str_ireplace("S", "", $result->nom2)) === 0)
+                                        $tab3[] = $ln;
+                                    if (stripos($ln[0], $result->nom2) === 0)
                                         $tab4[] = $ln;
                                 }
 //                    $tab3 = array_merge($tab3, $tab2[$result->nom]);

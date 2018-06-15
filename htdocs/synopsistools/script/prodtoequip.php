@@ -10,7 +10,7 @@ llxHeader();
 set_time_limit(5000000);
 ini_set('memory_limit', '1024M');
 
-$loadEquip = true;
+$loadEquip = false;
 $loadSav = true;
 
 
@@ -28,6 +28,12 @@ define('DONT_CHECK_SERIAL', true);
  * support
  * des   chrono    prosses
  * 
+ * 
+ * 
+ * maj bimp conf
+ * Aj droit modif sav au xx sav
+ * Aj droit toute les outiques 
+ * Aj droit logistique
  */
 
 if ($loadEquip == true) {
@@ -109,17 +115,17 @@ $OK++;
 
 
 if ($loadSav) {
-    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE c.id = s.id AND (revisionNext < 1 OR revisionNext IS NULL) LIMIT 0,30000000");
+    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE s.`Centre` LIKE 'AB' AND c.id = s.id AND (revisionNext < 1 OR revisionNext IS NULL)");
 
 $savok = 0;
 
+        $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
     while ($ligne = $db->fetch_object($sql)) {
 
-        $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
 
         $code_centre = "S";
-        $idP = 17; //Prod par default
-        $idClient = 4674;
+        $idP = 74729; //Prod par default
+        $idClient = 144582;
         
         if (isset($ligne->Centre) && $ligne->Centre != "")
             $code_centre = $ligne->Centre;
@@ -168,7 +174,7 @@ $savok = 0;
             'etat_materiel' => $ligne->Etat_Materiel,
             'etat_materiel_desc' => $ligne->description,
             'accessoires' => $ligne->Accessoires_joints,
-            'symptomes' => $ligne->Symptomes,
+            'symptomes' => ($ligne->Symptomes != "")? $ligne->Symptomes : "Symptomes inc",
             'diagnostic' => $ligne->Diagnostic,
             'resolution' => $ligne->Resolution,
             'date_create' => $ligne->date_create,
@@ -198,6 +204,7 @@ $savok = 0;
         } else {
             echo "<br/><br/>ERREUR FATAL <pre>Impossible de validé " . print_r($arraySav, 1).print_r($newErrors,1) ;//. print_r($sav, 1);
         }
+        $sav->reset();
     }
     
     

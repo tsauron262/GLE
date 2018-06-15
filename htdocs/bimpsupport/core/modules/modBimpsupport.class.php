@@ -234,7 +234,7 @@ class modBimpsupport extends DolibarrModules {
                                 'titre'=>'Retour groupés',
                                 'mainmenu'=>'',
                                 'leftmenu'=>'',
-                                'url'=>'/synopsisapple/ups/retour.php',
+                                'url'=>'/bimpapple/ups/retour.php',
                                 'langs'=>'global@synopsistools',	// Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
                                 'position'=>304,
                                 'enabled'=>'1',			// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.

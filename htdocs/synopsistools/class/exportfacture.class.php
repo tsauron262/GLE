@@ -23,11 +23,12 @@ class exportfacture {
     public function __construct($db, $sortie = 'html') {
         $this->db = $db;
         $this->path = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/extractFactGle/";
+        $this->pathI = "";
     }
 
     public function importFact() {
         global $db;
-        $dir = "/Users/tommy/Desktop/testimport/export/";
+        $dir = $this->pathI;
         if (is_dir($dir)) {
             if ($dh = opendir($dir)) {
                 while (($file = readdir($dh)) !== false) {
@@ -51,9 +52,17 @@ class exportfacture {
     }
 
     public function exportTout() {
-//        $this->importFact();
+        if(defined("MODE_TEST")){
+            $this->path = "/data/synchro/export/factures/";
+            $this->pathI = "/data/synchro/import/factures/";
+            $this->importFact();
+            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportpaiement.class.php");
+            $exp = new exportpaiement($this->db);
+            $exp->exportTout();
+        }
 
 
+        $this->exportFactureNewSav();
         $this->exportFactureSav();
         $this->exportFactureSavSeul();
         $this->exportFactureReseau();
@@ -73,7 +82,18 @@ class exportfacture {
         global $tabCentre;
         if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
             return $tabCentre[$centre][3];
-        mailSyn2("Impossible de trouvé un id8sens", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
+        if(!defined("MODE_TEST"))
+            mailSyn2("Impossible de trouvé un id8sens", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
+        return 0;
+    }
+
+    private function getId8sensByCentreNewSav($centre) {
+        require_once(DOL_DOCUMENT_ROOT . "/bimpsupport/centre.inc.php");
+        global $tabCentre;
+        if (isset($tabCentre[$centre][3]) && $tabCentre[$centre][3] > 0)
+            return $tabCentre[$centre][3];
+        if(!defined("MODE_TEST"))
+            mailSyn2("Impossible de trouvé un id8sens", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour impossible de trouver d'id 8sens Centre : " . $centre);
         return 0;
     }
 
@@ -88,6 +108,23 @@ class exportfacture {
             $this->id8sens = $ligne->id8Sens;
             if ($ligne->id8Sens < 1 && isset($ligne->Centre) && $ligne->Centre != "") {
                 $this->id8sens = $this->getId8sensByCentreSav($ligne->Centre);
+            }
+            $this->tabIgnore[] = $ligne->id;
+            $this->extract($ligne->id);
+        }
+    }
+
+    public function exportFactureNewSav() {
+        $this->type = "sav";
+        $result = $this->db->query("SELECT fact.rowid as id, idtech8sens as id8Sens, sav.code_centre as Centre 
+FROM `" . MAIN_DB_PREFIX . "facture` fact, `" . MAIN_DB_PREFIX . "facture_extrafields` fe, " . MAIN_DB_PREFIX . "element_element el , " . MAIN_DB_PREFIX . "propal prop, " . MAIN_DB_PREFIX . "bs_sav sav , " . MAIN_DB_PREFIX . "user_extrafields ue 
+WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid AND prop.rowid = el.fk_source AND prop.rowid = sav.id_propal AND  ue.`fk_object` = IF(id_user_tech > 0, id_user_tech, fact.fk_user_author) "
+                . $this->where);
+
+        while ($ligne = $this->db->fetch_object($result)) {
+            $this->id8sens = $ligne->id8Sens;
+            if ($ligne->id8Sens < 1 && isset($ligne->Centre) && $ligne->Centre != "") {
+                $this->id8sens = $this->getId8sensByCentreNewSav($ligne->Centre);
             }
             $this->tabIgnore[] = $ligne->id;
             $this->extract($ligne->id);
@@ -142,7 +179,8 @@ class exportfacture {
             if ($this->id8sens < 1) {
                 if ($this->debug)
                     echo "<br/>Comm pas de comm<br/>";
-                mailSyn2("Exportation facture", $userC->email, null, "Bonjour vos factures ne peuvent être exporté car vous n'avez pas d'identifiant 8Sens dans vottre profil <a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php?id=" . $userC->id . "'>Voir</a>");
+                if(!defined("MODE_TEST"))
+                    mailSyn2("Exportation facture", $userC->email, null, "Bonjour vos factures ne peuvent être exporté car vous n'avez pas d'identifiant 8Sens dans vottre profil <a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php?id=" . $userC->id . "'>Voir</a>");
             }
         }
         else {
@@ -152,7 +190,8 @@ class exportfacture {
             $userM->fetch($userCr);
             if ($this->debug)
                 echo "<br/>Pas de comm<br/>";
-            mailSyn2("Exportation facture", $userM->email, null, "Bonjour vos factures ne peuvent être exportées car il n'y a pas de commercial rataché <a href='" . DOL_URL_ROOT . "/compta/facture/card.php?facid=" . $id . "'>Voir</a>");
+            if(!defined("MODE_TEST"))
+                mailSyn2("Exportation facture", $userM->email, null, "Bonjour vos factures ne peuvent être exportées car il n'y a pas de commercial rataché <a href='" . DOL_URL_ROOT . "/compta/facture/card.php?facid=" . $id . "'>Voir</a>");
         }
     }
 
@@ -166,7 +205,8 @@ class exportfacture {
             $facts .= $ligne->facnumber . " - ";
         }
         if ($facts != "")
-            mailSyn2("Facture non export", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour voici les facture non exporté " . $facts);
+            if(!defined("MODE_TEST"))
+                mailSyn2("Facture non export", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour voici les facture non exporté " . $facts);
     }
 
     function getTxt($tab1, $tab2) {
@@ -233,8 +273,13 @@ class exportfacture {
                 if ($line->subprice < 0)
                     $line->pa_ht = -$line->pa_ht;
 
-
-                $tabFactDet[] = array("L" => "L", "ref" => $ref, "product_type" => $type, "qty" => $line->qty, "subprice" => price($line->subprice), "description" => $line->desc, "buy_price_ht" => price($line->pa_ht), "tva_tx" => $line->tva_tx, "remise_percent" => $line->remise_percent);
+                $tabCodeTva = array(
+                    "20" => 1,
+                    "5.500" => 7,
+                    "0" => 0
+                );
+                $tvaCode = $tabCodeTva[$line->tva_tx];
+                $tabFactDet[] = array("L" => "L", "ref" => $ref, "product_type" => $type, "qty" => $line->qty, "subprice" => price($line->subprice), "description" => $line->desc, "buy_price_ht" => price($line->pa_ht), "tva_code" => $tvaCode, "remise_percent" => $line->remise_percent, "tva_tx" => $tvaCode);
             }
 
 
@@ -323,7 +368,8 @@ class exportfacture {
             $to = "tommy@bimp.fr";
         }
         if ($to != "")
-            mailSyn2("Produit non catégorisé", $to, "admin@bimp.fr", "Bonjour ceci est un message automatique des export vers 8sens <br/>" . $msg);
+            if(!defined("MODE_TEST"))
+                mailSyn2("Produit non catégorisé", $to, "admin@bimp.fr", "Bonjour ceci est un message automatique des export vers 8sens <br/>" . $msg);
         if ($this->debug)
             echo "<span class='red'>" . $msg . "</span><br/>";
     }

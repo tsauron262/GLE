@@ -55,6 +55,7 @@ class exportfacture {
         if(defined("MODE_TEST")){
             $this->path = "/data/synchro/export/factures/";
             $this->pathI = "/data/synchro/import/factures/";
+            $this->importFact();
         }
 
 

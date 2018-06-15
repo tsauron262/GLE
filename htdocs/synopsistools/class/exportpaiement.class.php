@@ -65,7 +65,8 @@ class exportpaiement {
                         $this->db->query("UPDATE llx_paiement_facture SET exported = 1 WHERE rowid IN ('".implode("','",$tabPfId)."')");
                     }
                 }
-                echo $this->path;
+                else
+                    echo "Impossible d'exporté ".$this->path."Pai".dol_print_date(dol_now(), "%d-%m-%Y--%H:%M:%S").".txt avec ".$txt;
     }
 
 

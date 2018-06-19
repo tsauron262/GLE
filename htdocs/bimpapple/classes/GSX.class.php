@@ -117,7 +117,7 @@ class GSX
         'returnFormat'     => 'php',
         'gsxWsdl'          => '',
     );
-    protected $wsdlUrl;
+    public $wsdlUrl;
     protected $userSessionId;
     protected $soapClient;
     public static $apiMode = 'production';

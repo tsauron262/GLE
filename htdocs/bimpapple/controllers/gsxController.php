@@ -33,20 +33,13 @@ class gsxController extends BimpController
     );
     protected $repairs = array();
 
-    public function initGsx($requestType = false)
+    public function initGsx()
     {
-        if (in_array($requestType, $this->tabReqForceIphone)) {
-            $this->isIphone = true;
-        }
-        if (in_array($requestType, $this->tabReqForceNonIphone)) {
-            $this->isIphone = false;
-        }
-
         $this->gsx = new GSX($this->isIphone);
         return array_merge($this->gsx->errors['init'], $this->gsx->errors['soap']);
     }
 
-    public function setSerial($serial)
+    public function setSerial($serial, $requestType = false)
     {
         if (preg_match('/^S([0-9A-Z]{11,12})$/', $serial, $matches)) {
             $serial = $matches[1];
@@ -55,6 +48,13 @@ class gsxController extends BimpController
             $this->isIphone = true;
         }
         $this->serial = $serial;
+        
+        if (in_array($requestType, $this->tabReqForceIphone)) {
+            $this->isIphone = true;
+        }
+        if (in_array($requestType, $this->tabReqForceNonIphone)) {
+            $this->isIphone = false;
+        }
     }
 
     public function loadRepairs($id_sav)
@@ -714,7 +714,7 @@ class gsxController extends BimpController
     {
         $html = '';
 
-        $this->setSerial($serial);
+        $this->setSerial($serial, $requestType);
 
         $request = '';
         $client = '';
@@ -860,7 +860,7 @@ class gsxController extends BimpController
                     $requestData[$nomReq]['repairData']['fileData'] = "Fichier joint exclu du log";
             }
             if (count($this->gsx->errors['log']['soap']))
-                dol_syslog("Erreur GSX : " . $this->gsx->getGSXErrorsHtml() . "Requête :" . print_r($requestData, true) . " Réponse : " . print_r($response, true), 4, 0, "_apple");
+                dol_syslog("Erreur GSX : " . $this->gsx->getGSXErrorsHtml() . "Requête :" . print_r($requestData, true) . " Réponse : " . print_r($response, true). "Wsdl : ".$this->gsx->wsdlUrl, 4, 0, "_apple");
         } elseif (isset($response['error'])) {
             switch ($response['error']) {
                 case 'partInfos':

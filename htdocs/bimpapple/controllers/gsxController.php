@@ -33,9 +33,8 @@ class gsxController extends BimpController
     );
     protected $repairs = array();
 
-    public function initGsx($requestType = false)
+    public function initGsx()
     {
-
         $this->gsx = new GSX($this->isIphone);
         return array_merge($this->gsx->errors['init'], $this->gsx->errors['soap']);
     }

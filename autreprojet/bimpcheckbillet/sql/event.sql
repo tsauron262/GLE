@@ -8,5 +8,5 @@ CREATE TABLE IF NOT EXISTS `event` (
     `status`            INTEGER NOT NULL DEFAULT 0,
     `id_categ`          INTEGER,
     `id_categ_parent`   INTEGER NOT NULL,
-    `place`             VARCHAR(255)
+    `place`             TEXT
 ) ENGINE=innodb;

@@ -82,7 +82,7 @@ function getTariffsForEvent(id_event) {
     });
 }
 
-function modifyTariff(id_tariff, label, price, number_place, require_names, date_start, time_start, date_end, time_end,
+function modifyTariff(id_tariff, label, price, number_place, require_names, date_stop_sale, time_stop_sale, date_start, time_start, date_end, time_end,
         type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6,
         name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6,
         require_extra_1, require_extra_2, require_extra_3, require_extra_4, require_extra_5, require_extra_6) {
@@ -96,6 +96,8 @@ function modifyTariff(id_tariff, label, price, number_place, require_names, date
             price: price,
             number_place: number_place,
             require_names: require_names,
+            date_stop_sale: date_stop_sale,
+            time_stop_sale: time_stop_sale,
             date_start: date_start,
             time_start: time_start,
             date_end: date_end,
@@ -215,7 +217,7 @@ function createPrestashopProduct(id_tariff, id_categ_extern, image_name, id_tax)
                 if (out.errors.length !== 0) {
                     printErrors(out.errors, 'alertSubmit');
                 } else if (parseInt(out.id_inserted) > 0) {
-//                    addIdProdExtern(tariff.id, out.id_inserted);
+                    addIdProdExtern(tariff.id, out.id_inserted);
                 } else {
                     setMessage('alertSubmit', "Erreur inconnue.", 'error');
                 }
@@ -310,6 +312,7 @@ function getCombinations(id_prod_extern) {
  * Ready
  */
 $(document).ready(function () {
+    $('input[name=date_stop_sale]').datepicker({dateFormat: 'dd/mm/yy'})
     $('input[name=date_start]').datepicker({dateFormat: 'dd/mm/yy'})
     $('input[name=date_end]').datepicker({dateFormat: 'dd/mm/yy'})
     getEvents();
@@ -350,6 +353,8 @@ function initEvents() {
                 $('input[name=price]').val(),
                 $('input[name=number_place]').val(),
                 $('input[name=require_names]:checked').val(),
+                $('input[name=date_stop_sale]').val(),
+                $('input[name=time_stop_sale]').val(),
                 $('input[name=date_start]').val(),
                 $('input[name=time_start]').val(),
                 $('input[name=date_end]').val(),
@@ -454,6 +459,8 @@ function initEvents() {
 function autoFill(id_tariff) {
     var tariff = getTariffById(id_tariff);
     $('input[name=label]').val(tariff.label);
+    $('input[name=date_stop_sale]').val(formatDate(tariff.date_stop_sale));
+    $('input[name=time_stop_sale]').val(formatTime(tariff.date_stop_sale));
     $('input[name=date_start]').val(formatDate(tariff.date_start));
     $('input[name=time_start]').val(formatTime(tariff.date_start));
     $('input[name=date_end]').val(formatDate(tariff.date_end));

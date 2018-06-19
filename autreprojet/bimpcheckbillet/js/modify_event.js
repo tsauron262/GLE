@@ -77,7 +77,7 @@ function setImage(id_event) {
     });
 }
 
-function modifyEvent(id_event, label, description, date_start, time_start, date_end, time_end) {
+function modifyEvent(id_event, label, description, place, date_start, time_start, date_end, time_end) {
 
     $.ajax({
         type: "POST",
@@ -86,6 +86,7 @@ function modifyEvent(id_event, label, description, date_start, time_start, date_
             id_event: id_event,
             label: label,
             description: description,
+            place: place,
             date_start: date_start,
             time_start: time_start,
             date_end: date_end,
@@ -183,13 +184,15 @@ function closeEvent(id_event) {
     });
 }
 
-function createPrestashopCategory(id_event, label_event, id_categ_parent) {
+function createPrestashopCategory(id_event, label_event, id_categ_parent, description, place) {
 
     $.ajax({
         type: "POST",
         url: URL_PRESTASHOP,
         data: {
             label: label_event,
+            description: description,
+            place: place,
             id_categ_parent: id_categ_parent,
             action: 'createPrestashopCategory'
         },
@@ -297,6 +300,7 @@ function initEvents() {
             modifyEvent($('select[name=id_event] > option:selected').val(),
                     $('input[name=label]').val(),
                     tinymce.get('description').getContent(),
+                    tinymce.get('place').getContent(),
                     $('input[name=date_start]').val(),
                     $('input[name=time_start]').val(),
                     $('input[name=date_end]').val(),
@@ -378,6 +382,8 @@ function initEvents() {
     });
 
     $('div[name=create_prestashop_category]').click(function () {
+        var place;
+        var description;
         var id_categ_parent;
         var id_event = $('select[name=id_event] > option:selected').val();
         var label_event = $('select[name=id_event] > option:selected').text();
@@ -387,8 +393,10 @@ function initEvents() {
         if (id_event > 0) {
             var stop = false;
             events.forEach(function (event) {
-                if (parseInt(event.id) === parseInt(id_event)) {
+                if (!stop && parseInt(event.id) === parseInt(id_event)) {
                     id_categ_parent = event.id_categ_parent;
+                    place = event.place;
+                    description = event.description;
                     if (parseInt(event.id_categ) > 0) {
                         $('p#categ_already_created').css('display', 'inline');
                         stop = true;
@@ -396,7 +404,9 @@ function initEvents() {
                 }
             });
             if (stop === false)
-                createPrestashopCategory(id_event, label_event, id_categ_parent);
+                createPrestashopCategory(id_event, label_event, id_categ_parent, description, place);
+            else
+                alert("Impossible de retrouver les information concernant cet évènement");
         } else {
             $('p#select_event').css('display', 'inline');
         }
@@ -424,6 +434,7 @@ function initEvents() {
 function autoFill(event) {
     $('input[name=label]').val(event.label);
     $("#description").val(event.description);
+    $("#place").val(event.place);
     $('input[name=date_start]').val(formatDate(event.date_start));
     $('input[name=time_start]').val(formatTime(event.date_start));
     $('input[name=date_end]').val(formatDate(event.date_end));
@@ -434,6 +445,7 @@ function autoFill(event) {
 function autoEmpty() {
     $('input[name=label]').val('');
     $("#description").val('');
+    $("#place").val('');
     $('input[name=date_start]').val(formatDate(''));
     $('input[name=time_start]').val(formatTime(''));
     $('input[name=date_end]').val(formatDate(''));

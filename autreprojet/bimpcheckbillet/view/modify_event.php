@@ -64,6 +64,9 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="description">Description </label>';
     print '<textarea id="description" class="tinymce" placeholder="Description" name="description"></textarea><br/>';
 
+    print '<label for="place">Lieu </label>';
+    print '<textarea id="place" class="tinymce" placeholder="Lieu" rows="3" name="place" style="width: 500px"></textarea><br/>';
+    
     print '<label for="date_start">Date de début</label><br/>';
     print '<input class="form-control" placeholder="Date de début" type="text" name="date_start" style="display: inline ; width: 160px"/>';
     print '<input class="form-control" type="time" value="00:00" name="time_start" style="display: inline ; width: 100px"/><br/><br/>';

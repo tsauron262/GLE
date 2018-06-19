@@ -133,7 +133,11 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label class="btn btn-primary">       <input value=1 type="radio" name="require_names">Oui</label>';
     print '</div><br/><br/>';
 
-    print '<label for="date_start">Date de début (facultatif)</label><br/>';
+    print '<label for="date_stop_sale">Date de fin de vente</label><br/>';
+    print '<input class="form-control" placeholder="Date de fin de vente" type="text" name="date_stop_sale" style="display: inline ; width: 160px"/>';
+    print '<input class="form-control" type="time" value="00:00" name="time_end_sale" style="display: inline ; width: 100px"/><br/>';
+    
+        print '<label for="date_start">Date de début (facultatif)</label><br/>';
     print '<input class="form-control" placeholder="Date de début" type="text" name="date_start" style="display: inline ; width: 160px"/>';
     print '<input class="form-control" type="time" value="00:00" name="time_start" style="display: inline ; width: 100px"/><br/>';
 

@@ -16,6 +16,9 @@ define('PATH_TO_PRESTA', '/home/tilito/public_html/prestashop/');
 // Id feature month
 define('ID_FEATURE_MONTH', 7);
 
+// Id feature date end sale
+define('ID_FEATURE_DATE_END_SALE', 8);
+
 // Array feature (feature)
 define('ARRAY_MONTH', array(
     1 => 19,

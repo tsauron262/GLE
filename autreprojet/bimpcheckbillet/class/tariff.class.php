@@ -115,6 +115,8 @@ class Tariff {
         if (sizeof($this->errors) != 0)
             return -3;
 
+        if ($time_end_sale == '')
+            $time_end_sale = '00:00';
         if ($time_start == '')
             $time_start = '00:00';
         if ($time_end == '')
@@ -124,8 +126,7 @@ class Tariff {
         $full_date_start = $date_start . ' ' . $time_start . ':00';
         $full_date_end = $date_end . ' ' . $time_end . ':00';
 
-        if ($date_stop_sale != '')
-            $date_stop_sale_obj = DateTime::createFromFormat('d/m/Y H:i:s', $full_date_stop_sale);
+        $date_stop_sale_obj = DateTime::createFromFormat('d/m/Y H:i:s', $full_date_stop_sale);
         if ($date_start != '')
             $date_start_obj = DateTime::createFromFormat('d/m/Y H:i:s', $full_date_start);
         if ($date_end != '')
@@ -225,8 +226,10 @@ class Tariff {
         return -1;
     }
 
-    public function update($id_tariff, $label, $price, $number_place, $require_names, /* $file, */ $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
+    public function update($id_tariff, $label, $price, $number_place, $require_names, /* $file, */ $date_stop_sale, $time_stop_sale, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
 
+        if ($date_stop_sale == '')
+            $this->errors[] = "Le champ date de fin de vente est obligatoire";
         if (!($id_tariff > 0))
             $this->errors[] = "Le champ identifiant est obligatoire";
         if ($label == '')
@@ -240,14 +243,18 @@ class Tariff {
         if (sizeof($this->errors) != 0)
             return -3;
 
+        if ($time_stop_sale == '')
+            $time_stop_sale = '00:00';
         if ($time_start == '')
             $time_start = '00:00';
         if ($time_end == '')
             $time_end = '00:00';
 
+        $full_date_stop_sale = $date_stop_sale . ' ' . $time_stop_sale . ':00';
         $full_date_start = $date_start . ' ' . $time_start . ':00';
         $full_date_end = $date_end . ' ' . $time_end . ':00';
 
+        $date_stop_sale_obj = DateTime::createFromFormat('d/m/Y H:i:s', $full_date_stop_sale);
         if ($date_start != '')
             $date_start_obj = DateTime::createFromFormat('d/m/Y H:i:s', $full_date_start);
         if ($date_end != '')
@@ -259,6 +266,7 @@ class Tariff {
         $sql.= ', `price`=' . $price;
         $sql.= ', `number_place`=' . $number_place;
         $sql.= ', `require_names`=' . $require_names;
+        $sql.= ', `date_stop_sale`="' . $date_stop_sale_obj->format('Y-m-d H:i:s') . '"';
         if ($date_start != '')
             $sql.= ', `date_start`="' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         if ($date_end != '')

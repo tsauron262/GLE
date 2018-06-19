@@ -13,6 +13,7 @@ class Event {
     public $status;
     public $id_categ;
     public $id_categ_parent;
+    public $place;
 
     const STATUS_DRAFT = 1;
     const STATUS_VALIDATE = 2;
@@ -30,7 +31,7 @@ class Event {
             return false;
         }
 
-        $sql = 'SELECT id, label, description, date_creation, date_start, date_end, status, id_categ, id_categ_parent';
+        $sql = 'SELECT id, label, description, date_creation, date_start, date_end, status, id_categ, id_categ_parent, place';
         $sql .= ' FROM event';
         $sql .= ' WHERE id=' . $id;
 
@@ -47,6 +48,7 @@ class Event {
                 $this->status = $obj->status;
                 $this->id_categ = intVal($obj->id_categ);
                 $this->id_categ_parent = intVal($obj->id_categ_parent);
+                $this->place = stripslashes($obj->place);
                 return 1;
             }
         } else {
@@ -56,7 +58,7 @@ class Event {
         return -1;
     }
 
-    public function create($label, $description, $date_start, $time_start, $date_end, $time_end, $id_user, $file, $categ_parent, $id_categ = '') {
+    public function create($label, $description, $place, $date_start, $time_start, $date_end, $time_end, $id_user, $file, $categ_parent, $id_categ = '') {
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
@@ -90,6 +92,7 @@ class Event {
         $sql = 'INSERT INTO `event` (';
         $sql.= '`label`';
         $sql.= ', `description`';
+        $sql.= ', `place`';
         $sql.= ', `date_creation`';
         $sql.= ', `date_start`';
         $sql.= ', `date_end`';
@@ -98,6 +101,7 @@ class Event {
         $sql.= ') ';
         $sql.= 'VALUES ("' . addslashes($label) . '"';
         $sql.= ', "' . addslashes($description) . '"';
+        $sql.= ', "' . addslashes($place) . '"';
         $sql.= ', now()';
         $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ', "' . $date_end_obj->format('Y-m-d H:i:s') . '"';
@@ -131,7 +135,7 @@ class Event {
         return -1;
     }
 
-    function update($id_event, $label, $description, $date_start, $time_start, $date_end, $time_end, $id_user) {
+    function update($id_event, $label, $description, $place, $date_start, $time_start, $date_end, $time_end, $id_user) {
         if ($id_event == '')
             $this->errors[] = "Le champ identifiant est obligatoire";
         if ($label == '')
@@ -163,7 +167,8 @@ class Event {
 
         $sql = 'UPDATE `event` SET';
         $sql.= ' `label`="' . $label . '"';
-        $sql.= ', `description`="' . $description . '"';
+        $sql.= ', `description`="' . addslashes($description) . '"';
+        $sql.= ', `place`="' . addslashes($place) . '"';
         $sql.= ', `date_start`="' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ', `date_end`="' . $date_end_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ' WHERE id=' . $id_event;
@@ -225,7 +230,7 @@ class Event {
         $tariff = new Tariff($this->db);
 
         $sql = 'SELECT e.id as id, e.label as label, e.description as description, e.date_creation as date_creation,'
-                . ' e.date_start as date_start, e.date_end as date_end, e.status as status, e.id_categ as id_categ, e.id_categ_parent as id_categ_parent';
+                . ' e.date_start as date_start, e.date_end as date_end, e.status as status, e.id_categ as id_categ, e.id_categ_parent as id_categ_parent, e.place as place';
         $sql .= ' FROM event as e';
         if ($id_user != null and ! $is_super_admin) {
             $sql .= ' LEFT JOIN event_admin as e_a ON e_a.fk_event=e.id';
@@ -253,7 +258,8 @@ class Event {
                         'id_categ' => $obj->id_categ,
                         'id_categ_parent' => $obj->id_categ_parent,
                         'filename' => $filename,
-                        'tariffs' => $tariff->getTariffsForEvent($obj->id)
+                        'tariffs' => $tariff->getTariffsForEvent($obj->id),
+                        'place' => $obj->place
                     );
                 else
                     $events[] = array(
@@ -266,7 +272,8 @@ class Event {
                         'status' => $obj->status,
                         'id_categ' => $obj->id_categ,
                         'id_categ_parent' => $obj->id_categ_parent,
-                        'filename' => $filename
+                        'filename' => $filename,
+                        'place' => $obj->place
                     );
             }
             if ($with_tariff)

@@ -19,8 +19,10 @@ $action = Tools::getValue('action');
 switch ($action) {
     case 'createPrestashopProduct' : {
             // Pre-processing
-            $date_start_simple = substr($_POST['date_start'], 0, -9);
-            $date_end_simple = substr($_POST['date_end'], 0, -9);
+            $date_start_simple = substr($_POST['date_start'], 0, -9); // yyyy-mm-dd
+            $date_end_simple = substr($_POST['date_end'], 0, -9); // yyyy-mm-dd
+            $date_stop_sale_parsed = 'Le ' . substr($_POST['date_stop_sale'], 0, -8) . ' à ' . substr($_POST['date_stop_sale'], -8, -6) . 'h'; // yyyy-mm-dd hh
+
             $description = 'Du <strong>' . $date_start_simple . '</strong> au <strong>' . $date_end_simple . '</strong>';
             // features date start
             $month_start = (int) substr($_POST['date_start'], 5, 7);
@@ -52,6 +54,7 @@ switch ($action) {
             if ($product->id > 0) {
                 // Qty
                 StockAvailable::setQuantity((int) $product->id, 0, intVal($_POST['number_place']));
+
                 // Image
                 $image = new Image();
                 $image->id_product = (int) $product->id;
@@ -61,20 +64,30 @@ switch ($action) {
                 if (!copyImg($product->id, $image->id, URL_CHECK . 'img/event/' . $_POST['image_name'], 'products', !Tools::getValue('regenerate'))) {
                     $image->delete();
                 }
+
                 // Feature
                 $product::addFeatureProductImport($product->id, ID_FEATURE_MONTH, $id_start_feature_value);
                 if ($id_start_feature_value != $id_end_feature_value) // if product (tariff) overlap 2 months
                     $product::addFeatureProductImport($product->id, ID_FEATURE_MONTH, $id_end_feature_value);
+
+                // Create new feature value (date end sale) and link with the new product
+                $id_feature_value_date_stop_sale = FeatureValue::addFeatureValueImport(ID_FEATURE_DATE_END_SALE, $date_stop_sale_parsed);
+                $product::addFeatureProductImport($product->id, ID_FEATURE_DATE_END_SALE, $id_feature_value_date_stop_sale);
             }
             die(Tools::jsonEncode(array('id_inserted' => $product->id, 'errors' => array())));
             break;
         }
 
     case 'createPrestashopCategory' : {
+
+            $description = $_POST['description'] . '<br/>';
+            $description.= 'Adresse : <br/>' . $_POST['place'];
+
             $category = new Category();
             $category->name = array((int) Configuration::get('PS_LANG_DEFAULT') => $_POST['label']);
             $category->link_rewrite = array((int) Configuration::get('PS_LANG_DEFAULT') => str_replace(' ', '_', $_POST['label']));
             $category->id_parent = (int) $_POST['id_categ_parent'];
+            $category->description = $description;
             $category->add();
             die(Tools::jsonEncode(array('id_inserted' => $category->id, 'errors' => array())));
             break;

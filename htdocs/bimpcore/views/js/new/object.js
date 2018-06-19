@@ -219,7 +219,7 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
 
                 bimpModal.$footer.find('.save_object_button.modal_' + modal_idx).remove();
                 bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
-                bimpModal.addButton('Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
+                bimpModal.addButton('Valider<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
                 bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
                     if (validateForm($form)) {
                         $form.find('.inputContainer').each(function () {

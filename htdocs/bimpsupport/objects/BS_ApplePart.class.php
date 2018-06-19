@@ -134,12 +134,14 @@ class BS_ApplePart extends BimpObject
     
     public function isCartEditable()
     {
-        $sav = $this->getParentInstance();
-        if (!is_null($sav) && $sav->isLoaded()) {
-            return (int) $sav->isPropalEditable();
-        }
+//        $sav = $this->getParentInstance();
+//        if (!is_null($sav) && $sav->isLoaded()) {
+//            return (int) $sav->isPropalEditable();
+//        }
 
-        return 0;
+//        return 0;
+        
+        return 1;
     }
     // Overrides: 
 

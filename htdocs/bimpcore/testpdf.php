@@ -11,21 +11,22 @@ ini_set('display_errors', 1);
 
 
 //require_once './pdf/classes/LoyerPDF.php';
+require_once './pdf/classes/PropalPDF.php';
 //require_once './pdf/classes/PropalSavPDF.php';
-require_once './pdf/classes/InvoiceSavPDF.php';
+//require_once './pdf/classes/InvoiceSavPDF.php';
 
 global $db, $langs;
 
-//$pdf = new PropalPDF($db);
+$pdf = new PropalPDF($db);
 //$pdf = new LoyerPDF($db);
 //$pdf = new PropalSavPDF($db);
 
-//$obj = new Propal($db);
+$obj = new Propal($db);
 
-$pdf = new InvoiceSavPDF($db);
+//$pdf = new InvoiceSavPDF($db);
 
-$obj = new Facture($db);
-$obj->fetch(86647);
+//$obj = new Facture($db);
+$obj->fetch(92799);
 
 $pdf->init($obj);
 $pdf->render(__DIR__. '/testInvoice.pdf', true);

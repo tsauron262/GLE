@@ -193,6 +193,8 @@ function BC_Vente() {
 
         if (this.avoir > 0) {
             $('#venteAvoir').slideDown(250);
+            $('#avoirRbtForm').slideDown(250);
+
             $('#venteToReturn').slideUp(250);
             $('#venteToPay').slideUp(250);
 
@@ -204,6 +206,8 @@ function BC_Vente() {
             $('#ventePaiementButtons').slideDown(250);
             $('#ventePaimentsLines').slideDown(250);
             $('#condReglement').slideDown(250);
+
+            $('#avoirRbtForm').slideUp(250);
 
             if (this.toReturn > 0) {
                 $('#venteAvoir').slideUp(250);
@@ -550,11 +554,22 @@ function saveCurrentVente($button, status) {
             }
         }
     }
-
-    BimpAjax('saveVenteStatus', {
+    
+    var data = {
         id_vente: Vente.id_vente,
         status: status
-    }, null, {
+    };
+    
+    if (status === 2) {
+        if (Vente.avoir > 0) {
+            data.avoir_rbt_mode = $('#avoirRbtMode').find('[name="avoir_rbt_mode"]').val();
+            if (data.avoir_rbt_mode === 'rbt') {
+                data.avoir_rbt_paiement = $('#avoirRbtModePaiement').find('[name="avoir_rbt_paiement"]').val();
+            }
+        }
+    }
+
+    BimpAjax('saveVenteStatus', data, null, {
         $button: $button,
         id_vente: Vente.id_vente,
         display_success_in_popup_only: true,
@@ -1024,11 +1039,13 @@ function setVenteStatus($button, id_vente, status) {
             return;
         }
     }
-
-    BimpAjax('saveVenteStatus', {
+    
+    var data = {
         id_vente: id_vente,
         status: status
-    }, null, {
+    };
+
+    BimpAjax('saveVenteStatus', data, null, {
         $button: $button,
         display_success_in_popup_only: true,
         display_errors_in_popup_only: true,
@@ -1216,6 +1233,14 @@ function onVenteLoaded() {
 
     $('#condReglementSelect').change(function () {
         saveCondReglement();
+    });
+    
+    $('#avoirRbtMode').find('[name="avoir_rbt_mode"]').change(function() {
+        if ($(this).val() === 'rbt') {
+            $('#avoirRbtModePaiement').slideDown(250);
+        } else {
+            $('#avoirRbtModePaiement').slideUp(250);
+        }
     });
 
     checkMultipleValues();

@@ -557,6 +557,15 @@ $article_color: #004264;
     }
 }
 
+#avoirRbtForm {
+    display: none;
+    margin: 30px 0;
+    
+    #avoirRbtModePaiement {
+        display: none;
+    }
+}
+
 #customerDiscountsContainer {
     margin: 30px 0 20px;
 

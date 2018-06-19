@@ -92,7 +92,7 @@ function loadGSXView($button, id_sav) {
     var $gsxForm = $('#loadGSXForm');
     var $container = $('#gsxResultContainer');
     var serial = $gsxForm.find('#gsx_equipment_serial').val();
-//    serial = 'SGFDW60DJH8TT';
+//    serial = 'FFRW17TXHXR5';
     if (/^S?[A-Z0-9]{11,12}$/.test(serial) || /^S?[0-9]{15}$/.test(serial)) {
         BimpAjax('loadGSXView', {
             serial: serial,

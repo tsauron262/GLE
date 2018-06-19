@@ -184,13 +184,23 @@ forms:
                   multiple: 1
                   type: select_remises
                   id_client:
-                      prop:
-                          name: socid
-                          object:
-                              prop: 
-                                name: dol_object
-                                object: 
-                                    callback: getParentInstance                  
+                      callback: getIdClient
+            - custom: 1
+              label: Note publique
+              input_name: note_public
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+            - custom: 1
+              label: Note privée
+              input_name: note_private
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
                   
 fields_tables: 
     data: 
@@ -264,12 +274,17 @@ lists:
                 label: Destinataire
                 value: 
                     callback: displayContact
+            commercial: 
+                label: Commercial
+                value: 
+                    callback: displayCommercial
             date: 
                 label: Expédiée le
                 field: date_shipped
             signed: 
                 field: signed
                 edit: 1
+                max_width: 45px
             pdf:
                 label: Fichiers
                 value: 
@@ -279,6 +294,9 @@ lists:
                             - 1
                     
     commandes: 
+        checkboxes: 1
+        bulk_actions: 
+            callback: getCommandesListbulkActions
         enable_search: 0
         pagination: 0
         sort_field: id
@@ -297,7 +315,8 @@ lists:
             num_livraison:
                 label: N°
                 field: num_livraison
-                max_width: 30px
+                max_width: 40px
+                min_width: 40px
             status: 
                 field: status
             contact: 
@@ -308,19 +327,24 @@ lists:
                 label: Articles
                 value: 
                     callback: getNbArticles
+                min_width: 60px
+                max_width: 60px
             qty_services: 
                 label: Services
                 value: 
                     callback: getNbServices
-#            create:
-#                label: Créée le
-#                field: date_create
+                min_width: 60px
+                max_width: 60px
             date: 
                 label: Expédiée le
                 field: date_shipped
             signed: 
                 field: signed
                 edit: 1
+                max_width: 45px
+            facture: 
+                field: id_facture
+                display: nom_url
             pdf:
                 label: Fichiers
                 value: 

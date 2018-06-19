@@ -57,24 +57,30 @@ class BR_reservationShipment extends BimpObject
 
     public function doAddToCreditNoteOnRemove($remove_from_order = null)
     {
-        if ($this->isOrderInvoiced()) {
-            if (is_null($remove_from_order)) {
-                $fields = BimpTools::getValue('fields', array());
-                if (isset($fields['remove_from_order'])) {
-                    $remove_from_order = (int) $fields['remove_from_order'];
-                } else {
-                    $remove_from_order = 0;
+        $commande = $this->getCommande();
+        if (BimpObject::objectLoaded($commande)) {
+            if ((int) $commande->getData('id_facture')) {
+                if (is_null($remove_from_order)) {
+                    $remove_from_order = (int) BimpTools::getValue('fields/remove_from_order', 0);
                 }
+
+                if ((int) $remove_from_order) {
+                    return 1;
+                }
+                
+                return 0;
             }
-            if ((int) $remove_from_order) {
+        }
+        
+        $shipment = $this->getParentInstance();
+        if (BimpObject::objectLoaded($shipment)) {
+            if ((int) $shipment->getData('id_facture')) {
+                $status = $this->db->getValue('facture', 'fk_statut', '`rowid` = ' . (int) $shipment->getData('id_facture'));
+                if (is_null($status) || (int) $status === 0) {
+                    return 0;
+                }
                 return 1;
             }
-
-            return 0;
-        }
-
-        if ($this->isShipmentInvoiced()) {
-            return 1;
         }
 
         return 0;
@@ -241,23 +247,30 @@ class BR_reservationShipment extends BimpObject
             return $errors;
         }
 
-         // Ajout à l'avoir: 
+        // Ajout à l'avoir: 
+        $rebuild_facture = false;
+        
         if (!$this->isOrderInvoiced() && $this->isShipmentInvoiced()) {
-            $avoir_errors = array();
-            $orderLine = BimpObject::getInstance($this->module, 'BR_OrderLine');
-            $orderLine->find(array('id_order_line' => (int) $this->getData('id_commande_client_line')));
+            $facture_status = (int) $this->db->getValue('facture', 'fk_statut', '`rowid` = ' . (int) $shipment->getData('id_facture'));
+            if ($facture_status > 0) {
+                $avoir_errors = array();
+                $orderLine = BimpObject::getInstance($this->module, 'BR_OrderLine');
+                $orderLine->find(array('id_order_line' => (int) $this->getData('id_commande_client_line')));
 
-            if (BimpObject::objectLoaded($orderLine)) {
-                $avoir_errors = $orderLine->addToCreditNote($qty, $id_avoir, (int) $this->getData('id_equipment'));
+                if (BimpObject::objectLoaded($orderLine)) {
+                    $avoir_errors = $orderLine->addToCreditNote($qty, $id_avoir, (int) $this->getData('id_equipment'));
+                } else {
+                    $avoir_errors[] = 'ID de la ligne de commande absent ou invalide';
+                }
+
+                if (count($avoir_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Echec de l\'ajout à l\'avoir');
+                }
             } else {
-                $avoir_errors[] = 'ID de la ligne de commande absent ou invalide';
-            }
-
-            if (count($avoir_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Echec de l\'ajout à l\'avoir');
+                $rebuild_facture = true;
             }
         }
-        
+
         // Remise en stock:
         if ((int) $shipment->getData('status') === 2) {
             $ref_commande = $commande->dol_object->ref;
@@ -306,7 +319,7 @@ class BR_reservationShipment extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray($up_qty_errors, 'Des erreurs sont survenues lors de la mise à jour des statuts des réservations correspondantes');
             }
         } else {
-            // Retrait des commandes: - L'ajout à l'avoir sera fait par Bimp_Commande::removeOrderLine() si le protduit a été facturé hors expéditions. 
+            // Retrait des commandes: - L'ajout à l'avoir sera fait par Bimp_Commande::removeOrderLine() si le produit a été facturé hors expéditions. 
             $reservation = BimpObject::getInstance($this->module, 'BR_Reservation');
             if (in_array($shipment->getData('status'), array(1, 4))) {
                 $status = 250;
@@ -344,6 +357,13 @@ class BR_reservationShipment extends BimpObject
             $up_errors = $this->updateField('qty', $new_qty);
             if (count($up_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des quantités de la ligne d\'expédition');
+            }
+        }
+        
+        if ($rebuild_facture) {
+            $fac_errors = $shipment->rebuildFacture();
+            if (count($fac_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la reconstruction de la facture pour cette expédition');
             }
         }
 

@@ -119,6 +119,33 @@ forms:
                           name: socid
                           object:
                               prop: dol_object
+            - custom: 1
+              label: Note publique
+              input_name: note_public
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              value: 
+                  prop: 
+                      name: note_public
+                      object: 
+                          prop: dol_object
+                  
+            - custom: 1
+              label: Note privée
+              input_name: note_private
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              value: 
+                  prop: 
+                      name: note_private
+                      object: 
+                          prop: dol_object
                   
     add_line: 
         title: Ajouter un produit / service

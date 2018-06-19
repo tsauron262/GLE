@@ -15209,7 +15209,7 @@ i.iconRight {
   padding: 5px 0;
 }
 /* line 264, ../scss/bimpcore_new/_styles.scss */
-.buttonsContainer span, .buttonsContainer a, .buttonsContainer button, .buttonsContainer .button, .buttonsContainer .btn {
+.buttonsContainer button, .buttonsContainer .button, .buttonsContainer .btn {
   margin: 5px 10px;
   display: inline-block;
 }

@@ -595,21 +595,31 @@
 }
 
 /* line 560, ../scss/styles.scss */
+#avoirRbtForm {
+  display: none;
+  margin: 30px 0;
+}
+/* line 564, ../scss/styles.scss */
+#avoirRbtForm #avoirRbtModePaiement {
+  display: none;
+}
+
+/* line 569, ../scss/styles.scss */
 #customerDiscountsContainer {
   margin: 30px 0 20px;
 }
-/* line 563, ../scss/styles.scss */
+/* line 572, ../scss/styles.scss */
 #customerDiscountsContainer #customerDiscounts {
   max-width: 450px;
   margin: 0 30px;
 }
-/* line 569, ../scss/styles.scss */
+/* line 578, ../scss/styles.scss */
 #customerDiscountsContainer .title {
   font-weight: bold;
   font-size: 14px;
   margin-bottom: 10px;
 }
-/* line 575, ../scss/styles.scss */
+/* line 584, ../scss/styles.scss */
 #customerDiscountsContainer #totalDiscounts {
   color: #282828;
   padding: 8px;
@@ -618,27 +628,27 @@
   text-align: right;
 }
 
-/* line 584, ../scss/styles.scss */
+/* line 593, ../scss/styles.scss */
 .selectArticleLine {
   margin: 5px;
   padding: 10px;
   border: 1px solid #b4b4b4;
 }
-/* line 589, ../scss/styles.scss */
+/* line 598, ../scss/styles.scss */
 .selectArticleLine .product_price {
   font-weight: bold;
   font-size: 14px;
   text-align: right;
 }
 
-/* line 597, ../scss/styles.scss */
+/* line 606, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine,
 #curVenteRetours .returnLine {
   padding-top: 10px;
   margin-top: 10px;
   border-top: 1px solid #b4b4b4;
 }
-/* line 602, ../scss/styles.scss */
+/* line 611, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_title,
 #curVenteRetours .returnLine .product_title {
   color: #004264;
@@ -646,7 +656,7 @@
   padding-bottom: 8px;
   padding-right: 40px;
 }
-/* line 608, ../scss/styles.scss */
+/* line 617, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_title .removeArticle,
 #curVenteRetours .returnLine .product_title .removeArticle {
   -webkit-transition: all 0.3s ease;
@@ -659,19 +669,19 @@
   font-size: 28px;
   cursor: pointer;
 }
-/* line 617, ../scss/styles.scss */
+/* line 626, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_title .removeArticle:hover,
 #curVenteRetours .returnLine .product_title .removeArticle:hover {
   color: #a00000;
 }
-/* line 622, ../scss/styles.scss */
+/* line 631, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .product_info,
 #curVenteRetours .returnLine .product_info {
   color: #282828;
   font-size: 12px;
   padding-left: 15px;
 }
-/* line 628, ../scss/styles.scss */
+/* line 637, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises,
 #curVenteRetours .returnLine .article_remises {
   display: none;
@@ -680,23 +690,23 @@
   color: #8C0000;
   text-align: right;
 }
-/* line 635, ../scss/styles.scss */
+/* line 644, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .title,
 #curVenteRetours .returnLine .article_remises .title {
   font-weight: bold;
 }
-/* line 640, ../scss/styles.scss */
+/* line 649, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise,
 #curVenteRetours .returnLine .article_remises .content .remise {
   font-size: 14px;
   padding: 6px 30px 6px 0;
 }
-/* line 643, ../scss/styles.scss */
+/* line 652, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise span,
 #curVenteRetours .returnLine .article_remises .content .remise span {
   font-weight: bold;
 }
-/* line 647, ../scss/styles.scss */
+/* line 656, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise i,
 #curVenteRetours .returnLine .article_remises .content .remise i {
   -webkit-transition: all 0.3s ease;
@@ -709,25 +719,25 @@
   margin-right: -30px;
   cursor: pointer;
 }
-/* line 656, ../scss/styles.scss */
+/* line 665, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_remises .content .remise i:hover,
 #curVenteRetours .returnLine .article_remises .content .remise i:hover {
   color: #a00000;
 }
-/* line 664, ../scss/styles.scss */
+/* line 673, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options,
 #curVenteRetours .returnLine .article_options {
   padding-top: 10px;
   padding-left: 15px;
   padding-right: 60px;
 }
-/* line 669, ../scss/styles.scss */
+/* line 678, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty,
 #curVenteRetours .returnLine .article_options .article_qty {
   text-align: left;
   display: inline-block;
 }
-/* line 674, ../scss/styles.scss */
+/* line 683, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_down,
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_up,
 #curVenteRetours .returnLine .article_options .article_qty .qty_down,
@@ -740,14 +750,14 @@
   -o-transition: all 0.3s ease;
   transition: all 0.3s ease;
 }
-/* line 681, ../scss/styles.scss */
+/* line 690, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_down:hover,
 #ventePanierLines .cartArticleLine .article_options .article_qty .qty_up:hover,
 #curVenteRetours .returnLine .article_options .article_qty .qty_down:hover,
 #curVenteRetours .returnLine .article_options .article_qty .qty_up:hover {
   color: #ef7d00;
 }
-/* line 685, ../scss/styles.scss */
+/* line 694, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .article_qty_input,
 #curVenteRetours .returnLine .article_options .article_qty .article_qty_input {
   padding: 5px;
@@ -759,13 +769,13 @@
   width: 60px;
   vertical-align: middle;
 }
-/* line 695, ../scss/styles.scss */
+/* line 704, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .article_qty .article_qty_input:focus,
 #curVenteRetours .returnLine .article_options .article_qty .article_qty_input:focus {
   box-shadow: 0 0 4px #0087B4;
   border-color: #005A78;
 }
-/* line 701, ../scss/styles.scss */
+/* line 710, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .product_total_price,
 #curVenteRetours .returnLine .article_options .product_total_price {
   display: inline-block;
@@ -773,7 +783,7 @@
   margin-right: -60px;
   text-align: right;
 }
-/* line 707, ../scss/styles.scss */
+/* line 716, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .product_total_price .base_price,
 #curVenteRetours .returnLine .article_options .product_total_price .base_price {
   margin-right: 12px;
@@ -781,25 +791,25 @@
   font-size: 16px;
   text-decoration: line-through;
 }
-/* line 714, ../scss/styles.scss */
+/* line 723, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .article_options .product_total_price .final_price,
 #curVenteRetours .returnLine .article_options .product_total_price .final_price {
   color: #004264;
   font-weight: bold;
   font-size: 20px;
 }
-/* line 722, ../scss/styles.scss */
+/* line 731, ../scss/styles.scss */
 #ventePanierLines .cartArticleLine .placeAlert,
 #curVenteRetours .returnLine .placeAlert {
   margin-top: 10px;
 }
 
-/* line 727, ../scss/styles.scss */
+/* line 736, ../scss/styles.scss */
 #curVenteRetours {
   margin-top: 15px;
   display: none;
 }
-/* line 731, ../scss/styles.scss */
+/* line 740, ../scss/styles.scss */
 #curVenteRetours .totalReturnsTitle {
   font-weight: bold;
   color: #8c0000;
@@ -809,19 +819,19 @@
 }
 
 @media print {
-  /* line 741, ../scss/styles.scss */
+  /* line 750, ../scss/styles.scss */
   body * {
     visibility: hidden !important;
   }
 
-  /* line 746, ../scss/styles.scss */
+  /* line 755, ../scss/styles.scss */
   #venteTicketContainer,
   #venteTicketContainer * {
     display: block;
     visibility: visible !important;
   }
 
-  /* line 751, ../scss/styles.scss */
+  /* line 760, ../scss/styles.scss */
   #venteTicketContainer {
     position: absolute;
     left: 0;

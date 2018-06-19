@@ -1133,7 +1133,7 @@ class BimpObject
     {
         $errors = array();
 
-        if ($id_object) {
+        if ((int) $id_object) {
             if (!$this->fetch($id_object)) {
                 $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
                 return $errors;
@@ -3550,5 +3550,17 @@ class BimpObject
             return $instance->getUrl();
         }
         return BimpTools::getDolObjectUrl($instance);
+    }
+    
+    public static function getInstanceNomUrlWithIcons($instance)
+    {
+        $html = self::getInstanceNomUrl($instance);
+        $url = self::getInstanceUrl($instance);
+
+        if ($url) {
+            $html .= BimpRender::renderObjectIcons($instance, true, null, $url);
+        }
+        
+        return $html;
     }
 }

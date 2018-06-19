@@ -137,9 +137,9 @@ class commandeController extends reservationController
         $html .= '<i class="fa fa-arrow-circle-down iconLeft"></i>Attribuer des équipements';
         $html .= '</button>';
         $html .= '</div>';
-        
+
         $html .= '<div class="buttonsContainer align-right" style="display: inline-block; float: right;">';
-        
+
         if ((int) $commande->getData('id_facture')) {
             $html .= $this->renderGlobalFactureButton($commande);
             $html .= '<button type="button" class="btn btn-default disabled bs-popover" onclick="" ';
@@ -160,7 +160,7 @@ class commandeController extends reservationController
             $html .= '<i class="fa fa-plus-circle iconLeft"></i>Ajouter un produit / service';
             $html .= '</button>';
         }
-        
+
         $html .= '</div>';
 
         $html .= $this->renderEquipmentForm((int) $commande->id);
@@ -189,8 +189,8 @@ class commandeController extends reservationController
         }
 
         $shipment = BimpObject::getInstance($this->module, 'BR_CommandeShipment');
-        $list = new BC_ListTable($shipment, 'commandes', 1, null, 'Liste des expéditions', 'sign-out');
-        $list->addFieldFilterValue('id_commande_client', (int) $commande->id);
+        $list = new BC_ListTable($shipment, 'commandes', 1, (int) $commande->id, 'Liste des expéditions', 'sign-out');
+//        $list->addFieldFilterValue('id_commande_client', (int) $commande->id);
         $html .= $list->renderHtml();
 
         $html .= '</div>';
@@ -247,27 +247,30 @@ class commandeController extends reservationController
         $facture = $commande->getChildObject('facture');
         if (BimpObject::objectLoaded($facture)) {
             $ref = $facture->getData('facnumber');
+            $label = '';
+            $shipment = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
+            if (count($shipment->getList(array(
+                                'id_commande_client' => (int) $commande->id,
+                                'id_facture'         => array(
+                                    'operator' => '>',
+                                    'value'    => 0
+                                )
+                    )))) {
+                $label = 'Facture des éléments facturés hors expédition';
+            } else {
+                $label = 'Facture globale';
+            }
+            
+            $html .= '<strong>'.$label.': </strong>';
+            
+            $html .= BimpObject::getInstanceNomUrlWithIcons($facture);
+            
             if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
-                $label = '';
-                $shipment = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
-                if (count($shipment->getList(array(
-                                    'id_commande_client' => (int) $commande->id,
-                                    'id_facture'         => array(
-                                        'operator' => '>',
-                                        'value'    => 0
-                                    )
-                        )))) {
-                    $label = 'Facture des éléments facturés hors expédition';
-                } else {
-                    $label = 'Facture globale';
-                }
                 $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities($ref . '/' . $ref . '.pdf');
                 $onclick = 'window.open(\'' . htmlentities($url) . '\')';
                 $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>' . $label;
+                $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>Fichier PDF';
                 $html .= '</button>';
-            } else {
-                $html .= DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf';
             }
         } else {
             $html .= BimpRender::renderAlerts('Erreur: ID de la facture hors expédition invalide');

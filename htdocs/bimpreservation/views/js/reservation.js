@@ -161,35 +161,8 @@ function openEquipmentsForm() {
     $('#openEquipmentsFormButton').parent().slideUp(250);
 }
 
-function createShipment($button, id_commande) {
-    loadModalForm($button, {
-        module: 'bimpreservation',
-        object_name: 'BR_CommandeShipment',
-        param_values: '{"fields": {"id_commande_client": ' + id_commande + '}}'
-    }, 'Création d\'une nouvelle expédition', function () {
-
-    });
-
-//    if ($button.hasClass('disabled')) {
-//        return;
-//    }
-//
-//    $button.addClass('disabled');
-//
-//    BimpAjax('createShipment', {
-//        id_commande_client: id_commande
-//    }, $('#newShipmentResult'), {
-//        $button: $button,
-//        display_success_in_popup_only: true,
-//        success: function (result, bimpAjax) {
-//            bimpAjax.$button.removeClass('disabled');
-//            reloadObjectList('BR_Reservation_commandes_list_table');
-//            reloadObjectList('BR_CommandeShipment_commandes_list_table');
-//        },
-//        error: function (result, bimpAjax) {
-//            bimpAjax.$button.removeClass('disabled');
-//        }
-//    });
+function createSelectedShipmentsInvoice() {
+    bimp_msg('ici');
 }
 
 $(document).ready(function () {

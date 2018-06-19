@@ -979,15 +979,45 @@ class BC_Vente extends BimpObject
         $html .= '</select>';
         $html .= '</div>';
 
-        // Utilisation avoir client: 
+        // Remboursement avoir Client:
+        $html .= '<div id="avoirRbtForm">';
+
+        $html .= '<p class="alert alert-warning" style="margin: 30px 0">';
+        $html .= 'Cette opération donne lieu à un avoir client. Aucun paiement de la part du client ne sera pris en compte.';
+        $html .= '</p>';
+
+        $html .= '<div id="avoirRbtMode">';
+        $html .= '<span style="font-weight: bold; font-size: 14px">Avoir client : </span>';
+        $html .= BimpInput::renderInput('select', 'avoir_rbt_mode', 'remise', array(
+                    'options' => array(
+                        'remise' => 'Convertir en remise future',
+                        'rbt'    => 'Rembourser'
+                    )
+        ));
+        $html .= '</div>';
+
+        $html .= '<div id="avoirRbtModePaiement">';
+        $html .= '<span style="font-weight: bold; font-size: 14px">Mode de remboursement de l\'avoir client : </span>';
+        $html .= BimpInput::renderInput('select', 'avoir_rbt_paiement', 'LIQ', array(
+                    'options' => array(
+                        'LIQ' => 'Espèce',
+                        'CHQ' => 'Chèque',
+                        'CB'  => 'Carte bancaire',
+                        'VIR' => 'Virement bancaire'
+                    )
+        ));
+        $html .= '</div>';
+        $html .= '</div>';
+
+        // Utilisation remises client: 
         $id_client = (int) $this->getData('id_client');
         $html .= '<div id="customerDiscountsContainer"' . (!$id_client ? 'style="display: none"' : '') . '>';
-        $html .= '<div class="title"><i class="fas fa5-money-check-alt iconLeft"></i>Avoirs client à utiliser :</div>';
+        $html .= '<div class="title"><i class="fas fa5-money-check-alt iconLeft"></i>Remises client disponibles à utiliser :</div>';
         $html .= '<div id="customerDiscounts">';
         if ($id_client) {
             $html .= $this->renderDiscountsAssociation();
         }
-        $html .= '<div id="totalDiscounts">Total avoirs: <span></span></div>';
+        $html .= '<div id="totalDiscounts">Total remises client utilisées: <span></span></div>';
         $html .= '</div>';
         $html .= '</div>';
 
@@ -1638,6 +1668,17 @@ class BC_Vente extends BimpObject
             $errors[] = 'Paiements insuffisants';
         }
 
+        if ((float) $this->getData('total_ttc') < 0) {
+            $rbt_mode = BimpTools::getValue('avoir_rbt_mode', '');
+            if (!$rbt_mode) {
+                $errors[] = 'Mode de remboursement de l\'avoir client absent';
+            } elseif ($rbt_mode === 'rbt') {
+                if (!BimpTools::isSubmit('avoir_rbt_paiement')) {
+                    $errors[] = 'Mode de paiement du remboursement de l\'avoir client absent';
+                }
+            }
+        }
+
         if (count($errors)) {
             return false;
         }
@@ -1890,8 +1931,7 @@ class BC_Vente extends BimpObject
         $caisse = $this->getChildObject('caisse');
 
         // Création de la facture
-
-        $is_avoir = ((float) $this->getData('total_ttc') >= 0 ? false : true);
+        $is_avoir = ((float) $this->getData('total_ttc') < 0);
 
         $facture = new Facture($db);
 
@@ -2076,10 +2116,12 @@ class BC_Vente extends BimpObject
             require_once DOL_DOCUMENT_ROOT . '/compta/paiement/class/paiement.class.php';
         }
 
+        $total_paid = 0;
+        $total_facture_ttc = (float) $this->getData('total_ttc');
+
         if (!$is_avoir) {
-            // Ajout des paiements (facture standard): 
+            // Ajout des paiements: 
             $paiements = $this->getChildrenObjects('paiements');
-            $total_paid = 0;
 
             foreach ($paiements as $paiement) {
                 $montant = $paiement->getData('montant');
@@ -2107,8 +2149,6 @@ class BC_Vente extends BimpObject
                 }
             }
 
-            $total_facture_ttc = (float) $this->getData('total_ttc');
-
             if ($total_paid > $total_facture_ttc) {
                 $returned = round($total_facture_ttc - $total_paid, 2);
 
@@ -2133,55 +2173,105 @@ class BC_Vente extends BimpObject
                         }
                     }
                 }
-                if ($facture->set_paid($user) <= 0) {
+                if ($facture->set_paid($user) < 0) {
                     $errors[] = 'Echec de l\'enregistrement du statut "payé" pour cette facture';
                 }
             } else {
                 $diff = $total_facture_ttc - $total_paid;
-                if ($diff < 0.01) {
+                if ($diff < 0.01 && $diff > -0.01) {
                     if ($facture->set_paid($user) <= 0) {
                         $errors[] = 'Echec de l\'enregistrement du statut "payé" pour cette facture';
                     }
                 }
             }
         } else {
-            // On est dans le cas d'un avoir, suppression des paiements éventuels: 
+//            // On est dans le cas d'un avoir, suppression des paiements éventuels: 
             $paiement = BimpObject::getInstance('bimpcaisse', 'BC_VentePaiement');
             $paiement->deleteByParent($this->id);
 
-            // Création de l'avoir: 
+            $avoir_rbt_mode = BimpTools::getValue('avoir_rbt_mode', '');
 
-            $avoir = new Facture($db);
-            $avoir->socid = $id_client;
-            $avoir->date = dol_now();
-            $avoir->type = Facture::TYPE_CREDIT_NOTE;
-            $avoir->note_private = $note;
-            $avoir->fk_user_author = $user->id;
-            $avoir->fk_facture_source = $facture->id;
+            switch ($avoir_rbt_mode) {
+                case 'remise':
+                    $remise_errors = array();
+                    $bimpFacture = BimpObject::getInstance('bimpcore', 'Bimp_Facture', $facture->id);
+                    if (BimpObject::objectLoaded($bimpFacture)) {
+                        $remise_errors = $bimpFacture->convertToRemise();
+                    } else {
+                        $remise_errors[] = 'Fature invalide';
+                    }
 
-            $avoir->array_options['options_type'] = BimpCore::getConf('bimpcaisse_secteur_code');
-            $avoir->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
+                    if (count($remise_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la conversion du montant de la facture en remise client');
+                    }
+                    break;
 
-            if ($avoir->create($user) <= 0) {
-                $avoir_errors = BimpTools::getErrorsFromDolObject($avoir, null, $langs);
-                $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Des erreurs sont survenues lors de la création de l\'avoir');
-            } else {
-                $this->set('id_avoir', (int) $avoir->id);
+                case 'rbt':
+                    $avoir_rbt_paiement = BimpTools::getValue('avoir_rbt_paiement', '');
+                    $rbt_errors = array();
 
-                $totalpaye = $facture->getSommePaiement();
-                $totalcreditnotes = $facture->getSumCreditNotesUsed();
-                $totaldeposits = $facture->getSumDepositsUsed();
-                $remain_to_pay = abs($facture->total_ttc - $totalpaye - $totalcreditnotes - $totaldeposits);
+                    if (!$avoir_rbt_mode) {
+                        $rbt_errors[] = 'Mode de réglement du remboursement absent';
+                    } else {
+                        $p = new Paiement($db);
+                        $p->datepaye = dol_now();
+                        $p->amounts = array(
+                            $facture->id => $total_facture_ttc
+                        );
+                        $p->paiementid = (int) dol_getIdFromCode($db, $avoir_rbt_paiement, 'c_paiement');
+                        $p->facid = (int) $facture->id;
+                        $p->note = 'Remboursement avoir client (facture négative)';
 
-                $avoir->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), $remain_to_pay, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
-
-                if ($avoir->validate($user) <= 0) {
-                    $msg = 'Echec de la validation de l\'avoir';
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir), $msg);
-                } else {
-                    $avoir->generateDocument(self::$facture_model, $langs);
-                }
+                        if ($p->create($user) < 0) {
+                            $msg = 'Echec de la création du remboursement';
+                            $rbt_errors[] = $msg;
+                            BimpTools::getErrorsFromDolObject($p, $errors, $langs);
+                        } elseif (!empty($conf->banque->enabled)) {
+                            if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', self::$facture_default_bank_account_id, '', '') < 0) {
+                                $rbt_errors[] = 'Echec de l\'ajout du remboursement au compte bancaire N°' . self::$facture_default_bank_account_id;
+                                BimpTools::getErrorsFromDolObject($p, $errors, $langs);
+                            }
+                        }
+                    }
+                    if (count($rbt_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($rbt_errors, 'Des erreurs sont survenues lors de l\'ajout à la facture du remboursement de l\'avoir');
+                    }
+                    break;
             }
+
+//            // Création de l'avoir: 
+//
+//            $avoir = new Facture($db);
+//            $avoir->socid = $id_client;
+//            $avoir->date = dol_now();
+//            $avoir->type = Facture::TYPE_CREDIT_NOTE;
+//            $avoir->note_private = $note;
+//            $avoir->fk_user_author = $user->id;
+//            $avoir->fk_facture_source = $facture->id;
+//
+//            $avoir->array_options['options_type'] = BimpCore::getConf('bimpcaisse_secteur_code');
+//            $avoir->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
+//
+//            if ($avoir->create($user) <= 0) {
+//                $avoir_errors = BimpTools::getErrorsFromDolObject($avoir, null, $langs);
+//                $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Des erreurs sont survenues lors de la création de l\'avoir');
+//            } else {
+//                $this->set('id_avoir', (int) $avoir->id);
+//
+//                $totalpaye = $facture->getSommePaiement();
+//                $totalcreditnotes = $facture->getSumCreditNotesUsed();
+//                $totaldeposits = $facture->getSumDepositsUsed();
+//                $remain_to_pay = abs($facture->total_ttc - $totalpaye - $totalcreditnotes - $totaldeposits);
+//
+//                $avoir->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), $remain_to_pay, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
+//
+//                if ($avoir->validate($user) <= 0) {
+//                    $msg = 'Echec de la validation de l\'avoir';
+//                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir), $msg);
+//                } else {
+//                    $avoir->generateDocument(self::$facture_model, $langs);
+//                }
+//            }
         }
 
         $facture->generateDocument(self::$facture_model, $langs);

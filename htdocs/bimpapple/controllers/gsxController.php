@@ -35,18 +35,12 @@ class gsxController extends BimpController
 
     public function initGsx($requestType = false)
     {
-        if (in_array($requestType, $this->tabReqForceIphone)) {
-            $this->isIphone = true;
-        }
-        if (in_array($requestType, $this->tabReqForceNonIphone)) {
-            $this->isIphone = false;
-        }
 
         $this->gsx = new GSX($this->isIphone);
         return array_merge($this->gsx->errors['init'], $this->gsx->errors['soap']);
     }
 
-    public function setSerial($serial)
+    public function setSerial($serial, $requestType = false)
     {
         if (preg_match('/^S([0-9A-Z]{11,12})$/', $serial, $matches)) {
             $serial = $matches[1];
@@ -55,6 +49,13 @@ class gsxController extends BimpController
             $this->isIphone = true;
         }
         $this->serial = $serial;
+        
+        if (in_array($requestType, $this->tabReqForceIphone)) {
+            $this->isIphone = true;
+        }
+        if (in_array($requestType, $this->tabReqForceNonIphone)) {
+            $this->isIphone = false;
+        }
     }
 
     public function loadRepairs($id_sav)
@@ -714,7 +715,7 @@ class gsxController extends BimpController
     {
         $html = '';
 
-        $this->setSerial($serial);
+        $this->setSerial($serial, $requestType);
 
         $request = '';
         $client = '';

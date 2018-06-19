@@ -860,7 +860,7 @@ class gsxController extends BimpController
                     $requestData[$nomReq]['repairData']['fileData'] = "Fichier joint exclu du log";
             }
             if (count($this->gsx->errors['log']['soap']))
-                dol_syslog("Erreur GSX : " . $this->gsx->getGSXErrorsHtml() . "Requête :" . print_r($requestData, true) . " Réponse : " . print_r($response, true), 4, 0, "_apple");
+                dol_syslog("Erreur GSX : " . $this->gsx->getGSXErrorsHtml() . "Requête :" . print_r($requestData, true) . " Réponse : " . print_r($response, true), 4, 0, "_apple"). "Wsdl : ".$this->gsx->wsdlUrl;
         } elseif (isset($response['error'])) {
             switch ($response['error']) {
                 case 'partInfos':

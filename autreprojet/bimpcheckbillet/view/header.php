@@ -32,11 +32,14 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     foreach ($arrayofjs as $jsfile)
         print '<script type="text/javascript" src="' . $jsfile . '"></script>';
 
-    print '<script>var id_event_session=parseInt(' . $_SESSION['id_event'] . ');</script>';
+    if (isset($_SESSION['id_event']))
+        print '<script>var id_event_session=parseInt(' . $_SESSION['id_event'] . ');</script>';
+    else
+        print '<script>var id_event_session=null;</script>';
 
     print '<link rel="icon" href="../img/logo.png">';
     print '</head>';
-    
+
     if (isset($_SESSION['user'])) {
         global $user;
         $user = json_decode($_SESSION['user']);
@@ -67,9 +70,12 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="create_tariff.php">Créer</a>
           <a class="dropdown-item" href="modify_tariff.php">Modifier</a>';
-          if (USE_COMBINATION)
-              '<a class="dropdown-item" href="create_combination.php">Créer combinaison</a>
-        </div>
+            if (USE_COMBINATION) {
+                print '<a class="dropdown-item" href="create_combination.php">Créer déclinaison</a>';
+                print '<a class="dropdown-item" href="link_combination_tariff.php">Lier déclinaison</a>';
+            }
+
+            print '</div>
       </li>';
             print '<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Ticket</a>

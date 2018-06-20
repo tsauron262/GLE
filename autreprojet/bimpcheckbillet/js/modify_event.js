@@ -49,6 +49,9 @@ function getEvents() {
                     }
                     $('img#img_display').attr('src', +'../img/event/' + filename);
                 }
+            } else if (out.events.length === 0) {
+                alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
+                window.location.replace('../view/create_event.php');
             } else {
                 setMessage('alertSubmit', "Erreur 1286.", 'error');
                 $('button[name=create]').hide();
@@ -94,16 +97,16 @@ function modifyEvent(id_event, label, description, place, date_start, time_start
             action: 'modify_event'
         },
         error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 3564.', 'error');
+            setMessage('alertBottom', 'Erreur serveur 3564.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                setMessage('alertSubmit', "Evènement modifié.", 'msg');
+                setMessage('alertBottom', "Evènement modifié.", 'msg');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 3584.', 'error');
+                setMessage('alertBottom', 'Erreur serveur 3584.', 'error');
             }
         }
     });
@@ -119,16 +122,16 @@ function draftEvent(id_event) {
             action: 'draft_event'
         },
         error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 7886.', 'error');
+            setMessage('alertBottom', 'Erreur serveur 7886.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                setMessage('alertSubmit', "Evènement définit comme brouillon.", 'msg');
+                setMessage('alertBottom', "Evènement définit comme brouillon.", 'msg');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 2354.', 'error');
+                setMessage('alertBottom', 'Erreur serveur 2354.', 'error');
             }
         }
     });
@@ -144,16 +147,16 @@ function validateEvent(id_event) {
             action: 'validate_event'
         },
         error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 3486.', 'error');
+            setMessage('alertBottom', 'Erreur serveur 3486.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                setMessage('alertSubmit', "Evènement validé.", 'msg');
+                setMessage('alertBottom', "Evènement validé.", 'msg');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 2484.', 'error');
+                setMessage('alertBottom', 'Erreur serveur 2484.', 'error');
             }
         }
     });
@@ -169,16 +172,16 @@ function closeEvent(id_event) {
             action: 'close_event'
         },
         error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 3486.', 'error');
+            setMessage('alertBottom', 'Erreur serveur 3486.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                setMessage('alertSubmit', "Evènement fermé.", 'msg');
+                setMessage('alertBottom', "Evènement fermé.", 'msg');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 2484.', 'error');
+                setMessage('alertBottom', 'Erreur serveur 2484.', 'error');
             }
         }
     });
@@ -190,6 +193,7 @@ function createPrestashopCategory(id_event, label_event, id_categ_parent, descri
         type: "POST",
         url: URL_PRESTASHOP,
         data: {
+            id_event: id_event,
             label: label_event,
             description: description,
             place: place,
@@ -296,7 +300,6 @@ function initEvents() {
         e.preventDefault();
         var id_event = $('select[name=id_event] > option:selected').val();
         if (parseInt(id_event) > 0) {
-//        if (window.FormData !== undefined) {
             modifyEvent($('select[name=id_event] > option:selected').val(),
                     $('input[name=label]').val(),
                     tinymce.get('description').getContent(),
@@ -305,10 +308,6 @@ function initEvents() {
                     $('input[name=time_start]').val(),
                     $('input[name=date_end]').val(),
                     $('input[name=time_end]').val());
-//        } else {
-//            alert('Pas compatible avec navigateur');
-//        }
-//        return false;
         } else {
             setMessage('alertSubmit', 'Veuillez sélectionner un évènement.', 'error');
         }
@@ -319,9 +318,10 @@ function initEvents() {
         var id_event = $('select[name=id_event] > option:selected').val();
         if (id_event > 0) {
             var event = getEventById(id_event);
-            $('img#img_display').attr('src', '..//img/event/' + event.filename);
+            $('img#img_display').attr('src', '../img/event/' + event.filename);
             autoFill(event);
         } else {
+            $('img#img_display').attr('src', '');
             autoEmpty();
         }
 
@@ -358,7 +358,7 @@ function initEvents() {
         if (id_event > 0)
             draftEvent(id_event);
         else
-            setMessage('alertSubmit', "Veuillez sélectionnez un évènement.", 'error');
+            setMessage('alertBottom', "Veuillez sélectionnez un évènement.", 'error');
     });
 
     $('button[name=validate]').click(function () {
@@ -368,7 +368,7 @@ function initEvents() {
         if (id_event > 0)
             validateEvent(id_event);
         else
-            setMessage('alertSubmit', "Veuillez sélectionnez un évènement.", 'error');
+            setMessage('alertBottom', "Veuillez sélectionnez un évènement.", 'error');
     });
 
     $('button[name=close]').click(function () {
@@ -378,7 +378,7 @@ function initEvents() {
         if (id_event > 0)
             closeEvent(id_event);
         else
-            setMessage('alertSubmit', "Veuillez sélectionnez un évènement.", 'error');
+            setMessage('alertBottom', "Veuillez sélectionnez un évènement.", 'error');
     });
 
     $('div[name=create_prestashop_category]').click(function () {
@@ -444,6 +444,8 @@ function autoFill(event) {
 
 function autoEmpty() {
     $('input[name=label]').val('');
+//    $(tinymce.get('description').getBody()).html('');
+//    $(tinymce.get('place').getBody()).html('');
     $("#description").val('');
     $("#place").val('');
     $('input[name=date_start]').val(formatDate(''));

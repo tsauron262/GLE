@@ -25,7 +25,8 @@ function getEvents() {
                 displayCheckboxes(events);
                 getUser();
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 3546.', 'error');
+                setMessage('alertSubmit', "Les liasons administrateur-évènement ne seront disponibles qu'une fois qu'un évènement aura été créée.", 'warn');
+                getUser();
             }
         }
     });

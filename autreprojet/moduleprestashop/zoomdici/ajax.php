@@ -85,7 +85,7 @@ switch ($action) {
 
             $category = new Category();
             $category->name = array((int) Configuration::get('PS_LANG_DEFAULT') => $_POST['label']);
-            $category->link_rewrite = array((int) Configuration::get('PS_LANG_DEFAULT') => str_replace(' ', '_', $_POST['label']));
+            $category->link_rewrite = array((int) Configuration::get('PS_LANG_DEFAULT') => $_POST['id_event']);
             $category->id_parent = (int) $_POST['id_categ_parent'];
             $category->description = $description;
             $category->add();

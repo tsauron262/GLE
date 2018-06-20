@@ -17,13 +17,15 @@ class Tariff {
     public $id_prod_extern;
     public $filename;
     public $filename_custom;
+    public $combinations;
 
     public function __construct($db) {
         $this->db = $db;
         $this->errors = array();
+        $this->combinations = array();
     }
 
-    public function fetch($id) {
+    public function fetch($id, $fetch_combination = false) {
 
         if ($id < 0) {
             $this->errors[] = "Identifiant invalide :" . $id;
@@ -87,6 +89,9 @@ class Tariff {
                 }
                 @$this->filename = $filename;
                 @$this->filename_custom = $filename_custom;
+                if ($fetch_combination) {
+                    $this->fetchCombination();
+                }
                 return 1;
             }
         } else {
@@ -310,7 +315,7 @@ class Tariff {
         return -1;
     }
 
-    public function getTariffsForEvent($id_event) {
+    public function getTariffsForEvent($id_event, $fetch_combination = false) {
 
         $tariffs = array();
 
@@ -323,7 +328,7 @@ class Tariff {
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
                 $tariff = new Tariff($this->db);
-                $tariff->fetch($obj->id);
+                $tariff->fetch($obj->id, $fetch_combination);
                 $tariffs[] = $tariff;
             }
             return $tariffs;
@@ -443,6 +448,23 @@ class Tariff {
         }
 
         $this->errors[] = "Aucune image trouvé";
+        return -1;
+    }
+
+    public function fetchCombination() {
+        $sql = 'SELECT fk_combination';
+        $sql .= ' FROM tariff_combination';
+        $sql .= ' WHERE fk_tariff=' . $this->id;
+
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                $this->combinations[] = $obj->fk_combination;
+            }
+        } elseif (!$result) {
+            $this->errors[] = "Id produit extern inconnu";
+            return -2;
+        }
         return -1;
     }
 

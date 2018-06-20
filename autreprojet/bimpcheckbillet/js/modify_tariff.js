@@ -42,8 +42,11 @@ function getEvents() {
                         $('select[name=id_event]').trigger('change');
                     }
                 }
+            } else if (out.events.length === 0){
+                alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
+                window.location.replace('../view/create_event.php');
             } else {
-                setMessage('alertSubmit', "Créer un évènement avant de définir un tarif.", 'error');
+                setMessage('alertSubmit', "Erreur 3154.", 'error');
                 $('button[name=create]').hide();
             }
         }

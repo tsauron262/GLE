@@ -25,6 +25,8 @@ function getEvents() {
                 });
                 if (id_event_session > 0)
                     $('div#event' + id_event_session + ' > h4 > a').click();
+            } else if (out.events.length === 0) {
+                setMessage('alertSubmit', "Aucun évènement n'a été créer", 'warn');
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 3767.', 'error');
             }

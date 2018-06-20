@@ -20,7 +20,10 @@ $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME;
 $db = new PDO($dsn, DB_USER, DB_PASS_WORD)
         or die("Impossible de se connecter à la base interne : " . mysql_error());
 
-if (!isset($_POST['sender']))
+$action = $_POST['action'];
+
+
+if (!isset($_POST['sender']) and $action != 'login' and $action != 'register')
     $user_session = json_decode($_SESSION['user']);
 
 $user = new User($db);
@@ -29,7 +32,6 @@ $tariff = new Tariff($db);
 $ticket = new Ticket($db);
 $combination = new Combination($db);
 
-$action = $_POST['action'];
 
 if (!IS_MAIN_SERVER) {
     if ($action != 'check_ticket' and $action != 'login') {
@@ -305,11 +307,20 @@ switch ($action) {
      */
     case 'create_combination': {
             echo json_encode(array(
-                'id_inserted' => $combination->create($_POST['label']),
+                'id_inserted' => $combination->create($_POST['label'], $_POST['price'], $_POST['number_place']),
                 'errors' => $combination->errors));
             break;
         }
-        
+
+    /**
+     * link_combination_tariff.php
+     */
+    case 'link_combination_tariff': {
+            echo json_encode(array(
+                'id_inserted' => $combination->createTariffCombination($_POST['id_tariff'], $_POST['id_combination']),
+                'errors' => $combination->errors));
+            break;
+        }
     /**
      * General
      */
@@ -324,6 +335,12 @@ switch ($action) {
     case 'get_tariffs_for_event': {
             echo json_encode(array(
                 'tariffs' => $tariff->getTariffsForEvent($_POST['id_event']),
+                'errors' => $tariff->errors));
+            break;
+        }
+    case 'get_tariffs_for_event_with_combination': {
+            echo json_encode(array(
+                'tariffs' => $tariff->getTariffsForEvent($_POST['id_event'], true),
                 'errors' => $tariff->errors));
             break;
         }
@@ -348,6 +365,12 @@ switch ($action) {
                 'event' => $event,
                 'image_name' => $tariff->getImageName($_POST['id_tariff']),
                 'errors' => array_merge($tariff->errors, $event->errors)));
+            break;
+        }
+    case 'get_all_combinations': {
+            echo json_encode(array(
+                'combinations' => $combination->getAllCombination(),
+                'errors' => $combination->errors));
             break;
         }
 

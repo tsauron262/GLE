@@ -30,29 +30,39 @@ class Combination {
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                $this->id = intVal($id);
+                $this->id = (int) $id;
                 $this->label = stripslashes($obj->label);
-                $this->id_combination_extern = intVal($obj->id_combination_extern);
+                $this->price = (float) $obj->price;
+                $this->number_place = (int) $obj->number_place;
+                $this->id_combination_extern = (int) $obj->id_combination_extern;
                 return 1;
             }
         } else {
-            $this->errors[] = "Aucune combinaison n'a l'identifiant " . $id;
+            $this->errors[] = "Aucune déclinaison n'a l'identifiant " . $id;
             return -2;
         }
         return -1;
     }
 
-    public function create($label) {
+    public function create($label, $price, $number_place) {
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
+        if ($price == '')
+            $this->errors[] = "Le champ prix est obligatoire";
+        if ($number_place == '')
+            $this->errors[] = "Le champ nombre de place est obligatoire";
         if (sizeof($this->errors) != 0)
             return -3;
 
         $sql = 'INSERT INTO `combination` (';
-        $sql.= '`label`';
+        $sql.= '`label`,';
+        $sql.= '`price`,';
+        $sql.= '`number_place`';
         $sql.= ') ';
         $sql.= 'VALUES ("' . addslashes($label) . '"';
+        $sql .= ', ' . $price;
+        $sql .= ', ' . $number_place;
         $sql.= ')';
 
         try {
@@ -63,7 +73,7 @@ class Combination {
             $this->db->commit();
             return $last_insert_id;
         } catch (Exception $e) {
-            $this->errors[] = "Impossible de créer la combinaison. " . $e;
+            $this->errors[] = "Impossible de créer la déclinaison. " . $e;
             $this->db->rollBack();
             return -2;
         }
@@ -75,13 +85,13 @@ class Combination {
         if ($id_tariff == '')
             $this->errors[] = "Le champ identifiant tarif est obligatoire";
         if ($id_combination == '')
-            $this->errors[] = "Le champ identifiant combinaisonest obligatoire";
+            $this->errors[] = "Le champ identifiant déclinaisonest obligatoire";
         if (sizeof($this->errors) != 0)
             return -3;
 
         $sql = 'INSERT INTO `tariff_combination` (';
-        $sql.= '`id_tariff`';
-        $sql.= ', `id_combination`';
+        $sql.= '`fk_tariff`';
+        $sql.= ', `fk_combination`';
         $sql.= ') ';
         $sql.= 'VALUES (' . $id_tariff;
         $sql.= ', ' . $id_combination;
@@ -96,7 +106,7 @@ class Combination {
             $this->db->commit();
             return $last_insert_id;
         } catch (Exception $e) {
-            $this->errors[] = "Impossible de créer la liaison tarif - combinaison. " . $e;
+            $this->errors[] = "Impossible de créer la liaison tarif - déclinaison. " . $e;
             $this->db->rollBack();
             return -2;
         }
@@ -108,7 +118,7 @@ class Combination {
         if ($id_tariff == '')
             $this->errors[] = "Le champ identifiant tarif est obligatoire";
         if ($id_combination == '')
-            $this->errors[] = "Le champ identifiant combinaison est obligatoire";
+            $this->errors[] = "Le champ identifiant déclinaison est obligatoire";
         if (sizeof($this->errors) != 0)
             return -3;
 
@@ -123,9 +133,35 @@ class Combination {
             $this->db->commit();
             return 1;
         } catch (Exception $e) {
-            $this->errors[] = "Impossible de supprimer la liaison tarif - combinaison. " . $e;
+            $this->errors[] = "Impossible de supprimer la liaison tarif - déclinaison. " . $e;
             $this->db->rollBack();
             return -2;
+        }
+        return -1;
+    }
+
+    public function getAllCombination() {
+
+        $combinations = array();
+
+        $sql = 'SELECT id, label, id_combination_extern, price, number_place';
+        $sql .= ' FROM combination';
+
+
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                $combination = new Combination($this->db);
+                $combination->fetch($obj->id);
+                $combinations[] = $combination;
+            }
+            return $combinations;
+        } elseif ($result) {
+            $this->errors[] = "Aucune déclinaison n'ont été créée.";
+            return -2;
+        } else {
+            $this->errors[] = "Erreur SQL 3481.";
+            return -3;
         }
         return -1;
     }

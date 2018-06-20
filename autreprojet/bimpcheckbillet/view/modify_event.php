@@ -39,6 +39,8 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="event">Evènement </label><br/>';
     print '<select class="chosen-select" name="id_event"><option value="">Sélectionnez un évènement</option></select><br/><br/>';
 
+    print '<div id="alertSubmit"></div><br/>';
+
     print '<br/><div style="'
             . 'border: 1px solid #c2c2c2;'
             . 'border-radius: 8px;'
@@ -66,7 +68,7 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
 
     print '<label for="place">Lieu </label>';
     print '<textarea id="place" class="tinymce" placeholder="Lieu" rows="3" name="place" style="width: 500px"></textarea><br/>';
-    
+
     print '<label for="date_start">Date de début</label><br/>';
     print '<input class="form-control" placeholder="Date de début" type="text" name="date_start" style="display: inline ; width: 160px"/>';
     print '<input class="form-control" type="time" value="00:00" name="time_start" style="display: inline ; width: 100px"/><br/><br/>';
@@ -83,12 +85,14 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="img_display">Image</label><br/>';
     print '<img id="img_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
 
-    print '<div id="alertSubmit"></div><br/>';
 
     print '<button class="btn btn-primary" name="modify">Modifier évènement</button>';
 
 //    print '<button class="btn btn-danger" name="delete">Supprimer évènement</button>';
-
+    
+    print '<div id="alertBottom"></div><br/><br/>';
+   
+    
     print '</form><br/>';
 
     print '<label>Statut</label><br/>';

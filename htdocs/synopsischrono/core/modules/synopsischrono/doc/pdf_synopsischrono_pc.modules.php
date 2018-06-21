@@ -245,7 +245,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
                 $pdf->SetXY('20', '71');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-                $pdf->MultiCell(150, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
+                $pdf->MultiCell(60, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
 
 
 

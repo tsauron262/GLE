@@ -236,7 +236,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                     $tel = $addr->phone;
                     $mail = $addr->email;
                 }
-                $address = $chrono->societe->name;
+                $address = substr($chrono->societe->name,0,30);
 
                 if ($contact != "" && $contact != $chrono->societe->name)
                     $address .= "\n" . $contact;
@@ -371,7 +371,7 @@ en espèces (plafond maximun de 1000€), en carte bleue\n\n";
                     $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
                     $pdf->SetTextColor("black");
                     $pdf->SetXY($x, '278');
-                    $pdf->MultiCell(38, 6, $chrono->societe->nom, 0, 'C');
+                    $pdf->MultiCell(38, 6, substr($chrono->societe->name,0,25), 0, 'C');
                 }
 //                $pdf->MultiCell(30, 6, $chrono->ref, 0, 'L');
 //                for($i=0;$i<1000;$i = $i+5){

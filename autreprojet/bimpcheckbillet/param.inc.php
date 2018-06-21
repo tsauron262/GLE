@@ -23,7 +23,7 @@ define('URL_CHECK', "http://192.168.0.78/~tilito/bimp-erp/autreprojet/bimpcheckb
 
 define('PRESTA_PREF', "ps_");
 
-define('USE_COMBINATION', true);
+define('USE_ATTRIBUTE', true);
 
 // Ids categories parent in prestashop
 define('ID_CATEG_FESTIVAL', 96);

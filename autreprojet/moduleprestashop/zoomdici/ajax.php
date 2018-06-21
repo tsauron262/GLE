@@ -115,10 +115,13 @@ switch ($action) {
             break;
         }
 
-    case 'getCombinations' : {
-            $product = new Product((int) $_POST['id_prod_extern']);
-            $combinations = $product->getAttributeCombinationsById(5, Context::getContext()->language->id);
-            die(Tools::jsonEncode(array('combinations' => $combinations, 'errors' => array())));
+    case 'createAttributeGroup' : {
+            $attribute_group = new AttributeGroup();
+            $attribute_group->group_type = (int) $_POST['type'];
+            $attribute_group->name = array((int) Configuration::get('PS_LANG_DEFAULT') => $_POST['label']);
+            $attribute_group->public_name = array((int) Configuration::get('PS_LANG_DEFAULT') => $_POST['label']);
+            $attribute_group->add();
+            die(Tools::jsonEncode(array('id_inserted' => $attribute_group->id, 'errors' => array())));
             break;
         }
 

@@ -89,8 +89,6 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
 
     print '<div class="btn btn-primary" name="toggle_active" style="display: none;">Activer/désactiver produit </div><br/>';
 
-//    print '<div class="btn btn-primary" name="get_combinations" style="display: block;">Obtenir déclinaisons </div><br/>';
-
     print '<div class="alert alert-info" role="alert" name="product_not_created" style="display: none"><strong>Information</strong>: Créez le produit prestashop pour pouvoir l\'activer.</div>';
 
 

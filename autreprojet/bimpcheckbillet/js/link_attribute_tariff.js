@@ -5,7 +5,7 @@
 
 var events;
 var tariffs;
-var combinations;
+var attributes;
 
 /**
  * Ajax call
@@ -45,7 +45,7 @@ function getEvents() {
                         $('select[name=id_event]').trigger('change');
                     }
                 }
-                getCombinationAll();
+                getAttributeAll();
             } else if (out.events.length === 0) {
                 alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
                 window.location.replace('../view/create_event.php');
@@ -57,12 +57,12 @@ function getEvents() {
     });
 }
 
-function getCombinationAll() {
+function getAttributeAll() {
     $.ajax({
         type: "POST",
         url: "../interface.php",
         data: {
-            action: 'get_all_combinations'
+            action: 'get_all_attributes'
         },
         error: function () {
             setMessage('alertSubmit', 'Erreur serveur 9472.', 'error');
@@ -71,15 +71,15 @@ function getCombinationAll() {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
-            } else if (out.combinations.length > 0) {
-                combinations = out.combinations;
-                out.combinations.forEach(function (combination) {
-                    $('select[name=combination]').append(
-                            '<option value=' + combination.id + '>' + combination.label + '</option>');
+            } else if (out.attributes.length > 0) {
+                attributes = out.attributes;
+                out.attributes.forEach(function (attribute) {
+                    $('select[name=attribute]').append(
+                            '<option value=' + attribute.id + '>' + attribute.label + '</option>');
                 });
                 $('.chosen-select').trigger('chosen:updated');
             } else {
-                setMessage('alertSubmit', "Merci de créer des déclinaison avant de les lier.", 'warn');
+                setMessage('alertSubmit', "Merci de créer des attributs avant de les lier.", 'warn');
             }
         }
     });
@@ -94,7 +94,7 @@ function getTariffsForEvent(id_event) {
         url: "../interface.php",
         data: {
             id_event: id_event,
-            action: 'get_tariffs_for_event_with_combination'
+            action: 'get_tariffs_for_event_with_attribute'
         },
         error: function () {
             setMessage('alertSubmit', 'Erreur serveur 3564.', 'error');
@@ -119,15 +119,15 @@ function getTariffsForEvent(id_event) {
     });
 }
 
-function link(id_tariff, id_combination) {
+function link(id_tariff, id_attribute) {
 
     $.ajax({
         type: "POST",
         url: "../interface.php",
         data: {
             id_tariff: id_tariff,
-            id_combination: id_combination,
-            action: 'link_combination_tariff'
+            id_attribute: id_attribute,
+            action: 'link_attribute_tariff'
         },
         error: function () {
             setMessage('alertSubmit', 'Erreur serveur 3459.', 'error');
@@ -156,13 +156,13 @@ function initEvents() {
 
     $('button[name=link]').click(function () {
         var id_tariff = $('select[name=tariff] > option:selected').val();
-        var id_combination = $('select[name=combination] > option:selected').val();
-        if (id_tariff > 0 && id_combination > 0) {
-            link(id_tariff, id_combination);
-        } else if (!(id_tariff > 0) && !(id_combination > 0)) {
+        var id_attribute = $('select[name=attribute] > option:selected').val();
+        if (id_tariff > 0 && id_attribute > 0) {
+            link(id_tariff, id_attribute);
+        } else if (!(id_tariff > 0) && !(id_attribute > 0)) {
             setMessage('alertSubmit', "Veuillez sélectionner un tarif et une déclibaison.", 'error');
-        } else if (!(id_combination > 0)) {
-            setMessage('alertSubmit', "Veuillez sélectionner une déclinaison.", 'error');
+        } else if (!(id_attribute > 0)) {
+            setMessage('alertSubmit', "Veuillez sélectionner une attribut.", 'error');
         } else if (!(id_tariff > 0)) {
             setMessage('alertSubmit', "Veuillez sélectionner un tarif.", 'error');
         }
@@ -178,17 +178,13 @@ function initEvents() {
     $('select[name=tariff]').change(function () {
         var id_tariff = parseInt($(this).find('option:selected').val());
         var tariff = getTariff(id_tariff);
-        $('select[name=combination] > option').each(function () {
-            if (tariff.combinations.indexOf($(this).val()))
-//                console.log('disabled');
-
+        $('select[name=attribute] > option').each(function () {
+            if (tariff.attributes.indexOf($(this).val()))
                 $(this).prop('disabled', true);
             else
-//                console.log('enabled');
-
                 $(this).prop('disabled', false);
         });
-        $("select[name=combination]").trigger("chosen:updated");
+        $("select[name=attribute]").trigger("chosen:updated");
 
     });
 }

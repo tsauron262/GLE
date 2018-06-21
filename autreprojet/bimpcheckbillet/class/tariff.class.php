@@ -17,15 +17,15 @@ class Tariff {
     public $id_prod_extern;
     public $filename;
     public $filename_custom;
-    public $combinations;
+    public $attributes;
 
     public function __construct($db) {
         $this->db = $db;
         $this->errors = array();
-        $this->combinations = array();
+        $this->attributes = array();
     }
 
-    public function fetch($id, $fetch_combination = false) {
+    public function fetch($id, $fetch_attribute = false) {
 
         if ($id < 0) {
             $this->errors[] = "Identifiant invalide :" . $id;
@@ -89,8 +89,8 @@ class Tariff {
                 }
                 @$this->filename = $filename;
                 @$this->filename_custom = $filename_custom;
-                if ($fetch_combination) {
-                    $this->fetchCombination();
+                if ($fetch_attribute) {
+                    $this->fetchAttribute();
                 }
                 return 1;
             }
@@ -315,7 +315,7 @@ class Tariff {
         return -1;
     }
 
-    public function getTariffsForEvent($id_event, $fetch_combination = false) {
+    public function getTariffsForEvent($id_event, $fetch_attribute = false) {
 
         $tariffs = array();
 
@@ -328,7 +328,7 @@ class Tariff {
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
                 $tariff = new Tariff($this->db);
-                $tariff->fetch($obj->id, $fetch_combination);
+                $tariff->fetch($obj->id, $fetch_attribute);
                 $tariffs[] = $tariff;
             }
             return $tariffs;
@@ -451,15 +451,15 @@ class Tariff {
         return -1;
     }
 
-    public function fetchCombination() {
-        $sql = 'SELECT fk_combination';
-        $sql .= ' FROM tariff_combination';
+    public function fetchAttribute() {
+        $sql = 'SELECT fk_attribute';
+        $sql .= ' FROM tariff_attribute';
         $sql .= ' WHERE fk_tariff=' . $this->id;
 
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                $this->combinations[] = $obj->fk_combination;
+                $this->attributes[] = $obj->fk_attribute;
             }
         } elseif (!$result) {
             $this->errors[] = "Id produit extern inconnu";

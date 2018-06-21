@@ -9,7 +9,7 @@ include_once 'class/event.class.php';
 include_once 'class/tariff.class.php';
 include_once 'class/ticket.class.php';
 include_once 'class/order.class.php';
-include_once 'class/combination.class.php';
+include_once 'class/attribute.class.php';
 
 if (isset($_POST['description']))
     $_POST['description'] = addslashes($_POST['description']);
@@ -30,11 +30,11 @@ $user = new User($db);
 $event = new Event($db);
 $tariff = new Tariff($db);
 $ticket = new Ticket($db);
-$combination = new Combination($db);
+$attribute = new Attribute($db);
 
 
 if (!IS_MAIN_SERVER) {
-    if ($action != 'check_ticket' and $action != 'login') {
+    if ($action != 'check_ticket' and $action != 'login' and $action != 'get_events') {
         echo json_encode(array(
             'errors' => "Ce serveur n'autorise que les connexions et les validation de ticket."));
         exit();
@@ -303,22 +303,22 @@ switch ($action) {
         }
 
     /**
-     * create_combination.php
+     * create_attribute.php
      */
-    case 'create_combination': {
+    case 'create_attribute': {
             echo json_encode(array(
-                'id_inserted' => $combination->create($_POST['label'], $_POST['price'], $_POST['number_place']),
-                'errors' => $combination->errors));
+                'id_inserted' => $attribute->create($_POST['label'], $_POST['type'], $_POST['id_attribute_extern']),
+                'errors' => $attribute->errors));
             break;
         }
 
     /**
-     * link_combination_tariff.php
+     * link_attribute_tariff.php
      */
-    case 'link_combination_tariff': {
+    case 'link_attribute_tariff': {
             echo json_encode(array(
-                'id_inserted' => $combination->createTariffCombination($_POST['id_tariff'], $_POST['id_combination']),
-                'errors' => $combination->errors));
+                'id_inserted' => $attribute->createTariffAttribute($_POST['id_tariff'], $_POST['id_attribute']),
+                'errors' => $attribute->errors));
             break;
         }
     /**
@@ -338,7 +338,7 @@ switch ($action) {
                 'errors' => $tariff->errors));
             break;
         }
-    case 'get_tariffs_for_event_with_combination': {
+    case 'get_tariffs_for_event_with_attribute': {
             echo json_encode(array(
                 'tariffs' => $tariff->getTariffsForEvent($_POST['id_event'], true),
                 'errors' => $tariff->errors));
@@ -367,10 +367,10 @@ switch ($action) {
                 'errors' => array_merge($tariff->errors, $event->errors)));
             break;
         }
-    case 'get_all_combinations': {
+    case 'get_all_attributes': {
             echo json_encode(array(
-                'combinations' => $combination->getAllCombination(),
-                'errors' => $combination->errors));
+                'attributes' => $attribute->getAllAttribute(),
+                'errors' => $attribute->errors));
             break;
         }
 

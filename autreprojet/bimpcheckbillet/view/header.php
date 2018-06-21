@@ -49,14 +49,17 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
   </button>
   <div class="collapse navbar-collapse" id="navbarSupportedContent">';
         if (IS_MAIN_SERVER) {
+            // Home
             print '<div class="navbar-header">
       <a class="navbar-brand" href="home.php">Billetterie</a>
     </div>';
         }
         print'<ul class="navbar-nav mr-auto">';
         if ($user->status == 2 && IS_MAIN_SERVER)
+            // Management
             print '<li><a class="nav-link" href="manage_user.php">Gestion</a></li>';
         if (IS_MAIN_SERVER) {
+            // Event
             print '<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Évènement</a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -65,18 +68,27 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
           <a class="dropdown-item" href="stats_event.php">Statistique</a>
         </div>
       </li>';
+            // Tariff
             print '<li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tariff</a>
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tarif</a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="create_tariff.php">Créer</a>
-          <a class="dropdown-item" href="modify_tariff.php">Modifier</a>';
-            if (USE_COMBINATION) {
-                print '<a class="dropdown-item" href="create_combination.php">Créer déclinaison</a>';
-                print '<a class="dropdown-item" href="link_combination_tariff.php">Lier déclinaison</a>';
-            }
-
-            print '</div>
+          <a class="dropdown-item" href="modify_tariff.php">Modifier</a>
+        </div>
       </li>';
+            // Attribute
+            if (USE_ATTRIBUTE) {
+                print '<li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Attribut</a>
+        <div class="dropdown-menu nav-item" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="create_attribute.php">Créer attribut</a>
+            <a class="dropdown-item" href="link_attribute_tariff.php">Lier attribut</a>
+            <a class="dropdown-item" href="create_attribute_value.php">Créer valeur attribut</a>
+            <a class="dropdown-item" href="link_attribute_value_tariff.php">Lier valeur attribut</a>
+        </div>
+      </li>';
+            }
+            // Ticket
             print '<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Ticket</a>
         <div class="dropdown-menu nav-item" aria-labelledby="navbarDropdown">

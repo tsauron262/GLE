@@ -29,7 +29,7 @@ function getEvents() {
                             '<option value=' + event.id + '>' + event.label + '</option>');
                 });
                 initEvents();
-                $(".chosen-select").chosen({
+                $("select[name=id_event]").chosen({
                     placeholder_text_single: 'Evènement',
                     no_results_text: 'Pas de résultat'});
                 $('select[name=id_event]').change(function () {
@@ -42,7 +42,7 @@ function getEvents() {
                         $('select[name=id_event]').trigger('change');
                     }
                 }
-            } else if (out.events.length === 0){
+            } else if (out.events.length === 0) {
                 alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
                 window.location.replace('../view/create_event.php');
             } else {
@@ -71,16 +71,16 @@ function getTariffsForEvent(id_event) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.tariffs !== -1) {
                 tariffs = out.tariffs;
-                $('select[name=tariff] > option').remove();
                 $('select[name=tariff]').append('<option value="">Sélectionnez un tariff</option>');
                 out.tariffs.forEach(function (tariff) {
                     $('select[name=tariff]').append(
                             '<option value=' + tariff.id + '>' + tariff.label + '</option>');
                 });
-                $('.chosen-select').trigger('chosen:updated');
             } else {
+                $('select[name=tariff]').append('<option value="">Sélectionnez un tariff</option>');
                 setMessage('alertSubmit', "Aucun tariff pour cet évènement.", 'error');
             }
+            $('select[name=tariff]').trigger('chosen:updated');
         }
     });
 }
@@ -287,13 +287,13 @@ function toggleActiveProduct(id_prod_extern) {
     });
 }
 
-function getCombinations(id_prod_extern) {
+function getAttributes(id_prod_extern) {
     $.ajax({
         type: 'POST',
         url: URL_PRESTASHOP,
         data: {
             id_prod_extern: id_prod_extern,
-            action: 'getCombinations'
+            action: 'getAttributes'
         },
         error: function () {
             setMessage('alertSubmit', 'Erreur serveur 3645.', 'error');
@@ -302,8 +302,8 @@ function getCombinations(id_prod_extern) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
-            } else if (out.combinations != undefined) {
-                console.log(out.combinations);
+            } else if (out.attributes != undefined) {
+                console.log(out.attributes);
             } else {
                 setMessage('alertSubmit', "Erreur inconnue 2948.", 'error');
             }
@@ -318,6 +318,9 @@ $(document).ready(function () {
     $('input[name=date_stop_sale]').datepicker({dateFormat: 'dd/mm/yy'})
     $('input[name=date_start]').datepicker({dateFormat: 'dd/mm/yy'})
     $('input[name=date_end]').datepicker({dateFormat: 'dd/mm/yy'})
+    $("select[name=tariff]").chosen({
+        placeholder_text_single: 'Tarif',
+        no_results_text: 'Pas de résultat'});
     getEvents();
 }
 );
@@ -328,6 +331,7 @@ $(document).ready(function () {
 function initEvents() {
 
     $('select[name=id_event]').change(function () {
+        $('select[name=tariff]').empty();
         var id_event = $(this).val();
         if (id_event > 0)
             getTariffsForEvent(id_event);
@@ -343,7 +347,9 @@ function initEvents() {
             alert('Veuillez séléctionner un tariff avant de créer un produit dans prestashop');
         } else {
             var id_tax = parseInt($('#container_tax').find('label.active').find('input').first().val());
-            getCategEvent(id_tariff, id_tax);
+            if (confirm("Avez-vous créée et lié ce tarif avec ses toutes ses attributs auparavant ? \n\
+Si ce n'est pas le cas, merci de le faire avant de créer le produit dans prestashop"))
+                getCategEvent(id_tariff, id_tax);
         }
     });
 
@@ -440,7 +446,7 @@ function initEvents() {
         }
     });
 
-    $('div[name=get_combinations]').click(function () {
+    $('div[name=get_attributes]').click(function () {
         var id_prod_extern;
         var id_tariff = parseInt($('select[name=tariff] > option:selected').val());
         if (id_tariff > 0) {

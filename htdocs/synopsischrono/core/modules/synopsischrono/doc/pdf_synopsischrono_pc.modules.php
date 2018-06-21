@@ -236,7 +236,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                     $tel = $addr->phone;
                     $mail = $addr->email;
                 }
-                $address = substr($chrono->societe->name,0,30);
+                $address = substr($chrono->societe->name,0,300);
 
                 if ($contact != "" && $contact != $chrono->societe->name)
                     $address .= "\n" . $contact;
@@ -245,7 +245,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
                 $pdf->SetXY('20', '71');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-                $pdf->MultiCell(300, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
+                $pdf->MultiCell(150, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
 
 
 

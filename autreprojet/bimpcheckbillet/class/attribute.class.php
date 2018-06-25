@@ -8,11 +8,9 @@ class Attribute {
     public $label;
     public $id_attribute_extern;
     public $type;
-    
-    const TYPE_LIST = 0;
-    const TYPE_RADIO = 1;
-    const TYPE_COLOR = 2;
-    
+
+    const TYPE_LIST = 'select';
+    const TYPE_RADIO = 'radio';
 
     public function __construct($db) {
         $this->db = $db;
@@ -36,7 +34,7 @@ class Attribute {
             while ($obj = $result->fetchObject()) {
                 $this->id = (int) $id;
                 $this->label = stripslashes($obj->label);
-                $this->type = (int) $obj->type;
+                $this->type = $obj->type;
                 $this->id_attribute_extern = (int) $obj->id_attribute_extern;
                 return 1;
             }
@@ -64,7 +62,7 @@ class Attribute {
         $sql.= '`id_attribute_extern`';
         $sql.= ') ';
         $sql.= 'VALUES ("' . addslashes($label) . '"';
-        $sql .= ', ' . $type;
+        $sql .= ', "' . $type . '"';
         $sql .= ', ' . $id_attribute_extern;
         $sql.= ')';
 
@@ -164,6 +162,32 @@ class Attribute {
             return -2;
         } else {
             $this->errors[] = "Erreur SQL 3481.";
+            return -3;
+        }
+        return -1;
+    }
+
+    public function getAttributeByTariff($id_tariff) {
+        $attributes = array();
+
+        $sql = 'SELECT fk_attribute';
+        $sql .= ' FROM tariff_attribute';
+        $sql .= ' WHERE fk_tariff=' . $id_tariff;
+
+
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                $attribute = new Attribute($this->db);
+                $attribute->fetch($obj->fk_attribute);
+                $attributes[] = $attribute;
+            }
+            return $attributes;
+        } elseif ($result) {
+            $this->errors[] = "Aucun attribut n'a été créée.";
+            return -2;
+        } else {
+            $this->errors[] = "Erreur SQL 6482.";
             return -3;
         }
         return -1;

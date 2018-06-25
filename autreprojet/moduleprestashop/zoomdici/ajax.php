@@ -117,11 +117,22 @@ switch ($action) {
 
     case 'createAttributeGroup' : {
             $attribute_group = new AttributeGroup();
-            $attribute_group->group_type = (int) $_POST['type'];
+            $attribute_group->group_type = $_POST['type'];
             $attribute_group->name = array((int) Configuration::get('PS_LANG_DEFAULT') => $_POST['label']);
             $attribute_group->public_name = array((int) Configuration::get('PS_LANG_DEFAULT') => $_POST['label']);
             $attribute_group->add();
             die(Tools::jsonEncode(array('id_inserted' => $attribute_group->id, 'errors' => array())));
+            break;
+        }
+
+    case 'createAttributeValue' : {
+            $attribute = new Attribute();
+            $attribute->id_attribute_group = (int) $_POST['id_attribute_parent'];
+            $attribute->name = array((int) Configuration::get('PS_LANG_DEFAULT') => $_POST['label']);
+            $attribute->add();
+            $attribute_group = new AttributeGroup((int) $_POST['id_attribute_parent']);
+            $attribute_group->update();
+            die(Tools::jsonEncode(array('id_inserted' => $attribute->id, 'errors' => array())));
             break;
         }
 

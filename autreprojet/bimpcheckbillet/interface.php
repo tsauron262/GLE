@@ -10,6 +10,7 @@ include_once 'class/tariff.class.php';
 include_once 'class/ticket.class.php';
 include_once 'class/order.class.php';
 include_once 'class/attribute.class.php';
+include_once 'class/attribute_value.class.php';
 
 if (isset($_POST['description']))
     $_POST['description'] = addslashes($_POST['description']);
@@ -31,6 +32,7 @@ $event = new Event($db);
 $tariff = new Tariff($db);
 $ticket = new Ticket($db);
 $attribute = new Attribute($db);
+$attribute_value = new AttributeValue($db);
 
 
 if (!IS_MAIN_SERVER) {
@@ -321,6 +323,26 @@ switch ($action) {
                 'errors' => $attribute->errors));
             break;
         }
+
+    /**
+     * create_attribute_value.php
+     */
+    case 'create_attribute_value': {
+            echo json_encode(array(
+                'id_inserted' => $attribute_value->create($_POST['label'], $_POST['id_attribute_parent'], $_POST['id_attribute_value_extern']),
+                'errors' => $attribute_value->errors));
+            break;
+        }
+    /**
+     * link_attribute_value_tariff.php
+     */
+    case 'link_attribute_value_tariff': {
+            echo json_encode(array(
+                'id_inserted' => $attribute_value->createTariffAttributeValue($_POST['id_tariff'], $_POST['id_attribute_value']),
+                'errors' => $attribute_value->errors));
+            break;
+        }
+
     /**
      * General
      */
@@ -332,18 +354,21 @@ switch ($action) {
                 'errors' => $event->errors));
             break;
         }
+
     case 'get_tariffs_for_event': {
             echo json_encode(array(
                 'tariffs' => $tariff->getTariffsForEvent($_POST['id_event']),
                 'errors' => $tariff->errors));
             break;
         }
+
     case 'get_tariffs_for_event_with_attribute': {
             echo json_encode(array(
                 'tariffs' => $tariff->getTariffsForEvent($_POST['id_event'], true),
                 'errors' => $tariff->errors));
             break;
         }
+
     case 'change_event_session': {
             $_SESSION['id_event'] = intVal($_POST['id_event']);
             if ($_SESSION['id_event'] > 0)
@@ -352,12 +377,14 @@ switch ($action) {
                 echo json_encode(array('code_return' => -1));
             break;
         }
+
     case 'get_remaining_place': {
             echo json_encode(array(
                 'tariffs' => $tariff->getRemainingPlace($_POST['id_tariff']),
                 'errors' => $tariff->errors));
             break;
         }
+
     case 'get_event_by_tariff_id': {
             $tariff->fetch($_POST['id_tariff']);
             $event->fetch($tariff->fk_event);
@@ -367,9 +394,24 @@ switch ($action) {
                 'errors' => array_merge($tariff->errors, $event->errors)));
             break;
         }
+
     case 'get_all_attributes': {
             echo json_encode(array(
                 'attributes' => $attribute->getAllAttribute(),
+                'errors' => $attribute->errors));
+            break;
+        }
+
+    case 'get_attributes_value_by_parent_id': {
+            echo json_encode(array(
+                'attribute_values' => $attribute_value->getAllByParentId($_POST['id_attribute_parent']),
+                'errors' => $attribute_value->errors));
+            break;
+        }
+
+    case 'get_attributes_by_tariff_id': {
+            echo json_encode(array(
+                'attributes' => $attribute->getAttributeByTariff($_POST['id_tariff']),
                 'errors' => $attribute->errors));
             break;
         }

@@ -6,6 +6,7 @@
 var events;
 var tariffs;
 var attributes;
+var attribute_values;
 
 /**
  * Ajax call
@@ -33,7 +34,6 @@ function getEvents() {
                 });
                 initEvents();
                 $(".chosen-select").chosen({
-                    placeholder_text_single: 'Evènement',
                     no_results_text: 'Pas de résultat'});
                 $('select[name=id_event]').change(function () {
                     changeEventSession($('select[name=id_event] > option:selected').val());
@@ -45,41 +45,13 @@ function getEvents() {
                         $('select[name=id_event]').trigger('change');
                     }
                 }
-                getAttributeAll();
+//                getAttributeAll();
             } else if (out.events.length === 0) {
                 alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
                 window.location.replace('../view/create_event.php');
             } else {
                 setMessage('alertSubmit', "Erreur 3154.", 'error');
-                $('button[name=create]').hide();
-            }
-        }
-    });
-}
-
-function getAttributeAll() {
-    $.ajax({
-        type: "POST",
-        url: "../interface.php",
-        data: {
-            action: 'get_all_attributes'
-        },
-        error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 9472.', 'error');
-        },
-        success: function (rowOut) {
-            var out = JSON.parse(rowOut);
-            if (out.errors.length !== 0) {
-                printErrors(out.errors, 'alertSubmit');
-            } else if (out.attributes.length > 0) {
-                attributes = out.attributes;
-                out.attributes.forEach(function (attribute) {
-                    $('select[name=attribute]').append(
-                            '<option value=' + attribute.id + '>' + attribute.label + '</option>');
-                });
-                $('.chosen-select').trigger('chosen:updated');
-            } else {
-                setMessage('alertSubmit', "Merci de créer des attributs avant de les lier.", 'warn');
+                $('button[name=lnik]').hide();
             }
         }
     });
@@ -113,30 +85,98 @@ function getTariffsForEvent(id_event) {
                 });
                 $('.chosen-select').trigger('chosen:updated');
             } else {
-                setMessage('alertSubmit', "Aucun tariff pour cet évènement.", 'error');
+                setMessage('alertSubmit', "Aucun tariff pour cet évènement.", 'warn');
             }
         }
     });
 }
 
-function link(id_tariff, id_attribute) {
+function getAttributeForTariff(id_tariff) {
+
+    $('div#alertSubmit').empty();
 
     $.ajax({
         type: "POST",
         url: "../interface.php",
         data: {
             id_tariff: id_tariff,
-            id_attribute: id_attribute,
-            action: 'link_attribute_tariff'
+            action: 'get_attributes_by_tariff_id'
         },
         error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 3459.', 'error');
+            setMessage('alertSubmit', 'Erreur serveur 3594.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
-            } else if (out.id_inserted > 0) {
+            } else if (out.attributes.length > 0) {
+                attributes = out.attributes;
+                $('select[name=attribute] > option').remove();
+                $('select[name=attribute]').append('<option value="">Sélectionnez un attributs</option>');
+                out.attributes.forEach(function (attribute) {
+                    $('select[name=attribute]').append(
+                            '<option value=' + attribute.id + '>' + attribute.label + '</option>');
+                });
+                $('.chosen-select').trigger('chosen:updated');
+            } else {
+                setMessage('alertSubmit', "Aucun attribut pour ce tariff.", 'warn');
+            }
+        }
+    });
+}
+
+function getAttributeValueForAttribute(id_attribute) {
+
+    $('div#alertSubmit').empty();
+
+    $.ajax({
+        type: "POST",
+        url: "../interface.php",
+        data: {
+            id_attribute_parent: id_attribute,
+            action: 'get_attributes_value_by_parent_id'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 6482.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.attribute_values.length > 0) {
+                attribute_values = out.attribute_values;
+                $('select[name=attribute_value] > option').remove();
+                $('select[name=attribute_value]').append('<option value="">Sélectionnez une valeur d\'attributs</option>');
+                out.attribute_values.forEach(function (attribute_value) {
+                    $('select[name=attribute_value]').append(
+                            '<option value=' + attribute_value.id + '>' + attribute_value.label + '</option>');
+                });
+                $('.chosen-select').trigger('chosen:updated');
+            } else {
+                setMessage('alertSubmit', "Aucune valeur pour cet attribut pour ce tariff.", 'warn');
+            }
+        }
+    });
+}
+
+function link(id_tariff, id_attribute_value) {
+
+    $.ajax({
+        type: "POST",
+        url: "../interface.php",
+        data: {
+            id_tariff: id_tariff,
+            id_attribute_value: id_attribute_value,
+            action: 'link_attribute_value_tariff'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 9613.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (parseInt(out.id_inserted) > 0) {
                 alert("Liaison créée.");
                 location.reload();
             } else {
@@ -148,6 +188,7 @@ function link(id_tariff, id_attribute) {
 
 
 $(document).ready(function () {
+//    alert(1);
     getEvents();
 });
 
@@ -156,13 +197,13 @@ function initEvents() {
 
     $('button[name=link]').click(function () {
         var id_tariff = $('select[name=tariff] > option:selected').val();
-        var id_attribute = $('select[name=attribute] > option:selected').val();
-        if (id_tariff > 0 && id_attribute > 0) {
-            link(id_tariff, id_attribute);
-        } else if (!(id_tariff > 0) && !(id_attribute > 0)) {
-            setMessage('alertSubmit', "Veuillez sélectionner un tarif et une déclibaison.", 'error');
-        } else if (!(id_attribute > 0)) {
-            setMessage('alertSubmit', "Veuillez sélectionner une attribut.", 'error');
+        var id_attribute_value = $('select[name=attribute_value] > option:selected').val();
+        if (id_tariff > 0 && id_attribute_value > 0) {
+            link(id_tariff, id_attribute_value);
+        } else if (!(id_tariff > 0) && !(id_attribute_value > 0)) {
+            setMessage('alertSubmit', "Veuillez sélectionner un tarif et une valeur d'attribut.", 'error');
+        } else if (!(id_attribute_value > 0)) {
+            setMessage('alertSubmit', "Veuillez sélectionner une valeur d'attribut.", 'error');
         } else if (!(id_tariff > 0)) {
             setMessage('alertSubmit', "Veuillez sélectionner un tarif.", 'error');
         }
@@ -177,16 +218,26 @@ function initEvents() {
 
     $('select[name=tariff]').change(function () {
         var id_tariff = parseInt($(this).find('option:selected').val());
-        var tariff = getTariff(id_tariff);
-        $('select[name=attribute] > option').each(function (id_attr) {
-            if (parseInt(tariff.attributes.indexOf(id_attr)) === -1)
-                $(this).prop('disabled', false);
-            else
-                $(this).prop('disabled', true);
-        });
-        $("select[name=attribute]").trigger("chosen:updated");
+        if (id_tariff > 0)
+            getAttributeForTariff(id_tariff);
+//        var tariff = getTariff(id_tariff);
+//        $('select[name=attribute] > option').each(function (id_attr) {
+//            if (parseInt(tariff.attributes.indexOf(id_attr)) === -1)
+//                $(this).prop('disabled', false);
+//            else
+//                $(this).prop('disabled', true);
+//        });
+//        $("select[name=attribute]").trigger("chosen:updated");
 
     });
+
+    $('select[name=attribute]').change(function () {
+        var id_attribute = parseInt($(this).val());
+        if (id_attribute > 0)
+            getAttributeValueForAttribute(id_attribute);
+    });
+
+
 }
 
 function getTariff(id_tariff) {

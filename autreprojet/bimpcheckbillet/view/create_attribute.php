@@ -25,7 +25,6 @@ print '<select class="chosen-select" name="type">';
 print '<option value="">Sélectionnez un type</option>';
 print '<option value=' . Attribute::TYPE_LIST . '>Liste de sélection</option>';
 print '<option value=' . Attribute::TYPE_RADIO . '>Bouton radio</option>';
-print '<option value=' . Attribute::TYPE_COLOR . '>Couleur</option>';
 print '</select><br/><br/>';
 
 print '<button class="btn btn-primary" name="create">Créer</button>';

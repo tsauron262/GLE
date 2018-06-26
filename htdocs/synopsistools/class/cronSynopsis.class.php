@@ -65,7 +65,7 @@ class CronSynopsis {
         
         
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importDepot.class.php");
-        $import = new importDepot($db);
+        $import = new importDepot($this->db);
         $import->debug = true;
         $import->go(); 
         $this->output .= $import->output;

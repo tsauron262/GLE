@@ -50,10 +50,20 @@ class CronSynopsis {
 //        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");
 //        $export = new synopsisexport($this->db, 'file');
 //        $export->exportFactureSav(false);
-        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportfacture.class.php");
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportfacture.class.php");
         $export = new exportfacture($this->db);
         $export->exportTout(); 
         $this->output = $export->output;
+        
+        
+        
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportCommande.class.php");
+        $export = new exportCommande($this->db);
+        $export->debug = true;
+        $export->exportTout(); 
+        $this->output .= $export->output;
+
+
         return "End";
     }
 

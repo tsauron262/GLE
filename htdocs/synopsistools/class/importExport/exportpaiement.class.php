@@ -12,12 +12,11 @@ require_once (DOL_DOCUMENT_ROOT . "/categories/class/categorie.class.php");
  * moyen de paiement
  * 
  */
-class exportpaiement {
 
-//    var $sep = "    -   ";
-//    var $saut = "<br/>";        
-    var $sep = "\t";
-    var $saut = "\n";
+require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/export8sens.class.php");
+
+class exportpaiement extends export8sens {
+
     public $info = array();
     public $type = "";
     public $id8sens = 0;

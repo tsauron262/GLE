@@ -21,19 +21,6 @@ class importDepot extends import8sens {
             $entrepot->fetch('', $ln['DepCode']);
             
             
-            
-		$sql = "UPDATE ".MAIN_DB_PREFIX."entrepot ";
-		$sql .= " SET label = '" . $this->db->escape($this->libelle) ."'";
-		$sql .= ", fk_parent = " . (($this->fk_parent > 0) ? $this->fk_parent : "NULL");
-		$sql .= ", description = '" . $this->db->escape($this->description) ."'";
-		$sql .= ", statut = " . $this->statut;
-		$sql .= ", lieu = '" . $this->db->escape($this->lieu) ."'";
-		$sql .= ", address = '" . $this->db->escape($this->address) ."'";
-		$sql .= ", zip = '" . $this->db->escape($this->zip) ."'";
-		$sql .= ", town = '" . $this->db->escape($this->town) ."'";
-		$sql .= ", fk_pays = " . $this->country_id;
-		$sql .= " WHERE rowid = " . $id;
-            
             if ($entrepot->id > 0)
                 echo "<br/>depot connue";// . print_r($entrepot, 1);
             else
@@ -44,6 +31,7 @@ class importDepot extends import8sens {
             $entrepot->town = $ln['DepGAdrCity'];
             $entrepot->lieu = $ln['DepLib'];
             $entrepot->description = $ln['DepLib'];
+            $entrepot->statut = 1;
             $entrepot->update($entrepot->id, $user);
         }
     }

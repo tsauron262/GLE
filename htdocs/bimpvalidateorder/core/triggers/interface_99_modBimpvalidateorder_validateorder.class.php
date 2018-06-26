@@ -27,12 +27,19 @@ include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.cla
 class Interfacevalidateorder extends DolibarrTriggers {
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
-        global $conf;
+        global $conf, $user;
         if ($action == 'ORDER_VALIDATE') {
             $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');
             if(count($tabConatact) < 1){
-                setEventMessages("Impossible de validé, pas de Commercial signataire de la commande", null, 'errors');
-                return -2;
+                $tabComm = $object->thirdparty->getSalesRepresentatives($user);
+                if(count($tabComm) > 0){
+                    $object->add_contact($tabComm[0]['id'], 'SALESREPSIGN', 'internal');
+                }
+                else{                
+                    setEventMessages("Impossible de validé, pas de Commercial signataire de la commande", null, 'errors');
+                    return -2; 
+                }
+
             }
             
             

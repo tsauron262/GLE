@@ -28,8 +28,10 @@ class exportfacture extends export8sens {
 
     public function exportTout() {
         if(defined("MODE_TEST")){
-            $this->importFact();
-            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportpaiement.class.php");
+            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importFacture.class.php");
+            $importFact = new importFacture($this->db);
+            $importFact->importFact();
+            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportpaiement.class.php");
             $exp = new exportpaiement($this->db);
             $exp->exportTout();
         }

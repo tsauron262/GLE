@@ -28,8 +28,6 @@ class exportfacture extends export8sens {
 
     public function exportTout() {
         if(defined("MODE_TEST")){
-            $this->pathExport = "/data/synchro/export/factures/";
-            $this->pathI = "/data/synchro/import/factures/";
             $this->importFact();
             require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportpaiement.class.php");
             $exp = new exportpaiement($this->db);

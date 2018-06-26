@@ -29,6 +29,14 @@ class Interfacevalidateorder extends DolibarrTriggers {
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         global $conf;
         if ($action == 'ORDER_VALIDATE') {
+            $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');
+            if(count($tabConatact) < 1){
+                setEventMessages("Impossible de validé, pas de Commercial signataire de la commande", null, 'errors');
+                return -2;
+            }
+            
+            
+            
             $bvo = new BimpValidateOrder($user->db);
             $code = $bvo->checkValidateRights($user, $object);
             return $code;
@@ -37,6 +45,8 @@ class Interfacevalidateorder extends DolibarrTriggers {
             setEventMessages("Impossible de dévalidé", null, 'errors');
             return -2;
         }
+        
+        
         
         
         //Classé facturé

@@ -893,7 +893,7 @@ class Product extends CommonObject
 			/*moddrsi*/$sql.= ", import_key = ".($this->import_key != "" ? $this->import_key : 'NULL');/*fmoddrsi*/
 			// stock field is not here because it is a denormalized value from product_stock.
 			$sql.= " WHERE rowid = " . $id;
-echo $sql."<br/>";
+
 			dol_syslog(get_class($this)."::update", LOG_DEBUG);
 
 			$resql=$this->db->query($sql);

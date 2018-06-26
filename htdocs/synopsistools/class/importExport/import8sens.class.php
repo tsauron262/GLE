@@ -40,6 +40,8 @@ abstract class import8sens {
                         if(count($this->errors) == 0){
                             if(rename ($this->path . $file, $this->path ."imported/". $file))
                                 echo "<br/>Fichier traité déplacé vers ".$this->path ."imported/". $file;
+                            else
+                                $this->error("Impossible de déplacé le fichier ".$this->path . $file);
                         }
                     }
                 }

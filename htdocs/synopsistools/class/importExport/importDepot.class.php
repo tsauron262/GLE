@@ -37,7 +37,7 @@ class importDepot extends import8sens {
             if ($entrepot->id > 0)
                 echo "<br/>depot connue";// . print_r($entrepot, 1);
             else
-                $entrepot->id = $this->createDepot($ln);
+                $entrepot->id = $this->createEntrepot($ln);
             
             $entrepot->address = $ln['DepGAdrRue1'];
             $entrepot->zip = $ln['DepGAdrZip'];

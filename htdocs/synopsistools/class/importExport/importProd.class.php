@@ -23,7 +23,7 @@ class importProd extends import8sens {
                     if ($this->db->num_rows($sql2) > 0) {
                         $result2 = $this->db->fetch_object($sql2);
                         $this->tabResult["error"] ++;
-                        $this->alert("Prod avec ref identique et autre avec id8sens identique 1:".$result->id." 2:".$result2->id);
+                        $this->alert("Prod avec ref identique et autre avec id8sens identique 1:".$result->id." 2:".$result2->id." ref8sens: ".$ln['ArtCode']);
                     }
                     else{
                         $this->tabResult["connue"] ++;

@@ -23,7 +23,7 @@ class importProd extends import8sens {
                     if ($this->db->num_rows($sql2) > 0) {
                         $result2 = $this->db->fetch_object($sql2);
                         $this->tabResult["error"] ++;
-                        $this->error("Prod avec ref identique et autre avec id8sens identique 1:".$result->id." 2:".$result2->id);
+                        $this->alert("Prod avec ref identique et autre avec id8sens identique 1:".$result->id." 2:".$result2->id);
                     }
                     else{
                         $this->tabResult["connue"] ++;
@@ -50,11 +50,11 @@ class importProd extends import8sens {
                 }
             } else {
                 $this->tabResult["error"] ++;
-                $this->error("Prod sans label");
+                $this->alert("Prod sans label");
             }
         } else {
             $this->tabResult["error"] ++;
-            $this->error("Prod sans ref");
+            $this->alert("Prod sans ref");
         }
     }
 

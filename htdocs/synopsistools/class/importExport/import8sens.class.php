@@ -6,6 +6,7 @@ abstract class import8sens {
     var $tabResult = array("connue" => 0, "inc" => 0, "double" => 0, "modifier" => 0, "creer" => 0);
     var $path = "";
     var $errors = array();
+    var $alerts = array();
     var $object;
     var $update = false;
     var $utf8 = true;
@@ -94,6 +95,8 @@ abstract class import8sens {
 
     function printError() {
         foreach($this->errors as $msg)
+            echo "<br/><div class='red'>" . $msg . "</div><br/>";
+        foreach($this->alerts as $msg)
             echo "<br/>" . $msg . "<br/>";
     }
 
@@ -103,6 +106,14 @@ abstract class import8sens {
                 $this->errors[] = $msg;
         else
             $this->errors[] = $msgOrArray;
+    }
+
+    function alert($msgOrArray) {
+        if(is_array($msgOrArray))
+            foreach($msgOrArray as $msg)
+                $this->alerts[] = $msg;
+        else
+            $this->alerts[] = $msgOrArray;
     }
     
     function traiteChamp($cible, $val, $number = false){

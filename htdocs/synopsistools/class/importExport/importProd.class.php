@@ -16,14 +16,14 @@ class importProd extends import8sens {
         $this->tabResult["total"] ++;
         if ($ln['ArtCode'] != "") {
             if ($ln['ArtLib'] != "") {
-                $sql = $this->db->query("SELECT rowid as id FROM llx_product WHERE import_key = '" . $ln['ArtID'] . "'");
+                $sql = $this->db->query("SELECT rowid as id, ref FROM llx_product WHERE import_key = '" . $ln['ArtID'] . "'");
                 if($this->db->num_rows($sql) == 1){
                     $result = $this->db->fetch_object($sql);
                     $sql2 = $this->db->query("SELECT rowid as id FROM llx_product WHERE ref = '" . $ln['ArtCode'] . "' AND (import_key != '" . $ln['ArtID'] . "' || import_key IS NULL)");
                     if ($this->db->num_rows($sql2) > 0) {
                         $result2 = $this->db->fetch_object($sql2);
                         $this->tabResult["error"] ++;
-                        $this->alert("Prod avec ref identique et autre avec id8sens identique 1:".$result->id." 2:".$result2->id." ref8sens: ".$ln['ArtCode']);
+                        $this->alert("Prod avec ref identique et autre avec id8sens identique idIdentique id :".$result->id. " ref : ".$result->ref." |  RefIdentique id:".$result2->id." ref: ".$ln['ArtCode']);
                     }
                     else{
                         $this->tabResult["connue"] ++;

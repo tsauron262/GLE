@@ -459,7 +459,9 @@ class Tariff {
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                $this->attributes[] = (int) $obj->fk_attribute;
+                $attribute = new Attribute($this->db);
+                $attribute->fetch($obj->fk_attribute, true);
+                $this->attributes[] = $attribute;
             }
         } elseif (!$result) {
             $this->errors[] = "Id produit extern inconnu";

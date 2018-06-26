@@ -179,10 +179,13 @@ function initEvents() {
         var id_tariff = parseInt($(this).find('option:selected').val());
         var tariff = getTariff(id_tariff);
         $('select[name=attribute] > option').each(function (id_attr) {
-            if (parseInt(tariff.attributes.indexOf(id_attr)) === -1)
-                $(this).prop('disabled', false);
-            else
-                $(this).prop('disabled', true);
+            var option = $(this);
+            tariff.attributes.forEach(function (attribute) {
+                if (parseInt(attribute.id) === parseInt(id_attr))
+                    option.prop('disabled', false);
+                else
+                    option.prop('disabled', true);
+            });
         });
         $("select[name=attribute]").trigger("chosen:updated");
 

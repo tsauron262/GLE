@@ -25,10 +25,14 @@ print '<select class="chosen-select" name="tariff"><option value="">Sélectionne
 print '<label for="attribute">Attribut </label><br/>';
 print '<select class="chosen-select" name="attribute"><option value="">Sélectionnez un attribut</option></select><br/><br/>';
 
-
 print '<label for="attribute_value">Valeur d\'attribut </label><br/>';
 print '<select class="chosen-select" name="attribute_value"><option value="">Sélectionnez une valeur d\'attribut</option></select><br/><br/>';
 
+print '<label for="price">Prix </label>';
+print '<input class="form-control bfh-number" name="price" value=0 step=".01" type="number" min="0" style="width: 120px"/><br/>';
+
+print '<label for="number_place">Nombre de place</label>';
+print '<input class="form-control bfh-number" name="number_place" step="1" type="number" min="0" style="width: 120px"/><br/>';
 
 print '<button class="btn btn-primary" name="link">Lier</button>';
 

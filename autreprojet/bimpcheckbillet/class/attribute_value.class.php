@@ -44,6 +44,34 @@ class AttributeValue {
         return -1;
     }
 
+    public function fetchByParent($id_parent) {
+
+        if ($id < 0) {
+            $this->errors[] = "Identifiant parent invalide :" . $id;
+            return false;
+        }
+
+        $sql = 'SELECT id, label, id_attribute_parent, id_attribute_value_extern';
+        $sql .= ' FROM attribute_value';
+        $sql .= ' WHERE id_attribute_parent=' . $id_parent;
+
+
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                $this->id = (int) $obj->id;
+                $this->label = stripslashes($obj->label);
+                $this->id_attribute_parent = (int) $obj->id_attribute_parent;
+                $this->id_attribute_value_extern = (int) $obj->id_attribute_value_extern;
+                return 1;
+            }
+        } else {
+            $this->errors[] = "Aucune valeur d'attribut n'a l'identifiant " . $id;
+            return -2;
+        }
+        return -1;
+    }
+
     public function create($label, $id_attribute_parent, $id_attribute_value_extern) {
 
         if ($label == '')
@@ -125,8 +153,6 @@ class AttributeValue {
         $sql.= 'VALUES (' . $id_tariff;
         $sql.= ', ' . $id_attribute_value;
         $sql.= ')';
-
-        echo $sql."\n";
 
         try {
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

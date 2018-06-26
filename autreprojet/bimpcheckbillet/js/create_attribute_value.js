@@ -109,7 +109,7 @@ function initEvents() {
             return;
         }
         var attribute_parent = getAttributeById(parseInt($('select[name=attribute_parent] > option:selected').val()));
-        createPrestashopAttributeValue($('input[name=label]').val(),
+        createPrestashopAttributeValue($('input[name=label]').val(), 
                 attribute_parent.id,
                 attribute_parent.id_attribute_extern);
     });

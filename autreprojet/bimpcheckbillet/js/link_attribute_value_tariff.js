@@ -3,6 +3,8 @@
  * Global variable
  */
 
+var URL_PRESTASHOP = URL_PRESTA + '/modules/zoomdici/ajax.php';
+
 var events;
 var tariffs;
 var attributes;
@@ -159,12 +161,44 @@ function getAttributeValueForAttribute(id_attribute) {
     });
 }
 
-function link(id_tariff, id_attribute_value) {
+function linkPrestashop(price, qty, id_tariff, id_attribute_value, id_prod_extern, id_attribute_value_extern) {
+
+    $.ajax({
+        type: "POST",
+        url: URL_PRESTASHOP,
+        data: {
+            qty: qty,
+            price: price,
+            id_prod_extern: id_prod_extern,
+            id_attribute_value_extern: id_attribute_value_extern,
+            action: 'linkProductAttributeValue'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 6158.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.is_ok) {
+                link(price, qty, id_tariff, id_attribute_value)
+            } else if (!out.is_ok) {
+                setMessage('alertSubmit', "Cette valeur d'attribut a déjà été associée à ce tarif, rien n'a été fait.", 'warn');
+            } else {
+                setMessage('alertSubmit', 'Erreur serveur 6218.', 'error');
+            }
+        }
+    });
+}
+
+function link(price, qty, id_tariff, id_attribute_value) {
 
     $.ajax({
         type: "POST",
         url: "../interface.php",
         data: {
+            qty: qty,
+            price: price,
             id_tariff: id_tariff,
             id_attribute_value: id_attribute_value,
             action: 'link_attribute_value_tariff'
@@ -188,7 +222,6 @@ function link(id_tariff, id_attribute_value) {
 
 
 $(document).ready(function () {
-//    alert(1);
     getEvents();
 });
 
@@ -196,10 +229,18 @@ $(document).ready(function () {
 function initEvents() {
 
     $('button[name=link]').click(function () {
-        var id_tariff = $('select[name=tariff] > option:selected').val();
-        var id_attribute_value = $('select[name=attribute_value] > option:selected').val();
+        var id_tariff = parseInt($('select[name=tariff] > option:selected').val());
+        var id_attribute_value = parseInt($('select[name=attribute_value] > option:selected').val());
         if (id_tariff > 0 && id_attribute_value > 0) {
-            link(id_tariff, id_attribute_value);
+            var tariff = getTariff(id_tariff);
+            var attribute_value = getAttributeValue(id_attribute_value);
+            linkPrestashop(
+                    parseFloat($('input[name=price]').val()),
+                    parseInt($('input[name=number_place]').val()),
+                    id_tariff,
+                    id_attribute_value,
+                    tariff.id_prod_extern,
+                    attribute_value.id_attribute_value_extern);
         } else if (!(id_tariff > 0) && !(id_attribute_value > 0)) {
             setMessage('alertSubmit', "Veuillez sélectionner un tarif et une valeur d'attribut.", 'error');
         } else if (!(id_attribute_value > 0)) {
@@ -220,15 +261,6 @@ function initEvents() {
         var id_tariff = parseInt($(this).find('option:selected').val());
         if (id_tariff > 0)
             getAttributeForTariff(id_tariff);
-//        var tariff = getTariff(id_tariff);
-//        $('select[name=attribute] > option').each(function (id_attr) {
-//            if (parseInt(tariff.attributes.indexOf(id_attr)) === -1)
-//                $(this).prop('disabled', false);
-//            else
-//                $(this).prop('disabled', true);
-//        });
-//        $("select[name=attribute]").trigger("chosen:updated");
-
     });
 
     $('select[name=attribute]').change(function () {
@@ -247,4 +279,13 @@ function getTariff(id_tariff) {
             tariff_return = tariff;
     });
     return tariff_return;
+}
+
+function getAttributeValue(id_attribute_value) {
+    var attribute_value_return;
+    attribute_values.forEach(function (attribute_value) {
+        if (parseInt(attribute_value.id) === id_attribute_value)
+            attribute_value_return = attribute_value;
+    });
+    return attribute_value_return;
 }

@@ -60,7 +60,7 @@ function getTariffsForEvent(id_event) {
         url: "../interface.php",
         data: {
             id_event: id_event,
-            action: 'get_tariffs_for_event'
+            action: 'get_tariffs_for_event_with_attribute'
         },
         error: function () {
             setMessage('alertSubmit', 'Erreur serveur 3564.', 'error');

@@ -8,6 +8,7 @@ class Attribute {
     public $label;
     public $id_attribute_extern;
     public $type;
+    public $values;
 
     const TYPE_LIST = 'select';
     const TYPE_RADIO = 'radio';
@@ -15,9 +16,10 @@ class Attribute {
     public function __construct($db) {
         $this->db = $db;
         $this->errors = array();
+        $this->values = array();
     }
 
-    public function fetch($id) {
+    public function fetch($id, $fetch_values = false) {
 
         if ($id < 0) {
             $this->errors[] = "Identifiant invalide :" . $id;
@@ -36,6 +38,11 @@ class Attribute {
                 $this->label = stripslashes($obj->label);
                 $this->type = $obj->type;
                 $this->id_attribute_extern = (int) $obj->id_attribute_extern;
+                if ($fetch_values) {
+                    $attribute_value = new AttributeValue($this->db);
+                    $attribute_value->fetchByParent($this->id);
+                    $this->values[] = $attribute_value;
+                }
                 return 1;
             }
         } else {

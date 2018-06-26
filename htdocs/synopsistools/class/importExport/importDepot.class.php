@@ -21,10 +21,6 @@ class importDepot extends import8sens {
             $entrepot->fetch('', $ln['DepCode']);
             
             
-            if ($entrepot->id > 0)
-                echo "<br/>depot connue";// . print_r($entrepot, 1);
-            else
-                $entrepot->id = $this->createEntrepot($ln);
             
             $entrepot->address = $ln['DepGAdrRue1'];
             $entrepot->zip = $ln['DepGAdrZip'];
@@ -33,15 +29,17 @@ class importDepot extends import8sens {
             $entrepot->description = $ln['DepLib'];
             $entrepot->statut = 1;
             $entrepot->update($entrepot->id, $user);
+            
+            
+            if ($entrepot->id > 0){
+                $entrepot->update($entrepot->id, $user);
+            }
+            else{
+                $entrepot->libelle = $ln['DepCode'];
+                $entrepot->create($user);
+            }
         }
     }
 
-    function createEntrepot($ln) {
-        global $user;
-        require_once DOL_DOCUMENT_ROOT . "/product/stock/class/entrepot.class.php";
-        $entrepot = new Entrepot($this->db);
-        $entrepot->label = $ln['DepCode'];
-        return $entrepot->create($user);
-    }
 
 }

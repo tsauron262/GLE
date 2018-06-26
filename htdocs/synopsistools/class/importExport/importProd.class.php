@@ -117,7 +117,7 @@ class importProd extends import8sens {
             }
         }
         else
-            $this->error ("Pas d'id pour maj".print_r($ln,1));
+            $this->error ("Pas d'id pour maj ".print_r($ln['ArtCode'],1));
     }
 
 }

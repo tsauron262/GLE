@@ -136,6 +136,48 @@ switch ($action) {
             break;
         }
 
+    case 'linkProductAttributeValue': {
+
+            $product = new Product($_POST['id_prod_extern'], true, (int) Configuration::get('PS_LANG_DEFAULT'));
+
+            if (!((int) $product->id > 0))
+                die(Tools::jsonEncode(array('errors' => "Auncun produit ne correspond dans le serveur prestashop, avez-vous importé le tariff auparavant ?")));
+
+            $combinationAttributes = array();
+            $combinationAttributes[] = $_POST['id_attribute_value_extern'];
+
+
+            if (!$product->productAttributeExists($combinationAttributes)) {
+                $price = $_POST['price'];
+                $weight = 0;
+                $unit_price_impact = "";
+                $ecotax = 0;
+                $quantity = $_POST['qty'];
+                $id_image = Db::getInstance()->executeS('
+			SELECT `id_image`
+			FROM `' . _DB_PREFIX_ . 'image`
+			WHERE `id_product` = ' . (int) $product->id . '
+			ORDER BY `position`');
+                $reference = "";
+                $id_supplier = 1;
+                $ean13 = "";
+                $default = false;
+                $location = "";
+                $upc = "";
+                $minimal_quantity = 1;
+                $isbn = "";
+
+
+                $idProductAttribute = $product->addProductAttribute(
+                        (float) $price, (float) $weight, $unit_price_impact, (float) $ecotax, (int) $quantity, $id_image, $reference, $id_supplier, $ean13, $default, $location, $upc, $minimal_quantity, $isbn);
+                $product->addAttributeCombinaison($idProductAttribute, $combinationAttributes);
+                die(Tools::jsonEncode(array('errors' => array(), 'is_ok' => true)));
+            } else {
+                die(Tools::jsonEncode(array('errors' => "", 'is_ok' => false)));
+            }
+            break;
+        }
+
     default: {
             die(Tools::jsonEncode(array('errors' => "Echec : aucune action ne correspond à " . $action)));
             break;

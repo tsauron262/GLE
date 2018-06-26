@@ -1,17 +1,12 @@
 <?php
 
-if (!isset($conf)) {
-    require_once "../../main.inc.php";
-    llxHeader();
-    $go = true;
-}
 
-require_once DOL_DOCUMENT_ROOT."/synopsistools/importExport/class/import8sens.class.php";
+require_once DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/import8sens.class.php";
 
 class importProd extends import8sens {
     public function __construct($db) {
         parent::__construct($db);
-        $this->path .= "exportProd/";
+        $this->path .= "prod/";
     }
 
 
@@ -125,11 +120,4 @@ class importProd extends import8sens {
             $this->error ("Pas d'id pour maj".print_r($ln,1));
     }
 
-}
-
-
-if($go){
-    $c = new importProd($db);
-    $c->go();
-    llxFooter();
 }

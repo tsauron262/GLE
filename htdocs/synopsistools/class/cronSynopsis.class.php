@@ -61,22 +61,25 @@ class CronSynopsis {
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportCommande.class.php");
         $export = new exportCommande($this->db);
         $export->debug = $debug;
-        $export->debug = true;
         $export->exportTout(); 
         $this->output .= $export->output;
         
         
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importDepot.class.php");
         $import = new importDepot($this->db);
-        $export->debug = $debug;
-        $import->debug = true;
+        $import->debug = $debug;
         $import->go(); 
         $this->output .= $import->output;
         
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProd.class.php");
         $import = new importProd($this->db);
-        $export->debug = $debug;
-        $import->debug = true;
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output .= $import->output;
+        
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importStock.class.php");
+        $import = new importStock($this->db);
+        $import->debug = $debug;
         $import->go(); 
         $this->output .= $import->output;
 

@@ -23,7 +23,9 @@ class importProd extends import8sens {
                     if ($this->db->num_rows($sql2) > 0) {
                         $result2 = $this->db->fetch_object($sql2);
                         $this->tabResult["error"] ++;
-                        $this->alert("Prod avec ref identique et autre avec id8sens identique idIdentique id :".$result->id. " ref : ".$result->ref." |  RefIdentique id:".$result2->id." ref: ".$ln['ArtCode']);
+                        $this->alert("Prod avec ref identique et autre avec id8sens identique");
+                        $this->alert("IdIdentique id :".$result->id. " ref : ".$result->ref." |  UPDATE llx_commandedet SET fk_product = '".$result->id. "' WHERE fk_product = '".$result2->id. "'");
+                        $this->alert("RefIdentique id:".$result2->id." ref: ".$ln['ArtCode']."  |  UPDATE llx_commandedet SET fk_product = '".$result2->id. "' WHERE fk_product = '".$result->id. "'");
                     }
                     else{
                         $this->tabResult["connue"] ++;
@@ -50,11 +52,11 @@ class importProd extends import8sens {
                 }
             } else {
                 $this->tabResult["error"] ++;
-                $this->alert("Prod sans label");
+                $this->alert("Prod sans label ref : ".$ln['ArtCode']);
             }
         } else {
             $this->tabResult["error"] ++;
-            $this->alert("Prod sans ref");
+            $this->alert("Prod sans ref label : ".$ln['ArtLib']);
         }
     }
 

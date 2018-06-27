@@ -16,53 +16,52 @@ class importStock extends import8sens {
     }
 
     function traiteLn($ln) {
-        if (isset($this->tabCache['prod'][$ln['ArdGArtCode']])){
-            $this->prodId = $this->tabCache['prod'][$ln['ArdGArtCode']];
-        }
-        else {
-            $this->prodId = 0;
-            $sql = $this->db->query("SELECT rowid FROM `llx_product` WHERE `ref` = '".$ln['ArdGArtCode']."'");
-            if($this->db->num_rows($sql) > 0){
-                $result = $this->db->fetch_object($sql);
-                $this->prodId = $result->rowid;
-            }
-            $this->tabCache['prod'][$ln['ArdGArtCode']] = $this->prodId;
-        }
-        if (isset($this->tabCache['entrepot'][$ln['ArdGDepCode']])){
-            $this->entrepotId = $this->tabCache['entrepot'][$ln['ArdGDepCode']];
-        }
-        else {
-            $this->entrepotId = 0;
-            if($this->entrepot->fetch('', $ln['ArdGDepCode']))
-                    $this->entrepotId = $this->entrepot->id;
-            else
-            $this->error("2entrepot introuvable " . $ln['ArdGDepCode']);
-                
-            $this->tabCache['entrepot'][$ln['ArdGDepCode']] = $this->entrepotId;
-        }
-
-        $newStock = round(str_replace(",", ".",$ln['ArdStk']));
-
-
-        if ($this->prodId < 1)
-            $this->error("Prod introuvable " . $ln['ArdGArtCode']);
-        elseif ($this->entrepotId < 1)
-            $this->error("entrepot introuvable " . $ln['ArdGDepCode']);
-        else {
-            $sql = $this->db->query("SELECT reel FROM `llx_product_stock` WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId);
-            if ($this->db->num_rows($sql) == 1) {
-                $result = $this->db->fetch_object($sql);
-                $this->tabResult['connue'] ++;
-                if ($result->reel != $newStock) {
-                    $this->db->query("UPDATE `llx_product_stock` SET `reel`= '" . $newStock . "' WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId);
-                    $this->tabResult['modifier'] ++;
-                    $this->error("SELECT reel FROM `llx_product_stock` WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId." | ".$ln['ArdGArtCode']);
-                    $this->error("UPDATE `llx_product_stock` SET `reel`= '" . $newStock . "' WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId);
-                    
-                }
+        if ($ln['ArdGDepCode'] != "") {
+            if (isset($this->tabCache['prod'][$ln['ArdGArtCode']])) {
+                $this->prodId = $this->tabCache['prod'][$ln['ArdGArtCode']];
             } else {
-                $this->tabResult['creer'] ++;
-                $this->db->query("INSERT INTO `llx_product_stock`(`fk_product`, `fk_entrepot`, `reel`) VALUES ('" . $this->prodId . "','" . $this->entrepotId . "','" . $newStock . "')");
+                $this->prodId = 0;
+                $sql = $this->db->query("SELECT rowid FROM `llx_product` WHERE `ref` = '" . $ln['ArdGArtCode'] . "'");
+                if ($this->db->num_rows($sql) > 0) {
+                    $result = $this->db->fetch_object($sql);
+                    $this->prodId = $result->rowid;
+                }
+                $this->tabCache['prod'][$ln['ArdGArtCode']] = $this->prodId;
+            }
+            if (isset($this->tabCache['entrepot'][$ln['ArdGDepCode']])) {
+                $this->entrepotId = $this->tabCache['entrepot'][$ln['ArdGDepCode']];
+            } else {
+                $this->entrepotId = 0;
+                if ($this->entrepot->fetch('', $ln['ArdGDepCode']))
+                    $this->entrepotId = $this->entrepot->id;
+                else
+                    $this->error("2entrepot introuvable " . $ln['ArdGDepCode']);
+
+                $this->tabCache['entrepot'][$ln['ArdGDepCode']] = $this->entrepotId;
+            }
+
+            $newStock = round(str_replace(",", ".", $ln['ArdStk']));
+
+
+            if ($this->prodId < 1)
+                $this->error("Prod introuvable " . $ln['ArdGArtCode']);
+            elseif ($this->entrepotId < 1)
+                $this->error("entrepot introuvable " . $ln['ArdGDepCode']);
+            else {
+                $sql = $this->db->query("SELECT reel FROM `llx_product_stock` WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId);
+                if ($this->db->num_rows($sql) == 1) {
+                    $result = $this->db->fetch_object($sql);
+                    $this->tabResult['connue'] ++;
+                    if ($result->reel != $newStock) {
+                        $this->db->query("UPDATE `llx_product_stock` SET `reel`= '" . $newStock . "' WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId);
+                        $this->tabResult['modifier'] ++;
+                        $this->error("SELECT reel FROM `llx_product_stock` WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId . " | " . $ln['ArdGArtCode']);
+                        $this->error("UPDATE `llx_product_stock` SET `reel`= '" . $newStock . "' WHERE `fk_product` = " . $this->prodId . " AND `fk_entrepot` = " . $this->entrepotId);
+                    }
+                } else {
+                    $this->tabResult['creer'] ++;
+                    $this->db->query("INSERT INTO `llx_product_stock`(`fk_product`, `fk_entrepot`, `reel`) VALUES ('" . $this->prodId . "','" . $this->entrepotId . "','" . $newStock . "')");
+                }
             }
         }
     }

@@ -16,7 +16,7 @@ class importStock extends import8sens {
     }
 
     function traiteLn($ln) {
-        if ($ln['ArdGDepCode'] != "") {
+        if ($ln['ArdGDepCode'] != "" && $ln['ArdGArtCode'] != "") {
             if (isset($this->tabCache['prod'][$ln['ArdGArtCode']])) {
                 $this->prodId = $this->tabCache['prod'][$ln['ArdGArtCode']];
             } else {

@@ -1,12 +1,12 @@
 <?php
 
 if (!isset($conf)) {
-    require_once "../../main.inc.php";
+    require_once "../../../main.inc.php";
     llxHeader();
     $go = true;
 }
 
-require_once DOL_DOCUMENT_ROOT."/synopsistools/importExport/class/import8sens.class.php";
+require_once DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/import8sens.class.php";
 
 class importVente extends import8sens {
     var $tabResultInt = array();
@@ -14,11 +14,12 @@ class importVente extends import8sens {
     public function __construct($db) {
         $this->last = true;
         parent::__construct($db);
+        $this->moveFile = false;
     }
     
     public function go(){
         $this->action = 1;
-        $this->path .= "./inventaire/exportVente/";
+        $this->path .= "../inventaire/exportVente/";
         parent::go();
         
         if($this->logOld){
@@ -51,9 +52,12 @@ class importVente extends import8sens {
             parent::go();
 
 
-            require_once DOL_DOCUMENT_ROOT."/synopsistools/class/export8sens.class.php";
+            require_once DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/export8sens.class.php";
             $export = new export8sens($this->db);
-            file_put_contents($this->path."../resultInvent/result.txt", $export->getTxt($this->tabResultInt['inventaire'], array()));
+            if(file_put_contents($this->path."../resultInvent/result.txt", $export->getTxt($this->tabResultInt['inventaire'], array())))
+                    echo "Ficher ".$this->path."../resultInvent/result.txt exporté";
+            else
+                $this->error("Impossible d'éxporté ".$this->path."../resultInvent/result.txt");
         }
     }
     
@@ -102,7 +106,7 @@ class importVente extends import8sens {
         }
         $this->tabResultInt['prod'][$ln['PlvGArtCode']]["ref"] = $ln['PlvGArtCode'];
         
-        $datetime2 = new DateTime(date("Y-m-d H:i:s"));
+        $datetime2 = DateTime::createFromFormat("d/m/Y", "01/07/2018");
         $interval = $dateP->diff($datetime2);
         $nbmonth= $interval->format('%m'); //Retourne le nombre de mois
         if($nbmonth < 3)

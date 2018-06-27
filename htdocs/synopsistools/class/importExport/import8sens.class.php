@@ -11,6 +11,7 @@ abstract class import8sens {
     var $update = false;
     var $utf8 = true;
     var $debug = false;
+    var $moveFile = true;
     
     function __construct($db) {
         $this->db = $db;
@@ -38,10 +39,12 @@ abstract class import8sens {
                         echo $file;
                         $this->traiteFile(file_get_contents($this->path . $file));
                         if(count($this->errors) == 0){
-                            if(rename ($this->path . $file, $this->path ."imported/". $file))
-                                echo "<br/>Fichier traité déplacé vers ".$this->path ."imported/". $file;
-                            else
-                                $this->error("Impossible de déplacé le fichier ".$this->path . $file);
+                            if($this->moveFile){
+                                if(rename ($this->path . $file, $this->path ."imported/". $file))
+                                    echo "<br/>Fichier traité déplacé vers ".$this->path ."imported/". $file;
+                                else
+                                    $this->error("Impossible de déplacé le fichier ".$this->path . $file);
+                            }
                         }
                     }
                 }

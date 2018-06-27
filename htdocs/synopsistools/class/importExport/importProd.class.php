@@ -93,6 +93,8 @@ class importProd extends import8sens {
 
 
 
+            $this->traiteChamp("status", "1");
+            $this->traiteChamp("status_buy", "1");
 
 
             $this->traiteChamp("label", $ln['ArtLib']);

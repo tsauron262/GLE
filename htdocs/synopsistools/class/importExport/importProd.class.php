@@ -11,7 +11,7 @@ class importProd extends import8sens {
 
     function traiteLn($ln) {
         $this->tabResult["total"] ++;
-        if ($ln['ArtCode'] != "") {
+        if ($ln['ArtCode'] != "" && $ln['ArtCode'] != "0") {
             if ($ln['ArtLib'] == "") //{
                 $ln['ArtLib'] = "*";
             $sql = $this->db->query("SELECT rowid as id, ref FROM llx_product WHERE import_key = '" . $ln['ArtID'] . "'");

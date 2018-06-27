@@ -97,7 +97,7 @@ abstract class import8sens {
 
     function printError() {
         foreach($this->errors as $msg)
-            echo "<br/><div class='red'>" . $msg . "</div><br/>";
+            echo "<br/><div class='red'>ERROR FATAL : " . $msg . "</div><br/>";
         foreach($this->alerts as $msg)
             echo "<br/>" . $msg . "<br/>";
     }

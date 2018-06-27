@@ -34,8 +34,10 @@ class importProd extends import8sens {
             } else {
                 $sql = $this->db->query("SELECT rowid as id FROM llx_product WHERE ref = '" . $ln['ArtCode'] . "'");
                 if ($this->db->num_rows($sql) == 0) {
-                    $this->tabResult["inc"] ++;
-                    $this->updateProd($this->addProd($ln), $ln);
+                    if($ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X"){
+                        $this->tabResult["inc"] ++;
+                        $this->updateProd($this->addProd($ln), $ln);
+                    }
                 } elseif ($this->db->num_rows($sql) == 1) {
                     $result = $this->db->fetch_object($sql);
                     $this->tabResult["connue"] ++;
@@ -93,8 +95,8 @@ class importProd extends import8sens {
 
 
 
-            $this->traiteChamp("status", "1");
-            $this->traiteChamp("status_buy", "1");
+            $this->traiteChamp("status", $ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X");
+            $this->traiteChamp("status_buy", $ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X");
 
 
             $this->traiteChamp("label", $ln['ArtLib']);

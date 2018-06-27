@@ -95,8 +95,8 @@ class importProd extends import8sens {
 
 
 
-            $this->traiteChamp("status", $ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X");
-            $this->traiteChamp("status_buy", $ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X");
+            $this->traiteChamp("status", ($ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X")? "1" : "0");
+            $this->traiteChamp("status_buy", ($ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X")? "1" : "0");
 
 
             $this->traiteChamp("label", $ln['ArtLib']);

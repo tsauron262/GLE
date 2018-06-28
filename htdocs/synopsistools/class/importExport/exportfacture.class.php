@@ -4,12 +4,12 @@ require_once (DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
 require_once (DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once (DOL_DOCUMENT_ROOT . "/categories/class/categorie.class.php");
 
-class exportfacture {
+require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/export8sens.class.php");
+
+class exportfacture extends export8sens {
 
 //    var $sep = "    -   ";
-//    var $saut = "<br/>";        
-    var $sep = "\t";
-    var $saut = "\n";
+//    var $saut = "<br/>";   
     public $info = array();
     public $type = "";
     public $id8sens = 0;
@@ -21,42 +21,17 @@ class exportfacture {
     private $where = " AND fact.fk_statut > 0 AND close_code is null AND (fact.extraparams < 1 || fact.extraparams is NULL) AND fact.total != 0  AND facnumber NOT LIKE '%PROV%' GROUP BY fact.rowid";
 
     public function __construct($db, $sortie = 'html') {
-        $this->db = $db;
-        $this->path = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/extractFactGle/";
-        $this->pathI = "";
-    }
-
-    public function importFact() {
-        global $db;
-        $dir = $this->pathI;
-        if (is_dir($dir)) {
-            if ($dh = opendir($dir)) {
-                while (($file = readdir($dh)) !== false) {
-                    if(stripos($file, ".txt") !== false){
-                        $tabF = explode("\r", file_get_contents($dir.$file));
-                        foreach($tabF as $idLn => $ln){
-                            $tabLn = explode("\t", $ln);
-                            if($idLn > 1 && isset($tabLn[2])){
-                                $req = "UPDATE llx_facture set codeCli8Sens = '".$tabLn[1]."', Collab8sens = '".$tabLn[2]."', extraparams = 2 WHERE extraparams = 1 AND facnumber = '".$tabLn[0]."'";
-                                echo $req."<br/>";
-                                $db->query($req);
-                            }
-                            
-                        }
-                        rename($dir.$file,$dir."imported/".$file);
-                    }
-                }
-                closedir($dh);
-            }
-        }
+        parent::__construct($db);
+        $this->pathExport = $this->path."extractFactGle/";
+        $this->pathI = $this->path."../export/factures/";
     }
 
     public function exportTout() {
         if(defined("MODE_TEST")){
-            $this->path = "/data/synchro/export/factures/";
-            $this->pathI = "/data/synchro/import/factures/";
-            $this->importFact();
-            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportpaiement.class.php");
+            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importFacture.class.php");
+            $importFact = new importFacture($this->db);
+            $importFact->importFact();
+            require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/exportpaiement.class.php");
             $exp = new exportpaiement($this->db);
             $exp->exportTout();
         }
@@ -196,7 +171,7 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
     }
 
     public function getFactDontExport() {
-        $this->path = DOL_DATA_ROOT . "/test/";
+        $this->pathExport = DOL_DATA_ROOT . "/test/";
         $result = $this->db->query("SELECT fact.rowid as id, facnumber "
                 . "FROM `" . MAIN_DB_PREFIX . "facture` fact "
                 . "WHERE 1 " . $this->where);
@@ -208,34 +183,7 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
             if(!defined("MODE_TEST"))
                 mailSyn2("Facture non export", "admin@bimp.fr, jc.cannet@bimp.fr", "BIMP-ERP<admin@bimp.fr>", "Bonjour voici les facture non exporté " . $facts);
     }
-
-    function getTxt($tab1, $tab2) {
-        $sortie = "";
-        if (!isset($tab1[0]) || !isset($tab1[0]))
-            return 0;
-
-        foreach ($tab1[0] as $clef => $inut)
-            $sortie .= $clef . $this->sep;
-        $sortie .= $this->saut;
-        foreach ($tab2[0] as $clef => $inut)
-            $sortie .= $clef . $this->sep;
-        $sortie .= $this->saut;
-
-
-        foreach ($tab1 as $tabT) {
-            foreach ($tabT as $val)
-                $sortie .= str_replace(array($this->saut, $this->sep, "\n", "\r"), "  ", $val) . $this->sep;
-            $sortie .= $this->saut;
-        }
-        foreach ($tab2 as $tabT) {
-            foreach ($tabT as $val)
-                $sortie .= str_replace(array($this->saut, $this->sep, "\n", "\r"), "  ", $val) . $this->sep;
-            $sortie .= $this->saut;
-        }
-
-        return $sortie;
-    }
-
+    
     function extract($id) {
         if ($this->type == "") {
             $this->error("Pas de type pour export " . $id);
@@ -288,14 +236,14 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
             if ($this->exportOk) {
                 //header("Content-Disposition: attachment; filename=\"test.txt\"");
                 $text = $this->getTxt($tabFact, $tabFactDet);
-                if (file_put_contents($this->path . $facture->ref . ".txt", $text)) {
+                if (file_put_contents($this->pathExport . $facture->ref . ".txt", $text)) {
                     if ($this->debug)
                         echo "<br/>Facture " . $facture->getNomUrl(1) . " exporté<br/>";
                     $this->db->query("UPDATE " . MAIN_DB_PREFIX . "facture SET extraparams = 1 WHERE rowid = " . $facture->id);
                     $this->nbE++;
                     return 1;
                 } else
-                    $this->error("Impossible d'exporté le fichier " . $this->path . $facture->ref . ".txt");
+                    $this->error("Impossible d'exporté le fichier " . $this->pathExport . $facture->ref . ".txt");
             }
             return 0;
         }

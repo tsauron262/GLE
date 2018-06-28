@@ -200,7 +200,11 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getTargetInfosHtml()
     {
-        $html = '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
+        global $conf;
+        if($this->contact < 1 || !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
+            $html =  '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
+        else
+            $html = "";
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');
         $html = str_replace("\n", '<br/>', $html);
 
@@ -292,7 +296,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
-            if($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte') {
+            if($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte')) {
                 $this->acompteHt -= $line->total_ht;
                 $this->acompteTtc -= $line->total_ttc;
                 $i++;

@@ -93,7 +93,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         } elseif ($iTribu == 4)
             $req .= " AND ( ref NOT LIKE('SAVN%') && ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVMONTP%') && ref NOT LIKE('SAVMAU%') )";
 
-        $req .= " ORDER BY `nbJ` DESC, s.id";
+        $req .= " AND DATEDIFF(now(), s.date_update) < 100 ORDER BY `nbJ` DESC, s.id";
 
         $req .= " LIMIT 0,500";
         return $req;
@@ -112,10 +112,18 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                 if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->fetch($ligne->rid);
                     if (count($repair->lookup()) == 0) {
-                        echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
+                        echo "Tentative de maj de " . $ligne->ref . ". Fermé dans GLE" . $repair->getData('repair_complete') . " num " . $repair->getData('repair_number') . ". num2 " . $repair->getData('repair_confirm_number') . " Statut dans GSX : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->getData('repair_complete')) {
                             echo "Fermée dans GSX maj dans GLE.<br/>";
-                        } else {
+                        }
+                        elseif($repair->repairLookUp['repairStatus'] == "Fermée et complétée"){
+                            echo "fermé dans GSX Impossible de Fermé dans GLE ";
+                        } 
+                        else {
+                            
+                            
+                            
+                            
                             $mailTech = "jc.cannet@bimp.fr";
                             if ($ligne->Technicien > 0) {
                                 $user = new User($db);

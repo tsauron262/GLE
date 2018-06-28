@@ -56,6 +56,9 @@ if ($idprod > 0)
 	$sorttouse = 's.nom, pfp.quantity, pfp.price';
 	if (GETPOST('bestpricefirst')) $sorttouse = 'pfp.unitprice, s.nom, pfp.quantity, pfp.price';
 
+        if(defined("OLD_PRICE_FOURN"))
+            $productSupplierArray = $producttmp->list_product_fournisseur_price($idprod, 'pfp.rowid', 'DESC');
+        else
 	$productSupplierArray = $producttmp->list_product_fournisseur_price($idprod, $sorttouse);    // We list all price per supplier, and then firstly with the lower quantity. So we can choose first one with enough quantity into list.
 	if ( is_array($productSupplierArray))
 	{
@@ -96,6 +99,9 @@ if ($idprod > 0)
 		$price=$producttmp->pmp;
 		$prices[] = array("id" => 'pmpprice', "price" => price2num($price), "label" => $langs->trans("PMPValueShort").': '.price($price,0,$langs,0,0,-1,$conf->currency), "title" => $langs->trans("PMPValueShort").': '.price($price,0,$langs,0,0,-1,$conf->currency));  // For price field, we must use price2num(), for label or title, price()
 	}
+        
+        if(defined("OLD_PRICE_FOURN") && isset($prices[0]))
+            $prices = array($prices[0]);
 }
 
 echo json_encode($prices);

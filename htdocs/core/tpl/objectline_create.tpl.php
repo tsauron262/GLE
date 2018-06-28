@@ -652,7 +652,10 @@ jQuery(document).ready(function() {
     	      			}
     	        		options += '<option value="'+this.id+'" price="'+this.price+'">'+this.label+'</option>';
     	      		});
-    	      		options += '<option value="inputprice" price="'+defaultprice+'"><?php echo $langs->trans("InputPrice"); ?></option>';
+                        <?php
+                        if(!defined("OLD_PRICE_FOURN"))
+    	      		 echo 'options += \'<option value="inputprice" price="\'+defaultprice+\'"><?php echo $langs->trans("InputPrice"); ?></option>\';';
+                        ?>
 
     	      		console.log("finally selected defaultkey="+defaultkey+" defaultprice="+defaultprice);
 

@@ -23,11 +23,12 @@ require_once('../../main.inc.php');
 
 
 
+echo "Im Depots : <br/>";
+require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/cronSynopsis.class.php");
+$import = new CronSynopsis($db);
+$import->extractFact(true); 
 
-require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/exportfacture.class.php");
-$export = new exportfacture($db);
-$export->debug = true;
-$export->exportTout();    
+
 
 echo "FIN";
 

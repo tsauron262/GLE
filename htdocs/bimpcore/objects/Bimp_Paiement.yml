@@ -54,6 +54,8 @@ forms:
               content: 
                   callback: renderCaisseInput
               required: 1
+              show: 
+                  prop: useCaisse
             - custom: 1
               label: Mode de paiement
               data_type: id_object
@@ -61,13 +63,13 @@ forms:
               input: 
                   type: select_payment
               required: 1
-            - custom: 1
-              label: Compte
-              data_type: id_object
-              input_name: id_account
-              input: 
-                  type: select_mysoc_account
-              required: 1
+#            - custom: 1
+#              label: Compte
+#              data_type: id_object
+#              input_name: id_account
+#              input: 
+#                  type: select_mysoc_account
+#              required: 1
             - field: note
             - custom: 1
               label: Avoirs client

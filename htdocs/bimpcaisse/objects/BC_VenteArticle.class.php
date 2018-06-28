@@ -6,12 +6,18 @@ class BC_VenteArticle extends BimpObject
     public function getTotal()
     {
         if ($this->isLoaded()) {
-            return (float) ((float) $this->getData('unit_price_tax_in') * (int) $this->getData('qty'));
+            $vente = $this->getParentInstance();
+            if ($vente->isLoaded()) {
+                if ((int) $vente->getData('vente_ht')) {
+                    return (float) ((float) $this->getData('unit_price_tax_ex') * (int) $this->getData('qty'));
+                } else {
+                    return (float) ((float) $this->getData('unit_price_tax_in') * (int) $this->getData('qty'));
+                }
+            }
         }
         return 0;
     }
 
-    
     public function displayTotal()
     {
         if ($this->isLoaded()) {
@@ -63,16 +69,25 @@ class BC_VenteArticle extends BimpObject
     public function getTotalRemisesPercent($extra_percent = 0)
     {
         if ($this->isLoaded()) {
-            $id_vente = (int) $this->getData('id_vente');
+            $vente = $this->getParentInstance();
+
+            if (!$vente->isLoaded()) {
+                return $extra_percent;
+            }
 
             $remises = BimpObject::getInstance($this->module, 'BC_VenteRemise');
 
             $list = $remises->getList(array(
-                'id_vente'   => $id_vente,
+                'id_vente'   => (int) $vente->id,
                 'id_article' => (int) $this->id
             ));
 
-            $unit_price_ttc = (float) $this->getData('unit_price_tax_in');
+            if ((int) $vente->getData('vente_ht')) {
+                $unit_price_ttc = (float) $this->getData('unit_price_tax_ex');
+            } else {
+                $unit_price_ttc = (float) $this->getData('unit_price_tax_in');
+            }
+
             $qty = (int) $this->getData('qty');
             $total_ttc = (float) ($unit_price_ttc * $qty);
 

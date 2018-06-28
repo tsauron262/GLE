@@ -488,7 +488,6 @@ class BimpObject
         if (is_null($this->parent) || ($id_parent && (!$this->parent->id || $this->parent->id !== $id_parent))) {
             unset($this->parent);
             $this->parent = null;
-            $id_property = $this->getParentIdProperty();
             $module = $this->getParentModule();
             $object = $this->getParentObjectName();
             if ($module && $object) {

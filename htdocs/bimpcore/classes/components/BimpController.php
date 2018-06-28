@@ -1078,6 +1078,9 @@ class BimpController
             if (BimpTools::isSubmit('new_values')) {
                 $list->setNewValues(BimpTools::getValue('new_values', array()));
             }
+            if (BimpTools::isSubmit('selected_rows')) {
+                $list->setSelectedRows(BimpTools::getValue('selected_rows', array()));
+            }
             $rows_html = $list->renderRows();
             $pagination_html = $list->renderPagination();
         }
@@ -1439,28 +1442,78 @@ class BimpController
     {
         $errors = array();
         $html = '';
-        
+
         $id_product = (int) BimpTools::getValue('id_product', 0);
         $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
-        
+
         if (!$id_product) {
             $errors[] = 'ID du produit absent';
         } else {
             $product = BimpObject::getInstance('bimpcore', 'Bimp_Product', $id_product);
             if (!BimpObject::objectLoaded($product)) {
-                $errors[] = 'Produit d\'ID '.$id_product.' inexistant';
+                $errors[] = 'Produit d\'ID ' . $id_product . ' inexistant';
             } else {
                 $html = $product->renderStocksByEntrepots($id_entrepot);
             }
         }
-        
-        
+
+
         die(json_encode(array(
-            'errors' => $errors,
-            'html' => $html,
+            'errors'     => $errors,
+            'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }
+
+    protected function ajaxProcessSearchZipTown()
+    {
+        $errors = array();
+        $html = '';
+
+        $zip = BimpTools::getValue('zip', '');
+        $town = BimpTools::getValue('town', '');
+
+        if ($zip || $town) {
+            global $db;
+            $bdb = new BimpDb($db);
+
+            $fields = array(
+                'zip', 'town', 'fk_pays', 'fk_county'
+            );
+
+            $where = '`active` = 1';
+            if ($zip) {
+                $where .= ' AND `zip` LIKE \'' . $db->escape($zip) . '%\'';
+            }
+            if ($town) {
+                $where .= ' AND `town` LIKE \'%' . $db->escape($town) . '%\'';
+            }
+
+            $rows = $bdb->getRows('c_ziptown', $where, 100, 'array', $fields, ($zip ? 'zip' : 'town'), 'asc');
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    $html .= '<div>';
+                    $html .= '<span class="btn btn-light-default" onclick="selectZipTown($(this))"';
+                    $html .= ' data-town="' . $r['town'] . '"';
+                    $html .= ' data-zip="' . $r['zip'] . '"';
+                    $html .= ' data-state="' . $r['fk_county'] . '"';
+                    $html .= ' data-country="' . $r['fk_pays'] . '"';
+                    $html .= '>';
+                    $html .= $r['zip'] . ' - ' . $r['town'];
+                    $html .= '</span>';
+                    $html .= '</div>';
+                }
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
     // Callbacks:
 
     protected function getObjectIdFromPost($object_name)

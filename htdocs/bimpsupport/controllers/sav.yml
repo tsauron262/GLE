@@ -60,6 +60,13 @@ sections:
                           list: 
                               object: sav
                               children: apple_parts
+                    - cols: 
+                        - type: custom
+                          custom: 
+                              callback: 
+                                  method: renderLoadPartsButton
+                                  params:
+                                      object: sav
             
           - id: notes
             title: Notes

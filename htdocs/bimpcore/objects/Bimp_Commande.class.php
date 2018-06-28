@@ -772,4 +772,38 @@ class Bimp_Commande extends BimpObject
             'success_callback' => $success_callback
         );
     }
+
+    public function actionValidateFacture($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Facture validée avec succès';
+        $success_callback = 'location.reload();';
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la commande absent';
+        } elseif (!(int) $this->getData('id_facture')) {
+            $errors[] = 'Aucune facture enregistrée pour cette commande';
+        } else {
+            $facture = $this->getChildObject('facture');
+            if (!BimpObject::objectLoaded($facture)) {
+                $errors[] = 'Facture d\'ID ' . $this->getData('id_facture') . ' non trouvée';
+            } elseif ((int) $facture->getData('fk_statut') > 0) {
+                $errors[] = 'Cette facture a déjà été validée';
+            } else {
+                global $user, $langs;
+
+                if ($facture->dol_object->validate($user) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), 'Echec de la validation de la facture');
+                }
+
+                $facture->dol_object->generateDocument('bimpfact', $langs);
+            }
+        }
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
 }

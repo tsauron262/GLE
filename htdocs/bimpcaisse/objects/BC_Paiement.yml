@@ -1,0 +1,131 @@
+table: bc_paiement
+
+labels: 
+    name: Paiement en caisse
+    name_plur: paiements en caisse
+    
+objects: 
+    caisse:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BC_Caisse
+            id_object: 
+                field_value: id_caisse
+                
+    caisse_session: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BC_CaisseSession
+            id_object: 
+                field_value: id_caisse_session
+                
+    facture:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: compta/facture
+                file: facture
+            id_object: 
+                field_value: id_facture
+                
+    vente: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BC_Vente
+            id_object: 
+                field_value: id_vente
+                
+    paiement: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Paiement
+            id_object: 
+                field_value: id_paiement
+                
+fields: 
+    id_caisse: 
+        label: Caisse
+        type: id_object
+        object: caisse
+        
+    id_caisse_session:
+        label: Session de caisse
+        type: id_object
+        object: caisse_session
+        
+    id_facture: 
+        label: Facture
+        type: id_object
+        object: facture
+        search: 
+            input: 
+                type: search_list
+                search_list: 
+                    table: facture
+                    fields_search: rowid,facnumber
+                    field_return_label: facnumber
+                    field_return_value: rowid
+        
+    id_vente: 
+        label: Vente
+        type: id_object
+        object: vente
+        search: 
+            input: 
+                type: search_list
+                search_list: 
+                    table: bc_vente
+                    fields_search: id
+                    field_return_label: id
+                    label_syntaxe: Vente <label_1>
+                    field_return_value: id
+        
+    id_paiement: 
+        label: Paiement
+        type: id_object
+        object: paiement
+        search: 
+            input: 
+                type: search_list
+                search_list: 
+                    table: paiement
+                    fields_search: rowid,ref
+                    field_return_label: ref
+                    field_return_value: rowid
+        
+lists: 
+    session: 
+        objects_change_reload: BC_Vente,Bimp_Paiement
+        sort_field: id
+        sort_way: desc
+        n: 10
+        cols:
+            type: 
+                label: Type
+                value: 
+                    callback: displayType
+            amount: 
+                label: Montant
+                value: 
+                    callback: displayAmount
+            vente: 
+                field: id_vente
+                display: nom_url
+            facture: 
+                label: Facture(s)
+                value: 
+                    callback: displayFacture
+            paiement: 
+                field: id_paiement
+                display: nom_url
+            user: 
+                label: Caissier
+                field: user_create
+                

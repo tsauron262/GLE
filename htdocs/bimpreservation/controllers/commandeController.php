@@ -260,16 +260,25 @@ class commandeController extends reservationController
             } else {
                 $label = 'Facture globale';
             }
-            
-            $html .= '<strong>'.$label.': </strong>';
-            
+
+            $html .= '<strong>' . $label . ': </strong>';
+
             $html .= BimpObject::getInstanceNomUrlWithIcons($facture);
-            
-            if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
-                $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities($ref . '/' . $ref . '.pdf');
-                $onclick = 'window.open(\'' . htmlentities($url) . '\')';
+
+            if ((int) $facture->getData('fk_statut') > 0) {
+                if (file_exists(DOL_DATA_ROOT . '/facture/' . $ref . '/' . $ref . '.pdf')) {
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=facture&file=' . htmlentities($ref . '/' . $ref . '.pdf');
+                    $onclick = 'window.open(\'' . htmlentities($url) . '\')';
+                    $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
+                    $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>PDF Facture';
+                    $html .= '</button>';
+                }
+            } else {
+                $onclick = $commande->getJsActionOnclick('validateFacture', array(), array(
+                    'confirm_msg' => 'La facture ne sera plus supprimable. Veuillez confirmer'
+                ));
                 $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>Fichier PDF';
+                $html .= '<i class="fa fa-check iconLeft"></i>Valider la facture';
                 $html .= '</button>';
             }
         } else {

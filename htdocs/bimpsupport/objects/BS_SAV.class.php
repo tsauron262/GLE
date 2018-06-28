@@ -11,6 +11,7 @@ class BS_SAV extends BimpObject
     public static $facture_model_pdf = 'bimpinvoicesav';
     public static $idProdPrio = 3422;
     private $allGarantie = true;
+    public $useCaisseForPayments = false;
 
     const BS_SAV_NEW = 0;
     const BS_SAV_ATT_PIECE = 1;
@@ -70,12 +71,14 @@ class BS_SAV extends BimpObject
     );
     public static $systems_cache = null;
 
-    // Getters:
-
     public function __construct($db)
     {
         parent::__construct("bimpsupport", get_class($this));
+
+        $this->useCaisseForPayments = BimpCore::getConf('sav_use_caisse_for_payments');
     }
+
+    // Getters:
 
     public function isPropalEditable()
     {
@@ -142,8 +145,6 @@ class BS_SAV extends BimpObject
 
     public function getDefaultCodeCentre()
     {
-//        $this->printData(); exit;
-
         if (BimpTools::isSubmit('code_centre')) {
             return BimpTools::getValue('code_centre');
         } else {
@@ -427,14 +428,14 @@ class BS_SAV extends BimpObject
     {
         if ((int) $this->getData('id_facture')) {
             $facture = $this->getChildObject('facture');
-            if (!is_null($facture) && isset($facture->id) && $facture->id) {
-                return (float) round(($facture->dol_object->total_ttc - $facture->dol_object->getSommePaiement()), 2);
+            if (BimpObject::objectLoaded($facture)) {
+                return (float) round((float) $facture->getRemainToPay(), 2);
             }
         }
 
         if ((int) $this->getData('id_propal')) {
             $propal = $this->getChildObject('propal');
-            if (!is_null($propal) && $propal->isLoaded()) {
+            if (BimpObject::objectLoaded($propal)) {
                 return (float) round($propal->dol_object->total_ttc, 2);
             }
         }
@@ -859,11 +860,36 @@ class BS_SAV extends BimpObject
     {
         global $user, $langs;
 
+        $errors = array();
+
+        $caisse = null;
+        $id_caisse = 0;
+
+        if ($this->useCaisseForPayments) {
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+            if (!$id_caisse) {
+                $errors[] = 'Utilisateur connecté à aucune caisse. Enregistrement de l\'acompte abandonné';
+            } else {
+                if (!$caisse->fetch($id_caisse)) {
+                    $errors[] = 'La caisse à laquelle vous êtes connecté est invalide. Enregistrement de l\'acompte abandonné';
+                } else {
+                    $caisse->isValid($errors);
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+
         $id_client = (int) $this->getData('id_client');
         if (!$id_client) {
             $errors[] = 'Aucun client sélectionné pour ce SAV';
         }
         if ($acompte > 0 && !count($errors)) {
+            // Création de la facture: 
             BimpTools::loadDolClass('compta/facture', 'facture');
             $factureA = new Facture($this->db->db);
             $factureA->type = 3;
@@ -877,6 +903,7 @@ class BS_SAV extends BimpObject
                 $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte / 1.2);
                 $factureA->validate($user);
 
+                // Création du paiement: 
                 BimpTools::loadDolClass('compta/paiement', 'paiement');
                 $payement = new Paiement($this->db->db);
                 $payement->amounts = array($factureA->id => $acompte);
@@ -885,9 +912,39 @@ class BS_SAV extends BimpObject
                 if ($payement->create($user) <= 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Des erreurs sont survenues lors de la création du paiement de la facture d\'acompte');
                 } else {
+                    if ($this->useCaisseForPayments) {
+                        $id_account = (int) $caisse->getData('id_account');
+                    } else {
+                        $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+                    }
+
+                    // Ajout du paiement au compte bancaire: 
+                    if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                        $account_label = '';
+
+                        if ($this->useCaisseForPayments) {
+                            $account = $caisse->getChildObject('account');
+
+                            if (BimpObject::objectLoaded($account)) {
+                                $account_label = '"' . $account->bank . '"';
+                            }
+                        }
+
+                        if (!$account_label) {
+                            $account_label = ' d\'ID ' . $caisse->getData('id_account');
+                        }
+                        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $account_label);
+                    }
+
+                    // Enregistrement du paiement caisse: 
+                    if ($this->useCaisseForPayments) {
+                        $errors = array_merge($errors, $caisse->addPaiement($payement, $factureA->id));
+                    }
+
                     $factureA->set_paid($user);
                 }
 
+                // Création de la remise client: 
                 BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
                 $discount = new DiscountAbsolute($this->db->db);
                 $discount->description = "Acompte";
@@ -1891,6 +1948,8 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
     {
         global $user, $langs;
         $errors = array();
+        $caisse = null;
+        $payment_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
 
         $prets = $this->getChildrenObjects('prets');
         foreach ($prets as $pret) {
@@ -1903,14 +1962,28 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
             return array(BimpTools::getMsgFromArray($errors, 'Il n\'est pas possible de fermer ce SAV:'));
         }
 
-        $success = 'SAV Fermé avec succès';
+        if ($this->useCaisseForPayments && $payment_set) {
+            global $user;
 
-        $current_status = (int) $this->getSavedData('status');
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+            if (!$id_caisse) {
+                $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
+            } else {
+                if (!$caisse->fetch($id_caisse)) {
+                    $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                } else {
+                    $caisse->isValid($errors);
+                }
+            }
+        }
 
         if (count($errors)) {
             return $errors;
         }
 
+        $success = 'SAV Fermé avec succès';
+        $current_status = (int) $this->getSavedData('status');
         $warnings = array();
 
         if ((int) $this->getData('id_propal')) {
@@ -2036,16 +2109,33 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         $facture->validate($user, ''); //pas d'entrepot pour pas de destock
                         $facture->fetch($facture->id);
 
-                        if (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56)) {
+                        // Ajout du paiement: 
+                        if ($payment_set) {
                             require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
                             $payement = new Paiement($this->db->db);
                             $payement->amounts = array($facture->id => (float) $data['paid']);
                             $payement->datepaye = dol_now();
                             $payement->paiementid = (int) $data['mode_paiement'];
-                            $payement->create($user);
+                            if ($payement->create($user) <= 0) {
+                                $warnings[] = 'Echec de l\'ajout du paiement de la facture';
+                            } else {
+                                // Ajout du paiement au compte bancaire: 
+                                if ($this->useCaisseForPayments) {
+                                    $id_account = (int) $caisse->getData('id_account');
+                                } else {
+                                    $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+                                }
+                                if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
+                                }
+
+                                if ($this->useCaisseForPayments) {
+                                    $warnings = array_merge($warnings, $caisse->addPaiement($payement, $facture->id));
+                                }
+                            }
                         }
 
-                        if ((float) $facture->getSommePaiement() >= (float) $facture->total_ttc) {
+                        if ((float) ($facture->getSommePaiement() + $facture->getSumCreditNotesUsed() + $facture->getSumDepositsUsed()) >= (float) $facture->total_ttc) {
                             $facture->set_paid($user);
                         }
 
@@ -2211,6 +2301,28 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
     public function create(&$warnings = array())
     {
+        $errors = array();
+
+        if ($this->useCaisseForPayments && $this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
+            global $user;
+
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+            if (!$id_caisse) {
+                $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement de l\'acompte';
+            } else {
+                if (!$caisse->fetch($id_caisse)) {
+                    $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                } else {
+                    $caisse->isValid($errors);
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
         if (!(string) $this->getData('ref')) {
             $this->set('ref', $this->getNextNumRef());
         }

@@ -17,8 +17,17 @@ function onFacturePaymentChange($container) {
             $(this).val(value);
         }
         value = parseFloat(value);
+        
         var avoirs = parseFloat($(this).data('avoirs'));
+        if (isNaN(avoirs)) {
+            avoirs = 0;
+        }
+        
         var to_pay = parseFloat($(this).data('to_pay'));
+        if (isNaN(to_pay)) {
+            to_pay = 0;
+        }
+        
         if ((value + avoirs) > to_pay) {
             value = to_pay - avoirs;
             $(this).val(value);
@@ -51,18 +60,26 @@ function onClientTotalPaidAmountChange($container) {
     } else {
         total_paid = parseFloat(total_paid);
     }
+    
     var total_to_pay = $container.find('[name="total_to_pay"]').val();
     if (total_to_pay === '') {
         total_to_pay = 0;
     } else {
         total_to_pay = parseFloat(total_to_pay);
     }
+    
     var rest = total_paid;
     var rest_to_pay = total_to_pay;
 
     $container.find('input.facture_payment_input').each(function () {
         var avoirs = parseFloat($(this).data('avoirs'));
+        if (isNaN(avoirs)) {
+            avoirs = 0;
+        }
         var to_pay = parseFloat($(this).data('to_pay'));
+        if (isNaN(to_pay)) {
+            to_pay = 0;
+        }
         to_pay -= avoirs;
         if (to_pay > rest) {
             to_pay = Math.round10(rest, -2);

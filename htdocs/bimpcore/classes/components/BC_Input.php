@@ -71,7 +71,11 @@ class BC_Input extends BimpComponent
             'active_only' => array('data_type' => 'bool', 'default' => 1)
         ),
         'search_ziptown'              => array(
-            'linked_fields' => array('data_type' => 'array', 'default' => array())
+            'field_type' => array('default' => ''),
+            'town_field' => array('default' => ''),
+            'zip_field' => array('default' => ''),
+            'state_field' => array('default' => ''),
+            'country_field' => array('default' => '')
         ),
         'select_remises'              => array(
             'id_client' => array('data_type' => 'int', 'required' => 1)
@@ -264,7 +268,11 @@ class BC_Input extends BimpComponent
                 break;
 
             case 'search_ziptown':
-                $options['linked_fields'] = isset($this->params['linked_fields']) ? $this->params['linked_fields'] : array();
+                $options['field_type'] = isset($this->params['field_type']) ? $this->params['field_type'] : '';
+                $options['town_field'] = isset($this->params['town_field']) ? $this->params['town_field'] : '';
+                $options['zip_field'] = isset($this->params['zip_field']) ? $this->params['zip_field'] : '';
+                $options['state_field'] = isset($this->params['state_field']) ? $this->params['state_field'] : '';
+                $options['country_field'] = isset($this->params['country_field']) ? $this->params['country_field'] : '';
                 break;
 
             case 'select_remises':

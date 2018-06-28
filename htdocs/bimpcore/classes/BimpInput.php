@@ -317,13 +317,33 @@ class BimpInput
                 $html .= ob_get_clean();
                 break;
 
-            case 'search_ziptown':
-                if (!isset($options['linked_fields'])) {
-                    $options['linked_fields'] = array();
+            case 'search_ziptown':   
+                $html = '<div class="searchZiptownInputContainer">';
+                $html .= '<input type="text" class="search_ziptown" name="'.$field_name.'" value="'.$value.'"';
+                if (isset($options['field_type'])) {
+                    $html .= ' data-field_type="'.$options['field_type'].'"';
                 }
-                global $db;
-                $formCompany = new FormCompany($db);
-                $html .= $formCompany->select_ziptown($value, $field_name, $options['linked_fields'], 0, 0, '', 'maxwidth50onsmartphone');
+                if (isset($options['town_field'])) {
+                    $html .= ' data-town_field="'.$options['town_field'].'"';
+                }
+                if (isset($options['zip_field'])) {
+                    $html .= ' data-zip_field="'.$options['zip_field'].'"';
+                }
+                if (isset($options['state_field'])) {
+                    $html .= ' data-state_field="'.$options['state_field'].'"';
+                }
+                if (isset($options['country_field'])) {
+                    $html .= ' data-country_field="'.$options['country_field'].'"';
+                }
+                if (isset($options['data'])) {
+                    foreach ($options['data'] as $data_name => $data_value) {
+                        $html .= ' data-' . $data_name . '="' . $data_value . '"';
+                    }
+                }
+                $html .= '/>';
+                $html .= '<i class="loading fa fa-spinner fa-spin"></i>';
+                $html .= '</div>';
+                $html .= '<div class="searchZipTownResults hideOnClickOut"></div>';
                 break;
 
             case 'search_product':

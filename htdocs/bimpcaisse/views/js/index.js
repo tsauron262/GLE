@@ -122,10 +122,16 @@ function BC_Vente() {
             this.returns = result.vente_data.returns;
         }
 
+        if (parseInt($('#venteHt').find('[name="vente_ht"]').val())) {
+            $('.cart_total_label').text('Total HT');
+        } else {
+            $('.cart_total_label').text('Total TTC');
+        }
+
 //        displayMoneyValue(this.total_remises_vente, $('#venteRemises').find('.total_remises_vente span'));
         displayMoneyValue(this.total_remises_articles, $('#venteRemises').find('.total_remises_articles span'));
         displayMoneyValue(this.total_remises, $('#venteRemises').find('.total_remises span'));
-        displayMoneyValue((this.total_ttc - this.total_remises), $('#ventePanierTotal span'));
+        displayMoneyValue((this.total_ttc - this.total_remises), $('#ventePanierTotal span.cart_total'));
         displayMoneyValue(this.total_discounts, $('#totalDiscounts span'));
 
         $('#venteRemises').hide().find('.remises_lines').html('');
@@ -320,67 +326,6 @@ function closeCaisse($button, confirm_fonds) {
     });
 }
 
-function changeUser($button) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    var $form = $('#changeUserForm');
-
-    if (!$form.length) {
-        bimp_msg('Une erreur est survenue (Formulaire absent). Opération impossible.', 'danger');
-        return;
-    }
-
-    var id_caisse = parseInt($('#current_params').find('[name="id_caisse"]').val());
-    if (!id_caisse) {
-        bimp_msg('Erreur: aucune caisse active', 'danger');
-        return;
-    }
-
-    var id_new_user = parseInt($form.find('[name="id_new_user"]').val());
-    if (!id_new_user) {
-        bimp_msg('Aucun nouvel utilisateur sélectionné', 'warning');
-        return;
-    }
-
-    var id_user = parseInt($('#current_params').find('[name="id_user"]').val());
-    if (!id_user) {
-        bimp_msg('Erreur: ID de l\'utilisateur actuel absent', 'danger');
-        return;
-    }
-
-    if (id_user === id_new_user) {
-        bimp_msg('L\'utilisateur sélectionné est déjà assigné à cette caisse', 'warning');
-        return;
-    }
-
-    var user_name = $form.find('[name="id_new_user"]').find('option[value="' + id_new_user + '"]').text();
-    var caisse_name = $('#current_params').find('[name="caisse_name"]').val();
-
-    var msg = 'Etes-vous sûr de vouloir assigné l\'utilisateur "' + user_name + '"';
-    msg += ' à la caisse "' + caisse_name + '"?' + "\n\n";
-    msg += 'Cet utilisateur devra se connecter pour accéder à cette caisse';
-
-    if (confirm(msg)) {
-        BimpAjax('changeUser', {
-            id_caisse: id_caisse,
-            id_new_user: id_new_user,
-            logout: $form.find('[name="logout"]').val()
-        }, $form.find('.freeFormAjaxResult'), {
-            $button: $button,
-            success: function (result, bimpAjax) {
-                window.location = document.location.href.replace(document.location.search, "");
-            },
-            error: function (result, bimpAjax) {
-                if (!result || typeof (result.errors) === 'undefined') {
-                    window.location = document.location.href.replace(document.location.search, "");
-                }
-            }
-        });
-    }
-}
-
 function loadCaisseMvtForm($button) {
     var $params = $('#current_params');
     var id_entrepot = parseInt($params.find('[name="id_entrepot"]').val());
@@ -554,12 +499,12 @@ function saveCurrentVente($button, status) {
             }
         }
     }
-    
+
     var data = {
         id_vente: Vente.id_vente,
         status: status
     };
-    
+
     if (status === 2) {
         if (Vente.avoir > 0) {
             data.avoir_rbt_mode = $('#avoirRbtMode').find('[name="avoir_rbt_mode"]').val();
@@ -608,11 +553,16 @@ function saveCurrentVente($button, status) {
             $('#newVenteButton').removeClass('disabled');
             Vente.reset();
 
-            reloadObjectList('BC_Vente_default_list_table');
             if ((status === 2) && result.validate) {
                 var url = ticket_url + '?id_vente=' + bimpAjax.id_vente;
                 window.open(url, 'Ticket de caisse', "menubar=no, status=no, width=370, height=600");
             }
+            
+            $('body').trigger($.Event('objectChange', {
+                module: 'bimpcaisse',
+                object_name: 'BC_Vente',
+                id_object: bimpAjax.id_vente
+            }));
         },
         error: function (result, bimpAjax) {
             if (status === 2) {
@@ -771,6 +721,22 @@ function saveCondReglement() {
 
     BimpAjax('saveCondReglement', {
         id_cond: $('#condReglementSelect').val(),
+        id_vente: Vente.id_vente
+    }, null, {
+        success: function (result, bimpAjax) {
+            Vente.ajaxResult(result);
+        }
+    });
+}
+
+function saveVenteHt() {
+    if (!Vente.id_vente) {
+        bimp_msg('Erreur opération impossible (ID de la vente absent)', 'danger');
+        return;
+    }
+
+    BimpAjax('saveVenteHt', {
+        vente_ht: $('#venteHt').find('[name="vente_ht"]').val(),
         id_vente: Vente.id_vente
     }, null, {
         success: function (result, bimpAjax) {
@@ -1039,7 +1005,7 @@ function setVenteStatus($button, id_vente, status) {
             return;
         }
     }
-    
+
     var data = {
         id_vente: id_vente,
         status: status
@@ -1234,8 +1200,12 @@ function onVenteLoaded() {
     $('#condReglementSelect').change(function () {
         saveCondReglement();
     });
-    
-    $('#avoirRbtMode').find('[name="avoir_rbt_mode"]').change(function() {
+
+    $('#venteHt').find('[name="vente_ht"]').change(function () {
+        saveVenteHt();
+    });
+
+    $('#avoirRbtMode').find('[name="avoir_rbt_mode"]').change(function () {
         if ($(this).val() === 'rbt') {
             $('#avoirRbtModePaiement').slideDown(250);
         } else {

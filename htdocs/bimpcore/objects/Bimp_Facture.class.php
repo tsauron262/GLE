@@ -21,7 +21,7 @@ class Bimp_Facture extends BimpObject
             return 0;
         }
 
-        // Si facture BL, on interdit la suppression s'il existe un facture hors expédition pour la commande:
+        // Si facture BL, on interdit la suppression s'il existe une facture hors expédition pour la commande:
         $rows = (int) $this->db->getRows('br_commande_shipment', '`id_facture` = ' . (int) $this->id, null, 'object', array('id', 'id_commande_client'));
         if (!is_null($rows) && count($rows)) {
             foreach ($rows as $row) {
@@ -33,6 +33,19 @@ class Bimp_Facture extends BimpObject
         }
 
         return 1;
+    }
+
+    public function getRemainToPay()
+    {
+        if ($this->isLoaded()) {
+            $paid = (float) $this->dol_object->getSommePaiement();
+            $paid += (float) $this->dol_object->getSumCreditNotesUsed();
+            $paid += (float) $this->dol_object->getSumDepositsUsed();
+
+            (float) $this->dol_object->total_ttc - $paid;
+        }
+
+        return 0;
     }
 
     public function onDelete()
@@ -53,7 +66,9 @@ class Bimp_Facture extends BimpObject
     public function displayPaid()
     {
         if ($this->isLoaded()) {
-            $paid = $this->dol_object->getSommePaiement();
+            $paid = (float) $this->dol_object->getSommePaiement();
+            $paid += (float) $this->dol_object->getSumCreditNotesUsed();
+            $paid += (float) $this->dol_object->getSumDepositsUsed();
             return BimpTools::displayMoneyValue($paid, 'EUR');
         }
 

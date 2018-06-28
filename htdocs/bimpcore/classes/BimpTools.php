@@ -200,6 +200,10 @@ class BimpTools
 
     public static function getErrorsFromDolObject($object, $errors = null, $langs = null)
     {
+        if (is_null($langs)) {
+            global $langs;
+        }
+        
         if (is_null($errors)) {
             $errors = array();
         }

@@ -296,7 +296,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
-            if($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte') {
+            if($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte')) {
                 $this->acompteHt -= $line->total_ht;
                 $this->acompteTtc -= $line->total_ttc;
                 $i++;

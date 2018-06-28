@@ -144,7 +144,7 @@ class exportCommande extends export8sens {
                     "0" => 0
                 );
                 $tvaCode = $tabCodeTva[$line->tva_tx];
-                $tabCommandeDet[] = array("L" => "L", "ref" => $ref, "product_type" => $type, "qty" => $line->qty, "subprice" => price($line->subprice), "description" => $line->desc, "buy_price_ht" => price($line->pa_ht), "tva_code" => $tvaCode, "remise_percent" => $line->remise_percent, "tva_tx" => $tvaCode);
+                $tabCommandeDet[] = array("L" => "L", "ref" => $ref, "product_type" => $type, "qty" => $line->qty, "subprice" => price($line->subprice), "description" => $line->desc, "buy_price_ht" => price($line->pa_ht), "tva_code" => $tvaCode, "remise_percent" => $line->remise_percent, "tva_tx" => $tvaCode, "codeDepot" => $entrepot->label);
             }
 
 

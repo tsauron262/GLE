@@ -112,10 +112,18 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                 if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->fetch($ligne->rid);
                     if (count($repair->lookup()) == 0) {
-                        echo "Tentative de maj de " . $ligne->ref . " statut " . $repair->repairComplete . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
+                        echo "Tentative de maj de " . $ligne->ref . ". Fermé dans GLE" . $repair->getData('repair_complete') . " num " . $repair->getData('repair_number') . ". num2 " . $repair->getData('repair_confirm_number') . " Statut dans GSX : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->getData('repair_complete')) {
                             echo "Fermée dans GSX maj dans GLE.<br/>";
-                        } else {
+                        }
+                        elseif($repair->repairLookUp['repairStatus'] == "Fermée et complétée"){
+                            echo "fermé dans GSX Impossible de Fermé dans GLE ";
+                        } 
+                        else {
+                            
+                            
+                            
+                            
                             $mailTech = "jc.cannet@bimp.fr";
                             if ($ligne->Technicien > 0) {
                                 $user = new User($db);

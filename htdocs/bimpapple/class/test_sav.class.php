@@ -93,7 +93,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         } elseif ($iTribu == 4)
             $req .= " AND ( ref NOT LIKE('SAVN%') && ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVMONTP%') && ref NOT LIKE('SAVMAU%') )";
 
-        $req .= " ORDER BY `nbJ` DESC, s.id";
+        $req .= " AND DATEDIFF(now(), s.date_update) < 100 ORDER BY `nbJ` DESC, s.id";
 
         $req .= " LIMIT 0,500";
         return $req;

@@ -199,8 +199,8 @@ class Ticket {
             $this->errors[] = "Le champ id est obligatoire";
 
         $sql = 'DELETE';
-        $sql.= 'FROM ticket';
-        $sql.= 'WHERE id=' . $id;
+        $sql.= ' FROM ticket';
+        $sql.= ' WHERE id=' . $id;
 
         try {
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -306,11 +306,10 @@ class Ticket {
             $this->pdf->AddPage();
             $this->pdf->SetFont('times', '', 12);
         }
-        if($this->i == 7){
+        if ($this->i == 7) {
             $this->i = 0;
             $this->pdf->AddPage();
             $x = $y = 5;
-            
         }
         if ($is_first) {
             $this->pdf = new PDF_Code128('L');
@@ -320,20 +319,20 @@ class Ticket {
 
         $this->pdf->SetX($x);
         $this->pdf->SetY($y);
-        
+
         if ($tariff->filename_custom != null) {
             $this->pdf->Image($image_tariff_custom, $x + $margin + 2, $y + $margin - 1, 88, 57);
         } else {
             $this->pdf->Image($image_zoom, $x + $margin + 2, $y + $margin + 5, 50, 50);
-        $this->pdf->SetY($y + 8);
-        $this->pdf->SetX($x + 65);
+            $this->pdf->SetY($y + 8);
+            $this->pdf->SetX($x + 65);
 
-        $max_width = 23;
+            $max_width = 23;
 
-        $this->pdf->MultiCell(40, 4, mb_strimwidth($event->label, 0, $max_width, "...") . "\n" .
-                mb_strimwidth($tariff->label, 0, $max_width, "...") . "\n" .
-                mb_strimwidth(($ticket->first_name == null ? '' : $ticket->first_name), 0, $max_width, "...") . "\n" .
-                mb_strimwidth(($ticket->last_name == null ? '' : $ticket->last_name), 0, $max_width, "..."));
+            $this->pdf->MultiCell(40, 4, mb_strimwidth($event->label, 0, $max_width, "...") . "\n" .
+                    mb_strimwidth($tariff->label, 0, $max_width, "...") . "\n" .
+                    mb_strimwidth(($ticket->first_name == null ? '' : $ticket->first_name), 0, $max_width, "...") . "\n" .
+                    mb_strimwidth(($ticket->last_name == null ? '' : $ticket->last_name), 0, $max_width, "..."));
         }
 
         $this->pdf->Code128($x + 98, $y + 3, $ticket->barcode, 58, 12);
@@ -388,6 +387,29 @@ class Ticket {
             return $tickets;
         } elseif (!$result) {
             $this->errors[] = "Erreur SQL 2567.";
+            return -2;
+        }
+        return -1;
+    }
+
+    public function getTicketsByTariff($id_tariff) {
+
+        $tickets = array();
+
+        $sql = 'SELECT id';
+        $sql .= ' FROM ticket';
+        $sql .= ' WHERE fk_tariff=' . $id_tariff;
+
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                $ticket = new Ticket($this->db);
+                $ticket->fetch($obj->id);
+                $tickets[] = $ticket;
+            }
+            return $tickets;
+        } elseif (!$result) {
+            $this->errors[] = "Erreur SQL 6451.";
             return -2;
         }
         return -1;

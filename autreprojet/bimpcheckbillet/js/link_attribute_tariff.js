@@ -160,7 +160,7 @@ function initEvents() {
         if (id_tariff > 0 && id_attribute > 0) {
             link(id_tariff, id_attribute);
         } else if (!(id_tariff > 0) && !(id_attribute > 0)) {
-            setMessage('alertSubmit', "Veuillez sélectionner un tarif et une déclibaison.", 'error');
+            setMessage('alertSubmit', "Veuillez sélectionner un tarif et un attribut.", 'error');
         } else if (!(id_attribute > 0)) {
             setMessage('alertSubmit', "Veuillez sélectionner une attribut.", 'error');
         } else if (!(id_tariff > 0)) {

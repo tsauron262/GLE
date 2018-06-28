@@ -178,6 +178,29 @@ switch ($action) {
             break;
         }
 
+    case 'deleteCategAndItsProduct' : {
+            $category = new Category($_POST['id_event']);
+            $p = 1; // "Page number"
+            $n = 10000; // "Number of products per page"
+            $products = $category->getProducts((int) Configuration::get('PS_LANG_DEFAULT'), $p, $n);
+//            var_dump($products);
+//            die('Fin');
+            if ($products != false) {
+                foreach ($products as $arr_product) {
+                    $product = new Product((int) $arr_product['id_product']);
+                    $is_ok = $product->delete();
+                    if (!$is_ok)
+                        die(Tools::jsonEncode(array('is_ok' => $is_ok, 'errors' => "Problème lors de la suppression d'un tarif.")));
+                }
+            }
+            $is_ok = $category->delete();
+            if ($is_ok)
+                die(Tools::jsonEncode(array('is_ok' => $is_ok, 'errors' => array())));
+            else
+                die(Tools::jsonEncode(array('is_ok' => $is_ok, 'errors' => "Problème lors de la suppression de l'évènement, celà peut-être dû à une suppression antérieur de cet évènement.")));
+            break;
+        }
+
     default: {
             die(Tools::jsonEncode(array('errors' => "Echec : aucune action ne correspond à " . $action)));
             break;

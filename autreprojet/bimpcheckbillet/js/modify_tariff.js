@@ -347,9 +347,7 @@ function initEvents() {
             alert('Veuillez séléctionner un tariff avant de créer un produit dans prestashop');
         } else {
             var id_tax = parseInt($('#container_tax').find('label.active').find('input').first().val());
-            if (confirm("Avez-vous créée et lié ce tarif avec ses tous ses attributs auparavant ? \n\
-Si ce n'est pas le cas, merci de le faire avant de créer le produit dans prestashop"))
-                getCategEvent(id_tariff, id_tax);
+            getCategEvent(id_tariff, id_tax);
         }
     });
 

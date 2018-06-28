@@ -197,6 +197,79 @@ class Event {
         return -1;
     }
 
+    public function delete($id_event) {
+
+        // Delete tariffs
+        $tariff_static = new Tariff($this->db);
+        $tariffs = $tariff_static->getTariffsForEvent($id_event);
+
+//        print_r($tariffs);
+        if (is_array($tariffs)) {
+            foreach ($tariffs as $tariff) {
+                $res_delete_tariff = $tariff->delete();
+                echo $res_delete_tariff;
+                if ($res_delete_tariff != 1) {
+                    $this->errors[] = array_merge($this->errors, $tariff->errors);
+                    return -4;
+                }
+            }
+        }
+
+        // Delete event_admin
+        $sql = 'DELETE FROM `event_admin`';
+        $sql.= ' WHERE `fk_event`=' . $id_event;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de supprimer la liaison évènement - administrateur. " . $e;
+            $this->db->rollBack();
+            return -5;
+        }
+
+
+        // Delete event
+        $sql = 'DELETE FROM `event`';
+        $sql.= ' WHERE `id`=' . $id_event;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de supprimer l'évènement. " . $e;
+            $this->db->rollBack();
+            return -6;
+        }
+
+
+        // Delete image event
+        $file_event_prefix = PATH . '/img/event/' . $id_event . '.*';
+        if (file_exists($file_event_prefix)) {
+            $delete_event_file_ok = unlink($file_event_prefix);
+            if (!$delete_event_file_ok) {
+                $this->errors[] = "Problème lors de la suppression de l'image de l'évènement";
+                return -7;
+            }
+        }
+
+        // Delete image tariff
+        $file_tariff_prefix = PATH . '/img/event/' . $id_event . "_*";
+        if (file_exists($file_tariff_prefix)) {
+            $delete_tariff_file_ok = unlink($file_tariff_prefix);
+            if (!$delete_tariff_file_ok) {
+                $this->errors[] = "Problème lors de la suppression d'image de tarif.";
+                return -8;
+            }
+        }
+
+        return true;
+    }
+
     public function updateStatus($id_event, $status) {
 
         if ($status != $this::STATUS_DRAFT and $status != $this::STATUS_VALIDATE and $status != $this::STATUS_CLOSED)

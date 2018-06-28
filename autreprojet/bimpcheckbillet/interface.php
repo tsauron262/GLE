@@ -268,6 +268,13 @@ switch ($action) {
             break;
         }
 
+    case 'delete_event': {
+            echo json_encode(array(
+                'code_return' => $event->delete($_POST['id_event']),
+                'errors' => $event->errors));
+            break;
+        }
+
     /**
      * modify_tariff.php
      */
@@ -333,12 +340,13 @@ switch ($action) {
                 'errors' => $attribute_value->errors));
             break;
         }
+
     /**
      * link_attribute_value_tariff.php
      */
     case 'link_attribute_value_tariff': {
             echo json_encode(array(
-                'id_inserted' => $attribute_value->createTariffAttributeValue($_POST['id_tariff'], $_POST['id_attribute_value']),
+                'id_inserted' => $attribute_value->createTariffAttributeValue($_POST['id_tariff'], $_POST['id_attribute_value'], $_POST['price'], $_POST['qty']),
                 'errors' => $attribute_value->errors));
             break;
         }

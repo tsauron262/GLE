@@ -272,6 +272,57 @@ function toggleActiveCategory(id_categ) {
     });
 }
 
+function deletePrestashopEvent(event) {
+
+    $.ajax({
+        type: 'POST',
+        url: URL_PRESTASHOP,
+        data: {
+            id_event: event.id_categ,
+            action: 'deleteCategAndItsProduct'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 7826.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.is_ok) {
+                deleteEvent(event);
+            } else {
+                setMessage('alertSubmit', "Erreur inconnue 4821.", 'error');
+            }
+        }
+    });
+}
+
+function deleteEvent(event) { // check server
+    
+    $.ajax({
+        type: "POST",
+        url: "../interface.php",
+        data: {
+            id_event: event.id,
+            action: 'delete_event'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 3549.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.code_return > 0) {
+                alert("La catégorie a été supprimée.");
+                location.reload();
+            } else {
+                setMessage('alertSubmit', 'Erreur serveur 3482.', 'error');
+            }
+        }
+    });
+}
+
 /**
  * Ready
  */
@@ -428,6 +479,18 @@ function initEvents() {
             alert("Veuillez sélectionner un évènement avant de changer son status.");
         }
 
+    });
+
+    $('button[name=delete]').click(function () {
+        var id_event = $('select[name=id_event] > option:selected').val();
+        if (id_event > 0) {
+            var event = getEventById(id_event);
+            if (parseInt(event.id_categ) > 0)
+                deletePrestashopEvent(event);
+            else
+                deleteEvent(event);
+        } else
+            setMessage('alertBottom', "Veuillez sélectionnez un évènement.", 'error');
     });
 }
 

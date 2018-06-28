@@ -470,4 +470,65 @@ class Tariff {
         return -1;
     }
 
+    public function delete() {
+
+        $static_ticket = new Ticket($this->db);
+
+        // Delete tickets
+        $tickets = $static_ticket->getTicketsByTariff($this->id);
+        foreach ($tickets as $ticket) {
+            if ($ticket->delete($ticket->id) != 1) {
+                $this->errors = array_merge($this->errors, $ticket->errors);
+                return -4;
+            }
+        }
+
+        // Delete attribute_value_tariff
+        $sql = 'DELETE FROM `attribute_value_tariff`';
+        $sql.= ' WHERE `fk_tariff`=' . $this->id;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de supprimer la liaison tarif - valeur d'attribut. " . $e;
+            $this->db->rollBack();
+            return -1;
+        }
+
+        // Delete attribute_value_tariff
+        $sql = 'DELETE FROM `tariff_attribute`';
+        $sql.= ' WHERE `fk_tariff`=' . $this->id;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de supprimer la liaison tarif - attribut. " . $e;
+            $this->db->rollBack();
+            return -2;
+        }
+
+        // Delete tariff
+        $sql = 'DELETE FROM `tariff`';
+        $sql.= ' WHERE `id`=' . $this->id;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de supprimer le tarif. " . $e;
+            $this->db->rollBack();
+            return -3;
+        }
+
+        return 1;
+    }
+
 }

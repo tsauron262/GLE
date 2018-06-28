@@ -137,21 +137,29 @@ class AttributeValue {
         return -1;
     }
 
-    public function createTariffAttributeValue($id_tariff, $id_attribute_value) {
+    public function createTariffAttributeValue($id_tariff, $id_attribute_value, $price, $number_place) {
 
         if ($id_tariff == '')
             $this->errors[] = "Le champ identifiant tarif est obligatoire";
         if ($id_attribute_value == '')
             $this->errors[] = "Le champ identifiant attribut value est obligatoire";
+        if ($price == '')
+            $this->errors[] = "Le champ prix attribut value est obligatoire";
+        if ($number_place == '')
+            $this->errors[] = "Le champ nombre de place attribut value est obligatoire";
         if (sizeof($this->errors) != 0)
             return -3;
 
         $sql = 'INSERT INTO `attribute_value_tariff` (';
         $sql.= '`fk_tariff`';
         $sql.= ', `fk_attribute_value`';
+        $sql.= ', `price`';
+        $sql.= ', `number_place`';
         $sql.= ') ';
         $sql.= 'VALUES (' . $id_tariff;
         $sql.= ', ' . $id_attribute_value;
+        $sql.= ', ' . $price;
+        $sql.= ', ' . $number_place;
         $sql.= ')';
 
         try {

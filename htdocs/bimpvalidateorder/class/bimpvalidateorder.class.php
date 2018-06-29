@@ -37,15 +37,18 @@ $max_price = 0;
 
         if ($max_price < $price_order) {
             $id_responsibles = $this->getResponsiblesIds($price_order, $order);
+            $error = false;
             foreach($id_responsibles as $id_responsible){
-                if ($this->sendEmailToResponsible($id_responsible, $user, $order) == true) {
+                if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
+                        $error = true;
+            }
+            if(!$error)
                     setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande.", null, 'warnings');
                     return -1;
                 } else {
                     setEventMessages(null, $this->errors, 'errors');
                     return -2;
                 }
-            }
         }
         $idEn = $order->array_options['options_entrepot'];
         if($idEn < 1){

@@ -16,7 +16,7 @@ objects:
         instance: 
             bimp_object: 
                 module: bimpcore
-                name: Bimp_user
+                name: Bimp_User
             id_object: 
                 field_value: id_user_open
                 
@@ -26,7 +26,7 @@ objects:
         instance: 
             bimp_object: 
                 module: bimpcore
-                name: Bimp_user
+                name: Bimp_User
             id_object: 
                 field_value: id_user_closed
                 
@@ -63,3 +63,40 @@ fields:
         type: id_object
         object: user_closed
         
+fields_tables: 
+    default: 
+        title: Information session
+        icon: info
+        rows: 
+            - field: id_caisse
+              display: nom
+            - field: date_open
+            - field: date_closed
+            - field: fonds_begin
+            - field: fonds_end
+              show: 
+                  field_value: fonds_end
+            - field: id_user_open
+              display: nom_url
+            - field: id_user_closed
+              display: nom_url
+              show: 
+                  field_value: id_user_closed
+            
+views: 
+    default: 
+        title: 
+            callback: displaySessionName
+        objects_change_reload: BC_Vente,Bimp_Paiement
+        rows: 
+            - cols: 
+                - type: fields_table
+                  fields_table: default
+                  col_md: 6
+                  col_lg: 6
+                  
+                - type: custom
+                  custom: 
+                      callback: renderPaymentsInfos
+                  col_lg: 6
+                  col_md: 6

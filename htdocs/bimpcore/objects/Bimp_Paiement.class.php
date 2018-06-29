@@ -3,6 +3,15 @@
 class Bimp_Paiement extends BimpObject
 {
 
+    public $useCaisse = false;
+
+    public function __construct($module, $object_name)
+    {
+        $this->useCaisse = (int) BimpCore::getConf('sav_use_caisse_for_payments');
+
+        parent::__construct($module, $object_name);
+    }
+
     // Getters: 
 
     public function getClient()
@@ -23,7 +32,7 @@ class Bimp_Paiement extends BimpObject
         if ($id_facture) {
             $facture = BimpObject::getInstance('bimpcore', 'Bimp_Facture', $id_facture);
             if (BimpObject::objectLoaded($facture)) {
-                return (float) round(($facture->dol_object->total_ttc - $facture->dol_object->getSommePaiement()), 2);
+                return (float) round($facture->getRemainToPay(), 2);
             }
         }
 
@@ -35,32 +44,38 @@ class Bimp_Paiement extends BimpObject
         global $user;
         return array($user, 1);
     }
-
+    
     // Rendus: 
 
     public function renderCaisseInput()
     {
-        global $user;
-        $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
-        $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
-
         $html = '';
-        if ($id_caisse) {
-            $caisse->fetch($id_caisse);
-            if (!BimpObject::objectLoaded($caisse)) {
-                $html .= BimpRender::renderAlerts('Erreur: la caisse à laquelle vous êtes connecté semble ne plus exister');
-                $id_caisse = 0;
-            } else {
-                $html .= $caisse->getData('name');
-            }
-        }
 
-        if (!$id_caisse) {
-            $html .= BimpRender::renderAlerts('Vous n\'êtes connecté à aucune caisse', 'warning');
-            $html .= '<div style="text-align: center; margin: 15px 0">';
-            $url = DOL_URL_ROOT . '/bimpcaisse/index.php';
-            $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank"><i class="fa fa-external-link iconLeft"></i>Se connecter à une caisse</a>';
-            $html .= '</div>';
+        if ($this->useCaisse) {
+            global $user;
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+
+
+            if ($id_caisse) {
+                $caisse->fetch($id_caisse);
+                if (!BimpObject::objectLoaded($caisse)) {
+                    $html .= BimpRender::renderAlerts('Erreur: la caisse à laquelle vous êtes connecté semble ne plus exister');
+                    $id_caisse = 0;
+                } else {
+                    $html .= $caisse->getData('name');
+                }
+            }
+
+            if (!$id_caisse) {
+                $html .= BimpRender::renderAlerts('Vous n\'êtes connecté à aucune caisse', 'warning');
+                $html .= '<div style="text-align: center; margin: 15px 0">';
+                $url = DOL_URL_ROOT . '/bimpcaisse/index.php';
+                $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank"><i class="fa fa-external-link iconLeft"></i>Se connecter à une caisse</a>';
+                $html .= '</div>';
+            }
+        } else {
+            $id_caisse = 0;
         }
 
         $html .= '<input type="hidden" name="id_caisse" value="' . $id_caisse . '"/>';
@@ -138,11 +153,13 @@ class Bimp_Paiement extends BimpObject
 
         foreach ($list as $item) {
             if ($facture->fetch((int) $item['rowid'])) {
-                $montant_ttc = round((float) $facture->dol_object->total_ttc, 2);
-                $paid = round((float) $facture->dol_object->getSommePaiement(), 2);
-                $paid += round((float) $facture->dol_object->getSumCreditNotesUsed(), 2);
-                $paid += round((float) $facture->dol_object->getSumDepositsUsed(), 2);
+                $montant_ttc = (float) $facture->dol_object->total_ttc;
+                $paid = (float) $facture->dol_object->getSommePaiement();
+                $paid += (float) $facture->dol_object->getSumCreditNotesUsed();
+                $paid += (float) $facture->dol_object->getSumDepositsUsed();
                 $to_pay = $montant_ttc - $paid;
+                $to_pay = round($to_pay, 2);
+
                 if ($to_pay < 0.01) {
                     continue;
                 }
@@ -232,17 +249,18 @@ class Bimp_Paiement extends BimpObject
         if (BimpTools::isSubmit('id_mode_paiement')) {
             $this->dol_object->paiementid = (int) BimpTools::getValue('id_mode_paiement', 0);
         }
-        if (BimpTools::isSubmit('id_account')) {
-            $this->dol_object->fk_account = (int) BimpTools::getValue('id_account', 0);
-        }
+
+//        if (BimpTools::isSubmit('id_account')) {
+//            $this->dol_object->fk_account = (int) BimpTools::getValue('id_account', 0);
+//        }
 
         if (!(int) $this->dol_object->paiementid) {
             $errors[] = 'Mode de paiement absent';
         }
 
-        if (!(int) $this->dol_object->fk_account) {
-            $errors[] = 'Compte financier absent';
-        }
+//        if (!(int) $this->dol_object->fk_account) {
+//            $errors[] = 'Compte financier absent';
+//        }
 
         return $errors;
     }
@@ -251,20 +269,33 @@ class Bimp_Paiement extends BimpObject
     {
         $errors = array();
 
-        global $user, $conf;
+        global $db, $user, $conf;
+        $caisse = null;
+        $id_caisse = 0;
+        $account = null;
 
-        $id_caisse = (int) BimpTools::getValue('id_caisse');
-        if (!$id_caisse) {
-            $errors[] = 'Caisse absente';
-        } else {
-            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
-            if (!BimpObject::objectLoaded($caisse)) {
-                $errors[] = 'La caisse d\'ID ' . $id_caisse . ' n\'existe pas';
-            } elseif (!(int) $caisse->getData('status')) {
-                $errors[] = 'La caisse "' . $caisse->getData('name') . '" est fermée';
-            } elseif ((int) $caisse->getData('id_current_user') !== (int) $user->id) {
-                $errors[] = 'Vous n\'êtes pas connecté à la caisse sélectionnée';
+        if ($this->useCaisse) {
+            $id_caisse = (int) BimpTools::getValue('id_caisse');
+            if (!$id_caisse) {
+                $errors[] = 'Caisse absente';
+            } else {
+                $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                if (!BimpObject::objectLoaded($caisse)) {
+                    $errors[] = 'La caisse d\'ID ' . $id_caisse . ' n\'existe pas';
+                } else {
+                    $caisse->isValid($errors);
+                }
             }
+
+            $account = $caisse->getChildObject('account');
+        } else {
+            BimpTools::loadDolClass('compta/bank', 'account');
+            $account = new Account($db);
+            $account->fetch((int) BimpCore::getConf('bimpcaisse_id_default_account'));
+        }
+
+        if (!BimpObject::objectLoaded($account)) {
+            $errors[] = 'Compte bancaire invalide';
         }
 
         $total_paid = (float) BimpTools::getValue('total_paid_amount');
@@ -285,6 +316,7 @@ class Bimp_Paiement extends BimpObject
         }
 
         $this->dol_object->datepaye = dol_now();
+        $this->dol_object->fk_account = (int) $account->id;
 
         $i = 1;
 
@@ -313,9 +345,10 @@ class Bimp_Paiement extends BimpObject
                         }
                     }
 
-                    $paid = round((float) $facture->getSommePaiement(), 2);
-                    $paid += round((float) $facture->getSumCreditNotesUsed(), 2);
-                    $paid += round((float) $facture->getSumDepositsUsed(), 2);
+                    $paid = (float) $facture->getSommePaiement();
+                    $paid += (float) $facture->getSumCreditNotesUsed();
+                    $paid += (float) $facture->getSumDepositsUsed();
+                    $paid = round($paid, 2);
 
                     $diff = $facture->total_ttc - $paid - $amount;
                     if ($diff > -0.01 && $diff < 0.01) {
@@ -340,36 +373,59 @@ class Bimp_Paiement extends BimpObject
         $errors = parent::create($warnings);
 
         if (!count($errors)) {
+            if ($this->useCaisse) {
+                $bc_paiement = BimpObject::getInstance('bimpcaisse', 'BC_Paiement');
+                $paiement_errors = $bc_paiement->validateArray(array(
+                    'id_caisse'         => (int) $caisse->id,
+                    'id_caisse_session' => (int) $caisse->getData('id_current_session'),
+                    'id_facture'        => (int) 0,
+                    'id_paiement'       => (int) $this->id
+                ));
+                if (!count($paiement_errors)) {
+                    $paiement_errors = $bc_paiement->create();
+                }
+
+                if (count($paiement_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($paiement_errors, 'Echec de l\'enregistrement du paiement en caisse');
+                }
+            }
+
             // Ajout du paiement au compte financier:
             if (!empty($conf->banque->enabled)) {
                 $this->dol_object->error = '';
                 $this->dol_object->errors = array();
+                $label = 'Paiement facture client';
 
-                $centre = $this->db->getValue('entrepot', 'label', '`rowid` = ' . (int) $caisse->getData('id_entrepot'));
-                if (is_null($centre)) {
-                    $centre = 'inconnu';
+                if ($this->useCaisse) {
+                    $centre = $this->db->getValue('entrepot', 'label', '`rowid` = ' . (int) $caisse->getData('id_entrepot'));
+                    if (is_null($centre)) {
+                        $centre = 'inconnu';
+                    }
+                    $label .= '(Caisse "' . $caisse->getData('name') . '" - Centre "' . $centre . '")';
                 }
-                $label = 'Paiement facture client (Caisse "' . $caisse->getData('name') . '" - Centre "' . $centre . '")';
+
                 if ($this->dol_object->addPaymentToBank($user, 'payment', $label, $this->dol_object->fk_account, '', '') <= 0) { // todo: ajouter nom émetteur et banque émetteur. 
-                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du paiement au compte financier');
+                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du paiement au compte bancaire "' . $account->bank . '"');
                 }
             }
 
-            // Correction fonds de caisse: 
-            $caisse_mvt = 0;
-            if ($type_paiement === 'LIQ') {
-                $caisse_mvt = $total_factures;
-            } elseif ($total_paid > $total_factures) {
-                $caisse_mvt = $total_factures - $total_paid;
-            }
+            // Correction fonds de caisse:
+            if ($this->useCaisse) {
+                $caisse_mvt = 0;
+                if ($type_paiement === 'LIQ') {
+                    $caisse_mvt = $total_factures;
+                } elseif ($total_paid > $total_factures) {
+                    $caisse_mvt = $total_factures - $total_paid;
+                }
 
-            if ($caisse_mvt !== 0) {
-                $fonds = (float) $caisse->getData('fonds');
-                $fonds += $caisse_mvt;
-                $caisse->set('fonds', $fonds);
-                $update_errors = $caisse->update();
-                if (count($update_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour du fonds de caisse (Nouveau montant: ' . $fonds . ')');
+                if ($caisse_mvt !== 0) {
+                    $fonds = (float) $caisse->getData('fonds');
+                    $fonds += $caisse_mvt;
+                    $caisse->set('fonds', $fonds);
+                    $update_errors = $caisse->update();
+                    if (count($update_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour du fonds de caisse (Nouveau montant: ' . $fonds . ')');
+                    }
                 }
             }
         }

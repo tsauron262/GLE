@@ -1062,6 +1062,97 @@ function addSubObjectForm($button, object_name) {
     }
 }
 
+function searchZipTown($input) {
+    if (!$.isOk($input)) {
+        return;
+    }
+
+    var field_type = $input.data('field_type');
+    if (!field_type) {
+        return;
+    }
+
+    var data = {};
+    data[field_type] = $input.val();
+
+    $input.parent().find('.loading').show();
+
+    BimpAjax('searchZipTown', data, null, {
+        $input: $input,
+        field_type: field_type,
+        display_success: false,
+        display_errors: false,
+        display_warnings: false,
+        success: function (result, bimpAjax) {
+            $input.parent().find('.loading').hide();
+            if (result.html) {
+                $input.parent().parent().find('.searchZipTownResults').html(result.html).show();
+            } else {
+                $input.parent().parent().find('.searchZipTownResults').html('').hide();
+            }
+        },
+        error: function () {
+            $input.parent().find('.loading').hide();
+        }
+    });
+}
+
+function selectZipTown($button) {
+    var town = $button.data('town');
+    var zip = $button.data('zip');
+    var state = $button.data('state');
+    var country = $button.data('country');
+
+    var $container = $button.findParentByClass('searchZipTownResults');
+    $container.html('').hide();
+    var $input = $container.parent().find('input.search_ziptown');
+
+    var field_type = $input.data('field_type');
+
+    if (zip && field_type === 'zip') {
+        $input.val(zip);
+    }
+    if (town && field_type === 'town') {
+        $input.val(town);
+    }
+
+    var $form = $input.findParentByTag('form');
+    if ($.isOk($form)) {
+        var town_field = $input.data('town_field');
+        var zip_field = $input.data('zip_field');
+        var state_field = $input.data('state_field');
+        var country_field = $input.data('country_field');
+
+        if (town_field && town) {
+            var $townInput = $form.find('[name="' + town_field + '"]');
+            if ($townInput.length) {
+                $townInput.val(town).change();
+            }
+        }
+
+        if (zip_field && zip) {
+            var $zipInput = $form.find('[name="' + zip_field + '"]');
+            if ($zipInput.length) {
+                $zipInput.val(zip).change();
+            }
+        }
+
+        if (state_field && state) {
+            var $stateInput = $form.find('[name="' + state_field + '"]');
+            if ($stateInput.length) {
+                $stateInput.val(state).change();
+            }
+        }
+
+        if (country_field && country) {
+            var $countryInput = $form.find('[name="' + country_field + '"]');
+            if ($countryInput.length) {
+                $countryInput.val(country).change();
+            }
+        }
+    }
+}
+
 // Gestion de l'affichage conditionnel des champs: 
 
 function toggleInputDisplay($container, $input) {
@@ -1283,6 +1374,14 @@ function setInputsEvents($container) {
             });
 
             $(this).data('event_init', 1);
+        }
+    });
+    $container.find('.search_ziptown').each(function () {
+        if (!$(this).data('ziptown_event_init')) {
+            $(this).keyup(function () {
+                searchZipTown($(this));
+            });
+            $(this).data('ziptown_event_init', 1);
         }
     });
 }

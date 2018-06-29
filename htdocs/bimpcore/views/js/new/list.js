@@ -63,6 +63,12 @@ function reloadObjectList(list_id, callback) {
             }
         });
     }
+    
+    // Lignes sélectionnées:
+    data['selected_rows'] = [];
+    $list.find('tbody.listRows').find('input.item_check:checked').each(function() {
+        data['selected_rows'].push($(this).data('id_object'));
+    });
 
     // Lignes modifiées:
     var $rows = $list.find('tbody.listRows').find('tr.modified');

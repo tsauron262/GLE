@@ -130,18 +130,22 @@ body {
   width: 20%;
 }
 /* line 132, ../scss/ticket.scss */
-#ticket #ticket_payments {
+#ticket #ticket_payments,
+#ticket #ticket_rendus {
   margin-bottom: 15px;
 }
-/* line 135, ../scss/ticket.scss */
-#ticket #ticket_payments tbody tr td {
+/* line 136, ../scss/ticket.scss */
+#ticket #ticket_payments tbody tr td,
+#ticket #ticket_rendus tbody tr td {
   font-size: 14px;
 }
-/* line 138, ../scss/ticket.scss */
-#ticket #ticket_payments tbody tr td:first-child {
+/* line 139, ../scss/ticket.scss */
+#ticket #ticket_payments tbody tr td:first-child,
+#ticket #ticket_rendus tbody tr td:first-child {
   padding-right: 15px;
 }
-/* line 141, ../scss/ticket.scss */
-#ticket #ticket_payments tbody tr td:last-child {
+/* line 142, ../scss/ticket.scss */
+#ticket #ticket_payments tbody tr td:last-child,
+#ticket #ticket_rendus tbody tr td:last-child {
   text-align: right;
 }

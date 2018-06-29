@@ -146,8 +146,7 @@ $article_color: #004264;
 }
 
 #openCaisseForm,
-#closeCaisseForm,
-#changeUserForm {
+#closeCaisseForm {
     margin: 60px;
     text-align: center;
 
@@ -159,13 +158,12 @@ $article_color: #004264;
     }
 }
 
-#closeCaisseForm,
-#changeUserForm {
+#closeCaisseForm {
     display: none;
 }
 
 #closeCaisseButton,
-#changeUserButton {
+#disconnectUserButton {
     @media (min-width: 800px) {
         float: right;   
     }
@@ -209,6 +207,7 @@ $article_color: #004264;
 #currenVenteContent {
     background-color: #dcdcdc;
     padding: 15px;
+    border: 1px solid #dcdcdc;
 }
 
 #bc_main_container.fullScreen {
@@ -258,7 +257,8 @@ $article_color: #004264;
 
     #listVentesContainer,
     #clients, 
-    #stocks {
+    #mvt_fonds,
+    #paiements {
         position: absolute;
         bottom: 0;
         left: 0;
@@ -557,10 +557,22 @@ $article_color: #004264;
     }
 }
 
+#venteHt {
+    margin-top: 15px;
+
+    & > span {
+        vertical-align: middle;
+    }
+
+    .toggleContainer {
+        vertical-align: middle;
+    }
+}
+
 #avoirRbtForm {
     display: none;
     margin: 30px 0;
-    
+
     #avoirRbtModePaiement {
         display: none;
     }
@@ -580,7 +592,7 @@ $article_color: #004264;
         font-size: 14px;
         margin-bottom: 10px;
     }
-    
+
     #totalDiscounts {
         color: $gray-darker;
         padding: 8px;

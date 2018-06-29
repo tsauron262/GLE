@@ -408,7 +408,7 @@ cards:
     default: 
         view_btn: 1
         fields: 
-            - icon: fa5_box
+            - icon: fas_box
               label: Produit
               value: 
                   callback: 

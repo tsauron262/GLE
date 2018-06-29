@@ -438,7 +438,7 @@ select.switch {
             color: #B4B4B4;
         }
     }
-    
+
     .qtyInput {
         max-width: 80px;
     }
@@ -521,6 +521,21 @@ input[type=text].large_input {
     &:focus {
         box-shadow: 0 0 4px #0087B4;
         border-color: #005A78;
+    }
+}
+
+.searchZipTownResults {
+    position: absolute;
+    z-index: 99999;
+    background-color: #fff;
+    min-width: 120px;
+    box-shadow: 4px 4px 4px #505050;
+    padding: 0 15px;
+    max-height: 400px;
+    overflow-y: auto;
+
+    .btn {
+        margin: 0
     }
 }
 /*Free Forms*/

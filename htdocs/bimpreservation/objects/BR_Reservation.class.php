@@ -893,7 +893,7 @@ class BR_Reservation extends BimpObject
         }
 
         if (!array_key_exists($status, $this->getStatusListArray())) {
-            return array('Nouveau statut invalide pour ce type de réparation');
+            return array('Nouveau statut invalide pour ce type de réservation');
         }
 
         $errors = array();
@@ -925,6 +925,10 @@ class BR_Reservation extends BimpObject
 
         if (is_null($qty) || !$qty) {
             $qty = $current_qty;
+        }
+        
+        if (!in_array($status, self::$need_equipment_status) && (int) $this->getData('id_equipment')) {
+            $this->updateField('id_equipment', 0);
         }
 
         if (!$status && (in_array($current_status, array(3, 100))) && ((int) $this->getData('type') === self::BR_RESERVATION_COMMANDE)) {

@@ -79,6 +79,8 @@ class BC_Vente extends BimpObject
             return array();
         }
 
+        $vente_ht = (int) $this->getData('vente_ht');
+
         $nb_articles = 0;
         $total_ttc = 0;
         $articles = array();
@@ -97,7 +99,15 @@ class BC_Vente extends BimpObject
 
         foreach ($this->getChildrenObjects('articles') as $article) {
             $qty = (int) $article->getData('qty');
-            $unit_price = (float) $article->getData('unit_price_tax_in');
+
+            if ($vente_ht) {
+                $unit_price = (float) $article->getData('unit_price_tax_ex');
+                $tva = 0;
+            } else {
+                $unit_price = (float) $article->getData('unit_price_tax_in');
+                $tva = (float) $article->getData('tva_tx');
+            }
+
             $article_total_ttc = (float) ($unit_price * $qty);
             $nb_articles += $qty;
             $total_ttc += $article_total_ttc;
@@ -107,7 +117,7 @@ class BC_Vente extends BimpObject
                 'unit_price'    => (float) $unit_price,
                 'unit_price_ht' => (float) $article->getData('unit_price_tax_ex'),
                 'total_ttc'     => $article_total_ttc,
-                'tva'           => (float) $article->getData('tva_tx'),
+                'tva'           => $tva,
                 'total_remises' => 0
             );
         }
@@ -451,7 +461,11 @@ class BC_Vente extends BimpObject
         if ($this->isLoaded()) {
             $articles = $this->getChildrenObjects('articles');
             foreach ($articles as $article) {
-                $total_ttc += (float) ((float) $article->getData('unit_price_tax_in') * (int) $article->getData('qty'));
+                if ((int) $this->getData('vente_ht')) {
+                    $total_ttc += (float) ((float) $article->getData('unit_price_tax_ex') * (int) $article->getData('qty'));
+                } else {
+                    $total_ttc += (float) ((float) $article->getData('unit_price_tax_in') * (int) $article->getData('qty'));
+                }
             }
         }
         return BimpTools::displayMoneyValue($total_ttc, 'EUR');
@@ -871,7 +885,14 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
 
         $html .= '<div id="ventePanierTotal">';
-        $html .= 'Total TTC: <span>' . BimpTools::displayMoneyValue($total, 'EUR') . '</span>';
+        $html .= '<span class="cart_total_label">';
+        if ((int) $this->getData('vente_ht')) {
+            $html .= 'Total HT';
+        } else {
+            $html .= 'Total TTC';
+        }
+
+        $html .= '</span>: <span class="cart_total">' . BimpTools::displayMoneyValue($total, 'EUR') . '</span>';
         $html .= '</div>';
 
         $articles = $this->getChildrenObjects('articles');
@@ -956,7 +977,7 @@ class BC_Vente extends BimpObject
         $html .= '<i class="fa fa-plus-circle iconLeft"></i>Ajouter';
         $html .= '</button>';
         $html .= '<button type="button" id="venteAddPaiementCancelButton" class="btn btn-danger"';
-        $html .= ' onclick="$(\'#venteAddPaiementFormContainer\').slideUp(250);"';
+        $html .= ' onclick="$(\'#venteAddPaiementFormContainer\').slideUp(250);$(\'.ventePaiementButton.selected\').attr(\'class\', \'ventePaiementButton btn btn-large btn-default\');"';
         $html .= '>';
         $html .= '<i class="fa fa-times iconLeft"></i>Annuler';
         $html .= '</button>';
@@ -977,6 +998,13 @@ class BC_Vente extends BimpObject
             $html .= '<option value="' . $id . '"' . ((int) $id === $id_cond ? ' selected=""' : '') . '>' . $label . '</option>';
         }
         $html .= '</select>';
+        $html .= '</div>';
+
+        // Vente au prix HT: 
+        $vente_ht = (int) $this->getData('vente_ht');
+        $html .= '<div id="venteHt" style="font-size: 14px">';
+        $html .= '<span style="font-weight: bold">Vendre au prix hors-taxes : </span>';
+        $html .= BimpInput::renderInput('toggle', 'vente_ht', $vente_ht);
         $html .= '</div>';
 
         // Remboursement avoir Client:
@@ -1098,14 +1126,23 @@ class BC_Vente extends BimpObject
                     $price_ttc = 0;
                     if ((float) $equipment->getData('prix_vente_except') > 0) {
                         $price_ttc = (float) $equipment->getData('prix_vente_except');
+                        $price_ht = (float) BimpTools::calculatePriceTaxEx($price_ttc, $product->tva_tx);
                     } else {
                         $price_ttc = (float) $product->price_ttc;
+                        $price_ht = (float) $product->price;
                     }
                     $html .= '<div class="selectArticleLine">';
                     $html .= '<div class="equipment_title"><strong>Equipement ' . $id_equipment . '</strong> - n° de série: <strong>' . $equipment->getData('serial') . '</strong></div>';
                     $html .= '<div class="product_title"><strong>Produit:</strong> "' . $product->label . '"</div>';
                     $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
-                    $html .= '<div class="product_price">' . BimpTools::displayMoneyValue($price_ttc, 'EUR') . '</div>';
+                    $html .= '<div class="product_price">';
+                    if ((int) $this->getData('vente_ht')) {
+                        BimpTools::displayMoneyValue($price_ht, 'EUR');
+                    } else {
+                        BimpTools::displayMoneyValue($price_ttc, 'EUR');
+                    }
+
+                    $html .= '</div>';
 
                     if (array_key_exists($id_equipment, $current_equipments)) {
                         $html .= BimpRender::renderAlerts('cet équipement a déjà été ajouté au panier');
@@ -1147,7 +1184,15 @@ class BC_Vente extends BimpObject
             $html .= '<div class="selectArticleLine">';
             $html .= '<div class="product_title"><strong>Produit:</strong> "' . $product->label . '"</div>';
             $html .= '<div class="product_info"><strong>Réf: </strong>' . $product->ref . '</div>';
-            $html .= '<div class="product_price">' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</div>';
+            $html .= '<div class="product_price">';
+
+            if ((int) $this->getData('vente_ht')) {
+                $html .= BimpTools::displayMoneyValue($product->price, 'EUR');
+            } else {
+                $html .= BimpTools::displayMoneyValue($product->price_ttc, 'EUR');
+            }
+
+            $html .= '</div>';
             $html .= '<div style="margin-top: 10px; text-align: right">';
             $html .= '<button type="button" class="btn btn-primary"';
             $html .= ' onclick="selectArticle($(this), ' . $id_product . ', \'Product\')"';
@@ -1220,7 +1265,15 @@ class BC_Vente extends BimpObject
         $html .= '<div class="article_qty">&nbsp;</div>';
         $html .= '<div class="product_total_price">';
         $html .= '<span class="base_price"></span>';
-        $html .= '<span class="final_price">' . BimpTools::displayMoneyValue($article->getData('unit_price_tax_in'), 'EUR') . '</span>';
+        $html .= '<span class="final_price">';
+
+        if ((int) $this->getData('vente_ht')) {
+            BimpTools::displayMoneyValue($article->getData('unit_price_tax_ex'), 'EUR');
+        } else {
+            BimpTools::displayMoneyValue($article->getData('unit_price_tax_in'), 'EUR');
+        }
+
+        $html .= '</span>';
         $html .= '</div>';
         $html .= '</div>';
 
@@ -1268,7 +1321,15 @@ class BC_Vente extends BimpObject
         $html .= '</div>';
         $html .= '<div class="product_total_price">';
         $html .= '<span class="base_price"></span>';
-        $html .= '<span class="final_price">' . BimpTools::displayMoneyValue($product->price_ttc, 'EUR') . '</span>';
+        $html .= '<span class="final_price">';
+
+        if ((int) $this->getData('vente_ht')) {
+            BimpTools::displayMoneyValue($product->price, 'EUR');
+        } else {
+            BimpTools::displayMoneyValue($product->price_ttc, 'EUR');
+        }
+
+        $html .= '</span>';
         $html .= '</div>';
         $html .= '</div>';
         $html .= '<div class="stockAlert"' . (($stock >= $qty) ? ' style="display: none"' : '') . '>';
@@ -1836,44 +1897,6 @@ class BC_Vente extends BimpObject
                 }
             }
 
-            // Mise à jour du fonds de caisse: 
-
-            $total_paid = 0;
-            $total_paid_liq = 0;
-
-            $data = $this->getAjaxData();
-
-            if ($data['avoir'] <= 0) {
-                $total_ttc = (float) $this->getData('total_ttc');
-
-                foreach ($paiements as $paiement) {
-                    $montant = (float) $paiement->getData('montant');
-                    $total_paid += $montant;
-                    if ($paiement->getData('code') === 'LIQ') {
-                        $total_paid_liq += $montant;
-                    }
-                }
-
-                $fonds_diff = $total_paid_liq;
-
-                if ((float) $total_paid > (float) $total_ttc) {
-
-                    // Retrait du rendu monnaie: 
-                    $fonds_diff -= (float) ($total_paid - $total_ttc);
-                }
-
-                if ($fonds_diff != 0) {
-                    $fonds = (float) $caisse->getData('fonds');
-                    $fonds += $fonds_diff;
-                    $caisse->set('fonds', $fonds);
-                    $update_errors = $caisse->update();
-                    if (count($update_errors)) {
-                        $errors = array_merge($errors, $update_errors);
-                        $errors[] = 'Echec de la mise à jour du fonds de caisse.<br/>Veuillez vérifier le montant du fonds de caisse qui doit être: ' . BimpTools::displayMoneyValue((float) $fonds, 'EUR');
-                    }
-                }
-            }
-
             // Création de la facture et de l'avoir éventuel:
             $facture_errors = array();
             $id_facture = (int) $this->createFacture($facture_errors);
@@ -1929,6 +1952,14 @@ class BC_Vente extends BimpObject
 
         $centre = $this->getChildObject('entrepot');
         $caisse = $this->getChildObject('caisse');
+        $id_account = (int) $caisse->getData('id_account');
+        $account = $caisse->getChildObject('account');
+        $account_label = '';
+        if (BimpObject::objectLoaded($account)) {
+            $account_label = '"' . $account->bank . '"';
+        } else {
+            $account_label = ' d\'ID ' . $id_account;
+        }
 
         // Création de la facture
         $is_avoir = ((float) $this->getData('total_ttc') < 0);
@@ -2066,6 +2097,7 @@ class BC_Vente extends BimpObject
             }
         }
 
+        // Ajout des produits vendus: 
         foreach ($articles as $article) {
             $product = $article->getChildObject('product');
             $serial = '';
@@ -2077,9 +2109,17 @@ class BC_Vente extends BimpObject
             $fk_product = $product->id;
             $desc = $product->label . ' - Réf. ' . $product->ref . ($serial ? ' - N° de série: ' . $serial : '');
             $qty = (int) $article->getData('qty');
-            $pu_ttc = (float) $article->getData('unit_price_tax_in');
-            $txtva = (float) $article->getData('tva_tx');
-            $pu_ht = (float) BimpTools::calculatePriceTaxEx($pu_ttc, $txtva);
+
+            if ((int) $this->getData('vente_ht')) {
+                $pu_ttc = (float) $article->getData('unit_price_tax_ex');
+                $txtva = 0;
+                $pu_ht = $pu_ttc;
+            } else {
+                $pu_ttc = (float) $article->getData('unit_price_tax_in');
+                $txtva = (float) $article->getData('tva_tx');
+                $pu_ht = (float) BimpTools::calculatePriceTaxEx($pu_ttc, $txtva);
+            }
+
             $remise_percent = (float) $article->getTotalRemisesPercent($globale_remise_percent);
 
             $txlocaltax1 = 0;
@@ -2123,7 +2163,9 @@ class BC_Vente extends BimpObject
             // Ajout des paiements: 
             $paiements = $this->getChildrenObjects('paiements');
 
+            $n = 0;
             foreach ($paiements as $paiement) {
+                $n++;
                 $montant = $paiement->getData('montant');
                 $code = $paiement->getData('code');
                 $total_paid += $montant;
@@ -2141,14 +2183,21 @@ class BC_Vente extends BimpObject
                     $msg .= ' (' . BC_VentePaiement::$codes[$code]['label'] . ': ' . BimpTools::displayMoneyValue($montant, 'EUR') . ')';
                     $errors[] = $msg;
                     BimpTools::getErrorsFromDolObject($p, $errors, $langs);
-                } elseif (!empty($conf->banque->enabled)) {
-                    if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', self::$facture_default_bank_account_id, '', '') < 0) {
-                        $errors[] = 'Echec de l\'ajout du paiement n°' . $paiement->id . ' au compte bancaire N°' . self::$facture_default_bank_account_id;
-                        BimpTools::getErrorsFromDolObject($p, $errors, $langs);
+                } else {
+                    if (!empty($conf->banque->enabled)) {
+                        if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), 'Echec de l\'ajout du paiement n°' . $p->id . ' au compte bancaire ' . $account_label);
+                        }
+                    }
+                    
+                    $paiement_errors = $caisse->addPaiement($p, $facture->id, $this->id);
+                    if (count($paiement_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($paiement_errors, 'Des erreurs sont survenues lors de l\'enregistrement du paiement n°'.$n);
                     }
                 }
             }
 
+            // Ajout du rendu monnaie:
             if ($total_paid > $total_facture_ttc) {
                 $returned = round($total_facture_ttc - $total_paid, 2);
 
@@ -2166,10 +2215,18 @@ class BC_Vente extends BimpObject
                         $msg = 'Echec de l\'ajout à la facture du rendu monnaie de ' . BimpTools::displayMoneyValue($returned, 'EUR');
                         $errors[] = $msg;
                         BimpTools::getErrorsFromDolObject($p, $errors, $langs);
-                    } elseif (!empty($conf->banque->enabled)) {
-                        if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', self::$facture_default_bank_account_id, '', '') < 0) {
-                            $errors[] = 'Echec de l\'ajout du rendu monnaire de ' . BimpTools::displayMoneyValue($returned, 'EUR') . ' au compte bancaire N°' . self::$facture_default_bank_account_id;
-                            BimpTools::getErrorsFromDolObject($p, $errors, $langs);
+                    } else {
+                        if (!empty($conf->banque->enabled)) {
+                            if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                $errors[] = 'Echec de l\'ajout du rendu monnaire de ' . BimpTools::displayMoneyValue($returned, 'EUR') . ' au compte bancaire ' . $account_label;
+                                BimpTools::getErrorsFromDolObject($p, $errors, $langs);
+                            }
+                        }
+                        
+                        $paiement_errors = $caisse->addPaiement($p, $facture->id, $this->id);
+
+                        if (count($paiement_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($paiement_errors, 'Des erreurs sont survenues lors de l\'enregistrement du rendu monnaie de ' . BimpTools::displayMoneyValue($montant, 'EUR'));
                         }
                     }
                 }
@@ -2226,10 +2283,17 @@ class BC_Vente extends BimpObject
                             $msg = 'Echec de la création du remboursement';
                             $rbt_errors[] = $msg;
                             BimpTools::getErrorsFromDolObject($p, $errors, $langs);
-                        } elseif (!empty($conf->banque->enabled)) {
-                            if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', self::$facture_default_bank_account_id, '', '') < 0) {
-                                $rbt_errors[] = 'Echec de l\'ajout du remboursement au compte bancaire N°' . self::$facture_default_bank_account_id;
-                                BimpTools::getErrorsFromDolObject($p, $errors, $langs);
+                        } else {
+                            if (!empty($conf->banque->enabled)) {
+                                if ($p->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                    $rbt_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), 'Echec de l\'ajout du remboursement au compte bancaire ' . $account_label);
+                                }
+                            }
+                            
+                            $paiement_errors = $caisse->addPaiement($p, $facture->id, $this->id);
+
+                            if (count($paiement_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($paiement_errors, 'Des erreurs sont survnues lors de l\'enregistrement du remboursement de ' . BimpTools::displayMoneyValue($montant, 'EUR'));
                             }
                         }
                     }
@@ -2238,40 +2302,6 @@ class BC_Vente extends BimpObject
                     }
                     break;
             }
-
-//            // Création de l'avoir: 
-//
-//            $avoir = new Facture($db);
-//            $avoir->socid = $id_client;
-//            $avoir->date = dol_now();
-//            $avoir->type = Facture::TYPE_CREDIT_NOTE;
-//            $avoir->note_private = $note;
-//            $avoir->fk_user_author = $user->id;
-//            $avoir->fk_facture_source = $facture->id;
-//
-//            $avoir->array_options['options_type'] = BimpCore::getConf('bimpcaisse_secteur_code');
-//            $avoir->array_options['options_entrepot'] = (int) $this->getData('id_entrepot');
-//
-//            if ($avoir->create($user) <= 0) {
-//                $avoir_errors = BimpTools::getErrorsFromDolObject($avoir, null, $langs);
-//                $errors[] = BimpTools::getMsgFromArray($avoir_errors, 'Des erreurs sont survenues lors de la création de l\'avoir');
-//            } else {
-//                $this->set('id_avoir', (int) $avoir->id);
-//
-//                $totalpaye = $facture->getSommePaiement();
-//                $totalcreditnotes = $facture->getSumCreditNotesUsed();
-//                $totaldeposits = $facture->getSumDepositsUsed();
-//                $remain_to_pay = abs($facture->total_ttc - $totalpaye - $totalcreditnotes - $totaldeposits);
-//
-//                $avoir->addline($langs->trans('invoiceAvoirLineWithPaymentRestAmount'), $remain_to_pay, 1, 0, 0, 0, 0, 0, '', '', 'TTC');
-//
-//                if ($avoir->validate($user) <= 0) {
-//                    $msg = 'Echec de la validation de l\'avoir';
-//                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($avoir), $msg);
-//                } else {
-//                    $avoir->generateDocument(self::$facture_model, $langs);
-//                }
-//            }
         }
 
         $facture->generateDocument(self::$facture_model, $langs);

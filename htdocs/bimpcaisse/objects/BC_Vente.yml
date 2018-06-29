@@ -214,6 +214,11 @@ fields:
             type: hidden        
         default_value: 0
         
+    vente_ht: 
+        label: Vente au prix hors-taxes
+        type: bool
+        default_value: 0
+        
 fields_tables: 
     infos: 
         title: Informations
@@ -394,6 +399,7 @@ lists:
                 field: total_ttc
         extra_btn:
             callback: getDocumentExtraButtons
+            
 forms: 
     client: 
         rows: 

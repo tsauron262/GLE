@@ -225,7 +225,7 @@ views:
 lists: 
     default: 
         title: Produits
-        icon: fa5_box
+        icon: fas_box
         sort_field: id
         sort_way: desc
         n: 50

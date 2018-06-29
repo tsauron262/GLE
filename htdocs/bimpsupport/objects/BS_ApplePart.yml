@@ -28,7 +28,7 @@ fields:
         default_value: A
     qty: 
         label: Quantité
-        type: int
+        type: qty
         unsigned: 1
         min: 1
         default_value: 1
@@ -90,8 +90,6 @@ lists:
                 label: Qté
                 field: qty
                 edit: 1
-                min_width: 70px
-                max_width: 70px
             out_of_warranty: 
                 field: out_of_warranty
                 edit: 1

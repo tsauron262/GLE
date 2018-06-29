@@ -34,7 +34,7 @@ class BimpValidateOrder {
             return -3;
         }
 
-        if ($max_price < $price_order) {
+        if ($max_price <= $price_order) {
             $id_responsibles = $this->getResponsiblesIds($price_order, $order);
             $error = false;
             foreach ($id_responsibles as $id_responsible) {

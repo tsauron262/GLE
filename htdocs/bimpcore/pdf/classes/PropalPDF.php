@@ -91,9 +91,9 @@ class PropalPDF extends BimpDocumentPDF
             $rows .= '<div class="row">' . $this->langs->transnoentities('CustomerCode') . ' : ' . $this->langs->transnoentities($this->propal->thirdparty->code_client) . '</div>';
             $nRows++;
         }
-
         // Commercial: 
         if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
+            global $mysoc;
             $comm1 = $comm2 = 0;
             $contacts = $this->propal->getIdContact('internal', 'SALESREPSIGN');
             if (count($contacts)) {
@@ -128,6 +128,12 @@ class PropalPDF extends BimpDocumentPDF
                     $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
                     $nRows++;
                 }
+            }
+            if(isset($usertmp)){
+                if($usertmp->office_phone != "")
+                    $mysoc->phone = $usertmp->office_phone;
+                if($usertmp->email != "")
+                    $mysoc->email = $usertmp->email;
             }
         }
 

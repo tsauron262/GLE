@@ -29,7 +29,7 @@ class BimpValidateOrder {
         $price_order = $order->total_ht;
 
         $max_price = $this->getMaxPriceOrder($user);
-$max_price = 0;
+        $max_price = 0;
         if (sizeof($this->errors) != 0) {
             setEventMessages(null, $this->errors, 'errors');
             return -3;
@@ -38,22 +38,22 @@ $max_price = 0;
         if ($max_price < $price_order) {
             $id_responsibles = $this->getResponsiblesIds($price_order, $order);
             $error = false;
-            foreach($id_responsibles as $id_responsible){
+            foreach ($id_responsibles as $id_responsible) {
                 if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
-                        $error = true;
+                    $error = true;
             }
-            if(!$error)
-                    setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande.", null, 'warnings');
-                    return -1;
-                } else {
-                    setEventMessages(null, $this->errors, 'errors');
-                    return -2;
-                }
+            if (!$error) {
+                setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande.", null, 'warnings');
+                return -1;
+            } else {
+                setEventMessages(null, $this->errors, 'errors');
+                return -2;
+            }
         }
         $idEn = $order->array_options['options_entrepot'];
-        if($idEn < 1){
-                setEventMessages("Pas d'entrepot associé", null, 'errors');
-                return -2;
+        if ($idEn < 1) {
+            setEventMessages("Pas d'entrepot associé", null, 'errors');
+            return -2;
         }
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
         $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $order->id));
@@ -79,7 +79,7 @@ $max_price = 0;
      * Get the maximum price a user can validate
      */
     private function getMaxPriceOrder($user, $order) {
-        if($order->array_options['options_type'] == "E" && $user->id == 7){
+        if ($order->array_options['options_type'] == "E" && $user->id == 7) {
             return 100000;
         }
 
@@ -89,8 +89,8 @@ $max_price = 0;
         }
 
         $sql = 'SELECT maxpriceorder';
-        $sql.= ' FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
-        $sql.= ' WHERE fk_object=' . $user->id;
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
+        $sql .= ' WHERE fk_object=' . $user->id;
 
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
@@ -109,19 +109,18 @@ $max_price = 0;
 
         return $max_price;
     }
-    
-    private function getResponsiblesIds($price, $order){
-        if($order->array_options['options_type'] == "E" && $price < 100000){
+
+    private function getResponsiblesIds($price, $order) {
+        if ($order->array_options['options_type'] == "E" && $price < 100000) {
             return array(7);
-        }
-        else{
-            if($price < 50000)
-                return array(2,65);
+        } else {
+            if ($price < 50000)
+                return array(2, 65);
             else
-                return array(2,68);
+                return array(2, 68);
         }
     }
-    
+
     private function getFirstResponsibleId($price) {
 
         $sql = 'SELECT fk_object';
@@ -150,8 +149,8 @@ $max_price = 0;
         $subject = "BIMP ERP - Demande de validation de commande client";
 
         $msg = "Bonjour, \n\n";
-        $msg.= "L'utilisateur $user->firstname $user->lastname souhaite que vous validiez la commande suivante : ";
-        $msg.= $order->getNomUrl();
+        $msg .= "L'utilisateur $user->firstname $user->lastname souhaite que vous validiez la commande suivante : ";
+        $msg .= $order->getNomUrl();
         return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
     }
 

@@ -29,7 +29,6 @@ class BimpValidateOrder {
         $price_order = $order->total_ht;
 
         $max_price = $this->getMaxPriceOrder($user);
-        $max_price = 0;
         if (sizeof($this->errors) != 0) {
             setEventMessages(null, $this->errors, 'errors');
             return -3;

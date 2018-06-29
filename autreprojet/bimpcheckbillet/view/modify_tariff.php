@@ -152,7 +152,7 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
 
     print '<button class="btn btn-primary" name="modify">Modifier</button><br/><br/>';
 
-    print '<button class="btn btn-danger" name="delete">Supprimer tarif</button>';
+    print '<div class="btn btn-danger" name="delete">Supprimer tarif</div>';
 
     print '</form>';
     print '<div id="alertSubmit"></div>';

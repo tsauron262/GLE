@@ -235,7 +235,7 @@ function addIdCateg(id_event, id_categ) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                alert("La catégorie a été créée dans prestashop.");
+                alert("La catégorie a été créée dans prestashop, la page va se recharger.");
                 location.reload();
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 2548.', 'error');
@@ -314,7 +314,7 @@ function deleteEvent(event) { // check server
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                alert("La catégorie a été supprimée.");
+                alert("La catégorie a été supprimée, la page va se recharger.");
                 location.reload();
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 3482.', 'error');

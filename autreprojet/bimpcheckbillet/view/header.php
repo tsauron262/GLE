@@ -95,6 +95,7 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
           <a class="dropdown-item" href="create_ticket.php">Réserver</a>
           <a class="dropdown-item" href="check_ticket.php">Valider</a>
           <a class="dropdown-item" href="list_ticket.php">Liste</a>
+          <a class="dropdown-item" href="print_ticket.php">Imprimer</a>
         </div>
       </li>';
         } else {

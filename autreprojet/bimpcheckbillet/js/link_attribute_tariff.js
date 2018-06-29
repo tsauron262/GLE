@@ -137,7 +137,7 @@ function link(id_tariff, id_attribute) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.id_inserted > 0) {
-                alert("Liaison créée.");
+                alert("Liaison créée, la page va se recharger.");
                 location.reload();
             } else {
                 setMessage('alertSubmit', "Aucun tariff pour cet évènement.", 'error');

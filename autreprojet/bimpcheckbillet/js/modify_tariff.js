@@ -133,7 +133,7 @@ function modifyTariff(id_tariff, label, price, number_place, require_names, date
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                alert("Tarif modifié");
+                alert("Tarif modifié, la page va se recharger.");
                 location.reload();
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 3814.', 'error');
@@ -233,7 +233,6 @@ function createPrestashopProduct(id_tariff, id_categ_extern, image_name, id_tax)
 
 function addIdProdExtern(id_tariff, id_prod_extern) {
 
-
     $.ajax({
         type: "POST",
         url: "../interface.php",
@@ -250,14 +249,13 @@ function addIdProdExtern(id_tariff, id_prod_extern) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return === 1) {
-                alert('Produit créée');
+                alert('Produit créée, la page va se recharger.');
                 location.reload();
             } else {
                 setMessage('alertSubmit', "Erreur serveur 1873.", 'error');
             }
         }
-    }
-    );
+    });
 }
 
 function toggleActiveProduct(id_prod_extern) {
@@ -311,6 +309,56 @@ function getAttributes(id_prod_extern) {
     });
 }
 
+function deletePrestashopTariff(id_tariff, id_prod_extern) {
+    $.ajax({
+        type: 'POST',
+        url: URL_PRESTASHOP,
+        data: {
+            id_prod_extern: id_prod_extern,
+            action: 'deleteProduct'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 6482.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.is_ok) {
+                deleteTariff(id_tariff);
+            } else {
+                setMessage('alertSubmit', "Erreur inconnue 8431.", 'error');
+            }
+        }
+    });
+}
+
+function deleteTariff(id_tariff) {
+    $.ajax({
+        type: "POST",
+        url: "../interface.php",
+        data: {
+            id_tariff: id_tariff,
+            action: 'delete_tariff'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 6483.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (parseInt(out.code_return) === 1) {
+                alert('Produit supprimé, la page va se recharger.');
+                location.reload();
+            } else {
+                setMessage('alertSubmit', "Erreur serveur 3491.", 'error');
+            }
+        }
+    });
+}
+
+
 /**
  * Ready
  */
@@ -323,8 +371,9 @@ $(document).ready(function () {
         placeholder_text_single: 'Tarif',
         no_results_text: 'Pas de résultat'});
     getEvents();
-}
-);
+});
+
+
 /**
  * Function
  */
@@ -461,7 +510,24 @@ function initEvents() {
         } else {
             alert("Veuillez sélectionner un produit avant de changer un status.");
         }
-    })
+    });
+
+    $('div[name=delete]').click(function () {
+        var id_tariff = parseInt($('select[name=tariff] > option:selected').val());
+        var tariff;
+        if (id_tariff > 0) {
+            tariffs.forEach(function (tmp_tariff) {
+                if (tmp_tariff.id === id_tariff)
+                    tariff = tmp_tariff;
+            });
+            if (parseInt(tariff.id_prod_extern) > 0)
+                deletePrestashopTariff(tariff.id, tariff.id_prod_extern);
+            else
+                deleteTariff(tariff.id);
+        } else {
+            alert("Veuillez sélectionner un produit avant de changer un status.");
+        }
+    });
 }
 
 function autoFill(id_tariff) {

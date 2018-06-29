@@ -320,8 +320,8 @@ class Ticket {
         $event->fetch($ticket->id_event);
 
         $file_name_qrcode = PATH . '/img/qrcode/qrcode' . $ticket->id . '.png';
-//        $image_event = $this->addExtension(PATH . '/img/event/' . $ticket->id_event);
-//        $image_tariff = $this->addExtension(PATH . '/img/event/' . $ticket->id_event . '_' . $ticket->id_tariff);
+
+        
         $image_zoom = PATH . '/img/zoomdici.jpg';
         $image_tariff_custom = $this->addExtension(PATH . '/img/tariff_custom/' . $ticket->id_event . '_' . $ticket->id_tariff);
 
@@ -437,6 +437,13 @@ class Ticket {
             return -2;
         }
         return -1;
+    }
+    
+    public function createPdfFromCheck($ids_inserted, $id_event, $id_tariff, $with_num, $num_start, $number, $format) {
+        $this->pdf = new PDF_Code128('Portrait', 'mm', $format);
+//        $this->pdf = new PDF_Code128($orientation='P', $unit='mm', $format='A4');
+
+        
     }
 
 }

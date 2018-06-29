@@ -43,7 +43,7 @@ class Interfacevalidateorder extends DolibarrTriggers {
             }
             
             if($object->cond_reglement_code == "VIDE"){  
-                    //setEventMessages("Merci de séléctionner les Conditions de règlement", null, 'errors');
+                    setEventMessages("Merci de séléctionner les Conditions de règlement", null, 'errors');
                     return -2; 
             }
         }

@@ -134,8 +134,8 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="date_stop_sale">Date de fin de vente</label><br/>';
     print '<input class="form-control" placeholder="Date de fin de vente" type="text" name="date_stop_sale" style="display: inline ; width: 160px"/>';
     print '<input class="form-control" type="time" value="00:00" name="time_end_sale" style="display: inline ; width: 100px"/><br/>';
-    
-        print '<label for="date_start">Date de début (facultatif)</label><br/>';
+
+    print '<label for="date_start">Date de début (facultatif)</label><br/>';
     print '<input class="form-control" placeholder="Date de début" type="text" name="date_start" style="display: inline ; width: 160px"/>';
     print '<input class="form-control" type="time" value="00:00" name="time_start" style="display: inline ; width: 100px"/><br/>';
 
@@ -150,7 +150,10 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     printExtra(5);
     printExtra(6);
 
-    print '<button class="btn btn-primary" name="modify">Modifier</button>';
+    print '<button class="btn btn-primary" name="modify">Modifier</button><br/><br/>';
+
+    print '<button class="btn btn-danger" name="delete">Supprimer tarif</button>';
+
     print '</form>';
     print '<div id="alertSubmit"></div>';
 }

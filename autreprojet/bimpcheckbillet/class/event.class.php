@@ -14,6 +14,7 @@ class Event {
     public $id_categ;
     public $id_categ_parent;
     public $place;
+    private $filename;
 
     const STATUS_DRAFT = 1;
     const STATUS_VALIDATE = 2;
@@ -49,6 +50,12 @@ class Event {
                 $this->id_categ = intVal($obj->id_categ);
                 $this->id_categ_parent = intVal($obj->id_categ_parent);
                 $this->place = stripslashes($obj->place);
+                $exts = array('bmp', 'png', 'jpg');
+                foreach ($exts as $ext) {
+                    if (file_exists(PATH . '/img/event/' . $id . "." . $ext)) {
+                        $this->filename = $id . "." . $ext;
+                    }
+                }
                 return 1;
             }
         } else {
@@ -199,6 +206,8 @@ class Event {
 
     public function delete($id_event) {
 
+        $this->fetch($id_event);
+
         // Delete tariffs
         $tariff_static = new Tariff($this->db);
         $tariffs = $tariff_static->getTariffsForEvent($id_event);
@@ -207,9 +216,8 @@ class Event {
         if (is_array($tariffs)) {
             foreach ($tariffs as $tariff) {
                 $res_delete_tariff = $tariff->delete();
-                echo $res_delete_tariff;
                 if ($res_delete_tariff != 1) {
-                    $this->errors[] = array_merge($this->errors, $tariff->errors);
+                    $this->errors = array_merge($this->errors, $tariff->errors);
                     return -4;
                 }
             }
@@ -248,7 +256,7 @@ class Event {
 
 
         // Delete image event
-        $file_event_prefix = PATH . '/img/event/' . $id_event . '.*';
+        $file_event_prefix = PATH . '/img/event/' . $this->filename;
         if (file_exists($file_event_prefix)) {
             $delete_event_file_ok = unlink($file_event_prefix);
             if (!$delete_event_file_ok) {
@@ -256,17 +264,6 @@ class Event {
                 return -7;
             }
         }
-
-        // Delete image tariff
-        $file_tariff_prefix = PATH . '/img/event/' . $id_event . "_*";
-        if (file_exists($file_tariff_prefix)) {
-            $delete_tariff_file_ok = unlink($file_tariff_prefix);
-            if (!$delete_tariff_file_ok) {
-                $this->errors[] = "Problème lors de la suppression d'image de tarif.";
-                return -8;
-            }
-        }
-
         return true;
     }
 

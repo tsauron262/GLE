@@ -38,10 +38,10 @@ function getEvents() {
                 if (id_event_session > 0) {
                     if (!$('select[name=id_event] > option[value=' + id_event_session + ']').prop('disabled')) {
                         $('select[name=id_event] > option[value=' + id_event_session + ']').prop('selected', true);
-                        $(".chosen-select").trigger("chosen:updated");
                         $('select[name=id_event]').trigger('change');
                     }
                 }
+                $(".chosen-select").trigger("chosen:updated");
             } else if (out.events.length === 0) {
                 alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
                 window.location.replace('../view/create_event.php');
@@ -315,6 +315,7 @@ function getAttributes(id_prod_extern) {
  * Ready
  */
 $(document).ready(function () {
+    $(".chosen-select").chosen();
     $('input[name=date_stop_sale]').datepicker({dateFormat: 'dd/mm/yy'})
     $('input[name=date_start]').datepicker({dateFormat: 'dd/mm/yy'})
     $('input[name=date_end]').datepicker({dateFormat: 'dd/mm/yy'})

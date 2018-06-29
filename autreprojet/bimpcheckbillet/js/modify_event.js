@@ -298,7 +298,7 @@ function deletePrestashopEvent(event) {
 }
 
 function deleteEvent(event) { // check server
-    
+
     $.ajax({
         type: "POST",
         url: "../interface.php",
@@ -484,11 +484,14 @@ function initEvents() {
     $('button[name=delete]').click(function () {
         var id_event = $('select[name=id_event] > option:selected').val();
         if (id_event > 0) {
-            var event = getEventById(id_event);
-            if (parseInt(event.id_categ) > 0)
-                deletePrestashopEvent(event);
-            else
-                deleteEvent(event);
+            if (confirm("Vous êtes sur le point de supprimer un évènement,\n\
+les tariffs et les tickets (pdf inclus) qui lui sont rattachés seront également supprimés, poursuivre ?")) {
+                var event = getEventById(id_event);
+                if (parseInt(event.id_categ) > 0)
+                    deletePrestashopEvent(event);
+                else
+                    deleteEvent(event);
+            }
         } else
             setMessage('alertBottom', "Veuillez sélectionnez un évènement.", 'error');
     });

@@ -100,7 +100,7 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<button class="btn btn-success" name="validate" style="margin-left: 20px;">Valider évènement</button>';
     print '<button class="btn btn-danger" name="close" style="margin-left: 20px;">Fermer évènement</button><br/><br/>';
 
-    print '<button class="btn btn-danger" name="delete">Supprimer évènement et tarif associés.</button>';
+    print '<button class="btn btn-danger" name="delete">Supprimer</button>';
 
     print '</fieldset>';
 }

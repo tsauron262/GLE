@@ -36,7 +36,6 @@ class Tariff {
         $sql .= ' FROM tariff';
         $sql .= ' WHERE id=' . $id;
 
-//        echo $sql;
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
@@ -191,7 +190,6 @@ class Tariff {
         $sql.= ')';
 
 
-//        echo $sql;
         try {
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $this->db->beginTransaction();
@@ -472,16 +470,16 @@ class Tariff {
 
     public function delete() {
 
-        $static_ticket = new Ticket($this->db);
-
         // Delete tickets
+        $static_ticket = new Ticket($this->db);
         $tickets = $static_ticket->getTicketsByTariff($this->id);
         foreach ($tickets as $ticket) {
             if ($ticket->delete($ticket->id) != 1) {
                 $this->errors = array_merge($this->errors, $ticket->errors);
-                return -4;
+                return -1;
             }
         }
+
 
         // Delete attribute_value_tariff
         $sql = 'DELETE FROM `attribute_value_tariff`';
@@ -495,8 +493,9 @@ class Tariff {
         } catch (Exception $e) {
             $this->errors[] = "Impossible de supprimer la liaison tarif - valeur d'attribut. " . $e;
             $this->db->rollBack();
-            return -1;
+            return -2;
         }
+
 
         // Delete attribute_value_tariff
         $sql = 'DELETE FROM `tariff_attribute`';
@@ -510,8 +509,9 @@ class Tariff {
         } catch (Exception $e) {
             $this->errors[] = "Impossible de supprimer la liaison tarif - attribut. " . $e;
             $this->db->rollBack();
-            return -2;
+            return -3;
         }
+
 
         // Delete tariff
         $sql = 'DELETE FROM `tariff`';
@@ -525,7 +525,30 @@ class Tariff {
         } catch (Exception $e) {
             $this->errors[] = "Impossible de supprimer le tarif. " . $e;
             $this->db->rollBack();
-            return -3;
+            return -4;
+        }
+
+
+        // Delete image tariff
+        $file_tariff = PATH . '/img/event/' . $this->filename;
+        if (file_exists($file_tariff)) {
+            $delete_tariff_file_ok = unlink($file_tariff);
+            if (!$delete_tariff_file_ok) {
+                $this->errors[] = "Problème lors de la suppression d'image de tarif.";
+                return -5;
+            }
+        }
+
+        // Delete image custom tariff
+        if (isset($this->filename_custom)) {
+            $file_tariff_custom = PATH . '/img/tariff_custom/' . $this->filename_custom;
+            if (file_exists($file_tariff_custom)) {
+                $delete_tariff_file_ok = unlink($file_tariff_custom);
+                if (!$delete_tariff_file_ok) {
+                    $this->errors[] = "Problème lors de la suppression d'image de ticket correspondant à cet tarif.";
+                    return -5;
+                }
+            }
         }
 
         return 1;

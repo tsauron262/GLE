@@ -24,6 +24,7 @@ class Ticket {
     public $extra_4;
     public $extra_5;
     public $extra_6;
+    private $id_order;
     private $pdf;
     private $i = 0;
 
@@ -40,7 +41,7 @@ class Ticket {
         }
 
         $sql = 'SELECT date_creation, fk_event, fk_tariff, fk_user, date_scan, ';
-        $sql .= 'barcode, first_name, last_name, price, extra_1, extra_2, extra_3, extra_4, extra_5, extra_6';
+        $sql .= 'barcode, first_name, last_name, price, extra_1, extra_2, extra_3, extra_4, extra_5, extra_6, id_order';
         $sql .= ' FROM ticket';
         $sql .= ' WHERE id=' . $id;
 
@@ -64,6 +65,7 @@ class Ticket {
                 $this->extra_4 = $obj->extra_4;
                 $this->extra_5 = $obj->extra_5;
                 $this->extra_6 = $obj->extra_6;
+                $this->id_order = $obj->id_order;
                 return 1;
             }
         } elseif ($result) {
@@ -197,6 +199,28 @@ class Ticket {
 
         if ($id == '')
             $this->errors[] = "Le champ id est obligatoire";
+
+        $this->fetch($id);
+
+        // Delete pdf tariff
+        $file = PATH . '/img/tickets/ticket' . base64_encode($this->id_order) . '.pdf';
+        if (file_exists($file)) {
+            $delete_file_ok = unlink($file);
+            if (!$delete_file_ok) {
+                $this->errors[] = "Problème lors de la suppression du pdf du ticket.";
+                return -3;
+            }
+        }
+
+        // Delete qrcode
+        $file_name_qrcode = PATH . '/img/qrcode/qrcode' . $id . '.png';
+        if (file_exists($file_name_qrcode)) {
+            $delete_file_ok = unlink($file_name_qrcode);
+            if (!$delete_file_ok) {
+                $this->errors[] = "Problème lors de la suppression du QR code du ticket.";
+                return -4;
+            }
+        }
 
         $sql = 'DELETE';
         $sql.= ' FROM ticket';

@@ -28,7 +28,7 @@ class Interfacevalidateorder extends DolibarrTriggers {
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         global $conf, $user;
-        if ($action == 'ORDER_VALIDATE') {
+        if ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE') {
             $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');
             if(count($tabConatact) < 1){
                 $tabComm = $object->thirdparty->getSalesRepresentatives($user);
@@ -36,14 +36,15 @@ class Interfacevalidateorder extends DolibarrTriggers {
                     $object->add_contact($tabComm[0]['id'], 'SALESREPSIGN', 'internal');
                 }
                 else{                
-                    setEventMessages("Impossible de validé, pas de Commercial signataire de la commande", null, 'errors');
+                    setEventMessages("Impossible de validé, pas de Commercial signataire", null, 'errors');
                     return -2; 
                 }
 
             }
             
-            
-            
+        }
+         
+        if ($action == 'ORDER_VALIDATE') {   
             $bvo = new BimpValidateOrder($user->db);
             $code = $bvo->checkValidateRights($user, $object);
             return $code;

@@ -595,8 +595,8 @@ class Translate
 	function trans($key, $param1='', $param2='', $param3='', $param4='', $maxsize=0)
 	{
         global $conf;
-        
-        echo "ii".$key."pp";
+            
+                    setEventMessages("ii".$key."pp", null, 'errors');
 
 	    if (! empty($this->tab_translate[$key]))	// Translation is available
 		{

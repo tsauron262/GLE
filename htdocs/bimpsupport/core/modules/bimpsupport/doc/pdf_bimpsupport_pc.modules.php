@@ -242,7 +242,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             //etat
             $pdf->SetXY(130, 91.6);
-            $pdf->MultiCell(100, 6, $sav->displayData('etat_materiel', 'default', false, true), 0, 'L');
+            $pdf->MultiCell(100, 6, $sav->displayData('etat_materiel', 'default', false, true)."\n".$sav->displayData('etat_materiel_desc', 'default', false, true), 0, 'L');
 
             //accessoire
             $pdf->SetXY('142.8', '104.8');

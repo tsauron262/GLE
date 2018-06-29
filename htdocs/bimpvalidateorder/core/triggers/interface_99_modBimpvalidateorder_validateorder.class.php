@@ -54,8 +54,8 @@ class Interfacevalidateorder extends DolibarrTriggers {
             return $code;
         }
         if ($action == 'ORDER_UNVALIDATE') {
-            setEventMessages("Impossible de dévalidé", null, 'errors');
-            return -2;
+//            setEventMessages("Impossible de dévalidé", null, 'errors');
+//            return -2;
         }
         
         

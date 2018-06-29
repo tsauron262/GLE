@@ -29,20 +29,22 @@ class BimpValidateOrder {
         $price_order = $order->total_ht;
 
         $max_price = $this->getMaxPriceOrder($user);
-
+$max_price = 0;
         if (sizeof($this->errors) != 0) {
             setEventMessages(null, $this->errors, 'errors');
             return -3;
         }
 
         if ($max_price < $price_order) {
-            $id_responsible = $this->getFirstResponsibleId($price_order);
-            if ($this->sendEmailToResponsible($id_responsible, $user, $order) == true) {
-                setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande.", null, 'warnings');
-                return -1;
-            } else {
-                setEventMessages(null, $this->errors, 'errors');
-                return -2;
+            $id_responsibles = $this->getResponsiblesIds($price_order, $order);
+            foreach($id_responsibles as $id_responsible){
+                if ($this->sendEmailToResponsible($id_responsible, $user, $order) == true) {
+                    setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande.", null, 'warnings');
+                    return -1;
+                } else {
+                    setEventMessages(null, $this->errors, 'errors');
+                    return -2;
+                }
             }
         }
         $idEn = $order->array_options['options_entrepot'];
@@ -73,7 +75,10 @@ class BimpValidateOrder {
     /**
      * Get the maximum price a user can validate
      */
-    private function getMaxPriceOrder($user) {
+    private function getMaxPriceOrder($user, $order) {
+        if($order->array_options['options_type'] == "E" && $user->id == 7){
+            return 100000;
+        }
 
         if ($user->id < 0) {
             $this->errors[] = "Identifiant utilisateur inconnu.";
@@ -101,7 +106,19 @@ class BimpValidateOrder {
 
         return $max_price;
     }
-
+    
+    private function getResponsiblesIds($price, $order){
+        if($order->array_options['options_type'] == "E" && $price < 100000){
+            return array(7);
+        }
+        else{
+            if($price < 50000)
+                return array(2,65);
+            else
+                return array(2,68);
+        }
+    }
+    
     private function getFirstResponsibleId($price) {
 
         $sql = 'SELECT fk_object';

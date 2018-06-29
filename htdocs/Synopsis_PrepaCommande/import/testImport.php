@@ -529,7 +529,7 @@ if (is_dir($dir)) {
                             $typeLigne = "propal";
                         $paysGlobal = processPays($val['PysCode']);
                         $externalUserId = $val['PcvGPriID'];
-                        $internalUserId = processUser($externalUserId, $val["PcvCode"], $file);
+                        $internalUserId = processUser($externalUserId, $val["PcvCode"], $file, $val);
                         if (!$internalUserId)
                             $OKFile = false;
                         else {
@@ -1528,8 +1528,8 @@ if (is_dir($dir)) {
                                         if (!$db->num_rows($sql) > 0) {
                                             //Insert commande
                                             $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commande
-                                        (date_creation,ref, fk_user_author, fk_soc,fk_cond_reglement, date_commande, fk_mode_reglement,fk_delivery_address,import_key)
-                                 VALUES (now(),'" . $val['PcvCode'] . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
+                                        (extraparams, date_creation,ref, fk_user_author, fk_soc,fk_cond_reglement, date_commande, fk_mode_reglement,fk_delivery_address,import_key)
+                                 VALUES (1, ow(),'" . $val['PcvCode'] . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
                                             $sql = requeteWithCache($requete);
                                             $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "commande");
                                             if ($sql) {
@@ -2369,7 +2369,7 @@ function processPays($codePays) {
     }
 }
 
-function processUser($import_key, $nomCom, $file) {
+function processUser($import_key, $nomCom, $file, $val) {
 //    return 59;
     global $remUserArray, $db;
     if ($import_key > 0) {
@@ -2380,7 +2380,7 @@ function processUser($import_key, $nomCom, $file) {
         if (isset($result[0]['d']))
             return $result[0]['d'];
         else
-            affErreur("Pas de correspondance pour l'utilisateur dans BIMP-ERP : id 8Sens " . $import_key." commande ".$nomCom. " fichier ".$file);
+            affErreur("Pas de correspondance pour l'utilisateur dans BIMP-ERP : id 8Sens " . $import_key." non : ".print_r($val,1)." | commande ".$nomCom. " fichier ".$file);
 //        if (!isset($remUserArray[$import_key])) {
 //            $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext = " . $import_key;
 //            $sql = requeteWithCache($requete);

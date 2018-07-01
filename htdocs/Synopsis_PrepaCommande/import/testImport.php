@@ -1529,7 +1529,7 @@ if (is_dir($dir)) {
                                             //Insert commande
                                             $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commande
                                         (extraparams, date_creation,ref, fk_user_author, fk_soc,fk_cond_reglement, date_commande, fk_mode_reglement,fk_delivery_address,import_key)
-                                 VALUES (1, ow(),'" . $val['PcvCode'] . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
+                                 VALUES (1, now(),'" . $val['PcvCode'] . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
                                             $sql = requeteWithCache($requete);
                                             $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "commande");
                                             if ($sql) {

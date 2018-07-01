@@ -73,8 +73,7 @@ class ActionsSynopsischrono {
 //        require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
 //        $groupSav = new UserGroup($db);
 //        $groupSav->fetch('', "XX SAV");
-//        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && (userInGroupe("XX Sav", $user->id) || userInGroupe("XX Sav MyMu", $user->id)) && !userInGroupe("Sav74", $user->id) && !userInGroupe("Boutique74", $user->id)) {
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
             $hrefFin = "#pangridChronoDet105";
             $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
             $return .= '<div class="menu_titre">' . img_object("SAV", "drap0@synopsistools") . ' Fiche SAV</div>';

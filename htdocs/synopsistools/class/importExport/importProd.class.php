@@ -90,7 +90,8 @@ class importProd extends import8sens {
             $this->update = false;
 
 
-            $this->traiteChamp("options_serialisable", ($ln['ArtStkNuf'] == "N° de série"));
+//            $this->traiteChamp("options_serialisable", ($ln['ArtStkNuf'] == "N° de série"));
+            $this->traiteChamp("options_serialisable", 0);
 
 
 

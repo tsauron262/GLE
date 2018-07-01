@@ -11,7 +11,7 @@ $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray 
     "MO" => array("03 81 95 19 20", "sav252@bimp.fr", "Montbeliard", 84, "484926", "25200", "Montbeliard", "37 place Denfert Rochereau",27),
     "C" => array("03 44 200 200", "sav60@bimp.fr", "Compiegne", 106, "1040727", "60200", "Compiègne", "10 rue de l’étoile",30),
     "MA" => array("04 96 11 29 40", "sav13@bimp.fr", "Marseille", 116, "1046076", "13011", "Marseille", "Route de la Sablière",32),
-   // "AB" => array("04 50 22 15 55", "sav74@bimp.fr", "Annecy Boutique", 60, "1046075", "74000", "Annecy", "7 rue de la poste",21),
+    "AB" => array("04 50 22 15 55", "sav74@bimp.fr", "Annecy Boutique", 60, "1046075", "74000", "Annecy", "7 rue de la poste",21),
     "CFC" => array("04 63 46 76 37", "sav63@bimp.fr", "Chamalières", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
     "CFB" => array("04 63 46 76 37", "sav63@bimp.fr", "Clermont-Ferrand boutique", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),
     "CF" => array("04 63 46 76 37", "sav63@bimp.fr", "Chamalières OLD", 147, "1111748", "63000", "Clermont-Ferrand", "Centre Jaude 2 (1er Etage) 7 Rue Giscard de la Tour Fondue"),

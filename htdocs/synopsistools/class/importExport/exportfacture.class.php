@@ -22,7 +22,7 @@ class exportfacture extends export8sens {
 
     public function __construct($db, $sortie = 'html') {
         parent::__construct($db);
-        $this->pathExport = $this->path."extractFactGle/";
+        $this->pathExport = $this->path."fact/";
         $this->pathI = $this->path."../export/factures/";
     }
 

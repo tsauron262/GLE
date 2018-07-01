@@ -107,14 +107,10 @@ class importProd extends import8sens {
 
             if ($this->updatePrice) {
                 $this->object->updatePrice($this->object->price, 'HT', $user, $this->object->tva_tx);
-                $this->alert($this->object->id . " updatePrice");
-//                $this->alert (print_r($ln,1));
                 $this->tabResult["modifier"] ++;
             }
             if ($this->update) {
                 $this->object->update($this->object->id, $user);
-                $this->alert($this->object->id . " update");
-//                $this->alert (print_r($ln,1));
                 $this->tabResult["modifier"] ++;
             }
         } else

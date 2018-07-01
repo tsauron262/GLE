@@ -45,7 +45,7 @@ class importStock extends import8sens {
 
             if ($this->prodId < 1)
                 if($newStock != 0)
-                $this->error("Prod introuvable " . $ln['ArdGArtCode']);
+                $this->alert("Prod introuvable " . $ln['ArdGArtCode']);
             elseif ($this->entrepotId < 1)
                 $this->error("entrepot introuvable " . $ln['ArdGDepCode']);
             else {

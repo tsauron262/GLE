@@ -10,8 +10,8 @@ llxHeader();
 set_time_limit(5000000);
 ini_set('memory_limit', '1024M');
 
-$loadEquip = false;
-$loadSav = true;
+$loadEquip = true;
+$loadSav = false;
 
 
 $OK= 0;
@@ -115,7 +115,7 @@ $OK++;
 
 
 if ($loadSav) {
-    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE s.`Centre` LIKE 'AB' AND c.id = s.id AND (revisionNext < 1 OR revisionNext IS NULL)");
+    $sql = $db->query("SELECT s.*, c.*, e.id as idMat, s.id as idS  FROM `llx_synopsischrono` c, `llx_synopsischrono_chrono_105` s LEFT JOIN llx_be_equipment e ON e.note = CONCAT('OLD', Materiel) WHERE s.`Centre` NOT LIKE 'AB' AND c.id = s.id AND (revisionNext < 1 OR revisionNext IS NULL)");
 
 $savok = 0;
 

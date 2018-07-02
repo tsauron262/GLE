@@ -1063,7 +1063,7 @@ class BS_SAV extends BimpObject
         }
         
         $prop->array_options['options_type'] = "S";
-        define("NOT_VERIF_CONTACT", true);
+        define("NOT_VERIF", true);
 
         if ($this->getData('id_discount') > 0) {
             BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');

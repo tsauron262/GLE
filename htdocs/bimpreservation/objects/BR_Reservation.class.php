@@ -31,7 +31,7 @@ class BR_Reservation extends BimpObject
     public static $transfert_status = array(201, 301, 303);
     public static $temp_status = array(202, 302, 303);
     public static $sav_status = array(203, 304, 303);
-    public static $need_equipment_status = array(200, 201, 202, 250, 300, 304);
+    public static $need_equipment_status = array(200, 201, 202, 250, 300, 301, 303, 304);
     public static $types = array(
         1 => 'Commande',
         2 => 'Transfert',
@@ -1000,7 +1000,7 @@ class BR_Reservation extends BimpObject
         } else {
             $product = $this->getChildObject('product');
             $id_equipment = (int) $this->getData('id_equipment');
-            if (is_null($product) || !$product->isLoaded()) {
+            if (!$id_equipment && (is_null($product) || !$product->isLoaded())) {
                 $errors[] = 'Produit invalide';
             }
 
@@ -1298,22 +1298,24 @@ class BR_Reservation extends BimpObject
             $id_product = (int) $this->getData('id_product');
         }
 
-        if (!$id_product) {
-            $errors[] = 'Aucun produit sélectionné';
-        } else {
+        $equipementOblige = true;
+        if ($id_product) {
             $product = $this->getChildObject('product');
             if (is_null($product) || !$product->isLoaded()) {
-                $errors[] = 'Aucun produit spécifié';
-            } elseif ($product->isSerialisable()) {
-                if (!(int) $this->getData('id_equipment')) {
-                    $errors[] = 'Produit sérialisable: équipement obligatoire';
-                } else {
-                    $this->checkEquipment($equipment, $errors);
-                    $this->set('qty', 1);
-                }
-            } else {
-                $this->set('id_equipment', 0);
+                $errors[] = 'Produit introuvable';
             }
+            else
+                $equipementOblige = $product->isSerialisable();
+        }
+        
+        if($this->getData('id_equipment')) {
+            $this->checkEquipment($equipment, $errors);
+            $this->set('qty', 1);
+        }
+        else{
+            if ($equipementOblige) 
+                $errors[] = 'Produit sérialisable: équipement obligatoire';
+            $this->set('id_equipment', 0);
         }
 
         $id_transfert = (int) $this->getData('id_transfert');

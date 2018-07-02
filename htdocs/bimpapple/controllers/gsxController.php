@@ -217,7 +217,7 @@ class gsxController extends BimpController
                         ));
 
 
-                        $gsx_content .= $this->renderLoadPartsButton($sav, $serial);
+                        $gsx_content .= $this->renderLoadPartsButton($sav, $serial, "deux");
 
                         $html .= BimpRender::renderPanel($datas['productDescription'], $gsx_content, '', array(
                                     'type'     => 'secondary',
@@ -244,7 +244,7 @@ class gsxController extends BimpController
         return BimpRender::renderAlerts('Echec de la connexion GSX pour une raison inconnue');
     }
 
-    public function renderLoadPartsButton(BS_SAV $sav, $serial = null)
+    public function renderLoadPartsButton(BS_SAV $sav, $serial = null, $prefixe = "")
     {
         if (!BimpObject::objectLoaded($sav)) {
             $html = BimpRender::renderAlerts('ID du SAV absent ou invalide');
@@ -265,11 +265,11 @@ class gsxController extends BimpController
                             'icon_before' => 'download',
                             'classes'     => array('btn btn-default'),
                             'attr'        => array(
-                                'onclick' => 'loadPartsList(\'' . $serial . '\', ' . $sav->id . ')'
+                                'onclick' => 'loadPartsList(\'' . $serial . '\', ' . $sav->id . ', \'' . $prefixe.'partsListContainer' . '\')'
                             )
                 ));
                 $html .= '</div>';
-                $html .= '<div id="partsListContainer" style="display: none"></div>';
+                $html .= '<div id="'.$prefixe.'partsListContainer" style="display: none"></div>';
             } else {
                 $html = BimpRender::renderAlerts('Le numéro de série de l\'équipement sélectionné ne correspond pas à un produit Apple: ' . $serial, 'warning');
             }

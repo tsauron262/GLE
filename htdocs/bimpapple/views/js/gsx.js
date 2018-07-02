@@ -306,11 +306,11 @@ function loadSerialUpdateForm($button, serial, id_sav, id_repair, request_type, 
     });
 }
 
-function loadPartsList(serial, id_sav) {
+function loadPartsList(serial, id_sav, cible) {
     BimpAjax('loadPartsList', {
         serial: serial,
         id_sav: id_sav
-    }, $('#partsListContainer'), {
+    }, $('#'+cible), {
         display_success: false,
         display_errors_in_popup_only: true,
         append_html: true,

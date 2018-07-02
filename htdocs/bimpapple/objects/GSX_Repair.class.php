@@ -426,13 +426,10 @@ class GSX_Repair extends BimpObject
         switch ($repair_type) {
             case 'carry_in':
                 $data['statusCode'] = $status;
-                if ($this->isIphone) {
-                    $client = 'IPhoneUpdateCarryIn';
-                    $requestName = 'IPhoneUpdateCarryInRequest';
-                } else {
-                    $client = 'CarryInRepairUpdate';
-                    $requestName = 'UpdateCarryInRequest';
-                }
+                if ($this->isIphone) 
+                    $this->gsx = new GSX(false);//force not iphone
+                $client = 'CarryInRepairUpdate';
+                $requestName = 'UpdateCarryInRequest';
                 $data['statusCode'] = $status;
                 $clientRep = 'UpdateCarryIn' . 'Response';
                 break;
@@ -620,7 +617,7 @@ class GSX_Repair extends BimpObject
                     'result_container' => '$(\'#repair_' . $this->id . '_result\')',
                     'success_callback' => $callback,
                 ));
-                if (count($this->partsPending) && $this->getData('new_serial') != 'part') {
+                if (count($this->partsPending) && !(string) $this->getData('new_serial')) {
                     $html = 'La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour';
                     $html .= '<p style="text-align: center; padding: 30px">';
                     $html .= '<span class="btn btn-default closeRepair" onclick="' . $onclick . '">Forcer la fermeture</span></p>';

@@ -202,6 +202,11 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
         if ($.isOk($button)) {
             title = $button.text();
         }
+        
+        object_data.param_values = {
+            fields: extra_data
+        };
+
         loadModalForm($button, object_data, title, function ($form) {
             if ($.isOk($form)) {
                 var modal_idx = parseInt($form.data('modal_idx'));

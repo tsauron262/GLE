@@ -39,6 +39,8 @@ fields:
         input: 
             type: search_entrepot
         required: 1
+        default_value: 
+            request: id_entrepot
     name: 
         label: Nom
         required: 1

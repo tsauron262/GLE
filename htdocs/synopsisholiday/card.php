@@ -1454,7 +1454,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         $nextCPYearDate = $cp->getCPNextYearDate(true, false);
         $nextCPYearDateAfter = $cp->getCPNextYearDate(true, true);
         $nbRtt = $cp->getRTTforUser($user->id) / $cp->getConfCP('nbRTTDeducted');
-        print '<b>Année en cours : </b>';
+      /*  print '<b>Année en cours : </b>';
         print $langs->trans('SoldeCPUser', round($nb_holiday_current, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_current . ' / ' . $nbdeduced . ')' : '');
         print '&nbsp;(A utiliser avant le <b>' . $nextCPYearDate . '</b>).';
         print '<br/>';
@@ -1463,7 +1463,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '&nbsp;(A utiliser à partir du <b>' . $nextCPYearDate . '</b> et avant le <b>' . $nextCPYearDateAfter . '</b>).';
         print '<br/>';
         print 'Solde RTT : <b>' . round($nbRtt, 2) . ' jours</b>';
-
+*/
         print '</div></div>';
 
         if ($isDrh) {

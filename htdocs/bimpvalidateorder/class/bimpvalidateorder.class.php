@@ -28,18 +28,22 @@ class BimpValidateOrder {
 
         $price_order = $order->total_ht;
 
-        $max_price = $this->getMaxPriceOrder($user);
+        $max_price = $this->getMaxPriceOrder($user, $order);
         if (sizeof($this->errors) != 0) {
             setEventMessages(null, $this->errors, 'errors');
             return -3;
         }
 
-        if ($max_price <= $price_order) {
+        $tropRemise = ($order->array_options['options_type'] == "C" ? $this->checkRemise($order) : 0);
+
+        if ($max_price <= $price_order || $tropRemise) {
             $id_responsibles = $this->getResponsiblesIds($price_order, $order);
             $error = false;
             foreach ($id_responsibles as $id_responsible) {
-                if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
+                if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true){
                     $error = true;
+                    $this->errors[] = 'Envoie d\'email impossible';
+                }
             }
             if (!$error) {
                 setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande.", null, 'warnings');
@@ -109,6 +113,17 @@ class BimpValidateOrder {
         return $max_price;
     }
 
+    function checkRemise($order) {
+        $ok = true;
+        foreach ($order->lines as $line)
+            if ($line->remise_percent > 5) {
+                $this->extraMail[] = "Ligne " . $line->desc . " avec un réduction de " . $line->remise_percent . "%";
+                $ok = false;
+            }
+
+        return $ok;
+    }
+
     private function getResponsiblesIds($price, $order) {
         if ($order->array_options['options_type'] == "E" && $price < 100000) {
             return array(7);
@@ -150,6 +165,10 @@ class BimpValidateOrder {
         $msg = "Bonjour, \n\n";
         $msg .= "L'utilisateur $user->firstname $user->lastname souhaite que vous validiez la commande suivante : ";
         $msg .= $order->getNomUrl();
+        foreach($this->extraMail as $extra){
+            $msg .= "\n\n".$extra;
+        }
+        echo $msg;
         return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
     }
 

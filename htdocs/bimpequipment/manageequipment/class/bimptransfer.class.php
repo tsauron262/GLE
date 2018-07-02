@@ -324,7 +324,7 @@ class BimpTransfer {
         foreach ($lines as $key => $line) {
             $lines[$key]['id_reservation'] = $line['id'];
             $lines[$key]['fk_product'] = $line['id_product'];
-            if ($add_prod_info) {
+            if ($add_prod_info && $line['id_product'] > 0) {
                 $doli_prod = new Product($this->db);
                 $doli_prod->fetch($line['id_product']);
                 $lines[$key]['ref'] = $doli_prod->ref;

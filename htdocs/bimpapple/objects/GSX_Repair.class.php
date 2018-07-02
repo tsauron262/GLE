@@ -330,7 +330,8 @@ class GSX_Repair extends BimpObject
                         'Réparation marquée comme complète',
                         'Refusée - réparation annulée',
                         'Refusé - Refusé par Apple',
-                        'Fermée et complétée par le système'
+                        'Fermée et complétée par le système',
+                        'Nouveau devis refusé'
                     ))) {
                 $repairComplete = 1;
                 $ready_for_pick_up = 1;

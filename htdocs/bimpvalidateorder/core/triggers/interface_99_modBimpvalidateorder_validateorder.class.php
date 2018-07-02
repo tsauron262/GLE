@@ -31,6 +31,10 @@ class Interfacevalidateorder extends DolibarrTriggers {
         if ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE') {
             $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');
             if(count($tabConatact) < 1){
+                if(!is_object($object->thirdparty)){
+                    $object->thirdparty = new Societe($this->db);
+                    $object->thirdparty->fetch($object->socid);
+                }
                 $tabComm = $object->thirdparty->getSalesRepresentatives($user);
                 if(count($tabComm) > 0){
                     $object->add_contact($tabComm[0]['id'], 'SALESREPSIGN', 'internal');

@@ -741,7 +741,7 @@ class FormMail extends Form
                 $this->substit['__LINES__']=$lines;
 
 				$defaultmessage=str_replace('\n',"\n",$defaultmessage);
-print_r($this->substit);die;
+
 				// Deal with format differences between message and signature (text / HTML)
 				if(dol_textishtml($defaultmessage) && !dol_textishtml($this->substit['__SIGNATURE__'])) {
 					$this->substit['__SIGNATURE__'] = dol_nl2br($this->substit['__SIGNATURE__']);

@@ -1062,7 +1062,7 @@ class BS_SAV extends BimpObject
             $line->delete();
         }
         
-        $prop->array_options['option_type'] = "S";
+        $prop->array_options['options_type'] = "S";
         define("NOT_VERIF_CONTACT", true);
 
         if ($this->getData('id_discount') > 0) {

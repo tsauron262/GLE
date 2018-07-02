@@ -306,11 +306,11 @@ function loadSerialUpdateForm($button, serial, id_sav, id_repair, request_type, 
     });
 }
 
-function loadPartsList(serial, id_sav, cible) {
+function loadPartsList(serial, id_sav, sufixe) {
     BimpAjax('loadPartsList', {
         serial: serial,
         id_sav: id_sav
-    }, $('#'+cible), {
+    }, $('#partsListContainer'+sufixe), {
         display_success: false,
         display_errors_in_popup_only: true,
         append_html: true,
@@ -318,7 +318,7 @@ function loadPartsList(serial, id_sav, cible) {
         processing_padding: 20,
         processing_msg: 'Chargement en cours',
         success: function (result, bimpAjax) {
-            $('#loadPartsButtonContainer').slideUp(250);
+            $('#loadPartsButtonContainer'+sufixe).slideUp(250);
         }
     });
 }

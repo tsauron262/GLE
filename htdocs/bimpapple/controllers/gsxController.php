@@ -244,7 +244,7 @@ class gsxController extends BimpController
         return BimpRender::renderAlerts('Echec de la connexion GSX pour une raison inconnue');
     }
 
-    public function renderLoadPartsButton(BS_SAV $sav, $serial = null, $prefixe = "")
+    public function renderLoadPartsButton(BS_SAV $sav, $serial = null, $suffixe = "")
     {
         if (!BimpObject::objectLoaded($sav)) {
             $html = BimpRender::renderAlerts('ID du SAV absent ou invalide');
@@ -259,17 +259,17 @@ class gsxController extends BimpController
             if (is_null($serial)) {
                 $html = BimpRender::renderAlerts('Numéro de série de l\'équipement absent');
             } elseif (preg_match('/^S?[A-Z0-9]{11,12}$/', $serial) || preg_match('/^S?[0-9]{15}$/', $serial)) {
-                $html = '<div id="loadPartsButtonContainer" class="buttonsContainer">';
+                $html = '<div id="loadPartsButtonContainer'.$suffixe.'" class="buttonsContainer">';
                 $html .= BimpRender::renderButton(array(
                             'label'       => 'Charger la liste des composants compatibles',
                             'icon_before' => 'download',
                             'classes'     => array('btn btn-default'),
                             'attr'        => array(
-                                'onclick' => 'loadPartsList(\'' . $serial . '\', ' . $sav->id . ', \'' . $prefixe.'partsListContainer' . '\')'
+                                'onclick' => 'loadPartsList(\'' . $serial . '\', ' . $sav->id . ', \'' . $sufixe . '\')'
                             )
                 ));
                 $html .= '</div>';
-                $html .= '<div id="'.$prefixe.'partsListContainer" style="display: none"></div>';
+                $html .= '<div id="partsListContainer'.$suffixe.'" style="display: none"></div>';
             } else {
                 $html = BimpRender::renderAlerts('Le numéro de série de l\'équipement sélectionné ne correspond pas à un produit Apple: ' . $serial, 'warning');
             }

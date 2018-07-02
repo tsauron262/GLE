@@ -741,7 +741,7 @@ class FormMail extends Form
                 $this->substit['__LINES__']=$lines;
 
 				$defaultmessage=str_replace('\n',"\n",$defaultmessage);
-
+print_r($this->substit);die;
 				// Deal with format differences between message and signature (text / HTML)
 				if(dol_textishtml($defaultmessage) && !dol_textishtml($this->substit['__SIGNATURE__'])) {
 					$this->substit['__SIGNATURE__'] = dol_nl2br($this->substit['__SIGNATURE__']);
@@ -1017,6 +1017,11 @@ class FormMail extends Form
 		$this->substit['__PROJECT_REF__'] = (is_object($object->projet)?$object->projet->ref:'');
 		$this->substit['__PROJECT_NAME__'] = (is_object($object->projet)?$object->projet->title:'');
 
+                /*moddrsi*/
+                global $langs;
+		$this->substit['__USER_FULLNAME__'] = $user->getFullName($langs);
+                /*fmod drsi*/
+                
 		$this->substit['__SIGNATURE__'] = $user->signature;
 		$this->substit['__PERSONALIZED__'] = '';
 		$this->substit['__CONTACTCIVNAME__'] = '';	// Will be replace just before sending

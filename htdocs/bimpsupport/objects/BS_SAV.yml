@@ -734,6 +734,7 @@ lists:
                 field: id_client
                 display: nom_url
             equipement: 
+                label: Serial
                 field: id_equipment
                 display: ref
                 

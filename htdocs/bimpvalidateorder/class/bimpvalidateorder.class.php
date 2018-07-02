@@ -114,7 +114,7 @@ class BimpValidateOrder {
             return array(7);
         } else {
             if ($price < 50000)
-                return array(2, 62);
+                return array(2);
             else
                 return array(2, 68);
         }

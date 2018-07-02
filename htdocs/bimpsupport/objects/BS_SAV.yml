@@ -733,6 +733,9 @@ lists:
             client: 
                 field: id_client
                 display: nom_url
+            equipement: 
+                field: id_equipment
+                display: ref
                 
     client: 
         checkboxes: 1

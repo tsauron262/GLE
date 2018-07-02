@@ -32,7 +32,7 @@ require_once('pre.inc.php');
 //  require_once('Var_Dump.php');
 
 
-define("NOT_VERIF_CONTACT", true);
+define("NOT_VERIF", true);
 
 require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 require_once(DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php');

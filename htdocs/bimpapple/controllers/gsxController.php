@@ -265,7 +265,7 @@ class gsxController extends BimpController
                             'icon_before' => 'download',
                             'classes'     => array('btn btn-default'),
                             'attr'        => array(
-                                'onclick' => 'loadPartsList(\'' . $serial . '\', ' . $sav->id . ', \'' . $sufixe . '\')'
+                                'onclick' => 'loadPartsList(\'' . $serial . '\', ' . $sav->id . ', \'' . $suffixe . '\')'
                             )
                 ));
                 $html .= '</div>';

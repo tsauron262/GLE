@@ -31,6 +31,9 @@ if ($_REQUEST['modeCli'] == 1) {
 require_once('pre.inc.php');
 //  require_once('Var_Dump.php');
 
+
+define("NOT_VERIF_CONTACT", true);
+
 require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 require_once(DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php');
 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");

@@ -43,12 +43,13 @@ print '<label>Format</label><br/>';
 print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';
 print '<label class="btn btn-primary active"><input value="A4" type="radio" name="format" checked>A4</label>';
 print '<label class="btn btn-primary">       <input value="A3" type="radio" name="format">A3</label>';
-print '<label class="btn btn-primary">       <input value="a2" type="radio" name="format">A2</label>';
+//print '<label class="btn btn-primary">       <input value="A2" type="radio" name="format">A2</label>';
 print '</div><br/><br/>';
+
 
 print '<div class="btn btn-primary" name="create">Créer</div><br/><br/>';
 
-print '<div style="display: none;" class="btn btn-primary" name="download">Télécharger</div>';
+print '<a style="display: none; cursor: pointer;" class="btn btn-primary" name="download" href="' . URL_CHECK . '/img/multiple_print.pdf" download>Télécharger</a>';
 
 print '<div id="alertSubmit"></div>';
 

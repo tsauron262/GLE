@@ -365,16 +365,15 @@ switch ($action) {
                 if ($new_id > 0)
                     $ids_inserted[] = $new_id;
                 else {
-                    echo json_encode(array('errors' => $ticket->errors));
+                    echo json_encode(array(
+                        'errors' => $ticket->errors));
                     die();
                 }
             }
             
-            
-
-
-            echo json_encode(array('errors' => $ticket->errors,
-                $ticket->createPdfFromCheck($ids_inserted, $id_event, $id_tariff, $with_num, $num_start, $number, $format)
+            echo json_encode(array(
+                'code_return' => $ticket->createPdfFromCheck($ids_inserted, $id_event, $id_tariff, $with_num, $num_start, $format),
+                'errors' => $ticket->errors,
             ));
             break;
         }
@@ -495,7 +494,19 @@ switch ($action) {
                 'errors' => $user->errors));
             break;
         }
-
+    /**
+     * index.php
+     */
+    case 'login': {
+            $id_user = $user->connect($_POST['login'], $_POST['pass_word']);
+            if ($id_user > 0) {
+                $user->fetch($id_user);
+                unset($user->db);
+                $_SESSION['user'] = json_encode($user);
+            }
+            echo json_encode(array('errors' => $user->errors));
+            break;
+        }
 
 
 

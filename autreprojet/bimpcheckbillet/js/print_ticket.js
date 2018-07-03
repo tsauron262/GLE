@@ -96,13 +96,18 @@ function donwloadTickets(id_event, id_tariff, with_num, num_start, number, forma
         error: function () {
             setMessage('alertSubmit', 'Erreur serveur 4756.', 'error');
         },
+        beforeSend: function () {
+            $('*').css('cursor', 'wait');
+        },
+        complete: function () {
+            $('*').css('cursor', 'auto');
+        },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
-            } else if (parseInt(out.id) > 0) {
-//                $('div[name=download]').attr('src', 'URL/' + out.id + '.pdf');
-                $('div[name=download]').css('display', 'inline');
+            } else if (parseInt(out.code_return) > 0) {
+                $('a[name=download]').css('display', 'inline');
             } else {
                 setMessage('alertSubmit', "Erreur serveur 9143.", 'error');
             }

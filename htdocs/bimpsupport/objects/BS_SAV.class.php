@@ -2357,21 +2357,27 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
     {
         $errors = array();
 
-        if ($this->useCaisseForPayments && $this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
-            global $user;
+        if ((float) $this->getData('acompte') > 0) {
+            if (!(int) BimpTools::getValue('mode_paiement_acompte', 0)) {
+                $errors[] = 'Veuillez sélectionner un mode de paiement pour l\'acompte';
+            }
+            if ($this->useCaisseForPayments && $this->getData("id_facture_acompte")) {
+                global $user;
 
-            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
-            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
-            if (!$id_caisse) {
-                $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement de l\'acompte';
-            } else {
-                if (!$caisse->fetch($id_caisse)) {
-                    $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+                $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+                if (!$id_caisse) {
+                    $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement de l\'acompte';
                 } else {
-                    $caisse->isValid($errors);
+                    if (!$caisse->fetch($id_caisse)) {
+                        $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                    } else {
+                        $caisse->isValid($errors);
+                    }
                 }
             }
         }
+
 
         if (count($errors)) {
             return $errors;

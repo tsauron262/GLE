@@ -356,11 +356,14 @@ switch ($action) {
             $num_start = (int) $_POST['num_start'];
             $number = (int) $_POST['number'];
             $format = $_POST['format'];
+            $souche = (bool) $_POST['souche'];
+
+            $num_in_db = $num_start;
 
             $ids_inserted = array();
 
-            for ($i = 0; $i < $number; $i++) {
-                $new_id = $ticket->create($id_tariff, $id_user, $id_event, '', '', '', '', '', '', '', '', '', '');
+            for ($i = 0; $i < $number; $i++, $num_in_db++) {
+                $new_id = $ticket->create($id_tariff, $id_user, $id_event, '', $num_in_db, '', '', '', '', '', '', '', '');
                 // $ticket->create($id_tariff, $id_user, $id_event, $price, $first_name, $last_name, $extra_1, $extra_2, $extra_3, $extra_4, $extra_5, $extra_6, $id_order = '');
                 if ($new_id > 0)
                     $ids_inserted[] = $new_id;
@@ -370,9 +373,9 @@ switch ($action) {
                     die();
                 }
             }
-            
+
             echo json_encode(array(
-                'code_return' => $ticket->createPdfFromCheck($ids_inserted, $id_event, $id_tariff, $with_num, $num_start, $format),
+                'code_return' => $ticket->createPdfFromCheck($ids_inserted, $id_event, $id_tariff, $with_num, $num_start, $format, $souche),
                 'errors' => $ticket->errors,
             ));
             break;

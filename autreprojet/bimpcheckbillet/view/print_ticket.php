@@ -43,7 +43,12 @@ print '<label>Format</label><br/>';
 print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';
 print '<label class="btn btn-primary active"><input value="A4" type="radio" name="format" checked>A4</label>';
 print '<label class="btn btn-primary">       <input value="A3" type="radio" name="format">A3</label>';
-//print '<label class="btn btn-primary">       <input value="A2" type="radio" name="format">A2</label>';
+print '</div><br/><br/>';
+
+print '<label>Souche</label><br/>';
+print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';
+print '<label class="btn btn-primary active"><input value=0 type="radio" name="souche" checked>Sans</label>';
+print '<label class="btn btn-primary">       <input value=1 type="radio" name="souche">Avec</label>';
 print '</div><br/><br/>';
 
 

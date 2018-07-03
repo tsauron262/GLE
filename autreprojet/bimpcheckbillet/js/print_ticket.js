@@ -80,7 +80,7 @@ function getTariffsForEvent(id_event) {
     });
 }
 
-function donwloadTickets(id_event, id_tariff, with_num, num_start, number, format) {
+function donwloadTickets(id_event, id_tariff, with_num, num_start, number, format, souche) {
     $.ajax({
         type: "POST",
         url: "../interface.php",
@@ -91,6 +91,7 @@ function donwloadTickets(id_event, id_tariff, with_num, num_start, number, forma
             num_start: num_start,
             number: number,
             format: format,
+            souche: souche,
             action: 'create_tickets_from_check'
         },
         error: function () {
@@ -154,9 +155,10 @@ function initEvents() {
         var num_start = parseInt($('input[name=num_start]').val());
         var number = parseInt($('input[name=number]').val());
         var format = $('input[name=format]:checked').val();
+        var souche = $('input[name=souche]:checked').val();
 
         if (id_tariff > 0) {
-            donwloadTickets(id_event, id_tariff, with_num, num_start, number, format);
+            donwloadTickets(id_event, id_tariff, with_num, num_start, number, format, souche);
         } else {
             setMessage('alertSubmit', "Veuillez sélectionner un tariff", 'error');
         }

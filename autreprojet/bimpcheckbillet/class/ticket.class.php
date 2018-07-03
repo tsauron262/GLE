@@ -304,77 +304,6 @@ class Ticket {
         }
     }
 
-    public function createPdf($id_ticket, $x, $y, $is_first, $is_last, $set_to_left, $id_order) {
-        $this->i++;
-        $ticket_width = 140;
-        $ticket_height = 64;
-        $margin = 5;
-
-        $ticket = new Ticket($this->db);
-        $ticket->fetch($id_ticket);
-
-        $tariff = new Tariff($this->db);
-        $tariff->fetch($ticket->id_tariff);
-
-        $event = new Event($this->db);
-        $event->fetch($ticket->id_event);
-
-        $file_name_qrcode = PATH . '/img/qrcode/qrcode' . $ticket->id . '.png';
-
-
-        $image_zoom = PATH . '/img/zoomdici.jpg';
-        $image_tariff_custom = $this->addExtension(PATH . '/img/tariff_custom/' . $ticket->id_event . '_' . $ticket->id_tariff);
-
-        if ($is_first) {
-            $this->pdf = new PDF_Code128('L');
-            $this->pdf->AddPage();
-            $this->pdf->SetFont('times', '', 12);
-        }
-        if ($this->i == 7) {
-            $this->i = 0;
-            $this->pdf->AddPage();
-            $x = $y = 5;
-        }
-        if ($is_first) {
-            $this->pdf = new PDF_Code128('L');
-            $this->pdf->AddPage();
-            $this->pdf->SetFont('times', '', 12);
-        }
-
-        $this->pdf->SetX($x);
-        $this->pdf->SetY($y);
-
-        if ($tariff->filename_custom != null) {
-            $this->pdf->Image($image_tariff_custom, $x + $margin + 2, $y + $margin - 1, 88, 57);
-        } else {
-            $this->pdf->Image($image_zoom, $x + $margin + 2, $y + $margin + 5, 50, 50);
-            $this->pdf->SetY($y + 8);
-            $this->pdf->SetX($x + 65);
-
-            $max_width = 23;
-
-            $this->pdf->MultiCell(40, 4, mb_strimwidth($event->label, 0, $max_width, "...") . "\n" .
-                    mb_strimwidth($tariff->label, 0, $max_width, "...") . "\n" .
-                    mb_strimwidth(($ticket->first_name == null ? '' : $ticket->first_name), 0, $max_width, "...") . "\n" .
-                    mb_strimwidth(($ticket->last_name == null ? '' : $ticket->last_name), 0, $max_width, "..."));
-        }
-
-        $this->pdf->Code128($x + 98, $y + 3, $ticket->barcode, 58, 12);
-        QRcode::png(URL_PRESTA . "/index.php?id_product=" . $tariff->id_prod_extern . "&id_product_attribute=0&rewrite=&controller=product&num=" . $ticket->barcode, $file_name_qrcode, 0, 3);
-        $this->pdf->Image($file_name_qrcode, $x + 110, $y + 17, 29, 29);
-
-
-        $this->pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
-
-        if ($is_last)
-            $this->pdf->Output(PATH . '/img/tickets/ticket' . base64_encode($id_order) . '.pdf', 'F');
-
-        if ($set_to_left)
-            return array('x' => $x + $ticket_width + $margin, 'y' => $y);
-        else
-            return array('x' => $x - $ticket_width - $margin, 'y' => $y + $ticket_height + $margin);
-    }
-
     public function getNumberTicketByOrder($id_order) {
 
         $sql = 'SELECT COUNT(*) as nb_ticket_sold';
@@ -439,29 +368,106 @@ class Ticket {
         return -1;
     }
 
-    public function createPdfFromCheck($ids_inserted, $id_event, $id_tariff, $with_num, $num_start, $format) {
+    public function createPdf($id_ticket, $x, $y, $is_first, $is_last, $set_to_left, $id_order) {
+        $this->i++;
+        $ticket_width = 140;
+        $ticket_height = 64;
+        $margin = 5;
+
+        $ticket = new Ticket($this->db);
+        $ticket->fetch($id_ticket);
+
+        $tariff = new Tariff($this->db);
+        $tariff->fetch($ticket->id_tariff);
+
+        $event = new Event($this->db);
+        $event->fetch($ticket->id_event);
+
+        $file_name_qrcode = PATH . '/img/qrcode/qrcode' . $ticket->id . '.png';
+
+
+        $image_zoom = PATH . '/img/zoomdici.jpg';
+        $image_tariff_custom = $this->addExtension(PATH . '/img/tariff_custom/' . $ticket->id_event . '_' . $ticket->id_tariff);
+
+        if ($is_first) {
+            $this->pdf = new PDF_Code128('L');
+            $this->pdf->AddPage();
+            $this->pdf->SetFont('times', '', 12);
+        }
+        if ($this->i == 7) {
+            $this->i = 0;
+            $this->pdf->AddPage();
+            $x = $y = $margin;
+        }
+        if ($is_first) {
+            $this->pdf = new PDF_Code128('L');
+            $this->pdf->AddPage();
+            $this->pdf->SetFont('times', '', 12);
+        }
+
+        $this->pdf->SetX($x);
+        $this->pdf->SetY($y);
+
+        if ($tariff->filename_custom != null) {
+            $this->pdf->Image($image_tariff_custom, $x + $margin + 2, $y + $margin - 1, 88, 57);
+        } else {
+            $this->pdf->Image($image_zoom, $x + $margin + 2, $y + $margin + 5, 50, 50);
+            $this->pdf->SetY($y + 8);
+            $this->pdf->SetX($x + 65);
+
+            $max_width = 23;
+
+            $this->pdf->MultiCell(40, 4, mb_strimwidth($event->label, 0, $max_width, "...") . "\n" .
+                    mb_strimwidth($tariff->label, 0, $max_width, "...") . "\n" .
+                    mb_strimwidth(($ticket->first_name == null ? '' : $ticket->first_name), 0, $max_width, "...") . "\n" .
+                    mb_strimwidth(($ticket->last_name == null ? '' : $ticket->last_name), 0, $max_width, "..."));
+        }
+
+        $this->pdf->Code128($x + 98, $y + 3, $ticket->barcode, 58, 12);
+        QRcode::png(URL_PRESTA . "/index.php?id_product=" . $tariff->id_prod_extern . "&id_product_attribute=0&rewrite=&controller=product&num=" . $ticket->barcode, $file_name_qrcode, 0, 3);
+        $this->pdf->Image($file_name_qrcode, $x + 110, $y + 17, 29, 29);
+
+
+        $this->pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
+
+        if ($is_last)
+            $this->pdf->Output(PATH . '/img/tickets/ticket' . base64_encode($id_order) . '.pdf', 'F');
+
+        if ($set_to_left)
+            return array('x' => $x + $ticket_width + $margin, 'y' => $y);
+        else
+            return array('x' => $x - $ticket_width - $margin, 'y' => $y + $ticket_height + $margin);
+    }
+
+    public function createPdfFromCheck($ids_inserted, $id_event, $id_tariff, $with_num, $num_start, $format, $souche) {
         $current_num = $num_start;
         $i = 0;
 
-        $x = $y = $margin = 5;
+        $x = $y = $margin = 1;
 
-        $ticket_width = 98;
-        $ticket_height = 48;
+        $ticket_width = 146;
+        $ticket_height = 68;
+
+
+        if ($souche) {
+            $souche_width = 48;
+            $ticket_width -= $souche_width;
+        }
 
 
         if ($format == 'A4') {
-            $nb_ticket_page = 10;
+            $nb_ticket_page = 6;
+            $nb_ticket_width = 2;
+            $orientation = 'L';
+        } elseif ($format == 'A3') {
+            $nb_ticket_page = 12;
             $nb_ticket_width = 2;
             $orientation = 'P';
-        } elseif ($format == 'A3') {
-            $nb_ticket_page = 20;
-            $nb_ticket_width = 4;
-            $orientation = 'L';
         } /* elseif ($format == 'A2') {
-            $nb_ticket_page = 40;
-            $nb_ticket_width = 4;
-            $orientation = 'P';
-        }*/
+          $nb_ticket_page = 40;
+          $nb_ticket_width = 4;
+          $orientation = 'P';
+          } */
 
 
         $pdf = new PDF_Code128($orientation, 'mm', $format);
@@ -498,17 +504,29 @@ class Ticket {
             $ticket = new Ticket($this->db);
             $ticket->fetch($id);
 
+            if ($tariff->filename_custom != null) {
+                $image_tariff = PATH . '/img/tariff_custom/' . $tariff->filename_custom;
+            } else {
+                $image_tariff = PATH . '/img/event/' . $tariff->filename;
+            }
             $file_name_qrcode = PATH . '/img/qrcode/qrcode' . $ticket->id . '.png';
             QRcode::png(URL_PRESTA . "/index.php?id_product=" . $tariff->id_prod_extern . "&id_product_attribute=0&rewrite=&controller=product&num=" . $ticket->barcode, $file_name_qrcode, 0, 3);
 
 
             // Add in pdf
+            if ($souche) {
+                $pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $souche_width, $ticket_height);
+                $x += $souche_width;
+            }
+
+
             if ($with_num)
                 $pdf->MultiCell(10, 4, $current_num);
-            $pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
 
-            $pdf->Code128($x + 59, $y + 2, $ticket->barcode, 45, 12);
-            $pdf->Image($file_name_qrcode, $x + 72, $y + 12, 25, 25);
+            $pdf->Image($file_name_qrcode, $x + 74, $y + 12, 25, 25);
+            $pdf->Code128($x + 67, $y + 2, $ticket->barcode, 45, 8);
+            $pdf->Image($image_tariff, $x + 5, $y + 5, 57, 38);
+            $pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
 
 
             // Counters

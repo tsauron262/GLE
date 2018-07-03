@@ -823,7 +823,7 @@ class BS_SAV extends BimpObject
         switch ($new_status) {
             case self::BS_SAV_EXAM_EN_COURS:
                 if (!in_array($current_status, self::$propal_reviewable_status)) {
-                    $errors[] = $error_msg . ' (statut actuel invalide)';
+                    $errors[] = $error_msg . ' (statut actuel invalide : '.$current_status.')';
                 }
                 break;
 

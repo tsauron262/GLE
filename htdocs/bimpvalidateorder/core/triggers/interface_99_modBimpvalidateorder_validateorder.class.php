@@ -28,33 +28,29 @@ class Interfacevalidateorder extends DolibarrTriggers {
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         global $conf, $user;
-        if (($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE')) {
-            if(!defined("NOT_VERIF_CONTACT")){
-                $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');
-                if(count($tabConatact) < 1){
-                    if(!is_object($object->thirdparty)){
-                        $object->thirdparty = new Societe($this->db);
-                        $object->thirdparty->fetch($object->socid);
-                    }
-                    $tabComm = $object->thirdparty->getSalesRepresentatives($user);
-                    if(count($tabComm) > 0){
-                        $object->add_contact($tabComm[0]['id'], 'SALESREPSIGN', 'internal');
-                    }
-                    else{                
-                        setEventMessages("Impossible de validé, pas de Commercial signataire", null, 'errors');
-                        return -2; 
-                    }
-
+        if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE')) {
+            $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');
+            if (count($tabConatact) < 1) {
+                if (!is_object($object->thirdparty)) {
+                    $object->thirdparty = new Societe($this->db);
+                    $object->thirdparty->fetch($object->socid);
+                }
+                $tabComm = $object->thirdparty->getSalesRepresentatives($user);
+                if (count($tabComm) > 0) {
+                    $object->add_contact($tabComm[0]['id'], 'SALESREPSIGN', 'internal');
+                } else {
+                    setEventMessages("Impossible de validé, pas de Commercial signataire", null, 'errors');
+                    return -2;
                 }
             }
-            
-            if($object->cond_reglement_code == "VIDE"){  
-                    setEventMessages("Merci de séléctionner les Conditions de règlement", null, 'errors');
-                    return -2; 
+
+            if ($object->cond_reglement_code == "VIDE") {
+                setEventMessages("Merci de séléctionner les Conditions de règlement", null, 'errors');
+                return -2;
             }
         }
-         
-        if ($action == 'ORDER_VALIDATE') {   
+
+        if (!defined("NOT_VERIF") && $action == 'ORDER_VALIDATE') {
             $bvo = new BimpValidateOrder($user->db);
             $code = $bvo->checkValidateRights($user, $object);
             return $code;
@@ -63,38 +59,38 @@ class Interfacevalidateorder extends DolibarrTriggers {
             setEventMessages("Impossible de dévalidé", null, 'errors');
             return -2;
         }
-        
-        
-        
-        
+
+
+
+
         //Classé facturé
-        if ($action == "BILL_VALIDATE"){
+        if ($action == "BILL_VALIDATE") {
             $facturee = true;
             $object->fetchObjectLinked();
-            if(isset($object->linkedObjects['commande'])){
-                foreach($object->linkedObjects['commande'] as $comm){
+            if (isset($object->linkedObjects['commande'])) {
+                foreach ($object->linkedObjects['commande'] as $comm) {
                     $facturee = false;
                     $totalCom = $comm->total_ttc;
                     $totalFact = 0;
                     $comm->fetchObjectLinked();
-                    if(isset($comm->linkedObjects['facture'])){
-                        foreach($comm->linkedObjects['facture'] as $fact){
+                    if (isset($comm->linkedObjects['facture'])) {
+                        foreach ($comm->linkedObjects['facture'] as $fact) {
                             $totalFact += $fact->total_ttc;
                         }
                     }
                     $diff = $totalCom - $totalFact;
-                    if($diff < 0.02 && $diff > -0.02){
+                    if ($diff < 0.02 && $diff > -0.02) {
                         $facturee = true;
                         $comm->classifybilled($user);
                     }
                 }
             }
-            if(isset($object->linkedObjects['propal']) && $facturee){
-                foreach($object->linkedObjects['propal'] as $prop)
+            if (isset($object->linkedObjects['propal']) && $facturee) {
+                foreach ($object->linkedObjects['propal'] as $prop)
                     $prop->classifybilled($user);
             }
         }
-        
+
         return 0;
     }
 

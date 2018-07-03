@@ -88,12 +88,18 @@ class LignePanier {
     }
 
     function getInfo() {
-        if ($this->prodId < 1)
-            return $this->getError();
+        if ($this->prodId > 1){
         $prod = new product($this->db);
         $prod->fetch($this->prodId);
+            $label = $prod->label;
+            $url = $prod->getNomUrl(1);
+        }
+        else{
+            $label = "";
+            $url = "";
+        }
 
-        return array('id' => $this->prodId, 'isEquipment' => ($this->equipmentId > 0), 'stock' => $this->checkStock(), 'label' => dol_trunc($prod->label, 30), 'refUrl' => $prod->getNomUrl(1), 'serial' => $this->serial, 'error' => $this->error);
+        return array('id' => $this->prodId, 'isEquipment' => ($this->equipmentId > 0), 'stock' => $this->checkStock(), 'label' => dol_trunc($label, 30), 'refUrl' => $url, 'serial' => $this->serial, 'error' => $this->error);
     }
 
     function checkStock() {
@@ -134,6 +140,7 @@ class LignePanier {
         $sql = 'SELECT id';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'br_reservation';
         $sql .= ' WHERE id_equipment="' . $this->equipmentId . '"';
+        $sql .= ' AND status < 300';
 
         $result = $this->db->query($sql);
         if ($result and $this->db->num_rows($result) > 0) {

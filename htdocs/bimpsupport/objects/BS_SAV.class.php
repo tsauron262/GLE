@@ -848,7 +848,7 @@ class BS_SAV extends BimpObject
             case self::BS_SAV_DEVIS_ACCEPTE:
                 if ($propal_status > 2) {
                     $errors[] = $error_msg . ' (statut de la proposition commerciale invalide)';
-                } elseif (!in_array($current_status, array(0, 1, 2, 5))) {
+                } elseif (!in_array($current_status, array(0, 1, 2, 4, 5))) {
                     $errors[] = $error_msg . ' (statut actuel invalide)';
                 }
                 break;

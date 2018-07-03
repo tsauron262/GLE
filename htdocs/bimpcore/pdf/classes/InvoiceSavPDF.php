@@ -19,7 +19,7 @@ class InvoiceSavPDF extends InvoicePDF
                 if (!$this->sav->find(array('id_facture_acompte' => (int) $object->id))) {
                     unset($this->sav);
                     $this->sav = null;
-                    $this->errors[] = 'Aucun SAV associé à cette facture trouvé';
+//                    $this->errors[] = 'Aucun SAV associé à cette facture trouvé';
                 }
             }
         }
@@ -30,9 +30,17 @@ class InvoiceSavPDF extends InvoicePDF
     protected function initHeader()
     {
         parent::initHeader();
+        
+        if (!is_null($this->sav)) {
+            $rows .= $this->sav->getData('ref') . '<br/>';
+            $equipment = $this->sav->getchildObject('equipment');
+            if (!is_null($equipment) && $equipment->isLoaded()) {
+                $rows .= $equipment->getData('serial');
+            }
+        }
 
         $this->header_vars['apple_img'] = DOL_DOCUMENT_ROOT . "/synopsistools/img/agree.jpg";
-        $this->header_vars['header_middle'] = '';
+        $this->header_vars['header_middle'] = $rows;
     }
 
     public function getAfterTotauxHtml()

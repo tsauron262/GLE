@@ -777,9 +777,10 @@ lists:
             tech:
                 field: id_user_tech
                 display: nom_url
-            client: 
-                field: id_client
-                display: nom_url
+            equipement: 
+                label: Serial
+                field: id_equipment
+                display: ref
     
 cards:
     default:

@@ -789,6 +789,39 @@ class BS_SAV extends BimpObject
         return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
     }
 
+    // Rendus HTML: 
+
+    public function renderSavCheckup()
+    {
+        $html = '';
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('id_facture_acompte')) {
+                $sql = 'SELECT p.`rowid` FROM ' . MAIN_DB_PREFIX . 'paiement p';
+                $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture pf ON p.rowid = pf.fk_paiement';
+                $sql .= ' WHERE pf.fk_facture = ' . (int) $this->getData('id_facture_acompte');
+                $sql .= ' AND p.fk_paiement = 0';
+
+                $rows = $this->db->executeS($sql, 'array');
+
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        $onclick = $this->getJsActionOnclick('correctAcompteModePaiement', array('id_paiement' => (int) $r['rowid']), array(
+                            'form_name' => 'acompte_mode_paiement',
+                            'success_callback' => 'function() {window.location.reload();}'
+                        ));
+
+                        $html .= '<div style="margin: 15px 0">';
+                        $html .= BimpRender::renderAlerts('ATTENTION: aucun mode de paiement n\'a été indiqué pour le paiement de l\'acompte.');
+                        $html .= '<button class="btn btn-default" onclick="' . $onclick . '"><i class="fa fa-pencil iconLeft"></i>Corriger le mode de paiement de l\'acompte</button>';
+                        $html .= '</div>';
+                    }
+                }
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements:
 
     protected function onNewStatus(&$new_status, $current_status, $extra_data, &$warnings = array())
@@ -2349,6 +2382,100 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         }
 
         return $errors;
+    }
+
+    public function actionCorrectAcompteModePaiement($data, &$success)
+    {
+        global $user;
+
+        $errors = array();
+        $warnings = array();
+        $success = 'Mode de paiement enregistré avec succès';
+        $caisse = null;
+
+        if (!isset($data['id_paiement']) || !(int) $data['id_paiement']) {
+            $errors[] = 'ID du paiement absent';
+        }
+
+        if (!isset($data['mode_paiement']) || !(int) $data['mode_paiement']) {
+            $errors[] = 'veuillez sélectionner un mode de paiement';
+        }
+
+        if ($this->useCaisseForPayments && $this->getData("id_facture_acompte")) {
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+            if (!$id_caisse) {
+                $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du mode de paiement de l\'acompte';
+            } else {
+                if (!$caisse->fetch($id_caisse)) {
+                    $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                } else {
+                    $caisse->isValid($errors);
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            if ($this->useCaisseForPayments && BimpObject::objectLoaded($caisse)) {
+                $id_account = (int) $caisse->getData('id_account');
+            } else {
+                $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+            }
+
+            if (!$id_account) {
+                $errors[] = 'ID du compte bancaire absent pour l\'enregistrement du mode de paiement';
+            } else {
+                BimpTools::loadDolClass('compta/paiement', 'paiement');
+                $paiement = new Paiement($this->db->db);
+
+                if ($paiement->fetch((int) $data['id_paiement']) <= 0) {
+                    $errors[] = 'ID du paiement invalide';
+                } else {
+                    if ((int) $paiement->fk_paiement) {
+                        $errors[] = 'Un mode de paiement valide est déjà attribué à ce paiement';
+                    } else {
+                        // Mise à jour en base: 
+                        if ($this->db->update('paiement', array(
+                                    'fk_paiement' => (int) $data['mode_paiement']
+                                        ), '`rowid` = ' . (int) $data['id_paiement']) <= 0) {
+                            $msg = 'Echec de l\'enregistrement du mode de paiement';
+                            $sqlError = $this->db->db->lasterror();
+                            if ($sqlError) {
+                                $msg .= ' - ' . $sqlError;
+                            }
+                            $errors[] = $msg;
+                        } else {
+                            $paiement->paiementid = (int) $data['mode_paiement'];
+                            
+                            // Ajout du paiement au compte bancaire. 
+                            if ($paiement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                $account_label = '';
+
+                                if ($this->useCaisseForPayments) {
+                                    $account = $caisse->getChildObject('account');
+
+                                    if (BimpObject::objectLoaded($account)) {
+                                        $account_label = '"' . $account->bank . '"';
+                                    }
+                                }
+
+                                if (!$account_label) {
+                                    $account_label = ' d\'ID ' . $id_account;
+                                }
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($paiement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $account_label);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrides:

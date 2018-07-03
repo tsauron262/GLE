@@ -547,6 +547,21 @@ forms:
                   auto_expand: 1
                   values: 
                       array: list_wait_infos
+                      
+    acompte_mode_paiement: 
+        rows: 
+            - custom: 1
+              label: Paiement
+              hidden: 1
+              input_name: id_paiement
+              hidden: 1
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Mode de paiement
+              input_name: mode_paiement
+              input: 
+                  type: select_payment
                 
                 
 fields_tables: 

@@ -255,7 +255,8 @@ class BimpTransfer {
                         $name_status = 'Reçu';
                     }
                     $transfers[] = array(
-                        'id' => 'TR'.$obj->rowid,
+                        'id' => $obj->rowid,
+                        'ref' => 'TR'.$obj->rowid,
                         'status' => $obj->status,
                         'name_status' => $name_status,
                         'fk_warehouse_source' => $obj->fk_warehouse_source,
@@ -268,7 +269,8 @@ class BimpTransfer {
                         'date_closing' => ($obj->date_closing != null) ? $obj->date_closing : '');
                 } else {
                     $transfers[] = array(
-                        'id' => 'TR'.$obj->rowid,
+                        'id' => $obj->rowid,
+                        'ref' => 'TR'.$obj->rowid,
                         'status' => $obj->status,
                         'fk_warehouse_source' => $obj->fk_warehouse_source,
                         'fk_warehouse_dest' => $obj->fk_warehouse_dest,
@@ -322,7 +324,7 @@ class BimpTransfer {
         foreach ($lines as $key => $line) {
             $lines[$key]['id_reservation'] = $line['id'];
             $lines[$key]['fk_product'] = $line['id_product'];
-            if ($add_prod_info) {
+            if ($add_prod_info && $line['id_product'] > 0) {
                 $doli_prod = new Product($this->db);
                 $doli_prod->fetch($line['id_product']);
                 $lines[$key]['ref'] = $doli_prod->ref;

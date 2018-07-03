@@ -595,6 +595,9 @@ class Translate
 	function trans($key, $param1='', $param2='', $param3='', $param4='', $maxsize=0)
 	{
         global $conf;
+        
+        if($key == "")
+            return "";
 
 	    if (! empty($this->tab_translate[$key]))	// Translation is available
 		{

@@ -300,6 +300,10 @@ if (isset($_REQUEST['iphone']) && isset($_REQUEST['idChrono'])) {
 }
 
 llxHeader($js);
+echo "Merci d'utilisé le nouveau module !";
+
+llxFooter();
+die;
 echo $echo;
 
 

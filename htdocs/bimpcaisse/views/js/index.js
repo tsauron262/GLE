@@ -6,13 +6,18 @@ function BC_Vente() {
         this.id_vente = 0;
         this.id_client = 0;
         this.nb_articles = 0;
+        this.nb_returns = 0;
         this.total_ttc = 0;
         this.total_remises_vente = 0;
         this.total_remises_articles = 0;
         this.total_remises = 0;
+        this.total_returns = 0;
+        this.total_discounts = 0;
         this.toPay = 0;
         this.toReturn = 0;
+        this.avoir = 0;
         this.remises = [];
+        this.returns = [];
         this.paiement_differe = 0;
     };
 
@@ -69,6 +74,11 @@ function BC_Vente() {
             displayMoneyValue(this.toReturn, $('#venteToReturn').find('span'));
         }
 
+        if (typeof (result.vente_data.avoir) !== 'undefined') {
+            this.avoir = result.vente_data.avoir;
+            displayMoneyValue(this.avoir, $('#venteAvoir').find('span'));
+        }
+
         if (typeof (result.vente_data.articles) !== 'undefined') {
             for (var i in result.vente_data.articles) {
                 var article = result.vente_data.articles[i];
@@ -91,10 +101,38 @@ function BC_Vente() {
             }
         }
 
+        if (typeof (result.vente_data.nb_returns) !== 'undefined') {
+            this.nb_returns = result.vente_data.nb_returns;
+            var html = this.nb_returns + ' article';
+            if (this.nb_returns > 1) {
+                html += 's';
+            }
+            $('#curVenteRetours').find('.nbReturns').text(html);
+        }
+
+        if (typeof (result.vente_data.total_returns) !== 'undefined') {
+            this.total_returns = result.vente_data.total_returns;
+        }
+
+        if (typeof (result.vente_data.total_discounts) !== 'undefined') {
+            this.total_discounts = result.vente_data.total_discounts;
+        }
+
+        if (typeof (result.vente_data.returns) !== 'undefined') {
+            this.returns = result.vente_data.returns;
+        }
+
+        if (parseInt($('#venteHt').find('[name="vente_ht"]').val())) {
+            $('.cart_total_label').text('Total HT');
+        } else {
+            $('.cart_total_label').text('Total TTC');
+        }
+
 //        displayMoneyValue(this.total_remises_vente, $('#venteRemises').find('.total_remises_vente span'));
         displayMoneyValue(this.total_remises_articles, $('#venteRemises').find('.total_remises_articles span'));
         displayMoneyValue(this.total_remises, $('#venteRemises').find('.total_remises span'));
-        displayMoneyValue((this.total_ttc - this.total_remises), $('#ventePanierTotal span'));
+        displayMoneyValue((this.total_ttc - this.total_remises), $('#ventePanierTotal span.cart_total'));
+        displayMoneyValue(this.total_discounts, $('#totalDiscounts span'));
 
         $('#venteRemises').hide().find('.remises_lines').html('');
         $('#ventePanierLines').find('.cartArticleLine').each(function () {
@@ -113,6 +151,33 @@ function BC_Vente() {
             }
         }
 
+        var returns_html = '';
+        if (this.returns.length) {
+            for (var k in this.returns) {
+                returns_html += '<div id="cur_vente_return_' + this.returns[k].id_return + '" class="returnLine" data-id_return="' + this.returns[k].id_return + '">';
+                returns_html += '<div class="product_title">' + this.returns[k].label;
+                returns_html += '<span class="removeArticle" onclick="removeReturn($(this), ' + this.returns[k].id_return + ')">';
+                returns_html += '<i class="fa fa-trash"></i></span></div>';
+                returns_html += '<div class="product_info"><strong>Prix unitaire TTC</strong> : ' + this.returns[k].unit_price + '</div>';
+                returns_html += '<div class="product_info"><strong>Quantité</strong> : ' + this.returns[k].qty + '</div>';
+                returns_html += '<div class="product_info"><strong>Défectueux</strong> : ';
+                if (parseInt(this.returns[k].defective)) {
+                    returns_html += 'OUI';
+                } else {
+                    returns_html += 'NON';
+                }
+                returns_html += '</div>';
+                returns_html += '<div class="article_options">';
+                returns_html += '<div class="article_qty">&nbsp;</div>';
+                returns_html += '<div class="product_total_price">';
+                returns_html += '<span class="final_price">' + this.returns[k].total_ttc + '</span>';
+                returns_html += '</div>';
+                returns_html += '</div>';
+                returns_html += '</div>';
+            }
+        }
+        $('#returnsLines').html(returns_html);
+
         if (this.total_remises_articles > 0) {
             $('#venteRemises').find('.total_remises_articles').show();
         } else {
@@ -125,20 +190,48 @@ function BC_Vente() {
             $('#venteRemises').hide();
         }
 
-        if (this.toReturn > 0) {
-            $('#venteToReturn').slideDown(250);
-            $('#venteToPay').slideUp(250);
+        if (this.total_returns > 0) {
+            displayMoneyValue(this.total_returns, $('#curVenteRetours span.totalReturns'));
+            $('#curVenteRetours').slideDown(250);
         } else {
-            $('#venteToReturn').slideUp(250);
-            $('#venteToPay').slideDown(250);
+            $('#curVenteRetours').slideUp(250);
         }
 
-        if (this.nb_articles > 0 && (this.paiement_differe || this.toPay <= 0)) {
+        if (this.avoir > 0) {
+            $('#venteAvoir').slideDown(250);
+            $('#avoirRbtForm').slideDown(250);
+
+            $('#venteToReturn').slideUp(250);
+            $('#venteToPay').slideUp(250);
+
+            $('#ventePaiementButtons').slideUp(250);
+            $('#venteAddPaiementFormContainer').slideUp(250);
+            $('#ventePaimentsLines').slideUp(250);
+            $('#condReglement').slideUp(250);
+        } else {
+            $('#ventePaiementButtons').slideDown(250);
+            $('#ventePaimentsLines').slideDown(250);
+            $('#condReglement').slideDown(250);
+
+            $('#avoirRbtForm').slideUp(250);
+
+            if (this.toReturn > 0) {
+                $('#venteAvoir').slideUp(250);
+                $('#venteToReturn').slideDown(250);
+                $('#venteToPay').slideUp(250);
+            } else {
+                $('#venteAvoir').slideUp(250);
+                $('#venteToReturn').slideUp(250);
+                $('#venteToPay').slideDown(250);
+            }
+        }
+
+        if ((this.nb_articles > 0 || this.nb_returns > 0) && (this.paiement_differe || this.toPay <= 0)) {
             $('#validateCurrentVenteButton').removeClass('disabled');
-            $('#saveCurrentVenteButton').addClass('disabled');
+//            $('#saveCurrentVenteButton').addClass('disabled');
         } else {
             $('#validateCurrentVenteButton').addClass('disabled');
-            $('#saveCurrentVenteButton').removeClass('disabled');
+//            $('#saveCurrentVenteButton').removeClass('disabled');
         }
     };
 
@@ -231,67 +324,6 @@ function closeCaisse($button, confirm_fonds) {
             }
         }
     });
-}
-
-function changeUser($button) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    var $form = $('#changeUserForm');
-
-    if (!$form.length) {
-        bimp_msg('Une erreur est survenue (Formulaire absent). Opération impossible.', 'danger');
-        return;
-    }
-
-    var id_caisse = parseInt($('#current_params').find('[name="id_caisse"]').val());
-    if (!id_caisse) {
-        bimp_msg('Erreur: aucune caisse active', 'danger');
-        return;
-    }
-
-    var id_new_user = parseInt($form.find('[name="id_new_user"]').val());
-    if (!id_new_user) {
-        bimp_msg('Aucun nouvel utilisateur sélectionné', 'warning');
-        return;
-    }
-
-    var id_user = parseInt($('#current_params').find('[name="id_user"]').val());
-    if (!id_user) {
-        bimp_msg('Erreur: ID de l\'utilisateur actuel absent', 'danger');
-        return;
-    }
-
-    if (id_user === id_new_user) {
-        bimp_msg('L\'utilisateur sélectionné est déjà assigné à cette caisse', 'warning');
-        return;
-    }
-
-    var user_name = $form.find('[name="id_new_user"]').find('option[value="' + id_new_user + '"]').text();
-    var caisse_name = $('#current_params').find('[name="caisse_name"]').val();
-
-    var msg = 'Etes-vous sûr de vouloir assigné l\'utilisateur "' + user_name + '"';
-    msg += ' à la caisse "' + caisse_name + '"?' + "\n\n";
-    msg += 'Cet utilisateur devra se connecter pour accéder à cette caisse';
-
-    if (confirm(msg)) {
-        BimpAjax('changeUser', {
-            id_caisse: id_caisse,
-            id_new_user: id_new_user,
-            logout: $form.find('[name="logout"]').val()
-        }, $form.find('.freeFormAjaxResult'), {
-            $button: $button,
-            success: function (result, bimpAjax) {
-                window.location = document.location.href.replace(document.location.search, "");
-            },
-            error: function (result, bimpAjax) {
-                if (!result || typeof (result.errors) === 'undefined') {
-                    window.location = document.location.href.replace(document.location.search, "");
-                }
-            }
-        });
-    }
 }
 
 function loadCaisseMvtForm($button) {
@@ -468,10 +500,21 @@ function saveCurrentVente($button, status) {
         }
     }
 
-    BimpAjax('saveVenteStatus', {
+    var data = {
         id_vente: Vente.id_vente,
         status: status
-    }, null, {
+    };
+
+    if (status === 2) {
+        if (Vente.avoir > 0) {
+            data.avoir_rbt_mode = $('#avoirRbtMode').find('[name="avoir_rbt_mode"]').val();
+            if (data.avoir_rbt_mode === 'rbt') {
+                data.avoir_rbt_paiement = $('#avoirRbtModePaiement').find('[name="avoir_rbt_paiement"]').val();
+            }
+        }
+    }
+
+    BimpAjax('saveVenteStatus', data, null, {
         $button: $button,
         id_vente: Vente.id_vente,
         display_success_in_popup_only: true,
@@ -510,11 +553,16 @@ function saveCurrentVente($button, status) {
             $('#newVenteButton').removeClass('disabled');
             Vente.reset();
 
-            reloadObjectList('BC_Vente_default_list_table');
             if ((status === 2) && result.validate) {
                 var url = ticket_url + '?id_vente=' + bimpAjax.id_vente;
                 window.open(url, 'Ticket de caisse', "menubar=no, status=no, width=370, height=600");
             }
+            
+            $('body').trigger($.Event('objectChange', {
+                module: 'bimpcaisse',
+                object_name: 'BC_Vente',
+                id_object: bimpAjax.id_vente
+            }));
         },
         error: function (result, bimpAjax) {
             if (status === 2) {
@@ -656,6 +704,11 @@ function saveClient() {
                 $('#venteClientViewContainer').html(result.html).slideDown(250);
                 bimpAjax.$container.slideUp(250);
             }
+            if (typeof (result.discounts_html) !== 'undefined') {
+                $('#customerDiscounts').html(result.discounts_html);
+                checkDiscounts();
+            }
+            refreshVente();
         }
     });
 }
@@ -668,6 +721,22 @@ function saveCondReglement() {
 
     BimpAjax('saveCondReglement', {
         id_cond: $('#condReglementSelect').val(),
+        id_vente: Vente.id_vente
+    }, null, {
+        success: function (result, bimpAjax) {
+            Vente.ajaxResult(result);
+        }
+    });
+}
+
+function saveVenteHt() {
+    if (!Vente.id_vente) {
+        bimp_msg('Erreur opération impossible (ID de la vente absent)', 'danger');
+        return;
+    }
+
+    BimpAjax('saveVenteHt', {
+        vente_ht: $('#venteHt').find('[name="vente_ht"]').val(),
         id_vente: Vente.id_vente
     }, null, {
         success: function (result, bimpAjax) {
@@ -937,10 +1006,12 @@ function setVenteStatus($button, id_vente, status) {
         }
     }
 
-    BimpAjax('saveVenteStatus', {
+    var data = {
         id_vente: id_vente,
         status: status
-    }, null, {
+    };
+
+    BimpAjax('saveVenteStatus', data, null, {
         $button: $button,
         display_success_in_popup_only: true,
         display_errors_in_popup_only: true,
@@ -956,6 +1027,14 @@ function loadRemiseForm($button) {
         'object_name': 'BC_VenteRemise',
         'id_parent': Vente.id_vente
     }, 'Ajout d\'une remise');
+}
+
+function loadReturnForm($button) {
+    loadModalForm($button, {
+        'module': 'bimpcaisse',
+        'object_name': 'BC_VenteReturn',
+        'id_parent': Vente.id_vente
+    }, 'Ajout d\'un retour produit');
 }
 
 function deleteRemise($button, id_remise) {
@@ -1122,6 +1201,116 @@ function onVenteLoaded() {
         saveCondReglement();
     });
 
+    $('#venteHt').find('[name="vente_ht"]').change(function () {
+        saveVenteHt();
+    });
+
+    $('#avoirRbtMode').find('[name="avoir_rbt_mode"]').change(function () {
+        if ($(this).val() === 'rbt') {
+            $('#avoirRbtModePaiement').slideDown(250);
+        } else {
+            $('#avoirRbtModePaiement').slideUp(250);
+        }
+    });
+
+    checkMultipleValues();
+    checkDiscounts();
+}
+
+function searchReturnedEquipment($button) {
+    var $inputContainer = $button.findParentByClass('search_equipment_inputContainer');
+    var $form = $inputContainer.findParentByClass('BC_VenteReturn_form');
+
+    if (!$inputContainer.length || !$form.length) {
+        bimp_msg('Une erreur est survenue', 'danger');
+        return;
+    }
+
+    var serial = $inputContainer.find('[name="search_equipment"]').val();
+
+    if (!serial) {
+        bimp_msg('Aucun numéro de série spécifié', 'danger');
+        return;
+    }
+
+    $inputContainer.find('[name="search_equipment"]').val('');
+
+    BimpAjax('searchEquipmentToReturn', {
+        serial: serial,
+        id_vente: Vente.id_vente
+    }, null, {
+        $button: $button,
+        $inputContainer: $inputContainer,
+        $form: $form,
+        display_success: false,
+        success: function (result, bimpAjax) {
+            if (typeof (result.equipments) === 'object') {
+                var html = '<select name="id_equipment">';
+                var first = true;
+                for (var i in result.equipments) {
+                    html += '<option value="' + result.equipments[i].id + '"';
+                    html += ' data-id_client="' + result.equipments[i].id_client + '"';
+                    if (first) {
+                        html += ' selected="selected"';
+                    }
+                    html += '>' + result.equipments[i].label + '</option>';
+                }
+                html += '</select>';
+                bimpAjax.$form.find('.id_equipment_inputContainer').html(html);
+                var $parent = bimpAjax.$form.find('.id_equipment_inputContainer').parent();
+                var $input = bimpAjax.$form.find('[name=id_equipment]');
+                var initial_value = $input.find('option').first().attr('value');
+                bimpAjax.$form.find('.id_equipment_inputContainer').data('initial_value', initial_value);
+                setCommonEvents($parent);
+                setInputsEvents($parent);
+                setInputEvents(bimpAjax.$form.findParentByClass('BC_VenteReturn_form'), $input);
+                bimpAjax.$form.find('[name="id_product"]').val(0).findParentByClass('formRow').slideUp(250);
+                bimpAjax.$form.find('[name="show_equipment"]').val(1).change();
+                bimpAjax.$form.find('[name="id_equipment"]').change(function () {
+                    var id_client = $(this).find('option:selected').data('id_client');
+                    if (id_client) {
+                        id_client = parseInt(id_client);
+                        if (id_client !== Vente.id_client) {
+                            $('#venteClientFormContainer').find('[name="id_client"]').val(id_client);
+                            saveClient();
+                        }
+                    }
+                }).change();
+            }
+        }
+    });
+}
+
+function removeReturn($button, id_return) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    BimpAjax('removeReturn', {
+        id_vente: Vente.id_vente,
+        id_return: id_return
+    }, null, {
+        $button: $button,
+        id_return: id_return,
+        display_success: false,
+        display_errors_in_popup_only: true,
+        success: function (result, bimpAjax) {
+            $('#cur_vente_return_' + bimpAjax.id_return).fadeOut(250, function () {
+                $(this).remove();
+            });
+            Vente.ajaxResult(result);
+        }
+    });
+}
+
+function checkDiscounts() {
+    var $container = $('#customerDiscountsContainer');
+
+    if (!$container.find('select[name="discounts_add_value"]').find('option').length) {
+        $container.hide();
+    } else {
+        $container.show();
+    }
 }
 
 $(document).ready(function () {
@@ -1182,6 +1371,14 @@ $(document).ready(function () {
 
     $('#newVenteButton').click(function () {
         loadNewVente();
+    });
+
+    $('#newPaymentButton').click(function () {
+        loadModalForm($(this), {
+            module: 'bimpcore',
+            object_name: 'Bimp_Paiement',
+            form_name: 'default'
+        }, 'Paiement facture');
     });
 
     $('.windowMaximiseButton').click(function () {

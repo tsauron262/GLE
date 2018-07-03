@@ -220,7 +220,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
             $equipment = $sav->getChildObject('equipment');
             $product_label = '';
             if (!is_null($equipment) && $equipment->isLoaded()) {
-                $product_label = $equipment->displayProduct('default', true);
+                $product_label = $equipment->displayProduct('nom', true);
                 $pdf->SetXY('121', '71.2');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->MultiCell(100, 6, $product_label, 0, 'L');
@@ -242,7 +242,9 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             //etat
             $pdf->SetXY(130, 91.6);
-            $pdf->MultiCell(100, 6, $sav->displayData('etat_materiel', 'default', false, true), 0, 'L');
+            $pdf->MultiCell(75, 6, $sav->displayData('etat_materiel', 'default', false, true), 0, 'L');
+            $pdf->SetXY(111, 96);
+            $pdf->MultiCell(95, 6, str_replace("\n", ", ", $sav->displayData('etat_materiel_desc', 'default', false, true)), 0, 'L');
 
             //accessoire
             $pdf->SetXY('142.8', '104.8');

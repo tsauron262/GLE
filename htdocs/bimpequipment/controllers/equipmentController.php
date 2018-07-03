@@ -67,6 +67,9 @@ class equipmentController extends BimpController
 
             if (!count($errors)) {
                 $data = $equipment->gsxLookup($serial, $errors);
+                
+                if(isset($data['warning']) && $data['warning'] != "")
+                    $data['warning'] = BimpRender::renderAlerts($data['warning'], 'danger');
             }
         }
 
@@ -92,7 +95,7 @@ class equipmentController extends BimpController
                 $data = $equipment->gsxLookup($equipment->getData('serial'), $errors);
 
                 if (isset($data['warning']) && $data['warning']) {
-                    $html .= BimpRender::renderAlerts($data['warning'], 'warning');
+                    $html .= BimpRender::renderAlerts($data['warning'], 'danger');
                 }
                 if (isset($data['date_warranty_end']) && $data['date_warranty_end']) {
                     if ($data['date_warranty_end'] < date('Y-m-d')) {
@@ -104,6 +107,9 @@ class equipmentController extends BimpController
                     $DT = new DateTime($data['date_warranty_end']);
                     $msg = 'Date de fin de garantie: ' . $DT->format('d / m / Y');
                     $html .= BimpRender::renderAlerts($msg, $class);
+                }
+                else{
+                    $html .= BimpRender::renderAlerts("Date de fin de garantie: inconnue", 'danger');
                 }
             }
         }

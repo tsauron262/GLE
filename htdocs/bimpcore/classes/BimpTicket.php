@@ -74,8 +74,6 @@ class BimpTicket
 
             $html .= $this->renderHeader();
 
-
-
             if ($this->town) {
                 $html .= '<span class="bold" style="font-size: 17px">' . BimpTools::ucfirst($this->town) . ', le ' . date('d / m / Y') . '</span>';
             }
@@ -109,9 +107,9 @@ class BimpTicket
                     $desc = $line->desc;
                 }
 
-                if (strlen($desc) > 40) {
-                    $desc = substr($desc, 0, 38);
-                }
+//                if (strlen($desc) > 40) {
+//                    $desc = substr($desc, 0, 38);
+//                }
 
                 $html .= '<td colspan="5">' . $desc . '</td>';
                 $html .= '</tr>';
@@ -178,43 +176,58 @@ class BimpTicket
             $html .= '</table>';
 
             $sql = "SELECT p.datep as date, p.fk_paiement, p.num_paiement as num, pf.amount as amount, pf.multicurrency_amount,";
-            $sql.= " cp.code";
-            $sql.= " FROM " . MAIN_DB_PREFIX . "paiement_facture as pf, " . MAIN_DB_PREFIX . "paiement as p";
-            $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "c_paiement as cp ON p.fk_paiement = cp.id";
-            $sql.= " WHERE pf.fk_paiement = p.rowid AND pf.fk_facture = " . $this->facture->id;
-            $sql.= " ORDER BY p.datep";
+            $sql .= " cp.code";
+            $sql .= " FROM " . MAIN_DB_PREFIX . "paiement_facture as pf, " . MAIN_DB_PREFIX . "paiement as p";
+            $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "c_paiement as cp ON p.fk_paiement = cp.id";
+            $sql .= " WHERE pf.fk_paiement = p.rowid AND pf.fk_facture = " . $this->facture->id;
+            $sql .= " ORDER BY p.datep";
 
             $rows = $bdb->executeS($sql);
             if (!is_null($rows) && count($rows)) {
                 $returned = 0;
 
-                $html .= '<div class="bold">Réglements : </div>';
+                $payment_rows_html = '';
 
-                $html .= '<table id="ticket_payments">';
-                $html .= '<tbody>';
                 foreach ($rows as $row) {
                     $amount = (float) (($conf->multicurrency->enabled && $this->facture->multicurrency_tx != 1) ? $row->multicurrency_amount : $row->amount);
                     if ($amount <= 0) {
-                        $returned += (float) ($amount * -1);
+                        $returned_rows_html .= '<tr>';
+                        $returned_rows_html .= '<td>' . $langs->transnoentitiesnoconv("PaymentTypeShort" . $row->code) . ' :</td>';
+                        $returned_rows_html .= '<td>' . price(abs($amount), 0, $langs) . '</td>';
+                        $returned_rows_html .= '</tr>';
                     } else {
-                        $html .= '<tr>';
-                        $html .= '<td>' . $langs->transnoentitiesnoconv("PaymentTypeShort" . $row->code) . ' :</td>';
-                        $html .= '<td>' . price($amount, 0, $langs) . '</td>';
-                        $html .= '</tr>';
+                        $payment_rows_html .= '<tr>';
+                        $payment_rows_html .= '<td>' . $langs->transnoentitiesnoconv("PaymentTypeShort" . $row->code) . ' :</td>';
+                        $payment_rows_html .= '<td>' . price($amount, 0, $langs) . '</td>';
+                        $payment_rows_html .= '</tr>';
                     }
                 }
-                $html .= '</tbody>';
-                $html .= '</table>';
 
-                if ($returned > 0) {
-                    $html .= '<div class="bold" style="margin-bottom: 15px">Rendu monnaie : ' . price($returned, 0, $langs) . '</div>';
+                if ($payment_rows_html) {
+                    $html .= '<div class="bold">Réglements : </div>';
+                    $html .= '<table id="ticket_payments">';
+                    $html .= '<tbody>';
+                    $html .= $payment_rows_html;
+                    $html .= '</tbody>';
+                    $html .= '</table>';
                 }
+                
+                if ($returned_rows_html) {
+                    $html .= '<div class="bold">Rendus : </div>';
+                    $html .= '<table id="ticket_rendus">';
+                    $html .= '<tbody>';
+                    $html .= $returned_rows_html;
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+                }
+
+//                if ($returned > 0) {
+//                    $html .= '<div class="bold" style="margin-bottom: 15px">Rendu : ' . price($returned, 0, $langs) . '</div>';
+//                }
             }
 
             $html .= '<span style="font-size: 13px;">Ticket imprimé le : ' . date('d / m / Y H:i:s') . '</span>';
-
             $html .= $this->renderFooter();
-
             $html .= '</div>';
         }
 
@@ -325,9 +338,9 @@ class BimpTicket
         if ($mysoc->capital) {
             $captital = price2num($mysoc->capital);
             if (is_numeric($captital) && $captital > 0) {
-                $txt.=($txt ? " <br/> " : "") . $langs->transnoentities("CapitalOf", price($captital, 0, $langs, 0, 0, 0, $conf->currency)) . " €";
+                $txt .= ($txt ? " <br/> " : "") . $langs->transnoentities("CapitalOf", price($captital, 0, $langs, 0, 0, 0, $conf->currency)) . " €";
             } else {
-                $txt.=($txt ? " <br/> " : "") . $langs->transnoentities("CapitalOf", $captital, $langs) . " €";
+                $txt .= ($txt ? " <br/> " : "") . $langs->transnoentities("CapitalOf", $captital, $langs) . " €";
             }
         }
 

@@ -59,7 +59,7 @@ function printTableReception($db) {
         $doli_warehouse2->fetch($transfer['fk_warehouse_dest']);
 
         print '<tr>';
-        print '<td>' . $transfer['id'] . '</td>';
+        print '<td>' . $transfer['ref'] . '</td>';
         print '<td>' . $user->getNomUrl(-1, '', 0, 0, 24, 0, '') . '</td>';
         if ($transfer['status'] == $obj_transfer::STATUS_DRAFT) {
             print '<td>Brouillon</td>';

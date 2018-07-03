@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_gsx_repair` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 ALTER TABLE `llx_bs_apple_part` ADD `id_sav` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id`;
 

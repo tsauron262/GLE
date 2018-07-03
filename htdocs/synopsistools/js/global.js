@@ -1,4 +1,15 @@
 $(window).on("load", function () {
+    
+    $(function() {
+        $("input[type='text']").each(function(index, element) {
+            $(this).attr("autocomplete", "off");
+        });
+        $("form input[type='text']").each(function(index, element) {
+            $(this).attr("autocomplete", "kkk");
+        });
+    });
+    
+    
     activeScroll = false;
     cacherMenuConge();
     

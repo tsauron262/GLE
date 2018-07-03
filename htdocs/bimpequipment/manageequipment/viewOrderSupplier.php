@@ -119,6 +119,9 @@ if ($object->statut < 3) {
 if ($object->statut == 5) {
     print '<strong>Cette commande a été livrée. Cependant vous pouvez continuer à rajouter des produits supplémentaires.</strong><br/>';
 }
+
+print '<table class="titre"><tr><td>';
+
 print '<strong>Livré dans l\'entrepôt </strong>';
 
 $entrepots = getAllEntrepots($db);
@@ -137,6 +140,12 @@ foreach ($entrepots as $id_entrepot => $name) {
         print '<option value="' . $id_entrepot . '">' . $name . '</option>';
 }
 print '</select> ';
+
+print '</td><td></td><td>';
+
+print '<div id="zoneList"></div>';
+
+print '</td></tr></table>';
 
 print '<table id="productTable" class="noborder objectlistTable" style="margin-top:20px">';
 print '<thead><tr class="headerRow">';

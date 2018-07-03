@@ -9,6 +9,6 @@ CREATE TABLE IF NOT EXISTS `llx_br_order_line` (
   `qty_shipped` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `qty_billed` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `qty_returned` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 ALTER TABLE `llx_br_service_shipment` ADD `id_br_order_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_service`;

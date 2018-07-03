@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `llx_bmp_calc_montant` (
   `editable` tinyint(1) NOT NULL DEFAULT '1',
   `required` tinyint(1) NOT NULL DEFAULT '1',
   `active` tinyint(1) NOT NULL DEFAULT '1'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bmp_total_inter` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY (`id`),
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `llx_bmp_total_inter` (
   `all_frais` BOOLEAN NOT NULL DEFAULT FALSE,
   `all_recettes` BOOLEAN NOT NULL DEFAULT FALSE,
   `display` tinyint(1) NOT NULL DEFAULT '1'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 `all_frais` BOOLEAN NOT NULL DEFAULT FALSE, `all_recettes` BOOLEAN NOT NULL DEFAULT FALSE,
 
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS `llx_bmp_event_calc_montant` (
   `percent` float NOT NULL,
   `source_amount` FLOAT NOT NULL DEFAULT '0',
   `active` BOOLEAN NOT NULL DEFAULT TRUE
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 ALTER TABLE `llx_bmp_event_tarif` ADD `previsionnel` INT UNSIGNED NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bmp_event_tarif` ADD `ca_moyen_bar` FLOAT NOT NULL DEFAULT '0';

@@ -118,7 +118,6 @@ objects:
         cards: 
             default: 
                 type: facture_card
-            
     apple_parts: 
         relation: hasMany
         delete: 1
@@ -535,6 +534,20 @@ forms:
                   type: text
               label: Numéro de série
               input_name: serial
+              
+    wait_client: 
+        rows: 
+            - custom: 1
+              label: Informations
+              data_type: string
+              input_name: infos
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+                  values: 
+                      array: list_wait_infos
+                
                 
 fields_tables: 
     infos: 
@@ -622,7 +635,7 @@ views:
     default: 
         title: 
             callback: getRef
-        objects_change_reload: BS_SavProduct,BS_ApplePart
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
         rows:
             - cols: 
                   - type: object_header
@@ -660,7 +673,7 @@ views:
             callback: getRef
         delete_btn: 1
         edit_form: edit
-        objects_change_reload: BS_SavProduct,BS_ApplePart
+        objects_change_reload: BS_SavProduct,BS_ApplePart,Bimp_Paiement
         rows:
             - cols: 
                   - type: fields_table
@@ -734,6 +747,10 @@ lists:
             client: 
                 field: id_client
                 display: nom_url
+            equipement: 
+                label: Serial
+                field: id_equipment
+                display: ref
                 
     client: 
         checkboxes: 1
@@ -774,9 +791,10 @@ lists:
             tech:
                 field: id_user_tech
                 display: nom_url
-            client: 
-                field: id_client
-                display: nom_url
+            equipement: 
+                label: Serial
+                field: id_equipment
+                display: ref
     
 cards:
     default:

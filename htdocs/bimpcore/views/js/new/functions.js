@@ -225,6 +225,8 @@ function setCommonEvents($container) {
             displayProductStocks($(this), $(this).data('id_product'), $(this).data('id_entrepot'));
         });
     });
+    
+    checkMultipleValues();
 }
 
 function setDisplayPopupButtonEvents($button) {
@@ -593,4 +595,5 @@ $(document).ready(function () {
     $('.object_header').each(function () {
         setCommonEvents($(this));
     });
+    setCommonEvents($('body'));
 });

@@ -73,75 +73,75 @@ class ActionsSynopsischrono {
 //        require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
 //        $groupSav = new UserGroup($db);
 //        $groupSav->fetch('', "XX SAV");
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
-            $hrefFin = "#pangridChronoDet105";
-            $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
-            $return .= '<div class="menu_titre">' . img_object("SAV", "drap0@synopsistools") . ' Fiche SAV</div>';
-            $return .= '<div class="menu_contenu">';
-            $return .= '<a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/synopsisapple/FicheRapide.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="" title=""> Fiche rapide SAV</a>';
-            $return .= '<br/><a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/synopsisapple/test.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/on.png" border="0" alt="" title=""> Garantie Apple</a>';
-            $return .= '</div>';
-            $centre = str_replace(" ", "','", $user->array_options['options_apple_centre']);
-
-
-
-            $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur IN ('" . $centre . "')" : ""));
-            if($db->num_rows($result3) > 1)
-                $tabGroupe = array(array('label' => "Tous", 'valeur' => $centre, 'forUrl' => 'Tous'));
-            while ($ligne3 = $db->fetch_object($result3)) {
-                $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur, "forUrl" => $ligne3->valeur);
-            }
-            $tabResult = array();
-            $result2 = $db->query("SELECT COUNT(chr.id) as nb, Centre as CentreVal, Etat as EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_chrono_105` chrP, `" . MAIN_DB_PREFIX . "synopsischrono` chr WHERE chr.id = chrP.id AND " . ($centre ? "Centre IN ('" . $centre . "') AND" : "") . " (revisionNext < 1 || revisionNext Is NULL) GROUP BY Centre, Etat");
-            while ($ligne2 = $db->fetch_object($result2)) {
-                $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
-                if($centre != $ligne2->CentreVal){
-                    if (!isset($tabResult[$centre][$ligne2->EtatVal]))
-                        $tabResult[$centre][$ligne2->EtatVal] = 0;
-                    $tabResult[$centre][$ligne2->EtatVal] += $ligne2->nb;
-                }
-            }
-            
-            $tabStatut = array();
-            $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7" . " ORDER BY id ASC");
-            while ($ligne = $db->fetch_object($result)) {
-                $tabStatut[] = $ligne;
-            }
-            
-            
-
-            foreach ($tabGroupe as $ligne3) {
-                $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
-                $href = DOL_URL_ROOT . '/'
-                        . 'synopsischrono/index.php?idmenu=845&chronoDet=105&mainmenu=Process' . ($ligne3['valeur'] ? '&FiltreCentre=' . $ligne3['forUrl'] : "");
-                $return .= '<div class="menu_contenu ' . ($ligne3['forUrl'] != "Tous" ? 'menu_contenueCache' : '') . '"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
-                    ' . img_object("SAV", "drap0@synopsistools") . ' ' . $ligne3['label'] . '</a></span><br/>';
-
-                foreach($tabStatut as $ligne){
-                    $nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$ligne->valeur]) ? $tabResult[$centre][$ligne->valeur] : 0);
-                    $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
-                    if ($nb == "")
-                        $nb = "0";
-                    $nbStr = ($nb < 10 ? "&nbsp;&nbsp;" . $nb : ($nb < 100 ? "&nbsp;" . $nb : $nb));
-                    $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->valeur) . $hrefFin . "'>" . $nbStr . " : " . $ligne->label . "</a>";
-                    $return .= "</span><br/>";
-                }
-                $return .= '</div>';
-            }
-            if(count($tabGroupe) > 3){
-            $return .= "<div style='width:100%;text-align:center;'><a id='showDetailChrono'>(...)</a></div>";
-
-            $return .= "<script type='text/javascript'>$(document).ready(function(){"
-                    . "$('.menu_contenueCache').hide();"
-                    . "$('#showDetailChrono').click(function(){"
-                    . "$('.menu_contenueCache').show();"
-                    . "$(this).hide();"
-                    . "});"
-                    . "});</script>";
-            }
-
-            $return .= '</div><div class="blockvmenuend"></div>';
-        }
+//        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && (userInGroupe("XX Sav", $user->id)) || userInGroupe("XX Sav MyMu", $user->id)) {
+//            $hrefFin = "#pangridChronoDet105";
+//            $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
+//            $return .= '<div class="menu_titre">' . img_object("SAV", "drap0@synopsistools") . ' Fiche SAV</div>';
+//            $return .= '<div class="menu_contenu">';
+//            $return .= '<a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/synopsisapple/FicheRapide.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="" title=""> Fiche rapide SAV</a>';
+//            $return .= '<br/><a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/synopsisapple/test.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/on.png" border="0" alt="" title=""> Garantie Apple</a>';
+//            $return .= '</div>';
+//            $centre = str_replace(" ", "','", $user->array_options['options_apple_centre']);
+//
+//
+//
+//            $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur IN ('" . $centre . "')" : ""));
+//            if($db->num_rows($result3) > 1)
+//                $tabGroupe = array(array('label' => "Tous", 'valeur' => $centre, 'forUrl' => 'Tous'));
+//            while ($ligne3 = $db->fetch_object($result3)) {
+//                $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur, "forUrl" => $ligne3->valeur);
+//            }
+//            $tabResult = array();
+//            $result2 = $db->query("SELECT COUNT(chr.id) as nb, Centre as CentreVal, Etat as EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_chrono_105` chrP, `" . MAIN_DB_PREFIX . "synopsischrono` chr WHERE chr.id = chrP.id AND " . ($centre ? "Centre IN ('" . $centre . "') AND" : "") . " (revisionNext < 1 || revisionNext Is NULL) GROUP BY Centre, Etat");
+//            while ($ligne2 = $db->fetch_object($result2)) {
+//                $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
+//                if($centre != $ligne2->CentreVal){
+//                    if (!isset($tabResult[$centre][$ligne2->EtatVal]))
+//                        $tabResult[$centre][$ligne2->EtatVal] = 0;
+//                    $tabResult[$centre][$ligne2->EtatVal] += $ligne2->nb;
+//                }
+//            }
+//            
+//            $tabStatut = array();
+//            $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7" . " ORDER BY id ASC");
+//            while ($ligne = $db->fetch_object($result)) {
+//                $tabStatut[] = $ligne;
+//            }
+//            
+//            
+//
+//            foreach ($tabGroupe as $ligne3) {
+//                $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
+//                $href = DOL_URL_ROOT . '/'
+//                        . 'synopsischrono/index.php?idmenu=845&chronoDet=105&mainmenu=Process' . ($ligne3['valeur'] ? '&FiltreCentre=' . $ligne3['forUrl'] : "");
+//                $return .= '<div class="menu_contenu ' . ($ligne3['forUrl'] != "Tous" ? 'menu_contenueCache' : '') . '"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
+//                    ' . img_object("SAV", "drap0@synopsistools") . ' ' . $ligne3['label'] . '</a></span><br/>';
+//
+//                foreach($tabStatut as $ligne){
+//                    $nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$ligne->valeur]) ? $tabResult[$centre][$ligne->valeur] : 0);
+//                    $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
+//                    if ($nb == "")
+//                        $nb = "0";
+//                    $nbStr = ($nb < 10 ? "&nbsp;&nbsp;" . $nb : ($nb < 100 ? "&nbsp;" . $nb : $nb));
+//                    $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->valeur) . $hrefFin . "'>" . $nbStr . " : " . $ligne->label . "</a>";
+//                    $return .= "</span><br/>";
+//                }
+//                $return .= '</div>';
+//            }
+//            if(count($tabGroupe) > 3){
+//            $return .= "<div style='width:100%;text-align:center;'><a id='showDetailChrono'>(...)</a></div>";
+//
+//            $return .= "<script type='text/javascript'>$(document).ready(function(){"
+//                    . "$('.menu_contenueCache').hide();"
+//                    . "$('#showDetailChrono').click(function(){"
+//                    . "$('.menu_contenueCache').show();"
+//                    . "$(this).hide();"
+//                    . "});"
+//                    . "});</script>";
+//            }
+//
+//            $return .= '</div><div class="blockvmenuend"></div>';
+//        }
 
 
 

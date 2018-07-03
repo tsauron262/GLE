@@ -146,8 +146,7 @@ $article_color: #004264;
 }
 
 #openCaisseForm,
-#closeCaisseForm,
-#changeUserForm {
+#closeCaisseForm {
     margin: 60px;
     text-align: center;
 
@@ -159,14 +158,12 @@ $article_color: #004264;
     }
 }
 
-#closeCaisseForm,
-#changeUserForm {
+#closeCaisseForm {
     display: none;
 }
 
 #closeCaisseButton,
-#changeUserButton,
-#caisseMvtButton {
+#disconnectUserButton {
     @media (min-width: 800px) {
         float: right;   
     }
@@ -210,6 +207,7 @@ $article_color: #004264;
 #currenVenteContent {
     background-color: #dcdcdc;
     padding: 15px;
+    border: 1px solid #dcdcdc;
 }
 
 #bc_main_container.fullScreen {
@@ -259,7 +257,8 @@ $article_color: #004264;
 
     #listVentesContainer,
     #clients, 
-    #stocks {
+    #mvt_fonds,
+    #paiements {
         position: absolute;
         bottom: 0;
         left: 0;
@@ -441,12 +440,11 @@ $article_color: #004264;
 }
 
 #loadRemiseFormButton {
-    float: right;
-    margin-top: -15px;
 }
 
 #venteToPay, 
-#venteToReturn {
+#venteToReturn,
+#venteAvoir {
     text-align: center;
     font-weight: bold;
     font-size: 20px;
@@ -462,6 +460,11 @@ $article_color: #004264;
 #venteToReturn {
     color: #fff;
     background-color: #348C41;
+}
+
+#venteAvoir {
+    color: #fff;
+    background-color: #F0B400;
 }
 
 #ventePaiementButtons {
@@ -502,7 +505,7 @@ $article_color: #004264;
     }
 
     button {
-        margin-left: 30px;
+        margin-left: 0 15px;
     }
 }
 
@@ -554,6 +557,51 @@ $article_color: #004264;
     }
 }
 
+#venteHt {
+    margin-top: 15px;
+
+    & > span {
+        vertical-align: middle;
+    }
+
+    .toggleContainer {
+        vertical-align: middle;
+    }
+}
+
+#avoirRbtForm {
+    display: none;
+    margin: 30px 0;
+
+    #avoirRbtModePaiement {
+        display: none;
+    }
+}
+
+#customerDiscountsContainer {
+    margin: 30px 0 20px;
+
+    #customerDiscounts {
+        max-width: 450px;
+        margin: 0 30px;
+    }
+
+
+    .title {
+        font-weight: bold;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+
+    #totalDiscounts {
+        color: $gray-darker;
+        padding: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        text-align: right;
+    }
+}
+
 .selectArticleLine {
     margin: 5px;
     padding: 10px;
@@ -566,135 +614,147 @@ $article_color: #004264;
     }
 }
 
-#ventePanierLines {
-    .cartArticleLine {
-        padding-top: 10px;
-        margin-top: 10px;
-        border-top: 1px solid $gray;
+#ventePanierLines .cartArticleLine,
+#curVenteRetours .returnLine {
+    padding-top: 10px;
+    margin-top: 10px;
+    border-top: 1px solid $gray;
 
-        .product_title {
-            color: $article_color;
-            font-size: 18px;
-            padding-bottom: 8px;
-            padding-right: 40px;
+    .product_title {
+        color: $article_color;
+        font-size: 18px;
+        padding-bottom: 8px;
+        padding-right: 40px;
 
-            .removeArticle {
-                @include transition(all 0.3s ease);
-                color: $gray;
-                display: inline-block;
-                float: right;
-                margin-right: -30px;
-                font-size: 28px;
-                cursor: pointer;
+        .removeArticle {
+            @include transition(all 0.3s ease);
+            color: $gray;
+            display: inline-block;
+            float: right;
+            margin-right: -30px;
+            font-size: 28px;
+            cursor: pointer;
 
-                &:hover {
-                    color: $danger;
+            &:hover {
+                color: $danger;
+            }
+        }
+    }
+    .product_info {
+        color: $gray-darker;
+        font-size: 12px;
+        padding-left: 15px;
+    }
+
+    .article_remises {
+        display: none;
+        margin: 3px 0;
+        font-size: 12px;
+        color: #8C0000;
+        text-align: right;
+
+        .title {
+            font-weight: bold;
+        }
+
+        .content {
+            .remise {
+                font-size: 14px;
+                padding: 6px 30px 6px 0;
+                span {
+                    font-weight: bold;
                 }
-            }
-        }
-        .product_info {
-            color: $gray-darker;
-            font-size: 12px;
-            padding-left: 15px;
-        }
 
-        .article_remises {
-            display: none;
-            margin: 3px 0;
-            font-size: 12px;
-            color: #8C0000;
-            text-align: right;
-
-            .title {
-                font-weight: bold;
-            }
-
-            .content {
-                .remise {
-                    font-size: 14px;
-                    padding: 6px 30px 6px 0;
-                    span {
-                        font-weight: bold;
-                    }
-
-                    i {
-                        @include transition(all 0.3s ease);
-                        float: right;
-                        font-size: 20px;
-                        color: #b4b4b4;
-                        margin-top: -2px;
-                        margin-right: -30px;
-                        cursor: pointer;
-
-                        &:hover {
-                            color: $danger;
-                        }
-                    }
-                }
-            }
-
-        }
-        .article_options {
-            padding-top: 10px;
-            padding-left: 15px;
-            padding-right: 60px;
-
-            .article_qty {
-                text-align: left;
-                display: inline-block;
-
-                .qty_down,
-                .qty_up {
-                    color: $gray-dark;
-                    font-size: 32px;
-                    cursor: pointer;
-                    vertical-align: middle;
+                i {
                     @include transition(all 0.3s ease);
+                    float: right;
+                    font-size: 20px;
+                    color: #b4b4b4;
+                    margin-top: -2px;
+                    margin-right: -30px;
+                    cursor: pointer;
 
                     &:hover {
-                        color: $primary;
-                    }
-                }
-                .article_qty_input {
-                    padding: 5px;
-                    font-weight: bold;
-                    font-size: 14px;
-                    color: $gray-darker;
-                    border: 1px solid $gray-dark;
-                    text-align: center;
-                    width: 60px;
-                    vertical-align: middle;
-
-                    &:focus {
-                        box-shadow: 0 0 4px #0087B4;
-                        border-color: #005A78;
+                        color: $danger;
                     }
                 }
             }
-            .product_total_price {
-                display: inline-block;
-                float: right;
-                margin-right: -60px;
-                text-align: right;
+        }
 
-                .base_price {
-                    margin-right: 12px;
-                    color: $gray-dark;
-                    font-size: 16px;
-                    text-decoration: line-through;
+    }
+    .article_options {
+        padding-top: 10px;
+        padding-left: 15px;
+        padding-right: 60px;
+
+        .article_qty {
+            text-align: left;
+            display: inline-block;
+
+            .qty_down,
+            .qty_up {
+                color: $gray-dark;
+                font-size: 32px;
+                cursor: pointer;
+                vertical-align: middle;
+                @include transition(all 0.3s ease);
+
+                &:hover {
+                    color: $primary;
                 }
+            }
+            .article_qty_input {
+                padding: 5px;
+                font-weight: bold;
+                font-size: 14px;
+                color: $gray-darker;
+                border: 1px solid $gray-dark;
+                text-align: center;
+                width: 60px;
+                vertical-align: middle;
 
-                .final_price {
-                    color: $article_color;
-                    font-weight: bold;
-                    font-size: 20px;
+                &:focus {
+                    box-shadow: 0 0 4px #0087B4;
+                    border-color: #005A78;
                 }
-
             }
         }
-        .placeAlert {
-            margin-top: 10px;
+        .product_total_price {
+            display: inline-block;
+            float: right;
+            margin-right: -60px;
+            text-align: right;
+
+            .base_price {
+                margin-right: 12px;
+                color: $gray-dark;
+                font-size: 16px;
+                text-decoration: line-through;
+            }
+
+            .final_price {
+                color: $article_color;
+                font-weight: bold;
+                font-size: 20px;
+            }
+
         }
+    }
+    .placeAlert {
+        margin-top: 10px;
+    }
+}
+
+#curVenteRetours {
+    margin-top: 15px;
+    display: none;
+
+    .totalReturnsTitle {
+        font-weight: bold;
+        color: #8c0000;
+        font-size: 16px;
+        display: inline-block;
+        float: right;
     }
 }
 

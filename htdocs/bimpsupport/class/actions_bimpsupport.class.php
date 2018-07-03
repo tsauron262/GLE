@@ -168,7 +168,7 @@ class ActionsBimpsupport {
 //        require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
 //        $groupHotline = new UserGroup($db);
 //        $groupHotline->fetch('', "XX Hotline");
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && userInGroupe("XX Hotline", $user->id)) {
+        if (0 && isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && userInGroupe("XX Hotline", $user->id)) {
             $hrefFin = "#pangridChronoDet100";
             $return .= '<div class="blockvmenufirst blockvmenupair'.($context==1 ? ' vmenu':'').'">';
             $href = DOL_URL_ROOT . '/synopsischrono/index.php?idmenu=845&chronoDet=100&mainmenu=Process';

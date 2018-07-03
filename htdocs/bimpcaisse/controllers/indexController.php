@@ -5,18 +5,25 @@ class indexController extends BimpController
 
     protected $caisse = null;
 
+    public function isCaisseValide(BC_Caisse $caisse, &$errors = array())
+    {
+        return $caisse->isValid($errors);
+    }
+
     public function getUserCaisse()
     {
         if (is_null($this->caisse)) {
             global $user;
 
             if (isset($user->id) && $user->id) {
-                $caisse = BimpObject::getInstance($this->module, 'BC_Caisse');
-                if ($caisse->find(array(
-                            'id_current_user' => (int) $user->id,
-                            'status'          => 1
-                        ))) {
-                    $this->caisse = $caisse;
+                BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
+                $id_caisse = (int) BC_Caisse::getUserCaisse((int) $user->id);
+                if ($id_caisse) {
+                    $this->caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                    if (!BimpObject::objectLoaded($this->caisse)) {
+                        unset($this->caisse);
+                        $this->caisse = null;
+                    }
                 }
             }
         }
@@ -115,7 +122,7 @@ class indexController extends BimpController
 
         $caisse = $this->getUserCaisse();
 
-        if (is_null($caisse)) {
+        if (!BimpObject::objectLoaded($caisse)) {
             $html .= $this->renderOpenCaisseHtml();
         } else {
             $tabs = array(
@@ -129,17 +136,20 @@ class indexController extends BimpController
                     'title'   => 'Clients',
                     'content' => $this->renderClientsTabHtml()
                 ),
-//                array(
-//                    'id'      => 'stocks',
-//                    'title'   => 'Stocks produits',
-//                    'content' => 'Ici, pourquoi pas: consulter les stocks produits'
-//                )
+                array(
+                    'id'      => 'mvt_fonds',
+                    'title'   => 'Mouvements de fonds',
+                    'content' => $this->renderMvtFondsTabHtml($caisse)
+                ),
+                array(
+                    'id'      => 'paiements',
+                    'title'   => 'Historique des paiements',
+                    'content' => $this->renderSessionPaymentsTab($caisse)
+                )
             );
-
 
             $html .= BimpRender::renderNavTabs($tabs);
         }
-
 
         return $html;
     }
@@ -169,6 +179,18 @@ class indexController extends BimpController
                     $caisses[$caisse['id']] = $caisse['name'];
                 }
             }
+
+            $html .= '<div class="buttonsContainer align-right">';
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $onclick = $caisse->getJsActionOnclick('connectUser', array(
+                'id_entrepot' => $id_entrepot
+                    ), array(
+                'form_name' => 'user_connect'
+            ));
+            $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= '<i class="fas fa5-power-off iconLeft"></i>Se connecter à une caisse déjà ouverte';
+            $html .= '</button>';
+            $html .= '</div>';
 
             $html .= '<div id="openCaisseForm">';
 
@@ -274,7 +296,7 @@ class indexController extends BimpController
         } else {
             $caisse = $this->getUserCaisse();
             $errors = array();
-            if (is_null($caisse)) {
+            if (!BimpObject::objectLoaded($caisse)) {
                 $errors[] = 'Aucune caisse ouverte pour l\'utilisateur connecté';
             } else {
                 $this->isCaisseValide($caisse, $errors);
@@ -324,77 +346,17 @@ class indexController extends BimpController
         return $html;
     }
 
-    public function renderChangeUserHtml()
-    {
-        $html = '';
-
-        global $user;
-
-        if (!isset($user->id) || !$user->id) {
-            $html .= BimpRender::renderAlerts('Aucun utilisateur connecté. Veuillez vous authentifier');
-        } else {
-            $caisse = $this->getUserCaisse();
-            $errors = array();
-            if (is_null($caisse)) {
-                $errors[] = 'Aucune caisse ouverte pour l\'utilisateur connecté';
-            } else {
-                $this->isCaisseValide($caisse, $errors);
-            }
-
-            if (count($errors)) {
-                $html .= BimpRender::renderAlerts($errors);
-            } else {
-                $rows = array();
-
-                $rows[] = array(
-                    'label' => 'Caisse',
-                    'input' => '<strong>' . $caisse->getData('name') . '</strong>'
-                );
-
-                $rows[] = array(
-                    'label' => 'Nouvel utilisateur',
-                    'input' => BimpInput::renderInput('search_user', 'id_new_user', $user->id)
-                );
-
-                $rows[] = array(
-                    'label' => 'Déconnecter l\'utilisateur actuel',
-                    'input' => BimpInput::renderInput('toggle', 'logout', 1)
-                );
-
-                $buttons = array();
-
-                $button = '<button id="cancelChangeUserButton" type="button" class="btn btn-danger btn-large buttonLeft">';
-                $button .= '<i class="fa fa-times iconLeft"></i>Annuler';
-                $button .= '</button>';
-
-                $buttons[] = $button;
-
-                $button = '<button id="submitChangeUserButton" type="button" class="btn btn-primary btn-large"';
-                $button .= ' onclick="changeUser($(this));">';
-                $button .= '<i class="fa fa-check iconLeft"></i>Valider';
-                $button .= '</button>';
-
-                $buttons[] = $button;
-
-
-                $html .= '<div id="changeUserForm">';
-                $html .= BimpRender::renderFreeForm($rows, $buttons, 'Changement d\'utilisateur', 'exchange');
-                $html .= '</div>';
-            }
-        }
-
-        return $html;
-    }
-
     public function renderVentesTabHtml()
     {
+        global $user;
+
         $html = '';
 
         $caisse = $this->getUserCaisse();
 
         $html .= '<div id="current_params">';
-        if (!is_null($caisse)) {
-            $html .= '<input type="hidden" name="id_user" value="' . (int) $caisse->getData('id_current_user') . '"/>';
+        if (BimpObject::objectLoaded($caisse)) {
+            $html .= '<input type="hidden" name="id_user" value="' . (int) $user->id . '"/>';
             $html .= '<input type="hidden" name="id_entrepot" value="' . (int) $caisse->getData('id_entrepot') . '"/>';
             $html .= '<input type="hidden" name="id_caisse" value="' . (int) $caisse->id . '"/>';
             $html .= '<input type="hidden" name="caisse_name" value="' . $caisse->getData('name') . '"/>';
@@ -434,20 +396,25 @@ class indexController extends BimpController
         $html .= '<div id="listVentesContainer" class="col-lg-12">';
 
         $html .= '<div id="venteToolbar" class="buttonsContainer">';
+        // Bouton nouvelle vente: 
         $html .= '<button id="newVenteButton" class="btn btn-primary btn-large" type="button">';
         $html .= '<i class="fa fa-plus iconLeft"></i>Nouvelle vente';
         $html .= '</button>';
 
+        // Bouton paiement factures:
+        $html .= '<button id="newPaymentButton" class="btn btn-default btn-large" type="button">';
+        $html .= '<i class="fa fa-euro iconLeft"></i>Paiement factures';
+        $html .= '</button>';
+
+        // Bouton Fermer caisse:
         $html .= '<button id="closeCaisseButton" class="btn btn-danger btn-large" type="button">';
         $html .= '<i class="fa fa-times iconLeft"></i>Fermer la caisse';
         $html .= '</button>';
 
-        $html .= '<button id="changeUserButton" class="btn btn-default btn-large" type="button">';
-        $html .= '<i class="fa fa-exchange iconLeft"></i>Changer d\'utilisateur';
-        $html .= '</button>';
-
-        $html .= '<button id="caisseMvtButton" class="btn btn-default btn-large" type="button">';
-        $html .= '<i class="fa fa-money iconLeft"></i>Mouvement de fonds';
+        // Bouton déconnexion utilisateur:
+        $onclick = $caisse->getJsActionOnclick('disconnectUser');
+        $html .= '<button id="disconnectUserButton" class="btn btn-default btn-large" type="button" onclick="' . $onclick . '">';
+        $html .= '<i class="fas fa5-power-off iconLeft"></i>Se déconnecter de la caisse';
         $html .= '</button>';
         $html .= '</div>';
 
@@ -455,7 +422,6 @@ class indexController extends BimpController
 
         if (!is_null($caisse)) {
             $html .= $this->renderCloseCaisseHtml();
-            $html .= $this->renderChangeUserHtml();
 
             $list = new BC_ListTable(BimpObject::getInstance($this->module, 'BC_Vente'), 'default', 1, 0, 'Dernières ventes');
             $list->addFieldFilterValue('status', array(
@@ -479,34 +445,45 @@ class indexController extends BimpController
         return $list->renderHtml();
     }
 
-    public function isCaisseValide(BC_Caisse $caisse, &$errors)
+    public function renderMvtFondsTabHtml(BC_Caisse $caisse)
     {
-        global $user;
+        $errors = array();
 
-        if (!isset($user->id) || !$user->id) {
-            $errors[] = 'Aucun utilisateur connecté. Veuillez vous authentifier';
-        } else {
-
-            if (!$caisse->isLoaded()) {
-                $errors[] = 'ID de la caisse invalide. Cette caisse n\'existe pas';
-            } elseif (!(int) $caisse->getData('status')) {
-                $errors[] = 'Caisse fermée';
-            } else {
-                $id_caisse_user = (int) $caisse->getData('id_current_user');
-                if (!$id_caisse_user) {
-                    $errors[] = 'Aucun utilisateur assigné à cette caisse';
-                } elseif ((int) $user->id !== $id_caisse_user) {
-                    $errors[] = 'Utilisateur invalide. L\'utilisateur assigné à cette caisse doit se reconnecter';
-                }
-
-                $id_current_session = (int) $caisse->getData('id_current_session');
-                if (!$id_current_session) {
-                    $errors[] = 'Aucun ID de session enregistré pour cette caisse';
-                }
-            }
+        if (!$this->isCaisseValide($caisse, $errors)) {
+            return BimpRender::renderAlerts($errors);
         }
 
-        return (count($errors) ? false : true);
+        $caisseMvt = BimpObject::getInstance('bimpcaisse', 'BC_CaisseMvt');
+        $list = new BC_ListTable($caisseMvt, 'caisse', 1, null, 'Mouvements de fonds pour la caisse "' . $caisse->getData('name') . '"', 'exchange');
+        $list->addFieldFilterValue('id_entrepot', (int) $caisse->getData('id_entrepot'));
+        $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
+        $html .= $list->renderHtml();
+
+        return $html;
+    }
+
+    public function renderSessionPaymentsTab(BC_Caisse $caisse)
+    {
+        $errors = array();
+
+        if (!$this->isCaisseValide($caisse, $errors)) {
+            return BimpRender::renderAlerts($errors);
+        }
+
+        $session = BimpObject::getInstance('bimpcaisse', 'BC_CaisseSession', (int) $caisse->getData('id_current_session'));
+        if (!$session->isLoaded()) {
+            $html .= BimpRender::renderAlerts('Aucune session valide en cours pour cette caisse');
+        } else {
+            $html .= $session->renderView('default', true, 1);
+        }
+
+        $bc_paiement = BimpObject::getInstance('bimpcaisse', 'BC_Paiement');
+        $list = new BC_ListTable($bc_paiement, 'session', 1, null, 'Liste des paiements - caisse: "' . $caisse->getData('name') . '"', 'euro');
+        $list->addFieldFilterValue('id_caisse', (int) $caisse->id);
+        $list->addFieldFilterValue('id_caisse_session', (int) $caisse->getData('id_current_session'));
+        $html .= $list->renderHtml();
+
+        return $html;
     }
 
     // Traitements Ajax:
@@ -534,6 +511,22 @@ class indexController extends BimpController
             $errors[] = 'Montant du fonds de caisse non renseigné';
         }
 
+        BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
+        $id_user_caisse = (int) BC_Caisse::getUserCaisse((int) $user->id);
+        if ($id_user_caisse) {
+            if ($id_user_caisse === $id_caisse) {
+                $errors[] = 'Vous êtes déjà connecté à cette caisse';
+            } else {
+                $user_caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_user_caisse);
+                if (BimpObject::objectLoaded($user_caisse)) {
+                    $caisse_label = '"' . $user_caisse->getData('name') . '"';
+                } else {
+                    $caisse_label = ' d\'ID ' . $id_user_caisse;
+                }
+                $errors[] = 'Vous êtes déjà connecté à la caisse ' . $caisse_label;
+            }
+        }
+
         if (!count($errors)) {
             $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
             if (!$caisse->isLoaded()) {
@@ -546,7 +539,7 @@ class indexController extends BimpController
 
                     if ($fonds !== $current_fonds) {
                         if (!$confirm_fonds) {
-                            $msg = 'Un écart avec le fonds de caisse enregistré a été constaté.<br/>';
+                            $msg = 'Un écart avec le fonds de caisse enregistré a été constaté (Fonds actuel: ' . BimpTools::displayMoneyValue($current_fonds, 'EUR') . ').<br/>';
                             $msg .= 'Confirmez-vous le montant du fonds de caisse indiqué?';
                             $html = BimpRender::renderAlerts($msg, 'warning');
                             $need_confirm_fonds = 1;
@@ -577,17 +570,18 @@ class indexController extends BimpController
                         if (!count($session_errors)) {
                             $session_errors = $session->create();
                             if (!count($session_errors)) {
-                                // Mise à jour de la caisse: 
-                                $caisse->set('id_current_user', (int) $user->id);
+                                // Mise à jour de la caisse:
                                 $caisse->set('id_current_session', (int) $session->id);
                                 $caisse->set('status', 1);
                                 $session_errors = $caisse->update();
+
+                                // Enregistrement de l'utilisateur: 
+                                $errors = $caisse->connectUser($user->id);
                             }
                         }
 
                         if (count($session_errors)) {
-                            $errors[] = 'Echec de l\'ouverture de la caisse';
-                            $errors = array_merge($errors, $session_errors);
+                            $errors[] = BimpTools::getMsgFromArray($session_errors, 'Echec de l\'ouverture de la caisse');
                         } else {
                             $html = BimpRender::renderAlerts('Ouverture de la caisse "' . $caisse->getData('name') . '" effectuée avec succès', 'success');
                         }
@@ -641,7 +635,7 @@ class indexController extends BimpController
 
                     if ($fonds !== $current_fonds) {
                         if (!$confirm_fonds) {
-                            $msg = 'Un écart avec le fonds de caisse théorique a été constaté.<br/>';
+                            $msg = 'Un écart avec le fonds de caisse théorique a été constaté (Fonds actuel: ' . BimpTools::displayMoneyValue($current_fonds, 'EUR') . ').<br/>';
                             $msg .= 'Confirmez-vous le montant du fonds de caisse indiqué?';
                             $html = BimpRender::renderAlerts($msg, 'warning');
                             $need_confirm_fonds = 1;
@@ -650,8 +644,7 @@ class indexController extends BimpController
                             $msg = 'Correction du fonds de caisse suite à un différentiel constaté à la fermeture par ' . $user->getNomUrl();
                             $correction_errors = $caisse->correctFonds($fonds, $msg);
                             if (count($correction_errors)) {
-                                $errors[] = 'Echec de la correction du fonds de caisse';
-                                $errors = array_merge($errors, $correction_errors);
+                                $errors[] = BimpTools::getMsgFromArray($correction_errors, 'Echec de la correction du fonds de caisse');
                             } else {
                                 $fonds = $caisse->getSavedData('fonds');
                             }
@@ -667,17 +660,17 @@ class indexController extends BimpController
                         $session_errors = $session->update();
 
                         if (!count($session_errors)) {
-                            // Mise à jour de la caisse: 
-                            $caisse->set('id_current_user', 0);
+
                             $caisse->set('id_current_session', 0);
                             $caisse->set('status', 0);
                             $session_errors = $caisse->update();
                         }
 
                         if (count($session_errors)) {
-                            $errors[] = 'Echec de la fermeture de la caisse';
-                            $errors = array_merge($errors, $session_errors);
+                            $errors[] = BimpTools::getMsgFromArray($session_errors, 'Echec de la fermeture de la caisse');
                         } else {
+                            $errors = array_merge($errors, $caisse->disconnectAllUsers());
+
                             $html = BimpRender::renderAlerts('Fermeture de la caisse "' . $caisse->getData('name') . '" effectuée avec succès', 'success');
                         }
                     }
@@ -691,52 +684,6 @@ class indexController extends BimpController
             'need_confirm_fonds' => $need_confirm_fonds,
             'id_entrepot'        => $id_entrepot,
             'request_id'         => BimpTools::getValue('request_id', 0),
-        )));
-    }
-
-    protected function ajaxProcessChangeUser()
-    {
-        $errors = array();
-        global $user;
-
-        if (!isset($user->id) || !$user->id) {
-            $errors[] = 'Aucun utilisateur connecté. Authentification de l\'utilisateur actuellement assigné à la caisse nécessaire';
-        }
-
-        $id_caisse = (int) BimpTools::getValue('id_caisse', 0);
-        $id_new_user = (int) BimpTools::getValue('id_new_user', 0);
-        $logout = (int) BimpTools::getValue('logout', 0);
-
-        if (!$id_caisse) {
-            $errors[] = 'Aucune caisse sélectionnée';
-        }
-        if (!$id_new_user) {
-            $id_new_user[] = 'ID du nouvel utilisateur absent';
-        }
-
-        if ($id_new_user === (int) $user->id) {
-            $errors[] = 'L\'utilisateur sélectionné est déjà assigné à cette caisse';
-        }
-
-        if (!count($errors)) {
-            $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
-
-            if ($this->isCaisseValide($caisse, $errors)) {
-                // Mise à jour de la caisse: 
-                $caisse->set('id_current_user', $id_new_user);
-                $errors = $caisse->update();
-            }
-
-            if (!count($errors) && $logout) {
-                global $db;
-                require_once DOL_DOCUMENT_ROOT . '/user/logout.php';
-            }
-        }
-
-        die(json_encode(array(
-            'errors'     => $errors,
-            'success'    => 'Changement d\'utilisateur effectué avec succès',
-            'request_id' => BimpTools::getValue('request_id', 0),
         )));
     }
 
@@ -976,14 +923,57 @@ class indexController extends BimpController
         )));
     }
 
+    protected function ajaxProcessSaveVenteHt()
+    {
+        $errors = array();
+
+        $vente_ht = BimpTools::getValue('vente_ht', null);
+        $id_vente = BimpTools::getValue('id_vente', 0);
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        }
+
+        if (is_null($vente_ht)) {
+            $errors[] = 'Champ "Vente au prix hors-taxes" non spécifié';
+        } else {
+            $vente_ht = (int) $vente_ht;
+        }
+
+        $vente_data = array();
+
+        if (!count($errors)) {
+            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            if (!$vente->isLoaded()) {
+                $errors[] = 'Cette vente n\'existe plus';
+            } else {
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $vente->set('vente_ht', (int) $vente_ht);
+                    $errors = $vente->update();
+                }
+                $vente_data = $vente->getAjaxData();
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'success'    => 'Mise à jour des conditions de vente effectuée avec succès',
+            'vente_data' => $vente_data,
+            'request_id' => BimpTools::getValue('request_id', 0),
+        )));
+    }
+
     public function ajaxProcessSaveClient()
     {
         $errors = array();
 
-        $id_vente = BimpTools::getValue('id_vente', 0);
-        $id_client = BimpTools::getValue('id_client', 0);
+        $id_vente = (int) BimpTools::getValue('id_vente', 0);
+        $id_client = (int) BimpTools::getValue('id_client', 0);
 
         $html = '';
+        $discounts_html = '';
 
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
@@ -1001,20 +991,25 @@ class indexController extends BimpController
                 if ($vente->getData('status') === 2) {
                     $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
                 } else {
-                    $vente->set('id_client', (int) $id_client);
-                    $vente->set('id_client_contact', 0);
-                    $errors = $vente->update();
-                    if (!count($errors)) {
-                        $html = $vente->renderClientView();
+                    $current_client = (int) $vente->getData('id_client');
+                    if ($current_client !== $id_client) {
+                        $vente->set('id_client', (int) $id_client);
+                        $vente->set('id_client_contact', 0);
+                        $errors = $vente->update();
+                        if (!count($errors)) {
+                            $html = $vente->renderClientView();
+                            $discounts_html = $vente->renderDiscountsAssociation();
+                        }
                     }
                 }
             }
         }
 
         die(json_encode(array(
-            'errors'     => $errors,
-            'html'       => $html,
-            'request_id' => BimpTools::getValue('request_id', 0),
+            'errors'         => $errors,
+            'html'           => $html,
+            'discounts_html' => $discounts_html,
+            'request_id'     => BimpTools::getValue('request_id', 0),
         )));
     }
 
@@ -1372,6 +1367,131 @@ class indexController extends BimpController
         die(json_encode(array(
             'html'       => $this->renderCaisseSelect(),
             'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessSearchEquipmentToReturn()
+    {
+        $errors = array();
+        $warnings = array();
+        $equipments = array();
+
+        $serial = BimpTools::getValue('serial', '');
+        $id_vente = (int) BimpTools::getValue('id_vente', 0);
+
+        if (!$serial) {
+            $errors[] = 'Aucun numéro de série spécifié';
+        }
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        }
+
+        $vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente', $id_vente);
+        if (!BimpObject::objectLoaded($vente)) {
+            $errors[] = 'ID de la vente invalide';
+        }
+
+        $id_client = (int) $vente->getData('id_client');
+
+        if (!count($errors)) {
+            BimpObject::loadClass('bimpequipment', 'Equipment');
+            BimpObject::loadClass('bimpequipment', 'BE_Place');
+
+            $currentReturnedEquipments = array();
+
+            $returns = $vente->getChildrenObjects('returns');
+
+            foreach ($returns as $return) {
+                $id_equipment = (int) $return->getData('id_equipment');
+                if ($id_equipment) {
+                    $currentReturnedEquipments[] = $id_equipment;
+                }
+            }
+
+            $list = Equipment::findEquipments($serial, $id_client);
+
+            if (count($list)) {
+                $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+                $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe');
+                foreach ($list as $id_equipment) {
+                    if (in_array($id_equipment, $currentReturnedEquipments)) {
+                        $warnings[] = 'Un équipement correspondant à ce numéro de série a déjà été ajouté aux retours';
+                        continue;
+                    }
+                    if ($equipment->fetch((int) $id_equipment)) {
+                        $place = $equipment->getCurrentPlace();
+                        if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT &&
+                                (int) $place->getData('id_client')) {
+                            if ($client->fetch((int) $place->getData('id_client'))) {
+                                $equipments[] = array(
+                                    'id'        => (int) $id_equipment,
+                                    'label'     => $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . ' (' . $client->getData('nom') . ')',
+                                    'id_client' => (int) $place->getData('id_client')
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (!count($equipments)) {
+                $msg = 'Aucun équipement elligible au retour trouvé pour ce numéro de série';
+                if ($id_client) {
+                    $msg .= ' et le client sélectionné';
+                }
+                $errors[] = $msg;
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'warnings'   => $warnings,
+            'equipments' => $equipments,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessRemoveReturn()
+    {
+        $errors = array();
+
+        $id_vente = BimpTools::getValue('id_vente', 0);
+        $id_return = BimpTools::getValue('id_return', 0);
+
+        if (!$id_vente) {
+            $errors[] = 'ID de la vente absent';
+        }
+
+        if (!$id_return) {
+            $errors[] = 'Aucun article retourné spécifié';
+        }
+
+        $vente_data = array();
+
+        if (!count($errors)) {
+            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            if (!$vente->isLoaded()) {
+                $errors[] = 'Cette vente n\'existe plus';
+            } else {
+                if ($vente->getData('status') === 2) {
+                    $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
+                } else {
+                    $return = BimpObject::getInstance($this->module, 'BC_VenteReturn', (int) $id_return);
+                    if (!$return->isLoaded()) {
+                        $errors[] = 'Article non trouvé';
+                    } else {
+                        $errors = $return->delete();
+                    }
+                }
+                $vente_data = $vente->getAjaxData();
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'vente_data' => $vente_data,
+            'request_id' => BimpTools::getValue('request_id', 0),
         )));
     }
 }

@@ -61,10 +61,8 @@ function initEvents() {
 }
 
 function addLineTransfer(transfer) {
-
-    var id_tr = transfer.id;
-    var line = '<tr id=' + id_tr + '>';
-    line += '<td>' + transfer.id + '</td>';
+    var line = '<tr id=' + transfer.id + '>';
+    line += '<td>' + transfer.ref + '</td>';
     line += '<td>' + transfer.url_user + '</td>';
     line += '<td>' + transfer.name_status + '</td>';
     line += '<td>' + transfer.date_opening + '</td>';
@@ -118,6 +116,8 @@ function diplayLinks(right_caisse, right_caisse_admin) {
     if (right_caisse_admin === 1)
         $('#ph_links').append('<input type="button" class="butAction" value="Accéder caisse admin" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpcaisse/?fc=admin&id_entrepot=' + fk_warehouse + '\'">');
     $('#ph_links').append('<input type="button" class="butAction" value="Tous les transferts" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpequipment/manageequipment/viewReceptionMain.php?entrepot_id=' + fk_warehouse + '\'">');
+    $('#ph_links').append('<input type="button" class="butAction" value="BL Non envoyés" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpreservation/index.php?fc=shipments&shipped=0&invoiced=0&id_entrepot=' + fk_warehouse + '\'">');
+    $('#ph_links').append('<input type="button" class="butAction" value="BL Non facturés" onclick="location.href=\'' + DOL_URL_ROOT + '/bimpreservation/index.php?fc=shipments&shipped=1&invoiced=0&id_entrepot=' + fk_warehouse + '\'">');
 }
 
 

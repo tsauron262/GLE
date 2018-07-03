@@ -317,13 +317,33 @@ class BimpInput
                 $html .= ob_get_clean();
                 break;
 
-            case 'search_ziptown':
-                if (!isset($options['linked_fields'])) {
-                    $options['linked_fields'] = array();
+            case 'search_ziptown':   
+                $html = '<div class="searchZiptownInputContainer">';
+                $html .= '<input type="text" class="search_ziptown" name="'.$field_name.'" value="'.$value.'"';
+                if (isset($options['field_type'])) {
+                    $html .= ' data-field_type="'.$options['field_type'].'"';
                 }
-                global $db;
-                $formCompany = new FormCompany($db);
-                $html .= $formCompany->select_ziptown($value, $field_name, $options['linked_fields'], 0, 0, '', 'maxwidth50onsmartphone');
+                if (isset($options['town_field'])) {
+                    $html .= ' data-town_field="'.$options['town_field'].'"';
+                }
+                if (isset($options['zip_field'])) {
+                    $html .= ' data-zip_field="'.$options['zip_field'].'"';
+                }
+                if (isset($options['state_field'])) {
+                    $html .= ' data-state_field="'.$options['state_field'].'"';
+                }
+                if (isset($options['country_field'])) {
+                    $html .= ' data-country_field="'.$options['country_field'].'"';
+                }
+                if (isset($options['data'])) {
+                    foreach ($options['data'] as $data_name => $data_value) {
+                        $html .= ' data-' . $data_name . '="' . $data_value . '"';
+                    }
+                }
+                $html .= '/>';
+                $html .= '<i class="loading fa fa-spinner fa-spin"></i>';
+                $html .= '</div>';
+                $html .= '<div class="searchZipTownResults hideOnClickOut"></div>';
                 break;
 
             case 'search_product':
@@ -999,16 +1019,16 @@ class BimpInput
         foreach ($values as $value => $label) {
             $html .= '<tr class="itemRow">';
             $html .= '<td style="display: none">';
-            $html .= '<input type="hidden" name="' . $field_name . '[]" value="' . $value . '"/>';
+            $html .= '<input class="item_value" type="hidden" name="' . $field_name . '[]" value="' . $value . '"/>';
             $html .= '</td>';
             $html .= '<td>' . $label . '</td>';
             $html .= '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn" onclick="';
             if ($autosave) {
                 $html .= 'var $button = $(this); deleteObjectMultipleValuesItem(\'' . $object->module . '\', \'' . $object->object_name . '\', ';
                 $html .= $object->id . ', \'' . $field_name . '\', \'' . $value . '\', null, function() {';
-                $html .= '$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();});});';
+                $html .= 'removeMultipleInputValue($button, \'' . $value_input_name . '\');});';
             } else {
-                $html .= '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();});"';
+                $html .= 'removeMultipleInputValue($(this), \'' . $value_input_name . '\');';
             }
             $html .= '"><i class="fa fa-trash"></i></button></td>';
             $html .= '</tr>';

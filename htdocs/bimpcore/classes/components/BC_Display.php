@@ -53,7 +53,7 @@ class BC_Display extends BimpComponent
         $this->field_params = $field_params;
         $this->value = $value;
 
-        if (in_array($name, array('nom', 'nom_url', 'card'))) {
+        if (in_array($name, array('nom', 'nom_url', 'card', 'ref'))) {
             $this->params_def['type']['default'] = $name;
         } elseif (isset($field_params['values']) && !is_null($field_params['values']) && count($field_params['values'])) {
             $this->params_def['type']['default'] = 'array_value';
@@ -115,6 +115,7 @@ class BC_Display extends BimpComponent
 
                     case 'nom':
                     case 'nom_url':
+                    case 'ref':
                         if ($this->field_name === $this->object->getParentIdProperty()) {
                             $instance = $this->object->getParentInstance();
                         } elseif (isset($this->field_params['object'])) {
@@ -125,6 +126,9 @@ class BC_Display extends BimpComponent
 
                         if (!is_null($instance) && isset($instance->id) && $instance->id) {
                             switch ($this->params['type']) {
+                                case 'ref':
+                                    $html .= $instance->ref;
+                                    break;
                                 case 'nom':
                                     $html .= BimpObject::getInstanceNom($instance);
                                     if (!$this->no_html && $this->params['card']) {

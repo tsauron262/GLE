@@ -14,15 +14,6 @@ objects:
                 file: entrepot
             id_object:
                 field_value: id_entrepot
-    user: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_User
-            id_object: 
-                field_value: id_current_user
     current_session: 
         relation: hasOne
         delete: 0
@@ -30,6 +21,16 @@ objects:
             bimp_object: BC_CaisseSession
             id_object: 
                 field_value: id_current_session
+    account: 
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: 
+                module: compta/bank
+                file: account
+            id_object: 
+                field_value: id_account
+                
 fields: 
     id_entrepot:
         label: Entrepôt
@@ -38,6 +39,8 @@ fields:
         input: 
             type: search_entrepot
         required: 1
+        default_value: 
+            request: id_entrepot
     name: 
         label: Nom
         required: 1
@@ -46,16 +49,6 @@ fields:
         type: int
         values: 
             array: states
-    id_current_user: 
-        label: Utilisateur connecté
-        type: id_object
-        object: user
-        input: 
-            type: search_user
-        display: 
-            nom_url: 
-                type: nom_url
-                modal_view: default
     id_current_session:
         label: Session actuelle
         type: id_object
@@ -63,6 +56,12 @@ fields:
     fonds: 
         label: Fonds de caisse
         type: money
+    id_account: 
+        label: Compte bancaire
+        type: id_object
+        object: account
+        input: 
+            type: select_mysoc_account
 
 forms: 
     default: 
@@ -71,10 +70,27 @@ forms:
             - field: name
             - field: status
             - field: fonds
+            - field: id_account
     edit: 
         rows: 
             - field: name
-            - field: id_current_user
+            - field: id_account
+            
+    user_connect: 
+        rows: 
+            - field: id_entrepot
+            - custom: 1
+              label: Caisse
+              input_name: id_caisse
+              data_type: int
+              input: 
+                  type: select
+                  options: 
+                      array: openCaisses
+              depends_on: id_entrepot
+              display_if: 
+                  field_name: id_entrepot
+                  hide_values: 0,
 
 lists: 
     default: 
@@ -101,8 +117,8 @@ lists:
                 field: status
             fonds: 
                 field: fonds
-            id_current_user:
-                field: id_current_user
+            account: 
+                field: id_account
                 display: nom_url
         add_form_name: default
         edit_btn: 1

@@ -230,7 +230,7 @@ class pdf_bimpsupport_destruction extends ModeleBimpSupport {
 
 
 
-                $product_label = $equipment->displayProduct('default', true);
+                $product_label = $equipment->displayProduct('nom', true);
                 //le prod
                 $pdf->SetXY('115', '88');
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);

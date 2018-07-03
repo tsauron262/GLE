@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS `llx_be_logiciel` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 CREATE TABLE IF NOT EXISTS `llx_be_user_account` (
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS `llx_be_user_account` (
   `name` VARCHAR(128) NOT NULL DEFAULT '',
   `login` varchar(128) NOT NULL DEFAULT '',
   `pword` varchar(128) NOT NULL DEFAULT '',
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_be_connection` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `llx_be_connection` (
   `port_redir` varchar(128) NOT NULL DEFAULT '',
   `font_size` int(10) UNSIGNED NOT NULL,
   `id_user_account` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_be_reseau` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `llx_be_reseau` (
   `date_create` datetime DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 ALTER TABLE `llx_bmp_event_tarif` DROP `ca_moyen_bar`;
 ALTER TABLE `llx_bmp_event` ADD `ca_moyen_bar` FLOAT NOT NULL DEFAULT '0' AFTER `status`;
@@ -62,4 +62,4 @@ CREATE TABLE IF NOT EXISTS `llx_bmp_montant_detail_value` (
   `label` varchar(256) NOT NULL,
   `use_groupe_number` tinyint(1) NOT NULL DEFAULT '0',
   `unit_price` float NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

@@ -701,7 +701,7 @@ print "</tr>";
 
         print '</table></div><div class="divButAction">';
         print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
-        if (($user->rights->synopsischrono->Modifier || $rightChrono->modifier ) && $chr->statut == 0) {
+        if (($user->rights->synopsischrono->Modifier || $rightChrono->modifier ) && $chr->statut == 0 && $chr->model_refid != 105) {
             print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Modify\"'>Modifier</button>";
         }
         if (($user->rights->synopsischrono->ModifierApresValide ) && $chr->statut != 999) {

@@ -15,14 +15,14 @@ CREATE TABLE IF NOT EXISTS `llx_bnf_frais` (
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bnf_frais_montant` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_frais` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `tva_tx` float NOT NULL DEFAULT '0',
   `amount` float NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 CREATE TABLE IF NOT EXISTS `llx_bnf_frais_kilometers` (
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `llx_bnf_frais_kilometers` (
   `chevaux` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `carburant` INT NOT NULL DEFAULT '0';
   `kilometers` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 CREATE TABLE IF NOT EXISTS `llx_bnf_period` (
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS `llx_bnf_period` (
   `id_user` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_from` date DEFAULT NULL,
   `date_to` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 ALTER TABLE `llx_bs_sav` CHANGE `system` `system` INT(11) UNSIGNED NOT NULL DEFAULT '0';
 

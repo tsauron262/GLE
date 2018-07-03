@@ -37,6 +37,8 @@ class BC_ListTable extends BC_List
         'field_name'  => array(),
         'search'      => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null)
     );
+    
+    protected $selected_rows = array();
 
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
     {
@@ -209,6 +211,10 @@ class BC_ListTable extends BC_List
         }
     }
 
+    public function setSelectedRows($selected_rows) {
+        $this->selected_rows = $selected_rows;
+    }
+    
     // Rendus HTML:
 
     public function renderHtmlContent()
@@ -409,7 +415,7 @@ class BC_ListTable extends BC_List
                     $field = new BC_Field($this->object, $col_params['field'], true);
                     $html .= $field->renderSearchInput();
                     unset($field);
-                } elseif (!is_null($col_params['search']) && !is_null($col_params['search'])) {
+                } elseif (!is_null($col_params['search']) && method_exists($this->object, 'get' . ucfirst($col_name) . 'SearchFilters')) {
 //                    $input_name = 'search_' . $col_params['field_name'];
                     $search_type = $col_params['search']['type'];
                     $html .= '<div class="searchInputContainer"';
@@ -727,6 +733,12 @@ class BC_ListTable extends BC_List
                 if (is_numeric($id_object)) {
                     $this->object->fetch((int) $id_object);
                 }
+                
+                if (in_array((int) $id_object, $this->selected_rows)) {
+                    $selected = true;
+                } else {
+                    $selected = false;
+                }
 
                 $item_params = $this->fetchParams($this->config_path, $this->item_params);
 
@@ -746,6 +758,9 @@ class BC_ListTable extends BC_List
                 if (isset($this->new_values[(int) $id_object]) && count($this->new_values[(int) $id_object])) {
                     $html .= ' modified';
                 }
+                if ($selected) {
+                    $html .= ' selected';
+                }
                 $html .= '" id="' . $this->object->object_name . '_row_' . $id_object . '"';
                 $html .= ' data-id_object="' . $id_object . '"';
                 if ($this->params['positions']) {
@@ -762,6 +777,9 @@ class BC_ListTable extends BC_List
                         $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
                         $html .= ' name="' . $this->object->object_name . '_check"';
                         $html .= ' class="item_check"';
+                        if ($selected) {
+                            $html .= ' checked="1"';
+                        }
                         $html .= ' data-id_object="' . $id_object . '"/>';
                     }
                 }

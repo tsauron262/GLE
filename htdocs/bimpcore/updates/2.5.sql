@@ -20,4 +20,4 @@ CREATE TABLE IF NOT EXISTS `llx_be_equipment_place` (
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;

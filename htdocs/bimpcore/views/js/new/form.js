@@ -841,17 +841,17 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         }
 
         var html = '<tr class="itemRow">';
-        html += '<td style="display: none"><input type="hidden" value="' + value + '" name="' + values_field_name + '[]"/></td>';
+        html += '<td style="display: none"><input class="item_value" type="hidden" value="' + value + '" name="' + values_field_name + '[]"/></td>';
         html += '<td>' + label + '</td>';
         html += '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn"';
-        html += ' onclick="$(this).parent(\'td\').parent(\'tr\').remove();';
+        html += ' onclick="';
         if (ajax_save) {
             html += 'var $button = $(this); deleteObjectMultipleValuesItem(\'' + $container.data('module') + '\', ';
             html += '\'' + $container.data('object_name') + '\', ';
             html += $container.data('id_object') + ', \'' + values_field_name + '\', \'' + value + '\', null, ';
-            html += 'function(){$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();})});';
+            html += 'function(){removeMultipleInputValue($button, \'' + value_input_name + '\');});';
         } else {
-            html += '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove(); checkMultipleValues();});';
+            html += 'removeMultipleInputValue($(this), \'' + value_input_name + '\');';
         }
         html += '"><i class="fa fa-trash"></i></button></td>';
         html += '</tr>';
@@ -861,23 +861,74 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
         if (ajax_save) {
             addObjectMultipleValuesItem($container.data('module'), $container.data('object_name'), $container.data('id_object'), values_field_name, value, null, function () {
-                $container.find('div.inputMultipleValuesContainer').find('table').find('tbody').append(html);
+                $container.find('table').find('tbody.multipleValuesList').append(html);
+                checkMultipleValues();
+                $('body').trigger($.Event('inputMultipleValuesChange', {
+                    input_name: values_field_name,
+                    $container: $container
+                }));
             });
         } else {
             $container.find('table').find('tbody.multipleValuesList').append(html);
+            checkMultipleValues();
+            $('body').trigger($.Event('inputMultipleValuesChange', {
+                input_name: values_field_name,
+                $container: $container
+            }));
         }
     } else {
         bimp_msg('Une erreur est survenue. opération impossible', 'danger');
     }
-    checkMultipleValues();
+}
+
+function removeMultipleInputValue($button, value_input_name) {
+    var $multipleValues = $button.findParentByClass('inputMultipleValuesContainer');
+
+    $button.parent('td').parent('tr').fadeOut(250, function () {
+        $(this).remove();
+        checkMultipleValues();
+        $('body').trigger($.Event('inputMultipleValuesChange', {
+            input_name: $multipleValues.data('field_name'),
+            $container: $multipleValues
+        }));
+    });
 }
 
 function checkMultipleValues() {
     $('.inputMultipleValuesContainer').each(function () {
+        var $container = $(this);
         if ($(this).find('.itemRow').length) {
             $(this).find('.noItemRow').hide();
         } else {
             $(this).find('.noItemRow').show();
+        }
+        var $inputContainer = $container.parent().find('.inputContainer');
+        if ($inputContainer.length) {
+            var input_name = $inputContainer.data('field_name');
+            if (input_name) {
+                var $input = $inputContainer.find('[name="' + input_name + '"]');
+                if ($input.length) {
+                    if ($input.tagName() === 'select') {
+                        $input.find('option').show();
+                        $container.find('.itemRow').each(function () {
+                            $input.find('option[value="' + $(this).find('.item_value').val() + '"]').hide();
+                        });
+                        var show_input = false;
+                        $input.find('option').each(function () {
+                            if ($(this).css('display') !== 'none') {
+                                show_input = true;
+                            }
+                        });
+                        if (show_input) {
+                            $input.show();
+                            $container.find('.addValueBtn').parent('div').show();
+                        } else {
+                            $input.hide();
+                            $container.find('.addValueBtn').parent('div').hide();
+                        }
+                    }
+                }
+            }
         }
     });
 }
@@ -1011,6 +1062,97 @@ function addSubObjectForm($button, object_name) {
     }
 }
 
+function searchZipTown($input) {
+    if (!$.isOk($input)) {
+        return;
+    }
+
+    var field_type = $input.data('field_type');
+    if (!field_type) {
+        return;
+    }
+
+    var data = {};
+    data[field_type] = $input.val();
+
+    $input.parent().find('.loading').show();
+
+    BimpAjax('searchZipTown', data, null, {
+        $input: $input,
+        field_type: field_type,
+        display_success: false,
+        display_errors: false,
+        display_warnings: false,
+        success: function (result, bimpAjax) {
+            $input.parent().find('.loading').hide();
+            if (result.html) {
+                $input.parent().parent().find('.searchZipTownResults').html(result.html).show();
+            } else {
+                $input.parent().parent().find('.searchZipTownResults').html('').hide();
+            }
+        },
+        error: function () {
+            $input.parent().find('.loading').hide();
+        }
+    });
+}
+
+function selectZipTown($button) {
+    var town = $button.data('town');
+    var zip = $button.data('zip');
+    var state = $button.data('state');
+    var country = $button.data('country');
+
+    var $container = $button.findParentByClass('searchZipTownResults');
+    $container.html('').hide();
+    var $input = $container.parent().find('input.search_ziptown');
+
+    var field_type = $input.data('field_type');
+
+    if (zip && field_type === 'zip') {
+        $input.val(zip);
+    }
+    if (town && field_type === 'town') {
+        $input.val(town);
+    }
+
+    var $form = $input.findParentByTag('form');
+    if ($.isOk($form)) {
+        var town_field = $input.data('town_field');
+        var zip_field = $input.data('zip_field');
+        var state_field = $input.data('state_field');
+        var country_field = $input.data('country_field');
+
+        if (town_field && town) {
+            var $townInput = $form.find('[name="' + town_field + '"]');
+            if ($townInput.length) {
+                $townInput.val(town).change();
+            }
+        }
+
+        if (zip_field && zip) {
+            var $zipInput = $form.find('[name="' + zip_field + '"]');
+            if ($zipInput.length) {
+                $zipInput.val(zip).change();
+            }
+        }
+
+        if (state_field && state) {
+            var $stateInput = $form.find('[name="' + state_field + '"]');
+            if ($stateInput.length) {
+                $stateInput.val(state).change();
+            }
+        }
+
+        if (country_field && country) {
+            var $countryInput = $form.find('[name="' + country_field + '"]');
+            if ($countryInput.length) {
+                $countryInput.val(country).change();
+            }
+        }
+    }
+}
+
 // Gestion de l'affichage conditionnel des champs: 
 
 function toggleInputDisplay($container, $input) {
@@ -1140,7 +1282,9 @@ function setFormEvents($form) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
                         e.stopPropagation();
-                        submitForm($form.attr('id'));
+                        if (typeof (e.no_submit) === 'undefined' || !e.no_submit) {
+                            submitForm($form.attr('id'));
+                        }
                     }
                 });
             }
@@ -1230,6 +1374,14 @@ function setInputsEvents($container) {
             });
 
             $(this).data('event_init', 1);
+        }
+    });
+    $container.find('.search_ziptown').each(function () {
+        if (!$(this).data('ziptown_event_init')) {
+            $(this).keyup(function () {
+                searchZipTown($(this));
+            });
+            $(this).data('ziptown_event_init', 1);
         }
     });
 }

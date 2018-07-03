@@ -63,6 +63,12 @@ function reloadObjectList(list_id, callback) {
             }
         });
     }
+    
+    // Lignes sélectionnées:
+    data['selected_rows'] = [];
+    $list.find('tbody.listRows').find('input.item_check:checked').each(function() {
+        data['selected_rows'].push($(this).data('id_object'));
+    });
 
     // Lignes modifiées:
     var $rows = $list.find('tbody.listRows').find('tr.modified');
@@ -547,7 +553,7 @@ function setSelectedObjectsNewStatus($button, list_id, new_status, extra_data, c
     }
 }
 
-function setSelectedObjectsAction($button, list_id, action, extra_data, form_name, confirm_msg) {
+function setSelectedObjectsAction($button, list_id, action, extra_data, form_name, confirm_msg, single_action) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -556,6 +562,10 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
         if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
             return;
         }
+    }
+
+    if (typeof (single_action) === 'undefined') {
+        single_action = false;
     }
 
     var $list = $('#' + list_id);
@@ -609,45 +619,75 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                     }
                     bimpModal.$footer.find('.save_object_button.modal_' + modal_idx).remove();
                     bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
-                    bimpModal.addButton('Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
+                    bimpModal.addButton('Valider<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
 
                     bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
                         $form.find('.inputContainer').each(function () {
-                            var field_name = $(this).data('field_name');
-                            if ($(this).find('.cke').length) {
-                                var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
-                                $(this).find('[name="' + field_name + '"]').val(html_value);
+                            if ($(this).data('multiple')) {
+                                var field_name = $(this).data('values_field');
+                                var $valuesContainer = $(this).parent().find('.inputMultipleValuesContainer');
+                                if (!$valuesContainer.length) {
+                                    bimp_msg('Erreur: liste de valeurs absente pour le champ "' + field_name + '"', 'danger');
+                                    return;
+                                } else {
+                                    extra_data[field_name] = [];
+                                    $valuesContainer.find('[name="' + field_name + '[]"]').each(function () {
+                                        var value = $(this).val();
+                                        if (value !== '') {
+                                            extra_data[field_name].push(value);
+                                        }
+                                    });
+                                }
+                            } else {
+                                var field_name = $(this).data('field_name');
+                                if ($(this).find('.cke').length) {
+                                    var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+                                    $(this).find('[name="' + field_name + '"]').val(html_value);
+                                }
+                                extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
                             }
-                            extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
                         });
                         bimpModal.hide();
-                        setSelectedObjectsAction($button, list_id, action, extra_data, null, null);
+                        setSelectedObjectsAction($button, list_id, action, extra_data, null, null, single_action);
                     });
                 }
             });
         } else {
-            $button.addClass('disabled');
-            var i = 1;
-            $selected.each(function () {
-                var id_object = $(this).data('id_object');
-                if (id_object) {
-                    setObjectAction(null, {
-                        module: $list.data('module'),
-                        object_name: object_name,
-                        id_object: id_object
-                    }, action, extra_data, null, null, null, null);
-                } else {
-                    var msg = '';
-                    if (object_labels[object_name]['is_female']) {
-                        msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionnée n° ' + i + ' absent';
+            if (single_action) {
+                extra_data['id_objects'] = [];
+                $selected.each(function () {
+                    var $input = $(this);
+                    extra_data['id_objects'].push($input.data('id_object'));
+                });
+                setObjectAction($button, {
+                    module: $list.data('module'),
+                    object_name: object_name,
+                    id_object: 0
+                }, action, extra_data, null, null, null, null);
+            } else {
+                $button.addClass('disabled');
+                var i = 1;
+                $selected.each(function () {
+                    var id_object = $(this).data('id_object');
+                    if (id_object) {
+                        setObjectAction(null, {
+                            module: $list.data('module'),
+                            object_name: object_name,
+                            id_object: id_object
+                        }, action, extra_data, null, null, null, null);
                     } else {
-                        msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionné n° ' + i + ' absent';
+                        var msg = '';
+                        if (object_labels[object_name]['is_female']) {
+                            msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionnée n° ' + i + ' absent';
+                        } else {
+                            msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionné n° ' + i + ' absent';
+                        }
+                        bimp_msg(msg, 'danger');
                     }
-                    bimp_msg(msg, 'danger');
-                }
-                i++;
-            });
-            $button.removeClass('disabled');
+                    i++;
+                });
+                $button.removeClass('disabled');
+            }
         }
     }
 }

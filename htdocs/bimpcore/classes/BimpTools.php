@@ -20,12 +20,56 @@ class BimpTools
 
     public static function isSubmit($key)
     {
-        return (isset($_POST[$key]) || isset($_GET[$key]));
+        $keys = explode('/', $key);
+
+        $array = null;
+        foreach ($keys as $current_key) {
+            if (is_null($array)) {
+                if (isset($_POST[$current_key])) {
+                    $array = $_POST[$current_key];
+                } elseif (isset($_GET[$current_key])) {
+                    $array = $_GET[$current_key];
+                } else {
+                    return 0;
+                }
+            } else {
+                if (isset($array[$current_key])) {
+                    $array = $array[$current_key];
+                } else {
+                    return 0;
+                }
+            }
+        }
+        return 1;
     }
 
     public static function getValue($key, $default_value = null)
     {
-        $value = (isset($_POST[$key]) ? $_POST[$key] : (isset($_GET[$key]) ? $_GET[$key] : $default_value));
+        $keys = explode('/', $key);
+
+        $value = null;
+        foreach ($keys as $current_key) {
+            if (is_null($value)) {
+                if (isset($_POST[$current_key])) {
+                    $value = $_POST[$current_key];
+                } elseif (isset($_GET[$current_key])) {
+                    $value = $_GET[$current_key];
+                } else {
+                    break;
+                }
+            } else {
+                if (isset($value[$current_key])) {
+                    $value = $value[$current_key];
+                } else {
+                    $value = null;
+                    break;
+                }
+            }
+        }
+
+        if (is_null($value)) {
+            return $default_value;
+        }
 
         if (is_string($value)) {
             return stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
@@ -156,10 +200,14 @@ class BimpTools
 
     public static function getErrorsFromDolObject($object, $errors = null, $langs = null)
     {
+        if (is_null($langs)) {
+            global $langs;
+        }
+        
         if (is_null($errors)) {
             $errors = array();
         }
-        
+
         if (isset($object->error)) {
             if (!is_null($langs)) {
                 $errors[] = $langs->trans($object->error);
@@ -427,6 +475,9 @@ class BimpTools
             } else {
                 $sql .= '`' . $field . '`';
             }
+            
+            if(isset($filter['IN']))
+                $filter['in'] = $filter['IN'];
 
             if (is_array($filter)) {
                 if (isset($filter['min']) && isset($filter['max'])) {
@@ -454,6 +505,8 @@ class BimpTools
                 } elseif (isset($filter['in'])) {
                     if (is_array($filter['in'])) {
                         $sql .= ' IN (' . implode(',', $filter['in']) . ')';
+                    } elseif($filter['in'] == "") {
+                        $sql .= ' = 0 AND 0';
                     } else {
                         $sql .= ' IN (' . $filter['in'] . ')';
                     }
@@ -764,6 +817,10 @@ class BimpTools
 
         if (!is_float($value)) {
             return $value;
+        }
+        
+        if ($value > -0.01 && $value < 0.01) {
+            $value = 0;
         }
 
         $value = round($value, 2);

@@ -118,6 +118,7 @@ fields:
         values: 
             array: signed_values
         default_value: 0
+        
     info: 
         label: Informations
         type: text        
@@ -131,6 +132,11 @@ forms:
         rows: 
             - field: id_commande_client
               hidden: 1
+            - field: id_contact
+            - field: info
+            
+    edit: 
+        rows: 
             - field: id_contact
             - field: signed
             - field: info
@@ -171,6 +177,30 @@ forms:
               input: 
                   type: select_mysoc_account
               required: 1
+            - custom: 1
+              label: Avoirs client à utiliser
+              input_name: id_remises_list
+              input: 
+                  multiple: 1
+                  type: select_remises
+                  id_client:
+                      callback: getIdClient
+            - custom: 1
+              label: Note publique
+              input_name: note_public
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+            - custom: 1
+              label: Note privée
+              input_name: note_private
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
                   
 fields_tables: 
     data: 
@@ -225,7 +255,7 @@ lists:
         n: 25
         edit_btn: 1
         update_btn: 1
-        edit_form: default
+        edit_form: edit
         modal_view: default
         objects_change_reload: BR_Reservation,BR_ReservationShipment,BR_Service,BR_ServiceShipment
         extra_btn: 
@@ -244,12 +274,17 @@ lists:
                 label: Destinataire
                 value: 
                     callback: displayContact
+            commercial: 
+                label: Commercial
+                value: 
+                    callback: displayCommercial
             date: 
                 label: Expédiée le
                 field: date_shipped
             signed: 
                 field: signed
                 edit: 1
+                max_width: 45px
             pdf:
                 label: Fichiers
                 value: 
@@ -259,6 +294,9 @@ lists:
                             - 1
                     
     commandes: 
+        checkboxes: 1
+        bulk_actions: 
+            callback: getCommandesListbulkActions
         enable_search: 0
         pagination: 0
         sort_field: id
@@ -277,7 +315,8 @@ lists:
             num_livraison:
                 label: N°
                 field: num_livraison
-                max_width: 30px
+                max_width: 40px
+                min_width: 40px
             status: 
                 field: status
             contact: 
@@ -288,19 +327,24 @@ lists:
                 label: Articles
                 value: 
                     callback: getNbArticles
+                min_width: 60px
+                max_width: 60px
             qty_services: 
                 label: Services
                 value: 
                     callback: getNbServices
-#            create:
-#                label: Créée le
-#                field: date_create
+                min_width: 60px
+                max_width: 60px
             date: 
                 label: Expédiée le
                 field: date_shipped
             signed: 
                 field: signed
                 edit: 1
+                max_width: 45px
+            facture: 
+                field: id_facture
+                display: nom_url
             pdf:
                 label: Fichiers
                 value: 

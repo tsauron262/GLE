@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS `llx_br_reservation_cmd_fourn` (
   `type` int(10) UNSIGNED NOT NULL DEFAULT '1',
   `id_commande_fournisseur` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `id_commande_fournisseur_line` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 ALTER TABLE `llx_bc_vente` ADD `id_facture` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_client_contact`;
 

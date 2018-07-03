@@ -298,6 +298,25 @@ class BimpObject
         return $js;
     }
 
+    public function getJsLoadModalForm($form_name = 'default', $title = '', $values = array(), $success_callback = '')
+    {
+        $data = '{';
+        $data .= 'module: "' . $this->module . '", ';
+        $data .= 'object_name: "' . $this->object_name . '", ';
+        $data .= 'id_object: "' . ($this->isLoaded() ? $this->id : 0) . '", ';
+        $data .= 'id_parent: "' . (int) $this->getParentId() . '", ';
+        $data .= 'form_name: "' . $form_name . '", ';
+
+        if (count($values)) {
+            $data .= 'param_values: ' . json_encode($values);
+        }
+
+        $data .= '}';
+
+        $js = 'loadModalForm($(this), ' . htmlentities($data) . ', \'' . htmlentities($title) . '\', \'' . htmlentities($success_callback) . '\')';
+        return $js;
+    }
+
     public function getJsNewStatusOnclick($new_status, $data = array(), $params = array())
     {
         $js = 'setObjectNewStatus(';
@@ -469,7 +488,6 @@ class BimpObject
         if (is_null($this->parent) || ($id_parent && (!$this->parent->id || $this->parent->id !== $id_parent))) {
             unset($this->parent);
             $this->parent = null;
-            $id_property = $this->getParentIdProperty();
             $module = $this->getParentModule();
             $object = $this->getParentObjectName();
             if ($module && $object) {
@@ -1114,7 +1132,7 @@ class BimpObject
     {
         $errors = array();
 
-        if ($id_object) {
+        if ((int) $id_object) {
             if (!$this->fetch($id_object)) {
                 $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
                 return $errors;
@@ -1553,9 +1571,9 @@ class BimpObject
         );
     }
 
-    public function create(&$warnings = array())
+    public function create(&$warnings = array(), $force_create = false)
     {
-        if (!$this->canCreate()) {
+        if (!$force_create && !$this->canCreate()) {
             return array('Vous n\'avez pas la permission de créer ' . $this->getLabel('a'));
         }
         $errors = $this->validate();
@@ -1637,9 +1655,9 @@ class BimpObject
         return $errors;
     }
 
-    public function update(&$warnings = array())
+    public function update(&$warnings = array(), $force_udpate = false)
     {
-        if (!$this->canEdit()) {
+        if (!$force_udpate && !$this->canEdit()) {
             return array('Vous n\'avez pas la permission de modifier ' . $this->getLabel('this'));
         }
         $errors = array();
@@ -2027,13 +2045,13 @@ class BimpObject
         return 0;
     }
 
-    public function delete()
+    public function delete($force_delete = false)
     {
         if (!$this->isLoaded()) {
             return array('ID absent');
         }
 
-        if (!$this->canDelete()) {
+        if (!$force_delete && !$this->canDelete()) {
             return array('Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this'));
         }
 
@@ -2065,7 +2083,7 @@ class BimpObject
         } elseif (!count($errors)) {
             $id = $this->id;
             $this->reset();
-            if ($this->getConf('positions')) {
+            if ((int) $this->params['positions']) {
                 $this->resetPositions();
             }
             $objects = $this->getConf('objects', array(), true, 'array');
@@ -2077,8 +2095,8 @@ class BimpObject
                         $instance = $this->config->getObject('', $name);
                         if (!is_null($instance)) {
                             $del_errors = array();
-                            if ($instance->getParentModule() === $this->module && $instance->getParentObjectName() === $this->object_name) {
-                                if (!$instance->deleteByParent($id, $del_errors)) {
+                            if ($this->isChild($instance)) {
+                                if (!$instance->deleteByParent($id, $del_errors, $force_delete)) {
                                     $msg = 'Des erreurs sont survenues lors de la tentative de suppression des ';
                                     $msg .= $this->getInstanceLabel($instance, 'name_plur');
                                     if (count($del_errors)) {
@@ -2095,7 +2113,7 @@ class BimpObject
                                     $field_name = $this->getCurrentConf('instance/id_object/field_value', null);
                                     if (!is_null($field_name) && $field_name) {
                                         if ($instance->fetch((int) $this->getData($field_name))) {
-                                            $del_errors = $instance->delete();
+                                            $del_errors = $instance->delete($force_delete);
                                             if (count($del_errors)) {
                                                 $msg = 'Des erreurs sont survenues lors de la tentative de suppression ';
                                                 $msg .= $this->getInstanceLabel($instance, 'of_the') . ' d\'ID ' . $this->getData($field_name) . ':';
@@ -2138,7 +2156,7 @@ class BimpObject
         return $errors;
     }
 
-    public function deleteByParent($id_parent, &$errors = array())
+    public function deleteByParent($id_parent, &$errors = array(), $force_delete = false)
     {
         if (is_null($id_parent) || !$id_parent) {
             return false;
@@ -2149,13 +2167,13 @@ class BimpObject
         if (!is_null($parent_id_property) && $parent_id_property) {
             return self::deleteBy(array(
                         $parent_id_property => (int) $id_parent
-                            ), $errors);
+                            ), $errors, $force_delete);
         }
 
         $errors[] = 'Erreur technique: propriété contenant l\'ID du parent absente';
     }
 
-    public function deleteBy($filters, &$errors = array())
+    public function deleteBy($filters, &$errors = array(), $force_delete = false)
     {
         if (is_null($filters) || !count($filters)) {
             return false;
@@ -2181,7 +2199,7 @@ class BimpObject
             foreach ($items as $item) {
                 $this->reset();
                 if ($this->fetch($item->id)) {
-                    $del_errors = $this->delete();
+                    $del_errors = $this->delete($force_delete);
                     if (count($del_errors)) {
                         $check = false;
                         $errors = array_merge($errors, $del_errors);
@@ -3531,5 +3549,17 @@ class BimpObject
             return $instance->getUrl();
         }
         return BimpTools::getDolObjectUrl($instance);
+    }
+    
+    public static function getInstanceNomUrlWithIcons($instance)
+    {
+        $html = self::getInstanceNomUrl($instance);
+        $url = self::getInstanceUrl($instance);
+
+        if ($url) {
+            $html .= BimpRender::renderObjectIcons($instance, true, null, $url);
+        }
+        
+        return $html;
     }
 }

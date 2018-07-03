@@ -283,7 +283,7 @@ $nb_holiday_next = $nbaquis_next / $nbdeduced;
 $nextCPYearDate = $holiday->getCPNextYearDate(true, false);
 $nextCPYearDateAfter = $holiday->getCPNextYearDate(true, true);
 $nbRtt = $holiday->getRTTforUser($user_id);
-print '<b>Année en cours : </b>';
+/*print '<b>Année en cours : </b>';
 print $langs->trans('SoldeCPUser', round($nb_holiday_current, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_current . ' / ' . $nbdeduced . ')' : '');
 print '&nbsp;(A utiliser avant le <b>' . $nextCPYearDate . '</b>).';
 print '<br/>';
@@ -292,7 +292,7 @@ print $langs->trans('SoldeCPUser', round($nb_holiday_next, 2)) . ($nbdeduced != 
 print '&nbsp;(A utiliser à partir du <b>' . $nextCPYearDate . '</b> et avant le <b>' . $nextCPYearDateAfter . '</b>).';
 print '<br/>';
 print 'Solde RTT : <b>' . round($nbRtt, 2) . ' jours</b>';
-
+*/
 if ($id > 0) {
     dol_fiche_end();
     print '</br>';

@@ -890,6 +890,7 @@ class Product extends CommonObject
 	        $sql.= ", price_autogen = " . (!$this->price_autogen ? 0 : 1);
 			$sql.= ", fk_price_expression = ".($this->fk_price_expression != 0 ? $this->fk_price_expression : 'NULL');
 			$sql.= ", fk_user_modif = ".($user->id > 0 ? $user->id : 'NULL');
+			/*moddrsi*/$sql.= ", import_key = ".($this->import_key != "" ? $this->import_key : 'NULL');/*fmoddrsi*/
 			// stock field is not here because it is a denormalized value from product_stock.
 			$sql.= " WHERE rowid = " . $id;
 
@@ -3459,8 +3460,14 @@ class Product extends CommonObject
 		}
 		$result.=$linkstart.$newref.$linkend;
                 
-                BimpObject::loadClass('bimpcore', 'Bimp_Product');
-                $result .= Bimp_Product::getStockIconStatic($this->id); // $id_entrepôt facultatif, peut être null.
+                /*moddrsi*/
+                if(class_exists("BimpObject")){
+                    BimpObject::loadClass('bimpcore', 'Bimp_Product');
+                    $result .= Bimp_Product::getStockIconStatic($this->id); // $id_entrepôt facultatif, peut être null.
+                }
+                /*fmoddrsi*/
+                
+                
 		return $result;
 	}
 

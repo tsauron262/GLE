@@ -33,20 +33,13 @@ class gsxController extends BimpController
     );
     protected $repairs = array();
 
-    public function initGsx($requestType = false)
+    public function initGsx()
     {
-        if (in_array($requestType, $this->tabReqForceIphone)) {
-            $this->isIphone = true;
-        }
-        if (in_array($requestType, $this->tabReqForceNonIphone)) {
-            $this->isIphone = false;
-        }
-
         $this->gsx = new GSX($this->isIphone);
         return array_merge($this->gsx->errors['init'], $this->gsx->errors['soap']);
     }
 
-    public function setSerial($serial)
+    public function setSerial($serial, $requestType = false)
     {
         if (preg_match('/^S([0-9A-Z]{11,12})$/', $serial, $matches)) {
             $serial = $matches[1];
@@ -55,6 +48,13 @@ class gsxController extends BimpController
             $this->isIphone = true;
         }
         $this->serial = $serial;
+
+        if (in_array($requestType, $this->tabReqForceIphone)) {
+            $this->isIphone = true;
+        }
+        if (in_array($requestType, $this->tabReqForceNonIphone)) {
+            $this->isIphone = false;
+        }
     }
 
     public function loadRepairs($id_sav)
@@ -216,22 +216,8 @@ class gsxController extends BimpController
                                     'foldable' => true
                         ));
 
-                        $parts_content = '<div id="loadPartsButtonContainer" class="buttonsContainer">';
-                        $parts_content .= BimpRender::renderButton(array(
-                                    'label'       => 'Charger la liste des composants compatibles',
-                                    'icon_before' => 'download',
-                                    'classes'     => array('btn btn-default'),
-                                    'attr'        => array(
-                                        'onclick' => 'loadPartsList(\'' . $serial . '\', ' . $sav->id . ')'
-                                    )
-                        ));
-                        $parts_content .= '</div>';
-                        $parts_content .= '<div id="partsListContainer" style="display: none"></div>';
-                        $gsx_content .= BimpRender::renderPanel('Liste des composants Apple comptatibles', $parts_content, '', array(
-                                    'type'     => 'secondary',
-                                    'icon'     => 'bars',
-                                    'foldable' => true
-                        ));
+
+                        $gsx_content .= $this->renderLoadPartsButton($sav, $serial, "deux");
 
                         $html .= BimpRender::renderPanel($datas['productDescription'], $gsx_content, '', array(
                                     'type'     => 'secondary',
@@ -256,6 +242,44 @@ class gsxController extends BimpController
         }
 
         return BimpRender::renderAlerts('Echec de la connexion GSX pour une raison inconnue');
+    }
+
+    public function renderLoadPartsButton(BS_SAV $sav, $serial = null, $suffixe = "")
+    {
+        if (!BimpObject::objectLoaded($sav)) {
+            $html = BimpRender::renderAlerts('ID du SAV absent ou invalide');
+        } else {
+            if (is_null($serial)) {
+                $equipment = $sav->getChildObject('equipment');
+                if (BimpObject::objectLoaded($equipment)) {
+                    $serial = $equipment->getData('serial');
+                }
+            }
+
+            if (is_null($serial)) {
+                $html = BimpRender::renderAlerts('Numéro de série de l\'équipement absent');
+            } elseif (preg_match('/^S?[A-Z0-9]{11,12}$/', $serial) || preg_match('/^S?[0-9]{15}$/', $serial)) {
+                $html = '<div id="loadPartsButtonContainer' . $suffixe . '" class="buttonsContainer">';
+                $html .= BimpRender::renderButton(array(
+                            'label'       => 'Charger la liste des composants compatibles',
+                            'icon_before' => 'download',
+                            'classes'     => array('btn btn-default'),
+                            'attr'        => array(
+                                'onclick' => 'loadPartsList(\'' . $serial . '\', ' . $sav->id . ', \'' . $suffixe . '\')'
+                            )
+                ));
+                $html .= '</div>';
+                $html .= '<div id="partsListContainer' . $suffixe . '" style="display: none"></div>';
+            } else {
+                $html = BimpRender::renderAlerts('Le numéro de série de l\'équipement sélectionné ne correspond pas à un produit Apple: ' . $serial, 'warning');
+            }
+        }
+
+        return BimpRender::renderPanel('Liste des composants Apple comptatibles', $html, '', array(
+                    'type'     => 'secondary',
+                    'icon'     => 'bars',
+                    'foldable' => true
+        ));
     }
 
     public function renderRepairs($sav)
@@ -339,7 +363,7 @@ class gsxController extends BimpController
         return $html;
     }
 
-    public function renderPartsList($serial, $id_sav = null)
+    public function renderPartsList($serial, $id_sav = null, $sufixe = '')
     {
         $this->setSerial($serial);
 
@@ -347,23 +371,15 @@ class gsxController extends BimpController
         if (!is_null($id_sav)) {
             $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
             if (!is_null($sav) && $sav->isLoaded()) {
-                if ($sav->isPropalEditable()) {
-                    $add_btn = true;
-                }
+//                if ($sav->isPropalEditable()) {
+                $add_btn = true;
+//                }
             }
         }
 
         $parts = $this->getPartsListArray();
         $html = '';
         if (!is_null($parts) && is_array($parts) && count($parts)) {
-//            $html .= '<div class="typeFilters searchBloc">' . "\n";
-//            $html .= '<span class="btn btn-default filterTitle">Filtrer par catégorie de composant</span>';
-//            $html .= '<div class="typeFiltersContent">' . "\n";
-//            $html .= '<div style="margin-bottom: 20px;">' . "\n";
-//            $html .= '<span class="filterCheckAll">Tout cocher</span>';
-//            $html .= '<span class="filterHideAll">Tout décocher</span></div></div>';
-//            $html .= '</div>' . "\n";
-
             $html .= '<div class="partsSearchContainer">';
             $html .= '<div class="searchBloc">';
             $html .= '<label for="keywordFilter">Filtrer par mots-clés: </label>';
@@ -374,13 +390,13 @@ class gsxController extends BimpController
                 $html .= '<option value="' . $key . '">' . $type . '</option>';
             }
             $html .= '</select>';
-            $html .= '<span class="btn btn-default addKeywordFilter" onclick="PM.addKeywordFilter()"><i class="fa fa-plus-circle iconLeft"></i>Ajouter</span>';
+            $html .= '<span class="btn btn-default addKeywordFilter" onclick="PM[\'parts' . $sufixe . '\'].addKeywordFilter()"><i class="fa fa-plus-circle iconLeft"></i>Ajouter</span>';
             $html .= '</div>';
 
             $html .= '<div class="searchBloc">';
             $html .= '<label for="searchPartInput">Recherche par référence: </label>';
             $html .= '<input type="text" name="searchPartInput" class="searchPartInput" size="12" maxlength="24"/>';
-            $html .= '<span class="btn btn-default searchPartSubmit" onclick="PM.searchPartByNum()"><i class="fa fa-search iconLeft"></i>Rechercher</span>';
+            $html .= '<span class="btn btn-default searchPartSubmit" onclick="PM[\'parts' . $sufixe . '\'].searchPartByNum()"><i class="fa fa-search iconLeft"></i>Rechercher</span>';
             $html .= '</div>';
 
             $html .= '<div class="curKeywords"></div>';
@@ -480,20 +496,11 @@ class gsxController extends BimpController
                             'open'        => false
                 ));
             }
-
-            $html .= '<script type="text/javascript">';
-            $html .= 'var PM = new PartsManager();';
-            $html .= '</script>';
-            $html .= '</div>';
         } else {
             $html .= BimpRender::renderAlerts('Echec de la récupération de la liste des composants compatibles depuis la plateforme GSX');
             $html .= $this->gsx->getGSXErrorsHtml();
         }
         return $html;
-//        echo '<pre>';
-//        print_r($this->gsx->obtainCompTIA());
-//        echo '</pre>';
-//        return '';
     }
 
     public function renderRequestForm($id_sav, $serial, $requestType, $symptomCode, $id_repair = null, &$errors = array())
@@ -714,7 +721,7 @@ class gsxController extends BimpController
     {
         $html = '';
 
-        $this->setSerial($serial);
+        $this->setSerial($serial, $requestType);
 
         $request = '';
         $client = '';
@@ -860,7 +867,7 @@ class gsxController extends BimpController
                     $requestData[$nomReq]['repairData']['fileData'] = "Fichier joint exclu du log";
             }
             if (count($this->gsx->errors['log']['soap']))
-                dol_syslog("Erreur GSX : " . $this->gsx->getGSXErrorsHtml() . "Requête :" . print_r($requestData, true) . " Réponse : " . print_r($response, true), 4, 0, "_apple");
+                dol_syslog("Erreur GSX : " . $this->gsx->getGSXErrorsHtml() . "Requête :" . print_r($requestData, true) . " Réponse : " . print_r($response, true) . "Wsdl : " . $this->gsx->wsdlUrl, 4, 0, "_apple");
         } elseif (isset($response['error'])) {
             switch ($response['error']) {
                 case 'partInfos':
@@ -1002,7 +1009,6 @@ class gsxController extends BimpController
                         break;
 
                     case 'KGBSerialNumberUpdate':
-                        dol_syslog("KGBSerialNumberUpdate" . print_r($response, 1), 3);
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmationNumber'])) {
                             if ($response[$responseName]['updateStatus'] == "Y") {
                                 $confirmNumber = $response[$responseName]['repairConfirmationNumber'];
@@ -1020,7 +1026,6 @@ class gsxController extends BimpController
                         break;
 
                     case 'UpdateSerialNumber':
-                        dol_syslog("UpdateSerialNumber" . print_r($response, 1), 3);
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmation']['repairConfirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['repairConfirmationNumber'];
                             $repair->set('new_serial', 'part');
@@ -1268,6 +1273,7 @@ class gsxController extends BimpController
         $errors = array();
         $serial = BimpTools::getValue('serial', '');
         $id_sav = BimpTools::getValue('id_sav', 0);
+        $sufixe = BimpTools::getValue('sufixe', '');
         $html = '';
 
         if (!$serial) {
@@ -1279,7 +1285,7 @@ class gsxController extends BimpController
         }
 
         if (!count($errors)) {
-            $html = $this->renderPartsList($serial, $id_sav);
+            $html = $this->renderPartsList($serial, $id_sav, $sufixe);
         }
         die(json_encode(array(
             'errors'     => $errors,

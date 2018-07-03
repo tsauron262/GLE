@@ -1017,6 +1017,11 @@ class FormMail extends Form
 		$this->substit['__PROJECT_REF__'] = (is_object($object->projet)?$object->projet->ref:'');
 		$this->substit['__PROJECT_NAME__'] = (is_object($object->projet)?$object->projet->title:'');
 
+                /*moddrsi*/
+                global $langs;
+		$this->substit['__USER_FULLNAME__'] = $user->getFullName($langs);
+                /*fmod drsi*/
+                
 		$this->substit['__SIGNATURE__'] = $user->signature;
 		$this->substit['__PERSONALIZED__'] = '';
 		$this->substit['__CONTACTCIVNAME__'] = '';	// Will be replace just before sending

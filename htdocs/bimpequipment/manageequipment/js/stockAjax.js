@@ -91,10 +91,50 @@ function getRemainingLignes() {
                         }
                     }
                 });
+                
+                zoneListe();
                 initEvents();
             }
         }
     });
+}
+
+function zoneListe(){
+    var html = "Réf : <br/><select id='prodList'>";
+    $.each(tabEquipListe, function(index, equip) {
+        html += "<option value='"+equip.prodId+"'>"+equip.refurl+"</option>";
+    });
+    html += "</select>";
+    
+    html += "<br/>Serials : <br/><textarea id='textListe'></textarea>";
+    
+    html += "<button onclick='addListe()'>OK</button>";
+    
+    $("#zoneList").html(html);
+}
+
+function addListe(){
+    prodId = $("#prodList").val();
+    var text = $("#textListe").val();
+    text = text.replace(/\n|\r/g, " ");
+    var tabSerial = text.split(" ");
+    console.log(tabSerial);
+    
+    $("#productTable tr").each(function(){
+        if($(this).find("td[name=productId]").length > 0){
+            if($(this).find("td[name=productId]").html() == prodId){
+                var champ = $(this).find("input[name=serial]");
+                if(champ.val() == ""){
+                    champ.val(tabSerial[0]);
+                    validateSerial(champ);
+                    tabSerial.splice(0, 1);
+                }
+            }
+                
+
+        }
+    });
+    $("#textListe").val("");
 }
 
 function getTabProduct(lignes) {
@@ -175,6 +215,7 @@ function addDeliveredProduct(ligne) {
     $(line).appendTo('#productTable tbody');
 }
 
+var tabEquipListe = new Object();;
 function addEquipment(ligne) {
 
     cntProduct++;
@@ -191,6 +232,10 @@ function addEquipment(ligne) {
     line += '<td name="price">' + ligne.price_unity + ' €</td>';
     line += '<td style="text-align:center"><input type="checkbox" name="stocker"></td></tr>';
     $(line).appendTo('#productTable tbody');
+    if (typeof tabEquipListe[ligne.prodId] === 'undefined'){
+        tabEquipListe[ligne.prodId] = ligne;
+    }
+    
 }
 
 function addDeliveredEquipment(ligne, serial) {

@@ -173,14 +173,6 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
-    public function getNomExtraIcons($id_entrepot = null)
-    {
-        if ($this->isLoaded()) {
-            return self::getStockIconStatic($this->id, $id_entrepot);
-        }
-        return '';
-    }
-
     public static function getStockIconStatic($id_product, $id_entrepot = null)
     {
         if (is_null($id_entrepot)) {

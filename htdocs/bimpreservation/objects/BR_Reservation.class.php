@@ -31,7 +31,7 @@ class BR_Reservation extends BimpObject
     public static $transfert_status = array(201, 301, 303);
     public static $temp_status = array(202, 302, 303);
     public static $sav_status = array(203, 304, 303);
-    public static $need_equipment_status = array(200, 201, 202, 250, 300, 304);
+    public static $need_equipment_status = array(200, 201, 202, 250, 300, 301, 303, 304);
     public static $types = array(
         1 => 'Commande',
         2 => 'Transfert',
@@ -590,7 +590,7 @@ class BR_Reservation extends BimpObject
         return 0;
     }
 
-    // Affichage: 
+    // Affichage:
 
     public function displayEquipment()
     {
@@ -893,7 +893,7 @@ class BR_Reservation extends BimpObject
         }
 
         if (!array_key_exists($status, $this->getStatusListArray())) {
-            return array('Nouveau statut invalide pour ce type de réparation');
+            return array('Nouveau statut invalide pour ce type de réservation');
         }
 
         $errors = array();
@@ -926,6 +926,10 @@ class BR_Reservation extends BimpObject
         if (is_null($qty) || !$qty) {
             $qty = $current_qty;
         }
+        
+        if (!in_array($status, self::$need_equipment_status) && (int) $this->getData('id_equipment')) {
+            $this->updateField('id_equipment', 0);
+        }
 
         if (!$status && (in_array($current_status, array(3, 100))) && ((int) $this->getData('type') === self::BR_RESERVATION_COMMANDE)) {
             $rcf = BimpObject::getInstance($this->module, 'BR_ReservationCmdFourn');
@@ -946,7 +950,7 @@ class BR_Reservation extends BimpObject
                         }
 
                         if ($delete) {
-                            $delete_errors = $rcf->delete();
+                            $delete_errors = $rcf->delete(true);
                             if (count($delete_errors)) {
                                 $errors[] = 'Echec de la suppression de la ligne de commande fournisseur d\'ID ' . $item['id'];
                                 $errors = array_merge($errors, $delete_errors);
@@ -996,7 +1000,7 @@ class BR_Reservation extends BimpObject
         } else {
             $product = $this->getChildObject('product');
             $id_equipment = (int) $this->getData('id_equipment');
-            if (is_null($product) || !$product->isLoaded()) {
+            if (!$id_equipment && (is_null($product) || !$product->isLoaded())) {
                 $errors[] = 'Produit invalide';
             }
 
@@ -1026,7 +1030,7 @@ class BR_Reservation extends BimpObject
                 } else {
                     $new_qty = (int) ($qty + (int) $old_reservation->getData('qty'));
                     $id_old_reservation = $old_reservation->id;
-                    $delete_errors = $old_reservation->delete();
+                    $delete_errors = $old_reservation->delete(true);
                     if (count($delete_errors)) {
                         $errors[] = 'Echec de la suppression de la réservation ' . $id_old_reservation;
                         $errors = array_merge($errors, $delete_errors);
@@ -1067,69 +1071,65 @@ class BR_Reservation extends BimpObject
     {
         $qty = (int) $qty;
 
-        if ((int) $qty > (int) $this->getRemovableQty()) {
-            $errors[] = 'Quantité à retirer supérieure au maximum possible';
-        } else {
-            $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
-            if (BimpObject::objectLoaded($commande)) {
-                $errors = $commande->removeOrderLine((int) $this->getData('id_commande_client_line'), (int) $qty, $id_avoir);
-                if (!count($errors)) {
-                    if (isset($defective) && (int) $defective) {
-                        if ((int) $this->getData('id_equipment')) {
-                            $id_entrepot = (int) BimpCore::getConf('defective_id_entrepot');
-                            $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-                            $place_errors = $place->validateArray(array(
-                                'id_equipment' => (int) $this->getData('id_equipment'),
-                                'type'         => BE_Place::BE_PLACE_ENTREPOT,
-                                'id_entrepot'  => (int) $id_entrepot,
-                                'infos'        => 'Retrait de la commande "' . $commande->dol_object->ref . '" - Equipement défectueux',
-                                'date'         => date('Y-m-d H:i:s'),
-                                'code_mvt'     => dol_print_date(dol_now(), '%y%m%d%H%M%S')
-                            ));
+        $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        if (BimpObject::objectLoaded($commande)) {
+            $errors = $commande->removeOrderLine((int) $this->getData('id_commande_client_line'), (int) $qty, $id_avoir);
+            if (!count($errors)) {
+                if (isset($defective) && (int) $defective) {
+                    if ((int) $this->getData('id_equipment')) {
+                        $id_entrepot = (int) BimpCore::getConf('defective_id_entrepot');
+                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                        $place_errors = $place->validateArray(array(
+                            'id_equipment' => (int) $this->getData('id_equipment'),
+                            'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                            'id_entrepot'  => (int) $id_entrepot,
+                            'infos'        => 'Retrait de la commande "' . $commande->dol_object->ref . '" - Equipement défectueux',
+                            'date'         => date('Y-m-d H:i:s'),
+                            'code_mvt'     => dol_print_date(dol_now(), '%y%m%d%H%M%S')
+                        ));
 
-                            if (!count($place_errors)) {
-                                $place_errors = $place->create();
-                            }
-
-                            if (count($place_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement (Produits défectueux) pour l\'équipement d\'ID ' . $this->getData('id_equipment'));
-                            }
-                        } else {
-                            $product = $this->getChildObject('product');
-                            if (!BimpObject::objectLoaded($product)) {
-                                $errors[] = 'Aucun produit trouvé pour réservation d\'ID ' . $this->id;
-                            } else {
-                                global $user;
-                                $stock_label = 'Retrait de  la commande "' . $commande->dol_object->ref . '" (Produit défectueux)';
-                                if ($product->dol_object->correct_stock($user, (int) $this->getData('id_entrepot'), $qty, 1, $stock_label, 0, dol_print_date(dol_now(), '%y%m%d%H%M%S'), 'commande', (int) $this->getData('id_commande_client')) <= 0) {
-                                    $errors[] = 'Echec de la mise à jour des stocks entrepots pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités: ' . $qty . ')';
-                                } elseif ($product->dol_object->correct_stock($user, (int) BimpCore::getConf('defective_id_entrepot'), $qty, 0, $stock_label, 0, dol_print_date(dol_now(), '%y%m%d%H%M%S'), 'commande', (int) $this->getData('id_commande_client')) <= 0) {
-                                    $errors[] = 'Echec de la mise à jour des stocks entrepots pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités: ' . $qty . ')';
-                                }
-                            }
+                        if (!count($place_errors)) {
+                            $place_errors = $place->create();
                         }
-                    }
 
-                    if ((int) $this->getData('qty') > (int) $qty) {
-                        $new_qty = (int) $this->getData('qty') - (int) $qty;
-                        $this->set('qty', (int) $new_qty);
-                        $up_errors = $this->update();
-                        if (count($up_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la réservation correspondante');
+                        if (count($place_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement (Produits défectueux) pour l\'équipement d\'ID ' . $this->getData('id_equipment'));
                         }
                     } else {
-                        $del_errors = $this->delete();
-                        if (count($del_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression de la réservation correspondante');
+                        $product = $this->getChildObject('product');
+                        if (!BimpObject::objectLoaded($product)) {
+                            $errors[] = 'Aucun produit trouvé pour réservation d\'ID ' . $this->id;
+                        } else {
+                            global $user;
+                            $stock_label = 'Retrait de  la commande "' . $commande->dol_object->ref . '" (Produit défectueux)';
+                            if ($product->dol_object->correct_stock($user, (int) $this->getData('id_entrepot'), $qty, 1, $stock_label, 0, dol_print_date(dol_now(), '%y%m%d%H%M%S'), 'commande', (int) $this->getData('id_commande_client')) <= 0) {
+                                $errors[] = 'Echec de la mise à jour des stocks entrepots pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités: ' . $qty . ')';
+                            } elseif ($product->dol_object->correct_stock($user, (int) BimpCore::getConf('defective_id_entrepot'), $qty, 0, $stock_label, 0, dol_print_date(dol_now(), '%y%m%d%H%M%S'), 'commande', (int) $this->getData('id_commande_client')) <= 0) {
+                                $errors[] = 'Echec de la mise à jour des stocks entrepots pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités: ' . $qty . ')';
+                            }
                         }
                     }
                 }
 
-                $commande->checkIsFullyShipped();
-                $commande->checkIsFullyInvoiced();
-            } else {
-                $errors[] = 'ID de la commande client absent ou invalide';
+                if ((int) $this->getData('qty') > (int) $qty) {
+                    $new_qty = (int) $this->getData('qty') - (int) $qty;
+                    $this->set('qty', (int) $new_qty);
+                    $up_errors = $this->update();
+                    if (count($up_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la réservation correspondante');
+                    }
+                } else {
+                    $del_errors = $this->delete(true);
+                    if (count($del_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression de la réservation correspondante');
+                    }
+                }
             }
+
+            $commande->checkIsFullyShipped();
+            $commande->checkIsFullyInvoiced();
+        } else {
+            $errors[] = 'ID de la commande client absent ou invalide';
         }
 
         return $errors;
@@ -1298,22 +1298,24 @@ class BR_Reservation extends BimpObject
             $id_product = (int) $this->getData('id_product');
         }
 
-        if (!$id_product) {
-            $errors[] = 'Aucun produit sélectionné';
-        } else {
+        $equipementOblige = true;
+        if ($id_product) {
             $product = $this->getChildObject('product');
             if (is_null($product) || !$product->isLoaded()) {
-                $errors[] = 'Aucun produit spécifié';
-            } elseif ($product->isSerialisable()) {
-                if (!(int) $this->getData('id_equipment')) {
-                    $errors[] = 'Produit sérialisable: équipement obligatoire';
-                } else {
-                    $this->checkEquipment($equipment, $errors);
-                    $this->set('qty', 1);
-                }
-            } else {
-                $this->set('id_equipment', 0);
+                $errors[] = 'Produit introuvable';
             }
+            else
+                $equipementOblige = $product->isSerialisable();
+        }
+        
+        if($this->getData('id_equipment')) {
+            $this->checkEquipment($equipment, $errors);
+            $this->set('qty', 1);
+        }
+        else{
+            if ($equipementOblige) 
+                $errors[] = 'Produit sérialisable: équipement obligatoire';
+            $this->set('id_equipment', 0);
         }
 
         $id_transfert = (int) $this->getData('id_transfert');
@@ -1681,12 +1683,13 @@ class BR_Reservation extends BimpObject
 
         return $serials;
     }
-    
+
     // Gestion des droits: 
-    
+
     public function canDelete()
     {
-        global $user;
-        return (int) $user->admin;
+//        global $user;
+//        return (int) $user->admin;
+        return 0;
     }
 }

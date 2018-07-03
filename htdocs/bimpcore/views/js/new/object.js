@@ -202,6 +202,11 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
         if ($.isOk($button)) {
             title = $button.text();
         }
+        
+        object_data.param_values = {
+            fields: extra_data
+        };
+
         loadModalForm($button, object_data, title, function ($form) {
             if ($.isOk($form)) {
                 var modal_idx = parseInt($form.data('modal_idx'));
@@ -219,14 +224,14 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
 
                 bimpModal.$footer.find('.save_object_button.modal_' + modal_idx).remove();
                 bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
-                bimpModal.addButton('Envoyer<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
+                bimpModal.addButton('Valider<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
                 bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
                     if (validateForm($form)) {
                         $form.find('.inputContainer').each(function () {
                             if ($(this).data('multiple')) {
                                 var field_name = $(this).data('values_field');
                                 var $valuesContainer = $(this).parent().find('.inputMultipleValuesContainer');
-                                if ($valuesContainer.length) {
+                                if (!$valuesContainer.length) {
                                     bimp_msg('Erreur: liste de valeurs absente pour le champ "' + field_name + '"', 'danger');
                                     return;
                                 } else {

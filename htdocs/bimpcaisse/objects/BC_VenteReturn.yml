@@ -1,0 +1,146 @@
+table: bc_vente_return
+common_fields: 0
+
+labels: 
+    name: retour produit
+    name_plur: retours produits
+    
+parent_object: BC_Vente
+parent_id_property: id_vente
+
+objects: 
+    product: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Product
+            id_object: 
+                field_value: id_product
+                
+    equipment: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+            id_object: 
+                field_value: id_equipment
+                
+fields: 
+    id_vente:
+        label: Vente
+        type: id_parent
+        input: 
+            type: hidden
+        
+    id_product: 
+        label: Produit
+        type: id_object
+        object: product
+        display:
+            nom_url: 
+                type: nom_url
+        input: 
+            type: search_product
+            filter_type: product
+            help: Entrez la référence ou l'id d'un produit. Laissez vide si vous utilisez la recherche d'équipement
+        
+    id_equipment: 
+        label: Equipement
+        type: id_object
+        object: equipment
+        values: 
+            array: productEquipments
+        display_if: 
+            field_name: show_equipment
+            show_values: 1
+        
+    qty: 
+        label: Quantité
+        type: qty
+        default_value: 1
+        min: 1
+        decimals: 0
+        display_if: 
+            field_name: show_equipment
+            show_values: 0
+        
+    unit_price_tax_ex: 
+        label: Prix unitaire HT
+        type: money
+            
+    unit_price_tax_in: 
+        label: Prix unitaire TTC
+        type: money
+        
+    tva_tx: 
+        label: Taux de TVA
+        type: percent
+        
+    defective: 
+        label: Produit défectueux
+        type: bool
+        default_value: 0
+        
+forms: 
+    default: 
+        rows: 
+            - field: id_product
+            - custom: 1
+              label: Afficher équipement
+              input_name: show_equipment
+              hidden: 1
+              data_type: bool
+              input:
+                  type: hidden
+              value: 0
+              depends_on: id_product
+            - custom: 1
+              label: Recherche équipement
+              input_name: search_equipment
+              data_type: string
+              content: 
+                  callback: renderSearchEquipmentInput
+            - custom: 1
+              label: Prix de vente unitaire TTC
+              input_name: price_ttc
+              data_type: money
+              depends_on: id_product,id_equipment
+              value: 
+                  callback: getPrice
+              input: 
+                  type: text
+            - field: id_equipment
+            - field: qty
+            - field: defective
+    
+lists: 
+    default: 
+        title: Produits retournés
+        icon: reply
+        enable_search: 0
+        sort_field: id
+        sort_way: desc
+        n: 10
+        cols:
+            product: 
+                label: Produit
+                value: 
+                    callback: 
+                        method: displayProduct
+                        params: 
+                            - nom_url
+            id_equipment: 
+                field: id_equipment
+                display: nom_url
+            qty: 
+                field: qty
+            pu: 
+                field: unit_price_tax_in
+            total:
+                label: Total TTC
+                value: 
+                    callback: displayTotal

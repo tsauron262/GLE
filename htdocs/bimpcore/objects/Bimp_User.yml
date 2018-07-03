@@ -50,8 +50,27 @@ fields:
         type: text
     zip: 
         label: Code postal
+        input: 
+            type: search_ziptown
+            field_type: zip
+            town_field: town
+            country_field: fk_country
+        search: 
+            input: 
+                type: text
+            type: value_part
+            part_type: beginning
     town: 
         label: Ville
+        input: 
+            type: search_ziptown
+            field_type: town
+            zip_field: zip
+            country_field: fk_country
+        search: 
+            input: 
+                type: text
+            type: value_part
     fk_country: 
         label: Pays
         dol_prop: country_id

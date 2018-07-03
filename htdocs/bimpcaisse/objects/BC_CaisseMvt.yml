@@ -98,4 +98,25 @@ lists:
                 field: montant
             note: 
                 field: note
+                
+    caisse: 
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_btn: 1
+        add_form_name: light
+        cols:
+            date: 
+                label: Date
+                field: date_create
+            user: 
+                label: Utilisateur
+                field: user_create
+                display: nom_url
+            type: 
+                field: type
+            montant: 
+                field: montant
+            note: 
+                field: note
     

@@ -3,6 +3,8 @@ js:
     - /bimpapple/views/js/gsx.js
     - /bimpsupport/views/js/sav.js
     - /bimpequipment/views/js/equipment.js
+    - /bimpcore/views/js/paiement.js
+    
 css:
     - /bimpapple/views/css/gsx.css
     - /bimpsupport/views/css/sav.css
@@ -58,6 +60,13 @@ sections:
                           list: 
                               object: sav
                               children: apple_parts
+                    - cols: 
+                        - type: custom
+                          custom: 
+                              callback: 
+                                  method: renderLoadPartsButton
+                                  params:
+                                      object: sav
             
           - id: notes
             title: Notes

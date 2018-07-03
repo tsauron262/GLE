@@ -26,9 +26,11 @@ var partDataType = {
     'price': 'Prix'
 };
 
-function PartsManager() {
+var PM = [];
+function PartsManager(sufixe) {
     var ptr = this;
-    this.$container = $('#partsListContainer');
+    this.sufixe = sufixe;
+    this.$container = $('#partsListContainer' + sufixe);
 
     this.getPartListId = function (gpe, num) {
         if (this.parts[gpe]) {
@@ -70,7 +72,7 @@ function PartsManager() {
 
         var html = '<div class="curKeyword"><span class="keyword">' + kw + '</span>';
         html += '<span class="kwType kwt_' + kwType + '">&nbsp;&nbsp;(' + partDataType[kwType] + ')</span>';
-        html += '<span class="removeKeyWord" onclick="PM.removeKeywordFilter($(this))"><i class="fa fa-trash"></i></span></div>';
+        html += '<span class="removeKeyWord" onclick="PM[\'parts' + ptr.sufixe + '\'].removeKeywordFilter($(this))"><i class="fa fa-trash"></i></span></div>';
         this.$container.find('.curKeywords').append(html);
         this.$container.find('.keywordFilter').val('');
         this.filterByKeywords();
@@ -96,7 +98,7 @@ function PartsManager() {
             return;
         }
         this.unsetSearch();
-        $result.html('<div class="partSearchNum"><span class="searchNum">' + search + '</span><span class="removeSearch" onclick="PM.unsetSearch()"><i class="fa fa-trash"></i></span></div>').slideDown(250);
+        $result.html('<div class="partSearchNum"><span class="searchNum">' + search + '</span><span class="removeSearch" onclick="PM[\'parts' + ptr.sufixe + '\'].unsetSearch()"><i class="fa fa-trash"></i></span></div>').slideDown(250);
         this.$container.find('.curKeywords').find('div.curKeyword').each(function () {
             $(this).remove();
         });
@@ -214,6 +216,7 @@ function PartsManager() {
     };
 }
 
+
 function reloadRepairsViews(id_sav) {
     BimpAjax('loadRepairs', {
         id_sav: id_sav
@@ -309,8 +312,9 @@ function loadSerialUpdateForm($button, serial, id_sav, id_repair, request_type, 
 function loadPartsList(serial, id_sav, sufixe) {
     BimpAjax('loadPartsList', {
         serial: serial,
-        id_sav: id_sav
-    }, $('#partsListContainer'+sufixe), {
+        id_sav: id_sav,
+        sufixe: sufixe
+    }, $('#partsListContainer' + sufixe), {
         display_success: false,
         display_errors_in_popup_only: true,
         append_html: true,
@@ -318,7 +322,11 @@ function loadPartsList(serial, id_sav, sufixe) {
         processing_padding: 20,
         processing_msg: 'Chargement en cours',
         success: function (result, bimpAjax) {
-            $('#loadPartsButtonContainer'+sufixe).slideUp(250);
+            $('#loadPartsButtonContainer' + sufixe).slideUp(250, function () {
+                $(this).html('');
+            });
+
+            PM['parts' + sufixe] = new PartsManager(sufixe);
         }
     });
 }

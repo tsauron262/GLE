@@ -40,6 +40,10 @@ class OrderPDF extends BimpDocumentPDF
     {
         if (isset($this->object) && is_a($this->object, 'Commande')) {
             if (isset($this->object->id) && $this->object->id) {
+                if (isset($this->object->array_options['options_pdf_hide_reduc'])) {
+                    $this->hideReduc = (int) $this->object->array_options['options_pdf_hide_reduc'];
+                }
+
                 $this->commande = $this->object;
                 $this->commande->fetch_thirdparty();
 
@@ -417,9 +421,16 @@ class OrderPDF extends BimpDocumentPDF
             } else {
                 $row = array(
                     'code_article' => (!is_null($product) ? $product->ref : ''),
-                    'desc'         => $desc,
-                    'pu_ht'        => pdf_getlineupexcltax($this->object, $i, $this->langs),
+                    'desc'         => $desc
                 );
+
+                if ($this->hideReduc && $line->remise_percent) {
+                    $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
+                    $row['pu_ht'] = price($pu_ht, 0, $this->langs);
+                } else {
+                    $pu_ht = (float) $line->supprice;
+                    $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
+                }
 
                 if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) {
                     $row['tva'] = pdf_getlinevatrate($this->object, $i, $this->langs);
@@ -630,6 +641,14 @@ class BLPDF extends OrderPDF
                     'desc'         => $desc,
                     'pu_ht'        => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
+                
+                if ($this->hideReduc && $line->remise_percent) {
+                    $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
+                    $row['pu_ht'] = price($pu_ht, 0, $this->langs);
+                } else {
+                    $pu_ht = (float) $line->supprice;
+                    $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
+                }
 
                 if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT) && empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT_COLUMN)) {
                     $row['tva'] = pdf_getlinevatrate($this->object, $i, $this->langs);
@@ -637,10 +656,6 @@ class BLPDF extends OrderPDF
 
                 $totalQty = (int) $line->qty;
                 $qty = $totalQty;
-                $shipped = '';
-                $toShip = '';
-
-//                if (!is_null($product) && (int) $product->type === 0) {
                 $shipped = 0;
                 $toShip = $totalQty;
 
@@ -655,18 +670,17 @@ class BLPDF extends OrderPDF
                 } else {
                     $qty = 0;
                 }
-//                }
 
                 $row['qte'] = $qty;
                 $row['dl'] = $shipped;
                 $row['ral'] = $toShip;
 
-                $total_ht = (int) $qty * (float) $line->subprice;
+                $total_ht = (int) $qty * (float) $pu_ht;
 
                 $row['total_ht'] = price($total_ht);
 
                 // Ajout aux totaux: 
-                if (isset($line->remise_percent) && (float) $line->remise_percent) {
+                if (!$this->hideReduc && isset($line->remise_percent) && (float) $line->remise_percent) {
                     $remise = (float) ($total_ht * ((float) $line->remise_percent / 100));
                     $total_ht -= $remise;
                     $this->total_remises += $remise;
@@ -737,13 +751,16 @@ class BLPDF extends OrderPDF
     {
         global $conf;
 
+        if ($this->hideTotal) {
+            return '';
+        }
         $this->calcTotaux();
 
         $html = '<div>';
         $html .= '<table style="width: 100%" cellpadding="5">';
 
         // Total remises: 
-        if ($this->total_remises > 0) {
+        if (!$this->hideReduc && $this->total_remises > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #F0F0F0;">Total remises HT</td>';
             $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->total_remises, 0, $this->langs) . '</td>';

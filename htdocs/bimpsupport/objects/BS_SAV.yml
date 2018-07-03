@@ -534,6 +534,20 @@ forms:
                   type: text
               label: Numéro de série
               input_name: serial
+              
+    wait_client: 
+        rows: 
+            - custom: 1
+              label: Informations
+              data_type: string
+              input_name: infos
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+                  values: 
+                      array: list_wait_infos
+                
                 
 fields_tables: 
     infos: 

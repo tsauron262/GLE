@@ -15,6 +15,8 @@ class BimpDocumentPDF extends BimpModelPDF
     public $acompteHt = 0;
     public $acompteTtc = 0;
     public $tva = array();
+    public $hideReduc = false;
+    public $hideTotal = false;
 
     public function __construct($db)
     {
@@ -27,6 +29,12 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         if (!count($this->errors)) {
             if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
+                if (isset($this->object->array_options['options_pdf_hide_reduc'])) {
+                    $this->hideReduc = (int) $this->object->array_options['options_pdf_hide_reduc'];
+                }
+                if (isset($this->object->array_options['options_pdf_hide_total'])) {
+                    $this->hideTotal = (int) $this->object->array_options['options_pdf_hide_total'];
+                }
                 if (is_null($this->contact)) {
                     $contacts = $this->object->getIdContact('external', 'CUSTOMER');
                     if (isset($contacts[0]) && $contacts[0]) {
@@ -201,8 +209,8 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getTargetInfosHtml()
     {
         global $conf;
-        if($this->contact < 1 || !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
-            $html =  '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
+        if ($this->contact < 1 || !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
+            $html = '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
         else
             $html = "";
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');
@@ -296,7 +304,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
-            if($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte')) {
+            if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte')) {
                 $this->acompteHt -= $line->total_ht;
                 $this->acompteTtc -= $line->total_ttc;
                 $i++;
@@ -327,7 +335,13 @@ class BimpDocumentPDF extends BimpModelPDF
                     'total_ttc' => BimpTools::displayMoneyValue($line->total_ttc, '')
                 );
 
-                $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
+                if ($this->hideReduc && $line->remise_percent) {
+                    $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
+                    $row['pu_ht'] = price($pu_ht, 0, $this->langs);
+                } else {
+                    $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
+                }
+                
                 $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
 
                 if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref) {
@@ -342,7 +356,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $row['unite'] = pdf_getlineunit($this->object, $i, $this->langs);
                 }
 
-                if ($line->remise_percent) {
+                if (!$this->hideReduc && $line->remise_percent) {
                     $row['reduc'] = str_replace('.', ',', (string) round($line->remise_percent, 4, PHP_ROUND_HALF_DOWN)) . '%';
                 }
 
@@ -498,7 +512,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function calcTotaux()
     {
-        global $conf;
+        global $conf, $mysoc;
 
         $this->total_remises = 0;
 
@@ -508,9 +522,9 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
-            $pu_ht = (float) $line->subprice;
-            if ($line->remise_percent) {
-                $this->total_remises += ((float) $pu_ht * ((float) $line->remise_percent / 100)) * (int) pdf_getlineqty($this->object, $i, $this->langs);
+            
+            if (!$this->hideReduc && $line->remise_percent) {
+                $this->total_remises += ((float) $line->subprice * ((float) $line->remise_percent / 100)) * (int) pdf_getlineqty($this->object, $i, $this->langs);
             }
 
             $sign = 1;
@@ -595,13 +609,17 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getTotauxRowsHtml()
     {
         global $conf;
+        
+        if ($this->hideTotal) {
+            return '';
+        }
 
         $this->calcTotaux();
 
         $html .= '<table style="width: 100%" cellpadding="5">';
 
         // Total remises: 
-        if ($this->total_remises > 0) {
+        if (!$this->hideReduc && $this->total_remises > 0) {
             $html .= '<tr>';
             $html .= '<td style="background-color: #F0F0F0;">Total remises HT</td>';
             $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->total_remises, 0, $this->langs) . '</td>';
@@ -817,6 +835,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getAfterTotauxHtml()
     {
+        $html = '<br/>';
         $html .= '<table style="width: 95%" cellpadding="3">';
 
         /* if (!is_null($this->contact) && isset($this->contact->id) && $this->contact->id) {

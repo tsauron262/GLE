@@ -97,10 +97,20 @@ class BC_Caisse extends BimpObject
     {
         $caisses = array();
 
-        if ((int) $this->getData('id_entrepot')) {
+        $id_entrepot = (int) $this->getData('id_entrepot');
+
+        if (!$id_entrepot) {
+            if (BimpTools::isSubmit('id_entrepot')) {
+                $id_entrepot = (int) BimpTools::getValue('id_entrepot');
+            } elseif (BimpTools::isSubmit('param_values/fields/id_entrepot')) {
+                $id_entrepot = (int) BimpTools::getValue('param_values/fields/id_entrepot');
+            }
+        }
+        
+        if ($id_entrepot) {
             $instance = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
             $list = $instance->getList(array(
-                'id_entrepot'        => (int) $this->getData('id_entrepot'),
+                'id_entrepot'        => (int) $id_entrepot,
                 'status'             => array(
                     'operator' => '>',
                     'value'    => 0

@@ -49,7 +49,7 @@ class LoyerPDF extends PropalPDF
                     'mois'  => pdf_getlineqty($this->object, $i, $this->langs) . ' mois'
                 );
 
-                if ($line->remise_percent) {
+                if (!$this->hideReduc && $line->remise_percent) {
                     $row['reduc'] = pdf_getlineremisepercent($this->object, $i, $this->langs);
                 }
             }

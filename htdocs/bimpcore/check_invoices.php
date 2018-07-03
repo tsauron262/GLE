@@ -1,7 +1,4 @@
 <?php
-
-define('NOLOGIN', '1');
-
 require_once("../main.inc.php");
 
 ini_set('display_errors', 1);
@@ -22,6 +19,32 @@ echo '<body>';
 global $db;
 $bdb = new BimpDb($db);
 
+$where = '`fk_statut` = 1 AND `paye` = 0'; // AND `rowid` = 86937';
+$rows = $bdb->getRows('facture', $where, null, 'array', array(
+    'rowid'
+        ));
+
+if (!is_null($rows) && count($rows)) {
+    global $user;
+    $facture = BimpObject::getInstance('bimpcore', 'Bimp_Facture');
+
+    foreach ($rows as $r) {
+        if ($facture->fetch((int) $r['rowid'])) {
+            $to_pay = (float) $facture->getRemainToPay();
+            if ($to_pay >= -0.01 && $to_pay <= 0.01) {
+                echo $r['rowid'] . ': ' . $to_pay . ' => ';
+                if ($facture->dol_object->set_paid($user) <= 0) {
+                    echo '[ECHEC] - ' . $facture->dol_object->error;
+                } else {
+                    echo '[OK]';
+                }
+                echo '<br/>';
+            }
+        }
+    }
+} else {
+    echo 'AUCUNE FACTURE A TRAITER';
+}
 
 echo '</body></html>';
 

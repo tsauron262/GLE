@@ -2222,7 +2222,8 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                             }
                         }
 
-                        if ((float) ($facture->getSommePaiement() + $facture->getSumCreditNotesUsed() + $facture->getSumDepositsUsed()) >= (float) $facture->total_ttc) {
+                        $to_pay = (float) $facture->total_ttc - ((float) $facture->getSommePaiement() + (float) $facture->getSumCreditNotesUsed() + (float) $facture->getSumDepositsUsed());
+                        if ($to_pay >= -0.01 && $to_pay <= 0.1) {
                             $facture->set_paid($user);
                         }
 

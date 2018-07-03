@@ -322,7 +322,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
             $desc = $this->getLineDesc($line, $product);
 
-            if ($line->total_ht == 0) {
+            if ($line->subprice == 0) {
                 $row['desc'] = array(
                     'colspan' => 99,
                     'content' => $desc,

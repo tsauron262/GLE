@@ -631,7 +631,9 @@ class BS_SAV extends BimpObject
                 $buttons[] = array(
                     'label'   => 'Générer devis',
                     'icon'    => 'cogs',
-                    'onclick' => $this->getJsActionOnclick('generatePropal')
+                    'onclick' => $this->getJsActionOnclick('generatePropal', array(), array(
+                        'confirm_msg' => "Attention, la proposition commerciale va être entièrement générée à partir des données du SAV.\\nTous les enregistrements faits depuis la fiche propale ne seront pas pris en compte"
+                    ))
                 );
             }
 
@@ -670,17 +672,12 @@ class BS_SAV extends BimpObject
 
             // Envoyer devis: 
             if (!is_null($propal) && $propal_status === 0 && !in_array($status, array(self::BS_SAV_ATT_CLIENT_ACTION))) {
-                if ((string) $this->getData('diagnostic')) {
-                    $form_name = 'send_msg';
-                } else {
-                    $form_name = 'diagnostic';
-                }
                 $callback = 'function() {window.location.reload();}';
                 $buttons[] = array(
                     'label'   => 'Envoyer devis',
                     'icon'    => 'arrow-circle-right',
                     'onclick' => $this->getJsActionOnclick('validatePropal', array(), array(
-                        'form_name'        => $form_name,
+                        'form_name'        => 'validate_propal',
                         'success_callback' => $callback
                     ))
                 );
@@ -1720,7 +1717,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
     }
 
     public function actionValidatePropal($data, &$success)
-    {
+    {        
         $success = 'Devis validé avec succès';
         $errors = array();
         $warnings = array();
@@ -1731,9 +1728,12 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
         if (!(string) $this->getData('diagnostic')) {
             $errors[] = 'Vous devez remplir le champ "Diagnostic" avant de valider le devis';
-        } else {
+        } elseif (!isset($data['generate_propal']) || (int) $data['generate_propal']) {
+            echo 'ici'; exit;
             $errors = $this->generatePropal();
         }
+        
+        define("NOT_VERIF", true);
 
         $errors = array_merge($errors, $this->createReservations());
 
@@ -1859,7 +1859,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
                 $old_id_propal = $propal->id;
                 $revision = new BimpRevisionPropal($propal->dol_object);
-                $new_id_propal = $revision->reviserPropal(array(array('Diagnostic'), null), true, self::$propal_model_pdf, $errors);
+                $new_id_propal = $revision->reviserPropal(array(null, null), true, self::$propal_model_pdf, $errors);
 
                 if ($new_id_propal && !count($errors)) {
                     //Anulation du montant de la propal

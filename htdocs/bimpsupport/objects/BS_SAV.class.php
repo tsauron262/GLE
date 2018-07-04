@@ -1058,6 +1058,11 @@ class BS_SAV extends BimpObject
             $prop->date = dol_now();
             $prop->cond_reglement_id = 0;
             $prop->mode_reglement_id = 0;
+            
+
+            $prop->array_options['options_type'] = "S";
+            $prop->array_options['options_entrepot'] = $this->getData("id_entrepot");
+            $prop->array_options['options_libelle'] = $this->getData("ref");
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
@@ -1119,9 +1124,6 @@ class BS_SAV extends BimpObject
             $line->delete();
         }
 
-        $prop->array_options['options_type'] = "S";
-        $prop->array_options['options_entrepot'] = $this->getData("id_entrepot");
-        $prop->array_options['libelle'] = $this->getData("ref");
         define("NOT_VERIF", true);
 
         if ($this->getData('id_discount') > 0) {

@@ -98,9 +98,12 @@ function donwloadTickets(id_event, id_tariff, with_num, num_start, number, forma
             setMessage('alertSubmit', 'Erreur serveur 4756.', 'error');
         },
         beforeSend: function () {
+            $('div[name=create]').css('display', 'none');
+            $('a[name=download]').css('display', 'none');
             $('*').css('cursor', 'wait');
         },
         complete: function () {
+            $('div[name=create]').css('display', 'inline');
             $('*').css('cursor', 'auto');
         },
         success: function (rowOut) {

@@ -13,6 +13,7 @@ class Tariff {
     public $date_stop_sale;
     public $date_start;
     public $date_end;
+    public $email_text;
     public $require_names;
     public $id_prod_extern;
     public $filename;
@@ -32,7 +33,7 @@ class Tariff {
             return false;
         }
 
-        $sql = 'SELECT label, date_creation, require_names, date_stop_sale, date_start, date_end, price, number_place, type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6, name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6, require_extra_1, require_extra_2, require_extra_3, require_extra_4, require_extra_5, require_extra_6, id_prod_extern, fk_event';
+        $sql = 'SELECT label, date_creation, require_names, date_stop_sale, date_start, date_end, price, number_place, email_text, type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6, name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6, require_extra_1, require_extra_2, require_extra_3, require_extra_4, require_extra_5, require_extra_6, id_prod_extern, fk_event';
         $sql .= ' FROM tariff';
         $sql .= ' WHERE id=' . $id;
 
@@ -49,6 +50,7 @@ class Tariff {
                 $this->date_stop_sale = $obj->date_stop_sale;
                 $this->date_start = $obj->date_start;
                 $this->date_end = $obj->date_end;
+                $this->email_text = $obj->email_text;
                 $this->type_extra_1 = intVal($obj->type_extra_1);
                 $this->type_extra_2 = intVal($obj->type_extra_2);
                 $this->type_extra_3 = intVal($obj->type_extra_3);
@@ -100,7 +102,7 @@ class Tariff {
         return -1;
     }
 
-    public function create($label, $price, $number_place, $id_event, $file, $custom_img, $use_custom_img, $require_names, $id_prod_extern, $date_stop_sale, $time_end_sale, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
+    public function create($label, $price, $number_place, $id_event, $file, $custom_img, $use_custom_img, $require_names, $id_prod_extern, $date_stop_sale, $time_end_sale, $date_start, $time_start, $date_end, $time_end, $email_text, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
 
         if ($date_stop_sale == '')
             $this->errors[] = "Le champ date de fin de vente est obligatoire";
@@ -146,6 +148,7 @@ class Tariff {
         $sql.= ', `require_names`';
         $sql.= ', `id_prod_extern`';
         $sql.= ', `date_stop_sale`';
+        $sql.= ', `email_text`';
         if ($date_start != '')
             $sql.= ', `date_start`';
         if ($date_end != '')
@@ -171,6 +174,7 @@ class Tariff {
         $sql.= ', "' . $require_names . '"';
         $sql.= ', ' . ($id_prod_extern != '' ? $id_prod_extern : 'NULL');
         $sql.= ', "' . $date_stop_sale_obj->format('Y-m-d H:i:s') . '"';
+        $sql.= ', "' . $email_text . '"';
         if ($date_start != '')
             $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         if ($date_end != '')
@@ -229,7 +233,7 @@ class Tariff {
         return -1;
     }
 
-    public function update($id_tariff, $label, $price, $number_place, $require_names, /* $file, */ $date_stop_sale, $time_stop_sale, $date_start, $time_start, $date_end, $time_end, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
+    public function update($id_tariff, $label, $price, $number_place, $require_names, /* $file, */ $date_stop_sale, $time_stop_sale, $date_start, $time_start, $date_end, $time_end, $email_text, $type_extra_1, $name_extra_1, $require_extra_1, $type_extra_2, $name_extra_2, $require_extra_2, $type_extra_3, $name_extra_3, $require_extra_3, $type_extra_4, $name_extra_4, $require_extra_4, $type_extra_5, $name_extra_5, $require_extra_5, $type_extra_6, $name_extra_6, $require_extra_6) {
 
         if ($date_stop_sale == '')
             $this->errors[] = "Le champ date de fin de vente est obligatoire";
@@ -274,7 +278,7 @@ class Tariff {
             $sql.= ', `date_start`="' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         if ($date_end != '')
             $sql.= ', `date_end`="' . $date_end_obj->format('Y-m-d H:i:s') . '"';
-
+        $sql.= ', `email_text`="' . $email_text . '"';
         $sql.= ($type_extra_1 != '' and $name_extra_1 != '') ? ', `type_extra_1`=' . $type_extra_1 . ', `name_extra_1`="' . $name_extra_1 . '", `require_extra_1`=' . $require_extra_1 : ', `type_extra_1`= NULL, `name_extra_1`= NULL, `require_extra_1`= NULL';
         $sql.= ($type_extra_2 != '' and $name_extra_2 != '') ? ', `type_extra_2`=' . $type_extra_2 . ', `name_extra_2`="' . $name_extra_2 . '", `require_extra_2`=' . $require_extra_2 : ', `type_extra_2`= NULL, `name_extra_2`= NULL, `require_extra_2`= NULL';
         $sql.= ($type_extra_3 != '' and $name_extra_3 != '') ? ', `type_extra_3`=' . $type_extra_3 . ', `name_extra_3`="' . $name_extra_3 . '", `require_extra_3`=' . $require_extra_3 : ', `type_extra_3`= NULL, `name_extra_3`= NULL, `require_extra_3`= NULL';

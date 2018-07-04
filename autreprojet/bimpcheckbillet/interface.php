@@ -217,7 +217,7 @@ switch ($action) {
      */
     case 'create_tariff': {
             echo json_encode(array(
-                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_FILES['custom_img'], $_POST['input_cust_img'], $_POST['require_names'], '', $_POST['date_stop_sale'], $_POST['time_end_sale'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
+                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_FILES['custom_img'], $_POST['input_cust_img'], $_POST['require_names'], '', $_POST['date_stop_sale'], $_POST['time_end_sale'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'],  $_POST['email_text'],$_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
                 'errors' => $tariff->errors));
             break;
         }
@@ -227,7 +227,7 @@ switch ($action) {
      */
     case 'modify_tariff': {
             echo json_encode(array(
-                'code_return' => $tariff->update($_POST['id_tariff'], $_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['require_names'], /* $_FILES['file'], */ $_POST['date_stop_sale'], $_POST['time_stop_sale'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
+                'code_return' => $tariff->update($_POST['id_tariff'], $_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['require_names'], /* $_FILES['file'], */ $_POST['date_stop_sale'], $_POST['time_stop_sale'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['email_text'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
                 'errors' => $tariff->errors));
             break;
         }
@@ -356,7 +356,7 @@ switch ($action) {
             $num_start = (int) $_POST['num_start'];
             $number = (int) $_POST['number'];
             $format = $_POST['format'];
-            $souche = (bool) $_POST['souche'];
+            $souche = (int) $_POST['souche'];
 
             $num_in_db = $num_start;
 

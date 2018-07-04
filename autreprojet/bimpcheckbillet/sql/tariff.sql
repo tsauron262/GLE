@@ -28,5 +28,6 @@ CREATE TABLE IF NOT EXISTS `tariff` (
     `fk_event`          INTEGER NOT NULL,
     `number_place`      INTEGER DEFAULT 0,
     `date_stop_sale`    DATETIME,
+    `email_text`        TEXT NOT NULL,
     FOREIGN KEY (`fk_event`) REFERENCES `event` (`id`)
 ) ENGINE=innodb;

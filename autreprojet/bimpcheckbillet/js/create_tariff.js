@@ -37,7 +37,7 @@ function getEvents() {
                         $(".chosen-select").trigger("chosen:updated");
                     }
                 }
-            } else if (out.events.length === 0){
+            } else if (out.events.length === 0) {
                 alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
                 window.location.replace('../view/create_event.php');
             } else {
@@ -85,6 +85,8 @@ $(document).ready(function () {
     $('input[name=date_start]').datepicker({dateFormat: 'dd/mm/yy'})
     $('input[name=date_end]').datepicker({dateFormat: 'dd/mm/yy'})
     getEvents();
+    tinymce.init({selector: 'textarea'});
+
 });
 
 /**

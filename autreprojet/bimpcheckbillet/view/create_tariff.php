@@ -70,6 +70,9 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
 
+    print '<label for="email_text">Contenu email </label>';
+    print '<textarea id="email_text" class="tinymce" placeholder="Description" rows="3" name="email_text" style="width: 500px"></textarea><br/>';
+
     print '<label for="price">Prix </label>';
     print '<input class="form-control bfh-number" name="price" step=".01" type="number" min="0" style="width: 120px"/><br/>';
 

@@ -445,11 +445,11 @@ class Ticket {
 
         $x = $y = $margin = 1;
 
-        $ticket_width = 146;
+        $ticket_width = 147;
         $ticket_height = 68;
 
 
-        if ($souche) {
+        if ($souche == 1) {
             $souche_width = 48;
             $ticket_width -= $souche_width;
         }
@@ -463,12 +463,7 @@ class Ticket {
             $nb_ticket_page = 12;
             $nb_ticket_width = 2;
             $orientation = 'P';
-        } /* elseif ($format == 'A2') {
-          $nb_ticket_page = 40;
-          $nb_ticket_width = 4;
-          $orientation = 'P';
-          } */
-
+        }
 
         $pdf = new PDF_Code128($orientation, 'mm', $format);
         $pdf->SetFont('times', '', 12);
@@ -479,13 +474,9 @@ class Ticket {
         $tariff = new Tariff($this->db);
         $tariff->fetch($id_tariff);
 
-//        $this->errors[] = 'nb ticket par page : ' . $nb_ticket_page;
-//        $this->errors[] = 'nb ticket par largeur : ' . $nb_ticket_width;
-
         foreach ($ids_inserted as $id) {
             // Position
             if ($i % $nb_ticket_page == 0) { // change page
-//                $pdf = new PDF_Code128($orientation, 'mm', $format);
                 $pdf->AddPage();
                 $x = $y = $margin;
             } else { // change position in page
@@ -497,9 +488,11 @@ class Ticket {
                 }
             }
 
-            if ($with_num)
-                $pdf->SetXY($x + 83, $y + 40);
+            if ($with_num == 1)
+                $pdf->SetXY($x + 131, $y + 10);
 
+            if ($souche == 1)
+                $pdf->SetXY($x + 10, $y + 20);
 
             $ticket = new Ticket($this->db);
             $ticket->fetch($id);
@@ -514,20 +507,31 @@ class Ticket {
 
 
             // Add in pdf
-            if ($souche) {
+            if ($souche == 1) { // write souche
                 $pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $souche_width, $ticket_height);
+                $pdf->MultiCell(30, 4, ($with_num == 1 ? $current_num . "\n" : '') . $event->label);
+
                 $x += $souche_width;
+
+                $pdf->SetXY($x + 83, $y + 10);
+
+                // write common
+                if ($with_num == 1)
+                    $pdf->MultiCell(10, 4, $current_num);
+
+                $pdf->Image($file_name_qrcode, $x + 74, $y + 22, 25, 25);
+                $pdf->Code128($x + 67, $y + 3, $ticket->barcode, 63, 8);
+                $pdf->Image($image_tariff, $x + 5, $y + 5, 59, 59);
+                $pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
+            } else {
+                if ($with_num == 1)
+                    $pdf->MultiCell(10, 4, $current_num);
+
+                $pdf->Image($file_name_qrcode, $x + 122, $y + 21, 25, 25);
+                $pdf->Code128($x + 114, $y + 2, $ticket->barcode, 63, 8);
+                $pdf->Image($image_tariff, $x + 7, $y + 4, 105, 60);
+                $pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
             }
-
-
-            if ($with_num)
-                $pdf->MultiCell(10, 4, $current_num);
-
-            $pdf->Image($file_name_qrcode, $x + 74, $y + 12, 25, 25);
-            $pdf->Code128($x + 67, $y + 2, $ticket->barcode, 45, 8);
-            $pdf->Image($image_tariff, $x + 5, $y + 5, 57, 38);
-            $pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
-
 
             // Counters
             $current_num++;

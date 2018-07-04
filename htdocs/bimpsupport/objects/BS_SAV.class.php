@@ -953,6 +953,7 @@ class BS_SAV extends BimpObject
             $factureA->socid = $this->getData('id_client');
             $factureA->modelpdf = self::$facture_model_pdf;
             $factureA->array_options['options_type'] = "S";
+            $factureA->array_options['options_entrepot'] = $this->getData('id_entrepot');
             if ($factureA->create($user) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else {
@@ -2190,6 +2191,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         $facture = new Facture($this->db->db);
                         $facture->modelpdf = self::$facture_model_pdf;
                         $facture->array_options['options_type'] = "S";
+                        $facture->array_options['options_entrepot'] = $this->getData('id_entrepot');
                         $facture->createFromOrder($propal->dol_object);
                         $facture->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
                         $facture->validate($user, ''); //pas d'entrepot pour pas de destock

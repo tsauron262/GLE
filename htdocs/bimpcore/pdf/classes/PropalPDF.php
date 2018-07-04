@@ -116,7 +116,7 @@ class PropalPDF extends BimpDocumentPDF
         $this->header_vars['header_right'] = $this->renderTemplate(self::$tpl_dir . 'header_right.html', array(
             'doc_name' => $docName,
             'doc_ref'  => $docRef,
-            'rows'     => $rows
+            'rows'     => $this->header_vars['header_right']['rows'] . $rows
         ));
     }
 

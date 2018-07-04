@@ -28,6 +28,12 @@ sections:
                 type: rows
                 rows: 
                     - cols: 
+                        - type: custom
+                          custom: 
+                              callback: 
+                                  method: renderSavCheckup
+                                  object: sav
+                    - cols: 
                         - type: view
                           view:
                               name: infos

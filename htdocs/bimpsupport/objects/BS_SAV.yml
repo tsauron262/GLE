@@ -495,7 +495,7 @@ forms:
                       revPropRefu: Devis refusé
                       pieceOk: Piéce reçue
                       
-    diagnostic: 
+    validate_propal: 
         rows: 
             - field: diagnostic
             - custom: 1
@@ -505,6 +505,14 @@ forms:
               label: Notifier le client
               value: 1
               input_name: send_msg
+            - custom: 1
+              data_type: bool
+              input: 
+                  type: toggle
+                  help: Attention, si cette option est activée, toutes les modifications  faites depuis la fiche propale seront écrasées.
+              label: Générer le devis
+              value: 0
+              input_name: generate_propal
             
     resolution: 
         rows: 
@@ -547,8 +555,22 @@ forms:
                   auto_expand: 1
                   values: 
                       array: list_wait_infos
-                
-                
+                      
+    acompte_mode_paiement: 
+        rows: 
+            - custom: 1
+              label: Paiement
+              hidden: 1
+              input_name: id_paiement
+              hidden: 1
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Mode de paiement
+              input_name: mode_paiement
+              input: 
+                  type: select_payment
+              
 fields_tables: 
     infos: 
         title: Informations

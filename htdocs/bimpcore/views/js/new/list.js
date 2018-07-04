@@ -601,7 +601,10 @@ function setSelectedObjectsAction($button, list_id, action, extra_data, form_nam
                 object_name: $list.data('object_name'),
                 id_object: 0,
                 form_name: form_name,
-                extra_data: extra_data
+                extra_data: extra_data,
+                param_values: {
+                    fields: extra_data
+                }
             }, title, function ($form) {
                 if ($.isOk($form)) {
                     var modal_idx = parseInt($form.data('modal_idx'));

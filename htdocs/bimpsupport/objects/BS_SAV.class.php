@@ -631,7 +631,9 @@ class BS_SAV extends BimpObject
                 $buttons[] = array(
                     'label'   => 'Générer devis',
                     'icon'    => 'cogs',
-                    'onclick' => $this->getJsActionOnclick('generatePropal')
+                    'onclick' => $this->getJsActionOnclick('generatePropal', array(), array(
+                        'confirm_msg' => "Attention, la proposition commerciale va être entièrement générée à partir des données du SAV.\\nTous les enregistrements faits depuis la fiche propale ne seront pas pris en compte"
+                    ))
                 );
             }
 
@@ -670,17 +672,12 @@ class BS_SAV extends BimpObject
 
             // Envoyer devis: 
             if (!is_null($propal) && $propal_status === 0 && !in_array($status, array(self::BS_SAV_ATT_CLIENT_ACTION))) {
-                if ((string) $this->getData('diagnostic')) {
-                    $form_name = 'send_msg';
-                } else {
-                    $form_name = 'diagnostic';
-                }
                 $callback = 'function() {window.location.reload();}';
                 $buttons[] = array(
                     'label'   => 'Envoyer devis',
                     'icon'    => 'arrow-circle-right',
                     'onclick' => $this->getJsActionOnclick('validatePropal', array(), array(
-                        'form_name'        => $form_name,
+                        'form_name'        => 'validate_propal',
                         'success_callback' => $callback
                     ))
                 );
@@ -787,6 +784,39 @@ class BS_SAV extends BimpObject
             return $label;
         }
         return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
+    }
+
+    // Rendus HTML: 
+
+    public function renderSavCheckup()
+    {
+        $html = '';
+        if ($this->isLoaded()) {
+            if ((int) $this->getData('id_facture_acompte')) {
+                $sql = 'SELECT p.`rowid` FROM ' . MAIN_DB_PREFIX . 'paiement p';
+                $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture pf ON p.rowid = pf.fk_paiement';
+                $sql .= ' WHERE pf.fk_facture = ' . (int) $this->getData('id_facture_acompte');
+                $sql .= ' AND p.fk_paiement = 0';
+
+                $rows = $this->db->executeS($sql, 'array');
+
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        $onclick = $this->getJsActionOnclick('correctAcompteModePaiement', array('id_paiement' => (int) $r['rowid']), array(
+                            'form_name' => 'acompte_mode_paiement',
+                            'success_callback' => 'function() {window.location.reload();}'
+                        ));
+
+                        $html .= '<div style="margin: 15px 0">';
+                        $html .= BimpRender::renderAlerts('ATTENTION: aucun mode de paiement n\'a été indiqué pour le paiement de l\'acompte.');
+                        $html .= '<button class="btn btn-default" onclick="' . $onclick . '"><i class="fa fa-pencil iconLeft"></i>Corriger le mode de paiement de l\'acompte</button>';
+                        $html .= '</div>';
+                    }
+                }
+            }
+        }
+
+        return $html;
     }
 
     // Traitements:
@@ -1687,7 +1717,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
     }
 
     public function actionValidatePropal($data, &$success)
-    {
+    {        
         $success = 'Devis validé avec succès';
         $errors = array();
         $warnings = array();
@@ -1698,9 +1728,11 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
         if (!(string) $this->getData('diagnostic')) {
             $errors[] = 'Vous devez remplir le champ "Diagnostic" avant de valider le devis';
-        } else {
+        } elseif (!isset($data['generate_propal']) || (int) $data['generate_propal']) {
             $errors = $this->generatePropal();
         }
+        
+        define("NOT_VERIF", true);
 
         $errors = array_merge($errors, $this->createReservations());
 
@@ -1826,7 +1858,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 
                 $old_id_propal = $propal->id;
                 $revision = new BimpRevisionPropal($propal->dol_object);
-                $new_id_propal = $revision->reviserPropal(array(array('Diagnostic'), null), true, self::$propal_model_pdf, $errors);
+                $new_id_propal = $revision->reviserPropal(array(null, null), true, self::$propal_model_pdf, $errors);
 
                 if ($new_id_propal && !count($errors)) {
                     //Anulation du montant de la propal
@@ -2189,7 +2221,8 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                             }
                         }
 
-                        if ((float) ($facture->getSommePaiement() + $facture->getSumCreditNotesUsed() + $facture->getSumDepositsUsed()) >= (float) $facture->total_ttc) {
+                        $to_pay = (float) $facture->total_ttc - ((float) $facture->getSommePaiement() + (float) $facture->getSumCreditNotesUsed() + (float) $facture->getSumDepositsUsed());
+                        if ($to_pay >= -0.01 && $to_pay <= 0.1) {
                             $facture->set_paid($user);
                         }
 
@@ -2349,6 +2382,100 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         }
 
         return $errors;
+    }
+
+    public function actionCorrectAcompteModePaiement($data, &$success)
+    {
+        global $user;
+
+        $errors = array();
+        $warnings = array();
+        $success = 'Mode de paiement enregistré avec succès';
+        $caisse = null;
+
+        if (!isset($data['id_paiement']) || !(int) $data['id_paiement']) {
+            $errors[] = 'ID du paiement absent';
+        }
+
+        if (!isset($data['mode_paiement']) || !(int) $data['mode_paiement']) {
+            $errors[] = 'veuillez sélectionner un mode de paiement';
+        }
+
+        if ($this->useCaisseForPayments && $this->getData("id_facture_acompte")) {
+            $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
+            $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
+            if (!$id_caisse) {
+                $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du mode de paiement de l\'acompte';
+            } else {
+                if (!$caisse->fetch($id_caisse)) {
+                    $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
+                } else {
+                    $caisse->isValid($errors);
+                }
+            }
+        }
+
+        if (!count($errors)) {
+            if ($this->useCaisseForPayments && BimpObject::objectLoaded($caisse)) {
+                $id_account = (int) $caisse->getData('id_account');
+            } else {
+                $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+            }
+
+            if (!$id_account) {
+                $errors[] = 'ID du compte bancaire absent pour l\'enregistrement du mode de paiement';
+            } else {
+                BimpTools::loadDolClass('compta/paiement', 'paiement');
+                $paiement = new Paiement($this->db->db);
+
+                if ($paiement->fetch((int) $data['id_paiement']) <= 0) {
+                    $errors[] = 'ID du paiement invalide';
+                } else {
+                    if ((int) $paiement->fk_paiement) {
+                        $errors[] = 'Un mode de paiement valide est déjà attribué à ce paiement';
+                    } else {
+                        // Mise à jour en base: 
+                        if ($this->db->update('paiement', array(
+                                    'fk_paiement' => (int) $data['mode_paiement']
+                                        ), '`rowid` = ' . (int) $data['id_paiement']) <= 0) {
+                            $msg = 'Echec de l\'enregistrement du mode de paiement';
+                            $sqlError = $this->db->db->lasterror();
+                            if ($sqlError) {
+                                $msg .= ' - ' . $sqlError;
+                            }
+                            $errors[] = $msg;
+                        } else {
+                            $paiement->paiementid = (int) $data['mode_paiement'];
+                            
+                            // Ajout du paiement au compte bancaire. 
+                            if ($paiement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                $account_label = '';
+
+                                if ($this->useCaisseForPayments) {
+                                    $account = $caisse->getChildObject('account');
+
+                                    if (BimpObject::objectLoaded($account)) {
+                                        $account_label = '"' . $account->bank . '"';
+                                    }
+                                }
+
+                                if (!$account_label) {
+                                    $account_label = ' d\'ID ' . $id_account;
+                                }
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($paiement), 'Echec de l\'ajout de l\'acompte au compte bancaire ' . $account_label);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     // Overrides:

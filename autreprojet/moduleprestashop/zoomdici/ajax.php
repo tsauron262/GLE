@@ -36,6 +36,9 @@ switch ($action) {
             $product->id_tax_rules_group = (int) $_POST['id_tax'];
             $product->price = $_POST['price'];
 
+//            $product->date_to = $_POST['date_end'];
+            $product->date_to = '2018-07-09 00:00:00';
+
             $tabTaxe = TaxRuleCore::getTaxRulesByGroupId(Configuration::get('PS_LANG_DEFAULT'), $product->id_tax_rules_group);
             if (isset($tabTaxe[0])) {
                 $product->price = number_format($product->price / (100 + $tabTaxe[0]['rate']) * 100, 5);
@@ -51,7 +54,19 @@ switch ($action) {
             $product->link_rewrite = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['id_tariff']);
             $return = $product->add();
             $product->updateCategories($product->category, true);
+
             if ($product->id > 0) {
+                // Extrafields
+                $sql = 'UPDATE ' . _DB_PREFIX_ . 'product';
+                $sql .= ' SET';
+                $sql .= ' date_from="' . $_POST['date_start'] . '",';
+                $sql .= ' date_to="' . $_POST['date_end'] . '",';
+                $sql .= ' email_text="' . $_POST['email_text'] . '",';
+                $sql .= ' place="' . $_POST['place'] . '",';
+                $sql .= ' address="' . $_POST['address'] . '"';
+                $sql .= ' WHERE id_product=' . $product->id;
+                Db::getInstance()->execute($sql);
+
                 // Qty
                 StockAvailable::setQuantity((int) $product->id, 0, intVal($_POST['number_place']));
 
@@ -178,7 +193,7 @@ switch ($action) {
             break;
         }
 
-    case 'deleteCategAndItsProduct' : {
+    case 'deleteCategAndItsProduct': {
             $category = new Category($_POST['id_event']);
             $p = 1; // "Page number"
             $n = 10000; // "Number of products per page"
@@ -198,6 +213,16 @@ switch ($action) {
                 die(Tools::jsonEncode(array('is_ok' => $is_ok, 'errors' => array())));
             else
                 die(Tools::jsonEncode(array('is_ok' => $is_ok, 'errors' => "Problème lors de la suppression de l'évènement, celà peut-être dû à une suppression antérieur de cet évènement.")));
+            break;
+        }
+
+    case 'deleteProduct': {
+            $product = new Product((int) $_POST['id_prod_extern']);
+            $is_ok = $product->delete();
+            if ($is_ok)
+                die(Tools::jsonEncode(array('is_ok' => $is_ok, 'errors' => array())));
+            else
+                die(Tools::jsonEncode(array('is_ok' => $is_ok, 'errors' => "Problème lors de la suppression du tarif, celà peut-être dû à une suppression antérieur de ce tarif.")));
             break;
         }
 

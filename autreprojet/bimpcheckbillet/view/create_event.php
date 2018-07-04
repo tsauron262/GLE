@@ -39,7 +39,7 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="description">Description </label>';
     print '<textarea id="description" class="tinymce" placeholder="Description" rows="3" name="description" style="width: 500px"></textarea><br/>';
 
-    print '<label for="place">Lieu </label>';
+    print '<label for="place">Lieu </label> <label style="font: 10px arial, sans-serif;">(La dernière ligne doit contenir le code postale et le nom de la ville)</label>';
     print '<textarea id="place" class="tinymce" placeholder="Lieu" rows="3" name="place" style="width: 500px"></textarea><br/>';
 
     print '<label for="date_start">Date de début</label><br/>';

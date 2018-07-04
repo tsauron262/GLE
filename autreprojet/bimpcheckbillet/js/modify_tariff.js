@@ -195,6 +195,21 @@ function createPrestashopProduct(id_tariff, id_categ_extern, image_name, id_tax)
         date_end = tariff.date_end;
     }
 
+
+    var full_adresse_lines = event_for_tariff.place.match(/<p>(.*?)<\/p>/g).map(function (val) {
+        return val.replace(/<\/?b>/g, '');
+    });
+
+    var place = '';
+    var address;
+
+    for (var i in full_adresse_lines) {
+        if (parseInt(i) + 1 === full_adresse_lines.length)
+            address = full_adresse_lines[i];
+        else
+            place += full_adresse_lines[i];
+    }
+
     if (tariff.id_prod_extern === 0) {
         $.ajax({
             type: 'POST',
@@ -212,6 +227,8 @@ function createPrestashopProduct(id_tariff, id_categ_extern, image_name, id_tax)
                 id_tax: id_tax,
                 date_stop_sale: tariff.date_stop_sale,
                 email_text: tariff.email_text,
+                place: place,
+                address: address,
                 action: 'createPrestashopProduct'
             },
             error: function () {

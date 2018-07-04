@@ -25,7 +25,7 @@ $action = $_POST['action'];
 
 
 if (!isset($_POST['sender']) and $action != 'login' and $action != 'register')
-    $user_session = json_decode($_SESSION['user']);
+    @$user_session = json_decode($_SESSION['user']);
 
 $user = new User($db);
 $event = new Event($db);

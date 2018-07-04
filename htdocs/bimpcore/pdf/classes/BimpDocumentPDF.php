@@ -80,6 +80,53 @@ class BimpDocumentPDF extends BimpModelPDF
                 $mysoc->town = $entrepot->town;
             }
         }
+        
+        
+        // Commercial: 
+        if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
+            global $mysoc;
+            $comm1 = $comm2 = 0;
+            $contacts = $this->propal->getIdContact('internal', 'SALESREPSIGN');
+            if (count($contacts)) {
+                $comm1 = $contacts[0];
+            }
+            
+            $contacts = $this->propal->getIdContact('internal', 'SALESREPFOLL');
+            if (count($contacts)) {
+                $comm2 = $contacts[0];
+            }
+            
+            if($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0){
+                $usertmp = new User($this->db);
+                $usertmp->fetch($comm1);
+                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' client : ' . $usertmp->getFullName($this->langs) . '</div>';
+                $nRows++;
+                $usertmp = new User($this->db);
+                $usertmp->fetch($comm2);
+                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' devis : ' . $usertmp->getFullName($this->langs) . '</div>';
+                $nRows++;
+            }
+            else{
+                if($comm1 > 0){
+                    $usertmp = new User($this->db);
+                    $usertmp->fetch($comm1);
+                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
+                    $nRows++;
+                }
+                elseif($comm2 > 0){
+                    $usertmp = new User($this->db);
+                    $usertmp->fetch($comm2);
+                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
+                    $nRows++;
+                }
+            }
+            if(isset($usertmp)){
+                if($usertmp->office_phone != "")
+                    $mysoc->phone = $usertmp->office_phone;
+                if($usertmp->email != "")
+                    $mysoc->email = $usertmp->email;
+            }
+        }
 
         $logo_height = 0;
         if (!file_exists($logo_file)) {

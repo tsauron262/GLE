@@ -65,6 +65,7 @@ class BimpStatsFacture {
         // TODO MAJ BDD
         $this->mode = $format;
         $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType);    // apply filter
+        die;
         $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
         $hash = $this->addMargin($hash);
         if ($this->mode == 'd') {
@@ -146,7 +147,7 @@ class BimpStatsFacture {
             $sql .= ' AND f.paye = 1';
         elseif ($statut == 'u') //unpayed
             $sql .= ' AND f.paye = 0';
-die($sql);
+
 //        echo $sql . "\n";
         dol_syslog(get_class($this) . "::getFactureIds sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);

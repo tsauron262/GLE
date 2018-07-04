@@ -1120,6 +1120,7 @@ class BS_SAV extends BimpObject
         }
 
         $prop->array_options['options_type'] = "S";
+        $prop->array_options['options_entrepot'] = $this->getData("id_entrepot");
         define("NOT_VERIF", true);
 
         if ($this->getData('id_discount') > 0) {

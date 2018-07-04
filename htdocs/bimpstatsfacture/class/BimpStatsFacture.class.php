@@ -161,7 +161,6 @@ class BimpStatsFacture {
     }
 
     private function getFields($facids, $taxes) {
-        print_r($facids);die;
 
         $hash = array();
         $ind = 0;
@@ -202,13 +201,13 @@ class BimpStatsFacture {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment as eq ON eq.id = fs.id_equipment';
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_gsx_repair as re ON re.id_sav = fs.id';
                 $sql .= " WHERE fs.id = " . $fact[1];
+                $result2 = $this->db->query($sql);
                 if ($result2 and mysqli_num_rows($result2) > 0)
                     $obj2 = $this->db->fetch_object($result2);
             }
 
             if ($result and mysqli_num_rows($result) > 0) {
                 while ($obj = $this->db->fetch_object($result)) {
-                    $result2 = $this->db->query($sql);
                     $hash[$ind]['fac_id'] = $obj->fac_id;
                     $hash[$ind]['nom_facture'] = $obj->fac_number;
                     $hash[$ind]['fac_statut'] = $obj->fac_statut;

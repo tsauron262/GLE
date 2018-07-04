@@ -1729,7 +1729,6 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         if (!(string) $this->getData('diagnostic')) {
             $errors[] = 'Vous devez remplir le champ "Diagnostic" avant de valider le devis';
         } elseif (!isset($data['generate_propal']) || (int) $data['generate_propal']) {
-            echo 'ici'; exit;
             $errors = $this->generatePropal();
         }
         

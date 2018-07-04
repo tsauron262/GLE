@@ -511,7 +511,7 @@ forms:
                   type: toggle
                   help: Attention, si cette option est activée, toutes les modifications  faites depuis la fiche propale seront écrasées.
               label: Générer le devis
-              value: 0
+              value: 1
               input_name: generate_propal
             
     resolution: 

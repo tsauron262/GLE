@@ -74,15 +74,15 @@ class BS_ApplePart extends BimpObject
         $tabCas9 = array("661-02909", "661-04479","661-04579","661-04580","661-04581","661-04582","661-05421","661-05755");//Prix a 29
 
         $cas = 0;
-        foreach ($tabCas1 as $val)
-            if (stripos($ref, $val) === 0)
-                $cas = 1;
         foreach ($tabCas2 as $val)
             if (stripos($desc, $val) === 0)
                 $cas = 1;
         foreach ($tabCas3 as $val)
             if (stripos($ref, $val) === 0)
                 $cas = 3;
+        foreach ($tabCas1 as $val)
+            if (stripos($ref, $val) === 0)
+                $cas = 1;
             
             
         //Application double contrainte    

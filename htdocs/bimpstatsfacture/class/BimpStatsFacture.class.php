@@ -161,6 +161,7 @@ class BimpStatsFacture {
     }
 
     private function getFields($facids, $taxes) {
+        print_r($facids);die;
 
         $hash = array();
         $ind = 0;

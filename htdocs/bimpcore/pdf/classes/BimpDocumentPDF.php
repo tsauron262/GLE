@@ -96,6 +96,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $comm2 = $contacts[0];
             }
             
+            $rows = "";
             if($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0){
                 $usertmp = new User($this->db);
                 $usertmp->fetch($comm1);
@@ -142,7 +143,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->header_vars = array(
             'logo_img'     => $logo_file,
             'logo_height'  => $logo_height * BimpPDF::$pxPerMm,
-            'header_right' => ''
+            'header_right' => array('rows'=> $rows)
         );
     }
 

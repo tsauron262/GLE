@@ -190,7 +190,7 @@ class BimpStatsFacture {
 
         $sql .= ' WHERE f.rowid IN (\'' . implode("','", $facids) . '\')';
         $sql .= ' GROUP BY p.rowid ORDER BY f.rowid';
-
+die($sql);
         dol_syslog(get_class($this) . "::getFields sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);
 

@@ -33,7 +33,7 @@ class BimpValidateOrder {
             setEventMessages(null, $this->errors, 'errors');
             return -3;
         }
-
+die($max_price);
         $tropRemise = ($order->array_options['options_type'] == "C" ? $this->checkRemise($order) : 0);
 
         if ($max_price <= $price_order || $tropRemise) {

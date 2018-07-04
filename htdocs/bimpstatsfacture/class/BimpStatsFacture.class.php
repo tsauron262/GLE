@@ -146,7 +146,7 @@ class BimpStatsFacture {
             $sql .= ' AND f.paye = 1';
         elseif ($statut == 'u') //unpayed
             $sql .= ' AND f.paye = 0';
-
+die($sql);
 //        echo $sql . "\n";
         dol_syslog(get_class($this) . "::getFactureIds sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);

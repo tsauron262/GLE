@@ -48,16 +48,27 @@ class Interfacevalidateorder extends DolibarrTriggers {
                 setEventMessages("Merci de séléctionner les Conditions de règlement", null, 'errors');
                 return -2;
             }
+            
+             
+            $idEn = $object->array_options['options_entrepot'];
+            if ($idEn < 1) {
+                setEventMessages("Pas d'entrepot associé", null, 'errors');
+                return -2;
+            }
+            
+            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+            $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $order->id));
+
         }
 
         if (!defined("NOT_VERIF") && $action == 'ORDER_VALIDATE') {
             $bvo = new BimpValidateOrder($user->db);
-            $code = $bvo->checkValidateRights($user, $object);
-            return $code;
+            if(!$bvo->checkValidateRights($user, $object))    
+                return -2;
         }
         if ($action == 'ORDER_UNVALIDATE') {
-            setEventMessages("Impossible de dévalidé", null, 'errors');
-            return -2;
+//            setEventMessages("Impossible de dévalidé", null, 'errors');
+//            return -2;
         }
 
 

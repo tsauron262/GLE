@@ -97,7 +97,8 @@ class BimpStatsFacture {
         $sql = 'SELECT f.rowid as facid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture as f';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e ON f.rowid = e.fk_object';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON (f.rowid = fs.id_facture || f.rowid = fs.id_facture_acompte)';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON f.rowid = fs.id_facture';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs2 ON f.rowid = fs2.id_facture_acompte';
         $sql .= ' WHERE f.datef >= ' . $this->db->idate($dateStart);
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
 
@@ -111,14 +112,17 @@ class BimpStatsFacture {
         $sql .= " AND (";
         if (!empty($centres) and $placeType == 'c') {
             $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';
-            $sql .= ' OR fs.code_centre IN (\'' . implode("','", $centres) . '\'))';
+            $sql .= ' OR fs.code_centre IN (\'' . implode("','", $centres) . '\')';
+            $sql .= ' OR fs2.code_centre IN (\'' . implode("','", $centres) . '\'))';
             if (in_array('NRS', $centres)) {
                 $sql .= " OR ((e.centre IS NULL OR e.centre = '1')";
-                $sql .= " AND (fs.code_centre IS NULL OR fs.code_centre = '1'))";
+                $sql .= " AND (fs.code_centre IS NULL OR fs.code_centre = '1')";
+                $sql .= " AND (fs2.code_centre IS NULL OR fs.code_centre = '1'))";
             }
         } elseif (!empty($centres) and $placeType == 'e') {
             $sql .= '(e.entrepot IN (\'' . implode("','", $centres) . '\')';
-            $sql .= ' OR fs.id_entrepot IN (\'' . implode("','", $centres) . '\'))';
+            $sql .= ' OR fs.id_entrepot IN (\'' . implode("','", $centres) . '\')';
+            $sql .= ' OR fs2.id_entrepot IN (\'' . implode("','", $centres) . '\'))';
             if (in_array('NRS', $centres)) {
                 $sql .= " OR e.entrepot IS NULL OR e.entrepot = '1'";
             }
@@ -130,6 +134,7 @@ class BimpStatsFacture {
         if ($user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read) {
             $tab_center = explode(' ', $user->array_options['options_apple_centre']);
             $sql .= ' AND (fs.centre IN ("' . implode('","', $tab_center) . '")';
+            $sql .= ' OR fs2.centre IN ("' . implode('","', $tab_center) . '")';
             $sql .= ' OR e.centre IN ("' . implode('","', $tab_center) . '"))';
         }
 
@@ -141,7 +146,7 @@ class BimpStatsFacture {
             $sql .= ' AND f.paye = 1';
         elseif ($statut == 'u') //unpayed
             $sql .= ' AND f.paye = 0';
-
+die($sql);
 //        echo $sql . "\n";
         dol_syslog(get_class($this) . "::getFactureIds sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);

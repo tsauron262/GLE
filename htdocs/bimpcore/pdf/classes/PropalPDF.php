@@ -91,51 +91,6 @@ class PropalPDF extends BimpDocumentPDF
             $rows .= '<div class="row">' . $this->langs->transnoentities('CustomerCode') . ' : ' . $this->langs->transnoentities($this->propal->thirdparty->code_client) . '</div>';
             $nRows++;
         }
-        // Commercial: 
-        if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
-            global $mysoc;
-            $comm1 = $comm2 = 0;
-            $contacts = $this->propal->getIdContact('internal', 'SALESREPSIGN');
-            if (count($contacts)) {
-                $comm1 = $contacts[0];
-            }
-            
-            $contacts = $this->propal->getIdContact('internal', 'SALESREPFOLL');
-            if (count($contacts)) {
-                $comm2 = $contacts[0];
-            }
-            
-            if($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0){
-                $usertmp = new User($db);
-                $usertmp->fetch($comm1);
-                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' client : ' . $usertmp->getFullName($this->langs) . '</div>';
-                $nRows++;
-                $usertmp = new User($db);
-                $usertmp->fetch($comm2);
-                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' devis : ' . $usertmp->getFullName($this->langs) . '</div>';
-                $nRows++;
-            }
-            else{
-                if($comm1 > 0){
-                    $usertmp = new User($db);
-                    $usertmp->fetch($comm1);
-                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
-                    $nRows++;
-                }
-                elseif($comm2 > 0){
-                    $usertmp = new User($db);
-                    $usertmp->fetch($comm2);
-                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
-                    $nRows++;
-                }
-            }
-            if(isset($usertmp)){
-                if($usertmp->office_phone != "")
-                    $mysoc->phone = $usertmp->office_phone;
-                if($usertmp->email != "")
-                    $mysoc->email = $usertmp->email;
-            }
-        }
 
         // Objets liés:
         $linkedObjects = pdf_getLinkedObjects($this->propal, $this->langs);
@@ -161,7 +116,7 @@ class PropalPDF extends BimpDocumentPDF
         $this->header_vars['header_right'] = $this->renderTemplate(self::$tpl_dir . 'header_right.html', array(
             'doc_name' => $docName,
             'doc_ref'  => $docRef,
-            'rows'     => $rows
+            'rows'     => $this->header_vars['header_right']['rows'] . $rows
         ));
     }
 

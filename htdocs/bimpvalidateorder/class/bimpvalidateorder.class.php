@@ -29,10 +29,6 @@ class BimpValidateOrder {
      */
     public function checkValidateRights($user, $order) {
         
-//        $order->array_options['options_type'] = "P";
-        $order->total_ht = 500000;
-        $user->id = 62;
-        
         
         $updateValFin = $updateValComm = false;
         $ok = true;

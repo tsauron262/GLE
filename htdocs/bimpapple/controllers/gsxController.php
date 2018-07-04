@@ -269,7 +269,7 @@ class gsxController extends BimpController
                             )
                 ));
                 $html .= '</div>';
-                $html .= '<div id="partsListContainer' . $suffixe . '" style="display: none"></div>';
+                $html .= '<div id="partsListContainer' . $suffixe . '" class="partsListContainer" style="display: none"></div>';
             } else {
                 $html = BimpRender::renderAlerts('Le numéro de série de l\'équipement sélectionné ne correspond pas à un produit Apple: ' . $serial, 'warning');
             }

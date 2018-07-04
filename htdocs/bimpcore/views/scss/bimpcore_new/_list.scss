@@ -235,11 +235,11 @@ table.objectlistTable {
             width: 100%;
         }
 
-        .search_list_input {
-            width: 80%
-        }
-
         .optionsContainer {
+            display: none;
+        }
+        
+        .loading {
             display: none;
         }
     }

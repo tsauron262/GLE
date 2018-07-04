@@ -1,8 +1,8 @@
 <?php
-require_once("../main.inc.php");
+require_once("../../main.inc.php");
 
 ini_set('display_errors', 1);
-require_once __DIR__ . '/Bimp_Lib.php';
+require_once __DIR__ . '/../Bimp_Lib.php';
 
 //llxHeader();
 

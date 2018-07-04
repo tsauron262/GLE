@@ -66,7 +66,7 @@ class BS_ApplePart extends BimpObject
         $coefPrix = 1;
         $constPrix = 0;
         $newPrix = 0;
-        $tabCas1 = array("DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
+        $tabCas1 = array("661-05511", "DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
         $tabCas2 = array("SVC,IPOD", "Ipod nano");
         $tabCas3 = array("661", "Z661");
         $tabCas35 = array("iphone", "BAT,IPHONE", "SVC,IPHONE");//design commence par

@@ -82,15 +82,15 @@ class BimpDocumentPDF extends BimpModelPDF {
 
         // Commercial: 
         if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
-            if (is_object($this->propal)) {
+            if (is_object($this->object) && method_exists($this->object, "getIdContact")) {
                 global $mysoc;
                 $comm1 = $comm2 = 0;
-                $contacts = $this->propal->getIdContact('internal', 'SALESREPSIGN');
+                $contacts = $this->object->getIdContact('internal', 'SALESREPSIGN');
                 if (count($contacts)) {
                     $comm1 = $contacts[0];
                 }
 
-                $contacts = $this->propal->getIdContact('internal', 'SALESREPFOLL');
+                $contacts = $this->object->getIdContact('internal', 'SALESREPFOLL');
                 if (count($contacts)) {
                     $comm2 = $contacts[0];
                 }

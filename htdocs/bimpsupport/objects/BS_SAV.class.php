@@ -1730,11 +1730,15 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         if (isset($data['diagnostic'])) {
             $this->updateField('diagnostic', $data['diagnostic']);
         }
+        $propal = $this->getChildObject('propal');
 
         if (!(string) $this->getData('diagnostic')) {
             $errors[] = 'Vous devez remplir le champ "Diagnostic" avant de valider le devis';
         } elseif (!isset($data['generate_propal']) || (int) $data['generate_propal']) {
             $errors = $this->generatePropal();
+        }
+        else{
+            $this->allGarantie = (is_object($propal) && $propal->dol_object->total_ttc <= 0);
         }
         
         define("NOT_VERIF", true);
@@ -1744,12 +1748,11 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
         if (!count($errors)) {
             global $user, $langs;
 
-            $propal = $this->getChildObject('propal');
 
-            $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
 
             $new_status = null;
             if ($this->allGarantie) { // Déterminé par $this->generatePropal()
+                $this->addNote('Devis garantie validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 // Si on vient de commander les pieces sous garentie (On ne change pas le statut)
                 if ((int) $this->getData('status') !== self::BS_SAV_ATT_PIECE) {
                     $new_status = self::BS_SAV_DEVIS_ACCEPTE;
@@ -1760,6 +1763,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                 $propal->fetch($propal->id);
                 $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
             } else {
+                $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 $new_status = self::BS_SAV_ATT_CLIENT;
                 $propal->dol_object->valid($user);
                 $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);

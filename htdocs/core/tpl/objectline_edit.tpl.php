@@ -117,9 +117,10 @@ $coldisplay=-1; // We remove first td
 	} else {
 		print '<td align="right"><input size="1" type="text" class="flat right" name="tva_tx" value="' . price($line->tva_tx) . '" readonly />%</td>';
 	}
-
+        
 	$coldisplay++;
-	print '<td align="right"><input type="text" class="flat right" size="5" id="price_ht" name="price_ht" value="' . (isset($line->pu_ht)?price($line->pu_ht,0,'',0):price($line->subprice,0,'',0)) . '"';
+        $droitPrixVente = (!isset($user->rights->bimpcommercial) || (isset($user->rights->bimpcommercial->priceVente) && $user->rights->bimpcommercial->priceVente))? 1 : 0;
+	print '<td align="right"><input '.($droitPrixVente ? "" : "disabled").' type="text" class="flat right" size="5" id="price_ht" name="price_ht" value="' . (isset($line->pu_ht)?price($line->pu_ht,0,'',0):price($line->subprice,0,'',0)) . '"';
 	if ($this->situation_counter > 1) print ' readonly';
 	print '></td>';
 
@@ -182,7 +183,9 @@ $coldisplay=-1; // We remove first td
 			<select id="fournprice_predef" name="fournprice_predef" class="flat right" data-role="none" style="display: none;"></select>
 			<?php } ?>
 			<!-- For free product -->
-			<input class="flat right" type="text" size="5" id="buying_price" name="buying_price" class="hideobject" value="<?php echo price($line->pa_ht,0,'',0); ?>">
+                        
+                        <?php $droitPrixAchat = (!isset($user->rights->bimpcommercial) || (isset($user->rights->bimpcommercial->priceAchat) && $user->rights->bimpcommercial->priceAchat))? 1 : 0;?>
+			<input class="flat right" <?php echo ($droitPrixAchat ? "" : "disabled") ?> type="text" size="5" id="buying_price" name="buying_price" class="hideobject" value="<?php echo price($line->pa_ht,0,'',0); ?>">
 		</td>
 		<?php } ?>
 	    <?php if ($user->rights->margins->creer) {

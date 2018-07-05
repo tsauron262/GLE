@@ -333,7 +333,6 @@ class BimpDocumentPDF extends BimpModelPDF {
 
         $desc = preg_replace("/(\n)?[ \s]*<[ \/]*br[ \/]*>[ \s]*(\n)?/", '<br/>', $desc);
         $desc = str_replace("\n", '<br/>', $desc);
-        die($desc);
         return $desc;
     }
 

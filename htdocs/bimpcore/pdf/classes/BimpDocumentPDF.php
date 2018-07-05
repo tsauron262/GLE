@@ -16,6 +16,8 @@ class BimpDocumentPDF extends BimpModelPDF {
     public $tva = array();
     public $hideReduc = false;
     public $hideTotal = false;
+    public $hideRef = false;
+    public $hideLabelProd = true;
 
     public function __construct($db) {
         parent::__construct($db, 'P', 'A4');
@@ -31,6 +33,9 @@ class BimpDocumentPDF extends BimpModelPDF {
                 }
                 if (isset($this->object->array_options['options_pdf_hide_total'])) {
                     $this->hideTotal = (int) $this->object->array_options['options_pdf_hide_total'];
+                }
+                if (isset($this->object->array_options['options_pdf_hide_ref'])) {
+                    $this->hideRef = (int) $this->object->array_options['options_pdf_hide_ref'];
                 }
                 if (is_null($this->contact)) {
                     $contacts = $this->object->getIdContact('external', 'CUSTOMER');
@@ -309,22 +314,26 @@ class BimpDocumentPDF extends BimpModelPDF {
     public function getLineDesc($line, Product $product = null) {
         $desc = '';
         if (!is_null($product)) {
-            $desc = $product->ref;
-            $desc .= ($desc ? ' - ' : '') . $product->label;
+            if(!$this->hideRef)
+            $desc .= $product->ref;
+            if(!$this->hideLabelProd)
+                $desc .= ($desc ? ' - ' : '') . $product->label;
         }
 
         if (!is_null($line->desc) && $line->desc) {
             $line_desc = $line->desc;
             if (!is_null($product)) {
-                $line_desc = str_replace($product->label, '', $line_desc);
+                if(!$this->hideLabelProd)
+                    $line_desc = str_replace($product->label, '', $line_desc);
             }
             if ($line_desc) {
-                $desc .= ($desc ? '<br/>' : '') . $line_desc;
+                $desc .= ($desc ? (strlen($desc) > 20 ?'<br/>' : ' - ') : '') . $line_desc;
             }
         }
 
         $desc = preg_replace("/(\n)?[ \s]*<[ \/]*br[ \/]*>[ \s]*(\n)?/", '<br/>', $desc);
         $desc = str_replace("\n", '<br/>', $desc);
+        die($desc);
         return $desc;
     }
 

@@ -134,8 +134,8 @@ class BimpStatsFacture {
 
         if ($user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read) {
             $tab_center = explode(' ', $user->array_options['options_apple_centre']);
-            $sql .= ' AND (fs.centre IN ("' . implode('","', $tab_center) . '")';
-            $sql .= ' OR fs2.centre IN ("' . implode('","', $tab_center) . '")';
+            $sql .= ' AND (fs.code_centre IN ("' . implode('","', $tab_center) . '")';
+            $sql .= ' OR fs2.code_centre IN ("' . implode('","', $tab_center) . '")';
             $sql .= ' OR e.centre IN ("' . implode('","', $tab_center) . '"))';
         }
 

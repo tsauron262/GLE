@@ -123,10 +123,10 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<input class="form-control bfh-number" name="number_place" step="1" type="number" min="0" style="width: 120px"/><br/>';
 
     print '<label for="img_display">Image</label><br/>';
-    print '<img id="img_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
+    print '<img id="img_display" src="#" alt="&nbsp Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
 
     print '<label for="img_display">Image sur les tickets</label><br/>';
-    print '<img id="img_custom_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
+    print '<img id="img_custom_display" src="#" alt="&nbsp Aucune image n\'est définie pour les tickets de ce tariff" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
 
     print '<label for="event">Exiger nom et prénom </label><br/>';
     print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';

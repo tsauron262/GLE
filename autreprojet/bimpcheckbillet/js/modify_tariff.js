@@ -143,6 +143,39 @@ function modifyTariff(id_tariff, label, price, number_place, require_names, date
     });
 }
 
+function modifyTariffPrestashop(id_tariff, label, price, number_place, require_names, date_stop_sale, time_stop_sale, date_start, time_start, date_end, time_end, email_text,
+        type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6,
+        name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6,
+        require_extra_1, require_extra_2, require_extra_3, require_extra_4, require_extra_5, require_extra_6, id_prod_extern) {
+
+    $.ajax({
+        type: "POST",
+        url: URL_PRESTASHOP,
+        data: {
+            id_prod_extern: id_prod_extern,
+            label: label,
+            price: price,
+            action: 'updateProduct'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 8943.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (parseInt(out.is_ok) > 0) {
+                modifyTariff(id_tariff, label, price, number_place, require_names, date_stop_sale, time_stop_sale, date_start, time_start, date_end, time_end, email_text,
+                        type_extra_1, type_extra_2, type_extra_3, type_extra_4, type_extra_5, type_extra_6,
+                        name_extra_1, name_extra_2, name_extra_3, name_extra_4, name_extra_5, name_extra_6,
+                        require_extra_1, require_extra_2, require_extra_3, require_extra_4, require_extra_5, require_extra_6);
+            } else {
+                setMessage('alertSubmit', 'Erreur serveur 9736.', 'error');
+            }
+        }
+    });
+}
+
 function getCategEvent(id_tariff, id_tax) {
     $.ajax({
         type: 'POST',
@@ -176,6 +209,11 @@ function createPrestashopProduct(id_tariff, id_categ_extern, image_name, id_tax)
     var event_for_tariff;
     var date_start;
     var date_end;
+    var place = '';
+    var address;
+    var line;
+    var tmp_string;
+
 
     tariffs.forEach(function (tmp_tariff) {
         if (tmp_tariff.id === parseInt(id_tariff))
@@ -186,6 +224,7 @@ function createPrestashopProduct(id_tariff, id_categ_extern, image_name, id_tax)
         if (parseInt(tmp_event.id) === parseInt(tariff.fk_event))
             event_for_tariff = tmp_event;
     });
+
 
     if (tariff.date_start === null && tariff.date_end === null) {
         date_start = event_for_tariff.date_start;
@@ -200,14 +239,13 @@ function createPrestashopProduct(id_tariff, id_categ_extern, image_name, id_tax)
         return val.replace(/<\/?b>/g, '');
     });
 
-    var place = '';
-    var address;
-
     for (var i in full_adresse_lines) {
+        line = full_adresse_lines[i].replace(/<\/p>/ig, '===');
+        tmp_string = removeHtmlTags(line);
         if (parseInt(i) + 1 === full_adresse_lines.length)
-            address = full_adresse_lines[i];
+            address = tmp_string.replace(/===/ig, "<br/>");
         else
-            place += full_adresse_lines[i];
+            place += tmp_string.replace(/===/ig, "<br/>");
     }
 
     if (tariff.id_prod_extern === 0) {
@@ -425,37 +463,78 @@ function initEvents() {
 
     $('button[name=modify]').click(function (e) {
         e.preventDefault();
-        modifyTariff(
-                $('select[name=tariff]').val(),
-                $('input[name=label]').val(),
-                $('input[name=price]').val(),
-                $('input[name=number_place]').val(),
-                $('input[name=require_names]:checked').val(),
-                $('input[name=date_stop_sale]').val(),
-                $('input[name=time_stop_sale]').val(),
-                $('input[name=date_start]').val(),
-                $('input[name=time_start]').val(),
-                $('input[name=date_end]').val(),
-                $('input[name=time_end]').val(),
-                tinymce.get('email_text').getContent(),
-                $('select[name=type_extra_1] > option:selected').val(),
-                $('select[name=type_extra_2] > option:selected').val(),
-                $('select[name=type_extra_3] > option:selected').val(),
-                $('select[name=type_extra_4] > option:selected').val(),
-                $('select[name=type_extra_5] > option:selected').val(),
-                $('select[name=type_extra_6] > option:selected').val(),
-                $('input[name=name_extra_1]').val(),
-                $('input[name=name_extra_2]').val(),
-                $('input[name=name_extra_3]').val(),
-                $('input[name=name_extra_4]').val(),
-                $('input[name=name_extra_5]').val(),
-                $('input[name=name_extra_6]').val(),
-                $('input[name=require_extra_1]:checked').val(),
-                $('input[name=require_extra_2]:checked').val(),
-                $('input[name=require_extra_3]:checked').val(),
-                $('input[name=require_extra_4]:checked').val(),
-                $('input[name=require_extra_5]:checked').val(),
-                $('input[name=require_extra_6]:checked').val());
+        var id_tariff = parseInt($('select[name=tariff]').val());
+        if (id_tariff > 0) {
+
+            var tariff = getTariffById(id_tariff);
+
+            if (parseInt(tariff.id_prod_extern) > 0) {
+                modifyTariffPrestashop(
+                        id_tariff,
+                        $('input[name=label]').val(),
+                        $('input[name=price]').val(),
+                        $('input[name=number_place]').val(),
+                        $('input[name=require_names]:checked').val(),
+                        $('input[name=date_stop_sale]').val(),
+                        $('input[name=time_stop_sale]').val(),
+                        $('input[name=date_start]').val(),
+                        $('input[name=time_start]').val(),
+                        $('input[name=date_end]').val(),
+                        $('input[name=time_end]').val(),
+                        tinymce.get('email_text').getContent(),
+                        $('select[name=type_extra_1] > option:selected').val(),
+                        $('select[name=type_extra_2] > option:selected').val(),
+                        $('select[name=type_extra_3] > option:selected').val(),
+                        $('select[name=type_extra_4] > option:selected').val(),
+                        $('select[name=type_extra_5] > option:selected').val(),
+                        $('select[name=type_extra_6] > option:selected').val(),
+                        $('input[name=name_extra_1]').val(),
+                        $('input[name=name_extra_2]').val(),
+                        $('input[name=name_extra_3]').val(),
+                        $('input[name=name_extra_4]').val(),
+                        $('input[name=name_extra_5]').val(),
+                        $('input[name=name_extra_6]').val(),
+                        $('input[name=require_extra_1]:checked').val(),
+                        $('input[name=require_extra_2]:checked').val(),
+                        $('input[name=require_extra_3]:checked').val(),
+                        $('input[name=require_extra_4]:checked').val(),
+                        $('input[name=require_extra_5]:checked').val(),
+                        $('input[name=require_extra_6]:checked').val(),
+                        tariff.id_prod_extern);
+            } else {
+                modifyTariff(
+                        id_tariff,
+                        $('input[name=label]').val(),
+                        $('input[name=price]').val(),
+                        $('input[name=number_place]').val(),
+                        $('input[name=require_names]:checked').val(),
+                        $('input[name=date_stop_sale]').val(),
+                        $('input[name=time_stop_sale]').val(),
+                        $('input[name=date_start]').val(),
+                        $('input[name=time_start]').val(),
+                        $('input[name=date_end]').val(),
+                        $('input[name=time_end]').val(),
+                        tinymce.get('email_text').getContent(),
+                        $('select[name=type_extra_1] > option:selected').val(),
+                        $('select[name=type_extra_2] > option:selected').val(),
+                        $('select[name=type_extra_3] > option:selected').val(),
+                        $('select[name=type_extra_4] > option:selected').val(),
+                        $('select[name=type_extra_5] > option:selected').val(),
+                        $('select[name=type_extra_6] > option:selected').val(),
+                        $('input[name=name_extra_1]').val(),
+                        $('input[name=name_extra_2]').val(),
+                        $('input[name=name_extra_3]').val(),
+                        $('input[name=name_extra_4]').val(),
+                        $('input[name=name_extra_5]').val(),
+                        $('input[name=name_extra_6]').val(),
+                        $('input[name=require_extra_1]:checked').val(),
+                        $('input[name=require_extra_2]:checked').val(),
+                        $('input[name=require_extra_3]:checked').val(),
+                        $('input[name=require_extra_4]:checked').val(),
+                        $('input[name=require_extra_5]:checked').val(),
+                        $('input[name=require_extra_6]:checked').val());
+            }
+        }
     });
 
     $('select[name=tariff]').change(function (e) {
@@ -474,7 +553,8 @@ function initEvents() {
             if (tariff.id === id_tariff) {
                 id_prod_extern = tariff.id_prod_extern;
                 $('img#img_display').attr('src', '../img/event/' + tariff.filename);
-                $('img#img_custom_display').attr('src', '../img/tariff_custom/' + tariff.filename_custom);
+                if (tariff.filename_custom !== null)
+                    $('img#img_custom_display').attr('src', '../img/tariff_custom/' + tariff.filename_custom);
             }
         });
 
@@ -496,8 +576,8 @@ function initEvents() {
                 $('div[name=select_tariff]').css('display', 'block');
             }
         }
-    });
-
+    }
+    );
     $('div[name=toggle_active]').click(function () {
         var id_prod_extern;
         var id_tariff = parseInt($('select[name=tariff] > option:selected').val());
@@ -549,7 +629,8 @@ function initEvents() {
         } else {
             alert("Veuillez sélectionner un produit avant de changer un status.");
         }
-    });
+    }
+    );
 }
 
 function autoFill(id_tariff) {
@@ -651,4 +732,8 @@ function fillExtra(tariff, max) {
             $('input[name=require_extra_' + i + '][value=0]').closest('.btn').button('toggle');
         }
     }
+}
+
+function removeHtmlTags(inputString) {
+    return inputString.replace(/(<([^>]+)>)/ig, '');
 }

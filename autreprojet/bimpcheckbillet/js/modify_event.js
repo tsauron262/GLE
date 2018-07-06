@@ -80,6 +80,39 @@ function setImage(id_event) {
     });
 }
 
+function modifyEventPrestashop(id_event, label, description, place, date_start, time_start, date_end, time_end, id_categ) {
+
+    $.ajax({
+        type: "POST",
+        url: URL_PRESTASHOP,
+        data: {
+            id_event: id_event,
+            label: label,
+            description: description,
+            place: place,
+            date_start: date_start,
+            time_start: time_start,
+            date_end: date_end,
+            time_end: time_end,
+            id_categ: id_categ,
+            action: 'updatecateg'
+        },
+        error: function () {
+            setMessage('alertBottom', 'Erreur serveur 5720.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (parseInt(out.is_ok) > 1) {
+                modifyEvent(id_event, label, description, place, date_start, time_start, date_end, time_end)
+            } else {
+                setMessage('alertBottom', 'Erreur serveur 6871.', 'error');
+            }
+        }
+    });
+}
+
 function modifyEvent(id_event, label, description, place, date_start, time_start, date_end, time_end) {
 
     $.ajax({
@@ -350,15 +383,29 @@ function initEvents() {
     $('button[name=modify]').click(function (e) {
         e.preventDefault();
         var id_event = $('select[name=id_event] > option:selected').val();
+
         if (parseInt(id_event) > 0) {
-            modifyEvent($('select[name=id_event] > option:selected').val(),
-                    $('input[name=label]').val(),
-                    tinymce.get('description').getContent(),
-                    tinymce.get('place').getContent(),
-                    $('input[name=date_start]').val(),
-                    $('input[name=time_start]').val(),
-                    $('input[name=date_end]').val(),
-                    $('input[name=time_end]').val());
+            var event = getEventById(id_event);
+            if (parseInt(event.id_categ) > 0) {
+                modifyEventPrestashop($('select[name=id_event] > option:selected').val(),
+                        $('input[name=label]').val(),
+                        tinymce.get('description').getContent(),
+                        tinymce.get('place').getContent(),
+                        $('input[name=date_start]').val(),
+                        $('input[name=time_start]').val(),
+                        $('input[name=date_end]').val(),
+                        $('input[name=time_end]').val(),
+                        event.id_categ);
+            } else {
+                modifyEvent($('select[name=id_event] > option:selected').val(),
+                        $('input[name=label]').val(),
+                        tinymce.get('description').getContent(),
+                        tinymce.get('place').getContent(),
+                        $('input[name=date_start]').val(),
+                        $('input[name=time_start]').val(),
+                        $('input[name=date_end]').val(),
+                        $('input[name=time_end]').val());
+            }
         } else {
             setMessage('alertSubmit', 'Veuillez sélectionner un évènement.', 'error');
         }
@@ -499,8 +546,10 @@ les tariffs et les tickets (pdf inclus) qui lui sont rattachés seront égalemen
 
 function autoFill(event) {
     $('input[name=label]').val(event.label);
-    $("#description").val(event.description);
-    $("#place").val(event.place);
+    $(tinymce.get('description').getBody()).html(event.description);
+    $(tinymce.get('place').getBody()).html(event.place);
+//    $("#description").val(event.description);
+//    $("#place").val(event.place);
     $('input[name=date_start]').val(formatDate(event.date_start));
     $('input[name=time_start]').val(formatTime(event.date_start));
     $('input[name=date_end]').val(formatDate(event.date_end));
@@ -510,8 +559,8 @@ function autoFill(event) {
 
 function autoEmpty() {
     $('input[name=label]').val('');
-//    $(tinymce.get('description').getBody()).html('');
-//    $(tinymce.get('place').getBody()).html('');
+    $(tinymce.get('description').getBody()).html('');
+    $(tinymce.get('place').getBody()).html('');
     $("#description").val('');
     $("#place").val('');
     $('input[name=date_start]').val(formatDate(''));

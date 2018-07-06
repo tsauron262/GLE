@@ -140,8 +140,8 @@ function addTickets(tariff) {
     tickets.forEach(function (ticket) {
         html += '<tr>';
         html += '<td>' + ((ticket.last_name !== null) ? ticket.last_name : '') + '</td>';
-        html += '<td>' + ((ticket.first_name !== null) ? ticket.first_name : '') + '</td>';
-        html += '<td>' + ((ticket.price !== null) ? (ticket.price + ' €') : '') + '</td>';
+        html += '<td>' + ((ticket.first_name !== null && !parseInt(ticket.first_name) > 0) ? ticket.first_name : '') + '</td>';
+        html += '<td>' + ((ticket.price !== null) ? (ticket.price + ' €') : (tariff.price + ' €')) + '</td>';
         if (tariff.type_extra_1 !== 0 && tariff.name_extra_1 !== null)
             html += '<td>' + ((ticket.extra_1 !== null) ? ticket.extra_1 : '') + '</td>';
         if (tariff.type_extra_2 !== 0 && tariff.name_extra_2 !== null)

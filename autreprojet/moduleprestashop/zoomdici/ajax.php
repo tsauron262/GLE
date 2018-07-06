@@ -18,12 +18,13 @@ $action = Tools::getValue('action');
 
 switch ($action) {
     case 'createPrestashopProduct' : {
+
             // Pre-processing
             $date_start_simple = substr($_POST['date_start'], 0, -9); // yyyy-mm-dd
             $date_end_simple = substr($_POST['date_end'], 0, -9); // yyyy-mm-dd
             $date_stop_sale_parsed = 'Le ' . substr($_POST['date_stop_sale'], 0, -8) . ' à ' . substr($_POST['date_stop_sale'], -8, -6) . 'h'; // yyyy-mm-dd hh
-
             $description = 'Du <strong>' . $date_start_simple . '</strong> au <strong>' . $date_end_simple . '</strong>';
+
             // features date start
             $month_start = (int) substr($_POST['date_start'], 5, 7);
             $id_start_feature_value = ARRAY_MONTH[$month_start];
@@ -36,8 +37,14 @@ switch ($action) {
             $product->id_tax_rules_group = (int) $_POST['id_tax'];
             $product->price = $_POST['price'];
 
-//            $product->date_to = $_POST['date_end'];
-            $product->date_to = '2018-07-09 00:00:00';
+            // Extrafields
+            $product->date_from = $_POST['date_start'];
+            $product->date_to = $_POST['date_end'];
+            $product->email_text = $_POST['email_text'];
+            $product->place = $_POST['place'];
+//            $product->place = str_replace('<br/>', '\n', $_POST['place']);
+            $product->address = $_POST['address'];
+//            $product->address = str_replace('<br/>', '\n', $_POST['address']);
 
             $tabTaxe = TaxRuleCore::getTaxRulesByGroupId(Configuration::get('PS_LANG_DEFAULT'), $product->id_tax_rules_group);
             if (isset($tabTaxe[0])) {
@@ -56,17 +63,6 @@ switch ($action) {
             $product->updateCategories($product->category, true);
 
             if ($product->id > 0) {
-                // Extrafields
-                $sql = 'UPDATE ' . _DB_PREFIX_ . 'product';
-                $sql .= ' SET';
-                $sql .= ' date_from="' . $_POST['date_start'] . '",';
-                $sql .= ' date_to="' . $_POST['date_end'] . '",';
-                $sql .= ' email_text="' . $_POST['email_text'] . '",';
-                $sql .= ' place="' . $_POST['place'] . '",';
-                $sql .= ' address="' . $_POST['address'] . '"';
-                $sql .= ' WHERE id_product=' . $product->id;
-                Db::getInstance()->execute($sql);
-
                 // Qty
                 StockAvailable::setQuantity((int) $product->id, 0, intVal($_POST['number_place']));
 
@@ -96,7 +92,7 @@ switch ($action) {
     case 'createPrestashopCategory' : {
 
             $description = $_POST['description'] . '<br/>';
-            $description.= 'Adresse : <br/>' . $_POST['place'];
+            $description.= 'Adresse : <br/>' . $_POST['place']; // . $_POST['address'];
 
             $category = new Category();
             $category->name = array((int) Configuration::get('PS_LANG_DEFAULT') => $_POST['label']);
@@ -224,6 +220,27 @@ switch ($action) {
             else
                 die(Tools::jsonEncode(array('is_ok' => $is_ok, 'errors' => "Problème lors de la suppression du tarif, celà peut-être dû à une suppression antérieur de ce tarif.")));
             break;
+        }
+
+    case 'updatecateg': {
+            $description = $_POST['description'] . '<br/>';
+            $description.= 'Adresse : <br/>' . $_POST['place']; // . $_POST['address'];
+
+            $category = new Category((int) $_POST['id_categ']);
+            $category->name = array((int) Configuration::get('PS_LANG_DEFAULT') => $_POST['label']);
+            $category->description = $description;
+            $result = $category->update();
+            die(Tools::jsonEncode(array('is_ok' => $result, 'errors' => array())));
+        }
+
+    case 'updateProduct': {
+
+            $product = new Product((int) $_POST['id_prod_extern']);
+            $product->name = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['label']);
+            $product->price = $_POST['price'];
+
+            $result = $product->update();
+            die(Tools::jsonEncode(array('is_ok' => $result, 'errors' => array())));
         }
 
     default: {

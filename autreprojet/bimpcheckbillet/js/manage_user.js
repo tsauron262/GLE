@@ -246,6 +246,5 @@ function displayCheckboxes(events) {
         html += '<input class="change_event" type="checkbox" id=' + event.id + ' value=' + event.id + ' disabled>';
         html += '<label for=' + event.id + '>' + event.label + '</label>';
     });
-    html += '';
     $('#container_event').append(html);
 }

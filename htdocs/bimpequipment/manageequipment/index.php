@@ -25,7 +25,7 @@ function printOptionsBoutique($boutiques, $fk_entrepot) {
 
     if ($fk_entrepot != '') {
         foreach ($boutiques as $id => $name) {
-            if ($id == $fk_entrepot)
+            if ($id == $fk_entrepot || $fk_entrepot == $name)
                 print '<option value="' . $id . '" selected>' . $name . '</option>';
             else
                 print '<option value="' . $id . '">' . $name . '</option>';

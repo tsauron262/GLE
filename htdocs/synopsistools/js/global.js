@@ -21,6 +21,9 @@ $(window).on("load", function () {
             return false;
         }
     });
+    
+    
+    autoEntrepot();
 
 
     afficherMargeReduc();
@@ -1177,4 +1180,15 @@ function testEnvoie(champ) {
             testEnvoie();
         }
     }, 2000);
+}
+
+
+function autoEntrepot(){
+    var oldVal = $("#options_entrepot").val();
+    if(oldVal == 0){
+        $("#options_entrepot").find('option').each(function(){
+            if($(this).html() == DEFAULT_ENTREPOT+" ")
+                $(this).attr("selected", "selected");
+        });
+    }
 }

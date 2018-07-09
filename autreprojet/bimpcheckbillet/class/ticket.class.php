@@ -25,6 +25,7 @@ class Ticket {
     public $extra_5;
     public $extra_6;
     private $id_order;
+    // used for ticket's pdf
     private $pdf;
     private $i = 0;
 

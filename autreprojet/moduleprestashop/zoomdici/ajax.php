@@ -234,10 +234,10 @@ switch ($action) {
         }
 
     case 'updateProduct': {
-
             $product = new Product((int) $_POST['id_prod_extern']);
             $product->name = array((int) (Configuration::get('PS_LANG_DEFAULT')) => $_POST['label']);
             $product->price = $_POST['price'];
+            $product->email_text = $_POST['email_text'];
 
             $result = $product->update();
             die(Tools::jsonEncode(array('is_ok' => $result, 'errors' => array())));

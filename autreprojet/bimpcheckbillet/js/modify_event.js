@@ -47,7 +47,7 @@ function getEvents() {
                         $(".chosen-select").trigger("chosen:updated");
                         $('select[name=id_event]').trigger('change');
                     }
-                    $('img#img_display').attr('src', +'../img/event/' + filename);
+//                    $('img#img_display').attr('src', +'../img/event/' + filename);
                 }
             } else if (out.events.length === 0) {
                 alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
@@ -60,25 +60,25 @@ function getEvents() {
     });
 }
 
-function setImage(id_event) {
-
-    $.ajax({
-        type: "POST",
-        url: "../interface.php",
-        data: {
-            folder: 'img/event/',
-            name: id_event,
-            action: 'get_image'
-        },
-        error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 1844.', 'error');
-        },
-        success: function (rowOut) {
-            var out = JSON.parse(rowOut);
-            $("#img_display").attr('src', 'data:image/png;base64,' + atob(out.src));
-        }
-    });
-}
+//function setImage(id_event) {
+//
+//    $.ajax({
+//        type: "POST",
+//        url: "../interface.php",
+//        data: {
+//            folder: 'img/event/',
+//            name: id_event,
+//            action: 'get_image'
+//        },
+//        error: function () {
+//            setMessage('alertSubmit', 'Erreur serveur 1844.', 'error');
+//        },
+//        success: function (rowOut) {
+//            var out = JSON.parse(rowOut);
+//            $("#img_display").attr('src', 'data:image/png;base64,' + atob(out.src));
+//        }
+//    });
+//}
 
 function modifyEventPrestashop(id_event, label, description, place, date_start, time_start, date_end, time_end, id_categ) {
 
@@ -97,14 +97,21 @@ function modifyEventPrestashop(id_event, label, description, place, date_start, 
             id_categ: id_categ,
             action: 'updatecateg'
         },
+        beforeSend: function () {
+            $('*').css('cursor', 'wait');
+        },
+        complete: function () {
+            $('*').css('cursor', 'auto');
+        },
         error: function () {
             setMessage('alertBottom', 'Erreur serveur 5720.', 'error');
         },
         success: function (rowOut) {
+            $('*').css('cursor', 'auto');
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
-            } else if (parseInt(out.is_ok) > 1) {
+            } else if (parseInt(out.is_ok) > 0) {
                 modifyEvent(id_event, label, description, place, date_start, time_start, date_end, time_end)
             } else {
                 setMessage('alertBottom', 'Erreur serveur 6871.', 'error');
@@ -234,10 +241,16 @@ function createPrestashopCategory(id_event, label_event, id_categ_parent, descri
             action: 'createPrestashopCategory'
         },
         error: function () {
-
             setMessage('alertSubmit', 'Erreur serveur 2584.', 'error');
         },
+        beforeSend: function () {
+            $('*').css('cursor', 'wait');
+        },
+        complete: function () {
+            $('*').css('cursor', 'auto');
+        },
         success: function (rowOut) {
+            $('*').css('cursor', 'auto');
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');

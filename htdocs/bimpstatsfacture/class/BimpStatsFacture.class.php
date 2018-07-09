@@ -148,7 +148,7 @@ class BimpStatsFacture {
         elseif ($statut == 'u') //unpayed
             $sql .= ' AND f.paye = 0';
 
-//        echo $sql . "\n";
+//        echo $sql . "\n";die;
         dol_syslog(get_class($this) . "::getFactureIds sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
@@ -249,6 +249,9 @@ class BimpStatsFacture {
                     $hash[$ind]['fact_date'] = (isset($obj->fact_date)) ? dol_print_date($obj->fact_date) : '';
                     $ind++;
                 }
+            }
+            else{
+                die("introuvable ".$sql);
             }
         }
         return $hash;

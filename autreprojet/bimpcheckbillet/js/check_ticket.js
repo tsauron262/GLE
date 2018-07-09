@@ -33,12 +33,12 @@ function getEvents() {
                 $('#barcode').on('keyup', function (e) {
                     if (e.keyCode === 13) {
                         var barcode = $('#barcode').val();
-                        if(barcode.indexOf("?") > 0){
+                        if (barcode.indexOf("?") > 0) {
                             var url = new URL(barcode);
                             barcode = url.searchParams.get('num');
                         }
-                            checkTicket(barcode, $('select[name=event] > option:selected').val());
-                            $('#barcode').val("");
+                        checkTicket(barcode, $('select[name=event] > option:selected').val());
+                        $('#barcode').val("");
                     }
                 });
                 $('select[name=event]').change(function () {
@@ -51,8 +51,11 @@ function getEvents() {
                         $(".chosen-select").trigger("chosen:updated");
                     }
                 }
+            } else if (out.events.length === 0){
+                alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
+                window.location.replace('../view/create_event.php');
             } else {
-                setMessage('alertSubmit', "Créer un évènement avant de définir un tarif.", 'error');
+                setMessage('alertSubmit', "Erreur 7349.", 'error');
             }
         }
     });

@@ -58,3 +58,7 @@ label {
 li.disabled-result {
     color: #a6a6a6 !important;
 }
+
+.navbar {
+    z-index: 10;
+}

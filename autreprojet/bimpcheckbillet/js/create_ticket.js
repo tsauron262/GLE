@@ -36,8 +36,11 @@ function getEvents() {
                         $('select[name=event]').trigger('change');
                     }
                 }
+            } else if (out.events.length === 0){
+                alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
+                window.location.replace('../view/create_event.php');
             } else {
-                setMessage('alertSubmit', "Créer un évènement avant de réserver une place.", 'error');
+                setMessage('alertSubmit', "Erreur 8162.", 'error');
                 $('button[name=create]').hide();
             }
         }
@@ -111,7 +114,8 @@ function createTicket(id_event, id_tariff, price, first_name, last_name, extra_1
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                setMessage('alertSubmit', "Le ticket a été créée.", 'msg');
+                alert("Le ticket a été créée, veuillez le télécharger avant d'en créer un autre (un seul ticket sera stocké par utilisateur)");
+                $('fieldset.container_form').append('<br/><a class="btn btn-primary" href="' + out.url + '" download >Télécharger Ticket</a>');
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 3885.', 'error');
             }

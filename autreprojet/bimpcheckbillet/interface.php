@@ -9,6 +9,8 @@ include_once 'class/event.class.php';
 include_once 'class/tariff.class.php';
 include_once 'class/ticket.class.php';
 include_once 'class/order.class.php';
+include_once 'class/attribute.class.php';
+include_once 'class/attribute_value.class.php';
 
 if (isset($_POST['description']))
     $_POST['description'] = addslashes($_POST['description']);
@@ -19,18 +21,22 @@ $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME;
 $db = new PDO($dsn, DB_USER, DB_PASS_WORD)
         or die("Impossible de se connecter à la base interne : " . mysql_error());
 
-if (!isset($_POST['sender']))
-    $user_session = json_decode($_SESSION['user']);
+$action = $_POST['action'];
+
+
+if (!isset($_POST['sender']) and $action != 'login' and $action != 'register')
+    @$user_session = json_decode($_SESSION['user']);
 
 $user = new User($db);
 $event = new Event($db);
 $tariff = new Tariff($db);
 $ticket = new Ticket($db);
+$attribute = new Attribute($db);
+$attribute_value = new AttributeValue($db);
 
-$action = $_POST['action'];
 
 if (!IS_MAIN_SERVER) {
-    if ($action != 'check_ticket' and $action != 'login') {
+    if ($action != 'check_ticket' and $action != 'login' and $action != 'get_events') {
         echo json_encode(array(
             'errors' => "Ce serveur n'autorise que les connexions et les validation de ticket."));
         exit();
@@ -38,77 +44,7 @@ if (!IS_MAIN_SERVER) {
 }
 
 switch ($action) {
-    /**
-     * create_event.php
-     */
-    case 'create_event': {
-            $user = json_decode($_SESSION['user']);
-            echo json_encode(array(
-                'code_return' => $event->create($_POST['label'], $_POST['description'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id, $_FILES['file'], $_POST['id_categ ']),
-                'errors' => $event->errors));
-            break;
-        }
-
-    /**
-     * create_tariff.php
-     */
-    case 'create_tariff': {
-            echo json_encode(array(
-                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_FILES['custom_img'], $_POST['input_cust_img'], $_POST['require_names'], '', $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
-                'errors' => $tariff->errors));
-            break;
-        }
-
-    /**
-     * create_ticket.php
-     */
-    case 'create_ticket': {
-            $user_session = json_decode($_SESSION['user']);
-            $user->fetch($user_session->id);
-            echo json_encode(array(
-                'code_return' => $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['first_name'], $_POST['last_name'], $_POST['extra_1'], $_POST['extra_2'], $_POST['extra_3'], $_POST['extra_4'], $_POST['extra_5'], $_POST['extra_6'], $_POST['id_order'], $_POST['id_prod_extern']),
-                'errors' => $ticket->errors));
-            break;
-        }
-
-    /**
-     * index.php
-     */
-    case 'login': {
-            $id_user = $user->connect($_POST['login'], $_POST['pass_word']);
-            if ($id_user > 0) {
-                $user->fetch($id_user);
-                unset($user->db);
-                $_SESSION['user'] = json_encode($user);
-            }
-            echo json_encode(array('errors' => $user->errors));
-            break;
-        }
-
-    /**
-     * check_ticket.php
-     */
-    case 'check_ticket': {
-            $ticket->check($_POST['barcode'], $_POST['id_event']);
-            echo json_encode(array('errors' => $ticket->errors));
-            break;
-        }
-
-    /**
-     * register.php
-     */
-    case 'register': {
-            $id_user = $user->create($_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['login'], $_POST['pass_word']);
-            if ($id_user > 0) {
-                $user->fetch($id_user);
-                unset($user->db);
-                $_SESSION['user'] = json_encode($user);
-            }
-            echo json_encode(array(
-                'id_inserted' => $id_user,
-                'errors' => $user->errors));
-            break;
-        }
+    /*            HOME               */
 
     /**
      * home.php
@@ -121,6 +57,13 @@ switch ($action) {
                 'errors' => $event->errors));
             break;
         }
+
+
+
+
+
+
+    /*           MANAGEMENT          */
 
     /**
      * manage_user.php
@@ -139,29 +82,6 @@ switch ($action) {
                 break;
             }
         }
-
-    case 'change_event_admin': {
-            $user_session = json_decode($_SESSION['user']);
-            $user->fetch($user_session->id);
-            if ($user->status != $user::STATUT_SUPER_ADMIN) {
-                echo json_encode(array('errors' => "Vous n'avez pas le droit de modifier ces données"));
-                break;
-            } else {
-                if ($_POST['new_status'] == 'true') {
-                    echo json_encode(array(
-                        'code_return' => $event->createEventAdmin($_POST['id_event'], $_POST['id_user']),
-                        'errors' => $event->errors));
-                } elseif ($_POST['new_status'] == 'false') {
-                    echo json_encode(array(
-                        'code_return' => $event->deleteEventAdmin($_POST['id_event'], $_POST['id_user']),
-                        'errors' => $event->errors));
-                } else {
-                    echo json_encode(array('errors' => "Mauvais statut: " . $_POST['new_status']));
-                }
-            }
-            break;
-        }
-
     case 'change_login_and_pass_word': {
             $user_session = json_decode($_SESSION['user']);
             $user->fetch($user_session->id);
@@ -193,13 +113,29 @@ switch ($action) {
         }
 
 
+
+
+    /*           EVENT               */
+
+    /**
+     * create_event.php
+     */
+    case 'create_event': {
+            $user = json_decode($_SESSION['user']);
+            echo json_encode(array(
+                'code_return' => $event->create($_POST['label'], $_POST['description'], $_POST['place'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id, $_FILES['file'], $_POST['categ_parent'], $_POST['id_categ ']),
+                'errors' => $event->errors));
+            break;
+        }
+
+
     /**
      * modify_event.php
      */
     case 'modify_event': {
             $user = json_decode($_SESSION['user']);
             echo json_encode(array(
-                'code_return' => $event->update($_POST['id_event'], $_POST['label'], $_POST['description'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id),
+                'code_return' => $event->update($_POST['id_event'], $_POST['label'], $_POST['description'], $_POST['place'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $user->id),
                 'errors' => $event->errors));
             break;
         }
@@ -252,19 +188,10 @@ switch ($action) {
             break;
         }
 
-    /**
-     * modify_tariff.php
-     */
-    case 'modify_tariff': {
+    case 'delete_event': {
             echo json_encode(array(
-                'code_return' => $tariff->update($_POST['id_tariff'], $_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['require_names'], /* $_FILES['file'], */ $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
-                'errors' => $tariff->errors));
-            break;
-        }
-    case 'set_id_prod_extern': {
-            echo json_encode(array(
-                'code_return' => $tariff->setIdProdExtern($_POST['id_tariff'], $_POST['id_prod_extern']),
-                'errors' => $tariff->errors));
+                'code_return' => $event->delete($_POST['id_event']),
+                'errors' => $event->errors));
             break;
         }
 
@@ -275,6 +202,134 @@ switch ($action) {
             echo json_encode(array(
                 'tab' => $event->getStats($_POST['id_event']),
                 'errors' => $event->errors));
+            break;
+        }
+
+
+
+
+
+
+    /*           TARIFF              */
+
+    /**
+     * create_tariff.php
+     */
+    case 'create_tariff': {
+            echo json_encode(array(
+                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_FILES['custom_img'], $_POST['input_cust_img'], $_POST['require_names'], '', $_POST['date_stop_sale'], $_POST['time_end_sale'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'],  $_POST['email_text'],$_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
+                'errors' => $tariff->errors));
+            break;
+        }
+
+    /**
+     * modify_tariff.php
+     */
+    case 'modify_tariff': {
+            echo json_encode(array(
+                'code_return' => $tariff->update($_POST['id_tariff'], $_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['require_names'], /* $_FILES['file'], */ $_POST['date_stop_sale'], $_POST['time_stop_sale'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['email_text'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
+                'errors' => $tariff->errors));
+            break;
+        }
+    case 'set_id_prod_extern': {
+            echo json_encode(array(
+                'code_return' => $tariff->setIdProdExtern($_POST['id_tariff'], $_POST['id_prod_extern']),
+                'errors' => $tariff->errors));
+            break;
+        }
+
+    case 'delete_tariff': {
+            $tariff->fetch($_POST['id_tariff']);
+            echo json_encode(array(
+                'code_return' => $tariff->delete(),
+                'errors' => $tariff->errors));
+            break;
+        }
+
+
+
+
+
+
+
+
+    /*         ATTRIBUTE             */
+
+    /**
+     * create_attribute.php
+     */
+    case 'create_attribute': {
+            echo json_encode(array(
+                'id_inserted' => $attribute->create($_POST['label'], $_POST['type'], $_POST['id_attribute_extern']),
+                'errors' => $attribute->errors));
+            break;
+        }
+
+    /**
+     * link_attribute_tariff.php
+     */
+    case 'link_attribute_tariff': {
+            echo json_encode(array(
+                'id_inserted' => $attribute->createTariffAttribute($_POST['id_tariff'], $_POST['id_attribute']),
+                'errors' => $attribute->errors));
+            break;
+        }
+
+    /**
+     * create_attribute_value.php
+     */
+    case 'create_attribute_value': {
+            echo json_encode(array(
+                'id_inserted' => $attribute_value->create($_POST['label'], $_POST['id_attribute_parent'], $_POST['id_attribute_value_extern']),
+                'errors' => $attribute_value->errors));
+            break;
+        }
+
+    /**
+     * link_attribute_value_tariff.php
+     */
+    case 'link_attribute_value_tariff': {
+            echo json_encode(array(
+                'id_inserted' => $attribute_value->createTariffAttributeValue($_POST['id_tariff'], $_POST['id_attribute_value'], $_POST['price'], $_POST['qty']),
+                'errors' => $attribute_value->errors));
+            break;
+        }
+
+
+
+
+
+
+    /*           TICKET              */
+
+    /**
+     * create_ticket.php
+     */
+    case 'create_ticket': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
+            if ($user->id == EXTERN_USER) {
+                echo json_encode(array(
+                    'code_return' => $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['first_name'], $_POST['last_name'], $_POST['extra_1'], $_POST['extra_2'], $_POST['extra_3'], $_POST['extra_4'], $_POST['extra_5'], $_POST['extra_6'], $_POST['id_order'], $_POST['id_prod_extern']),
+                    'errors' => $ticket->errors));
+            } else {
+                $id_order = -$user->id;
+                $id_ticket = $ticket->create($_POST['id_tariff'], $user->id, $_POST['id_event'], $_POST['price'], $_POST['first_name'], $_POST['last_name'], $_POST['extra_1'], $_POST['extra_2'], $_POST['extra_3'], $_POST['extra_4'], $_POST['extra_5'], $_POST['extra_6'], $id_order, $_POST['id_prod_extern']);
+                $ticket->createPdf($id_ticket, 5, 5, true, true, true, $id_order);
+                echo json_encode(array(
+                    'code_return' => $id_ticket,
+                    'url' => URL_CHECK . 'img/tickets/ticket' . base64_encode($id_order) . '.pdf',
+                    'errors' => $ticket->errors));
+            }
+            break;
+        }
+
+    /**
+     * check_ticket.php
+     */
+    case 'check_ticket': {
+            $ticket->check($_POST['barcode'], $_POST['id_event']);
+            echo json_encode(array('errors' => $ticket->errors));
             break;
         }
 
@@ -289,8 +344,74 @@ switch ($action) {
         }
 
     /**
-     * General
+     * print_ticket.php
      */
+    case 'create_tickets_from_check': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
+            $id_user = (int) $user->id;
+            $id_event = (int) $_POST['id_event'];
+            $id_tariff = (int) $_POST['id_tariff'];
+            $with_num = (int) $_POST['with_num'];
+            $num_start = (int) $_POST['num_start'];
+            $number = (int) $_POST['number'];
+            $format = $_POST['format'];
+            $souche = (int) $_POST['souche'];
+
+            $num_in_db = $num_start;
+
+            $ids_inserted = array();
+
+            for ($i = 0; $i < $number; $i++, $num_in_db++) {
+                $new_id = $ticket->create($id_tariff, $id_user, $id_event, '', $num_in_db, '', '', '', '', '', '', '', '');
+                // $ticket->create($id_tariff, $id_user, $id_event, $price, $first_name, $last_name, $extra_1, $extra_2, $extra_3, $extra_4, $extra_5, $extra_6, $id_order = '');
+                if ($new_id > 0)
+                    $ids_inserted[] = $new_id;
+                else {
+                    echo json_encode(array(
+                        'errors' => $ticket->errors));
+                    die();
+                }
+            }
+
+            echo json_encode(array(
+                'code_return' => $ticket->createPdfFromCheck($ids_inserted, $id_event, $id_tariff, $with_num, $num_start, $format, $souche),
+                'errors' => $ticket->errors,
+            ));
+            break;
+        }
+
+
+
+
+
+
+
+
+    /*          GENERAL              */
+
+    case 'change_event_admin': {
+            $user_session = json_decode($_SESSION['user']);
+            $user->fetch($user_session->id);
+            if ($user->status != $user::STATUT_SUPER_ADMIN) {
+                echo json_encode(array('errors' => "Vous n'avez pas le droit de modifier ces données"));
+                break;
+            } else {
+                if ($_POST['new_status'] == 'true') {
+                    echo json_encode(array(
+                        'code_return' => $event->createEventAdmin($_POST['id_event'], $_POST['id_user']),
+                        'errors' => $event->errors));
+                } elseif ($_POST['new_status'] == 'false') {
+                    echo json_encode(array(
+                        'code_return' => $event->deleteEventAdmin($_POST['id_event'], $_POST['id_user']),
+                        'errors' => $event->errors));
+                } else {
+                    echo json_encode(array('errors' => "Mauvais statut: " . $_POST['new_status']));
+                }
+            }
+            break;
+        }
+
     case 'get_events': {
             $user_session = json_decode($_SESSION['user']);
             $user->fetch($user_session->id);
@@ -299,12 +420,21 @@ switch ($action) {
                 'errors' => $event->errors));
             break;
         }
+
     case 'get_tariffs_for_event': {
             echo json_encode(array(
                 'tariffs' => $tariff->getTariffsForEvent($_POST['id_event']),
                 'errors' => $tariff->errors));
             break;
         }
+
+    case 'get_tariffs_for_event_with_attribute': {
+            echo json_encode(array(
+                'tariffs' => $tariff->getTariffsForEvent($_POST['id_event'], true),
+                'errors' => $tariff->errors));
+            break;
+        }
+
     case 'change_event_session': {
             $_SESSION['id_event'] = intVal($_POST['id_event']);
             if ($_SESSION['id_event'] > 0)
@@ -313,12 +443,14 @@ switch ($action) {
                 echo json_encode(array('code_return' => -1));
             break;
         }
+
     case 'get_remaining_place': {
             echo json_encode(array(
                 'tariffs' => $tariff->getRemainingPlace($_POST['id_tariff']),
                 'errors' => $tariff->errors));
             break;
         }
+
     case 'get_event_by_tariff_id': {
             $tariff->fetch($_POST['id_tariff']);
             $event->fetch($tariff->fk_event);
@@ -329,9 +461,62 @@ switch ($action) {
             break;
         }
 
+    case 'get_all_attributes': {
+            echo json_encode(array(
+                'attributes' => $attribute->getAllAttribute(),
+                'errors' => $attribute->errors));
+            break;
+        }
+
+    case 'get_attributes_value_by_parent_id': {
+            echo json_encode(array(
+                'attribute_values' => $attribute_value->getAllByParentId($_POST['id_attribute_parent']),
+                'errors' => $attribute_value->errors));
+            break;
+        }
+
+    case 'get_attributes_by_tariff_id': {
+            echo json_encode(array(
+                'attributes' => $attribute->getAttributeByTariff($_POST['id_tariff']),
+                'errors' => $attribute->errors));
+            break;
+        }
+
     /**
-     * Called from prestashop
+     * register.php
      */
+    case 'register': {
+            $id_user = $user->create($_POST['first_name'], $_POST['last_name'], $_POST['email'], $_POST['login'], $_POST['pass_word']);
+            if ($id_user > 0) {
+                $user->fetch($id_user);
+                unset($user->db);
+                $_SESSION['user'] = json_encode($user);
+            }
+            echo json_encode(array(
+                'id_inserted' => $id_user,
+                'errors' => $user->errors));
+            break;
+        }
+    /**
+     * index.php
+     */
+    case 'login': {
+            $id_user = $user->connect($_POST['login'], $_POST['pass_word']);
+            if ($id_user > 0) {
+                $user->fetch($id_user);
+                unset($user->db);
+                $_SESSION['user'] = json_encode($user);
+            }
+            echo json_encode(array('errors' => $user->errors));
+            break;
+        }
+
+
+
+
+
+    /*         PRESTASHOP            */
+
     case 'get_tariff_from_prestashop': {
             echo json_encode(array(
                 'tariffs' => $tariff->getTariffByProdsExtern($_POST['ids_prods_extern']),
@@ -413,11 +598,19 @@ switch ($action) {
             $db2 = new PDO($dsn2, DB_USER_2, DB_PASS_WORD_2)
                     or die("Impossible de se connecter à la base externe : " . mysql_error());
             $order = new Order($db2);
-            echo json_encode(array(
-                'generated_tickets' => $order->generateTicket($_POST['id_order'], $ticket, $tariff),
-                'status' => $order->checkOrderStatus($_POST['id_order'], $ticket),
-                'errors' => $order->errors
-            ));
+            $status = $order->checkOrderStatus($_POST['id_order'], $ticket);
+            if ($status == 1) {
+                echo json_encode(array(
+                    'status' => $status,
+                    'generated_tickets' => $order->generateTicket($_POST['id_order'], $ticket, $tariff),
+                    'errors' => $order->errors
+                ));
+            } else {
+                echo json_encode(array(
+                    'status' => $status,
+                    'errors' => $order->errors
+                ));
+            }
             break;
         }
     case 'get_filled_tickets': {
@@ -428,9 +621,11 @@ switch ($action) {
             break;
         }
 
-    /**
-     * Default
-     */
+
+
+
+    /*          DEFAULT              */
+
     default: {
             echo json_encode(array(
                 'errors' => "Pas d'action pour : " . $_POST['action']));

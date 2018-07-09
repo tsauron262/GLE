@@ -70,13 +70,31 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="tariff">Tarif </label><br/>';
     print '<select class="chosen-select" name="tariff"><option value="">Sélectionnez un tarif</option></select><br/><br/>';
 
-    print '<p name="product_already_created" style="display: none">Ce tarif correspond déjà à un produit prestashop</p>';
-    print '<p name="select_tariff" style="display: inline">Sélectionnez un tarif pour créer un produit prestashop</p>';
-    print '<div class="btn btn-primary" name="create_prestashop_product" style="display: none">Creér produit prestashop</div><br/><br/>';
-    
-    print '<div class="btn btn-primary" name="toggle_active">Activer/désactiver produit </div><br/><br/>';
+    print '<div style="'
+            . 'border: 1px solid #c2c2c2;'
+            . 'border-radius: 8px;'
+            . 'box-shadow: 0 1px 10px rgba(0,0,0,.5);'
+            . 'padding: 10px;">';
+    print '<label>Prestashop</label><br/>';
 
-    print '<br/><div id="div_tax" style="'
+
+
+
+
+    print '<div class="alert alert-info" role="alert" name="select_tariff" style="display: block"><strong>Information</strong>: Sélectionnez un tarif pour créer un produit prestashop.</div>';
+
+    print '<div class="btn btn-primary" name="create_prestashop_product" style="display: none">Creér produit prestashop</div><br/>';
+
+    print '<div class="alert alert-info" role="alert" name="product_already_created" style="display: none"><strong>Information</strong>: Ce tarif correspond déjà à un produit prestashop</div>';
+
+    print '<div class="btn btn-primary" name="toggle_active" style="display: none;">Activer/désactiver produit </div><br/>';
+
+    print '<div class="alert alert-info" role="alert" name="product_not_created" style="display: none"><strong>Information</strong>: Créez le produit prestashop pour pouvoir l\'activer.</div>';
+
+
+
+
+    print '<div id="div_tax" style="'
             . 'display: none;'
             . 'border: 1px solid #c2c2c2;'
             . 'border-radius: 8px;'
@@ -89,10 +107,14 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label class="btn btn-primary">       <input value=3 type="radio" name="tax">5.5%</label>';
     print '</div><br/><br/>';
     print '<div class="btn btn-primary" id="conf_create_prestashop_category">Confirmer création catégorie prestashop</div>';
+    print '</div>';
     print '</div><br/>';
 
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
+
+    print '<label for="email_text">Contenu email </label>';
+    print '<textarea id="email_text" class="tinymce" placeholder="Description" rows="3" name="email_text" style="width: 500px"></textarea><br/>';
 
     print '<label for="price">Prix </label>';
     print '<input class="form-control bfh-number" name="price" step=".01" type="number" min="0" style="width: 120px"/><br/>';
@@ -101,16 +123,20 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<input class="form-control bfh-number" name="number_place" step="1" type="number" min="0" style="width: 120px"/><br/>';
 
     print '<label for="img_display">Image</label><br/>';
-    print '<img id="img_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
+    print '<img id="img_display" src="#" alt="&nbsp Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
 
     print '<label for="img_display">Image sur les tickets</label><br/>';
-    print '<img id="img_custom_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
+    print '<img id="img_custom_display" src="#" alt="&nbsp Aucune image n\'est définie pour les tickets de ce tariff" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
 
     print '<label for="event">Exiger nom et prénom </label><br/>';
     print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';
     print '<label class="btn btn-primary active"><input value=0 type="radio" name="require_names" checked>Non</label>';
     print '<label class="btn btn-primary">       <input value=1 type="radio" name="require_names">Oui</label>';
     print '</div><br/><br/>';
+
+    print '<label for="date_stop_sale">Date de fin de vente</label><br/>';
+    print '<input class="form-control" placeholder="Date de fin de vente" type="text" name="date_stop_sale" style="display: inline ; width: 160px"/>';
+    print '<input class="form-control" type="time" value="00:00" name="time_end_sale" style="display: inline ; width: 100px"/><br/>';
 
     print '<label for="date_start">Date de début (facultatif)</label><br/>';
     print '<input class="form-control" placeholder="Date de début" type="text" name="date_start" style="display: inline ; width: 160px"/>';
@@ -127,7 +153,10 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     printExtra(5);
     printExtra(6);
 
-    print '<button class="btn btn-primary" name="modify">Modifier</button>';
+    print '<button class="btn btn-primary" name="modify">Modifier</button><br/><br/>';
+
+    print '<div class="btn btn-danger" name="delete">Supprimer tarif</div>';
+
     print '</form>';
     print '<div id="alertSubmit"></div>';
 }

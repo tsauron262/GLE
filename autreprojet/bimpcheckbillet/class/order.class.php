@@ -72,7 +72,7 @@ class Order {
                 return intVal($obj->qty);
             }
         } else {
-            $this->errors[] = "Id commande inconnu : ".$id_order;
+            $this->errors[] = "Id commande inconnu : " . $id_order;
             return -2;
         }
     }
@@ -92,16 +92,29 @@ class Order {
      * @return int 1 => order fullfilled, -1 other
      */
     public function checkOrderStatus($id_order, $ticket_obj) {
-//        return 1;
-        $qty_total = $this->getNumberTicketSold($id_order);
 
-        $qty_sold = $ticket_obj->getNumberTicketByOrder($id_order);
+        $sql = ' SELECT valid';
+        $sql .= ' FROM ' . PRESTA_PREF . 'orders';
+        $sql .= ' WHERE id_order=' . $id_order;
 
-//        echo $qty_total
-
-        if ($qty_total == $qty_sold)
-            return 1;
+        $result = $this->db->query($sql);
+        if ($result and $result->rowCount() > 0) {
+            while ($obj = $result->fetchObject()) {
+                return intVal($obj->valid);
+            }
+        } else {
+            $this->errors[] = "Id commande inconnu : " . $id_order;
+            return -2;
+        }
         return -1;
+
+//        $qty_total = $this->getNumberTicketSold($id_order);
+//
+//        $qty_sold = $ticket_obj->getNumberTicketByOrder($id_order);
+//
+//        if ($qty_total == $qty_sold)
+//            return 1;
+//        return -1;
     }
 
     public function generateTicket($id_order, $ticket, $tariff) {
@@ -129,7 +142,7 @@ class Order {
 
         $tariffs = $tariff->getTariffByProdsExtern(array_keys($prod_qty));
 //var_dump($tariffs);
-
+        
         foreach ($prod_qty as $id => $qty) {
             // count existing tickets for that tariff in the order
             $cnt_ticket = 0;

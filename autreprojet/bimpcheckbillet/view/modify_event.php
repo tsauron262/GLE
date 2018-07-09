@@ -39,17 +39,35 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="event">Evènement </label><br/>';
     print '<select class="chosen-select" name="id_event"><option value="">Sélectionnez un évènement</option></select><br/><br/>';
 
-    print '<div class="btn btn-primary" name="create_prestashop_category">Créer catégorie prestashop</div><br/>';
-    print '<p id="categ_already_created" style="display: none">Cet évènement est déjà catégorisé dans prestashop</p>';
-    print '<p id="select_event"          style="display: none">Sélectionnez un évènement pour créer une catégorie prestashop</p><br/>';
+    print '<div id="alertSubmit"></div><br/>';
 
-    print '<div class="btn btn-primary" name="toggle_active">Activer/désactiver catégorie</div><br/><br/>';
+    print '<br/><div style="'
+            . 'border: 1px solid #c2c2c2;'
+            . 'border-radius: 8px;'
+            . 'box-shadow: 0 1px 10px rgba(0,0,0,.5);'
+            . 'padding: 10px;">';
+    print '<label>Prestashop</label><br/>';
+
+    print '<div class="alert alert-info" role="alert" name="select_event" style = "display: none"><strong>Information</strong>: Sélectionnez un évènement pour créer une catégorie prestashop ou activer une catégorie</div>';
+
+    print '<div class="btn btn-primary" name="create_prestashop_category">Créer catégorie prestashop</div><br/>';
+
+    print '<div class="alert alert-info" role="alert" name="categ_already_created" style = "display: none"><strong>Information</strong>: Cet évènement est déjà catégorisé dans prestashop</div>';
+
+    print '<div class="btn btn-primary" name="toggle_active" style="display: none;">Activer/désactiver catégorie</div><br/>';
+
+    print '<div class="alert alert-info" role="alert" name="categ_not_created" style = "display: none"><strong>Information</strong>: Créer la catégorie pour pouvoir l\'activer</div>';
+
+    print '</div><br/>';
 
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
 
     print '<label for="description">Description </label>';
     print '<textarea id="description" class="tinymce" placeholder="Description" name="description"></textarea><br/>';
+
+    print '<label for="place">Lieu </label> <label style="font: 10px arial, sans-serif;">(La dernière ligne doit contenir le code postale et le nom de la ville)</label>';
+    print '<textarea id="place" class="tinymce" placeholder="Lieu" rows="3" name="place" style="width: 500px"></textarea><br/>';
 
     print '<label for="date_start">Date de début</label><br/>';
     print '<input class="form-control" placeholder="Date de début" type="text" name="date_start" style="display: inline ; width: 160px"/>';
@@ -67,18 +85,23 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="img_display">Image</label><br/>';
     print '<img id="img_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
 
-    print '<div id="alertSubmit"></div><br/>';
 
     print '<button class="btn btn-primary" name="modify">Modifier évènement</button>';
 
 //    print '<button class="btn btn-danger" name="delete">Supprimer évènement</button>';
+
+    print '<div id="alertBottom"></div><br/><br/>';
+
 
     print '</form><br/>';
 
     print '<label>Statut</label><br/>';
     print '<button class="btn btn-primary" name="draft">Définir comme brouillon</button>';
     print '<button class="btn btn-success" name="validate" style="margin-left: 20px;">Valider évènement</button>';
-    print '<button class="btn btn-danger" name="close" style="margin-left: 20px;">Fermer évènement</button>';
+    print '<button class="btn btn-danger" name="close" style="margin-left: 20px;">Fermer évènement</button><br/><br/>';
+
+    print '<button class="btn btn-danger" name="delete">Supprimer</button>';
+
     print '</fieldset>';
 }
 print '</body>';

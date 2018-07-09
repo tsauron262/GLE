@@ -315,8 +315,8 @@ class BimpDocumentPDF extends BimpModelPDF {
         $desc = '';
         if (!is_null($product)) {
             if(!$this->hideRef)
-            $desc .= $product->ref;
-            if(!$this->hideLabelProd && strlen($line->desc) > 5)
+                $desc .= $product->ref;
+            if(!$this->hideLabelProd || strlen($line->desc) < 5)
                 $desc .= ($desc ? ' - ' : '') . $product->label;
         }
 

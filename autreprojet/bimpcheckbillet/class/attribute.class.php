@@ -121,6 +121,7 @@ class Attribute {
         return -1;
     }
 
+    
     public function deleteTariffAttribute($id_tariff, $id_attribute) {
 
         if ($id_tariff == '')

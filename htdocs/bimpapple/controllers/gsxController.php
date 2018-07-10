@@ -893,6 +893,7 @@ class gsxController extends BimpController
                         $html .= '</div>';
                         $html .= '</div>';
                         $html .= '</div>';
+                        $i++;
                     }
                     break;
 

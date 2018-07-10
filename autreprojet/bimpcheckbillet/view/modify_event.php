@@ -83,9 +83,10 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
 //    print '<input id="file" type="file" name="file" style="display:none"/>Parcourir</label>';
 //
     print '<label for="img_display">Image</label><br/>';
-    print '<img id="img_display" src="#" alt=" Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
+    print '<img id="img_display" src="#" alt="&nbsp Aucune image" style="max-height: 600px ; max-width: 800px"/><br/><br/>';
 
-
+    print '<div class="alert alert-info" role="alert" style="display: block;"><strong>Information en cas de modification:</strong><br/> Uniquement les champs suivants seront mis à jour dans prestashop:<br/> libellé, description et lieu.</div>';
+    
     print '<button class="btn btn-primary" name="modify">Modifier évènement</button>';
 
 //    print '<button class="btn btn-danger" name="delete">Supprimer évènement</button>';

@@ -66,7 +66,7 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<input id="file" accept=".bmp,.jpg,.png" type="file" name="file" style="display:none"/>Parcourir</label>';
 
     print '<span class="label label-info" id="name_file_display"></span>';
-    print '<img id="img_display" src="#" alt=" Aucune image sélectionnée"/><br/><br/><br/>';
+    print '<img id="img_display" src="#" alt="&nbsp Aucune image sélectionnée"/><br/><br/><br/>';
 
     print '<button class="btn btn-primary" name="create">Créer évènement</button>';
     print '</form>';

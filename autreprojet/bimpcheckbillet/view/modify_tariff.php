@@ -116,7 +116,7 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="email_text">Contenu email </label>';
     print '<textarea id="email_text" class="tinymce" placeholder="Description" rows="3" name="email_text" style="width: 500px"></textarea><br/>';
 
-    print '<label for="price">Prix </label>';
+    print '<label for="price">Prix (taxes incluses)</label>';
     print '<input class="form-control bfh-number" name="price" step=".01" type="number" min="0" style="width: 120px"/><br/>';
 
     print '<label for="number_place">Nombre de place </label>';
@@ -152,6 +152,8 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     printExtra(4);
     printExtra(5);
     printExtra(6);
+    
+    print '<div class="alert alert-info" role="alert" style="display: block;"><strong>Information en cas de modification:</strong><br/> Uniquement les champs suivants seront mis à jour dans prestashop:<br/> libellé, prix et contenue mail.</div>';
 
     print '<button class="btn btn-primary" name="modify">Modifier</button><br/><br/>';
 

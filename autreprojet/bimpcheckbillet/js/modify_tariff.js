@@ -153,6 +153,7 @@ function modifyTariffPrestashop(id_tariff, label, price, number_place, require_n
         url: URL_PRESTASHOP,
         data: {
             id_prod_extern: id_prod_extern,
+            email_text: email_text,
             label: label,
             price: price,
             action: 'updateProduct'
@@ -269,10 +270,17 @@ function createPrestashopProduct(id_tariff, id_categ_extern, image_name, id_tax)
                 address: address,
                 action: 'createPrestashopProduct'
             },
+            beforeSend: function () {
+                $('*').css('cursor', 'wait');
+            },
+            complete: function () {
+                $('*').css('cursor', 'auto');
+            },
             error: function () {
                 setMessage('alertSubmit', 'Erreur serveur 1894.', 'error');
             },
             success: function (rowOut) {
+                $('*').css('cursor', 'auto');
                 var out = JSON.parse(rowOut);
                 if (out.errors.length !== 0) {
                     printErrors(out.errors, 'alertSubmit');
@@ -448,6 +456,8 @@ function initEvents() {
 
     $('div[name=create_prestashop_product]').click(function () {
         $('div#div_tax').css('display', 'block');
+        var element_div_tax = document.getElementById("div_tax");
+        element_div_tax.scrollIntoView({behavior: 'smooth'});
     });
 
     $('div#conf_create_prestashop_category').click(function () {

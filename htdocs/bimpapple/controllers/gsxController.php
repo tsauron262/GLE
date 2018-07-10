@@ -856,7 +856,7 @@ class gsxController extends BimpController
         $requestData = $this->gsx->_requestBuilder($request, $wrapper, $data);
         $response = $this->gsx->request($requestData, $client);
 
-        dol_syslog("Requête " . $request . " | " . print_r($response, 1), LOG_ERR, 0, "_apple");
+        dol_syslog("Requête " . $request . " | " . print_r($requestData, 1). " | " . print_r($response, 1), LOG_ERR, 0, "_apple");
 
         if (count($this->gsx->errors['soap'])) {
             $html .= BimpRender::renderAlerts('Echec de l\'envoi de la requête "' . $request . '"');

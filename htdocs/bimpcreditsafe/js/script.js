@@ -27,7 +27,10 @@ function InfoSoc(elem,elem2) {
         $("#intra_vat").val(result.Tva);
         $("#phone").val(result.Tel);
         $("#idprof3").val(result.Naf);
-        $("#name_alias_input").val("Note : " + result.Note); 
+        if($("input[name='options_notecreditsafe']").length > 0)
+            $("input[name='options_notecreditsafe']").val("Note : " + result.Note);
+        else
+            $("#name_alias_input").val("Note : " + result.Note); 
         if(result.Siret != this.elem.val() && result.Siret != this.elem2.val())
             this.elem2.val(result.Siret);
     }
@@ -66,8 +69,10 @@ function InfoSoc(elem,elem2) {
         if(textDef == "")
             textDef = "SIREN";
         var siren = window.prompt("Numéro de SIREN/SIRET ou p pour un PARTICULIER \n "+this.erreur, textDef);
-        if(siren == null)
-            siren = "";
+        if(siren == null){
+            history.back();
+            return 0;
+        }
         siren = siren.replace(" ", "").replace(" ", "").replace(" ", "").replace(" ", "").replace("	", "").replace("   ", "");
         if(siren == "PARTICULIER" || siren == "P" || siren == "p"){
             this.typeTier.val(8);

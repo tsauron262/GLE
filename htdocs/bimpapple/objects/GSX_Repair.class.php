@@ -176,6 +176,7 @@ class GSX_Repair extends BimpObject
             if (isset($partsPending['returnOrderNumber'])) {
                 $partsPending = array($partsPending);
             }
+            dol_syslog($partsPending,3);
             $id_sav = (int) $this->getData('id_sav');
             foreach ($partsPending as $part) {
                 $fileName = null;

@@ -67,8 +67,8 @@ class Interfacevalidateorder extends DolibarrTriggers {
             $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
         }
         if ($action == 'ORDER_UNVALIDATE') {
-//            setEventMessages("Impossible de dévalidé", null, 'errors');
-//            return -2;
+            setEventMessages("Impossible de dévalidé", null, 'errors');
+            return -2;
         }
 
 

@@ -565,6 +565,9 @@ else
                             $ln = $db->fetch_object($sql);
                             $date = dol_print_date($ln->datef, "%d/%m/%Y");
                         }
+                        else{
+                            $date = "01/04/2018";
+                        }
                         print '<td align="right">';
                         print $date;
                         print '</td>';

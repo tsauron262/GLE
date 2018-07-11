@@ -176,9 +176,10 @@ class GSX_Repair extends BimpObject
             if (isset($partsPending['returnOrderNumber'])) {
                 $partsPending = array($partsPending);
             }
-            dol_syslog($partsPending,3);
             $id_sav = (int) $this->getData('id_sav');
+            $i = 0;
             foreach ($partsPending as $part) {
+                $i++;
                 $fileName = null;
                 $labelDir = '/bimpcore/sav/' . $id_sav . '';
                 if (!is_dir(DOL_DATA_ROOT . $labelDir)) {
@@ -186,7 +187,7 @@ class GSX_Repair extends BimpObject
                 }
                 $fileUrl = "";
                 if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] != "" && isset($part['partNumber'])) {
-                    $fileName = "label_" . $part['returnOrderNumber'] . ".pdf";
+                    $fileName = "label_" . $part['returnOrderNumber'] . "-". $i . ".pdf";
                     $fileNamePath = $labelDir . "/" . $fileName;
                     $fileUrl = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileName;
                     if (!file_exists(DOL_DATA_ROOT . $fileNamePath)) {

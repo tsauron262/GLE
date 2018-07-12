@@ -24,7 +24,7 @@
  *	\ingroup    stock
  *	\brief      Page fiche entrepot
  */
-ini_set('max_execution_time', 3000);
+ini_set('max_execution_time', 300);
 require '../../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/product/stock/class/entrepot.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
@@ -482,14 +482,12 @@ else
                                         //Todo recup des transferer depuis date
                                         //
                                         if($objp->rowid > 0 && isset($_REQUEST['dateStock'])){
-                                            $sql = $db->query("SELECT SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('".$_REQUEST['dateStock']."', '%Y-%m-%d') AND `fk_product` = ".$objp->rowid." AND `fk_entrepot` = ".$object->id);
-                                            if($db->num_rows($sql) > 0){
-                                                $ligne = $db->fetch_object($sql);
+                                            $sql2 = $db->query("SELECT SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('".$_REQUEST['dateStock']."', '%Y-%m-%d') AND `fk_product` = ".$objp->rowid." AND `fk_entrepot` = ".$object->id);
+                                            if($db->num_rows($sql2) > 0){
+                                                $ligne = $db->fetch_object($sql2);
                                                 $objp->value -= $ligne->nb;
                                             }
                                         }
-                                        
-                                        
                                         
                                         /*fmoddrsi*/
                                         if($objp->value <> 0){
@@ -613,8 +611,8 @@ else
 //					}
 
 					print "</tr>";
-					$i++;
 				}
+					$i++;
                                 }
 				$db->free($resql);
 

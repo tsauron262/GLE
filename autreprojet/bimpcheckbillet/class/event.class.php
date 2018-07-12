@@ -270,7 +270,7 @@ class Event {
     public function updateStatus($id_event, $status) {
 
         if ($status != $this::STATUS_DRAFT and $status != $this::STATUS_VALIDATE and $status != $this::STATUS_CLOSED)
-            $this->errors[] = "Status évènement invalde.";
+            $this->errors[] = "Status évènement invalide.";
         if ($id_event == '')
             $this->errors[] = "Le champ identifiant est obligatoire";
         if (sizeof($this->errors) != 0)

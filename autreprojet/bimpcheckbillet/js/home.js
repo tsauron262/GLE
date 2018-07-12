@@ -54,6 +54,8 @@ function displayEvent(event) {
         status = 'Validé';
     if (event.status === '3')
         status = 'Terminé';
+    else
+        status = 'Non définit';
     var html = '<div class="panel panel-default">';
     html += '<div class="panel-heading" role="tab" id="event' + event.id + '">';
     html += '<h4 class="panel-title">';

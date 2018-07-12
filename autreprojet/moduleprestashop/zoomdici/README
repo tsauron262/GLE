@@ -12,7 +12,7 @@ When prestashop is installed:
 - then add a value in that feature for each month of the year, and add it's id
     in the ARRAY_MONTH variable ;
 - do it also for "Date end sale" and ID_FEATURE_DATE_END_SALE (no value to add);
-- set other config in "param.inc.php" an also in "./js/validate_order.js"
+- set other config in "param.inc.php" also in "./js/validate_order.js"
 - create 4 categorie (festival, concert, spectacle & autre)
 
     // Check server

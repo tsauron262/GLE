@@ -519,7 +519,7 @@ else
                     $productstatic->label = $objp->produit;
 					$productstatic->type=$objp->type;
 					$productstatic->entity=$objp->entity;
-					print $productstatic->getNomUrl(1,'stock',160);
+					print $productstatic->ref;
 					print '</td>';
 
 					// Label

@@ -560,7 +560,7 @@ else
                     }
                     
                     /*mod drsi*/
-                        $sql = $db->query("SELECT SUM(qty) as nb FROM `llx_facturedet` fd, `llx_facture` f WHERE f.rowid = fd.`fk_facture` AND fk_statut > 0 AND `fk_product` = ".$productstatic->id);
+                        $sql = $db->query("SELECT SUM(qty) as nb FROM `llx_facturedet` fd, `llx_facture` f WHERE f.rowid = fd.`fk_facture` AND fk_statut > 0 ".(isset($_REQUEST['dateStock'])? "AND f.datef < ".$_REQUEST['dateStock'] : "")." AND `fk_product` = ".$productstatic->id);
                             $ln = $db->fetch_object($sql);
                             $nb = $ln->nb;
                         

@@ -310,7 +310,8 @@ class Event {
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                $exts = array('bmp', 'png', 'jpg');
+                $exts = array('bmp', 'png', 'jpg', 'jpeg');
+                $filename = "";
                 foreach ($exts as $ext) {
                     if (file_exists(PATH . '/img/event/' . $obj->id . "." . $ext)) {
                         $filename = $obj->id . "." . $ext;

@@ -6,6 +6,9 @@ class BimpValidateOrder {
 
     private $db;
     public $errors;
+    private $tabValideComm = array(62 => 100);
+    private $tabValideMontant = array(2 => array(0, 1000000000000), 68 => array(50000, 100000000000));
+    private $tabValideMontantPart = array(7 => array(0, 100000), 2 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
 
     function __construct($db) {
         $this->db = $db;
@@ -25,53 +28,92 @@ class BimpValidateOrder {
      *             -4 => error other
      */
     public function checkValidateRights($user, $order) {
-
-        $price_order = $order->total_ht;
-
-        $max_price = $this->getMaxPriceOrder($user, $order);
-        if (sizeof($this->errors) != 0) {
-            setEventMessages(null, $this->errors, 'errors');
-            return -3;
-        }
-
-        $tropRemise = ($order->array_options['options_type'] == "C" ? $this->checkRemise($order) : 0);
-
-        if ($max_price <= $price_order || $tropRemise) {
-            $id_responsibles = $this->getResponsiblesIds($price_order, $order);
-            $error = false;
-            foreach ($id_responsibles as $id_responsible) {
-                if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true){
-                    $error = true;
-                    $this->errors[] = 'Envoie d\'email impossible';
+        
+        
+        $updateValFin = $updateValComm = false;
+        $ok = true;
+        $id_responsiblesFin = $id_responsiblesComm = array();
+        $sql = $this->db->query("SELECT `validFin`, `validComm` FROM `llx_commande` WHERE `rowid` = ".$order->id);
+        $result = $this->db->fetch_object($sql);
+        
+        if($result->validFin < 1){
+            $id_responsiblesFin = $this->checkAutorisationFinanciere($user, $order);
+            if(count($id_responsiblesFin) == 0){
+                $updateValFin = true;
+            }
+            else{
+                $ok = false;
+                $error = false;
+                foreach ($id_responsiblesFin as $id_responsible) {
+                    if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
+                        $error = true;
                 }
-            }
-            if (!$error) {
-                setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande.", null, 'warnings');
-                return -1;
-            } else {
-                setEventMessages(null, $this->errors, 'errors');
-                return -2;
+                if (!$error) {
+                    setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande financiérement.", null, 'warnings');
+                }
+                else
+                        $this->errors[] = 'Envoi d\'email impossible';
             }
         }
-        $idEn = $order->array_options['options_entrepot'];
-        if ($idEn < 1) {
-            setEventMessages("Pas d'entrepot associé", null, 'errors');
-            return -2;
+        
+        
+        
+        
+        if($result->validComm < 1){
+            $id_responsiblesComm = $this->checkAutorisationCommmerciale($user, $order);
+            if(count($id_responsiblesComm) == 0){
+                $updateValComm = true;
+            }
+            else{
+                $ok = false;
+                $error = false;
+                foreach ($id_responsiblesComm as $id_responsible) {
+                    if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
+                        $error = true;
+                }
+                if (!$error) {
+                    setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande commercialement.", null, 'warnings');
+                }
+                else
+                        $this->errors[] = 'Envoi d\'email impossible';
+            }
         }
-        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-        $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $order->id));
+        
+        
+        
 
-        if (sizeof($this->errors) != 0) {
-            setEventMessages(null, $this->errors, 'errors');
+     
+        
+        
+       
+        
+        
+        
+        
+        if(!$ok)
+                $this->db->rollback();
+        if($updateValFin){
+                $this->db->query("UPDATE llx_commande SET validFin = 1 WHERE rowid = ".$order->id);
+                setEventMessages('Validation Financiére OK', array(), 'mesgs');
         }
+        if($updateValComm){
+                $this->db->query("UPDATE llx_commande SET validComm = 1 WHERE rowid = ".$order->id);
+                setEventMessages('Validation Commerciale OK', array(), 'mesgs');
+        }
+        if(!$ok)
+                $this->db->commit();
+        
+        
 
 
-        if (sizeof($this->errors) == 0)
-            return 1;
-        else {
+        if (sizeof($this->errors) > 0){
             setEventMessages(null, $this->errors, 'errors');
             return -5;
         }
+        
+        if(!$ok)
+            return   -1;
+        return 1;
     }
 
     /**
@@ -82,8 +124,11 @@ class BimpValidateOrder {
      * Get the maximum price a user can validate
      */
     private function getMaxPriceOrder($user, $order) {
-        if ($order->array_options['options_type'] == "E" && $user->id == 7) {
-            return 100000;
+        $max_price = 0;
+        if ($order->array_options['options_type'] == "P") {
+            foreach ($this->tabValideMontantPart as $userId => $tabM)
+                if ($userId == $user->id)
+                    $max_price = $tabM[1];
         }
 
         if ($user->id < 0) {
@@ -98,7 +143,8 @@ class BimpValidateOrder {
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $max_price = $obj->maxpriceorder;
+                if ($obj->maxpriceorder > $max_price)
+                    $max_price = $obj->maxpriceorder;
             }
         } elseif (!$result) {
             $this->errors[] = "La requête SQL pour la recherche du prix maximum a échouée.";
@@ -113,47 +159,82 @@ class BimpValidateOrder {
         return $max_price;
     }
 
-    function checkRemise($order) {
+    private function checkRemise($order, $user) {
         $ok = true;
-        foreach ($order->lines as $line)
-            if ($line->remise_percent > 5) {
-                $this->extraMail[] = "Ligne " . $line->desc . " avec un réduction de " . $line->remise_percent . "%";
-                $ok = false;
-            }
-
+        if (!in_array($user->id, $this->tabValideRemise)) {
+            foreach ($order->lines as $line)
+                if ($line->remise_percent > 5) {
+                    $this->extraMail[] = "Ligne " . $line->desc . " avec un réduction de " . $line->remise_percent . "%";
+                    $ok = false;
+                }
+        }
         return $ok;
     }
 
-    private function getResponsiblesIds($price, $order) {
-        if ($order->array_options['options_type'] == "E" && $price < 100000) {
-            return array(7);
-        } else {
-            if ($price < 50000)
-                return array(2);
-            else
-                return array(2, 68);
+    private function checkAutorisationFinanciere($user, $order) {
+        $price = $order->total_ht;
+
+        $max_price = $this->getMaxPriceOrder($user, $order);
+        
+        $tabUserOk = array();
+        if ($max_price <= $price) {
+            if ($order->array_options['options_type'] == "P" && $price < 100000) {//Aurelie
+                foreach ($this->tabValideMontantPart as $idUser => $tabMont) {
+                    if($price > $tabMont[0] && $price <= $tabMont[1]){
+                        $tabUserOk[] = $idUser;
+                        if($idUser == $user->id)
+                            return array();
+                    }
+                }
+            } else {
+                foreach ($this->tabValideMontant as $idUser => $tabMont) {
+                    if($price > $tabMont[0] && $price <= $tabMont[1]){
+                        $tabUserOk[] = $idUser;
+                        if($idUser == $user->id)
+                            return array();
+                    }
+                }
+            }
         }
+        return $tabUserOk;
+    }
+    
+    
+    
+    
+    private function checkAutorisationCommmerciale($user, $order) {
+        $price = $order->total_ht;
+        $tabUserOk = array();
+        $okRemise = ($order->array_options['options_type'] != "P" ? $this->checkRemise($order, $user) : 1);
+        if (!$okRemise){
+            foreach ($this->tabValideComm as $idUser => $tabMont) {
+                $tabUserOk[] = $idUser;
+                if($idUser == $user->id)//on peut validé
+                    return array();
+            }
+        }
+        return $tabUserOk; 
     }
 
-    private function getFirstResponsibleId($price) {
-
-        $sql = 'SELECT fk_object';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
-        $sql .= ' WHERE maxpriceorder >=' . $price;
-        $sql .= ' ORDER BY maxpriceorder ASC';
-        $sql .= ' LIMIT 1';
-
-        $result = $this->db->query($sql);
-        if ($result and mysqli_num_rows($result) > 0) {
-            $obj = $this->db->fetch_object($result);
-            $id_responsible = $obj->fk_object;
-        } elseif (!$result) {
-            $this->errors[] = "La requête SQL pour la recherche du responsable.";
-            return -1;
-        }
-
-        return $id_responsible;
-    }
+//    private function getFirstResponsibleId($price) {
+//
+//        $sql = 'SELECT fk_object';
+//        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'user_extrafields';
+//        $sql .= ' WHERE maxpriceorder >=' . $price;
+//        $sql .= ' ORDER BY maxpriceorder ASC';
+//        $sql .= ' LIMIT 1';
+//
+//        $result = $this->db->query($sql);
+//        if ($result and mysqli_num_rows($result) > 0) {
+//            $obj = $this->db->fetch_object($result);
+//            $id_responsible = $obj->fk_object;
+//        } elseif (!$result) {
+//            $this->errors[] = "La requête SQL pour la recherche du responsable.";
+//            return -1;
+//        }
+//
+//        return $id_responsible;
+//    }
 
     private function sendEmailToResponsible($id_responsible, $user, $order) {
 
@@ -165,10 +246,10 @@ class BimpValidateOrder {
         $msg = "Bonjour, \n\n";
         $msg .= "L'utilisateur $user->firstname $user->lastname souhaite que vous validiez la commande suivante : ";
         $msg .= $order->getNomUrl();
-        foreach($this->extraMail as $extra){
-            $msg .= "\n\n".$extra;
+        foreach ($this->extraMail as $extra) {
+            $msg .= "\n\n" . $extra;
         }
-        echo $msg;
+        echo $doli_user_responsible->email . "   " . $msg;
         return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
     }
 

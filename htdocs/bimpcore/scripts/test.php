@@ -2,7 +2,7 @@
 
 define('NOLOGIN', '1');
 
-require_once("../main.inc.php");
+require_once("../../main.inc.php");
 
 //
 //$modulepart = 'bimpcore';

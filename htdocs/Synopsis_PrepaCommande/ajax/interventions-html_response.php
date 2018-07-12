@@ -65,7 +65,6 @@ if ($res > 0) {
             }
             if (isset($val->fk_product) && $val->fk_product > 0) {
                 $prod->fetch($val->fk_product);
-                echo "<pre>";
                 if ($prod->array_options["options_type2"] == 1 || $prod->array_options["options_type2"] == 3) {
                     if ($cnt == 0) {
                         print "<table  cellpadding=10>";

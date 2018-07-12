@@ -1,6 +1,6 @@
 <?php
 
-require_once("../main.inc.php");
+require_once("../../main.inc.php");
 
 ini_set('display_errors', 1);
 
@@ -10,8 +10,8 @@ ini_set('display_errors', 1);
 //echo DOL_DATA_ROOT.'/invoice.pdf';
 
 
-require_once './pdf/classes/LoyerPDF.php';
-require_once './pdf/classes/InvoicePDF.php';
+require_once '../pdf/classes/LoyerPDF.php';
+require_once '../pdf/classes/InvoicePDF.php';
 
 global $db, $langs;
 
@@ -21,16 +21,16 @@ global $db, $langs;
 //$obj = new Propal($db);
 //$obj->fetch(92608);
 
-$pdf = new InvoicePDF($db);
-
-$obj = new Facture($db);
-$obj->fetch(86570);
-
-$pdf->init($obj);
-$pdf->render(__DIR__. '/testFacture.pdf', true);
+//$pdf = new InvoicePDF($db);
+//
+//$obj = new Facture($db);
+//$obj->fetch(86570);
+//
+//$pdf->init($obj);
+//$pdf->render(__DIR__. '/testFacture.pdf', true);
 
 //$pdf->write_file($propal, $langs);
 
-$pdf->render(DOL_DATA_ROOT . '/propal.pdf', true);
+//$pdf->render(DOL_DATA_ROOT . '/propal.pdf', true);
 
 

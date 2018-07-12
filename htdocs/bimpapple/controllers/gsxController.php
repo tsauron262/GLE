@@ -269,7 +269,7 @@ class gsxController extends BimpController
                             )
                 ));
                 $html .= '</div>';
-                $html .= '<div id="partsListContainer' . $suffixe . '" style="display: none"></div>';
+                $html .= '<div id="partsListContainer' . $suffixe . '" class="partsListContainer" style="display: none"></div>';
             } else {
                 $html = BimpRender::renderAlerts('Le numéro de série de l\'équipement sélectionné ne correspond pas à un produit Apple: ' . $serial, 'warning');
             }
@@ -856,7 +856,7 @@ class gsxController extends BimpController
         $requestData = $this->gsx->_requestBuilder($request, $wrapper, $data);
         $response = $this->gsx->request($requestData, $client);
 
-        dol_syslog("Requête " . $request . " | " . print_r($response, 1), LOG_ERR, 0, "_apple");
+//        dol_syslog("Requête " . $request . " | " . print_r($requestData, 1). " | ".print_r($_REQUEST, 1). " | " . print_r($response, 1), LOG_ERR, 0, "_apple");
 
         if (count($this->gsx->errors['soap'])) {
             $html .= BimpRender::renderAlerts('Echec de l\'envoi de la requête "' . $request . '"');
@@ -893,7 +893,9 @@ class gsxController extends BimpController
                         $html .= '</div>';
                         $html .= '</div>';
                         $html .= '</div>';
+                        $i++;
                     }
+                    $html .= '<input type="hidden" name="componentCheckDetails_nextIdx" value="' . $i . '"/>';
                     break;
 
                 case 'tierPart':

@@ -34,11 +34,11 @@ function onEquipmentFormLoaded($form) {
                             bimpAjax.$form.find('[name="product_label"]').val(result.data.product_label).change();
                         }
                         if (typeof (result.data.date_purchase) === 'string' && result.data.date_purchase) {
-                            bimpAjax.$form.find('[name="date_purchase_picker"]').data("DateTimePicker").date(result.data.date_purchase);
+                            bimpAjax.$form.find('[name="date_purchase_picker"]').data("DateTimePicker").date(moment(result.data.date_purchase));
                             bimpAjax.$form.find('[name="date_purchase_picker"]').change();
                         }
                         if (typeof (result.data.date_warranty_end) === 'string' && result.data.date_warranty_end) {
-                            bimpAjax.$form.find('[name="date_warranty_end_picker"]').data("DateTimePicker").date(result.data.date_warranty_end);
+                            bimpAjax.$form.find('[name="date_warranty_end_picker"]').data("DateTimePicker").date(moment(result.data.date_warranty_end));
                             bimpAjax.$form.find('[name="date_warranty_end_picker"]').change();
                         }
                         if (typeof (result.data.warranty_type) === 'string' && result.data.warranty_type) {

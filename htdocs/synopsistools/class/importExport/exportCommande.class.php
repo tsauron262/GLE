@@ -18,7 +18,7 @@ class exportCommande extends export8sens {
     public $output = "Rien";
     public $error = "";
     public $tabIgnore = array();
-    private $where = " AND comm.fk_statut > 0  AND (comm.extraparams < 1 || comm.extraparams is NULL) AND comm.total_ht != 0  AND ref NOT LIKE '%PROV%' GROUP BY comm.rowid";
+    private $where = " AND fe.type != 'R' AND comm.fk_statut > 0  AND (comm.extraparams < 1 || comm.extraparams is NULL) AND comm.total_ht != 0  AND ref NOT LIKE '%PROV%' GROUP BY comm.rowid";
 
     public function __construct($db, $sortie = 'html') {
         parent::__construct($db);
@@ -82,8 +82,8 @@ class exportCommande extends export8sens {
     public function getCommandeDontExport() {
         $this->pathExport = DOL_DATA_ROOT . "/test/";
         $result = $this->db->query("SELECT comm.rowid as id, ref "
-                . "FROM `" . MAIN_DB_PREFIX . "commande` comm "
-                . "WHERE 1 " . $this->where);
+                . "FROM `" . MAIN_DB_PREFIX . "commande` comm, `" . MAIN_DB_PREFIX . "commande_extrafields` fe "
+                . "WHERE fe.fk_object = comm.rowid " . $this->where);
         $comms = "";
         while ($ligne = $this->db->fetch_object($result)) {
             $comms .= $ligne->ref . " - ";

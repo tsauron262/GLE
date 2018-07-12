@@ -460,6 +460,13 @@ class Ticket {
             $nb_ticket_page = 6;
             $nb_ticket_width = 2;
             $orientation = 'L';
+        } elseif ($format == 'TICKET') {
+            $nb_ticket_page = 1;
+            $nb_ticket_width = 1;
+            $width = 148;  
+            $height = 70; 
+            $format = array($width, $height);
+            $orientation = ($height>$width) ? 'P' : 'L'; 
         } elseif ($format == 'A3') {
             $nb_ticket_page = 12;
             $nb_ticket_width = 2;
@@ -468,7 +475,7 @@ class Ticket {
 
         $pdf = new PDF_Code128($orientation, 'mm', $format);
         $pdf->SetFont('times', '', 12);
-
+        
         $event = new Event($this->db);
         $event->fetch($id_event);
 
@@ -510,7 +517,7 @@ class Ticket {
             // Add in pdf
             if ($souche == 1) { // write souche
                 $pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $souche_width, $ticket_height);
-                $pdf->MultiCell(30, 4, ($with_num == 1 ? $current_num . "\n" : '') . $event->label);
+                $pdf->MultiCell(30, 4, ($with_num == 1 ? $current_num . "\n" : '') . utf8_decode($event->label)."\n".$tariff->label);
 
                 $x += $souche_width;
 
@@ -518,11 +525,11 @@ class Ticket {
 
                 // write common
                 if ($with_num == 1)
-                    $pdf->MultiCell(10, 4, $current_num);
+                    $pdf->MultiCell(20, 4, $current_num);
 
                 $pdf->Image($file_name_qrcode, $x + 74, $y + 22, 25, 25);
                 $pdf->Code128($x + 67, $y + 3, $ticket->barcode, 63, 8);
-                $pdf->Image($image_tariff, $x + 5, $y + 5, 59, 59);
+                $pdf->Image($image_tariff, $x + 2, $y + 5, 64, 59);
                 $pdf->Image(PATH . '/img/ticket_border.png', $x, $y, $ticket_width, $ticket_height);
             } else {
                 if ($with_num == 1)

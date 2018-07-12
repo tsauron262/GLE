@@ -94,7 +94,10 @@ class importProd extends import8sens {
             $this->traiteChamp("options_serialisable", 0);
 
 
-
+if($ln['ArtCode'] == "SERV-CPM11"){
+    echo "<pre>prod SERV-CPM11";
+    print_r($this->object);
+}
 
             $this->traiteChamp("status", ($ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X")? "1" : "0");
             $this->traiteChamp("status_buy", ($ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X")? "1" : "0");

@@ -70,7 +70,7 @@ class Tariff {
                 $this->require_extra_5 = intVal($obj->require_extra_5);
                 $this->require_extra_6 = intVal($obj->require_extra_6);
                 $this->id_prod_extern = intVal($obj->id_prod_extern);
-                $exts = array('bmp', 'png', 'jpg');
+                $exts = array('bmp', 'png', 'jpg', 'jpeg');
                 foreach ($exts as $ext) {
                     if (file_exists(PATH . '/img/event/' . $obj->fk_event . '_' . $id . "." . $ext)) {
                         $filename = $obj->fk_event . '_' . $id . "." . $ext;

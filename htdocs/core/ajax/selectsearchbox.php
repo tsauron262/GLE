@@ -175,6 +175,8 @@ if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintochron
 	$arrayresult=array_merge(array($arrayresult["searchintochrono"]), $arrayresult);
 if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintosav"]))
 	$arrayresult=array_merge(array($arrayresult["searchintosav"]), $arrayresult);
+if(stripos($search_boxvalue, "co") === 0 && isset($arrayresult["searchintoorder"]))
+	$arrayresult=array_merge(array($arrayresult["searchintoorder"]), $arrayresult);
 /*fmod drsi*/
     
     

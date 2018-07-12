@@ -1,6 +1,6 @@
 <?php
 
-require_once("../main.inc.php");
+require_once("../../main.inc.php");
 
 ini_set('display_errors', 1);
 
@@ -10,10 +10,10 @@ ini_set('display_errors', 1);
 //echo DOL_DATA_ROOT.'/invoice.pdf';
 
 
-//require_once './pdf/classes/LoyerPDF.php';
-require_once './pdf/classes/PropalPDF.php';
-//require_once './pdf/classes/PropalSavPDF.php';
-//require_once './pdf/classes/InvoiceSavPDF.php';
+//require_once '../pdf/classes/LoyerPDF.php';
+require_once '../pdf/classes/PropalPDF.php';
+//require_once '../pdf/classes/PropalSavPDF.php';
+//require_once '../pdf/classes/InvoiceSavPDF.php';
 
 global $db, $langs;
 

@@ -1,4 +1,8 @@
 <?php
+error_reporting(E_ERROR);
+ini_set('display_errors', 1);
+
+ini_set('max_execution_time', 600);
 
 session_start();
 

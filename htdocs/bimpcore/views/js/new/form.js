@@ -86,6 +86,7 @@ function saveObjectFromForm(form_id, $button, successCallback, on_save) {
                 bimpAjax.display_warnings_in_popup_only = true;
                 bimpAjax.display_result_warnings(result.warnings);
                 bimpAjax.display_warnings_in_popup_only = false;
+                bimpAjax.$button.remove();
             }
             $('body').trigger($.Event('objectChange', {
                 module: result.module,

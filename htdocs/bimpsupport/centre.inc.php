@@ -23,8 +23,8 @@ global $tabCentre;
     );
 
 
-//$tabCentre["GB"] = $tabCentre["GA"];
-//$tabCentre["GB"]['2'] = "Grenoble boutique";
+$tabCentre["GB"] = $tabCentre["GA"];
+$tabCentre["GB"]['2'] = "Grenoble boutique";
 
 //$tabCentre["AB"] = $tabCentre["M"];
 //$tabCentre["AB"]['2'] = "Annecy Boutique";

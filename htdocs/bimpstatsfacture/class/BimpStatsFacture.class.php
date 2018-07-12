@@ -66,6 +66,7 @@ class BimpStatsFacture {
         $this->mode = $format;
         $facids = $this->getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType);    // apply filter
         $hash = $this->getFields($facids, $taxes);      // get all information about filtered factures
+
         $hash = $this->addMargin($hash);
         if ($this->mode == 'd') {
             $hash = $this->addSocieteURL($hash);
@@ -94,10 +95,11 @@ class BimpStatsFacture {
 
     private function getFactureIds($dateStart, $dateEnd, $types, $centres, $statut, $etats, $user, $placeType) {
         $ids = array();
-        $sql = 'SELECT f.rowid as facid';
+        $sql = 'SELECT f.rowid as facid, fs.id as idSav1, fs2.id as idSav2';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture as f';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e ON f.rowid = e.fk_object';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON (f.rowid = fs.id_facture || f.rowid = fs.id_facture_acompte)';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON f.rowid = fs.id_facture';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs2 ON f.rowid = fs2.id_facture_acompte';
         $sql .= ' WHERE f.datef >= ' . $this->db->idate($dateStart);
         $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
 
@@ -111,14 +113,17 @@ class BimpStatsFacture {
         $sql .= " AND (";
         if (!empty($centres) and $placeType == 'c') {
             $sql .= ' (e.centre IN (\'' . implode("','", $centres) . '\')';
-            $sql .= ' OR fs.code_centre IN (\'' . implode("','", $centres) . '\'))';
+            $sql .= ' OR fs.code_centre IN (\'' . implode("','", $centres) . '\')';
+            $sql .= ' OR fs2.code_centre IN (\'' . implode("','", $centres) . '\'))';
             if (in_array('NRS', $centres)) {
                 $sql .= " OR ((e.centre IS NULL OR e.centre = '1')";
-                $sql .= " AND (fs.code_centre IS NULL OR fs.code_centre = '1'))";
+                $sql .= " AND (fs.code_centre IS NULL OR fs.code_centre = '1')";
+                $sql .= " AND (fs2.code_centre IS NULL OR fs.code_centre = '1'))";
             }
         } elseif (!empty($centres) and $placeType == 'e') {
             $sql .= '(e.entrepot IN (\'' . implode("','", $centres) . '\')';
-            $sql .= ' OR fs.id_entrepot IN (\'' . implode("','", $centres) . '\'))';
+            $sql .= ' OR fs.id_entrepot IN (\'' . implode("','", $centres) . '\')';
+            $sql .= ' OR fs2.id_entrepot IN (\'' . implode("','", $centres) . '\'))';
             if (in_array('NRS', $centres)) {
                 $sql .= " OR e.entrepot IS NULL OR e.entrepot = '1'";
             }
@@ -129,7 +134,8 @@ class BimpStatsFacture {
 
         if ($user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read) {
             $tab_center = explode(' ', $user->array_options['options_apple_centre']);
-            $sql .= ' AND (fs.centre IN ("' . implode('","', $tab_center) . '")';
+            $sql .= ' AND (fs.code_centre IN ("' . implode('","', $tab_center) . '")';
+            $sql .= ' OR fs2.code_centre IN ("' . implode('","', $tab_center) . '")';
             $sql .= ' OR e.centre IN ("' . implode('","', $tab_center) . '"))';
         }
 
@@ -142,12 +148,13 @@ class BimpStatsFacture {
         elseif ($statut == 'u') //unpayed
             $sql .= ' AND f.paye = 0';
 
-//        echo $sql . "\n";
+//        echo $sql . "\n";die;
         dol_syslog(get_class($this) . "::getFactureIds sql=" . $sql, LOG_DEBUG);
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $ids[] = $obj->facid;
+                $idSav = ($obj->idSav1 ? $obj->idSav1 : $obj->idSav2);
+                $ids[] = array($obj->facid, $idSav);
             }
         }
         return $ids;
@@ -156,72 +163,95 @@ class BimpStatsFacture {
     private function getFields($facids, $taxes) {
 
         $hash = array();
-
-        $sql = 'SELECT f.rowid as fac_id, f.facnumber as fac_number, f.fk_statut as fac_statut,';
-        $sql .= ' s.rowid as soc_id, s.nom as soc_nom,';
-        $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
-        $sql .= ' e.centre as centre2, e.type as type, e.entrepot as fk_entrepot2,';
-        $sql .= ' fs.code_centre as centre1, fs.id_entrepot as fk_entrepot1, fs.id as sav_id, fs.ref as sav_ref,';
-        $sql .= ' pf.amount as pai_paye_ttc,';
-        $sql .= ' eq.product_label as description, ';
-        $sql .= ' eq.serial as numero_serie, eq.warranty_type as type_garantie,';
-        $sql .= ' re.repair_confirm_number as ggsx, f.datef as fact_date, ';
-
-        if ($taxes == 'ttc')
-            $sql.= ' f.total_ttc as fac_total, SUM(prop.total) as prop_total';
-        else    // ht
-            $sql.= ' f.total as fac_total, SUM(prop.total_ht) as prop_total';
-        $sql .= ' FROM      ' . MAIN_DB_PREFIX . 'facture as f';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe             as s  ON f.fk_soc        = s.rowid';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture    as pf ON f.rowid         = pf.fk_facture';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement            as p  ON pf.fk_paiement  = p.rowid';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e  ON f.rowid         = e.fk_object';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON (f.rowid = fs.id_facture || f.rowid = fs.id_facture_acompte)';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment as eq ON eq.id = fs.id_equipment';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_gsx_repair as re ON re.id_sav = fs.id';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as elel ON `sourcetype` LIKE "propal" AND `fk_target` = f.rowid AND `targettype` LIKE "facture"';
-        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propal as prop ON `fk_source` = prop.rowid AND prop.fk_statut != 3';
-
-        $sql .= ' WHERE f.rowid IN (\'' . implode("','", $facids) . '\')';
-        $sql .= ' GROUP BY p.rowid ORDER BY f.rowid';
-
-        dol_syslog(get_class($this) . "::getFields sql=" . $sql, LOG_DEBUG);
-        $result = $this->db->query($sql);
-
         $ind = 0;
-        if ($result and mysqli_num_rows($result) > 0) {
-            while ($obj = $this->db->fetch_object($result)) {
-                $hash[$ind]['fac_id'] = $obj->fac_id;
-                $hash[$ind]['nom_facture'] = $obj->fac_number;
-                $hash[$ind]['fac_statut'] = $obj->fac_statut;
-                $hash[$ind]['factotal'] = $obj->fac_total;
-                $hash[$ind]['soc_id'] = $obj->soc_id;
-                $hash[$ind]['nom_societe'] = $obj->soc_nom;
-                $hash[$ind]['pai_id'] = (isset($obj->pai_id)) ? $obj->pai_id : '';
-                $hash[$ind]['ref_paiement'] = (isset($obj->pai_ref)) ? $obj->pai_ref : '';
-                $hash[$ind]['paipaye_ttc'] = $obj->pai_paye_ttc;
-                if ($obj->centre1 != "0" and $obj->centre1 != '' and $obj->centre1 != false)
-                    $hash[$ind]['ct'] = $obj->centre1;
-                elseif ($obj->centre2 != "0" and $obj->centre2 != '' and $obj->centre2 != false)
-                    $hash[$ind]['ct'] = $obj->centre2;
-                else
-                    $hash[$ind]['ct'] = 0;
-                $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '' and $obj->type != false) ? $obj->type : 0;
-                $hash[$ind]['equip_ref'] = (isset($obj->description)) ? $obj->description : '';
-                if ($obj->fk_entrepot1 != "0" and $obj->fk_entrepot1 != '' and $obj->fk_entrepot1 != false)
-                    $hash[$ind]['fk_entrepot'] = $obj->fk_entrepot1;
-                elseif ($obj->fk_entrepot2 != "0" and $obj->fk_entrepot2 != '' and $obj->fk_entrepot2 != false)
-                    $hash[$ind]['fk_entrepot'] = $obj->fk_entrepot2;
-                else
-                    $hash[$ind]['fk_entrepot'] = 0;
-                $hash[$ind]['numero_serie'] = (isset($obj->numero_serie)) ? $obj->numero_serie : '';
-                $hash[$ind]['type_garantie'] = (isset($obj->type_garantie)) ? $obj->type_garantie : '';
-                $hash[$ind]['sav_id'] = (isset($obj->sav_id)) ? $obj->sav_id : '';
-                $hash[$ind]['sav_ref'] = (isset($obj->sav_ref)) ? $obj->sav_ref : '';
-                $hash[$ind]['ggsx'] = (isset($obj->ggsx)) ? $obj->ggsx : '';
-                $hash[$ind]['prop_total'] = (isset($obj->prop_total)) ? $obj->prop_total : '';
-                $hash[$ind]['fact_date'] = (isset($obj->fact_date)) ? dol_print_date($obj->fact_date) : '';
-                $ind++;
+
+        foreach ($facids as $fact) {
+            $sql = 'SELECT f.rowid as fac_id, prop.rowid as prop_id, f.facnumber as fac_number, f.fk_statut as fac_statut,';
+            $sql .= ' s.rowid as soc_id, s.nom as soc_nom,';
+            $sql .= ' p.rowid as pai_id, p.ref as pai_ref,';
+            $sql .= ' e.centre as centre2, e.type as type, e.entrepot as fk_entrepot2,';
+            $sql .= ' pf.amount as pai_paye_ttc,';
+            $sql .= ' f.datef as fact_date, ';
+
+            if ($taxes == 'ttc')
+                $sql .= ' f.total_ttc as fac_total,  SUM(prop.total) as prop_total';
+            else    // ht
+                $sql .= ' f.total as fac_total,  SUM(prop.total_ht) as prop_total';
+            $sql .= ' FROM      ' . MAIN_DB_PREFIX . 'facture as f';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe             as s  ON f.fk_soc        = s.rowid';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement_facture    as pf ON f.rowid         = pf.fk_facture';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'paiement            as p  ON pf.fk_paiement  = p.rowid';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e  ON f.rowid         = e.fk_object';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'element_element as elel ON `sourcetype` LIKE "propal" AND `fk_target` = f.rowid AND `targettype` LIKE "facture"';
+            $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'propal as prop ON `fk_source` = prop.rowid AND prop.fk_statut != 3';
+
+            $sql .= ' WHERE f.rowid  = ' . $fact[0];
+            dol_syslog(get_class($this) . "::getFields sql=" . $sql, LOG_DEBUG);
+            $result = $this->db->query($sql);
+
+
+
+            if ($result and mysqli_num_rows($result) > 0) {
+                while ($obj = $this->db->fetch_object($result)) {
+                    $obj2 = false;
+                    if ($fact[1] > 0 || $obj->prop_id > 0) {//SAV
+                        $sql = "SELECT";
+                        $sql .= ' fs.code_centre as centre1, fs.id_entrepot as fk_entrepot1, fs.id as sav_id, fs.ref as sav_ref,';
+                        $sql .= ' eq.product_label as description, ';
+                        $sql .= ' eq.serial as numero_serie, eq.warranty_type as type_garantie,';
+                        $sql .= ' re.repair_confirm_number as ggsx ';
+
+                        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'bs_sav as fs';
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'be_equipment as eq ON eq.id = fs.id_equipment';
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bimp_gsx_repair as re ON re.id_sav = fs.id';
+                        if($fact[1] > 0)
+                            $sql .= " WHERE fs.id = " . $fact[1];
+                        else
+                            $sql .= " WHERE fs.id_propal = " . $obj->prop_id;
+                        $result2 = $this->db->query($sql);
+                        if ($result2 and mysqli_num_rows($result2) > 0)
+                            $obj2 = $this->db->fetch_object($result2);
+                    }
+
+
+
+
+
+                    $hash[$ind]['fac_id'] = $obj->fac_id;
+                    $hash[$ind]['nom_facture'] = $obj->fac_number;
+                    $hash[$ind]['fac_statut'] = $obj->fac_statut;
+                    $hash[$ind]['factotal'] = $obj->fac_total;
+                    $hash[$ind]['soc_id'] = $obj->soc_id;
+                    $hash[$ind]['nom_societe'] = $obj->soc_nom;
+                    $hash[$ind]['pai_id'] = (isset($obj->pai_id)) ? $obj->pai_id : '';
+                    $hash[$ind]['ref_paiement'] = (isset($obj->pai_ref)) ? $obj->pai_ref : '';
+                    $hash[$ind]['paipaye_ttc'] = $obj->pai_paye_ttc;
+                    if ($obj2 AND $obj2->centre1 != "0" and $obj2->centre1 != '' and $obj2->centre1 != false)
+                        $hash[$ind]['ct'] = $obj2->centre1;
+                    elseif ($obj->centre2 != "0" and $obj->centre2 != '' and $obj->centre2 != false)
+                        $hash[$ind]['ct'] = $obj->centre2;
+                    else
+                        $hash[$ind]['ct'] = 0;
+                    $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '' and $obj->type != false) ? $obj->type : 0;
+                    $hash[$ind]['equip_ref'] = (isset($obj->description)) ? $obj->description : '';
+                    if ($obj2 AND $obj2->fk_entrepot1 != "0" and $obj2->fk_entrepot1 != '' and $obj2->fk_entrepot1 != false)
+                        $hash[$ind]['fk_entrepot'] = $obj2->fk_entrepot1;
+                    elseif ($obj->fk_entrepot2 != "0" and $obj->fk_entrepot2 != '' and $obj->fk_entrepot2 != false)
+                        $hash[$ind]['fk_entrepot'] = $obj->fk_entrepot2;
+                    else
+                        $hash[$ind]['fk_entrepot'] = 0;
+                    $hash[$ind]['numero_serie'] = (isset($obj->numero_serie)) ? $obj->numero_serie : '';
+                    $hash[$ind]['type_garantie'] = (isset($obj->type_garantie)) ? $obj->type_garantie : '';
+                    $hash[$ind]['sav_id'] = ($obj2 AND isset($obj2->sav_id)) ? $obj2->sav_id : '';
+                    $hash[$ind]['sav_ref'] = ($obj2 AND isset($obj2->sav_ref)) ? $obj2->sav_ref : '';
+                    $hash[$ind]['ggsx'] = ($obj2 AND isset($obj2->ggsx)) ? $obj2->ggsx : '';
+                    $hash[$ind]['prop_total'] = (isset($obj->prop_total)) ? $obj->prop_total : '';
+                    $hash[$ind]['fact_date'] = (isset($obj->fact_date)) ? dol_print_date($obj->fact_date) : '';
+                    $ind++;
+                }
+            }
+            else{
+                die("introuvable ".$sql);
             }
         }
         return $hash;
@@ -230,7 +260,7 @@ class BimpStatsFacture {
     private function addMargin($hash) {
         foreach ($hash as $id => $h) {
             $sql = 'SELECT buy_price_ht, total_ht, qty';
-            $sql.= ' FROM ' . MAIN_DB_PREFIX . 'facturedet';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facturedet';
             $sql .= ' WHERE  fk_facture =' . $h['fac_id'];
             dol_syslog(get_class($this) . "::addMargin sql=" . $sql, LOG_DEBUG);
             $result = $this->db->query($sql);
@@ -307,7 +337,7 @@ class BimpStatsFacture {
     }
 
     private function addSavURL($hash) {
-        require_once DOL_DOCUMENT_ROOT."/bimpsupport/objects/BS_SAV.class.php";
+        require_once DOL_DOCUMENT_ROOT . "/bimpsupport/objects/BS_SAV.class.php";
         $chrono = new BS_SAV($this->db);
         foreach ($hash as $ind => $h) {
             if (isset($h['sav_id'])) {
@@ -383,7 +413,7 @@ class BimpStatsFacture {
         }
         preg_match_all('/"(.*?)"/', $row_line, $in);
 
-        for ($i = 1; $i < sizeof($in[1]) - 1; $i+=2) {
+        for ($i = 1; $i < sizeof($in[1]) - 1; $i += 2) {
             $out[$in[1][$i]] = $in[1][$i + 1];
         }
 

@@ -16698,11 +16698,11 @@ table.objectlistTable > tfoot > tr.paginationContainer > td {
   width: 100%;
 }
 /* line 238, ../scss/bimpcore_new/_list.scss */
-.listSearchRow .searchInputContainer .search_list_input {
-  width: 80%;
+.listSearchRow .searchInputContainer .optionsContainer {
+  display: none;
 }
 /* line 242, ../scss/bimpcore_new/_list.scss */
-.listSearchRow .searchInputContainer .optionsContainer {
+.listSearchRow .searchInputContainer .loading {
   display: none;
 }
 

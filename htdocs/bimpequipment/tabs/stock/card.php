@@ -448,6 +448,7 @@ else
 			print_liste_field_titre("EstimatedStockValueShort","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             if (empty($conf->global->PRODUIT_MULTIPRICES)) print_liste_field_titre("SellPriceMin","", "p.price","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             if (empty($conf->global->PRODUIT_MULTIPRICES)) print_liste_field_titre("EstimatedStockValueSellShort","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
+            print_liste_field_titre("Vente","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             print_liste_field_titre("Der date Achat","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             print_liste_field_titre("Der date Vente","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
 			if ($user->rights->stock->mouvement->creer) print_liste_field_titre('');
@@ -559,6 +560,15 @@ else
                     }
                     
                     /*mod drsi*/
+                        $sql = $db->query("SELECT SUM(qty) as nb FROM `llx_facturedet` fd, `llx_facture` f WHERE f.rowid = fd.`fk_facture` AND fk_statut > 0 AND `fk_product` = ".$productstatic->id);
+                            $ln = $db->fetch_object($sql);
+                            $nb = $ln->nb;
+                        
+                        print '<td align="right">';
+                        print $nb;
+                        print '</td>';
+                        
+                        
                     $date = "";
                         $sql = $db->query("SELECT datef FROM `llx_facture_fourn_det` fd, `llx_facture_fourn` f WHERE fk_statut > 0 AND `fk_product` = ".$productstatic->id." AND fd.`fk_facture_fourn` = f.rowid ORDER BY datef DESC");
                         if($db->num_rows($sql) > 0){

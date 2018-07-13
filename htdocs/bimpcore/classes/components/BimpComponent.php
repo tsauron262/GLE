@@ -3,6 +3,7 @@
 abstract class BimpComponent
 {
 
+    public $component_name = 'Composant';
     public $object;
     public $name;
     public $config_path = null;
@@ -306,7 +307,8 @@ abstract class BimpComponent
 
     public function addTechnicalError($msg)
     {
-        $this->addError('[ERREUR TECHNIQUE] ' . $msg);
+        $label = 'Composant "' . $this->component_name . '" - Type: "' . $this->name . '" - Objet: "' . $this->object->getLabel() . '"';
+        $this->addError('[ERREUR TECHNIQUE] ' . $label . ' - ' . $msg);
     }
 
     public function addError($msg)

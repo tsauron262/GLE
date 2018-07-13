@@ -135,7 +135,7 @@ class BimpRevisionPropal extends BimpRevision
         if ($qteZeroSaufAccomte) {
             $newLine = array();
             foreach ($object->lines as $ligne) {
-                if ($ligne->desc != "Acompte" && $ligne->ref != "SAV-PCU" && stripos($ligne->desc,"Urgence") === false)
+                if ($ligne->desc != "Acompte" && $ligne->ref != "SAV-PCU" && stripos($ligne->desc, "Urgence") === false)
                     $ligne->qty = 0;
             }
         }
@@ -166,7 +166,7 @@ class BimpRevisionPropal extends BimpRevision
             return $newId;
         }
 
-        $errors[] = $object->error;
+        $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object));
         return 0;
     }
 

@@ -153,7 +153,7 @@ fields:
         type: string
             
     prix_achat:
-        label: Prix d'achat
+        label: Prix d'achat HT
         type: money
         default_value: 0
         

@@ -893,7 +893,10 @@ class gsxController extends BimpController
                         $html .= '</div>';
                         $html .= '</div>';
                         $html .= '</div>';
+                        $i++;
                     }
+
+                    $html .= '<input type="hidden" name="componentCheckDetails_nextIdx" value="' . $i . '"/>';
                     break;
 
                 case 'tierPart':

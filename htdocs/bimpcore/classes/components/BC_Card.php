@@ -2,7 +2,7 @@
 
 class BC_Card extends BimpComponent
 {
-
+    public $component_name = 'Mini-fiche';
     public static $type = 'card';
     public $display_object = null;
     public $object_type = '';

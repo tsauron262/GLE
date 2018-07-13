@@ -50,5 +50,9 @@ class BimpConfigDefinitions
         'on'    => array(),
         'alias' => array()
     );
+    public static $single_cell = array(
+        'filters' => array('data_type' => 'array', 'compile' => 1),
+        'col'     => array('default' => '')
+    );
 
 }

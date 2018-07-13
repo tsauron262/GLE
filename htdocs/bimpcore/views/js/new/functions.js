@@ -183,17 +183,15 @@ function setCommonEvents($container) {
         this.rows = rows + minRows;
     });
     $container.find('textarea.auto_expand').each(function () {
-        if (typeof (this.baseScrollHeight) === 'undefined') {
-            var minRows = parseInt($(this).data('min_rows')), rows;
-            if (!minRows) {
-                minRows = 3;
-            }
-            this.baseScrollHeight = minRows * 16;
-            this.rows = minRows;
-            if (this.scrollHeight) {
-                rows = Math.floor((this.scrollHeight - this.baseScrollHeight) / 16);
-                this.rows = rows + minRows;
-            }
+        var minRows = parseInt($(this).data('min_rows')), rows;
+        if (!minRows) {
+            minRows = 3;
+        }
+        this.baseScrollHeight = minRows * 16;
+        this.rows = minRows;
+        if (this.scrollHeight) {
+            rows = Math.floor((this.scrollHeight - this.baseScrollHeight) / 16);
+            this.rows = rows + minRows;
         }
     });
     $container.find('select').each(function () {
@@ -225,7 +223,19 @@ function setCommonEvents($container) {
             displayProductStocks($(this), $(this).data('id_product'), $(this).data('id_entrepot'));
         });
     });
-    
+    $container.find('a[data-toggle="tab"]').each(function () {
+        if (!parseInt($(this).data('event_init'))) {
+            $(this).on('shown.bs.tab', function (e) {
+                var target = '' + e.target;
+                var tab_id = target.replace(/^.*#(.*)$/, '$1');
+                var $content = $('#' + tab_id);
+                if ($content.length) {
+                    setCommonEvents($content);
+                }
+            });
+            $(this).data('event_init', 1);
+        }
+    });
     checkMultipleValues();
 }
 
@@ -309,13 +319,23 @@ function inputQtyUp($qtyInputContainer) {
     var $input = $qtyInputContainer.find('input.qtyInput');
     if ($input.length) {
         var val = 0;
-        if (parseInt($input.data('decimals')) > 0) {
-            val = parseFloat($input.val());
+        var step = 1;
+        var decimals = parseInt($input.data('decimals'));
+        if (decimals > 0) {
+            val = Math.round10(parseFloat($input.val()), -decimals);
+            step = parseFloat($input.data('step'));
         } else {
             val = parseInt($input.val());
+            step = parseInt($input.data('step'));
+        }
+        if (isNaN(step) || typeof (step) === 'undefined') {
+            step = 1;
         }
         if (typeof (val) === 'number') {
-            val++;
+            val += step;
+            if (decimals > 0) {
+                val = Math.round10(val, -decimals);
+            }
             $input.val(val).change();
             checkInputQty($qtyInputContainer);
         }
@@ -326,13 +346,23 @@ function inputQtyDown($qtyInputContainer) {
     var $input = $qtyInputContainer.find('input.qtyInput');
     if ($input.length) {
         var val = 0;
-        if (parseInt($input.data('decimals')) > 0) {
-            val = parseFloat($input.val());
+        var step = 1;
+        var decimals = parseInt($input.data('decimals'));
+        if (decimals > 0) {
+            val = Math.round10(parseFloat($input.val()), -decimals);
+            step = parseFloat($input.data('step'));
         } else {
             val = parseInt($input.val());
+            step = parseInt($input.data('step'));
+        }
+        if (isNaN(step) || typeof (step) === 'undefined') {
+            step = 1;
         }
         if (typeof (val) === 'number') {
-            val--;
+            val -= step;
+            if (decimals > 0) {
+                val = Math.round10(val, -decimals);
+            }
             $input.val(val).change();
             checkInputQty($qtyInputContainer);
         }

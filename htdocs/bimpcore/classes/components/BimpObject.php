@@ -19,7 +19,8 @@ class BimpObject
         'position'
     );
     public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent');
-    public $use_commom_fields = true;
+    public $use_commom_fields = false;
+    public $use_positions = false;
     public $params_defs = array(
         'table'              => array('default' => ''),
         'controller'         => array('default' => ''),
@@ -126,7 +127,7 @@ class BimpObject
                 if ($object->isLoaded()) {
                     return 1;
                 }
-            } elseif (isset($object->id) && $object->id) {
+            } elseif (isset($object->id) && (int) $object->id) {
                 return 1;
             }
         }
@@ -144,15 +145,14 @@ class BimpObject
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
 
         $this->use_commom_fields = (int) $this->getConf('common_fields', 1, false, 'bool');
+        $this->use_positions = (int) $this->getConf('positions', 0, false, 'bool');
 
         if ($this->config->isDefined('dol_object')) {
             $this->dol_object = $this->config->getObject('dol_object');
             $this->use_commom_fields = 0;
         }
 
-        if ($this->use_commom_fields) {
-            $this->addCommonFieldsConfig();
-        }
+        $this->addCommonFieldsConfig();
 
         $errors = array();
         $this->params = BimpComponent::fetchParamsStatic($this->config, '', $this->params_defs, $errors);
@@ -258,6 +258,17 @@ class BimpObject
                     )
                 ),
                 'editable'      => 0
+            );
+        }
+
+        if ($this->use_positions) {
+            $this->config->params['fields']['position'] = array(
+                'label'    => 'Position',
+                'type'     => 'int',
+                'input'    => array(
+                    'type' => 'hidden'
+                ),
+                'editable' => 0
             );
         }
     }
@@ -503,6 +514,29 @@ class BimpObject
         return $this->parent;
     }
 
+    public function doMatchFilters($filters)
+    {
+        foreach ($filters as $field => $filter) {
+            if ($this->field_exists($field)) {
+                if (is_array($filter)) {
+                    // todo ... 
+                } else {
+                    $type = $this->getConf('fields/' . $field . '/type', 'string', false);
+                    $value = $this->getData($field);
+                    BimpTools::checkValueByType($type, $value);
+                    BimpTools::checkValueByType($type, $filter);
+                    if ($value !== $filter) {
+                        return 0;
+                    }
+                }
+            } else {
+                return 0;
+            }
+        }
+
+        return 1;
+    }
+
     // Gestion des objets enfants:
 
     public function hasChildren($object_name)
@@ -565,8 +599,11 @@ class BimpObject
                 if (!is_null($instance)) {
                     if (is_a($instance, 'BimpObject')) {
                         if ($instance->getParentObjectName() === $this->object_name) {
-                            foreach ($this->getConf('objects/' . $object_name . '/list/filters', array(), false, 'array') as $field => $filter) {
-                                $filters = BimpTools::mergeSqlFilter($filters, $field, $filter);
+                            $list_filters = $this->config->getCompiledParams('objects/' . $object_name . '/list/filters');
+                            if (!is_null($list_filters)) {
+                                foreach ($list_filters as $field => $filter) {
+                                    $filters = BimpTools::mergeSqlFilter($filters, $field, $filter);
+                                }
                             }
                             $filters = BimpTools::mergeSqlFilter($filters, $instance->getParentIdProperty(), $this->id);
                             $primary = $instance->getPrimary();
@@ -593,11 +630,14 @@ class BimpObject
                 }
 
                 $instance = $this->config->getObject('', $object_name);
+
                 if (!is_null($instance)) {
                     if (is_a($instance, 'BimpObject')) {
-
-                        foreach ($this->getConf('objects/' . $object_name . '/list/filters', array(), false, 'array') as $field => $filter) {
-                            $filters = BimpTools::mergeSqlFilter($filters, $field, $filter);
+                        $list_filters = $this->config->getCompiledParams('objects/' . $object_name . '/list/filters');
+                        if (!is_null($list_filters)) {
+                            foreach ($list_filters as $field => $filter) {
+                                $filters = BimpTools::mergeSqlFilter($filters, $field, $filter);
+                            }
                         }
                         if ($this->isChild($instance)) {
                             $filters[$instance->getParentIdProperty()] = $this->id;
@@ -897,6 +937,10 @@ class BimpObject
                 case 'date_create':
                 case 'date_update':
                     $type = 'datetime';
+                    break;
+
+                case 'position':
+                    $type = 'int';
                     break;
             }
         } else {
@@ -1655,9 +1699,9 @@ class BimpObject
         return $errors;
     }
 
-    public function update(&$warnings = array(), $force_udpate = false)
+    public function update(&$warnings = array(), $force_update = false)
     {
-        if (!$force_udpate && !$this->canEdit()) {
+        if (!$force_update && !$this->canEdit()) {
             return array('Vous n\'avez pas la permission de modifier ' . $this->getLabel('this'));
         }
         $errors = array();
@@ -2325,7 +2369,10 @@ class BimpObject
                 $params = array($user);
             }
 
+            echo 'Appel' . "\n";
             $result = call_user_func_array(array($this->dol_object, 'update'), $params);
+
+            echo "\n" . 'Prop res: ' . $result;
 
             foreach ($bimpObjectFields as $field => $value) {
                 $this->updateField($field, $value);
@@ -3032,7 +3079,7 @@ class BimpObject
     {
         $children_instance = $this->config->getObject('', $children_object);
 
-        if (!isset($this->id) || !$this->id) {
+        if (!$this->isLoaded()) {
             $msg = 'Impossible d\'afficher la liste des ' . $children_instance->getLabel('name_plur');
             $msg .= ' - ID ' . $this->getLabel('of_the') . ' absent';
             return BimpRender::renderAlerts($msg);
@@ -3525,22 +3572,28 @@ class BimpObject
 
     public static function getInstanceNomUrl($instance)
     {
+        $html = '';
         if (is_a($instance, 'BimpObject')) {
             if ($instance->isDolObject()) {
-                return $instance->dol_object->getNomUrl(1);
+                $html = $instance->dol_object->getNomUrl(1);
             } else {
+                if ($instance->params['icon']) {
+                    $html .= BimpRender::renderIcon($instance->params['icon']) . '&nbsp;';
+                }
                 $url = $instance->getUrl();
                 if ($url) {
-                    return '<a href="' . $url . '" target="_blank">' . $instance->getInstanceName() . '</a>';
+                    $html .= '<a href="' . $url . '" target="_blank">' . $instance->getInstanceName() . '</a>';
                 } else {
-                    return $instance->getInstanceName();
+                    $html .= $instance->getInstanceName();
                 }
             }
         } elseif (method_exists($instance, 'getNomUrl')) {
-            return $instance->getNomUrl(1);
+            $html .= $instance->getNomUrl(1);
+        } else {
+            $html .= 'Objet "' . get_class($instance) . '"' . isset($instance->id) ? ' n° ' . $instance->id : '';
         }
 
-        return 'Objet "' . get_class($instance) . '"' . isset($instance->id) ? ' n° ' . $instance->id : '';
+        return $html;
     }
 
     public static function getInstanceUrl($instance)
@@ -3550,7 +3603,7 @@ class BimpObject
         }
         return BimpTools::getDolObjectUrl($instance);
     }
-    
+
     public static function getInstanceNomUrlWithIcons($instance)
     {
         $html = self::getInstanceNomUrl($instance);
@@ -3559,7 +3612,7 @@ class BimpObject
         if ($url) {
             $html .= BimpRender::renderObjectIcons($instance, true, null, $url);
         }
-        
+
         return $html;
     }
 }

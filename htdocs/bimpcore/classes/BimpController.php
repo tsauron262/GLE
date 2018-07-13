@@ -28,6 +28,8 @@ class BimpController
 
     public function __construct($module, $controller = 'index')
     {
+        set_time_limit(60);
+        
         $this->module = $module;
         $this->controller = $controller;
 

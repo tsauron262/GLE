@@ -68,6 +68,21 @@ class BimpInput
                     $html .= $data;
                     $html .= '/>';
                 }
+
+                if (isset($options['values']) && count($options['values'])) {
+                    $allow_custom = (isset($options['allow_custom']) ? (int) $options['allow_custom'] : 1);
+                    $html .= '<div style="margin-top: 15px">';
+                    $html .= '<select id="' . $input_id . '_input_values" class="input_values ' . $field_name . '_input_values"';
+                    $html .= ' data-field_name="' . $field_name . '"';
+                    $html .= ' data-allow_custom="' . $allow_custom . '"';
+                    $html .= '>';
+                    foreach ($options['values'] as $val => $label) {
+                        $html .= '<option value="' . $val . '"' . (($val == $value) ? ' selected' : '') . '>' . $label . '</option>';
+                    }
+                    $html .= '</select>';
+                    $html .= '</div>';
+                }
+
                 break;
 
             case 'qty':
@@ -317,23 +332,23 @@ class BimpInput
                 $html .= ob_get_clean();
                 break;
 
-            case 'search_ziptown':   
+            case 'search_ziptown':
                 $html = '<div class="searchZiptownInputContainer">';
-                $html .= '<input type="text" class="search_ziptown" name="'.$field_name.'" value="'.$value.'"';
+                $html .= '<input type="text" class="search_ziptown" name="' . $field_name . '" value="' . $value . '"';
                 if (isset($options['field_type'])) {
-                    $html .= ' data-field_type="'.$options['field_type'].'"';
+                    $html .= ' data-field_type="' . $options['field_type'] . '"';
                 }
                 if (isset($options['town_field'])) {
-                    $html .= ' data-town_field="'.$options['town_field'].'"';
+                    $html .= ' data-town_field="' . $options['town_field'] . '"';
                 }
                 if (isset($options['zip_field'])) {
-                    $html .= ' data-zip_field="'.$options['zip_field'].'"';
+                    $html .= ' data-zip_field="' . $options['zip_field'] . '"';
                 }
                 if (isset($options['state_field'])) {
-                    $html .= ' data-state_field="'.$options['state_field'].'"';
+                    $html .= ' data-state_field="' . $options['state_field'] . '"';
                 }
                 if (isset($options['country_field'])) {
-                    $html .= ' data-country_field="'.$options['country_field'].'"';
+                    $html .= ' data-country_field="' . $options['country_field'] . '"';
                 }
                 if (isset($options['data'])) {
                     foreach ($options['data'] as $data_name => $data_value) {

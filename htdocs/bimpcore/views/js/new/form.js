@@ -489,6 +489,9 @@ function validateForm($form) {
                 // Patch: (problème avec l'éditeur html => le textarea n'est pas alimenté depuis l'éditeur) 
                 if ($(this).find('.cke').length) {
                     var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+                    if (html_value === '<br>') {
+                        html_value = '';
+                    }
                     $(this).find('[name="' + field_name + '"]').val(html_value);
                 }
 
@@ -620,14 +623,14 @@ function reloadObjectInput(form_id, input_name, fields) {
                 var $parent = bimpAjax.$container.parent();
                 $parent.html(result.html).slideDown(250, function () {
                     $parent.removeAttr('style');
-                    setCommonEvents($parent);
-                    setInputsEvents($parent);
-                    var $input = bimpAjax.$form.find('[name=' + bimpAjax.input_name + ']');
-                    if ($input.length) {
-                        setInputEvents($form, $input);
-                        $input.change();
-                    }
                 });
+                setCommonEvents($parent);
+                setInputsEvents($parent);
+                var $input = bimpAjax.$form.find('[name=' + bimpAjax.input_name + ']');
+                if ($input.length) {
+                    setInputEvents($form, $input);
+                    $input.change();
+                }
             }
         }
     });
@@ -1158,13 +1161,15 @@ function selectZipTown($button) {
 
 function toggleInputDisplay($container, $input) {
     var input_val = $input.val();
+    var show = false;
+
     var show_values = $container.data('show_values');
     var hide_values = $container.data('hide_values');
-    var show = false;
+
     if (typeof (show_values) !== 'undefined') {
         show_values += '';
         show_values = show_values.split(',');
-        for (i in show_values) {
+        for (var i in show_values) {
             if (input_val == show_values[i]) {
                 show = true;
                 break;
@@ -1174,10 +1179,53 @@ function toggleInputDisplay($container, $input) {
         show = true;
         hide_values += '';
         hide_values = hide_values.split(',');
-        for (i in hide_values) {
+        for (var i in hide_values) {
             if (input_val == hide_values[i]) {
                 show = false;
                 break;
+            }
+        }
+    } else {
+        var inputs_names = $container.data('inputs_names');
+        if (inputs_names) {
+            inputs_names += '';
+            inputs_names = inputs_names.split(',');
+            var $form = $container.findParentByClass('object_form');
+            if ($.isOk($form)) {
+                show = false;
+                var hide = false;
+                for (var i in inputs_names) {
+                    $input = $form.find('[name="' + inputs_names[i] + '"]');
+                    if ($input.length) {
+                        input_val = $input.val();
+                        show_values = $container.data('show_values_' + inputs_names[i]);
+                        hide_values = $container.data('hide_values_' + inputs_names[i]);
+
+                        if (typeof (show_values) !== 'undefined') {
+                            show_values += '';
+                            show_values = show_values.split(',');
+                            for (var j in show_values) {
+                                if (input_val == show_values[j]) {
+                                    show = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (typeof (hide_values) !== 'undefined') {
+                            hide_values += '';
+                            hide_values = hide_values.split(',');
+                            for (var j in hide_values) {
+                                if (input_val == hide_values[j]) {
+                                    hide = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (hide) {
+                    show = false;
+                }
             }
         }
     }
@@ -1212,6 +1260,21 @@ function resetInputDisplay($form) {
                     $input = $form.find('input[name=' + input_name + ']:checked');
                 }
                 toggleInputDisplay($display_if, $input);
+            }
+        } else {
+            var inputs_names = $display_if.data('inputs_names');
+            if (inputs_names) {
+                inputs_names += '';
+                inputs_names = inputs_names.split(',');
+                for (var i in inputs_names) {
+                    var $input = $form.find('[name="' + inputs_names[i] + '"]');
+                    if ($input.length) {
+                        if ($input.attr('type') === 'radio') {
+                            $input = $form.find('input[name=' + inputs_names[i] + ']:checked');
+                        }
+                        toggleInputDisplay($display_if, $input);
+                    }
+                }
             }
         }
     });
@@ -1257,6 +1320,20 @@ function setFormEvents($form) {
                 $input.change(function () {
                     toggleInputDisplay($container, $(this));
                 });
+            }
+        } else {
+            var inputs_names = $container.data('inputs_names');
+            if (inputs_names) {
+                inputs_names += '';
+                inputs_names = inputs_names.split(',');
+                for (var i in inputs_names) {
+                    var $input = $form.find('[name="' + inputs_names[i] + '"]');
+                    if ($input.length) {
+                        $input.change(function () {
+                            toggleInputDisplay($container, $(this));
+                        });
+                    }
+                }
             }
         }
     });
@@ -1339,6 +1416,47 @@ function setInputsEvents($container) {
                 $textarea.val(text).change();
             });
             $(this).data('event_init', 1);
+        }
+    });
+    $container.find('.input_values').each(function () {
+        if (!parseInt($(this).data('event_init'))) {
+            var $inputContainer = $(this).findParentByClass('inputContainer');
+            var field_name = $(this).data('field_name');
+            var allow_custom = parseInt($(this).data('allow_custom'));
+            var $input_values = $(this);
+            if ($.isOk($inputContainer)) {
+                var $target_input = $inputContainer.find('[name="' + field_name + '"]');
+                if ($.isOk($target_input)) {
+                    $(this).change(function () {
+                        var val = $(this).val();
+                        $target_input.val(val).change();
+                    });
+                    $target_input.change(function () {
+                        var val = $(this).val() + '';
+                        var check = false;
+                        $input_values.find('option').each(function () {
+                            if (val === $(this).attr('value')) {
+                                check = true;
+                                $input_values.val(val);
+                            }
+                        });
+                        if (!check) {
+                            if (allow_custom) {
+                                if (val === '') {
+                                    $input_values.stop().slidDown(250);
+                                } else {
+                                    $input_values.slideUp(250);
+                                }
+                            } else {
+                                $target_input.val($input_values.val()).change();
+                            }
+                        }
+                    });
+                }
+            }
+            $(this).data('event_init', 1);
+        } else {
+            bimp_msg('la');
         }
     });
     $container.find('.qtyInputContainer').each(function () {

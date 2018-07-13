@@ -3,6 +3,7 @@
 class BC_Form extends BC_Panel
 {
 
+    public $component_name = 'Formulaire';
     public static $type = 'form';
     public static $config_required = false;
     public $id_parent = null;
@@ -351,7 +352,7 @@ class BC_Form extends BC_Panel
             if ($this->object->config->isDefined('associations/' . $params['association'] . '/list')) {
                 $html .= '<div class="inputContainer ' . $this->fields_prefix . $params['association'] . '_inputContainer"';
                 $html .= ' data-field_name="' . $this->fields_prefix . $params['association'] . '"';
-                $html .= ' data-initial_values="' . implode(',', $items) . '"';
+                $html .= ' data-initial_value="' . implode(',', $items) . '"';
                 $html .= ' data-multiple="1"';
                 $html .= ' data-field_prefix="' . $this->fields_prefix . '"';
                 $html .= ' data-required="' . $params['required'] . '"';
@@ -588,7 +589,7 @@ class BC_Form extends BC_Panel
         } elseif ($this->object->config->isDefined($this->config_path . '/rows/' . $row . '/content')) {
             $html .= '<div class="inputContainer ' . $this->fields_prefix . $params['input_name'] . '_inputContainer customField"';
             $html .= ' data-field_name="' . $this->fields_prefix . $params['input_name'] . '"';
-            $html .= ' data-initial_values="' . $params['value'] . '"';
+            $html .= ' data-initial_value="' . $params['value'] . '"';
             $html .= ' data-multiple="0"';
             $html .= ' data-form_row="' . $row . '"';
             $html .= ' data-field_prefix="' . $this->fields_prefix . '"';

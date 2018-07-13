@@ -24,7 +24,7 @@ class BS_SavProduct extends BimpObject
 
         return 0;
     }
-    
+
     public function canDelete()
     {
         global $user;
@@ -146,38 +146,41 @@ class BS_SavProduct extends BimpObject
         return $errors;
     }
 
-    public function create()
+    public function create(&$warnings, $force_create = false)
     {
-        $errors = parent::create();
+        $errors = parent::create($warnings, $force_create);
+        
+        if (count($errors)) {
+            return $errors;
+        }
 
-        if (!count($errors)) {
-            $qty = (int) $this->getData('qty');
-            if ($qty > 1) {
-                $product = $this->getChildObject('product');
-                if (!is_null($product) && $product->isLoaded()) {
-                    if ($product->isSerialisable()) {
+        $product = $this->getChildObject('product');
+
+        $qty = (int) $this->getData('qty');
+        if ($qty > 1) {
+            if (!is_null($product) && $product->isLoaded()) {
+                if ($product->isSerialisable()) {
+                    $qty--;
+
+                    $instance = BimpObject::getInstance($this->module, $this->object_name);
+                    while ($qty > 0) {
+                        $instance->reset();
+                        $instance->validateArray(array(
+                            'id_sav'          => (int) $this->getData('id_sav'),
+                            'id_product'      => (int) $this->getData('id_product'),
+                            'qty'             => 1,
+                            'id_equipment'    => 0,
+                            'out_of_warranty' => (int) $this->getData('out_of_warranty')
+                        ));
+                        $instance->create();
                         $qty--;
-
-                        $instance = BimpObject::getInstance($this->module, $this->object_name);
-                        while ($qty > 0) {
-                            $instance->reset();
-                            $instance->validateArray(array(
-                                'id_sav'          => (int) $this->getData('id_sav'),
-                                'id_product'      => (int) $this->getData('id_product'),
-                                'qty'             => 1,
-                                'id_equipment'    => 0,
-                                'out_of_warranty' => (int) $this->getData('out_of_warranty')
-                            ));
-                            $instance->create();
-                            $qty--;
-                        }
-                        $this->set('qty', 1);
-                        $this->update();
                     }
+                    $this->set('qty', 1);
+                    $this->update();
                 }
             }
         }
-
+        
         return $errors;
     }
 }

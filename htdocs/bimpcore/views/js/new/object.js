@@ -200,9 +200,13 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
         object_data.form_name = form_name;
         var title = '';
         if ($.isOk($button)) {
-            title = $button.text();
+            if ($button.hasClass('rowButton')) {
+                title = $button.data('content');
+            } else {
+                title = $button.text();
+            }
         }
-        
+
         object_data.param_values = {
             fields: extra_data
         };

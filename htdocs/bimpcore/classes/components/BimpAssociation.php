@@ -373,6 +373,7 @@ class BimpAssociation
             $msg .= ' à ' . $this->object->getLabel('the') . ' ' . $id_object;
             $errors[] = $msg;
         }
+        
         return $errors;
     }
 

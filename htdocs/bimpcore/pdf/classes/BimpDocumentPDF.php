@@ -80,8 +80,8 @@ class BimpDocumentPDF extends BimpModelPDF
                 $mysoc->town = $entrepot->town;
             }
         }
-        
-        
+
+
         // Commercial: 
         if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
             global $mysoc;
@@ -90,14 +90,14 @@ class BimpDocumentPDF extends BimpModelPDF
             if (count($contacts)) {
                 $comm1 = $contacts[0];
             }
-            
+
             $contacts = $this->propal->getIdContact('internal', 'SALESREPFOLL');
             if (count($contacts)) {
                 $comm2 = $contacts[0];
             }
-            
+
             $rows = "";
-            if($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0){
+            if ($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0) {
                 $usertmp = new User($this->db);
                 $usertmp->fetch($comm1);
                 $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' client : ' . $usertmp->getFullName($this->langs) . '</div>';
@@ -106,25 +106,23 @@ class BimpDocumentPDF extends BimpModelPDF
                 $usertmp->fetch($comm2);
                 $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' devis : ' . $usertmp->getFullName($this->langs) . '</div>';
                 $nRows++;
-            }
-            else{
-                if($comm1 > 0){
+            } else {
+                if ($comm1 > 0) {
                     $usertmp = new User($this->db);
                     $usertmp->fetch($comm1);
                     $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
                     $nRows++;
-                }
-                elseif($comm2 > 0){
+                } elseif ($comm2 > 0) {
                     $usertmp = new User($this->db);
                     $usertmp->fetch($comm2);
                     $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
                     $nRows++;
                 }
             }
-            if(isset($usertmp)){
-                if($usertmp->office_phone != "")
+            if (isset($usertmp)) {
+                if ($usertmp->office_phone != "")
                     $mysoc->phone = $usertmp->office_phone;
-                if($usertmp->email != "")
+                if ($usertmp->email != "")
                     $mysoc->email = $usertmp->email;
             }
         }
@@ -143,7 +141,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->header_vars = array(
             'logo_img'     => $logo_file,
             'logo_height'  => $logo_height * BimpPDF::$pxPerMm,
-            'header_right' => array('rows'=> $rows)
+            'header_right' => array('rows' => $rows)
         );
     }
 
@@ -389,7 +387,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 } else {
                     $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
                 }
-                
+
                 $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
 
                 if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref) {
@@ -570,7 +568,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
-            
+
             if (!$this->hideReduc && $line->remise_percent) {
                 $this->total_remises += ((float) $line->subprice * ((float) $line->remise_percent / 100)) * (int) pdf_getlineqty($this->object, $i, $this->langs);
             }
@@ -657,7 +655,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getTotauxRowsHtml()
     {
         global $conf;
-        
+
         if ($this->hideTotal) {
             return '';
         }

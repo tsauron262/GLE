@@ -625,6 +625,15 @@ class Equipment extends BimpObject
         return $errors;
     }
 
+    public function getInstanceName($icon = true)
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+        
+        return $this->id . ' - S/N: ' . $this->getData('serial');
+    }
+
     // Gestion des droits: 
 
     public function canDelete()

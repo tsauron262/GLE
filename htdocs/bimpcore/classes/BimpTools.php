@@ -228,6 +228,17 @@ class BimpTools
 
         return $errors;
     }
+    
+    public static function getDateForDolDate($date)
+    {
+        $DT = new DateTime($date);
+        return (int) $DT->format('U');
+    }
+    
+    public static function getDateFromDolDate($date)
+    {
+        return date('Y-m-d', $date);
+    }
 
     // Gestion générique des objets: 
 
@@ -1019,5 +1030,10 @@ class BimpTools
         }
 
         return $msg;
+    }
+    
+    public static function replaceBr($text, $replacement = "\n")
+    {
+        return preg_replace("/<[ \/]*br[ \/]*>/", $replacement, $text);
     }
 }

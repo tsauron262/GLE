@@ -3,6 +3,7 @@
 class BC_Panel extends BimpComponent
 {
 
+    public $component_name = 'Panel';
     public $identifier;
     public $content_only = false;
     public $level = 1;
@@ -32,7 +33,7 @@ class BC_Panel extends BimpComponent
         if (BimpObject::objectLoaded($object)) {
             $this->identifier .= '_' . $object->id;
         }
-        
+
         if (isset($this->id_parent) && !is_null($this->id_parent) && $this->id_parent) {
             if (!is_null($object)) {
                 $parent_object_name = $object->getParentObjectName();

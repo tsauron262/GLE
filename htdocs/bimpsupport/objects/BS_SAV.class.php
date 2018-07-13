@@ -762,6 +762,17 @@ class BS_SAV extends BimpObject
 
         return '';
     }
+    
+    public function displayEquipment(){
+        $return = "";
+        $equipement = $this->getChildObject('equipment');
+        if($equipement->getData("product_label") != "")
+            $return .= $equipement->getData("product_label")."<br/>";
+        $return .= $equipement->getData("serial")."<br/>";
+        $return .= $equipement->getData("warranty_type");
+        return $return;
+    }
+    
 
     public function defaultDisplayEquipmentsItem($id_equipment)
     {

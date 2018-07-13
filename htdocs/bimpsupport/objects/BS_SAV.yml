@@ -179,7 +179,7 @@ fields:
                 table: be_equipment e
                 field_return_value: e.id
                 field_return_label: e.serial
-                fields_search: e.serial,e.id
+                fields_search: e.serial,e.id,e.product_label
             help: Numéro de série ou ID d'un équipement
         create_form: light
     id_entrepot:
@@ -769,10 +769,10 @@ lists:
             client: 
                 field: id_client
                 display: nom_url
-            equipement: 
-                label: Serial
-                field: id_equipment
-                display: ref
+            equipment: 
+                label: Materiel
+                value:
+                    callback: displayEquipment
                 
     client: 
         checkboxes: 1
@@ -836,4 +836,14 @@ cards:
 
 searches:
     default: 
-        fields_search: a.ref
+        fields_search: 
+            - e.serial
+            - a.ref
+            - s.nom
+        joins: 
+            - table: be_equipment
+              on: a.id_equipment = e.id
+              alias: e
+            - table: societe
+              on: a.id_client = s.rowid
+              alias: s

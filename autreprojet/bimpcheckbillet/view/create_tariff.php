@@ -70,41 +70,49 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<label for="label">Libellé </label>';
     print '<input class="form-control" placeholder="Libellé" name="label" maxlength=256 style="width: 300px"><br/>';
 
-    print '<label for="price">Prix </label>';
+    print '<label for="email_text">Contenu email </label>';
+    print '<textarea id="email_text" class="tinymce" placeholder="Description" rows="3" name="email_text" style="width: 500px"></textarea><br/>';
+
+    print '<label for="price">Prix (taxes incluses)</label>';
     print '<input class="form-control bfh-number" name="price" step=".01" type="number" min="0" style="width: 120px"/><br/>';
 
     print '<label for="number_place">Nombre de place</label>';
     print '<input class="form-control bfh-number" name="number_place" step="1" type="number" min="0" style="width: 120px"/><br/>';
 
     print '<label>Image (.bmp, .jpg ou .png)</label><br/>';
-    print '<label class="btn btn-primary" for="file">';
+    print '<label class="btn btn-primary" for="file">&nbsp';
     print '<input id="file" accept=".bmp,.jpg,.png" type="file" name="file" style="display:none"/>Parcourir</label>';
 
     print '<span class="label label-info" id="name_file_display"></span>';
-    print '<img id="img_display" src="#" alt=" Aucune image sélectionnée" style="max-height: 600px ; max-width: 800px"/><br/><br/><br/>';
-    
+    print '<img id="img_display" src="#" alt="&nbsp Aucune image sélectionnée" style="max-height: 600px ; max-width: 800px"/><br/><br/><br/>';
+
     // custom image
-    print '<label for="event">Image sur ticket (.bmp, .jpg ou .png)</label><br/>';
+    print '<label for="event">Image sur ticket (.bmp, .jpg ou .png)</label>&nbsp';
     print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';
     print '<label class="btn btn-primary active"><input value=0 type="radio" name="input_cust_img" checked>Logo Zoomdici</label>';
     print '<label class="btn btn-primary">       <input value=1 type="radio" name="input_cust_img">Image personnalisée</label>';
     print '</div><br/><br/>';
-    
-   
+
+
     print '<div id="div_custom_img" style="display: none;">';
     print '<label>Image sur les tickets</label><br/>';
     print '<label class="btn btn-primary" for="custom_img">';
     print '<input id="custom_img" accept=".bmp,.jpg,.png" type="file" name="custom_img" style="display:none"/>Parcourir</label><br/>';
 
     print '<span class="label label-info" id="name_file_display"></span>';
-    print '<img id="custom_img_display" src="#" alt=" Aucune image sélectionnée" style="max-height: 600px ; max-width: 800px"/><br/><br/><br/>';
+    print '<img id="custom_img_display" src="#" alt="&nbsp Aucune image sélectionnée" style="max-height: 600px ; max-width: 800px"/><br/><br/><br/>';
     print '</div>';
 
     print '<label for="event">Exiger nom et prénom </label><br/>';
     print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';
     print '<label class="btn btn-primary active"><input value=0 type="radio" name="require_names" checked>Non</label>';
     print '<label class="btn btn-primary">       <input value=1 type="radio" name="require_names">Oui</label>';
-    print '</div><br/><br/>';    
+    print '</div><br/><br/>';
+
+
+    print '<label for="date_stop_sale">Date de fin de vente</label><br/>';
+    print '<input class="form-control" placeholder="Date de fin de vente" type="text" name="date_stop_sale" style="display: inline ; width: 160px"/>';
+    print '<input class="form-control" type="time" value="00:00" name="time_end_sale" style="display: inline ; width: 100px"/><br/>';
 
     print '<label for="date_start">Date de début (facultatif)</label><br/>';
     print '<input class="form-control" placeholder="Date de début" type="text" name="date_start" style="display: inline ; width: 160px"/>';

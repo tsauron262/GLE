@@ -68,7 +68,7 @@ class BS_ApplePart extends BimpObject
         $coefPrix = 1;
         $constPrix = 0;
         $newPrix = 0;
-        $tabCas1 = array("DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
+        $tabCas1 = array("661-05511", "DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
         $tabCas2 = array("SVC,IPOD", "Ipod nano");
         $tabCas3 = array("661", "Z661");
         $tabCas35 = array("iphone", "BAT,IPHONE", "SVC,IPHONE"); //design commence par
@@ -76,17 +76,17 @@ class BS_ApplePart extends BimpObject
         $tabCas9 = array("661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755"); //Prix a 29
 
         $cas = 0;
-        foreach ($tabCas1 as $val)
-            if (stripos($ref, $val) === 0)
-                $cas = 1;
         foreach ($tabCas2 as $val)
             if (stripos($desc, $val) === 0)
                 $cas = 1;
         foreach ($tabCas3 as $val)
             if (stripos($ref, $val) === 0)
                 $cas = 3;
-
-
+        foreach ($tabCas1 as $val)
+            if (stripos($ref, $val) === 0)
+                $cas = 1;
+            
+            
         //Application double contrainte    
         if ($cas == 3) {
             foreach ($tabCas35 as $val)

@@ -782,6 +782,38 @@ class BS_SAV extends BimpObject
 
         return '';
     }
+    
+    public function displayEquipment(){
+        $return = "";
+        $equipement = $this->getChildObject('equipment');
+        if($equipement->getData("product_label") != "")
+            $return .= $equipement->getData("product_label")."<br/>";
+        $return .= $equipement->getData("serial")."<br/>";
+        $return .= $equipement->getData("warranty_type");
+        return $return;
+    }
+    
+    public function getEquipementSearchFilters(&$filters, $value)
+    {
+        $filters['or_equipment'] = array(
+            'or' => array(
+                'e.serial'         => array(
+                    'part_type' => 'middle', // ou middle ou end
+                    'part'      => $value
+                ),
+                'e.product_label'     => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'e.warranty_type'     => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                // etc...
+            )
+        );
+    }
+    
 
     public function defaultDisplayEquipmentsItem($id_equipment)
     {
@@ -1039,6 +1071,7 @@ class BS_SAV extends BimpObject
             $factureA->socid = $this->getData('id_client');
             $factureA->modelpdf = self::$facture_model_pdf;
             $factureA->array_options['options_type'] = "S";
+            $factureA->array_options['options_entrepot'] = $this->getData('id_entrepot');
             if ($factureA->create($user) <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factureA), 'Des erreurs sont survenues lors de la création de la facture d\'acompte');
             } else {
@@ -1143,6 +1176,11 @@ class BS_SAV extends BimpObject
             $prop->date = dol_now();
             $prop->cond_reglement_id = 0;
             $prop->mode_reglement_id = 0;
+            
+
+            $prop->array_options['options_type'] = "S";
+            $prop->array_options['options_entrepot'] = $this->getData("id_entrepot");
+            $prop->array_options['options_libelle'] = $this->getData("ref");
 
             // A checker : ok avant création? 
             $prop->array_options['options_type'] = "S";
@@ -2061,6 +2099,7 @@ class BS_SAV extends BimpObject
         if (isset($data['diagnostic'])) {
             $this->updateField('diagnostic', $data['diagnostic']);
         }
+        $propal = $this->getChildObject('propal');
 
         if (!(string) $this->getData('diagnostic')) {
             $errors[] = 'Vous devez remplir le champ "Diagnostic" avant de valider le devis';
@@ -2082,12 +2121,11 @@ class BS_SAV extends BimpObject
         if (!count($errors)) {
             global $user, $langs;
 
-            $propal = $this->getChildObject('propal');
 
-            $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
 
             $new_status = null;
-            if ($this->allGarantie) { // Déterminé par $this->generatePropalLines()
+            if ($this->allGarantie) { // Déterminé par $this->generatePropal()
+                $this->addNote('Devis garantie validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 // Si on vient de commander les pieces sous garentie (On ne change pas le statut)
                 if ((int) $this->getData('status') !== self::BS_SAV_ATT_PIECE) {
                     $new_status = self::BS_SAV_DEVIS_ACCEPTE;
@@ -2098,6 +2136,7 @@ class BS_SAV extends BimpObject
                 $propal->fetch($propal->id);
                 $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
             } else {
+                $this->addNote('Devis envoyé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                 $new_status = self::BS_SAV_ATT_CLIENT;
                 $propal->dol_object->valid($user);
                 $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
@@ -2542,6 +2581,7 @@ class BS_SAV extends BimpObject
                         $facture = new Facture($this->db->db);
                         $facture->modelpdf = self::$facture_model_pdf;
                         $facture->array_options['options_type'] = "S";
+                        $facture->array_options['options_entrepot'] = $this->getData('id_entrepot');
                         $facture->createFromOrder($propal->dol_object);
                         $facture->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
                         $facture->validate($user, ''); //pas d'entrepot pour pas de destock

@@ -1,7 +1,8 @@
 {extends file='page.tpl'}
 {block name='page_content'}
-    
-{$html}
+
+
+{$html nofilter}
 
 {foreach from=$products item=product}
     <h5>test{$product['name']}</h5>

@@ -21,6 +21,9 @@ $(window).on("load", function () {
             return false;
         }
     });
+    
+    
+    autoEntrepot();
 
 
     afficherMargeReduc();
@@ -69,9 +72,9 @@ $(window).on("load", function () {
     $("td:contains('Email de secours'), td:contains('Mail de secours')").each(function () {   ///plus de mdp apple
         $(this).next("td").each(function () {
             if ($(this).find("input").length > 0) {
-                val = $(this).find("input").val();
-                $(this).parent().append("<input type='password' name='options_apple_mdp' value='" + val + "'/>");
-                $(this).remove();
+                $(this).find("input").each(function(){
+                            $(this).attr("type", "password");
+                });
             } else
                 $(this).html("*******");
         });
@@ -1177,4 +1180,15 @@ function testEnvoie(champ) {
             testEnvoie();
         }
     }, 2000);
+}
+
+
+function autoEntrepot(){
+    var oldVal = $("#options_entrepot").val();
+    if(oldVal == 0){
+        $("#options_entrepot").find('option').each(function(){
+            if($(this).html() == DEFAULT_ENTREPOT+" ")
+                $(this).attr("selected", "selected");
+        });
+    }
 }

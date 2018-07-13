@@ -39,8 +39,11 @@ function getEvents() {
                         }, 500);
                     }
                 }
+            } else if (out.events.length === 0){
+                alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
+                window.location.replace('../view/create_event.php');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 3716.', 'error');
+                setMessage('alertSubmit', "Erreur 7946.", 'error');
             }
         }
     });

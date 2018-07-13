@@ -25,7 +25,8 @@ function getEvents() {
                 displayCheckboxes(events);
                 getUser();
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 3546.', 'error');
+                setMessage('alertSubmit', "Les liasons administrateur-évènement ne seront disponibles qu'une fois qu'un évènement aura été créée.", 'warn');
+                getUser();
             }
         }
     });
@@ -183,6 +184,7 @@ function initEvents() {
         $('input[type=checkbox]').prop('checked', false);
 
         if (id_user > 0) {
+            $('#alertSubmit').empty();
             // Identification
             $('input[name=login]').val(user.login);
             $('input[name=pass_word]').val(user.pass_word);
@@ -208,6 +210,7 @@ function initEvents() {
                 $('input[type=checkbox]').prop('checked', true);
             }
         } else {
+            setMessage('alertSubmit', "Aucune action n'est possible tant  que vous n'avez pas sélectionné d'utilisateur.", 'warn');
             $('input[name=login]').val('');
             $('input[name=pass_word]').val('');
         }
@@ -245,6 +248,5 @@ function displayCheckboxes(events) {
         html += '<input class="change_event" type="checkbox" id=' + event.id + ' value=' + event.id + ' disabled>';
         html += '<label for=' + event.id + '>' + event.label + '</label>';
     });
-    html += '';
     $('#container_event').append(html);
 }

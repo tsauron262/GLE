@@ -168,7 +168,7 @@ class synopsisHook {//FA1506-0369
     }
 
     static function getHeader() {
-        global $db, $langs, $isMobile, $conf;
+        global $db, $langs, $isMobile, $conf, $user;
         self::$timeDeb = microtime(true);
         
         
@@ -237,8 +237,8 @@ class synopsisHook {//FA1506-0369
 
         ///js
         $return .= "<script type=\"text/javascript\">"
-                . 'var DOL_URL_ROOT = "' . DOL_URL_ROOT . '";'
-                . 'var idPagePrinc = "' . (isset($_SESSION['pagePrinc']) ? $_SESSION['pagePrinc'] : "") . '";'
+                . 'var DOL_URL_ROOT = "' . DOL_URL_ROOT . '";';
+        $return .= 'var idPagePrinc = "' . (isset($_SESSION['pagePrinc']) ? $_SESSION['pagePrinc'] : "") . '";'
                 . 'var selectCentre = "' . $listCentre . '";'
 //                . 'alert("Test en cours !!! Nombreuses errerurs de chargement possible.");'
                 . "</script>\n";
@@ -264,9 +264,11 @@ class synopsisHook {//FA1506-0369
     }
 
     static function footer() {
-        global $conf, $db, $logLongTime;
+        global $conf, $db, $logLongTime, $user;
 
         $return = "";
+        
+        $return .= '<script>var DEFAULT_ENTREPOT = "' . $user->array_options['options_defaultentrepot'] . '";</script>';
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISDASHBOARD)) {
             if (stripos($_SERVER['REQUEST_URI'], DOL_URL_ROOT . "/index.php?mainmenu=home") !== false) {

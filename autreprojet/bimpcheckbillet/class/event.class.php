@@ -12,6 +12,9 @@ class Event {
     public $date_end;
     public $status;
     public $id_categ;
+    public $id_categ_parent;
+    public $place;
+    private $filename;
 
     const STATUS_DRAFT = 1;
     const STATUS_VALIDATE = 2;
@@ -29,7 +32,7 @@ class Event {
             return false;
         }
 
-        $sql = 'SELECT id, label, description, date_creation, date_start, date_end, status, id_categ';
+        $sql = 'SELECT id, label, description, date_creation, date_start, date_end, status, id_categ, id_categ_parent, place';
         $sql .= ' FROM event';
         $sql .= ' WHERE id=' . $id;
 
@@ -45,6 +48,14 @@ class Event {
                 $this->date_end = $obj->date_end;
                 $this->status = $obj->status;
                 $this->id_categ = intVal($obj->id_categ);
+                $this->id_categ_parent = intVal($obj->id_categ_parent);
+                $this->place = stripslashes($obj->place);
+                $exts = array('bmp', 'png', 'jpg');
+                foreach ($exts as $ext) {
+                    if (file_exists(PATH . '/img/event/' . $id . "." . $ext)) {
+                        $this->filename = $id . "." . $ext;
+                    }
+                }
                 return 1;
             }
         } else {
@@ -54,10 +65,12 @@ class Event {
         return -1;
     }
 
-    public function create($label, $description, $date_start, $time_start, $date_end, $time_end, $id_user, $file, $id_categ = '') {
+    public function create($label, $description, $place, $date_start, $time_start, $date_end, $time_end, $id_user, $file, $categ_parent, $id_categ = '') {
 
         if ($label == '')
             $this->errors[] = "Le champ label est obligatoire";
+        if ($categ_parent == '')
+            $this->errors[] = "Le champ catégorie parent est obligatoire";
         if ($date_start == '')
             $this->errors[] = "Le champ date de début est obligatoire";
         if ($date_end == '')
@@ -86,17 +99,21 @@ class Event {
         $sql = 'INSERT INTO `event` (';
         $sql.= '`label`';
         $sql.= ', `description`';
+        $sql.= ', `place`';
         $sql.= ', `date_creation`';
         $sql.= ', `date_start`';
         $sql.= ', `date_end`';
         $sql.= ', `id_categ`';
+        $sql.= ', `id_categ_parent`';
         $sql.= ') ';
         $sql.= 'VALUES ("' . addslashes($label) . '"';
         $sql.= ', "' . addslashes($description) . '"';
+        $sql.= ', "' . addslashes($place) . '"';
         $sql.= ', now()';
         $sql.= ', "' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ', "' . $date_end_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ', ' . ($id_categ != '' ? $id_categ : 'NULL');
+        $sql.= ', ' . $categ_parent;
         $sql.= ')';
 
         try {
@@ -125,7 +142,7 @@ class Event {
         return -1;
     }
 
-    function update($id_event, $label, $description, $date_start, $time_start, $date_end, $time_end, $id_user) {
+    function update($id_event, $label, $description, $place, $date_start, $time_start, $date_end, $time_end, $id_user) {
         if ($id_event == '')
             $this->errors[] = "Le champ identifiant est obligatoire";
         if ($label == '')
@@ -157,7 +174,8 @@ class Event {
 
         $sql = 'UPDATE `event` SET';
         $sql.= ' `label`="' . $label . '"';
-        $sql.= ', `description`="' . $description . '"';
+        $sql.= ', `description`="' . addslashes($description) . '"';
+        $sql.= ', `place`="' . addslashes($place) . '"';
         $sql.= ', `date_start`="' . $date_start_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ', `date_end`="' . $date_end_obj->format('Y-m-d H:i:s') . '"';
         $sql.= ' WHERE id=' . $id_event;
@@ -184,6 +202,69 @@ class Event {
             return -2;
         }
         return -1;
+    }
+
+    public function delete($id_event) {
+
+        $this->fetch($id_event);
+
+        // Delete tariffs
+        $tariff_static = new Tariff($this->db);
+        $tariffs = $tariff_static->getTariffsForEvent($id_event);
+
+//        print_r($tariffs);
+        if (is_array($tariffs)) {
+            foreach ($tariffs as $tariff) {
+                $res_delete_tariff = $tariff->delete();
+                if ($res_delete_tariff != 1) {
+                    $this->errors = array_merge($this->errors, $tariff->errors);
+                    return -4;
+                }
+            }
+        }
+
+        // Delete event_admin
+        $sql = 'DELETE FROM `event_admin`';
+        $sql.= ' WHERE `fk_event`=' . $id_event;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de supprimer la liaison évènement - administrateur. " . $e;
+            $this->db->rollBack();
+            return -5;
+        }
+
+
+        // Delete event
+        $sql = 'DELETE FROM `event`';
+        $sql.= ' WHERE `id`=' . $id_event;
+
+        try {
+            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->beginTransaction();
+            $this->db->exec($sql);
+            $this->db->commit();
+        } catch (Exception $e) {
+            $this->errors[] = "Impossible de supprimer l'évènement. " . $e;
+            $this->db->rollBack();
+            return -6;
+        }
+
+
+        // Delete image event
+        $file_event_prefix = PATH . '/img/event/' . $this->filename;
+        if (file_exists($file_event_prefix)) {
+            $delete_event_file_ok = unlink($file_event_prefix);
+            if (!$delete_event_file_ok) {
+                $this->errors[] = "Problème lors de la suppression de l'image de l'évènement";
+                return -7;
+            }
+        }
+        return true;
     }
 
     public function updateStatus($id_event, $status) {
@@ -219,7 +300,7 @@ class Event {
         $tariff = new Tariff($this->db);
 
         $sql = 'SELECT e.id as id, e.label as label, e.description as description, e.date_creation as date_creation,'
-                . ' e.date_start as date_start, e.date_end as date_end, e.status as status, e.id_categ as id_categ';
+                . ' e.date_start as date_start, e.date_end as date_end, e.status as status, e.id_categ as id_categ, e.id_categ_parent as id_categ_parent, e.place as place';
         $sql .= ' FROM event as e';
         if ($id_user != null and ! $is_super_admin) {
             $sql .= ' LEFT JOIN event_admin as e_a ON e_a.fk_event=e.id';
@@ -229,7 +310,8 @@ class Event {
         $result = $this->db->query($sql);
         if ($result and $result->rowCount() > 0) {
             while ($obj = $result->fetchObject()) {
-                $exts = array('bmp', 'png', 'jpg');
+                $exts = array('bmp', 'png', 'jpg', 'jpeg');
+                $filename = "";
                 foreach ($exts as $ext) {
                     if (file_exists(PATH . '/img/event/' . $obj->id . "." . $ext)) {
                         $filename = $obj->id . "." . $ext;
@@ -245,8 +327,10 @@ class Event {
                         'date_end' => $obj->date_end,
                         'status' => $obj->status,
                         'id_categ' => $obj->id_categ,
+                        'id_categ_parent' => $obj->id_categ_parent,
                         'filename' => $filename,
-                        'tariffs' => $tariff->getTariffsForEvent($obj->id)
+                        'tariffs' => $tariff->getTariffsForEvent($obj->id),
+                        'place' => $obj->place
                     );
                 else
                     $events[] = array(
@@ -258,7 +342,9 @@ class Event {
                         'date_end' => $obj->date_end,
                         'status' => $obj->status,
                         'id_categ' => $obj->id_categ,
-                        'filename' => $filename
+                        'id_categ_parent' => $obj->id_categ_parent,
+                        'filename' => $filename,
+                        'place' => $obj->place
                     );
             }
             if ($with_tariff)

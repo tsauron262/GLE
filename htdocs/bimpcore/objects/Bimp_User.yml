@@ -140,6 +140,9 @@ fields:
         label: Compétence
         dol_extra_field: 1
         type: text
+    defaultentrepot: 
+        label: Entrepot par default
+        dol_extra_field: 1
         
 forms:
     light: 
@@ -158,6 +161,7 @@ forms:
             - field: idtech8sens
             - field: comp
             - field: signature
+            - field: defaultentrepot
             
 lists:
     default: 
@@ -232,6 +236,7 @@ fields_tables:
             - field: fk_user
               display: nom_url
             - field: comp
+            - field: defaultentrepot
         
     notes: 
         title: Notes

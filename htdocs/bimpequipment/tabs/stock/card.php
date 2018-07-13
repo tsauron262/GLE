@@ -24,7 +24,7 @@
  *	\ingroup    stock
  *	\brief      Page fiche entrepot
  */
-
+ini_set('max_execution_time', 300);
 require '../../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/product/stock/class/entrepot.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
@@ -448,8 +448,11 @@ else
 			print_liste_field_titre("EstimatedStockValueShort","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             if (empty($conf->global->PRODUIT_MULTIPRICES)) print_liste_field_titre("SellPriceMin","", "p.price","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             if (empty($conf->global->PRODUIT_MULTIPRICES)) print_liste_field_titre("EstimatedStockValueSellShort","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
-			if ($user->rights->stock->mouvement->creer) print_liste_field_titre('');
-			if ($user->rights->stock->creer)            print_liste_field_titre('');
+            print_liste_field_titre("Vente","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
+            print_liste_field_titre("Der date Achat","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
+            print_liste_field_titre("Der date Vente","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
+//			if ($user->rights->stock->mouvement->creer) print_liste_field_titre('');
+//			if ($user->rights->stock->creer)            print_liste_field_titre('');
 			print "</tr>\n";
 
 			$totalunit=0;
@@ -479,14 +482,12 @@ else
                                         //Todo recup des transferer depuis date
                                         //
                                         if($objp->rowid > 0 && isset($_REQUEST['dateStock'])){
-                                            $sql = $db->query("SELECT SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('".$_REQUEST['dateStock']."', '%Y-%m-%d') AND `fk_product` = ".$objp->rowid." AND `fk_entrepot` = ".$object->id);
-                                            if($db->num_rows($sql) > 0){
-                                                $ligne = $db->fetch_object($sql);
+                                            $sql2 = $db->query("SELECT SUM(`value`) as nb FROM `llx_stock_mouvement` WHERE `tms` > STR_TO_DATE('".$_REQUEST['dateStock']."', '%Y-%m-%d') AND `fk_product` = ".$objp->rowid." AND `fk_entrepot` = ".$object->id);
+                                            if($db->num_rows($sql2) > 0){
+                                                $ligne = $db->fetch_object($sql2);
                                                 $objp->value -= $ligne->nb;
                                             }
                                         }
-                                        
-                                        
                                         
                                         /*fmoddrsi*/
                                         if($objp->value <> 0){
@@ -516,7 +517,7 @@ else
                     $productstatic->label = $objp->produit;
 					$productstatic->type=$objp->type;
 					$productstatic->entity=$objp->entity;
-					print $productstatic->getNomUrl(1,'stock',160);
+					print $productstatic->ref;
 					print '</td>';
 
 					// Label
@@ -555,25 +556,63 @@ else
                         print price(price2num($pricemin*$objp->value,'MT'),1);
                         print '</td>';
                     }
+                    
+                    /*mod drsi*/
+                        $sql = $db->query("SELECT SUM(qty) as nb FROM `llx_facturedet` fd, `llx_facture` f WHERE f.rowid = fd.`fk_facture` AND fk_statut > 0 ".(isset($_REQUEST['dateStock'])? "AND f.datef < '".$_REQUEST['dateStock']."'" : "")." AND `fk_product` = ".$productstatic->id);
+                            $ln = $db->fetch_object($sql);
+                            $nb = $ln->nb;
+                        
+                        print '<td align="right">';
+                        print $nb;
+                        print '</td>';
+                        
+                        
+                    $date = "";
+                        $sql = $db->query("SELECT datef FROM `llx_facture_fourn_det` fd, `llx_facture_fourn` f WHERE fk_statut > 0 AND `fk_product` = ".$productstatic->id." AND fd.`fk_facture_fourn` = f.rowid ORDER BY datef DESC");
+                        if($db->num_rows($sql) > 0){
+                            $ln = $db->fetch_object($sql);
+                            $date = dol_print_date($ln->datef, "%d/%m/%Y");
+                        }
+                        else{
+                            $date = "01/04/2018";
+                        }
+                        print '<td align="right">';
+                        print $date;
+                        print '</td>';
+                        
+                        
+                    $date = "";
+                        $sql = $db->query("SELECT datef FROM `llx_facturedet` fd, `llx_facture` f WHERE fk_statut > 0 AND `fk_product` = ".$productstatic->id." AND fd.`fk_facture` = f.rowid ORDER BY datef DESC");
+                        if($db->num_rows($sql) > 0){
+                            $ln = $db->fetch_object($sql);
+                            $date = dol_print_date($ln->datef, "%d/%m/%Y");
+                        }
+                        print '<td align="right">';
+                        print $date;
+                        print '</td>';
+                    
+                    
+                    
+                    
                     $totalvaluesell+=price2num($pricemin*$objp->value,'MT');
 
-                    if ($user->rights->stock->mouvement->creer)
-					{
-						print '<td align="center"><a href="'.DOL_URL_ROOT.'/product/stock/product.php?dwid='.$object->id.'&id='.$objp->rowid.'&action=transfert&backtopage='.urlencode($_SERVER["PHP_SELF"].'?id='.$id).'">';
-						print img_picto($langs->trans("StockMovement"),'uparrow.png','class="hideonsmartphone"').' '.$langs->trans("StockMovement");
-						print "</a></td>";
-					}
-
-					if ($user->rights->stock->creer)
-					{
-						print '<td align="center"><a href="'.DOL_URL_ROOT.'/product/stock/product.php?dwid='.$object->id.'&id='.$objp->rowid.'&action=correction&backtopage='.urlencode($_SERVER["PHP_SELF"].'?id='.$id).'">';
-						print $langs->trans("StockCorrection");
-						print "</a></td>";
-					}
+//                    if ($user->rights->stock->mouvement->creer)
+//					{
+//						print '<td align="center"><a href="'.DOL_URL_ROOT.'/product/stock/product.php?dwid='.$object->id.'&id='.$objp->rowid.'&action=transfert&backtopage='.urlencode($_SERVER["PHP_SELF"].'?id='.$id).'">';
+//						print img_picto($langs->trans("StockMovement"),'uparrow.png','class="hideonsmartphone"').' '.$langs->trans("StockMovement");
+//						print "</a></td>";
+//					}
+//
+//					if ($user->rights->stock->creer)
+//					{
+//						print '<td align="center"><a href="'.DOL_URL_ROOT.'/product/stock/product.php?dwid='.$object->id.'&id='.$objp->rowid.'&action=correction&backtopage='.urlencode($_SERVER["PHP_SELF"].'?id='.$id).'">';
+//						print $langs->trans("StockCorrection");
+//						print "</a></td>";
+//					}
 
 					print "</tr>";
-					$i++;
 				}
+					$i++;
                                 }
 				$db->free($resql);
 

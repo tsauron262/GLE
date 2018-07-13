@@ -34,8 +34,11 @@ function getEvents() {
                         $('select[name=event]').trigger('change');
                     }
                 }
+            } else if (out.events.length === 0){
+                alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
+                window.location.replace('../view/create_event.php');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 3716.', 'error');
+                setMessage('alertSubmit', "Erreur 6438.", 'error');
             }
         }
     });
@@ -90,13 +93,17 @@ function initEvents() {
 function displayTable(tariffs) {
     $('div#displayTable').empty();
     var html = '';
-    tariffs.forEach(function (tariff) {
-        html += '<h5><strong>' + tariff.label + '</strong></h5>';
-        html += '<table>';
-        html += addHeader(tariff);
-        html += addTickets(tariff);
-        html += '</table><br/><br/>';
-    });
+    if (tariffs !== -1) {
+        tariffs.forEach(function (tariff) {
+            html += '<h5><strong>' + tariff.label + '</strong></h5>';
+            html += '<table>';
+            html += addHeader(tariff);
+            html += addTickets(tariff);
+            html += '</table><br/><br/>';
+        });
+    } else {
+        html += 'Il n\'y a aucun tariff définit pour ce évènement';
+    }
     $('div#displayTable').append(html);
 }
 
@@ -133,8 +140,8 @@ function addTickets(tariff) {
     tickets.forEach(function (ticket) {
         html += '<tr>';
         html += '<td>' + ((ticket.last_name !== null) ? ticket.last_name : '') + '</td>';
-        html += '<td>' + ((ticket.first_name !== null) ? ticket.first_name : '') + '</td>';
-        html += '<td>' + ((ticket.price !== null) ? (ticket.price + ' €') : '') + '</td>';
+        html += '<td>' + ((ticket.first_name !== null && !parseInt(ticket.first_name) > 0) ? ticket.first_name : '') + '</td>';
+        html += '<td>' + ((ticket.price !== null) ? (ticket.price + ' €') : (tariff.price + ' €')) + '</td>';
         if (tariff.type_extra_1 !== 0 && tariff.name_extra_1 !== null)
             html += '<td>' + ((ticket.extra_1 !== null) ? ticket.extra_1 : '') + '</td>';
         if (tariff.type_extra_2 !== 0 && tariff.name_extra_2 !== null)

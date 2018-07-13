@@ -54,7 +54,7 @@ function initEvents() {
         if (window.FormData !== undefined) {
             createEvent();
         } else {
-            alert('pas compatible avec navigateur');
+            alert('Pas compatible avec navigateur');
         }
         return false;
     });

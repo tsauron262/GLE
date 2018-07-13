@@ -3,15 +3,12 @@
 session_start();
 include_once '../param.inc.php';
 
-header('Access-Control-Allow-Origin: *');  
-header('Access-Control-Allow-Methods: GET, PUT, POST, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Content-Range, Content-Disposition, Content-Description');
-
 function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     print '<!DOCTYPE html>';
     print '<html>';
 
     print '<head>';
+    print '<meta name="viewport" content="width=device-width, initial-scale=1">';
     print '<title>' . $title . '</title>';
 // CSS
     print '<link rel="stylesheet" href="../lib/css/jquery-ui.css">';
@@ -35,7 +32,10 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     foreach ($arrayofjs as $jsfile)
         print '<script type="text/javascript" src="' . $jsfile . '"></script>';
 
-    print '<script>var id_event_session=parseInt(' . $_SESSION['id_event'] . ');</script>';
+    if (isset($_SESSION['id_event']))
+        print '<script>var id_event_session=parseInt(' . $_SESSION['id_event'] . ');</script>';
+    else
+        print '<script>var id_event_session=null;</script>';
 
     print '<link rel="icon" href="../img/logo.png">';
     print '</head>';
@@ -44,17 +44,22 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
         global $user;
         $user = json_decode($_SESSION['user']);
         print '<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+              <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
   <div class="collapse navbar-collapse" id="navbarSupportedContent">';
         if (IS_MAIN_SERVER) {
-
+            // Home
             print '<div class="navbar-header">
       <a class="navbar-brand" href="home.php">Billetterie</a>
     </div>';
         }
         print'<ul class="navbar-nav mr-auto">';
         if ($user->status == 2 && IS_MAIN_SERVER)
+            // Management
             print '<li><a class="nav-link" href="manage_user.php">Gestion</a></li>';
         if (IS_MAIN_SERVER) {
+            // Event
             print '<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Évènement</a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
@@ -63,19 +68,34 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
           <a class="dropdown-item" href="stats_event.php">Statistique</a>
         </div>
       </li>';
+            // Tariff
             print '<li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tariff</a>
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tarif</a>
         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="create_tariff.php">Créer</a>
           <a class="dropdown-item" href="modify_tariff.php">Modifier</a>
         </div>
       </li>';
+            // Attribute
+            if (USE_ATTRIBUTE) {
+                print '<li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Attribut</a>
+        <div class="dropdown-menu nav-item" aria-labelledby="navbarDropdown">
+            <a class="dropdown-item" href="create_attribute.php">Créer attribut</a>
+            <a class="dropdown-item" href="link_attribute_tariff.php">Lier attribut</a>
+            <a class="dropdown-item" href="create_attribute_value.php">Créer valeur attribut</a>
+            <a class="dropdown-item" href="link_attribute_value_tariff.php">Lier valeur attribut</a>
+        </div>
+      </li>';
+            }
+            // Ticket
             print '<li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Ticket</a>
         <div class="dropdown-menu nav-item" aria-labelledby="navbarDropdown">
           <a class="dropdown-item" href="create_ticket.php">Réserver</a>
           <a class="dropdown-item" href="check_ticket.php">Valider</a>
           <a class="dropdown-item" href="list_ticket.php">Liste</a>
+          <a class="dropdown-item" href="print_ticket.php">Imprimer</a>
         </div>
       </li>';
         } else {
@@ -96,7 +116,7 @@ function printHeader($title, $arrayofjs = array(), $arrayofcss = array()) {
     } else {
         $page = basename($_SERVER['PHP_SELF']);
         if ($page != 'index.php' && $page != 'register.php') {
-            print '<fieldset class="container_form">';
+            print '<fieldset class="container_form" style="text-align: center;">';
             print '<h4>Veuillez vous connecter</h4>';
             print '<input type="button" class="btn btn-primary" value="Accéder à la page de connection" onClick="document.location.href=\'index.php\'"/>';
             print '</fieldset>';

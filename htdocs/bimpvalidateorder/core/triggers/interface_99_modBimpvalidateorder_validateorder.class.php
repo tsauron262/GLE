@@ -56,8 +56,6 @@ class Interfacevalidateorder extends DolibarrTriggers {
                 return -2;
             }
             
-            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-            $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $order->id));
 
         }
 
@@ -65,10 +63,12 @@ class Interfacevalidateorder extends DolibarrTriggers {
             $bvo = new BimpValidateOrder($user->db);
             if(!$bvo->checkValidateRights($user, $object))    
                 return -2;
+            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+            $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
         }
         if ($action == 'ORDER_UNVALIDATE') {
-//            setEventMessages("Impossible de dévalidé", null, 'errors');
-//            return -2;
+            setEventMessages("Impossible de dévalidé", null, 'errors');
+            return -2;
         }
 
 

@@ -47,8 +47,11 @@ function getEvents() {
                         $(".chosen-select").trigger("chosen:updated");
                         $('select[name=id_event]').trigger('change');
                     }
-                    $('img#img_display').attr('src',  + '../img/event/' + filename);
+//                    $('img#img_display').attr('src', +'../img/event/' + filename);
                 }
+            } else if (out.events.length === 0) {
+                alert("Aucun évènement n'a été créée, vous allez être redirigé vers la page de création des évènements.");
+                window.location.replace('../view/create_event.php');
             } else {
                 setMessage('alertSubmit', "Erreur 1286.", 'error');
                 $('button[name=create]').hide();
@@ -57,27 +60,67 @@ function getEvents() {
     });
 }
 
-function setImage(id_event) {
+//function setImage(id_event) {
+//
+//    $.ajax({
+//        type: "POST",
+//        url: "../interface.php",
+//        data: {
+//            folder: 'img/event/',
+//            name: id_event,
+//            action: 'get_image'
+//        },
+//        error: function () {
+//            setMessage('alertSubmit', 'Erreur serveur 1844.', 'error');
+//        },
+//        success: function (rowOut) {
+//            var out = JSON.parse(rowOut);
+//            $("#img_display").attr('src', 'data:image/png;base64,' + atob(out.src));
+//        }
+//    });
+//}
+
+function modifyEventPrestashop(id_event, label, description, place, date_start, time_start, date_end, time_end, id_categ) {
 
     $.ajax({
         type: "POST",
-        url: "../interface.php",
+        url: URL_PRESTASHOP,
         data: {
-            folder: 'img/event/',
-            name: id_event,
-            action: 'get_image'
+            id_event: id_event,
+            label: label,
+            description: description,
+            place: place,
+            date_start: date_start,
+            time_start: time_start,
+            date_end: date_end,
+            time_end: time_end,
+            id_categ: id_categ,
+            action: 'updatecateg'
+        },
+        beforeSend: function () {
+            $('*').css('cursor', 'wait');
+        },
+        complete: function () {
+            $('*').css('cursor', 'auto');
         },
         error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 1844.', 'error');
+            setMessage('alertBottom', 'Erreur serveur 5720.', 'error');
         },
         success: function (rowOut) {
+            $('*').css('cursor', 'auto');
             var out = JSON.parse(rowOut);
-            $("#img_display").attr('src', 'data:image/png;base64,' + atob(out.src));
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (parseInt(out.is_ok) > 0) {
+                modifyEvent(id_event, label, description, place, date_start, time_start, date_end, time_end)
+            } else {
+                setMessage('alertBottom', 'Erreur serveur 6871.', 'error');
+            }
         }
     });
 }
 
-function modifyEvent(id_event, label, description, date_start, time_start, date_end, time_end) {
+function modifyEvent(id_event, label, description, place, date_start, time_start, date_end, time_end) {
 
     $.ajax({
         type: "POST",
@@ -86,6 +129,7 @@ function modifyEvent(id_event, label, description, date_start, time_start, date_
             id_event: id_event,
             label: label,
             description: description,
+            place: place,
             date_start: date_start,
             time_start: time_start,
             date_end: date_end,
@@ -93,16 +137,16 @@ function modifyEvent(id_event, label, description, date_start, time_start, date_
             action: 'modify_event'
         },
         error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 3564.', 'error');
+            setMessage('alertBottom', 'Erreur serveur 3564.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                setMessage('alertSubmit', "Evènement modifié.", 'msg');
+                setMessage('alertBottom', "Evènement modifié.", 'msg');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 3584.', 'error');
+                setMessage('alertBottom', 'Erreur serveur 3584.', 'error');
             }
         }
     });
@@ -118,16 +162,16 @@ function draftEvent(id_event) {
             action: 'draft_event'
         },
         error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 7886.', 'error');
+            setMessage('alertBottom', 'Erreur serveur 7886.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                setMessage('alertSubmit', "Evènement définit comme brouillon.", 'msg');
+                setMessage('alertBottom', "Evènement définit comme brouillon.", 'msg');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 2354.', 'error');
+                setMessage('alertBottom', 'Erreur serveur 2354.', 'error');
             }
         }
     });
@@ -143,16 +187,16 @@ function validateEvent(id_event) {
             action: 'validate_event'
         },
         error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 3486.', 'error');
+            setMessage('alertBottom', 'Erreur serveur 3486.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                setMessage('alertSubmit', "Evènement validé.", 'msg');
+                setMessage('alertBottom', "Evènement validé.", 'msg');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 2484.', 'error');
+                setMessage('alertBottom', 'Erreur serveur 2484.', 'error');
             }
         }
     });
@@ -168,35 +212,45 @@ function closeEvent(id_event) {
             action: 'close_event'
         },
         error: function () {
-            setMessage('alertSubmit', 'Erreur serveur 3486.', 'error');
+            setMessage('alertBottom', 'Erreur serveur 3486.', 'error');
         },
         success: function (rowOut) {
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                setMessage('alertSubmit', "Evènement fermé.", 'msg');
+                setMessage('alertBottom', "Evènement fermé.", 'msg');
             } else {
-                setMessage('alertSubmit', 'Erreur serveur 2484.', 'error');
+                setMessage('alertBottom', 'Erreur serveur 2484.', 'error');
             }
         }
     });
 }
 
-function createPrestashopCategory(id_event, label_event) {
+function createPrestashopCategory(id_event, label_event, id_categ_parent, description, place) {
 
     $.ajax({
         type: "POST",
         url: URL_PRESTASHOP,
         data: {
+            id_event: id_event,
             label: label_event,
+            description: description,
+            place: place,
+            id_categ_parent: id_categ_parent,
             action: 'createPrestashopCategory'
         },
         error: function () {
-
             setMessage('alertSubmit', 'Erreur serveur 2584.', 'error');
         },
+        beforeSend: function () {
+            $('*').css('cursor', 'wait');
+        },
+        complete: function () {
+            $('*').css('cursor', 'auto');
+        },
         success: function (rowOut) {
+            $('*').css('cursor', 'auto');
             var out = JSON.parse(rowOut);
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
@@ -227,9 +281,8 @@ function addIdCateg(id_event, id_categ) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (out.code_return > 0) {
-                alert("La catégorie a été créée dans prestashop.");
-                $('div[name=create_prestashop_category]').css('display', 'none');
-                $('p[name=categ_already_created]').css('display', 'inline');
+                alert("La catégorie a été créée dans prestashop, la page va se recharger.");
+                location.reload();
             } else {
                 setMessage('alertSubmit', 'Erreur serveur 2548.', 'error');
             }
@@ -254,9 +307,63 @@ function toggleActiveCategory(id_categ) {
             if (out.errors.length !== 0) {
                 printErrors(out.errors, 'alertSubmit');
             } else if (parseInt(out.toggled) === 1) {
-                alert("Changement de statut effectué");
+                if (out.active == true)
+                    alert("Cette catégorie est maintenant activée.");
+                else
+                    alert("Cette catégorie est maintenant désactivée.");
             } else {
                 setMessage('alertSubmit', "Erreur inconnue 2349.", 'error');
+            }
+        }
+    });
+}
+
+function deletePrestashopEvent(event) {
+
+    $.ajax({
+        type: 'POST',
+        url: URL_PRESTASHOP,
+        data: {
+            id_event: event.id_categ,
+            action: 'deleteCategAndItsProduct'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 7826.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.is_ok) {
+                deleteEvent(event);
+            } else {
+                setMessage('alertSubmit', "Erreur inconnue 4821.", 'error');
+            }
+        }
+    });
+}
+
+function deleteEvent(event) { // check server
+
+    $.ajax({
+        type: "POST",
+        url: "../interface.php",
+        data: {
+            id_event: event.id,
+            action: 'delete_event'
+        },
+        error: function () {
+            setMessage('alertSubmit', 'Erreur serveur 3549.', 'error');
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (out.errors.length !== 0) {
+                printErrors(out.errors, 'alertSubmit');
+            } else if (out.code_return > 0) {
+                alert("La catégorie a été supprimée, la page va se recharger.");
+                location.reload();
+            } else {
+                setMessage('alertSubmit', 'Erreur serveur 3482.', 'error');
             }
         }
     });
@@ -289,19 +396,29 @@ function initEvents() {
     $('button[name=modify]').click(function (e) {
         e.preventDefault();
         var id_event = $('select[name=id_event] > option:selected').val();
+
         if (parseInt(id_event) > 0) {
-//        if (window.FormData !== undefined) {
-            modifyEvent($('select[name=id_event] > option:selected').val(),
-                    $('input[name=label]').val(),
-                    tinymce.get('description').getContent(),
-                    $('input[name=date_start]').val(),
-                    $('input[name=time_start]').val(),
-                    $('input[name=date_end]').val(),
-                    $('input[name=time_end]').val());
-//        } else {
-//            alert('Pas compatible avec navigateur');
-//        }
-//        return false;
+            var event = getEventById(id_event);
+            if (parseInt(event.id_categ) > 0) {
+                modifyEventPrestashop($('select[name=id_event] > option:selected').val(),
+                        $('input[name=label]').val(),
+                        tinymce.get('description').getContent(),
+                        tinymce.get('place').getContent(),
+                        $('input[name=date_start]').val(),
+                        $('input[name=time_start]').val(),
+                        $('input[name=date_end]').val(),
+                        $('input[name=time_end]').val(),
+                        event.id_categ);
+            } else {
+                modifyEvent($('select[name=id_event] > option:selected').val(),
+                        $('input[name=label]').val(),
+                        tinymce.get('description').getContent(),
+                        tinymce.get('place').getContent(),
+                        $('input[name=date_start]').val(),
+                        $('input[name=time_start]').val(),
+                        $('input[name=date_end]').val(),
+                        $('input[name=time_end]').val());
+            }
         } else {
             setMessage('alertSubmit', 'Veuillez sélectionner un évènement.', 'error');
         }
@@ -312,9 +429,10 @@ function initEvents() {
         var id_event = $('select[name=id_event] > option:selected').val();
         if (id_event > 0) {
             var event = getEventById(id_event);
-            $('img#img_display').attr('src', '..//img/event/' + event.filename);
+            $('img#img_display').attr('src', '../img/event/' + event.filename);
             autoFill(event);
         } else {
+            $('img#img_display').attr('src', '');
             autoEmpty();
         }
 
@@ -323,17 +441,21 @@ function initEvents() {
                 id_categ = parseInt(event.id_categ);
         });
 
+        $('div[name=select_event]').css('display', 'none');
+        $('div[name=create_prestashop_category]').css('display', 'none');
+        $('div[name=categ_already_created]').css('display', 'none');
+        $('div[name=toggle_active]').css('display', 'none');
+        $('div[name=categ_not_created]').css('display', 'none');
+
         if (id_categ > 0) {
-            $('div[name=create_prestashop_category]').css('display', 'none');
-            $('p[name=categ_already_created]').css('display', 'inline');
+            $('div[name=categ_already_created]').css('display', 'block');
+            $('div[name=toggle_active]').css('display', 'block');
         } else {
-            $('p[name=categ_already_created]').css('display', 'none');
             if (id_event > 0) {
-                $('p[name=select_event]').css('display', 'none');
-                $('div[name=create_prestashop_category]').css('display', 'inline');
+                $('div[name=create_prestashop_category]').css('display', 'block');
+                $('div[name=categ_not_created]').css('display', 'block');
             } else {
-                $('p[name=select_event]').css('display', 'inline');
-                $('div[name=create_prestashop_category]').css('display', 'none');
+                $('div[name=select_event]').css('display', 'block');
             }
         }
 
@@ -347,7 +469,7 @@ function initEvents() {
         if (id_event > 0)
             draftEvent(id_event);
         else
-            setMessage('alertSubmit', "Veuillez sélectionnez un évènement.", 'error');
+            setMessage('alertBottom', "Veuillez sélectionnez un évènement.", 'error');
     });
 
     $('button[name=validate]').click(function () {
@@ -357,7 +479,7 @@ function initEvents() {
         if (id_event > 0)
             validateEvent(id_event);
         else
-            setMessage('alertSubmit', "Veuillez sélectionnez un évènement.", 'error');
+            setMessage('alertBottom', "Veuillez sélectionnez un évènement.", 'error');
     });
 
     $('button[name=close]').click(function () {
@@ -367,10 +489,13 @@ function initEvents() {
         if (id_event > 0)
             closeEvent(id_event);
         else
-            setMessage('alertSubmit', "Veuillez sélectionnez un évènement.", 'error');
+            setMessage('alertBottom', "Veuillez sélectionnez un évènement.", 'error');
     });
 
     $('div[name=create_prestashop_category]').click(function () {
+        var place;
+        var description;
+        var id_categ_parent;
         var id_event = $('select[name=id_event] > option:selected').val();
         var label_event = $('select[name=id_event] > option:selected').text();
         $('p#categ_already_created').css('display', 'none');
@@ -379,13 +504,20 @@ function initEvents() {
         if (id_event > 0) {
             var stop = false;
             events.forEach(function (event) {
-                if (parseInt(event.id) === parseInt(id_event) && parseInt(event.id_categ) > 0) {
-                    $('p#categ_already_created').css('display', 'inline');
-                    stop = true;
+                if (!stop && parseInt(event.id) === parseInt(id_event)) {
+                    id_categ_parent = event.id_categ_parent;
+                    place = event.place;
+                    description = event.description;
+                    if (parseInt(event.id_categ) > 0) {
+                        $('p#categ_already_created').css('display', 'inline');
+                        stop = true;
+                    }
                 }
             });
             if (stop === false)
-                createPrestashopCategory(id_event, label_event);
+                createPrestashopCategory(id_event, label_event, id_categ_parent, description, place);
+            else
+                alert("Impossible de retrouver les information concernant cet évènement");
         } else {
             $('p#select_event').css('display', 'inline');
         }
@@ -408,11 +540,29 @@ function initEvents() {
         }
 
     });
+
+    $('button[name=delete]').click(function () {
+        var id_event = $('select[name=id_event] > option:selected').val();
+        if (id_event > 0) {
+            if (confirm("Vous êtes sur le point de supprimer un évènement,\n\
+les tariffs et les tickets (pdf inclus) qui lui sont rattachés seront également supprimés, poursuivre ?")) {
+                var event = getEventById(id_event);
+                if (parseInt(event.id_categ) > 0)
+                    deletePrestashopEvent(event);
+                else
+                    deleteEvent(event);
+            }
+        } else
+            setMessage('alertBottom', "Veuillez sélectionnez un évènement.", 'error');
+    });
 }
 
 function autoFill(event) {
     $('input[name=label]').val(event.label);
-    $("#description").val(event.description);
+    $(tinymce.get('description').getBody()).html(event.description);
+    $(tinymce.get('place').getBody()).html(event.place);
+//    $("#description").val(event.description);
+//    $("#place").val(event.place);
     $('input[name=date_start]').val(formatDate(event.date_start));
     $('input[name=time_start]').val(formatTime(event.date_start));
     $('input[name=date_end]').val(formatDate(event.date_end));
@@ -422,7 +572,10 @@ function autoFill(event) {
 
 function autoEmpty() {
     $('input[name=label]').val('');
+    $(tinymce.get('description').getBody()).html('');
+    $(tinymce.get('place').getBody()).html('');
     $("#description").val('');
+    $("#place").val('');
     $('input[name=date_start]').val(formatDate(''));
     $('input[name=time_start]').val(formatTime(''));
     $('input[name=date_end]').val(formatDate(''));

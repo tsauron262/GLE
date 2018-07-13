@@ -773,6 +773,27 @@ class BS_SAV extends BimpObject
         return $return;
     }
     
+    public function getEquipementSearchFilters(&$filters, $value)
+    {
+        $filters['or_equipment'] = array(
+            'or' => array(
+                'e.serial'         => array(
+                    'part_type' => 'middle', // ou middle ou end
+                    'part'      => $value
+                ),
+                'e.product_label'     => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'e.warranty_type'     => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                // etc...
+            )
+        );
+    }
+    
 
     public function defaultDisplayEquipmentsItem($id_equipment)
     {

@@ -773,6 +773,10 @@ lists:
                 label: Materiel
                 value:
                     callback: displayEquipment
+                joins: 
+                    - table: be_equipment
+                      alias: e
+                      on: a.id_equipment = e.id
                 
     client: 
         checkboxes: 1

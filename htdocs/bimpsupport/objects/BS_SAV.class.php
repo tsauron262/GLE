@@ -783,10 +783,13 @@ class BS_SAV extends BimpObject
             $return .= $sav->getNomUrl()."<br/>";
         }
         
-        $list = $this->getChildrenObjects("GSX_Repair");
-        foreach($list as $obj){
-            $return .= $obj->getData('repair_confirm_number')."<br/>";
-        } 
+        
+        $repairS = BimpObject::getInstance('bimpapple', 'GSX_Repair');
+        $list = $repairS->getList(array('id_sav' => $this->id));
+        foreach($list as $arr){
+            $reapir = BimpObject::getInstance('bimpapple', 'GSX_Repair');
+            $return .= $arr['repair_confirm_number']."<br/>";
+        }
         
         $return .= "<pre>".print_r($list,1);
         return $return;

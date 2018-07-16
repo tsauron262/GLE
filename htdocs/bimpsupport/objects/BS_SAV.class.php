@@ -2160,7 +2160,7 @@ class BS_SAV extends BimpObject
             if (!count($errors)) {
                 $propal_status = (int) $propal->getData('fk_statut');
 
-                if ($propal_status === 2) {
+                if ($propal_status >= 2) {
                     $res_errors = $this->setReservationsStatus(304);
 
                     if (count($res_errors)) {

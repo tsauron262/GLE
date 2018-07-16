@@ -791,7 +791,6 @@ class BS_SAV extends BimpObject
             $return .= $arr['repair_confirm_number']."<br/>";
         }
         
-        $return .= "<pre>".print_r($list,1);
         return $return;
     }
     

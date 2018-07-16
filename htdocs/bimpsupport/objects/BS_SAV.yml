@@ -600,6 +600,9 @@ fields_tables:
               display: card
               show: 
                   field_value: id_facture
+            - label: Autre
+              value:
+                 callback: displayExtraSav
               
     client: 
         title: Client

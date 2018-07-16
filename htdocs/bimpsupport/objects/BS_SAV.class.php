@@ -773,6 +773,25 @@ class BS_SAV extends BimpObject
         return $return;
     }
     
+    public function displayExtraSav(){
+        $equip = $this->getChildObject("equipment");
+        $savS = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+        $list = $savS->getList(array('id_equipment' => $equip->id));
+        foreach($list as $arr){
+            $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+            $sav->fetch($arr['id']);
+            $return .= $sav->getNomUrl()."<br/>";
+        }
+        
+        $list = $this->getChildrenObjects("GSX_Repair");
+        foreach($list as $obj){
+            $return .= $obj->getData('repair_confirm_number')."<br/>";
+        } 
+        
+        $return .= "<pre>".print_r($list,1);
+        return $return;
+    }
+    
     public function getEquipementSearchFilters(&$filters, $value)
     {
         $filters['or_equipment'] = array(

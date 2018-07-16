@@ -26,15 +26,15 @@ class BS_SAV extends BimpObject
 
     public static $status_list = array(
         self::BS_SAV_NEW               => array('label' => 'Nouveau', 'icon' => 'file-o', 'classes' => array('info')),
-        self::BS_SAV_ATT_PIECE         => array('label' => 'Attente pièce', 'icon' => 'hourglass-start', 'classes' => array('important')),
-        self::BS_SAV_ATT_CLIENT        => array('label' => 'Attente acceptation client', 'icon' => 'hourglass-start', 'classes' => array('important')),
-        self::BS_SAV_ATT_CLIENT_ACTION => array('label' => 'Attente client', 'icon' => 'hourglass-start', 'classes' => array('warning')),
-        self::BS_SAV_DEVIS_ACCEPTE     => array('label' => 'Devis Accepté', 'icon' => 'check', 'classes' => array('success')),
-        self::BS_SAV_REP_EN_COURS      => array('label' => 'Réparation en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_EXAM_EN_COURS     => array('label' => 'Examen en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
+        self::BS_SAV_ATT_CLIENT_ACTION => array('label' => 'Attente client', 'icon' => 'hourglass-start', 'classes' => array('warning')),
+        self::BS_SAV_ATT_CLIENT        => array('label' => 'Attente acceptation client', 'icon' => 'hourglass-start', 'classes' => array('important')),
+        self::BS_SAV_DEVIS_ACCEPTE     => array('label' => 'Devis Accepté', 'icon' => 'check', 'classes' => array('success')),
         self::BS_SAV_DEVIS_REFUSE      => array('label' => 'Devis refusé', 'icon' => 'exclamation-circle', 'classes' => array('danger')),
+        self::BS_SAV_ATT_PIECE         => array('label' => 'Attente pièce', 'icon' => 'hourglass-start', 'classes' => array('important')),
+        self::BS_SAV_REP_EN_COURS      => array('label' => 'Réparation en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_A_RESTITUER       => array('label' => 'A restituer', 'icon' => 'arrow-right', 'classes' => array('success')),
-        self::BS_SAV_FERME             => array('label' => 'Fermé', 'icon' => 'times', 'classes' => array('danger'))
+        self::BS_SAV_FERME             => array('label' => 'Fermée', 'icon' => 'times', 'classes' => array('danger'))
     );
     public static $need_propal_status = array(2, 3, 4, 5, 6, 9);
     public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 7, 9);
@@ -1172,14 +1172,14 @@ class BS_SAV extends BimpObject
             $serial = $equipment->getData('serial');
         }
 
-        $prop->addline("Prise en charge :  : " . $ref .
-                "\n" . "S/N : " . $serial .
-                "\n" . "Garantie :
-Pour du matériel couvert par Apple, la garantie initiale s'applique.
-Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
-Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.
-Une garantie de 30 jours est appliquée pour les réparations logicielles.
-", 0, 1, 0, 0, 0, 0, (!is_null($client) ? $client->dol_object->remise_percent : 0), 'HT', 0, 0, 3);
+//        $prop->addline("Prise en charge :  : " . $ref .
+//                "\n" . "S/N : " . $serial .
+//                "\n" . "Garantie :
+//Pour du matériel couvert par Apple, la garantie initiale s'applique.
+//Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
+//Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.
+//Une garantie de 30 jours est appliquée pour les réparations logicielles.
+//", 0, 1, 0, 0, 0, 0, (!is_null($client) ? $client->dol_object->remise_percent : 0), 'HT', 0, 0, 3);
 
 
         // Ajout du service prioritaire:

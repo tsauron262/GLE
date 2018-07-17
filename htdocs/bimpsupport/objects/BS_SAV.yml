@@ -590,8 +590,8 @@ fields_tables:
             - field: sav_pro
               edit: 1
             - field: prestataire_number
-            - field: id_propal
-              display: card
+#            - field: id_propal
+#              display: card
             - field: id_facture_acompte
               display: card
               show: 
@@ -777,10 +777,8 @@ lists:
                 label: Materiel
                 value:
                     callback: displayEquipment
-                joins: 
-                    - table: be_equipment
-                      alias: e
-                      on: a.id_equipment = e.id
+                search: 
+                    type: value_part
                 
     client: 
         checkboxes: 1

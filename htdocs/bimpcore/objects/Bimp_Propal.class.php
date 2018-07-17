@@ -201,7 +201,11 @@ class Bimp_Propal extends BimpObject
         }
 
         // Date: 
-        $date = BimpTools::getDateForDolDate($this->getData('date'));
+        if ((string) $this->getData('date')) {
+            $date = BimpTools::getDateForDolDate($this->getData('date'));
+        } else {
+            $date = '';
+        }
         if ($date !== $this->dol_object->date) {
             $this->dol_object->error = '';
             $this->dol_object->errors = array();
@@ -212,7 +216,11 @@ class Bimp_Propal extends BimpObject
         }
 
         // Date fin validité: 
-        $date = BimpTools::getDateForDolDate($this->getData('fin_validite'));
+        if ((string) $this->getData('fin_validite')) {
+            $date = BimpTools::getDateForDolDate($this->getData('fin_validite'));
+        } else {
+            $date = '';
+        }
         if ($date !== $this->dol_object->fin_validite) {
             $this->dol_object->error = '';
             $this->dol_object->errors = array();
@@ -223,7 +231,11 @@ class Bimp_Propal extends BimpObject
         }
 
         // Date livraison: 
-        $date = BimpTools::getDateForDolDate($this->getData('date_livraison'));
+        if ((string) $this->getData('date_livraison')) {
+            $date = BimpTools::getDateForDolDate($this->getData('date_livraison'));
+        } else {
+            $date = '';
+        }
         if ($date !== $this->dol_object->date_livraison) {
             $this->dol_object->error = '';
             $this->dol_object->errors = array();

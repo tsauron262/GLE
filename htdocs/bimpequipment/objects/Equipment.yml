@@ -377,7 +377,7 @@ list:
             field: serial
         place: 
             label: Emplacement
-            value: 
+            value:
                 callback: displayCurrentPlace
             search: 
                 type: value_part

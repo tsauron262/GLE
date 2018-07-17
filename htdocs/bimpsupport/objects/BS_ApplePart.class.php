@@ -85,8 +85,8 @@ class BS_ApplePart extends BimpObject
         foreach ($tabCas1 as $val)
             if (stripos($ref, $val) === 0)
                 $cas = 1;
-            
-            
+
+
         //Application double contrainte    
         if ($cas == 3) {
             foreach ($tabCas35 as $val)
@@ -135,13 +135,11 @@ class BS_ApplePart extends BimpObject
 
     public function isCartEditable()
     {
-//        $sav = $this->getParentInstance();
-//        if (!is_null($sav) && $sav->isLoaded()) {
-//            return (int) $sav->isPropalEditable();
-//        }
-//        return 0;
-
-        return 1;
+        $sav = $this->getParentInstance();
+        if (!is_null($sav) && $sav->isLoaded()) {
+            return (int) $sav->isPropalEditable();
+        }
+        return 0;
     }
 
     // Overrides: 
@@ -176,7 +174,7 @@ class BS_ApplePart extends BimpObject
                             $label .= ' APPRO';
                         }
                         $line->pa_ht = ((int) $this->getData('no_order') || ($this->getData('exchange_price') < 1)) ? (float) $this->getData('stock_price') : (float) $this->getData('exchange_price');
-                        $line->desc = $this->getData('label');
+                        $line->desc = $label;
                         $line->qty = (int) $this->getData('qty');
                         $line->tva_tx = 20;
                         $line->pu_ht = self::convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
@@ -251,7 +249,9 @@ class BS_ApplePart extends BimpObject
                         $line_warnings = array();
 
                         if ($id_line) {
-                            $line_errors = $line->update($line_warnings, true);
+                            if ($line->isEditable(true)) {
+                                $line_errors = $line->update($line_warnings, true);
+                            }
                         } else {
                             $line_errors = $line->create($line_warnings, true);
                         }
@@ -286,7 +286,7 @@ class BS_ApplePart extends BimpObject
         if (!BimpObject::objectLoaded($sav)) {
             return array('ID du SAV absent');
         }
-        
+
         $id = (int) $this->id;
 
         $errors = parent::delete($force_delete);

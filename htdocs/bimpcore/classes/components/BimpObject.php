@@ -1707,11 +1707,11 @@ class BimpObject
         $errors = array();
 
         if (!$this->isLoaded()) {
-            return array('ID Absent');
+            return array('ID ' . $this->getLabel('of_the') . ' Absent');
         }
 
         $errors = $this->validate();
-
+        
         if (!count($errors)) {
             if ($this->use_commom_fields) {
                 $this->data['date_update'] = date('Y-m-d H:i:s');
@@ -2092,7 +2092,7 @@ class BimpObject
     public function delete($force_delete = false)
     {
         if (!$this->isLoaded()) {
-            return array('ID absent');
+            return array('ID ' . $this->getLabel('of_the') . ' absent');
         }
 
         if (!$force_delete && !$this->canDelete()) {
@@ -2324,7 +2324,7 @@ class BimpObject
     }
 
     protected function updateDolObject(&$errors)
-    {
+    {        
         if (!$this->isLoaded()) {
             return 0;
         }
@@ -2356,7 +2356,7 @@ class BimpObject
                 }
             }
         }
-
+       
         if (method_exists($this, 'beforeUpdateDolObject')) {
             $this->beforeUpdateDolObject();
         }

@@ -38,7 +38,8 @@ class BimpConfig
             return false;
         }
 
-        $this->params = spyc_load_file($dir . $file_name);
+        $this->params = $this->getParamsFromFile($dir . $file_name, $this->errors);
+
         if (is_array($this->params) && count($this->params)) {
             return true;
         }
@@ -46,6 +47,54 @@ class BimpConfig
         $this->params = array();
         $this->logConfigError('Echec du chargement de la configuration depuis le fichier YAML "' . $file_name . '"');
         return false;
+    }
+
+    public function getParamsFromFile($file, &$errors = array())
+    {
+        $params = array();
+
+        if (!file_exists($file)) {
+            $errors[] = 'Le fichier de configuration "' . $file . '" n\existe pas';
+        } else {
+            $params = spyc_load_file($file);
+            if (isset($params['extends'])) {
+                $parent_file = DOL_DOCUMENT_ROOT . '/';
+                if (isset($params['extends']['module'])) {
+                    $parent_file .= $params['extends']['module'] . '/objects/';
+                    if (isset($params['extends']['object_name']) && $params['extends']['object_name']) {
+                        $parent_file .= $params['extends']['object_name'] . '.yml';
+                    } else {
+                        $errors[] = 'Nom du fichier d\'extension absent dans le fichier "' . $file . '"';
+                    }
+                } elseif (is_string($params['extends']) && isset($this->instance->module)) {
+                    $parent_file .= $this->instance->module . '/objects/' . $params['extends'] . '.yml';
+                } else {
+                    $errors[] = 'Nom du module absent du fichier de configuration "' . $file . '"';
+                }
+
+                if (is_file($parent_file)) {
+                    $parent_params = $this->getParamsFromFile($parent_file, $errors);
+                    $params = $this->mergeParams($parent_params, $params);
+                } else {
+                    $errors[] = 'Le fichier étendu "' . $parent_file . '" n\'existe pas';
+                }
+            }
+        }
+
+        return $params;
+    }
+
+    public function mergeParams(Array $parent_params, Array $child_params)
+    {
+        foreach ($child_params as $key => $values) {
+            if (isset($parent_params[$key]) && is_array($values) && is_array($parent_params[$key])) {
+                $parent_params[$key] = $this->mergeParams($parent_params[$key], $values);
+            } else {
+                $parent_params[$key] = $values;
+            }
+        }
+
+        return $parent_params;
     }
 
     // Gestion des chemins de configuration: 

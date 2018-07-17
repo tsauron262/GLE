@@ -28,3 +28,5 @@ CREATE TABLE IF NOT EXISTS `llx_bs_sav_propal_line` (
   `out_of_warranty` tinyint(1) NOT NULL DEFAULT '1',
   `position` int(10) UNSIGNED NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB;
+
+ALTER TABLE `llx_br_reservation` ADD `id_sav_propal_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_sav_product`;

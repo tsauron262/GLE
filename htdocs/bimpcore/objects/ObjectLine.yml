@@ -106,6 +106,8 @@ forms:
                       params: 
                           - pu_ht
               depends_on: id_equipment
+              show: 
+                  callback: isParentEditable
               
             - custom: 1
               label: Taux de TVA
@@ -118,6 +120,8 @@ forms:
                       params: 
                           - tva_tx
               depends_on: id_equipment
+              show: 
+                  callback: isParentEditable
             - custom: 1
               label: Prix d'achat
               input_name: id_fourn_price
@@ -128,6 +132,8 @@ forms:
                       params: 
                           - id_fourn_price
               depends_on: id_equipment
+              show: 
+                  callback: isParentEditable
 
 lists: 
     default: 

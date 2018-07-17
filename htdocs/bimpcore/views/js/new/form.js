@@ -1441,13 +1441,7 @@ function setInputsEvents($container) {
                             }
                         });
                         if (!check) {
-                            if (allow_custom) {
-                                if (val === '') {
-                                    $input_values.stop().slidDown(250);
-                                } else {
-                                    $input_values.slideUp(250);
-                                }
-                            } else {
+                            if (!allow_custom) {
                                 $target_input.val($input_values.val()).change();
                             }
                         }

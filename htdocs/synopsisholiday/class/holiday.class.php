@@ -2698,7 +2698,7 @@ class SynopsisHoliday extends Holiday {
                 $ac->userassigned = $userAssigned;
             } else {
                 $ac->userownerid = $this->fk_user;
-                $ac->userassigned = array('id' => $this->fk_user, 'transparency' => 1);
+                $ac->userassigned[] = array('id' => $this->fk_user, 'transparency' => 1);
             }
 
             if ($fk_action)

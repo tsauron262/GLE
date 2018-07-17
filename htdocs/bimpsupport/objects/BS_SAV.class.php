@@ -26,15 +26,15 @@ class BS_SAV extends BimpObject
 
     public static $status_list = array(
         self::BS_SAV_NEW               => array('label' => 'Nouveau', 'icon' => 'file-o', 'classes' => array('info')),
-        self::BS_SAV_ATT_PIECE         => array('label' => 'Attente pièce', 'icon' => 'hourglass-start', 'classes' => array('important')),
-        self::BS_SAV_ATT_CLIENT        => array('label' => 'Attente acceptation client', 'icon' => 'hourglass-start', 'classes' => array('important')),
-        self::BS_SAV_ATT_CLIENT_ACTION => array('label' => 'Attente client', 'icon' => 'hourglass-start', 'classes' => array('warning')),
-        self::BS_SAV_DEVIS_ACCEPTE     => array('label' => 'Devis Accepté', 'icon' => 'check', 'classes' => array('success')),
-        self::BS_SAV_REP_EN_COURS      => array('label' => 'Réparation en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_EXAM_EN_COURS     => array('label' => 'Examen en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
+        self::BS_SAV_ATT_CLIENT_ACTION => array('label' => 'Attente client', 'icon' => 'hourglass-start', 'classes' => array('warning')),
+        self::BS_SAV_ATT_CLIENT        => array('label' => 'Attente acceptation client', 'icon' => 'hourglass-start', 'classes' => array('important')),
+        self::BS_SAV_DEVIS_ACCEPTE     => array('label' => 'Devis Accepté', 'icon' => 'check', 'classes' => array('success')),
         self::BS_SAV_DEVIS_REFUSE      => array('label' => 'Devis refusé', 'icon' => 'exclamation-circle', 'classes' => array('danger')),
+        self::BS_SAV_ATT_PIECE         => array('label' => 'Attente pièce', 'icon' => 'hourglass-start', 'classes' => array('important')),
+        self::BS_SAV_REP_EN_COURS      => array('label' => 'Réparation en cours', 'icon' => 'hourglass-start', 'classes' => array('warning')),
         self::BS_SAV_A_RESTITUER       => array('label' => 'A restituer', 'icon' => 'arrow-right', 'classes' => array('success')),
-        self::BS_SAV_FERME             => array('label' => 'Fermé', 'icon' => 'times', 'classes' => array('danger'))
+        self::BS_SAV_FERME             => array('label' => 'Fermée', 'icon' => 'times', 'classes' => array('danger'))
     );
     public static $need_propal_status = array(2, 3, 4, 5, 6, 9);
     public static $propal_reviewable_status = array(0, 1, 2, 3, 4, 6, 7, 9);
@@ -804,6 +804,49 @@ class BS_SAV extends BimpObject
 
         return $return;
     }
+    
+    public function displayExtraSav(){
+        $equip = $this->getChildObject("equipment");
+        $savS = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+        $list = $savS->getList(array('id_equipment' => $equip->id));
+        foreach($list as $arr){
+            $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+            $sav->fetch($arr['id']);
+            $return .= $sav->getNomUrl()."<br/>";
+        }
+        
+        
+        $repairS = BimpObject::getInstance('bimpapple', 'GSX_Repair');
+        $list = $repairS->getList(array('id_sav' => $this->id));
+        foreach($list as $arr){
+            $reapir = BimpObject::getInstance('bimpapple', 'GSX_Repair');
+            $return .= "<a href='#gsx'>".$arr['repair_confirm_number']."</a><br/>";
+        }
+        
+        return $return;
+    }
+    
+    public function getEquipementSearchFilters(&$filters, $value)
+    {
+        $filters['or_equipment'] = array(
+            'or' => array(
+                'e.serial'         => array(
+                    'part_type' => 'middle', // ou middle ou end
+                    'part'      => $value
+                ),
+                'e.product_label'     => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'e.warranty_type'     => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                // etc...
+            )
+        );
+    }
+    
 
     public function defaultDisplayEquipmentsItem($id_equipment)
     {
@@ -2501,7 +2544,7 @@ class BS_SAV extends BimpObject
             if (!count($errors)) {
                 $propal_status = (int) $propal->getData('fk_statut');
 
-                if ($propal_status === 2) {
+                if ($propal_status >= 2) {
                     $res_errors = $this->setReservationsStatus(304);
 
                     if (count($res_errors)) {

@@ -119,7 +119,7 @@ $coldisplay=-1; // We remove first td
 	}
         
 	$coldisplay++;
-        $droitPrixVente = (!isset($user->rights->bimpcommercial) || (isset($user->rights->bimpcommercial->priceVente) && $user->rights->bimpcommercial->priceVente))? 1 : 0;
+        global $tabProdPrixModifToujours; $droitPrixVente = (in_array($line->ref, $tabProdPrixModifToujours) || !isset($user->rights->bimpcommercial) || (isset($user->rights->bimpcommercial->priceVente) && $user->rights->bimpcommercial->priceVente))? 1 : 0;
         print '<td align="right"><input type="text" class="flat right" size="5" id="price_ht" name="price_ht" value="' . (isset($line->pu_ht)?price($line->pu_ht,0,'',0):price($line->subprice,0,'',0)) . '"';
 	if ($this->situation_counter > 1 || !$droitPrixVente)
             print ' readonly';
@@ -185,7 +185,7 @@ $coldisplay=-1; // We remove first td
 			<?php } ?>
 			<!-- For free product -->
                         
-                        <?php $droitPrixAchat = (!isset($user->rights->bimpcommercial) || (isset($user->rights->bimpcommercial->priceAchat) && $user->rights->bimpcommercial->priceAchat))? 1 : 0;
+                        <?php global $tabProdPrixModifToujours; $droitPrixAchat = (in_array($line->ref, $tabProdPrixModifToujours) || !isset($user->rights->bimpcommercial) || (isset($user->rights->bimpcommercial->priceAchat) && $user->rights->bimpcommercial->priceAchat))? 1 : 0;
                             echo '<input class="flat right"  type="text" size="5" id="buying_price" name="buying_price" class="hideobject" value="'. price($line->pa_ht,0,'',0). '" '.($droitPrixAchat? '' : 'readonly') . '>';
                         ?>
 		</td>

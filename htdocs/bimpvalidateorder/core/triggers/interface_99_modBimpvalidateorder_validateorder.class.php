@@ -28,6 +28,23 @@ class Interfacevalidateorder extends DolibarrTriggers {
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         global $conf, $user;
+        
+        if($action == "ORDER_CREATE"){
+            $object->fetchObjectLinked();
+            if (isset($object->linkedObjects['propal'])) {
+                foreach ($object->linkedObjects['propal'] as $prop)
+                    $object->addLine("Selon nottre devis ".$prop->ref,0,0,0);
+            }
+        }
+        if($action == "BILL_CREATE"){
+            $object->fetchObjectLinked();
+            if (isset($object->linkedObjects['commande'])) {
+                foreach ($object->linkedObjects['commande'] as $comm) {
+                    $object->addLine("Selon nottre commande ".$comm->ref,0,0,0);
+                }
+            }
+        }
+        
         if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE')) {
             $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');
             if (count($tabConatact) < 1) {

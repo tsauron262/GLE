@@ -32,6 +32,9 @@ class synopsisHook {//FA1506-0369
             $fileInfo = new fileInfo($db);
             $fileInfo->showNewFile();
         }
+        
+        global $tabProdPrixModifToujours;
+        $tabProdPrixModifToujours = array("REMISECRT");
 
 
 

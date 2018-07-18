@@ -778,9 +778,11 @@ class BS_SAV extends BimpObject
         $savS = BimpObject::getInstance('bimpsupport', 'BS_SAV');
         $list = $savS->getList(array('id_equipment' => $equip->id));
         foreach($list as $arr){
-            $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-            $sav->fetch($arr['id']);
-            $return .= $sav->getNomUrl()."<br/>";
+            if($arr['id'] != $this->id){
+                $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+                $sav->fetch($arr['id']);
+                $return .= $sav->getNomUrl()."<br/>";
+            }
         }
         
         

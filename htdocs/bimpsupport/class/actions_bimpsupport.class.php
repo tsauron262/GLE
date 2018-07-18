@@ -91,7 +91,7 @@ class ActionsBimpsupport {
                     $centreUser[] = $idT2;
             }
             else{
-                $centreUser = explode(" ", $user->array_options['options_apple_centre']);//Transforme lettre centre en id centre
+                $centreUser = explode(" ", trim($user->array_options['options_apple_centre']));//Transforme lettre centre en id centre
                 foreach($centreUser as $idT=> $CT){//Va devenir inutille
                     foreach($tabCentre as $idT2 => $tabCT)
                         if($tabCT[8] == $CT)

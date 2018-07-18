@@ -652,9 +652,18 @@ jQuery(document).ready(function() {
     	      			}
     	        		options += '<option value="'+this.id+'" price="'+this.price+'">'+this.label+'</option>';
     	      		});
-                        <?php
+                        <?php global $tabProdPrixModifToujours;
+                        echo 'var tabProdPrixModifToujours = ["'.implode('","', $tabProdPrixModifToujours).'"];';
+                        
+                         echo 'if(!$.inArray($("#search_idprod").val(), tabProdPrixModifToujours)){'.
+                            'options += \'<option value="inputprice" price="\'+defaultprice+\'">'.$langs->trans("InputPrice") .'</option>\';';
+                         echo '$("#price_ht").show();';
+                         echo '$("#price_ht").css("width", "auto");';
+                         echo '$("#price_ht").css("height", "auto");';
+                         echo '}';
+                        
                         if(!defined("OLD_PRICE_FOURN"))
-    	      		 echo 'options += \'<option value="inputprice" price="\'+defaultprice+\'"><?php echo $langs->trans("InputPrice"); ?></option>\';';
+    	      		 echo 'options += \'<option value="inputprice" price="\'+defaultprice+\'">'.$langs->trans("InputPrice") .'</option>\';';
                         ?>
 
     	      		console.log("finally selected defaultkey="+defaultkey+" defaultprice="+defaultprice);

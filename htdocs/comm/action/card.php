@@ -764,6 +764,10 @@ if ($action == 'create')
 	print '<div class="assignedtouser">';
 	print $form->select_dolusers_forevent(($action=='create'?'add':'update'), 'assignedtouser', 1, '', 0, '', '', 0, 0, 0, 'AND u.statut != 0');
 	print '</div>';
+		print '<div class="assignedtogroup"><form>';
+		print $form->select_dolgroups('', 'addUserGrp', 1);
+                print '<input type="submit" class="button valignmiddle" value="Ajouter"/>';
+		print '</div>';
 	if (in_array($user->id,array_keys($listofuserid)))
 	{
 		print '<div class="myavailability">';
@@ -1115,7 +1119,7 @@ if ($id > 0)
 		print '</div>';
 		print '<div class="assignedtogroup"><form>';
 		print $form->select_dolgroups('', 'addUserGrp', 1);
-                print '<input type="submit" value="Ajouter"/>';
+                print '<input type="submit" class="button valignmiddle" value="Ajouter"/>';
 		print '</div>';
 		if (in_array($user->id,array_keys($listofuserid)))
 		{

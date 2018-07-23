@@ -163,12 +163,12 @@ if (GETPOST('addUserGrp') || GETPOST('addUserGrp'))
                 
                 
 		$_SESSION['assignedtouser']=json_encode($assignedtouser);
-	}
 	$donotclearsession=1;
 	if ($action == 'add') $action = 'create';
 	if ($action == 'update') $action = 'edit';
 
 	$listUserAssignedUpdated = true;
+	}
 }
 
 // Link to a project

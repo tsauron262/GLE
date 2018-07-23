@@ -10,6 +10,12 @@ class export8sens {
         $this->path = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/import/";
     }
     
+    function traiteStr($str){
+        $str = html_entity_decode($str);
+        $str = str_replace("&#39;", "'", $str);
+        return $str;
+    }
+    
 
     function getTxt($tab1, $tab2) {
         $sortie = "";

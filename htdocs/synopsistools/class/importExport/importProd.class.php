@@ -144,12 +144,12 @@ class importProd extends import8sens {
     }
     
     function createCat($cat, $fk_parent){
-        die("INSERT INTO ".MAIN_DB_PREFIX."categorie (label, type, fk_parent) VALUES ('".addslashes($cat)."', 0, ".$fk_parent.") ");
+        $sql = $this->db->query("INSERT INTO ".MAIN_DB_PREFIX."categorie (label, type, fk_parent) VALUES ('".addslashes($cat)."', 0, ".$fk_parent.") ");
         return $this->db->last_insert_id($sql);
     }
     
     function updateProdCat($catId, $fk_parent){
-        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "categorie_product cp, " . MAIN_DB_PREFIX . "categorie c WHERE c.fk_parent = ".$fk_parent." AND cp.fk_categorie = c.rowid AND cp.fk_product = ".$this->object->id);
+        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT c.rowid FROM " . MAIN_DB_PREFIX . "categorie c WHERE c.fk_parent = ".$fk_parent.") AND fk_product = ".$this->object->id);
         if($catId > 0)
             $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $catId . "," . $this->object->id . ")");
     }

@@ -94,10 +94,6 @@ class importProd extends import8sens {
             $this->traiteChamp("options_serialisable", 0);
 
 
-if($ln['ArtCode'] == "SERV-CPM11"){
-    echo "<pre>prod SERV-CPM11";
-    print_r($this->object);
-}
 
             $this->traiteChamp("status", ($ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X")? "1" : "0");
             $this->traiteChamp("status_buy", ($ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X")? "1" : "0");
@@ -106,6 +102,11 @@ if($ln['ArtCode'] == "SERV-CPM11"){
             $this->traiteChamp("label", $ln['ArtLib']);
             $this->traiteChamp("ref", $ln['ArtCode']);
             $this->traiteChamp("import_key", $ln['ArtID']);
+            
+            $this->traiteCat("Gamme", $ln["ArtGammeEnu"]);
+            $this->traiteCat("Categorie", $ln["ArtCategEnu"]);
+            $this->traiteCat("Nature", $ln["ArtNatureEnu"]);
+            $this->traiteCat("Collection", $ln["ArtCollectEnu"]);
 
 
             if ($this->updatePrice) {
@@ -120,4 +121,32 @@ if($ln['ArtCode'] == "SERV-CPM11"){
             $this->error("Pas d'id pour maj " . $ln['ArtCode']);
     }
 
+    
+    function traiteCat($grandeCat, $cat){
+        $sql = $this->db->query("SELECT * FROM `llx_categorie` WHERE `type` = 0 AND `label` LIKE '".$grandeCat."' AND fk_parent = 2");
+        if($this->db->num_rows($sql) < 1)
+            die("Grande Famille ".$grandeCat. " introuvable");
+        else{
+            $grCat = $this->db->fetch_object($sql);
+            $sql2 = $this->db->query("SELECT * FROM `llx_categorie` WHERE `type` = 0 AND `fk_parent` = ".$grCat->rowid." AND label LIKE '".$cat."'");
+            if($this->db->num_rows($sql2) < 1){
+                $catId = $this->createCat($cat, $grCat->rowid);
+            }
+            else{
+                $ln = $this->db->fetch_object($sql2);
+                $catId  = $ln->rowid;
+            }
+            $this->updateProdCat($catId, $grCat->rowid);
+        }
+    }
+    
+    function createCat($cat, $fk_parent){
+        $sql = $this->db->query("INSERT INTO ".MAIN_DB_PREFIX."categorie (label, type, fk_parent) VALUES ('".$cat."', 0, ".$fk_parent.") ");
+        return $this->db->last_insert_id($sql);
+    }
+    
+    function updateProdCat($catId, $fk_parent){
+        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "categorie_product cp, " . MAIN_DB_PREFIX . "categorie c WHERE c.fk_parent = ".$fk_parent." AND cp.fk_categorie = c.rowid AND cp.fk_product = ".$this->object->id);
+        $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $catId . "," . $this->object->id . ")");
+    }
 }

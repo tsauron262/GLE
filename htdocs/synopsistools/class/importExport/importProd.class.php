@@ -130,7 +130,7 @@ class importProd extends import8sens {
             $catId = 0;
             $grCat = $this->db->fetch_object($sql);
             if($cat != "" && $cat != "  " && $cat != " " && $cat !=  "  "){
-                $sql2 = $this->db->query("SELECT * FROM `llx_categorie` WHERE `type` = 0 AND `fk_parent` = ".$grCat->rowid." AND label LIKE '".$cat."'");
+                $sql2 = $this->db->query("SELECT * FROM `llx_categorie` WHERE `type` = 0 AND `fk_parent` = ".$grCat->rowid." AND label LIKE '".addslashes($cat)."'");
                 if($this->db->num_rows($sql2) < 1){
                     $catId = $this->createCat($cat, $grCat->rowid);
                 }
@@ -144,7 +144,7 @@ class importProd extends import8sens {
     }
     
     function createCat($cat, $fk_parent){
-        die("INSERT INTO ".MAIN_DB_PREFIX."categorie (label, type, fk_parent) VALUES ('".$cat."', 0, ".$fk_parent.") ");
+        die("INSERT INTO ".MAIN_DB_PREFIX."categorie (label, type, fk_parent) VALUES ('".addslashes($cat)."', 0, ".$fk_parent.") ");
         return $this->db->last_insert_id($sql);
     }
     

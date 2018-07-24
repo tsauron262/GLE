@@ -104,6 +104,7 @@ class importProd extends import8sens {
             $this->traiteChamp("import_key", $ln['ArtID']);
             
             $this->traiteCat("Gamme", $ln["ArtGammeEnu"]);
+            $this->traiteCat("Famille", $ln["ArtFamilleEnu"]);
             $this->traiteCat("Categorie", $ln["ArtCategEnu"]);
             $this->traiteCat("Nature", $ln["ArtNatureEnu"]);
             $this->traiteCat("Collection", $ln["ArtCollectEnu"]);

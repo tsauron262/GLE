@@ -144,7 +144,7 @@ class importProd extends import8sens {
     }
     
     function createCat($cat, $fk_parent){
-        $sql = $this->db->query("INSERT INTO ".MAIN_DB_PREFIX."categorie (label, type, fk_parent) VALUES ('".$cat."', 0, ".$fk_parent.") ");
+        die("INSERT INTO ".MAIN_DB_PREFIX."categorie (label, type, fk_parent) VALUES ('".$cat."', 0, ".$fk_parent.") ");
         return $this->db->last_insert_id($sql);
     }
     

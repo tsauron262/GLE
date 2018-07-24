@@ -83,6 +83,8 @@ class importProd extends import8sens {
             $this->object = new Product($this->db);
             $this->object->fetch($idGle);
             $this->object->fetch_optionals();
+            
+            $this->ident = $this->object->ref;
 
             $this->traiteChamp("price", $ln['ArtPrixBase'], true);
             $this->traiteChamp("tva_tx", $ln['ArtGTaxTaux'], true);

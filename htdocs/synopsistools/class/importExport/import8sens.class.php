@@ -17,7 +17,7 @@ abstract class import8sens {
         $this->db = $db;
         $this->path = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/export/";
         set_time_limit(5000000);
-        ini_set('memory_limit', '1024M');
+        ini_set('memory_limit', '10240M');
     }
     
     
@@ -75,7 +75,7 @@ abstract class import8sens {
             $tabTitre = explode("	", $tabLigne[0]);
         $tabFinal = $tabTitre2 = array();
         foreach ($tabLigne as $idLn => $ligne) {
-            if (($idLn != 1 && $idLn < 2+600000) || $idLn == 5365) {
+            if (($idLn != 1)) {
                 $tabTmp = explode("	", $ligne);
                 $tabLn = array();
                 foreach ($tabTmp as $idTmp => $chTmp) {
@@ -141,7 +141,7 @@ abstract class import8sens {
             $val = $this->traiteStr($val);
         }
         if($oldVal != $val){
-            $this->error("Champ ".$cible." diferent ancienne val |".$oldVal."| new val |".$val."|");
+            $this->error($this->ident." Champ ".$cible." diferent ancienne val |".$oldVal."| new val |".$val."|");
             if($type == "option"){
                 $this->object->array_options[$cible] = $val;
                 $this->update = true;

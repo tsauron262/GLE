@@ -127,14 +127,17 @@ class importProd extends import8sens {
         if($this->db->num_rows($sql) < 1)
             die("Grande Famille ".$grandeCat. " introuvable");
         else{
+            $catId = 0;
             $grCat = $this->db->fetch_object($sql);
-            $sql2 = $this->db->query("SELECT * FROM `llx_categorie` WHERE `type` = 0 AND `fk_parent` = ".$grCat->rowid." AND label LIKE '".$cat."'");
-            if($this->db->num_rows($sql2) < 1){
-                $catId = $this->createCat($cat, $grCat->rowid);
-            }
-            else{
-                $ln = $this->db->fetch_object($sql2);
-                $catId  = $ln->rowid;
+            if($cat != ""){
+                $sql2 = $this->db->query("SELECT * FROM `llx_categorie` WHERE `type` = 0 AND `fk_parent` = ".$grCat->rowid." AND label LIKE '".$cat."'");
+                if($this->db->num_rows($sql2) < 1){
+                    $catId = $this->createCat($cat, $grCat->rowid);
+                }
+                else{
+                    $ln = $this->db->fetch_object($sql2);
+                    $catId  = $ln->rowid;
+                }
             }
             $this->updateProdCat($catId, $grCat->rowid);
         }
@@ -147,6 +150,7 @@ class importProd extends import8sens {
     
     function updateProdCat($catId, $fk_parent){
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "categorie_product cp, " . MAIN_DB_PREFIX . "categorie c WHERE c.fk_parent = ".$fk_parent." AND cp.fk_categorie = c.rowid AND cp.fk_product = ".$this->object->id);
-        $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $catId . "," . $this->object->id . ")");
+        if($catId > 0)
+            $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $catId . "," . $this->object->id . ")");
     }
 }

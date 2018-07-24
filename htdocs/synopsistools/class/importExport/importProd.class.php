@@ -130,7 +130,7 @@ class importProd extends import8sens {
         else{
             $catId = 0;
             $grCat = $this->db->fetch_object($sql);
-            if($cat != "" && $cat != "  " && $cat != " " && $cat !=  "  ")
+            if($cat == "" || $cat == "  " || $cat == " " || $cat ==  "  ")
                 $cat = "A catégoriser";
             $sql2 = $this->db->query("SELECT * FROM `llx_categorie` WHERE `type` = 0 AND `fk_parent` = ".$grCat->rowid." AND label LIKE '".addslashes($cat)."'");
             if($this->db->num_rows($sql2) < 1){

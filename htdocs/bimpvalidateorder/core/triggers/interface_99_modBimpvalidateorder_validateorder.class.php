@@ -78,8 +78,9 @@ class Interfacevalidateorder extends DolibarrTriggers {
 
         if (!defined("NOT_VERIF") && $action == 'ORDER_VALIDATE') {
             $bvo = new BimpValidateOrder($user->db);
-            if(!$bvo->checkValidateRights($user, $object))    
+            if($bvo->checkValidateRights($user, $object) < 1)    
                 return -2;
+            
             $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
             $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
         }

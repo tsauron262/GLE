@@ -70,6 +70,13 @@ class BimpDocumentPDF extends BimpModelPDF {
         global $conf, $mysoc;
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        
+        
+        if(isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C'))){
+            $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
+            if(is_file($testFile))
+                $logo_file = $testFile;
+        }
 
         if (method_exists($this->object, 'fetch_optionals')) {
             $this->object->fetch_optionals();

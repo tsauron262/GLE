@@ -33,14 +33,14 @@ class Interfacevalidateorder extends DolibarrTriggers {
             $object->fetchObjectLinked();
             if (isset($object->linkedObjects['propal'])) {
                 foreach ($object->linkedObjects['propal'] as $prop)
-                    $object->addLine("Selon nottre devis ".$prop->ref,0,0,0);
+                    $object->addLine("Selon notre devis ".$prop->ref,0,0,0);
             }
         }
         if($action == "BILL_CREATE"){
             $object->fetchObjectLinked();
             if (isset($object->linkedObjects['commande'])) {
                 foreach ($object->linkedObjects['commande'] as $comm) {
-                    $object->addLine("Selon nottre commande ".$comm->ref,0,0,0);
+                    $object->addLine("Selon notre commande ".$comm->ref,0,0,0);
                 }
             }
         }

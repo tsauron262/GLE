@@ -1165,8 +1165,9 @@ class BS_SAV extends BimpObject
 
         BimpTools::loadDolClass('comm/propal', 'propal');
 
-        $prop = new Propal($this->db->db);
-        $prop->fetch($this->getData('id_propal'));
+//        $prop = new Propal($this->db->db);
+//        $prop->fetch($this->getData('id_propal'));
+        $prop = $this->getChildObject('propal')->dol_object;
 
         $prop->set_ref_client($user, $this->getData('prestataire_number'));
 

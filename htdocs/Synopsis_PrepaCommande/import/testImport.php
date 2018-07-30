@@ -946,6 +946,7 @@ if (is_dir($dir)) {
 //                                        echo "Changement de ref de ".$res->ref." en ".$val['PlvCode'];
 //                                    }
 
+                                    
                                     if (count($sqlUpt) > 0 || count($sqlUpt2) > 0) {
                                         $ok = true;
                                         if (count($sqlUpt) > 0) {

@@ -152,7 +152,7 @@ class importProd extends import8sens {
             $catId = array();
             if ($cat == "" || $cat == "  " || $cat == " " || $cat == "  ")
                 $cat = "A catégoriser";
-            $catTmp = getCatIDByNom($cat, $grCatId, "racine");
+            $catTmp = $this->getCatIDByNom($cat, $grCatId, "racine");
             if ($catTmp < 1) {
                 $catId[] = $this->createCat($cat, $grCatId);
             } else {

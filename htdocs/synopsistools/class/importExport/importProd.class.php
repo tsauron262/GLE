@@ -169,10 +169,8 @@ class importProd extends import8sens {
     
     function updateProdCat($catId, $fk_parent){
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = ".$fk_parent.") AND fk_product = ".$this->object->id);
-        echo "DELETE FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie_all` WHERE `id_subroot` = ".$fk_parent.") AND fk_product = ".$this->object->id."<br/>";
         foreach($catId as $cat){
             $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $cat . "," . $this->object->id . ")");
-            echo "INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $cat . "," . $this->object->id . ")";
         }
     }
 }

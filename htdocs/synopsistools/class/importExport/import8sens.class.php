@@ -30,17 +30,21 @@ abstract class import8sens {
     
     
     function getFiles() {
+        $extenssion = ".txt";
         if (is_dir($this->path)) {
             if ($dh = opendir($this->path)) {
                 if($this->debug)
                     echo "<br/>Dossier : ".$this->path;
                 while (($file = readdir($dh)) !== false) {
-                    if (stripos($file, ".txt")) {
+                    if (stripos($file, $extenssion)) {
                         echo $file;
-                        $this->traiteFile(file_get_contents($this->path . $file));
+                        $content = file_get_contents($this->path . $file);
+                        $newFile = str_replace($extenssion, ".ENcGLE", $file);
+                        rename($this->path . $file, $this->path . $newFile);
+                        $this->traiteFile($content);
                         if(count($this->errors) == 0){
                             if($this->moveFile){
-                                if(rename ($this->path . $file, $this->path ."imported/". $file))
+                                if(rename ($this->path . $newFile, $this->path ."imported/". $file))
                                     echo "<br/>Fichier traité déplacé vers ".$this->path ."imported/". $file;
                                 else
                                     $this->error("Impossible de déplacé le fichier ".$this->path . $file);

@@ -897,7 +897,7 @@ class BS_SAV extends BimpObject
             return array($error_msg . ' (Client absent ou invalide)');
         }
 
-        if (is_null($propal) && in_array($new_status, self::$need_propal_status)) {
+        if (is_null($propal) && in_array($new_status, self::$need_propal_status) && $this->getData("sav_pro") < 1) {
             return array($error_msg . ' (Proposition commerciale absente)');
         }
 
@@ -2156,9 +2156,6 @@ class BS_SAV extends BimpObject
                 $errors[] = 'Certains produits nécessitent encore l\'attribution d\'un équipement';
             }
 
-            if (!count($errors)) {
-                $errors = $this->setNewStatus(self::BS_SAV_FERME);
-            }
 
             if (!count($errors)) {
                 $propal_status = (int) $propal->getData('fk_statut');
@@ -2320,6 +2317,10 @@ class BS_SAV extends BimpObject
                 $this->addNote('Restitué le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
             } else {
                 $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+            }
+            
+            if (!count($errors)) {
+                $errors = $this->setNewStatus(self::BS_SAV_FERME);
             }
 
             // Fermeture des réparations GSX: 
@@ -2595,7 +2596,7 @@ class BS_SAV extends BimpObject
                 }
             }
 
-            if ($this->getData("id_propal") < 1) {
+            if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
                 $prop_errors = $this->createPropal();
                 if (count($prop_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création de la proposition commerciale');

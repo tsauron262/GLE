@@ -152,7 +152,6 @@ class importProd extends import8sens {
     }
     
     function getCatMere($id){
-        return 0;
         $sql = $this->db->query("SELECT `fk_parent` FROM `llx_categorie` WHERE `rowid` = ".$id);
         if($this->db->num_rows($sql) > 0){
             $ln = $this->db->fetch_object($sql);

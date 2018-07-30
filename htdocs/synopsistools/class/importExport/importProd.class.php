@@ -131,20 +131,32 @@ class importProd extends import8sens {
         if($this->db->num_rows($sql) < 1)
             die("Grande Famille ".$grandeCat. " introuvable");
         else{
-            $catId = 0;
+            $catId = array();
             $grCat = $this->db->fetch_object($sql);
             if($cat == "" || $cat == "  " || $cat == " " || $cat ==  "  ")
                 $cat = "A catégoriser";
 //            $sql2 = $this->db->query("SELECT * FROM `llx_categorie` WHERE `type` = 0 AND `fk_parent` = ".$grCat->rowid." AND label LIKE '".addslashes($cat)."'");
             $sql2 = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `leaf` LIKE  '".addslashes($cat)."' AND id_subroot = ".$grCat->rowid);//TODO rajput de type
             if($this->db->num_rows($sql2) < 1){
-                $catId = $this->createCat($cat, $grCat->rowid);
+                $catId[] = $this->createCat($cat, $grCat->rowid);
             }
             else{
                 $ln = $this->db->fetch_object($sql2);
-                $catId  = $ln->rowid;
+                $catId[]  = $ln->rowid;
+                while($catMere = $this->getCatMere($catTmp) AND $catMere != $grCat->rowid){
+                    $catId[] = $catMere;
+                }
             }
             $this->updateProdCat($catId, $grCat->rowid);
+        }
+    }
+    
+    function getCatMere($id){
+        return 0;
+        $sql = $this->db->query("SELECT `fk_parent` FROM `llx_categorie` WHERE `rowid` = ".$id);
+        if($this->db->num_rows($sql) > 0){
+            $ln = $this->db->fetch_object($sql);
+            return $ln->fk_parent;
         }
     }
     
@@ -155,8 +167,8 @@ class importProd extends import8sens {
     
     function updateProdCat($catId, $fk_parent){
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = ".$fk_parent.") AND fk_product = ".$this->object->id);
-        echo "DELETE FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = ".$fk_parent.") AND fk_product = ".$this->object->id."<br/>";
-        if($catId > 0)
-            $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $catId . "," . $this->object->id . ")");
+        echo "DELETE FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie_all` WHERE `id_subroot` = ".$fk_parent.") AND fk_product = ".$this->object->id."<br/>";
+        foreach($catId as $cat)
+            $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $cat . "," . $this->object->id . ")");
     }
 }

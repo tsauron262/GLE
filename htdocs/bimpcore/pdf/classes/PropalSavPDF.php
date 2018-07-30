@@ -39,6 +39,11 @@ class PropalSavPDF extends PropalPDF
                     $rows .= $equipment->getData('product_label')."<br/>";
                 $rows .= $equipment->getData('serial');
             }
+            
+            $infoCentre = $this->sav->getCentreData();
+            global $mysoc;
+            $mysoc->email = $infoCentre['mail'];
+            $mysoc->phone = $infoCentre['tel'];
         }
 
         $this->header_vars['apple_img'] = DOL_DOCUMENT_ROOT . "/synopsistools/img/agree.jpg";

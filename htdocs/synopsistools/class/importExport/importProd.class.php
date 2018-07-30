@@ -145,7 +145,8 @@ class importProd extends import8sens {
                 $catId[]  = $ln->rowid;
                 $catTmp = $ln->rowid;
                 while($catMere = $this->getCatMere($catTmp) AND $catMere != $grCat->rowid){
-                    $catId[] = $catMere;
+                    if($catMere != $grCat->rowid)
+                        $catId[] = $catMere;
                     $catTmp = $catMere;
                 }
             }

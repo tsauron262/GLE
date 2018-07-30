@@ -143,8 +143,10 @@ class importProd extends import8sens {
             else{
                 $ln = $this->db->fetch_object($sql2);
                 $catId[]  = $ln->rowid;
+                $catTmp = $ln->rowid;
                 while($catMere = $this->getCatMere($catTmp) AND $catMere != $grCat->rowid){
                     $catId[] = $catMere;
+                    $catTmp = $catMere;
                 }
             }
             $this->updateProdCat($catId, $grCat->rowid);

@@ -135,7 +135,8 @@ class importProd extends import8sens {
             $grCat = $this->db->fetch_object($sql);
             if($cat == "" || $cat == "  " || $cat == " " || $cat ==  "  ")
                 $cat = "A catégoriser";
-            $sql2 = $this->db->query("SELECT * FROM `llx_categorie` WHERE `type` = 0 AND `fk_parent` = ".$grCat->rowid." AND label LIKE '".addslashes($cat)."'");
+//            $sql2 = $this->db->query("SELECT * FROM `llx_categorie` WHERE `type` = 0 AND `fk_parent` = ".$grCat->rowid." AND label LIKE '".addslashes($cat)."'");
+            $sql2 = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `leaf` LIKE  '".addslashes($cat)."' AND id_subroot = ".$grCat->rowid);//TODO rajput de type
             if($this->db->num_rows($sql2) < 1){
                 $catId = $this->createCat($cat, $grCat->rowid);
             }
@@ -153,7 +154,7 @@ class importProd extends import8sens {
     }
     
     function updateProdCat($catId, $fk_parent){
-        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT c.rowid FROM " . MAIN_DB_PREFIX . "categorie c WHERE c.fk_parent = ".$fk_parent.") AND fk_product = ".$this->object->id);
+        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT * FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = ".$fk_parent.") AND fk_product = ".$this->object->id);
         if($catId > 0)
             $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $catId . "," . $this->object->id . ")");
     }

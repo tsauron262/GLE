@@ -625,7 +625,9 @@ if ($id > 0)
         $sql.= ", p.total as total_ttc";
         $sql.= ", p.ref, p.ref_client, p.remise";
 		$sql.= ", p.datep as dp, p.fin_validite as datelimite";
-		$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."propal as p, ".MAIN_DB_PREFIX."c_propalst as c";
+                $sql .= ", pe.*";
+		$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."c_propalst as c, ".MAIN_DB_PREFIX."propal as p";
+                $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."propal_extrafields pe ON pe.fk_object = p.rowid ";
 		$sql.= " WHERE p.fk_soc = s.rowid AND p.fk_statut = c.id";
 		$sql.= " AND s.rowid = ".$object->id;
 		$sql.= " AND p.entity = ".$conf->entity;
@@ -665,6 +667,8 @@ if ($id > 0)
                 if ( ($db->jdate($objp->datelimite) < ($now - $conf->propal->cloture->warning_delay)) && $objp->fk_statut == 1 ) {
                     print " ".img_warning();
                 }
+                if(isset($objp->libelle) && $objp->libelle != "")
+                print "(".dol_trunc($objp->libelle, 20).")";
 				print '</td><td align="right" width="80px">'.dol_print_date($db->jdate($objp->dp),'day')."</td>\n";
 				print '<td align="right" style="min-width: 60px">'.price($objp->total_ht).'</td>';
 				print '<td align="right" style="min-width: 60px" class="nowrap">'.$propal_static->LibStatut($objp->fk_statut,5).'</td></tr>';

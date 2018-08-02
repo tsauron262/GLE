@@ -172,7 +172,7 @@ class InvoicePDF extends BimpDocumentPDF
                     if (!empty($lo['date_value'])) {
                         $refObject .= ' / ' . $lo['date_value'];
                     }
-                    $rows .= '<div class="row">' . $refObject . '</div>';
+                    $rows .= '<span class="row">' . $refObject . '</span><br/>';
                     $nRows++;
                 }
             }

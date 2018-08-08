@@ -561,6 +561,16 @@ class BS_SAV extends BimpObject
                 );
             }
 
+            // Commande piece: 
+            if (in_array($status, array(self::BS_SAV_REP_EN_COURS, self::BS_SAV_DEVIS_ACCEPTE))) {
+                $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_PIECE . ', 1)';
+                $buttons[] = array(
+                    'label'   => 'Attente pièce',
+                    'icon'    => 'check',
+                    'onclick' => $onclick
+                );
+            }
+
             // Réparation en cours: 
             if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE))) {
                 if (!is_null($propal) && $propal_status > 0) {

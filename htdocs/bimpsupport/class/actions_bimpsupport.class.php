@@ -141,7 +141,7 @@ class ActionsBimpsupport {
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
                     if ($nb == "")
                         $nb = "0";
-                    $nbStr = "<span style='width: 29px; display: inline-block; text-align:right'>".$nb."</span>";
+                    $nbStr = "<span style='width: 33px; display: inline-block; text-align:right'>".$nb."</span>";
                     $return .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . " : " . $tabStat['label'] . "</a>";
                     $return .= "</span><br/>";
                 }

@@ -143,6 +143,9 @@ fields:
     defaultentrepot: 
         label: Entrepot par default
         dol_extra_field: 1
+    apple_centre: 
+        label: Centre SAV
+        dol_extra_field: 1
         
 forms:
     light: 
@@ -162,6 +165,7 @@ forms:
             - field: comp
             - field: signature
             - field: defaultentrepot
+            - field: apple_centre
             
 lists:
     default: 
@@ -237,6 +241,7 @@ fields_tables:
               display: nom_url
             - field: comp
             - field: defaultentrepot
+            - field: apple_centre
         
     notes: 
         title: Notes

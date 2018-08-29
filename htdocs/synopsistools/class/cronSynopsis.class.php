@@ -307,7 +307,7 @@ class CronSynopsis {
             }
             
             foreach(array(14, 7) as $nbDay){
-                $sql = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "user_extrafields`, " . MAIN_DB_PREFIX . "user u WHERE `date_s` = DATE(DATE_ADD(now(), INTERVAL ".$nbDay." DAY) AND fk_object = u.rowid AND statut = 1");
+                $sql = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "user_extrafields`, " . MAIN_DB_PREFIX . "user u WHERE `date_s` = DATE(DATE_ADD(now(), INTERVAL ".$nbDay." DAY)) AND fk_object = u.rowid AND statut = 1");
                 while ($result = $this->db->fetch_object($sql)) {
                     $userF = new User($this->db);
                     $userF->fetch($result->fk_object);

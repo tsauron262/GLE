@@ -48,7 +48,7 @@ class BS_SAV extends BimpObject
     public static $contact_prefs = array(
         1 => 'E-mail',
         2 => 'Téléphone',
-        3 => 'SMS'
+        3 => 'SMS + E-mail'
     );
     public static $etats_materiel = array(
         1 => array('label' => 'Neuf', 'classes' => array('success')),

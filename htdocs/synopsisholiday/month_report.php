@@ -122,11 +122,24 @@ if($num == '0') {
                 if ($mode != 2){
                     $holidaystatic->id=$holiday['rowid'];
                     $holidaystatic->ref=$holiday['rowid'];
+                    
+                    
+$debut = mktime( 0, 0, 0, $month, 1, $year );
+$fin = mktime( 0, 0, 0, $month, date("t",$debut), $year );
+//die($holiday['date_debut']."   ".date('Y-m-d', $debut));
+if(strtotime($holiday['date_debut']) < strtotime(date('Y-m-d', $debut)))
+    $holiday['date_debut'] = date('Y-m-d', $debut);
+if(strtotime($holiday['date_fin']) > strtotime(date('Y-m-d', $fin)))
+    $holiday['date_fin'] = date('Y-m-d', $fin);
 
                     $start_date=$db->jdate($holiday['date_debut']);
                     $end_date=$db->jdate($holiday['date_fin']);
                     $start_date_gmt=$db->jdate($holiday['date_debut'],1);
                     $end_date_gmt=$db->jdate($holiday['date_fin'],1);
+                    
+                    
+                    
+                    
 		$nbopenedday=num_open_day($start_date_gmt, $end_date_gmt, 0, 1, $holiday['halfday']);
                 }
 

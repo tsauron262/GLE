@@ -179,7 +179,7 @@ class importProd extends import8sens {
     
     function testCat($catId, $fk_parent){
         if(!isset($this->cache['listSousCat'][$fk_parent])){
-            $sql100 = $db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = " . $fk_parent . "");
+            $sql100 = $this->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = " . $fk_parent . "");
             while($result = $this->db->fetch_object($sql100))
                 $this->cache['listSousCat'][$fk_parent][] = $result->rowid;
         }

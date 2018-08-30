@@ -50,7 +50,6 @@ class importFourn extends import8sens {
     function updateFourn($idGle, $ln) {
         global $user;
         if ($idGle > 0) {
-            echo "<br/>update ".$idGle;
             $this->update = false;
             $this->object = new Societe($this->db);
             $this->object->fetch($idGle);
@@ -106,6 +105,7 @@ class importFourn extends import8sens {
 //                $this->tabResult["modifier"] ++;
 //            }
             if ($this->update) {
+            echo "<br/>update ".$idGle;
                 $this->object->update($this->object->id, $user);
                 $this->tabResult["modifier"] ++;
             }

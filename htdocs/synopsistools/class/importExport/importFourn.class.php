@@ -39,6 +39,10 @@ class importFourn extends import8sens {
             $this->error($fourn->error);
             return -1;
         }
+        if ($id < 1) {
+            $this->error("Impossible de créer le fourn ".print_r($ln,1));
+            return -1;
+        }
         if (count($fourn->errors) > 0) {
             $this->error($fourn->errors);
             return -1;

@@ -145,6 +145,7 @@ class importProd extends import8sens {
     }
 
     function traiteCat($grandeCat, $cat) {
+        return 1;
         $grCatId = $this->getCatIDByNom($grandeCat);
         if ($grCatId < 1)
             die("Grande Famille " . $grandeCat . " introuvable");

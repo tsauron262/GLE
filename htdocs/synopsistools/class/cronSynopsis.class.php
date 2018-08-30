@@ -96,6 +96,8 @@ class CronSynopsis {
         $this->output .= $import->output;
 
 
+        echo "fin";
+        
         return "End";
     }
 

@@ -71,7 +71,8 @@ abstract class import8sens {
 
     function traiteFile($content) {
         if($this->utf8){
-            $content = str_replace("\r", "", $content);
+            $content = str_replace("\r", "\n", $content);
+            $content = str_replace("\n\n", "\n", $content);
             $tabLigne = explode("\n", $content);
         }
         else{
@@ -130,6 +131,11 @@ abstract class import8sens {
             $this->alerts[] = $msgOrArray;
     }
     
+    function traiteNumber($number){
+        $number = str_replace(",", ".", $number);
+        return number_format($number, 5, ".", "");
+    }
+    
     function traiteChamp($cible, $val, $number = false){
         $val = trim($val);
         $type = "normal";
@@ -140,10 +146,8 @@ abstract class import8sens {
         else
             $oldVal = $this->object->$cible;
         if($number){
-            $val = str_replace(",", ".", $val);
-            $val = number_format($val, 5, ".", "");
-            $oldVal = str_replace(",", ".", $oldVal);
-            $oldVal = number_format($oldVal, 5, ".", "");
+            $val = $this->traiteNumber($val);
+            $oldVal = $this->traiteNumber($oldVal);
         }
         else{
             //$val = utf8_decode($val);

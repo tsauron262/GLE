@@ -13,6 +13,7 @@ class export8sens {
     function traiteStr($str){
         $str = html_entity_decode($str);
         $str = str_replace("&#39;", "'", $str);
+        $str = str_replace("&#39;", "'", $str);
         $str = strip_tags($str);
         return $str;
     }

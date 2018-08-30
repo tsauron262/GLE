@@ -63,7 +63,7 @@ class importProdFourn extends import8sens {
         }
         else{
             if($ln['ProGArtCode'] != "")
-            $this->error("Prod ".$ln['ProGArtCode']." introuvable");
+            $this->alert("Prod ".$ln['ProGArtCode']." introuvable");
         }
         
     }

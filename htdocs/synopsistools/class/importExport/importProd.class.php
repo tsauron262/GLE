@@ -178,9 +178,16 @@ class importProd extends import8sens {
     }
     
     function testCat($catId, $fk_parent){
-//        $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = " . $fk_parent . ") AND fk_product = " . $this->object->id. " AND fk_categorie NOT IN (".implode(", ",$catId).")");
-//        if($this->db->num_rows($sql) > 0)//Cat a suppr
-//            return 0;
+        if(!isset($this->cache['listSousCat'][$fk_parent])){
+            $sql100 = $db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = " . $fk_parent . "");
+            while($result = $this->db->fetch_object($sql100))
+                $this->cache['listSousCat'][$fk_parent][] = $result->rowid;
+        }
+        
+        
+        $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (".implode(",", $this->cache['listSousCat'][$fk_parent]).") AND fk_product = " . $this->object->id. " AND fk_categorie NOT IN (".implode(", ",$catId).")");
+        if($this->db->num_rows($sql) > 0)//Cat a suppr
+            return 0;
         foreach($catId as $cat)
             if(!in_array($cat, $this->allCatProd))
                     return 0; //Car a ajouter
@@ -197,7 +204,10 @@ class importProd extends import8sens {
 
     function createCat($cat, $fk_parent) {
         $sql = $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie (label, type, fk_parent) VALUES ('" . addslashes($cat) . "', 0, " . $fk_parent . ") ");
-        return $this->db->last_insert_id($sql);
+        $id = $this->db->last_insert_id($sql);
+        if(isset($this->cache['listSousCat'][$fk_parent]))
+            $this->cache['listSousCat'][$fk_parent][] = $id;
+        return $id;
     }
 
     function updateProdCat($catId, $fk_parent) {

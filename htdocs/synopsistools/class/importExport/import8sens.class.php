@@ -100,6 +100,7 @@ abstract class import8sens {
         }
         echo "<pre>";
         echo "Tab Titre: ".print_r($tabTitre,1);
+        echo "</pre>";
 //        print_r($tabFinal[5363]);
 //        print_r(count($tabFinal));
 

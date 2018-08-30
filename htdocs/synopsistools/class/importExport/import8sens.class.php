@@ -26,6 +26,7 @@ abstract class import8sens {
         echo "<pre>";
         $this->printError();
         print_r($this->tabResult);
+        echo "</pre>";
     }
     
     

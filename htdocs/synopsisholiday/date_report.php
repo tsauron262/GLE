@@ -1,41 +1,5 @@
-
-
-
-
 <?php
-include("date_report.php");
-die;
-?>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<?php /* Copyright (C) 2007-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2007-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2011      François Legastelois <flegastelois@teclib.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -98,14 +62,27 @@ if(empty($year)) {
 	$year = date('Y');
 }
 
+
+if(isset($_REQUEST['dateDebut']))
+    $dateDebut = str_replace('/', '-', $_REQUEST['dateDebut']);
+else if($month==1)
+    $dateDebut = "".($year-1) ."/12/25";
+else
+    $dateDebut = $year."/" . ($month-1) ."/" ."25";
+
+if(isset($_REQUEST['dateFin']))
+    $dateFin = str_replace('/', '-', $_REQUEST['dateFin']);
+else
+    $dateFin = $year."-". ($month ) ."-" ."24";
+
 $sql = "SELECT cp.rowid, cp.fk_user, cp.date_debut, cp.date_fin, cp.halfday, cp.type_conges";
 $sql.= " FROM " . MAIN_DB_PREFIX . "holiday cp";
 $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "user u ON cp.fk_user = u.rowid";
 $sql.= " WHERE cp.statut = 6";	// Approved
 // TODO Use BETWEEN instead of date_format
-$sql.= " AND (date_format(cp.date_debut, '%Y-%c') = '$year-$month' OR date_format(cp.date_fin, '%Y-%c') = '$year-$month')";
+$sql.= " AND (( cp.date_debut >= '".date('Y-m-d', strtotime($dateDebut))."' AND  cp.date_debut <= '".date('Y-m-d', strtotime($dateFin))."') OR ( cp.date_fin >= '".date('Y-m-d', strtotime($dateDebut))."' AND  cp.date_fin <= '".date('Y-m-d', strtotime($dateFin))."') OR ( cp.date_fin >= '".date('Y-m-d', strtotime($dateFin))."' AND  cp.date_debut <= '".date('Y-m-d', strtotime($dateDebut))."'))";
 $sql.= " ORDER BY u.lastname,cp.date_debut";
-//echo $sql;
+
 $result  = $db->query($sql);
 $num = $db->num_rows($result);
 
@@ -118,12 +95,28 @@ print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 print $langs->trans('Month').': ';
 print $htmlother->select_month($month, 'month_start').' ';
 print $htmlother->select_year($year,'year_start',1,10,3);
+$form = new Form($db);
+
+
+
 
 //print "<select name='mode'><option value='1'>1</option><option value='2' ".($mode == 2 ? "selected" : "").">2</option></select>";
 
 print '<input type="submit" value="'.$langs->trans("Refresh").'" class="button" />';
 
 print '</form>';
+
+
+print '<form>';
+
+$html->select_date(strtotime($dateDebut), "dateDebut"); 
+$html->select_date(strtotime($dateFin), "dateFin"); 
+
+
+print '<input type="submit" value="'.$langs->trans("Refresh").'" class="button" />';
+
+print '</form>';
+
 
 print '<br>';
 
@@ -160,13 +153,11 @@ if($num == '0') {
                     $holidaystatic->ref=$holiday['rowid'];
                     
                     
-$debut = mktime( 0, 0, 0, $month, 1, $year );
-$fin = mktime( 0, 0, 0, $month, date("t",$debut), $year );
 //die($holiday['date_debut']."   ".date('Y-m-d', $debut));
-if(strtotime($holiday['date_debut']) < strtotime(date('Y-m-d', $debut)))
-    $holiday['date_debut'] = date('Y-m-d', $debut);
-if(strtotime($holiday['date_fin']) > strtotime(date('Y-m-d', $fin)))
-    $holiday['date_fin'] = date('Y-m-d', $fin);
+if(strtotime($holiday['date_debut']) < strtotime(date('Y-m-d', strtotime($dateDebut))))
+    $holiday['date_debut'] = date('Y-m-d', strtotime($dateDebut));
+if(strtotime($holiday['date_fin']) > strtotime(date('Y-m-d', strtotime($dateFin))))
+    $holiday['date_fin'] = date('Y-m-d', strtotime($dateFin));
 
                     $start_date=$db->jdate($holiday['date_debut']);
                     $end_date=$db->jdate($holiday['date_fin']);

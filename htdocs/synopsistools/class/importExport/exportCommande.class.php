@@ -18,7 +18,7 @@ class exportCommande extends export8sens {
     public $output = "Rien";
     public $error = "";
     public $tabIgnore = array();
-    private $where = " AND fe.type != 'R' AND comm.fk_statut > 0  AND (comm.extraparams < 1 || comm.extraparams is NULL) AND comm.total_ht != 0  AND ref NOT LIKE '%PROV%' GROUP BY comm.rowid";
+    private $where = " AND fe.type != 'R' AND comm.fk_statut > 0  AND (comm.extraparams < 1 || comm.extraparams is NULL)  AND ref NOT LIKE '%PROV%' GROUP BY comm.rowid";
 
     public function __construct($db, $sortie = 'html') {
         parent::__construct($db);

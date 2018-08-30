@@ -178,7 +178,6 @@ class importProd extends import8sens {
     }
     
     function testCat($catId, $fk_parent){
-        return 1;
         $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = " . $fk_parent . ") AND fk_product = " . $this->object->id. " AND fk_categorie NOT IN (".implode(", ",$catId).")");
         if($this->db->num_rows($sql) > 0)//Cat a suppr
             return 0;
@@ -202,7 +201,7 @@ class importProd extends import8sens {
     }
 
     function updateProdCat($catId, $fk_parent) {
-        
+        echo "update cat prod ".$this->object->id."<br/>";
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = " . $fk_parent . ") AND fk_product = " . $this->object->id);
         foreach ($catId as $cat) {
             $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $cat . "," . $this->object->id . ")");

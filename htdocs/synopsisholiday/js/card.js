@@ -70,7 +70,6 @@ $(document).ready(function () {
 
 
     inputCentre = $('textarea[name="description"]');
-    inputCentre.after(selectCentre);
     inputChoix = $("select[name='centreRapide']");
     inputChoix.change(function () {
         inputCentre.val(inputCentre.val() + " " + $(this).find(' option:selected').text());

@@ -75,7 +75,7 @@ if(isset($_REQUEST['dateFin']))
 else
     $dateFin = $year."-". ($month ) ."-" ."24";
 
-$sql = "SELECT cp.rowid, cp.fk_user, cp.date_debut, cp.date_fin, cp.halfday, cp.type_conges";
+$sql = "SELECT cp.rowid, cp.description, cp.fk_user, cp.date_debut, cp.date_fin, cp.halfday, cp.type_conges";
 $sql.= " FROM " . MAIN_DB_PREFIX . "holiday cp";
 $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "user u ON cp.fk_user = u.rowid";
 $sql.= " WHERE cp.statut = 6";	// Approved
@@ -127,6 +127,7 @@ print '<tr class="liste_titre">';
 print '<td>'.$langs->trans('Ref').'</td>';
 print '<td>'.$langs->trans('Employee').'</td>';
 print '<td>Type</td>';
+print '<td>Infos</td>';
 print '<td>'.$langs->trans('DateDebCP').'</td>';
 print '<td>'.$langs->trans('DateFinCP').'</td>';
 print '<td align="right">'.$langs->trans('nbJours').'</td>';
@@ -180,6 +181,7 @@ if(strtotime($holiday['date_fin']) > strtotime(date('Y-m-d', strtotime($dateFin)
 		print '<td>'.$holidaystatic->getNomUrl(1).'</td>';
 		print '<td>'.$nomUser.'</td>';
 		print '<td>'.($type == 0? "congés" : ($type == 1? "absence exceptionnelle" : ($type == 2? "rtt" : ""))).'</td>';
+		print '<td>'.$holiday['description'].'</td>';
                 if ($mode != 2){
 		print '<td>'.dol_print_date($start_date,'day');
 		print '</td>';

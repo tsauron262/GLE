@@ -1381,34 +1381,34 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         //$delayForRequest = $delayForRequest * (60*60*24);
         $nextMonth = dol_time_plus_duree($now, $delayForRequest, 'd');
 
-        print '<script type="text/javascript">
-	    function valider()
-	    {
-    	    if(document.demandeCP.date_debut_.value != "")
-    	    {
-	           	if(document.demandeCP.date_fin_.value == "")';
-//	           	{
-//	               if(document.demandeCP.valideur.value != "-1") {
-//	                 return true;
-//	               }
-//	               else {
-//	                 alert("' . dol_escape_js($langs->transnoentities('InvalidValidatorCP')) . '");
-//	                 return false;
-//	               }
-//	               }
-//	            else
-        print '{
-	              alert("' . dol_escape_js($langs->transnoentities('NoDateFin')) . '");
-	              return false;
-	            }
-	        }
-	        else
-	        {
-	           alert("' . dol_escape_js($langs->transnoentities('NoDateDebut')) . '");
-	           return false;
-	        }
-       	}
-       </script>' . "\n";
+//        print '<script type="text/javascript">
+//	    function valider()
+//	    {   
+//    	    if(document.demandeCP.date_debut_.value != "")
+//    	    {
+//	           	if(document.demandeCP.date_fin_.value == "")';
+////	           	{
+////	               if(document.demandeCP.valideur.value != "-1") {
+////	                 return true;
+////	               }
+////	               else {
+////	                 alert("' . dol_escape_js($langs->transnoentities('InvalidValidatorCP')) . '");
+////	                 return false;
+////	               }
+////	               }
+////	            else
+//        print '{
+//	              alert("' . dol_escape_js($langs->transnoentities('NoDateFin')) . '");
+//	              return false;
+//	            }
+//	        }
+//	        else
+//	        {
+//	           alert("' . dol_escape_js($langs->transnoentities('NoDateDebut')) . '");
+//	           return false;
+//	        }
+//       	}
+//       </script>' . "\n";
 
         // Formulaire de demande
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" onsubmit="return valider()" name="demandeCP">' . "\n";
@@ -1532,6 +1532,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<td>' . $langs->trans("DescCP") . '</td>';
         print '<td>';
         print '<textarea name="description" class="flat" rows="' . ROWS_3 . '" cols="70"></textarea>';
+        
         print '</td>';
         print '</tr>';
 
@@ -1542,6 +1543,12 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<span>';
         print '<input type="checkbox" name="is_exception" id="is_exception" style="margin-right: 10px"/>';
         print '<label for="is_exception">Il s\'agit d\'une demande d\'absence exceptionnelle (Ne décompte pas le solde)</label>';
+        
+        print '<br/><select name="centreRapide" style="display:none;">'
+                . '<option value="">Raison</option>'
+                . '<option value="">Maladie</option>'
+                . '<option value="">Congé parental</option>'
+            . '</select>';
         print '</span><br/>';
         print '<span>';
         print '<input type="checkbox" name="is_rtt" id="is_rtt" style="margin-right: 10px"/>';
@@ -1563,18 +1570,18 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '</center>';
 
         // js - sélection d'un seul checkbox RTT ou absence exceptionnelle
-        print '<script type="text/javascript">';
-        print '$(document).ready(function() {';
-        print "$('#is_exception').change(function() {";
-        print "if ($(this).prop('checked') && $('#is_rtt').prop('checked'))";
-        print "$('#is_rtt').removeAttr('checked');";
-        print "});";
-        print "$('#is_rtt').change(function() {";
-        print "if ($(this).prop('checked') && $('#is_exception').prop('checked'))";
-        print "$('#is_exception').removeAttr('checked');";
-        print "});";
-        print '});';
-        print '</script>';
+//        print '<script type="text/javascript">';
+//        print '$(document).ready(function() {';
+//        print "$('#is_exception').change(function() {";
+//        print "if ($(this).prop('checked') && $('#is_rtt').prop('checked'))";
+//        print "$('#is_rtt').removeAttr('checked');";
+//        print "});";
+//        print "$('#is_rtt').change(function() {";
+//        print "if ($(this).prop('checked') && $('#is_exception').prop('checked'))";
+//        print "$('#is_exception').removeAttr('checked');";
+//        print "});";
+//        print '});';
+//        print '</script>';
     }
 } else {
     if ($error) {
@@ -1899,18 +1906,18 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
 
                 if ($edit) {
                     // js - sélection d'un seul checkbox RTT ou absence exceptionnelle
-                    print '<script type="text/javascript">';
-                    print '$(document).ready(function() {';
-                    print "$('#is_exception').change(function() {";
-                    print "if ($(this).prop('checked') && $('#is_rtt').prop('checked'))";
-                    print "$('#is_rtt').removeAttr('checked');";
-                    print "});";
-                    print "$('#is_rtt').change(function() {";
-                    print "if ($(this).prop('checked') && $('#is_exception').prop('checked'))";
-                    print "$('#is_exception').removeAttr('checked');";
-                    print "});";
-                    print '});';
-                    print '</script>';
+//                    print '<script type="text/javascript">';
+//                    print '$(document).ready(function() {';
+//                    print "$('#is_exception').change(function() {";
+//                    print "if ($(this).prop('checked') && $('#is_rtt').prop('checked'))";
+//                    print "$('#is_rtt').removeAttr('checked');";
+//                    print "});";
+//                    print "$('#is_rtt').change(function() {";
+//                    print "if ($(this).prop('checked') && $('#is_exception').prop('checked'))";
+//                    print "$('#is_exception').removeAttr('checked');";
+//                    print "});";
+//                    print '});';
+//                    print '</script>';
                 }
                 print '<br><br>';
 

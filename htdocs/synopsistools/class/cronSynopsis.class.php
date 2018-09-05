@@ -306,7 +306,7 @@ class CronSynopsis {
                 $userF->setstatus(0);
                 $str2 = "Bonjour le compte de " . $result->login . " viens d'être fermé. Cordialement.";
                 $str .= $str2."<br/>";
-                mailSyn2("Fermeture compte " . $result->login, $mails.($result->email != "")? ",".$result->email :"", null, $str2);
+                mailSyn2("Fermeture compte " . $result->login, $mails.($result->email != "" ? ",".$result->email :""), null, $str2);
             }
             
             foreach(array(14, 7) as $nbDay){

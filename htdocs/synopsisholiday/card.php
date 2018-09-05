@@ -1531,7 +1531,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<tr>';
         print '<td>' . $langs->trans("DescCP") . '</td>';
         print '<td>';
-        print '<textarea name="description" class="flat" rows="' . ROWS_3 . '" cols="70"></textarea>';
+        print '<textarea name="description" id="description"  class="flat" rows="' . ROWS_3 . '" cols="70"></textarea>';
         
         print '</td>';
         print '</tr>';
@@ -1868,7 +1868,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 } else {
                     print '<tr>';
                     print '<td>' . $langs->trans('DescCP') . '</td>';
-                    print '<td><textarea name="description" class="flat" rows="' . ROWS_3 . '" cols="70">' . $cp->description . '</textarea></td>';
+                    print '<td><textarea name="description" id="description" class="flat" rows="' . ROWS_3 . '" cols="70">' . $cp->description . '</textarea></td>';
                     print '</tr>';
                 }
 

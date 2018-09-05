@@ -297,25 +297,24 @@ class CronSynopsis {
         global $user;
         $str = "";
         if (array_key_exists('options_date_s', $user->array_options)) {
-            $mails = "tommy@drsi.fr, f.poirier@bimp.fr, j.belhocine@bimp.fr, grh@bimp.fr";
-            $sql = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "user_extrafields`, " . MAIN_DB_PREFIX . "user u WHERE `date_s` <= now() AND fk_object = u.rowid AND statut = 1");
+            $mails = "tommy@drsi.fr, grh@bimp.fr";
+            $mails2 = $mails .", f.poirier@bimp.fr, j.belhocine@bimp.fr";
+            $sql = $this->db->query("SELECT u.login, u.rowid, u2.email  FROM `" . MAIN_DB_PREFIX . "user_extrafields` ue, " . MAIN_DB_PREFIX . "user u LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user  WHERE `date_s` <= now() AND fk_object = u.rowid AND statut = 1");
             while ($result = $this->db->fetch_object($sql)) {
                 $userF = new User($this->db);
-                $userF->fetch($result->fk_object);
+                $userF->fetch($result->rowid);
                 $userF->setstatus(0);
                 $str2 = "Bonjour le compte de " . $result->login . " viens d'être fermé. Cordialement.";
                 $str .= $str2."<br/>";
-                mailSyn2("Fermeture compte " . $result->login, $mails, null, $str2);
+                mailSyn2("Fermeture compte " . $result->login, $mails.($result->email != "")? ",".$result->email :"", null, $str2);
             }
             
             foreach(array(14, 7) as $nbDay){
-                $sql = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "user_extrafields`, " . MAIN_DB_PREFIX . "user u WHERE `date_s` = DATE(DATE_ADD(now(), INTERVAL ".$nbDay." DAY)) AND fk_object = u.rowid AND statut = 1");
+                $sql = $this->db->query("SELECT u.login, u.rowid, u2.email  FROM `" . MAIN_DB_PREFIX . "user_extrafields` ue, " . MAIN_DB_PREFIX . "user u LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user WHERE `date_s` = DATE(DATE_ADD(now(), INTERVAL ".$nbDay." DAY)) AND fk_object = u.rowid AND statut = 1");
                 while ($result = $this->db->fetch_object($sql)) {
-                    $userF = new User($this->db);
-                    $userF->fetch($result->fk_object);
                     $str2 = "Bonjour le compte de " . $result->login . " sera fermé dans ".$nbDay." jours. Cordialement.";
                     $str .= $str2."<br/>";
-                    mailSyn2("Fermeture compte " . $result->login. " dans ".$nbDay." jours", $mails, null, $str2);
+                    mailSyn2("Fermeture compte " . $result->login. " dans ".$nbDay." jours", $mails2.($result->email != "")? ",".$result->email :"", null, $str2);
                 }
             }
         echo $str." Comptes fermés";

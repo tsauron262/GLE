@@ -72,7 +72,7 @@ $(document).ready(function () {
     inputCentre = $('#description');
     inputChoix = $("select[name='choixRapide']");
     inputChoix.change(function () {
-        inputCentre.val(inputCentre.val() + " " + $(this).find(' option:selected').text());
+        inputCentre.html(inputCentre.html() + " " + $(this).find(' option:selected').text());
     });
     inputException = $('#is_exception');
     

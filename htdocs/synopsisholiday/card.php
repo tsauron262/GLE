@@ -1547,7 +1547,12 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<br/><select name="choixRapide" style="display:none;">'
                 . '<option value="">Raison</option>'
                 . '<option value="">Maladie</option>'
-                . '<option value="">Congé parental</option>'
+                . '<option value="">Mariage</option>'
+                . '<option value="">Naissance ou Adoption</option>'
+                . '<option value="">Décès</option>'
+                . '<option value="">Enfant malade</option>'
+                . '<option value="">Déménagement</option>'
+                . '<option value="">Congés paternité </option>'
             . '</select>';
         print '</span><br/>';
         print '<span>';

@@ -188,7 +188,7 @@ if(strtotime($holiday['date_fin']) > strtotime(date('Y-m-d', $fin)))
                 if ($mode != 2)
 		print '<td>'.$holidaystatic->getNomUrl(1).'</td>';
 		print '<td>'.$nomUser.'</td>';
-		print '<td>'.($type == 0? "congés" : ($type == 1? "congés exceptionnels" : ($type == 2? "rtt" : ""))).'</td>';
+		print '<td>'.($type == 0? "congés" : ($type == 1? "absence exceptionnelle" : ($type == 2? "rtt" : ""))).'</td>';
                 if ($mode != 2){
 		print '<td>'.dol_print_date($start_date,'day');
 		print '</td>';

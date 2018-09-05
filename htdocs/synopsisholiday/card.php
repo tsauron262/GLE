@@ -185,7 +185,7 @@ if ($action == 'create') {
             }
         }
 
-        // Si congés exceptionnels et rtt sélectionnés en même temps:
+        // Si absence exceptionnelle et rtt sélectionnés en même temps:
         // (même si théoriquement pas possible depuis le formulaire) 
         if ($is_rtt && $is_exception) {
             header('Location: card.php?action=request&error=BothExceptionAndRtt');
@@ -305,7 +305,7 @@ if ($action == 'update') {
                 exit;
             }
 
-            // Si congés exceptionnels et rtt sélectionnés en même temps:
+            // Si absence exceptionnelle et rtt sélectionnés en même temps:
             // (même si théoriquement pas possible depuis le formulaire) 
             if ($is_rtt && $is_exception) {
                 header('Location: card.php?id=' . $_POST['holiday_id'] . '&action=edit&error=BothExceptionAndRtt');
@@ -641,7 +641,7 @@ if ($action == 'drh_confirm_valid') {
                     }
                     break;
 
-                case 1: // congés exceptionnels, pas de mise à jour du solde des CP
+                case 1: // absence exceptionnelle, pas de mise à jour du solde des CP
                     break;
 
                 case 2: // RTT
@@ -848,7 +848,7 @@ if ($action == 'drh_group_valid') {
                         }
                         break;
 
-                    case 1: // congés exceptionnels, pas de mise à jour du solde des CP
+                    case 1: // absence exceptionnelle, pas de mise à jour du solde des CP
                         break;
 
                     case 2: // RTT
@@ -1143,7 +1143,7 @@ if ($action == 'confirm_group_cancel' && GETPOST('confirm') == 'yes') {
 //                    case 0: // congés payés ordinaires
 //                        break;
 //
-//                    case 1: // congés exceptionnels, pas de mise à jour du solde des CP
+//                    case 1: // absence exceptionnelle, pas de mise à jour du solde des CP
 //                        break;
 //
 //                    case 2: // RTT
@@ -1357,7 +1357,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     $errors[] = 'Vous ne pouvez pas déposer de congés sur cette période car vous avez été désigné comme remplaçant.';
                     break;
                 case 'BothExceptionAndRtt':
-                    $errors[] = 'Veuillez ne sélectionner qu\'un seul choix dans la partie "Congés exceptionnels / RTT".';
+                    $errors[] = 'Veuillez ne sélectionner qu\'un seul choix dans la partie "Absence exceptionnelle / RTT".';
                     break;
                 case 'noGroup':
                     $errors[] = 'Veuillez sélectionner un groupe d\'utilisateurs.';
@@ -1535,13 +1535,13 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '</td>';
         print '</tr>';
 
-        // Sélection RTT / Congés exceptionnels:
+        // Sélection RTT / Absence exceptionnelle:
         print '<tr>';
-        print '<td>Congés exceptionnels / RTT</td>';
+        print '<td>Absence exceptionnelle / RTT</td>';
         print '<td>';
         print '<span>';
         print '<input type="checkbox" name="is_exception" id="is_exception" style="margin-right: 10px"/>';
-        print '<label for="is_exception">Il s\'agit d\'une demande de congés exceptionnels (Ne décompte pas le solde)</label>';
+        print '<label for="is_exception">Il s\'agit d\'une demande de absence exceptionnelle (Ne décompte pas le solde)</label>';
         print '</span><br/>';
         print '<span>';
         print '<input type="checkbox" name="is_rtt" id="is_rtt" style="margin-right: 10px"/>';
@@ -1562,7 +1562,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<input type="button" value="' . $langs->trans("Cancel") . '" class="butAction" onclick="history.go(-1)">';
         print '</center>';
 
-        // js - sélection d'un seul checkbox RTT ou congés exceptionnels
+        // js - sélection d'un seul checkbox RTT ou absence exceptionnelle
         print '<script type="text/javascript">';
         print '$(document).ready(function() {';
         print "$('#is_exception').change(function() {";
@@ -1667,7 +1667,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                         $errors[] = 'Veuillez sélectionner au moins un utilisateur dans le groupe.';
                         break;
                     case 'BothExceptionAndRtt':
-                        $errors[] = 'Veuillez ne sélectionner qu\'un seul choix dans la partie "Congés exceptionnels / RTT".';
+                        $errors[] = 'Veuillez ne sélectionner qu\'un seul choix dans la partie "Absence exceptionnelle / RTT".';
                         break;
                 }
 
@@ -1876,7 +1876,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     if ($cp->type_conges == 1)
                         print ' checked="checked"';
                     print '/>';
-                    print '<label for="is_rtt">Il s\'agit d\'une demande de congés exceptionnels</label>';
+                    print '<label for="is_rtt">Il s\'agit d\'une demande de absence exceptionnelle</label>';
                     print '</span><br/>';
                     print '<span>';
                     print '<input type="checkbox" name="is_rtt" id="is_rtt" style="margin-right: 10px"';
@@ -1898,7 +1898,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 print '</table>' . "\n";
 
                 if ($edit) {
-                    // js - sélection d'un seul checkbox RTT ou congés exceptionnels
+                    // js - sélection d'un seul checkbox RTT ou absence exceptionnelle
                     print '<script type="text/javascript">';
                     print '$(document).ready(function() {';
                     print "$('#is_exception').change(function() {";

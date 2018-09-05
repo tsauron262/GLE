@@ -69,10 +69,10 @@ $(document).ready(function () {
 
 
 
-    inputCentre = $('#description');
+    inputDesc = $('#description');
     inputChoix = $("select[name='choixRapide']");
     inputChoix.change(function () {
-        inputCentre.html(inputCentre.html() + " " + $(this).find(' option:selected').text());
+        inputDesc.html(inputDesc.html() + " " + $(this).find(' option:selected').text());
     });
     inputException = $('#is_exception');
     

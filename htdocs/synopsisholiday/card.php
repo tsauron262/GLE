@@ -1429,8 +1429,8 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
             print '<input type="radio" name="usersGroup" value="1" id="userGroup_yes"/>';
             print '<label for="userGroup_no">Congés collectifs</label>';
             print '</div>';
-            print '<script type="text/javascript" src="' . $dolibarr_main_url_root . '/synopsisholiday/js/card.js"></script>';
         }
+            print '<script type="text/javascript" src="' . $dolibarr_main_url_root . '/synopsisholiday/js/card.js"></script>';
         print '<div id="singleUserBlock">';
         print '<div style="display: inline-block; vertical-align: top; margin-right: 15px;">';
         if (!$droitAll) {

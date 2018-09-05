@@ -70,8 +70,9 @@ $(document).ready(function () {
 
 
     inputCentre = $('textarea[name="description"]');
-    inputChoix = $("select[name='centreRapide']");
+    inputChoix = $("select[name='choixRapide']");
     inputChoix.change(function () {
+        alert("ll");
         inputCentre.val(inputCentre.val() + " " + $(this).find(' option:selected').text());
     });
     inputException = $('#is_exception');

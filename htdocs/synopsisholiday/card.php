@@ -1544,7 +1544,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<input type="checkbox" name="is_exception" id="is_exception" style="margin-right: 10px"/>';
         print '<label for="is_exception">Il s\'agit d\'une demande d\'absence exceptionnelle (Ne décompte pas le solde)</label>';
         
-        print '<br/><select name="centreRapide" style="display:none;">'
+        print '<br/><select name="choixRapide" style="display:none;">'
                 . '<option value="">Raison</option>'
                 . '<option value="">Maladie</option>'
                 . '<option value="">Congé parental</option>'

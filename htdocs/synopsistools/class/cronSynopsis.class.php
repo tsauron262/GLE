@@ -306,7 +306,7 @@ class CronSynopsis {
                 $userF->setstatus(0);
                 $str2 = "Bonjour le compte de " . $result->login . " viens d'être fermé. Cordialement.";
                 $str .= $str2."<br/>";
-                mailSyn2("Fermeture compte " . $result->login, $mails.($result->email != "" ? ",".$result->email :""), null, $str2);
+                mailSyn2("Fermeture compte " . $result->login, $mails2.($result->email != "" ? ",".$result->email :""), null, $str2);
             }
             
             foreach(array(14, 7) as $nbDay){
@@ -314,7 +314,7 @@ class CronSynopsis {
                 while ($result = $this->db->fetch_object($sql)) {
                     $str2 = "Bonjour le compte de " . $result->login . " sera fermé dans ".$nbDay." jours. Cordialement.";
                     $str .= $str2."<br/>";
-                    mailSyn2("Fermeture compte " . $result->login. " dans ".$nbDay." jours", $mails2.($result->email != "")? ",".$result->email :"", null, $str2);
+                    mailSyn2("Fermeture compte " . $result->login. " dans ".$nbDay." jours", $mails.($result->email != "")? ",".$result->email :"", null, $str2);
                 }
             }
         echo $str." Comptes fermés";

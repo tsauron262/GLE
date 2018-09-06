@@ -8,7 +8,7 @@ class BimpPDF_Table
     public $rows = array();
     public $topMargin = 10; // mm
     public $botMargin = 0; // mm
-    public $cellpadding = 4; //px
+    public $cellpadding = 3; //px
     public $cellspacing = 0; // px
     public $fontSize = 8; // px
     public $width = 190; //mm

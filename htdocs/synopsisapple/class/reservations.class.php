@@ -12,7 +12,7 @@ class Reservations
 {
 
     // Active tous les echos et désactive les logs: 
-    var $display_debug = true;
+    var $display_debug = false;
     // mettre à false pour envoyer les mails aux bons destinataires:
     var $debugMails = false;
     public $createProductAndChrono = false;

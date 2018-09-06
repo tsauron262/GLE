@@ -46,9 +46,9 @@ class BS_SAV extends BimpObject
         4 => 'Ne dispose pas de sauvegarde et n\'en désire pas'
     );
     public static $contact_prefs = array(
+        3 => 'SMS + E-mail',
         1 => 'E-mail',
-        2 => 'Téléphone',
-        3 => 'SMS + E-mail'
+        2 => 'Téléphone'
     );
     public static $etats_materiel = array(
         1 => array('label' => 'Neuf', 'classes' => array('success')),

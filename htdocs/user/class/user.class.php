@@ -796,6 +796,9 @@ class User extends CommonObject
 		global $conf,$langs,$user;
 
 		$error=0;
+                
+                
+                if (! is_object($this->oldcopy)) $this->oldcopy = clone $this;
 
 		// Check parameters
 		if ($this->statut == $statut) return 0;

@@ -283,11 +283,11 @@ class Bimp_Paiement extends BimpObject
                 if (!BimpObject::objectLoaded($caisse)) {
                     $errors[] = 'La caisse d\'ID ' . $id_caisse . ' n\'existe pas';
                 } else {
-                    $caisse->isValid($errors);
+                    if($caisse->isValid($errors))
+                        $account = $caisse->getChildObject('account');
                 }
             }
 
-            $account = $caisse->getChildObject('account');
         } else {
             BimpTools::loadDolClass('compta/bank', 'account');
             $account = new Account($db);

@@ -5,6 +5,28 @@ require("../main.inc.php");
 llxHeader();
 
 
+
+$sql = $db->query("SELECT * FROM `llx_propal_extrafields` WHERE `type` IS NULL ORDER BY `fk_object` ASC");
+
+while($ligne = $db->fetch_object($sql)){
+    $propal = new Propal($db);
+    $propal->fetch($ligne->fk_object);
+    $userT = new User($db);
+    $userT->fetch($propal->user_author_id);
+    mailSyn("Secteur Devis", "tommy@bimp.fr", "admin@bimp.fr", "Bonjour, suite  aune erreur de ma part, certain devis on perdu leur Secteur, en voici un que vous avez créer ".$propal->getNomUrl(1)." merci de resaisir le secteur en question. <br/><br/> Désolé de la géne occasioné");
+}
+
+
+
+
+
+
+
+
+
+
+
+die;
 global $user;
 echo "{".$conf->global->MAIN_SECURITY_HASH_ALGO."}".$user->pass_indatabase_crypted."<br/><br/>";
 

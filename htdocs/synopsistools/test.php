@@ -13,10 +13,14 @@ while($ligne = $db->fetch_object($sql)){
     $propal->fetch($ligne->fk_object);
     $userT = new User($db);
     $userT->fetch($propal->user_author_id);
-    mailSyn("Secteur Devis", "tommy@bimp.fr", "admin@bimp.fr", "Bonjour, suite  aune erreur de ma part, certain devis on perdu leur Secteur, en voici un que vous avez créer ".$propal->getNomUrl(1)." merci de resaisir le secteur en question. <br/><br/> Désolé de la géne occasioné");
+    $msg = "Bonjour, suite  aune erreur de ma part, certain devis on perdu leur Secteur, en voici un que vous avez créer ".$propal->getNomUrl(1)." merci de resaisir le secteur en question. <br/><br/> Désolé de la géne occasioné";
+    mailSyn2("Secteur Devis", "tommy@bimp.fr", "admin@bimp.fr", $msg);
+    echo "<br/>".$msg."<br/>";
 }
 
 
+
+llxFooter();
 
 
 

@@ -10,7 +10,7 @@ class BimpValidateOrder {
     private $tabValideMontant = array(2 => array(0, 1000000000000), 68 => array(50000, 100000000000));
     private $tabValideMontantPart = array(7 => array(0, 100000), 2 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
     private $tabValideMontantEduc = array(51 => array(0, 100000), 2 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
-    private $tabSecteurEduc = array("E", "HEID", "ENS", "EBTS");
+    private $tabSecteurEduc = array("E", "ENS", "EBTS");
 
     function __construct($db) {
         $this->db = $db;

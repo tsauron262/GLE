@@ -9,6 +9,8 @@ class BimpValidateOrder {
     private $tabValideComm = array(62 => 100);
     private $tabValideMontant = array(2 => array(0, 1000000000000), 68 => array(50000, 100000000000));
     private $tabValideMontantPart = array(7 => array(0, 100000), 2 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
+    private $tabValideMontantEduc = array(51 => array(0, 100000), 2 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
+    private $tabSecteurEduct = array("E", "HEID", "ENS", "EBTS");
 
     function __construct($db) {
         $this->db = $db;
@@ -130,6 +132,11 @@ class BimpValidateOrder {
                 if ($userId == $user->id)
                     $max_price = $tabM[1];
         }
+        if (in_array($order->array_options['options_type'], $this->tabSecteurEduc)) {
+            foreach ($this->tabValideMontantEduc as $userId => $tabM)
+                if ($userId == $user->id)
+                    $max_price = $tabM[1];
+        }
 
         if ($user->id < 0) {
             $this->errors[] = "Identifiant utilisateur inconnu.";
@@ -180,6 +187,14 @@ class BimpValidateOrder {
         if ($max_price <= $price) {
             if ($order->array_options['options_type'] == "P" && $price < 100000) {//Aurelie
                 foreach ($this->tabValideMontantPart as $idUser => $tabMont) {
+                    if($price > $tabMont[0] && $price <= $tabMont[1]){
+                        $tabUserOk[] = $idUser;
+                        if($idUser == $user->id)
+                            return array();
+                    }
+                }
+            } elseif (in_array($order->array_options['options_type'], $this->tabSecteurEduc) && $price < 100000) {//Joana
+                foreach ($this->tabValideMontantEduc as $idUser => $tabMont) {
                     if($price > $tabMont[0] && $price <= $tabMont[1]){
                         $tabUserOk[] = $idUser;
                         if($idUser == $user->id)

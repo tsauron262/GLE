@@ -14,6 +14,7 @@ while($ligne = $db->fetch_object($sql)){
     $userT = new User($db);
     $userT->fetch($propal->user_author_id);
     $msg = "Bonjour, suite  aune erreur de ma part, certain devis on perdu leur Secteur, en voici un que vous avez créer ".$propal->getNomUrl(1)." merci de resaisir le secteur en question. <br/><br/> Désolé de la géne occasioné";
+    $msg .= "mail : ".$userT->email;
     mailSyn2("Secteur Devis", "tommy@bimp.fr", "admin@bimp.fr", $msg);
     echo "<br/>".$msg."<br/>";
 }

@@ -71,8 +71,8 @@ class importProdFourn extends import8sens {
     function addPrice($idP, $idF, $ln) {
         echo "addPrice<br/>";
         $this->db->query("INSERT INTO `llx_product_fournisseur_price`"
-                . "(`fk_product`, `fk_soc`, `ref_fourn`,`price`, `quantity`, `tva_tx`) VALUES "
-                . "(".$idP.",".$idF.",'".$ln['ProCode']."','".$ln['ProPrixBase']."',1,'".$ln['Pro1TaxTaux']."')");
+                . "(`fk_product`, `fk_soc`, `ref_fourn`,`price`, `quantity`, `tva_tx`, unitprice) VALUES "
+                . "(".$idP.",".$idF.",'".$ln['ProCode']."','".$ln['ProPrixBase']."',1,'".$ln['Pro1TaxTaux']."', '".$ln['ProPrixBase']."')");
         return $id;
     }
 
@@ -80,7 +80,7 @@ class importProdFourn extends import8sens {
         echo "updatePrice<br/>";
         global $user;
         $this->db->query("UPDATE `llx_product_fournisseur_price` SET "
-                . "ref_fourn = '".$ln['ProCode']."', price = '".$ln['ProPrixBase']."', quantity = 1, tva_tx = '".$ln['Pro1TaxTaux']."' "
+                . "ref_fourn = '".$ln['ProCode']."', price = '".$ln['ProPrixBase']."', quantity = 1, tva_tx = '".$ln['Pro1TaxTaux']."', unitprice = '".$ln['ProPrixBase']."' "
                 . " WHERE rowid = ".$idGle);
         
     }

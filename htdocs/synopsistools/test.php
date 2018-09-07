@@ -7,7 +7,7 @@ llxHeader();
 
 
 $sql = $db->query("SELECT * FROM `llx_propal_extrafields` WHERE `type` IS NULL ORDER BY `fk_object` ASC");
-
+require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
 while($ligne = $db->fetch_object($sql)){
     $propal = new Propal($db);
     $propal->fetch($ligne->fk_object);

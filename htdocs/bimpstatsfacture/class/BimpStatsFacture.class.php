@@ -431,6 +431,15 @@ class BimpStatsFacture {
                 }
             }
         }
+        
+        if($name == 'type' && count($type) < 2){
+            $type = array();
+            $sql = $db->query("SELECT * FROM `llx_bimp_c_secteur` WHERE 1");
+            while($ln = $db->fetch_object($sql)){
+                $type[$ln->clef] = $ln->valeur;
+            }
+
+        }
         return $out;
     }
 

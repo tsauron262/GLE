@@ -73,13 +73,7 @@ print '<input id="dateEnd" type="text" class="isDate round"></div></td></tr>';
 if ($is_customer) {
 // Types
     $type = $staticSF->getExtrafieldArray('facture', 'type');
-    if(count($type) < 2){
-        $type = array();
-        $sql = $db->query("SELECT * FROM `llx_bimp_c_secteur` WHERE 1");
-        while($ln = $db->fetch_object($sql)){
-            $type[$ln->clef] = $ln->valeur;
-        }
-    }
+
     
     
     print '<tr><td>Secteurs</td><td>';

@@ -2034,6 +2034,7 @@ class BS_SAV extends BimpObject
                                 "\n" . "Frais de gestion devis refusé.", $frais / 1.20, 1, 20, 0, 0, 3470, $client->dol_object->remise_percent, 'HT', null, null, 1);
 
                         $propal->fetch($propal->id);
+                        $propal->dol_object->valid($user);
                         $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
                         $propal->dol_object->cloture($user, 2, "Auto via SAV");
                         $this->removeReservations();

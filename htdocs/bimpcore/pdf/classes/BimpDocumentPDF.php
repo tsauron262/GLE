@@ -384,6 +384,8 @@ class BimpDocumentPDF extends BimpModelPDF {
                     $product = null;
                 }
             }
+            if(is_object($product) && $product->ref == "REMISECRT")
+                continue;
 
             $desc = $this->getLineDesc($line, $product);
 

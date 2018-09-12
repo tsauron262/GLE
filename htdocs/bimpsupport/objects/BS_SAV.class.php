@@ -585,11 +585,13 @@ class BS_SAV extends BimpObject
 
             // Réparation terminée: 
             if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {
+                if (!is_null($propal) && $propal_status > 0){
                 $buttons[] = array(
                     'label'   => 'Réparation terminée',
                     'icon'    => 'check',
                     'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
                 );
+                }
             }
 
             // Fermer SAV (devis refusé) : 

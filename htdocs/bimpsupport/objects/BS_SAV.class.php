@@ -2037,6 +2037,7 @@ class BS_SAV extends BimpObject
 
                         $propal->fetch($propal->id);
                         $propal->dol_object->valid($user);
+                        dol_syslog("Propal id : .".$propal->dol_object->id." devrais êttre validé",3);
                         $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
                         $propal->dol_object->cloture($user, 2, "Auto via SAV");
                         $this->removeReservations();

@@ -5,10 +5,18 @@ class userController extends BimpController
 
     public function displayHead()
     {
-        global $langs;
-//        $user = $this->config->getObject('', 'commande');
-//        $head = commande_prepare_head($commande);
-//        dol_fiche_head($head, 'bimplogisitquecommande', $langs->trans("CustomerOrder"), -1, 'order');
+        global $langs, $user;
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/usergroups.lib.php';
+        $userS = $this->config->getObject('', 'user')->dol_object;
+        $head = user_prepare_head($userS);
+        dol_fiche_head($head, 'bimplogisitquecommande', $langs->trans("CustomerOrder"), -1, 'order');
+        
+	$linkback = '';
+	if ($user->rights->user->user->lire || $user->admin) {
+		$linkback = '<a href="'.DOL_URL_ROOT.'/user/index.php">'.$langs->trans("BackToList").'</a>';
+	}
+	
+        dol_banner_tab($userS,'id',$linkback,$user->rights->user->user->lire || $user->admin, 'rowid', 'ref', '', '&fc=user');
     }
 
     public function renderHtml()

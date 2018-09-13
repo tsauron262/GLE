@@ -1667,6 +1667,7 @@ if ($action == 'create')
 	$head = propal_prepare_head($object);
 	dol_fiche_head($head, 'comm', $langs->trans('Proposal'), -1, 'propal');
 
+        echo "<a href='../../bimpcommercial/index.php?fc=propal&id=".$object->id."' class='butAction' style='margin-left: 40%;'> New VERSION</a>";
 	$formconfirm = '';
 
 	// Clone confirmation

@@ -29,14 +29,11 @@ function getEvents() {
                 });
                 $(".chosen-select").chosen({
                     placeholder_text_single: 'Evènement',
-                    no_results_text: 'Pas de résultat'});
+                    no_results_text: 'Pas de résultat'
+                });
                 $('#barcode').on('keyup', function (e) {
                     if (e.keyCode === 13) {
                         var barcode = $('#barcode').val();
-                        if (barcode.indexOf("?") > 0) {
-                            var url = new URL(barcode);
-                            barcode = url.searchParams.get('num');
-                        }
                         checkTicket(barcode, $('select[name=event] > option:selected').val());
                         $('#barcode').val("");
                     }
@@ -62,7 +59,11 @@ function getEvents() {
 }
 
 function checkTicket(barcode, id_event) {
-
+                        if (barcode.indexOf("?") > 0) {
+                            var url = new URL(barcode);
+                            barcode = url.searchParams.get('num');
+                        }
+                        
     $('div#alertSubmit').empty();
 
     if (barcode === '') {
@@ -87,7 +88,6 @@ function checkTicket(barcode, id_event) {
         },
         success: function (json) {
             $('#alertSubmit').empty();
-            decoder.stop();
             var out = JSON.parse(json);
             if (out.errors.length !== 0) {
                 if (sound === 1)

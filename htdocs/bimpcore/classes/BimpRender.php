@@ -132,6 +132,30 @@ class BimpRender
         return self::renderButton($params, $tag);
     }
 
+    public static function renderRowButton($label, $icon, $onclick, $class = '', $attrs = array(), $tag = 'span')
+    {
+        $html = '';
+        $html .= '<' . $tag . ' class="rowButton' . ((string) $class ? ' ' . $class : '');
+
+        $html .= ' bs-popover"';
+        $html .= ' data-toggle="popover"';
+        $html .= ' data-trigger="hover"';
+        $html .= ' data-placement="top"';
+        $html .= ' data-content="' . $label;
+
+        $html .= '" onclick="' . $onclick . '"';
+
+        if (!empty($attrs)) {
+            $html .= BimpRender::displayTagAttrs($attrs);
+        }
+
+        $html .= '>';
+        $html .= '<i class="' . BimpRender::renderIconClass($icon) . '"></i>';
+        $html .= '</' . $tag . '>';
+
+        return $html;
+    }
+
     public static function renderDropDownButton($label, $items, $params)
     {
         if (!isset($params['type'])) {
@@ -152,7 +176,11 @@ class BimpRender
             $html .= '<span class="caret"></span>';
         }
         $html .= '</button>';
-        $html .= '<ul class="dropdown-menu">';
+        $html .= '<ul class="dropdown-menu';
+        if (isset($params['menu_right']) && (int) $params['menu_right']) {
+            $html .= ' dropdown-menu-right';
+        }
+        $html .= '">';
         foreach ($items as $item) {
             if ($item === 'separator') {
                 $html .= '<li role="separator" class="divider"></li>';
@@ -179,7 +207,7 @@ class BimpRender
         }
 
         if (!isset($params['foldable'])) {
-            $params['foldable'] = false;
+            $params['foldable'] = true;
         }
 
         if (!isset($params['panel_class'])) {

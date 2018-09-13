@@ -83,7 +83,8 @@ class BC_Input extends BimpComponent
             'country_field' => array('default' => '')
         ),
         'select_remises'              => array(
-            'id_client' => array('data_type' => 'int', 'required' => 1)
+            'id_client'     => array('data_type' => 'int', 'required' => 1),
+            'extra_filters' => array('default' => '')
         )
     );
 
@@ -284,6 +285,7 @@ class BC_Input extends BimpComponent
 
             case 'select_remises':
                 $options['id_client'] = isset($this->params['id_client']) ? $this->params['id_client'] : 0;
+                $options['extra_filters'] = isset($this->params['extra_filters']) ? $this->params['extra_filters'] : '';
                 break;
         }
 

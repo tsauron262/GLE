@@ -249,7 +249,7 @@ class BimpValidateOrder {
         foreach ($this->extraMail as $extra) {
             $msg .= "\n\n" . $extra;
         }
-        echo $doli_user_responsible->email . "   " . $msg;
+//        echo $doli_user_responsible->email . "   " . $msg;
         return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
     }
 

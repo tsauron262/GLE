@@ -11,8 +11,11 @@ class BimpCore
             '/bimpcore/views/js/bootstrap-datetimepicker.js',
             '/bimpcore/views/js/functions.js',
             '/bimpcore/views/js/ajax.js',
-            '/bimpcore/views/js/list.js',
+//            '/bimpcore/views/js/component.js',
+            '/bimpcore/views/js/modal.js',
+            '/bimpcore/views/js/object.js',
             '/bimpcore/views/js/form.js',
+            '/bimpcore/views/js/list.js',
             '/bimpcore/views/js/view.js',
             '/bimpcore/views/js/viewsList.js'
         ),
@@ -32,6 +35,10 @@ class BimpCore
             foreach (self::$files['js'] as $js_file) {
                 echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
             }
+
+            echo '<script type="text/javascript">';
+            echo ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
+            echo '</script>';
             self::$filesInit = true;
         }
     }

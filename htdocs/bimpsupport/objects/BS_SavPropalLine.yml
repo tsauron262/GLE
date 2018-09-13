@@ -1,8 +1,11 @@
 extends: 
-    module: bimpcore
+    module: bimpcommercial
     object_name: Bimp_PropalLine
 
 table: bs_sav_propal_line
+
+parent_module: bimpsupport
+parent_object: BS_SavPropal
 
 labels: 
     name: ligne du devis
@@ -36,9 +39,24 @@ fields:
         display_if:
             field_name: type
             show_values: 1
+            
+    def_pu_ht: 
+        label: PU HT par défaut
+        type: money
+        default_value: 0
+        
+    def_tva_tx:
+        label: Taux de TVA par défaut
+        type: percent
+        default_value: 0
+        
+    def_id_fourn_price:
+        label: Prix fournisseur par défaut
+        type: int
+        default_value: 0
         
 forms: 
-    default: 
+    sav: 
         rows: 
             - field: type
               hidden: 
@@ -64,9 +82,23 @@ forms:
               show:
                   callback: isProductEditable
               
-            - field: id_equipment
+            - custom: 1
+              label: Equipement
+              input_name: id_equipment
+              data_type: int
+              input: 
+                  type: search_list
+                  search_list:
+                      table: be_equipment e
+                      field_return_value: e.id
+                      field_return_label: e.serial
+                      fields_search: e.serial,e.id,e.product_label
+                  help: Numéro de série ou ID d'un équipement
               show:
                   callback: isProductEditable
+              display_if: 
+                  field_name: type
+                  hide_values: 2
             
             - custom: 1
               label: Prix unitaire HT
@@ -113,19 +145,19 @@ forms:
                   show_values: 1
               depends_on: id_product,id_equipment
                   
-            - custom: 1
-              label: Remise
-              value: 
-                  prop: remise
-              input_name: remise
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - remise
-              display_if: 
-                  field_name: type
-                  show_values: 1
+#            - custom: 1
+#              label: Remise
+#              value: 
+#                  prop: remise
+#              input_name: remise
+#              content: 
+#                  callback: 
+#                      method: renderLineInput
+#                      params: 
+#                          - remise
+#              display_if: 
+#                  field_name: type
+#                  show_values: 1
                   
             - field: out_of_warranty
             
@@ -144,13 +176,20 @@ forms:
                   field_name: type
                   show_values: 1
               depends_on: id_product,id_equipment
-              create_form: default
+              create_form: 
+                  callback: getFournisseurPriceCreateForm
               create_form_values: 
                   fields: 
                       fk_product: 
                           callback: getIdProductFromPost
               value: 
                   callback: getIdFournPriceFromPost
+                  
+            - custom: 1
+              label: Marges
+              input_name: margins_table
+              content: 
+                  callback: renderFormMargins
                   
             - custom: 1
               label: Description
@@ -162,10 +201,23 @@ forms:
                       method: renderLineInput
                       params: 
                           - desc
+                          
+            - object: remises
+              multiple: 1
+              form_values: 
+                  fields: 
+                      object_type: 
+                          callback: getParentCommType
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              show: 
+                  callback: isNotLoaded
                       
 lists: 
     default: 
-        objects_change_reload: BS_SAV,BS_ApplePart
+        objects_change_reload: BS_SAV,BS_ApplePart,ObjectLineRemise
+        add_form_name: sav
         cols: 
             warranty: 
                 field: out_of_warranty

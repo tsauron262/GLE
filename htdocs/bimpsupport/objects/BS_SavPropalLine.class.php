@@ -1,10 +1,11 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/Bimp_PropalLine.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/Bimp_PropalLine.class.php';
 
 class BS_SavPropalLine extends Bimp_PropalLine
 {
 
+    public static $parent_comm_type = 'sav_propal';
     public $equipment_required = true;
 
     // Getters: 
@@ -56,45 +57,79 @@ class BS_SavPropalLine extends Bimp_PropalLine
         return array();
     }
 
-    public function onEquipmentAttributed()
+//    public function onEquipmentAttributed()
+//    {
+//        $errors = array();
+//
+//        $propal = $this->getParentInstance();
+//
+//        if (!BimpObject::objectLoaded($propal)) {
+//            $errors[] = 'ID du devis Absent';
+//        } else {
+//            if ((int) $propal->getData('fk_statut') > 0) {
+//                $id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $propal->id);
+//
+//                if (!(int) $id_sav) {
+//                    $errors[] = 'ID du SAV absent - ' . $this->db->db->lasterror();
+//                } else {
+//                    $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+//                    if ($reservation->find(array(
+//                                'type'               => BR_Reservation::BR_RESERVATION_SAV,
+//                                'id_sav_propal_line' => (int) $this->id
+//                            ))) {
+//                        $reservation->updateField('id_equipment', (int) $this->getData('id_equipment'));
+//                    } else {
+//                        $errors[] = 'Réservation non trouvée';
+//                    }
+//                }
+//            }
+//        }
+//        if (count($errors)) {
+//            return array(BimpTools::getMsgFromArray($errors, 'Des erreurs sont survenues lors de la mise à jour de la réservation correspondante'));
+//        }
+//
+//        return array();
+//    }
+    // overrides: 
+
+    public function attributeEquipment($id_equipment, $pu_ht = null, $tva_tx = null, $id_fourn_price = null, $id_equipment_line = 0)
     {
-        $errors = array();
+        $current_id_equipment = 0;
+        $equipment_line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLineEquipment');
+
+        if ((int) $id_equipment_line) {
+            $current_id_equipment = (int) $equipment_line->getSavedData('id_equipment', $id_equipment_line);
+        }
+
+        $errors = parent::attributeEquipment($id_equipment, $pu_ht, $tva_tx, $id_fourn_price, $id_equipment_line);
+        if (count($errors)) {
+            return $errors;
+        }
 
         $propal = $this->getParentInstance();
 
-        if (!BimpObject::objectLoaded($propal)) {
-            $errors[] = 'ID du devis Absent';
-        } else {
-            if ((int) $propal->getData('fk_statut') > 0) {
-                $id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $propal->id);
-
-                if (!(int) $id_sav) {
-                    $errors[] = 'ID du SAV absent - ' . $this->db->db->lasterror();
-                } else {
-                    $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-                    if ($reservation->find(array(
-                                'type'               => BR_Reservation::BR_RESERVATION_SAV,
-                                'id_sav_propal_line' => (int) $this->id
-                            ))) {
-                        $reservation->updateField('id_equipment', (int) $this->getData('id_equipment'));
-                    } else {
-                        $errors[] = 'Réservation non trouvée';
-                    }
-                }
+        if (BimpObject::objectLoaded($propal)) {
+            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+            $return_first = (!(int) $current_id_equipment ? true : false);
+            $id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $propal->id);
+            if ($reservation->find(array(
+                        'type'               => BR_Reservation::BR_RESERVATION_SAV,
+                        'id_sav'             => $id_sav,
+                        'id_sav_propal_line' => (int) $this->id,
+                        'id_equipment'       => $current_id_equipment
+                            ), $return_first)) {
+                $reservation->updateField('id_equipment', $id_equipment);
             }
         }
-        if (count($errors)) {
-            return array(BimpTools::getMsgFromArray($errors, 'Des erreurs sont survenues lors de la mise à jour de la réservation correspondante'));
-        }
 
-        return array();
+        return $errors;
     }
 
-    // overrides: 
-
-    public function isEquipmentAvailable(Equipment $equipment = null)
+    public function isEquipmentAvailable(Equipment $equipment)
     {
-        $errors = array();
+        if (!BimpObject::objectLoaded($equipment)) {
+            return array('Equipement invalide');
+        }
 
         $propal = $this->getParentInstance();
 
@@ -102,14 +137,9 @@ class BS_SavPropalLine extends Bimp_PropalLine
             return array('ID du devis Absent');
         }
 
-        if (is_null($equipment) && (int) $this->getData('id_equipment')) {
-            $equipment = $this->getChildObject('equipment');
-        }
-
         $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
 
         $id_reservation = 0;
-
         if ($reservation->find(array(
                     'type'               => BR_Reservation::BR_RESERVATION_SAV,
                     'id_sav_propal_line' => (int) $this->id,
@@ -117,42 +147,8 @@ class BS_SavPropalLine extends Bimp_PropalLine
             $id_reservation = $reservation->id;
         }
 
-
-        if (BimpObject::objectLoaded($equipment)) {
-            $current_reservations = $equipment->getReservationsList();
-            if (count($current_reservations)) {
-                if (!$id_reservation || ($id_reservation && !in_array($id_reservation, $current_reservations))) {
-                    $errors[] = 'L\'équipement "' . $equipment->getInstanceName() . '" est déjà réservé';
-                }
-            }
-            if (!count($errors)) {
-                $line = BimpObject::getInstance($this->module, $this->object_name);
-                if ($line->find(array(
-                            'id_equipment' => (int) $equipment->id
-                                ), true)) {
-                    if ((int) $line->id !== (int) $this->id) {
-                        $errors[] = 'L\'équipement "' . $equipment->getInstanceName() . '" a déjà été attribué à un produit';
-                    }
-                }
-            }
-            $sav = $this->getParentInstance();
-            if (BimpObject::objectLoaded($sav)) {
-                $id_entrepot = (int) $propal->getData('entrepot');
-                if ($id_entrepot) {
-                    $place = $equipment->getCurrentPlace();
-                    if (is_null($place) || (int) $place->getData('type') !== BE_Place::BE_PLACE_ENTREPOT || (int) $place->getData('id_entrepot') !== $id_entrepot) {
-                        $errors[] = 'L\'équipement "' . $equipment->getInstanceName() . '" n\'est pas disponible dans l\'entrepôt sélectionné';
-                    }
-                }
-            }
-
-            if (!count($errors) && BimpObject::objectLoaded($reservation)) {
-                $reservation->set('id_equipment', (int) $equipment->id);
-                $errors = array_merge($errors, $reservation->update());
-            }
-        }
-
-        return $errors;
+        $id_entrepot = (int) $propal->getData('entrepot');
+        return $equipment->checkAvailability($id_entrepot, $id_reservation);
     }
 
     public function isEquipmentEditable()

@@ -20,7 +20,6 @@ fields:
         values: 
             array: names
         required: 1
-        sortable: 1
         
     status:
         label: Statut
@@ -28,7 +27,6 @@ fields:
         values:
             array: status_list
         required: 1
-        sortable: 1
         
     rate:
         label: taux
@@ -54,7 +52,7 @@ list:
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
-    sort_col: position
+    sort_field: position
     sort_way: asc
     n: 10
     cols:

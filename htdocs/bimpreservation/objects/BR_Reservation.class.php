@@ -86,7 +86,7 @@ class BR_Reservation extends BimpObject
 
     public function isOrderInvoiced()
     {
-        $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
         if (BimpObject::objectLoaded($commande)) {
             if ((int) $commande->getData('id_facture')) {
                 return 1;
@@ -102,11 +102,11 @@ class BR_Reservation extends BimpObject
             0 => 'Créer un nouvel avoir'
         );
 
-        $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
 
         if (BimpObject::objectLoaded($commande)) {
             $asso = new BimpAssociation($commande, 'avoirs');
-            $avoir = BimpObject::getInstance('bimpcore', 'Bimp_Facture');
+            $avoir = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             foreach ($asso->getAssociatesList() as $id_avoir) {
                 if ($avoir->fetch((int) $id_avoir)) {
                     if ((int) $avoir->dol_object->statut === (int) Facture::STATUS_DRAFT) {
@@ -1071,7 +1071,7 @@ class BR_Reservation extends BimpObject
     {
         $qty = (int) $qty;
 
-        $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
         if (BimpObject::objectLoaded($commande)) {
             $errors = $commande->removeOrderLine((int) $this->getData('id_commande_client_line'), (int) $qty, $id_avoir);
             if (!count($errors)) {

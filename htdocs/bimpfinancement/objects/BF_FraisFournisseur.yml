@@ -37,7 +37,6 @@ fields:
         label: Date
         type: date
         required: 1
-        sortable: 1
 
     id_soc_supplier:
         label: Société fournisseur
@@ -49,13 +48,6 @@ fields:
             type: search_societe
             societe_type: supplier
             help: Entrez le nom ou la référence pour rechercher un fournisseur enregistré
-        display: 
-            nom_url: 
-                type: nom_url
-            card: 
-                type: card
-                card: societe_card
-        sortable: 1
     
     supplier_name:
         label: Nom fournisseur
@@ -64,28 +56,22 @@ fields:
         input:
             type: text
             help: Utilisez ce champ si le fournisseur n'est pas enregistré
-            display_if:
-                input_name: id_soc_supplier
-                show_values: 
-                    array: 0,
-        sortable: 1
+        display_if:
+            field_name: id_soc_supplier
+            show_values: 0,
     
     description:
         label: Libellé
-        required: 1
-        sortable: 1
         
     amount:
         label: Montant HT
         type: money
         required: 1
-        sortable: 1
         
     paid:
         label: Payé
         type: bool
         default_value: 0
-        sortable: 1
         
     id_file:
         label: Fichier
@@ -107,12 +93,13 @@ forms:
             - field: paid
             - field: id_file
             - label: Fichier
+              custom: 1
+              input_name: file
               input:
-                  name: file
                   type: file_upload
-                  display_if:
-                      input_name: id_file
-                      show_values: 0,
+              display_if:
+                  input_name: id_file
+                  show_values: 0,
 
 list:
     checkboxes: 1
@@ -123,7 +110,7 @@ list:
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
-    sort_col: date_create
+    sort_field: date_create
     sort_way: desc
     n: 25
     cols:
@@ -144,7 +131,7 @@ list:
             field: paid
             edit: 1
             min_width: 125px
-    add_form: default
+    add_form_name: default
     edit_btn: 1
     update_btn: 1
     delete_btn: 1

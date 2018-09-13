@@ -808,7 +808,7 @@ class BR_CommandeShipment extends BimpObject
         $private_note = (isset($data['note_private']) ? $data['note_private'] : '');
 
         if (!count($errors)) {
-            $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+            $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = $label . ': ID de la commande client absent ou invalide';
             } else {
@@ -903,7 +903,7 @@ class BR_CommandeShipment extends BimpObject
         $private_note = (isset($data['note_private']) ? $data['note_private'] : '');
 
         if (!count($errors)) {
-            $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', $id_commande);
+            $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = 'La commande client d\'ID ' . $id_commande . ' n\'existe pas';
             } else {

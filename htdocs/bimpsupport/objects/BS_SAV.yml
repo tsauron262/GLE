@@ -87,9 +87,7 @@ objects:
         relation: hasOne
         delete: 0
         instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Propal
+            bimp_object: BS_SavPropal
             id_object: 
                 field_value: id_propal
                 
@@ -98,7 +96,7 @@ objects:
         delete: 0
         instance: 
             bimp_object: 
-                module: bimpcore
+                module: bimpcommercial
                 name: Bimp_Facture
             id_object: 
                 field_value: id_facture
@@ -111,7 +109,7 @@ objects:
         delete: 0
         instance: 
             bimp_object: 
-                module: bimpcore
+                module: bimpcommercial
                 name: Bimp_Facture
             id_object: 
                 field_value: id_facture_acompte
@@ -372,6 +370,12 @@ fields:
     acompte: 
         label: Acompte
         type: money
+        default_value: 0
+    version:
+        label: Version
+        type: float
+        input: 
+            type: hidden
         default_value: 0
     
 forms: 

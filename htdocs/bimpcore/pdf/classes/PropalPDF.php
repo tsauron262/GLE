@@ -128,7 +128,7 @@ class PropalPDF extends BimpDocumentPDF
             $html = '<div style="font-size: 7px; line-height: 8px;">';
             $html .= $this->propal->note_public;
             $html .= '</div>';
-            
+
             if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
                 $this->pdf->addVMargin(2);
             }
@@ -212,6 +212,7 @@ class PropalPDF extends BimpDocumentPDF
                     $bankid = $this->object->fk_bank;
                 }
 
+                require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
                 $account = new Account($this->db);
                 $account->fetch($bankid);
                 $html .= $this->getBankHtml($account);

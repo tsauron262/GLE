@@ -58,25 +58,45 @@ class BimpConfig
         } else {
             $params = spyc_load_file($file);
             if (isset($params['extends'])) {
+                $sub_dir = '';
+                if (is_a($this->instance, 'BimpObject')) {
+                    $sub_dir = 'objects';
+                } elseif (is_a($this->instance, 'BimpController')) {
+                    $sub_dir = 'controllers';
+                }
                 $parent_file = DOL_DOCUMENT_ROOT . '/';
+                $extends_module = '';
+                $extends_object = '';
+
                 if (isset($params['extends']['module'])) {
-                    $parent_file .= $params['extends']['module'] . '/objects/';
+                    $extends_module = $params['extends']['module'];
                     if (isset($params['extends']['object_name']) && $params['extends']['object_name']) {
-                        $parent_file .= $params['extends']['object_name'] . '.yml';
+                        $extends_object = $params['extends']['object_name'];
                     } else {
                         $errors[] = 'Nom du fichier d\'extension absent dans le fichier "' . $file . '"';
                     }
                 } elseif (is_string($params['extends']) && isset($this->instance->module)) {
-                    $parent_file .= $this->instance->module . '/objects/' . $params['extends'] . '.yml';
+                    $extends_module = $this->instance->module;
+                    $extends_object = $params['extends'];
                 } else {
                     $errors[] = 'Nom du module absent du fichier de configuration "' . $file . '"';
                 }
 
-                if (is_file($parent_file)) {
-                    $parent_params = $this->getParamsFromFile($parent_file, $errors);
-                    $params = $this->mergeParams($parent_params, $params);
-                } else {
-                    $errors[] = 'Le fichier étendu "' . $parent_file . '" n\'existe pas';
+                if ($extends_module && $extends_object) {
+                    $parent_file .= $extends_module . '/' . $sub_dir . '/' . $extends_object . '.yml';
+                    if (is_file($parent_file)) {
+                        $parent_params = $this->getParamsFromFile($parent_file, $errors);
+                        $params = $this->mergeParams($parent_params, $params);
+
+                        if (property_exists($this->instance, 'extends')) {
+                            $this->instance->extends[] = array(
+                                'module'      => $extends_module,
+                                'object_name' => $extends_object
+                            );
+                        }
+                    } else {
+                        $errors[] = 'Le fichier étendu "' . $parent_file . '" n\'existe pas';
+                    }
                 }
             }
         }
@@ -90,7 +110,13 @@ class BimpConfig
             if (isset($parent_params[$key]) && is_array($values) && is_array($parent_params[$key])) {
                 $parent_params[$key] = $this->mergeParams($parent_params[$key], $values);
             } else {
-                $parent_params[$key] = $values;
+                if (is_string($values) && $values === 'unset') {
+                    if (isset($parent_params[$key])) {
+                        unset($parent_params[$key]);
+                    }
+                } else {
+                    $parent_params[$key] = $values;
+                }
             }
         }
 

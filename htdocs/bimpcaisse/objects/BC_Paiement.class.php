@@ -44,7 +44,7 @@ class BC_Paiement extends BimpObject
 
         if (BimpObject::objectLoaded($p)) {
             $rows = $this->db->getRows('paiement_facture', '`fk_paiement` = ' . (int) $p->id, null, 'array', array('fk_facture', 'amount'));
-            $facture = BimpObject::getInstance('bimpcore', 'Bimp_Facture');
+            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             if (!is_null($rows)) {
                 $html = '';
                 $fl = true;

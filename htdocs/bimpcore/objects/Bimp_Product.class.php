@@ -182,7 +182,7 @@ class Bimp_Product extends BimpObject
                 $filters = json_decode(BimpTools::getValue('param_list_filters', array()));
                 foreach ($filters as $filter) {
                     if ($filter->name === 'id_commande_client') {
-                        $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $filter->filter);
+                        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $filter->filter);
                         if (BimpObject::objectLoaded($commande)) {
                             $id_entrepot = (int) $commande->dol_object->array_options['options_entrepot'];
                             break;
@@ -220,7 +220,7 @@ class Bimp_Product extends BimpObject
             $filters['fp.rowid'] = (int) $id_price;
         }
 
-        $sql = 'SELECT fp.rowid as id, fp.unitprice as price, fp.quantity as qty, fp.tva_tx as tva, s.nom, s.code_fournisseur as ref';
+        $sql = 'SELECT fp.rowid as id, fp.price, fp.quantity as qty, fp.tva_tx as tva, s.nom, s.code_fournisseur as ref';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe s ON fp.fk_soc = s.rowid';
         $sql .= BimpTools::getSqlWhere($filters);

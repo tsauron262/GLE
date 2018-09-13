@@ -1,6 +1,4 @@
 
-
-
 CREATE TABLE IF NOT EXISTS `llx_bc_vente_return` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_vente` int(10) UNSIGNED NOT NULL DEFAULT '0',

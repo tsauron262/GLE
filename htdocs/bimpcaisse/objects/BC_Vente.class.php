@@ -1786,7 +1786,7 @@ class BC_Vente extends BimpObject
             // Gestion des stocks et emplacements des articles vendus: 
             foreach ($articles as $article) {
                 $equipment = $article->getChildObject('equipment');
-                if (BimpObject::objectLoaded($article)) {
+                if (BimpObject::objectLoaded($equipment)) {
                     $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                     if (!$article->checkPlace($id_entrepot)) {
                         // Correction de l'emplacement initial en cas d'erreur: 
@@ -2251,7 +2251,7 @@ class BC_Vente extends BimpObject
             switch ($avoir_rbt_mode) {
                 case 'remise':
                     $remise_errors = array();
-                    $bimpFacture = BimpObject::getInstance('bimpcore', 'Bimp_Facture', $facture->id);
+                    $bimpFacture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', $facture->id);
                     if (BimpObject::objectLoaded($bimpFacture)) {
                         $remise_errors = $bimpFacture->convertToRemise();
                     } else {

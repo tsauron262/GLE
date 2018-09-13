@@ -1,7 +1,7 @@
 table: br_commande_shipment
 common_fields: 1
 
-parent_module: bimpcore
+parent_module: bimpcommercial
 parent_object: Bimp_Commande
 parent_id_property: id_commande_client
 
@@ -15,7 +15,7 @@ objects:
         delete: 0
         instance: 
             bimp_object:
-                module: bimpcore
+                module: bimpcommercial
                 name: Bimp_Commande
             id_object: 
                 field_value: id_commande_client
@@ -57,7 +57,7 @@ objects:
         delete: 0
         instance: 
             bimp_object: 
-                module: bimpcore
+                module: bimpcommercial
                 name: Bimp_Facture
             id_object: 
                 field_value: id_facture

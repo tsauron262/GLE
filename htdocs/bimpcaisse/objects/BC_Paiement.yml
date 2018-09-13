@@ -44,7 +44,7 @@ objects:
         delete: 0
         instance: 
             bimp_object: 
-                module: bimpcore
+                module: bimpcommercial
                 name: Bimp_Paiement
             id_object: 
                 field_value: id_paiement

@@ -1,0 +1,76 @@
+bootstrap: 1
+
+objects: 
+    bimp_comm: 
+        instance: 
+            bimp_object: BimpComm
+            id_object: 
+                request: id
+                
+sections: 
+    - type: tabs
+      tabs: 
+          default: 
+              label: Fiche
+              sections: 
+                    - type: object_header
+                      object_header: 
+                          object: bimp_comm
+                    - type: nav_tabs
+                      nav_tabs: 
+                          - id: card
+                            title: Fiche
+                            struct: 
+                                type: rows
+                                rows: 
+                                    - cols: 
+                                        - type: view
+                                          view: 
+                                              panel: 1
+                                              object: bimp_comm
+                                              name: default
+                                    - cols: 
+                                        - type: custom
+                                          col_lg: 6
+                                          col_md: 6
+                                          col_sm: 12
+                                          custom:
+                                              callback: 
+                                                  method: renderFilesTable
+                                                  object: bimp_comm
+
+                                        - type: custom
+                                          col_lg: 6
+                                          col_md: 6
+                                          col_sm: 12
+                                          custom: 
+                                              callback:
+                                                  method: renderEventsTable
+                                                  object: bimp_comm
+                                        
+                                    - cols: 
+                                        - type: custom
+                                          col_lg: 6
+                                          col_md: 6
+                                          col_sm: 12
+                                          custom: 
+                                              callback:
+                                                  method: renderLinkedObjectsTable
+                                                  object: bimp_comm
+                                                  
+                          - id: content
+                            title: Contenu
+                            struct: 
+                                type: view
+                                view: 
+                                    panel: 0
+                                    object: bimp_comm
+                                    name: content
+                          - id: contacts
+                            title: Contacts / Adresses
+                            struct: 
+                                type: custom
+                                custom: 
+                                    callback: 
+                                        method: renderContacts
+                                        object: bimp_comm

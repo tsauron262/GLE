@@ -134,6 +134,11 @@ fields:
             type: value_part
             part_type: beginning
         
+    available: 
+        label: Disponible à la vente
+        type: bool
+        default_value: 1
+        
     date_purchase: 
         label: Date d'achat
         type: date
@@ -243,6 +248,7 @@ fields_tables:
                       params: 
                           - card
             - field: serial
+            - field: available
             - field: date_purchase
             - field: prix_achat
             - field: prix_vente_except 
@@ -312,6 +318,7 @@ forms:
             - field: id_product
             - field: product_label
             - field: type
+            - field: available
             - field: date_purchase
             - field: prix_achat
             - field: prix_vente_except
@@ -329,6 +336,7 @@ forms:
             - field: id_product
             - field: product_label
             - field: type
+            - field: available
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end

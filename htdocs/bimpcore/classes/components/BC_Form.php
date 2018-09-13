@@ -461,8 +461,7 @@ class BC_Form extends BC_Panel
 
         $object_id_parent = 0;
 
-        if ($object->getParentModule() === $this->object->module &&
-                $object->getParentObjectName() === $this->object->object_name) {
+        if ($this->object->isChild($object)) {
             $object->parent = $this->object;
             if (BimpObject::objectLoaded($this->object)) {
                 $object_id_parent = $this->object->id;
@@ -494,7 +493,7 @@ class BC_Form extends BC_Panel
         $html .= '</div>';
 
         $form = new BC_Form($object, null, $params['form_name'], 1, true);
-        $form->setValues($params['values']);
+        $form->setValues($params['form_values']);
         $form->setFieldsPrefix($this->fields_prefix . $object_name . '_');
 
         $subFormIdentifier = '';
@@ -508,13 +507,14 @@ class BC_Form extends BC_Panel
             $html .= ' data-name="' . $params['form_name'] . '"';
             $html .= ' data-id_object="' . (BimpObject::objectLoaded($object) ? $object->id : 0) . '"';
             $html .= ' data-id_parent="' . $object_id_parent . '"';
+            $html .= ' data-idx="sub_object_idx"';
             $html .= '>';
             $html .= '<div class="formGroupHeading">';
             $html .= '<div class="formGroupTitle">';
             $html .= '<h4>' . BimpTools::ucfirst(BimpObject::getInstanceLabel($object)) . ' #sub_object_idx</h4>';
             $html .= '</div>';
             $html .= '<div class="formGroupButtons">';
-            $html .= '<span class="btn btn-default" onclick="$(this).findParentByClass(\'formInputGroup\').remove()">';
+            $html .= '<span class="btn btn-default" onclick="removeSubObjectForm($(this))">';
             $html .= '<i class="fa fa-trash iconLeft"></i>Supprimer</span>';
             $html .= '</div>';
             $html .= '</div>';
@@ -564,6 +564,10 @@ class BC_Form extends BC_Panel
 
             $params = $this->fetchParams($row_path, self::$row_params);
             $params = array_merge($params, $this->fetchParams($row_path, self::$custom_row_params));
+        }
+
+        if ((is_null($params['value']) || $params['value'] === '') && isset($this->params['values']['fields'][$params['input_name']])) {
+            $params['value'] = $this->params['values']['fields'][$params['input_name']];
         }
 
         $html = '';

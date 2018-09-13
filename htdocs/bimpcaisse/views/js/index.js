@@ -1375,7 +1375,7 @@ $(document).ready(function () {
 
     $('#newPaymentButton').click(function () {
         loadModalForm($(this), {
-            module: 'bimpcore',
+            module: 'bimpcommercial',
             object_name: 'Bimp_Paiement',
             form_name: 'default'
         }, 'Paiement facture');

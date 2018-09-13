@@ -3,7 +3,8 @@ js:
     - /bimpapple/views/js/gsx.js
     - /bimpsupport/views/js/sav.js
     - /bimpequipment/views/js/equipment.js
-    - /bimpcore/views/js/paiement.js
+    - /bimpcommercial/views/js/paiement.js
+    - /bimpcommercial/views/js/object_line.js
     
 css:
     - /bimpapple/views/css/gsx.css

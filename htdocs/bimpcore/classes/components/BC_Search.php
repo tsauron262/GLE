@@ -55,7 +55,7 @@ class BC_Search extends BimpComponent
         foreach ($this->params['fields_search'] as $field) {
             $filters['or_search']['or'][$field] = array(
                 'part_type' => 'middle',
-                'part'      => $this->search_value
+                'part'      => addslashes($this->search_value)
             );
         }
 

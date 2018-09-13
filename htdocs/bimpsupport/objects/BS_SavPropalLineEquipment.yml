@@ -1,0 +1,6 @@
+extends: 
+    module: bimpcommercial
+    object_name: Bimp_PropalLineEquipment
+    
+parent_module: bimpsupport
+parent_object: BS_SavPropalLine

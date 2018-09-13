@@ -107,6 +107,10 @@ class exportCommande extends export8sens {
             $commande->fetch($id);
             $societe = new Societe($this->db);
             $societe->fetch($commande->socid);
+            
+            $secteur = "INC";
+            if(isset($commande->array_options['options_type']))
+                $secteur = $commande->array_options['options_type'];
 
 
             if ($this->debug)
@@ -122,7 +126,7 @@ class exportCommande extends export8sens {
 
 
             $tabCommande = $tabCommandeDet = array();
-            $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $societe->name, "phone" => $societe->phone, "address" => $societe->address, "zip" => $societe->zip, "town" => $societe->town, "ref" => $commande->ref, "date" => dol_print_date($commande->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label);
+            $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $societe->name, "phone" => $societe->phone, "address" => $societe->address, "zip" => $societe->zip, "town" => $societe->town, "ref" => $commande->ref, "date" => dol_print_date($commande->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label, "secteur" => $secteur);
             $commande->fetch_lines();
             foreach ($commande->lines as $line) {
                 $type = $this->getRef($line);

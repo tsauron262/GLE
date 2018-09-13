@@ -2184,6 +2184,9 @@ class BS_SAV extends BimpObject
                                                 $data['out_of_warranty'] = (int) $sp['out_of_warranty'];
                                                 $data['deletable'] = 1;
                                                 $data['editable'] = 1;
+                                                $data['def_pu_ht'] = (float) $line['subprice'];
+                                                $data['def_tva_tx'] = (float) $line('tva_tx');
+                                                $data['def_id_fourn_price'] = (int) $line['fk_product_fournisseur_price'];
                                                 $insert = true;
                                                 unset($sav_products[$idx]);
                                                 $insert = true;
@@ -2221,7 +2224,20 @@ class BS_SAV extends BimpObject
                                     if ($this->db->update('br_reservation', array(
                                                 'id_sav_propal_line' => $id_new_line
                                                     ), '`id_sav_product` = ' . $id_sav_product) <= 0) {
-                                        $errors[] = 'Echec mise à jour réservation pour la ligne propale n°' . $i;
+                                        $errors[] = 'Echec mise à jour de la réservation pour la ligne propale n°' . $i . ' - ' . $this->db->db->lasterror();
+                                    }
+                                }
+                                if ((float) $line['remise_percent']) {
+                                    if ($this->db->insert('object_line_remise', array(
+                                                'id_object_line' => (int) $id_new_line,
+                                                'object_type'    => 'sav_propal',
+                                                'label'          => '',
+                                                'type'           => 1,
+                                                'percent'        => (float) $line['remise_percent'],
+                                                'montant'        => 0,
+                                                'per_unit'       => 0
+                                            )) <= 0) {
+                                        $errors[] = 'Echec de la création de la remise pour la ligne n°' . $i . ' - ' . $this->db->db->lasterror();
                                     }
                                 }
                             }
@@ -2245,8 +2261,23 @@ class BS_SAV extends BimpObject
                             'out_of_warranty'    => 1,
                             'position'           => (int) $line['rang']
                         );
-                        if ($this->db->insert('bs_sav_propal_line', $data) <= 0) {
+                        $id_new_line = (int) $this->db->insert('bs_sav_propal_line', $data, true);
+                        if ($id_new_line <= 0) {
                             $errors[] = 'Echec insertion ligne propale n°' . $i . ' - ' . $this->db->db->lasterror();
+                        } else {
+                            if ((float) $line['remise_percent']) {
+                                if ($this->db->insert('object_line_remise', array(
+                                            'id_object_line' => (int) $id_new_line,
+                                            'object_type'    => 'sav_propal',
+                                            'label'          => '',
+                                            'type'           => 1,
+                                            'percent'        => (float) $line['remise_percent'],
+                                            'montant'        => 0,
+                                            'per_unit'       => 0
+                                        )) <= 0) {
+                                    $errors[] = 'Echec de la création de la remise pour la ligne n°' . $i . ' - ' . $this->db->db->lasterror();
+                                }
+                            }
                         }
                     }
                 }
@@ -2786,52 +2817,55 @@ class BS_SAV extends BimpObject
 
                             if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === Product::TYPE_PRODUCT) {
                                 if ($product->isSerialisable()) {
-                                    $error_msg = 'Echec de la mise à jour de l\'emplacement pour le produit "' . $product->getData('ref') . ' - ' . $product->getData('label') . '"';
-                                    if (!$line->getData('id_equipment')) {
-                                        $warnings[] = $error_msg . ' - Equipement non attribué';
-                                    } else {
-                                        // Création du nouvel emplacement: 
-                                        $place->reset();
-                                        if ($id_client) {
-                                            $place_errors = $place->validateArray(array(
-                                                'id_equipment' => (int) $line->getData('id_equipment'),
-                                                'type'         => BE_Place::BE_PLACE_CLIENT,
-                                                'id_client'    => (int) $id_client,
-                                                'infos'        => 'Vente SAV',
-                                                'date'         => date('Y-m-d H:i:s')
-                                            ));
+                                    $eq_lines = $line->getEquipmentLines();
+                                    $eq_line_errors = array();
+                                    foreach ($eq_lines as $eq_line) {
+                                        if (!(int) $eq_line->getData('id_equipment')) {
+                                            $eq_line_errors[] = 'Equipement non attribué';
                                         } else {
-                                            $place_errors = $place->validateArray(array(
-                                                'id_equipment' => (int) $line->getData('id_equipment'),
-                                                'type'         => BE_Place::BE_PLACE_FREE,
-                                                'place_name'   => 'Equipement vendu (client non renseigné)',
-                                                'infos'        => 'Vente SAV',
-                                                'date'         => date('Y-m-d H:i:s')
-                                            ));
-                                        }
-                                        if (!count($place_errors)) {
-                                            $place_errors = $place->create();
-                                        }
-
-                                        if (count($place_errors)) {
-                                            $equipment = $line->getChildObject('equipment');
-                                            if (BimpObject::objectLoaded($equipment)) {
-                                                $label = $equipment->getRef();
+                                            // Création du nouvel emplacement: 
+                                            $place->reset();
+                                            if ($id_client) {
+                                                $place_errors = $place->validateArray(array(
+                                                    'id_equipment' => (int) $eq_line->getData('id_equipment'),
+                                                    'type'         => BE_Place::BE_PLACE_CLIENT,
+                                                    'id_client'    => (int) $id_client,
+                                                    'infos'        => 'Vente SAV',
+                                                    'date'         => date('Y-m-d H:i:s')
+                                                ));
                                             } else {
-                                                $label = 'Erreur: cet équipment n\'existe plus';
+                                                $place_errors = $place->validateArray(array(
+                                                    'id_equipment' => (int) $eq_line->getData('id_equipment'),
+                                                    'type'         => BE_Place::BE_PLACE_FREE,
+                                                    'place_name'   => 'Equipement vendu (client non renseigné)',
+                                                    'infos'        => 'Vente SAV',
+                                                    'date'         => date('Y-m-d H:i:s')
+                                                ));
                                             }
-                                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $label . '"');
+                                            if (!count($place_errors)) {
+                                                $place_errors = $place->create();
+                                            }
+
+                                            if (count($place_errors)) {
+                                                $equipment = $line->getChildObject('equipment');
+                                                if (BimpObject::objectLoaded($equipment)) {
+                                                    $label = $equipment->getRef();
+                                                } else {
+                                                    $label = 'Erreur: cet équipment n\'existe plus';
+                                                }
+                                                $eq_line_errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $label . '"');
+                                            }
                                         }
+                                    }
+                                    if (count($eq_line_errors)) {
+                                        $error_msg = 'Echec de la mise à jour de l\'emplacement pour le produit "' . $product->getData('ref') . ' - ' . $product->getData('label') . '"';
+                                        $warnings[] = BimpTools::getMsgFromArray($eq_line_errors, $error_msg);
                                     }
                                 } else {
                                     $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $line->qty, 1, $this->getRef(), 0, $codemove);
                                     if ($result < 0) {
-                                        $warnings[] = 'Echec de la mise à jour du stock pour le produit "' . $product->getData('label') . '" (Ref: "' . $product->etRef() . '")';
-                                        if (count($product->dol_object->errors)) {
-                                            $warnings = array_merge($warnings, $product->dol_object->errors);
-                                        } elseif ($product->dol_object->error) {
-                                            $warnings[] = $product->dol_object->error;
-                                        }
+                                        $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getData('label') . '" (Ref: "' . $product->getRef() . '")';
+                                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
                                     }
                                 }
                             }
@@ -2849,7 +2883,6 @@ class BS_SAV extends BimpObject
                             if (!count($place_errors)) {
                                 $place_errors = $place->create();
                             }
-
                             if (count($place_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
                             }

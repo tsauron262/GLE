@@ -92,6 +92,26 @@ class Bimp_Propal extends BimpComm
         $buttons = array();
 
         if ($this->isLoaded()) {
+
+            $pdf_dir = $this->getDirOutput();
+            $ref = dol_sanitizeFileName($this->getRef());
+            $pdf_file = $pdf_dir . '/' . $ref . '/' . $ref . '.pdf';
+            if (file_exists($pdf_file)) {
+                $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
+                $onclick = 'window.open(\'' . $url . '\');';
+                $buttons[] = array(
+                    'label'   => $ref . '.pdf',
+                    'icon'    => 'fas_file-pdf',
+                    'onclick' => $onclick
+                );
+            }
+
+            $buttons[] = array(
+                'label'   => 'Générer le PDF',
+                'icon'    => 'fas_sync',
+                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
+            );
+
             $status = $this->getData('fk_statut');
 
             if (!is_null($status)) {
@@ -199,11 +219,14 @@ class Bimp_Propal extends BimpComm
 
                 // Envoi mail:
                 if ($this->isActionAllowed('sendMail') && $this->canSetAction('sendMail')) {
-                    $onclick = 'bimpModal.loadAjaxContent($(this), \'loadMailForm\', {id: ' . $this->id . '}, \'Envoyer par email\')';
+//                    comm/propal/card.php?id=123513&action=presend&mode=init#formmailbeforetitle
+//                    $onclick = 'bimpModal.loadAjaxContent($(this), \'loadMailForm\', {id: ' . $this->id . '}, \'Envoyer par email\')';
+                    $url = DOL_URL_ROOT . '/comm/propal/card.php?id=' . $this->id . '&action=presend&mode=init#formmailbeforetitle';
+                    $onclick = 'window.location = \'' . $url . '\'';
                     $buttons[] = array(
                         'label'   => 'Envoyer par email',
                         'icon'    => 'envelope',
-                        'onclick' => $onclick
+                        'onclick' => $onclick,
                     );
                 }
 
@@ -237,19 +260,23 @@ class Bimp_Propal extends BimpComm
 
                 // Créer contrat:
                 if ($this->isActionAllowed('createContract') && $this->canSetAction('createContract')) {
+                    $url = DOL_URL_ROOT . '/contrat/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
                     $buttons[] = array(
                         'label'   => 'Créer un contrat',
                         'icon'    => 'fas_file-signature',
-                        'onclick' => $this->getJsActionOnclick('createContract')
+//                        'onclick' => $this->getJsActionOnclick('createContract')
+                        'onclick' => 'window.location = \'' . $url . '\''
                     );
                 }
-
+//                
                 // Créer facture / avoir
                 if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
+                    $url = DOL_URL_ROOT . '/compta/facture/card.php?action=create&origin=propal&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
                     $buttons[] = array(
                         'label'   => 'Créer une facture ou un avoir',
                         'icon'    => 'fas_file-invoice-dollar',
-                        'onclick' => $this->getJsActionOnclick('createInvoice')
+//                        'onclick' => $this->getJsActionOnclick('createInvoice')
+                        'onclick' => 'window.location = \'' . $url . '\''
                     );
                 }
 
@@ -454,11 +481,6 @@ class Bimp_Propal extends BimpComm
 
     public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
-        $errors = array();
-
-        if (!$force_create && !$this->canCreate()) {
-            return array('Vous n\'avez pas la permission de créer ' . $this->getLabel('a'));
-        }
 
         if (!$this->isLoaded()) {
             return array('ID ' . $this->getLabel('of_the') . ' absent');
@@ -466,11 +488,6 @@ class Bimp_Propal extends BimpComm
 
         if (!$this->fetch($this->id)) {
             return array(BimpTools::ucfirst($this->getLabel('this')) . ' est invalide. Copie impossible');
-        }
-
-        $validate_errors = $this->validate();
-        if (count($validate_errors)) {
-            return array(BimpTools::getMsgFromArray($validate_errors), BimpTools::ucfirst($this->getLabel('this')) . ' comporte des erreurs. Copie impossible');
         }
 
         if (isset($new_data['date_livraison']) && $new_data['date_livraison'] !== $this->getData('date_livraison')) {
@@ -487,15 +504,7 @@ class Bimp_Propal extends BimpComm
             }
         }
 
-        $new_id = $this->dol_object->createFromClone(isset($new_data['fk_soc']) ? (int) $new_data['fk_soc'] : 0);
-
-        if ($new_id <= 0) {
-            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la copie de la propositon commerciale');
-        } else {
-            $this->fetch((int) $new_id);
-        }
-
-        return $errors;
+        return parent::duplicate($new_data, $warnings, $force_create);
     }
 
     // Actions:
@@ -590,25 +599,7 @@ class Bimp_Propal extends BimpComm
             return 0;
         }
 
-        $bimpObjectFields = array();
         global $user;
-
-//        foreach ($this->data as $field => $value) {
-//            if ($this->field_exists($field)) {
-//                if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
-//                    $this->dol_object->array_options['options_' . $field] = $value;
-//                } else {
-//                    $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
-//                    if (is_null($prop)) {
-//                        $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-//                    } elseif (!property_exists($this->dol_object, $prop)) {
-//                        $bimpObjectFields[$field] = $value;
-//                    }
-//                }
-//            }
-//        }
-
-        $this->hydrateDolObject($bimpObjectFields);
 
         // Ref. client
         if ((string) $this->getData('ref_client') !== (string) $this->dol_object->ref_client) {
@@ -724,6 +715,9 @@ class Bimp_Propal extends BimpComm
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour du délai de livraison');
             }
         }
+
+        $bimpObjectFields = array();
+        $this->hydrateDolObject($bimpObjectFields);
 
         if (method_exists($this, 'beforeUpdateDolObject')) {
             $this->beforeUpdateDolObject();

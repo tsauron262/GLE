@@ -109,6 +109,13 @@ class ObjectLineRemise extends BimpObject
             return array($msg);
         }
 
+        if ((int) $this->getData('type') === self::OL_REMISE_AMOUNT && (int) BimpTools::getValue('remise_ht', 0)) {
+            if (!isset($parent->tva_tx)) {
+                return array('Taux de TVA de la ligne absent');
+            }
+            $this->set('montant', (float) BimpTools::calculatePriceTaxIn((float) $this->getData('montant'), (float) $parent->tva_tx));
+        }
+
         return parent::create($warnings, $force_create);
     }
 
@@ -126,6 +133,13 @@ class ObjectLineRemise extends BimpObject
             }
             $msg .= '. Il n\'est pas possible d\'éditer cette remise';
             return array($msg);
+        }
+
+        if ((int) $this->getData('type') === self::OL_REMISE_AMOUNT && (int) BimpTools::getValue('remise_ht', 0)) {
+            if (!isset($parent->tva_tx)) {
+                return array('Taux de TVA de la ligne absent');
+            }
+            $this->set('montant', (float) BimpTools::calculatePriceTaxIn((float) $this->getData('montant'), (float) $parent->tva_tx));
         }
 
         return parent::update($warnings, $force_update);

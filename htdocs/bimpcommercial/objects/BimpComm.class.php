@@ -136,7 +136,7 @@ class BimpComm extends BimpObject
                     $html .= BimpInput::renderInput('select', static::$comm_type . '_model_pdf', $this->getModelPdf(), array(
                                 'options' => $models
                     ));
-                    $onclick = 'var model = $(this).parent(\'.' . static::$comm_type . 'PdfGenerateContainer\').find(\'[name=' . static::$comm_type . '_model_pdf]\').val();setObjectAction($(this), ' . $this->getJsObjectData() . ', \'generatePdf\', {model: model}, null, null, function() {window.location.reload()}, null);';
+                    $onclick = 'var model = $(this).parent(\'.' . static::$comm_type . 'PdfGenerateContainer\').find(\'[name=' . static::$comm_type . '_model_pdf]\').val();setObjectAction($(this), ' . $this->getJsObjectData() . ', \'generatePdf\', {model: model}, null, null, null, null);';
                     $html .= '<button type="button" onclick="' . $onclick . '" class="btn btn-default">';
                     $html .= '<i class="fas fa5-sync iconLeft"></i>Générer';
                     $html .= '</button>';
@@ -882,22 +882,31 @@ class BimpComm extends BimpObject
         $success = 'PDF généré avec succès';
 
         if ($this->isLoaded()) {
-            if (!isset($data['model']) || !$data['model']) {
-                $data['model'] = $this->getModelPdf();
-            }
-            global $langs;
-            $this->dol_object->error = '';
-            $this->dol_object->errors = array();
-            if ($this->dol_object->generateDocument($data['model'], $langs) <= 0) {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du PDF');
+            if (!$this->isDolObject() || !method_exists($this->dol_object, 'generateDocument')) {
+                $errors[] = 'Cette fonction n\'est pas disponible pour ' . $this->getLabel('the_plur');
+            } else {
+                if (!isset($data['model']) || !$data['model']) {
+                    $data['model'] = $this->getModelPdf();
+                }
+                global $langs;
+                $this->dol_object->error = '';
+                $this->dol_object->errors = array();
+                if ($this->dol_object->generateDocument($data['model'], $langs) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du PDF');
+                } else {
+                    $ref = dol_sanitizeFileName($this->getRef());
+                    $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . $ref . '/' . $ref . '.pdf';
+                    $success_callback = 'window.open(\'' . $url . '\');';
+                }
             }
         } else {
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 
@@ -1110,7 +1119,7 @@ class BimpComm extends BimpObject
     }
 
     // Gestion des droits: 
-    
+
     public function canView()
     {
         global $user;

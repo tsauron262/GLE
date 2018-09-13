@@ -400,8 +400,12 @@ list:
                     options: 
                         options: 
                             array: hasReservations
+        available: 
+            field: available
+            edit: 1
     add_form_name: default
     edit_btn: 1
+    update_btn: 1
     delete_btn: 1
     view_btn: 1
     page_btn: 1

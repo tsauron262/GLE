@@ -30,15 +30,24 @@ sections:
                                               object: bimp_comm
                                               name: default
                                     - cols: 
-                                        - type: custom
+                                        - type: rows
                                           col_lg: 6
                                           col_md: 6
                                           col_sm: 12
-                                          custom:
-                                              callback: 
-                                                  method: renderFilesTable
-                                                  object: bimp_comm
+                                          rows: 
+                                              - cols: 
+                                                  - type: custom
+                                                    custom:
+                                                        callback: 
+                                                            method: renderFilesTable
+                                                            object: bimp_comm
 
+                                                  - type: custom
+                                                    custom: 
+                                                        callback:
+                                                            method: renderLinkedObjectsTable
+                                                            object: bimp_comm
+                                        
                                         - type: custom
                                           col_lg: 6
                                           col_md: 6
@@ -46,16 +55,6 @@ sections:
                                           custom: 
                                               callback:
                                                   method: renderEventsTable
-                                                  object: bimp_comm
-                                        
-                                    - cols: 
-                                        - type: custom
-                                          col_lg: 6
-                                          col_md: 6
-                                          col_sm: 12
-                                          custom: 
-                                              callback:
-                                                  method: renderLinkedObjectsTable
                                                   object: bimp_comm
                                                   
                           - id: content

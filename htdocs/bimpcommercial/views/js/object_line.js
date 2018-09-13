@@ -57,7 +57,8 @@ function reloadObjectLineFormMargins($form) {
                                 type: parseInt($remiseForm.find('[name="remises_' + idx + '_type"]').val()),
                                 percent: parseFloat($remiseForm.find('[name="remises_' + idx + '_percent"]').val()),
                                 montant: parseFloat($remiseForm.find('[name="remises_' + idx + '_montant"]').val()),
-                                per_unit: parseInt($remiseForm.find('[name="remises_' + idx + '_per_unit"]').val())
+                                per_unit: parseInt($remiseForm.find('[name="remises_' + idx + '_per_unit"]').val()),
+                                remise_ht: parseInt($remiseForm.find('[name="remises_' + idx + '_remise_ht"]').val()),
                             };
                             data.line_remises.push(remise);
                         }
@@ -96,6 +97,11 @@ function reloadObjectLineFormMargins($form) {
             var $input = $form.find('[name="per_unit"]');
             if ($input.length) {
                 remise.per_unit = parseInt($input.val());
+            }
+
+            var $input = $form.find('[name="remise_ht"]');
+            if ($input.length) {
+                remise.remise_ht = parseInt($input.val());
             }
 
             data.line_remises.push(remise);
@@ -190,6 +196,13 @@ function onObjectLineFormLoaded($form) {
                                 reloadObjectLineFormMargins($('#' + e.id_form));
                             });
                         }
+
+                        var $input = e.$subForm.find('[name="remises_' + e.idx + '_remise_ht"]');
+                        if ($input.length) {
+                            $input.change(function () {
+                                reloadObjectLineFormMargins($('#' + e.id_form));
+                            });
+                        }
                         reloadObjectLineFormMargins($('#' + e.id_form));
                     }
                 });
@@ -221,6 +234,9 @@ function onObjectLineRemiseFormLoaded($form) {
                 reloadObjectLineFormMargins($(this).findParentByClass('object_form'));
             });
             $form.find('[name="per_unit"]').change(function () {
+                reloadObjectLineFormMargins($(this).findParentByClass('object_form'));
+            });
+            $form.find('[name="remise_ht"]').change(function () {
                 reloadObjectLineFormMargins($(this).findParentByClass('object_form'));
             });
 

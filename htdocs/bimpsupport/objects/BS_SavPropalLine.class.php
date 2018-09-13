@@ -22,6 +22,15 @@ class BS_SavPropalLine extends Bimp_PropalLine
         return 0;
     }
 
+    public function isWarrantyEditable()
+    {
+        if ($this->isLineProduct() && $this->isEditable()) {
+            return 1;
+        }
+
+        return 0;
+    }
+
     // Traitements:
 
     public function updateSav()

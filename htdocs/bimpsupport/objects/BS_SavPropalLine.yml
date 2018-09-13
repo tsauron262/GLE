@@ -222,6 +222,6 @@ lists:
             warranty: 
                 field: out_of_warranty
                 edit: 
-                    callback: isLineProduct
+                    callback: isWarrantyEditable
                 item_show: 
                     callback: showWarranty

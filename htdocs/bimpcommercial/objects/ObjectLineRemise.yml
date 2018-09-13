@@ -65,6 +65,16 @@ forms:
             - field: type
             - field: percent
             - field: montant
+            - custom: 1
+              input_name: remise_ht
+              data_type: bool
+              label: Applicable sur le montant Hors Taxes
+              value: 0
+              input: 
+                  type: toggle
+              display_if: 
+                  field_name: type
+                  show_values: 2
             - field: per_unit
             - custom: 1
               label: Marges
@@ -73,6 +83,7 @@ forms:
                   callback: renderFormMargins
               show: 
                   callback: showMarginsInForms
+                  
 lists: 
     default: 
         title: Remises

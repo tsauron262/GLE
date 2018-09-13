@@ -491,7 +491,7 @@ class ObjectLine extends BimpObject
                     }
                 }
             }
-            if (in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
+            if (in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE)) && (int) $this->getData('editable')) {
                 $onclick = 'loadModalList(\'bimpcommercial\', \'ObjectLineRemise\', \'default\', ' . $this->id . ', $(this), \'Remises\', {parent_object_type: \'' . static::$parent_comm_type . '\'})';
                 $buttons[] = array(
                     'label'   => 'Remises',
@@ -1799,6 +1799,9 @@ class ObjectLine extends BimpObject
                         break;
 
                     case ObjectLineRemise::OL_REMISE_AMOUNT:
+                        if (isset($remise['remise_ht']) && (int) $remise['remise_ht']) {
+                            $remise['montant'] = (float) BimpTools::calculatePriceTaxIn((float) $remise['montant'], $line_tva_tx);
+                        }
                         if ((int) $remise['per_unit']) {
                             $total_remises += ((float) $remise['montant'] * (float) $line_qty);
                         } else {
@@ -2241,6 +2244,7 @@ class ObjectLine extends BimpObject
                 $pa_ht = (float) $this->db->getValue('product_fournisseur_price', 'price', '`rowid` = ' . (int) $id_fourn_price);
 
                 // Vérification des valeurs des lignes d'équipement et mise à jour si nécessaire: 
+                $eq_lines = $this->getEquipmentLines();
                 foreach ($eq_lines as $eq_line) {
                     $update_line = false;
                     $equipment = null;

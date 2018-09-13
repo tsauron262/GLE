@@ -117,8 +117,6 @@ forms:
                   callback: isEditable
             - field: date_livraison
             - field: model_pdf
-              show: 
-                  callback: isNotLoaded
             - field: pdf_hide_reduc
             - field: pdf_hide_total
             - field: note_private
@@ -183,9 +181,9 @@ fields_tables:
             - field: ref_client
               edit: 
                   callback: isEditable
-            - label: Remises client
-              value: 
-                  callback: displayRemisesClient
+#            - label: Remises client
+#              value: 
+#                  callback: displayRemisesClient
                   
     payment:
         rows:

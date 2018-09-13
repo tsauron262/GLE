@@ -81,7 +81,7 @@ $object->statut = 1;
 				return $result;
     		}
         }
-        elseif ($action == 'USER_MODIFY')
+        elseif ($action == 'USER_MODIFY' || $action == 'USER_ENABLEDISABLE')
         {
             dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
         	if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')

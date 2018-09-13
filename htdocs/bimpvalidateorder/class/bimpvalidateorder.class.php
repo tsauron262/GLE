@@ -7,8 +7,11 @@ class BimpValidateOrder {
     private $db;
     public $errors;
     private $tabValideComm = array(62 => 100);
+    private $tabValideCommEduc = array(51 => 100);
     private $tabValideMontant = array(2 => array(0, 1000000000000), 68 => array(50000, 100000000000));
     private $tabValideMontantPart = array(7 => array(0, 100000), 2 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
+    private $tabValideMontantEduc = array(51 => array(0, 100000), 2 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
+    private $tabSecteurEduc = array("E", "ENS", "EBTS");
 
     function __construct($db) {
         $this->db = $db;
@@ -130,6 +133,11 @@ class BimpValidateOrder {
                 if ($userId == $user->id)
                     $max_price = $tabM[1];
         }
+        if (in_array($order->array_options['options_type'], $this->tabSecteurEduc)) {
+            foreach ($this->tabValideMontantEduc as $userId => $tabM)
+                if ($userId == $user->id)
+                    $max_price = $tabM[1];
+        }
 
         if ($user->id < 0) {
             $this->errors[] = "Identifiant utilisateur inconnu.";
@@ -161,12 +169,23 @@ class BimpValidateOrder {
 
     private function checkRemise($order, $user) {
         $ok = true;
-        if (!in_array($user->id, $this->tabValideRemise)) {
-            foreach ($order->lines as $line)
-                if ($line->remise_percent > 5) {
-                    $this->extraMail[] = "Ligne " . $line->desc . " avec un réduction de " . $line->remise_percent . "%";
-                    $ok = false;
-                }
+        if (in_array($order->array_options['options_type'], $this->tabSecteurEduc)) {
+            if (!in_array($user->id, $this->tabValideRemise)) {
+                foreach ($order->lines as $line)
+                    if ($line->remise_percent > 6) {
+                        $this->extraMail[] = "Ligne " . $line->desc . " avec un réduction de " . $line->remise_percent . "%";
+                        $ok = false;
+                    }
+            }
+        }
+        else{
+            if (!in_array($user->id, $this->tabValideRemise)) {
+                foreach ($order->lines as $line)
+                    if ($line->remise_percent > 5) {
+                        $this->extraMail[] = "Ligne " . $line->desc . " avec un réduction de " . $line->remise_percent . "%";
+                        $ok = false;
+                    }
+            }
         }
         return $ok;
     }
@@ -180,6 +199,14 @@ class BimpValidateOrder {
         if ($max_price <= $price) {
             if ($order->array_options['options_type'] == "P" && $price < 100000) {//Aurelie
                 foreach ($this->tabValideMontantPart as $idUser => $tabMont) {
+                    if($price > $tabMont[0] && $price <= $tabMont[1]){
+                        $tabUserOk[] = $idUser;
+                        if($idUser == $user->id)
+                            return array();
+                    }
+                }
+            } elseif (in_array($order->array_options['options_type'], $this->tabSecteurEduc) && $price < 100000) {//Joana
+                foreach ($this->tabValideMontantEduc as $idUser => $tabMont) {
                     if($price > $tabMont[0] && $price <= $tabMont[1]){
                         $tabUserOk[] = $idUser;
                         if($idUser == $user->id)
@@ -207,10 +234,19 @@ class BimpValidateOrder {
         $tabUserOk = array();
         $okRemise = ($order->array_options['options_type'] != "P" ? $this->checkRemise($order, $user) : 1);
         if (!$okRemise){
-            foreach ($this->tabValideComm as $idUser => $tabMont) {
-                $tabUserOk[] = $idUser;
-                if($idUser == $user->id)//on peut validé
-                    return array();
+            if (in_array($order->array_options['options_type'], $this->tabSecteurEduc)) {
+                foreach ($this->tabValideCommeduc as $idUser => $tabMont) {
+                    $tabUserOk[] = $idUser;
+                    if($idUser == $user->id)//on peut validé
+                        return array();
+                }
+            }
+            else{
+                foreach ($this->tabValideComm as $idUser => $tabMont) {
+                    $tabUserOk[] = $idUser;
+                    if($idUser == $user->id)//on peut validé
+                        return array();
+                }
             }
         }
         return $tabUserOk; 
@@ -249,7 +285,7 @@ class BimpValidateOrder {
         foreach ($this->extraMail as $extra) {
             $msg .= "\n\n" . $extra;
         }
-//        echo $doli_user_responsible->email . "   " . $msg;
+        
         return mailSyn2($subject, $doli_user_responsible->email, $user->email, $msg);
     }
 

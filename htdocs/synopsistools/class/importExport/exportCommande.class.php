@@ -18,7 +18,7 @@ class exportCommande extends export8sens {
     public $output = "Rien";
     public $error = "";
     public $tabIgnore = array();
-    private $where = " AND fe.type != 'R' AND comm.fk_statut > 0  AND (comm.extraparams < 1 || comm.extraparams is NULL) AND comm.total_ht != 0  AND ref NOT LIKE '%PROV%' GROUP BY comm.rowid";
+    private $where = " AND fe.type != 'R' AND comm.fk_statut > 0  AND (comm.extraparams < 1 || comm.extraparams is NULL)  AND ref NOT LIKE '%PROV%' GROUP BY comm.rowid";
 
     public function __construct($db, $sortie = 'html') {
         parent::__construct($db);
@@ -144,6 +144,7 @@ class exportCommande extends export8sens {
                     "0" => 0
                 );
                 $tvaCode = $tabCodeTva[$line->tva_tx];
+                $line->desc = $this->traiteStr($line->desc);
                 $tabCommandeDet[] = array("L" => "L", "ref" => $ref, "product_type" => $type, "qty" => $line->qty, "subprice" => price($line->subprice), "description" => $line->desc, "buy_price_ht" => price($line->pa_ht), "tva_code" => $tvaCode, "remise_percent" => $line->remise_percent, "tva_tx" => $tvaCode, "codeDepot" => $entrepot->label);
             }
 

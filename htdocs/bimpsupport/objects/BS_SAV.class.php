@@ -46,9 +46,9 @@ class BS_SAV extends BimpObject
         4 => 'Ne dispose pas de sauvegarde et n\'en désire pas'
     );
     public static $contact_prefs = array(
+        3 => 'SMS + E-mail',
         1 => 'E-mail',
-        2 => 'Téléphone',
-        3 => 'SMS'
+        2 => 'Téléphone'
     );
     public static $etats_materiel = array(
         1 => array('label' => 'Neuf', 'classes' => array('success')),
@@ -560,6 +560,16 @@ class BS_SAV extends BimpObject
                 );
             }
 
+            // Commande piece: 
+            if (in_array($status, array(self::BS_SAV_REP_EN_COURS, self::BS_SAV_DEVIS_ACCEPTE))) {
+                $onclick = 'setNewSavStatus($(this), ' . $this->id . ', ' . self::BS_SAV_ATT_PIECE . ', 1)';
+                $buttons[] = array(
+                    'label'   => 'Attente pièce',
+                    'icon'    => 'check',
+                    'onclick' => $onclick
+                );
+            }
+
             // Réparation en cours: 
             if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE))) {
                 if (!is_null($propal) && $propal_status > 0) {
@@ -574,11 +584,13 @@ class BS_SAV extends BimpObject
 
             // Réparation terminée: 
             if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {
-                $buttons[] = array(
-                    'label'   => 'Réparation terminée',
-                    'icon'    => 'check',
-                    'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
-                );
+                if (!is_null($propal) && $propal_status > 0) {
+                    $buttons[] = array(
+                        'label'   => 'Réparation terminée',
+                        'icon'    => 'check',
+                        'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
+                    );
+                }
             }
 
             // Fermer SAV (devis refusé) : 
@@ -825,9 +837,11 @@ class BS_SAV extends BimpObject
         $savS = BimpObject::getInstance('bimpsupport', 'BS_SAV');
         $list = $savS->getList(array('id_equipment' => $equip->id));
         foreach ($list as $arr) {
-            $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-            $sav->fetch($arr['id']);
-            $return .= $sav->getNomUrl() . "<br/>";
+            if ($arr['id'] != $this->id) {
+                $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+                $sav->fetch($arr['id']);
+                $return .= $sav->getNomUrl() . "<br/>";
+            }
         }
 
 
@@ -990,7 +1004,7 @@ class BS_SAV extends BimpObject
             return array($error_msg . ' (Client absent ou invalide)');
         }
 
-        if (is_null($propal) && in_array($new_status, self::$need_propal_status)) {
+        if (is_null($propal) && in_array($new_status, self::$need_propal_status) && $this->getData("sav_pro") < 1) {
             return array($error_msg . ' (Proposition commerciale absente)');
         }
 
@@ -1264,8 +1278,9 @@ class BS_SAV extends BimpObject
 
         BimpTools::loadDolClass('comm/propal', 'propal');
 
-        $prop = new Propal($this->db->db);
-        $prop->fetch($this->getData('id_propal'));
+//        $prop = new Propal($this->db->db);
+//        $prop->fetch($this->getData('id_propal'));
+        $prop = $this->getChildObject('propal')->dol_object;
 
         $prop->set_ref_client($user, $this->getData('prestataire_number'));
 
@@ -2619,6 +2634,8 @@ class BS_SAV extends BimpObject
 
                         $propal->fetch($propal->id);
                         $propal->dol_object->valid($user);
+
+                        dol_syslog("Propal id : ." . $propal->dol_object->id . " devrait être validée", 3);
                         $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
                         $propal->dol_object->cloture($user, 2, "Auto via SAV");
                         $this->removeReservations();
@@ -2747,9 +2764,6 @@ class BS_SAV extends BimpObject
                 $errors[] = 'Certains produits nécessitent encore l\'attribution d\'un équipement';
             }
 
-            if (!count($errors)) {
-                $errors = $this->setNewStatus(self::BS_SAV_FERME);
-            }
 
             if (!count($errors)) {
                 $propal_status = (int) $propal->getData('fk_statut');
@@ -2915,6 +2929,10 @@ class BS_SAV extends BimpObject
                 $this->addNote('Restitué le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
             } else {
                 $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
+            }
+
+            if (!count($errors)) {
+                $errors = $this->setNewStatus(self::BS_SAV_FERME);
             }
 
             // Fermeture des réparations GSX: 
@@ -3230,7 +3248,7 @@ class BS_SAV extends BimpObject
                 }
             }
 
-            if ($this->getData("id_propal") < 1) {
+            if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
                 $prop_errors = $this->createPropal();
                 if (count($prop_errors)) {
                     $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création de la proposition commerciale');

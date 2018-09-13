@@ -143,6 +143,34 @@ if (GETPOST('addassignedtouser') || GETPOST('updateassignedtouser'))
 	$listUserAssignedUpdated = true;
 }
 
+
+if (GETPOST('addUserGrp') || GETPOST('addUserGrp'))
+{
+	// Add a new user
+	if (GETPOST('addUserGrp') > 0)
+	{
+		$assignedtouser=array();
+		if (! empty($_SESSION['assignedtouser']))
+		{
+			$assignedtouser=json_decode($_SESSION['assignedtouser'], true);
+		}
+                require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
+                $grp = new UserGroup($db);
+                $grp->fetch(GETPOST('addUserGrp'));
+                foreach($grp->members as $userT){
+        		$assignedtouser[$userT->id]=array('id'=>$userT->id, 'transparency'=>GETPOST('transparency'),'mandatory'=>1);
+                }
+                
+                
+		$_SESSION['assignedtouser']=json_encode($assignedtouser);
+	$donotclearsession=1;
+	if ($action == 'add') $action = 'create';
+	if ($action == 'update') $action = 'edit';
+
+	$listUserAssignedUpdated = true;
+	}
+}
+
 // Link to a project
 if ($action == 'classin' && ($user->rights->agenda->allactions->create ||
     (($object->authorid == $user->id || $object->userownerid == $user->id) && $user->rights->agenda->myactions->create)))
@@ -736,6 +764,10 @@ if ($action == 'create')
 	print '<div class="assignedtouser">';
 	print $form->select_dolusers_forevent(($action=='create'?'add':'update'), 'assignedtouser', 1, '', 0, '', '', 0, 0, 0, 'AND u.statut != 0');
 	print '</div>';
+		print '<div class="assignedtogroup"><form>';
+		print $form->select_dolgroups('', 'addUserGrp', 1);
+                print '<input type="submit" class="button valignmiddle" value="Ajouter"/>';
+		print '</div>';
 	if (in_array($user->id,array_keys($listofuserid)))
 	{
 		print '<div class="myavailability">';
@@ -1084,6 +1116,10 @@ if ($id > 0)
 
 		print '<div class="assignedtouser">';
 		print $form->select_dolusers_forevent(($action=='create'?'add':'update'), 'assignedtouser', 1, '', 0, '', '', 0, 0, 0, 'AND u.statut != 0');
+		print '</div>';
+		print '<div class="assignedtogroup"><form>';
+		print $form->select_dolgroups('', 'addUserGrp', 1);
+                print '<input type="submit" class="button valignmiddle" value="Ajouter"/>';
 		print '</div>';
 		if (in_array($user->id,array_keys($listofuserid)))
 		{

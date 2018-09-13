@@ -74,6 +74,23 @@ class BimpDocumentPDF extends BimpModelPDF
         global $conf, $mysoc;
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        
+        
+        if(isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO'))){
+            $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
+            if(is_file($testFile))
+                $logo_file = $testFile;
+        }
+        if(isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))){
+            $testFile = str_replace(array(".jpg", ".png"), "_SAV.png", $logo_file);
+            if(is_file($testFile))
+                $logo_file = $testFile;
+        }
+        if(isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))){
+            $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
+            if(is_file($testFile))
+                $logo_file = $testFile;
+        }
 
         if (method_exists($this->object, 'fetch_optionals')) {
             $this->object->fetch_optionals();
@@ -277,10 +294,13 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getTargetInfosHtml()
     {
         global $conf;
-        if ($this->contact < 1 || !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
+        if ($this->contact < 1)
             $html = '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
+        elseif(!empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
+            $this->contact->firstname .= '<br/>' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '';
         else
             $html = "";
+        
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');
         $html = str_replace("\n", '<br/>', $html);
 
@@ -390,6 +410,8 @@ class BimpDocumentPDF extends BimpModelPDF
                     $product = null;
                 }
             }
+            if(is_object($product) && $product->ref == "REMISECRT")
+                continue;
 
             $desc = $this->getLineDesc($line, $product);
 

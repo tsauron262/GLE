@@ -73,6 +73,9 @@ print '<input id="dateEnd" type="text" class="isDate round"></div></td></tr>';
 if ($is_customer) {
 // Types
     $type = $staticSF->getExtrafieldArray('facture', 'type');
+
+    
+    
     print '<tr><td>Secteurs</td><td>';
     print '<select id="type" class="select2" multiple style="width: 200px;">';
     print '<option  value="NRS">Non renseigné</option>';

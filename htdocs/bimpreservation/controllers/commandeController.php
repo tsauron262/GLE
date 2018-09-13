@@ -47,7 +47,7 @@ class commandeController extends reservationController
             foreach ($errors as $error) {
                 $mail_msg .= ' - ' . $error . "\n";
             }
-            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<no-reply@bimp.fr>', $mail_msg);
+            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<admin@bimp.fr>', $mail_msg);
         }
 
         $html .= BimpRender::renderNavTabs(array(

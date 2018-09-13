@@ -233,15 +233,15 @@ class BimpStatsFacture {
                     else
                         $hash[$ind]['ct'] = 0;
                     $hash[$ind]['ty'] = ($obj->type != "0" and $obj->type != '' and $obj->type != false) ? $obj->type : 0;
-                    $hash[$ind]['equip_ref'] = (isset($obj->description)) ? $obj->description : '';
+                    $hash[$ind]['equip_ref'] = (isset($obj2->description)) ? $obj2->description : '';
                     if ($obj2 AND $obj2->fk_entrepot1 != "0" and $obj2->fk_entrepot1 != '' and $obj2->fk_entrepot1 != false)
                         $hash[$ind]['fk_entrepot'] = $obj2->fk_entrepot1;
                     elseif ($obj->fk_entrepot2 != "0" and $obj->fk_entrepot2 != '' and $obj->fk_entrepot2 != false)
                         $hash[$ind]['fk_entrepot'] = $obj->fk_entrepot2;
                     else
                         $hash[$ind]['fk_entrepot'] = 0;
-                    $hash[$ind]['numero_serie'] = (isset($obj->numero_serie)) ? $obj->numero_serie : '';
-                    $hash[$ind]['type_garantie'] = (isset($obj->type_garantie)) ? $obj->type_garantie : '';
+                    $hash[$ind]['numero_serie'] = (isset($obj2->numero_serie)) ? $obj2->numero_serie : '';
+                    $hash[$ind]['type_garantie'] = (isset($obj2->type_garantie)) ? $obj2->type_garantie : '';
                     $hash[$ind]['sav_id'] = ($obj2 AND isset($obj2->sav_id)) ? $obj2->sav_id : '';
                     $hash[$ind]['sav_ref'] = ($obj2 AND isset($obj2->sav_ref)) ? $obj2->sav_ref : '';
                     $hash[$ind]['ggsx'] = ($obj2 AND isset($obj2->ggsx)) ? $obj2->ggsx : '';
@@ -430,6 +430,15 @@ class BimpStatsFacture {
                     $out[$obj->valeur] = (isset($obj->label)) ? $obj->label : '';
                 }
             }
+        }
+        
+        if($name == 'type' && count($out) < 2){
+            $out = array();
+            $sql = $this->db->query("SELECT * FROM `llx_bimp_c_secteur` WHERE 1");
+            while($ln = $this->db->fetch_object($sql)){
+                $out[$ln->clef] = $ln->valeur;
+            }
+
         }
         return $out;
     }

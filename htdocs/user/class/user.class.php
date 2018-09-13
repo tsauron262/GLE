@@ -796,6 +796,9 @@ class User extends CommonObject
 		global $conf,$langs,$user;
 
 		$error=0;
+                
+                
+                if (! is_object($this->oldcopy)) $this->oldcopy = clone $this;
 
 		// Check parameters
 		if ($this->statut == $statut) return 0;
@@ -2384,7 +2387,7 @@ class User extends CommonObject
                 
                 //$info['pager'] = array();
                 if($domain && $this->statut == 1){
-                    $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","shadowaddress","lib-storage","indexer-worker","dsync"), $info ['enabledservice']);
+                    $info ['enabledservice'] = array_merge(array("mail","smtp","smtpsecured","pop3","pop3secured","imap","imapsecured","deliver","lda","lmtp","forward","senderbcc","recipientbcc","managesieve","managesievesecured","sieve","sievesecured","shadowaddress","lib-storage","indexer-worker","dsync", "doveadm"), $info ['enabledservice']);
                     
                     if(isset($this->array_options['options_displayedinglobaladdressbook']) && $this->array_options['options_displayedinglobaladdressbook']){
                         $info['enabledservice'][] = "displayedInGlobalAddressBook";

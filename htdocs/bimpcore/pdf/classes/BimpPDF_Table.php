@@ -8,7 +8,7 @@ class BimpPDF_Table
     public $rows = array();
     public $topMargin = 10; // mm
     public $botMargin = 0; // mm
-    public $cellpadding = 5; //px
+    public $cellpadding = 3; //px
     public $cellspacing = 0; // px
     public $fontSize = 8; // px
     public $width = 190; //mm
@@ -100,6 +100,15 @@ class BimpPDF_Table
 
     protected function writeRow($pdf, $cols, $row, $class = 'row')
     {
+        $nbRow = count($this->rows);
+        $nbRow = 1;
+        $coef = (200 - ($nbRow * 10)) / 100;//A 10 lignes on est en taille normal a 20 on est a 0
+        $cellpadding = $coef*$this->cellpadding;
+        
+        if($cellpadding < 0.5)
+            $cellpadding = 0.5;
+        
+        
         $html = '';
         $html .= '<table class="' . $class . '';
         foreach ($this->table_classes as $tableClass) {
@@ -111,7 +120,7 @@ class BimpPDF_Table
             $html .= ' ' . $prop . ': ' . $value . ';';
         }
         $html .= '" ';
-        $html .= 'cellspacing="' . $this->cellspacing . '" cellpadding="' . $this->cellpadding . '">';
+        $html .= 'cellspacing="' . $this->cellspacing . '" cellpadding="' . $cellpadding . '">';
         $html .= '<tr';
         if (isset($row['row_style'])) {
             $html .= ' style="' . $row['row_style'] . '"';

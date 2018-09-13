@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS `llx_bf_demande` (
   `montant_services` FLOAT NOT NULL DEFAULT '0.00', 
   `montant_logiciels` FLOAT NOT NULL DEFAULT '0.00',
   `commission_commerciale` FLOAT NOT NULL DEFAULT '0', 
-  `commission_financiere` FLOAT NOT NULL DEFAULT '0';
+  `commission_financiere` FLOAT NOT NULL DEFAULT '0',
   `status` INT NOT NULL DEFAULT '0', 
   `accepted` BOOLEAN NOT NULL DEFAULT FALSE,
   `id_client_contact` INT UNSIGNED NOT NULL DEFAULT '0',

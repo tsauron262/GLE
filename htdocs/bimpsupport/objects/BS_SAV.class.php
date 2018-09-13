@@ -75,6 +75,7 @@ class BS_SAV extends BimpObject
         'Attente désactivation de la localisation'
     );
     public static $systems_cache = null;
+    public $check_version = true;
 
     public function __construct($db)
     {
@@ -100,16 +101,14 @@ class BS_SAV extends BimpObject
     public function needEquipmentAttribution()
     {
         if ($this->isLoaded()) {
-            $sav_products = $this->getChildrenObjects('products');
-            foreach ($sav_products as $sav_product) {
-                if (!(int) $sav_product->getData('id_equipment')) {
-                    $product = $sav_product->getChildObject('product');
-                    if (!is_null($product) && $product->isLoaded()) {
-                        if ($product->getData('fk_product_type') === Product::TYPE_PRODUCT &&
-                                $product->isSerialisable()) {
-                            return 1;
-                        }
-                    }
+            BimpObject::loadClass('bimpsupport', 'BS_SavPropalLine');
+            $lines = $this->getChildrenObjects('propal_lines', array(
+                'type'               => BS_SavPropalLine::LINE_PRODUCT,
+                'linked_object_name' => ''
+            ));
+            foreach ($lines as $line) {
+                if ($line->hasEquipmentToAttribute()) {
+                    return 1;
                 }
             }
         }
@@ -585,12 +584,12 @@ class BS_SAV extends BimpObject
 
             // Réparation terminée: 
             if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {
-                if (!is_null($propal) && $propal_status > 0){
-                $buttons[] = array(
-                    'label'   => 'Réparation terminée',
-                    'icon'    => 'check',
-                    'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
-                );
+                if (!is_null($propal) && $propal_status > 0) {
+                    $buttons[] = array(
+                        'label'   => 'Réparation terminée',
+                        'icon'    => 'check',
+                        'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
+                    );
                 }
             }
 
@@ -639,25 +638,23 @@ class BS_SAV extends BimpObject
             }
 
             //Générer devis 
-            if (!is_null($propal) && $propal_status === 0 && $status !== self::BS_SAV_FERME) {
-                $buttons[] = array(
-                    'label'   => 'Générer devis',
-                    'icon'    => 'cogs',
-                    'onclick' => $this->getJsActionOnclick('generatePropal', array(), array(
-                        'confirm_msg' => "Attention, la proposition commerciale va être entièrement générée à partir des données du SAV.\\nTous les enregistrements faits depuis la fiche propale ne seront pas pris en compte"
-                    ))
-                );
-            }
-
+//            if (!is_null($propal) && $propal_status === 0 && $status !== self::BS_SAV_FERME) {
+//                $buttons[] = array(
+//                    'label'   => 'Générer devis',
+//                    'icon'    => 'cogs',
+//                    'onclick' => $this->getJsActionOnclick('generatePropal', array(), array(
+//                        'confirm_msg' => "Attention, la proposition commerciale va être entièrement générée à partir des données du SAV.\\nTous les enregistrements faits depuis la fiche propale ne seront pas pris en compte"
+//                    ))
+//                );
+//            }
             // Attribuer un équipement
-            if ($this->needEquipmentAttribution()) {
-                $buttons[] = array(
-                    'label'   => 'Attribuer un équipement',
-                    'icon'    => 'arrow-circle-right',
-                    'onclick' => $this->getJsActionOnclick('attibuteEquipment', array(), array('form_name' => 'equipment'))
-                );
-            }
-
+//            if ($this->needEquipmentAttribution()) {
+//                $buttons[] = array(
+//                    'label'   => 'Attribuer un équipement',
+//                    'icon'    => 'arrow-circle-right',
+//                    'onclick' => $this->getJsActionOnclick('attibuteEquipment', array(), array('form_name' => 'equipment'))
+//                );
+//            }
             // Créer Devis 
             if (is_null($propal) && $status < 999) {
                 $buttons[] = array(
@@ -699,7 +696,7 @@ class BS_SAV extends BimpObject
             if ((int) $this->getData('id_facture')) {
                 $facture = $this->getChildObject('facture');
                 if (!(int) $facture->dol_object->paye) {
-                    $paiement = BimpObject::getInstance('bimpcore', 'Bimp_Paiement');
+                    $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
                     $values = array(
                         'fields' => array(
                             'id_client'  => (int) $this->getData('id_client'),
@@ -716,6 +713,46 @@ class BS_SAV extends BimpObject
         }
 
         return $buttons;
+    }
+
+    public function getEquipmentSearchFilters(&$filters, $value)
+    {
+        $filters['or_equipment'] = array(
+            'or' => array(
+                'e.serial'        => array(
+                    'part_type' => 'middle', // ou middle ou end
+                    'part'      => $value
+                ),
+                'e.product_label' => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'e.warranty_type' => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                )
+            )
+        );
+    }
+
+    public function getEquipementSearchFilters(&$filters, $value)
+    {
+        $filters['or_equipment'] = array(
+            'or' => array(
+                'e.serial'        => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'e.product_label' => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+                'e.warranty_type' => array(
+                    'part_type' => 'middle',
+                    'part'      => $value
+                ),
+            )
+        );
     }
 
     // Affichage:
@@ -774,61 +811,49 @@ class BS_SAV extends BimpObject
 
         return '';
     }
-    
-    public function displayEquipment(){
+
+    public function displayEquipment()
+    {
         $return = "";
         $equipement = $this->getChildObject('equipment');
-        if($equipement->getData("product_label") != "")
-            $return .= $equipement->getData("product_label")."<br/>";
-        $return .= $equipement->getData("serial")."<br/>";
-        $return .= $equipement->getData("warranty_type");
+        if ((int) $equipement->getData('id_product')) {
+            $return .= $equipement->displayProduct('nom') . '<br/>';
+        }
+        if ($equipement->getData("product_label") != "") {
+            $return .= $equipement->getData("product_label") . '<br/>';
+        }
+        $return .= BimpObject::getInstanceNomUrlWithIcons($equipement);
+
+        if ((string) $equipement->getData('warranty_type') && (string) $equipement->getData('warranty_type') !== '0') {
+            $return .= '<br/>Type garantie: ' . $equipement->getData("warranty_type");
+        }
+
         return $return;
     }
-    
-    public function displayExtraSav(){
+
+    public function displayExtraSav()
+    {
         $equip = $this->getChildObject("equipment");
         $savS = BimpObject::getInstance('bimpsupport', 'BS_SAV');
         $list = $savS->getList(array('id_equipment' => $equip->id));
-        foreach($list as $arr){
-            if($arr['id'] != $this->id){
+        foreach ($list as $arr) {
+            if ($arr['id'] != $this->id) {
                 $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
                 $sav->fetch($arr['id']);
-                $return .= $sav->getNomUrl()."<br/>";
+                $return .= $sav->getNomUrl() . "<br/>";
             }
         }
-        
-        
+
+
         $repairS = BimpObject::getInstance('bimpapple', 'GSX_Repair');
         $list = $repairS->getList(array('id_sav' => $this->id));
-        foreach($list as $arr){
+        foreach ($list as $arr) {
             $reapir = BimpObject::getInstance('bimpapple', 'GSX_Repair');
-            $return .= "<a href='#gsx'>".$arr['repair_confirm_number']."</a><br/>";
+            $return .= "<a href='#gsx'>" . $arr['repair_confirm_number'] . "</a><br/>";
         }
-        
+
         return $return;
     }
-    
-    public function getEquipementSearchFilters(&$filters, $value)
-    {
-        $filters['or_equipment'] = array(
-            'or' => array(
-                'e.serial'         => array(
-                    'part_type' => 'middle', // ou middle ou end
-                    'part'      => $value
-                ),
-                'e.product_label'     => array(
-                    'part_type' => 'middle',
-                    'part'      => $value
-                ),
-                'e.warranty_type'     => array(
-                    'part_type' => 'middle',
-                    'part'      => $value
-                ),
-                // etc...
-            )
-        );
-    }
-    
 
     public function defaultDisplayEquipmentsItem($id_equipment)
     {
@@ -837,7 +862,7 @@ class BS_SAV extends BimpObject
             $label = '';
             if ((int) $equipment->getData('id_product')) {
                 $product = $equipment->config->getObject('', 'product');
-                if (!is_null($product) && isset($product->id) && $product->id) {
+                if (BimpObject::objectLoaded($product)) {
                     $label = $product->label;
                 } else {
                     return BimpRender::renderAlerts('Equipement ' . $id_equipment . ': Produit associé non trouvé');
@@ -870,7 +895,7 @@ class BS_SAV extends BimpObject
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
                         $onclick = $this->getJsActionOnclick('correctAcompteModePaiement', array('id_paiement' => (int) $r['rowid']), array(
-                            'form_name' => 'acompte_mode_paiement',
+                            'form_name'        => 'acompte_mode_paiement',
                             'success_callback' => 'function() {window.location.reload();}'
                         ));
 
@@ -881,6 +906,76 @@ class BS_SAV extends BimpObject
                     }
                 }
             }
+        }
+
+        return $html;
+    }
+
+    public function renderPropalView()
+    {
+        $html = '';
+        if ((int) $this->isLoaded()) {
+            if ((int) $this->getData('id_propal')) {
+                $propal = $this->getChildObject('propal');
+                if (BimpObject::objectLoaded($propal)) {
+                    $view = new BC_View($propal, 'sav', 0, 1, 'Devis ' . $propal->getRef(), 'fas_file-invoice');
+                    $html .= $view->renderHtml();
+                }
+
+                $instance = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+                $list = new BC_ListTable($instance, 'default', 1, (int) $this->getData('id_propal'), 'Lignes du devis');
+                $html .= $list->renderHtml();
+            }
+        }
+
+        return $html;
+    }
+
+    public function renderPropalesList()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $asso = new BimpAssociation($this, 'propales');
+            $list = $asso->getAssociatesList();
+
+//            echo '<pre>';
+//            print_r($list);
+//            exit;
+            if (count($list)) {
+                krsort($list);
+                $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal');
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th>Réf.</th>';
+                $html .= '<th>Statut</th>';
+                $html .= '<th>Montant TTC</th>';
+                $html .= '<th>Fichier</th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+                $html .= '<tbody>';
+
+                foreach ($list as $id_propal) {
+                    if ($propal->fetch($id_propal)) {
+                        $html .= '<tr>';
+                        $html .= '<td>' . $propal->getRef() . '</td>';
+                        $html .= '<td>' . $propal->displayData('fk_statut') . '</td>';
+                        $html .= '<td>' . $propal->displayData('total') . '</td>';
+                        $html .= '<td>' . $propal->displayPDFButton(false) . '</td>';
+                        $html .= '</tr>';
+                    }
+                }
+
+                $html .= '</tbody>';
+                $html .= '</table>';
+            }
+
+            $html = BimpRender::renderPanel('Propositions commerciales (devis)', $html, '', array(
+                        'type'     => 'secondary',
+                        'foldable' => true,
+                        'icon'     => 'fas_file-invoice'
+            ));
         }
 
         return $html;
@@ -920,7 +1015,7 @@ class BS_SAV extends BimpObject
         switch ($new_status) {
             case self::BS_SAV_EXAM_EN_COURS:
                 if (!in_array($current_status, self::$propal_reviewable_status)) {
-                    $errors[] = $error_msg . ' (statut actuel invalide : '.$current_status.')';
+                    $errors[] = $error_msg . ' (statut actuel invalide : ' . $current_status . ')';
                 }
                 break;
 
@@ -1125,36 +1220,42 @@ class BS_SAV extends BimpObject
             $prop->date = dol_now();
             $prop->cond_reglement_id = 0;
             $prop->mode_reglement_id = 0;
-            
-
-            $prop->array_options['options_type'] = "S";
-            $prop->array_options['options_entrepot'] = $this->getData("id_entrepot");
-            $prop->array_options['options_libelle'] = $this->getData("ref");
 
             if ($prop->create($user) <= 0) {
                 $errors[] = 'Echec de la création de la propale';
                 BimpTools::getErrorsFromDolObject($prop, $errors, $langs);
             } else {
+                $prop->array_options['options_type'] = "S";
+                $prop->array_options['options_entrepot'] = (int) $this->getData("id_entrepot");
+                $prop->array_options['options_libelle'] = $this->getRef();
+                $prop->update_extrafields($user);
                 if ($id_contact) {
                     $prop->add_contact($id_contact, 40);
                     $prop->add_contact($id_contact, 41);
                 }
 
-                $this->set('id_propal', $prop->id);
+                $this->updateField('id_propal', (int) $prop->id);
+                $asso = new BimpAssociation($this, 'propales');
+                $asso->addObjectAssociation((int) $prop->id);
 
                 if ($this->getData("id_facture_acompte"))
                     addElementElement("propal", "facture", $prop->id, $this->getData("id_facture_acompte"));
-
-                if ($update)
-                    $this->update();
             }
         }
 
         return $errors;
     }
 
-    public function generatePropal()
+    public function generatePropalLines()
     {
+        if (!$this->isLoaded()) {
+            return array('ID du SAV absent');
+        }
+
+        if (!$this->isPropalEditable()) {
+            return array('Le devis ne peut pas être modifié. Veuillez mettre le devis en révision');
+        }
+
         global $langs, $user;
 
         $errors = array();
@@ -1183,23 +1284,75 @@ class BS_SAV extends BimpObject
 
         $prop->set_ref_client($user, $this->getData('prestataire_number'));
 
-        if ($prop->statut > 0) {
-            return array('Cette propale doit être révisée pour pouvoir être re-générée');
-        }
-
-        $prop->fetch_lines();
-        foreach ($prop->lines as $line) {
-            $line->delete();
-        }
-
         define("NOT_VERIF", true);
 
+        $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+        $line->no_equipment_post = true;
+
+        // Acompte: 
         if ($this->getData('id_discount') > 0) {
             BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
             $discount = new DiscountAbsolute($this->db->db);
             $discount->fetch($this->getData('id_discount'));
-            $prop->addline("Acompte", -$discount->amount_ht, 1, 20, 0, 0, 0, 0, 'HT', -($discount->amount_ttc), 0, 1, 0, 0, 0, 0, -$discount->amount_ht, null, null, null, null, null, null, null, null, $discount->id);
+
+            $line->find(array(
+                'id_obj'             => $prop->id,
+                'linked_object_name' => 'sav_discount',
+                'linked_id_object'   => (int) $discount->id
+            ));
+
+            $line_errors = $line->validateArray(array(
+                'id_obj'             => (int) $prop->id,
+                'type'               => BS_SavPropalLine::LINE_FREE,
+                'deletable'          => 0,
+                'editable'           => 0,
+                'linked_id_object'   => (int) $discount->id,
+                'linked_object_name' => 'sav_discount'
+            ));
+
+            if (!count($line_errors)) {
+                // (infobits = 1 ??) 
+                $line->desc = 'Acompte';
+                $line->id_product = 0;
+                $line->pu_ht = -$discount->amount_ht;
+                $line->pa_ht = -$discount->amount_ht;
+                $line->qty = 1;
+                $line->tva_tx = 20;
+                $line->id_remise_except = (int) $discount->id;
+                $line->remise = 0;
+
+                $line_warnings = array();
+                $error_label = '';
+                if (!$line->isLoaded()) {
+                    $error_label = 'création';
+                    $line_errors = $line->create($line_warnings, true);
+                } else {
+                    $error_label = 'mise à jour';
+                    $line_errors = $line->update($line_warnings, true);
+                }
+
+                $line_errors = array_merge($line_errors, $line_warnings);
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne d\'acompte');
+                }
+            }
         }
+
+        // Prise en charge: 
+        $line->find(array(
+            'id_obj'             => (int) $prop->id,
+            'linked_object_name' => 'sav_pc',
+            'linked_id_object'   => (int) $this->id
+        ));
+
+        $line->validateArray(array(
+            'id_obj'             => (int) $prop->id,
+            'type'               => BS_SavPropalLine::LINE_TEXT,
+            'deletable'          => 0,
+            'editable'           => 0,
+            'linked_id_object'   => (int) $this->id,
+            'linked_object_name' => 'sav_pc'
+        ));
 
         $ref = $this->getData('ref');
         $equipment = $this->getChildObject('equipment');
@@ -1208,17 +1361,27 @@ class BS_SAV extends BimpObject
             $serial = $equipment->getData('serial');
         }
 
-//        $prop->addline("Prise en charge :  : " . $ref .
-//                "\n" . "S/N : " . $serial .
-//                "\n" . "Garantie :
-//Pour du matériel couvert par Apple, la garantie initiale s'applique.
-//Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
-//Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.
-//Une garantie de 30 jours est appliquée pour les réparations logicielles.
-//", 0, 1, 0, 0, 0, 0, (!is_null($client) ? $client->dol_object->remise_percent : 0), 'HT', 0, 0, 3);
+        $line->desc = 'Prise en charge : ' . $ref . '<br/>';
+        $line->desc .= 'S/N : ' . $serial . '<br/>';
+        $line->desc .= 'Garantie : pour du matériel couvert par Apple, la garantie initiale s\'applique. Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d\'oeuvre.';
+        $line->desc .= 'Les pannes logicielles ne sont pas couvertes par la garantie du fabricant. Une garantie de 30 jours est appliquée pour les réparations logicielles.';
 
+        $line_warnings = array();
+        $error_label = '';
+        if (!$line->isLoaded()) {
+            $error_label = 'création';
+            $line_errors = $line->create($line_warnings, true);
+        } else {
+            $error_label = 'mise à jour';
+            $line_errors = $line->update($line_warnings, true);
+        }
 
-        // Ajout du service prioritaire:
+        $line_errors = array_merge($line_errors, $line_warnings);
+        if (count($line_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne de prise en charge');
+        }
+
+        // Service prioritaire: 
         if ((int) $this->getData('prioritaire')) {
             require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
             $prodF = new ProductFournisseur($this->db->db);
@@ -1226,67 +1389,267 @@ class BS_SAV extends BimpObject
             $prodF->tva_tx = ($prodF->tva_tx > 0) ? $prodF->tva_tx : 0;
             $prodF->find_min_price_product_fournisseur($prodF->id, 1);
 
-            $prop->addline($prodF->description, $prodF->price, 1, $prodF->tva_tx, 0, 0, $prodF->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
+            $line->find(array(
+                'id_obj'             => $prop->id,
+                'linked_object_name' => 'sav_prioritaire',
+                'linked_id_object'   => (int) $this->id
+            ));
+
+            $line->validateArray(array(
+                'id_obj'             => (int) $prop->id,
+                'type'               => BS_SavPropalLine::LINE_PRODUCT,
+                'deletable'          => 0,
+                'editable'           => 0,
+                'linked_id_object'   => (int) $this->id,
+                'linked_object_name' => 'sav_prioritaire',
+                'out_of_warranty'    => 1
+            ));
+
+            $line->desc = '';
+            $line->id_product = (int) self::$idProdPrio;
+            $line->pu_ht = $prodF->price;
+            $line->pa_ht = (float) $prodF->fourn_price;
+            $line->id_fourn_price = (int) $prodF->product_fourn_price_id;
+            $line->qty = 1;
+            $line->tva_tx = $prodF->tva_tx;
+            $line->remise = 0;
+
+            $line_warnings = array();
+            $error_label = '';
+            if (!$line->isLoaded()) {
+                $error_label = 'création';
+                $line_errors = $line->create($line_warnings, true);
+            } else {
+                $error_label = 'mise à jour';
+                $line_errors = $line->update($line_warnings, true);
+            }
+
+            $line_errors = array_merge($line_errors, $line_warnings);
+            if (count($line_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne "SAV prioritaire"');
+            }
         }
 
-        //Ajout diagnostique
-        if ($this->getData('diagnostic') != "") {
-            $prop->addline("Diagnostic : " . $this->getData('diagnostic'), 0, 1, 0, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 3);
+        // Garantie: 
+        $error = $this->processPropalGarantie();
+        if ($error) {
+            $errors[] = $error;
+        }
+
+        // Diagnostic: 
+        $line->find(array(
+            'id_obj'             => $prop->id,
+            'linked_object_name' => 'sav_diagnostic',
+            'linked_id_object'   => (int) $this->id
+        ));
+
+        $line_errors = array();
+
+        if ((string) $this->getData('diagnostic')) {
+            $line->validateArray(array(
+                'id_obj'             => (int) $prop->id,
+                'type'               => BS_SavPropalLine::LINE_TEXT,
+                'deletable'          => 0,
+                'editable'           => 0,
+                'linked_id_object'   => (int) $this->id,
+                'linked_object_name' => 'sav_diagnostic'
+            ));
+
+            $line->desc = 'Diagnostic : ' . $this->getData('diagnostic');
+
+            $line_warnings = array();
+            $error_label = '';
+            if (!$line->isLoaded()) {
+                $error_label = 'création';
+                $line_errors = $line->create($line_warnings, true);
+            } else {
+                $error_label = 'mise à jour';
+                $line_errors = $line->update($line_warnings, true);
+            }
+
+            $line_errors = array_merge($line_errors, $line_warnings);
+        } else {
+            if ($line->isLoaded()) {
+                $error_label = 'suppression';
+                $line_errors = $line->delete(true);
+            }
+        }
+
+        if (count($line_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne "Diagnostic"');
+        }
+
+        // Infos Suppl: 
+        $line->find(array(
+            'id_obj'             => $prop->id,
+            'linked_object_name' => 'sav_extra_infos',
+            'linked_id_object'   => (int) $this->id
+        ));
+
+        $line_errors = array();
+        if ((string) $this->getData('extra_infos')) {
+            $line->validateArray(array(
+                'id_obj'             => (int) $prop->id,
+                'type'               => BS_SavPropalLine::LINE_TEXT,
+                'deletable'          => 0,
+                'editable'           => 0,
+                'linked_id_object'   => (int) $this->id,
+                'linked_object_name' => 'sav_extra_infos'
+            ));
+
+            $line->desc = $this->getData('extra_infos');
+
+            $line_warnings = array();
+            $error_label = '';
+            if (!$line->isLoaded()) {
+                $error_label = 'création';
+                $line_errors = $line->create($line_warnings, true);
+            } else {
+                $error_label = 'mise à jour';
+                $line_errors = $line->update($line_warnings, true);
+            }
+            $line_errors = array_merge($line_errors, $line_warnings);
+        } else {
+            if ($line->isLoaded()) {
+                $error_label = 'suppression';
+                $line_errors = $line->delete(true);
+            }
+        }
+
+        if (count($line_errors)) {
+            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne "Informations supplémentaires"');
+        }
+
+        return $errors;
+    }
+
+    public function processPropalGarantie(Propal $propal = null)
+    {
+        if (!$this->isLoaded()) {
+            return 'ID du SAV absent';
+        }
+
+        if (!$this->isPropalEditable()) {
+            return '';
+        }
+
+        $this->allGarantie = true;
+
+        if (is_null($propal)) {
+            $bProp = $this->getChildObject('propal');
+            if (BimpObject::objectLoaded($bProp)) {
+                $propal = $bProp->dol_object;
+            }
+        }
+
+        if (!BimpObject::objectLoaded($propal)) {
+            return 'Devis absent ou invalide';
         }
 
         $garantieHt = $garantieTtc = $garantiePa = 0;
 
-        //Ajout des prod apple
-        foreach ($this->getChildrenObjects("products") as $prod) {
-            $prodG = new Product($this->db->db);
-            $prodG->fetch($prod->getData("id_product"));
-            $remise = $prod->getData("remise");
-            $coefRemise = (100 - $remise) / 100;
-            require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
-            $prodF = new ProductFournisseur($this->db->db);
-            $prodF->find_min_price_product_fournisseur($prodG->id, $prod->getData("qty"));
-            $prop->addline($prodG->description, $prodG->price, $prod->getData("qty"), $prodG->tva_tx, 0, 0, $prodG->id, $client->dol_object->remise_percent + $remise, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
-            if (!$prod->getData("out_of_warranty")) {
-                $garantieHt += $prodG->price * $prod->getData("qty") * $coefRemise;
-                $garantieTtc += $prodG->price * $prod->getData("qty") * ($prodG->tva_tx / 100) * $coefRemise;
-                $garantiePa += $prodF->fourn_price * $prod->getData("qty");
-            } else
+        $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+        foreach ($this->getChildrenObjects('propal_lines', array(
+            'type'               => BS_SavPropalLine::LINE_PRODUCT,
+            'linked_id_object'   => 0,
+            'linked_object_name' => ''
+        )) as $line) {
+            if ((int) $line->id_product) {
+                if ($product->fetch((int) $line->id_product)) {
+                    if (!(int) $line->getData('out_of_warranty')) {
+                        $remise = (float) $line->remise;
+                        $coefRemise = (100 - $remise) / 100;
+                        $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
+                        $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
+                        $garantiePa += (float) $line->pa_ht * (float) $line->qty;
+                    } else {
+                        $this->allGarantie = false;
+                    }
+                }
+            }
+        }
+
+        foreach ($this->getChildrenObjects('propal_lines', array(
+            'linked_object_name' => 'sav_apple_part'
+        )) as $line) {
+            if (!(int) $line->getData('out_of_warranty')) {
+                $garantieHt += ((float) $line->pu_ht * (float) $line->qty);
+                $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100));
+                $garantiePa += (float) $line->pa_ht * (float) $line->qty;
+            } else {
                 $this->allGarantie = false;
+            }
         }
 
-        //Ajout des Prod non Apple
+        $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
 
-        foreach ($this->getChildrenObjects("apple_parts") as $prod) {
-            $tva = 20;
-            $price = ($prod->getData("no_order") || $prod->getData("exchange_price") < 1) ? $prod->getData("stock_price") : $prod->getData("exchange_price");
-            $price2 = BS_ApplePart::convertPrix($price, $prod->getData("part_number"), $prod->getData("label"));
-            $label = $prod->getData("part_number") . " - " . $prod->getData("label");
-            $label .= ($prod->getData("no_order")) ? " APPRO" : "";
-            $prop->addline($label, $price2, $prod->getData("qty"), $tva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', null, null, null, null, null, null, null, $price);
-            if (!$prod->getData("out_of_warranty")) {
-                $garantieHt += $price2 * $prod->getData("qty");
-                $garantieTtc += $price2 * $prod->getData("qty") * ($tva / 100);
-                $garantiePa += $price * $prod->getData("qty");
-            } else
-                $this->allGarantie = false;
+        $rows = $line->getList(array(
+            'id_obj'             => (int) $propal->id,
+            'linked_id_object'   => (int) $this->id,
+            'linked_object_name' => 'sav_garantie'
+                ), null, null, 'position', 'asc', 'array', array('id'));
+
+        if ($rows > 1) {
+            foreach ($rows as $idx => $r) {
+                if ($idx === 0) {
+                    continue;
+                }
+                $line->fetch((int) $r['id']);
+                $line->delete();
+            }
         }
 
-        //Ajout garantie
-        if ($garantieHt > 0) {
-            $tva = 100 * $garantieTtc / $garantieHt;
-            $prop->addline("Garantie", -($garantieHt), 1, $tva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$garantiePa);
+        if (isset($rows[0]['id']) && (int) $rows[0]['id']) {
+            $line->fetch((int) $rows[0]['id']);
         }
 
-        // Ajout infos supplémentaires:
-        if ($this->getData('extra_infos') != "") {
-            $prop->addline($this->getData('extra_infos'), 0, 1, 0, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 3);
+        $line_errors = array();
+
+        if ((float) $garantieHt > 0) {
+            $line->validateArray(array(
+                'id_obj'             => (int) $propal->id,
+                'type'               => BS_SavPropalLine::LINE_FREE,
+                'deletable'          => 0,
+                'editable'           => 0,
+                'linked_id_object'   => (int) $this->id,
+                'linked_object_name' => 'sav_garantie'
+            ));
+
+            $line->desc = 'Garantie';
+            $line->id_product = 0;
+            $line->pu_ht = -$garantieHt;
+            $line->pa_ht = -$garantiePa;
+            $line->id_fourn_price = 0;
+            $line->qty = 1;
+            if ((float) $garantieHt) {
+                $line->tva_tx = 100 * ($garantieTtc / $garantieHt);
+            } else {
+                $line->tva_tx = 0;
+            }
+            $line->remise = 0;
+
+            $line_warnings = array();
+            $error_label = '';
+            if (!$line->isLoaded()) {
+                $error_label = 'création';
+                $line_errors = $line->create($line_warnings, true);
+            } else {
+                $error_label = 'mise à jour';
+                $line_errors = $line->update($line_warnings, true);
+            }
+            $line_errors = array_merge($line_errors, $line_warnings);
+        } else {
+            if ($line->isLoaded()) {
+                $error_label = 'suppression';
+                $line_errors = $line->delete(true);
+            }
         }
 
-        require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
-        $prop->fetch($prop->id);
-        $prop->generateDocument(self::$propal_model_pdf, $langs);
+        if (count($line_errors)) {
+            return BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne "Garantie"');
+        }
 
-        return $errors;
+        return '';
     }
 
     public function sendMsg($msg_type = '')
@@ -1580,13 +1943,9 @@ class BS_SAV extends BimpObject
 
     public function setAllStatutWarranty($garantie = false)
     {
-        foreach ($this->getChildrenObjects("products") as $prod) {
-            $prod->set("out_of_warranty", $garantie ? "0" : "1");
-            $prod->update();
-        }
-        foreach ($this->getChildrenObjects("apple_parts") as $prod) {
-            $prod->set("out_of_warranty", $garantie ? "0" : "1");
-            $prod->update();
+        foreach ($this->getChildrenObjects("propal_lines") as $line) {
+            $line->set("out_of_warranty", $garantie ? "0" : "1");
+            $line->update();
         }
     }
 
@@ -1597,38 +1956,73 @@ class BS_SAV extends BimpObject
         if ($this->isLoaded()) {
             $errors = $this->removeReservations();
             if (!count($errors)) {
-                $error_msg = 'Echec de la création de la réservation pour le produit';
-                $sav_products = $this->getChildrenObjects('products');
+                BimpObject::loadClass('bimpcommercial', 'ObjectLine');
+                $error_msg = 'Echec de la création de la réservation';
+                $lines = $this->getChildrenObjects('propal_lines', array(
+                    'type'               => ObjectLine::LINE_PRODUCT,
+                    'linked_object_name' => ''
+                ));
+
                 $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+                $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
 
-                foreach ($sav_products as $sav_product) {
-                    if (!is_null($sav_product) && $sav_product->isLoaded()) {
-                        $product = $sav_product->getChildObject('product');
-                        if (!is_null($product) && $product->isLoaded() && (int) $product->getData('fk_product_type') === Product::TYPE_PRODUCT) {
-                            $reservation->reset();
-                            $prod_errors = $reservation->validateArray(array(
-                                'id_sav'         => (int) $this->id,
-                                'id_sav_product' => (int) $sav_product->id,
-                                'id_entrepot'    => (int) $this->getData('id_entrepot'),
-                                'id_product'     => (int) $product->id,
-                                'id_equipment'   => (int) $sav_product->getData('id_equipment'),
-                                'type'           => BR_Reservation::BR_RESERVATION_SAV,
-                                'status'         => 203,
-                                'id_commercial'  => (int) $this->getData('id_user_tech'),
-                                'id_client'      => (int) $this->getData('id_client'),
-                                'qty'            => (int) $sav_product->getData('qty'),
-                                'date_from'      => date('Y-m-d H:i:s')
-                            ));
-                            if (!count($prod_errors)) {
-                                $prod_errors = $reservation->create();
-                            }
+                foreach ($lines as $line) {
+                    if (BimpObject::objectLoaded($line)) {
+                        if (!(int) $line->id_product) {
+                            continue;
+                        }
+                        if ($product->fetch((int) $line->id_product)) {
+                            if ((int) $product->getData('fk_product_type') === Product::TYPE_PRODUCT) {
+                                if ($product->isSerialisable()) {
+                                    $eq_lines = $line->getEquipmentLines();
+                                    foreach ($eq_lines as $eq_line) {
+                                        $reservation->reset();
+                                        $res_errors = $reservation->validateArray(array(
+                                            'id_sav'             => (int) $this->id,
+                                            'id_sav_propal_line' => (int) $line->id,
+                                            'id_entrepot'        => (int) $this->getData('id_entrepot'),
+                                            'id_product'         => (int) $product->id,
+                                            'id_equipment'       => (int) $eq_line->getData('id_equipment'),
+                                            'type'               => BR_Reservation::BR_RESERVATION_SAV,
+                                            'status'             => 203,
+                                            'id_commercial'      => (int) $this->getData('id_user_tech'),
+                                            'id_client'          => (int) $this->getData('id_client'),
+                                            'qty'                => 1,
+                                            'date_from'          => date('Y-m-d H:i:s')
+                                        ));
 
-                            if (count($prod_errors)) {
-                                $errors[] = $error_msg .= ' "' . $product->id . '"';
-                                $errors = array_merge($errors, $prod_errors);
-                            } else {
-                                $sav_product->set('id_reservation', $reservation->id);
-                                $errors = array_merge($errors, $sav_product->update());
+                                        if (!count($res_errors)) {
+                                            $res_errors = $reservation->create();
+                                        }
+
+                                        if (count($res_errors)) {
+                                            $msg = $error_msg . ' le produit "' . BimpObject::getInstanceNom($product) . '"';
+                                            $errors[] = BimpTools::getMsgFromArray($res_errors, $msg);
+                                        }
+                                    }
+                                } else {
+                                    $reservation->reset();
+                                    $res_errors = $reservation->validateArray(array(
+                                        'id_sav'             => (int) $this->id,
+                                        'id_sav_propal_line' => (int) $line->id,
+                                        'id_entrepot'        => (int) $this->getData('id_entrepot'),
+                                        'id_product'         => (int) $product->id,
+                                        'id_equipment'       => 0,
+                                        'type'               => BR_Reservation::BR_RESERVATION_SAV,
+                                        'status'             => 203,
+                                        'id_commercial'      => (int) $this->getData('id_user_tech'),
+                                        'id_client'          => (int) $this->getData('id_client'),
+                                        'qty'                => (int) $line->qty,
+                                        'date_from'          => date('Y-m-d H:i:s')
+                                    ));
+                                    if (!count($res_errors)) {
+                                        $res_errors = $reservation->create();
+                                    }
+
+                                    if (count($res_errors)) {
+                                        $errors[] = BimpTools::getMsgFromArray($res_errors, $error_msg . ' pour le produit "' . BimpObject::getInstanceNom($product) . '"');
+                                    }
+                                }
                             }
                         }
                     }
@@ -1653,10 +2047,6 @@ class BS_SAV extends BimpObject
                             ), $delete_errors, true)) {
                 $errors[] = BimpTools::getMsgFromArray($delete_errors, 'Echec de la suppression des réservations actuelles');
             }
-
-            $this->db->update('bs_sav_product', array(
-                'id_reservation' => 0
-                    ), '`id_sav` = ' . (int) $this->id);
         } else {
             $errors[] = 'Echec de la suppression des réservations actuelles (ID du SAV absent)';
         }
@@ -1674,42 +2064,18 @@ class BS_SAV extends BimpObject
                 'type'   => BR_Reservation::BR_RESERVATION_SAV
             ));
             if (!is_null($list) && count($list)) {
-                $sav_product = BimpObject::getInstance('bimpsupport', 'BS_SavProduct');
 
                 foreach ($list as $item) {
                     if ($reservation->fetch((int) $item['id'])) {
                         $qty = null;
-                        $id_equipment = null;
                         $reservation->set('status', $status);
-                        if ($reservation->isProductSerialisable()) {
-                            $qty = 1;
-                            if (!$sav_product->find(array(
-                                        'id_reservation' => (int) $reservation->id
-                                    ))) {
-                                $errors[] = 'Produit du sav non trouvé pour la réservation "' . $reservation->getData('ref') . '"';
-                                continue;
-                            }
-
-                            $id_equipment = (int) $sav_product->getData('id_equipment');
-                            if (!$id_equipment) {
-                                $prod = $sav_product->getChildObject('product');
-                                if (!is_null($prod) && $prod->isLoaded()) {
-                                    $prod_label = $prod->getData('ref') . ' - ' . $prod->getData('label');
-                                } else {
-                                    $prod_label = 'inconnu';
-                                }
-                                $errors[] = 'Attribution d\'un équipement obligatoire pour le produit "' . $prod_label . '"';
-                                continue;
-                            }
-                        }
-
-                        $res_errors = $reservation->setNewStatus($status, $qty, $id_equipment);
+                        $res_errors = $reservation->setNewStatus($status, $qty, $reservation->getData('id_equipment'));
                         if (!count($res_errors)) {
                             $res_errors = $reservation->update();
                         }
                         if (count($res_errors)) {
-                            $errors[] = 'Echec de la mise à jour du statut pour la réservation "' . $reservation->getData('ref') . '"';
-                            $errors = array_merge($errors, $res_errors);
+                            $msg = 'Echec de la mise à jour du statut pour la réservation "' . $reservation->getData('ref') . '"';
+                            $errors[] = BimpTools::getMsgFromArray($res_errors, $msg);
                         }
                     } else {
                         $errors[] = 'La réservation d\'ID "' . $item['id'] . '" n\'existe plus';
@@ -1719,6 +2085,206 @@ class BS_SAV extends BimpObject
         } else {
             BimpObject::loadClass('bimpreservation', 'BR_Reservation');
             $errors[] = 'ID du SAV absent. Impossible de passer les réservations de produit au status "' . BR_Reservation::$status_list[$status]['label'] . '"';
+        }
+
+        return $errors;
+    }
+
+    public function convertSav(Equipment $equipment = null)
+    {
+        $errors = array();
+
+        if (is_null($equipment)) {
+            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+        }
+
+        BimpObject::loadClass('bimpsupport', 'BS_SavPropalLine');
+
+        if (!(int) $this->isLoaded()) {
+            $errors[] = 'SAV invalide';
+        }
+
+        $id_propal = (int) $this->getData('id_propal');
+        if (!(int) $id_propal) {
+            $errors[] = 'ID Propale invalide';
+        }
+
+        if (!count($errors)) {
+            $version = (float) $this->getData('version');
+            if ($version < 1.0) {
+                $asso = new BimpAssociation($this, 'propales');
+                $asso->addObjectAssociation((int) $id_propal);
+
+                $this->db->delete('bs_sav_propal_line', '`id_obj` = ' . (int) $id_propal);
+
+                $lines = $this->db->getRows('propaldet', 'fk_propal = ' . (int) $id_propal, null, 'array');
+                $sav_products = $this->db->getRows('bs_sav_product', '`id_sav` = ' . (int) $this->id, null, 'array');
+                $apple_parts = $this->db->getRows('bs_apple_part', '`id_sav` = ' . (int) $this->id, null, 'array');
+                $remain_lines = array();
+                $id_sav_product = 0;
+
+                if (!is_null($lines)) {
+                    $i = 1;
+                    foreach ($lines as $line) {
+                        $data = array(
+                            'id_obj'             => (int) $id_propal,
+                            'id_line'            => (int) $line['rowid'],
+                            'type'               => 0,
+                            'deletable'          => 0,
+                            'editable'           => 0,
+                            'linked_id_object'   => 0,
+                            'linked_object_name' => '',
+                            'id_reservation'     => 0,
+                            'out_of_warranty'    => 1,
+                            'position'           => (int) $line['rang']
+                        );
+                        $insert = false;
+                        if ((string) $line['description']) {
+                            if ((int) $this->getData('id_discount') && $line['description'] === 'Acompte') {
+                                $data['type'] = BS_SavPropalLine::LINE_FREE;
+                                $data['linked_object_name'] = 'sav_discount';
+                                $data['linked_id_object'] = (int) $this->getData('id_discount');
+                                $insert = true;
+                            } elseif (preg_match('/^Prise en charge.*$/', $line['description'])) {
+                                $data['type'] = BS_SavPropalLine::LINE_TEXT;
+                                $data['linked_object_name'] = 'sav_pc';
+                                $data['linked_id_object'] = (int) $this->id;
+                                $insert = true;
+                            } elseif (preg_match('/^Diagnostic :.*$/', $line['description'])) {
+                                $data['type'] = BS_SavPropalLine::LINE_TEXT;
+                                $data['linked_object_name'] = 'sav_diagnostic';
+                                $data['linked_id_object'] = (int) $this->id;
+                                $insert = true;
+                            } elseif ($line['description'] === $this->getData('extra_infos')) {
+                                $data['type'] = BS_SavPropalLine::LINE_TEXT;
+                                $data['linked_object_name'] = 'sav_extra_infos';
+                                $data['linked_id_object'] = (int) $this->id;
+                                $insert = true;
+                            } elseif (preg_match('/^Garantie.*$/', $line['description'])) {
+                                $data['type'] = BS_SavPropalLine::LINE_FREE;
+                                $data['linked_object_name'] = 'sav_garantie';
+                                $data['linked_id_object'] = (int) $this->id;
+                                $insert = true;
+                            }
+                        }
+                        if (!$insert) {
+                            if ((int) $line['fk_product']) {
+                                if ((int) $line['fk_product'] === BS_SAV::$idProdPrio) {
+                                    $data['type'] = BS_SavPropalLine::LINE_PRODUCT;
+                                    $data['linked_object_name'] = 'sav_prioritaire';
+                                    $data['linked_id_object'] = (int) $this->id;
+                                    $insert = true;
+                                } else {
+                                    if (!is_null($sav_products)) {
+                                        foreach ($sav_products as $idx => $sp) {
+                                            if ((int) $sp['id_product'] === (int) $line['fk_product'] &&
+                                                    (float) $sp['qty'] === (float) $line['qty'] &&
+                                                    (float) $sp['remise'] === (float) $line['remise_percent']) {
+                                                $data['type'] = BS_SavPropalLine::LINE_PRODUCT;
+                                                $data['out_of_warranty'] = (int) $sp['out_of_warranty'];
+                                                $data['deletable'] = 1;
+                                                $data['editable'] = 1;
+                                                $data['def_pu_ht'] = (float) $line['subprice'];
+                                                $data['def_tva_tx'] = (float) $line('tva_tx');
+                                                $data['def_id_fourn_price'] = (int) $line['fk_product_fournisseur_price'];
+                                                $insert = true;
+                                                unset($sav_products[$idx]);
+                                                $insert = true;
+                                                $id_sav_product = (int) $sp['id'];
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        if (!$insert) {
+                            if (!is_null($apple_parts)) {
+                                foreach ($apple_parts as $idx => $part) {
+                                    $label = $part['part_number'] . ' - ' . $part['label'];
+                                    if (strpos($line['description'], $label) !== false) {
+                                        $data['type'] = BS_SavPropalLine::LINE_FREE;
+                                        $data['linked_object_name'] = 'sav_apple_part';
+                                        $data['linked_id_object'] = (int) $part['id'];
+                                        $data['out_of_warranty'] = (int) $part['out_of_warranty'];
+                                        unset($apple_parts[$idx]);
+                                        $insert = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if ($insert) {
+                            $id_new_line = (int) $this->db->insert('bs_sav_propal_line', $data, true);
+                            if ($id_new_line <= 0) {
+                                $errors[] = 'Echec insertion ligne propale n°' . $i . ' - ' . $this->db->db->lasterror();
+                            } else {
+                                if ($id_sav_product) {
+                                    if ($this->db->update('br_reservation', array(
+                                                'id_sav_propal_line' => $id_new_line
+                                                    ), '`id_sav_product` = ' . $id_sav_product) <= 0) {
+                                        $errors[] = 'Echec mise à jour de la réservation pour la ligne propale n°' . $i . ' - ' . $this->db->db->lasterror();
+                                    }
+                                }
+                                if ((float) $line['remise_percent']) {
+                                    if ($this->db->insert('object_line_remise', array(
+                                                'id_object_line' => (int) $id_new_line,
+                                                'object_type'    => 'sav_propal',
+                                                'label'          => '',
+                                                'type'           => 1,
+                                                'percent'        => (float) $line['remise_percent'],
+                                                'montant'        => 0,
+                                                'per_unit'       => 0
+                                            )) <= 0) {
+                                        $errors[] = 'Echec de la création de la remise pour la ligne n°' . $i . ' - ' . $this->db->db->lasterror();
+                                    }
+                                }
+                            }
+                        } else {
+                            $remain_lines[$i] = $line;
+                        }
+
+                        $i++;
+                    }
+
+                    foreach ($remain_lines as $i => $line) {
+                        $data = array(
+                            'id_obj'             => (int) $id_propal,
+                            'id_line'            => (int) $line['rowid'],
+                            'type'               => BS_SavPropalLine::LINE_FREE,
+                            'deletable'          => 1,
+                            'editable'           => 1,
+                            'linked_id_object'   => 0,
+                            'linked_object_name' => '',
+                            'id_reservation'     => 0,
+                            'out_of_warranty'    => 1,
+                            'position'           => (int) $line['rang']
+                        );
+                        $id_new_line = (int) $this->db->insert('bs_sav_propal_line', $data, true);
+                        if ($id_new_line <= 0) {
+                            $errors[] = 'Echec insertion ligne propale n°' . $i . ' - ' . $this->db->db->lasterror();
+                        } else {
+                            if ((float) $line['remise_percent']) {
+                                if ($this->db->insert('object_line_remise', array(
+                                            'id_object_line' => (int) $id_new_line,
+                                            'object_type'    => 'sav_propal',
+                                            'label'          => '',
+                                            'type'           => 1,
+                                            'percent'        => (float) $line['remise_percent'],
+                                            'montant'        => 0,
+                                            'per_unit'       => 0
+                                        )) <= 0) {
+                                    $errors[] = 'Echec de la création de la remise pour la ligne n°' . $i . ' - ' . $this->db->db->lasterror();
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!count($errors)) {
+                    $this->updateField('version', 1);
+                }
+            }
         }
 
         return $errors;
@@ -1778,19 +2344,8 @@ class BS_SAV extends BimpObject
         );
     }
 
-    public function actionGeneratePropal($data, &$success)
-    {
-        $errors = array();
-
-        $success = 'Devis généré avec succès';
-
-        $errors = $this->generatePropal();
-
-        return $errors;
-    }
-
     public function actionValidatePropal($data, &$success)
-    {        
+    {
         $success = 'Devis validé avec succès';
         $errors = array();
         $warnings = array();
@@ -1802,16 +2357,20 @@ class BS_SAV extends BimpObject
 
         if (!(string) $this->getData('diagnostic')) {
             $errors[] = 'Vous devez remplir le champ "Diagnostic" avant de valider le devis';
-        } elseif (!isset($data['generate_propal']) || (int) $data['generate_propal']) {
-            $errors = $this->generatePropal();
+        } else {
+            $propal_errors = $this->generatePropalLines();
+            if (count($propal_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($propal_errors, 'Des erreurs sont survenues lors de la mise à jour des lignes du devis');
+            }
         }
-        else{
-            $this->allGarantie = (is_object($propal) && $propal->dol_object->total_ttc <= 0);
+
+        if (count($errors)) {
+            return $errors;
         }
-        
+
         define("NOT_VERIF", true);
 
-        $errors = array_merge($errors, $this->createReservations());
+//        $errors = array_merge($errors, $this->createReservations());
 
         if (!count($errors)) {
             global $user, $langs;
@@ -1935,7 +2494,7 @@ class BS_SAV extends BimpObject
 
                 $old_id_propal = $propal->id;
                 $revision = new BimpRevisionPropal($propal->dol_object);
-                $new_id_propal = $revision->reviserPropal(array(null, null), true, self::$propal_model_pdf, $errors);
+                $new_id_propal = $revision->reviserPropal(false, true, self::$propal_model_pdf, $errors);
 
                 if ($new_id_propal && !count($errors)) {
                     //Anulation du montant de la propal
@@ -1949,14 +2508,83 @@ class BS_SAV extends BimpObject
                     $propal->dol_object->statut = 0;
                     $propal->dol_object->addline("Devis révisé", -($totHt) / (100 - $client->dol_object->remise_percent) * 100, 1, $tTva, 0, 0, 0, $client->dol_object->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, 0); //-$totPa);
 
-                    $this->set('id_propal', $new_id_propal);
-                    $this->update();
                     $errors = array_merge($errors, $this->setNewStatus(self::BS_SAV_EXAM_EN_COURS));
                     global $user, $langs;
                     $this->addNote('Devis mis en révision le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                     $warnings = array_merge($warnings, $this->removeReservations());
+
+                    if (isset($this->config->objects['propal'])) {
+                        unset($this->config->objects['propal']);
+                    }
+
+                    $this->updateField('id_propal', (int) $new_id_propal);
+
+                    $asso = new BimpAssociation($this, 'propales');
+                    $asso->addObjectAssociation((int) $new_id_propal);
+
+                    $propalLine = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+                    $lines_list = $propalLine->getList(array(
+                        'id_obj' => (int) $old_id_propal,
+                            ), null, null, 'position', 'asc', 'array', array('id'));
+                    $i = 0;
+                    foreach ($lines_list as $item) {
+                        $i++;
+                        if ($propalLine->fetch((int) $item['id'])) {
+                            $remises = $propalLine->getRemises();
+                            $eq_lines = $propalLine->getEquipmentLines();
+                            $propalLine->id = null;
+                            $propalLine->set('id', 0);
+                            $propalLine->remise = 0;
+                            $propalLine->setIdParent($new_id_propal);
+                            $line_errors = $propalLine->create();
+                            if (count($line_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la copie de la ligne du devis n°' . $i);
+                            } else {
+                                if (count($remises)) {
+                                    $j = 0;
+                                    foreach ($remises as $remise) {
+                                        $j++;
+                                        $remise->id = null;
+                                        $remise->set('id', 0);
+                                        $remise->set('id_object_line', $propalLine->id);
+                                        $remise_errors = $remise->create();
+                                        if (count($remise_errors)) {
+                                            $warnings[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la copie de la remise n°' . $j . ' pour la ligne du devis n°' . $i);
+                                        }
+                                    }
+                                }
+                                if (count($eq_lines)) {
+                                    $new_eq_lines = $propalLine->getEquipmentLines();
+                                    $j = 0;
+                                    foreach ($eq_lines as $eq_line) {
+                                        $j++;
+                                        $id_equipment = (int) $eq_line->getData('id_equipment');
+                                        if ($id_equipment) {
+                                            $new_eq_line = array_shift($new_eq_lines);
+                                            $eq_line_errors = array();
+                                            if (BimpObject::objectLoaded($new_eq_line)) {
+                                                $new_eq_line->validateArray(array(
+                                                    'id_equipment'   => $id_equipment,
+                                                    'pu_ht'          => (float) $eq_line->getData('pu_ht'),
+                                                    'tva_tx'         => (float) $eq_line->getData('tva_tx'),
+                                                    'pa_ht'          => (float) $eq_line->getData('pa_ht'),
+                                                    'id_fourn_price' => (int) $eq_line->getData('id_fourn_price')
+                                                ));
+                                                $eq_line_errors = $new_eq_line->update();
+                                            } else {
+                                                $eq_line_errors[] = 'Aucune ligne d\'équipement disponible';
+                                            }
+                                            if (count($eq_line_errors)) {
+                                                $warnings[] = BimpTools::getMsgFromArray($eq_line_errors, 'Echec de la copie de la ligne d\'équipement n°' . $j . ' pour la ligne du devis n°' . $i);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 } else {
-                    $errors[] = 'Echec de la mise révision du devis';
+                    $errors[] = 'Echec de la mise en révision du devis';
                 }
             } else {
                 $errors[] = 'Le devis n\'a pas besoin d\'être révisé car il est toujours au statut "Brouillon"';
@@ -2037,18 +2665,15 @@ class BS_SAV extends BimpObject
 
                         $propal->fetch($propal->id);
                         $propal->dol_object->valid($user);
-                        dol_syslog("Propal id : .".$propal->dol_object->id." devrais êttre validé",3);
+
+                        dol_syslog("Propal id : ." . $propal->dol_object->id . " devrait être validée", 3);
                         $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
                         $propal->dol_object->cloture($user, 2, "Auto via SAV");
                         $this->removeReservations();
-                        $sav_product = BimpObject::getInstance('bimpsupport', 'BS_SavProduct');
-                        $sav_product->deleteBy(array(
-                            'id_sav' => (int) $this->id
-                        ));
-                        $apple_part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
-                        $apple_part->deleteBy(array(
-                            'id_sav' => (int) $this->id
-                        ));
+//                        $apple_part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart');
+//                        $apple_part->deleteBy(array(
+//                            'id_sav' => (int) $this->id
+//                        ));
                         $msg_type = 'revPropRefu';
                     }
                 } else {
@@ -2187,57 +2812,60 @@ class BS_SAV extends BimpObject
                         $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                         $id_entrepot = (int) $this->getData('id_entrepot');
                         $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
-                        foreach ($this->getChildrenObjects('products') as $sav_product) {
-                            $product = $sav_product->getChildObject('product');
+                        foreach ($this->getChildrenObjects('propal_lines') as $line) {
+                            $product = $line->getProduct();
 
                             if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === Product::TYPE_PRODUCT) {
                                 if ($product->isSerialisable()) {
-                                    $error_msg = 'Echec de la mise à jour de l\'emplacement pour le produit "' . $product->getData('ref') . ' - ' . $product->getData('label') . '"';
-                                    if (!$sav_product->getData('id_equipment')) {
-                                        $warnings[] = $error_msg . ' - Equipement non attribué';
-                                    } else {
-                                        // Création du nouvel emplacement: 
-                                        $place->reset();
-                                        if ($id_client) {
-                                            $place_errors = $place->validateArray(array(
-                                                'id_equipment' => (int) $sav_product->getData('id_equipment'),
-                                                'type'         => BE_Place::BE_PLACE_CLIENT,
-                                                'id_client'    => (int) $id_client,
-                                                'infos'        => 'Vente SAV',
-                                                'date'         => date('Y-m-d H:i:s')
-                                            ));
+                                    $eq_lines = $line->getEquipmentLines();
+                                    $eq_line_errors = array();
+                                    foreach ($eq_lines as $eq_line) {
+                                        if (!(int) $eq_line->getData('id_equipment')) {
+                                            $eq_line_errors[] = 'Equipement non attribué';
                                         } else {
-                                            $place_errors = $place->validateArray(array(
-                                                'id_equipment' => (int) $sav_product->getData('id_equipment'),
-                                                'type'         => BE_Place::BE_PLACE_FREE,
-                                                'place_name'   => 'Equipement vendu (client non renseigné)',
-                                                'infos'        => 'Vente SAV',
-                                                'date'         => date('Y-m-d H:i:s')
-                                            ));
-                                        }
-                                        if (!count($place_errors)) {
-                                            $place_errors = $place->create();
-                                        }
-
-                                        if (count($place_errors)) {
-                                            $equipment = $sav_product->getChildObject('equipment');
-                                            if (BimpObject::objectLoaded($equipment)) {
-                                                $label = $equipment->getRef();
+                                            // Création du nouvel emplacement: 
+                                            $place->reset();
+                                            if ($id_client) {
+                                                $place_errors = $place->validateArray(array(
+                                                    'id_equipment' => (int) $eq_line->getData('id_equipment'),
+                                                    'type'         => BE_Place::BE_PLACE_CLIENT,
+                                                    'id_client'    => (int) $id_client,
+                                                    'infos'        => 'Vente SAV',
+                                                    'date'         => date('Y-m-d H:i:s')
+                                                ));
                                             } else {
-                                                $label = 'Erreur: cet équipment n\'existe plus';
+                                                $place_errors = $place->validateArray(array(
+                                                    'id_equipment' => (int) $eq_line->getData('id_equipment'),
+                                                    'type'         => BE_Place::BE_PLACE_FREE,
+                                                    'place_name'   => 'Equipement vendu (client non renseigné)',
+                                                    'infos'        => 'Vente SAV',
+                                                    'date'         => date('Y-m-d H:i:s')
+                                                ));
                                             }
-                                            $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $label . '"');
+                                            if (!count($place_errors)) {
+                                                $place_errors = $place->create();
+                                            }
+
+                                            if (count($place_errors)) {
+                                                $equipment = $line->getChildObject('equipment');
+                                                if (BimpObject::objectLoaded($equipment)) {
+                                                    $label = $equipment->getRef();
+                                                } else {
+                                                    $label = 'Erreur: cet équipment n\'existe plus';
+                                                }
+                                                $eq_line_errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour le n° de série "' . $label . '"');
+                                            }
                                         }
                                     }
+                                    if (count($eq_line_errors)) {
+                                        $error_msg = 'Echec de la mise à jour de l\'emplacement pour le produit "' . $product->getData('ref') . ' - ' . $product->getData('label') . '"';
+                                        $warnings[] = BimpTools::getMsgFromArray($eq_line_errors, $error_msg);
+                                    }
                                 } else {
-                                    $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $sav_product->getData('qty'), 1, $this->getRef(), 0, $codemove);
+                                    $result = $product->dol_object->correct_stock($user, $id_entrepot, (int) $line->qty, 1, $this->getRef(), 0, $codemove);
                                     if ($result < 0) {
-                                        $warnings[] = 'Echec de la mise à jour du stock pour le produit "' . $product->getData('label') . '" (Ref: "' . $product->etRef() . '")';
-                                        if (count($product->dol_object->errors)) {
-                                            $warnings = array_merge($warnings, $product->dol_object->errors);
-                                        } elseif ($product->dol_object->error) {
-                                            $warnings[] = $product->dol_object->error;
-                                        }
+                                        $msg = 'Echec de la mise à jour du stock pour le produit "' . $product->getData('label') . '" (Ref: "' . $product->getRef() . '")';
+                                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), $msg);
                                     }
                                 }
                             }
@@ -2255,7 +2883,6 @@ class BS_SAV extends BimpObject
                             if (!count($place_errors)) {
                                 $place_errors = $place->create();
                             }
-
                             if (count($place_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de l\'enregistrement du nouvel emplacement pour l\'équipement de ce SAV');
                             }
@@ -2267,57 +2894,61 @@ class BS_SAV extends BimpObject
                         $facture->modelpdf = self::$facture_model_pdf;
                         $facture->array_options['options_type'] = "S";
                         $facture->array_options['options_entrepot'] = $this->getData('id_entrepot');
-                        $facture->createFromOrder($propal->dol_object);
-                        $facture->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
-                        $facture->validate($user, ''); //pas d'entrepot pour pas de destock
-                        $facture->fetch($facture->id);
 
-                        // Ajout du paiement: 
-                        if ($payment_set) {
-                            require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
-                            $payement = new Paiement($this->db->db);
-                            $payement->amounts = array($facture->id => (float) $data['paid']);
-                            $payement->datepaye = dol_now();
-                            $payement->paiementid = (int) $data['mode_paiement'];
-                            if ($payement->create($user) <= 0) {
-                                $warnings[] = 'Echec de l\'ajout du paiement de la facture';
+                        if ($facture->createFromOrder($propal->dol_object) <= 0) {
+                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
+                        } else {
+                            $facture->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
+                            if ($facture->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
+                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la validation de la facture');
                             } else {
-                                // Ajout du paiement au compte bancaire: 
-                                if ($this->useCaisseForPayments) {
-                                    $id_account = (int) $caisse->getData('id_account');
-                                } else {
-                                    $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
-                                }
-                                if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
-                                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
+                                $facture->fetch($facture->id);
+
+                                // Ajout du paiement: 
+                                if ($payment_set) {
+                                    require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+                                    $payement = new Paiement($this->db->db);
+                                    $payement->amounts = array($facture->id => (float) $data['paid']);
+                                    $payement->datepaye = dol_now();
+                                    $payement->paiementid = (int) $data['mode_paiement'];
+                                    if ($payement->create($user) <= 0) {
+                                        $warnings[] = 'Echec de l\'ajout du paiement de la facture';
+                                    } else {
+                                        // Ajout du paiement au compte bancaire: 
+                                        if ($this->useCaisseForPayments) {
+                                            $id_account = (int) $caisse->getData('id_account');
+                                        } else {
+                                            $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+                                        }
+                                        if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
+                                        }
+
+                                        if ($this->useCaisseForPayments) {
+                                            $warnings = array_merge($warnings, $caisse->addPaiement($payement, $facture->id));
+                                        }
+                                    }
                                 }
 
-                                if ($this->useCaisseForPayments) {
-                                    $warnings = array_merge($warnings, $caisse->addPaiement($payement, $facture->id));
+                                $to_pay = (float) $facture->total_ttc - ((float) $facture->getSommePaiement() + (float) $facture->getSumCreditNotesUsed() + (float) $facture->getSumDepositsUsed());
+                                if ($to_pay >= -0.01 && $to_pay <= 0.1) {
+                                    $facture->set_paid($user);
+                                }
+
+                                $propal->dol_object->cloture($user, 4, "Auto via SAV");
+
+                                //Generation
+                                $up_errors = $this->updateField('id_facture', (int) $facture->id);
+                                if (count($up_errors)) {
+                                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $facture->id . ')');
+                                } else {
+                                    $facture->generateDocument(self::$facture_model_pdf, $langs);
+                                }
+
+                                if (isset($data['send_msg']) && $data['send_msg']) {
+                                    $warnings = array_merge($warnings, $this->sendMsg('Facture'));
                                 }
                             }
-                        }
-
-                        $to_pay = (float) $facture->total_ttc - ((float) $facture->getSommePaiement() + (float) $facture->getSumCreditNotesUsed() + (float) $facture->getSumDepositsUsed());
-                        if ($to_pay >= -0.01 && $to_pay <= 0.1) {
-                            $facture->set_paid($user);
-                        }
-
-                        $propal->dol_object->cloture($user, 4, "Auto via SAV");
-
-                        //Generation
-                        $facture->fetch($facture->id);
-
-                        $this->set('id_facture', $facture->id);
-                        $up_errors = $this->update();
-                        if (count($up_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $facture->id . ')');
-                        } else {
-                            $facture->generateDocument(self::$facture_model_pdf, $langs);
-                        }
-
-                        if (isset($data['send_msg']) && $data['send_msg']) {
-                            $warnings = array_merge($warnings, $this->sendMsg('Facture'));
                         }
                     }
                 } else {
@@ -2332,7 +2963,7 @@ class BS_SAV extends BimpObject
             } else {
                 $this->addNote('Fermé le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
             }
-            
+
             if (!count($errors)) {
                 $errors = $this->setNewStatus(self::BS_SAV_FERME);
             }
@@ -2361,6 +2992,7 @@ class BS_SAV extends BimpObject
         if (count($errors)) {
             $this->setNewStatus($current_status);
         }
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
@@ -2383,67 +3015,106 @@ class BS_SAV extends BimpObject
     public function actionAttibuteEquipment($data, &$success)
     {
         $errors = array();
+        $warnings = array();
 
-        $products = array();
+        $errors[] = 'Fonction désactivée';
+//        $lines = array();
+//
+//        $success = '';
+//
+//        $propal = $this->getChildObject('propal');
+//
+//        if (!BimpObject::objectLoaded($propal)) {
+//            return array('Proposition commerciale absente ou invalide');
+//        }
+//
+//        BimpObject::loadClass('bimpsupport', 'BS_SavPropalLine');
+//
+//        foreach ($this->getChildrenObjects('propal_lines', array(
+//            'type'               => BS_SavPropalLine::LINE_PRODUCT,
+//            'linked_object_name' => ''
+//        )) as $line) {
+//            if (!(int) $line->id_product || (int) $line->getData('id_equipmnet')) {
+//                continue;
+//            }
+//
+//            $product = $line->getProduct();
+//            if (BimpObject::objectLoaded($product)) {
+//                if ($product->getData('fk_product_type') === Product::TYPE_PRODUCT && $product->isSerialisable()) {
+//                    $lines[] = $line;
+//                }
+//            }
+//        }
+//
+//        if (!count($lines)) {
+//            return array('Aucun produit nécessitant l\'attribution d\'un équipement trouvé pour ce SAV');
+//        }
+//
+//        if (!isset($data['serial']) || !$data['serial']) {
+//            $errors[] = 'Veillez saisir le numéro de série d\'un équipement';
+//        } else {
+//            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+//            $filters = array(
+//                'serial' => array(
+//                    'in' => array('\'' . $data['serial'] . '\'', '\'S' . $data['serial'] . '\'')
+//                )
+//            );
+//            $list = $equipment->getList($filters, null, null, 'id', 'desc', 'array', array('id'));
+//
+//            if (is_null($list) || !count($list)) {
+//                $errors[] = 'Aucun équipement trouvé pour ce numéro de série';
+//            } else {
+//                foreach ($list as $item) {
+//                    if ($equipment->fetch((int) $item['id'])) {
+//                        $id_product = (int) $equipment->getData('id_product');
+//                        if ($id_product) {
+//                            foreach ($lines as $line) {
+//                                if (!(int) $line->getData('id_equipment') && (int) $line->id_product) {
+//                                    if ($id_product === (int) $line->id_product) {
+//                                        $product = $line->getProduct();
+//                                        if (BimpObject::objectLoaded($product)) {
+//                                            $line->set('id_equipment', $equipment->id);
+//                                            if (count($line->checkEquipment())) {
+//                                                continue;
+//                                            }
+//                                            if ($propal->getData('fk_statut') > 0) {
+//                                                $line->updateField('id_equipment', (int) $equipment->id);
+//                                            } else {
+//                                                if ((float) $equipment->getData('prix_vente_except')) {
+//                                                    $line->pu_ht = (float) BimpTools::calculatePriceTaxEx((float) $equipment->getData('prix_vente_except'), (float) $product->getData('tva_tx'));
+//                                                }
+//                                                $errors = $line->update();
+//                                            }
+//                                            $success = 'Equipement ' . $equipment->id . ' (N° série ' . $equipment->getData('serial') . ') attribué pour le produit "' . $product->getData('ref') . ' - ' . $product->getData('label') . '"';
+//                                            if (!count($errors)) {
+//                                                $line_errors = $line->onEquipmentAttributed();
+//                                                if (count($line_errors)) {
+//                                                    $warnings[] = BimpTools::getMsgFromArray($line_errors);
+//                                                }
+//                                            }
+//                                            break 2;
+//                                        }
+//                                    }
+//                                } elseif ((int) $line->getData('id_equipment') === (int) $equipment->id) {
+//                                    $errors[] = 'L\'équipement ' . $equipment->id . ' (N° série ' . $equipment->getData('serial') . ') a déjà été attribué à un produit de ce SAV';
+//                                    break 2;
+//                                }
+//                            }
+//                        }
+//                    } else {
+//                        $errors[] = 'Echec de la récupération des données pour l\'équipement d\'ID ' . $item['id'];
+//                    }
+//                }
+//            }
+//            if (!$success && !count($errors)) {
+//                $errors[] = 'Aucun produit enregistré pour ce SAV ne correspond à ce numéro de série';
+//            }
+//        }
 
-        $success = '';
-
-        foreach ($this->getChildrenObjects('products') as $sav_product) {
-            $product = $sav_product->getChildObject('product');
-            if (!is_null($product) && $product->isLoaded()) {
-                if ($product->isSerialisable()) {
-                    $products[] = $sav_product;
-                }
-            }
-        }
-
-        if (!count($products)) {
-            return array('Aucun produit nécessitant l\'attribution d\'un équipement trouvé pour ce SAV');
-        }
-
-        if (!isset($data['serial']) || !$data['serial']) {
-            $errors[] = 'Veillez saisir le numéro de série d\'un équipement';
-        } else {
-            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
-            $filters = array(
-                'serial' => array(
-                    'in' => array('\'' . $data['serial'] . '\'', '\'S' . $data['serial'] . '\'')
-                )
-            );
-            $list = $equipment->getList($filters, null, null, 'id', 'desc', 'array', array('id'));
-            if (is_null($list) || !count($list)) {
-                $errors[] = 'Aucun équipement trouvé pour ce numéro de série';
-            } else {
-                foreach ($list as $item) {
-                    if ($equipment->fetch((int) $item['id'])) {
-                        $id_product = (int) $equipment->getData('id_product');
-                        if ($id_product) {
-                            foreach ($products as $sav_product) {
-                                if (!(int) $sav_product->getData('id_equipment')) {
-                                    if ($id_product === (int) $sav_product->getData('id_product')) {
-                                        $product = $sav_product->getChildObject('product');
-                                        $sav_product->set('id_equipment', $equipment->id);
-                                        $errors = $sav_product->update();
-                                        $success = 'Equipement ' . $equipment->id . ' (N° série ' . $equipment->getData('serial') . ') attribué pour le produit "' . $product->getData('ref') . ' - ' . $product->getData('label') . '"';
-                                        break 2;
-                                    }
-                                } elseif ((int) $sav_product->getData('id_equipment') === $equipment->id) {
-                                    $errors[] = 'L\'équipement ' . $equipment->id . ' (N° série ' . $equipment->getData('serial') . ') a déjà été attribué à un produit de ce SAV';
-                                    break 2;
-                                }
-                            }
-                        }
-                    } else {
-                        $errors[] = 'Echec de la récupération des données pour l\'équipement d\'ID ' . $item['id'];
-                    }
-                }
-            }
-            if (!$success && !count($errors)) {
-                $errors[] = 'Aucun produit enregistré pour ce SAV ne correspond à ce numéro de série';
-            }
-        }
-
-        return $errors;
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
     }
 
     public function actionAttentePiece($data, &$success)
@@ -2527,7 +3198,7 @@ class BS_SAV extends BimpObject
                             $errors[] = $msg;
                         } else {
                             $paiement->paiementid = (int) $data['mode_paiement'];
-                            
+
                             // Ajout du paiement au compte bancaire. 
                             if ($paiement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
                                 $account_label = '';
@@ -2569,7 +3240,7 @@ class BS_SAV extends BimpObject
             if (!(int) BimpTools::getValue('mode_paiement_acompte', 0)) {
                 $errors[] = 'Veuillez sélectionner un mode de paiement pour l\'acompte';
             }
-            if ($this->useCaisseForPayments && $this->getData("id_facture_acompte")) {
+            if ($this->useCaisseForPayments) {
                 global $user;
 
                 $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
@@ -2642,10 +3313,18 @@ class BS_SAV extends BimpObject
             }
         }
 
+        // Création des lignes propal:
+        if ((int) $this->getData('id_propal')) {
+            $prop_errors = $this->generatePropalLines();
+            if (count($prop_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création des lignes du devis');
+            }
+        }
+
         return $errors;
     }
 
-    public function update(&$warnings = array())
+    public function update(&$warnings = array(), $force_update = false)
     {
         $errors = array();
 
@@ -2656,10 +3335,38 @@ class BS_SAV extends BimpObject
         }
 
         if (!count($errors)) {
-            $errors = parent::update($warnings);
+            $errors = parent::update($warnings, $force_update);
+        }
+
+        // Mise à jour des lignes propales:
+        if ((int) $this->getData('id_propal')) {
+            $propal = $this->getChildObject('propal');
+            if (BimpObject::objectLoaded($propal)) {
+                if ((int) $propal->getData('fk_statut') === 0) {
+                    $prop_errors = $this->generatePropalLines();
+                    if (count($prop_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la mise à jour des lignes du devis');
+                    }
+                }
+            }
         }
 
         return $errors;
+    }
+
+    public function fetch($id)
+    {
+        if (parent::fetch($id)) {
+//            echo (float) $this->getData('version');
+//            exit;
+            if ($this->check_version && (float) $this->getData('version') < 1.0) {
+                $this->convertSav();
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     // Gestion des droits: 

@@ -1,5 +1,6 @@
 <?php
 
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formadmin.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
@@ -68,6 +69,21 @@ class BimpInput
                     $html .= $data;
                     $html .= '/>';
                 }
+
+                if (isset($options['values']) && count($options['values'])) {
+                    $allow_custom = (isset($options['allow_custom']) ? (int) $options['allow_custom'] : 1);
+                    $html .= '<div style="margin-top: 15px">';
+                    $html .= '<select id="' . $input_id . '_input_values" class="input_values ' . $field_name . '_input_values"';
+                    $html .= ' data-field_name="' . $field_name . '"';
+                    $html .= ' data-allow_custom="' . $allow_custom . '"';
+                    $html .= '>';
+                    foreach ($options['values'] as $val => $label) {
+                        $html .= '<option value="' . $val . '"' . (($val == $value) ? ' selected' : '') . '>' . $label . '</option>';
+                    }
+                    $html .= '</select>';
+                    $html .= '</div>';
+                }
+
                 break;
 
             case 'qty':
@@ -256,6 +272,14 @@ class BimpInput
                         $html .= '>' . $label . '</option>';
                     }
                     $html .= '</select>';
+
+                    foreach ($options['options'] as $option_value => $option) {
+                        if (isset($option['help'])) {
+                            $html .= '<div class="selectOptionHelp ' . $field_name . '_' . $option_value . '_help">';
+                            $html .= BimpRender::renderAlerts($option['help'], 'info');
+                            $html .= '</div>';
+                        }
+                    }
                 } else {
                     $html .= '<p class="alert alert-warning">Aucune option disponible</p>';
                 }
@@ -274,12 +298,20 @@ class BimpInput
                     if (!(int) $options['active_only'] || ((int) $options['active_only'] && (int) $payment_data['active'])) {
                         switch ($options['value_type']) {
                             case 'code':
-                                $html .= '<option value="' . $payment_data['code'] . '" data-id_payment="' . $id_payment . '">' . $payment_data['label'] . '</option>';
+                                $html .= '<option value="' . $payment_data['code'] . '" data-id_payment="' . $id_payment . '"';
+                                if ((string) $value === (string) $payment_data['code']) {
+                                    $html .= ' selected="1"';
+                                }
+                                $html .= '>' . $payment_data['label'] . '</option>';
                                 break;
 
                             case 'id':
                             default:
-                                $html .= '<option value="' . $id_payment . '" data-code="' . $payment_data['code'] . '">' . $payment_data['label'] . '</option>';
+                                $html .= '<option value="' . $id_payment . '" data-code="' . $payment_data['code'] . '"';
+                                if ((int) $value === (int) $payment_data['id']) {
+                                    $html .= ' selected="1"';
+                                }
+                                $html .= '>' . $payment_data['label'] . '</option>';
                                 break;
                         }
                     }
@@ -312,28 +344,54 @@ class BimpInput
                     $options['id_client'] = 0;
                 }
                 $filter = 'fk_facture IS NULL AND fk_facture_line IS NULL';
+
+                if (isset($options['extra_filters']) && $options['extra_filters']) {
+                    $filter .= ' AND ' . $options['extra_filters'];
+                }
+
+//                echo $filter; exit;
                 ob_start();
                 $form->select_remises((int) $value, $field_name, $filter, (int) $options['id_client']);
                 $html .= ob_get_clean();
                 break;
 
-            case 'search_ziptown':   
+            case 'select_availability':
+                $options = array(0 => '');
+                $form->load_cache_availability();
+                foreach ($form->cache_availability as $id => $availability) {
+                    $options[(int) $id] = $availability['label'];
+                }
+                return self::renderInput('select', $field_name, $value, array(
+                            'options' => $options
+                                ), $form, $option, $input_id);
+
+            case 'select_input_reasons':
+                $options = array(0 => '');
+                $form->loadCacheInputReason();
+                foreach ($form->cache_demand_reason as $id => $reason) {
+                    $options[(int) $id] = $reason['label'];
+                }
+                return self::renderInput('select', $field_name, $value, array(
+                            'options' => $options
+                                ), $form, $option, $input_id);
+
+            case 'search_ziptown':
                 $html = '<div class="searchZiptownInputContainer">';
-                $html .= '<input type="text" class="search_ziptown" name="'.$field_name.'" value="'.$value.'"';
+                $html .= '<input type="text" class="search_ziptown" name="' . $field_name . '" value="' . $value . '"';
                 if (isset($options['field_type'])) {
-                    $html .= ' data-field_type="'.$options['field_type'].'"';
+                    $html .= ' data-field_type="' . $options['field_type'] . '"';
                 }
                 if (isset($options['town_field'])) {
-                    $html .= ' data-town_field="'.$options['town_field'].'"';
+                    $html .= ' data-town_field="' . $options['town_field'] . '"';
                 }
                 if (isset($options['zip_field'])) {
-                    $html .= ' data-zip_field="'.$options['zip_field'].'"';
+                    $html .= ' data-zip_field="' . $options['zip_field'] . '"';
                 }
                 if (isset($options['state_field'])) {
-                    $html .= ' data-state_field="'.$options['state_field'].'"';
+                    $html .= ' data-state_field="' . $options['state_field'] . '"';
                 }
                 if (isset($options['country_field'])) {
-                    $html .= ' data-country_field="'.$options['country_field'].'"';
+                    $html .= ' data-country_field="' . $options['country_field'] . '"';
                 }
                 if (isset($options['data'])) {
                     foreach ($options['data'] as $data_name => $data_value) {
@@ -639,6 +697,7 @@ class BimpInput
             $input_id = $input_name;
         }
 
+        $input_id .= '_' . rand(111111, 999999);
         if (is_null($value)) {
             $value = '';
         } elseif (preg_match('/^([0-9]{4})\-([0-9][0-9])\-([0-9][0-9]).*$/', $value, $matches)) {

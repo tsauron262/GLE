@@ -128,7 +128,7 @@ class PropalPDF extends BimpDocumentPDF
             $html = '<div style="font-size: 7px; line-height: 8px;">';
             $html .= $this->propal->note_public;
             $html .= '</div>';
-            
+
             if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
                 $this->pdf->addVMargin(2);
             }

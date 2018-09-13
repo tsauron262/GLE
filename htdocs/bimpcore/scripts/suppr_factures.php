@@ -22,7 +22,7 @@ $bdb = new BimpDb($db);
 
 $rows = $bdb->getRows('facture', '`facnumber` LIKE \'(PROVACS%\'', null, 'array', array('rowid'));
 
-$f = BimpObject::getInstance('bimpcore', 'Bimp_Facture');
+$f = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 BimpTools::loadDolClass('compta/paiement', 'paiement');
 BimpTools::loadDolClass('compta/bank', 'account');
 

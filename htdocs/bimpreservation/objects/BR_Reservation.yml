@@ -90,7 +90,7 @@ objects:
                 name: BS_SAV
             id_object: 
                 field_value: id_sav
-                
+         
     sav_product:
         relation: hasOne
         delete: 0
@@ -100,6 +100,16 @@ objects:
                 name: BS_SavProduct
             id_object: 
                 field_value: id_sav_product
+                
+    sav_propal_line:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpsupport
+                name: BS_SavPropalLine
+            id_object: 
+                field_value: id_sav_propal_line
                 
     shipment: 
         instance: 
@@ -267,6 +277,16 @@ fields:
         label: Ligne produit SAV
         type: id_object
         object: sav_product
+        input: 
+            type: hidden
+        display_if: 
+            field_name: type
+            show_values: 4
+            
+    id_sav_propal_line:
+        label: Ligne devis SAV
+        type: id_object
+        object: sav_propal_line
         input: 
             type: hidden
         display_if: 

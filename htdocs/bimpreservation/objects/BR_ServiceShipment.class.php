@@ -77,7 +77,7 @@ class BR_ServiceShipment extends BimpObject
     public function getCommande()
     {
         if (is_null($this->commande)) {
-            $this->commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+            $this->commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
         }
 
         return $this->commande;
@@ -131,7 +131,7 @@ class BR_ServiceShipment extends BimpObject
 
         if (BimpObject::objectLoaded($commande)) {
             $asso = new BimpAssociation($commande, 'avoirs');
-            $avoir = BimpObject::getInstance('bimpcore', 'Bimp_Facture');
+            $avoir = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             foreach ($asso->getAssociatesList() as $id_avoir) {
                 if ($avoir->fetch((int) $id_avoir)) {
                     if ((int) $avoir->dol_object->statut === (int) Facture::STATUS_DRAFT) {
@@ -165,7 +165,7 @@ class BR_ServiceShipment extends BimpObject
     {
         $errors = array();
 
-        $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
         $id_order_line = (int) $this->getData('id_commande_client_line');
         $shipment = $this->getParentInstance();
 

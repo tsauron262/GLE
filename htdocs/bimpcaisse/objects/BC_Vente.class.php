@@ -2251,7 +2251,7 @@ class BC_Vente extends BimpObject
             switch ($avoir_rbt_mode) {
                 case 'remise':
                     $remise_errors = array();
-                    $bimpFacture = BimpObject::getInstance('bimpcore', 'Bimp_Facture', $facture->id);
+                    $bimpFacture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', $facture->id);
                     if (BimpObject::objectLoaded($bimpFacture)) {
                         $remise_errors = $bimpFacture->convertToRemise();
                     } else {

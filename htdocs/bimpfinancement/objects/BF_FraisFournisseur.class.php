@@ -3,12 +3,14 @@
 class BF_FraisFournisseur extends BimpObject
 {
 
+    // Affichages: 
+    
     public function displaySupplier($display_name)
     {
-        if (isset($this->id) && $this->id) {
+        if ($this->isLoaded()) {
 
-            $id_supplier = $this->getData('id_soc_supplier');
-            if (!is_null($id_supplier) && $id_supplier) {
+            $id_supplier = (int) $this->getData('id_soc_supplier');
+            if ($id_supplier) {
                 return $this->displayData('id_soc_supplier', $display_name);
             } else {
                 $name = $this->getData('supplier_name');
@@ -19,5 +21,19 @@ class BF_FraisFournisseur extends BimpObject
         }
 
         return '';
+    }
+    
+    // Traitements: 
+     
+    public function createFile()
+    {
+        
+    }
+    
+    // Overrides: 
+    
+    public function create()
+    {
+        
     }
 }

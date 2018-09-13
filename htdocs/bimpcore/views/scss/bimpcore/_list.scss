@@ -1,76 +1,47 @@
-.objectList  {    
-    table.objectlistTable {
-        border: none;
-        box-shadow: none;
+table.bimp_list_table,
+table.objectlistTable {
+    border: none;
+    box-shadow: none;
+    width: 100%;
 
-        & > thead > tr > th {
-            padding: 10px 6px;
-            margin-bottom: 8px;
-            color: #fff;
+    & > thead > tr > th {
+        padding: 10px 6px;
+        margin-bottom: 8px;
+        color: #fff;
+        background-color: $primary;
+        text-align: left;
+        font-weight: bold;
+
+        min-width: 80px;
+
+        &.th_checkboxes {
+            min-width: 40px!important;
+            width: 40px!important;
+        }
+
+        &.th_tools {
+            min-width: 0;
+        }
+
+        &.positionHandle {
+            min-width: 30px;
+        }
+    }
+
+    & > tbody > tr {
+        & > th {
+            padding: 5px 12px 5px 6px;
             background-color: $primary;
-            text-align: left;
-            font-weight: bold;
+            color: #fff;
+            border-bottom: 1px solid #fff;
+            text-align: right;
         }
 
-        & > tbody > tr.objectListItemRow {
-            @include transition(all 0.3s ease);
-
-            background-color: #fff!important;
-            & > td {
-                background-color: #fff!important;
-            }
-
-            &.selected {
-                background-color: #FFF5E1!important;
-
-                & > td {
-                    background-color: #FFF5E1!important;
-                }
-            }
-            
-            &.modified  {
-                background-color: #E1F5FF!important;
-                border-color: #E1F5FF!important;
-
-                & > td {
-                    background-color: #E1F5FF!important;
-                    border-color: #E1F5FF!important;
-
-                    .editInputContainer .modified {
-                        box-shadow: 0 0 3px #003550!important;
-                    }
-                }
-            }
-
-            &:hover {
-                background-color: #FAFAFA!important;
-                
-                & > td {
-                    background-color: #FAFAFA!important;
-                }
-            }
-
-            &.selected:hover {
-                background-color: #FFEFCD!important;
-                
-                & > td {
-                    background-color: #FFEFCD!important;
-                }
-            }
-            
-            &.modified:hover {
-                background-color: #CDEFFF!important;
-                
-                & > td {
-                    background-color: #CDEFFF!important;
-                }
-            }
-        }
-
-        td {
+        & > td {
             padding: 5px 6px;
+            border-bottom: 1px solid #ddd;
 
-            .editInputContainer {
+            .inputContainer {
                 display: inline-block;
                 width: 100%;
 
@@ -89,248 +60,365 @@
                 color: $gray-darker;
             }
         }
+    }
 
-        .objectSubList {
-            width: 100%;
-            & > thead > tr > th {
-                padding: 4px 10px;
-                margin-bottom: 4px;
-                color: $gray-darker;
-                background-color: $gray-lighter;
-                text-align: left;
-                font-weight: bold;
-                border-bottom: 1px solid $primary;
+    & > tbody > tr {
+        @include transition(all 0.3s ease);
+
+        background-color: #fff!important;
+        & > td {
+            background-color: #fff!important;
+
+            @media (max-width: $screen-sm) {
+                .toggle-label-off,
+                .toggle-label-on {
+                    display: none;
+                }
             }
+        }
 
-            td {
-                padding: 4px 10px;
-                border-bottom: 1px solid $gray-light;
-                background-color: #fff;
-                color: $gray-dark;
+        &.selected {
+            background-color: #FFF5E1!important;
+
+            & > td {
+                background-color: #FFF5E1!important;
+            }
+        }
+
+        &.modified  {
+            background-color: #E1F5FF!important;
+            border-color: #E1F5FF!important;
+
+            & > td {
+                background-color: #E1F5FF!important;
+                border-color: #E1F5FF!important;
+
+                .inputContainer .modified {
+                    box-shadow: 0 0 3px #003550!important;
+                }
+            }
+        }
+
+        &:hover {
+            background-color: #FAFAFA!important;
+
+            & > td {
+                background-color: #FAFAFA!important;
+            }
+        }
+
+        &.selected:hover {
+            background-color: #FFEFCD!important;
+
+            & > td {
+                background-color: #FFEFCD!important;
+            }
+        }
+
+        &.modified:hover {
+            background-color: #CDEFFF!important;
+
+            & > td {
+                background-color: #CDEFFF!important;
             }
         }
     }
 
-    .sortTitle {
-        cursor: pointer;
+    & > tfoot > tr > th {
+        color: #fff;
+        background-color: $primary;
+        text-align: right;
+        padding: 5px 12px 5px 6px;
+    }
+    
+    & > tfoot > tr > td {
+        background-color: #E6E6E6;
+        font-weight: bold;
+        color: $gray-darker;
+        padding: 8px 6px;
+    }
+
+    .objectSubList {
+        width: 100%;
+        & > thead > tr > th {
+            padding: 4px 10px;
+            margin-bottom: 4px;
+            color: $gray-darker;
+            background-color: $gray-lighter;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 1px solid $primary;
+        }
+
+        td {
+            padding: 4px 10px;
+            border-bottom: 1px solid $gray-light;
+            background-color: #fff;
+            color: $gray-dark;
+        }
+    }
+
+    & > tfoot > tr.paginationContainer > td {
+        background-color: #fff;
+    }
+}
+
+.sortTitle {
+    cursor: pointer;
+
+    &:after {
+        font-family: 'FontAwesome';
+        margin-left: 8px;
+        opacity: 0;
+        color: #fff;
+        transition: all 0.15s ease;
+        -webkit-transition: all 0.15s ease;
+    }
+    &:hover,
+        &.active {
+        text-decoration: none!important;
+        &:after {
+            opacity: 1;
+        }
+    }
+
+    &.sorted-asc:after {
+        content: '\f0d7';
+    }
+    &.sorted-desc:after {
+        content: '\f0d8';
+    }
+    &.active.sorted-asc:after {
+        content: '\f0d8';
+    }
+    &.active.sorted-desc:after {
+        content: '\f0d7';
+    }
+    &.active.sorted-asc:hover:after {
+        content: '\f0d7';
+    }
+    &.active.sorted-desc:hover:after {
+        content: '\f0d8';
+    }
+
+    &.deactivated,
+    &.deactivated:hover {
+        cursor: not-allowed;
 
         &:after {
-            font-family: 'FontAwesome';
-            margin-left: 8px;
-            opacity: 0;
-            color: #fff;
-            transition: all 0.15s ease;
-            -webkit-transition: all 0.15s ease;
-        }
-        &:hover,
-            &.active {
-            text-decoration: none!important;
-            &:after {
-                opacity: 1;
-            }
+            opacity: 0!important;
         }
 
-        &.sorted-asc:after {
-            content: '\f0d7';
-        }
-        &.sorted-desc:after {
-            content: '\f0d8';
-        }
-        &.active.sorted-asc:after {
-            content: '\f0d8';
-        }
-        &.active.sorted-desc:after {
-            content: '\f0d7';
-        }
-        &.active.sorted-asc:hover:after {
-            content: '\f0d7';
-        }
-        &.active.sorted-desc:hover:after {
-            content: '\f0d8';
-        }
-
-        &.deactivated,
-        &.deactivated:hover {
-            cursor: not-allowed;
-
-            &:after {
-                opacity: 0!important;
-            }
-
-        }
     }
-    .listSearchRow {
-        display: none;
-        background-color: #DCDCDC;
+}
+.listSearchRow {
+    display: none;
+    background-color: #DCDCDC;
 
-        i.fa-search {
-            font-size: 16px;
-            font-weight: bold;
-            color: #787878;
-        }
-        .inputHelp {
-            display: none;
-        }
-
-        #search_id {
-            max-width: 45px;
-        }
-        td.searchTools {
-            text-align: right;
-        }
-
-        .searchInputContainer {
-            width: 100%;
-            padding: 2px;
-
-            input, select, .input-group {
-                width: 100%;
-            }
-
-            .search_list_input {
-                width: 80%
-            }
-        }
-    }
-    .addObjectRow {
-        display: none;
-        background-color: #A0A0A0;
-
-        td:first-child {
-            text-align: center;
-
-            i.fa-plus-circle {
-                font-size: 20px;
-                font-weight: normal;
-                color: #DCDCDC;
-            }
-        }
-        .inputHelp {
-            display: none;
-        }
-
-        .inputContainer {
-            input, select, textarea {
-                width: 100%;
-            }
-        }
-    }
-    th.th_tools {
-        margin-right: 25px;
-    }
-
-    .headerTools {
-        text-align: right;
-        height: 100%;
-
-        .headerButton {
-            display: inline-block;
-            margin: 5px;
-            color: #fff;
-            font-weight: normal;
-            margin: 0 3px;
-            padding: 4px 6px;
-            height: 100%;
-            cursor: pointer;
-            font-size: 14px;
-
-            transition: all 0.3s ease;
-            -webkit-transition: all 0.3s ease;
-
-            &:hover {
-                color: #EF7D00;
-                background-color: #fff;
-            }
-            &:before,
-                &:after {
-                font-family: 'FontAwesome';
-            }
-        }
-        .openSearchRowButton:before {
-            content: '\f002';
-        }
-        .openAddObjectRowButton:before {
-            content: '\f055';
-        }
-        .activatePositionsButton:before {
-            content: '\f07d';
-        }
-        .openBulkActionsPopupButton:before {
-            content: '\f046';
-        }
-        .openParametersPopupButton:before {
-            content: '\f013';
-        }
-    }
-    td.buttons {
-        text-align: right;
-        min-width: 160px;
-    }
-    .rowButton {
-        color: #636363;
-        text-align: center;
-        width: 32px;
-        height: 32px;
-        vertical-align: middle;
-        line-height: 32px;
-        border-radius: 50%;
-        cursor: pointer;
-        display: inline-block;
-        margin: 0 1px;
+    i.fa-search {
         font-size: 16px;
+        font-weight: bold;
+        color: #787878;
+    }
+    .inputHelp {
+        display: none;
+    }
+
+    #search_id {
+        max-width: 45px;
+    }
+    td.searchTools {
+        text-align: right;
+
+        .btn {
+            margin-right: 10px;
+        }
+    }
+
+    .searchInputContainer {
+        width: 100%;
+        padding: 2px;
+
+        input, select, .input-group {
+            width: 100%;
+        }
+
+        .optionsContainer {
+            display: none;
+        }
+
+        .loading {
+            display: none;
+        }
+    }
+}
+.addObjectRow {
+    display: none;
+    background-color: #A0A0A0;
+
+    td:first-child {
+        text-align: center;
+
+        i.fa-plus-circle {
+            font-size: 20px;
+            font-weight: normal;
+            color: #DCDCDC;
+        }
+    }
+    .inputHelp {
+        display: none;
+    }
+
+    .inputContainer {
+        input, select, textarea {
+            width: 100%;
+        }
+    }
+}
+th.th_tools {
+    margin-right: 25px;
+}
+
+.headerTools {
+    text-align: right;
+    height: 100%;
+
+    .headerButton {
+        display: inline-block;
+        margin: 5px;
+        color: #fff;
         font-weight: normal;
+        margin: 0 3px;
+        padding: 4px 6px;
+        height: 100%;
+        cursor: pointer;
+        font-size: 14px;
 
         transition: all 0.3s ease;
         -webkit-transition: all 0.3s ease;
 
         &:hover {
-            color: #fff;
-            background-color: #EF7D00;
-            text-decoration: none;
+            color: #EF7D00;
+            background-color: #fff;
         }
+        &:before,
+            &:after {
+            font-family: 'FontAwesome';
+        }
+    }
+    .openSearchRowButton:before {
+        content: '\f002';
+    }
+    .openAddObjectRowButton:before {
+        content: '\f055';
+    }
+    .activatePositionsButton:before {
+        content: '\f07d';
+    }
+    .openBulkActionsPopupButton:before {
+        content: '\f046';
+    }
+    .openParametersPopupButton:before {
+        content: '\f013';
+    }
+    .refreshListButton:before {
+        content: '\f01e';
+    }
+    .loadingIcon {
+        display: inline-block;
+        margin: 5px;
+        color: #fff;
+        font-weight: bold;
+        margin: 0 3px;
+        padding: 2px 6px;
+        height: 100%;
+        opacity: 0;
+        font-size: 16px;
+
         &:before {
             font-family: 'FontAwesome';
-        }
-        &.editButton:before {
-            content: '\f044';
-        }
-        &.updateButton:before {
-            content: '\f0c7';
-        }
-        &.deleteButton:before {
-            content: '\f1f8';
-        }
-        &.viewButton:before {
-            content: '\f06e';
-        }
-    }
-
-    .select2-container {
-        max-width: 160px!important;
-    }
-
-    .positionHandle {
-        display: none;
-        text-align: center;
-    }
-
-    td.positionHandle {
-        span {
-            display: inline-block;
-            font-size: 15px;
-            margin: 0 6px;
+            content: '\f110';
         }
 
-        span:before {
-            font-family: 'FontAwesome';
-            content: '\f07d';
+        &.visible {
+            opacity: 1;
         }
-    }
-
-    tbody td.positionHandle {
-        cursor: grab;
     }
 }
+td.buttons {
+    text-align: right;
+    min-width: 160px;
+    padding-right: 6px!important;
+
+    .btn {
+        margin-right: 4px;
+    }
+}
+.rowButton {
+    color: #636363!important;
+    text-align: center;
+    width: 32px;
+    height: 32px;
+    vertical-align: middle;
+    line-height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-block;
+    margin: 0 1px;
+    font-size: 16px;
+    font-weight: normal;
+
+    transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+
+    &:hover {
+        color: #fff!important;
+        background-color: #EF7D00;
+        text-decoration: none;
+    }
+    &:before {
+        font-family: 'FontAwesome';
+    }
+    &.editButton:before {
+        content: '\f044';
+    }
+    &.updateButton:before {
+        content: '\f0c7';
+    }
+    &.deleteButton:before {
+        content: '\f1f8';
+    }
+    &.viewButton:before {
+        content: '\f06e';
+    }
+}
+
+.select2-container {
+    max-width: 160px!important;
+}
+
+.positionHandle {
+    display: none;
+    text-align: center;
+}
+
+td.positionHandle {
+    span {
+        display: inline-block;
+        font-size: 15px;
+        margin: 0 6px;
+    }
+
+    span:before {
+        font-family: 'FontAwesome';
+        content: '\f07d';
+    }
+}
+
+tbody td.positionHandle {
+    cursor: grab;
+}
+
 .ajaxResultContainer {
     display: none;
     margin: 20px 15px;

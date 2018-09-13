@@ -1,0 +1,27 @@
+
+extends: 
+    module: bimpcommercial
+    object_name: BimpComm
+
+dol_object: 
+    instance: 
+        dol_object: 
+            module: fourn
+            file: fournisseur.commande
+            class: CommandeFournisseur
+            
+table: commande_fournisseur
+controller: commandeFourn
+icon: fas_file-invoice
+list_page_url: 
+    controller: commandesFourn
+
+labels: 
+    name: commande fournisseur
+    name_plur: commandes fournisseurs
+    is_female: 1
+        
+objects: 
+    lines: 
+        instance: 
+            bimp_object: Bimp_CommandeFournLine

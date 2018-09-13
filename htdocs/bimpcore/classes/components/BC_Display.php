@@ -3,6 +3,7 @@
 class BC_Display extends BimpComponent
 {
 
+    public $component_name = 'Affichage';
     public static $type = 'display';
     public static $config_required = false;
     public $field_name = null;
@@ -129,6 +130,7 @@ class BC_Display extends BimpComponent
                                 case 'ref':
                                     $html .= $instance->ref;
                                     break;
+
                                 case 'nom':
                                     $html .= BimpObject::getInstanceNom($instance);
                                     if (!$this->no_html && $this->params['card']) {
@@ -346,7 +348,13 @@ class BC_Display extends BimpComponent
                     case 'string':
                     case 'html':
                     default:
-                        $html .= (string) $this->value;
+                        if ($this->no_html) {
+                            $value = BimpTools::replaceBr($this->value);
+                            $html .= (string) strip_tags($value);
+                        } else {
+                            $html .= (string) $this->value;
+                        }
+
                         break;
                 }
             }

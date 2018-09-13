@@ -4,7 +4,7 @@ js:
     - /bimpsupport/views/js/ticket.js
     - /bimpsupport/views/js/sav.js
     - /bimpequipment/views/js/equipment.js
-    - /bimpcore/views/js/paiement.js
+    - /bimpcommercial/views/js/paiement.js
     
 title: Support
 

@@ -3,6 +3,7 @@
 class BC_Panel extends BimpComponent
 {
 
+    public $component_name = 'Panel';
     public $identifier;
     public $content_only = false;
     public $level = 1;
@@ -24,6 +25,7 @@ class BC_Panel extends BimpComponent
         $this->params_def['objects_change_reload'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['no_reload'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['footer_extra_btn'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
+        $this->params_def['msgs'] = array('type' => 'definitions', 'defs_type' => 'msgs', 'multiple' => true, 'default' => null);
 
         $this->content_only = (int) $content_only;
         $this->level = $level;
@@ -32,7 +34,7 @@ class BC_Panel extends BimpComponent
         if (BimpObject::objectLoaded($object)) {
             $this->identifier .= '_' . $object->id;
         }
-        
+
         if (isset($this->id_parent) && !is_null($this->id_parent) && $this->id_parent) {
             if (!is_null($object)) {
                 $parent_object_name = $object->getParentObjectName();
@@ -124,6 +126,13 @@ class BC_Panel extends BimpComponent
             $content .= '</div>';
 
             $content .= '<div class="container-fluid object_component_content object_' . static::$type . '_content">';
+
+            if (!is_null($this->params['msgs']) && count($this->params['msgs'])) {
+                foreach ($this->params['msgs'] as $msg) {
+                    $html .= BimpRender::renderAlerts($msg['content'], $msg['type']);
+                }
+            }
+
             $content .= $this->renderHtmlContent();
             $content .= '</div>';
 
@@ -178,9 +187,18 @@ class BC_Panel extends BimpComponent
                 $onclick = isset($action_params['onclick']) ? $action_params['onclick'] : '';
                 $icon = isset($action_params['icon']) ? $action_params['icon'] : '';
                 $onclick = str_replace('component_id', $this->identifier, $onclick);
-                if ($label && $onclick) {
+                $disabled = isset($action_params['disabled']) ? (int) $action_params['disabled'] : 0;
+                $popover = isset($action_params['popover']) ? (string) $action_params['popover'] : '';
+                $classes = array('btn', 'btn-light-default');
+                if ($disabled) {
+                    $classes[] = 'disabled';
+                }
+                if ($popover) {
+                    $classes[] = 'bs-popover';
+                }
+                if ($label) {
                     $button = array(
-                        'classes' => array('btn', 'btn-light-default'),
+                        'classes' => $classes,
                         'label'   => $label,
                         'attr'    => array(
                             'type'    => 'button',
@@ -189,6 +207,14 @@ class BC_Panel extends BimpComponent
                     );
                     if ($icon) {
                         $button['icon_before'] = $icon;
+                    }
+                    if ($popover) {
+                        $button['data']['toggle'] = 'popover';
+                        $button['data']['trigger'] = 'hover';
+                        $button['data']['container'] = 'body';
+                        $button['data']['placement'] = 'top';
+                        $button['data']['html'] = 'false';
+                        $button['data']['content'] = $popover;
                     }
                 }
 
@@ -200,7 +226,8 @@ class BC_Panel extends BimpComponent
             if (count($items)) {
                 if (count($items) > 1) {
                     return BimpRender::renderDropDownButton('Actions', $items, array(
-                                'icon' => 'cogs'
+                                'icon'       => 'cogs',
+                                'menu_right' => 1
                     ));
                 }
                 return str_replace('btn-light-default', 'btn-default', $items[0]);

@@ -87,9 +87,7 @@ objects:
         relation: hasOne
         delete: 0
         instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Propal
+            bimp_object: BS_SavPropal
             id_object: 
                 field_value: id_propal
                 
@@ -98,7 +96,7 @@ objects:
         delete: 0
         instance: 
             bimp_object: 
-                module: bimpcore
+                module: bimpcommercial
                 name: Bimp_Facture
             id_object: 
                 field_value: id_facture
@@ -111,24 +109,29 @@ objects:
         delete: 0
         instance: 
             bimp_object: 
-                module: bimpcore
+                module: bimpcommercial
                 name: Bimp_Facture
             id_object: 
                 field_value: id_facture_acompte
         cards: 
             default: 
                 type: facture_card
+                
+    propal_lines: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: BS_SavPropalLine
+        list: 
+            filters: 
+                id_obj: 
+                    field_value: id_propal
+                    
     apple_parts: 
         relation: hasMany
         delete: 1
         instance: 
-            bimp_object: BS_ApplePart
-            
-    products: 
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: BS_SavProduct
+            bimp_object: BS_ApplePart       
             
     prets: 
         relation: hasMany
@@ -136,6 +139,11 @@ objects:
         instance: 
             bimp_object: BS_SavPret
             
+associations: 
+    propales:
+        object: propal
+        label: Devis
+        
 fields: 
     ref:
         label: Référence
@@ -363,6 +371,12 @@ fields:
         label: Acompte
         type: money
         default_value: 0
+    version:
+        label: Version
+        type: float
+        input: 
+            type: hidden
+        default_value: 0
     
 forms: 
     default:
@@ -391,7 +405,6 @@ forms:
             - field: accessoires
             - field: etat_materiel
             - field: etat_materiel_desc
-#            - field: date_problem
             - field: save_option
             - field: sav_pro
             - field: prestataire_number
@@ -414,9 +427,8 @@ forms:
             - field: id_equipment
             - field: id_contrat
             - field: prestataire_number
-            - field: id_propal
+#            - field: id_propal
             - field: id_user_tech
-#            - field: date_problem
             - field: system
             - field: login_admin
             - field: pword_admin
@@ -505,14 +517,6 @@ forms:
               label: Notifier le client
               value: 1
               input_name: send_msg
-            - custom: 1
-              data_type: bool
-              input: 
-                  type: toggle
-                  help: Attention, si cette option est activée, toutes les modifications  faites depuis la fiche propale seront écrasées.
-              label: Générer le devis
-              value: 1
-              input_name: generate_propal
             
     resolution: 
         rows: 
@@ -590,8 +594,8 @@ fields_tables:
             - field: sav_pro
               edit: 1
             - field: prestataire_number
-            - field: id_propal
-              display: card
+#            - field: id_propal
+#              display: card
             - field: id_facture_acompte
               display: card
               show: 
@@ -746,6 +750,10 @@ lists:
             fields: 
                 id_entrepot: 
                     request: id_entrepot
+        joins: 
+            - table: be_equipment
+              alias: e
+              on: a.id_equipment = e.id
         add_btn_label: Nouveau SAV
         edit_btn: 1
         edit_form: edit
@@ -776,10 +784,8 @@ lists:
                 label: Materiel
                 value:
                     callback: displayEquipment
-                joins: 
-                    - table: be_equipment
-                      alias: e
-                      on: a.id_equipment = e.id
+                search: 
+                    type: value_part
                 
     client: 
         checkboxes: 1

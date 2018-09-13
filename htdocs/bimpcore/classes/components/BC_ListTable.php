@@ -3,6 +3,7 @@
 class BC_ListTable extends BC_List
 {
 
+    public $component_name = 'Tableau';
     public static $type = 'list_table';
     public $search = false;
     protected $rows = null;
@@ -35,9 +36,9 @@ class BC_ListTable extends BC_List
         'hidden'      => array('data_type' => 'bool', 'default' => 0),
         'search_list' => array('data_type' => 'array', 'compile' => true, 'default' => null),
         'field_name'  => array(),
-        'search'      => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null)
+        'search'      => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null),
+        'col_style'   => array('default' => '')
     );
-    
     protected $selected_rows = array();
 
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
@@ -49,8 +50,10 @@ class BC_ListTable extends BC_List
         $this->params_def['cols'] = array('type' => 'keys');
         $this->params_def['extra_cols'] = array('data_type' => 'array');
         $this->params_def['enable_search'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['enable_sort'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['enable_refresh'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['enable_edit'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['single_cell'] = array('type' => 'definitions', 'defs_type' => 'single_cell', 'default' => null);
 
         $path = null;
 
@@ -160,7 +163,13 @@ class BC_ListTable extends BC_List
 
         foreach ($this->items as $item) {
             $row = array();
+            $row['single_cell'] = false;
             if ($this->object->fetch((int) $item[$primary])) {
+                if (($this->params['single_cell']['col'])) {
+                    if ($this->object->doMatchFilters($this->params['single_cell']['filters'])) {
+                        $row['single_cell'] = true;
+                    }
+                }
                 $new_values = isset($this->new_values[(int) $item[$primary]]) ? $this->new_values[(int) $item[$primary]] : array();
                 if ($this->params['positions']) {
                     $row['position'] = $this->object->getData('position');
@@ -169,6 +178,9 @@ class BC_ListTable extends BC_List
                     }
                 }
                 foreach ($this->cols as $col_name) {
+                    if ($row['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
+                        continue;
+                    }
                     $content = '';
                     if ($this->setConfPath('cols/' . $col_name)) {
                         $show = (bool) $this->object->getCurrentConf('show', true, false, 'bool');
@@ -211,10 +223,11 @@ class BC_ListTable extends BC_List
         }
     }
 
-    public function setSelectedRows($selected_rows) {
+    public function setSelectedRows($selected_rows)
+    {
         $this->selected_rows = $selected_rows;
     }
-    
+
     // Rendus HTML:
 
     public function renderHtmlContent()
@@ -281,7 +294,6 @@ class BC_ListTable extends BC_List
             foreach ($this->cols as $col_name) {
                 if ($this->setConfPath('cols/' . $col_name)) {
                     $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params);
-
                     if (!$col_params['label']) {
                         if ($col_params['field']) {
                             $col_params['label'] = $this->object->config->get('fields/' . $col_params['field'] . '/label', ucfirst($col_name));
@@ -295,16 +307,15 @@ class BC_ListTable extends BC_List
                     if (!is_null($col_params['width'])) {
                         $html .= ' width="' . $col_params['width'] . '"';
                     }
-                    if (!is_null($col_params['max_width']) || !is_null($col_params['min_width'])) {
-                        $html .= ' style="';
-                        if (!is_null($col_params['min_width'])) {
-                            $html .= 'min-width: ' . $col_params['min_width'] . ';';
-                        }
-                        if (!is_null($col_params['max_width'])) {
-                            $html .= 'max-width: ' . $col_params['max_width'] . ';';
-                        }
-                        $html .= '"';
+
+                    $html .= ' style="';
+                    if (!is_null($col_params['min_width'])) {
+                        $html .= 'min-width: ' . $col_params['min_width'] . ';';
                     }
+                    if (!is_null($col_params['max_width'])) {
+                        $html .= 'max-width: ' . $col_params['max_width'] . ';';
+                    }
+                    $html .= '"';
 
                     $html .= ' data-col_name="' . $col_name . '"';
                     $html .= ' data-field_name="' . ($col_params['field'] ? $col_params['field'] : '') . '"';
@@ -416,7 +427,6 @@ class BC_ListTable extends BC_List
                     $html .= $field->renderSearchInput();
                     unset($field);
                 } elseif (!is_null($col_params['search']) && method_exists($this->object, 'get' . ucfirst($col_name) . 'SearchFilters')) {
-//                    $input_name = 'search_' . $col_params['field_name'];
                     $search_type = $col_params['search']['type'];
                     $html .= '<div class="searchInputContainer"';
                     $html .= ' data-field_name="' . $col_name . '"';
@@ -733,7 +743,7 @@ class BC_ListTable extends BC_List
                 if (is_numeric($id_object)) {
                     $this->object->fetch((int) $id_object);
                 }
-                
+
                 if (in_array((int) $id_object, $this->selected_rows)) {
                     $selected = true;
                 } else {
@@ -748,10 +758,12 @@ class BC_ListTable extends BC_List
                     $row_style = $item_params['row_style'];
                 }
 
+                $td_style = $item_params['col_style'];
+
                 if (isset($row['td_style'])) {
-                    $td_style = $row['td_style'];
+                    $td_style .= $row['td_style'];
                 } else {
-                    $td_style = $item_params['td_style'];
+                    $td_style .= $item_params['td_style'];
                 }
 
                 $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow';
@@ -791,9 +803,15 @@ class BC_ListTable extends BC_List
 
                 $this->setConfPath('cols');
                 foreach ($this->cols as $col_name) {
+                    if ($row['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
+                        continue;
+                    }
+
                     $hidden = (int) $this->object->getCurrentConf($col_name . '/hidden', 0, false, 'bool');
                     $min_width = $this->object->getCurrentConf($col_name . '/min_width', 0);
                     $max_width = $this->object->getCurrentConf($col_name . '/max_width', 0);
+                    $col_style = $this->object->getCurrentConf($col_name . '/col_style', '');
+                    $show = (int) $this->object->getCurrentConf($col_name . '/item_show', 1);
 
                     $html .= '<td style="';
                     if ($hidden) {
@@ -808,8 +826,13 @@ class BC_ListTable extends BC_List
                     if ($td_style) {
                         $html .= ' ' . $td_style;
                     }
-                    $html .= '">';
-                    $html .= (isset($row[$col_name]) ? $row[$col_name] : '');
+                    if ($col_style) {
+                        $html .= ' ' . $col_style;
+                    }
+                    $html .= '"' . ($row['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
+                    if ($show) {
+                        $html .= (isset($row[$col_name]) ? $row[$col_name] : '');
+                    }
                     $html .= '</td>';
                 }
 

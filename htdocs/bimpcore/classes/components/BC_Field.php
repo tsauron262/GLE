@@ -3,6 +3,7 @@
 class BC_Field extends BimpComponent
 {
 
+    public $component_name = 'Champ';
     public static $type = 'field';
     public $edit = false;
     public $value = null;
@@ -75,7 +76,7 @@ class BC_Field extends BimpComponent
 
         $this->params['editable'] = 1;
         $this->params['viewable'] = 1;
-        
+
         if ($this->isObjectValid()) {
             $this->params['editable'] = (int) $this->object->canEditField($name);
         }
@@ -334,6 +335,34 @@ class BC_Field extends BimpComponent
                 }
                 $html .= ' data-hide_values="' . str_replace('"', "'", $hide_values) . '"';
             }
+        } elseif (isset($params['fields_names'])) {
+            $fields_names = $params['fields_names'];
+            if (!is_array($fields_names)) {
+                $fields_names = explode(',', $fields_names);
+            }
+            $fields = array();
+            foreach ($fields_names as $field) {
+                if (isset($params[$field])) {
+                    $fields[] = $name_prefix . $field;
+                    if (isset($params[$field]['show_values']) && !is_null($params[$field]['show_values'])) {
+                        $show_values = $params[$field]['show_values'];
+                        if (is_array($show_values)) {
+                            $show_values = implode(',', $show_values);
+                        }
+                        $html .= ' data-show_values_' . $name_prefix . $field . '="' . str_replace('"', "'", $show_values) . '"';
+                    }
+                    
+                    if (isset($params[$field]['hide_values']) && !is_null($params[$field]['hide_values'])) {
+                        $hide_values = $params[$field]['hide_values'];
+                        if (is_array($hide_values)) {
+                            $hide_values = implode(',', $hide_values);
+                        }
+                        $html .= ' data-hide_values_' . $name_prefix . $field . '="' . str_replace('"', "'", $hide_values) . '"';
+                    }
+                }
+            }
+
+            $html .= ' data-inputs_names="' . implode(',', $fields) . '"';
         }
         return $html;
     }

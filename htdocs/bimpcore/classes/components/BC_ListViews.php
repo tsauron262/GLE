@@ -3,6 +3,7 @@
 class BC_ListViews extends BC_List
 {
 
+    public $component_name = 'Liste';
     public static $type = 'list_view';
 
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
@@ -58,7 +59,7 @@ class BC_ListViews extends BC_List
                 $this->params['item_col_xs'] = 12;
             }
         }
-        
+
         if (!count($this->errors)) {
             if (!$this->object->canView()) {
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
@@ -101,7 +102,7 @@ class BC_ListViews extends BC_List
         if (is_null($this->items)) {
             $this->fetchItems();
         }
-        
+
         $html = '';
 
         $html .= '<div class="objectViewContainer" style="display: none"></div>';

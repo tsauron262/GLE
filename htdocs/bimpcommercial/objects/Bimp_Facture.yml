@@ -1,0 +1,416 @@
+extends: 
+    module: bimpcommercial
+    object_name: BimpComm
+    
+dol_object: 
+    instance: 
+        dol_object: 
+            module: compta/facture
+            file: facture
+            
+force_extrafields_update: 1
+
+table: facture
+controller: facture
+icon: fas_file-invoice-dollar
+list_page_url: 
+    controller: factures
+
+labels: 
+    name: facture
+    is_female: 1
+    
+objects: 
+    lines: 
+        instance: 
+            bimp_object: Bimp_FactureLine
+            
+    entrepot: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object:
+                field_value: entrepot
+                
+    account: 
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: 
+                module: compta/bank
+                file: account
+            id_object: 
+                field_value: fk_account
+    
+fields:         
+    facnumber: 
+        label: Référence
+        dol_prop: ref
+    type: 
+        label: Type
+        type: int
+        values: 
+            array: types
+        input: 
+            type: select
+            options: 
+                array: selectTypes
+        depends_on: fk_soc
+    entrepot: 
+        label: Entrepôt
+        dol_extra_field: 1
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
+    model_pdf: 
+        default_value: bimpfact
+    libelle: 
+        label: Libellé
+        dol_extra_field: 1
+    datef: 
+        label: Date facturation
+        dol_prop: date
+        type: date
+        input: 
+            display_now: 1
+        required: 1
+    fk_account: 
+        label: Compte bancaire
+        type: id_object
+        object: account
+        input: 
+            type: select_mysoc_account
+        required: 1
+    ef_type: 
+        label: Secteur
+        dol_extra_field: 1
+        values: 
+            array: secteurs
+        required: 1
+    centre: 
+        label: Centre
+        dol_extra_field: 1
+        values: 
+            array: centres
+    total: 
+        label: Total HT
+        dol_prop: total_ht
+        type: money
+    total_ttc: 
+        label: Total TTC
+        type: money
+    ref: unset
+    fk_availability: unset
+    fk_input_reason: unset
+    total_ht: unset
+        
+forms: 
+    default: 
+        rows:
+            - custom: 1
+              lable: Origine
+              input_name: origin
+              input: 
+                  type: hidden
+              value: 
+                  callback: getRequestOrigin
+              hidden: 1
+              
+            - custom: 1
+              lable: Origine
+              input_name: origin
+              data_type: int
+              input: 
+                  type: hidden
+              value: 
+                  callback: getRequestIdOrigin
+              hidden: 1
+              
+            - field: fk_soc
+              show: 
+                  callback: isNotLoaded
+                  
+            - field: ref_client
+            
+            - field: type
+              show: 
+                  callback: isNotLoaded
+                  
+            - custom: 1
+              label: Type d'acompte
+              input_name: typedeposit
+              input: 
+                  type: select
+                  options: 
+                      array: typesDeposit
+              display_if:
+                  fields_names: type,origin
+                  type: 
+                      hide_values: 1,2,4,5
+                  origin: 
+                      show_values: propal,commande
+              show: 
+                  callback: isNotLoaded
+                      
+            - custom: 1
+              label: Facture remplacée
+              input_name: id_facture_replaced
+              data_type: int
+              input: 
+                  type: select
+                  options: 
+                      array: replacedInvoices
+              value: 
+                callback: getRequestIdFactureReplaced
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              show: 
+                  callback: isNotLoaded
+              depends_on: fk_soc
+                  
+            - custom: 1
+              label: Facture à corriger
+              input_name: id_facture_to_correct
+              data_type: int
+              input: 
+                  type: select
+                  options: 
+                      array: FacturesToCorrect
+              value: 
+                  callback: getRequestIdFactureToCorrect
+              display_if: 
+                  field_name: type
+                  show_values: 2
+              depends_on: fk_soc
+              show: 
+                  callback: isNotLoaded
+              
+            - custom: 1
+              label: Créer l'avoir avec les même lignes que la factures dont il est issu
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              input_name: avoir_same_lines
+              display_if: 
+                  fields_names: type,id_facture_to_correct
+                  type: 
+                      show_values: 2
+                  id_facture_to_correct:
+                      hide_values: 0
+              show: 
+                  callback: isNotLoaded
+            
+            - custom: 1
+              label: Créer l'avoir avec le montant restant à payer de la facture dont il est issu.
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+              input_name: avoir_remain_to_pay
+              display_if: 
+                  fields_names: type,id_facture_to_correct
+                  type: 
+                      show_values: 2
+                  id_facture_to_correct:
+                      hide_values: 0
+              show: 
+                  callback: isNotLoaded
+            
+            - field: entrepot
+              show: 
+                  callback: isEditable
+                  
+            - field: ef_type
+            
+            - field: libelle
+            
+            - field: datef
+              show: 
+                  callback: isEditable
+                  
+            - field: fk_cond_reglement
+              show: 
+                  callback: isEditable
+            - field: fk_mode_reglement
+              show: 
+                  callback: isEditable
+                  
+            - field: fk_account
+              show: 
+                  callback: isEditable
+                  
+            - field: model_pdf
+              show: 
+                  callback: isNotLoaded
+                  
+            - field: note_private
+            
+            - field: note_public
+            
+    paid_partially:
+        msgs: 
+            - content: Cette facture n'a pas été payée à hauteur du montant initial. Pour quelle raison voulez-vous la classer malgré tout?
+              type: warning
+        rows: 
+            - custom: 1
+              label: Raison
+              input_name: close_code
+              input: 
+                  type: select
+                  options: 
+                      array: closeReasons
+            - custom: 1
+              label: Commentaires
+              input_name: close_note
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+                  
+    cancel:
+        msgs: 
+            - content: Pour quelle raison voulez-vous classer la facture abandonnée ?
+              type: warning
+        rows: 
+            - custom: 1
+              label: Raison
+              input_name: close_code
+              input: 
+                  type: select
+                  options: 
+                      array: cancelReasons
+            - custom: 1
+              label: Commentaires
+              input_name: close_note
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+                      
+fields_tables: 
+    infos: 
+        rows: 
+            - label: Type
+              value: 
+                  callback: displayType
+            - field: libelle
+              edit: 1
+            - field: fk_statut
+            - field: entrepot
+              display: nom_url
+            - field: ef_type
+              edit: 
+                  callback: isEditable
+            - field: datef
+              edit: 
+                  callback: isEditable
+    
+    client: 
+        rows: 
+            - field: fk_soc
+              display: card
+            - field: ref_client
+              edit: 1
+            - label: Remises client
+              value: 
+                  callback: displayRemisesClient
+            
+    payment:
+        rows:
+            - field: fk_account                  
+            - field: fk_cond_reglement
+              edit: 
+                  callback: isEditable
+            - field: fk_mode_reglement
+              edit: 
+                  callback: isEditable
+                
+    pdf: 
+        rows: 
+            - label: Fichier PDF
+              value: 
+                  callback: displayPDFButton
+                                                 
+    totals: 
+        rows: 
+            - field: total
+            - field: tva
+            - field: total_ttc
+            
+views: 
+    default: 
+        objects_change_reload: Bimp_FactureLine
+    content: 
+        objects_change_reload: Bimp_FactureLine
+        
+lists: 
+    default: 
+        title: Factures
+        icon: fas_file-invoice-dollar
+        list_filters: 
+            callback: getListFilters
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        add_btn_label: Créer une nouvelle facture
+        add_form_values: 
+            fields: 
+                entrepot: 
+                    request: id_entrepot
+                fk_soc:
+                    request: id_client
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 0
+        modal_view: default
+        page_btn: 1
+        cols: 
+            ref: 
+                field: facnumber
+            type: 
+                field: type
+            status: 
+                field: fk_statut
+            paid: 
+                label: Payée
+                value: 
+                    callback: 
+                        method: displayPaidStatus
+                        params: 
+                            - 0
+                            - 1
+            client: 
+                field: fk_soc
+                display: nom_url
+            total: 
+                field: total_ttc
+            pdf: 
+                label: fichier PDF
+                value: 
+                    callback: 
+                        method: displayPDFButton
+                        params: 
+                            - false
+        
+cards: 
+    default: 
+        title: 
+            field_value: facnumber
+        status: fk_statut
+        view_btn: 1
+        fields: 
+            - field: total_ttc
+            - label: Payé
+              value: 
+                  callback: displayPaid
+            - label: Fichier PDF
+              value: 
+                  callback: displayPDFButton
+        

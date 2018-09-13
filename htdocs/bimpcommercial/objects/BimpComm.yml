@@ -1,0 +1,330 @@
+primary: rowid
+
+header_btn: 
+    callback: getActionsButtons
+    
+objects:
+    lines: 
+        relation: hasMany
+        delete: 1
+        instance: ObjectLine
+        
+    client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Societe
+            id_object: 
+                field_value: fk_soc
+                
+    contact: 
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Contact
+            
+fields:
+    ref: 
+        label: Référence
+    fk_statut: 
+        label: Statut
+        type: int
+        dol_prop: statut
+        values: 
+            array: status_list
+    fk_soc: 
+        label: Client
+        dol_prop: socid
+        type: id_object
+        object: client
+        input: 
+            type: search_societe
+            societe_type: customer
+        required: 1
+    ref_client: 
+        label: Référence client
+    fk_cond_reglement: 
+        label: Conditions de règlement
+        dol_prop: cond_reglement_id
+        type: int
+        values: 
+            array: condReglements
+        input: 
+            type: select_cond_reglement
+        required: 1
+    fk_mode_reglement: 
+        label: Mode de règlement
+        dol_prop: mode_reglement_id
+        type: int
+        values: 
+            array: modeReglements
+        input: 
+            type: select_payment
+    fk_availability: 
+        label: Délai de livraison
+        dol_prop: availability_id
+        type: int
+        values: 
+            array: availabilities
+        input: 
+            type: select_availability
+    fk_input_reason: 
+        label: Origine
+        dol_prop: demand_reason_id
+        type: int
+        values: 
+            array: demandReasons
+        input: 
+            type: select_input_reasons
+    total: 
+        label: Total TTC
+        dol_prop: total_ttc
+        type: money
+    total_ht: 
+        label: Total HT
+        type: money
+    tva: 
+        label: Total TVA
+        dol_prop: total_tva
+        type: money    
+    model_pdf: 
+        label: Modèle de document par défaut
+        dol_prop: modelpdf
+        values: 
+            array: modelsPdf
+    note_private: 
+        label: Note privée
+        type: html
+    note_public: 
+        label: Note publique
+        type: html   
+        
+forms: 
+    contact:
+        title: Ajouter un contact
+        rows: 
+            - custom: 1
+              label: Type
+              input_name: type
+              input: 
+                  type: select
+                  options: 
+                      1: Contact tiers
+                      2: Utilisateur
+            - custom: 1
+              label: Tiers
+              input_name: id_client
+              input: 
+                  type: search_societe
+                  societe_type: customer
+              value: 
+                  field_value: fk_soc
+              display_if: 
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Contact
+              input_name: id_contact
+              data_type: id_object
+              object: contact
+              create_form: default
+              create_form_values:
+                  fields: 
+                      fk_soc: 
+                          field_value: fk_soc
+              value: 
+                  request: fields/id_contact
+              input: 
+                  type: select
+                  options: 
+                      array: clientContacts
+              display_if: 
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Utilisateur
+              input_name: id_user
+              input: 
+                  type: search_user
+              value: 
+                  prop:
+                      object: 
+                          global: user
+                      name: id
+              display_if: 
+                  field_name: type
+                  show_values: 2
+            - custom: 1
+              label: Type de contact
+              input_name: tiers_type_contact
+              input: 
+                  type: select
+                  options: 
+                      array: externalContactTypes
+              display_if: 
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Type de contact
+              input_name: user_type_contact
+              input: 
+                  type: select
+                  options: 
+                      array: internalContactTypes
+              display_if: 
+                  field_name: type
+                  show_values: 2 
+                  
+    duplicate:
+        rows: 
+            - field: fk_soc
+            
+    use_remise:
+        rows: 
+            - custom: 1
+              label: Remise / avoir à appliquer
+              input_name: id_discount
+              data_type: int
+              input: 
+                  type: select_remises
+                  id_client: 
+                      field_value: fk_soc
+                  extra_filters:
+                      callback: getRequestSelectRemisesFilters
+        
+fields_tables: 
+    infos: 
+        title: Informations
+        icon: info-circle
+                  
+    client: 
+        title: Client
+        icon: user
+        
+    payment:
+        title: Règlement
+        icon: euro
+                
+    pdf: 
+        title: Document
+        icon: fas_file-pdf
+                                    
+    sav_infos: 
+        title: Informations
+        icon: info-circle
+                  
+    totals: 
+        title: Montants totaux
+        icon: euro
+                  
+    note_public:
+        rows: 
+            - field: note_public
+    
+    note_private:
+        rows: 
+            - field: note_private
+            
+views: 
+    default: 
+        delete_btn: 
+            callback: isDeletable
+        edit_form: default
+        footer_extra_btn: 
+            callback: getActionsButtons
+        rows: 
+            - cols: 
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  rows: 
+                      - cols: 
+                            - type: fields_table
+                              fields_table:
+                                  name: infos
+                                  
+                      - cols: 
+                            - type: fields_table
+                              fields_table: 
+                                  name: payment
+                      
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  rows: 
+                      - cols: 
+                          - type: fields_table
+                            fields_table: 
+                                name: client
+                                
+                      - cols:
+                          - type: fields_table
+                            fields_table:
+                                name: pdf
+                                
+            - cols:
+                - type: view
+                  view: 
+                      name: notes
+                      panel: 1
+                                
+    content: 
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 5
+                  col_md: 5
+                  col_sm: 12
+                  fields_table: 
+                      name: totals
+
+                - type: custom
+                  col_lg: 7
+                  col_md: 7
+                  col_sm: 12
+                  custom: 
+                      callback: renderMarginsTable
+            - cols: 
+                - type: custom
+                  col_lg: 5
+                  col_md: 5
+                  col_sm: 12
+                  custom: 
+                      callback: renderContentExtraLeft
+                - type: custom
+                  col_lg: 7
+                  col_md: 7
+                  col_sm: 12
+                  custom: 
+                      callback: renderContentExtraRight
+                                
+            - cols: 
+                - type: list
+                  list: 
+                      name: default
+                      children: lines
+                      title: Lignes
+                      
+    notes: 
+        title: Notes
+        icon: file-text
+        rows: 
+            - cols:
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: note_public
+                      panel: 0
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: note_private
+                      panel: 0

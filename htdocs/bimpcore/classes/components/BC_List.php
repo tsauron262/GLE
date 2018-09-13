@@ -3,6 +3,7 @@
 class BC_List extends BC_Panel
 {
 
+    public $component_name = 'Liste';
     public static $type = 'list';
     protected $item_params = array();
     public $id_parent;

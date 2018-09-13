@@ -19,287 +19,398 @@ function addInputEvent(form_id, input_name, event, callback) {
 
 // Enregistrements ajax des objets: 
 
-function saveObjectFromForm(form_id, $button, success_callback) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
-    var $result = $('#' + form_id + '_result');
+function saveObjectFromForm(form_id, $button, successCallback, on_save) {
+    var $resultContainer = $('#' + form_id + '_result');
     var $form = $('#' + form_id);
 
     if (!$form.length) {
         var msg = 'Erreur technique: formulaire non trouvé';
-        bimp_display_msg(msg, $result, 'danger');
+        bimp_msg(msg, 'danger', $resultContainer);
         return;
     }
 
-    var module = $form.data('module_name');
+    var module = $form.data('module');
     var object_name = $form.data('object_name');
 
-    var data = new FormData($form.get(0));
+    var $formular = $form.find('form.' + object_name + '_form');
 
-    bimp_json_ajax('saveObject', data, $result, function (result) {
-        if (result.errors.length) {
-            $button.removeClass('disabled');
-        }
+    if (!$formular.length) {
+        bimp_msg('Erreur. Formulaire absent ou invalide', 'danger');
+        return;
+    }
 
-        if ((typeof (result.object_view_url) !== 'undefined') && result.object_view_url) {
-            var $link = $button.parent().find('.objectViewLink');
-            if ($link.length) {
-                $link.removeClass('hidden').attr('href', result.object_view_url);
-            }
-        }
+    if (!validateForm($form)) {
+        return;
+    }
 
-        if (typeof (success_callback) !== 'undefined') {
-            if (typeof (success_callback) === 'function') {
-                success_callback();
-            }
-        }
+    var data = new FormData($formular.get(0));
 
-        $('body').trigger($.Event('objectChange', {
-            module: module,
-            object_name: object_name,
-            id_object: result.id_object
-        }));
+    if (!on_save || typeof (on_save) === 'undefined') {
+        on_save = $form.data('on_save');
+    }
 
-    }, function () {
-        $button.removeClass('disabled');
-    }, true, {
+    BimpAjax('saveObject', data, $resultContainer, {
+        $form: $form,
+        form_id: form_id,
+        $button: $button,
+        on_save: on_save,
         processData: false,
-        contentType: false
-    });
-}
+        contentType: false,
+        display_success_in_popup_only: true,
+        display_processing: true,
+        processing_padding: 10,
+        success: function (result, bimpAjax) {
+            if (!result.warnings || !result.warnings.length) {
+                bimpAjax.$resultContainer.slideUp(250, function () {
+                    $(this).html('');
+                });
 
-function saveObject(module, object_name, id_object, fields, $resultContainer, successCallback) {
-    var data = fields;
+                switch (bimpAjax.on_save) {
+                    case 'reload':
+                        if ((typeof (result.object_view_url) !== 'undefined') && result.object_view_url) {
+                            var $link = bimpAjax.$button.parent().find('.objectViewLink');
+                            if ($link.length) {
+                                $link.removeClass('hidden').attr('href', result.object_view_url);
+                            }
+                        }
+                        reloadForm(bimpAjax.form_id);
+                        break;
 
-    data['module_name'] = module;
-    data['object_name'] = object_name;
-    data['id_object'] = id_object;
+                    case 'close':
+                        closeForm(bimpAjax.form_id);
+                        break;
 
-    bimp_json_ajax('saveObject', data, $resultContainer, function (result) {
-        if (typeof (successCallback) !== 'undefined') {
+                    case 'redirect':
+                        if (result.object_view_url) {
+                            window.location = result.object_view_url;
+                        }
+                        break;
+
+                    case 'none':
+                        break;
+                }
+            } else {
+                bimpAjax.display_warnings_in_popup_only = true;
+                bimpAjax.display_result_warnings(result.warnings);
+                bimpAjax.display_warnings_in_popup_only = false;
+                bimpAjax.$button.remove();
+            }
+            $('body').trigger($.Event('objectChange', {
+                module: result.module,
+                object_name: result.object_name,
+                id_object: result.id_object
+            }));
             if (typeof (successCallback) === 'function') {
                 successCallback(result);
             }
         }
-        $('body').trigger($.Event('objectChange', {
-            module: module,
-            object_name: object_name,
-            id_object: result.id_object
-        }));
     });
 }
 
-function saveObjectField(module, object_name, id_object, field, value, $resultContainer, successCallback) {
-    var data = {
-        module: module,
-        object_name: object_name,
-        id_object: id_object,
-        field: field,
-        value: value
-    };
-
-    bimp_json_ajax('saveObjectField', data, $resultContainer, function (result) {
-        if (typeof (successCallback) === 'function') {
-            successCallback(result);
+function loadModalForm($button, data, title, successCallback, on_save) {
+    if (typeof (on_save) !== 'string') {
+        on_save = '';
+    }
+    if (typeof (title) === 'undefined' || !title) {
+        if (data.id_object) {
+            title = '<i class="fa fa-edit iconLeft"></i>Edition ';
+            if (typeof (object_labels[data.object_name].of_the) !== 'undefined') {
+                title += object_labels[data.object_name].of_the;
+            } else {
+                title += 'l\'objet "' + data.object_name + '"';
+            }
+            title += ' ' + data.id_object;
+        } else {
+            title = '<i class="fa fa-plus-circle iconLeft"></i>Ajout ';
+            if (typeof (object_labels[data.object_name].of_a) !== 'undefined') {
+                title += object_labels[data.object_name].of_a;
+            } else {
+                title += 'd\'un objet "' + data.object_name + '"';
+            }
         }
-        $('body').trigger($.Event('objectChange', {
-            module: module,
-            object_name: object_name,
-            id_object: id_object
-        }));
-    });
-}
-
-function saveObjectAssociations(id_object, object_name, association, $button) {
-    if ($button.hasClass('disabled')) {
-        return;
     }
-
-    $button.addClass('disabled');
-
-    var $resultContainer = $('#' + object_name + '_' + association + '_associatonsAjaxResult');
-
-    var list = [];
-
-    $('#' + object_name + '_' + association + '_associations_list').find('input[type=checkbox]').each(function () {
-        if ($(this).prop('checked')) {
-            list.push(parseInt($(this).val()));
-        }
-    });
-
-    var data = {
-        'id_object': id_object,
-        'object_name': object_name,
-        'association': association,
-        'list': list
-    };
-
-    bimp_json_ajax('saveObjectAssociations', data, $resultContainer, function () {
-        $button.removeClass('disabled');
-    }, function () {
-        $button.removeClass('disabled');
-    });
-}
-
-function deleteObject($button, module, object_name, id_object, $resultContainer, successCallBack) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-    var msg = 'Voulez-vous vraiment supprimer ';
-
-    if (typeof (object_labels[object_name]) !== 'undefined') {
-        msg += object_labels[object_name]['the'] + ' n°' + id_object;
-    } else {
-        msg += 'cet objet?';
-    }
-
-    if (confirm(msg)) {
-        $button.addClass('disabled');
-        var data = {
-            'module': module,
-            'object_name': object_name,
-            'objects': [id_object]
-        };
-
-        bimp_json_ajax('deleteObjects', data, $resultContainer, function (result) {
-            $button.removeClass('disabled');
-            var $lists = $('.' + object_name + '_list');
-            if ($lists.length) {
-                $lists.each(function () {
-                    reloadObjectList($(this).attr('id'));
-                });
-            }
-            var $views = $('.' + object_name + '_view');
-            if ($views.length) {
-                var html = '<div class="alert alert-danger" style="margin: 15px">';
-                if (typeof (object_labels[object_name]) !== 'undefined') {
-                    html += object_labels[object_name]['name'] + ' n°' + id_object + ' supprimé';
-                    if (object_labels[object_name]['is_female']) {
-                        html += 'e';
-                    }
-                } else {
-                    html += 'objet supprimé';
-                }
-                html += '</div>';
-                $views.each(function () {
-                    $(this).html(html);
-                });
-            }
-            if (typeof (successCallBack) === 'function') {
-                successCallBack(result);
-            }
-            $('body').trigger($.Event('objectDelete', {
-                module: module,
-                object_name: object_name,
-                id_object: result.id_object
-            }));
-        }, function (result) {
-            $button.removeClass('disabled');
-        });
-    }
-}
-
-function loadModalForm($button, data) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
 
     if (typeof (data.id_object) === 'undefined') {
         data.id_object = 0;
     }
-
-    var $modal = $('#page_modal');
-    var $resultContainer = $modal.find('.modal-ajax-content');
-    $resultContainer.html('').hide();
-
-    var title = '';
-
-    if (data.id_object) {
-        title = '<i class="fa fa-edit iconLeft"></i>Edition ';
-        if (typeof (object_labels[data.object_name].of_the) !== 'undefined') {
-            title += object_labels[data.object_name].of_the;
-        } else {
-            title += 'l\'objet "' + data.object_name + '"';
-        }
-        title += ' ' + data.id_object;
-    } else {
-        title = '<i class="fa fa-plus-circle iconLeft"></i>Ajout ';
-        if (typeof (object_labels[data.object_name].of_a) !== 'undefined') {
-            title += object_labels[data.object_name].of_a;
-        } else {
-            title += 'd\'un objet "' + data.object_name + '"';
-        }
-    }
-
-    $modal.find('.modal-title').html(title);
-    $modal.find('.loading-text').text('Chargement du formulaire');
-    $modal.find('.content-loading').show();
-    $modal.modal('show');
-
-    var isCancelled = false;
-
-    $modal.on('hide.bs.modal', function (e) {
-        $modal.find('.extra_button').remove();
-        $modal.find('.content-loading').hide();
-        isCancelled = true;
-        $button.removeClass('disabled');
-    });
-
     data.full_panel = 0;
 
-    bimp_json_ajax('loadObjectForm', data, null, function (result) {
-        $modal.find('.content-loading').hide();
-        if (!isCancelled) {
-            if (!bimp_display_result_errors(result, $resultContainer)) {
-                if (typeof (result.html) !== 'undefined') {
-                    $resultContainer.html(result.html).slideDown(250);
+    bimpModal.loadAjaxContent($button, 'loadObjectForm', data, title, 'Chargement du formulaire', function (result, bimpAjax) {
+        var $form = bimpAjax.$resultContainer.find('.object_form');
+        var modal_idx = parseInt(bimpAjax.$resultContainer.data('idx'));
+        $form.data('modal_idx', modal_idx);
+        bimpModal.removeComponentContent($form.attr('id'));
+        bimpModal.addButton('<i class="fa fa-save iconLeft"></i>Enregistrer', 'saveObjectFromForm(\'' + result.form_id + '\', $(this), null, \'' + on_save + '\');', 'primary', 'save_object_button', modal_idx);
+        bimpModal.addlink('<i class="fa fa-file-o iconLeft"></i>Afficher', '', 'primary', 'hidden objectViewLink', modal_idx);
 
-                    var button_html = '<button type="button" class="extra_button btn btn-primary"';
-                    button_html += ' onclick="saveObjectFromForm(\'' + result.form_id + '\', $(this));">';
-                    button_html += '<i class="fa fa-save iconLeft"></i>Enregistrer</button>';
-                    $modal.find('.modal-footer').append(button_html);
-
-                    button_html = '<a class="hidden objectViewLink extra_button btn btn-primary" href="">';
-                    button_html += '<i class="fa fa-file-o iconLeft"></i>Afficher</a>';
-                    $modal.find('.modal-footer').append(button_html);
-
-                    var $form = $resultContainer.find('.objectForm');
-                    if ($form.length) {
-                        $form.each(function () {
-                            onFormLoaded($form);
-                        });
-                    }
-                }
-            }
-            $modal.modal('handleUpdate');
+        if ($form.length) {
+            $form.each(function () {
+                onFormLoaded($form);
+            });
         }
 
-    }, function (result) {
-        $modal.find('.content-loading').hide();
-        if (!bimp_display_result_errors(result, $resultContainer)) {
-            bimp_display_msg('Echec du chargement du formulaire', $resultContainer, 'danger');
+        if (typeof (successCallback) === 'function') {
+            successCallback($form);
         }
-        $modal.modal('handleUpdate');
+    }, {
+        error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé'
     });
 }
 
-function loadObjectFieldValue(module, object_name, id_object, field, $resultContainer, successCallback) {
+function reloadForm(form_id) {
+    var $form = $('#' + form_id);
+    if (!$form.length) {
+        return;
+    }
+
     var data = {
-        object_module: module,
-        object_name: object_name,
-        id_object: id_object,
-        field: field
+        'module': $form.data('module'),
+        'object_name': $form.data('object_name'),
+        'id_object': $form.data('id_object'),
+        'id_parent': $form.data('id_parent'),
+        'form_name': $form.data('name'),
+        'full_panel': 0
     };
 
-    bimp_json_ajax('loadObjectFieldValue', data, $resultContainer, function (result) {
-        if (typeof (successCallback) === 'function') {
-            successCallback(result);
+    var $params = $('#' + form_id + '_params');
+    if ($params.length) {
+        $params.find('input.object_component_param').each(function () {
+            data[$(this).attr('name')] = $(this).val();
+        });
+    }
+
+    $form.find('.object_form_content').hide();
+
+    var $panel = $('#' + form_id + '_panel');
+    var $modal = $();
+    if (!$.isOk($panel)) {
+        if ($form.data('modal_idx')) {
+            $modal = $form.findParentByClass('modal');
+            if ($modal.length) {
+                $modal.find('.loading-text').text('Chargement du formulaire');
+                $modal.find('.content-loading').show();
+            }
+        }
+    }
+
+    BimpAjax('loadObjectForm', data, null, {
+        $form: $form,
+        $panel: $panel,
+        $modal: $modal,
+        display_success: false,
+        error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être rechargé',
+        success: function (result, bimpAjax) {
+            if (result.form_id && result.html) {
+                if ($.isOk(bimpAjax.$form)) {
+                    if ($.isOk(bimpAjax.$panel)) {
+                        bimpAjax.$panel.find('.panel-footer').find('.save_object_button').removeClass('disabled');
+                    }
+
+                    if ($.isOk(bimpAjax.$modal)) {
+                        bimpAjax.$modal.find('.content-loading').hide();
+                        bimpAjax.$modal.find('.loading-text').text('');
+                        var modal_idx = parseInt(bimpAjax.$form.data('modal_idx'));
+                        if (modal_idx) {
+                            bimpAjax.$modal.find('.modal-footer').find('.save_object_button.modal_' + modal_idx).removeClass('disabled');
+                        }
+                    }
+
+                    bimpAjax.$form.find('.object_form_content').html(result.html).slideDown(function () {
+                        setFormEvents(bimpAjax.$form);
+                        setCommonEvents(bimpAjax.$form);
+                    });
+                }
+            }
+        }
+    });
+}
+
+function closeForm(form_id) {
+    var $form = $('#' + form_id);
+    if (!$form.length) {
+        return;
+    }
+
+    var $modal = $form.findParentByClass('modal');
+    if ($.isOk($modal)) {
+        var modal_idx = parseInt($form.data('modal_idx'));
+        if (modal_idx) {
+            bimpModal.removeContent(modal_idx);
+        }
+        bimpModal.hide();
+    } else {
+        var $container = $('#' + form_id + '_container');
+        if ($container.length) {
+            $container.slideUp(250, function () {
+                $(this).remove();
+            });
+        }
+    }
+}
+
+function submitForm(form_id) {
+    var $form = $('#' + form_id);
+    if (!$form.length) {
+        return;
+    }
+
+    var $modal = $form.findParentByClass('modal');
+    if ($.isOk($modal)) {
+        var modal_idx = parseInt($form.data('modal_idx'));
+        var $btn = $modal.find('.modal-footer').find('.save_object_button.modal_' + modal_idx);
+        if ($btn.length) {
+            $btn.click();
+        } else {
+            $btn = $modal.find('.modal-footer').find('.set_action_button.modal_' + modal_idx);
+            if ($btn.length) {
+                $btn.click();
+            }
+        }
+    } else {
+        var $container = $('#' + form_id + '_container');
+        if ($container.length) {
+            var $btn = $container.find('.save_object_button');
+            if ($btn.length) {
+                $btn.click();
+            } else {
+                $btn = $container.find('.set_action_button');
+                if ($btn.length) {
+                    $btn.click();
+                }
+            }
+        }
+    }
+}
+
+function loadObjectFormFromForm(title, result_input_name, parent_form_id, module, object_name, form_name, id_parent, reload_input, $button, values) {
+    var $form = $('#' + parent_form_id);
+
+    if (!$form.length) {
+        bimp_msg('Une erreur est survenue. Impossible de charger le formulaire', 'danger');
+        return;
+    }
+
+    var $resultContainer = $form.find('#' + parent_form_id + '_result');
+
+    if (!$resultContainer) {
+        bimp_msg('Une erreur est survenue. Impossible de charger le formulaire', 'danger');
+        return;
+    }
+
+    $resultContainer.html('').hide();
+
+    var $parentFormSubmit = null;
+
+    var $panel = $form.findParentByClass('panel');
+    if ($panel && $panel.length) {
+        $parentFormSubmit = $panel.find('.panel-footer').find('.save_object_button');
+    } else {
+        var modal_idx = $form.data('modal_idx');
+        if (modal_idx) {
+            $parentFormSubmit = bimpModal.$footer.find('.save_object_button.modal_' + modal_idx);
+        }
+    }
+
+    var data = {
+        'module': module,
+        'object_name': object_name,
+        'form_name': form_name,
+        'id_object': 0,
+        'id_parent': id_parent
+    };
+
+    if (typeof (values) !== 'undefined' && values) {
+        data['param_values'] = values;
+    }
+
+    BimpAjax('loadObjectForm', data, null, {
+        display_success: false,
+        error_msg: 'Une erreur est survenue. Le formulaire n\'a pas pu être chargé',
+        $button: $button,
+        $parentForm: $form,
+        $resultContainer: $resultContainer,
+        title: title,
+        $parentFormSubmit: $parentFormSubmit,
+        result_input_name: result_input_name,
+        reload_input: reload_input,
+        success: function (result, bimpAjax) {
+            if (typeof (result.html) !== 'undefined' && result.html) {
+                if (bimpAjax.$parentFormSubmit) {
+                    bimpAjax.$parentFormSubmit.addClass('disabled');
+                }
+                var $formContent = bimpAjax.$parentForm.find('.object_form_content');
+                $formContent.slideUp(250, function () {
+                    var html = '<div class="panel panel-default">';
+
+                    html += '<div class="panel-heading">';
+                    html += '<div class="panel-title">';
+                    html += bimpAjax.title;
+                    html += '</div>';
+                    html += '</div>';
+
+                    html += '<div class="panel-body">';
+                    html += result.html;
+                    html += '</div>';
+
+                    html += '<div class="panel-footer" style="text-align: right">';
+                    html += '<button class="cancel_button btn btn-default">';
+                    html += '<i class="fa fa-times iconLeft"></i>Annuler';
+                    html += '<button class="save_object_button btn btn-primary">';
+                    html += '<i class="fa fa-save iconLeft"></i>Enregistrer';
+                    html += '</div>';
+
+                    html += '</div>';
+                    bimpAjax.$resultContainer.html(html).slideDown(function () {
+                        var $newForm = bimpAjax.$resultContainer.find('#' + result.form_id);
+                        if ($newForm.length) {
+                            onFormLoaded($newForm);
+                            bimpAjax.$resultContainer.find('.panel-footer').find('.cancel_button').click(function () {
+                                bimpAjax.$resultContainer.slideUp(250, function () {
+                                    bimpAjax.$resultContainer.html('');
+                                    $formContent.slideDown(250, function () {
+                                        if (bimpAjax.$parentFormSubmit) {
+                                            bimpAjax.$parentFormSubmit.removeClass('disabled');
+                                        }
+                                    });
+                                });
+                            });
+                            bimpAjax.$resultContainer.find('.panel-footer').find('.save_object_button').click(function () {
+                                saveObjectFromForm(result.form_id, $(this), function (saveResult) {
+                                    bimpAjax.$resultContainer.slideUp(250, function () {
+                                        bimpAjax.$resultContainer.html('');
+                                        $formContent.slideDown(250, function () {
+                                            if (bimpAjax.$parentFormSubmit) {
+                                                bimpAjax.$parentFormSubmit.removeClass('disabled');
+                                            }
+                                            if (bimpAjax.result_input_name) {
+                                                if (bimpAjax.reload_input) {
+                                                    var fields = {};
+                                                    bimpAjax.$parentForm.find('.inputContainer').each(function () {
+                                                        var field_name = $(this).data('field_name');
+                                                        if (field_name && (field_name !== bimpAjax.result_input_name)) {
+                                                            var $input = $(this).find('[name="' + field_name + '"]');
+                                                            if ($input.length) {
+                                                                fields[field_name] = $input.val();
+                                                            }
+                                                        }
+                                                    });
+                                                    fields[bimpAjax.result_input_name] = saveResult.id_object;
+                                                    reloadObjectInput(bimpAjax.$parentForm.attr('id'), bimpAjax.result_input_name, fields);
+                                                } else {
+                                                    var $resultInput = bimpAjax.$parentForm.find('[name="' + bimpAjax.result_input_name + '"]');
+                                                    if ($resultInput.length) {
+                                                        $resultInput.val(saveResult.id_object).change();
+                                                    }
+                                                }
+                                            }
+                                        });
+                                    });
+                                }, 'none');
+                            });
+                        }
+                    });
+                });
+            }
         }
     });
 }
@@ -313,16 +424,17 @@ function addObjectMultipleValuesItem(module, object_name, id_object, field, item
         item_value: item_value
     };
 
-    bimp_json_ajax('addObjectMultipleValuesItem', data, $resultContainer, function (result) {
-        if (typeof (successCallback) === 'function') {
-            successCallback(result);
+    BimpAjax('addObjectMultipleValuesItem', data, $resultContainer, {
+        success: function (result) {
+            if (typeof (successCallback) === 'function') {
+                successCallback(result);
+            }
+            $('body').trigger($.Event('objectChange', {
+                module: result.module,
+                object_name: result.object_name,
+                id_object: result.id_object
+            }));
         }
-
-        $('body').trigger($.Event('objectChange', {
-            module: module,
-            object_name: object_name,
-            id_object: id_object
-        }));
     });
 }
 
@@ -335,16 +447,19 @@ function deleteObjectMultipleValuesItem(module, object_name, id_object, field, i
         item_value: item_value
     };
 
-    bimp_json_ajax('deleteObjectMultipleValuesItem', data, $resultContainer, function (result) {
-        if (typeof (successCallback) === 'function') {
-            successCallback(result);
-        }
 
-        $('body').trigger($.Event('objectChange', {
-            module: module,
-            object_name: object_name,
-            id_object: id_object
-        }));
+    BimpAjax('deleteObjectMultipleValuesItem', data, $resultContainer, {
+        success: function (result) {
+            if (typeof (successCallback) === 'function') {
+                successCallback(result);
+            }
+
+            $('body').trigger($.Event('objectChange', {
+                module: module,
+                object_name: object_name,
+                id_object: id_object
+            }));
+        }
     });
 }
 
@@ -354,21 +469,108 @@ function saveAssociations(operation, associations, $resultContainer, successCall
         associations: associations
     };
 
-    bimp_json_ajax('saveAssociations', data, $resultContainer, function (result) {
-        if (typeof (successCallBack) === 'function') {
-            successCallBack(result);
-        }
-        for (var i in result.done) {
-            $('body').trigger($.Event('objectChange', {
-                module: associations[result.done[i]].module,
-                object_name: associations[result.done[i]].object_name,
-                id_object: associations[result.done[i]].id_object
-            }));
+    BimpAjax('saveAssociations', data, $resultContainer, {
+        success: function (result) {
+            if (typeof (successCallBack) === 'function') {
+                successCallBack(result);
+            }
+            for (var i in result.done) {
+                $('body').trigger($.Event('objectChange', {
+                    module: associations[result.done[i]].module,
+                    object_name: associations[result.done[i]].object_name,
+                    id_object: associations[result.done[i]].id_object
+                }));
+            }
         }
     });
 }
 
-// Gestion des formulaires objets: 
+// Gestion des formulaires objets:
+
+function validateForm($form) {
+
+    var data_missing = false;
+    $form.find('.inputContainer').each(function () {
+        var $template = $(this).findParentByClass('subObjectFormTemplate');
+        if (!$.isOk($template)) {
+            var field_name = $(this).data('field_name');
+
+            if (field_name) {
+                // Patch: (problème avec l'éditeur html => le textarea n'est pas alimenté depuis l'éditeur) 
+                if ($(this).find('.cke').length) {
+                    var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+                    if (html_value === '<br>') {
+                        html_value = '';
+                    }
+                    $(this).find('[name="' + field_name + '"]').val(html_value);
+                }
+
+                if (parseInt($(this).data('required'))) {
+                    if (parseInt($(this).data('multiple'))) {
+                        if ($(this).find('.check_list_container').length) {
+                            var check = false;
+                            $(this).find('.check_list_container').find('.check_list_item').each(function () {
+                                if ($(this).find('[name="' + field_name + '[]"]').prop('checked')) {
+                                    check = true;
+                                }
+                            });
+                            if (!check) {
+//                                bimp_msg($(this).data('field_name'));
+                                $(this).addClass('value_required');
+                                data_missing = true;
+                            } else {
+                                $(this).removeClass('value_required');
+                            }
+                        }
+                    } else {
+                        var $input = $(this).find('[name="' + field_name + '"]');
+                        if ($input.length) {
+                            var data_type = $(this).data('data_type');
+                            if (data_type && (data_type === 'id_object')) {
+                                if (!parseInt($input.val()) || parseInt($input.val()) <= 0) {
+//                                    bimp_msg($input.attr('name'));
+                                    data_missing = true;
+                                    $(this).addClass('value_required');
+                                } else {
+                                    $(this).removeClass('value_required');
+                                }
+                            } else {
+                                if ($input.val() === '') {
+//                                    bimp_msg($input.attr('name'));
+                                    data_missing = true;
+                                    $(this).addClass('value_required');
+                                } else {
+                                    $(this).removeClass('value_required');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    });
+    $form.find('.inputMultipleValuesContainer').each(function () {
+        var $template = $(this).findParentByClass('subObjectFormTemplate');
+        if (!$.isOk($template)) {
+            if (parseInt($(this).data('required'))) {
+                if (!$(this).find('.inputMultipleValues').find('tr.itemRow').length) {
+                    data_missing = true;
+//                    bimp_msg($(this).data('field_name'));
+                    $(this).addClass('value_required');
+                } else {
+                    $(this).removeClass('value_required');
+                }
+            }
+        }
+    });
+    var check = true;
+    if (data_missing) {
+        check = false;
+        bimp_msg('Certains champs obligatoires ne sont pas renseignés', 'danger');
+    }
+
+    return check;
+}
 
 function reloadObjectInput(form_id, input_name, fields) {
     var $form = $('#' + form_id);
@@ -376,52 +578,105 @@ function reloadObjectInput(form_id, input_name, fields) {
         return;
     }
 
-    var object_module = $form.data('object_module');
-    var object_name = $form.data('object_name');
-    var id_parent = $form.data('id_parent');
-
-    var $container = $form.find('#' + form_id + '_' + input_name);
-
-    if (!$container.length) {
-        return;
-    }
-
     var custom = 0;
-    if ($container.hasClass('customField')) {
-        custom = 1;
+    var is_object = 0;
+    var value = '';
+
+    var $container = $form.find('.' + input_name + '_inputContainer');
+
+    if ($container.length) {
+        if ($container.hasClass('customField')) {
+            custom = 1;
+        }
+
+        value = $container.find('[name="' + input_name + '"]').val();
+        if (typeof (value) === 'undefined') {
+            value = '';
+        }
+    } else {
+        $container = $form.find('#' + input_name + '_subObjectsContainer');
+        if ($container.length) {
+            is_object = 1;
+        } else {
+            bimp_msg('Erreur: champ "' + input_name + '" non trouvé');
+        }
     }
 
     var data = {
-        object_module: object_module,
-        object_name: object_name,
-        id_parent: id_parent,
+        form_id: form_id,
+        module: $form.data('module'),
+        object_name: $form.data('object_name'),
+        form_name: $form.data('name'),
+        id_object: $form.data('id_object'),
+        id_parent: $form.data('id_parent'),
         field_name: input_name,
         fields: fields,
-        custom_field: custom
+        custom_field: custom,
+        value: value,
+        field_prefix: $container.data('field_prefix'),
+        is_object: is_object
     };
 
     if (custom) {
-        data['content_config_path'] = $container.data('content_config_path');
+        data['form_row'] = $container.data('form_row');
     }
 
-    bimp_json_ajax('loadObjectInput', data, $container, function (result) {
-        if (typeof (result.html) !== 'undefined') {
-            $container.html(result.html).slideDown(250, function () {
-                var $input = $container.find('[name=' + input_name + ']');
+    BimpAjax('loadObjectInput', data, $container, {
+        $form: $form,
+        $container: $container,
+        input_name: input_name,
+        error_msg: 'Echec du chargement du champ',
+        display_success: false,
+        success: function (result, bimpAjax) {
+            if (typeof (result.html) !== 'undefined') {
+                var $form = $('#' + result.form_id);
+                var $parent = bimpAjax.$container.parent();
+                $parent.html(result.html).slideDown(250, function () {
+                    $parent.removeAttr('style');
+                });
+                setCommonEvents($parent);
+                setInputsEvents($parent);
+                var $input = bimpAjax.$form.find('[name=' + bimpAjax.input_name + ']');
                 if ($input.length) {
                     setInputEvents($form, $input);
+                    setSelectDisplayHelpEvents(bimpAjax.$container, $input);
+                    $('body').trigger($.Event('inputReloaded', {
+                        $form: $form,
+                        input_name: bimpAjax.input_name,
+                        $input: $input
+                    }));
+                    $input.change();
                 }
-            });
+            }
         }
-    }, 'Echec du chargement du champ');
+    });
 }
 
 function searchObjectList($input) {
-    var $container = $input.parent('div');
+    if (!$.isOk($input)) {
+        bimp_msg('Une erreur est survenue. Impossible d\'effectuer la recherche', 'danger');
+        console.error('$input invalide');
+        return;
+    }
+
+    var $container = $input.findParentByClass('inputContainer');
+
+    if (!$.isOk($container)) {
+        $container = $input.findParentByClass('searchInputContainer');
+        if (!$.isOk($container)) {
+            bimp_msg('Une erreur est survenue. Impossible d\'effectuer la recherche', 'danger');
+            console.error('$container invalide');
+            return;
+        }
+    }
+
     var value = $input.val();
 
     if (!value) {
         $container.find('[name=' + $container.data('field_name') + ']').val('0').change();
+        $container.find('.search_input_selected_label').slideUp(250, function () {
+            $(this).find('span').text('');
+        });
         return;
     }
 
@@ -434,6 +689,7 @@ function searchObjectList($input) {
         'join_on': $input.data('join_on'),
         'join_return_label': $input.data('join_return_label'),
         'label_syntaxe': $input.data('label_syntaxe'),
+        'filters': $input.data('filters'),
         'value': value
     };
 
@@ -443,45 +699,63 @@ function searchObjectList($input) {
     $spinner.addClass('active');
     $result.html('').hide();
 
-    bimp_json_ajax('searchObjectlist', data, null, function (result) {
-        $result.html('').hide();
-        $spinner.removeClass('active');
-        if (typeof (result.list) !== 'undefined') {
-            if (result.list.length) {
-                for (var i in result.list) {
-                    var html = '<button type="button" class="btn btn-light-default"';
-                    html += ' data-value="' + result.list[i].value + '">';
-                    html += result.list[i].label;
-                    if (result.list[i].join_label) {
-                        html += ' (' + result.list[i].join_label + ')';
+    BimpAjax('searchObjectlist', data, null, {
+        $input: $input,
+        $container: $container,
+        $result: $result,
+        $spinner: $spinner,
+        display_success: false,
+        success: function (result, bimpAjax) {
+            $result.html('').hide();
+            bimpAjax.$spinner.removeClass('active');
+            if (typeof (result.list) !== 'undefined') {
+                if (result.list.length) {
+                    for (var i in result.list) {
+                        var html = '<button type="button" class="btn btn-light-default"';
+                        html += ' data-value="' + result.list[i].value + '">';
+                        html += result.list[i].label;
+                        if (result.list[i].join_label) {
+                            html += ' (' + result.list[i].join_label + ')';
+                        }
+                        html += '</button>';
+                        bimpAjax.$result.append(html);
                     }
-                    html += '</button>';
-                    $result.append(html);
-                }
-                var field_name = $container.data('field_name');
-                var multiple = parseInt($container.data('multiple'));
-                if (multiple) {
-                    field_name += '_add_value';
-                }
-                var $field_input = $container.find('[name=' + field_name + ']');
-                $result.find('button').click(function () {
-                    $field_input.val($(this).data('value')).change();
-                    $result.html('').hide();
-                    $input.val($(this).text());
-                });
-                $result.show();
-                $result.off('mouseleave');
-                $result.mouseenter(function () {
-                    $(this).off('mouseenter');
-                    $(this).mouseleave(function () {
-                        $(this).slideUp(250);
+                    var field_name = bimpAjax.$container.data('field_name');
+                    var multiple = parseInt(bimpAjax.$container.data('multiple'));
+                    if (multiple) {
+                        field_name += '_add_value';
+                    }
+                    var $field_input = bimpAjax.$container.find('[name=' + field_name + ']');
+                    var $label_input = bimpAjax.$container.find('[name="' + field_name + '_label"]');
+                    bimpAjax.$result.find('button').click(function () {
+                        $field_input.val($(this).data('value')).change();
+                        bimpAjax.$result.html('').hide();
+                        var label = $(this).text();
+                        if (!bimpAjax.$input.parent().hasClass('searchInputContainer')) {
+                            bimpAjax.$input.val('');
+                            $container.find('.search_input_selected_label').find('span').text(label);
+                            $container.find('.search_input_selected_label').slideDown(250);
+                            if ($label_input.length) {
+                                $label_input.val(label);
+                            }
+                        } else {
+                            bimpAjax.$input.val(label);
+                        }
                     });
-                });
+                    bimpAjax.$result.show();
+//                    bimpAjax.$result.off('mouseleave');
+//                    bimpAjax.$result.mouseenter(function () {
+//                        $(this).off('mouseenter');
+//                        $(this).mouseleave(function () {
+//                            $(this).slideUp(250);
+//                        });
+//                    });
+                }
             }
+        }, error: function (result, bimpAjax) {
+            bimpAjax.$result.html('').hide();
+            bimpAjax.$spinner.removeClass('active');
         }
-    }, function () {
-        $result.html('').hide();
-        $spinner.removeClass('active');
     });
 }
 
@@ -490,7 +764,7 @@ function getFieldValue($form, field_name) {
         return '';
     }
 
-    var $inputContainer = $form.find('#' + $form.attr('id') + '_' + field_name);
+    var $inputContainer = $form.find('.' + field_name + '_inputContainer');
     var $input = $inputContainer.find('[name=' + field_name + ']');
     if ($input.length) {
         return $input.val();
@@ -537,19 +811,47 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         return;
     }
 
-    var $container = $button.parent('div').parent('div.inputMultipleValuesContainer');
+    var $container = $button.findParentByClass('inputMultipleValuesContainer');
     if (!$container.length) {
+        bimp_msg('Une erreur est survenue. opération impossible', 'danger');
         return;
     }
-    var $inputContainer = $container.parent('.inputContainer');
+    var $inputContainer = $container.parent().find('.inputContainer');
     if (!$inputContainer.length) {
+        bimp_msg('Une erreur est survenue. opération impossible', 'danger');
         return;
     }
     var $value_input = $inputContainer.find('[name=' + value_input_name + ']');
     var $label_input = $inputContainer.find('[name=' + label_input_name + ']');
-    var value = $value_input.val();
-    var label = $label_input.val();
-    if (typeof (value) !== 'undefined' && value !== '') {
+
+    var value = '';
+    var label = '';
+
+    if ($value_input.length) {
+        value = $value_input.val();
+    }
+    if ($label_input.length) {
+        if ($label_input.tagName() === 'select') {
+            label = $label_input.find('[value="' + value + '"]').text();
+        } else {
+            label = $label_input.val();
+        }
+    }
+
+    if (value || value === 0) {
+        var values_field_name = $inputContainer.data('values_field');
+        var check = true;
+        $container.find('.multipleValuesList').find('input[name="' + values_field_name + '[]"]').each(function () {
+            if ($(this).val() == value) {
+                bimp_msg('Cet élément a déjà été ajouté', 'warning');
+                check = false;
+            }
+        });
+
+        if (!check) {
+            return;
+        }
+
         if (!label) {
             if ($value_input.get(0).tagName.toLowerCase() === 'select') {
                 label = $value_input.find('[value="' + value + '"]').text();
@@ -557,19 +859,19 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
                 label = value;
             }
         }
-        var field_name = $inputContainer.data('field_name');
-        var html = '<tr>';
-        html += '<td style="display: none"><input type="hidden" value="' + value + '" name="' + field_name + '[]"/></td>';
+
+        var html = '<tr class="itemRow">';
+        html += '<td style="display: none"><input class="item_value" type="hidden" value="' + value + '" name="' + values_field_name + '[]"/></td>';
         html += '<td>' + label + '</td>';
-        html += '<td><button type="button" class="btn btn-light-danger iconBtn"';
-        html += ' onclick="$(this).parent(\'td\').parent(\'tr\').remove();';
+        html += '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn"';
+        html += ' onclick="';
         if (ajax_save) {
             html += 'var $button = $(this); deleteObjectMultipleValuesItem(\'' + $container.data('module') + '\', ';
             html += '\'' + $container.data('object_name') + '\', ';
-            html += $container.data('id_object') + ', \'' + field_name + '\', \'' + value + '\', null, ';
-            html += 'function(){$button.parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove();})});';
+            html += $container.data('id_object') + ', \'' + values_field_name + '\', \'' + value + '\', null, ';
+            html += 'function(){removeMultipleInputValue($button, \'' + value_input_name + '\');});';
         } else {
-            html += '$(this).parent(\'td\').parent(\'tr\').fadeOut(250, function() {$(this).remove()});';
+            html += 'removeMultipleInputValue($(this), \'' + value_input_name + '\');';
         }
         html += '"><i class="fa fa-trash"></i></button></td>';
         html += '</tr>';
@@ -578,13 +880,77 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         $label_input.val('');
 
         if (ajax_save) {
-            addObjectMultipleValuesItem($container.data('module'), $container.data('object_name'), $container.data('id_object'), field_name, value, null, function () {
-                $container.find('div.inputMultipleValuesContainer').find('table').find('tbody').append(html);
+            addObjectMultipleValuesItem($container.data('module'), $container.data('object_name'), $container.data('id_object'), values_field_name, value, null, function () {
+                $container.find('table').find('tbody.multipleValuesList').append(html);
+                checkMultipleValues();
+                $('body').trigger($.Event('inputMultipleValuesChange', {
+                    input_name: values_field_name,
+                    $container: $container
+                }));
             });
         } else {
-            $container.find('table').find('tbody').append(html);
+            $container.find('table').find('tbody.multipleValuesList').append(html);
+            checkMultipleValues();
+            $('body').trigger($.Event('inputMultipleValuesChange', {
+                input_name: values_field_name,
+                $container: $container
+            }));
         }
+    } else {
+        bimp_msg('Une erreur est survenue. opération impossible', 'danger');
     }
+}
+
+function removeMultipleInputValue($button, value_input_name) {
+    var $multipleValues = $button.findParentByClass('inputMultipleValuesContainer');
+
+    $button.parent('td').parent('tr').fadeOut(250, function () {
+        $(this).remove();
+        checkMultipleValues();
+        $('body').trigger($.Event('inputMultipleValuesChange', {
+            input_name: $multipleValues.data('field_name'),
+            $container: $multipleValues
+        }));
+    });
+}
+
+function checkMultipleValues() {
+    $('.inputMultipleValuesContainer').each(function () {
+        var $container = $(this);
+        if ($(this).find('.itemRow').length) {
+            $(this).find('.noItemRow').hide();
+        } else {
+            $(this).find('.noItemRow').show();
+        }
+        var $inputContainer = $container.parent().find('.inputContainer');
+        if ($inputContainer.length) {
+            var input_name = $inputContainer.data('field_name');
+            if (input_name) {
+                var $input = $inputContainer.find('[name="' + input_name + '"]');
+                if ($input.length) {
+                    if ($input.tagName() === 'select') {
+                        $input.find('option').show();
+                        $container.find('.itemRow').each(function () {
+                            $input.find('option[value="' + $(this).find('.item_value').val() + '"]').hide();
+                        });
+                        var show_input = false;
+                        $input.find('option').each(function () {
+                            if ($(this).css('display') !== 'none') {
+                                show_input = true;
+                            }
+                        });
+                        if (show_input) {
+                            $input.show();
+                            $container.find('.addValueBtn').parent('div').show();
+                        } else {
+                            $input.hide();
+                            $container.find('.addValueBtn').parent('div').hide();
+                        }
+                    }
+                }
+            }
+        }
+    });
 }
 
 function checkTextualInput($input) {
@@ -600,7 +966,13 @@ function checkTextualInput($input) {
             switch (data_type) {
                 case 'number':
                     var min = $input.data('min');
+                    if (typeof (min) === 'undefined') {
+                        min = 'none';
+                    }
                     var max = $input.data('max');
+                    if (typeof (max) === 'undefined') {
+                        max = 'none';
+                    }
                     var decimals = parseInt($input.data('decimals'));
                     var unsigned = parseInt($input.data('unsigned'));
 
@@ -622,18 +994,26 @@ function checkTextualInput($input) {
                             break;
                         }
                         parsed_value = parseFloat(value);
-                        min = parseFloat(min);
-                        max = parseFloat(max);
+                        if (min !== 'none') {
+                            min = parseFloat(min);
+                        }
+                        if (max !== 'none') {
+                            max = parseFloat(max);
+                        }
                     } else {
                         value = value.replace(/^(\-?[0-9]*)\.?.*$/, '$1');
                         parsed_value = parseInt(value);
-                        min = parseInt(min);
-                        max = parseInt(max);
+                        if (min !== 'none') {
+                            min = parseInt(min);
+                        }
+                        if (max !== 'none') {
+                            max = parseInt(max);
+                        }
                     }
-                    if (parsed_value < min) {
+                    if (min !== 'none' && parsed_value < min) {
                         value = min;
                         msg = 'Min: ' + min;
-                    } else if (parsed_value > max) {
+                    } else if (max !== 'none' && parsed_value > max) {
                         value = max;
                         msg = 'Max: ' + max;
                     }
@@ -665,23 +1045,175 @@ function displayInputMsg($input, msg, className) {
         className = 'info';
     }
     var html = '<p class="alert alert-' + className + '">' + msg + '</p>';
-    bimp_display_element_popover($input, html, 'right');
+    bimp_display_element_popover($input, html, 'bottom');
     $input.unbind('blur').blur(function () {
         $input.popover('destroy');
     });
+}
+
+function addSubObjectForm($button, object_name) {
+    var $container = $button.findParentByClass('subObjects');
+    if (!$.isOk($container)) {
+        bimp_msg('Erreur technique (container absent)', 'danger');
+        return;
+    }
+
+    if ($container.attr('id') !== object_name + '_subObjectsContainer') {
+        bimp_msg('Erreur technique (container invalide)', 'danger');
+        return;
+    }
+
+    var $template = $container.find('.subObjectFormTemplate');
+    if (!$.isOk($template)) {
+        bimp_msg('Erreur technique (template absent)', 'danger');
+        return;
+    }
+
+    var idx = parseInt($container.find('[name="' + object_name + '_count"]').val());
+    idx++;
+    var html = $template.html();
+    html = html.replace(/sub_object_idx/g, idx);
+    $container.find('.subObjectsMultipleForms').append(html);
+    $container.find('[name="' + object_name + '_count"]').val(idx);
+    var $subForm = $container.find('.subObjectsMultipleForms').find('.subObjectForm').last();
+    if ($subForm.length) {
+        setFormEvents($subForm);
+        setCommonEvents($subForm);
+    }
+
+    $('body').trigger($.Event('subObjectFormAdded', {
+        $subForm: $subForm,
+        id_form: $container.findParentByClass('object_form').data('identifier'),
+        idx: idx
+    }));
+}
+
+function removeSubObjectForm($button) {
+    var $container = $button.findParentByClass('formInputGroup');
+
+    if ($.isOk($container)) {
+        var $form = $container.findParentByClass('object_form');
+
+        var id_form = $form.data('identifier');
+        var object_name = $container.data('object_name');
+        var idx = $container.data('idx');
+
+        $container.remove();
+
+        $('body').trigger($.Event('subObjectFormRemoved', {
+            id_form: id_form,
+            object_name: object_name,
+            idx: idx
+        }));
+    } else {
+        bimp_msg('Une erreur est survenue, opération abandonnée (Conteneur absent ou invalide)', 'danger');
+    }
+}
+
+function searchZipTown($input) {
+    if (!$.isOk($input)) {
+        return;
+    }
+
+    var field_type = $input.data('field_type');
+    if (!field_type) {
+        return;
+    }
+
+    var data = {};
+    data[field_type] = $input.val();
+
+    $input.parent().find('.loading').show();
+
+    BimpAjax('searchZipTown', data, null, {
+        $input: $input,
+        field_type: field_type,
+        display_success: false,
+        display_errors: false,
+        display_warnings: false,
+        success: function (result, bimpAjax) {
+            $input.parent().find('.loading').hide();
+            if (result.html) {
+                $input.parent().parent().find('.searchZipTownResults').html(result.html).show();
+            } else {
+                $input.parent().parent().find('.searchZipTownResults').html('').hide();
+            }
+        },
+        error: function () {
+            $input.parent().find('.loading').hide();
+        }
+    });
+}
+
+function selectZipTown($button) {
+    var town = $button.data('town');
+    var zip = $button.data('zip');
+    var state = $button.data('state');
+    var country = $button.data('country');
+
+    var $container = $button.findParentByClass('searchZipTownResults');
+    $container.html('').hide();
+    var $input = $container.parent().find('input.search_ziptown');
+
+    var field_type = $input.data('field_type');
+
+    if (zip && field_type === 'zip') {
+        $input.val(zip);
+    }
+    if (town && field_type === 'town') {
+        $input.val(town);
+    }
+
+    var $form = $input.findParentByTag('form');
+    if ($.isOk($form)) {
+        var town_field = $input.data('town_field');
+        var zip_field = $input.data('zip_field');
+        var state_field = $input.data('state_field');
+        var country_field = $input.data('country_field');
+
+        if (town_field && town) {
+            var $townInput = $form.find('[name="' + town_field + '"]');
+            if ($townInput.length) {
+                $townInput.val(town).change();
+            }
+        }
+
+        if (zip_field && zip) {
+            var $zipInput = $form.find('[name="' + zip_field + '"]');
+            if ($zipInput.length) {
+                $zipInput.val(zip).change();
+            }
+        }
+
+        if (state_field && state) {
+            var $stateInput = $form.find('[name="' + state_field + '"]');
+            if ($stateInput.length) {
+                $stateInput.val(state).change();
+            }
+        }
+
+        if (country_field && country) {
+            var $countryInput = $form.find('[name="' + country_field + '"]');
+            if ($countryInput.length) {
+                $countryInput.val(country).change();
+            }
+        }
+    }
 }
 
 // Gestion de l'affichage conditionnel des champs: 
 
 function toggleInputDisplay($container, $input) {
     var input_val = $input.val();
+    var show = false;
+
     var show_values = $container.data('show_values');
     var hide_values = $container.data('hide_values');
-    var show = false;
+
     if (typeof (show_values) !== 'undefined') {
         show_values += '';
         show_values = show_values.split(',');
-        for (i in show_values) {
+        for (var i in show_values) {
             if (input_val == show_values[i]) {
                 show = true;
                 break;
@@ -691,18 +1223,73 @@ function toggleInputDisplay($container, $input) {
         show = true;
         hide_values += '';
         hide_values = hide_values.split(',');
-        for (i in hide_values) {
+        for (var i in hide_values) {
             if (input_val == hide_values[i]) {
                 show = false;
                 break;
             }
         }
+    } else {
+        var inputs_names = $container.data('inputs_names');
+        if (inputs_names) {
+            inputs_names += '';
+            inputs_names = inputs_names.split(',');
+            var $form = $container.findParentByClass('object_form');
+            if ($.isOk($form)) {
+                show = false;
+                var hide = false;
+                for (var i in inputs_names) {
+                    $input = $form.find('[name="' + inputs_names[i] + '"]');
+                    if ($input.length) {
+                        input_val = $input.val();
+                        show_values = $container.data('show_values_' + inputs_names[i]);
+                        hide_values = $container.data('hide_values_' + inputs_names[i]);
+
+                        if (typeof (show_values) !== 'undefined') {
+                            show_values += '';
+                            show_values = show_values.split(',');
+                            for (var j in show_values) {
+                                if (input_val == show_values[j]) {
+                                    show = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (typeof (hide_values) !== 'undefined') {
+                            hide_values += '';
+                            hide_values = hide_values.split(',');
+                            for (var j in hide_values) {
+                                if (input_val == hide_values[j]) {
+                                    hide = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (hide) {
+                    show = false;
+                }
+            }
+        }
     }
 
     if (show) {
-        $container.stop().slideDown(250);
+        $container.stop().slideDown(250, function () {
+            $(this).css('height', 'auto');
+        });
     } else {
-        $container.stop().slideUp(250);
+        var input_name = $container.find('.inputContainer').data('field_name');
+        if (input_name) {
+            var $input = $container.find('[name="' + input_name + '"]');
+            if ($input.length) {
+                var initial_value = $container.find('.inputContainer').data('initial_value');
+                $input.val(initial_value);
+            }
+        }
+        $container.stop().slideUp(250, function () {
+            $(this).css('height', 'auto');
+        });
     }
 }
 
@@ -718,11 +1305,26 @@ function resetInputDisplay($form) {
                 }
                 toggleInputDisplay($display_if, $input);
             }
+        } else {
+            var inputs_names = $display_if.data('inputs_names');
+            if (inputs_names) {
+                inputs_names += '';
+                inputs_names = inputs_names.split(',');
+                for (var i in inputs_names) {
+                    var $input = $form.find('[name="' + inputs_names[i] + '"]');
+                    if ($input.length) {
+                        if ($input.attr('type') === 'radio') {
+                            $input = $form.find('input[name=' + inputs_names[i] + ']:checked');
+                        }
+                        toggleInputDisplay($display_if, $input);
+                    }
+                }
+            }
         }
     });
 }
 
-// Gestion des évennements: 
+// Gestion des événements: 
 
 function onFormLoaded($form) {
     if (!$form.length) {
@@ -732,8 +1334,24 @@ function onFormLoaded($form) {
     if (!parseInt($form.data('loaded_event_processed'))) {
         $form.data('loaded_event_processed', 1);
 
+        $form.find('.subObjectFormTemplate').each(function () {
+            $(this).find('.inputContainer').each(function () {
+                var field_name = $(this).data('field_name');
+                if (field_name) {
+                    var className = field_name.replace(/^(.*_)sub_object_idx_(.*)$/, '$1$2') + '_input';
+                    if (className) {
+                        $(this).find('[name="' + field_name + '"]').addClass(className);
+                    }
+                }
+            });
+        });
+
         setFormEvents($form);
         setCommonEvents($form);
+
+        $('body').trigger($.Event('formLoaded', {
+            $form: $form
+        }));
     }
 }
 
@@ -759,6 +1377,20 @@ function setFormEvents($form) {
                     toggleInputDisplay($container, $(this));
                 });
             }
+        } else {
+            var inputs_names = $container.data('inputs_names');
+            if (inputs_names) {
+                inputs_names += '';
+                inputs_names = inputs_names.split(',');
+                for (var i in inputs_names) {
+                    var $input = $form.find('[name="' + inputs_names[i] + '"]');
+                    if ($input.length) {
+                        $input.change(function () {
+                            toggleInputDisplay($container, $(this));
+                        });
+                    }
+                }
+            }
         }
     });
 
@@ -774,6 +1406,31 @@ function setFormEvents($form) {
             }
         }
     }
+
+    $form.find('.inputContainer').each(function () {
+        var field_name = $(this).data('field_name');
+        var $input = $(this).find('[name="' + field_name + '"]');
+        if ($input.length) {
+            if ($input.tagName() !== 'textarea') {
+                $input.keyup(function (e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (typeof (e.no_submit) === 'undefined' || !e.no_submit) {
+                            submitForm($form.attr('id'));
+                        }
+                    }
+                });
+            }
+        }
+        setSelectDisplayHelpEvents($(this), $input);
+    });
+
+    $form.find('form').first().submit(function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        submitForm($form.attr('id'));
+    });
 }
 
 function setInputsEvents($container) {
@@ -803,6 +1460,100 @@ function setInputsEvents($container) {
             $(this).data('check_event_init', 1);
         }
     });
+    $container.find('.texarea_values').each(function () {
+        if (!parseInt($(this).data('event_init'))) {
+            var field_name = $(this).data('field_name');
+            var $textarea = $(this).parent().find('textarea[name="' + field_name + '"]');
+            $(this).find('.textarea_value').click(function () {
+                var text = $textarea.val();
+                if (text) {
+                    text += ', ';
+                }
+                text += $(this).text();
+                $textarea.val(text).change();
+            });
+            $(this).data('event_init', 1);
+        }
+    });
+    $container.find('.input_values').each(function () {
+        if (!parseInt($(this).data('event_init'))) {
+            var $inputContainer = $(this).findParentByClass('inputContainer');
+            var field_name = $(this).data('field_name');
+            var allow_custom = parseInt($(this).data('allow_custom'));
+            var $input_values = $(this);
+            if ($.isOk($inputContainer)) {
+                var $target_input = $inputContainer.find('[name="' + field_name + '"]');
+                if ($.isOk($target_input)) {
+                    $(this).change(function () {
+                        var val = $(this).val();
+                        $target_input.val(val).change();
+                    });
+                    $target_input.change(function () {
+                        var val = $(this).val() + '';
+                        var check = false;
+                        $input_values.find('option').each(function () {
+                            if (val === $(this).attr('value')) {
+                                check = true;
+                                $input_values.val(val);
+                            }
+                        });
+                        if (!check) {
+                            if (!allow_custom) {
+                                $target_input.val($input_values.val()).change();
+                            }
+                        }
+                    });
+                }
+            }
+            $(this).data('event_init', 1);
+        } else {
+            bimp_msg('la');
+        }
+    });
+    $container.find('.qtyInputContainer').each(function () {
+        if (!parseInt($(this).data('event_init'))) {
+            $(this).find('.qtyDown').click(function () {
+                var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
+                if ($.isOk($qtyInputcontainer)) {
+                    $qtyInputcontainer.find('input.qtyInput').focus();
+                    inputQtyDown($qtyInputcontainer);
+                }
+            });
+            $(this).find('.qtyUp').click(function () {
+                var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
+                if ($.isOk($qtyInputcontainer)) {
+                    $qtyInputcontainer.find('input.qtyInput').focus();
+                    inputQtyUp($qtyInputcontainer);
+                }
+            });
+            $(this).find('input.qtyInput').keyup(function (e) {
+                var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
+                if ($.isOk($qtyInputcontainer)) {
+                    if (e.key === 'Up') {
+                        inputQtyUp($qtyInputcontainer);
+                    } else if (e.key === 'Down') {
+                        inputQtyDown($qtyInputcontainer);
+                    } else if (e.key === 'End' || e.key === 'Right') {
+                        inputQtyMax($qtyInputcontainer);
+                    } else if (e.key === 'Home' || e.key === 'Left') {
+                        inputQtyMin($qtyInputcontainer);
+                    }
+                }
+            }).focus(function () {
+                $(this).select();
+            });
+
+            $(this).data('event_init', 1);
+        }
+    });
+    $container.find('.search_ziptown').each(function () {
+        if (!$(this).data('ziptown_event_init')) {
+            $(this).keyup(function () {
+                searchZipTown($(this));
+            });
+            $(this).data('ziptown_event_init', 1);
+        }
+    });
 }
 
 function setInputEvents($form, $input) {
@@ -818,7 +1569,7 @@ function setInputEvents($form, $input) {
         setSwitchInputEvents($input);
     }
 
-    if ($input.hasClass('.toggle_value')) {
+    if ($input.hasClass('toggle_value')) {
         setToggleInputEvent($input);
     }
 
@@ -829,6 +1580,18 @@ function setInputEvents($form, $input) {
             $input.change(function () {
                 toggleInputDisplay($container, $(this));
             });
+        } else {
+            var inputs_names = $(this).data('inputs_names');
+            if (typeof (inputs_names) !== 'undefined') {
+                inputs_names = inputs_names.split(',');
+                for (var i in inputs_names) {
+                    if (input_name === inputs_names[i]) {
+                        $input.change(function () {
+                            toggleInputDisplay($container, $(this));
+                        });
+                    }
+                }
+            }
         }
     });
 
@@ -980,20 +1743,25 @@ function setSearchListOptionsEvents($container) {
                 if (typeof (join_return_label) === 'undefined') {
                     join_return_label = '';
                 }
+                var filters = $container.find('#searchList_' + option + '_filters').val();
+                if (typeof (filters) === 'undefined') {
+                    filters = '';
+                }
 
                 $input.val('');
                 $input.data('fields_search', fields_search);
                 $input.data('join', join);
                 $input.data('join_on', join_on);
                 $input.data('join_return_label', join_return_label);
+                $input.data('filters', filters);
                 if (help) {
-                    if (!$parent.find('.help').length) {
-                        $input.after('<p class="help">' + help + '</p>');
+                    if (!$parent.find('.inputHelp').length) {
+                        $input.after('<p class="inputHelp">' + help + '</p>');
                     } else {
-                        $parent.find('.help').text(help);
+                        $parent.find('.inputHelp').text(help);
                     }
                 } else {
-                    $parent.find('.help').remove();
+                    $parent.find('.inputHelp').remove();
                 }
             }).change();
             $input.val(current_value);
@@ -1003,8 +1771,25 @@ function setSearchListOptionsEvents($container) {
     }
 }
 
+function setSelectDisplayHelpEvents($container, $input) {
+    if ($input.tagName() === 'select') {
+        if (!$input.data('select_help_event_init')) {
+            var field_name = $input.attr('name');
+            $input.change(function () {
+                $container.find('div.selectOptionHelp').stop().hide().removeAttr('style');
+                var $div = $container.find('div.' + field_name + '_' + $input.val() + '_help');
+                if ($.isOk($div)) {
+                    $div.slideDown(250);
+                }
+            });
+            $input.data('select_help_event_init', 1);
+            $input.change();
+        }
+    }
+}
+
 $(document).ready(function () {
-    $('.objectForm').each(function () {
+    $('.object_form').each(function () {
         onFormLoaded($(this));
     });
 
@@ -1012,7 +1797,7 @@ $(document).ready(function () {
 
     $('body').on('controllerTabLoaded', function (e) {
         if (e.$container.length) {
-            e.$container.find('.objectForm').each(function () {
+            e.$container.find('.object_form').each(function () {
                 onFormLoaded($(this));
             });
         }

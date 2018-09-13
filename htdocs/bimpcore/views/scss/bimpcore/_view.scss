@@ -1,4 +1,4 @@
-[id$="_view_panel"] {
+.object_view {
     .panel-secondary {
         /*border-color: #c8c8c8;*/
         .panel-heading {
@@ -9,7 +9,6 @@
     }
 }
 
-
 .object_view_content {
     padding: 0!important;
 
@@ -18,12 +17,14 @@
     }
 }
 
-.objectViewTableContainer {
+.objectFieldsTableContainer {
     width: 100%;
     border: 1px solid $secondary;
+    margin: 5px 0;
 }
 
-.objectViewtable {
+.bimp_fields_table,
+.objectFieldsTable {
     width: 100%;
 
     & > thead > tr > th {
@@ -33,7 +34,7 @@
         font-size: 15px;
         font-weight: normal;
     }
-    
+
     & > thead > tr.col_headers > th {
         padding: 5px 8px;
         background-color: $primary;
@@ -50,6 +51,7 @@
         }
 
         & > tr {
+            @include transition(all 0.3s ease);
             & > th, & > td {
                 padding: 5px 10px;
             }
@@ -69,13 +71,23 @@
                 .inputContainer,
                 .inputGroupContainer {
                     margin-right: 10px;
-                    
+
                     textarea {
                         width: 100%;
                     }
                 }
                 .form-control {
                     width: auto!important;
+                }
+            }
+
+            &.modified  {
+                background-color: #E1F5FF!important;
+                border-color: #A9C5D2!important;
+
+                & > td {
+                    background-color: #E1F5FF!important;
+                    border-color: #A9C5D2!important;
                 }
             }
         }
@@ -87,7 +99,63 @@
         background-color: $gray-lighter;
     }
 }
+
+.object_header {
+    padding: 15px 15px 0 15px;
+    background-color: #fff;
+    h1, h2 {
+        margin-top: 0;
+    }
+    
+    .object_header_infos {
+        margin: 3px 0 0 0;
+        font-style: italic;
+        color: #787878;
+        font-size: 11px;
+    }
+
+    .header_status {
+        display: inline-block;
+        font-size: 15px;
+        margin: 5px 10px;
+    }
+
+    .header_button {
+        vertical-align: top;
+        display: inline-block;
+        margin: 2px 25px 6px 0;
+    }
+
+    .header_buttons {
+        text-align: right;
+        margin-top: 10px;
+
+        .btn {
+            margin: 3px 5px;
+        }
+    }
+
+    .header_bottom {
+        margin-top: 10px;
+        padding: 5px;
+        border-top: 2px solid $gray-dark;
+    }
+}
+
+.object_card {
+    margin-top: 0;
+
+    .object_card_status {
+        display: inline-block;
+        text-align: right;
+        float: right;
+        margin-left: 15px;
+    }
+}
 .object_card_table {    
+    width: 100%;
+    margin-top: 5px;
+
     tbody tr {
         th, td {
             padding: 0 5px;
@@ -95,7 +163,7 @@
         }
 
         th {
-            width: 30%;
+            width: 20%;
             min-width: 120px;
             font-weight: bold;
             text-align: right;
@@ -142,5 +210,14 @@
                 vertical-align: middle;
             }
         }
+    }
+}
+.multiple_values_items_list {
+    padding: 5px;
+
+    .multiple_values_item {
+        margin: 5px 0;
+        border: 1px solid $gray;
+        padding: 10px;
     }
 }

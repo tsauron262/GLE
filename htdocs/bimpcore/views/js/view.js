@@ -11,112 +11,104 @@ function reloadObjectView(view_id) {
         return;
     }
 
+    var new_values = {};
+
+    $view.find('.object_fields_table').each(function () {
+        $(this).find('.objectFieldsTable').children('tbody').children('tr').each(function () {
+            if ($(this).hasClass('modified')) {
+                var $inputContainer = $(this).find('.inputContainer');
+                if ($inputContainer.length && !$inputContainer.hasClass('no-modified')) {
+                    var field_name = $inputContainer.data('field_name');
+                    if (field_name) {
+                        var $input = $inputContainer.find('[name="' + field_name + '"]');
+                        if ($input.length) {
+                            new_values[field_name] = $input.val();
+                        }
+                    }
+                }
+            }
+        });
+    });
+
     var data = {
-        'module_name': $view.data('module_name'),
+        'module': $view.data('module'),
         'object_name': $view.data('object_name'),
-        'view_name': $view.data('view_name'),
+        'view_name': $view.data('name'),
         'id_object': $view.data('id_object'),
-        'content_only': 1
+        'content_only': 1,
+        'new_values': new_values
     };
 
-    bimp_json_ajax('loadObjectView', data, null, function (result) {
-        if (typeof (result.html) !== 'undefined') {
-            if (result.html) {
-                $view.find('.object_view_content').stop().fadeOut(250, function () {
-                    $(this).html(result.html);
-                    $(this).fadeIn(250, function () {
-                        onViewRefreshed($view);
+    BimpAjax('loadObjectView', data, null, {
+        $view: $view,
+        display_success: false,
+        success: function (result, bimpAjax) {
+            if (typeof (result.html) !== 'undefined') {
+                if (result.html) {
+                    bimpAjax.$view.find('.object_view_content').stop().fadeOut(250, function () {
+                        $(this).html(result.html);
+                        $(this).fadeIn(250, function () {
+                            onViewRefreshed(bimpAjax.$view);
+                        });
                     });
-                });
+                }
+            }
+            if (typeof (result.header_html) !== 'undefined') {
+                if (result.header_html) {
+                    var $header = $('#' + bimpAjax.$view.data('object_name') + '_' + bimpAjax.$view.data('id_object') + '_header');
+                    if ($header.length) {
+                        $header.html(result.header_html);
+                    }
+                }
             }
         }
     });
 }
 
-function loadModalFormFromView(view_id, form_name, $button) {
+function loadModalFormFromView(view_id, form_name, $button, title) {
     var $view = $('#' + view_id);
     if (!$view.length) {
         return;
     }
 
     var data = {
-        'module_name': $view.data('module_name'),
+        'module': $view.data('module'),
         'object_name': $view.data('object_name'),
         'id_object': $view.data('id_object'),
         'form_name': form_name
     };
 
-    loadModalForm($button, data);
+    loadModalForm($button, data, title);
 }
 
-function loadModalView(module, object_name, id_object, view_name, $button) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    $button.addClass('disabled');
-
-    var $modal = $('#page_modal');
-    var $resultContainer = $modal.find('.modal-ajax-content');
-    $resultContainer.html('').hide();
-
-    var title = '';
-
-    if (id_object) {
+function loadModalView(module, object_name, id_object, view_name, $button, title) {
+    if (typeof (title) === 'undefined' || !title) {
         title = '<i class="fa fa-file-o iconLeft"></i>';
         if (typeof (object_labels[object_name].name) !== 'undefined') {
             title += object_labels[object_name].name;
         } else {
             title += 'Objet "' + object_name + '"';
         }
-        title += ' n°' + id_object;
+        if (id_object) {
+            title += ' n°' + id_object;
+        }
     }
 
-    $modal.find('.modal-title').html(title);
-    $modal.find('.loading-text').text('Chargement');
-    $modal.find('.content-loading').show();
-    $modal.modal('show');
-
-    var isCancelled = false;
-
-    $modal.on('hide.bs.modal', function (e) {
-        $modal.find('.extra_button').remove();
-        $modal.find('.content-loading').hide();
-        isCancelled = true;
-        $button.removeClass('disabled');
-    });
-
     var data = {
-        'object_module': module,
+        'module': module,
         'object_name': object_name,
         'view_name': view_name,
         'id_object': id_object,
-        'panel': 0
+        'content_only': 1
     };
 
-    bimp_json_ajax('loadObjectView', data, null, function (result) {
-        $modal.find('.content-loading').hide();
-        if (!isCancelled) {
-            if (!bimp_display_result_errors(result, $resultContainer)) {
-                if (typeof (result.html) !== 'undefined') {
-                    $resultContainer.html(result.html).slideDown(250);
-                    var $new_view = $resultContainer.find('.objectView');
-                    if ($new_view.length) {
-                        $new_view.each(function () {
-                            onViewLoaded($(this));
-                        });
-                    }
-                }
-            }
-            $modal.modal('handleUpdate');
+    bimpModal.loadAjaxContent($button, 'loadObjectView', data, title, null, function (result, bimpAjax) {
+        var $new_view = bimpAjax.$resultContainer.find('#' + result.view_id);
+        if ($new_view.length) {
+            $new_view.data('modal_idx', bimpAjax.$resultContainer.data('idx'));
+            bimpModal.removeComponentContent($new_view.attr('id'));
+            onViewLoaded($new_view);
         }
-
-    }, function (result) {
-        $modal.find('.content-loading').hide();
-        if (!bimp_display_result_errors(result, $resultContainer)) {
-            bimp_display_msg('Echec du chargement du contenu', $resultContainer, 'danger');
-        }
-        $modal.modal('handleUpdate');
     });
 }
 
@@ -144,8 +136,6 @@ function saveObjectFromViewModalForm(view_id, $button) {
         return;
     }
 
-    $button.addClass('disabled');
-
     var $modal = $('#' + view_id + '_modal');
     var $formContainer = $modal.find('.formContainer');
     if ($formContainer.length) {
@@ -154,62 +144,46 @@ function saveObjectFromViewModalForm(view_id, $button) {
         if ($form.length) {
             var data = $form.serialize();
         }
-        bimp_json_ajax('saveObject', data, $resultContainer, function () {
-            $button.removeClass('disabled');
-            $('body').trigger($.Event('objectChange', {
-                module: $view.data('module'),
-                object_name: $view.data('object_name'),
-                id_object: $view.data('id_object')
-            }));
-        }, function () {
-            $button.removeClass('disabled');
+
+        BimpAjax('saveObject', data, $resultContainer, {
+            $button: $button,
+            $view: $view,
+            success: function (result, bimpAjax) {
+                $('body').trigger($.Event('objectChange', {
+                    module: bimpAjax.$view.data('module'),
+                    object_name: bimpAjax.$view.data('object_name'),
+                    id_object: bimpAjax.$view.data('id_object')
+                }));
+            }
         });
     }
 }
 
-function saveObjectfromFieldsTable(table_id, $button) {
-    if ($button.hasClass('disabled')) {
+function saveObjectfromFieldsTable(fields_table_id, $button) {
+    var $fieldsTable = $('#' + fields_table_id);
+    if (!$fieldsTable.length) {
+        bimp_msg('Erreur: liste des champs non trouvée', 'danger');
         return;
     }
 
-    $button.addClass('disabled');
+    var $resultContainer = $fieldsTable.find('#' + fields_table_id + '_result');
 
-    var $table = $('#' + table_id);
-    if ($table.length) {
-        var $view = $table.parent();
-        while (1) {
-            if ($view.hasClass('objectView')) {
-                break;
-            }
-            if (!$view.length) {
-                break;
-            }
-            $view = $view.parent();
+    var data = getInputsValues($fieldsTable);
+
+    data['module'] = $fieldsTable.data('module');
+    data['object_name'] = $fieldsTable.data('object_name');
+    data['id_object'] = $fieldsTable.data('id_object');
+
+    BimpAjax('saveObject', data, $resultContainer, {
+        $button: $button,
+        success: function (result) {
+            $('body').trigger($.Event('objectChange', {
+                module: result.module,
+                object_name: result.object_name,
+                id_object: result.id_object
+            }));
         }
-
-        if ($view.length) {
-            var $resultContainer = $table.find('.ajaxResultsContainer');
-
-            $resultContainer.parent('td').parent('tr').show();
-
-            var data = getInputsValues($table);
-
-            data['object_module'] = $view.data('module_name');
-            data['object_name'] = $view.data('object_name');
-            data['id_object'] = $view.data('id_object');
-
-            bimp_json_ajax('saveObject', data, $resultContainer, function () {
-                $button.removeClass('disabled');
-                $('body').trigger($.Event('objectChange', {
-                    module: $view.data('module_name'),
-                    object_name: $view.data('object_name'),
-                    id_object: $view.data('id_object')
-                }));
-            }, function () {
-                $button.removeClass('disabled');
-            });
-        }
-    }
+    });
 }
 
 function displayObjectView($container, module_name, object_name, view_name, id_object, panel_type) {
@@ -222,7 +196,7 @@ function displayObjectView($container, module_name, object_name, view_name, id_o
     }
 
     var data = {
-        'module_name': module_name,
+        'module': module_name,
         'object_name': object_name,
         'view_name': view_name,
         'id_object': id_object,
@@ -234,46 +208,95 @@ function displayObjectView($container, module_name, object_name, view_name, id_o
     $container.find('.content-loading').show();
     $container.slideDown(250);
 
-    bimp_json_ajax('loadObjectView', data, $container, function (result) {
-        if (typeof (result.html) !== 'undefined') {
-            if (result.html) {
-                $container.html(result.html).show();
-                onViewLoaded($container.find('#' + result.view_id));
+    BimpAjax('loadObjectView', data, $container, {
+        append_html: true,
+        success: function (result) {
+            if (typeof (result.html) !== 'undefined') {
+                if (result.html) {
+                    onViewLoaded($('#' + result.view_id));
+                }
             }
         }
-    }, null, false);
+    });
 }
 
-function loadModalObjectPage($button, url, modal_id, title) {
+function loadModalObjectPage($button, url, title) {
+    bimpModal.loadIframe($button, url, title);
+}
+
+// Actions 
+function checkFieldsTableModifications($fieldsTable) {
+    if (!$fieldsTable.length) {
+        return;
+    }
+
+    var hasModifications = false;
+    $fieldsTable.find('.inputContainer').each(function () {
+        if (!$(this).hasClass('no-modified')) {
+            var field_name = $(this).data('field_name');
+            if (field_name) {
+                var $input = $(this).find('[name="' + field_name + '"]');
+                if ($input.length) {
+                    var $row = $(this).findParentByTag('tr');
+                    if ($input.val() != $(this).data('initial_value')) {
+                        $row.addClass('modified');
+                        hasModifications = true;
+                    } else {
+                        $row.removeClass('modified');
+                    }
+                }
+            }
+        }
+    });
+
+    var $footer = $('#' + $fieldsTable.attr('id') + '_container').find('.panel-footer');
+    if ($footer.length) {
+        if (hasModifications) {
+            $footer.find('.saveButton').show();
+            $footer.find('.cancelmodificationsButton').show();
+        } else {
+            $footer.find('.saveButton').hide();
+            $footer.find('.cancelmodificationsButton').hide();
+        }
+    }
+}
+
+function cancelFieldsTableModifications(fields_table_id, $button) {
     if ($button.hasClass('disabled')) {
         return;
     }
 
     $button.addClass('disabled');
 
-    var $modal = $('#' + modal_id);
-    var $resultContainer = $modal.find('.modal-ajax-content');
-    $resultContainer.html('').hide();
+    var $fieldsTable = $('#' + fields_table_id);
+    if (!$fieldsTable.length) {
+        bimp_msg('Erreur: liste des champs non trouvée', 'danger');
+        return;
+    }
 
-    $modal.find('.modal-title').html(title);
-    $modal.modal('show');
-    $modal.find('.content-loading').show().find('.loading-text').text('Chargement');
-
-    $modal.on('hide.bs.modal', function (e) {
-        $modal.find('.extra_button').remove();
-        $modal.find('.content-loading').hide();
-        $button.removeClass('disabled');
+    $fieldsTable.find('.inputContainer').each(function () {
+        var field_name = $(this).data('field_name');
+        if (field_name) {
+            var $input = $(this).find('[name="' + field_name + '"]');
+            var initial_value = $(this).data('initial_value');
+            if ($input.length) {
+                if ($input.val() != initial_value) {
+                    if ($input.hasClass('datepicker_value')) {
+                        if (!initial_value) {
+                            $input.val('').change();
+                            $input.parent().find('input.bs_datetimepicker').val('');
+                        } else {
+                            $input.parent().find('input.bs_datetimepicker').data('DateTimePicker').date(moment(initial_value));
+                        }
+                    } else {
+                        $input.val(initial_value).change();
+                    }
+                }
+            }
+        }
     });
 
-    var html = '<div style="overflow: hidden"><iframe id="iframe" frameborder="0" src="' + url + '" width="100%" height="800px"></iframe></div>';
-    $resultContainer.html(html);
-
-    $('#iframe').on("load", function () {
-            var $head = $("iframe").contents().find("head");                
-            $head.append($("<link/>", {rel: "stylesheet", href: DOL_URL_ROOT + "/bimpcore/views/css/content_only.css", type: "text/css"}));
-        $modal.find('.content-loading').hide();
-        $resultContainer.slideDown(250);
-      });
+    $button.removeClass('disabled');
 }
 
 // Gestion des événements
@@ -287,25 +310,26 @@ function onViewLoaded($view) {
         $view.data('loaded_event_processed', 1);
         $view.find('.modal').modal();
 
-        setCommonEvents($view);
+        setCommonEvents($('#' + $view.attr('id') + '_container'));
 
-        $view.find('.objectViewtable').each(function () {
+        $view.find('.object_fields_table').each(function () {
             setInputsEvents($(this));
+            setFieldsTableEvents($(this));
         });
 
-        $view.find('.objectList').each(function () {
+        $view.find('.object_list_table').each(function () {
             onListLoaded($(this));
         });
 
-        $view.find('.objectForm').each(function () {
+        $view.find('.object_form').each(function () {
             onFormLoaded($(this));
         });
 
-        $view.find('.objectView').each(function () {
+        $view.find('.object_view').each(function () {
             onViewLoaded($(this));
         });
 
-        $view.find('.objectViewslist').each(function () {
+        $view.find('.object_list_views').each(function () {
             onViewsListLoaded($(this));
         });
 
@@ -316,7 +340,7 @@ function onViewLoaded($view) {
             }
             if (!$('body').data($view.attr('id') + '_object_events_init')) {
                 $('body').on('objectChange', function (e) {
-                    if ((e.module === $view.data('module_name')) && (e.object_name === $view.data('object_name'))
+                    if ((e.module === $view.data('module')) && (e.object_name === $view.data('object_name'))
                             && parseInt(e.id_object) === parseInt($view.data('id_object'))) {
                         reloadObjectView($view.attr('id'));
                     } else if (objects && objects.length) {
@@ -350,23 +374,24 @@ function onViewLoaded($view) {
 }
 
 function onViewRefreshed($view) {
-    $view.find('.objectViewtable').each(function () {
+    $view.find('.object_fields_table').each(function () {
         setInputsEvents($(this));
+        setFieldsTableEvents($(this));
     });
 
-    $view.find('.objectList').each(function () {
+    $view.find('.object_list_table').each(function () {
         onListLoaded($(this));
     });
 
-    $view.find('.objectForm').each(function () {
+    $view.find('.obejct_form').each(function () {
         onFormLoaded($(this));
     });
 
-    $view.find('.objectView').each(function () {
+    $view.find('.object_view').each(function () {
         onViewLoaded($(this));
     });
 
-    $view.find('.objectViewslist').each(function () {
+    $view.find('.object_list_views').each(function () {
         onViewsListLoaded($(this));
     });
 
@@ -376,14 +401,35 @@ function onViewRefreshed($view) {
     }));
 }
 
+function setFieldsTableEvents($fieldsTable) {
+    if (!parseInt($fieldsTable.data('events_init'))) {
+
+        $fieldsTable.find('.inputContainer').each(function () {
+            var field_name = $(this).data('field_name');
+            if (field_name) {
+                var $input = $(this).find('[name="' + field_name + '"]');
+                $input.change(function () {
+                    checkFieldsTableModifications($fieldsTable);
+                });
+            }
+            $input.keyup(function () {
+                $input.change();
+            });
+        });
+        checkFieldsTableModifications($fieldsTable);
+        $fieldsTable.data('events_init', 1);
+    }
+
+}
+
 $(document).ready(function () {
-    $('.objectView').each(function () {
+    $('.object_view').each(function () {
         onViewLoaded($(this));
     });
 
     $('body').on('controllerTabLoaded', function (e) {
         if (e.$container.length) {
-            e.$container.find('.objectView').each(function () {
+            e.$container.find('.object_view').each(function () {
                 onViewLoaded($(this));
             });
         }

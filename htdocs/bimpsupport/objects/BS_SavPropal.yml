@@ -1,0 +1,41 @@
+extends: 
+    module: bimpcommercial
+    object_name: Bimp_Propal
+    
+labels: 
+    name: devis SAV
+    name_plur: devis SAV
+    is_female: 0
+    
+objects: 
+    lines: 
+        instance: 
+            bimp_object: BS_SavPropalLine
+            
+views: 
+    sav: 
+        title: Devis
+        icon: fas_file-invoice
+        objects_change_reload: BS_SAV,BS_SavPropalLine,BS_ApplePart,ObjectLineRemise
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: sav_infos
+                   
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  rows: 
+                      - cols: 
+                          - type: fields_table
+                            fields_table: 
+                                name: totals
+                                
+                          - type: custom
+                            custom: 
+                                callback: renderMarginsTable

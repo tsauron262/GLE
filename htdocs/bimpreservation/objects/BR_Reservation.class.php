@@ -86,7 +86,7 @@ class BR_Reservation extends BimpObject
 
     public function isOrderInvoiced()
     {
-        $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
         if (BimpObject::objectLoaded($commande)) {
             if ((int) $commande->getData('id_facture')) {
                 return 1;
@@ -102,11 +102,11 @@ class BR_Reservation extends BimpObject
             0 => 'Créer un nouvel avoir'
         );
 
-        $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
 
         if (BimpObject::objectLoaded($commande)) {
             $asso = new BimpAssociation($commande, 'avoirs');
-            $avoir = BimpObject::getInstance('bimpcore', 'Bimp_Facture');
+            $avoir = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             foreach ($asso->getAssociatesList() as $id_avoir) {
                 if ($avoir->fetch((int) $id_avoir)) {
                     if ((int) $avoir->dol_object->statut === (int) Facture::STATUS_DRAFT) {
@@ -926,7 +926,7 @@ class BR_Reservation extends BimpObject
         if (is_null($qty) || !$qty) {
             $qty = $current_qty;
         }
-        
+
         if (!in_array($status, self::$need_equipment_status) && (int) $this->getData('id_equipment')) {
             $this->updateField('id_equipment', 0);
         }
@@ -1071,7 +1071,7 @@ class BR_Reservation extends BimpObject
     {
         $qty = (int) $qty;
 
-        $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
         if (BimpObject::objectLoaded($commande)) {
             $errors = $commande->removeOrderLine((int) $this->getData('id_commande_client_line'), (int) $qty, $id_avoir);
             if (!count($errors)) {
@@ -1303,17 +1303,15 @@ class BR_Reservation extends BimpObject
             $product = $this->getChildObject('product');
             if (is_null($product) || !$product->isLoaded()) {
                 $errors[] = 'Produit introuvable';
-            }
-            else
+            } else
                 $equipementOblige = $product->isSerialisable();
         }
-        
-        if($this->getData('id_equipment')) {
+
+        if ($this->getData('id_equipment')) {
             $this->checkEquipment($equipment, $errors);
             $this->set('qty', 1);
-        }
-        else{
-            if ($equipementOblige) 
+        } else {
+            if ($equipementOblige)
                 $errors[] = 'Produit sérialisable: équipement obligatoire';
             $this->set('id_equipment', 0);
         }
@@ -1360,7 +1358,7 @@ class BR_Reservation extends BimpObject
         }
 
         $product = $this->getChildObject('product');
-        if (is_null($product) || !$product->isLoaded()) {
+        if (!BimpObject::objectLoaded($product)) {
             $errors[] = 'ID du produit invalide';
         }
 
@@ -1374,6 +1372,11 @@ class BR_Reservation extends BimpObject
             $this->set('qty', 1);
         } elseif ($this->isProductSerialisable()) {
             $errors[] = 'Produit sérialisable: équipement obligatoire au statut "' . self::$status_list[$status]['label'] . '"';
+        }
+
+        $line = $this->getChildObject('sav_propal_line');
+        if (!BimpObject::objectLoaded($line)) {
+            $errors[] = 'ID de la ligne de devis du SAV absent ou invalide';
         }
 
         return $errors;

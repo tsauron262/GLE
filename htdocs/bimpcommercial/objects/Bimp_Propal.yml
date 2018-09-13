@@ -1,0 +1,296 @@
+extends: 
+    module: bimpcommercial
+    object_name: BimpComm
+
+dol_object: 
+    instance: 
+        dol_object: 
+            module: comm/propal
+            file: propal
+            
+table: propal
+controller: propal
+icon: fas_file-invoice
+list_page_url: 
+    controller: propals
+
+labels: 
+    name: proposition commerciale
+    name_plur: propositions commerciales
+    is_female: 1
+    
+objects: 
+    lines: 
+        instance: 
+            bimp_object: Bimp_PropalLine
+            
+    entrepot: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object:
+                field_value: entrepot
+                
+fields:     
+    datec: 
+        label: Créée le
+        type: datetime
+    datep: 
+        label: Date
+        dol_prop: date
+        type: date
+        input: 
+            display_now: 1
+        required: 1
+    fin_validite: 
+        label: Date de fin de validité
+        type: date
+    date_livraison: 
+        label: Date de livraison
+        type: date
+    libelle: 
+        label: Libellé
+        dol_extra_field: 1
+    entrepot: 
+        label: Entrepôt
+        dol_extra_field: 1
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
+    ef_type: 
+        label: Secteur
+        dol_extra_field: 1
+        values: 
+            array: secteurs
+        required: 1
+    model_pdf: 
+        default_value: bimpdevis
+    pdf_hide_reduc: 
+        label: Masquer les remises dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+    pdf_hide_total: 
+        label: Masquer les totaux dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0 
+        
+forms: 
+    default: 
+        rows: 
+            - field: entrepot
+            - field: ef_type
+            - field: fk_soc
+              show: 
+                  callback: isNotLoaded
+            - field: ref_client
+            - field: libelle
+            - field: fk_input_reason
+              show: 
+                  callback: isEditable
+            - field: fk_cond_reglement
+              show: 
+                  callback: isEditable
+            - field: fk_mode_reglement
+              show: 
+                  callback: isEditable
+            - field: datep
+              show: 
+                  callback: isEditable
+            - custom: 1
+              label: Durée de validité (en jours)
+              show: 
+                  callback: isNotLoaded
+              value: 
+                  callback: getDureeValidite
+              input_name: duree_validite
+              input: 
+                  type: qty
+                  min: 1
+            - field: fk_availability
+              show: 
+                  callback: isEditable
+            - field: date_livraison
+            - field: model_pdf
+            - field: pdf_hide_reduc
+            - field: pdf_hide_total
+            - field: note_private
+            - field: note_public
+            
+    close: 
+        rows: 
+            - custom: 1
+              label: Nouveau statut
+              data_type: int
+              input_name: new_status
+              input: 
+                  type: select
+                  options: 
+                      array: closeStatus
+            - custom: 1
+              label: Note
+              data_type: text
+              input_name: note
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              value: 
+                  field_value: note_private
+                  
+    duplicate_propal:
+        rows: 
+            - field: fk_soc
+            - field: date_livraison
+            
+fields_tables: 
+    infos: 
+        rows: 
+            - field: libelle
+              edit: 1
+            - field: fk_statut
+            - field: entrepot
+              display: nom_url
+              edit: 1
+            - field: ef_type
+              edit: 1
+            - field: fk_input_reason
+              edit: 
+                  callback: isEditable
+            - field: datep
+              edit: 
+                  callback: isEditable
+            - field: fin_validite
+              edit: 
+                  callback: isEditable
+            - field: date_livraison
+              edit: 1
+            - field: fk_availability
+              edit: 
+                  callback: isEditable
+    
+    client: 
+        rows: 
+            - field: fk_soc
+              display: card
+            - field: ref_client
+              edit: 
+                  callback: isEditable
+#            - label: Remises client
+#              value: 
+#                  callback: displayRemisesClient
+                  
+    payment:
+        rows:
+            - field: fk_cond_reglement
+              edit: 
+                  callback: isEditable
+            - field: fk_mode_reglement
+              edit: 
+                  callback: isEditable
+                
+    pdf: 
+        rows: 
+            - field: pdf_hide_reduc
+              edit: 1
+            - field: pdf_hide_total
+              edit: 1
+            - label: Fichier PDF
+              value: 
+                  callback: displayPDFButton
+                                    
+    sav_infos: 
+        title: Informations
+        icon: info-circle
+        rows: 
+            - field: fk_statut
+            - field: datep
+              edit: 
+                  callback: isEditable
+            - field: fin_validite
+              edit: 
+                  callback: isEditable
+            - field: date_livraison
+              edit: 1
+            - field: libelle
+              edit: 1
+            - field: pdf_hide_reduc
+              edit: 1
+            - field: pdf_hide_total
+              edit: 1
+            - label: Fichier PDF
+              value: 
+                  callback: displayPDFButton
+                  
+    totals: 
+        rows: 
+            - field: total_ht
+            - field: tva
+            - field: total
+            
+views: 
+    default: 
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise
+    content: 
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise
+
+lists: 
+    default: 
+        title: Propositions commerciales
+        icon: fas_file-invoice
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les propositions commerciales sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        list_filters: 
+            callback: getListFilters
+        sort_field: datec
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        add_form_values: 
+            fields: 
+                entrepot: 
+                    request: id_entrepot
+                fk_soc:
+                    request: id_client
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 
+            callback: isDeletable
+        modal_view: default
+        page_btn: 1
+        cols: 
+            ref: 
+                field: ref
+            statut: 
+                field: fk_statut
+            entrepot: 
+                field: entrepot
+                display: nom_url
+            client: 
+                field: fk_soc
+                display: nom_url
+            date_create: 
+                field: datec
+            total: 
+                field: total
+        
+cards: 
+    default: 
+        title: 
+            field_value: ref
+        status: fk_statut
+        view_btn: 1
+        fields: 
+            - field: total
+            - label: Fichier PDF
+              value: 
+                  callback: displayPDFButton
+        

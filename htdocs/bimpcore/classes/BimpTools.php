@@ -198,12 +198,12 @@ class BimpTools
         return '/test2/public/theme/common/nophoto.png';
     }
 
-    public static function getErrorsFromDolObject($object, $errors = null, $langs = null)
+    public static function getErrorsFromDolObject($object, $errors = null, $langs = null, &$warnings = array())
     {
         if (is_null($langs)) {
             global $langs;
         }
-        
+
         if (is_null($errors)) {
             $errors = array();
         }
@@ -226,7 +226,75 @@ class BimpTools
             }
         }
 
+        $errors = array_merge($errors, self::getDolEventsMsgs(array('errors')));
+        $warnings = array_merge($warnings, self::getDolEventsMsgs(array('warnings')));
+
         return $errors;
+    }
+
+    public static function getDateForDolDate($date)
+    {
+        if (is_null($date) || !$date) {
+            return '';
+        }
+        $DT = new DateTime($date);
+        return (int) $DT->format('U');
+    }
+
+    public static function getDateFromDolDate($date, $return_format = 'Y-m-d')
+    {
+        if (is_null($date) || !$date) {
+            return '';
+        }
+        return date($return_format, $date);
+    }
+
+    public static function getExtraFieldValues($object_type, $field)
+    {
+        global $db;
+        $bdb = new BimpDb($db);
+        $where = '`elementtype` = \'' . $object_type . '\' AND `name` = \'' . $field . '\'';
+        $value = $bdb->getValue('extrafields', 'param', $where);
+        if (is_null($value)) {
+            return array();
+        }
+
+        return unserialize($value);
+    }
+
+    public static function getDolObjectLinkedObjectsList($dol_object, BimpDb $bdb = null)
+    {
+        $list = array();
+
+        if (BimpObject::objectLoaded($dol_object)) {
+            if (is_null($bdb)) {
+                global $db;
+                $bdb = new BimpDb($db);
+            }
+
+            $where = '(`fk_source` = ' . (int) $dol_object->id . ' AND `sourcetype` = \'' . $dol_object->element . '\')';
+            $where .= ' OR (`fk_target` = ' . (int) $dol_object->id . ' AND `targettype` = \'' . $dol_object->element . '\')';
+            $rows = $bdb->getRows('element_element', $where, null, 'array');
+            if (!is_null($rows) && count($rows)) {
+                foreach ($rows as $r) {
+                    if ((int) $r['fk_source'] === (int) $dol_object->id &&
+                            $r['sourcetype'] === $dol_object->element) {
+                        $list[] = array(
+                            'id_object' => (int) $r['fk_target'],
+                            'type'      => $r['targettype']
+                        );
+                    } elseif ((int) $r['fk_target'] === (int) $dol_object->id &&
+                            $r['targettype'] === $dol_object->element) {
+                        $list[] = array(
+                            'id_object' => (int) $r['fk_source'],
+                            'type'      => $r['sourcetype']
+                        );
+                    }
+                }
+            }
+        }
+
+        return $list;
     }
 
     // Gestion générique des objets: 
@@ -359,6 +427,110 @@ class BimpTools
         return '';
     }
 
+    public static function getFileIcon($fileName)
+    {
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        if ((string) $ext) {
+            if (in_array($ext, array('pdf'))) {
+                return 'fas_file-pdf';
+            } elseif (in_array($ext, array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif'))) {
+                return 'fas_file-image';
+            } elseif (in_array($ext, array('txt'))) {
+                return 'fas_file-alt';
+            } elseif (in_array($ext, array('php', 'js', 'html', 'css', 'yml', 'tpl', 'scss'))) {
+                return 'fas_file-code';
+            } elseif (in_array($ext, array('doc', 'docx', 'docm', 'dotx'))) {
+                return 'fas_file-word';
+            } elseif (in_array($ext, array('csv', 'xls', 'xlsx', 'xlsb', 'xltx', 'xltm', 'xlt', 'xml', 'xlam', 'xla', 'xlw', 'xlr'))) {
+                return 'fas_file-excel';
+            } elseif (in_array($ext, array('ppt', 'pot', 'pps'))) {
+                return 'fas_file-powerpoint';
+            } elseif (in_array($ext, array('zip', 'rar', 'tar', 'xar', 'bz2', 'gz', 'ls', 'rz', 'sz', '7z', 's7z', 'zz'))) {
+                return 'fas_file-archive';
+            }
+        }
+
+        return 'fas_file';
+    }
+
+    public static function getFileType($fileName)
+    {
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        if ((string) $ext) {
+            if (in_array($ext, array('pdf'))) {
+                return 'PDF';
+            } elseif (in_array($ext, array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif'))) {
+                return 'Image';
+            } elseif (in_array($ext, array('txt'))) {
+                return 'Texte';
+            } elseif (in_array($ext, array('php', 'js', 'html', 'css', 'yml', 'tpl', 'scss'))) {
+                return 'Code informatique';
+            } elseif (in_array($ext, array('doc', 'docx', 'docm', 'dotx'))) {
+                return 'Fichier Word';
+            } elseif (in_array($ext, array('csv', 'xls', 'xlsx', 'xlsb', 'xltx', 'xltm', 'xlt', 'xml', 'xlam', 'xla', 'xlw', 'xlr'))) {
+                return 'Fichier Excel';
+            } elseif (in_array($ext, array('ppt', 'pot', 'pps'))) {
+                return 'Fichier powerpoint';
+            } elseif (in_array($ext, array('zip', 'rar', 'tar', 'xar', 'bz2', 'gz', 'ls', 'rz', 'sz', '7z', 's7z', 'zz'))) {
+                return 'Dossier compressé';
+            }
+        }
+
+        return 'Divers';
+    }
+
+    public static function getFileTypeCode($fileName)
+    {
+        $ext = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+
+        if ((string) $ext) {
+            if (in_array($ext, array('pdf'))) {
+                return 'pdf';
+            } elseif (in_array($ext, array('jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif'))) {
+                return 'img';
+            } elseif (in_array($ext, array('txt'))) {
+                return 'txt';
+            } elseif (in_array($ext, array('php', 'js', 'html', 'css', 'yml', 'tpl', 'scss'))) {
+                return 'code';
+            } elseif (in_array($ext, array('doc', 'docx', 'docm', 'dotx'))) {
+                return 'word';
+            } elseif (in_array($ext, array('csv', 'xls', 'xlsx', 'xlsb', 'xltx', 'xltm', 'xlt', 'xml', 'xlam', 'xla', 'xlw', 'xlr'))) {
+                return 'xls';
+            } elseif (in_array($ext, array('ppt', 'pot', 'pps'))) {
+                return 'ppt';
+            } elseif (in_array($ext, array('zip', 'rar', 'tar', 'xar', 'bz2', 'gz', 'ls', 'rz', 'sz', '7z', 's7z', 'zz'))) {
+                return 'zip';
+            }
+        }
+
+        return 'oth';
+    }
+
+    public static function displayFileType($fileName, $text_only = 0, $icon_only = 0, $no_html = 0)
+    {
+        if ($no_html) {
+            return self::getFileType($fileName);
+        }
+
+        $html = '';
+
+        if (!$text_only) {
+            $class = '';
+            if (!$icon_only) {
+                $class = 'iconLeft';
+            }
+            $html .= BimpRender::renderIcon(BimpTools::getFileIcon($fileName), $class);
+        }
+
+        if (!$icon_only) {
+            $html .= self::getfileType($fileName);
+        }
+
+        return $html;
+    }
+
     // Gestion Logs: 
 
     public static function logTechnicalError($object, $method, $msg)
@@ -475,8 +647,8 @@ class BimpTools
             } else {
                 $sql .= '`' . $field . '`';
             }
-            
-            if(isset($filter['IN']))
+
+            if (isset($filter['IN']))
                 $filter['in'] = $filter['IN'];
 
             if (is_array($filter)) {
@@ -505,7 +677,7 @@ class BimpTools
                 } elseif (isset($filter['in'])) {
                     if (is_array($filter['in'])) {
                         $sql .= ' IN (' . implode(',', $filter['in']) . ')';
-                    } elseif($filter['in'] == "") {
+                    } elseif ($filter['in'] == "") {
                         $sql .= ' = 0 AND 0';
                     } else {
                         $sql .= ' IN (' . $filter['in'] . ')';
@@ -818,7 +990,7 @@ class BimpTools
         if (!is_float($value)) {
             return $value;
         }
-        
+
         if ($value > -0.01 && $value < 0.01) {
             $value = 0;
         }
@@ -1019,5 +1191,10 @@ class BimpTools
         }
 
         return $msg;
+    }
+
+    public static function replaceBr($text, $replacement = "\n")
+    {
+        return preg_replace("/<[ \/]*br[ \/]*>/", $replacement, $text);
     }
 }

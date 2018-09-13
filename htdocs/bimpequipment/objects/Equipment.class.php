@@ -268,6 +268,45 @@ class Equipment extends BimpObject
         }
     }
 
+    public function checkAvailability($id_entrepot = 0, $allowed_id_reservation = 0)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'Equipement invalide';
+        } else {
+            if (!(int) $this->getData('available')) {
+                $errors[] = 'L\'équipement ' . $this->getData('serial') . ' n\'est pas disponible';
+            } else {
+                $reservations = $this->getReservationsList();
+                if (count($reservations)) {
+                    if (!$allowed_id_reservation || ($allowed_id_reservation && !in_array($allowed_id_reservation, $reservations))) {
+                        $errors[] = 'L\'équipement ' . $this->getData('serial') . ' est réservé';
+                    }
+                }
+
+                if ($id_entrepot) {
+                    $place = $this->getCurrentPlace();
+                    if ((int) $place->getData('type') !== BE_Place::BE_PLACE_ENTREPOT ||
+                            (int) $place->getData('id_entrepot') !== $id_entrepot) {
+                        BimpTools::loadDolClass('product/stock', 'entrepot');
+                        $entrepot = new Entrepot($this->db->db);
+                        $entrepot->fetch($id_entrepot);
+                        if (BimpObject::objectLoaded($entrepot)) {
+                            $label = '"' . $entrepot->libelle . '"';
+                        } else {
+                            $label = 'sélectionné';
+                        }
+                        $errors[] = 'L\'équipement ' . $this->getData('serial') . ' n\'est pas disponible dans l\'entrepot ' . $label;
+                    }
+                }
+            }
+        }
+        return $errors;
+    }
+
+    // Affichage: 
+
     public function displayOriginElement()
     {
         if ($this->isLoaded()) {
@@ -623,6 +662,15 @@ class Equipment extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function getInstanceName($icon = true)
+    {
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        return $this->id . ' - S/N: ' . $this->getData('serial');
     }
 
     // Gestion des droits: 

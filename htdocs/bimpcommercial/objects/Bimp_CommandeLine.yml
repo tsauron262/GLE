@@ -1,0 +1,33 @@
+extends: 
+    module: bimpcommercial
+    object_name: ObjectLine
+    
+table: bimp_commande_line
+
+parent_module: bimpcommercial
+parent_object: Bimp_Commande
+
+labels: 
+    name: ligne de commande
+    name_plur: lignes de commande
+    is_female: 1
+    
+objects: 
+    line: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: commande
+                class: OrderLine
+            id_object: 
+                field_value: id_line
+                
+fields: 
+    qty_shipped: 
+        label: Qté livrée
+        type: int
+        default_value: 0
+        min: 0
+        max: 
+            field_value: qty

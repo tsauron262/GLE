@@ -1,0 +1,13 @@
+
+bootstrap: 1
+title: Commandes fournisseurs
+
+objects: 
+    commande_fourn: 
+        instance:
+            bimp_object: Bimp_CommandeFourn
+            
+sections: 
+    - type: list
+      list: 
+          object: commande_fourn

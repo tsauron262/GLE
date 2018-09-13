@@ -1,0 +1,12 @@
+bootstrap: 1
+title: Commandes
+
+objects: 
+    commande: 
+        instance:
+            bimp_object: Bimp_Commande
+            
+sections: 
+    - type: list
+      list: 
+          object: commande

@@ -1,7 +1,7 @@
 bootstrap: 1
 
 js: 
-    - /bimpcore/views/js/paiement.js
+    - /bimpcommercial/views/js/paiement.js
     
 css: 
     - /bimpcaisse/views/css/styles.css

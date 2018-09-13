@@ -3,6 +3,7 @@
 class BC_FieldsTable extends BC_Panel
 {
 
+    public $component_name = 'Tableau de données';
     public static $type = 'fields_table';
     protected $new_values = array();
     public $row_params = array(
@@ -60,7 +61,7 @@ class BC_FieldsTable extends BC_Panel
 
         foreach ($this->params['rows'] as $row) {
             $row_params = $this->fetchParams($this->config_path . '/rows/' . $row, $this->row_params);
-
+            
             if (!(int) $row_params['show']) {
                 continue;
             }

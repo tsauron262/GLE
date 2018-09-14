@@ -460,6 +460,9 @@ class Bimp_Propal extends BimpComm
     public function renderHeaderExtraLeft()
     {
         $html = '';
+        
+        
+        $html .= "<a class='butAction' href='../comm/propal/card.php?id=".$this->id."'>Ancienne version</a>";
 
         if ($this->isLoaded()) {
             $user = new User($this->db->db);

@@ -6,7 +6,7 @@
 }
 
 .back_white_gradient {
-    background-color: #FFF;
+    background-color: none;
     -webkit-transition: background-color 800ms linear;
     -ms-transition: background-color 800ms linear;
     transition: background-color 800ms linear;

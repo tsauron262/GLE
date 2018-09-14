@@ -12,6 +12,11 @@ class Bimp_Product extends BimpObject
         4 => 'Déplacement contrat',
         5 => 'Logiciel'
     );
+    public static $product_type = array(
+        "" => '',
+        0 => 'Product',
+        1 => 'Service'
+    );
 
     public function isSerialisable()
     {

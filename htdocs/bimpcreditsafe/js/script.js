@@ -78,6 +78,10 @@ function InfoSoc(elem,elem2) {
             this.typeTier.val(8);
             return "";
         }
+        if(siren == "EDUC" || siren == "E" || siren == "e"){
+            this.typeTier.val(5);
+            return "";
+        }
         if(!this.isSiretSiren(siren) || siren == textDef){
             this.promptSiren(siren);
         }

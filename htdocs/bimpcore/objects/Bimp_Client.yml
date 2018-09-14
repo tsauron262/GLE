@@ -53,29 +53,14 @@ fields:
         type: text
     zip: 
         label: Code postal
-        input: 
-            type: search_ziptown
-            field_type: zip
-            town_field: town
-            state_field: fk_departement
-            country_field: fk_pays
-        search: 
-            input: 
-                type: text
-            type: value_part
-            part_type: beginning
+#        input: 
+#            type: search_ziptown
+#            linked_fields: town,fk_pays,fk_departement
     town: 
         label: Ville
-        input: 
-            type: search_ziptown
-            field_type: town
-            zip_field: zip
-            state_field: fk_departement
-            country_field: fk_pays
-        search: 
-            input: 
-                type: text
-            type: value_part
+#        input: 
+#            type: search_ziptown
+#            linked_fields: zip,fk_pays,fk_departement
     fk_pays:
         label: Pays
         dol_prop: country_id
@@ -393,8 +378,6 @@ lists:
                 field: zip
             town: 
                 field: town
-            code:
-                field: code_client
                 
     clients_caisse: 
         list_filters:
@@ -431,8 +414,3 @@ cards:
     default: 
         type: societe_card
         view_btn: 1
-searches:
-    default: 
-        fields_search: 
-            - label
-            - ref

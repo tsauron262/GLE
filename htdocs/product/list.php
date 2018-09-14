@@ -32,6 +32,13 @@
  *  \brief      Page to list products and services
  */
 
+if(isset($_REQUEST["sall"]) && $_REQUEST["sall"] != "")
+    header("Location: ../bimpcore/?tab=products&search=1&object=products&sall=".$_REQUEST["sall"]);
+else
+    header("Location: ../bimpcore/?tab=products");
+die;
+
+
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.product.class.php';

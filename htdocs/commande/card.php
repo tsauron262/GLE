@@ -1420,6 +1420,10 @@ if ($action == 'create' && $user->rights->commande->creer)
 
 			// Object source contacts list
 			$srccontactslist = $objectsrc->liste_contact(- 1, 'external', 1);
+                        
+                        $objectsrc->fetchObjectLinked();
+                        if(isset($objectsrc->linkedObjects['commande']) && count($objectsrc->linkedObjects['commande']) > 0)
+                            setEventMessages("Attention ".count($objectsrc->linkedObjects['commande'])." commande(s) existe déja pour cette propal", null, 'errors'); 
 		}
 	}
 	else

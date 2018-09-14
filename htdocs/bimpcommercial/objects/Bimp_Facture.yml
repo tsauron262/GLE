@@ -414,3 +414,7 @@ cards:
               value: 
                   callback: displayPDFButton
         
+searches:
+    default: 
+        fields_search: 
+            - facnumber

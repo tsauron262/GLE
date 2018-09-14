@@ -314,6 +314,24 @@ class Bimp_Propal extends BimpComm
         return $conf->propal->dir_output;
     }
 
+    // Affichages: 
+
+    public function displayCommercial()
+    {
+        if ($this->isLoaded()) {
+            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
+            if (isset($contacts[0]) && $contacts[0]) {
+                BimpTools::loadDolClass('contact');
+                $user = new User($this->db->db);
+                if ($user->fetch((int) $contacts[0]) > 0) {
+                    return $user->getNomUrl(1) . BimpRender::renderObjectIcons($user);
+                }
+            }
+        }
+        
+        return '';
+    }
+
     // Rendus HTML: 
 
     public function renderMailForm()

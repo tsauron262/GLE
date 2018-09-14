@@ -274,9 +274,15 @@ lists:
             entrepot: 
                 field: entrepot
                 display: nom_url
+            secteur: 
+                field: ef_type
             client: 
                 field: fk_soc
                 display: nom_url
+            commercial: 
+                label: Commercial
+                value: 
+                    callback: displayCommercial
             date_create: 
                 field: datec
             total: 

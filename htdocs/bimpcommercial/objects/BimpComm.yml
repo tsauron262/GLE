@@ -328,3 +328,8 @@ views:
                   fields_table: 
                       name: note_private
                       panel: 0
+                      
+searches:
+    default: 
+        fields_search: 
+            - ref

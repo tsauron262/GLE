@@ -2185,7 +2185,7 @@ class BS_SAV extends BimpObject
                                                 $data['deletable'] = 1;
                                                 $data['editable'] = 1;
                                                 $data['def_pu_ht'] = (float) $line['subprice'];
-                                                $data['def_tva_tx'] = (float) $line('tva_tx');
+                                                $data['def_tva_tx'] = (float) $line['tva_tx'];
                                                 $data['def_id_fourn_price'] = (int) $line['fk_product_fournisseur_price'];
                                                 $insert = true;
                                                 unset($sav_products[$idx]);

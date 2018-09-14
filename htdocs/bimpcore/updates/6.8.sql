@@ -34,5 +34,3 @@ CREATE TABLE IF NOT EXISTS `llx_object_line_remise` (
 ALTER TABLE `llx_bimp_file`
   DROP `file_dir`,
   DROP `file_type`;
-
-ALTER TABLE `llx_be_equipment` ADD `available` tinyint(1) NOT NULL DEFAULT '1' AFTER `serial`;

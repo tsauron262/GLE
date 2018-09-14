@@ -54,6 +54,7 @@ fields:
     libelle: 
         label: Libellé
         dol_extra_field: 1
+        required: 1
     entrepot: 
         label: Entrepôt
         dol_extra_field: 1
@@ -269,6 +270,8 @@ lists:
         cols: 
             ref: 
                 field: ref
+            libelle: 
+                field: libelle
             statut: 
                 field: fk_statut
             entrepot: 

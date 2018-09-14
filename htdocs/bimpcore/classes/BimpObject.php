@@ -55,7 +55,7 @@ class BimpObject
     public $children = array();
     public $extends = array();
 
-    public static function getInstance($module, $object_name, $id_object = null)
+    public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {
         $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
         if (file_exists($file)) {
@@ -69,7 +69,7 @@ class BimpObject
         }
 
         if (!is_null($id_object)) {
-            $instance->fetch($id_object);
+            $instance->fetch($id_object, $parent);
         }
 
         return $instance;
@@ -513,7 +513,7 @@ class BimpObject
         $id_property = $this->getParentIdProperty();
         $id_parent = (int) $this->getData($id_property);
 
-        if (is_null($this->parent) || ($id_parent && (!(int) $this->parent->id || $this->parent->id !== $id_parent))) {
+        if (is_null($this->parent) || ($id_parent && (!(int) $this->parent->id || (int) $this->parent->id !== $id_parent))) {
             unset($this->parent);
             $this->parent = null;
             $module = $this->getParentModule();
@@ -673,13 +673,14 @@ class BimpObject
 
                 if (!is_null($instance)) {
                     if (is_a($instance, 'BimpObject')) {
+                        $is_child = (int) $this->isChild($instance);
                         $list_filters = $this->config->getCompiledParams('objects/' . $object_name . '/list/filters');
                         if (!is_null($list_filters)) {
                             foreach ($list_filters as $field => $filter) {
                                 $filters = BimpTools::mergeSqlFilter($filters, $field, $filter);
                             }
                         }
-                        if ($this->isChild($instance)) {
+                        if ($is_child) {
                             $filters[$instance->getParentIdProperty()] = $this->id;
                         }
                         $primary = $instance->getPrimary();
@@ -690,6 +691,9 @@ class BimpObject
                         foreach ($list as $item) {
                             if (!isset($this->children[$object_name][(int) $item[$primary]])) {
                                 $child = BimpObject::getInstance($instance->module, $instance->object_name, (int) $item[$primary]);
+                                if ($is_child) {
+                                    $child->parent = $this;
+                                }
                                 if ($child->isLoaded()) {
                                     $this->children[$object_name][(int) $item[$primary]] = $child;
                                     $children[] = $child;
@@ -1168,6 +1172,9 @@ class BimpObject
                 $return[$field] = array('and' => $this->checkSqlFilters($filter['and'], $has_extrafields));
             } else {
                 if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+                    if (preg_match('/^ef_(.*)$/', $field, $matches)) {
+                        $field = $matches[1];
+                    }
                     $return['ef.' . $field] = $filter;
                     $has_extrafields = true;
                 } else {
@@ -1936,7 +1943,7 @@ class BimpObject
         return $this->fetch($id_object);
     }
 
-    public function fetch($id)
+    public function fetch($id, $parent = null)
     {
         if (BimpController::$debug_time) {
             global $main_controller;
@@ -1947,6 +1954,10 @@ class BimpObject
         }
 
         $this->reset();
+        
+        if (!is_null($parent) && BimpObject::objectLoaded($parent)) {
+            $this->parent = $parent;
+        }
 
         if (!is_null($this->dol_object)) {
             return $this->fetchDolObject($id);
@@ -2040,21 +2051,25 @@ class BimpObject
 
     public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null, $extra_order_by = null, $extra_order_way = 'ASC')
     {
-        if ($order_by === 'id') {
-            $order_by = $this->getPrimary();
-        }
-
         $table = $this->getTable();
 
         if (is_null($table)) {
             return array();
         }
 
+        if ($order_by === 'id') {
+            $order_by = $this->getPrimary();
+        }
+        $order_by_alias = 'a';
+
         if ($this->isDolObject()) {
             $has_extrafields = false;
             foreach ($return_fields as $key => $field) {
                 if ($this->field_exists($field)) {
                     if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+                        if (preg_match('/^ef_(.*)$/', $field, $matches)) {
+                            $field = $matches[1];
+                        }
                         $return_fields[$key] = 'ef.' . $field;
                         $has_extrafields = true;
                     }
@@ -2062,6 +2077,18 @@ class BimpObject
             }
 
             $filters = $this->checkSqlFilters($filters, $has_extrafields);
+
+            if ($this->field_exists($order_by)) {
+                if ((int) $this->getConf('fields/' . $order_by . '/dol_extra_field', 0, false, 'bool')) {
+                    $has_extrafields = true;
+                    $order_by_alias = 'ef';
+                    if (preg_match('/^ef_(.*)$/', $order_by, $matches)) {
+                        $order_by = $matches[1];
+                    }
+                }
+            } else {
+                $order_by = '';
+            }
 
             if ($has_extrafields) {
                 if (is_null($joins)) {
@@ -2079,7 +2106,7 @@ class BimpObject
         $sql .= BimpTools::getSqlSelect($return_fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
+        $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, $order_by_alias, $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
         if (BimpTools::isSubmit('list_sql')) {
@@ -3277,8 +3304,22 @@ class BimpObject
         }
 
         if (!count($errors)) {
+            if ($this->params['list_page_url']) {
+                $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+                if ($url) {
+                    $list_button = '<div class="buttonsContainer">';
+                    $list_button .= '<a class="btn btn-primary" href="' . $url . '">';
+                    $list_button .= '<i class="fa fa-chevron-left iconLeft"></i>Liste complète des ' . $this->getLabel('name_plur');
+                    $list_button .= '</a>';
+                    $list_button .= '</div>';
+                }
+            }
+
             $search = new BC_Search($this, $search_name, $search_value);
-            return $search->renderHtml();
+            $html = $list_button;
+            $html .= $search->renderHtml();
+            $html .= $list_button;
+            return $html;
         }
 
         return BimpRender::renderAlerts($errors);
@@ -3832,7 +3873,7 @@ class BimpObject
 
         $rows = $this->db->getRows('bimp_c_secteur');
 
-        
+
 
         if (is_array($rows)) {
             foreach ($rows as $r) {

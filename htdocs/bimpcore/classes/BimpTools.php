@@ -1157,12 +1157,14 @@ class BimpTools
         if ($url && isset($params['url_params'])) {
             $url_params = $config->getCompiledParams($path . '/url_params');
             foreach ($url_params as $name => $value) {
-                if (!preg_match('/\?/', $url)) {
-                    $url .= '?';
-                } else {
-                    $url .= '&';
+                if ((string) $name && (string) $value) {
+                    if (!preg_match('/\?/', $url)) {
+                        $url .= '?';
+                    } else {
+                        $url .= '&';
+                    }
+                    $url .= $name . '=' . $value;
                 }
-                $url .= $name . '=' . $value;
             }
         }
 

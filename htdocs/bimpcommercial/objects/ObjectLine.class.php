@@ -888,7 +888,8 @@ class ObjectLine extends BimpObject
                 'deletable'          => 1,
                 'editable'           => 1,
                 'linked_id_object'   => 0,
-                'linked_object_name' => 0
+                'linked_object_name' => 0,
+                'position'           => (int) $line->rang
             ));
 
             if (!count($errors)) {
@@ -1133,7 +1134,6 @@ class ObjectLine extends BimpObject
             default:
                 return false;
         }
-
 
         return true;
     }
@@ -2319,6 +2319,23 @@ class ObjectLine extends BimpObject
                 return false;
             }
 
+            $remise_infos = $this->getRemiseTotalInfos();
+            if ((float) $this->remise !== (float) $remise_infos['percent']) {
+                $remise_percent = (float) $this->remise;
+                $remises = $this->getRemises();
+                foreach ($remises as $remise) {
+                    $remise->delete();
+                }
+
+                $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+                $remise->validateArray(array(
+                    'id_object_line' => (int) $this->id,
+                    'object_type'    => static::$parent_comm_type,
+                    'type'           => ObjectLineRemise::OL_REMISE_PERCENT,
+                    'percent'        => (float) $remise_percent
+                ));
+                $remise->create($warnings, true);
+            }
             return true;
         }
 

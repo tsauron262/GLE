@@ -743,7 +743,7 @@ lists:
         list_filters: 
             callback: getListFilters
         sort_field: date_create
-        sort_way: desc
+        sort_way: asc
         n: 10
         add_form_name: default
         add_form_values: 

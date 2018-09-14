@@ -81,6 +81,8 @@ class BS_SAV extends BimpObject
     {
         parent::__construct("bimpsupport", get_class($this));
 
+        define("NOT_VERIF", true);
+        
         $this->useCaisseForPayments = BimpCore::getConf('sav_use_caisse_for_payments');
     }
 
@@ -1284,7 +1286,6 @@ class BS_SAV extends BimpObject
 
         $prop->set_ref_client($user, $this->getData('prestataire_number'));
 
-        define("NOT_VERIF", true);
 
         $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
         $line->no_equipment_post = true;

@@ -25,23 +25,6 @@ class Bimp_Commande extends BimpComm
 
         return ModelePDFCommandes::liste_modeles($this->db->db);
     }
-    
-    public function getSecteursArray()
-    {
-        $secteurs = array(
-            0 => ''
-        );
-
-        $values = BimpTools::getExtraFieldValues('commande', 'type');
-
-        if (isset($values['options'])) {
-            foreach ($values['options'] as $key => $label) {
-                $secteurs[$key] = $label;
-            }
-        }
-
-        return $secteurs;
-    }
 
     public function getDirOutput()
     {

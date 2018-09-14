@@ -152,23 +152,6 @@ class Bimp_Facture extends BimpComm
         return $types;
     }
 
-    public function getSecteursArray()
-    {
-        $secteurs = array(
-            0 => ''
-        );
-
-        $values = BimpTools::getExtraFieldValues('facture', 'type');
-
-        if (isset($values['options'])) {
-            foreach ($values['options'] as $key => $label) {
-                $secteurs[$key] = $label;
-            }
-        }
-
-        return $secteurs;
-    }
-
     public function getModelsPdfArray()
     {
         if (!class_exists('ModelePDFFactures')) {

@@ -103,6 +103,7 @@ fields:
         object: entrepot
         input: 
             type: search_entrepot
+            
     ef_type: 
         label: Secteur
         dol_extra_field: 1

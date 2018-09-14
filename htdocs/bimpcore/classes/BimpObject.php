@@ -3824,6 +3824,25 @@ class BimpObject
         return array();
     }
 
+    public function getSecteursArray()
+    {
+        $secteurs = array(
+            0 => ''
+        );
+
+        $rows = $this->db->getRows('bimp_c_secteur');
+
+        
+
+        if (is_array($rows)) {
+            foreach ($rows as $r) {
+                $secteurs[$r->clef] = $r->valeur;
+            }
+        }
+
+        return $secteurs;
+    }
+
     // Action Communes: 
 
     public function actionDeleteFile($data, &$success)
@@ -3853,7 +3872,7 @@ class BimpObject
             'warnings' => $warnings
         );
     }
-    
+
     public function actionRemoveLinkedObject($data, &$success)
     {
         $errors = array();
@@ -3863,7 +3882,7 @@ class BimpObject
         if (!isset($data['id_link']) || !(int) $data['link_id']) {
             
         }
-        
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

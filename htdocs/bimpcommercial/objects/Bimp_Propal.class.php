@@ -62,23 +62,6 @@ class Bimp_Propal extends BimpComm
         );
     }
 
-    public function getSecteursArray()
-    {
-        $secteurs = array(
-            0 => ''
-        );
-
-        $values = BimpTools::getExtraFieldValues('propal', 'type');
-
-        if (isset($values['options'])) {
-            foreach ($values['options'] as $key => $label) {
-                $secteurs[$key] = $label;
-            }
-        }
-
-        return $secteurs;
-    }
-
     public function getListFilters()
     {
         return array();

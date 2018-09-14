@@ -1640,7 +1640,7 @@ class Propal extends CommonObject
         $sql.= " SET ref = '".$num."',";
         $sql.= " fk_statut = ".self::STATUS_VALIDATED.", date_valid='".$this->db->idate($now)."', fk_user_valid=".$user->id;
         $sql.= " WHERE rowid = ".$this->id." AND fk_statut = ".self::STATUS_DRAFT;
-        dol_syslog("validate propal ".$sql,3);
+
         dol_syslog(get_class($this)."::valid", LOG_DEBUG);
 		$resql=$this->db->query($sql);
 		if (! $resql)

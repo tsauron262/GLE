@@ -716,30 +716,42 @@ class BimpComm extends BimpObject
                 $dol_lines[(int) $line->id] = $line;
             }
 
-            foreach ($this->getChildrenObjects('lines') as $line) {
-                $bimp_lines[(int) $line->getData('id_line')] = $line;
+            $bimp_line = $this->getChildObject('lines');
+            $rows = $this->db->getRows($bimp_line->getTable(), '`id_obj` = ' . (int) $this->id, null, 'array', array('id', 'id_line', 'position'));
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    $bimp_lines[(int) $r['id_line']] = array(
+                        'id'       => (int) $r['id'],
+                        'position' => (int) $r['position']
+                    );
+                }
             }
 
             // Suppression des lignes absentes de l'objet dolibarr:
-            foreach ($bimp_lines as $id_line => $line) {
-                if (!array_key_exists($id_line, $dol_lines)) {
-                    $line->delete();
-                    unset($bimp_lines[$id_line]);
+            foreach ($bimp_lines as $id_dol_line => $data) {
+                if (!array_key_exists((int) $id_dol_line, $dol_lines)) {
+                    if ($bimp_line->fetch($data['id'])) {
+                        $bimp_line->delete();
+                        unset($bimp_lines[$id_dol_line]);
+                    }
                 }
             }
 
             // Création des lignes absentes de l'objet bimp: 
             $objectLine = $this->getChildObject('lines');
 
-            $i = 1;
-            foreach ($dol_lines as $id_line => $line) {
-                if (!array_key_exists($id_line, $bimp_lines) && method_exists($objectLine, 'createFromDolLine')) {
-                    $line_errors = $objectLine->createFromDolLine((int) $this->id, $line, $warnings);
+            $i = 0;
+            foreach ($dol_lines as $id_dol_line => $dol_line) {
+                $i++;
+                if (!array_key_exists($id_dol_line, $bimp_lines) && method_exists($objectLine, 'createFromDolLine')) {
+                    $line_errors = $objectLine->createFromDolLine((int) $this->id, $dol_line, $warnings);
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la récupération des données pour la ligne n° ' . $i);
                     }
+                } elseif ($bimp_lines[(int) $id_dol_line]['position'] !== (int) $dol_line->rang) {
+                    $bimp_line->updateField('position', (int) $dol_line->rang, $bimp_lines[(int) $id_dol_line]['id']);
                 }
-                $i++;
             }
         }
 

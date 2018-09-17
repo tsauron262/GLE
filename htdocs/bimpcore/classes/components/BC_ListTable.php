@@ -164,7 +164,7 @@ class BC_ListTable extends BC_List
         foreach ($this->items as $item) {
             $row = array();
             $row['single_cell'] = false;
-            if ($this->object->fetch((int) $item[$primary])) {
+            if ($this->object->fetch((int) $item[$primary], $this->parent)) {
                 if (($this->params['single_cell']['col'])) {
                     if ($this->object->doMatchFilters($this->params['single_cell']['filters'])) {
                         $row['single_cell'] = true;
@@ -741,7 +741,7 @@ class BC_ListTable extends BC_List
                 $this->object->reset();
 
                 if (is_numeric($id_object)) {
-                    $this->object->fetch((int) $id_object);
+                    $this->object->fetch((int) $id_object, $this->parent);
                 }
 
                 if (in_array((int) $id_object, $this->selected_rows)) {

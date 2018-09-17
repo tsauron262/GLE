@@ -204,29 +204,6 @@ fields_tables:
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
-                                    
-    sav_infos: 
-        title: Informations
-        icon: info-circle
-        rows: 
-            - field: fk_statut
-            - field: datep
-              edit: 
-                  callback: isEditable
-            - field: fin_validite
-              edit: 
-                  callback: isEditable
-            - field: date_livraison
-              edit: 1
-            - field: libelle
-              edit: 1
-            - field: pdf_hide_reduc
-              edit: 1
-            - field: pdf_hide_total
-              edit: 1
-            - label: Fichier PDF
-              value: 
-                  callback: displayPDFButton
                   
     totals: 
         rows: 

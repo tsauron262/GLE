@@ -70,6 +70,8 @@ class BimpObject
 
         if (!is_null($id_object)) {
             $instance->fetch($id_object, $parent);
+        } else {
+            $instance->parent = $parent;
         }
 
         return $instance;
@@ -620,7 +622,11 @@ class BimpObject
     {
         $child = $this->config->getObject('', $object_name);
         if (!is_null($child) && !is_null($id_object)) {
-            $child->fetch($id_object);
+            $parent = null;
+            if ($this->isChild($child)) {
+                $parent = $this;
+            }
+            $child->fetch($id_object, $parent);
         }
         return $child;
     }
@@ -690,10 +696,12 @@ class BimpObject
                         }
                         foreach ($list as $item) {
                             if (!isset($this->children[$object_name][(int) $item[$primary]])) {
-                                $child = BimpObject::getInstance($instance->module, $instance->object_name, (int) $item[$primary]);
+                                $parent = null;
                                 if ($is_child) {
-                                    $child->parent = $this;
+                                    $parent = $this;
                                 }
+                                $child = BimpObject::getInstance($instance->module, $instance->object_name, (int) $item[$primary], $parent);
+
                                 if ($child->isLoaded()) {
                                     $this->children[$object_name][(int) $item[$primary]] = $child;
                                     $children[] = $child;
@@ -868,10 +876,7 @@ class BimpObject
     {
         $this->config->resetObjects();
 
-        if (!is_null($this->parent)) {
-            unset($this->parent);
-            $this->parent = null;
-        }
+        $this->parent = null;
 
         foreach ($this->children as $object_name => $objects) {
             foreach ($objects as $id_object => $object) {
@@ -1954,8 +1959,8 @@ class BimpObject
         }
 
         $this->reset();
-        
-        if (!is_null($parent) && BimpObject::objectLoaded($parent)) {
+
+        if (!is_null($parent)) {
             $this->parent = $parent;
         }
 
@@ -3868,12 +3873,10 @@ class BimpObject
     public function getSecteursArray()
     {
         $secteurs = array(
-            0 => ''
+            '' => ''
         );
 
         $rows = $this->db->getRows('bimp_c_secteur');
-
-
 
         if (is_array($rows)) {
             foreach ($rows as $r) {

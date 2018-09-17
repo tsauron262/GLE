@@ -72,6 +72,11 @@ fields:
         
     linked_object_name:
         label: Type d\'objet lié
+        
+    remise: 
+        label: Remise
+        type: percent
+        default_value: 0
 
 forms: 
     default: 

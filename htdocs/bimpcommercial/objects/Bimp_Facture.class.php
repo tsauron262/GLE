@@ -1910,9 +1910,9 @@ class Bimp_Facture extends BimpComm
 
     // Overrides BimpObject:
 
-    public function fetch($id)
+    public function fetch($id, $parent = null)
     {
-        $result = parent::fetch($id);
+        $result = parent::fetch($id, $parent);
 
         if ($this->isLoaded()) {
             switch ((int) $this->getData('type')) {

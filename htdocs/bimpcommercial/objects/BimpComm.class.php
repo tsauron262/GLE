@@ -741,6 +741,8 @@ class BimpComm extends BimpObject
             // Création des lignes absentes de l'objet bimp: 
             $objectLine = $this->getChildObject('lines');
 
+            $bimp_line->reset();
+
             $i = 0;
             foreach ($dol_lines as $id_dol_line => $dol_line) {
                 $i++;
@@ -749,8 +751,12 @@ class BimpComm extends BimpObject
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la récupération des données pour la ligne n° ' . $i);
                     }
-                } elseif ($bimp_lines[(int) $id_dol_line]['position'] !== (int) $dol_line->rang) {
+                } elseif ((int) $bimp_lines[(int) $id_dol_line]['position'] !== (int) $dol_line->rang) {
                     $bimp_line->updateField('position', (int) $dol_line->rang, $bimp_lines[(int) $id_dol_line]['id']);
+                } elseif ((float) $bimp_lines[(int) $id_dol_line]['remise'] !== (float) $line->remise_percent) {
+                    if ($bimp_line->fetch((int) $bimp_lines[(int) $id_dol_line]['id'], $this)) {
+                        $bimp_line->checkRemises();
+                    }
                 }
             }
         }

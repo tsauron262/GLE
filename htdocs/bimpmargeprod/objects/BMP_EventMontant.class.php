@@ -1002,9 +1002,9 @@ class BMP_EventMontant extends BimpObject
         return $errors;
     }
 
-    public function fetch($id)
+    public function fetch($id, $parent = null)
     {
-        if (parent::fetch($id)) {
+        if (parent::fetch($id, $parent)) {
             $typeMontant = $this->getChildObject('type_montant');
             if (!is_null($typeMontant)) {
                 $type = (int) $typeMontant->getData('type');

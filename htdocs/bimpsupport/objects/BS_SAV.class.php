@@ -82,7 +82,7 @@ class BS_SAV extends BimpObject
         parent::__construct("bimpsupport", get_class($this));
 
         define("NOT_VERIF", true);
-        
+
         $this->useCaisseForPayments = BimpCore::getConf('sav_use_caisse_for_payments');
     }
 
@@ -3355,9 +3355,9 @@ class BS_SAV extends BimpObject
         return $errors;
     }
 
-    public function fetch($id)
+    public function fetch($id, $parent = null)
     {
-        if (parent::fetch($id)) {
+        if (parent::fetch($id, $parent)) {
 //            echo (float) $this->getData('version');
 //            exit;
             if ($this->check_version && (float) $this->getData('version') < 1.0) {

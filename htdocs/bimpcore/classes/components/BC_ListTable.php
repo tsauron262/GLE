@@ -161,56 +161,83 @@ class BC_ListTable extends BC_List
 
         $primary = $this->object->getPrimary();
 
+        $this->setConfPath();
+
         foreach ($this->items as $item) {
-            $row = array();
-            $row['single_cell'] = false;
             if ($this->object->fetch((int) $item[$primary], $this->parent)) {
+                $item_params = $this->fetchParams($this->config_path, $this->item_params);
+
+                $row = array(
+                    'params' => array(
+                        'checkbox'       => (int) $this->object->getCurrentConf('item_checkbox', true, false, 'bool'),
+                        'single_cell'    => false,
+                        'item_params'    => $item_params,
+                        'canEdit'        => (int) $this->object->canEdit(),
+                        'canView'        => (int) $this->object->canView(),
+                        'canDelete'      => (int) $this->object->canDelete(),
+                        'instance_name'  => $this->object->getInstanceName(),
+                        'url'            => '',
+                        'page_btn_label' => '',
+                    ),
+                    'cols'   => array()
+                );
+
+                if ((int) $item_params['page_btn']) {
+                    $controller = $this->object->getController();
+                    if ($controller) {
+                        $row['params']['url'] = DOL_URL_ROOT . '/' . $this->object->module . '/index.php?fc=' . $controller . '&id=' . $item[$primary];
+                        $row['params']['page_btn_label'] = 'Affichage la page';
+                    } elseif ($this->object->isDolObject()) {
+                        $row['params']['url'] = BimpTools::getDolObjectUrl($this->object->dol_object, (int) $item[$primary]);
+                        $row['params']['page_btn_label'] = 'Affichage la fiche ' . $this->object->getLabel();
+                    }
+                }
+
                 if (($this->params['single_cell']['col'])) {
                     if ($this->object->doMatchFilters($this->params['single_cell']['filters'])) {
-                        $row['single_cell'] = true;
+                        $row['params']['single_cell'] = true;
                     }
                 }
                 $new_values = isset($this->new_values[(int) $item[$primary]]) ? $this->new_values[(int) $item[$primary]] : array();
                 if ($this->params['positions']) {
-                    $row['position'] = $this->object->getData('position');
-                    if (is_null($row['position'])) {
-                        $row['position'] = 0;
-                    }
+                    $row['params']['position'] = (int) $this->object->getData('position');
                 }
                 foreach ($this->cols as $col_name) {
-                    if ($row['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
+                    if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
                         continue;
                     }
-                    $content = '';
-                    if ($this->setConfPath('cols/' . $col_name)) {
-                        $show = (bool) $this->object->getCurrentConf('show', true, false, 'bool');
-                        if (!$show) {
-                            continue;
-                        }
-                        $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params);
+                    $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params);
 
+                    $row['cols'][$col_name] = array(
+                        'content'   => '',
+                        'show'      => (int) $col_params['show'],
+                        'hidden'    => (int) $col_params['hidden'],
+                        'min_width' => $col_params['min_width'],
+                        'max_width' => $col_params['max_width'],
+                        'col_style' => $col_params['col_style'],
+                    );
 
-                        if ($col_params['field']) {
-                            $field = new BC_Field($this->object, $col_params['field'], ($this->params['enable_edit'] && $col_params['edit']));
-                            $field->display_name = $col_params['display'];
-
-                            if (isset($new_values[$col_params['field']])) {
-                                $field->new_value = $new_values[$col_params['field']];
-                            }
-
-                            $content = $field->renderHtml();
-                        } else if (isset($col_params['value'])) {
-                            $content .= $col_params['value'];
-                        }
+                    if (!$row['cols'][$col_name]['show']) {
+                        continue;
                     }
 
-                    $row[$col_name] = $content;
+                    if ($col_params['field']) {
+                        $field = new BC_Field($this->object, $col_params['field'], ($this->params['enable_edit'] && (int) $col_params['edit']));
+                        $field->display_name = $col_params['display'];
+
+                        if (isset($new_values[$col_params['field']])) {
+                            $field->new_value = $new_values[$col_params['field']];
+                        }
+
+                        $row['cols'][$col_name]['content'] = $field->renderHtml();
+                    } elseif (isset($col_params['value'])) {
+                        $row['cols'][$col_name]['content'] .= $col_params['value'];
+                    }
                 }
                 $rows[$item[$primary]] = $row;
                 $this->object->reset();
             }
         }
-
         if (!is_null($this->id_parent)) {
             $this->object->setIdParent($this->id_parent);
         }
@@ -736,13 +763,12 @@ class BC_ListTable extends BC_List
             $this->fetchRows();
         }
 
+        $this->object->reset();
+
         if (count($this->rows)) {
             foreach ($this->rows as $id_object => $row) {
-                $this->object->reset();
-
-                if (is_numeric($id_object)) {
-                    $this->object->fetch((int) $id_object, $this->parent);
-                }
+                $id_object = (int) $id_object;
+                $item_params = $row['params']['item_params'];
 
                 if (in_array((int) $id_object, $this->selected_rows)) {
                     $selected = true;
@@ -750,24 +776,8 @@ class BC_ListTable extends BC_List
                     $selected = false;
                 }
 
-                $item_params = $this->fetchParams($this->config_path, $this->item_params);
-
-                if (isset($row['row_style'])) {
-                    $row_style = $row['row_style'];
-                } else {
-                    $row_style = $item_params['row_style'];
-                }
-
-                $td_style = $item_params['col_style'];
-
-                if (isset($row['td_style'])) {
-                    $td_style .= $row['td_style'];
-                } else {
-                    $td_style .= $item_params['td_style'];
-                }
-
                 $html .= '<tr class="' . $this->object->object_name . '_row objectListItemRow';
-                if (isset($this->new_values[(int) $id_object]) && count($this->new_values[(int) $id_object])) {
+                if (isset($this->new_values[$id_object]) && count($this->new_values[$id_object])) {
                     $html .= ' modified';
                 }
                 if ($selected) {
@@ -776,16 +786,16 @@ class BC_ListTable extends BC_List
                 $html .= '" id="' . $this->object->object_name . '_row_' . $id_object . '"';
                 $html .= ' data-id_object="' . $id_object . '"';
                 if ($this->params['positions']) {
-                    $html .= ' data-position="' . $row['position'] . '"';
+                    $html .= ' data-position="' . $row['params']['position'] . '"';
                 }
-                if (!is_null($row_style) && $row_style) {
-                    $html .= ' style="' . $row_style . '"';
+                if (!is_null($item_params['row_style']) && $item_params['row_style']) {
+                    $html .= ' style="' . $item_params['row_style'] . '"';
                 }
                 $html .= '>';
 
-                $html .= '<td style="text-align: center; ' . $td_style . '">';
+                $html .= '<td style="text-align: center; ' . $item_params['td_style'] . '">';
                 if ($this->params['checkboxes']) {
-                    if ($this->object->getCurrentConf('item_checkbox', true, false, 'bool')) {
+                    if ((int) $row['params']['checkbox']) {
                         $html .= '<input type="checkbox" id_="' . $this->object->object_name . '_check_' . $id_object . '"';
                         $html .= ' name="' . $this->object->object_name . '_check"';
                         $html .= ' class="item_check"';
@@ -798,40 +808,34 @@ class BC_ListTable extends BC_List
                 $html .= '</td>';
 
                 if ($this->params['positions']) {
-                    $html .= '<td class="positionHandle" style="' . $td_style . '"><span></span></td>';
+                    $html .= '<td class="positionHandle" style="' . $item_params['td_style'] . '"><span></span></td>';
                 }
 
                 $this->setConfPath('cols');
                 foreach ($this->cols as $col_name) {
-                    if ($row['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
+                    if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
                         continue;
                     }
 
-                    $hidden = (int) $this->object->getCurrentConf($col_name . '/hidden', 0, false, 'bool');
-                    $min_width = $this->object->getCurrentConf($col_name . '/min_width', 0);
-                    $max_width = $this->object->getCurrentConf($col_name . '/max_width', 0);
-                    $col_style = $this->object->getCurrentConf($col_name . '/col_style', '');
-                    $show = (int) $this->object->getCurrentConf($col_name . '/item_show', 1);
-
                     $html .= '<td style="';
-                    if ($hidden) {
+                    if ($row['cols'][$col_name]['hidden']) {
                         $html .= 'display: none;';
                     }
-                    if ($min_width) {
-                        $html .= 'min-width: ' . $min_width . ';';
+                    if ($row['cols'][$col_name]['min_width']) {
+                        $html .= 'min-width: ' . $row['cols'][$col_name]['min_width'] . ';';
                     }
-                    if ($max_width) {
-                        $html .= 'max-width: ' . $max_width . ';';
+                    if ($row['cols'][$col_name]['max_width']) {
+                        $html .= 'max-width: ' . $row['cols'][$col_name]['max_width'] . ';';
                     }
-                    if ($td_style) {
-                        $html .= ' ' . $td_style;
+                    if ($item_params['td_style']) {
+                        $html .= $item_params['td_style'];
                     }
-                    if ($col_style) {
-                        $html .= ' ' . $col_style;
+                    if ($row['cols'][$col_name]['col_style']) {
+                        $html .= $row['cols'][$col_name]['col_style'];
                     }
-                    $html .= '"' . ($row['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
-                    if ($show) {
-                        $html .= (isset($row[$col_name]) ? $row[$col_name] : '');
+                    $html .= '"' . ($row['params']['single_cell'] ? ' colspan="' . count($this->cols) . '"' : '') . '>';
+                    if ((int) $row['cols'][$col_name]['show']) {
+                        $html .= (isset($row['cols'][$col_name]['content']) ? $row['cols'][$col_name]['content'] : '');
                     }
                     $html .= '</td>';
                 }
@@ -845,8 +849,8 @@ class BC_ListTable extends BC_List
 
                 $this->setConfPath();
 
-                if ((int) $this->object->canEdit()) {
-                    if ($this->params['enable_edit'] && $item_params['update_btn']) {
+                if ((int) $row['params']['canEdit']) {
+                    if ($this->params['enable_edit'] && (int) $item_params['update_btn']) {
                         $rowButtons[] = array(
                             'class'   => 'cancelModificationsButton hidden',
                             'icon'    => 'undo',
@@ -859,7 +863,7 @@ class BC_ListTable extends BC_List
                             'onclick' => 'updateObjectFromRow(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
                         );
                     }
-                    if ($item_params['edit_btn']) {
+                    if ((int) $item_params['edit_btn']) {
                         $title = '';
                         if (!is_null($item_params['edit_form_title']) && $item_params['edit_form_title']) {
                             $title = htmlentities(addslashes($item_params['edit_form_title']));
@@ -875,13 +879,13 @@ class BC_ListTable extends BC_List
                     }
                 }
 
-                if ((int) $this->object->canView()) {
+                if ((int) $row['params']['canView']) {
                     if (!is_null($item_params['modal_view'])) {
                         $title = '';
                         if ($this->object->config->isDefined('views/' . $item_params['modal_view'] . '/title')) {
                             $title = htmlentities(addslashes($this->object->getConf('views/' . $item_params['modal_view'] . '/title')));
                         } else {
-                            $title = htmlentities(addslashes($this->object->getInstanceName()));
+                            $title = htmlentities(addslashes($row['params']['instance_name']));
                         }
                         $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', \'' . $item_params['modal_view'] . '\', $(this), \'' . $title . '\')';
                         $rowButtons[] = array(
@@ -890,7 +894,7 @@ class BC_ListTable extends BC_List
                             'onclick' => $onclick
                         );
                     }
-                    if (!is_null($item_params['inline_view'])) {
+                    if (!is_null($item_params['inline_view']) && $item_params['inline_view']) {
                         $onclick = 'displayObjectView($(\'#' . $this->identifier . '_container\').find(\'.objectViewContainer\'), ';
                         $onclick .= '\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', \'' . $item_params['inline_view'] . '\', ' . $id_object . ', \'default\'';
                         $onclick .= ');';
@@ -900,41 +904,21 @@ class BC_ListTable extends BC_List
                             'onclick' => $onclick
                         );
                     }
-                    if ($item_params['page_btn']) {
-                        if (!is_null($id_object) && $id_object) {
-                            $controller = $this->object->getController();
-                            if ($controller) {
-                                $url = DOL_URL_ROOT . '/' . $this->object->module . '/index.php?fc=' . $controller . '&id=' . $id_object;
-                                $rowButtons[] = array(
-                                    'label'   => 'Afficher la page',
-                                    'onclick' => 'window.location = \'' . $url . '\';',
-                                    'icon'    => 'file-o'
-                                );
-                                $rowButtons[] = array(
-                                    'label'   => 'Afficher la page dans un nouvel onglet',
-                                    'onclick' => 'window.open(\'' . $url . '\');',
-                                    'icon'    => 'external-link'
-                                );
-                            } elseif ($this->object->isDolObject()) {
-                                $url = BimpTools::getDolObjectUrl($this->object->dol_object, $id_object);
-                                if ($url) {
-                                    $rowButtons[] = array(
-                                        'label'   => 'Afficher la fiche ' . $this->object->getLabel(),
-                                        'onclick' => 'window.location = \'' . $url . '\';',
-                                        'icon'    => 'file-o'
-                                    );
-                                    $rowButtons[] = array(
-                                        'label'   => 'Afficher la fiche ' . $this->object->getLabel() . ' dans un nouvel onglet',
-                                        'onclick' => 'window.open(\'' . $url . '\');',
-                                        'icon'    => 'external-link'
-                                    );
-                                }
-                            }
-                        }
+                    if ((int) $item_params['page_btn'] && $row['params']['url']) {
+                        $rowButtons[] = array(
+                            'label'   => $row['params']['page_btn_label'],
+                            'onclick' => 'window.location = \'' . $row['params']['url'] . '\';',
+                            'icon'    => 'file-o'
+                        );
+                        $rowButtons[] = array(
+                            'label'   => $row['params']['page_btn_label'] . ' dans un nouvel onglet',
+                            'onclick' => 'window.open(\'' . $row['params']['url'] . '\');',
+                            'icon'    => 'external-link'
+                        );
                     }
                 }
 
-                if ((int) $this->object->canDelete()) {
+                if ((int) $row['params']['canDelete']) {
                     if ($item_params['delete_btn']) {
                         $rowButtons[] = array(
                             'class'   => 'deleteButton',
@@ -946,7 +930,7 @@ class BC_ListTable extends BC_List
 
 
                 $min_width = ((count($rowButtons) * 36) + 12) . 'px';
-                $html .= '<td class="buttons" style="min-width: ' . $min_width . '; ' . $td_style . '">';
+                $html .= '<td class="buttons" style="min-width: ' . $min_width . '; ' . $item_params['td_style'] . '">';
 
                 foreach ($rowButtons as $btn_params) {
                     $html .= $this->renderRowButton($btn_params);

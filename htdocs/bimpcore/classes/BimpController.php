@@ -3,7 +3,7 @@
 class BimpController
 {
 
-    public static $debug_time = true;
+    public static $debug_time = false;
     public $times = array();
     public $module = '';
     public $controller = '';

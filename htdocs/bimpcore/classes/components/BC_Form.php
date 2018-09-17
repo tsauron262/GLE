@@ -101,7 +101,9 @@ class BC_Form extends BC_Panel
         if (isset($this->params['values']) && !is_null($this->params['values'])) {
             if (isset($this->params['values']['fields'])) {
                 foreach ($this->params['values']['fields'] as $field_name => $value) {
-                    $object->set($field_name, $value);
+                    if (!is_null($value)) {
+                        $object->set($field_name, $value);
+                    }
                 }
             }
 

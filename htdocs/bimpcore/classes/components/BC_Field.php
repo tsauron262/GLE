@@ -172,6 +172,18 @@ class BC_Field extends BimpComponent
             case 'field_input':
             case 'value_part':
                 switch ($this->params['type']) {
+                    case 'date':
+                        $search_type = $input_type = 'date_range';
+                        break;
+                    
+                    case 'time':
+                        $search_type = $input_type = 'time_range';
+                        break;
+                    
+                    case 'datetime':
+                        $search_type = $input_type = 'datetime_range';
+                        break;
+
                     case 'bool':
                         $input_type = 'select';
                         $options['options'] = array(
@@ -351,7 +363,7 @@ class BC_Field extends BimpComponent
                         }
                         $html .= ' data-show_values_' . $name_prefix . $field . '="' . str_replace('"', "'", $show_values) . '"';
                     }
-                    
+
                     if (isset($params[$field]['hide_values']) && !is_null($params[$field]['hide_values'])) {
                         $hide_values = $params[$field]['hide_values'];
                         if (is_array($hide_values)) {

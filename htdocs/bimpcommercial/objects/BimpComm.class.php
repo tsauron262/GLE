@@ -1007,7 +1007,7 @@ class BimpComm extends BimpObject
                 $errors[] = 'Nature du contact absent';
             } else {
                 switch ((int) $data['type']) {
-                    case 1:;
+                    case 1:
                         $id_contact = isset($data['id_contact']) ? (int) $data['id_contact'] : 0;
                         $type_contact = isset($data['tiers_type_contact']) ? (int) $data['tiers_type_contact'] : 0;
                         if (!$id_contact) {

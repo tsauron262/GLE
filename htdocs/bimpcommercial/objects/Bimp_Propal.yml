@@ -84,6 +84,13 @@ fields:
 forms: 
     default: 
         rows: 
+            - custom: 1
+              input_name: id_user_commercial
+              label: Commercial signataire
+              input: 
+                  type: search_user
+              show: 
+                  callback: isNotLoaded
             - field: entrepot
             - field: ef_type
             - field: fk_soc
@@ -244,6 +251,13 @@ lists:
             callback: isDeletable
         modal_view: default
         page_btn: 1
+        joins: 
+            - table: element_contact
+              on: ec.element_id = a.rowid
+              alias: ec
+            - table: c_type_contact
+              on: ec.fk_c_type_contact = tc.rowid
+              alias: tc
         cols: 
             ref: 
                 field: ref
@@ -263,6 +277,9 @@ lists:
                 label: Commercial
                 value: 
                     callback: displayCommercial
+                search: 
+                    input: 
+                        type: search_user
             date_create: 
                 field: datec
             total: 

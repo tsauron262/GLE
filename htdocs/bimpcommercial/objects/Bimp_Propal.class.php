@@ -297,6 +297,14 @@ class Bimp_Propal extends BimpComm
         return $conf->propal->dir_output;
     }
 
+    public function getCommercialSearchFilters(&$filters, $value)
+    {
+        $filters['tc.element'] = 'propal';
+        $filters['tc.source'] = 'internal';
+        $filters['tc.code'] = 'SALESREPSIGN';
+        $filters['ec.fk_socpeople'] = (int) $value;
+    }
+
     // Affichages: 
 
     public function displayCommercial()
@@ -746,6 +754,22 @@ class Bimp_Propal extends BimpComm
         }
 
         return 0;
+    }
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            $id_user = (int) BimpTools::getValue('id_user_commercial', 0);
+            if ($id_user) {
+                if ($this->dol_object->add_contact($id_user, 'SALESREPSIGN', 'internal') <= 0) {
+                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du commercial signataire');
+                }
+            }
+        }
+
+        return $errors;
     }
 
     // Gestion des droits - overrides BimpObject: 

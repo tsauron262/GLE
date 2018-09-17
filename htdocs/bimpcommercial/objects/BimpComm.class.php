@@ -717,13 +717,14 @@ class BimpComm extends BimpObject
             }
 
             $bimp_line = $this->getChildObject('lines');
-            $rows = $this->db->getRows($bimp_line->getTable(), '`id_obj` = ' . (int) $this->id, null, 'array', array('id', 'id_line', 'position'));
+            $rows = $this->db->getRows($bimp_line->getTable(), '`id_obj` = ' . (int) $this->id, null, 'array', array('id', 'id_line', 'position', 'remise'));
 
             if (is_array($rows)) {
                 foreach ($rows as $r) {
                     $bimp_lines[(int) $r['id_line']] = array(
                         'id'       => (int) $r['id'],
-                        'position' => (int) $r['position']
+                        'position' => (int) $r['position'],
+                        'remise'   => (float) $r['remise']
                     );
                 }
             }
@@ -753,7 +754,7 @@ class BimpComm extends BimpObject
                     }
                 } elseif ((int) $bimp_lines[(int) $id_dol_line]['position'] !== (int) $dol_line->rang) {
                     $bimp_line->updateField('position', (int) $dol_line->rang, $bimp_lines[(int) $id_dol_line]['id']);
-                } elseif ((float) $bimp_lines[(int) $id_dol_line]['remise'] !== (float) $line->remise_percent) {
+                } elseif ((float) $bimp_lines[(int) $id_dol_line]['remise'] !== (float) $dol_line->remise_percent) {
                     if ($bimp_line->fetch((int) $bimp_lines[(int) $id_dol_line]['id'], $this)) {
                         $bimp_line->checkRemises();
                     }

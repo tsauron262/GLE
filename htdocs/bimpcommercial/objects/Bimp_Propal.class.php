@@ -83,7 +83,7 @@ class Bimp_Propal extends BimpComm
                 $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
                 $onclick = 'window.open(\'' . $url . '\');';
                 $buttons[] = array(
-                    'label'   => "Voir ".$ref . '.pdf',
+                    'label'   => "Voir " . $ref . '.pdf',
                     'icon'    => 'fas_file-pdf',
                     'onclick' => $onclick
                 );
@@ -753,7 +753,10 @@ class Bimp_Propal extends BimpComm
     public function canCreate()
     {
         global $user;
-        return $user->rights->propal->creer;
+        if (isset($user->rights->propal->creer)) {
+            return (int) $user->rights->propal->creer;
+        }
+        return 1;
     }
 
     public function canEdit()

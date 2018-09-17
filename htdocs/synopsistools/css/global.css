@@ -509,3 +509,7 @@ input, input.flat, textarea, textarea.flat, form.flat select, select, select.fla
 .ui-widget.ui-widget-content{
     z-index: 10001!important;
 }
+
+.fullScreen{
+    z-index: 10002!important;
+}

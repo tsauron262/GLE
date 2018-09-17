@@ -83,7 +83,7 @@ class Bimp_Propal extends BimpComm
                 $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
                 $onclick = 'window.open(\'' . $url . '\');';
                 $buttons[] = array(
-                    'label'   => $ref . '.pdf',
+                    'label'   => "Voir ".$ref . '.pdf',
                     'icon'    => 'fas_file-pdf',
                     'onclick' => $onclick
                 );

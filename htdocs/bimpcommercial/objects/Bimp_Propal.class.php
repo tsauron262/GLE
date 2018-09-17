@@ -83,7 +83,7 @@ class Bimp_Propal extends BimpComm
                 $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
                 $onclick = 'window.open(\'' . $url . '\');';
                 $buttons[] = array(
-                    'label'   => "Voir ".$ref . '.pdf',
+                    'label'   => "Voir " . $ref . '.pdf',
                     'icon'    => 'fas_file-pdf',
                     'onclick' => $onclick
                 );
@@ -295,6 +295,14 @@ class Bimp_Propal extends BimpComm
         global $conf;
 
         return $conf->propal->dir_output;
+    }
+
+    public function getCommercialSearchFilters(&$filters, $value)
+    {
+        $filters['tc.element'] = 'propal';
+        $filters['tc.source'] = 'internal';
+        $filters['tc.code'] = 'SALESREPSIGN';
+        $filters['ec.fk_socpeople'] = (int) $value;
     }
 
     // Affichages: 
@@ -748,12 +756,31 @@ class Bimp_Propal extends BimpComm
         return 0;
     }
 
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            $id_user = (int) BimpTools::getValue('id_user_commercial', 0);
+            if ($id_user) {
+                if ($this->dol_object->add_contact($id_user, 'SALESREPSIGN', 'internal') <= 0) {
+                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du commercial signataire');
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Gestion des droits - overrides BimpObject: 
 
     public function canCreate()
     {
         global $user;
-        return $user->rights->propal->creer;
+        if (isset($user->rights->propal->creer)) {
+            return (int) $user->rights->propal->creer;
+        }
+        return 1;
     }
 
     public function canEdit()

@@ -457,6 +457,7 @@ class BimpInput
                 }
                 global $db;
                 $formProduct = new FormProduct($db);
+//                echo $value; exit;
                 $html .= $formProduct->selectWarehouses((int) $value, $field_name);
                 break;
 

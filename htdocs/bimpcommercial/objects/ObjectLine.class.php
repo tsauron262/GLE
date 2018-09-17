@@ -2328,6 +2328,7 @@ class ObjectLine extends BimpObject
         // Calcul de la remise globale en pourcentage: 
         $remises = $this->getRemiseTotalInfos();
         $this->remise = $remises['percent'];
+        $this->set('remise', (float) $remises['percent']);
 
         $errors = parent::update($warnings, $force_update);
         $errors = array_merge($errors, $this->updateLine(false));

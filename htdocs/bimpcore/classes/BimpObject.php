@@ -1090,8 +1090,22 @@ class BimpObject
                     if ($search_type === 'field_input') {
                         $input_type = BC_Field::getInputType($this, $field_name);
 
-                        if ($input_type === 'text') {
-                            $search_type = 'value_part';
+                        switch ($input_type) {
+                            case 'text':
+                                $search_type = 'value_part';
+                                break;
+                         
+                            case 'time': 
+                                $search_type = 'time_range';
+                                break;
+                            
+                            case 'date':
+                                $search_type = 'date_range';
+                                break;
+                            
+                            case 'datetime':
+                                $search_type = 'datetime_range';
+                                break;
                         }
                     }
 

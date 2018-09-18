@@ -701,8 +701,7 @@ class BimpDocumentPDF extends BimpModelPDF
             $this->tva[$vatrate] += $tva_line;
             $i++;
         }
-        
-        $this->tva[20] += $this->acompteTva20;
+        $this->tva["20.000"] += $this->acompteTva20;
     }
 
     public function getTotauxRowsHtml()

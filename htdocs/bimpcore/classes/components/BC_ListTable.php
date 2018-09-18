@@ -887,7 +887,7 @@ class BC_ListTable extends BC_List
                         } else {
                             $title = htmlentities(addslashes($row['params']['instance_name']));
                         }
-                        $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', \'' . $item_params['modal_view'] . '\', $(this), \'' . $title . '\')';
+                        $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $id_object . ', \'' . $item_params['modal_view'] . '\', $(this), \'' . $title . '\')';
                         $rowButtons[] = array(
                             'label'   => 'Vue rapide',
                             'icon'    => 'eye',

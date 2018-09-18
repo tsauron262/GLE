@@ -1067,6 +1067,7 @@ class Form
         if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if (! empty($conf->global->COMPANY_HIDE_INACTIVE_IN_COMBOBOX)) $sql.= " AND s.status <> 0";
         // Add criteria
+
         if ($filterkey && $filterkey != '')
         {
 			$sql.=" AND (";
@@ -1085,9 +1086,11 @@ class Form
         	{
         		$sql .= " OR s.barcode LIKE '".$this->db->escape($filterkey)."%'";
         	}
-                /*moddrsi pour recherche SIREN/SIRET*/
+                /*moddrsi pour recherche SIREN/SIRET code cli*/
         		$sql .= " OR s.siren LIKE '".str_replace(" ", "", $this->db->escape($filterkey))."%'";
         		$sql .= " OR s.siret LIKE '".str_replace(" ", "", $this->db->escape($filterkey))."%'";
+        		$sql .= " OR s.code_client LIKE '".str_replace(" ", "", $this->db->escape($filterkey))."%'";
+        		$sql .= " OR s.code_fournisseur LIKE '".str_replace(" ", "", $this->db->escape($filterkey))."%'";
                         /*fmod drsi*/
         	$sql.=")";
         }

@@ -302,6 +302,11 @@ class BimpDocumentPDF extends BimpModelPDF
         else
             $html = "";
         
+        
+        if(strtoupper($this->thirdparty->lastname) == strtoupper($this->thirdparty->socname)){
+            $this->thirdparty->lastname = "";
+        }
+        
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');
         $html = str_replace("\n", '<br/>', $html);
 

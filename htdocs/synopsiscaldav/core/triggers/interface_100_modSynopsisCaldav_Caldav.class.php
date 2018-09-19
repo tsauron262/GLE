@@ -112,11 +112,17 @@ class InterfaceCaldav {
                 
                 //mise a jour du ctag
                 if(!in_array($object->type_id, array(3,8,9,10,30,31,40))){
+                    
+                    
+                    
                     $tIdUser = array();
                     if (isset($object->userownerid) && $object->userownerid > 0)
                         $tIdUser[$object->userownerid] = $object->userownerid;
                     foreach($object->userassigned as $val)
                         $tIdUser[$val['id']] = $val['id'];
+                    if(isset($object->oldcopy->userassigned) && is_array($object->oldcopy->userassigned))
+                        foreach($object->oldcopy->userassigned as $val)//Pour incrémenté le CTAG aussi des user sortanrt
+                            $tIdUser[$val['id']] = $val['id'];
                     foreach($tIdUser as $idUser){
                         $tabT = getElementElement("user", "idCaldav", $idUser);
                         if(isset($tabT[0]))

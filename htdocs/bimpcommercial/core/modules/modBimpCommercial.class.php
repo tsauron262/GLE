@@ -221,18 +221,18 @@ class modBimpCommercial extends DolibarrModules
 
 		// Example to declare a new Top Menu entry and its Left menu entry:
 		/* BEGIN MODULEBUILDER TOPMENU */
-		//$this->menu[$r++]=array('fk_menu'=>'',			                // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
-		//						'type'=>'top',			                // This is a Top menu entry
-		//						'titre'=>'MyModule',
-		//						'mainmenu'=>'mymodule',
-		//						'leftmenu'=>'',
-		//						'url'=>'/mymodule/mymoduleindex.php',
-		//						'langs'=>'mymodule@mymodule',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
-		//						'position'=>1000+$r,
-		//						'enabled'=>'$conf->mymodule->enabled',	// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
-		//						'perms'=>'1',			                // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
-		//						'target'=>'',
-		//						'user'=>2);				                // 0=Menu for internal users, 1=external users, 2=both
+		$this->menu[$r++]=array('fk_menu'=>'fk_mainmenu=commercial,fk_leftmenu=propals',			                // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
+								'type'=>'left',			                // This is a Top menu entry
+								'titre'=>'MyPropal',
+								'mainmenu'=>'',
+								'leftmenu'=>'',
+								'url'=>'/bimpcommercial/index.php?fc=userPropals&id=1',
+								'langs'=>'bimpcomm@bimpcommercial',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+								'position'=>1000+$r,
+								'enabled'=>'1',	// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
+								'perms'=>'1',			                // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules
+								'target'=>'',
+								'user'=>0);				                // 0=Menu for internal users, 1=external users, 2=both
 
 		/* END MODULEBUILDER TOPMENU */
 

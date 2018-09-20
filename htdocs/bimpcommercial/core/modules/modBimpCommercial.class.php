@@ -90,7 +90,7 @@ class modBimpCommercial extends DolibarrModules
 		$this->dirs = array("/bimpcommercial/data");
 
 		// Config pages. Put here list of php page, stored into mymodule/admin directory, to use to setup module.
-		$this->config_page_url = array("setup.php@mymodule");
+		//$this->config_page_url = array("setup.php@mymodule");
 
 		// Dependencies
 		$this->hidden = false;			// A condition to hide module
@@ -209,6 +209,14 @@ class modBimpCommercial extends DolibarrModules
 		$this->rights[$r][1] = 'Modifié prix achat';	// Permission label
 		$this->rights[$r][3] = 1; 					// Permission by default for new user (0/1)
 		$this->rights[$r][4] = 'priceAchat';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+
+		$r++;
+                
+                $this->rights[$r][0] = $this->numero + $r;	// Permission id (must not be already used)
+		$this->rights[$r][1] = 'Attribué les commerciaux';	// Permission label
+		$this->rights[$r][3] = 0; 					// Permission by default for new user (0/1)
+		$this->rights[$r][4] = 'commerciauxToSoc';				// In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 		//$this->rights[$r][5] = '';				    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
 
 		$r++;

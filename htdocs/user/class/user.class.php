@@ -230,7 +230,7 @@ class User extends CommonObject
 		}
 		else if ($login)
 		{
-			$sql.= " AND u.login = '".$this->db->escape($login)."'";
+			$sql.= " AND (u.login = '".$this->db->escape($login)."' OR u.email = '".$this->db->escape($login)."')";
 		}
 		else
 		{

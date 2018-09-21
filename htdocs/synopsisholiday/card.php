@@ -1553,6 +1553,8 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 . '<option value="">Enfant malade</option>'
                 . '<option value="">Déménagement</option>'
                 . '<option value="">Congés paternité </option>'
+                . '<option value="">Récupération </option>'
+                . '<option value="">Autres</option>'
             . '</select>';
         print '</span><br/>';
         print '<span>';

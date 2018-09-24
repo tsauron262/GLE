@@ -260,7 +260,9 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
 
 
         if ($this->type == "sav") {
-            if ($line->desc == "Acompte")
+            if ($line->tva_tx == 0)
+                $valeur = "GEN-SAV-HTVA";
+            elseif ($line->desc == "Acompte")
                 $valeur = "GEN-SAV-ACOMPTE";
             elseif ($line->fk_product_type == 1)
                 $valeur = "GEN-SAV-MO";

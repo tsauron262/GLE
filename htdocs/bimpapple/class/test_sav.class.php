@@ -78,26 +78,26 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
             $user->array_options['options_apple_service'] = "897316";
             $user->array_options['options_apple_shipto'] = "1046075";
 
-        if ($iTribu == 1) {
-            $req .= " AND ( ref LIKE('SAVN%'))";
-            global $user;
-            $user->array_options['options_apple_id'] = "f.marino@bimp.fr";
-            $user->array_options['options_apple_service'] = "0000579256";
-            $user->array_options['options_apple_shipto'] = "0000459993";
-        } elseif ($iTribu == 2) {
-            $req .= " AND ( ref LIKE('SAVMONTP%') || ref LIKE('SAVMAU%'))";
-            global $user;
-            $user->array_options['options_apple_id'] = "xavier@itribustore.fr";
-            $user->array_options['options_apple_service'] = "0000579256";
-            $user->array_options['options_apple_shipto'] = "0000579256";
-        } elseif ($iTribu == 3) {
-            $req .= " AND ( ref LIKE('SAVP%'))";
-            global $user;
-            $user->array_options['options_apple_id'] = "elodie@itribustore.fr";
-            $user->array_options['options_apple_service'] = "579256";
-            $user->array_options['options_apple_shipto'] = "883234";
-        } elseif ($iTribu == 4)
-            $req .= " AND ( ref NOT LIKE('SAVN%') && ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVMONTP%') && ref NOT LIKE('SAVMAU%') )";
+//        if ($iTribu == 1) {
+//            $req .= " AND ( ref LIKE('SAVN%'))";
+//            global $user;
+//            $user->array_options['options_apple_id'] = "f.marino@bimp.fr";
+//            $user->array_options['options_apple_service'] = "0000579256";
+//            $user->array_options['options_apple_shipto'] = "0000459993";
+//        } elseif ($iTribu == 2) {
+//            $req .= " AND ( ref LIKE('SAVMONTP%') || ref LIKE('SAVMAU%'))";
+//            global $user;
+//            $user->array_options['options_apple_id'] = "xavier@itribustore.fr";
+//            $user->array_options['options_apple_service'] = "0000579256";
+//            $user->array_options['options_apple_shipto'] = "0000579256";
+//        } elseif ($iTribu == 3) {
+//            $req .= " AND ( ref LIKE('SAVP%'))";
+//            global $user;
+//            $user->array_options['options_apple_id'] = "elodie@itribustore.fr";
+//            $user->array_options['options_apple_service'] = "579256";
+//            $user->array_options['options_apple_shipto'] = "883234";
+//        } elseif ($iTribu == 4)
+//            $req .= " AND ( ref NOT LIKE('SAVN%') && ref NOT LIKE('SAVP%') && ref NOT LIKE('SAVMONTP%') && ref NOT LIKE('SAVMAU%') )";
 
         $req .= " AND DATEDIFF(now(), s.date_update) < 100 ORDER BY `nbJ` DESC, s.id";
 

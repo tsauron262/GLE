@@ -125,6 +125,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                         }
                         elseif($repair->repairLookUp['repairStatus'] == "Fermée et complétée"){
                             echo "fermé dans GSX Impossible de Fermé dans GLE ";
+                            $this->nbErr++;
                         } 
                         else {
                             
@@ -166,11 +167,14 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                         }
                     }
                     else {
+                        $this->nbErr++;
                         echo "Echec de la recup de " . $ligne->ref . " " . $ligne->nbJ . " jours<br/>";
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
-                } else
+                } else{
+                    $this->nbErr++;
                     echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache) " . $ligne->nbJ . " jours<br/>";
+                }
             
         }
     }
@@ -193,6 +197,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                             echo "Passage dans GLE a RFPU<br/>";
                             $repair->readyForPickUp = 1;
                             $repair->update();
+                            $this->ok++;
                         } else {
                             if (count($repair->updateStatus('RFPU')) == 0){
                                 echo "Semble avoir été passer dans GSX a RFPU<br/>";
@@ -215,11 +220,14 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                         }
                     }
                     else {
+                        $this->nbErr++;
                         echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . "<br/>";
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
-                } else
+                } else{
+                    $this->nbErr++;
                     echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache)<br/>";
+                }
             
         }
     }

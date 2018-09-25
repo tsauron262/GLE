@@ -1,7 +1,6 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpapple/classes/GSX.class.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpObject.php';
 
 class GSX_Repair extends BimpObject
 {

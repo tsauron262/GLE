@@ -593,7 +593,7 @@ L’équipe BIMP";
                             $break = true;
                             break;
                         } else {
-                            $msg = 'Echec de la récupération des réservations - ' . $fault->message . ' (code: ' . $fault->code . ').';
+                            $msg = 'Echec de la récupération des réservations soldTo '.$soldTo.' shipTo '.$shipTo.' - ' . $fault->message . ' (code: ' . $fault->code . ').';
                             $this->logError($msg);
                             $continue = true;
                         }

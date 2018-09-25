@@ -30,6 +30,7 @@ class test_sav {
     public $useCache = false;
     
     function __construct() {
+        require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         require_once DOL_DOCUMENT_ROOT . '/synopsistools/SynDiversFunction.php';
         require_once DOL_DOCUMENT_ROOT . '/bimpapple/objects/GSX_Repair.class.php';
     }

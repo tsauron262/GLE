@@ -35,21 +35,26 @@ class test_sav {
     }
 
     function testGlobal() {
+        $this->ok = 0;
         $_GET['envoieMail'] = "yes";
-        $this->tentativeARestitueAuto(4);
-        $this->tentativeARestitueAuto(1);
-        $this->tentativeARestitueAuto(2);
-        $this->tentativeARestitueAuto(3);
+//        $this->tentativeARestitueAuto(4);
+//        $this->tentativeARestitueAuto(1);
+//        $this->tentativeARestitueAuto(2);
+//        $this->tentativeARestitueAuto(3);
+        $this->tentativeARestitueAuto(0);
 
-        $this->tentativeFermetureAuto(4);
-        $this->tentativeFermetureAuto(1);
-        $this->tentativeFermetureAuto(2);
-        $this->tentativeFermetureAuto(3);
+//        $this->tentativeFermetureAuto(4);
+//        $this->tentativeFermetureAuto(1);
+//        $this->tentativeFermetureAuto(2);
+//        $this->tentativeFermetureAuto(3);
+        $this->tentativeFermetureAuto(0);
         
         if($this->nbErr > 0)
-            $this->output = $this->nbErr." posant prôbléme.";
+            $this->output .= $this->nbErr." posant prôbléme.";
+        $this->output .= $this->ok." resolu.";
         
-        return true;
+        
+        return 'END';
     }
 
     function getReq($statut, $iTribu) {
@@ -115,6 +120,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                         echo "Tentative de maj de " . $ligne->ref . ". Fermé dans GLE" . $repair->getData('repair_complete') . " num " . $repair->getData('repair_number') . ". num2 " . $repair->getData('repair_confirm_number') . " Statut dans GSX : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->getData('repair_complete')) {
                             echo "Fermée dans GSX maj dans GLE.<br/>";
+                            $this->ok++;
                         }
                         elseif($repair->repairLookUp['repairStatus'] == "Fermée et complétée"){
                             echo "fermé dans GSX Impossible de Fermé dans GLE ";
@@ -133,8 +139,10 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                             }
 
                             if ($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement") {
-                                if (count($repair->close(1, 0)) == 0)
+                                if (count($repair->close(1, 0)) == 0){
                                     echo "Semble avoir été fermé en auto<br/>";
+                                    $this->ok++;
+                                }
                                 else {
                                     $this->nbErr++;
                                     echo "N'arrive pas a être fermé<br/> ";
@@ -143,8 +151,10 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 }
                             }
                             else {//tentative de passage a rfpu
-                                if (count($repair->updateStatus('RFPU')) == 0)
+                                if (count($repair->updateStatus('RFPU')) == 0){
                                     echo "Semble avoir été passer dans GSX a RFPU<br/>";
+                                    $this->ok++;
+                                }
                                 else {
                                     $this->nbErr++;
                                     echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
@@ -183,8 +193,10 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                             $repair->readyForPickUp = 1;
                             $repair->update();
                         } else {
-                            if (count($repair->updateStatus('RFPU')) == 0)
+                            if (count($repair->updateStatus('RFPU')) == 0){
                                 echo "Semble avoir été passer dans GSX a RFPU<br/>";
+                                $this->ok++;
+                            }
                             else {
                                 $this->nbErr++;
                                 echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";

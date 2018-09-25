@@ -150,7 +150,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     $this->nbErr++;
                                     echo "N'arrive pas a être fermé<br/> ";
                                     if (isset($_GET['envoieMail']))
-                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas fermé dans GSX.  Reponse : " . $repair->repairLookUp['repairStatus']);
+                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->getData('repair_confirm_number') . " n'est pas fermé dans GSX.  Reponse : " . $repair->repairLookUp['repairStatus']);
                                 }
                             }
                             else {//tentative de passage a rfpu
@@ -162,7 +162,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                     $this->nbErr++;
                                     echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
                                     if (isset($_GET['envoieMail']))
-                                        mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
+                                        mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->getData('repair_confirm_number') . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
                                 }
                             }
                         }
@@ -193,7 +193,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                 if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->fetch($ligne->rid);
                     if (count($repair->lookup()) == 0) {
-                        echo "Tentative de maj de " . $ligne->ref . " statut ready for pickup : " . $repair->getData('ready_for_pick_up') . " num " . $repair->repairNumber . ". num2 " . $repair->confirmNumbers['repair'] . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
+                        echo "Tentative de maj de " . $ligne->ref . " statut ready for pickup : " . $repair->getData('ready_for_pick_up') . " num " . $repair->repairNumber . ". num2 " . $repair->getData('repair_confirm_number') . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement" || $repair->getData('ready_for_pick_up')) {
                             echo "Passage dans GLE a RFPU<br/>";
                             $repair->readyForPickUp = 1;
@@ -217,7 +217,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 }
                                 $mailTech = "tommy@bimp.fr";
                                 if (isset($_GET['envoieMail']))
-                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->confirmNumbers['repair'] . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
+                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->getData('repair_confirm_number') . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
                             }
                         }
                     }

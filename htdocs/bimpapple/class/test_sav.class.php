@@ -264,11 +264,7 @@ WHERE c.id = cs.id AND cs.Etat != 999 AND cs.Etat != 2 AND cs.Etat != 9 AND DATE
 
     function getNomUrlChrono($id, $ref) {
         global $db;
-        require_once DOL_DOCUMENT_ROOT."/synopsischrono/class/chrono.class.php";
-        $chrono = new Chrono($db);
-        $chrono->ref = $ref;
-        $chrono->id = $id;
-        return $chrono->getNomUrl();
+        return "<a href='".DOL_URL_ROOT."/bimpsupport/index.php?fc=sav&id=".$id."'>".$ref."</a>";
     }
 
 }

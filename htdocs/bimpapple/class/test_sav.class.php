@@ -120,8 +120,8 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                 if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->gsx->errors['soap'] = array();
                     $repair->fetch($ligne->rid);
-                    $erreurLookup = $repair->lookup();
-                    if (count($erreurLookup) == 0) {
+                    $erreurSOAP = $repair->lookup();
+                    if (count($erreurSOAP) == 0) {
                         echo "Tentative de maj de " . $ligne->ref . ". Fermé dans GLE" . $repair->getData('repair_complete') . " num " . $repair->getData('repair_number') . ". num2 " . $repair->getData('repair_confirm_number') . " Statut dans GSX : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->getData('repair_complete')) {
                             echo "Fermée dans GSX maj dans GLE.<br/>";
@@ -145,7 +145,8 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                             }
 
                             if ($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement") {
-                                if (count($repair->close(1, 0)) == 0){
+                                $erreurSOAP = $repair->close(1, 0);
+                                if (count($erreurSOAP) == 0){
                                     echo "Semble avoir été fermé en auto<br/>";
                                     $this->nbOk++;
                                 }
@@ -159,15 +160,17 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 }
                             }
                             else {//tentative de passage a rfpu
-                                if (count($repair->updateStatus('RFPU')) == 0){
+                                $erreurSOAP = $repair->updateStatus('RFPU');
+                                if (count($erreurSOAP) == 0){
                                     echo "Semble avoir été passer dans GSX a RFPU<br/>";
                                     $this->nbOk++;
                                 }
                                 else {
                                     $this->nbErr++;
-                                    echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
+                                    $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $repair, $erreurSOAP);
+                                    echo $messErreur;
                                     if (isset($_GET['envoieMail'])){
-                                        mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->getData('repair_confirm_number') . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
+                                        mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                         $this->nbMail++;
                                     }
                                 }
@@ -176,7 +179,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     }
                     else {
                         $this->nbErr++;
-                        echo "Echec de la recup de " . $ligne->ref . " " . $ligne->nbJ . " jours<br/>". "<pre>".print_r($erreurLookup,1)."</pre><br/>";
+                        echo "Echec de la recup de " . $ligne->ref . " " . $ligne->nbJ . " jours<br/>". "<pre>".print_r($erreurSOAP,1)."</pre><br/>";
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
                 } else{
@@ -185,6 +188,16 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                 }
             
         }
+    }
+    
+    function displayError($mess, $ligne, $repair, $tabError = null){
+        $html = $mess ."<br/> SAV :". $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " Depuis : " . $ligne->nbJ . " jours<br/>";
+        $html .= "<br/>Code repa : " . $repair->getData('repair_confirm_number') . "  Statut GSX : " . $repair->repairLookUp['repairStatus'];
+        $html .= "<br/>RFPU dans GLE ?".$repair->getData('ready_for_pick_up')." Fermé dans GLE ?".$repair->getData('repair_complete');
+        if(is_array($tabError) && count($tabError) > 0)
+           $html .= "<br/><pre>".print_r($tabError,1)."</pre>";
+        
+        return $html;
     }
 
     function tentativeARestitueAuto($iTribu = 0) {
@@ -200,8 +213,8 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                 if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->gsx->errors['soap'] = array();
                     $repair->fetch($ligne->rid);
-                    $erreurLookup = $repair->lookup();
-                    if (count($erreurLookup) == 0) {
+                    $erreurSOAP = $repair->lookup();
+                    if (count($erreurSOAP) == 0) {
                         echo "Tentative de maj de " . $ligne->ref . " statut ready for pickup : " . $repair->getData('ready_for_pick_up') . " num " . $repair->repairNumber . ". num2 " . $repair->getData('repair_confirm_number') . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement" || $repair->getData('ready_for_pick_up')) {
                             echo "Passage dans GLE a RFPU<br/>";
@@ -233,7 +246,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     }
                     else {
                         $this->nbErr++;
-                        echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . "<br/><pre>".print_r($erreurLookup,1)."</pre><br/>";
+                        echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . "<br/><pre>".print_r($erreurSOAP,1)."</pre><br/>";
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
                 } else{

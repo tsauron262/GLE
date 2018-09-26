@@ -31,15 +31,19 @@ foreach ($files as $ind => $file) {
 
 
     if (strpos($file, 'monthly') !== false)
-        $class = 'day';
-    else
         $class = '';
+    else
+        $class = 'day';
 
     if ($ind == 0)
         print '<input id="' . $file . '" name="file" type="radio" value="' . $file . '" checked>';
     else
         print '<input id="' . $file . '" name="file" type="radio" value="' . $file . '">';
-    print '<label class="' . $class . '" for="' . $file . '">Sauvegarde du ' . date("d/m/Y G:i:s", $tms[0]) . ' (' . human_filesize(filesize($file)) . 'o)</label ><br/><br/>';
+
+    if ($class == 'day')
+        print '<label class="' . $class . '" for="' . $file . '">Sauvegarde temporaire du ' . date("d/m/Y G:i:s", $tms[0]) . ' (' . human_filesize(filesize($file)) . 'o)</label ><br/><br/>';
+    else
+        print '<label class="' . $class . '" for="' . $file . '">Sauvegarde bimensuelle du ' . date("d/m/Y G:i:s", $tms[0]) . ' (' . human_filesize(filesize($file)) . 'o)</label ><br/><br/>';
 }
 
 print '<button style="width:200px" type="submit">Valider</button>';

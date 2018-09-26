@@ -1,4 +1,5 @@
 <?php
+
 session_start();
 
 print '<head>
@@ -10,7 +11,7 @@ print '<head>
 
 include_once 'param.inc.php';
 
-$command = 'mysql --user=\'' . DB_USER . '\' --password=\'' . DB_PASSWORD . '\' --host=\'' . DB_HOST . '\' \'' . DB_NAME . '\'< \'' . PATH . '/' . $_POST['file'] . '\'';
+$command = 'mysql --user=\'' . DB_USER . '\' --password=\'' . DB_PASSWORD . '\' --host=\'' . DB_HOST . '\' \'' . DB_NAME . '\' < \'' . PATH . '/' . $_POST['file'] . '\'';
 
 exec($command, $errors, $ret);
 

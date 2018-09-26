@@ -18,7 +18,7 @@ include_once 'param.inc.php';
  */
 function createBackup($file_name) {
 
-    $command = 'mysqldump --user=\'' . DB_USER . '\' --password=\'' . DB_PASSWORD . '\' ' . '--host=\'' . DB_HOST . '\' \'' . DB_NAME . '\'> \'' . $file_name . '\'';
+    $command = 'mysqldump --user=\'' . DB_USER . '\' --password=\'' . DB_PASSWORD . '\' --host=\'' . DB_HOST . '\' -B \'' . DB_NAME . '\' > \'' . $file_name . '\'';
 
     exec($command, $errors, $ret_val);
 
@@ -64,7 +64,7 @@ function createMonthly($now) {
     $time_15_day = 60 * 60 * 24 * 15;
 //                 ss   mm   hh   15day 
 //    $time_15_day = 30 // dev
-    
+
     if ($time_gap > $time_15_day) {
         if (createBackup(PATH . '/dump_monthly/backup-' . $now . '.sql') == 1)
             return 1;

@@ -259,7 +259,10 @@ class GSX_Repair extends BimpObject
             'unreceivedModules'        => '',
         );
 
-        if (is_null($number)) {
+        if (isset($number) && $number && isset($number_type) && $number_type && isset($look_up_data[$number_type])) {
+                $look_up_data[$number_type] = $number;
+        }
+        else {
             $repairNumber = $this->getData('repair_number');
             $repairConfirmNumber = $this->getData('repair_confirm_number');
             if (!is_null($repairConfirmNumber) && $repairConfirmNumber) {
@@ -268,17 +271,14 @@ class GSX_Repair extends BimpObject
             elseif (!is_null($repairNumber) && $repairNumber) {
                 $look_up_data['repairNumber'] = $repairNumber;
             }
+            else
+                return array("Aucune info pour le repairLookup ".print_r($look_up_data,1));
         }
 
         if ($this->isIphone) {
             $look_up_data['imeiNumber'] = '';
         }
 
-        if (isset($number) && $number && isset($number_type) && $number_type) {
-            if (isset($look_up_data[$number_type])) {
-                $look_up_data[$number_type] = $number;
-            }
-        }
 
         $client = '';
         $requestName = '';

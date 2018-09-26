@@ -122,6 +122,8 @@ class GSX_Repair extends BimpObject
 
     public function loadPartsPending()
     {
+        if($this->getData('canceled'))
+            return array("Réparation annulé");
         if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
@@ -291,15 +293,21 @@ class GSX_Repair extends BimpObject
         }
         $request = $this->gsx->_requestBuilder($requestName, 'lookupRequestData', $look_up_data);
         $response = $this->gsx->request($request, $client);
+        
+        $canceled = $this->getData('canceled');
 
         if (count($this->gsx->errors['soap']) > $n_soap_errors) {
-            if(stripos($this->gsx->errors['soap'][$n_soap_errors], "SOAP Error:  (Code: RPR.LKP.01)") !== false){
+            if(!$canceled && stripos($this->gsx->errors['soap'][$n_soap_errors], "SOAP Error:  (Code: RPR.LKP.01)") !== false){
                 $this->set('canceled', 1);
                 $this->update();
             }
             return $this->gsx->errors['soap'];
         } else if (!isset($response[$client . 'Response']['lookupResponseData'])) {
             return array('Echec de la requête "lookup" pour une raison inconnue');
+        }
+        if($canceled){
+            $this->set('canceled', 0);
+            $update = true;
         }
 
         $this->repairLookUp = $response[$client . 'Response']['lookupResponseData']['repairLookup'];

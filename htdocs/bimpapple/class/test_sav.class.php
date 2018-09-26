@@ -191,7 +191,8 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         while ($ligne = $db->fetch_object($sql)) {
                 if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->fetch($ligne->rid);
-                    if (count($repair->lookup()) == 0) {
+                    $erreurLookup = $repair->lookup();
+                    if (count($erreurLookup) == 0) {
                         echo "Tentative de maj de " . $ligne->ref . " statut ready for pickup : " . $repair->getData('ready_for_pick_up') . " num " . $repair->repairNumber . ". num2 " . $repair->getData('repair_confirm_number') . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement" || $repair->getData('ready_for_pick_up')) {
                             echo "Passage dans GLE a RFPU<br/>";
@@ -221,7 +222,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     }
                     else {
                         $this->nbErr++;
-                        echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . "<br/>";
+                        echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . "<br/><pre>".print_r($erreurLookup,1)."</pre><br/>";
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
                 } else{

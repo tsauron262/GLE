@@ -122,7 +122,7 @@ class GSX_Repair extends BimpObject
 
     public function loadPartsPending()
     {
-        if($this->getData('canceled'))
+        if($this->getData('canceled') || $this->getData('repair_complete'))
             return array("Réparation annulée");
         if($this->getData('closed'))
             return array("Réparation fermée");

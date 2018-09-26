@@ -1,4 +1,6 @@
 <?php
+
+//if (!isset($_SESSION))
 session_start();
 
 define('LOGIN', 'a');
@@ -10,15 +12,18 @@ define('DB_PASSWORD', '$mokinU2');
 define('DB_NAME', 'test');
 
 define('PATH', realpath(dirname(__FILE__)));
-define('URL_ROOT', '//'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']));
+define('URL_ROOT', '//' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['PHP_SELF']));
 
 if (isset($_POST['login']) && isset($_POST['pw'])) {
     $_SESSION['login'] = $_POST['login'];
     $_SESSION['pw'] = $_POST['pw'];
+} elseif (isset($_GET['login']) && isset($_GET['pw'])) {
+    $_SESSION['login'] = $_GET['login'];
+    $_SESSION['pw'] = $_GET['pw'];
 }
 
 if ($_SESSION['login'] != LOGIN or $_SESSION['pw'] != PASSWORD) {
-print '
+    print '
     <!DOCTYPE html>
 <head>
     <link rel="stylesheet" type="text/css" href="styles.css">

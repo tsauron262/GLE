@@ -12,9 +12,9 @@ include_once 'param.inc.php';
 
 $command = 'mysql --user=\'' . DB_USER . '\' --password=\'' . DB_PASSWORD . '\' --host=\'' . DB_HOST . '\' \'' . DB_NAME . '\'< \'' . PATH . '/' . $_POST['file'] . '\'';
 
-exec($command, $errors, $ret_val);
+exec($command, $errors, $ret);
 
-if ($ret_val != 0) {
+if ($ret != 0) {
     print 'Une erreur est survenue, voici les détails :';
     print_r($errors);
 } else {

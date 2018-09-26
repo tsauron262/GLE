@@ -233,7 +233,7 @@ class GSX_Repair extends BimpObject
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX (4)');
+            return array('Echec de la connexion à GSX (4)'.print_r($this->gsx->errors,1));
         }
 
         $n_soap_errors = count($this->gsx->errors['soap']);

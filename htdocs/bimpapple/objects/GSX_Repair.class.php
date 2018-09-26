@@ -255,11 +255,11 @@ class GSX_Repair extends BimpObject
         if (is_null($number)) {
             $repairNumber = $this->getData('repair_number');
             $repairConfirmNumber = $this->getData('repair_confirm_number');
-            if (!is_null($repairNumber) && $repairNumber) {
-                $look_up_data['repairNumber'] = $repairNumber;
-            }
             if (!is_null($repairConfirmNumber) && $repairConfirmNumber) {
                 $look_up_data['repairConfirmationNumber'] = $repairConfirmNumber;
+            }
+            elseif (!is_null($repairNumber) && $repairNumber) {
+                $look_up_data['repairNumber'] = $repairNumber;
             }
         }
 
@@ -941,7 +941,7 @@ class GSX_Repair extends BimpObject
 
     public function fetch($id, $parent = null)
     {
-        //$this->gsx->errors['soap'] = array();
+        $this->gsx->errors['soap'] = array();
         if (parent::fetch($id, $parent)) {
             $this->setSerial($this->getData('serial'));
             $this->lookup();

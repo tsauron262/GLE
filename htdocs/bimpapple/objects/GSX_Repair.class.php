@@ -221,7 +221,7 @@ class GSX_Repair extends BimpObject
 
     public function lookup($number = null, $number_type = null)
     {
-        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
+    if (is_null($this->gsx)){// || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 

@@ -294,7 +294,7 @@ class GSX_Repair extends BimpObject
 
         if (count($this->gsx->errors['soap']) > $n_soap_errors) {
             if(stripos($this->gsx->errors['soap'][$n_soap_errors], "SOAP Error:  (Code: RPR.LKP.01)") !== false){
-                $this->set('closed', 1);
+                $this->set('canceled', 1);
                 $this->update();
             }
             return $this->gsx->errors['soap'];

@@ -191,6 +191,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
         while ($ligne = $db->fetch_object($sql)) {
                 if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
+                    $repair->gsx->errors['soap'] = array();
                     $repair->fetch($ligne->rid);
                     $erreurLookup = $repair->lookup();
                     if (count($erreurLookup) == 0) {

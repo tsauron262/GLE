@@ -68,6 +68,7 @@ s.ref FROM `llx_bs_sav` s, `llx_bimp_gsx_repair` r
 
 WHERE r.`id_sav` = s.`id` AND `" . ($statut == "closed" ? "repair_complete" : "ready_for_pick_up") . "` = 0
 AND serial is not null
+AND canceled = 0
 AND DATEDIFF(now(), s.date_update) < 100 
 AND s.status = " . ($statut == "closed" ? "999" : "9");
         

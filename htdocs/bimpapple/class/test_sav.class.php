@@ -122,7 +122,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     $repair->fetch($ligne->rid);
                     $erreurSOAP = $repair->lookup();
                     if (count($erreurSOAP) == 0) {
-                        echo "Tentative de maj de " . $ligne->ref . ". Fermé dans GLE" . $repair->getData('repair_complete') . " num " . $repair->getData('repair_number') . ". num2 " . $repair->getData('repair_confirm_number') . " Statut dans GSX : " . $repair->repairLookUp['repairStatus'] . "<br/>";
+                        echo "Tentative de maj de " . $ligne->ref;
                         if ($repair->getData('repair_complete')) {
                             echo "Fermée dans GSX maj dans GLE.<br/>";
                             $this->nbOk++;
@@ -152,9 +152,10 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                 }
                                 else {
                                     $this->nbErr++;
-                                    echo "N'arrive pas a être fermé<br/> ";
+                                    $messErreur = $this->displayError("N'arrive pas a être fermé", $ligne, $repair, $erreurSOAP);
+                                    echo $messErreur;
                                     if (isset($_GET['envoieMail'])){
-                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->getData('repair_confirm_number') . " n'est pas fermé dans GSX.  Reponse : " . $repair->repairLookUp['repairStatus']);
+                                        mailSyn2("Sav non fermé dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                         $this->nbMail++;
                                     }
                                 }
@@ -179,24 +180,29 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     }
                     else {
                         $this->nbErr++;
-                        echo "Echec de la recup de " . $ligne->ref . " " . $ligne->nbJ . " jours<br/>". "<pre>".print_r($erreurSOAP,1)."</pre><br/>";
+                        $messErreur = $this->displayError("Echec de la recup dans GSX", $ligne, $repair, $erreurSOAP);
+                        echo $messErreur;
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
                 } else{
                     $this->nbErr++;
-                    echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache) " . $ligne->nbJ . " jours<br/>";
+                    $messErreur = $this->displayError("Echec de la recup dans GSX (en cache)", $ligne, null, $erreurSOAP);
+                    echo $messErreur;
                 }
             
         }
     }
     
-    function displayError($mess, $ligne, $repair, $tabError = null){
-        $html = $mess ."<br/> SAV :". $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " Depuis : " . $ligne->nbJ . " jours<br/>";
-        $html .= "<br/>Code repa : " . $repair->getData('repair_confirm_number') . "  Statut GSX : " . $repair->repairLookUp['repairStatus'];
-        $html .= "<br/>RFPU dans GLE ?".$repair->getData('ready_for_pick_up')." Fermé dans GLE ?".$repair->getData('repair_complete');
+    function displayError($mess, $ligne, $repair = null, $tabError = null){
+        $html = $mess ."<br/> SAV :". $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " Depuis : " . $ligne->nbJ . " jours";
+        if(isset($repair)){
+            $html .= "<br/>Code repa : " . $repair->getData('repair_confirm_number') . "  Statut GSX : " . $repair->repairLookUp['repairStatus'];
+            $html .= "<br/>RFPU dans GLE ?".$repair->getData('ready_for_pick_up')." Fermé dans GLE ?".$repair->getData('repair_complete');
+        }
         if(is_array($tabError) && count($tabError) > 0)
            $html .= "<br/><pre>".print_r($tabError,1)."</pre>";
         
+        $html .= "<br/>";
         return $html;
     }
 
@@ -215,7 +221,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     $repair->fetch($ligne->rid);
                     $erreurSOAP = $repair->lookup();
                     if (count($erreurSOAP) == 0) {
-                        echo "Tentative de maj de " . $ligne->ref . " statut ready for pickup : " . $repair->getData('ready_for_pick_up') . " num " . $repair->repairNumber . ". num2 " . $repair->getData('repair_confirm_number') . " Reponse : " . $repair->repairLookUp['repairStatus'] . "<br/>";
+                        echo "Tentative de maj de " . $ligne->ref;
                         if ($repair->repairLookUp['repairStatus'] == "Prêt pour enlèvement" || $repair->getData('ready_for_pick_up')) {
                             echo "Passage dans GLE a RFPU<br/>";
                             $repair->readyForPickUp = 1;
@@ -228,7 +234,8 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                             }
                             else {
                                 $this->nbErr++;
-                                echo "N'arrive pas a être passé a RFPU dans GSX<br/> ";
+                                $messErreur = $this->displayError("N'arrive pas a être passé a RFPU dans GSX", $ligne, $repair, $erreurSOAP);
+                                echo $messErreur;
 
                                 $mailTech = "jc.cannet@bimp.fr";
                                 if ($ligne->Technicien > 0) {
@@ -238,7 +245,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                                         $mailTech = $user->email;
                                 }
                                 if (isset($_GET['envoieMail'])){
-                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " avec comme code repa : " . $repair->getData('repair_confirm_number') . " n'est pas passé RFPU dans GSX. Reponse : " . $repair->repairLookUp['repairStatus']);
+                                    mailSyn2("Sav non RFPU dans GSX", $mailTech, "gle_suivi@bimp.fr", "Bonjour le SAV " . $messErreur);
                                     $this->nbMail++;
                                 }
                             }
@@ -246,12 +253,14 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     }
                     else {
                         $this->nbErr++;
-                        echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . "<br/><pre>".print_r($erreurSOAP,1)."</pre><br/>";
+                        $messErreur = $this->displayError("Echec de la recup dans GSX (en cache)", $ligne, $repair, $erreurSOAP);
+                        echo $messErreur;
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
                 } else{
                     $this->nbErr++;
-                    echo "Echec de la recup de " . $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " (en cache)<br/>";
+                    $messErreur = $this->displayError("Echec de la recup dans GSX (en cache)", $ligne, null, $erreurSOAP);
+                    echo $messErreur;
                 }
             
         }

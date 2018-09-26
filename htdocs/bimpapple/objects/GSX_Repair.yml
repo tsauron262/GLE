@@ -58,7 +58,7 @@ fields:
         type: bool
         default_value: 0
     canceled: 
-        label: Annulé
+        label: Annulée
         type: bool
         default_value: 0
         

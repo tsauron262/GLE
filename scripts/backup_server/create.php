@@ -47,8 +47,8 @@ function createDaily($now) {
 /**
  * @param type $now date today
  * @return  1 if a backup as been created
- *         -1 if not created
- *         -2 if error
+ *         -1 if error
+ *         -0 if not created
  */
 function createMonthly($now) {
 
@@ -80,7 +80,8 @@ function createMonthly($now) {
 $now = time();
 $date = new DateTime();
 
-if (createMonthly($now) == 0) // not created but no error
+$res_create_monthly = createMonthly($now);
+if ($res_create_monthly == 0) // not created but no error
     createDaily($now);
 
 

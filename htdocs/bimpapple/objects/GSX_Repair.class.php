@@ -293,6 +293,10 @@ class GSX_Repair extends BimpObject
         $response = $this->gsx->request($request, $client);
 
         if (count($this->gsx->errors['soap']) > $n_soap_errors) {
+            if(stripos($this->gsx->errors['soap'][$n_soap_errors], "SOAP Error:  (Code: RPR.LKP.01)") !== false){
+                $this->set('closed', 1);
+                $this->update();
+            }
             return $this->gsx->errors['soap'];
         } else if (!isset($response[$client . 'Response']['lookupResponseData'])) {
             return array('Echec de la requête "lookup" pour une raison inconnue');

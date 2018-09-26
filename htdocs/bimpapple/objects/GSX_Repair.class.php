@@ -941,6 +941,7 @@ class GSX_Repair extends BimpObject
 
     public function fetch($id, $parent = null)
     {
+        $this->gsx->errors['soap'] = array();
         if (parent::fetch($id, $parent)) {
             $this->setSerial($this->getData('serial'));
             $this->lookup();

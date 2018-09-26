@@ -98,7 +98,7 @@ class GSX_Repair extends BimpObject
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (2)');
         }
 
         $this->set('id_sav', (int) $id_sav);
@@ -127,7 +127,7 @@ class GSX_Repair extends BimpObject
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (3)');
         }
 
         $this->partsPending = array();
@@ -233,7 +233,7 @@ class GSX_Repair extends BimpObject
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (4)');
         }
 
         $n_soap_errors = count($this->gsx->errors['soap']);
@@ -410,7 +410,7 @@ class GSX_Repair extends BimpObject
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (5)');
         }
 
         $repair_type = $this->getData('repair_type');
@@ -498,7 +498,7 @@ class GSX_Repair extends BimpObject
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (6)');
         }
 
         $repair_confirm_number = $this->getData('repair_confirm_number');
@@ -604,7 +604,7 @@ class GSX_Repair extends BimpObject
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (7)');
         }
 
         $repair_confirm_number = $this->getData('repair_confirm_number');

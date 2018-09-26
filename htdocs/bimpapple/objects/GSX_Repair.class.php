@@ -438,15 +438,13 @@ class GSX_Repair extends BimpObject
                 break;
             case 'repair_or_replace':
                 $data['repairStatusCode'] = $status;
-                if ($this->isIphone) /*{
-                    $client = 'IPhoneUpdateRepairOrReplaceRequest';
-                    $requestName = 'IPhoneUpdateRepairOrReplaceRequest';*/
-//                } else {
-                    $this->isIphone = false;
-                    
+                if ($this->isIphone) {
+                    $client = 'IPhoneUpdateRepairOrReplace';
+                    $requestName = 'IPhoneUpdateRepairOrReplaceRequest';
+                } else {
                     $client = 'UpdateRepairOrReplace';
                     $requestName = 'UpdateRepairOrReplaceRequest';
-//                }
+                }
                 $data['repairStatusCode'] = $status;
                 $clientRep = $client . 'Response';
                 break;

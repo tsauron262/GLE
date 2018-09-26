@@ -124,6 +124,8 @@ class GSX_Repair extends BimpObject
     {
         if($this->getData('canceled'))
             return array("Réparation annulé");
+        if($this->getData('closed'))
+            return array("Réparation fermé");
         if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }

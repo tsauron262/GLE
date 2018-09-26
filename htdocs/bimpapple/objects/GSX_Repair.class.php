@@ -456,7 +456,7 @@ class GSX_Repair extends BimpObject
         $response = $this->gsx->request($request, $client);
 
         if (count($this->gsx->errors['soap']) > $n_soap_errors) {
-            $errors[] = 'Echec de la requête "' . $requestName . '"';
+            $errors[] = 'Echec de la requête "' . $requestName . '" WSDL : '.$this->gsx->wsdlUrl;
             $errors = array_merge($errors, $this->gsx->errors['soap']);
         }
 

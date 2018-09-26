@@ -122,9 +122,9 @@ class GSX_Repair extends BimpObject
 
     public function loadPartsPending()
     {
-        if($this->getData('canceled') || $this->getData('repair_complete'))
+        if($this->getData('canceled'))
             return array("Réparation annulée");
-        if($this->getData('closed'))
+        if($this->getData('closed') || $this->getData('repair_complete'))
             return array("Réparation fermée");
         if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);

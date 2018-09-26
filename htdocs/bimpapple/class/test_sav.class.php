@@ -117,7 +117,8 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
         while ($ligne = $db->fetch_object($sql)) {
                 if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
                     $repair->fetch($ligne->rid);
-                    if (count($repair->lookup()) == 0) {
+                    $erreurLookup = $repair->lookup();
+                    if (count($erreurLookup) == 0) {
                         echo "Tentative de maj de " . $ligne->ref . ". Fermé dans GLE" . $repair->getData('repair_complete') . " num " . $repair->getData('repair_number') . ". num2 " . $repair->getData('repair_confirm_number') . " Statut dans GSX : " . $repair->repairLookUp['repairStatus'] . "<br/>";
                         if ($repair->getData('repair_complete')) {
                             echo "Fermée dans GSX maj dans GLE.<br/>";
@@ -168,7 +169,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     }
                     else {
                         $this->nbErr++;
-                        echo "Echec de la recup de " . $ligne->ref . " " . $ligne->nbJ . " jours<br/>";
+                        echo "Echec de la recup de " . $ligne->ref . " " . $ligne->nbJ . " jours<br/>". "<pre>".print_r($erreurLookup,1)."</pre><br/>";
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }
                 } else{

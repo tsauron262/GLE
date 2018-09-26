@@ -486,7 +486,7 @@ class GSX_Repair extends BimpObject
             }
         }
 
-        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
+        if (is_null($this->gsx)) {
             $this->gsx = new GSX($this->isIphone);
         }
 

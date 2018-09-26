@@ -93,7 +93,7 @@ class GSX_Repair extends BimpObject
                 break;
         }
 
-        if (is_null($this->gsx)) {
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 
@@ -122,7 +122,7 @@ class GSX_Repair extends BimpObject
 
     public function loadPartsPending()
     {
-        if (is_null($this->gsx)) {
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 
@@ -221,7 +221,7 @@ class GSX_Repair extends BimpObject
 
     public function lookup($number = null, $number_type = null)
     {
-        if (is_null($this->gsx)) {
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 
@@ -398,7 +398,7 @@ class GSX_Repair extends BimpObject
             return array('Statut de la réparation à mettre à jour invalide (' . $status . ')');
         }
 
-        if (is_null($this->gsx)) {
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 
@@ -429,7 +429,7 @@ class GSX_Repair extends BimpObject
         switch ($repair_type) {
             case 'carry_in':
                 $data['statusCode'] = $status;
-                if ($this->isIphone) 
+                if (0 != $this->gsx->isIphone) 
                     $this->gsx = new GSX(false);//force not iphone
                 $client = 'CarryInRepairUpdate';
                 $requestName = 'UpdateCarryInRequest';
@@ -443,7 +443,7 @@ class GSX_Repair extends BimpObject
                     $requestName = 'UpdateIPhoneRepairOrReplaceRequest';
                 } else {*/
                     
-                    if ($this->isIphone) 
+                    if (0 != $this->gsx->isIphone) 
                         $this->gsx = new GSX(false);//force not iphone
                     $client = 'UpdateRepairOrReplace';
                     $requestName = 'UpdateRepairOrReplaceRequest';
@@ -486,7 +486,7 @@ class GSX_Repair extends BimpObject
             }
         }
 
-        if (is_null($this->gsx)) {
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 
@@ -592,7 +592,7 @@ class GSX_Repair extends BimpObject
             }
         }
 
-        if (is_null($this->gsx)) {
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 

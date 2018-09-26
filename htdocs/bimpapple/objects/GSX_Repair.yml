@@ -57,6 +57,10 @@ fields:
         label: Total commande mis à jour
         type: bool
         default_value: 0
+    canceled: 
+        label: Annulé
+        type: bool
+        default_value: 0
         
 forms: 
     import: 
@@ -101,6 +105,7 @@ fields_tables:
             - field: ready_for_pick_up
             - field: repair_complete
             - field: closed
+            - field: canceled
             - field: date_closed
             - field: reimbursed
             

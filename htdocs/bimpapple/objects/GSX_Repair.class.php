@@ -658,7 +658,7 @@ class GSX_Repair extends BimpObject
             $response = $this->gsx->request($request, $client);
 
             if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {
-                return array('Echec de la requête de fermeture de la réparation');
+                return array_merge($this->gsx->errors['soap'], array('Echec de la requête de fermeture de la réparation'));
             }
         }
 

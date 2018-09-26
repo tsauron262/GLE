@@ -119,7 +119,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
         while ($ligne = $db->fetch_object($sql)) {
                 if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
-                    $repair->gsx->errors['soap'] = array();
+//                    $repair->gsx->errors['soap'] = array();
                     $repair->fetch($ligne->rid);
                     $erreurSOAP = $repair->lookup();
                     if (count($erreurSOAP) == 0) {
@@ -218,7 +218,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
 
         while ($ligne = $db->fetch_object($sql)) {
                 if (!$this->useCache || !isset($_SESSION['idRepairIncc'][$ligne->rid])) {
-                    $repair->gsx->errors['soap'] = array();
+//                    $repair->gsx->errors['soap'] = array();
                     $repair->fetch($ligne->rid);
                     $erreurSOAP = $repair->lookup();
                     if (count($erreurSOAP) == 0) {

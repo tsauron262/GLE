@@ -141,8 +141,8 @@ class GSX_Repair extends BimpObject
             'repairType'               => '',
             'repairStatus'             => '',
             'purchaseOrderNumber'      => '',
-            'sroNumber'                => isset($repairNumber) ? $repairNumber : '',
-            'repairConfirmationNumber' => isset($repairConfirmNumber) ? $repairConfirmNumber : '',
+            'sroNumber'                =>  '',
+            'repairConfirmationNumber' =>  '',
             'serialNumbers'            => array(
                 'serialNumber' => ''
             ),
@@ -156,6 +156,13 @@ class GSX_Repair extends BimpObject
             'kbbSerialNumberFlag'      => '',
             'comptiaCode'              => '',
         );
+        
+        if (!is_null($repairConfirmNumber) && $repairConfirmNumber) {
+                $data['repairConfirmationNumber'] = $repairConfirmNumber;
+        }
+        elseif (!is_null($repairNumber) && $repairNumber) {
+            $data['sroNumber'] = $repairNumber;
+        }
 
         if ($this->isIphone) {
             $client = 'IPhonePartsPendingReturn';

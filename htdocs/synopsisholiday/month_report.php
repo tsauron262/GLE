@@ -1,5 +1,41 @@
+
+
+
+
 <?php
-/* Copyright (C) 2007-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
+include("date_report.php");
+die;
+?>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<?php /* Copyright (C) 2007-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2011      François Legastelois <flegastelois@teclib.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -122,11 +158,24 @@ if($num == '0') {
                 if ($mode != 2){
                     $holidaystatic->id=$holiday['rowid'];
                     $holidaystatic->ref=$holiday['rowid'];
+                    
+                    
+$debut = mktime( 0, 0, 0, $month, 1, $year );
+$fin = mktime( 0, 0, 0, $month, date("t",$debut), $year );
+//die($holiday['date_debut']."   ".date('Y-m-d', $debut));
+if(strtotime($holiday['date_debut']) < strtotime(date('Y-m-d', $debut)))
+    $holiday['date_debut'] = date('Y-m-d', $debut);
+if(strtotime($holiday['date_fin']) > strtotime(date('Y-m-d', $fin)))
+    $holiday['date_fin'] = date('Y-m-d', $fin);
 
                     $start_date=$db->jdate($holiday['date_debut']);
                     $end_date=$db->jdate($holiday['date_fin']);
                     $start_date_gmt=$db->jdate($holiday['date_debut'],1);
                     $end_date_gmt=$db->jdate($holiday['date_fin'],1);
+                    
+                    
+                    
+                    
 		$nbopenedday=num_open_day($start_date_gmt, $end_date_gmt, 0, 1, $holiday['halfday']);
                 }
 
@@ -139,7 +188,7 @@ if($num == '0') {
                 if ($mode != 2)
 		print '<td>'.$holidaystatic->getNomUrl(1).'</td>';
 		print '<td>'.$nomUser.'</td>';
-		print '<td>'.($type == 0? "congés" : ($type == 1? "congés exceptionnels" : ($type == 2? "rtt" : ""))).'</td>';
+		print '<td>'.($type == 0? "congés" : ($type == 1? "absence exceptionnelle" : ($type == 2? "rtt" : ""))).'</td>';
                 if ($mode != 2){
 		print '<td>'.dol_print_date($start_date,'day');
 		print '</td>';

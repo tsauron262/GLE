@@ -26,7 +26,7 @@ $rows = $bdb->getRows('facture', $where, null, 'array', array(
 
 if (!is_null($rows) && count($rows)) {
     global $user;
-    $facture = BimpObject::getInstance('bimpcore', 'Bimp_Facture');
+    $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
 
     foreach ($rows as $r) {
         if ($facture->fetch((int) $r['rowid'])) {

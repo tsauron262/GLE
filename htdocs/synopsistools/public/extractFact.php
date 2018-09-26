@@ -16,7 +16,7 @@ require_once('../../main.inc.php');
 //$sautDeLigne = "<br/><br/>";
 //$separateur = " | ";
 
-
+llxHeader();
 //require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/synopsisexport.class.php");
 //$export = new synopsisexport($db, (isset($_REQUEST['sortie'])? $_REQUEST['sortie'] : 'html'));
 //$export->exportFactureSav();
@@ -36,3 +36,4 @@ echo "FIN";
 echo "<br/><br/><a href='" . $_SERVER["HTTP_REFERER"] . "'>Retour</a>";
 
 
+llxFooter();

@@ -134,6 +134,11 @@ fields:
             type: value_part
             part_type: beginning
         
+    available: 
+        label: Disponible à la vente
+        type: bool
+        default_value: 1
+        
     date_purchase: 
         label: Date d'achat
         type: date
@@ -153,7 +158,7 @@ fields:
         type: string
             
     prix_achat:
-        label: Prix d'achat
+        label: Prix d'achat HT
         type: money
         default_value: 0
         
@@ -243,6 +248,7 @@ fields_tables:
                       params: 
                           - card
             - field: serial
+            - field: available
             - field: date_purchase
             - field: prix_achat
             - field: prix_vente_except 
@@ -312,6 +318,7 @@ forms:
             - field: id_product
             - field: product_label
             - field: type
+            - field: available
             - field: date_purchase
             - field: prix_achat
             - field: prix_vente_except
@@ -329,6 +336,7 @@ forms:
             - field: id_product
             - field: product_label
             - field: type
+            - field: available
             - field: date_purchase
             - field: warranty_type
             - field: date_warranty_end
@@ -377,7 +385,7 @@ list:
             field: serial
         place: 
             label: Emplacement
-            value: 
+            value:
                 callback: displayCurrentPlace
             search: 
                 type: value_part
@@ -392,8 +400,12 @@ list:
                     options: 
                         options: 
                             array: hasReservations
+        available: 
+            field: available
+            edit: 1
     add_form_name: default
     edit_btn: 1
+    update_btn: 1
     delete_btn: 1
     view_btn: 1
     page_btn: 1
@@ -402,7 +414,9 @@ list:
 searches:
     default: 
         has_serial: 1
-        fields_search: a.serial
+        fields_search: 
+            - a.product_label
+            - a.serial
         
 cards: 
     default: 

@@ -1,0 +1,64 @@
+extends: 
+    module: bimpcommercial
+    object_name: Bimp_Propal
+    
+labels: 
+    name: devis SAV
+    name_plur: devis SAV
+    is_female: 0
+    
+objects: 
+    lines: 
+        instance: 
+            bimp_object: BS_SavPropalLine
+fields_tables: 
+    sav_infos: 
+        title: Informations
+        icon: info-circle
+        rows: 
+            - field: fk_statut
+            - field: datep
+              edit: 
+                  callback: isEditable
+            - field: fin_validite
+              edit: 
+                  callback: isEditable
+            - field: date_livraison
+              edit: 1
+            - field: libelle
+              edit: 1
+            - field: pdf_hide_reduc
+              edit: 1
+            - field: pdf_hide_total
+              edit: 1
+            - label: Fichier PDF
+              value: 
+                  callback: displayPDFButton
+                  
+views: 
+    sav: 
+        title: Devis
+        icon: fas_file-invoice
+        objects_change_reload: BS_SAV,BS_SavPropalLine,BS_ApplePart,ObjectLineRemise
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: sav_infos
+                   
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  rows: 
+                      - cols: 
+                          - type: fields_table
+                            fields_table: 
+                                name: totals
+                                
+                          - type: custom
+                            custom: 
+                                callback: renderMarginsTable

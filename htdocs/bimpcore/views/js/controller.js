@@ -14,22 +14,25 @@ function loadTabContent(url, tab_name) {
             $(this).find('.content-loading').show();
             $(this).show();
 
-            var data = {
-                ajaxRequestUrl: url
-            };
-
-            bimp_json_ajax('loadControllerTab', data, $content, function (result) {
-                if (typeof (result.html) !== 'undefined') {
-                    $container.find('.content-loading').hide();
-                    $content.html(result.html).fadeIn(250);
-                    $('body').trigger($.Event('controllerTabLoaded', {
-                        $container: $container,
-                        tab_name: tab_name
-                    }));
+            BimpAjax('loadControllerTab', {}, $content, {
+                $container: $container,
+                $content: $content,
+                display_success: false,
+                url: url,
+                success: function (result, bimpAjax) {
+                    if (typeof (result.html) !== 'undefined') {
+                        bimpAjax.$container.find('.content-loading').hide();
+                        bimpAjax.$content.html(result.html).fadeIn(250);
+                        $('body').trigger($.Event('controllerTabLoaded', {
+                            $container: $container,
+                            tab_name: tab_name
+                        }));
+                    }
+                },
+                error: function (result, bimpAjax) {
+                    bimpAjax.$container.find('.content-loading').hide();
                 }
-            }, function (result) {
-                $(this).find('.content-loading').hide();
-            }, false);
+            });
         });
     }
 }
@@ -82,4 +85,20 @@ $(document).ready(function () {
     window.onhashchange = function (e) {
         onUrlHashChange(e.newURL);
     };
+
+    $('#openModalBtn').popover().click(function () {
+        $(this).popover('hide');
+    });
+
+    $('.bs-popover').each(function () {
+        if (!parseInt($(this).data('event_init'))) {
+            $(this).popover();
+            $(this).click(function () {
+                $(this).popover('hide');
+            });
+            $(this).data('event_init', 1);
+        }
+    });
+    
+    
 });

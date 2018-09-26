@@ -227,6 +227,7 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
                     "0" => 0
                 );
                 $tvaCode = $tabCodeTva[$line->tva_tx];
+                $line->desc = $this->traiteStr($line->desc);
                 $tabFactDet[] = array("L" => "L", "ref" => $ref, "product_type" => $type, "qty" => $line->qty, "subprice" => price($line->subprice), "description" => $line->desc, "buy_price_ht" => price($line->pa_ht), "tva_code" => $tvaCode, "remise_percent" => $line->remise_percent, "tva_tx" => $tvaCode);
             }
 
@@ -259,7 +260,9 @@ WHERE fe.fk_object = fact.rowid AND fe.`type` = 'S' AND el.targettype = 'facture
 
 
         if ($this->type == "sav") {
-            if ($line->desc == "Acompte")
+            if ($line->tva_tx == 0)
+                $valeur = "GEN-SAV-HTVA";
+            elseif ($line->desc == "Acompte")
                 $valeur = "GEN-SAV-ACOMPTE";
             elseif ($line->fk_product_type == 1)
                 $valeur = "GEN-SAV-MO";

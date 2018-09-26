@@ -42,9 +42,9 @@ class BF_Demande extends BimpObject
     {
         $contacts = array();
 
-        $id_client = $this->getData('id_client');
+        $id_client = (int) $this->getData('id_client');
         if (!is_null($id_client) && $id_client) {
-            $where = '`fk_soc` = ' . (int) $id_client;
+            $where = '`fk_soc` = ' . $id_client;
             $rows = $this->db->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
@@ -60,9 +60,9 @@ class BF_Demande extends BimpObject
     {
         $contacts = array();
 
-        $id_supplier = $this->getData('id_supplier');
-        if (!is_null($id_supplier) && $id_supplier) {
-            $where = '`fk_soc` = ' . (int) $id_supplier;
+        $id_supplier = (int) $this->getData('id_supplier');
+        if ($id_supplier) {
+            $where = '`fk_soc` = ' . $id_supplier;
             $rows = $this->db->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
@@ -76,7 +76,7 @@ class BF_Demande extends BimpObject
 
     public function renderViewLoadedScript()
     {
-        if (isset($this->id) && $this->id) {
+        if ($this->isLoaded()) {
             return '<script type="text/javascript">onBFDemandeViewLoaded(' . $this->id . ');</script>';
         }
         return '';

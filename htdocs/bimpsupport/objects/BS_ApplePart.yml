@@ -62,15 +62,12 @@ lists:
               icon: trash
               onclick: deleteSelectedObjects('list_id', $(this))
         enable_search: 0
-        enable_edit: 
-            callback: isCartEditable
         sort_field: id
         sort_way: desc
         n: 25
         delete_btn: 
             callback: isCartEditable
-        update_btn: 
-            callback: isCartEditable
+        update_btn: 1
         cols: 
             label: 
                 label: Nom
@@ -89,15 +86,18 @@ lists:
             qty: 
                 label: Qté
                 field: qty
-                edit: 1
+                edit: 
+                    callback: isCartEditable
             out_of_warranty: 
                 field: out_of_warranty
-                edit: 1
+                edit: 
+                    callback: isCartEditable
             stock_price: 
                 field: stock_price
             exchange_price: 
                 field: exchange_price
             order: 
                 field: no_order
-                edit: 1
+                edit:
+                    callback: isCartEditable
                 

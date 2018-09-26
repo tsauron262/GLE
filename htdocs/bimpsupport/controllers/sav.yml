@@ -3,7 +3,8 @@ js:
     - /bimpapple/views/js/gsx.js
     - /bimpsupport/views/js/sav.js
     - /bimpequipment/views/js/equipment.js
-    - /bimpcore/views/js/paiement.js
+    - /bimpcommercial/views/js/paiement.js
+    - /bimpcommercial/views/js/object_line.js
     
 css:
     - /bimpapple/views/css/gsx.css
@@ -39,12 +40,16 @@ sections:
                               name: infos
                               panel: 1
                               object: sav
+                              
                     - cols: 
-                        - type: list
-                          list:
-                              name: sav
-                              object: sav
-                              children: prets
+                        - type: custom
+                          col_lg: 6
+                          col_md: 6
+                          custom: 
+                              callback: 
+                                  method: renderPropalesList
+                                  object: sav
+                        
                               
           - id: materiel
             title: Matériel
@@ -58,9 +63,22 @@ sections:
                               name: materiel
                     - cols: 
                         - type: list
-                          list: 
+                          list:
+                              name: sav
                               object: sav
-                              children: products          
+                              children: prets
+          - id: devis
+            title: Devis
+            struct: 
+                type: rows
+                rows: 
+                    - cols: 
+                        - type: custom
+                          custom: 
+                              callback: 
+                                  method: renderPropalView
+                                  object: sav
+                                  
                     - cols: 
                         - type: list
                           list: 
@@ -73,7 +91,6 @@ sections:
                                   method: renderLoadPartsButton
                                   params:
                                       object: sav
-            
           - id: notes
             title: Notes
             struct:

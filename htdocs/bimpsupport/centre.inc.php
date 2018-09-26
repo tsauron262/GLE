@@ -1,7 +1,7 @@
 <?php
 
 global $tabCentre;
-    $tabCentre = array("V"     => array("04 75 81 81 54", "sav07@bimp.fr", "Saint Peray (valence)", 19, "1000566", "07130", "Saint-Peray", "739 Avenue Gross Umstadt", 25),
+    $tabCentre = array("V"     => array("04 75 81 81 54", "sav07@bimp.fr", "Valence", 19, "1000566", "07500", "GUILLERAND GRANGES", "Espace le Colibri 85 rue Conrad Killian", 25),
         "M"     => array("04 50 22 15 55", "sav74@bimp.fr", "Meythet", 58, "462140", "74960", "Meythet", "3 RUE DU VIEUX MOULIN", 21),
         "CB"    => array("09 70 72 12 32", "sav73@bimp.fr", "Chambéry", 213, "1139941", "73000", "Chambéry", "150 rue croix d'or", 36),
         'L'     => array("04 78 17 30 28", "sav69@bimp.fr", "Lyon", 21, "1000565", "69006", "Lyon", "67 rue Vendome", 23),
@@ -19,7 +19,7 @@ global $tabCentre;
         "N"     => array("04 66 842 974", "sav30@bimp.fr", "Nîmes", 217, "1187562", "30900", "Nîmes", "Centre commercial Cap Costière, 400 Avenue Claude Baillet", 39),
         "MONTP" => array("04 67 555 111", "sav34@bimp.fr", "Montpellier", 218, "1187561", "34000", "Montpellier", "36 Rue Saint-Guilhem", 38),
         "MAU"   => array("04 67 222 143", "sav341@bimp.fr", "Mauguio", 221, "1187560", "34130", "Mauguio", "39 Rue René Fonck", 37),
-        "BB"    => array("09 53 01 39 84", "sav01@bimp.fr", "Bourg-en-Bresse", 351, "1046075", "01000", "Bourg-en-Bresse", "11 Avenue de la Victoire", 2)
+        "BB"    => array("09 53 01 39 84", "sav01@bimp.fr", "Bourg-en-Bresse", 351, "1199659", "01000", "Bourg-en-Bresse", "11 Avenue de la Victoire", 1)
     );
 
 

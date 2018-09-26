@@ -33,6 +33,17 @@
  */
 
 require '../../main.inc.php';
+
+
+if(isset($_REQUEST["sall"]) && $_REQUEST["sall"] != "")
+    header("Location: ../../bimpcommercial/?fc=propals&search=1&object=propal&sall=".$_REQUEST["sall"]);
+else
+    header("Location: ../../bimpcommercial/?fc=propals");
+die;
+
+
+
+
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formpropal.class.php';

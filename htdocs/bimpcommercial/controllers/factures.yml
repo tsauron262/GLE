@@ -1,0 +1,12 @@
+bootstrap: 1
+title: Factures
+
+objects: 
+    facture: 
+        instance:
+            bimp_object: Bimp_Facture
+            
+sections: 
+    - type: list
+      list: 
+          object: facture

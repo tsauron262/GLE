@@ -187,7 +187,7 @@ class modSynopsisHoliday extends DolibarrModules {
      */
     function init() {
         $this->remove();
-        $sql = array("ALTER TABLE `" . MAIN_DB_PREFIX . "holiday` ADD `type_conges` INT( 1 ) UNSIGNED NOT NULL DEFAULT '0' COMMENT '0: ordinaires. 1 : congés exceptionnels. 2: rtt';",
+        $sql = array("ALTER TABLE `" . MAIN_DB_PREFIX . "holiday` ADD `type_conges` INT( 1 ) UNSIGNED NOT NULL DEFAULT '0' COMMENT '0: ordinaires. 1 : absence exceptionnelle. 2: rtt';",
             "ALTER TABLE `" . MAIN_DB_PREFIX . "holiday` ADD `date_drh_valid` DATETIME NULL DEFAULT NULL AFTER `date_valid`;",
             "ALTER TABLE `" . MAIN_DB_PREFIX . "holiday` ADD `fk_user_drh_valid` INT( 11 ) NULL DEFAULT NULL AFTER `fk_user_valid` ;",
             "ALTER TABLE `" . MAIN_DB_PREFIX . "holiday_users` ADD `nb_rtt` DOUBLE NOT NULL DEFAULT '0';",

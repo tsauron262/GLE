@@ -27,7 +27,7 @@ $sql .= ' WHERE r.id_commande_client > 0 AND r.id_commande_client NOT IN (SELECT
 
 $result = $bdb->executeS($sql, 'array');
 
-$commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande');
+$commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
 BimpObject::loadClass('bimpreservation', 'BR_OrderLine');
 
 if (!is_null($result)) {

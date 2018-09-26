@@ -936,9 +936,9 @@ class GSX_Repair extends BimpObject
         return $errors;
     }
 
-    public function fetch($id)
+    public function fetch($id, $parent = null)
     {
-        if (parent::fetch($id)) {
+        if (parent::fetch($id, $parent)) {
             $this->setSerial($this->getData('serial'));
             $this->lookup();
             return true;

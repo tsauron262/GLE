@@ -1,87 +1,92 @@
 // Gestion des événements:
-function reloadObjectViewsList(views_list_id) {
-    var $viewsList = $('#' + views_list_id);
+function reloadObjectViewsList(list_views_id) {
+    var $listViews = $('#' + list_views_id);
 
-    if (!$viewsList.length) {
+    if (!$listViews.length) {
         return;
     }
 
-    var data = {
-        module_name: $viewsList.data('module_name'),
-        object_name: $viewsList.data('object_name'),
-        views_list_name: $viewsList.data('views_list_name')
-    };
+    var data = getComponentParams($listViews);
 
-    bimp_json_ajax('loadObjectViewsList', data, null, function (result) {
-        if (typeof (result.html) !== 'undefined') {
-            $viewsList.html(result.html);
-            var $container = $viewsList.parent('.viewsListContainer');
+    data['list_views_id'] = list_views_id;
+    data['module_name'] = $listViews.data('module');
+    data['object_name'] = $listViews.data('object_name');
+    data['views_list_name'] = $listViews.data('name');
 
-            if (typeof (result.pagination) !== 'undefined' && result.pagination) {
-                $container.children('.paginationContainer').html(result.pagination).show();
-            } else {
-                $container.children('.paginationContainer').hide().html('');
+    BimpAjax('loadObjectViewsList', data, null, {
+        $listViews: $listViews,
+        display_success: false,
+        success: function (result, bimpAjax) {
+            if (typeof (result.html) !== 'undefined') {
+                bimpAjax.$listViews.children('.object_list_view_content').html(result.html);
+                var $container = bimpAjax.$listViews.findParentByClass('list_views_container');
+
+                if (typeof (result.pagination) !== 'undefined' && result.pagination) {
+                    $container.children('.paginationContainer').html(result.pagination).show();
+                } else {
+                    $container.children('.paginationContainer').hide().html('');
+                }
+
+                onListViewsRefresh($listViews);
             }
-
-            onViewsListRefresh($viewsList);
         }
     });
 }
 
-function onViewsListLoaded($viewsList) {
-    if (!$viewsList.length) {
+function onListViewsLoaded($listViews) {
+    if (!$listViews.length) {
         return;
     }
 
-    if (!parseInt($viewsList.data('loaded_event_processed'))) {
-        $viewsList.data('loaded_event_processed', 1);
+    if (!parseInt($listViews.data('loaded_event_processed'))) {
+        $listViews.data('loaded_event_processed', 1);
 
-        setCommonEvents($('#' + $viewsList.attr('id') + '_container'));
+        setCommonEvents($('#' + $listViews.attr('id') + '_container'));
     }
 
-    if (!$viewsList.data('object_change_event_init')) {
-        var module = $viewsList.data('module_name');
-        var object_name = $viewsList.data('object_name');
-        var objects = $viewsList.data('objects_change_reload');
+    if (!$listViews.data('object_change_event_init')) {
+        var module = $listViews.data('module');
+        var object_name = $listViews.data('object_name');
+        var objects = $listViews.data('objects_change_reload');
         if (objects) {
             objects = objects.split(',');
         }
 
         $('body').on('objectChange', function (e) {
             if ((e.module === module) && (e.object_name === object_name)) {
-                reloadObjectViewsList($viewsList.attr('id'));
+                reloadObjectViewsList($listViews.attr('id'));
             } else if (objects && objects.length) {
                 for (var i in objects) {
                     if (e.object_name === objects[i]) {
-                        reloadObjectViewsList($viewsList.attr('id'));
+                        reloadObjectViewsList($listViews.attr('id'));
                     }
                 }
             }
         });
 
-        $viewsList.data('object_change_event_init', 1);
+        $listViews.data('object_change_event_init', 1);
         $('body').trigger($.Event('viewsListLoaded', {
-            $viewsList: $viewsList
+            $listViews: $listViews
         }));
     }
 }
 
-function onViewsListRefresh($viewsList) {
-    setCommonEvents($viewsList);
+function onListViewsRefresh($listViews) {
+    setCommonEvents($listViews);
     $('body').trigger($.Event('viewsListRefresh', {
-        $viewsList: $viewsList
+        $listViews: $listViews
     }));
 }
 
 $(document).ready(function () {
-    $('.objectViewslist').each(function () {
-        onViewsListLoaded($(this));
+    $('.object_list_view').each(function () {
+        onListViewsLoaded($(this));
     });
 
     $('body').on('controllerTabLoaded', function (e) {
         if (e.$container.length) {
-            e.$container.find('.objectViewslist').each(function () {
-                onViewsListLoaded($(this));
+            e.$container.find('.object_list_view').each(function () {
+                onListViewsLoaded($(this));
             });
         }
     });

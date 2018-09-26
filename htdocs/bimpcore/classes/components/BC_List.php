@@ -3,9 +3,11 @@
 class BC_List extends BC_Panel
 {
 
+    public $component_name = 'Liste';
     public static $type = 'list';
     protected $item_params = array();
     public $id_parent;
+    public $parent = null;
     protected $filters = array();
     protected $new_values = array();
     protected $items = null;
@@ -43,6 +45,11 @@ class BC_List extends BC_Panel
 
         if (!is_null($id_parent) && !is_null($object)) {
             $object->setIdParent($id_parent);
+            $parent_module = $object->getParentModule();
+            $parent_object_name = $object->getParentObjectName();
+            if ($parent_module && $parent_object_name) {
+                $this->parent = BimpObject::getInstance($parent_module, $parent_object_name, (int) $id_parent);
+            }
         }
 
         $this->id_parent = $id_parent;
@@ -66,9 +73,6 @@ class BC_List extends BC_Panel
         $this->setConfPath();
 
         $this->filters = $this->object->getSearchFilters();
-//        echo '<pre>';
-//        print_r($this->params);
-//        exit;
     }
 
     // Gestion des filtres: 

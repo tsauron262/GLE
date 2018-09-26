@@ -3,6 +3,7 @@
 class BC_View extends BC_Panel
 {
 
+    public $component_name = 'Fiche';
     public static $type = 'view';
     public $new_values = array();
 

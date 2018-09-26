@@ -1,0 +1,12 @@
+bootstrap: 1
+title: Propositions commerciales
+
+objects: 
+    propal: 
+        instance:
+            bimp_object: Bimp_Propal
+            
+sections: 
+    - type: list
+      list: 
+          object: propal

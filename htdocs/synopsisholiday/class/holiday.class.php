@@ -23,7 +23,7 @@
  * Notes de mise à jour - Synopsis. 
  *      - Ajout de la valeur 6 pour la variable $statut : approbation finale par le DRH.
  *      - Ajout vars:
- *          - $type_conges pour différencier les congés payés ordinaires des rtt et congés exceptionnels. 
+ *          - $type_conges pour différencier les congés payés ordinaires des rtt et absence exceptionnelle. 
  *          - $fk_user_drh_valid : id drh si validation. 
  *          - $date_drh_valid : date de validation par le DRH
  *          - $fk_actioncomm : id actioncomm pour événement agenda, si statut = 2, 3 ou 6.
@@ -91,7 +91,7 @@ class SynopsisHoliday extends Holiday {
     var $fk_substitute = '';
     public static $typesConges = array(
         0 => 'Congés payés',
-        1 => 'Congés exceptionnels',
+        1 => 'Absence exceptionnelle',
         2 => 'RTT'
     );
     var $fk_actioncomm = '';
@@ -2698,7 +2698,7 @@ class SynopsisHoliday extends Holiday {
                 $ac->userassigned = $userAssigned;
             } else {
                 $ac->userownerid = $this->fk_user;
-                $ac->userassigned = array('id' => $this->fk_user, 'transparency' => 1);
+                $ac->userassigned[] = array('id' => $this->fk_user, 'transparency' => 1);
             }
 
             if ($fk_action)

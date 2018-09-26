@@ -91,7 +91,7 @@ class ActionsBimpsupport {
                     $centreUser[] = $idT2;
             }
             else{
-                $centreUser = explode(" ", $user->array_options['options_apple_centre']);//Transforme lettre centre en id centre
+                $centreUser = explode(" ", trim($user->array_options['options_apple_centre']));//Transforme lettre centre en id centre
                 foreach($centreUser as $idT=> $CT){//Va devenir inutille
                     foreach($tabCentre as $idT2 => $tabCT)
                         if($tabCT[8] == $CT)
@@ -141,7 +141,7 @@ class ActionsBimpsupport {
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
                     if ($nb == "")
                         $nb = "0";
-                    $nbStr = ($nb < 10 ? "&nbsp;&nbsp;" . $nb : ($nb < 100 ? "&nbsp;" . $nb : $nb));
+                    $nbStr = "<span style='width: 33px; display: inline-block; text-align:right'>".$nb."</span>";
                     $return .= "<a href='" . $href . "&status=" . urlencode($idStat) . $hrefFin . "'>" . $nbStr . " : " . $tabStat['label'] . "</a>";
                     $return .= "</span><br/>";
                 }

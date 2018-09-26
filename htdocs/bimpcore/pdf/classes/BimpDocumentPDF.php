@@ -3,7 +3,8 @@
 require_once __DIR__ . '/BimpModelPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 
-class BimpDocumentPDF extends BimpModelPDF {
+class BimpDocumentPDF extends BimpModelPDF
+{
 
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/document/';
     public $thirdparty = null;
@@ -13,19 +14,22 @@ class BimpDocumentPDF extends BimpModelPDF {
     public $localtax2 = array();
     public $acompteHt = 0;
     public $acompteTtc = 0;
+    public $acompteTva20 = 0;
     public $tva = array();
     public $hideReduc = false;
     public $hideTotal = false;
     public $hideRef = false;
     public $hideLabelProd = true;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         parent::__construct($db, 'P', 'A4');
     }
 
     // Initialisation
 
-    protected function initData() {
+    protected function initData()
+    {
         if (!count($this->errors)) {
             if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
                 if (isset($this->object->array_options['options_pdf_hide_reduc'])) {
@@ -66,17 +70,35 @@ class BimpDocumentPDF extends BimpModelPDF {
         }
     }
 
-    protected function initHeader() {
+    protected function initHeader()
+    {
         global $conf, $mysoc;
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
+        
+        
+        if(isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO'))){
+            $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
+            if(is_file($testFile))
+                $logo_file = $testFile;
+        }
+        if(isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))){
+            $testFile = str_replace(array(".jpg", ".png"), "_SAV.png", $logo_file);
+            if(is_file($testFile))
+                $logo_file = $testFile;
+        }
+        if(isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))){
+            $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
+            if(is_file($testFile))
+                $logo_file = $testFile;
+        }
 
         if (method_exists($this->object, 'fetch_optionals')) {
             $this->object->fetch_optionals();
             if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
                 $entrepot = new Entrepot($this->db);
                 $entrepot->fetch($this->object->array_options['options_entrepot']);
-                if($entrepot->address != "" && $entrepot->town != ""){
+                if ($entrepot->address != "" && $entrepot->town != "") {
                     $mysoc->zip = $entrepot->zip;
                     $mysoc->address = $entrepot->address;
                     $mysoc->town = $entrepot->town;
@@ -87,9 +109,10 @@ class BimpDocumentPDF extends BimpModelPDF {
 
         // Commercial: 
         if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
-            if (is_object($this->object) && method_exists($this->object, "getIdContact")) {
-                global $mysoc;
-                $comm1 = $comm2 = 0;
+            global $mysoc;
+            $comm1 = $comm2 = 0;
+            $contacts = array();
+            if (method_exists($this->object, 'getIdContact')) {
                 $contacts = $this->object->getIdContact('internal', 'SALESREPSIGN');
                 if (count($contacts)) {
                     $comm1 = $contacts[0];
@@ -99,13 +122,25 @@ class BimpDocumentPDF extends BimpModelPDF {
                 if (count($contacts)) {
                     $comm2 = $contacts[0];
                 }
+            }
 
-                $rows = "";
-                if ($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0) {
+            $rows = "";
+            if ($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0) {
+                $usertmp = new User($this->db);
+                $usertmp->fetch($comm1);
+                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' client : ' . $usertmp->getFullName($this->langs) . '</div>';
+                $nRows++;
+                $usertmp = new User($this->db);
+                $usertmp->fetch($comm2);
+                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' devis : ' . $usertmp->getFullName($this->langs) . '</div>';
+                $nRows++;
+            } else {
+                if ($comm1 > 0) {
                     $usertmp = new User($this->db);
                     $usertmp->fetch($comm1);
                     $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' client : ' . $usertmp->getFullName($this->langs) . '</div>';
                     $nRows++;
+                } elseif ($comm2 > 0) {
                     $usertmp = new User($this->db);
                     $usertmp->fetch($comm2);
                     $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' devis : ' . $usertmp->getFullName($this->langs) . '</div>';
@@ -123,12 +158,12 @@ class BimpDocumentPDF extends BimpModelPDF {
                         $nRows++;
                     }
                 }
-                if (isset($usertmp)) {
-                    if ($usertmp->office_phone != "")
-                        $mysoc->phone = $usertmp->office_phone;
-                    if ($usertmp->email != "")
-                        $mysoc->email = $usertmp->email;
-                }
+            }
+            if (isset($usertmp)) {
+                if ($usertmp->office_phone != "")
+                    $mysoc->phone = $usertmp->office_phone;
+                if ($usertmp->email != "")
+                    $mysoc->email = $usertmp->email;
             }
         }
 
@@ -144,13 +179,14 @@ class BimpDocumentPDF extends BimpModelPDF {
         }
 
         $this->header_vars = array(
-            'logo_img' => $logo_file,
-            'logo_height' => $logo_height * BimpPDF::$pxPerMm,
+            'logo_img'     => $logo_file,
+            'logo_height'  => $logo_height * BimpPDF::$pxPerMm,
             'header_right' => array('rows' => $rows)
         );
     }
 
-    protected function initfooter() {
+    protected function initfooter()
+    {
         $line1 = '';
         $line2 = '';
 
@@ -230,7 +266,8 @@ class BimpDocumentPDF extends BimpModelPDF {
 
     // Rendus:
 
-    protected function renderContent() {
+    protected function renderContent()
+    {
         $this->renderAddresses($this->thirparty, $this->contact);
         $this->renderTop();
         $this->renderBeforeLines();
@@ -247,26 +284,37 @@ class BimpDocumentPDF extends BimpModelPDF {
         }
     }
 
-    public function getSenderInfosHtml() {
+    public function getSenderInfosHtml()
+    {
         $html = '<div class="bold">' . $this->langs->convToOutputCharset($this->fromCompany->name) . '</div>';
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty);
         $html = str_replace("\n", '<br/>', $html);
         return $html;
     }
 
-    public function getTargetInfosHtml() {
+    public function getTargetInfosHtml()
+    {
         global $conf;
-        if ($this->contact < 1 || !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
+        if ($this->contact < 1)
             $html = '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
+        elseif(!empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
+            $this->contact->firstname .= '<br/>' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '';
         else
             $html = "";
+        
+        
+        if(strtoupper($this->thirdparty->lastname) == strtoupper($this->thirdparty->socname)){
+            $this->thirdparty->lastname = "";
+        }
+        
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');
         $html = str_replace("\n", '<br/>', $html);
 
         return $html;
     }
 
-    public function renderAddresses() {
+    public function renderAddresses()
+    {
         $html = '';
 
 //        	if ($usecontact && !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) {
@@ -301,33 +349,36 @@ class BimpDocumentPDF extends BimpModelPDF {
         $this->writeContent($html);
     }
 
-    public function renderTop() {
+    public function renderTop()
+    {
         if (isset($this->object->array_options['options_libelle']) && $this->object->array_options['options_libelle']) {
             $this->writeContent('<p style="font-size: 10px">Objet : <strong>' . $this->object->array_options['options_libelle'] . '</strong></p>');
         }
     }
 
-    public function renderBeforeLines() {
+    public function renderBeforeLines()
+    {
         
     }
 
-    public function getLineDesc($line, Product $product = null) {
+    public function getLineDesc($line, Product $product = null)
+    {
         $desc = '';
         if (!is_null($product)) {
-            if(!$this->hideRef)
+            if (!$this->hideRef)
                 $desc .= $product->ref;
-            if(!$this->hideLabelProd || strlen($line->desc) < 5)
+            if (!$this->hideLabelProd || strlen($line->desc) < 5)
                 $desc .= ($desc ? ' - ' : '') . $product->label;
         }
 
         if (!is_null($line->desc) && $line->desc) {
             $line_desc = $line->desc;
             if (!is_null($product)) {
-                if(!$this->hideLabelProd)
+                if (!$this->hideLabelProd)
                     $line_desc = str_replace($product->label, '', $line_desc);
             }
             if ($line_desc) {
-                $desc .= ($desc ? (strlen($desc) > 20 ?'<br/>' : ' - ') : '') . $line_desc;
+                $desc .= ($desc ? (strlen($desc) > 20 ? '<br/>' : ' - ') : '') . $line_desc;
             }
         }
 
@@ -336,7 +387,8 @@ class BimpDocumentPDF extends BimpModelPDF {
         return $desc;
     }
 
-    public function renderLines() {
+    public function renderLines()
+    {
         global $conf;
 
         $table = new BimpPDF_AmountsTable($this->pdf);
@@ -352,6 +404,7 @@ class BimpDocumentPDF extends BimpModelPDF {
             if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte')) {
                 $this->acompteHt -= $line->total_ht;
                 $this->acompteTtc -= $line->total_ttc;
+                $this->acompteTva20 -= $line->total_tva;
                 $i++;
                 continue;
             }
@@ -364,6 +417,10 @@ class BimpDocumentPDF extends BimpModelPDF {
                     $product = null;
                 }
             }
+            if(is_object($product) && $product->ref == "REMISECRT"){
+                $i++;
+                continue;
+            }
 
             $desc = $this->getLineDesc($line, $product);
 
@@ -371,12 +428,12 @@ class BimpDocumentPDF extends BimpModelPDF {
                 $row['desc'] = array(
                     'colspan' => 99,
                     'content' => $desc,
-                    'style' => 'font-weight: bold; background-color: #F5F5F5;'
+                    'style'   => 'font-weight: bold; background-color: #F5F5F5;'
                 );
             } else {
                 $row = array(
-                    'desc' => $desc,
-                    'total_ht' => BimpTools::displayMoneyValue($line->total_ht, ''),
+                    'desc'      => $desc,
+                    'total_ht'  => BimpTools::displayMoneyValue($line->total_ht, ''),
                     'total_ttc' => BimpTools::displayMoneyValue($line->total_ttc, '')
                 );
 
@@ -418,7 +475,8 @@ class BimpDocumentPDF extends BimpModelPDF {
         unset($table);
     }
 
-    public function renderAfterLines() {
+    public function renderAfterLines()
+    {
         $this->pdf->addVMargin(2);
 
         $html = '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
@@ -431,7 +489,8 @@ class BimpDocumentPDF extends BimpModelPDF {
         $this->writeContent($html);
     }
 
-    public function renderBottom() {
+    public function renderBottom()
+    {
         $table = new BimpPDF_Table($this->pdf, false);
         $table->cellpadding = 0;
         $table->remove_empty_cols = false;
@@ -439,7 +498,7 @@ class BimpDocumentPDF extends BimpModelPDF {
         $table->addCol('right', '', 95);
 
         $table->rows[] = array(
-            'left' => $this->getBottomLeftHtml(),
+            'left'  => $this->getBottomLeftHtml(),
             'right' => $this->getBottomRightHtml()
         );
 
@@ -447,11 +506,13 @@ class BimpDocumentPDF extends BimpModelPDF {
         $table->write();
     }
 
-    public function getBottomLeftHtml() {
+    public function getBottomLeftHtml()
+    {
         return $this->getPaymentInfosHtml();
     }
 
-    public function getBankHtml($account, $only_number = false) {
+    public function getBankHtml($account, $only_number = false)
+    {
         global $conf;
 
         require_once DOL_DOCUMENT_ROOT . '/core/class/html.formbank.class.php';
@@ -536,11 +597,13 @@ class BimpDocumentPDF extends BimpModelPDF {
         return $html;
     }
 
-    public function getPaymentInfosHtml() {
+    public function getPaymentInfosHtml()
+    {
         return '';
     }
 
-    public function getBottomRightHtml() {
+    public function getBottomRightHtml()
+    {
 
         $html .= $this->getTotauxRowsHtml();
         $html .= $this->getPaymentsHtml();
@@ -549,7 +612,8 @@ class BimpDocumentPDF extends BimpModelPDF {
         return $html;
     }
 
-    public function calcTotaux() {
+    public function calcTotaux()
+    {
         global $conf, $mysoc;
 
         $this->total_remises = 0;
@@ -642,9 +706,11 @@ class BimpDocumentPDF extends BimpModelPDF {
             $this->tva[$vatrate] += $tva_line;
             $i++;
         }
+        $this->tva["20.000"] += $this->acompteTva20;
     }
 
-    public function getTotauxRowsHtml() {
+    public function getTotauxRowsHtml()
+    {
         global $conf;
 
         if ($this->hideTotal) {
@@ -865,11 +931,13 @@ class BimpDocumentPDF extends BimpModelPDF {
         return $html;
     }
 
-    public function getPaymentsHtml() {
+    public function getPaymentsHtml()
+    {
         return '';
     }
 
-    public function getAfterTotauxHtml() {
+    public function getAfterTotauxHtml()
+    {
         $html = '<br/>';
         $html .= '<table style="width: 95%" cellpadding="3">';
 
@@ -910,8 +978,8 @@ class BimpDocumentPDF extends BimpModelPDF {
         return $html;
     }
 
-    public function renderAfterBottom() {
+    public function renderAfterBottom()
+    {
         
     }
-
 }

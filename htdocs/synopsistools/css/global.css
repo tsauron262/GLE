@@ -499,3 +499,19 @@ table.tabBorder100 td{
 input, input.flat, textarea, textarea.flat, form.flat select, select, select.flat, .dataTables_length label select{
     color: black;
 }
+
+
+
+/* z-index modal au dessus du reste*/
+.ui-widget-overlay{
+    z-index: 10000!important;
+}
+.ui-widget.ui-widget-content{
+    z-index: 10001!important;
+}.ui-widget.ui-widget-content.ui-autocomplete{
+    z-index: 10002!important;
+}
+
+.fullScreen{
+    z-index: 10002!important;
+}

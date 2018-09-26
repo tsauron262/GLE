@@ -1,0 +1,85 @@
+table: object_line_equipment
+common_fields: 0
+
+parent_module: bimpcommercial
+parent_object: ObjectLine
+parent_id_property: id_object_line
+
+objects: 
+    equipment: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+            id_object: 
+                field_value: id_equipment
+                
+    fournisseur_price: 
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductFournisseurPrice
+
+fields:             
+    id_object_line: 
+        label: Ligne
+        type: id_parent
+        
+    object_type: 
+        label: Type objet lié
+        input:
+            type: hidden
+        required: 1
+    
+    id_equipment: 
+        label: Equipement
+        type: id_object
+        object: equipment
+        
+    pu_ht: 
+        label: Prix unitaire HT
+        type: money
+        
+    tva_tx: 
+        label: Taux de TVA
+        type: percent
+        
+    pa_ht: 
+        label: Prix d'achat HT
+        type: money
+        
+    id_fourn_price: 
+        label: Prix fournisseur
+        type: id_object
+        object: fournisseur_price
+        
+lists:
+    default: 
+        enable_search: 0
+        enable_sort: 0
+        pagination: 0
+        sort_field: id
+        sort_way: asc
+        n: 0
+        edit_btn: 
+            callback: isEditable
+        update_btn: 
+            callback: isEditable
+        extra_btn: 
+            callback: getListBtn
+        cols:
+            equipement: 
+                label: Equipement
+                value: 
+                    callback: displayEquipment
+            pu: 
+                field: pu_ht
+            tva: 
+                field: tva_tx
+            pa:
+                field: pa_ht
+            

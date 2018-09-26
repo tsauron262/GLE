@@ -6,9 +6,11 @@ function reloadObjectList(list_id, callback) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-//        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+//        console.error('Erreur technique: identifiant de la liste invalide (' + list_id + '). Echec du rechargement de la liste');
         return;
     }
+
+    $list.find('.headerTools').find('.loadingIcon').css('opacity', 1);
 
     var $resultContainer = $('#' + list_id + '_result');
     var object_name = $list.data('object_name');
@@ -20,9 +22,9 @@ function reloadObjectList(list_id, callback) {
 
     // Données de base:
     var data = {
-        'list_name': $list.data('list_name'),
+        'list_name': $list.data('name'),
         'list_id': list_id,
-        'module_name': $list.data('module_name'),
+        'module': $list.data('module'),
         'object_name': object_name,
         'id_parent': id_parent_object
     };
@@ -62,13 +64,19 @@ function reloadObjectList(list_id, callback) {
         });
     }
 
+    // Lignes sélectionnées:
+    data['selected_rows'] = [];
+    $list.find('tbody.listRows').find('input.item_check:checked').each(function () {
+        data['selected_rows'].push($(this).data('id_object'));
+    });
+
     // Lignes modifiées:
     var $rows = $list.find('tbody.listRows').find('tr.modified');
     if ($rows.length) {
         data['new_values'] = {};
         $rows.each(function () {
             var id_object = $(this).data('id_object');
-            $(this).find('.editInputContainer').each(function () {
+            $(this).find('.inputContainer').each(function () {
                 var field_name = $(this).data('field_name');
                 if (field_name) {
                     var $input = $(this).find('[name="' + field_name + '"]');
@@ -86,68 +94,83 @@ function reloadObjectList(list_id, callback) {
     }
 
     // Options de trie et de pagination:
-    var sort_col = $list.find('input[name=sort_col]').val();
-    var sort_way = $list.find('input[name=sort_way]').val();
-    var sort_option = $list.find('input[name=sort_option]').val();
-    var n = $list.find('input[name=n]').val();
-    var p = $list.find('input[name=p]').val();
+    var sort_col = $list.find('input[name=param_sort_field]').val();
+    var sort_way = $list.find('input[name=param_sort_way]').val();
+    var sort_option = $list.find('input[name=param_sort_option]').val();
+    var n = $list.find('input[name=param_n]').val();
+    var p = $list.find('input[name=param_p]').val();
+    var joins = $list.find('input[name=param_joins]').val();
 
     if (sort_col) {
-        data['sort_col'] = sort_col;
+        data['param_sort_field'] = sort_col;
     }
     if (sort_way) {
-        data['sort_way'] = sort_way;
+        data['param_sort_way'] = sort_way;
     }
     if (sort_option) {
-        data['sort_option'] = sort_option;
+        data['param_sort_option'] = sort_option;
     }
     if (n) {
-        data['n'] = n;
+        data['param_n'] = n;
     }
     if (p) {
-        data['p'] = p;
+        data['param_p'] = p;
+    }
+    if (joins) {
+        data['param_joins'] = joins;
     }
 
     // Filtres: 
-    if ($list.find('input[name=list_filters]').length) {
-        data['list_filters'] = $list.find('input[name=list_filters]').val();
+    if ($list.find('input[name=param_list_filters]').length) {
+        data['param_list_filters'] = $list.find('input[name=param_list_filters]').val();
     }
-    if ($list.find('input[name=associations_filters]').length) {
-        data['associations_filters'] = $list.find('input[name=associations_filters]').val();
+    if ($list.find('input[name=param_association_filters]').length) {
+        data['param_association_filters'] = $list.find('input[name=param_association_filters]').val();
     }
 
     // Envoi requête:
-    bimp_json_ajax('loadObjectList', data, 0, function (result) {
-        if (result.rows_html) {
-            $list.find('tbody.listRows').html(result.rows_html);
-            var $container = $('#' + $list.attr('id') + '_container');
-            if ($container.length) {
+    var error_msg = 'Une erreur est sruvenue. La liste des ';
+    if (typeof (object_labels[object_name].name_plur) !== 'undefined') {
+        error_msg += object_labels[object_name].name_plur;
+    } else {
+        error_msg += 'objets "' + object_name + '"';
+    }
+    error_msg += ' n\'a pas pu être rechargée';
+
+    BimpAjax('loadObjectList', data, null, {
+        $list: $list,
+        $resultContainer: $resultContainer,
+        display_success: false,
+        error_msg: error_msg,
+        success: function (result, bimpAjax) {
+            $list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
+            if (result.rows_html) {
+                bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
                 if (result.pagination_html) {
-                    $container.find('.listPagination').each(function () {
+                    bimpAjax.$list.find('.listPagination').each(function () {
                         $(this).data('event_init', 0);
                         $(this).html(result.pagination_html).parent('td').parent('tr.paginationContainer').show();
                     });
-                    setPaginationEvents($list);
+                    setPaginationEvents(bimpAjax.$list);
                 } else {
-                    $container.find('.listPagination').each(function () {
+                    bimpAjax.$list.find('.listPagination').each(function () {
                         $(this).html('').parent('td').parent('tr.paginationContainer').hide();
                     });
                 }
-            }
 
-            onListRefeshed($list);
+                onListRefeshed(bimpAjax.$list);
 
-            if (typeof (callback) === 'function') {
-                callback(true);
+                if (typeof (callback) === 'function') {
+                    callback(true);
+                }
+            } else {
+                if (typeof (callback) === 'function') {
+                    callback(false);
+                }
             }
-        } else {
-            if (typeof (callback) === 'function') {
-                callback(false);
-            }
-        }
-    }, function (result) {
-        if (!bimp_display_result_errors(result, $resultContainer)) {
-            bimp_display_msg('La liste des ' + object_labels[object_name].name_plur + ' n\'a pas pu être rechargée', $resultContainer, 'danger');
+        },
+        error: function () {
+            $list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
             if (typeof (callback) === 'function') {
                 callback(false);
             }
@@ -155,10 +178,44 @@ function reloadObjectList(list_id, callback) {
     });
 }
 
-function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent) {
+function loadModalList(module, object_name, list_name, id_parent, $button, title, extra_data) {
+    if (typeof (title) === 'undefined' || !title) {
+        title = '<i class="fa fa-bars iconLeft"></i>Liste des ';
+        if (typeof (object_labels[object_name].name_plur) !== 'undefined') {
+            title += object_labels[object_name].name_plur;
+        } else {
+            title += 'Objet "' + object_name + '"';
+        }
+    }
+
+    if (typeof (id_parent) === 'undefined') {
+        id_parent = 0;
+    }
+    var data = {
+        'module': module,
+        'object_name': object_name,
+        'list_name': list_name,
+        'id_parent': id_parent
+    };
+    
+    if (extra_data) {
+        data['extra_data'] = extra_data;
+    }
+
+    bimpModal.loadAjaxContent($button, 'loadObjectListFullPanel', data, title, '', function (result, bimpAjax) {
+        var $new_list = bimpAjax.$resultContainer.find('#' + result.list_id);
+        if ($new_list.length) {
+            $new_list.data('modal_idx', bimpAjax.$resultContainer.data('idx'));
+            bimpModal.removeComponentContent($new_list.attr('id'));
+            onListLoaded($new_list);
+        }
+    });
+}
+
+function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent, title) {
     var $list = $('#' + list_id);
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -167,7 +224,7 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
     }
 
     var data = {
-        'module_name': $list.data('module_name'),
+        'module': $list.data('module'),
         'object_name': $list.data('object_name'),
         'form_name': form_name,
         'id_object': id_object,
@@ -176,50 +233,44 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
 
     var $values_input = $list.find('input[name=' + form_name + '_add_form_values]');
     if ($values_input.length) {
-        data.values = $values_input.val();
+        data['param_values'] = $values_input.val();
     }
 
-    var $asso_filters_input = $list.find('input[name=associations_filters]');
+    var $asso_filters_input = $list.find('input[name=param_associations_filters]');
     if ($asso_filters_input.length) {
-        data['associations_params'] = $asso_filters_input.val();
+        data['param_associations_params'] = $asso_filters_input.val();
     }
 
-    loadModalForm($button, data);
+    loadModalForm($button, data, title);
 }
 
 function updateObjectFromRow(list_id, id_object, $button) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
     var object_name = $list.data('object_name');
 
 //    var $resultContainer = $('#' + list_id + '_result');
-    var $row = $list.find('tbody').find('#' + object_name + '_row_' + id_object);
+    var $row = $list.find('tbody.listRows').find('#' + object_name + '_row_' + id_object);
 
     if (!$row.length) {
-        bimp_show_msg('Erreur technique: liste non trouvée', 'danger');
+        bimp_msg('Erreur technique: liste non trouvée', 'danger');
         return;
     }
 
-    $button.addClass('disabled');
-
     var data = {
-        'list_name': $list.data('list_name'),
-        'module_name': $list.data('module_name'),
+        'list_name': $list.data('name'),
+        'module': $list.data('module'),
         'object_name': object_name,
         'id_object': id_object
     };
 
     $row.removeClass('modified');
-    $row.find('.editInputContainer').each(function () {
+    $row.find('.inputContainer').each(function () {
         var field_name = $(this).data('field_name');
         if (field_name) {
             var val = $(this).find('[name=' + field_name + ']').val();
@@ -229,18 +280,14 @@ function updateObjectFromRow(list_id, id_object, $button) {
         }
     });
 
-    bimp_json_ajax('saveObject', data, null, function (result) {
-        $button.removeClass('disabled');
-        if (typeof (result.success) !== 'undefined') {
-            bimp_show_msg(result.success, 'success');
+    BimpAjax('saveObject', data, null, {
+        success: function (result) {
+            $('body').trigger($.Event('objectChange', {
+                module: result.module,
+                object_name: result.object_name,
+                id_object: result.id_object
+            }));
         }
-        $('body').trigger($.Event('objectChange', {
-            module: $list.data('module_name'),
-            object_name: object_name,
-            id_object: id_object
-        }));
-    }, function (result) {
-        $button.removeClass('disabled');
     });
 }
 
@@ -248,7 +295,7 @@ function saveAllRowsModifications(list_id, $button) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -260,13 +307,10 @@ function saveAllRowsModifications(list_id, $button) {
 }
 
 function addObjectFromList(list_id, $button) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -275,16 +319,14 @@ function addObjectFromList(list_id, $button) {
 
     if (!$row.length) {
         if ($result.length) {
-            bimp_display_msg('Aucun formulaire trouvé', $result, 'danger');
+            bimp_msg('Aucun formulaire trouvé', 'danger');
         }
         return;
     }
 
-    $button.addClass('disabled');
-
     var data = {
-        'list_name': $list.data('list_name'),
-        'module_name': $list.data('module_name'),
+        'list_name': $list.data('name'),
+        'module': $list.data('module'),
         'object_name': $list.data('object_name'),
         'id_object': 0
     };
@@ -297,21 +339,16 @@ function addObjectFromList(list_id, $button) {
         }
     });
 
-    bimp_json_ajax('saveObject', data, $result, function (result) {
-        if (!result.errors.length) {
+    BimpAjax('saveObject', data, null, {
+        $button: $button,
+        success: function (result) {
             resetListAddObjectRow(list_id);
-            $button.removeClass('disabled');
-            if (typeof (result.success) !== 'undefined') {
-                bimp_show_msg(result.success, 'success');
-            }
             $('body').trigger($.Event('objectChange', {
-                module: $list.data('module_name'),
-                object_name: $list.data('object_name'),
+                module: result.module,
+                object_name: result.object_name,
                 id_object: result.id_object
             }));
         }
-    }, function (result) {
-        $button.removeClass('disabled');
     });
 }
 
@@ -326,7 +363,7 @@ function deleteObjects(list_id, objects_list, $button) {
 
     var $list = $('#' + list_id);
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -347,24 +384,23 @@ function deleteObjects(list_id, objects_list, $button) {
 
     if (confirm(msg)) {
         var $resultContainer = $('#' + list_id + '_result');
-        $button.addClass('disabled');
         var data = {
-            'module_name': $list.data('module_name'),
+            'module': $list.data('module'),
             'object_name': object_name,
             'objects': objects_list
         };
 
-        bimp_json_ajax('deleteObjects', data, $resultContainer, function (result) {
-            $button.removeClass('disabled');
-            for (var i in objects_list) {
-                $('body').trigger($.Event('objectDelete', {
-                    module: $list.data('module_name'),
-                    object_name: $list.data('object_name'),
-                    id_object: objects_list[i]
-                }));
+        BimpAjax('deleteObjects', data, null, {
+            $button: $button,
+            success: function (result) {
+                for (var i in result.objects_list) {
+                    $('body').trigger($.Event('objectDelete', {
+                        module: result.module,
+                        object_name: result.object_name,
+                        id_object: result.objects_list[i]
+                    }));
+                }
             }
-        }, function (result) {
-            $button.removeClass('disabled');
         });
     }
 }
@@ -373,7 +409,7 @@ function deleteSelectedObjects(list_id, $button) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
@@ -388,7 +424,7 @@ function deleteSelectedObjects(list_id, $button) {
         } else {
             msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
         }
-        bimp_display_msg(msg, $resultContainer, 'danger');
+        bimp_msg(msg, 'danger');
     } else {
         var objects_list = [];
         $selected.each(function () {
@@ -401,21 +437,27 @@ function deleteSelectedObjects(list_id, $button) {
 function saveObjectPosition(list_id, id_object, position) {
     var $list = $('#' + list_id);
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
     var data = {
-        'module_name': $list.data('module_name'),
+        'list_id': list_id,
+        'module': $list.data('module'),
         'object_name': $list.data('object_name'),
         'id_object': id_object,
         'position': position
     };
 
-    bimp_json_ajax('saveObjectPosition', data, null, function () {
-        sortListByPosition($list.attr('id'));
-    }, function () {
-        sortListByPosition($list.attr('id'));
+    BimpAjax('saveObjectPosition', data, null, {
+        success: function (result) {
+            var $list = $('#' + result.list_id);
+            sortListByPosition($list.attr('id'));
+        },
+        error: function (result) {
+            var $list = $('#' + result.list_id);
+            sortListByPosition($list.attr('id'));
+        }
     });
 }
 
@@ -423,23 +465,23 @@ function toggleSelectedItemsAssociation(list_id, operation, association, id_asso
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
     var $resultContainer = $('#' + list_id + '_result');
     var $selected = $list.find('tbody').find('input.item_check:checked');
-    var module = $list.data('module_name');
+    var module = $list.data('module');
     var object_name = $list.data('object_name');
 
     if (!$selected.length) {
         var msg = '';
-        if (object_labels[object_name]['is_female']) {
+        if (object_labels[object]['is_female']) {
             msg = 'Aucune ' + object_labels[object_name]['name'] + ' sélectionnée';
         } else {
             msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
         }
-        bimp_display_msg(msg, $resultContainer, 'danger');
+        bimp_msg(msg, 'danger');
     } else {
         var associations = [];
 
@@ -457,28 +499,228 @@ function toggleSelectedItemsAssociation(list_id, operation, association, id_asso
     }
 }
 
+function setSelectedObjectsNewStatus($button, list_id, new_status, extra_data, confirm_msg) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        return;
+    }
+
+    if (typeof (extra_data) === 'undefined') {
+        extra_data = {};
+    }
+
+    var $selected = $list.find('tbody').find('input.item_check:checked');
+    var object_name = $list.data('object_name');
+
+    if (!$selected.length) {
+        var msg = '';
+        if (object_labels[object_name]['is_female']) {
+            msg = 'Aucune ' + object_labels[object_name]['name'] + ' sélectionnée';
+        } else {
+            msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
+        }
+        bimp_msg(msg, 'danger');
+    } else {
+        if (typeof (confirm_msg) === 'string') {
+            if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
+                return;
+            }
+        }
+        $button.addClass('disabled');
+        var i = 1;
+        $selected.each(function () {
+            var id_object = $(this).data('id_object');
+            if (id_object) {
+                setObjectNewStatus(null, {
+                    module: $list.data('module'),
+                    object_name: object_name,
+                    id_object: id_object
+                }, new_status, extra_data, null, null, null);
+            } else {
+                var msg = '';
+                if (object_labels[object_name]['is_female']) {
+                    msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionnée n° ' + i + ' absent';
+                } else {
+                    msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionné n° ' + i + ' absent';
+                }
+                bimp_msg(msg, 'danger');
+            }
+            i++;
+        });
+        $button.removeClass('disabled');
+    }
+}
+
+function setSelectedObjectsAction($button, list_id, action, extra_data, form_name, confirm_msg, single_action) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    if (typeof (confirm_msg) === 'string') {
+        if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
+            return;
+        }
+    }
+
+    if (typeof (single_action) === 'undefined') {
+        single_action = false;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        return;
+    }
+
+    if (typeof (extra_data) === 'undefined') {
+        extra_data = {};
+    }
+
+    var $selected = $list.find('tbody').find('input.item_check:checked');
+    var object_name = $list.data('object_name');
+
+    if (!$selected.length) {
+        var msg = '';
+        if (object_labels[object_name]['is_female']) {
+            msg = 'Aucune ' + object_labels[object_name]['name'] + ' sélectionnée';
+        } else {
+            msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
+        }
+        bimp_msg(msg, 'danger');
+    } else {
+        if (typeof (form_name) === 'string' && form_name) {
+            var title = '';
+            if ($.isOk($button)) {
+                title = $button.text();
+            }
+            loadModalForm($button, {
+                module: $list.data('module'),
+                object_name: $list.data('object_name'),
+                id_object: 0,
+                form_name: form_name,
+                extra_data: extra_data,
+                param_values: {
+                    fields: extra_data
+                }
+            }, title, function ($form) {
+                if ($.isOk($form)) {
+                    var modal_idx = parseInt($form.data('modal_idx'));
+                    if (!modal_idx) {
+                        bimp_msg('Erreur technique: index de la modale absent');
+                        return;
+                    }
+                }
+                if ($form.length) {
+                    for (var field_name in extra_data) {
+                        var $input = $form.find('[name="' + field_name + '"]');
+                        if ($input.length) {
+                            $input.val(extra_data[field_name]);
+                        }
+                    }
+                    bimpModal.$footer.find('.save_object_button.modal_' + modal_idx).remove();
+                    bimpModal.$footer.find('.objectViewLink.modal_' + modal_idx).remove();
+                    bimpModal.addButton('Valider<i class="fa fa-arrow-circle-right iconRight"></i>', '', 'primary', 'set_action_button', modal_idx);
+
+                    bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
+                        $form.find('.inputContainer').each(function () {
+                            if ($(this).data('multiple')) {
+                                var field_name = $(this).data('values_field');
+                                var $valuesContainer = $(this).parent().find('.inputMultipleValuesContainer');
+                                if (!$valuesContainer.length) {
+                                    bimp_msg('Erreur: liste de valeurs absente pour le champ "' + field_name + '"', 'danger');
+                                    return;
+                                } else {
+                                    extra_data[field_name] = [];
+                                    $valuesContainer.find('[name="' + field_name + '[]"]').each(function () {
+                                        var value = $(this).val();
+                                        if (value !== '') {
+                                            extra_data[field_name].push(value);
+                                        }
+                                    });
+                                }
+                            } else {
+                                var field_name = $(this).data('field_name');
+                                if ($(this).find('.cke').length) {
+                                    var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+                                    $(this).find('[name="' + field_name + '"]').val(html_value);
+                                }
+                                extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
+                            }
+                        });
+                        bimpModal.hide();
+                        setSelectedObjectsAction($button, list_id, action, extra_data, null, null, single_action);
+                    });
+                }
+            });
+        } else {
+            if (single_action) {
+                extra_data['id_objects'] = [];
+                $selected.each(function () {
+                    var $input = $(this);
+                    extra_data['id_objects'].push($input.data('id_object'));
+                });
+                setObjectAction($button, {
+                    module: $list.data('module'),
+                    object_name: object_name,
+                    id_object: 0
+                }, action, extra_data, null, null, null, null);
+            } else {
+                $button.addClass('disabled');
+                var i = 1;
+                $selected.each(function () {
+                    var id_object = $(this).data('id_object');
+                    if (id_object) {
+                        setObjectAction(null, {
+                            module: $list.data('module'),
+                            object_name: object_name,
+                            id_object: id_object
+                        }, action, extra_data, null, null, null, null);
+                    } else {
+                        var msg = '';
+                        if (object_labels[object_name]['is_female']) {
+                            msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionnée n° ' + i + ' absent';
+                        } else {
+                            msg = 'ID ' + object_labels[object_name]['of_the'] + ' sélectionné n° ' + i + ' absent';
+                        }
+                        bimp_msg(msg, 'danger');
+                    }
+                    i++;
+                });
+                $button.removeClass('disabled');
+            }
+        }
+    }
+}
+
 // Actions:
 
 function cancelObjectRowModifications(list_id, id_object, $button) {
     var $list = $('#' + list_id);
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
     var object_name = $list.data('object_name');
 
     var $row = $list.find('tbody.listRows').find('tr#' + object_name + '_row_' + id_object);
     if (!$row.length) {
-        bimp_show_msg('Erreur technique: ligne correspondante non trouvée', 'danger');
+        bimp_msg('Erreur technique: ligne correspondante non trouvée', 'danger');
         return;
     }
 
-    $row.find('.editInputContainer').each(function () {
+    $row.find('.inputContainer').each(function () {
         var field_name = $(this).data('field_name');
         var $input = $(this).find('[name="' + field_name + '"]');
-        var $initial = $(this).find('[name="' + field_name + '_initial_value"]');
-        if ($input.length && $initial.length) {
-            $input.val($initial.val()).change();
+        var initial_value = $(this).data('initial_value');
+        if ($input.length) {
+            $input.val(initial_value).change();
         }
         $input.removeClass('modified');
     });
@@ -494,13 +736,13 @@ function cancelAllRowsModifications(list_id, $button) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
     $list.find('tbody.listRows').children('tr.modified').each(function () {
         var id_object = $(this).data('id_object');
-        var $button = $(this).find('.cancelModificationsButton');
+        $button = $(this).find('.cancelModificationsButton');
         cancelObjectRowModifications(list_id, id_object, $button);
     });
 }
@@ -508,18 +750,16 @@ function cancelAllRowsModifications(list_id, $button) {
 function checkRowModifications($row) {
     if ($row.length) {
         var modified = false;
-        $row.find('.editInputContainer').each(function () {
+        $row.find('.inputContainer').each(function () {
             var field_name = $(this).data('field_name');
             if (field_name) {
                 var $input = $(this).find('[name="' + field_name + '"]');
-                var $initial = $(this).find('[name="' + field_name + '_initial_value"]');
-                if ($initial.length) {
-                    if ($input.length) {
-                        if ($initial.val() != $input.val()) {
-                            $input.addClass('modified');
-                        } else {
-                            $input.removeClass('modified');
-                        }
+                var initial_value = $(this).data('initial_value');
+                if ($input.length) {
+                    if (initial_value != $input.val()) {
+                        $input.addClass('modified');
+                    } else {
+                        $input.removeClass('modified');
                     }
                 }
                 if ($input.length) {
@@ -538,7 +778,10 @@ function checkRowModifications($row) {
             $row.find('.cancelModificationsButton').hide();
             $row.find('.updateButton').hide();
         }
-        checkRowsModifications($row.parent('tbody').parent('table').parent('.objectList'));
+        var $list = findParentByClass($row, 'object_list_table');
+        if ($list.length) {
+            checkRowsModifications($list);
+        }
     }
 }
 
@@ -563,13 +806,11 @@ function toggleCheckAll(list_id, $input) {
     var $inputs = $('#' + list_id).find('tbody').find('input.item_check');
     if ($input.prop('checked')) {
         $inputs.each(function () {
-            $(this).attr('checked', 1);
+            $(this).prop('checked', true).change();
         });
     } else {
         $inputs.each(function () {
-            $(this).removeAttr('checked').removeProp('checked');
-            var html = $(this).parent('td').html();
-            $(this).parent('td').html(html);
+            $(this).removeAttr('checked').prop('checked', false).change();
         });
     }
 }
@@ -580,20 +821,20 @@ function sortList(list_id, col_name) {
         var $span = $row.find('#' + col_name + '_sortTitle');
         if ($span.length) {
             var $list = $('#' + list_id);
-            var prev_sort_col = $list.find('input[name=sort_col]').val();
-            var prev_sort_way = $list.find('input[name=sort_way]').val();
-            var prev_sort_option = $list.find('input[name=sort_option]').val();
-            $list.find('input[name=sort_col]').val($span.parent('th').data('col_name'));
+            var prev_sort_field = $list.find('input[name=param_sort_field]').val();
+            var prev_sort_way = $list.find('input[name=param_sort_way]').val();
+            var prev_sort_option = $list.find('input[name=param_sort_option]').val();
+            $list.find('input[name=param_sort_field]').val($span.parent('th').data('field_name'));
             if ($span.hasClass('sorted-asc')) {
-                $list.find('input[name=sort_way]').val('desc');
+                $list.find('input[name=param_sort_way]').val('desc');
             } else {
-                $list.find('input[name=sort_way]').val('asc');
+                $list.find('input[name=param_sort_way]').val('asc');
             }
             var sort_option = $span.data('sort_option');
             if (!sort_option) {
                 sort_option = '';
             }
-            $list.find('input[name=sort_option]').val(sort_option);
+            $list.find('input[name=param_sort_option]').val(sort_option);
             reloadObjectList(list_id, function (success) {
                 if (success) {
                     $row.find('.sortTitle').each(function () {
@@ -608,9 +849,9 @@ function sortList(list_id, col_name) {
                         $span.removeClass('sorted-asc').addClass('sorted-desc');
                     }
                 } else {
-                    $list.find('input[name=sort_col]').val(prev_sort_col);
-                    $list.find('input[name=sort_way]').val(prev_sort_way);
-                    $list.find('input[name=sort_option]').val(prev_sort_option);
+                    $list.find('input[name=param_sort_field]').val(prev_sort_field);
+                    $list.find('input[name=param_sort_way]').val(prev_sort_way);
+                    $list.find('input[name=param_sort_option]').val(prev_sort_option);
                 }
             });
         }
@@ -624,9 +865,9 @@ function sortListByPosition(list_id, first_page) {
     var $list = $('#' + list_id);
 
     if ($list.length) {
-        $list.find('input[name=sort_col]').val('position');
-        $list.find('input[name=sort_way]').val('asc');
-        $list.find('input[name=sort_option]').val('');
+        $list.find('input[name=param_sort_field]').val('position');
+        $list.find('input[name=param_sort_way]').val('asc');
+        $list.find('input[name=param_sort_option]').val('');
         if (!first_page) {
             var $pagination = $('#' + list_id + '_pagination');
             if ($pagination.length) {
@@ -643,11 +884,12 @@ function sortListByPosition(list_id, first_page) {
 
 function loadPage($list, page) {
     if (!$list.length) {
-        bimp_show_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
         return;
     }
 
-    $list.find('input[name=p]').val(page);
+    $list.find('input[name=param_p]').val(page);
+
     reloadObjectList($list.attr('id'));
 }
 
@@ -713,6 +955,7 @@ function resetListSearchInputs(list_id) {
             $(this).data('DateTimePicker').clear();
             $(this).parent().find('.datepicker_value').val('');
         });
+        $row.find('.search_input_selected_label').html('').hide();
     }
     reloadObjectList(list_id);
 }
@@ -724,10 +967,28 @@ function onListLoaded($list) {
         return;
     }
 
+//    bimp_msg($list.attr('id'));
+
     if (!parseInt($list.data('loaded_event_processed'))) {
         $list.data('loaded_event_processed', 1);
 
-        $list.find('#' + $list.attr('id') + '_n').change(function () {
+        var $tbody = $list.find('tbody.listRows');
+
+        $tbody.find('a').each(function () {
+//        $(this).attr('target', '_blank');
+            var link_title = $(this).attr('title');
+            if (link_title) {
+                $(this).removeAttr('title');
+                $(this).popover({
+                    trigger: 'hover',
+                    content: link_title,
+                    placement: 'bottom',
+                    html: true
+                });
+            }
+        });
+
+        $list.find('input[name="param_n"]').change(function () {
             reloadObjectList($list.attr('id'));
         });
 
@@ -764,13 +1025,29 @@ function onListLoaded($list) {
                         $handles.show();
                         $(this).removeClass('action-open').addClass('action-close');
                         deactivateSorting($list);
-                        $list.find('input[name=p]').val('1');
+                        $list.find('input[name=param_p]').val('1');
                         sortListByPosition($list.attr('id'), true);
                     } else {
                         $handles.hide();
                         $(this).removeClass('action-close').addClass('action-open');
                         activateSorting($list);
                     }
+                }
+            });
+            $tools.find('input[name="select_n"]').change(function () {
+                var n = parseInt($(this).val());
+                $list.find('input[name="param_n"]').val(n).change();
+            });
+
+            $tools.find('.refreshListButton').click(function () {
+                reloadObjectList($list.attr('id'));
+            });
+
+            $list.find('input[name="param_n"]').change(function () {
+                var val = parseInt($(this).val());
+                var select_val = parseInt($tools.find('input[name="select_n"]').val());
+                if (val !== select_val) {
+                    $tools.find('input[name="select_n"]').val(val).change();
                 }
             });
         }
@@ -801,16 +1078,19 @@ function onListLoaded($list) {
         setPaginationEvents($list);
 
         if (!$list.data('object_change_event_init')) {
-            var module = $list.data('module_name');
+            var module = $list.data('module');
             var object_name = $list.data('object_name');
 
             var objects = $list.data('objects_change_reload');
             if (objects) {
                 objects = objects.split(',');
+            } else {
+                objects = [];
             }
 
             if (!$('body').data($list.attr('id') + '_object_events_init')) {
                 $('body').on('objectChange', function (e) {
+//                    bimp_msg($list.attr('id') + ' => ' + e.module + ', ' + module + ', ' + e.object_name + ', ' + object_name);
                     if ((e.module === module) && (e.object_name === object_name)) {
                         reloadObjectList($list.attr('id'));
                     } else if (objects && objects.length) {
@@ -846,10 +1126,9 @@ function onListRefeshed($list) {
 //    });
 
     var $tbody = $list.find('tbody.listRows');
-    $list.find('input[name=p]').val('');
 
     $tbody.find('a').each(function () {
-        $(this).attr('target', '_blank');
+//        $(this).attr('target', '_blank');
         var link_title = $(this).attr('title');
         if (link_title) {
             $(this).removeAttr('title');
@@ -891,16 +1170,16 @@ function setSearchInputsEvents($list) {
                                     search_on_key_up = 0;
                                 }
                                 if (parseInt(search_on_key_up)) {
-                                    var min_chars = $(this).data('min_chars');
-                                    if (typeof (min_chars) === 'undefined') {
-                                        min_chars = 1;
-                                    }
+//                                    var min_chars = $(this).data('min_chars');
+//                                    if (typeof (min_chars) === 'undefined') {
+//                                        min_chars = 0;
+//                                    }
                                     $input.keyup(function () {
-                                        var val = '' + $input.val();
+//                                        var val = '' + $input.val();
 
-                                        if (val.length >= min_chars) {
-                                            reloadObjectList($list.attr('id'));
-                                        }
+//                                        if (val.length >= min_chars) {
+                                        reloadObjectList($list.attr('id'));
+//                                        }
                                     });
                                 } else {
                                     $input.change(function () {
@@ -950,7 +1229,7 @@ function setListEditInputsEvents($list) {
                 }
             });
 
-            $(this).find('.editInputContainer').each(function () {
+            $(this).find('.inputContainer').each(function () {
                 var field_name = $(this).data('field_name');
                 if (field_name) {
                     var $input = $(this).find('[name="' + field_name + '"]');
@@ -1020,7 +1299,7 @@ function setPaginationEvents($list) {
 }
 
 function setPositionsHandlesEvents($list) {
-    var $tbody = $list.find('tbody');
+    var $tbody = $list.find('tbody.listRows');
     var $handles = $tbody.find('td.positionHandle');
     if ($list.find('.headerTools').find('.activatePositionsButton').hasClass('action-close')) {
         $handles.show();
@@ -1036,17 +1315,17 @@ function setPositionsHandlesEvents($list) {
             items: $rows,
             opacity: 0.75,
             start: function (e, ui) {
-                var $list = ui.item.parent('tbody').parent('table').parent('.objectList');
-                first_position = parseInt($list.find('tbody').find('tr.objectListItemRow').first().data('position'));
+                var $list = ui.item.findParentByClass('object_list_table');
+                first_position = parseInt($list.find('tbody.listRows').find('tr.objectListItemRow').first().data('position'));
             },
             update: function (e, ui) {
                 var id_object = parseInt(ui.item.data('id_object'));
-                var $list = ui.item.parent('tbody').parent('table').parent('.objectList');
+                var $list = ui.item.findParentByClass('object_list_table');
                 var position = 0;
                 if (id_object && $list.length) {
                     var current_position = first_position;
                     var check = true;
-                    $list.find('tbody').find('tr.objectListItemRow').each(function () {
+                    $list.find('tbody.listRows').find('tr.objectListItemRow').each(function () {
                         if (check) {
                             if (parseInt($(this).data('id_object')) === id_object) {
                                 position = current_position;
@@ -1066,14 +1345,13 @@ function setPositionsHandlesEvents($list) {
 }
 
 $(document).ready(function () {
-    $('.objectList').each(function () {
+    $('.object_list_table').each(function () {
         onListLoaded($(this));
     });
 
     $('body').on('controllerTabLoaded', function (e) {
         if (e.$container.length) {
-            e.$container.find('.objectList').each(function () {
-                onListLoaded($(this));
+            e.$container.find('.object_list_table').each(function () {
                 onListLoaded($(this));
             });
         }

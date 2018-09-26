@@ -167,7 +167,14 @@ if (! empty($socid))
 		$i = 0;
 
 		$tmpuser = new User($db);
-
+                
+                
+                if($num > 0 && isset($user->rights->bimpcommercial) && $user->rights->bimpcommercial->commerciauxToSoc == 0){
+                    $user->rights->societe->creer = 0;
+                    echo "Vous n'avez pas la permission de modifier les commerciaux<br/><br/>"; 
+                }
+                
+                
 		while ($i < $num)
 		{
 			$obj = $db->fetch_object($resql);

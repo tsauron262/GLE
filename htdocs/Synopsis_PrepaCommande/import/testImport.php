@@ -922,7 +922,7 @@ if (is_dir($dir)) {
 
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Produits</th>";
                                 $mailContent .= "<tr><th  style='color:#fff; background-color: #0073EA;'>Produits</th>" . "\n";
-                                $requete = "SELECT p.*, 2dureeSav as durSav, 2prixAchatHt as prixAchat FROM " . MAIN_DB_PREFIX . "product p LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields ON fk_object = p.rowid WHERE p.import_key = '" . $val['ArtID'] . "' OR ref='" . $val['PlvCode'] . "'";
+                                $requete = "SELECT p.*, 2dureeSav as durSav FROM " . MAIN_DB_PREFIX . "product p LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields ON fk_object = p.rowid WHERE p.import_key = '" . $val['ArtID'] . "' OR ref='" . $val['PlvCode'] . "'";
                                 $sql = requeteWithCache($requete);
                                 $res = fetchWithCache($sql);
                                 $sqlUpt = array();
@@ -935,17 +935,18 @@ if (is_dir($dir)) {
                                         $sqlUpt[] = " label = '" . $val['ArtLib'] . "'";
                                     if ($res->price != $val['ArtPrixBase'])
                                         $sqlUpt[] = " price = '" . $val['ArtPrixBase'] . "'";
-                                    if ($res->prixAchat != $val['PlvPA'])
-                                        $sqlUpt2[] = " 2prixAchatHt = '" . $val['PlvPA'] . "'";
+//                                    if ($res->prixAchat != $val['PlvPA'])
+//                                        $sqlUpt2[] = " 2prixAchatHt = '" . $val['PlvPA'] . "'";
                                     if ($res->durSav != $val['ArtDureeGar'])
                                         $sqlUpt2[] = " 2dureeSav = " . ($val['ArtDureeGar'] > 0 ? $val['ArtDureeGar'] : 0) . "";
                                     if ($res->tva_tx != $val['TaxTaux'])
                                         $sqlUpt[] = " tva_tx = '" . $val['TaxTaux'] . "'";
-                                    if ($res->ref != $val['PlvCode']){
-                                        $sqlUpt[] = " ref = '" . $val['PlvCode'] . "'";
-                                        echo "Changement de ref de ".$res->ref." en ".$val['PlvCode'];
-                                    }
+//                                    if ($res->ref != $val['PlvCode']){
+//                                        $sqlUpt[] = " ref = '" . $val['PlvCode'] . "'";
+//                                        echo "Changement de ref de ".$res->ref." en ".$val['PlvCode'];
+//                                    }
 
+                                    
                                     if (count($sqlUpt) > 0 || count($sqlUpt2) > 0) {
                                         $ok = true;
                                         if (count($sqlUpt) > 0) {
@@ -1015,13 +1016,12 @@ if (is_dir($dir)) {
                                     (
                                     `tms` ,
                                     `fk_object`,
-                                    `2dureeSav` ,
-                                    `2prixAchatHt`
+                                    `2dureeSav` 
                                     )
                                      VALUES (now(),
                                     '" . $prodId . "',
-                                    '" . $val['ArtDureeGar'] . "',
-                                    " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . ") ";
+                                    '" . $val['ArtDureeGar'] . "'
+                                    " /*. ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . ") "*/;
 
                                     if ($sql) {
                                         $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation produit OK</td>";

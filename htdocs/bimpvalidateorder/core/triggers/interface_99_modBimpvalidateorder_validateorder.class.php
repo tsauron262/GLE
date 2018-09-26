@@ -28,6 +28,23 @@ class Interfacevalidateorder extends DolibarrTriggers {
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         global $conf, $user;
+        
+        if($action == "ORDER_CREATE"){
+            $object->fetchObjectLinked();
+            if (isset($object->linkedObjects['propal'])) {
+                foreach ($object->linkedObjects['propal'] as $prop)
+                    $object->addLine("Selon notre devis ".$prop->ref,0,0,0);
+            }
+        }
+        if($action == "BILL_CREATE"){
+            $object->fetchObjectLinked();
+            if (isset($object->linkedObjects['commande'])) {
+                foreach ($object->linkedObjects['commande'] as $comm) {
+                    $object->addLine("Selon notre commande ".$comm->ref,0,0,0);
+                }
+            }
+        }
+        
         if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE')) {
             $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');
             if (count($tabConatact) < 1) {
@@ -61,12 +78,13 @@ class Interfacevalidateorder extends DolibarrTriggers {
 
         if (!defined("NOT_VERIF") && $action == 'ORDER_VALIDATE') {
             $bvo = new BimpValidateOrder($user->db);
-            if(!$bvo->checkValidateRights($user, $object))    
+            if($bvo->checkValidateRights($user, $object) < 1)    
                 return -2;
+            
             $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
             $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
         }
-        if ($action == 'ORDER_UNVALIDATE') {
+        if ($action == 'ORDER_UNVALIDATE' || ($action == 'ORDER_DELETE' && $object->statut == 1)) {
             setEventMessages("Impossible de dévalidé", null, 'errors');
             return -2;
         }

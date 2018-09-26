@@ -67,7 +67,7 @@ class BimpDb
             }
         }
         $sql .= ' WHERE ' . $where;
-        
+
         return $this->execute($sql);
     }
 
@@ -120,12 +120,13 @@ class BimpDb
             $sql = file_get_contents($file);
             if ($sql) {
                 $tabSql = explode(";", $sql);
-                foreach ($tabSql as $req)
+                foreach ($tabSql as $req) {
                     if ($req != "")
                         if ($result = $this->execute($req) < 0)
                             return false;
-                return true;
+                }
             }
+            return true;
         }
         return false;
     }

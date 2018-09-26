@@ -5,16 +5,16 @@ require_once DOL_DOCUMENT_ROOT . '/bimpreservation/controllers/reservationContro
 class commandeController extends reservationController
 {
 
-    public function displayHead()
-    {
-        global $langs;
-        $commande = $this->config->getObject('', 'commande');
-        require_once DOL_DOCUMENT_ROOT . '/core/lib/order.lib.php';
-        $head = commande_prepare_head($commande->dol_object);
-        dol_fiche_head($head, 'bimplogisitquecommande', $langs->trans("CustomerOrder"), -1, 'order');
-    }
+//    public function displayHead()
+//    {
+//        global $langs;
+//        $commande = $this->config->getObject('', 'commande');
+//        require_once DOL_DOCUMENT_ROOT . '/core/lib/order.lib.php';
+//        $head = commande_prepare_head($commande->dol_object);
+//        dol_fiche_head($head, 'bimplogisitquecommande', $langs->trans("CustomerOrder"), -1, 'order');
+//    }
 
-    public function renderHtml()
+    public function renderContentHtml()
     {
         if (!BimpTools::isSubmit('id')) {
             return BimpRender::renderAlerts('ID de la commande absent');
@@ -33,8 +33,8 @@ class commandeController extends reservationController
 
         $html = '';
 
-        $html .= '<div class="page_content container-fluid">';
-        $html .= '<h1>Commande client "' . $commande->dol_object->ref . '"</h1>';
+//        $html .= '<div class="page_content container-fluid">';
+//        $html .= '<h1>Commande client "' . $commande->dol_object->ref . '"</h1>';
 
         $errors = $commande->checkIntegrity();
 
@@ -47,7 +47,7 @@ class commandeController extends reservationController
             foreach ($errors as $error) {
                 $mail_msg .= ' - ' . $error . "\n";
             }
-            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<no-reply@bimp.fr>', $mail_msg);
+            mailSyn2($subject, 'f.martinez@bimp.fr', 'BIMP<admin@bimp.fr>', $mail_msg);
         }
 
         $html .= BimpRender::renderNavTabs(array(
@@ -78,7 +78,7 @@ class commandeController extends reservationController
                     ),
         ));
 
-        $html .= '</div>';
+//        $html .= '</div>';
 
         return $html;
     }
@@ -224,7 +224,7 @@ class commandeController extends reservationController
         $html .= '<div class="row">';
         $html .= '<div class="col-lg-12">';
 
-        $instance = BimpObject::getInstance('bimpcore', 'Bimp_Facture');
+        $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
         $list = new BC_ListTable($instance, 'default', 1, null, 'Liste des avoirs en lien avec cette commande');
         $list->addObjectAssociationFilter($commande, $commande->id, 'avoirs');
         $list->addObjectChangeReload('BR_ReservationShipment');

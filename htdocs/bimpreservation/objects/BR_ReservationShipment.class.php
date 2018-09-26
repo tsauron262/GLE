@@ -89,7 +89,7 @@ class BR_reservationShipment extends BimpObject
     public function getCommande()
     {
         if (is_null($this->commande)) {
-            $this->commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+            $this->commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
         }
 
         return $this->commande;
@@ -204,7 +204,7 @@ class BR_reservationShipment extends BimpObject
 
         if (BimpObject::objectLoaded($commande)) {
             $asso = new BimpAssociation($commande, 'avoirs');
-            $avoir = BimpObject::getInstance('bimpcore', 'Bimp_Facture');
+            $avoir = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             foreach ($asso->getAssociatesList() as $id_avoir) {
                 if ($avoir->fetch((int) $id_avoir)) {
                     if ((int) $avoir->dol_object->statut === (int) Facture::STATUS_DRAFT) {
@@ -233,7 +233,7 @@ class BR_reservationShipment extends BimpObject
         $errors = array();
 
         $shipment = $this->getParentInstance();
-        $commande = BimpObject::getInstance('bimpcore', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
 
         if (!BimpObject::objectLoaded($shipment)) {
             $errors[] = 'ID de l\'expédition absent';

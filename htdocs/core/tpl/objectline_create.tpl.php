@@ -652,9 +652,30 @@ jQuery(document).ready(function() {
     	      			}
     	        		options += '<option value="'+this.id+'" price="'+this.price+'">'+this.label+'</option>';
     	      		});
-                        <?php
-                        if(!defined("OLD_PRICE_FOURN"))
-    	      		 echo 'options += \'<option value="inputprice" price="\'+defaultprice+\'"><?php echo $langs->trans("InputPrice"); ?></option>\';';
+                        <?php global $tabProdPrixModifToujours;
+                        echo 'var droitProd = !$.inArray($("#search_idprod").val(), ["'.implode('","', $tabProdPrixModifToujours).'"]);';
+                        $droitPrixAchat = (in_array($line->ref, $tabProdPrixModifToujours) || !isset($user->rights->bimpcommercial) || (isset($user->rights->bimpcommercial->priceAchat) && $user->rights->bimpcommercial->priceAchat))? 1 : 0;
+                        if($droitPrixAchat)
+                            echo 'var droitPrixAchat = true;';
+                        else
+                            echo 'var droitPrixAchat = droitProd;';
+                        $droitPrixVente = (in_array($line->ref, $tabProdPrixModifToujours) || !isset($user->rights->bimpcommercial) || (isset($user->rights->bimpcommercial->priceVente) && $user->rights->bimpcommercial->priceVente))? 1 : 0;
+                        if($droitPrixVente)
+                            echo 'var droitPrixVente = true;';
+                        else
+                            echo 'var droitPrixVente = droitProd;';
+                        
+                         echo 'if(droitPrixAchat){'.
+                            'options += \'<option value="inputprice" price="\'+defaultprice+\'">'.$langs->trans("InputPrice") .'</option>\';';
+                            echo '}'; 
+                         echo 'if(droitPrixVente){';
+                         echo '$("#price_ht").show();';
+                         echo '$("#price_ht").css("width", "auto");';
+                         echo '$("#price_ht").css("height", "auto");';
+                         echo '}';
+                        
+//                        if(!defined("OLD_PRICE_FOURN"))
+//    	      		 echo 'options += \'<option value="inputprice" price="\'+defaultprice+\'">'.$langs->trans("InputPrice") .'</option>\';';
                         ?>
 
     	      		console.log("finally selected defaultkey="+defaultkey+" defaultprice="+defaultprice);

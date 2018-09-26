@@ -3,6 +3,7 @@
 class BC_Form extends BC_Panel
 {
 
+    public $component_name = 'Formulaire';
     public static $type = 'form';
     public static $config_required = false;
     public $id_parent = null;
@@ -100,7 +101,9 @@ class BC_Form extends BC_Panel
         if (isset($this->params['values']) && !is_null($this->params['values'])) {
             if (isset($this->params['values']['fields'])) {
                 foreach ($this->params['values']['fields'] as $field_name => $value) {
-                    $object->set($field_name, $value);
+                    if (!is_null($value)) {
+                        $object->set($field_name, $value);
+                    }
                 }
             }
 
@@ -351,7 +354,7 @@ class BC_Form extends BC_Panel
             if ($this->object->config->isDefined('associations/' . $params['association'] . '/list')) {
                 $html .= '<div class="inputContainer ' . $this->fields_prefix . $params['association'] . '_inputContainer"';
                 $html .= ' data-field_name="' . $this->fields_prefix . $params['association'] . '"';
-                $html .= ' data-initial_values="' . implode(',', $items) . '"';
+                $html .= ' data-initial_value="' . implode(',', $items) . '"';
                 $html .= ' data-multiple="1"';
                 $html .= ' data-field_prefix="' . $this->fields_prefix . '"';
                 $html .= ' data-required="' . $params['required'] . '"';
@@ -460,8 +463,7 @@ class BC_Form extends BC_Panel
 
         $object_id_parent = 0;
 
-        if ($object->getParentModule() === $this->object->module &&
-                $object->getParentObjectName() === $this->object->object_name) {
+        if ($this->object->isChild($object)) {
             $object->parent = $this->object;
             if (BimpObject::objectLoaded($this->object)) {
                 $object_id_parent = $this->object->id;
@@ -493,7 +495,7 @@ class BC_Form extends BC_Panel
         $html .= '</div>';
 
         $form = new BC_Form($object, null, $params['form_name'], 1, true);
-        $form->setValues($params['values']);
+        $form->setValues($params['form_values']);
         $form->setFieldsPrefix($this->fields_prefix . $object_name . '_');
 
         $subFormIdentifier = '';
@@ -507,13 +509,14 @@ class BC_Form extends BC_Panel
             $html .= ' data-name="' . $params['form_name'] . '"';
             $html .= ' data-id_object="' . (BimpObject::objectLoaded($object) ? $object->id : 0) . '"';
             $html .= ' data-id_parent="' . $object_id_parent . '"';
+            $html .= ' data-idx="sub_object_idx"';
             $html .= '>';
             $html .= '<div class="formGroupHeading">';
             $html .= '<div class="formGroupTitle">';
             $html .= '<h4>' . BimpTools::ucfirst(BimpObject::getInstanceLabel($object)) . ' #sub_object_idx</h4>';
             $html .= '</div>';
             $html .= '<div class="formGroupButtons">';
-            $html .= '<span class="btn btn-default" onclick="$(this).findParentByClass(\'formInputGroup\').remove()">';
+            $html .= '<span class="btn btn-default" onclick="removeSubObjectForm($(this))">';
             $html .= '<i class="fa fa-trash iconLeft"></i>Supprimer</span>';
             $html .= '</div>';
             $html .= '</div>';
@@ -565,6 +568,10 @@ class BC_Form extends BC_Panel
             $params = array_merge($params, $this->fetchParams($row_path, self::$custom_row_params));
         }
 
+        if ((is_null($params['value']) || $params['value'] === '') && isset($this->params['values']['fields'][$params['input_name']])) {
+            $params['value'] = $this->params['values']['fields'][$params['input_name']];
+        }
+
         $html = '';
 
         if ($params['data_type'] === 'id_object' && $params['object'] && $params['create_form']) {
@@ -588,7 +595,7 @@ class BC_Form extends BC_Panel
         } elseif ($this->object->config->isDefined($this->config_path . '/rows/' . $row . '/content')) {
             $html .= '<div class="inputContainer ' . $this->fields_prefix . $params['input_name'] . '_inputContainer customField"';
             $html .= ' data-field_name="' . $this->fields_prefix . $params['input_name'] . '"';
-            $html .= ' data-initial_values="' . $params['value'] . '"';
+            $html .= ' data-initial_value="' . $params['value'] . '"';
             $html .= ' data-multiple="0"';
             $html .= ' data-form_row="' . $row . '"';
             $html .= ' data-field_prefix="' . $this->fields_prefix . '"';

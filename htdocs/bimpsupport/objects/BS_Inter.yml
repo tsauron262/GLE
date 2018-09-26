@@ -76,8 +76,8 @@ fields:
         input:
             rows: 3
             auto_expand: 1
-        sortable: 0
-        searchable: 0
+        sortable: 1
+        searchable: 1
     
 list:
     title: Interventions
@@ -100,6 +100,8 @@ list:
         date_create:
             label: Début
             field: date_create
+        description:
+            field: description
         tech_user: 
             label: Technicien
             field: tech_id_user

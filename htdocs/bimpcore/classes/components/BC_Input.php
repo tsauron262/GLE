@@ -3,6 +3,7 @@
 class BC_Input extends BimpComponent
 {
 
+    public $component_name = 'Champ de saisi';
     public static $type = 'input';
     public static $config_required = false;
     public $data_type = '';
@@ -16,6 +17,10 @@ class BC_Input extends BimpComponent
     public $extraData = array();
     public $name_prefix = '';
     public static $type_params_def = array(
+        'text'                        => array(
+            'values'       => array('data_type' => 'array', 'compile' => true, 'default' => array()),
+            'allow_custom' => array('data_type' => 'bool', 'default' => 1)
+        ),
         'qty'                         => array(
             'step' => array('data_type' => 'float', 'default' => 1)
         ),
@@ -71,14 +76,15 @@ class BC_Input extends BimpComponent
             'active_only' => array('data_type' => 'bool', 'default' => 1)
         ),
         'search_ziptown'              => array(
-            'field_type' => array('default' => ''),
-            'town_field' => array('default' => ''),
-            'zip_field' => array('default' => ''),
-            'state_field' => array('default' => ''),
+            'field_type'    => array('default' => ''),
+            'town_field'    => array('default' => ''),
+            'zip_field'     => array('default' => ''),
+            'state_field'   => array('default' => ''),
             'country_field' => array('default' => '')
         ),
         'select_remises'              => array(
-            'id_client' => array('data_type' => 'int', 'required' => 1)
+            'id_client'     => array('data_type' => 'int', 'required' => 1),
+            'extra_filters' => array('default' => '')
         )
     );
 
@@ -173,6 +179,8 @@ class BC_Input extends BimpComponent
 
         switch ($this->params['type']) {
             case 'text':
+                $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
+                $options['allow_custom'] = (int) (isset($this->params['allow_custom']) ? $this->params['allow_custom'] : 1);
             case 'qty':
                 $options['data'] = array();
                 if ($this->params['type'] === 'qty') {
@@ -277,6 +285,7 @@ class BC_Input extends BimpComponent
 
             case 'select_remises':
                 $options['id_client'] = isset($this->params['id_client']) ? $this->params['id_client'] : 0;
+                $options['extra_filters'] = isset($this->params['extra_filters']) ? $this->params['extra_filters'] : '';
                 break;
         }
 

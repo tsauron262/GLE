@@ -393,6 +393,8 @@ lists:
                 field: zip
             town: 
                 field: town
+            code:
+                field: code_client
                 
     clients_caisse: 
         list_filters:
@@ -429,3 +431,8 @@ cards:
     default: 
         type: societe_card
         view_btn: 1
+searches:
+    default: 
+        fields_search: 
+            - label
+            - ref

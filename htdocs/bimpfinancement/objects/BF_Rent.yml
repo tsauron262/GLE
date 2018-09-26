@@ -18,21 +18,17 @@ fields:
         label: Nombre
         type: int
         required: 1
-        sortable: 1
         
     amount_ht:
         label: Montant HT
         type: money
         required: 1
-        sortable: 1
         
     payment:
         label: Règlement
         type: int
         values: 
             array: payments
-        required: 0
-        sortable: 1
         
     periodicity:
         label: Périodicité
@@ -42,6 +38,7 @@ fields:
         
 list:
     checkboxes: 1
+    positions: 1
     title: Loyers
     icon: calendar
     bulk_actions: 
@@ -49,7 +46,7 @@ list:
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
-    sort_col: position
+    sort_field: position
     sort_way: asc
     n: 10
     cols:
@@ -68,4 +65,3 @@ list:
     add_object_row: 1
     update_btn: 1
     delete_btn: 1
-    drag_n_drop: 1

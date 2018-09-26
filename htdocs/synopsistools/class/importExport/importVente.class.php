@@ -82,14 +82,14 @@ class importVente extends import8sens {
     }
 
     function traiteLnInvent($ln) {
-        if ($ln['ArtCode'] != "EPS-C11CB27301") {//car premiere ligne non trouvé dans les ventes
+//        if ($ln['ArtCode'] != "EPS-C11CB27301") {//car premiere ligne non trouvé dans les ventes
             if (isset($this->tabResultInt['prod'][$ln['ArtCode']])) {
                 $ln = array_merge($ln, $this->tabResultInt['prod'][$ln['ArtCode']]);
             } else {
                 echo "<br/>ATTENTION : Article introuvable en achat vente" . $ln['ArtCode'];
             }
             $this->tabResultInt['inventaire'][] = $ln;
-        }
+//        }
     }
 
     function traiteLnVente($ln) {
@@ -99,19 +99,29 @@ class importVente extends import8sens {
 
         if (substr($ln['PlvCodePcv'], 0, 1) == "F") {
             $qty = $ln['PlvQteUV'];
-            $this->tabResultInt['prod'][$ln['PlvGArtCode']]["tot"] += $qty;
-            if ($dateP > $dateOld) {
-                $this->tabResultInt['prod'][$ln['PlvGArtCode']]["derDate"] = $ln['PlvDate'];
-                $this->tabResultInt['prod'][$ln['PlvGArtCode']]["derPrix"] = $ln['PlvPUNet'];
-            }
-            $this->tabResultInt['prod'][$ln['PlvGArtCode']]["ref"] = $ln['PlvGArtCode'];
 
-            $datetime2 = DateTime::createFromFormat("d/m/Y", "30/06/2018");
+            $datetime2 = DateTime::createFromFormat("d/m/Y", "31/03/2018");
             $interval = $dateP->diff($datetime2);
             $nbmonth = $interval->format('%m'); //Retourne le nombre de mois
             $nbyear = $interval->format('%y'); //Retourne le nombre de mois
-            if ($dateP < $datetime2 && $nbyear == 0) {
-                if ($nbmonth < 3)
+            
+            
+            
+            if($ln['PlvGArtCode'] == "ADA-USBCGE/WH "){
+                echo "month:".$nbmonth."year:".$nbyear."date:".$ln['PlvDate']."<br/>";
+            }
+            
+            
+            if ($dateP <= $datetime2 && $nbyear == 0) {
+                $this->tabResultInt['prod'][$ln['PlvGArtCode']]["tot"] += $qty;
+                if ($dateP > $dateOld) {
+                    $this->tabResultInt['prod'][$ln['PlvGArtCode']]["derDate"] = $ln['PlvDate'];
+                    $this->tabResultInt['prod'][$ln['PlvGArtCode']]["derPrix"] = $ln['PlvPUNet'];
+                }
+                $this->tabResultInt['prod'][$ln['PlvGArtCode']]["ref"] = $ln['PlvGArtCode'];
+            
+            
+                if ($nbmonth < 3 )//&& $dateP !=  DateTime::createFromFormat("d/m/Y", "31/03/2018"))
                     $this->tabResultInt['prod'][$ln['PlvGArtCode']]["3mois"] += $qty;
                 elseif ($nbmonth < 6)
                     $this->tabResultInt['prod'][$ln['PlvGArtCode']]["6mois"] += $qty;
@@ -119,12 +129,6 @@ class importVente extends import8sens {
                     $this->tabResultInt['prod'][$ln['PlvGArtCode']]["12mois"] += $qty;
                 if ($nbmonth < 12)
                     $this->tabResultInt['prod'][$ln['PlvGArtCode']]["1an"] += $qty;
-            }
-            if ($ln['PlvGArtCode'] == "APP-MN922ZD/A") {
-                global $mem;
-                if(intval($mem) != intval($this->tabResultInt['prod'][$ln['PlvGArtCode']]["3mois"]))
-                echo "<br>Code " . $ln['PlvDate'] . " = " . $nbmonth . " mois qty : " . $qty . " " . $ln['PlvNumLig'] . " " . $ln['PlvCodePcv']." ".$this->tabResultInt['prod'][$ln['PlvGArtCode']]["3mois"]." av ".$mem;
-                $mem = $this->tabResultInt['prod'][$ln['PlvGArtCode']]["3mois"];
             }
         }
 

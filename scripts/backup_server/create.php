@@ -63,6 +63,8 @@ function createMonthly($now) {
     $time_gap = $now - filectime($files_m[0]);
     $time_15_day = 60 * 60 * 24 * 15;
 //                 ss   mm   hh   15day 
+//    $time_15_day = 30 // dev
+    
     if ($time_gap > $time_15_day) {
         if (createBackup(PATH . '/dump_monthly/backup-' . $now . '.sql') == 1)
             return 1;

@@ -1,0 +1,25 @@
+extends: 
+    module: bimpcommercial
+    object_name: ObjectLine
+    
+table: bimp_facture_line
+
+parent_module: bimpcommercial
+parent_object: Bimp_Facture
+
+labels: 
+    name: ligne de facture
+    name_plur: lignes de facture
+    is_female: 1
+    
+objects: 
+    line: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: compta/facture
+                file: facture
+                class: FactureLigne
+            id_object: 
+                field_value: id_line

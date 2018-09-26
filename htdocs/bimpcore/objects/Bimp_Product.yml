@@ -25,7 +25,8 @@ fields:
         
     fk_product_type: 
         label: Type
-        dol_prop: type
+        values: 
+            array: product_type
         type: int
         
     stock: 
@@ -239,6 +240,8 @@ lists:
                 field: ref
             label: 
                 field: label
+            type: 
+                field: fk_product_type
             barcode: 
                 field: barcode
             stock: 
@@ -256,3 +259,9 @@ cards:
         fields: 
             - field: ref
             - field: barcode
+            
+searches:
+    default: 
+        fields_search: 
+            - label
+            - ref

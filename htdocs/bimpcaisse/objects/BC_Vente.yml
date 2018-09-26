@@ -106,6 +106,7 @@ objects:
                 module: core
                 file: discount
                 class: DiscountAbsolute
+                
 associations: 
     discounts: 
         object: discount
@@ -117,6 +118,7 @@ associations:
             type: select
             options: 
                 array: availableCustomerDiscounts
+                
 fields:
     status: 
         label: Statut

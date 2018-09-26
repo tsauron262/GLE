@@ -3462,7 +3462,7 @@ class Product extends CommonObject
                 
                 /*moddrsi*/
                 if(class_exists("BimpObject")){
-                    BimpObject::loadClass('bimpcore', 'Bimp_Product');
+                    require_once DOL_DOCUMENT_ROOT.'/bimpcore/objects/Bimp_Product.class.php';
                     $result .= Bimp_Product::getStockIconStatic($this->id); // $id_entrepôt facultatif, peut être null.
                 }
                 /*fmoddrsi*/

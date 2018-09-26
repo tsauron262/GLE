@@ -21,6 +21,7 @@ fields:
             auto_expand: 1
             note: 1
             rows: 2
+        searchable: 0
 
 list:
     title: Commentaires
@@ -31,7 +32,7 @@ list:
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
-    sort_col: date_create
+    sort_field: date_create
     sort_way: desc
     n: 10
     add_object_row: 1

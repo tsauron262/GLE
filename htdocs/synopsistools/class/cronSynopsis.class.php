@@ -25,6 +25,7 @@ class CronSynopsis {
     }
 
     public function testGlobal() {
+        $this->verifCompteFermer();
         $this->sauvBdd();
 
         $this->netoyage();
@@ -33,7 +34,6 @@ class CronSynopsis {
 //        $this->verif();
 //        $this->sortieMail();
 
-        $this->verifCompteFermer();
 
 
 
@@ -44,6 +44,15 @@ class CronSynopsis {
     public function sauvBdd($table = "") {
         require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/maj.class.php");
         $this->sortie .= maj::sauvBdd($table);
+    }
+    
+    
+    public function callTrigerPeter(){
+        $this->db->query("CALL refresh_llx_mat_view_propaldet();");
+        $this->db->query("CALL refresh_llx_mat_view_facturedet();");
+        $this->db->query("CALL refresh_llx_mat_view_commandedet();");
+        $this->db->query("CALL refresh_llx_mat_view_categorie();");
+        $this->db->query("CALL refresh_llx_mat_view_product_cat();");
     }
 
     public function extractFact($debug = false) {
@@ -82,8 +91,22 @@ class CronSynopsis {
         $import->debug = $debug;
         $import->go(); 
         $this->output .= $import->output;
+        
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importFourn.class.php");
+        $import = new importFourn($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output .= $import->output;
+        
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProdFourn.class.php");
+        $import = new importProdFourn($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output .= $import->output;
 
 
+        echo "fin";
+        
         return "End";
     }
 
@@ -283,25 +306,24 @@ class CronSynopsis {
         global $user;
         $str = "";
         if (array_key_exists('options_date_s', $user->array_options)) {
-            $mails = "tommy@drsi.fr, f.poirier@bimp.fr, j.belhocine@bimp.fr, grh@bimp.fr";
-            $sql = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "user_extrafields`, " . MAIN_DB_PREFIX . "user u WHERE `date_s` <= now() AND fk_object = u.rowid AND statut = 1");
+            $mails = "tommy@bimp.fr, grh@bimp.fr";
+            $mails2 = $mails .", f.poirier@bimp.fr, j.belhocine@bimp.fr";
+            $sql = $this->db->query("SELECT u.login, u.rowid, u2.email  FROM `" . MAIN_DB_PREFIX . "user_extrafields` ue, " . MAIN_DB_PREFIX . "user u LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user  WHERE `date_s` <= now() AND fk_object = u.rowid AND u.statut = 1");
             while ($result = $this->db->fetch_object($sql)) {
                 $userF = new User($this->db);
-                $userF->fetch($result->fk_object);
+                $userF->fetch($result->rowid);
                 $userF->setstatus(0);
                 $str2 = "Bonjour le compte de " . $result->login . " viens d'être fermé. Cordialement.";
                 $str .= $str2."<br/>";
-                mailSyn2("Fermeture compte " . $result->login, $mails, null, $str2);
+                mailSyn2("Fermeture compte " . $result->login, $mails2.($result->email != "" ? ",".$result->email :""), null, $str2);
             }
             
-            foreach(array(15, 7) as $nbDay){
-                $sql = $this->db->query("SELECT *  FROM `" . MAIN_DB_PREFIX . "user_extrafields`, " . MAIN_DB_PREFIX . "user u WHERE `date_s` = DATE_ADD(now(), INTERVAL 15 DAY) AND fk_object = u.rowid AND statut = 1");
+            foreach(array(14, 7) as $nbDay){
+                $sql = $this->db->query("SELECT u.login, u.rowid, u2.email  FROM `" . MAIN_DB_PREFIX . "user_extrafields` ue, " . MAIN_DB_PREFIX . "user u LEFT JOIN llx_user u2 ON u2.rowid = u.fk_user WHERE `date_s` = DATE(DATE_ADD(now(), INTERVAL ".$nbDay." DAY)) AND fk_object = u.rowid AND u.statut = 1");
                 while ($result = $this->db->fetch_object($sql)) {
-                    $userF = new User($this->db);
-                    $userF->fetch($result->fk_object);
                     $str2 = "Bonjour le compte de " . $result->login . " sera fermé dans ".$nbDay." jours. Cordialement.";
                     $str .= $str2."<br/>";
-                    mailSyn2("Fermeture compte " . $result->login. " dans ".$nbDay." jours", $mails, null, $str2);
+                    mailSyn2("Fermeture compte " . $result->login. " dans ".$nbDay." jours", $mails.($result->email != "")? ",".$result->email :"", null, $str2);
                 }
             }
         echo $str." Comptes fermés";

@@ -38,7 +38,8 @@ class BimpConfig
             return false;
         }
 
-        $this->params = spyc_load_file($dir . $file_name);
+        $this->params = $this->getParamsFromFile($dir . $file_name, $this->errors);
+
         if (is_array($this->params) && count($this->params)) {
             return true;
         }
@@ -46,6 +47,80 @@ class BimpConfig
         $this->params = array();
         $this->logConfigError('Echec du chargement de la configuration depuis le fichier YAML "' . $file_name . '"');
         return false;
+    }
+
+    public function getParamsFromFile($file, &$errors = array())
+    {
+        $params = array();
+
+        if (!file_exists($file)) {
+            $errors[] = 'Le fichier de configuration "' . $file . '" n\existe pas';
+        } else {
+            $params = spyc_load_file($file);
+            if (isset($params['extends'])) {
+                $sub_dir = '';
+                if (is_a($this->instance, 'BimpObject')) {
+                    $sub_dir = 'objects';
+                } elseif (is_a($this->instance, 'BimpController')) {
+                    $sub_dir = 'controllers';
+                }
+                $parent_file = DOL_DOCUMENT_ROOT . '/';
+                $extends_module = '';
+                $extends_object = '';
+
+                if (isset($params['extends']['module'])) {
+                    $extends_module = $params['extends']['module'];
+                    if (isset($params['extends']['object_name']) && $params['extends']['object_name']) {
+                        $extends_object = $params['extends']['object_name'];
+                    } else {
+                        $errors[] = 'Nom du fichier d\'extension absent dans le fichier "' . $file . '"';
+                    }
+                } elseif (is_string($params['extends']) && isset($this->instance->module)) {
+                    $extends_module = $this->instance->module;
+                    $extends_object = $params['extends'];
+                } else {
+                    $errors[] = 'Nom du module absent du fichier de configuration "' . $file . '"';
+                }
+
+                if ($extends_module && $extends_object) {
+                    $parent_file .= $extends_module . '/' . $sub_dir . '/' . $extends_object . '.yml';
+                    if (is_file($parent_file)) {
+                        $parent_params = $this->getParamsFromFile($parent_file, $errors);
+                        $params = $this->mergeParams($parent_params, $params);
+
+                        if (property_exists($this->instance, 'extends')) {
+                            $this->instance->extends[] = array(
+                                'module'      => $extends_module,
+                                'object_name' => $extends_object
+                            );
+                        }
+                    } else {
+                        $errors[] = 'Le fichier étendu "' . $parent_file . '" n\'existe pas';
+                    }
+                }
+            }
+        }
+
+        return $params;
+    }
+
+    public function mergeParams(Array $parent_params, Array $child_params)
+    {
+        foreach ($child_params as $key => $values) {
+            if (isset($parent_params[$key]) && is_array($values) && is_array($parent_params[$key])) {
+                $parent_params[$key] = $this->mergeParams($parent_params[$key], $values);
+            } else {
+                if (is_string($values) && $values === 'unset') {
+                    if (isset($parent_params[$key])) {
+                        unset($parent_params[$key]);
+                    }
+                } else {
+                    $parent_params[$key] = $values;
+                }
+            }
+        }
+
+        return $parent_params;
     }
 
     // Gestion des chemins de configuration: 

@@ -17,20 +17,15 @@ fields:
         label: Date
         type: date
         required: 1
-        sortable: 1
 
     description:
         label: Libellé
         required: 1
-        sortable: 1
         
     amount:
         label: Montant HT
         type: money
         required: 1
-        sortable: 1
-        
-    
         
 list:
     checkboxes: 1
@@ -41,7 +36,7 @@ list:
           icon: trash
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
-    sort_col: date_create
+    sort_field: date_create
     sort_way: desc
     n: 25
     cols:

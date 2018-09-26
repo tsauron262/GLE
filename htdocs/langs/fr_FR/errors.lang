@@ -1,4 +1,4 @@
-# Dolibarr language file - Source file is en_US - errors
+ErrorDiscountLargerThanRemainToPaySplitItBefore# Dolibarr language file - Source file is en_US - errors
 
 # No errors
 NoErrorCommitIsDone=Pas d'erreur, on valide
@@ -218,3 +218,4 @@ WarningTooManyDataPleaseUseMoreFilters=Trop de données (plus de %s lignes). Uti
 WarningSomeLinesWithNullHourlyRate=Des temps ont été enregistrés par des utilisateurs lorsque leur taux horaire n'était défini. Une valeur de 0 %s a été utilisée, mais cela peut entraîner une mauvaise évaluation du temps passé.
 WarningYourLoginWasModifiedPleaseLogin=Votre identifiant a été modifié. Par sécurité, vous devrez vous identifiez avec votre nouvel identifiant avant l'action suivante.
 WarningAnEntryAlreadyExistForTransKey=Une donnée identique existe déjà pour la traduction du code dans cette langue
+ErrorDiscountLargerThanRemainToPaySplitItBefore=Cette remise est plus grande que le montant restant à payer. Veuillez la scinder en deux montants moins élevés avant application

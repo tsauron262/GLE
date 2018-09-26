@@ -1,0 +1,427 @@
+extends: 
+    module: bimpcommercial
+    object_name: BimpComm
+
+dol_object: 
+    instance: 
+        dol_object: commande
+            
+table: commande
+controller: commande
+icon: fas_dolly
+list_page_url: 
+    controller: commandes
+
+labels: 
+    name: commande
+    is_female: 1
+        
+objects: 
+    lines: 
+        instance: 
+            bimp_object: Bimp_CommandeLine
+            
+    order_lines: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpreservation
+                name: BR_OrderLine
+                
+    products: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpreservation
+                name: BR_OrderLine
+        list: 
+            title: Produits
+            filters: 
+                type: 1
+    
+    services: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpreservation
+                name: BR_OrderLine
+        list: 
+            title: Services
+            filters: 
+                type: 2
+                
+    facture: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Facture
+            id_object: 
+                field_value: id_facture
+                
+    shipments: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpreservation
+                name: BR_CommandeShipment
+                
+    fournisseur_price: 
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductFournisseurPrice
+                
+    entrepot: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object:
+                field_value: entrepot
+                
+associations: 
+    avoirs: 
+        object: facture
+        label: Avoirs
+        display: 
+            default: 
+                type: nom_url
+                
+fields: 
+    entrepot: 
+        label: Entrepôt
+        dol_extra_field: 1
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
+            
+    ef_type: 
+        label: Secteur
+        dol_extra_field: 1
+        values: 
+            array: secteurs
+        required: 1
+            
+    libelle: 
+        label: Libellé
+        dol_extra_field: 1
+        
+    id_facture: 
+        label: Facture
+        type: id_object
+        object: facture
+        default_value: 0
+    
+    date_commande:
+        label: Date
+        type: date
+        
+    date_creation: 
+        label: Créée le
+        type: datetime
+        
+    date_livraison: 
+        label: Date prévue de livraison
+        type: date
+        
+    total_ttc: 
+        label: Total TTC
+        type: money
+        
+    total: unset
+        
+fields_tables: 
+    infos: 
+        rows: 
+            - field: fk_statut
+            - field: entrepot
+              display: nom_url
+              edit: 1
+            - field: fk_input_reason
+              edit: 
+                  callback: isEditable
+            - field: date_commande
+              edit: 
+                  callback: isEditable
+            - field: date_livraison
+              edit: 
+                  callback: isEditable
+            - field: fk_availability
+              edit: 
+                  callback: isEditable
+                  
+    payment:
+        rows:
+            - field: fk_cond_reglement
+              edit: 
+                  callback: isEditable
+            - field: fk_mode_reglement
+              edit: 
+                  callback: isEditable
+                  
+    client: 
+        rows: 
+            - field: fk_soc
+              display: card
+            - field: ref_client
+              edit: 
+                  callback: isEditable
+            - label: Remises client
+              value: 
+                  callback: displayRemisesClient
+                  
+    pdf: 
+        rows: 
+            - label: Fichier PDF
+              value: 
+                  callback: displayPDFButton
+                  
+    totals: 
+        rows: 
+            - field: total_ht
+            - field: tva
+            - field: total_ttc
+                  
+forms: 
+    default: 
+        rows: 
+            - field: libelle
+            - field: entrepot
+              show: 
+                  callback: isEditable
+            - field: ef_type
+            - field: fk_soc
+              show: 
+                  callback: isNotLoaded
+            - field: ref_client
+            - field: fk_input_reason
+              show: 
+                  callback: isEditable
+            - field: fk_cond_reglement
+              show: 
+                  callback: isEditable
+            - field: fk_mode_reglement
+              show: 
+                  callback: isEditable
+            - field: date_commande
+              show: 
+                  callback: isEditable
+            - field: date_livraison
+              show: 
+                  callback: isEditable
+            - field: fk_availability
+              show: 
+                  callback: isEditable
+            - field: model_pdf
+              show: 
+                  callback: isNotLoaded
+            - field: note_private
+            - field: note_public
+            - custom: 1
+              hidden: 1
+              label: Elément d'origine
+              input_name: origin
+              input: 
+                  type: hidden
+              value: 
+                  request: param_values/fields/origin
+            - custom: 1
+              hidden: 1
+              label: ID élément d'origine
+              input_name: origin_id
+              input: 
+                  type: hidden
+              value: 
+                  request: param_values/fields/origin_id
+            
+    remove_lines: 
+        title: Retirer des produits / services
+        rows: 
+            - object: order_lines
+              label: Produits / Services
+              form_name: remove
+              multiple: 1
+              on_edit: 1
+              
+    facture:
+        title: Créer une facture à partir des produits non facturés de cette commande
+        rows: 
+            - custom: 1
+              label: Conditions de réglement
+              input_name: cond_reglement
+              value: 
+                  callback: getCommandeCondReglement
+              input: 
+                  type: select_cond_reglement
+            - custom: 1
+              label: Compte financier
+              input_name: id_account
+              data_type: id_object
+              input: 
+                  type: select_mysoc_account
+              required: 1
+            - custom: 1
+              label: Avoirs client à utiliser
+              input_name: id_remises_list
+              input: 
+                  multiple: 1
+                  type: select_remises
+                  id_client:
+                      prop:
+                          name: socid
+                          object:
+                              prop: dol_object
+            - custom: 1
+              label: Note publique
+              input_name: note_public
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              value: 
+                  prop: 
+                      name: note_public
+                      object: 
+                          prop: dol_object
+                  
+            - custom: 1
+              label: Note privée
+              input_name: note_private
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              value: 
+                  prop: 
+                      name: note_private
+                      object: 
+                          prop: dol_object
+                  
+    add_line: 
+        title: Ajouter un produit / service
+        rows: 
+            - custom: 1
+              label: Produit / Service
+              data_type: id_object
+              input_name: id_product
+              input: 
+                  type: search_product
+              required: 1
+            - custom: 1
+              label: Quantité
+              input_name: qty
+              data_type: int
+              input: 
+                  type: qty
+              value: 1
+              min: 1
+            - custom: 1
+              label: Réduction
+              input_name: reduc
+              data_type: percent
+              input: 
+                  type: text
+            - custom: 1
+              label: Prix d'achat
+              input_name: id_fournisseur_price
+              data_type: id_object
+              object: fournisseur_price
+              input: 
+                  type: select
+                  options:
+                      array: productFournisseursPrices
+              required: 1
+              display_if: 
+                  field_name: id_product
+                  hide_values: 0,
+              depends_on: id_product
+              create_form: default
+              create_form_values: 
+                  fields: 
+                      fk_product: 
+                          request: fields/id_product
+              value: 
+                  request: fields/id_fournisseur_price
+            - custom: 1
+              label: Description
+              input_name: desc
+              data_type: html
+              input: 
+                  type: html
+            - custom: 1
+              label: Service à durée limitée
+              input_name: limited
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+            - custom: 1
+              label: Du
+              input_name: date_start
+              data_type: date
+              input: 
+                  type: date
+              display_if: 
+                  field_name: limited
+                  show_values: 1
+            - custom: 1
+              label: Au
+              input_name: date_end
+              data_type: date
+              input: 
+                  type: date
+              display_if: 
+                  field_name: limited
+                  show_values: 1 
+                  
+lists: 
+    default: 
+        title: Liste des commandes
+        icon: fas_dolly
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les commandes sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: date_creation
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        add_form_values: 
+            fields: 
+                entrepot: 
+                    request: id_entrepot
+                fk_soc:
+                    request: id_client
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 
+            callback: isDeletable
+        modal_view: default
+        page_btn: 1
+        cols: 
+            ref: 
+                field: ref
+            statut: 
+                field: fk_statut
+            entrepot: 
+                field: entrepot
+                display: nom_url
+            client: 
+                field: fk_soc
+                display: nom_url
+            date_create: 
+                field: date_creation
+            total: 
+                field: total_ttc

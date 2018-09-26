@@ -1,0 +1,20 @@
+extends: 
+    module: bimpcommercial
+    object_name: BimpComm
+
+js:
+    - /bimpcommercial/views/js/paiement.js
+    - /bimpequipment/views/js/equipment.js
+    
+objects: 
+    bimp_comm: 
+        instance: 
+            bimp_object: Bimp_Facture
+            id_object: 
+                request: id
+                
+    facture: 
+        instance: 
+            bimp_object: Bimp_Facture
+            id_object: 
+                request: id

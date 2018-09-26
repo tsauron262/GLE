@@ -1,7 +1,7 @@
 table: br_order_line
 common_fields: 0
 
-parent_module: bimpcore
+parent_module: bimpcommercial
 parent_object: Bimp_Commande
 parent_id_property: id_commande
 

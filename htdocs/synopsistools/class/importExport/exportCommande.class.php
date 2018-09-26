@@ -18,7 +18,7 @@ class exportCommande extends export8sens {
     public $output = "Rien";
     public $error = "";
     public $tabIgnore = array();
-    private $where = " AND fe.type != 'R' AND comm.fk_statut > 0  AND (comm.extraparams < 1 || comm.extraparams is NULL) AND comm.total_ht != 0  AND ref NOT LIKE '%PROV%' GROUP BY comm.rowid";
+    private $where = " AND fe.type != 'R' AND comm.fk_statut > 0  AND (comm.extraparams < 1 || comm.extraparams is NULL)  AND ref NOT LIKE '%PROV%' GROUP BY comm.rowid";
 
     public function __construct($db, $sortie = 'html') {
         parent::__construct($db);
@@ -107,6 +107,10 @@ class exportCommande extends export8sens {
             $commande->fetch($id);
             $societe = new Societe($this->db);
             $societe->fetch($commande->socid);
+            
+            $secteur = "INC";
+            if(isset($commande->array_options['options_type']))
+                $secteur = $commande->array_options['options_type'];
 
 
             if ($this->debug)
@@ -122,7 +126,7 @@ class exportCommande extends export8sens {
 
 
             $tabCommande = $tabCommandeDet = array();
-            $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $societe->name, "phone" => $societe->phone, "address" => $societe->address, "zip" => $societe->zip, "town" => $societe->town, "ref" => $commande->ref, "date" => dol_print_date($commande->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label);
+            $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $societe->name, "phone" => $societe->phone, "address" => $societe->address, "zip" => $societe->zip, "town" => $societe->town, "ref" => $commande->ref, "date" => dol_print_date($commande->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label, "secteur" => $secteur);
             $commande->fetch_lines();
             foreach ($commande->lines as $line) {
                 $type = $this->getRef($line);
@@ -144,6 +148,7 @@ class exportCommande extends export8sens {
                     "0" => 0
                 );
                 $tvaCode = $tabCodeTva[$line->tva_tx];
+                $line->desc = $this->traiteStr($line->desc);
                 $tabCommandeDet[] = array("L" => "L", "ref" => $ref, "product_type" => $type, "qty" => $line->qty, "subprice" => price($line->subprice), "description" => $line->desc, "buy_price_ht" => price($line->pa_ht), "tva_code" => $tvaCode, "remise_percent" => $line->remise_percent, "tva_tx" => $tvaCode, "codeDepot" => $entrepot->label);
             }
 

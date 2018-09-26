@@ -1,0 +1,125 @@
+table: object_line_remise
+common_fields: 0
+
+labels: 
+    name: remise
+    is_female: 1
+    
+parent_module: bimpcommercial
+parent_object: ObjectLine
+parent_id_property: id_object_line
+                
+fields: 
+    id_object_line: 
+        label: Ligne
+        type: id_parent
+        
+    object_type: 
+        label: Type objet lié
+        input:
+            type: hidden
+        required: 1
+        
+    label: 
+        label: Libellé
+        
+    type: 
+        label: Type de réduction
+        type: int
+        values: 
+            1: Pourcentage
+            2: Montant fixe
+    
+    percent: 
+        label: Pourcentage
+        type: percent
+        default_value: 0
+        display_if: 
+            field_name: type
+            show_values: 1
+        decimals: 6
+        min: 0
+        max: 100
+            
+    montant: 
+        label: Montant
+        type: money
+        default_value: 0
+        display_if: 
+            field_name: type
+            show_values: 2
+            
+    per_unit:
+        label: Appliquer la réduction sur chaque unité
+        type: bool
+        default_value: 0
+        display_if: 
+            field_name: type
+            hide_values: 1
+            
+forms: 
+    default: 
+        rows: 
+            - field: object_type
+            - field: label
+            - field: type
+            - field: percent
+            - field: montant
+            - custom: 1
+              input_name: remise_ht
+              data_type: bool
+              label: Applicable sur le montant Hors Taxes
+              value: 0
+              input: 
+                  type: toggle
+              display_if: 
+                  field_name: type
+                  show_values: 2
+            - field: per_unit
+            - custom: 1
+              label: Marges
+              input_name: margins_table
+              content: 
+                  callback: renderFormMargins
+              show: 
+                  callback: showMarginsInForms
+                  
+lists: 
+    default: 
+        title: Remises
+        icon: percent
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les remises sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        enable_search: 0
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_btn: 
+            callback: isParentEditable
+        add_form_name: default
+        add_form_values: 
+            fields: 
+                object_type: 
+                    callback: getParentObjectType
+        edit_btn:
+            callback: isParentEditable
+        delete_btn: 
+            callback: isParentEditable
+        cols:
+            label: 
+                field: label
+            type: 
+                field: type
+            montant: 
+                label: Réduction
+                value: 
+                    callback: displayMontant
+            per_unit: 
+                label: Sur chaque unité
+                value: 
+                    callback: displayPerUnit
+                
+            

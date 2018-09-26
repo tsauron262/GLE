@@ -17,7 +17,7 @@ abstract class import8sens {
         $this->db = $db;
         $this->path = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/export/";
         set_time_limit(5000000);
-        ini_set('memory_limit', '1024M');
+        ini_set('memory_limit', '10240M');
     }
     
     
@@ -26,27 +26,37 @@ abstract class import8sens {
         echo "<pre>";
         $this->printError();
         print_r($this->tabResult);
+        echo "</pre>";
     }
     
     
     function getFiles() {
+        $extension = ".txt";
         if (is_dir($this->path)) {
             if ($dh = opendir($this->path)) {
                 if($this->debug)
                     echo "<br/>Dossier : ".$this->path;
+                $files = array();
                 while (($file = readdir($dh)) !== false) {
-                    if (stripos($file, ".txt")) {
-                        echo $file;
-                        $this->traiteFile(file_get_contents($this->path . $file));
-                        if(count($this->errors) == 0){
-                            if($this->moveFile){
-                                if(rename ($this->path . $file, $this->path ."imported/". $file))
-                                    echo "<br/>Fichier traité déplacé vers ".$this->path ."imported/". $file;
-                                else
-                                    $this->error("Impossible de déplacé le fichier ".$this->path . $file);
-                            }
+                    if (stripos($file, $extension)) {
+                        $files[] = $file;
+                    }
+                }
+                foreach($files as $file){
+                    echo $file;
+                    $content = file_get_contents($this->path . $file);
+                    $newFile = str_replace($extension, ".ENcGLE", $file);
+                    rename($this->path . $file, $this->path . $newFile);
+                    $this->traiteFile($content);
+                    if(count($this->errors) == 0){
+                        if($this->moveFile){
+                            if(rename ($this->path . $newFile, $this->path ."imported/". $file))
+                                echo "<br/>Fichier traité déplacé vers ".$this->path ."imported/". $file;
+                            else
+                                $this->error("Impossible de déplacé le fichier ".$this->path . $file);
                         }
                     }
+                    rename($this->path . $newFile, $this->path . $file);
                 }
             }
         }
@@ -62,7 +72,8 @@ abstract class import8sens {
 
     function traiteFile($content) {
         if($this->utf8){
-            $content = str_replace("\r", "", $content);
+            $content = str_replace("\r", "\n", $content);
+            $content = str_replace("\n\n", "\n", $content);
             $tabLigne = explode("\n", $content);
         }
         else{
@@ -75,7 +86,7 @@ abstract class import8sens {
             $tabTitre = explode("	", $tabLigne[0]);
         $tabFinal = $tabTitre2 = array();
         foreach ($tabLigne as $idLn => $ligne) {
-            if (($idLn != 1 && $idLn < 2+600000) || $idLn == 5365) {
+            if (($idLn != 1)) {
                 $tabTmp = explode("	", $ligne);
                 $tabLn = array();
                 foreach ($tabTmp as $idTmp => $chTmp) {
@@ -89,6 +100,7 @@ abstract class import8sens {
         }
         echo "<pre>";
         echo "Tab Titre: ".print_r($tabTitre,1);
+        echo "</pre>";
 //        print_r($tabFinal[5363]);
 //        print_r(count($tabFinal));
 
@@ -121,6 +133,11 @@ abstract class import8sens {
             $this->alerts[] = $msgOrArray;
     }
     
+    function traiteNumber($number){
+        $number = str_replace(",", ".", $number);
+        return number_format($number, 5, ".", "");
+    }
+    
     function traiteChamp($cible, $val, $number = false){
         $val = trim($val);
         $type = "normal";
@@ -131,17 +148,15 @@ abstract class import8sens {
         else
             $oldVal = $this->object->$cible;
         if($number){
-            $val = str_replace(",", ".", $val);
-            $val = number_format($val, 5, ".", "");
-            $oldVal = str_replace(",", ".", $oldVal);
-            $oldVal = number_format($oldVal, 5, ".", "");
+            $val = $this->traiteNumber($val);
+            $oldVal = $this->traiteNumber($oldVal);
         }
         else{
             //$val = utf8_decode($val);
             $val = $this->traiteStr($val);
         }
         if($oldVal != $val){
-            $this->error("Champ ".$cible." diferent ancienne val |".$oldVal."| new val |".$val."|");
+            $this->error($this->ident." Champ ".$cible." diferent ancienne val |".$oldVal."| new val |".$val."|");
             if($type == "option"){
                 $this->object->array_options[$cible] = $val;
                 $this->update = true;

@@ -667,7 +667,7 @@ class GsxUps
             );
         }
 
-        require_once(DOL_DOCUMENT_ROOT . "/bimpapple/core/modules/bimpapple/modules_synopsisapple.php");
+        require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/core/modules/synopsisapple/modules_synopsisapple.php");
         synopsisapple_pdf_create($db, $ship, 'appleretour');
 
         return array(

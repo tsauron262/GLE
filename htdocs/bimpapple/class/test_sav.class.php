@@ -194,7 +194,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
     }
     
     function displayError($mess, $ligne, $repair = null, $tabError = null){
-        $html = $mess ."<br/> SAV :". $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " Depuis : " . $ligne->nbJ . " jours";
+        $html = "<br/>".$mess ."<br/> SAV :". $this->getNomUrlChrono($ligne->cid, $ligne->ref) . " Depuis : " . $ligne->nbJ . " jours";
         if(isset($repair)){
             $html .= "<br/>Code repa : " . $repair->getData('repair_confirm_number') . "  Statut GSX : " . $repair->repairLookUp['repairStatus'];
             $html .= "<br/>RFPU dans GLE ?".$repair->getData('ready_for_pick_up')." Fermé dans GLE ?".$repair->getData('repair_complete');
@@ -253,7 +253,7 @@ AND s.status = " . ($statut == "closed" ? "999" : "9");
                     }
                     else {
                         $this->nbErr++;
-                        $messErreur = $this->displayError("Echec de la recup dans GSX (en cache)", $ligne, $repair, $erreurSOAP);
+                        $messErreur = $this->displayError("Echec de la recup dans GSX ", $ligne, $repair, $erreurSOAP);
                         echo $messErreur;
                         $_SESSION['idRepairIncc'][$ligne->rid] = $ligne->ref;
                     }

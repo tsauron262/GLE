@@ -158,7 +158,7 @@ forms:
               create_form_values:
                   fields: 
                       fk_soc: 
-                          field_value: fk_soc
+                          callback: getAddContactIdClient
               value: 
                   request: fields/id_contact
               input: 

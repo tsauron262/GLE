@@ -17,3 +17,4 @@ ALTER TABLE `llx_facture` ADD `remise_globale` DOUBLE(24,8) NOT NULL DEFAULT '0'
 ALTER TABLE `llx_commande` ADD `remise_globale` DOUBLE(24,8) NOT NULL DEFAULT '0';
 
 ALTER TABLE `llx_object_line_remise` CHANGE `percent` `percent` FLOAT(24,8) NOT NULL DEFAULT '0';
+ALTER TABLE `llx_bimp_propal_line` ADD UNIQUE( `id_line`);

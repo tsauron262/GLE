@@ -50,8 +50,15 @@ class importProdFourn extends import8sens {
                 $sql3 = $this->db->query("SELECT rowid, ref_fourn, price, quantity, tva_tx FROM `llx_product_fournisseur_price` WHERE `fk_product` = ".$prodId." AND `fk_soc` = ".$fournId." AND ref_fourn LIKE '".$ln['ProCode']."'");
                 if($this->db->num_rows($sql3) > 0){
                     $ln3 = $this->db->fetch_object($sql3);
-                    if($ln3->ref_fourn != $ln['ProCode'] || $this->traiteNumber($ln3->unitprice) != $this->traiteNumber($ln['ProPrixBase']) || $this->traiteNumber($ln3->price) != $this->traiteNumber($ln['ProPrixBase']) || $ln3->quantity != 1 || $this->traiteNumber($ln3->tva_tx) != $this->traiteNumber($ln['Pro1TaxTaux']))
-                        $this->updatePrice($ln3->rowid, $ln);
+                    if($ln3->ref_fourn != $ln['ProCode'] 
+                                || $this->traiteNumber($ln3->unitprice) != $this->traiteNumber($ln['ProPrixBase']) 
+                                || $this->traiteNumber($ln3->price) != $this->traiteNumber($ln['ProPrixBase']) 
+                                || $ln3->quantity != 1 
+                                || $this->traiteNumber($ln3->tva_tx) != $this->traiteNumber($ln['Pro1TaxTaux'])){
+                            $this->updatePrice($ln3->rowid, $ln);
+                            print_r($ln);
+                            print_r($ln3);
+                        }
                 }
                 else{
                     $this->addPrice($prodId, $fournId, $ln);
@@ -63,7 +70,7 @@ class importProdFourn extends import8sens {
         }
         else{
             if($ln['ProGArtCode'] != "")
-            $this->alert("Prod ".$ln['ProGArtCode']." introuvable");
+                $this->alert("Prod ".$ln['ProGArtCode']." introuvable");
         }
         
     }

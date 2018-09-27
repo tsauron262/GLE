@@ -90,7 +90,7 @@ fields:
         type: bool
         default_value: 0 
     pdf_hide_ref:
-        label: Masquer la référence dans le PDF
+        label: Masquer les références des produits dans le PDF
         dol_extra_field: 1
         type: bool
         default_value: 0

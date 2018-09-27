@@ -689,7 +689,7 @@ class GSX
                 if (isset($f->detail) && isset($f->detail->errors) && isset($f->detail->errors->error))
                     $add = print_r($f->detail->errors->error, 1);
                 if (self::$debug_mode && in_array($user->id, array(1, 270, 271))) {
-                    $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . $add . print_r($SOAPRequest, true) . print_r($requestData, true));
+                    $this->soap_error($f->faultcode, $f->faultstring . " <pre> " . $add . print_r($SOAPRequest, true) . print_r($requestData, true)."</pre>");
                 } else {
                     $this->soap_error($f->faultcode, $f->faultstring);
                 }
@@ -876,6 +876,10 @@ class GSX
 //        $string = (utf8_decode($string));
         // The API is not very verbose with bad credentials… wrong credentials can throw the "expired session" error.
         $additionalInfo = ( $code == 'ATH.LOG.20' ) ? ' (You may have provided the wrong login credentials)' : '';
+        
+        $string = ($code == "RPR.LKP.01")? "" : $string;
+        
+        $additionalInfo .= " WSDL : ".$this->wsdlUrl;
 
         $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
 

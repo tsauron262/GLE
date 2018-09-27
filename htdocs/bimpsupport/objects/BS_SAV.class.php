@@ -1222,42 +1222,42 @@ class BS_SAV extends BimpObject
         }
 
         // Prise en charge: 
-        $line->find(array(
-            'id_obj'             => (int) $prop->id,
-            'linked_object_name' => 'sav_pc',
-            'linked_id_object'   => (int) $this->id
-        ));
-
-        $line->validateArray(array(
-            'id_obj'             => (int) $prop->id,
-            'type'               => BS_SavPropalLine::LINE_TEXT,
-            'deletable'          => 0,
-            'editable'           => 0,
-            'linked_id_object'   => (int) $this->id,
-            'linked_object_name' => 'sav_pc'
-        ));
-
-        $ref = $this->getData('ref');
-        $equipment = $this->getChildObject('equipment');
-        $serial = 'N/C';
-        if (!is_null($equipment) && $equipment->isLoaded()) {
-            $serial = $equipment->getData('serial');
-        }
-
-        $line->desc = 'Prise en charge : ' . $ref . '<br/>';
-        $line->desc .= 'S/N : ' . $serial . '<br/>';
-        $line->desc .= 'Garantie : pour du matériel couvert par Apple, la garantie initiale s\'applique. Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d\'oeuvre.';
-        $line->desc .= 'Les pannes logicielles ne sont pas couvertes par la garantie du fabricant. Une garantie de 30 jours est appliquée pour les réparations logicielles.';
-
-        $line_warnings = array();
-        $error_label = '';
-        if (!$line->isLoaded()) {
-            $error_label = 'création';
-            $line_errors = $line->create($line_warnings, true);
-        } else {
-            $error_label = 'mise à jour';
-            $line_errors = $line->update($line_warnings, true);
-        }
+//        $line->find(array(
+//            'id_obj'             => (int) $prop->id,
+//            'linked_object_name' => 'sav_pc',
+//            'linked_id_object'   => (int) $this->id
+//        ));
+//
+//        $line->validateArray(array(
+//            'id_obj'             => (int) $prop->id,
+//            'type'               => BS_SavPropalLine::LINE_TEXT,
+//            'deletable'          => 0,
+//            'editable'           => 0,
+//            'linked_id_object'   => (int) $this->id,
+//            'linked_object_name' => 'sav_pc'
+//        ));
+//
+//        $ref = $this->getData('ref');
+//        $equipment = $this->getChildObject('equipment');
+//        $serial = 'N/C';
+//        if (!is_null($equipment) && $equipment->isLoaded()) {
+//            $serial = $equipment->getData('serial');
+//        }
+//
+//        $line->desc = 'Prise en charge : ' . $ref . '<br/>';
+//        $line->desc .= 'S/N : ' . $serial . '<br/>';
+//        $line->desc .= 'Garantie : pour du matériel couvert par Apple, la garantie initiale s\'applique. Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d\'oeuvre.';
+//        $line->desc .= 'Les pannes logicielles ne sont pas couvertes par la garantie du fabricant. Une garantie de 30 jours est appliquée pour les réparations logicielles.';
+//
+//        $line_warnings = array();
+//        $error_label = '';
+//        if (!$line->isLoaded()) {
+//            $error_label = 'création';
+//            $line_errors = $line->create($line_warnings, true);
+//        } else {
+//            $error_label = 'mise à jour';
+//            $line_errors = $line->update($line_warnings, true);
+//        }
 
         $line_errors = array_merge($line_errors, $line_warnings);
         if (count($line_errors)) {
@@ -2549,7 +2549,6 @@ class BS_SAV extends BimpObject
                         $propal->fetch($propal->id);
                         $propal->dol_object->valid($user);
 
-                        dol_syslog("Propal id : ." . $propal->dol_object->id . " devrait être validée", 3);
                         $propal->dol_object->generateDocument(self::$propal_model_pdf, $langs);
                         $propal->dol_object->cloture($user, 2, "Auto via SAV");
                         $this->removeReservations();

@@ -45,6 +45,15 @@ class CronSynopsis {
         require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/maj.class.php");
         $this->sortie .= maj::sauvBdd($table);
     }
+    
+    
+    public function callTrigerPeter(){
+        $this->db->query("CALL refresh_llx_mat_view_propaldet();");
+        $this->db->query("CALL refresh_llx_mat_view_facturedet();");
+        $this->db->query("CALL refresh_llx_mat_view_commandedet();");
+        $this->db->query("CALL refresh_llx_mat_view_categorie();");
+        $this->db->query("CALL refresh_llx_mat_view_product_cat();");
+    }
 
     public function extractFact($debug = false) {
 //        require_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/synopsisexport.class.php");

@@ -64,6 +64,7 @@ objects:
             bimp_object: 
                 module: bimpequipment
                 name: Equipment
+                
             
 associations:
     equipments:
@@ -220,7 +221,10 @@ fields:
         display: 
             default: 
                 type: timer
-        searchable: 0
+        searchable: 0 
+    sujet:
+        label: Sujet ticket
+        type: text
         
 forms: 
     default:
@@ -232,6 +236,7 @@ forms:
               label: Client 
               depends_on: id_contrat
             - field: id_contact
+            - field: sujet
             - field: status
             - field: impact
             - field: cover
@@ -289,6 +294,8 @@ fields_tables:
             - field: cover
               edit: 1
             - field: status
+              edit: 1
+            - field: sujet
               edit: 1
               
     objects:
@@ -373,6 +380,8 @@ lists:
                 display: icon
                 max_width: 40px
                 min_width: 40px
+            sujet:
+                field: sujet
             date_create:
                 label: Créé le
                 field: date_create

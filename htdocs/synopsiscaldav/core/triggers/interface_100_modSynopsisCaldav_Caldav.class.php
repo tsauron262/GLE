@@ -112,11 +112,17 @@ class InterfaceCaldav {
                 
                 //mise a jour du ctag
                 if(!in_array($object->type_id, array(3,8,9,10,30,31,40))){
+                    
+                    
+                    
                     $tIdUser = array();
                     if (isset($object->userownerid) && $object->userownerid > 0)
                         $tIdUser[$object->userownerid] = $object->userownerid;
                     foreach($object->userassigned as $val)
                         $tIdUser[$val['id']] = $val['id'];
+                    if(isset($object->oldcopy->userassigned) && is_array($object->oldcopy->userassigned))
+                        foreach($object->oldcopy->userassigned as $val)//Pour incrémenté le CTAG aussi des user sortanrt
+                            $tIdUser[$val['id']] = $val['id'];
                     foreach($tIdUser as $idUser){
                         $tabT = getElementElement("user", "idCaldav", $idUser);
                         if(isset($tabT[0]))
@@ -157,7 +163,7 @@ class InterfaceCaldav {
                 
         }
         if ($action == "ACTION_MODIFY"){
-            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET dtstamp = '".$dtstamp."', participentExt = ".$participentExt.", sequence = ".$sequence.", etag = '".$objectEtag2."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
+            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET organisateur = '".$organisateur."', dtstamp = '".$dtstamp."', participentExt = ".$participentExt.", sequence = ".$sequence.", etag = '".$objectEtag2."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
         }
         if ($action == "ACTION_CREATE"){
 //            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object, agendaplus, Rappel) VALUES ('".$objectEtag2."', '".$objectUri2."', '".$object->id."', '".$objectDataTemp."', '".$objectRappel."')");

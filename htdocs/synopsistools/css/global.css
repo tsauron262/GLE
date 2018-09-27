@@ -508,6 +508,8 @@ input, input.flat, textarea, textarea.flat, form.flat select, select, select.fla
 }
 .ui-widget.ui-widget-content{
     z-index: 10001!important;
+}.ui-widget.ui-widget-content.ui-autocomplete{
+    z-index: 10002!important;
 }
 
 .fullScreen{

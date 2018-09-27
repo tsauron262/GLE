@@ -15,6 +15,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $localtax2 = array();
     public $acompteHt = 0;
     public $acompteTtc = 0;
+    public $acompteTva20 = 0;
     public $tva = array();
     public $hideReduc = false;
     public $hideTotal = false;
@@ -302,7 +303,12 @@ class BimpDocumentPDF extends BimpModelPDF
             $this->contact->firstname .= '<br/>' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '';
         else
             $html = "";
-
+        
+        
+        if(strtoupper($this->thirdparty->lastname) == strtoupper($this->thirdparty->socname)){
+            $this->thirdparty->lastname = "";
+        }
+        
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');
         $html = str_replace("\n", '<br/>', $html);
 
@@ -418,14 +424,10 @@ class BimpDocumentPDF extends BimpModelPDF
             $i++;
 
             if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte')) {
-                $acompteHt = $line->subprice * (float) $line->qty;
-                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
-
-                $total_ht_without_remises += $acompteHt;
-                $total_ttc_without_remises += $acompteTtc;
-
-                $this->acompteHt -= $acompteHt;
-                $this->acompteTtc -= $acompteTtc;
+                $this->acompteHt -= $line->total_ht;
+                $this->acompteTtc -= $line->total_ttc;
+                $this->acompteTva20 -= $line->total_tva;
+                $i++;
                 continue;
             }
 
@@ -754,6 +756,7 @@ class BimpDocumentPDF extends BimpModelPDF
             $this->tva[$vatrate] += $tva_line;
             $i++;
         }
+        $this->tva["20.000"] += $this->acompteTva20;
     }
 
     public function getTotauxRowsHtml()

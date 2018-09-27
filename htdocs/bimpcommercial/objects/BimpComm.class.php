@@ -61,8 +61,12 @@ class BimpComm extends BimpObject
     }
 
     public function getClientContactsArray()
-    {
-        return self::getSocieteContactsArray((int) $this->getData('fk_soc'), false);
+    {        
+        $id_client = (int) BimpTools::getPostFieldValue('id_client');
+        if (!$id_client) {
+            $id_client = (int) $this->getData('fk_soc');
+        }
+        return self::getSocieteContactsArray($id_client, false);
     }
 
     public function getEmailModelsArray()

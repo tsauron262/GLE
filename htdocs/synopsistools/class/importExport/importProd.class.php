@@ -94,6 +94,8 @@ class importProd extends import8sens {
 
 //            $this->traiteChamp("options_serialisable", ($ln['ArtStkNuf'] == "N° de série"));
             $this->traiteChamp("options_serialisable", 0);
+            $this->traiteChamp("options_deee", $ln['ArtFree1']);
+            $this->traiteChamp("options_rpcp", $ln['ArtFree2']);
 
 
 

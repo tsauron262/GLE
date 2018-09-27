@@ -464,6 +464,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 $row['total_ht'] = pdf_getlinetotalexcltax($this->object, $i, $this->langs);
             }
+            $row['object'] = $product;
 
             $table->rows[] = $row;
             $i++;

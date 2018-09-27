@@ -1931,7 +1931,7 @@ class Societe extends CommonObject
         while($ln = $this->db->fetch_object($sql)){
             $userT = new User($this->db);
             $userT->fetch($ln->fk_user);
-            $label .="<br/><b>Commercial : </b>".$userT->getNomUrl(1, '', 0, 1);
+            $label .="<br/><b>Commercial : </b>".$userT->getNomUrl(1, '', 0, 1, 20);
         }
         /*fmoddrsi*/
 

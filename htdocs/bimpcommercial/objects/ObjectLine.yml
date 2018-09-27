@@ -245,6 +245,9 @@ forms:
                   callback: renderFormMargins
               show: 
                   callback: showMarginsInForms
+              display_if: 
+                  field_name: type
+                  hide_values: 2
               
             - custom: 1
               label: Description

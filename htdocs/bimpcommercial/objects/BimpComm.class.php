@@ -338,7 +338,8 @@ class BimpComm extends BimpObject
 
             $remise_globale = (float) $this->getData('remise_globale');
             if ($remise_globale) {
-                $remise_amount = $this->getTotalTtcWithoutRemises() * ($remise_globale / 100);
+                $ttc = $this->getTotalTtcWithoutRemises();
+                $remise_amount = $ttc * ($remise_globale / 100);
                 $total_lines = 0;
 
                 $lines = $this->getChildrenObjects('lines');
@@ -348,7 +349,9 @@ class BimpComm extends BimpObject
                     }
                 }
 
-                $this->remise_globale_line_rate = ($remise_amount / $total_lines) * 100;
+                if ($total_lines) {
+                    $this->remise_globale_line_rate = ($remise_amount / $total_lines) * 100;
+                }
             }
         }
 
@@ -407,11 +410,11 @@ class BimpComm extends BimpObject
 
                 $soc = $soc->dol_object;
 
-                if ($soc->remise_percent) {
-                    $html .= $langs->trans("CompanyHasRelativeDiscount", $soc->remise_percent);
-                } else {
-                    $html .= $langs->trans("CompanyHasNoRelativeDiscount");
-                }
+//                if ($soc->remise_percent) {
+//                    $html .= $langs->trans("CompanyHasRelativeDiscount", $soc->remise_percent);
+//                } else {
+//                    $html .= $langs->trans("CompanyHasNoRelativeDiscount");
+//                }
 
                 if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) { // Never use this
                     $filterabsolutediscount = "fk_facture_source IS NULL"; // If we want deposit to be substracted to payments only and not to total of final invoice
@@ -426,24 +429,42 @@ class BimpComm extends BimpObject
 
                 $can_use_discount = false;
 
-                if ($absolute_discount > 0.009) {
-                    $html .= '<br/>';
-                    $html .= $langs->trans("CompanyHasAbsoluteDiscount", price($absolute_discount), $langs->transnoentities("Currency" . $conf->currency));
-                    // bug dans dolibarr: Commande::insert_discount - désactivé
+//                if ($absolute_discount > 0.009) {
+//                    $html .= '<br/>';
+//                    $html .= $langs->trans("CompanyHasAbsoluteDiscount", price($absolute_discount), $langs->transnoentities("Currency" . $conf->currency));
+                // bug dans dolibarr: Commande::insert_discount - désactivé
 //                    if ($status === Commande::STATUS_DRAFT) {
 //                        $can_use_discount = true;
 //                    }
-                }
+//                }
+//                if ($absolute_creditnote > 0.009) {
+//                    $html .= '<br/>';
+//                    $html .= $langs->trans("CompanyHasCreditNote", price($absolute_creditnote), $langs->transnoentities("Currency" . $conf->currency));
+//                }
+//
+//                if (!$absolute_discount && !$absolute_creditnote) {
+//                    $html .= '<br/>';
+//                    $html .= $langs->trans("CompanyHasNoAbsoluteDiscount");
+//                }
 
-                if ($absolute_creditnote > 0.009) {
-                    $html .= '<br/>';
-                    $html .= $langs->trans("CompanyHasCreditNote", price($absolute_creditnote), $langs->transnoentities("Currency" . $conf->currency));
-                }
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<tbody>';
+                $html .= '<tr>';
+                $html .= '<td style="width: 140px">Remise par défaut: </td>';
+                $html .= '<td style="font-weight: bold;">' . BimpTools::displayFloatValue((float) $soc->remise_percent) . '%</td>';
+                $html .= '</tr>';
 
-                if (!$absolute_discount && !$absolute_creditnote) {
-                    $html .= '<br/>';
-                    $html .= $langs->trans("CompanyHasNoAbsoluteDiscount");
-                }
+                $html .= '<tr>';
+                $html .= '<td style="width: 140px">Acomptes: </td>';
+                $html .= '<td style="font-weight: bold;">' . BimpTools::displayMoneyValue((float) $absolute_discount, 'EUR') . '</td>';
+                $html .= '</tr>';
+
+                $html .= '<tr>';
+                $html .= '<td style="width: 140px">Avoirs: </td>';
+                $html .= '<td style="font-weight: bold;">' . BimpTools::displayMoneyValue((float) $absolute_creditnote, 'EUR') . '</td>';
+                $html .= '</tr>';
+                $html .= '</tbody>';
+                $html .= '</table>';
 
                 if ($can_use_discount) {
                     $html .= '<div class="buttonsContainer align-right">';
@@ -897,7 +918,7 @@ class BimpComm extends BimpObject
                             }
                             break;
 
-                        case 'order':
+                        case 'commande':
                             if (is_null($commande_instance)) {
                                 $commande_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
                             }
@@ -1169,10 +1190,10 @@ class BimpComm extends BimpObject
             foreach ($this->dol_object->lines as $line) {
                 $dol_lines[(int) $line->id] = $line;
             }
-
+            
             $bimp_line = $this->getChildObject('lines');
             $rows = $this->db->getRows($bimp_line->getTable(), '`id_obj` = ' . (int) $this->id, null, 'array', array('id', 'id_line', 'position', 'remise'));
-
+            
             if (is_array($rows)) {
                 foreach ($rows as $r) {
                     $bimp_lines[(int) $r['id_line']] = array(
@@ -1195,7 +1216,6 @@ class BimpComm extends BimpObject
 
             // Création des lignes absentes de l'objet bimp: 
             $objectLine = $this->getChildObject('lines');
-
             $bimp_line->reset();
 
             $i = 0;
@@ -1264,7 +1284,7 @@ class BimpComm extends BimpObject
         }
 
         $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
-        $lines = $origin->getChildrenObjects('lines');
+        $lines = $origin->getChildrenObjects('lines', array(), 'position', 'asc');
 
         $warnings = array();
         $i = 0;
@@ -1281,6 +1301,7 @@ class BimpComm extends BimpObject
                 'editable'  => $line->getData('Editable')
             ));
             $line_instance->desc = $line->desc;
+            $line_instance->tva_tx = $line->tva_tx;
             $line_instance->id_product = $line->id_product;
             $line_instance->qty = $line->qty;
             $line_instance->pu_ht = $line->pu_ht;
@@ -1788,7 +1809,7 @@ class BimpComm extends BimpObject
 
         if ($origin && $origin_id) {
             $origin_object = self::getInstanceByType($origin, $origin_id);
-
+            
             if (!BimpObject::objectLoaded($origin_object)) {
                 return array('Elément d\'origine invalide');
             }
@@ -1809,7 +1830,7 @@ class BimpComm extends BimpObject
 
         if (!count($errors)) {
             if ($origin && $origin_id) {
-                $warnings = array_merge($warnings, $this->createLinesFromOrigin($origin));
+                $warnings = array_merge($warnings, $this->createLinesFromOrigin($origin_object));
             }
         }
 

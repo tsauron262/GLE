@@ -247,6 +247,7 @@ class ObjectLine extends BimpObject
 
     public function getTotalTtcWithoutRemises()
     {
+//        echo round(BimpTools::calculatePriceTaxIn((float) $this->pu_ht, (float) $this->tva_tx) * (float) $this->qty, 8) . "\n";
         return round(BimpTools::calculatePriceTaxIn((float) $this->pu_ht, (float) $this->tva_tx) * (float) $this->qty, 8);
     }
 
@@ -374,7 +375,7 @@ class ObjectLine extends BimpObject
 
     public function getFournisseurPriceCreateForm()
     {
-        if ($this->canEditPrixAchat) {
+        if ($this->canEditPrixAchat()) {
             return 'default';
         }
 

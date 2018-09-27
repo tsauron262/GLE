@@ -515,7 +515,6 @@ function validateForm($form) {
                                 }
                             });
                             if (!check) {
-//                                bimp_msg($(this).data('field_name'));
                                 $(this).addClass('value_required');
                                 data_missing = true;
                             } else {
@@ -536,7 +535,6 @@ function validateForm($form) {
                                 }
                             } else {
                                 if ($input.val() === '') {
-//                                    bimp_msg($input.attr('name'));
                                     data_missing = true;
                                     $(this).addClass('value_required');
                                 } else {
@@ -555,7 +553,6 @@ function validateForm($form) {
             if (parseInt($(this).data('required'))) {
                 if (!$(this).find('.inputMultipleValues').find('tr.itemRow').length) {
                     data_missing = true;
-//                    bimp_msg($(this).data('field_name'));
                     $(this).addClass('value_required');
                 } else {
                     $(this).removeClass('value_required');
@@ -1469,21 +1466,21 @@ function setFormEvents($form) {
 
 function setInputsEvents($container) {
     $container.find('.switch').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
+        if (!parseInt($(this).data('switch_event_init'))) {
             setSwitchInputEvents($(this));
-            $(this).data('event_init', 1);
+            $(this).data('switch_event_init', 1);
         }
     });
     $container.find('.toggle_value').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
+        if (!parseInt($(this).data('toggle_event_init'))) {
             setToggleInputEvent($(this));
-            $(this).data('event_init', 1);
+            $(this).data('toggle_event_init', 1);
         }
     });
     $container.find('.searchListOptions').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
+        if (!parseInt($(this).data('search_list_event_init'))) {
             setSearchListOptionsEvents($(this));
-            $(this).data('event_init', 1);
+            $(this).data('search_list_event_init', 1);
         }
     });
     $container.find('input[type="text"]').each(function () {
@@ -1495,7 +1492,7 @@ function setInputsEvents($container) {
         }
     });
     $container.find('.texarea_values').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
+        if (!parseInt($(this).data('textarea_values_event_init'))) {
             var field_name = $(this).data('field_name');
             var $textarea = $(this).parent().find('textarea[name="' + field_name + '"]');
             $(this).find('.textarea_value').click(function () {
@@ -1506,11 +1503,11 @@ function setInputsEvents($container) {
                 text += $(this).text();
                 $textarea.val(text).change();
             });
-            $(this).data('event_init', 1);
+            $(this).data('textarea_values_event_init', 1);
         }
     });
     $container.find('.input_values').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
+        if (!parseInt($(this).data('input_values_event_init'))) {
             var $inputContainer = $(this).findParentByClass('inputContainer');
             var field_name = $(this).data('field_name');
             var allow_custom = parseInt($(this).data('allow_custom'));
@@ -1539,13 +1536,11 @@ function setInputsEvents($container) {
                     });
                 }
             }
-            $(this).data('event_init', 1);
-        } else {
-            bimp_msg('la');
+            $(this).data('input_values_event_init', 1);
         }
     });
     $container.find('.qtyInputContainer').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
+        if (!parseInt($(this).data('qty_event_init'))) {
             $(this).find('.qtyDown').click(function () {
                 var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
                 if ($.isOk($qtyInputcontainer)) {
@@ -1577,7 +1572,7 @@ function setInputsEvents($container) {
                 $(this).select();
             });
 
-            $(this).data('event_init', 1);
+            $(this).data('qty_event_init', 1);
         }
     });
     $container.find('.search_ziptown').each(function () {
@@ -1595,7 +1590,7 @@ function setInputEvents($form, $input) {
         return;
     }
 
-    if (parseInt($input.data('event_init'))) {
+    if (parseInt($input.data('events_init'))) {
         return;
     }
 
@@ -1639,7 +1634,7 @@ function setInputEvents($form, $input) {
     }
 
     resetInputDisplay($form);
-    $input.data('event_init', 1);
+    $input.data('events_init', 1);
 }
 
 function setSwitchInputEvents($input) {

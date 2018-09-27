@@ -616,6 +616,16 @@ class BimpObject extends BimpCache
 
     // Gestion des objets enfants:
 
+    public function setChild($child)
+    {
+        if (BimpObject::objectLoaded($child) && is_a($child, 'BimpObject')) {
+            if (!isset($this->children[$child->object_name])) {
+                $this->children[$child->object_name] = array();
+            }
+            $this->children[$child->object_name][$child->id] = $child;
+        }
+    }
+
     public function hasChildren($object_name)
     {
         if (!array_key_exists($object_name, $this->params['objects'])) {
@@ -730,11 +740,11 @@ class BimpObject extends BimpCache
                         }
                         $primary = $instance->getPrimary();
                         $list = $instance->getList($filters, null, null, $order_by, $order_way, 'array', array($primary));
-                        if (!isset($this->children[$object_name])) {
-                            $this->children[$object_name] = array();
+                        if (!isset($this->children[$instance->object_name])) {
+                            $this->children[$instance->object_name] = array();
                         }
                         foreach ($list as $item) {
-                            if (!isset($this->children[$object_name][(int) $item[$primary]])) {
+                            if (!isset($this->children[$instance->object_name][(int) $item[$primary]])) {
                                 $parent = null;
                                 if ($is_child) {
                                     $parent = $this;
@@ -742,11 +752,11 @@ class BimpObject extends BimpCache
                                 $child = BimpObject::getInstance($instance->module, $instance->object_name, (int) $item[$primary], $parent);
 
                                 if ($child->isLoaded()) {
-                                    $this->children[$object_name][(int) $item[$primary]] = $child;
+                                    $this->children[$instance->object_name][(int) $item[$primary]] = $child;
                                     $children[] = $child;
                                 }
                             } else {
-                                $children[] = $this->children[$object_name][(int) $item[$primary]];
+                                $children[] = $this->children[$instance->object_name][(int) $item[$primary]];
                             }
                         }
                     }
@@ -1802,6 +1812,9 @@ class BimpObject extends BimpCache
 
                 $parent = $this->getParentInstance();
                 if (!is_null($parent)) {
+                    if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
+                        $parent->setChild($this);
+                    }
                     if (method_exists($parent, 'onChildSave')) {
                         $parent->onChildSave($this);
                     }
@@ -1883,6 +1896,9 @@ class BimpObject extends BimpCache
         $parent = $this->getParentInstance();
 
         if (!is_null($parent)) {
+            if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
+                $parent->setChild($this);
+            }
             if (method_exists($parent, 'onChildSave')) {
                 $warnings = array_merge($warnings, $parent->onChildSave($this));
             }
@@ -1973,6 +1989,9 @@ class BimpObject extends BimpCache
                     $parent = $this->getParentInstance();
 
                     if (!is_null($parent)) {
+                        if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
+                            $parent->setChild($this);
+                        }
                         if (method_exists($parent, 'onChildSave')) {
                             $warnings = array_merge($warnings, $parent->onChildSave($this));
                         }
@@ -2201,7 +2220,7 @@ class BimpObject extends BimpCache
         }
 
         $rows = $this->db->executeS($sql, $return);
-
+        
         if (is_null($rows)) {
             $rows = array();
         }
@@ -2611,9 +2630,6 @@ class BimpObject extends BimpCache
                 }
                 if (isset($this->dol_object->array_options['options_' . $extrafield])) {
                     $value = $this->dol_object->array_options['options_' . $extrafield];
-//                    if ($extrafield === 'type') {
-//                        echo $value; exit;
-//                    }
                 } else {
                     $value = '';
                 }

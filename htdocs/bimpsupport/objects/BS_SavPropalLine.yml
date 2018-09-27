@@ -190,6 +190,9 @@ forms:
               input_name: margins_table
               content: 
                   callback: renderFormMargins
+              display_if: 
+                  field_name: type
+                  hide_values: 2
                   
             - custom: 1
               label: Description

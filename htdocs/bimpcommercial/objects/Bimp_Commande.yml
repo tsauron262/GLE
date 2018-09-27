@@ -147,7 +147,6 @@ fields:
         type: money
         
     total: unset
-    remise_globale: unset
         
 fields_tables: 
     infos: 

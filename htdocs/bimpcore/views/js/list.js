@@ -393,13 +393,14 @@ function deleteObjects(list_id, objects_list, $button) {
         BimpAjax('deleteObjects', data, null, {
             $button: $button,
             success: function (result) {
-                for (var i in result.objects_list) {
+//                for (var i in result.objects_list) {
                     $('body').trigger($.Event('objectDelete', {
                         module: result.module,
                         object_name: result.object_name,
-                        id_object: result.objects_list[i]
+                        id_object: 0
+//                        id_object: result.objects_list[i]
                     }));
-                }
+//                }
             }
         });
     }

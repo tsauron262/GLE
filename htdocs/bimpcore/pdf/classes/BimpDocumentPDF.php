@@ -303,12 +303,12 @@ class BimpDocumentPDF extends BimpModelPDF
             $this->contact->firstname .= '<br/>' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '';
         else
             $html = "";
-        
-        
-        if(strtoupper($this->thirdparty->lastname) == strtoupper($this->thirdparty->socname)){
+
+
+        if (strtoupper($this->thirdparty->lastname) == strtoupper($this->thirdparty->socname)) {
             $this->thirdparty->lastname = "";
         }
-        
+
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');
         $html = str_replace("\n", '<br/>', $html);
 
@@ -319,11 +319,11 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         $html = '';
 
-//        	if ($usecontact && !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) {
-//$thirdparty = $object->contact;
-//} else {
-//$thirdparty = $object->thirdparty;
-//}
+//        if ($usecontact && !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) {
+//            $thirdparty = $object->contact;
+//        } else {
+//            $thirdparty = $object->thirdparty;
+//        }
 
         $html .= '<div class="section addresses_section">';
         $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
@@ -424,6 +424,12 @@ class BimpDocumentPDF extends BimpModelPDF
             $i++;
 
             if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte')) {
+//                $acompteHt = $line->subprice * (float) $line->qty;
+//                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
+
+                $total_ht_without_remises += $line->total_ht;
+                $total_ttc_without_remises += $line->total_ttc;
+
                 $this->acompteHt -= $line->total_ht;
                 $this->acompteTtc -= $line->total_ttc;
                 $this->acompteTva20 -= $line->total_tva;
@@ -511,7 +517,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($remise_globale) {
             $remise_infos = $this->bimpCommObject->getRemisesInfos();
             $table->rows[] = array(
-                'desc'      => 'Remise globale',
+                'desc'      => 'Remise exceptionnelle sur l\'intégralité ' . $this->bimpCommObject->getLabel('of_the'),
                 'qte'       => 1,
                 'tva'       => '',
                 'pu_ht'     => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], ''),

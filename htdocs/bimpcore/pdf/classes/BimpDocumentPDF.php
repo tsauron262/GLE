@@ -21,6 +21,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $hideTotal = false;
     public $hideRef = false;
     public $hideLabelProd = true;
+    public $totals = array("DEEE"=>0, "RPCP"=>0);
 
     public function __construct($db)
     {
@@ -510,7 +511,14 @@ class BimpDocumentPDF extends BimpModelPDF
                 $total_ht_without_remises += $line->subprice * (float) $line->qty;
                 $total_ttc_without_remises += BimpTools::calculatePriceTaxIn($line->subprice * (float) $line->qty, (float) $line->tva_tx);
             }
+           /*Pour les ecotaxe et copie privé*/
             $row['object'] = $product;
+            if(is_object($product)){
+                if(isset($product->array_options['options_deee']) && $product->array_options['options_deee'] > 0)
+                    $this->totals['DEEE'] += $product->array_options['options_deee'] * $row['qte'];
+                if(isset($product->array_options['options_rpcp']) && $product->array_options['options_rpcp'] > 0)
+                    $this->totals['RPCP'] += $product->array_options['options_rpcp'] * $row['qte'];
+            }
 
             $table->rows[] = $row;
         }
@@ -536,8 +544,17 @@ class BimpDocumentPDF extends BimpModelPDF
     public function renderAfterLines()
     {
         $this->pdf->addVMargin(2);
+        $html = '';
+        
+        if($this->totals['RPCP'] > 0){
+            $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">Rémunération Copie Privée : '.price($this->totals['RPCP']).' € HT</p>
+<p style="font-size: 6px; font-style: italic">Notice officielle d\'information sur la copie privée à : http://www.copieprivee.culture.gouv.fr<br/>
+Remboursement/exonération de la rémunération pour usage professionnel : http://www.copiefrance.fr</p>';
+        }
+        
+        
 
-        $html = '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
+        $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
         $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
 
         $html .= '<p style="font-size: 6px; font-style: italic">La Société ' . $this->fromCompany->nom . ' ne peut être tenue pour responsable de la perte éventuelles de données informatiques.';
@@ -784,6 +801,15 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= '<td style="background-color: #F0F0F0;">Total remises HT</td>';
             $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->total_remises, 0, $this->langs) . '</td>';
             $html .= '</tr>';
+        }
+        
+        
+        // Total DEEE
+        if($this->totals['DEEE'] > 0){
+        $html .= '<tr>';
+        $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("Total éco-participation HT") . '</td>';
+        $html .= '<td style="background-color: #DCDCDC;text-align: right;">' . price($this->totals['DEEE']) . '</td>';
+        $html .= '</tr>';
         }
 
         // Total HT:

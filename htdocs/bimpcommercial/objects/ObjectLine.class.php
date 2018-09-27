@@ -45,6 +45,7 @@ class ObjectLine extends BimpObject
     protected $post_id_product = null;
     protected $post_equipment = null;
     public $no_equipment_post = false;
+    public $remises = null;
 
     // Getters: 
 
@@ -88,6 +89,17 @@ class ObjectLine extends BimpObject
         }
 
         return 0;
+    }
+
+    public function isRemisable()
+    {
+        $product = $this->getProduct();
+        if (BimpObject::objectLoaded($product)) {
+            if (!(int) $product->getData('remisable')) {
+                return 0;
+            }
+        }
+        return (int) $this->getData('remisable');
     }
 
     public function isParentEditable()
@@ -231,6 +243,11 @@ class ObjectLine extends BimpObject
             return (float) ($pu_ttc * (float) $this->qty);
         }
         return 0;
+    }
+
+    public function getTotalTtcWithoutRemises()
+    {
+        return round(BimpTools::calculatePriceTaxIn((float) $this->pu_ht, (float) $this->tva_tx) * (float) $this->qty, 8);
     }
 
     public function getMargin()
@@ -423,9 +440,18 @@ class ObjectLine extends BimpObject
                         return 0;
                     }
                     return $id_fourn_price;
+
+                case 'remisable':;
+                    if ($id_product && (int) $this->id_product !== $id_product) {
+                        return (int) $product->getData('remisable');
+                    }
+                    return (int) $this->isRemisable();
             }
         }
 
+        if ($field === 'remisable') {
+            return 1;
+        }
         return 0;
     }
 
@@ -491,10 +517,10 @@ class ObjectLine extends BimpObject
                     }
                 }
             }
-            if (in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE)) && (int) $this->getData('editable')) {
+            if ($this->isRemisable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE)) && (int) $this->getData('editable')) {
                 $onclick = 'loadModalList(\'bimpcommercial\', \'ObjectLineRemise\', \'default\', ' . $this->id . ', $(this), \'Remises\', {parent_object_type: \'' . static::$parent_comm_type . '\'})';
                 $buttons[] = array(
-                    'label'   => 'Remises',
+                    'label'   => 'Remises ligne',
                     'icon'    => 'percent',
                     'onclick' => $onclick
                 );
@@ -548,11 +574,21 @@ class ObjectLine extends BimpObject
     public function getRemises()
     {
         if ($this->isLoaded() && static::$parent_comm_type) {
-            $lines = $this->getChildrenObjects('remises', array(
-                'id_object_line' => (int) $this->id,
-                'object_type'    => static::$parent_comm_type
-            ));
-            return $lines;
+            if (is_null($this->remises)) {
+                $this->remises = $this->getChildrenObjects('remises', array(
+                    'id_object_line' => (int) $this->id,
+                    'object_type'    => static::$parent_comm_type
+                ));
+            }
+            if (!$this->isRemisable() && count($this->remises)) {
+                foreach ($this->remises as $remise) {
+                    $remise->delete(true);
+                }
+                unset($this->remises);
+                $this->remises = null;
+            }
+            
+            return $this->remises;
         }
 
         return array();
@@ -561,46 +597,121 @@ class ObjectLine extends BimpObject
     public function getRemiseTotalInfos()
     {
         $infos = array(
-            'percent' => 0,
-            'amount'  => 0
+            'line_percent'              => 0,
+            'line_amount_ht'            => 0,
+            'line_amount_ttc'           => 0,
+            'remise_globale_percent'    => 0,
+            'remise_globale_amount_ht'  => 0,
+            'remise_globale_amount_ttc' => 0,
+            'total_percent'             => 0,
+            'total_amount_ht'           => 0,
+            'total_amount_ttc'          => 0,
+            'total_ht_without_remises'  => 0,
+            'total_ttc_without_remises' => 0
         );
 
         if (!$this->isLoaded()) {
             return $infos;
         }
 
+        $total_ht = $this->getTotalHT();
+        $total_ttc = $this->getTotalTtcWithoutRemises();
+        $infos['total_ht_without_remises'] = $total_ht;
+        $infos['total_ttc_without_remises'] = $total_ttc;
+
+        if (!$this->isRemisable()) {
+            return $infos;
+        }
+
         $remises = $this->getRemises();
 
-        $total_ttc = BimpTools::calculatePriceTaxIn($this->pu_ht, (float) $this->tva_tx) * (float) $this->qty;
-
-        $total_remises = 0;
+        $total_line_amounts = 0;
 
         foreach ($remises as $remise) {
             switch ((int) $remise->getData('type')) {
                 case ObjectLineRemise::OL_REMISE_PERCENT:
-                    $infos['percent'] += (float) $remise->getData('percent');
+                    $infos['line_percent'] += (float) $remise->getData('percent');
                     break;
 
                 case ObjectLineRemise::OL_REMISE_AMOUNT:
                     if ((int) $remise->getData('per_unit')) {
-                        $total_remises += ((float) $remise->getData('montant') * (float) $this->qty);
+                        $total_line_amounts += ((float) $remise->getData('montant') * (float) $this->qty);
                     } else {
-                        $total_remises += (float) $remise->getData('montant');
+                        $total_line_amounts += (float) $remise->getData('montant');
                     }
                     break;
             }
         }
 
-        if ($total_remises) {
-            $infos['percent'] += (float) (($total_remises / $total_ttc) * 100);
+        if ($total_line_amounts) {
+            $infos['line_percent'] += (float) (($total_line_amounts / $total_ttc) * 100);
         }
 
-        if ($infos['percent']) {
-            $infos['amount'] = (float) ($total_ttc * ($infos['percent'] / 100));
+        if ($infos['line_percent']) {
+            $infos['line_amount_ht'] = (float) ($total_ht * ($infos['line_percent'] / 100));
+            $infos['line_amount_ttc'] = (float) ($total_ttc * ($infos['line_percent'] / 100));
         }
 
+        $parent = $this->getParentInstance();
+
+        if ($this->isRemisable()) {
+            if ($parent->isLoaded()) {
+                if ($parent->field_exists('remise_globale')) {
+                    $remise_globale = (float) $parent->getRemiseGlobaleLineRate();
+                    if ($remise_globale > 0) {
+                        $infos['remise_globale_percent'] = $remise_globale;
+                        $infos['remise_globale_amount_ht'] = $total_ht * ($remise_globale / 100);
+                        $infos['remise_globale_amount_ttc'] = $total_ttc * ($remise_globale / 100);
+                    }
+                }
+            }
+        }
+
+        $infos['total_percent'] = round($infos['line_percent'] + $infos['remise_globale_percent'], 8);
+        $infos['total_amount_ht'] = $infos['line_amount_ht'] + $infos['remise_globale_amount_ht'];
+        $infos['total_amount_ttc'] = $infos['line_amount_ttc'] + $infos['remise_globale_amount_ttc'];
 
         return $infos;
+    }
+
+    public function getClientDefaultRemiseFormValues()
+    {
+        $parent = $this->getParentInstance();
+        if (BimpObject::objectLoaded($parent)) {
+            $client = $parent->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                BimpObject::loadClass('bimpcommercial', 'ObjectLineRemise');
+                if ((float) $client->dol_object->remise_percent > 0) {
+                    return array(
+                        array(
+                            'fields' => array(
+                                'label'   => 'Remise client par défaut',
+                                'type'    => ObjectLineRemise::OL_REMISE_PERCENT,
+                                'percent' => (float) $client->dol_object->remise_percent
+                            )
+                        )
+                    );
+                }
+            }
+        }
+
+        return array();
+    }
+
+    // Gettters - Overrides BimpObject:
+
+    public function isChild($instance)
+    {
+        if (is_a($instance, 'ObjectLineRemise')) {
+            $obj_type = $instance->getParentObjectType();
+            if (!$obj_type) {
+                if (isset($_POST['remises_sub_object_idx_object_type'])) {
+                    $instance->set('object_type', $_POST['remises_sub_object_idx_object_type']);
+                }
+            }
+        }
+
+        return parent::isChild($instance);
     }
 
     // Affichages: 
@@ -858,10 +969,21 @@ class ObjectLine extends BimpObject
 
     public function displayRemise()
     {
+        $html = '';
         if ($this->isLoaded()) {
-            $remises = $this->getRemiseTotalInfos();
-            return BimpTools::displayMoneyValue($remises['amount'], 'EUR') . ' (' . round($remises['percent'], 4) . '%)';
+            if ($this->isRemisable()) {
+                $remises = $this->getRemiseTotalInfos();
+                if ((float) $remises['total_amount_ttc']) {
+                    $html .= BimpTools::displayMoneyValue($remises['total_amount_ht'], 'EUR');
+                    $html .= ' / ' . BimpTools::displayMoneyValue($remises['total_amount_ttc'], 'EUR');
+                    $html .= ' (' . round($remises['total_percent'], 4) . '%)';
+                }
+            } else {
+                $html = '<span class="warning">Non remisable</span>';
+            }
         }
+
+        return $html;
     }
 
     // Traitements:
@@ -873,8 +995,11 @@ class ObjectLine extends BimpObject
         if (BimpObject::objectLoaded($line)) {
             $this->reset();
 
+            $remisable = 1;
+
             if (isset($line->fk_product) && (int) $line->fk_product) {
                 $type = 1;
+                $remisable = (int) $this->db->getValue('product_extrafields', 'remisable', '`fk_object` = ' . (int) $line->fk_product);
             } elseif ((float) $line->subprice) {
                 $type = 3;
             } else {
@@ -889,7 +1014,8 @@ class ObjectLine extends BimpObject
                 'editable'           => 1,
                 'linked_id_object'   => 0,
                 'linked_object_name' => 0,
-                'position'           => (int) $line->rang
+                'position'           => (int) $line->rang,
+                'remisable'          => $remisable
             ));
 
             if (!count($errors)) {
@@ -904,7 +1030,7 @@ class ObjectLine extends BimpObject
                 } else {
                     $this->fetch($id);
 
-                    if (isset($line->remise_percent) && (float) $line->remise_percent) {
+                    if ($remisable && isset($line->remise_percent) && (float) $line->remise_percent) {
                         if (static::$parent_comm_type) {
                             $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
                             $remise->validateArray(array(
@@ -1082,7 +1208,6 @@ class ObjectLine extends BimpObject
                         default:
                             $result = 0;
                     }
-
                     break;
 
                 default:
@@ -1469,11 +1594,11 @@ class ObjectLine extends BimpObject
     public function calcRemise()
     {
         if ($this->isLoaded()) {
-            $remises = $this->getRemiseTotalInfos();
-            $this->remise = (float) $remises['percent'];
-            $this->set('remise', (float) $remises['percent']);
-            $warnings = array();
-            $this->update($warnings, true);
+            $remises_infos = $this->getRemiseTotalInfos();
+            if ((float) $this->remise !== $remises_infos['total_percent'] ||
+                    $remises_infos['total_percent'] !== (float) $this->getData('remise')) {
+                $this->update($warnings, true);
+            }
         }
     }
 
@@ -1486,6 +1611,8 @@ class ObjectLine extends BimpObject
                     $instance->onChildSave($child);
                 }
             } else {
+                unset($this->remises);
+                $this->remises = null;
                 $this->calcRemise();
             }
         }
@@ -1493,21 +1620,46 @@ class ObjectLine extends BimpObject
 
     public function checkRemises()
     {
-        $remise_infos = $this->getRemiseTotalInfos();
-        if ((float) $this->remise !== (float) $remise_infos['percent']) {
-            $remise_percent = (float) $this->remise;
-            $remises = $this->getRemises();
-            foreach ($remises as $remise) {
-                $remise->delete();
+        $remises = $this->getRemises();
+
+        // On suppose que "$this->remise" a pu être modifié via l'ancienne interface Dolibarr: 
+
+        if (!$this->isRemisable()) {
+            if (count($remises)) {
+                foreach ($remises as $remise) {
+                    $remise->delete(true);
+                }
+                unset($this->remises);
+                $this->remises = null;
             }
-            $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise', null, $this);
-            $remise->validateArray(array(
-                'id_object_line' => (int) $this->id,
-                'object_type'    => static::$parent_comm_type,
-                'type'           => ObjectLineRemise::OL_REMISE_PERCENT,
-                'percent'        => (float) $remise_percent
-            ));
-            $remise->create($warnings, true);
+            if ((float) $this->remise || (float) $this->getData('remise')) {
+                $this->remise = 0;
+                $this->update();
+            }
+        } else {
+            $remise_infos = $this->getRemiseTotalInfos();
+
+            if ((float) $this->remise !== (float) $remise_infos['total_percent']) {
+                $remise_percent = (float) $this->remise;
+
+                $remises = $this->getRemises();
+                foreach ($remises as $remise) {
+                    $remise->delete(true);
+                }
+                unset($this->remises);
+                $this->remises = null;
+
+                $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise', null, $this);
+                $remise->validateArray(array(
+                    'id_object_line' => (int) $this->id,
+                    'object_type'    => static::$parent_comm_type,
+                    'type'           => ObjectLineRemise::OL_REMISE_PERCENT,
+                    'percent'        => (float) $remise_percent
+                ));
+                $remise->create($warnings, true);
+
+                $this->calcRemise();
+            }
         }
     }
 
@@ -1523,7 +1675,7 @@ class ObjectLine extends BimpObject
 
         if ($field === 'id_product') {
             $value = (int) $this->id_product;
-        } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price'))) {
+        } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'remisable'))) {
             $value = $this->getValueByProduct($field);
         } else {
             if (BimpTools::isSubmit($field)) {
@@ -1710,6 +1862,18 @@ class ObjectLine extends BimpObject
             case 'date_to':
                 $html = BimpInput::renderInput('date', 'date_to', (string) $value);
                 break;
+
+            case 'remisable':
+                $product = $this->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    if (!(int) $product->getData('remisable')) {
+                        $html .= '<input type="hidden" value="0" name="remisable"/>';
+                        $html .= '<span class="danger">NON</span>';
+                        break;
+                    }
+                }
+                $html .= BimpInput::renderInput('toggle', 'remisable', (int) $value);
+                break;
         }
 
         return $html;
@@ -1739,9 +1903,11 @@ class ObjectLine extends BimpObject
         $line_remise = 0;
         $line_tva_tx = 0;
         $line_qty = 0;
+        $is_line_remisable = 1;
 
         $total_vente = 0;
         $total_achat = 0;
+
         foreach ($lines as $line) {
             if ($id_line && (int) $line->id === (int) $id_line) {
                 $line_pu = (float) $line->pu_ht;
@@ -1749,6 +1915,7 @@ class ObjectLine extends BimpObject
                 $line_remise = (float) $line->remise;
                 $line_tva_tx = (float) $line->tva_tx;
                 $line_qty = (float) $line->qty;
+                $is_line_remisable = (int) $line->getData('remisable');
                 continue;
             }
             $pu = (float) $line->pu_ht;
@@ -1780,62 +1947,76 @@ class ObjectLine extends BimpObject
             $line_qty = (float) BimpTools::getValue('line_qty');
         }
 
-        if (BimpTools::isSubmit('line_remise')) {
-            $line_remise = (float) BimpTools::getValue('line_remise');
-        } elseif (BimpTools::isSubmit('line_remises')) {
-            $line_remise = 0;
-            $remises = array();
+        if (BimpTools::isSubmit('line_remisable')) {
+            $is_line_remisable = (int) BimpTools::getValue('line_remisable');
+        }
 
-            if ($id_line) {
-                $remise_instance = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
-                $list_remise = $remise_instance->getList(array(
-                    'id_object_line' => $id_line,
-                    'object_type'    => static::$parent_comm_type
-                        ), null, null, 'id', 'desc', 'array');
+        if ($is_line_remisable) {
+            if (BimpTools::isSubmit('line_remise')) {
+                $line_remise = (float) BimpTools::getValue('line_remise');
+            } elseif (BimpTools::isSubmit('line_remises')) {
+                $line_remise = 0;
+                $remises = array();
 
-                if (!is_null($list_remise)) {
-                    foreach ($list_remise as $item) {
-                        $remises[(int) $item['id']] = $item;
+                if ($id_line) {
+                    $remise_instance = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+                    $list_remises = $remise_instance->getList(array(
+                        'id_object_line' => $id_line,
+                        'object_type'    => static::$parent_comm_type
+                            ), null, null, 'id', 'desc', 'array');
+
+                    if (!is_null($list_remises)) {
+                        foreach ($list_remises as $item) {
+                            $remises[(int) $item['id']] = $item;
+                        }
                     }
                 }
-            }
 
-            $new_remises = BimpTools::getValue('line_remises');
+                $new_remises = BimpTools::getValue('line_remises');
 
-            foreach ($new_remises as $new_remise) {
-                if (isset($new_remise['id']) && (int) $new_remise['id']) {
-                    $remises[(int) $new_remise['id']] = $new_remise;
-                } else {
-                    $remises[] = $new_remise;
+                foreach ($new_remises as $new_remise) {
+                    if (isset($new_remise['id']) && (int) $new_remise['id']) {
+                        $remises[(int) $new_remise['id']] = $new_remise;
+                    } else {
+                        $remises[] = $new_remise;
+                    }
+                }
+
+                $total_remises = 0;
+                BimpObject::loadClass('bimpcommercial', 'ObjectLineRemise');
+
+                foreach ($remises as $remise) {
+                    switch ((int) $remise['type']) {
+                        case ObjectLineRemise::OL_REMISE_PERCENT:
+                            $line_remise += (float) $remise['percent'];
+                            break;
+
+                        case ObjectLineRemise::OL_REMISE_AMOUNT:
+                            if (isset($remise['remise_ht']) && (int) $remise['remise_ht']) {
+                                $remise['montant'] = (float) BimpTools::calculatePriceTaxIn((float) $remise['montant'], $line_tva_tx);
+                            }
+                            if ((int) $remise['per_unit']) {
+                                $total_remises += ((float) $remise['montant'] * (float) $line_qty);
+                            } else {
+                                $total_remises += (float) $remise['montant'];
+                            }
+                            break;
+                    }
+                }
+
+                if (BimpObject::objectLoaded($parent)) {
+                    if ($parent->field_exists('remise_globale')) {
+                        $line_remise += (float) $parent->getRemiseGlobaleLineRate();
+                    }
+                }
+
+                if ($total_remises) {
+                    $line_total_ttc = BimpTools::calculatePriceTaxIn($line_pu, (float) $line_tva_tx) * (float) $line_qty;
+                    $line_remise += (float) (($total_remises / $line_total_ttc) * 100);
                 }
             }
-
-            $total_remises = 0;
-            BimpObject::loadClass('bimpcommercial', 'ObjectLineRemise');
-
-            foreach ($remises as $remise) {
-                switch ((int) $remise['type']) {
-                    case ObjectLineRemise::OL_REMISE_PERCENT:
-                        $line_remise += (float) $remise['percent'];
-                        break;
-
-                    case ObjectLineRemise::OL_REMISE_AMOUNT:
-                        if (isset($remise['remise_ht']) && (int) $remise['remise_ht']) {
-                            $remise['montant'] = (float) BimpTools::calculatePriceTaxIn((float) $remise['montant'], $line_tva_tx);
-                        }
-                        if ((int) $remise['per_unit']) {
-                            $total_remises += ((float) $remise['montant'] * (float) $line_qty);
-                        } else {
-                            $total_remises += (float) $remise['montant'];
-                        }
-                        break;
-                }
-            }
-
-            if ($total_remises) {
-                $line_total_ttc = BimpTools::calculatePriceTaxIn($line_pu, (float) $line_tva_tx) * (float) $line_qty;
-                $line_remise += (float) (($total_remises / $line_total_ttc) * 100);
-            }
+        } else {
+            $line_remise = 0;
         }
 
         if ((float) $line_remise > 0) {
@@ -1999,6 +2180,11 @@ class ObjectLine extends BimpObject
         }
 
         $this->remise = null;
+
+        if (!is_null($this->remises)) {
+            unset($this->remises);
+            $this->remises = null;
+        }
 
         parent::reset();
     }
@@ -2325,13 +2511,55 @@ class ObjectLine extends BimpObject
             }
         }
 
-        // Calcul de la remise globale en pourcentage: 
+        if (!$this->isRemisable()) {
+            $remises = $this->getRemises();
+            foreach ($remises as $remise) {
+                $remise->delete(true);
+            }
+            unset($this->remises);
+            $this->remises = null;
+        }
+
         $remises = $this->getRemiseTotalInfos();
-        $this->remise = $remises['percent'];
-        $this->set('remise', (float) $remises['percent']);
+        $this->remise = (float) $remises['total_percent'];
+        $this->set('remise', (float) $remises['total_percent']);
 
         $errors = parent::update($warnings, $force_update);
         $errors = array_merge($errors, $this->updateLine(false));
+
+        if (!count($errors)) {
+            $parent = $this->getParentInstance();
+            if (BimpObject::objectLoaded($parent)) {
+                if ($parent->field_exists('remise_globale') &&
+                        (float) $parent->getData('remise_globale')) {
+                    $warnings[] = 'Attention: le montant de la remise globale a pu être modifié';
+                }
+            }
+        }
+        return $errors;
+    }
+
+    public function updateField($field, $value, $id_object = null)
+    {
+        $errors = parent::updateField($field, $value, $id_object);
+
+        if (!count($errors)) {
+            if ($field === 'remisable' && !$value) {
+                $instance = $this;
+                if (!$this->isLoaded()) {
+                    $instance = BimpObject::getInstance($this->module, $this->object_name, $id_object);
+                }
+
+                if ($instance->isLoaded()) {
+                    $remises = $instance->getRemises();
+                    foreach ($remises as $remise) {
+                        $remise->delete(true);
+                    }
+                    unset($instance->remises);
+                    $instance->remises = null;
+                }
+            }
+        }
 
         return $errors;
     }
@@ -2360,6 +2588,7 @@ class ObjectLine extends BimpObject
             return array('Suppression de la ligne impossible');
         }
 
+        $remises = $this->getRemises();
         $errors = $this->deleteLine();
 
         if (!count($errors)) {
@@ -2373,12 +2602,12 @@ class ObjectLine extends BimpObject
                         $line->delete($force_delete);
                     }
                 }
-
-                $remises = $this->getRemises();
                 if (count($remises)) {
                     foreach ($remises as $remise) {
-                        $remise->delete($force_delete);
+                        $remise->delete(true);
                     }
+                    unset($this->remises);
+                    $this->remise = null;
                 }
             }
         }

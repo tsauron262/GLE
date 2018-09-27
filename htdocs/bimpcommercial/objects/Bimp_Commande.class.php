@@ -117,7 +117,6 @@ class Bimp_Commande extends BimpComm
 //                    ))
 //                );
 //            }
-
             // Créer intervention
             if ($conf->ficheinter->enabled) {
                 $langs->load("interventions");
@@ -319,79 +318,6 @@ class Bimp_Commande extends BimpComm
         }
 
         return array();
-    }
-
-    // Affichage - Overrides BimpComm
-
-    public function displayRemisesClient()
-    {
-        $html = '';
-
-        if ($this->isLoaded()) {
-            $soc = $this->getChildObject('client');
-            $status = (int) $this->getData('fk_statut');
-
-            if (BimpObject::objectLoaded($soc)) {
-                global $langs, $conf;
-
-                $soc = $soc->dol_object;
-
-                if ($soc->remise_percent) {
-                    $html .= $langs->trans("CompanyHasRelativeDiscount", $soc->remise_percent);
-                } else {
-                    $html .= $langs->trans("CompanyHasNoRelativeDiscount");
-                }
-
-                if (!empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) { // Never use this
-                    $filterabsolutediscount = "fk_facture_source IS NULL"; // If we want deposit to be substracted to payments only and not to total of final invoice
-                    $filtercreditnote = "fk_facture_source IS NOT NULL"; // If we want deposit to be substracted to payments only and not to total of final invoice
-                } else {
-                    $filterabsolutediscount = "fk_facture_source IS NULL OR (fk_facture_source IS NOT NULL AND ((description LIKE '(DEPOSIT)%' OR description LIKE 'Acompte%') AND description NOT LIKE '(EXCESS RECEIVED)%'))";
-                    $filtercreditnote = "fk_facture_source IS NOT NULL AND ((description NOT LIKE '(DEPOSIT)%' AND description NOT LIKE 'Acompte%') OR description LIKE '(EXCESS RECEIVED)%')";
-                }
-
-                $absolute_discount = (float) round(price2num($soc->getAvailableDiscounts('', $filterabsolutediscount), 'MT'), 2);
-                $absolute_creditnote = (float) round(price2num($soc->getAvailableDiscounts('', $filtercreditnote), 'MT'), 2);
-
-                $can_use_discount = false;
-
-                if ($absolute_discount > 0.009) {
-                    $html .= '<br/>';
-                    $html .= $langs->trans("CompanyHasAbsoluteDiscount", price($absolute_discount), $langs->transnoentities("Currency" . $conf->currency));
-                    // bug dans dolibarr: Commande::insert_discount - désactivé
-//                    if ($status === Commande::STATUS_DRAFT) {
-//                        $can_use_discount = true;
-//                    }
-                }
-
-                if ($absolute_creditnote > 0.009) {
-                    $html .= '<br/>';
-                    $html .= $langs->trans("CompanyHasCreditNote", price($absolute_creditnote), $langs->transnoentities("Currency" . $conf->currency));
-                }
-
-                if (!$absolute_discount && !$absolute_creditnote) {
-                    $html .= '<br/>';
-                    $html .= $langs->trans("CompanyHasNoAbsoluteDiscount");
-                }
-
-                if ($can_use_discount) {
-                    $html .= '<div class="buttonsContainer align-right">';
-                    $onclick = $this->getJsActionOnclick('useRemise', array(
-                        'discounts'    => ($can_use_discount ? 1 : 0),
-                        'credit_notes' => 0
-                            ), array(
-                        'form_name' => 'use_remise'
-                    ));
-                    $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-                    $html .= '<i class="' . BimpRender::renderIconClass('fas_file-import') . ' iconLeft"></i>Appliquer une remise disponible';
-                    $html .= '</button>';
-
-                    $html .= '</div>';
-                }
-            }
-        }
-
-        return $html;
     }
 
     // Traitements: 
@@ -891,10 +817,12 @@ class Bimp_Commande extends BimpComm
             foreach ($this->dol_object->lines as $line) {
                 if (isset($line->fk_product) && (int) $line->fk_product) {
                     $type = (int) $product->getSavedData('fk_product_type', (int) $line->fk_product);
-                    if ($type === Product::TYPE_PRODUCT) {
-                        $nCommandeProducts += (int) $line->qty;
-                    } else {
-                        $nCommandeServices += (int) $line->qty;
+                    if ((int) $line->qty > 0) {
+                        if ($type === Product::TYPE_PRODUCT) {
+                            $nCommandeProducts += (int) $line->qty;
+                        } else {
+                            $nCommandeServices += (int) $line->qty;
+                        }
                     }
                 }
             }
@@ -1141,11 +1069,23 @@ class Bimp_Commande extends BimpComm
     public function canCreate()
     {
         global $user;
-        return $user->rights->commande->creer;
+        if (defined('NOLOGIN')) {
+            return 1;
+        }
+
+        if (isset($user->rights->commande->creer)) {
+            return (int) $user->rights->commande->creer;
+        }
+
+        return 0;
     }
 
     public function canEdit()
     {
+        if (defined('NOLOGIN')) {
+            return 1;
+        }
+        
         return $this->canCreate();
     }
 

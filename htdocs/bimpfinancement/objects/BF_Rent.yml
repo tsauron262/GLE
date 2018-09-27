@@ -35,6 +35,12 @@ fields:
         type: int
         values: 
             array: periodicities
+            
+    period2:
+        label: Périodicité
+        type: int
+        values: 
+            array: periodicities
         
 list:
     checkboxes: 1

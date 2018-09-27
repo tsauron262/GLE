@@ -19,19 +19,6 @@ class BS_SavPret extends BimpObject
         return 'window.open("' . $result['file_url'] . '");';
     }
 
-    public function getCentresArray()
-    {
-        $centres = array(
-            '' => ''
-        );
-        global $tabCentre;
-        foreach ($tabCentre as $code => $centre) {
-            $centres[$code] = $centre[2];
-        }
-
-        return $centres;
-    }
-
     public function getEquipmentsArray()
     {
         $equipments = array();

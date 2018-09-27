@@ -14,6 +14,7 @@ class BimpConfig
     public static $keywords = array(
         'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'dol_list', 'conf', 'bimpcore_conf'
     );
+    public static $params_cache = array();
 
     public function __construct($dir, $file_name, $instance)
     {
@@ -33,6 +34,11 @@ class BimpConfig
         }
         $this->dir = $dir;
 
+        if (array_key_exists($dir . $file_name, self::$params_cache)) {
+            $this->params = self::$params_cache[$dir . $file_name];
+            return true;
+        }
+
         if (!file_exists($dir . $file_name)) {
             $this->logConfigError('Erreur technique: le fichier de configuration "' . $file_name . '" n\'existe pas');
             return false;
@@ -41,6 +47,7 @@ class BimpConfig
         $this->params = $this->getParamsFromFile($dir . $file_name, $this->errors);
 
         if (is_array($this->params) && count($this->params)) {
+            self::$params_cache[$dir . $file_name] = $this->params;
             return true;
         }
 

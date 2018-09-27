@@ -1,6 +1,6 @@
 <?php
 
-class userPropalsController extends BimpController
+class clientPropalsController extends BimpController
 {
 
     public function displayHead()
@@ -26,23 +26,20 @@ class userPropalsController extends BimpController
     public function renderHtml()
     {
         if (!BimpTools::isSubmit('id')) {
-            return BimpRender::renderAlerts('ID du commercial absent');
+            return BimpRender::renderAlerts('ID du client absent');
         }
 
-        $user = BimpObject::getInstance('bimpcore', 'Bimp_User', (int) BimpTools::getValue('id', 0));
+        $societe = BimpObject::getInstance('bimpcore', 'Bimp_Societe', (int) BimpTools::getValue('id', 0));
 
-        if (!BimpObject::objectLoaded($user)) {
-            return BimpRender::renderAlerts('ID du commercial invalide');
+        if (!BimpObject::objectLoaded($societe)) {
+            return BimpRender::renderAlerts('ID du client invalide');
         }
 
         $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal');
 
-        $list = new BC_ListTable($propal, 'user', 1, null, 'Vos proposition commerciales');
-        $list->addFieldFilterValue('ec.fk_socpeople', (int) $user->id);
-        $list->addFieldFilterValue('tc.element', 'propal');
-        $list->addFieldFilterValue('tc.source', 'internal');
-        $list->addFieldFilterValue('tc.code', 'SALESREPSIGN');
-        $list->params['add_form_values']['fields']['id_user_commercial'] = (int) $user->id;
+        $list = new BC_ListTable($propal, 'client', 1, null, 'Proposition commerciales du client "' . $societe->getData('code_client') . ' - ' . $societe->getData('nom') . '"');
+        $list->addFieldFilterValue('fk_soc', (int) $societe->id);
+        $list->params['add_form_values']['fields']['fk_soc'] = (int) $societe->id;
         return $list->renderHtml();
     }
 }

@@ -25,7 +25,6 @@ $bdb = new BimpDb($db);
 $id_commande = (int) BimpTools::getValue('id_commande', 0);
 $id_entrepot = (int) BimpTools::getValue('id_entrepot', 0);
 
-
 if (!$id_commande) {
     echo 'ID COMMANDE ABSENT';
 } elseif (!$id_entrepot) {

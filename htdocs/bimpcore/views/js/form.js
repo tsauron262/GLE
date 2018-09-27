@@ -307,7 +307,11 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
     } else {
         var modal_idx = $form.data('modal_idx');
         if (modal_idx) {
-            $parentFormSubmit = bimpModal.$footer.find('.save_object_button.modal_' + modal_idx);
+            if (bimpModal.$footer.find('.save_object_button.modal_' + modal_idx).length) {
+                $parentFormSubmit = bimpModal.$footer.find('.save_object_button.modal_' + modal_idx);
+            } else if (bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).length) {
+                $parentFormSubmit = bimpModal.$footer.find('.set_action_button.modal_' + modal_idx);
+            }
         }
     }
 
@@ -384,17 +388,13 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                                             }
                                             if (bimpAjax.result_input_name) {
                                                 if (bimpAjax.reload_input) {
-                                                    var fields = {};
-                                                    bimpAjax.$parentForm.find('.inputContainer').each(function () {
-                                                        var field_name = $(this).data('field_name');
-                                                        if (field_name && (field_name !== bimpAjax.result_input_name)) {
-                                                            var $input = $(this).find('[name="' + field_name + '"]');
-                                                            if ($input.length) {
-                                                                fields[field_name] = $input.val();
-                                                            }
-                                                        }
-                                                    });
-                                                    fields[bimpAjax.result_input_name] = saveResult.id_object;
+                                                    var fields = getInputsValues(bimpAjax.$parentForm);
+                                                    var $inputContainer = bimpAjax.$parentForm.find('.' + bimpAjax.result_input_name + '_inputContainer');
+                                                    if ($inputContainer.data('multiple') || $inputContainer.find('.check_list_container').length) {
+                                                        fields[bimpAjax.result_input_name].push(saveResult.id_object);
+                                                    } else {
+                                                        fields[bimpAjax.result_input_name] = saveResult.id_object;
+                                                    }
                                                     reloadObjectInput(bimpAjax.$parentForm.attr('id'), bimpAjax.result_input_name, fields);
                                                 } else {
                                                     var $resultInput = bimpAjax.$parentForm.find('[name="' + bimpAjax.result_input_name + '"]');
@@ -776,30 +776,64 @@ function getInputsValues($container) {
     var values = {};
     $container.find('.inputContainer').each(function () {
         var field = $(this).data('field_name');
-        var multiple = $(this).data('multiple');
-        if (multiple) {
-            var $inputs = $(this).find('[name="' + field + '[]"]');
-            values[field] = [];
+        if ($(this).data('multiple')) {
+            field = $(this).data('values_field');
+        }
+        values[field] = getInputValue($(this));
+    });
+    return values;
+}
+
+function getInputValue($inputContainer) {
+    if (!$inputContainer.length) {
+        return '';
+    }
+
+    var field_name = $inputContainer.data('field_name');
+    var multiple = $inputContainer.data('multiple');
+    var check_list = $inputContainer.find('.check_list_container').length;
+    var value = '';
+
+    if (multiple || check_list) {
+        value = [];
+        if (check_list) {
+            var $inputs = $inputContainer.find('[name="' + field_name + '[]"]');
             $inputs.each(function () {
                 if ($(this).attr('type') === 'checkbox') {
                     if ($(this).prop('checked')) {
-                        values[field].push($(this).val());
+                        value.push($(this).val());
                     }
                 } else {
-                    values[field].push($(this).val());
+                    value.push($(this).val());
                 }
             });
-            if (!values[field].length) {
-                values[field] = 0;
+            if (!value.length) {
+                value = 0;
             }
         } else {
-            var $input = $(this).find('[name="' + field + '"]');
-            if ($input.length) {
-                values[field] = $input.val();
+            field_name = $inputContainer.data('values_field');
+            var $valuesContainer = $inputContainer.parent().find('.inputMultipleValuesContainer');
+            if (!$valuesContainer.length) {
+                bimp_msg('Erreur: liste de valeurs absente pour le champ "' + field_name + '"', 'danger');
+                return;
+            } else {
+                $valuesContainer.find('[name="' + field_name + '[]"]').each(function () {
+                    var val = $(this).val();
+                    if (val !== '') {
+                        value.push(val);
+                    }
+                });
             }
         }
-    });
-    return values;
+    } else {
+        if ($inputContainer.find('.cke').length) {
+            var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
+            $inputContainer.find('[name="' + field_name + '"]').val(html_value);
+        }
+        value = $inputContainer.find('[name="' + field_name + '"]').val();
+    }
+
+    return value;
 }
 
 function addMultipleInputCurrentValue($button, value_input_name, label_input_name, ajax_save) {
@@ -813,12 +847,12 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
     var $container = $button.findParentByClass('inputMultipleValuesContainer');
     if (!$container.length) {
-        bimp_msg('Une erreur est survenue. opération impossible', 'danger');
+        bimp_msg('Une erreur est survenue. opération impossible (1)', 'danger');
         return;
     }
     var $inputContainer = $container.parent().find('.inputContainer');
     if (!$inputContainer.length) {
-        bimp_msg('Une erreur est survenue. opération impossible', 'danger');
+        bimp_msg('Une erreur est survenue. opération impossible (2)', 'danger');
         return;
     }
     var $value_input = $inputContainer.find('[name=' + value_input_name + ']');
@@ -832,7 +866,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     }
     if ($label_input.length) {
         if ($label_input.tagName() === 'select') {
-            label = $label_input.find('[value="' + value + '"]').text();
+            label = $label_input.find('[value="' + value + '"]').html();
         } else {
             label = $label_input.val();
         }
@@ -854,7 +888,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
         if (!label) {
             if ($value_input.get(0).tagName.toLowerCase() === 'select') {
-                label = $value_input.find('[value="' + value + '"]').text();
+                label = $value_input.find('[value="' + value + '"]').html();
             } else {
                 label = value;
             }
@@ -897,7 +931,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
             }));
         }
     } else {
-        bimp_msg('Une erreur est survenue. opération impossible', 'danger');
+        bimp_msg('Veuillez sélectionner une valeur', 'warning');
     }
 }
 

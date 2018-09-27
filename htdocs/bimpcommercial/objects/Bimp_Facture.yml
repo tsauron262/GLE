@@ -45,6 +45,15 @@ objects:
             id_object: 
                 field_value: fk_account
     
+    files:
+        list: 
+            filters:
+                parent_object_name: Bimp_Facture
+        add_form: 
+            values:
+                fields: 
+                    parent_object_name: Bimp_Facture
+                    
 fields:         
     facnumber: 
         label: Référence
@@ -107,6 +116,7 @@ fields:
     fk_availability: unset
     fk_input_reason: unset
     total_ht: unset
+    remise_globale: unset
         
 forms: 
     default: 

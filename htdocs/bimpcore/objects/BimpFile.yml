@@ -10,6 +10,15 @@ parent_id_property: id_parent
 labels: 
     name: fichier
 
+objects: 
+    user_delete: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_User
+                
 fields:
     parent_module:
         label: Module
@@ -50,6 +59,21 @@ fields:
         input:
             auto_expand: 1
             rows: 1
+            
+    deleted: 
+        label: Supprimé
+        type: bool
+        default_value: 0
+        
+    user_delete: 
+        label: Supprimé par
+        type: id_object
+        object: user_delete
+        default_value: 0
+        
+    date_delete: 
+        label: Supprimé le
+        type: datetime
 
 forms:
     upload: 
@@ -70,6 +94,7 @@ forms:
         rows:
             - field: file_name
             - field: description
+            
 lists:
     default:
         title: Fichiers
@@ -85,7 +110,7 @@ lists:
         delete_btn: 
             callback: isDeletable
         sort_field: id
-        sort_way: desc
+        sort_way: asc
         n: 10
         extra_btn:
             callback: getDefaultListExtraButtons

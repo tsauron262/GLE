@@ -1,6 +1,6 @@
 <?php
 
-class BimpObject
+class BimpObject extends BimpCache
 {
 
     public $db = null;
@@ -143,9 +143,7 @@ class BimpObject
 
     public function __construct($module, $object_name)
     {
-        global $db;
-
-        $this->db = new BimpDb($db);
+        $this->db = self::getBdb();
         $this->module = $module;
         $this->object_name = $object_name;
         $this->config = new BimpConfig(DOL_DOCUMENT_ROOT . '/' . $module . '/objects/', $object_name, $this);
@@ -432,14 +430,26 @@ class BimpObject
 
             if ($instance_parent_module === $this->module &&
                     $instance_parent_object_name === $this->object_name) {
-                return true;
+                if (!$instance->isLoaded()) {
+                    return true;
+                }
+                if ((int) $instance->getParentId() === (int) $this->id) {
+                    return true;
+                }
+                return false;
             }
 
             if (is_array($this->extends)) {
                 foreach ($this->extends as $extends) {
                     if ($extends['module'] === $instance_parent_module &&
                             $extends['object_name'] === $instance_parent_object_name) {
-                        return true;
+                        if (!$instance->isLoaded()) {
+                            return true;
+                        }
+                        if ((int) $instance->getParentId() === (int) $this->id) {
+                            return true;
+                        }
+                        return false;
                     }
                 }
             }
@@ -520,6 +530,7 @@ class BimpObject
             $this->parent = null;
             $module = $this->getParentModule();
             $object = $this->getParentObjectName();
+
             if ($module && $object) {
                 $instance = self::getInstance($module, $object);
 
@@ -579,6 +590,30 @@ class BimpObject
         return 1;
     }
 
+    public function getFilesDir()
+    {
+        if ($this->isLoaded()) {
+            return DOL_DATA_ROOT . '/bimpcore/' . $this->module . '/' . $this->object_name . '/' . $this->id . '/';
+        }
+
+        return '';
+    }
+
+    public function getFileUrl($file_name)
+    {
+        if (!$file_name) {
+            return '';
+        }
+
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $file = $this->module . '/' . $this->object_name . '/' . $this->id . '/' . $file_name;
+
+        return DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($file);
+    }
+
     // Gestion des objets enfants:
 
     public function hasChildren($object_name)
@@ -627,6 +662,10 @@ class BimpObject
                 $parent = $this;
             }
             $child->fetch($id_object, $parent);
+        } elseif (is_a($child, 'BimpObject') && BimpObject::objectLoaded($child)) {
+            if ($this->isChild($child)) {
+                $child->parent = $this;
+            }
         }
         return $child;
     }
@@ -1094,15 +1133,15 @@ class BimpObject
                             case 'text':
                                 $search_type = 'value_part';
                                 break;
-                         
-                            case 'time': 
+
+                            case 'time':
                                 $search_type = 'time_range';
                                 break;
-                            
+
                             case 'date':
                                 $search_type = 'date_range';
                                 break;
-                            
+
                             case 'datetime':
                                 $search_type = 'datetime_range';
                                 break;
@@ -1155,6 +1194,9 @@ class BimpObject
 
     protected function checkFieldHistory($field, $value)
     {
+        if (is_null($value)) {
+            return;
+        }
         $history = $this->getConf('fields/' . $field . '/history', false, false, 'bool');
         if ($history) {
             $current_value = $this->getData($field);
@@ -1617,7 +1659,6 @@ class BimpObject
             }
 
             if (!count($errors)) {
-                $this->checkFieldHistory($field, $value);
                 $this->data[$field] = $value;
             }
         }
@@ -1721,6 +1762,7 @@ class BimpObject
 
             foreach ($this->data as $field => &$value) {
                 $this->checkFieldValueType($field, $value);
+                $this->checkFieldHistory($field, $value);
                 if (is_null($value)) {
                     unset($this->data[$field]);
                 }
@@ -1803,7 +1845,7 @@ class BimpObject
 
             foreach ($this->data as $field => &$value) {
                 $this->checkFieldValueType($field, $value);
-
+                $this->checkFieldHistory($field, $value);
                 if (is_null($value)) {
                     unset($this->data[$field]);
                 }
@@ -1822,7 +1864,6 @@ class BimpObject
                 unset($this->data[$primary]);
 
                 $result = $this->db->update($table, $this->data, '`' . $primary . '` = ' . (int) $this->id);
-
                 $this->set($primary, $this->id);
             }
 
@@ -1843,9 +1884,10 @@ class BimpObject
 
         if (!is_null($parent)) {
             if (method_exists($parent, 'onChildSave')) {
-                $parent->onChildSave($this);
+                $warnings = array_merge($warnings, $parent->onChildSave($this));
             }
         }
+
         return $errors;
     }
 
@@ -1909,6 +1951,31 @@ class BimpObject
                         $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');
                     } else {
                         $this->set($field, $value);
+                    }
+                }
+
+                if (!count($errors)) {
+                    if ($this->getConf('fields/' . $field . '/history', false, false, 'bool')) {
+                        global $user;
+                        $history = BimpObject::getInstance('bimpcore', 'BimpHistory');
+                        $history->validateArray(array(
+                            'module'    => $this->module,
+                            'object'    => $this->object_name,
+                            'id_object' => (int) $id_object,
+                            'field'     => $field,
+                            'value'     => $value,
+                            'date'      => date('Y-m-d H:i:s'),
+                            'id_user'   => (int) $user->id,
+                        ));
+                        $history->create($warnings, true);
+                    }
+
+                    $parent = $this->getParentInstance();
+
+                    if (!is_null($parent)) {
+                        if (method_exists($parent, 'onChildSave')) {
+                            $warnings = array_merge($warnings, $parent->onChildSave($this));
+                        }
                     }
                 }
             }
@@ -2607,6 +2674,7 @@ class BimpObject
             foreach ($objects as $object_name) {
                 $object = $this->getChildObject($object_name);
                 if (is_a($object, 'BimpObject')) {
+                    $parent_id_property = '';
                     if ($this->isChild($object)) {
                         $parent_id_property = $object->getParentIdProperty();
                     }
@@ -3707,6 +3775,43 @@ class BimpObject
         return '';
     }
 
+    // Array communs: 
+
+    public function getInternalContactTypesArray()
+    {
+        if ($this->isDolObject() && method_exists($this->dol_object, 'liste_type_contact')) {
+            $cache_key = $this->module . '_' . $this->object_name . '_internal_contact_types_array';
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = $this->dol_object->liste_type_contact('internal');
+            }
+            return self::$cache[$cache_key];
+        }
+
+        return array();
+    }
+
+    public function getExternalContactTypesArray()
+    {
+        if ($this->isDolObject() && method_exists($this->dol_object, 'liste_type_contact')) {
+            $cache_key = $this->module . '_' . $this->object_name . '_external_contact_types_array';
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = $this->dol_object->liste_type_contact('external');
+            }
+            return self::$cache[$cache_key];
+        }
+
+        return array();
+    }
+
+    public function getFilesArray($with_deleted = 0)
+    {
+        if ($this->isLoaded()) {
+            return self::getObjectFilesArray($this, $with_deleted);
+        }
+
+        return array();
+    }
+
     // Liens et url: 
 
     public function getUrl()
@@ -3783,122 +3888,6 @@ class BimpObject
         }
 
         return $html;
-    }
-
-    // Arrays communs:
-
-    public function getCondReglementsArray()
-    {
-        $rows = $this->db->getRows('c_payment_term', '`active` > 0', null, 'array', array('rowid', 'libelle'), 'sortorder');
-
-        $conds = array();
-        if (!is_null($rows)) {
-            foreach ($rows as $r) {
-                $conds[(int) $r['rowid']] = $r['libelle'];
-            }
-        }
-
-        return $conds;
-    }
-
-    public function getModeReglementsArray($key = 'id', $active_only = true)
-    {
-        if (!class_exists('Form')) {
-            require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
-        }
-
-        $form = new Form($this->db->db);
-        $form->load_cache_types_paiements();
-
-        $payments = array();
-        foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
-            if (!$active_only || ($active_only && (int) $payment_data['active'])) {
-                switch ($key) {
-                    case 'id':
-                        $payments[(int) $payment_data['id']] = $payment_data['label'];
-                        break;
-
-                    case 'code':
-                        $payments[$payment_data['code']] = $payment_data['label'];
-                        break;
-                }
-            }
-        }
-
-        return $payments;
-    }
-
-    public function getAvailabilitiesArray()
-    {
-        if (!class_exists('Form')) {
-            require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
-        }
-
-        $form = new Form($this->db->db);
-        $form->load_cache_availability();
-
-        $values = array();
-
-        foreach ($form->cache_availability as $id => $availability) {
-            $values[(int) $id] = $availability['label'];
-        }
-
-        return $values;
-    }
-
-    public function getDemandReasonsArray()
-    {
-        if (!class_exists('Form')) {
-            require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
-        }
-
-        $form = new Form($this->db->db);
-        $form->loadCacheInputReason();
-
-        $values = array(
-            0 => ''
-        );
-
-        foreach ($form->cache_demand_reason as $id => $dr) {
-            $values[(int) $id] = $dr['label'];
-        }
-
-        return $values;
-    }
-
-    public function getInternalContactTypesArray()
-    {
-        if ($this->isDolObject() && method_exists($this->dol_object, 'liste_type_contact')) {
-            return $this->dol_object->liste_type_contact('internal');
-        }
-
-        return array();
-    }
-
-    public function getExternalContactTypesArray()
-    {
-        if ($this->isDolObject() && method_exists($this->dol_object, 'liste_type_contact')) {
-            return $this->dol_object->liste_type_contact('external');
-        }
-
-        return array();
-    }
-
-    public function getSecteursArray()
-    {
-        $secteurs = array(
-            '' => ''
-        );
-
-        $rows = $this->db->getRows('bimp_c_secteur');
-
-        if (is_array($rows)) {
-            foreach ($rows as $r) {
-                $secteurs[$r->clef] = $r->valeur;
-            }
-        }
-
-        return $secteurs;
     }
 
     // Action Communes: 

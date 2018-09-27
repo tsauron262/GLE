@@ -291,7 +291,6 @@ lists:
                 label: Périodicité
                 field: periodicity
             vr:
-                label: VR demandée
                 field: vr
             status:
                 label: Etat

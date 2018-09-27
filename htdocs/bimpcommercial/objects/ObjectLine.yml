@@ -66,6 +66,11 @@ fields:
         type: bool
         default_value: 1
         
+    remisable: 
+        label: Remisable
+        type: bool
+        default_value: 1
+        
     linked_id_object: 
         label: Objet lié
         type: id_object
@@ -75,11 +80,16 @@ fields:
         
     remise: 
         label: Remise
-        type: float
+        type: percent
         default_value: 0
+        decimals: 8
 
 forms: 
     default: 
+        values: 
+            objects: 
+                remises: 
+                    callback: getClientDefaultRemiseFormValues
         rows: 
             - field: type
               hidden: 
@@ -247,6 +257,19 @@ forms:
                       params: 
                           - desc
                           
+            - custom: 1
+              label: Remises autorisées
+              input_name: remisable
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params:
+                          - remisable
+              depends_on: id_product
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              
             - object: remises
               multiple: 1
               form_values: 
@@ -254,8 +277,11 @@ forms:
                       object_type: 
                           callback: getParentCommType
               display_if: 
-                  field_name: type
-                  show_values: 1
+                  fields_names: type,remisable
+                  type: 
+                      show_values: 1
+                  remisable: 
+                      hide_values: 0
                           
     equipment:
         title: Attribuer un équipement
@@ -326,6 +352,7 @@ lists:
     default: 
         checkboxes: 1
         positions: 1
+        positions_open: 1
         objects_change_reload: ObjectLineRemise
         enable_search: 0
         enable_sort: 0
@@ -378,13 +405,6 @@ lists:
                         method: displayLineData
                         params:
                             - tva_tx
-            remise: 
-                label: Remise TTC
-                value: 
-                    callback: 
-                        method: displayRemise
-                min_width: 130px
-                max_width: 130px
             pa_ht: 
                 label: PA HT
                 value: 
@@ -400,6 +420,13 @@ lists:
                         params:
                             - qty
                             - 1
+            remise: 
+                label: Remises<br/>HT / TTC (%)
+                value: 
+                    callback: 
+                        method: displayRemise
+                min_width: 130px
+                max_width: 130px
             total_ttc: 
                 label: Total TTC
                 value: 

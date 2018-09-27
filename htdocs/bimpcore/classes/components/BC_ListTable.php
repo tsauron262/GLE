@@ -46,6 +46,7 @@ class BC_ListTable extends BC_List
         $this->params_def['checkboxes'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['add_object_row'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['positions'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['positions_open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['bulk_actions'] = array('data_type' => array(), 'compile' => true);
         $this->params_def['cols'] = array('type' => 'keys');
         $this->params_def['extra_cols'] = array('data_type' => 'array');
@@ -102,6 +103,10 @@ class BC_ListTable extends BC_List
         if (!count($this->errors)) {
             $this->fetchCols();
             $this->colspan = 2 + count($this->cols);
+            
+            if ($this->params['positions_open']) {
+                $this->colspan++;
+            }
         }
     }
 
@@ -315,7 +320,7 @@ class BC_ListTable extends BC_List
             $html .= '</th>';
 
             if ($this->params['positions']) {
-                $html .= '<th class="positionHandle"></th>';
+                $html .= '<th class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></th>';
             }
 
             foreach ($this->cols as $col_name) {
@@ -353,9 +358,14 @@ class BC_ListTable extends BC_List
 
                         if ($col_params['field'] && $this->params['sort_field'] === $col_params['field']) {
                             $html .= strtolower($this->params['sort_way']);
-                            $html .= ' active';
+                            if (!$this->params['positions_open']) {
+                                $html .= ' active';
+                            }
                         } else {
                             $html .= strtolower($default_sort_way);
+                        }
+                        if ($this->params['positions_open']) {
+                            $html .= ' deactivated';
                         }
                         $html .= '" onclick="if (!$(this).hasClass(\'deactivated\')) { sortList(\'' . $this->identifier . '\', \'' . $col_name . '\'); }">';
 
@@ -388,7 +398,14 @@ class BC_ListTable extends BC_List
                 $html .= '<span class="headerButton openAddObjectRowButton open-close action-open"></span>';
             }
             if ($this->params['positions']) {
-                $html .= '<span class="headerButton activatePositionsButton open-close action-open"></span>';
+                $html .= '<span class="headerButton activatePositionsButton bs-popover open-close action-' . ($this->params['positions_open'] ? 'close' : 'open') . '"';
+//                if ($this->params['positions_open']) {
+//                    $label = 'Désactiver le positionnement';
+//                } else {
+//                    $label = 'Activer le positionnement';
+//                }
+//                $html .= BimpRender::renderPopoverData($label, 'top', false);
+                $html .= '></span>';
             }
             if ($this->params['checkboxes'] && count($this->params['bulk_actions'])) {
                 $html .= '<span class="headerButton displayPopupButton openBulkActionsPopupButton"';
@@ -439,7 +456,7 @@ class BC_ListTable extends BC_List
         $html .= '<td style="text-align: center"><i class="fa fa-search"></i></td>';
 
         if ($this->params['positions']) {
-            $html .= '<td class="positionHandle"></td>';
+            $html .= '<td class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></td>';
         }
 
         foreach ($this->cols as $col_name) {
@@ -510,7 +527,7 @@ class BC_ListTable extends BC_List
             $html .= '<td><i class="fa fa-plus-circle"></i></td>';
 
             if ($this->params['positions']) {
-                $html .= '<td class="positionHandle"></td>';
+                $html .= '<td class="positionHandle"' . (!$this->params['positions_open'] ? ' style="display: none"' : '') . '></td>';
             }
 
             if (!is_null($this->id_parent)) {
@@ -808,7 +825,7 @@ class BC_ListTable extends BC_List
                 $html .= '</td>';
 
                 if ($this->params['positions']) {
-                    $html .= '<td class="positionHandle" style="' . $item_params['td_style'] . '"><span></span></td>';
+                    $html .= '<td class="positionHandle" style="' . (!$this->params['position'] ? 'display: none;' : '') . $item_params['td_style'] . '"><span></span></td>';
                 }
 
                 $this->setConfPath('cols');
@@ -887,7 +904,7 @@ class BC_ListTable extends BC_List
                         } else {
                             $title = htmlentities(addslashes($row['params']['instance_name']));
                         }
-                        $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', \'' . $item_params['modal_view'] . '\', $(this), \'' . $title . '\')';
+                        $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $id_object . ', \'' . $item_params['modal_view'] . '\', $(this), \'' . $title . '\')';
                         $rowButtons[] = array(
                             'label'   => 'Vue rapide',
                             'icon'    => 'eye',

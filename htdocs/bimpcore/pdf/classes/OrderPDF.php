@@ -40,6 +40,8 @@ class OrderPDF extends BimpDocumentPDF
     {
         if (isset($this->object) && is_a($this->object, 'Commande')) {
             if (isset($this->object->id) && $this->object->id) {
+                $this->bimpCommObject = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->object->id);
+
                 if (isset($this->object->array_options['options_pdf_hide_reduc'])) {
                     $this->hideReduc = (int) $this->object->array_options['options_pdf_hide_reduc'];
                 }
@@ -641,7 +643,7 @@ class BLPDF extends OrderPDF
                     'desc'         => $desc,
                     'pu_ht'        => pdf_getlineupexcltax($this->object, $i, $this->langs),
                 );
-                
+
                 if ($this->hideReduc && $line->remise_percent) {
                     $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
                     $row['pu_ht'] = price($pu_ht, 0, $this->langs);

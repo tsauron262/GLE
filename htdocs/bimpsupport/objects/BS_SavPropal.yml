@@ -11,6 +11,7 @@ objects:
     lines: 
         instance: 
             bimp_object: BS_SavPropalLine
+            
 fields_tables: 
     sav_infos: 
         title: Informations

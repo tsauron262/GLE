@@ -410,6 +410,11 @@ i.iconRight {
         max-height: 650px;
         padding-bottom: 60px;
         overflow-y: auto;
+        
+        .page_modal_img {
+            max-width: 100%;
+            height: auto;
+        }
     }
 }
 

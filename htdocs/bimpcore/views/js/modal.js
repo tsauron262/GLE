@@ -301,12 +301,12 @@ function BimpModal($modal) {
         var $img = $container.find('.page_modal_img');
         $img.on("load", function () {
             modal.$loading.hide();
-            modal.$content.slideDown(250, function () {
-                var width = $img.width() + 30;
-                modal.$modal.children('.modal-dialog').css('width', width);
-                $container.data('width', width);
-                modal.$modal.modal('handleUpdate');
-            });
+//            modal.$contents.slideDown(250, function () {
+//                var width = $img.width() + 30;
+//                modal.$modal.children('.modal-dialog').css('width', width);
+//                $container.data('width', width);
+//                modal.$modal.modal('handleUpdate');
+//            });
         });
     };
 

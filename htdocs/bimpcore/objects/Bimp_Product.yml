@@ -127,6 +127,11 @@ fields:
         type: bool
         dol_extra_field: 1
         default_value: 0
+    remisable: 
+        label: Remisable
+        type: bool
+        dol_extra_field: 1
+        default_value: 1
     type2: 
         label: Sous-type
         type: int

@@ -21,6 +21,7 @@ class BC_Form extends BC_Panel
         'label'              => array('default' => ''),
         'create_form'        => array('default' => ''),
         'create_form_values' => array('data_type' => 'array'),
+        'create_form_label'  => array('default' => 'Créer'),
         'display'            => array('default' => 'default'),
         'hidden'             => array('data_type' => 'bool', 'default' => 0),
         'required'           => array('data_type' => 'bool', 'default' => null)
@@ -129,6 +130,9 @@ class BC_Form extends BC_Panel
     public function setValues($values)
     {
         if (isset($values['fields'])) {
+            if (!isset($this->params['values']['fields'])) {
+                $this->params['values']['fields'] = array();
+            }
             foreach ($values['fields'] as $field_name => $value) {
                 $this->params['values']['fields'][$field_name] = $value;
                 $this->object->set($field_name, $value);
@@ -136,9 +140,29 @@ class BC_Form extends BC_Panel
         }
 
         if (isset($values['associations'])) {
+            if (!isset($this->params['values']['associations'])) {
+                $this->params['values']['associations'] = array();
+            }
+
             foreach ($values['associations'] as $association => $associates) {
                 $this->params['values']['associations'][$association] = $associates;
                 $this->object->setAssociatesList($association, $associates);
+            }
+        }
+
+        if (isset($values['objects'])) {
+            if (!isset($this->params['values']['objects'])) {
+                $this->params['values']['objects'] = array();
+            }
+
+            foreach ($values['objects'] as $object_name => $objects) {
+                if (!isset($this->params['values']['objects'][$object_name])) {
+                    $this->params['values']['objects'][$object_name] = array();
+                }
+
+                foreach ($objects as $object_values) {
+                    $this->params['values']['objects'][$object_name][] = $object_values;
+                }
             }
         }
     }
@@ -292,8 +316,9 @@ class BC_Form extends BC_Panel
         if ($field->params['type'] === 'id_object') {
             $form_name = ($params['create_form'] ? $params['create_form'] : ($field->params['create_form'] ? $field->params['create_form'] : ''));
             $form_values = ($params['create_form_values'] ? $params['create_form_values'] : ($field->params['create_form_values'] ? $field->params['create_form_values'] : ''));
+            $btn_label = ($params['create_form_label'] ? $params['create_form_label'] : ($field->params['create_form_label'] ? $field->params['create_form_label'] : 'Créer'));
             if ($form_name) {
-                $html .= self::renderCreateObjectButton($this->object, $this->identifier, $field->params['object'], $this->fields_prefix . $field->name, $form_name, $form_values);
+                $html .= self::renderCreateObjectButton($this->object, $this->identifier, $field->params['object'], $this->fields_prefix . $field->name, $form_name, $form_values, $btn_label);
             }
         }
         $html .= $field->renderHtml();
@@ -370,7 +395,7 @@ class BC_Form extends BC_Panel
                     $form_name = ($params['create_form'] ? $params['create_form'] : $this->object->getConf('associations/' . $params['association'] . '/create_form', ''));
                     if ($form_name) {
 //                        $html .= $this->renderCreateObjectButton('', $input_name . '_search', $form_name, false, $associate);
-                        $html .= $this->renderCreateObjectButton($this->object, $this->identifier, '', '', $form_name, null, false, $associate);
+                        $html .= $this->renderCreateObjectButton($this->object, $this->identifier, '', '', $form_name, null, 'Créer', false, $associate);
                     }
                 }
 
@@ -499,6 +524,7 @@ class BC_Form extends BC_Panel
         $form->setFieldsPrefix($this->fields_prefix . $object_name . '_');
 
         $subFormIdentifier = '';
+        $nb_items = 0;
         if ((int) $params['multiple']) {
             $subFormIdentifier = $this->fields_prefix . $object_name . '_sub_object_idx_sub_object_form';
             $form->identifier = $subFormIdentifier;
@@ -526,14 +552,53 @@ class BC_Form extends BC_Panel
             $html .= '</div>';
 
             $html .= '<div class="subObjectsMultipleForms">';
+
+            if (isset($this->params['values']['objects'][$object_name])) {
+                foreach ($this->params['values']['objects'][$object_name] as $object_values) {
+                    $nb_items++;
+
+                    $form->object->reset();
+                    $form->params['values'] = array();
+                    $form->setValues($params['form_values']);
+                    $form->setValues($object_values);
+
+                    $html .= '<div id="' . $this->fields_prefix . $object_name . '_' . $nb_items . '_sub_object_form" class="formInputGroup subObjectForm"';
+                    $html .= ' data-module="' . $object->module . '"';
+                    $html .= ' data-object_name="' . $object->object_name . '"';
+                    $html .= ' data-name="' . $params['form_name'] . '"';
+                    $html .= ' data-id_object="' . (BimpObject::objectLoaded($object) ? $object->id : 0) . '"';
+                    $html .= ' data-id_parent="' . $object_id_parent . '"';
+                    $html .= ' data-idx="' . $nb_items . '"';
+                    $html .= '>';
+                    $html .= '<div class="formGroupHeading">';
+                    $html .= '<div class="formGroupTitle">';
+                    $html .= '<h4>' . BimpTools::ucfirst(BimpObject::getInstanceLabel($object)) . ' #' . $nb_items . '</h4>';
+                    $html .= '</div>';
+                    $html .= '<div class="formGroupButtons">';
+                    $html .= '<span class="btn btn-default" onclick="removeSubObjectForm($(this))">';
+                    $html .= '<i class="fa fa-trash iconLeft"></i>Supprimer</span>';
+                    $html .= '</div>';
+                    $html .= '</div>';
+                    $form->setFieldsPrefix($this->fields_prefix . $object_name . '_' . $nb_items . '_');
+                    $html .= $form->renderHtmlContent(false);
+                    $html .= '</div>';
+                }
+            }
+
             $html .= '</div>';
             $html .= '<div class="formGroupButtons">';
             $html .= '<span class="btn btn-default" onclick="addSubObjectForm($(this), \'' . $this->fields_prefix . $object_name . '\')">';
             $html .= '<i class="fa fa-plus-circle iconLeft"></i>Ajouter ' . BimpObject::getInstanceLabel($object, 'a') . '</span>';
             $html .= '</div>';
         } else {
+            $nb_items = 1;
             $subFormIdentifier = $this->fields_prefix . $object_name . '_sub_object_form';
             $form->identifier = $subFormIdentifier;
+
+            if (isset($this->params['values']['objects'][$object_name])) {
+                $form->setValues($this->params['values']['objects'][$object_name]);
+            }
+
             $html .= '<div id="' . $subFormIdentifier . '" class="subObjectForm"';
             $html .= ' data-module="' . $object->module . '"';
             $html .= ' data-object_name="' . $object->object_name . '"';
@@ -546,7 +611,7 @@ class BC_Form extends BC_Panel
         }
 
         $html .= '<input type="hidden" name="' . $this->fields_prefix . $object_name . '_multiple" value="' . (int) $params['multiple'] . '"/>';
-        $html .= '<input type="hidden" name="' . $this->fields_prefix . $object_name . '_count" value="' . ((int) $params['multiple'] ? 0 : 1) . '"/>';
+        $html .= '<input type="hidden" name="' . $this->fields_prefix . $object_name . '_count" value="' . $nb_items . '"/>';
         $html .= '</div>';
 
         if (!is_null($params['depends_on'])) {
@@ -575,7 +640,7 @@ class BC_Form extends BC_Panel
         $html = '';
 
         if ($params['data_type'] === 'id_object' && $params['object'] && $params['create_form']) {
-            $html .= self::renderCreateObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values']);
+            $html .= self::renderCreateObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values'], $params['create_form_label']);
         }
 
         if ($this->object->config->isDefined($row_path . '/input')) {
@@ -612,7 +677,7 @@ class BC_Form extends BC_Panel
         return $html;
     }
 
-    public static function renderCreateObjectButton(BimpObject $parent, $parent_form_id, $object_name, $result_input_name, $form_name, $form_values = null, $reload_input = true, $object = null, $successcallBack = '')
+    public static function renderCreateObjectButton(BimpObject $parent, $parent_form_id, $object_name, $result_input_name, $form_name, $form_values = null, $btn_label = 'Créer', $reload_input = true, $object = null, $successcallBack = '')
     {
         if (!$form_name) {
             return '';
@@ -626,7 +691,7 @@ class BC_Form extends BC_Panel
             return '';
         }
 
-        $label = 'Créer ' . $object->getLabel('a');
+        $label = $btn_label . ' ' . $object->getLabel('a');
         $title = 'Ajout ' . addslashes($object->getLabel('of_a'));
 
         if ($parent->isLoaded() && $object->getParentObjectName() === $parent->object_name) {

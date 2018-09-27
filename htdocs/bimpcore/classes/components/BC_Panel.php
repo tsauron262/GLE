@@ -98,6 +98,7 @@ class BC_Panel extends BimpComponent
             $content = '<div id="' . $this->identifier . '"';
             $content .= ' class="object_component object_' . static::$type;
             $content .= ' ' . $this->object->object_name . '_component ' . $this->object->object_name . '_' . static::$type;
+            $content .= ' ' . $this->object->object_name . '_' . static::$type . '_' . $this->name;
             if ((int) $this->params['no_reload']) {
                 $content .= ' no_reload';
             }

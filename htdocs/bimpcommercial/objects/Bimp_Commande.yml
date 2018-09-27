@@ -87,6 +87,15 @@ objects:
             id_object:
                 field_value: entrepot
                 
+    files:
+        list: 
+            filters:
+                parent_object_name: Bimp_Commande
+        add_form: 
+            values:
+                fields: 
+                    parent_object_name: Bimp_Commande
+                
 associations: 
     avoirs: 
         object: facture
@@ -138,6 +147,7 @@ fields:
         type: money
         
     total: unset
+    remise_globale: unset
         
 fields_tables: 
     infos: 
@@ -226,6 +236,10 @@ forms:
                   callback: isNotLoaded
             - field: note_private
             - field: note_public
+            - field: remise_globale
+              hidden: 1
+              input: 
+                  type: hidden
             - custom: 1
               hidden: 1
               label: Elément d'origine

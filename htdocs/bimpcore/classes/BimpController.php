@@ -1086,7 +1086,7 @@ class BimpController
                         $field = new BC_Field($object, $field_name, true);
                         $field->name_prefix = $field_prefix;
                         if ($field->params['type'] === 'id_object' && $field->params['create_form']) {
-                            $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], true);
+                            $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);
                         }
                         $html .= $field->renderInput();
                         unset($field);

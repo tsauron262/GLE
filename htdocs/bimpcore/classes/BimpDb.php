@@ -67,7 +67,6 @@ class BimpDb
             }
         }
         $sql .= ' WHERE ' . $where;
-
         return $this->execute($sql);
     }
 
@@ -166,7 +165,7 @@ class BimpDb
         return $this->executeS($sql, $return);
     }
 
-    public function getRow($table, $where = '1', $fields = null)
+    public function getRow($table, $where = '1', $fields = null, $return = 'object')
     {
         $sql = 'SELECT ';
 
@@ -188,7 +187,11 @@ class BimpDb
         $sql .= ' WHERE ' . $where . ' LIMIT 1';
         $result = $this->db->query($sql);
         if ($result && $this->db->num_rows($result)) {
-            $obj = $this->db->fetch_object($result);
+            if ($return === 'object') {
+                $obj = $this->db->fetch_object($result);
+            } else {
+                $obj = $this->db->fetch_array($result);
+            }
             $this->db->free($result);
             return $obj;
         }

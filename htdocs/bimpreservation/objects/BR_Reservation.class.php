@@ -758,7 +758,7 @@ class BR_Reservation extends BimpObject
                 $this->set('status', 0);
                 $this->set('id_equipment', 0);
 
-                $errors = array_merge($errors, $this->create());
+                $errors = array_merge($errors, $this->create($warnings, true));
             }
         }
 

@@ -7,6 +7,7 @@ class BimpDocumentPDF extends BimpModelPDF
 {
 
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/document/';
+    public $bimpCommObject = null;
     public $thirdparty = null;
     public $contact = null;
     public $total_remises = 0;
@@ -75,21 +76,21 @@ class BimpDocumentPDF extends BimpModelPDF
         global $conf, $mysoc;
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
-        
-        
-        if(isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO'))){
+
+
+        if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('R', 'C', 'ME', 'CO'))) {
             $testFile = str_replace(array(".jpg", ".png"), "_PRO.png", $logo_file);
-            if(is_file($testFile))
+            if (is_file($testFile))
                 $logo_file = $testFile;
         }
-        if(isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))){
+        if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
             $testFile = str_replace(array(".jpg", ".png"), "_SAV.png", $logo_file);
-            if(is_file($testFile))
+            if (is_file($testFile))
                 $logo_file = $testFile;
         }
-        if(isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))){
+        if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('E'))) {
             $testFile = str_replace(array(".jpg", ".png"), "_EDUC.png", $logo_file);
-            if(is_file($testFile))
+            if (is_file($testFile))
                 $logo_file = $testFile;
         }
 
@@ -125,6 +126,7 @@ class BimpDocumentPDF extends BimpModelPDF
             }
 
             $rows = "";
+            $nRows = 0;
             if ($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0) {
                 $usertmp = new User($this->db);
                 $usertmp->fetch($comm1);
@@ -297,16 +299,16 @@ class BimpDocumentPDF extends BimpModelPDF
         global $conf;
         if ($this->contact < 1)
             $html = '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
-        elseif(!empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
+        elseif (!empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
             $this->contact->firstname .= '<br/>' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '';
         else
             $html = "";
-        
-        
-        if(strtoupper($this->thirdparty->lastname) == strtoupper($this->thirdparty->socname)){
+
+
+        if (strtoupper($this->thirdparty->lastname) == strtoupper($this->thirdparty->socname)) {
             $this->thirdparty->lastname = "";
         }
-        
+
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');
         $html = str_replace("\n", '<br/>', $html);
 
@@ -317,11 +319,11 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         $html = '';
 
-//        	if ($usecontact && !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) {
-//$thirdparty = $object->contact;
-//} else {
-//$thirdparty = $object->thirdparty;
-//}
+//        if ($usecontact && !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) {
+//            $thirdparty = $object->contact;
+//        } else {
+//            $thirdparty = $object->thirdparty;
+//        }
 
         $html .= '<div class="section addresses_section">';
         $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
@@ -397,11 +399,37 @@ class BimpDocumentPDF extends BimpModelPDF
             $this->setAmountsTableParams($table);
         }
 
+        $remise_globale = 0;
+        $remise_globale_line_rate = 0;
+
+        $bimpLines = array();
+
+        if (BimpObject::objectLoaded($this->bimpCommObject) && is_a($this->bimpCommObject, 'BimpComm')) {
+            if ($this->bimpCommObject->field_exists('remise_globale')) {
+                $remise_globale = (float) $this->bimpCommObject->getData('remise_globale');
+                $remise_globale_line_rate = (float) $this->bimpCommObject->getRemiseGlobaleLineRate();
+                foreach ($this->bimpCommObject->getChildrenObjects('lines') as $bimpLine) {
+                    $bimpLines[(int) $bimpLine->getData('id_line')] = $bimpLine;
+                }
+            }
+        }
+
         BimpTools::loadDolClass('product');
 
-        $i = 0;
+        $i = -1;
+        $total_ht_without_remises = 0;
+        $total_ttc_without_remises = 0;
+
         foreach ($this->object->lines as $line) {
+            $i++;
+
             if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte')) {
+//                $acompteHt = $line->subprice * (float) $line->qty;
+//                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
+
+                $total_ht_without_remises += $line->total_ht;
+                $total_ttc_without_remises += $line->total_ttc;
+
                 $this->acompteHt -= $line->total_ht;
                 $this->acompteTtc -= $line->total_ttc;
                 $this->acompteTva20 -= $line->total_tva;
@@ -417,8 +445,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $product = null;
                 }
             }
-            if(is_object($product) && $product->ref == "REMISECRT"){
-                $i++;
+            if (is_object($product) && $product->ref == "REMISECRT") {
                 continue;
             }
 
@@ -431,15 +458,24 @@ class BimpDocumentPDF extends BimpModelPDF
                     'style'   => 'font-weight: bold; background-color: #F5F5F5;'
                 );
             } else {
+                $line_remise = $line->remise_percent;
+
+                if (isset($bimpLines[(int) $line->id])) {
+                    if ($bimpLines[(int) $line->id]->isRemisable()) {
+                        $line_remise -= $remise_globale_line_rate;
+                    } else {
+                        $line_remise = 0;
+                    }
+                }
+
                 $row = array(
-                    'desc'      => $desc,
-                    'total_ht'  => BimpTools::displayMoneyValue($line->total_ht, ''),
-                    'total_ttc' => BimpTools::displayMoneyValue($line->total_ttc, '')
+                    'desc' => $desc
                 );
 
-                if ($this->hideReduc && $line->remise_percent) {
-                    $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
-                    $row['pu_ht'] = price($pu_ht, 0, $this->langs);
+                $pu_ht_with_remise = (float) ($line->subprice - ($line->subprice * ($line_remise / 100)));
+
+                if ($this->hideReduc && $line_remise) {
+                    $row['pu_ht'] = price($pu_ht_with_remise, 0, $this->langs);
                 } else {
                     $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
                 }
@@ -458,16 +494,37 @@ class BimpDocumentPDF extends BimpModelPDF
                     $row['unite'] = pdf_getlineunit($this->object, $i, $this->langs);
                 }
 
-                if (!$this->hideReduc && $line->remise_percent) {
-                    $row['reduc'] = str_replace('.', ',', (string) round($line->remise_percent, 4, PHP_ROUND_HALF_DOWN)) . '%';
+                if (!$this->hideReduc && $line_remise) {
+                    $line_remise = round($line_remise, 4, PHP_ROUND_HALF_DOWN);
+                    if ($line_remise) {
+                        $row['reduc'] = str_replace('.', ',', (string) $line_remise) . '%';
+                    }
                 }
 
-                $row['total_ht'] = pdf_getlinetotalexcltax($this->object, $i, $this->langs);
+                $row_total_ht = $pu_ht_with_remise * (float) $line->qty;
+                $row_total_ttc = BimpTools::calculatePriceTaxIn($row_total_ht, $line->tva_tx);
+
+                $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '');
+                $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
+
+                $total_ht_without_remises += $line->subprice * (float) $line->qty;
+                $total_ttc_without_remises += BimpTools::calculatePriceTaxIn($line->subprice * (float) $line->qty, (float) $line->tva_tx);
             }
             $row['object'] = $product;
 
             $table->rows[] = $row;
-            $i++;
+        }
+
+        if ($remise_globale) {
+            $remise_infos = $this->bimpCommObject->getRemisesInfos();
+            $table->rows[] = array(
+                'desc'      => 'Remise exceptionnelle sur l\'intégralité ' . $this->bimpCommObject->getLabel('of_the'),
+                'qte'       => 1,
+                'tva'       => '',
+                'pu_ht'     => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], ''),
+                'total_ht'  => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], ''),
+                'total_ttc' => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ttc'], '')
+            );
         }
 
         $this->writeContent('<div style="text-align: right; font-size: 6px;">Montants exprimés en Euros</div>');
@@ -625,9 +682,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
         $i = 0;
         foreach ($this->object->lines as $line) {
-
             if (!$this->hideReduc && $line->remise_percent) {
-                $this->total_remises += ((float) $line->subprice * ((float) $line->remise_percent / 100)) * (int) pdf_getlineqty($this->object, $i, $this->langs);
+                $this->total_remises += ((float) $line->subprice * ((float) $line->remise_percent / 100)) * (float) $line->qty;
             }
 
             $sign = 1;

@@ -402,7 +402,9 @@ select.switch {
         border: 1px solid $gray;
 
         & > td {
-            padding: 6px 12px;
+            color: #3c3c3c;
+            font-weight: bold;
+            padding: 3px 12px;
         }
     }
 }
@@ -470,11 +472,12 @@ select.switch {
 
             &:before {
                 font-family: 'FontAwesome';
-                position: absolute;
                 margin-left: -24px;
+                margin-right: 16px;
                 font-weight: normal;
                 content: '\f096';
                 font-size: 14px;
+                vertical-align: middle;
             }
         }
 

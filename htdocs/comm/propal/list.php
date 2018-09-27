@@ -37,6 +37,8 @@ require '../../main.inc.php';
 
 if(isset($_REQUEST["sall"]) && $_REQUEST["sall"] != "")
     header("Location: ../../bimpcommercial/?fc=propals&search=1&object=propal&sall=".$_REQUEST["sall"]);
+elseif(isset($_REQUEST["socid"]) && $_REQUEST["socid"] > 0)
+    header("Location: ../../bimpcommercial/?fc=clientPropals&id=".$_REQUEST["socid"]);
 else
     header("Location: ../../bimpcommercial/?fc=propals");
 die;

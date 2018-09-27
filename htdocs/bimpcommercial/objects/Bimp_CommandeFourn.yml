@@ -25,3 +25,15 @@ objects:
     lines: 
         instance: 
             bimp_object: Bimp_CommandeFournLine
+            
+    files:
+        list: 
+            filters:
+                parent_object_name: Bimp_CommandeFourn
+        add_form: 
+            values:
+                fields: 
+                    parent_object_name: Bimp_CommandeFourn
+                    
+fields: 
+    remise_globale: unset

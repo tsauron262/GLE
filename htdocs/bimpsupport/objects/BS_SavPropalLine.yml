@@ -190,6 +190,9 @@ forms:
               input_name: margins_table
               content: 
                   callback: renderFormMargins
+              display_if: 
+                  field_name: type
+                  hide_values: 2
                   
             - custom: 1
               label: Description
@@ -201,7 +204,20 @@ forms:
                       method: renderLineInput
                       params: 
                           - desc
-                          
+                        
+            - custom: 1
+              label: Remises autorisées
+              input_name: remisable
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params:
+                          - remisable
+              depends_on: id_product
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              
             - object: remises
               multiple: 1
               form_values: 
@@ -209,8 +225,11 @@ forms:
                       object_type: 
                           callback: getParentCommType
               display_if: 
-                  field_name: type
-                  show_values: 1
+                  fields_names: type,remisable
+                  type: 
+                      show_values: 1
+                  remisable: 
+                      hide_values: 0
               show: 
                   callback: isNotLoaded
                       

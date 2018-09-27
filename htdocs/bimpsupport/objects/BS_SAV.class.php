@@ -181,135 +181,17 @@ class BS_SAV extends BimpObject
 
     public function getClient_contactsArray()
     {
-        $contacts = array();
-
-        $id_client = (int) $this->getData('id_client');
-        if ($id_client) {
-            $where = '`fk_soc` = ' . (int) $id_client;
-            $rows = $this->db->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    $contacts[(int) $r['rowid']] = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
-                }
-            }
-        }
-
-        return $contacts;
+        return $this->getSocieteContactsArray((int) $this->getData('id_client'));
     }
 
     public function getContratsArray()
     {
-        $contrats = array(
-            0 => ''
-        );
-
-        $id_client = (int) $this->getData('id_client');
-        if ($id_client) {
-            $where = '`fk_soc` = ' . $id_client;
-            $rows = $this->db->getRows('contrat', $where, null, 'array', array(
-                'rowid', 'ref'
-            ));
-
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    $contrats[(int) $r['rowid']] = $r['ref'];
-                }
-            }
-        }
-
-        return $contrats;
+        return $this->getSocieteContratsArray((int) $this->getData('id_client'));
     }
 
     public function getPropalsArray()
     {
-        $propals = array(
-            0 => ''
-        );
-        $id_client = (int) $this->getData('id_client');
-
-        if ($id_client) {
-            $where = '`fk_soc` = ' . $id_client;
-            $rows = $this->db->getRows('propal', $where, null, 'array', array(
-                'rowid', 'ref'
-            ));
-
-            if (!is_null($rows)) {
-                foreach ($rows as $r) {
-                    $propals[(int) $r['rowid']] = $r['ref'];
-                }
-            }
-        }
-
-        return $propals;
-    }
-
-    public function getUserCentresArray()
-    {
-        global $tabCentre;
-
-        $centres = array(
-            '' => ''
-        );
-
-        global $user;
-        $userCentres = explode(' ', $user->array_options['options_apple_centre']);
-
-        if (count($userCentres)) {
-            foreach ($userCentres as $code) {
-                if (preg_match('/^ ?([A-Z]+) ?$/', $code, $matches)) {
-                    if (isset($tabCentre[$code])) {
-                        $centres[$matches[1]] = $tabCentre[$matches[1]][2];
-                    }
-                }
-            }
-        }
-
-        if (count($centres) <= 1) {
-            foreach ($tabCentre as $code => $centre) {
-                $centres[$code] = $centre[2];
-            }
-        }
-
-        return $centres;
-    }
-
-    public function getCentresArray()
-    {
-        global $tabCentre;
-
-        $centres = array(
-            '' => ''
-        );
-
-        foreach ($tabCentre as $code => $centre) {
-            $centres[$code] = $centre[2];
-        }
-
-        return $centres;
-    }
-
-    public function getSystemsArray()
-    {
-        return array(
-            300  => "iOs",
-            1013 => "MAC OS 10.13",
-            1012 => "MAC OS 10.12",
-            1011 => "MAC OS 10.11",
-            1010 => "MAC OS 10.10",
-            1075 => "MAC OS 10.7.5",
-            106  => "MAC OS 10.6",
-            107  => "MAC OS 10.7",
-            109  => "MAC OS 10.9",
-            108  => "MAC OS 10.8",
-            9911 => "Windows 10",
-            203  => "Windows 8",
-            204  => "Windows 7",
-            202  => "Windows Vista",
-            201  => "Windows XP",
-            8801 => "Linux",
-            2    => "Indéterminé",
-            1    => "Autre"
-        );
+        return $this->getSocietePropalsArray((int) $this->getData('id_client'));
     }
 
     public function getCreateJsCallback()

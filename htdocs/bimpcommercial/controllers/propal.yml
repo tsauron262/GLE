@@ -1,10 +1,6 @@
 extends: 
     module: bimpcommercial
     object_name: BimpComm
-
-js:
-    - /bimpequipment/views/js/equipment.js
-    - /bimpcommercial/views/js/object_line.js
     
 objects: 
     bimp_comm: 

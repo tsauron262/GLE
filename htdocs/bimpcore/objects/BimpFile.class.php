@@ -12,52 +12,64 @@ class BimpFile extends BimpObject
 
     public function getFilePath()
     {
-        $module = (string) $this->getData('parent_module');
-        $object_name = (string) $this->getData('parent_object_name');
-        $id_object = (string) $this->getData('id_parent');
-        $file = (string) $this->getData('file_name');
-        $ext = (string) $this->getData('file_ext');
+        $dir = $this->getFileDir();
 
-        if (!$module || !$object_name || !$id_object || !$file || !$ext) {
+        if (!$dir) {
             return '';
         }
 
-        return DOL_DATA_ROOT . '/bimpcore/' . $module . '/' . $object_name . '/' . $id_object . '/' . $file . '.' . $ext;
+        $file = (string) $this->getData('file_name');
+        $ext = (string) $this->getData('file_ext');
+
+        if (!$file || !$ext) {
+            return '';
+        }
+
+        return $dir . $file . '.' . $ext;
     }
 
     public function getFileDir()
     {
-        $module = (string) $this->getData('parent_module');
-        $object_name = (string) $this->getData('parent_object_name');
-        $id_object = (string) $this->getData('id_parent');
+        $parent = $this->getParentInstance();
 
-        if (!$module || !$object_name || !$id_object) {
+        if (!BimpObject::objectLoaded($parent)) {
             return '';
         }
 
-        return DOL_DATA_ROOT . '/bimpcore/' . $module . '/' . $object_name . '/' . $id_object . '/';
+        if (is_a($parent, 'BimpObject')) {
+            return $parent->getFilesDir();
+        }
+
+        return DOL_DATA_ROOT . '/bimpcore/' . $this->getData('parent_module') . '/' . $this->getData('parent_object_name') . '/' . $this->getData('id_parent') . '/';
     }
 
     public function getFileUrl()
     {
-        $module = (string) $this->getData('parent_module');
-        $object_name = (string) $this->getData('parent_object_name');
-        $id_object = (string) $this->getData('id_parent');
         $file = (string) $this->getData('file_name');
         $ext = (string) $this->getData('file_ext');
 
-        if (!$module || !$object_name || !$id_object || !$file || !$ext) {
+        if (!$file || !$ext) {
             return '';
         }
 
-        $file = $module . '/' . $object_name . '/' . $id_object . '/' . $file . '.' . $ext;
+        $parent = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($parent)) {
+            return '';
+        }
+
+        if (is_a($parent, 'BimpObject')) {
+            return $parent->getFileUrl($file . '.' . $ext);
+        }
+
+        $file = $this->getData('parent_module') . '/' . $this->getData('parent_object_name') . '/' . $this->getData('id_parent') . '/' . $file . '.' . $ext;
 
         return DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($file);
     }
 
     public function isDeletable()
     {
-        return 1;
+        return (int) (!(int) $this->getData('deleted'));
     }
 
     public function isDownloadable()
@@ -93,14 +105,33 @@ class BimpFile extends BimpObject
 //                if ($url) {
 //                    $url .= '&attachment=0';
 //                    $buttons[] = array(
-//                        'label'   => 'Afficher le document',
-//                        'icon'    => 'eye',
-//                        'onclick' => 'window.open(\'' . $url . '\', \'_blank\');'
+//                        'tag'   => 'a',
+//                        'class' => 'documentpreview',
+//                        'label' => 'Afficher le document',
+//                        'icon'  => 'search',
+//                        'attrs' => array(
+//                            'attr' => array(
+//                                'href' => $url,
+//                                'mime' => 'application/pdf'
+//                            )
+//                        ),
 //                    );
 //                }
 //                break;
         }
         return $buttons;
+    }
+
+    // Getters - Overrides BimpObject:
+
+    public function getParentObjectName()
+    {
+        return $this->getData('parent_object_name');
+    }
+
+    public function getParentModule()
+    {
+        return $this->getData('parent_module');
     }
 
     // Affichages: 
@@ -144,12 +175,14 @@ class BimpFile extends BimpObject
         } else {
             $ret = dol_add_file_process($file_dir, 0, 0, 'file');
             if ($ret <= 0) {
-                $errors = BimpTools::getDolEventsMsgs();
+                $errors = BimpTools::getDolEventsMsgs(array('errors', 'warnings'));
                 if (!count($errors)) {
-                    $errors[] = 'Echec de l\'enrgistrement du fichier pour une raison inconnue';
+                    $errors[] = 'Echec de l\'enregistrement du fichier pour une raison inconnue';
                 }
             }
+            BimpTools::cleanDolEventsMsgs();
         }
+
 
         return $errors;
     }
@@ -182,7 +215,11 @@ class BimpFile extends BimpObject
             $current_files[(int) $r['id']] = $r['file_name'] . '.' . $r['file_ext'];
         }
 
-        $file_dir = DOL_DATA_ROOT . '/bimpcore/' . $module . '/' . $object_name . '/' . $id_object;
+        $this->set('parent_module', $module);
+        $this->set('parent_object_name', $object_name);
+        $this->set('id_parent', $id_object);
+
+        $file_dir = $this->getFileDir();
 
         $files = array();
 
@@ -194,6 +231,10 @@ class BimpFile extends BimpObject
                 }
 
                 if (is_dir($file_dir . '/' . $f)) {
+                    continue;
+                }
+
+                if (preg_match('/^(.*)_deleted\..*$/', $f)) {
                     continue;
                 }
 
@@ -211,7 +252,6 @@ class BimpFile extends BimpObject
                                         'file_size'          => filesize($file_dir . '/' . $f)
                             )))) {
                         parent::create();
-                        $this->reset();
                     }
                 }
             }
@@ -293,8 +333,10 @@ class BimpFile extends BimpObject
                 if ($new_name !== $current_name) {
                     $dir = $this->getFileDir();
                     $ext = $this->getData('file_ext');
-                    if ($error = BimpTools::renameFile($dir, $current_name . '.' . $ext, $new_name . '.' . $ext)) {
-                        return array($error);
+                    if (file_exists($dir . $current_name . '.' . $ext)) {
+                        if ($error = BimpTools::renameFile($dir, $current_name . '.' . $ext, $new_name . '.' . $ext)) {
+                            return array($error);
+                        }
                     }
                 }
             }
@@ -305,10 +347,38 @@ class BimpFile extends BimpObject
 
     public function delete($force_delete = false)
     {
-        $errors = $this->removeFile();
-        if (!count($errors)) {
-            $errors = parent::delete($force_delete);
+        if (!$this->isLoaded()) {
+            return array('ID ' . $this->getLabel('of_the') . ' absent');
         }
+
+        if (!$force_delete && !$this->canDelete()) {
+            return array('Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this'));
+        }
+
+        if ((int) $this->getData('deleted')) {
+            return array($this->getLabel('this') . ' a déjà été supprimé');
+        }
+
+        $errors = array();
+
+        global $user;
+
+        $this->set('deleted', 1);
+        $this->set('user_delete', (int) $user->id);
+        $this->set('date_delete', date('Y-m-d H:i:s'));
+        $this->set('file_name', $this->getData('file_name') . '_deleted');
+
+        $errors = $this->update($warnings, true);
+
+        if (!count($errors)) {
+            $dir = $this->getFileDir();
+            $file = $this->getData('file_name') . '.' . $this->getData('file_ext');
+
+            if (file_exists($dir . $file)) {
+                BimpTools::renameFile($dir, $file, $this->getData('file_name') . '_deleted' . '.' . $this->getData('file_ext'));
+            }
+        }
+
         return $errors;
     }
 }

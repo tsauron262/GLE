@@ -28,6 +28,8 @@ class PropalPDF extends BimpDocumentPDF
     protected function initData()
     {
         if (isset($this->object) && is_a($this->object, 'Propal')) {
+            $this->bimpCommObject = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal', (int) $this->object->id);
+            
             if (isset($this->object->id) && $this->object->id) {
                 $this->propal = $this->object;
                 if (isset($this->propal->socid) && $this->propal->socid) {
@@ -64,7 +66,11 @@ class PropalPDF extends BimpDocumentPDF
         global $conf, $db;
 
         $docName = $this->langs->transnoentities('CommercialProposal');
-        $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->propal->ref);
+        if ($this->hideRef) {
+            $docRef = '';
+        } else {
+            $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->propal->ref);
+        }
 
         $rows = '';
         $nRows = 0;

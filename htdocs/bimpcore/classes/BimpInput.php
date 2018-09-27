@@ -574,17 +574,24 @@ class BimpInput
 
                     $html = '<div class="check_list_container">';
                     $i = 1;
-                    foreach ($options['items'] as $item) {
+                    foreach ($options['items'] as $idx => $item) {
+                        if (is_array($item)) {
+                            $item_value = isset($item['value']) ? $item['value'] : $idx;
+                            $item_label = isset($item['label']) ? $item['label'] : 'n°' . $idx;
+                        } else {
+                            $item_value = $idx;
+                            $item_label = (string) $item;
+                        }
                         $i++;
                         $rand = rand(111111, 999999);
                         $html .= '<div class="check_list_item">';
-                        $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item['value'] . '" id="' . $input_id . '_' . $i . '_' . $rand . '"';
-                        if (in_array($item['value'], $value)) {
+                        $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item_value . '" id="' . $input_id . '_' . $i . '_' . $rand . '"';
+                        if (in_array($item_value, $value)) {
                             $html .= ' checked';
                         }
                         $html .= '/>';
                         $html .= '<label for="' . $input_id . '_' . $i . '_' . $rand . '">';
-                        $html .= $item['label'];
+                        $html .= $item_label;
                         $html .= '</label>';
                         $html .= '</div>';
                     }

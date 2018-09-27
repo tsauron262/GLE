@@ -102,6 +102,7 @@ function hidePopovers($container) {
         $(this).popover('hide');
     });
 }
+
 // Evenements: 
 
 function setCommonEvents($container) {

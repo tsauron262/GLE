@@ -7,11 +7,12 @@ if (!defined('BIMP_LIB')) {
     require_once __DIR__ . '/libs/spyc/Spyc.php';
 
     require_once $dir . 'BimpDb.php';
+    require_once $dir . 'BimpValidate.php';
+    require_once $dir . 'BimpCache.php';
     require_once $dir . 'BimpTools.php';
     require_once $dir . 'BimpConfig.php';
     require_once $dir . 'BimpInput.php';
     require_once $dir . 'BimpRender.php';
-    require_once $dir . 'BimpCache.php';
     require_once $dir . 'BimpConfigDefinitions.php';
     require_once $dir . 'BimpComponent.php';
 

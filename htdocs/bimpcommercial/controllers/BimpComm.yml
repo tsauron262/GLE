@@ -1,5 +1,11 @@
 bootstrap: 1
 
+js: 
+    0: /bimpcommercial/views/js/mails.js
+    1: /bimpequipment/views/js/equipment.js
+    2: /bimpcommercial/views/js/object_line.js
+    3: /bimpcommercial/views/js/paiement.js
+    
 objects: 
     bimp_comm: 
         instance: 
@@ -30,23 +36,14 @@ sections:
                                               object: bimp_comm
                                               name: default
                                     - cols: 
-                                        - type: rows
+                                        - type: custom
                                           col_lg: 6
                                           col_md: 6
                                           col_sm: 12
-                                          rows: 
-                                              - cols: 
-                                                  - type: custom
-                                                    custom:
-                                                        callback: 
-                                                            method: renderFilesTable
-                                                            object: bimp_comm
-
-                                                  - type: custom
-                                                    custom: 
-                                                        callback:
-                                                            method: renderLinkedObjectsTable
-                                                            object: bimp_comm
+                                          custom: 
+                                              callback:
+                                                  method: renderLinkedObjectsTable
+                                                  object: bimp_comm
                                         
                                         - type: custom
                                           col_lg: 6
@@ -73,3 +70,16 @@ sections:
                                     callback: 
                                         method: renderContacts
                                         object: bimp_comm
+                          - id: files
+                            title: Fichiers
+                            struct: 
+                                type: rows
+                                rows:                                                   
+                                    - cols: 
+                                        - type: list
+                                          list: 
+                                              title: Fichier joints
+                                              name: default
+                                              panel: 1
+                                              object: bimp_comm
+                                              children: files

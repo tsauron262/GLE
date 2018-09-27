@@ -42,20 +42,7 @@ class BE_Place extends BimpObject
 
         return $contacts;
     }
-
-    public function getCentresArray()
-    {
-        $centres = array(
-            '' => ''
-        );
-        global $tabCentre;
-        foreach ($tabCentre as $code => $centre) {
-            $centres[$code] = $centre[2];
-        }
-
-        return $centres;
-    }
-
+    
     public function getTdStyle()
     {
         if ($this->isLoaded()) {

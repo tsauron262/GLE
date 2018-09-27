@@ -64,7 +64,7 @@ class BimpCommController extends BimpController
                 $object_name = (string) ObjectLine::getObjectNameByType($type);
             }
         }
-        
+
         if ($module && $object_name) {
             $objectLine = BimpObject::getInstance($module, $object_name, $id_object_line);
             if (!is_null($objectLine)) {

@@ -40,32 +40,40 @@ function reloadObjectLineFormMargins($form) {
                 }
             }
 
-            $input = $form.find('[name="remise"]');
+            $input = $form.find('[name="remisable"]');
             if ($input.length) {
-                data.line_remise = parseFloat($input.val());
+                data.line_remisable = parseInt($input.val());
             } else {
-                data.line_remises = [];
-
-                var $container = $form.find('#remises_subObjectsContainer');
-                if ($container.length) {
-                    $container.find('.subObjectForm').each(function () {
-                        var $remiseForm = $(this);
-                        var idx = $remiseForm.data('idx');
-                        if (idx !== 'sub_object_idx') {
-                            var remise = {
-                                id: parseInt($remiseForm.find('[name="remises_' + idx + '_id_object"]').val()),
-                                type: parseInt($remiseForm.find('[name="remises_' + idx + '_type"]').val()),
-                                percent: parseFloat($remiseForm.find('[name="remises_' + idx + '_percent"]').val()),
-                                montant: parseFloat($remiseForm.find('[name="remises_' + idx + '_montant"]').val()),
-                                per_unit: parseInt($remiseForm.find('[name="remises_' + idx + '_per_unit"]').val()),
-                                remise_ht: parseInt($remiseForm.find('[name="remises_' + idx + '_remise_ht"]').val()),
-                            };
-                            data.line_remises.push(remise);
-                        }
-                    });
-                }
+                data.line_remisable = 1;
             }
 
+            if (data.line_remisable) {
+                $input = $form.find('[name="remise"]');
+                if ($input.length) {
+                    data.line_remise = parseFloat($input.val());
+                } else {
+                    data.line_remises = [];
+
+                    var $container = $form.find('#remises_subObjectsContainer');
+                    if ($container.length) {
+                        $container.find('.subObjectForm').each(function () {
+                            var $remiseForm = $(this);
+                            var idx = $remiseForm.data('idx');
+                            if (idx !== 'sub_object_idx') {
+                                var remise = {
+                                    id: parseInt($remiseForm.find('[name="remises_' + idx + '_id_object"]').val()),
+                                    type: parseInt($remiseForm.find('[name="remises_' + idx + '_type"]').val()),
+                                    percent: parseFloat($remiseForm.find('[name="remises_' + idx + '_percent"]').val()),
+                                    montant: parseFloat($remiseForm.find('[name="remises_' + idx + '_montant"]').val()),
+                                    per_unit: parseInt($remiseForm.find('[name="remises_' + idx + '_per_unit"]').val()),
+                                    remise_ht: parseInt($remiseForm.find('[name="remises_' + idx + '_remise_ht"]').val()),
+                                };
+                                data.line_remises.push(remise);
+                            }
+                        });
+                    }
+                }
+            }
         } else if ($form.hasClass('ObjectLineRemise_form')) {
             check = true;
 
@@ -149,6 +157,10 @@ function onObjectLineFormLoaded($form) {
                 reloadObjectLineFormMargins($(this).findParentByClass('object_form'));
             });
 
+            $form.find('[name="remisable"]').change(function () {
+                reloadObjectLineFormMargins($(this).findParentByClass('object_form'));
+            });
+
             var id_form = $form.data('identifier');
 
             if (!parseInt($('body').data(id_form + '_form_margins_events_init'))) {
@@ -158,7 +170,8 @@ function onObjectLineFormLoaded($form) {
                         if (e.input_name === 'pu_ht' ||
                                 e.input_name === 'tva_tx' ||
                                 e.input_name === 'qty' ||
-                                e.input_name === 'id_fourn_price') {
+                                e.input_name === 'id_fourn_price' ||
+                                e.input_name === 'remisable') {
                             e.$input.change(function () {
                                 reloadObjectLineFormMargins(e.$form);
                             });
@@ -239,6 +252,10 @@ function onObjectLineRemiseFormLoaded($form) {
             $form.find('[name="remise_ht"]').change(function () {
                 reloadObjectLineFormMargins($(this).findParentByClass('object_form'));
             });
+            $form.find('[name="remisable"]').change(function () {
+                reloadObjectLineFormMargins($(this).findParentByClass('object_form'));
+            });
+
 
             $form.data('form_margins_events_init', 1);
         }

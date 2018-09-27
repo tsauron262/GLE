@@ -35,6 +35,7 @@ fields:
     coef:
         label: Coéficient
         type: float
+        decimals: 5
         
     comment:
         label: Commentaire
@@ -45,6 +46,7 @@ fields:
         
 list:
     checkboxes: 1
+    positions: 1
     title: Refinanceurs consultés
     icon: bank
     bulk_actions: 

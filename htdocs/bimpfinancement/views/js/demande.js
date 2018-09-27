@@ -27,7 +27,9 @@ function initEvents($view) {
             '[name="quantity"], [name="amount"], [name="amount_ht"],' +
             '[name="mode_calcul"],' +
             '[name="rate"], [name="coef"],' +
-            '[name="periodicity"]';
+            '[name="periodicity"],' +
+            '[name="periode2"],' +
+            '[name="vr"],[name="vr_vente"]';
     $view.find(selecteur).change(function () {
         calculateMontantTotal($view);
     });
@@ -69,6 +71,10 @@ function calculateMontantTotal($view, champ) {
     if (montant_logiciels) {
         total += montant_logiciels;
     }
+    
+    //Calcul du VR
+    var VR_vente = parseFloat($view.find('[name="vr_vente"]').val());
+    total = total - VR_vente;
 
     //On a le premier total
 
@@ -102,7 +108,8 @@ function calculateMontantTotal($view, champ) {
     var duree = 0;
     $view.find(".BF_Rent_row").each(function () {
         totalLoyer += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
-        duree += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('select[name="periodicity"]').val());
+        if($(this).find('input[name="periode2"]').val() == 0)
+            duree += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('select[name="periodicity"]').val());
     });
     displayMoneyValue(totalLoyer, $view.find('#total_loyer'));
 
@@ -124,14 +131,18 @@ function calculateMontantTotal($view, champ) {
             coef = $(this).find("input[name=coef]").val();
         }
     });
-    if (coef < 1)
-        coef = 1;
 
-    var echoir = ($view.find('input[name="mode_calcul"]').val() == 2);
+
     var periodicity = $view.find('input[name="periodicity"]').val();
-    var interet = calculInteret(total2, duree, taux, echoir);
 
-    var coupBanque = (total2 * coef) - total2 + interet;
+    var coupBanque = 0;
+    if(coef > 0)
+        coupBanque += (duree * periodicity) * total2 * coef / 100 - total2;
+
+    if(taux > 0){
+        var echoir = ($view.find('input[name="mode_calcul"]').val() == 2);
+        coupBanque += calculInteret(total2, duree, taux, echoir);
+    }
 
     displayMoneyValue(coupBanque, $view.find('#cout_banque'));
 
@@ -161,6 +172,7 @@ function calculateMontantTotal($view, champ) {
     //CA Calculé
     var caCalc = commF + totalLoyI + totalFD + difBanqFinan;
     displayMoneyValue(caCalc, $view.find('#ca_calc'), (caCalc < 0) ? "redT" : "");
+    
 
 
     //Reste a payé
@@ -203,21 +215,25 @@ function calculTotal(selecteur) {
 
 function hideShowAvance(view_id, hide) {
     if ($("#ca_calc").length > 0) {
-        var $container = $('#' + view_id).find('.objectViewtable');
-        var selecteur = "#montant_total, #montant_total2, #duree_total, #cout_banque, #loy_inter, #frais_div, #total_loyer,"
+        var $container = $('.BF_Demande_fields_table_montants');
+        console.log($('#' + view_id));
+        var selecteur = "#montant_total";
+        var selecteur2 = "#montant_total, #montant_total2, #duree_total, #cout_banque, #loy_inter, #frais_div, #total_loyer,"
                 + "#periodicity_inputContainer, #mode_calcul_inputContainer, #duration_inputContainer,"
                 + '[name="periodicity"], [name="mode_calcul"], [name="duration"]';
+        
         var elems = $container.find(selecteur).parent().parent();
-        var elem2 = elems.parent().parent().find(".btn-primary").parent();
+        var elemsACacher = $container.find(selecteur2).parent().parent();
+        var elem2 = elems.parent().parent().parent().parent().parent().parent().find(".panel-footer");
         var moreBut = "erreur";
-
+        
         $("#plusMoinsAvance").remove();
         if (hide == true) {
-            elems.hide();
+            elemsACacher.hide();
             moreBut = "onClick='hideShowAvance(\"" + view_id + "\", false)'>Mode Avancé";
         }
         else {
-            elems.show();
+            elemsACacher.show();
             moreBut = "onClick='hideShowAvance(\"" + view_id + "\", true)'>Mode Normal";
         }
 

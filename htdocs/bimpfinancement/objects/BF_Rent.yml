@@ -36,38 +36,40 @@ fields:
         values: 
             array: periodicities
             
-    period2:
-        label: Périodicité
-        type: int
-        values: 
-            array: periodicities
+    periode2:
+        label: Seconde période
+        type: bool
         
-list:
-    checkboxes: 1
-    positions: 1
-    title: Loyers
-    icon: calendar
-    bulk_actions: 
-        - label: Supprimer les lignes sélectionnées
-          icon: trash
-          onclick: deleteSelectedObjects('list_id', $(this));
-          btn_class: deleteSelectedObjects
-    sort_field: position
-    sort_way: asc
-    n: 10
-    cols:
-        quantity: 
-            field: quantity
-            edit: 1
-        amount: 
-            field: amount_ht
-            edit: 1
-        payment:
-            field: payment
-            edit: 1
-        periodicity:
-            field: periodicity
-            edit: 1
-    add_object_row: 1
-    update_btn: 1
-    delete_btn: 1
+lists:
+    default:
+        checkboxes: 1
+        positions: 1
+        title: Loyers
+        icon: calendar
+        bulk_actions: 
+            - label: Supprimer les lignes sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        sort_field: position
+        sort_way: asc
+        n: 10
+        cols:
+            quantity: 
+                field: quantity
+                edit: 1
+            amount: 
+                field: amount_ht
+                edit: 1
+            payment:
+                field: payment
+                edit: 1
+            periodicity:
+                field: periodicity
+                edit: 1
+            periode2:
+                field: periode2
+                edit: 1
+        add_object_row: 1
+        update_btn: 1
+        delete_btn: 1

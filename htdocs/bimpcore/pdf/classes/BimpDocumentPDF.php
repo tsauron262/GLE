@@ -510,6 +510,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $total_ht_without_remises += $line->subprice * (float) $line->qty;
                 $total_ttc_without_remises += BimpTools::calculatePriceTaxIn($line->subprice * (float) $line->qty, (float) $line->tva_tx);
             }
+            $row['object'] = $product;
 
             $table->rows[] = $row;
         }

@@ -145,6 +145,7 @@ function reloadObjectList(list_id, callback) {
         success: function (result, bimpAjax) {
             $list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
             if (result.rows_html) {
+                hidePopovers($list);
                 bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
                 if (result.pagination_html) {
                     bimpAjax.$list.find('.listPagination').each(function () {

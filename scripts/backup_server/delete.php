@@ -18,7 +18,7 @@ if (isset($_POST['days_to_keep'])) {
     $files = glob('dump_daily/*.sql');
     $now = time();
     $limit_date = 60 * 60 * 24 * $days_to_keep;
-//    $limit_date = $days_to_keep; // dev
+//    $limit_date = $days_to_keep;
 
     
     foreach ($files as $file) {

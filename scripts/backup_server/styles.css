@@ -85,6 +85,6 @@ body {
     /*vertical-align:middle;*/
 }
 
-h3, b, strong {
+h3, b, strong, div.greyBorder {
     color: #879700;
 }

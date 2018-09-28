@@ -91,13 +91,13 @@ objects:
         list: 
             filters:
                 parent_module: bimpfinancement
-                parent_object_name: demande
+                parent_object_name: BF_Demande
         add_form: 
             name: upload
             values:
                 fields: 
                     parent_module: bimpfinancement
-                    parent_object_name: demande
+                    parent_object_name: BF_Demande
             
 #associations:
 #    files: 

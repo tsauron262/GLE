@@ -425,6 +425,7 @@ forms:
             - field: id_client
             - field: id_contact
             - field: id_equipment
+            - field: prioritaire
             - field: id_contrat
             - field: prestataire_number
 #            - field: id_propal

@@ -434,7 +434,6 @@ class BimpDocumentPDF extends BimpModelPDF
                 $this->acompteHt -= $line->total_ht;
                 $this->acompteTtc -= $line->total_ttc;
                 $this->acompteTva20 -= $line->total_tva;
-                $i++;
                 continue;
             }
 

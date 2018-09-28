@@ -1924,6 +1924,16 @@ class Societe extends CommonObject
             $label.= '<br><b>' . $langs->trans('CustomerAccountancyCode') . ':</b> '. $this->code_compta_client;
         if (! empty($conf->accounting->enabled) && $this->fournisseur)
             $label.= '<br><b>' . $langs->trans('SupplierAccountancyCode') . ':</b> '. $this->code_compta_fournisseur;
+        
+        
+        /*mod drsi*/
+        $sql = $this->db->query("SELECT * FROM `llx_societe_commerciaux` WHERE `fk_soc` = ".$this->id);
+        while($ln = $this->db->fetch_object($sql)){
+            $userT = new User($this->db);
+            $userT->fetch($ln->fk_user);
+            $label .="<br/><b>Commercial : </b>".$userT->getNomUrl(1, '', 0, 1, 16);
+        }
+        /*fmoddrsi*/
 
         $label.= '</div>';
 

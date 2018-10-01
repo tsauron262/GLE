@@ -29,6 +29,4 @@ htdocs/includes/composer/
 /htdocs/synopsissignature/temp/
 /htdocs/conf/
 /.gitignore
-/autreprojet/bimpcheckbillet/img/qrcode/
-/autreprojet/bimpcheckbillet/img/event/
-/autreprojet/bimpcheckbillet/img/tickets/
+/htdocs/includes/

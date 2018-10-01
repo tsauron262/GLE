@@ -437,7 +437,7 @@ class Ldap
 			$this->ldapErrorCode = @ldap_errno($this->connection);
 			$this->ldapErrorText = @ldap_error($this->connection);
 			$this->error=$this->ldapErrorCode." ".$this->ldapErrorText;
-			//dol_syslog(get_class($this)."::add failed: ".$this->error, LOG_ERR);
+			dol_syslog(get_class($this)."::add failed: ".$this->error, LOG_ERR);
 			return -1;
 		}
 	}
@@ -502,7 +502,7 @@ class Ldap
 	 *	@param	string		$newrdn			New RDN entry key (uid=qqq)
 	 *	@param	string		$newparent		New parent (ou=xxx,dc=aaa,dc=bbb)
 	 *	@param	User			$user			Objet user that modify
-	 *	@param	bool			$deleteoldrdn	If TRUE the old RDN value(s) is removed, else the old RDN value(s) is retained as non-distinguished values of the entry.
+	 *	@param	bool			$deleteoldrdn	If true the old RDN value(s) is removed, else the old RDN value(s) is retained as non-distinguished values of the entry.
 	 *	@return	int							<0 if KO, >0 if OK
 	 */
 	function rename($dn, $newrdn, $newparent, $user, $deleteoldrdn = true)

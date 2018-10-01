@@ -31,8 +31,8 @@ if (! empty($conf->projet->enabled))
     require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 }
 
-$langs->load("compta");
-$langs->load("bills");
+// Load translation files required by the page
+$langs->loadLangs(array('compta', 'bills'));
 
 $id=GETPOST('id','int');
 $action=GETPOST('action','aZ09');
@@ -41,6 +41,8 @@ $action=GETPOST('action','aZ09');
 $socid = GETPOST('socid','int');
 if ($user->societe_id) $socid=$user->societe_id;
 $result = restrictedArea($user, 'tax', $id, 'chargesociales','charges');
+
+$object = new ChargeSociales($db);
 
 $object = new ChargeSociales($db);
 

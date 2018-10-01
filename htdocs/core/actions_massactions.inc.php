@@ -1,5 +1,7 @@
 <?php
 /* Copyright (C) 2015-2017 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2018	   Nicolas ZABOURI	<info@inovea-conseil.com>
+ * Copyright (C) 2018 	   Juanjo Menent  <jmenent@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -356,6 +358,14 @@ if (! $error && $massaction == 'confirm_presend')
 					$substitutionarray['__CHECK_READ__'] = '<img src="'.DOL_MAIN_URL_ROOT.'/public/emailing/mailing-read.php?tag='.$thirdparty->tag.'&securitykey='.urlencode($conf->global->MAILING_EMAIL_UNSUBSCRIBE_KEY).'" width="1" height="1" style="width:1px;height:1px" border="0"/>';
 
 					$parameters=array('mode'=>'formemail');
+
+					if ( ! empty( $listofobjectthirdparties ) ) {
+						$parameters['listofobjectthirdparties'] = $listofobjectthirdparties;
+					}
+					if ( ! empty( $listofobjectref ) ) {
+						$parameters['listofobjectref'] = $listofobjectref;
+					}
+
 					complete_substitutions_array($substitutionarray, $langs, $objecttmp, $parameters);
 
 					$subject=make_substitutions($subject, $substitutionarray);
@@ -414,25 +424,25 @@ if (! $error && $massaction == 'confirm_presend')
 								if ($triggername == 'SOCIETE_SENTBYMAIL')    $triggername = 'COMPANY_SENTBYEMAIL';
 								if ($triggername == 'CONTRAT_SENTBYMAIL')    $triggername = 'CONTRACT_SENTBYEMAIL';
 								if ($triggername == 'COMMANDE_SENTBYMAIL')   $triggername = 'ORDER_SENTBYEMAIL';
-								if ($triggername == 'FACTURE_SENTBYMAIL')    $triggername = 'BILL_SENTBYEMAIL';
+								if ($triggername == 'FACTURE_SENTBYMAIL')    $triggername = 'BILL_SENTBYMAIL';
 								if ($triggername == 'EXPEDITION_SENTBYMAIL') $triggername = 'SHIPPING_SENTBYEMAIL';
 								if ($triggername == 'COMMANDEFOURNISSEUR_SENTBYMAIL') $triggername = 'ORDER_SUPPLIER_SENTBYMAIL';
 								if ($triggername == 'FACTUREFOURNISSEUR_SENTBYMAIL') $triggername = 'BILL_SUPPLIER_SENTBYEMAIL';
 								if ($triggername == 'SUPPLIERPROPOSAL_SENTBYMAIL') $triggername = 'PROPOSAL_SUPPLIER_SENTBYEMAIL';
 
-								if (! empty($trigger_name))
+								if (! empty($triggername))
 								{
 									// Appel des triggers
 									include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
 									$interface=new Interfaces($db);
-									$result=$interface->run_triggers($trigger_name, $objectobj, $user, $langs, $conf);
+									$result=$interface->run_triggers($triggername, $objectobj, $user, $langs, $conf);
 									if ($result < 0) { $error++; $errors=$interface->errors; }
 									// Fin appel triggers
 
 									if ($error)
 									{
 										setEventMessages($db->lasterror(), $errors, 'errors');
-										dol_syslog("Error in trigger ".$trigger_name.' '.$db->lasterror(), LOG_ERR);
+										dol_syslog("Error in trigger ".$triggername.' '.$db->lasterror(), LOG_ERR);
 									}
 								}
 
@@ -601,6 +611,13 @@ if ($massaction == 'confirm_createbills')
 						{
 							$fk_parent_line = 0;
 						}
+
+						// Extrafields
+						if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED) && method_exists($lines[$i], 'fetch_optionals')) {
+							$lines[$i]->fetch_optionals($lines[$i]->rowid);
+							$array_options = $lines[$i]->array_options;
+						}
+
 						$result = $objecttmp->addline(
 							$desc,
 							$lines[$i]->subprice,
@@ -625,7 +642,8 @@ if ($massaction == 'confirm_createbills')
 							$fk_parent_line,
 							$lines[$i]->fk_fournprice,
 							$lines[$i]->pa_ht,
-							$lines[$i]->label
+							$lines[$i]->label,
+							$array_options
 							);
 						if ($result > 0)
 						{
@@ -726,6 +744,56 @@ if ($massaction == 'confirm_createbills')
 		$error++;
 	}
 }
+
+if (!$error && $massaction == 'cancelorders')
+{
+
+	$db->begin();
+
+	$nbok = 0;
+
+
+	$orders = GETPOST('toselect', 'array');
+	foreach ($orders as $id_order)
+	{
+
+		$cmd = new Commande($db);
+		if ($cmd->fetch($id_order) <= 0)
+			continue;
+
+		if ($cmd->statut != Commande::STATUS_VALIDATED)
+		{
+			$langs->load('errors');
+			setEventMessages($langs->trans("ErrorObjectMustHaveStatusValidToBeCanceled", $cmd->ref), null, 'errors');
+			$error++;
+			break;
+		}
+		else
+			$result = $cmd->cancel();
+
+		if ($result < 0)
+		{
+			setEventMessages($cmd->error, $cmd->errors, 'errors');
+			$error++;
+			break;
+		}
+		else
+			$nbok++;
+	}
+	if (!$error)
+	{
+		if ($nbok > 1)
+			setEventMessages($langs->trans("RecordsModified", $nbok), null, 'mesgs');
+		else
+			setEventMessages($langs->trans("RecordsModified", $nbok), null, 'mesgs');
+		$db->commit();
+	}
+	else
+	{
+		$db->rollback();
+	}
+}
+
 
 if (! $error && $massaction == "builddoc" && $permtoread && ! GETPOST('button_search'))
 {
@@ -973,7 +1041,41 @@ if (! $error && $massaction == 'validate' && $permtocreate)
 		//var_dump($listofobjectthirdparties);exit;
 	}
 }
+// Closed records
+if (!$error && $massaction == 'closed' && $objectclass == "Propal" && $permtoclose) {
+    $db->begin();
 
+    $objecttmp = new $objectclass($db);
+    $nbok = 0;
+    foreach ($toselect as $toselectid) {
+        $result = $objecttmp->fetch($toselectid);
+        if ($result > 0) {
+            $result = $objecttmp->cloture($user, 3);
+            if ($result <= 0) {
+                setEventMessages($objecttmp->error, $objecttmp->errors, 'errors');
+                $error++;
+                break;
+            } else
+                $nbok++;
+        }
+        else {
+            setEventMessages($objecttmp->error, $objecttmp->errors, 'errors');
+            $error++;
+            break;
+        }
+    }
+
+    if (!$error) {
+        if ($nbok > 1)
+            setEventMessages($langs->trans("RecordsModified", $nbok), null, 'mesgs');
+        else
+            setEventMessages($langs->trans("RecordsModified", $nbok), null, 'mesgs');
+        $db->commit();
+    }
+    else {
+        $db->rollback();
+    }
+}
 // Delete record from mass action (massaction = 'delete' for direct delete, action/confirm='delete'/'yes' with a confirmation step before)
 if (! $error && ($massaction == 'delete' || ($action == 'delete' && $confirm == 'yes')) && $permtodelete)
 {
@@ -986,24 +1088,23 @@ if (! $error && ($massaction == 'delete' || ($action == 'delete' && $confirm == 
 		$result=$objecttmp->fetch($toselectid);
 		if ($result > 0)
 		{
-			// Refuse deletion for some status ?
-			/*
-       		if ($objectclass == 'Facture' && $objecttmp->status == Facture::STATUS_DRAFT)
-       		{
-       			$langs->load("errors");
-       			$nbignored++;
-       			$resaction.='<div class="error">'.$langs->trans('ErrorOnlyDraftStatusCanBeDeletedInMassAction',$objecttmp->ref).'</div><br>';
-       			continue;
-       		}*/
+			// Refuse deletion for some objects/status
+			if ($objectclass == 'Facture' && empty($conf->global->INVOICE_CAN_ALWAYS_BE_REMOVED) && $objecttmp->status != Facture::STATUS_DRAFT)
+			{
+				$langs->load("errors");
+				$nbignored++;
+				$resaction.='<div class="error">'.$langs->trans('ErrorOnlyDraftStatusCanBeDeletedInMassAction',$objecttmp->ref).'</div><br>';
+				continue;
+			}
 
-			if (in_array($objecttmp->element, array('societe','member'))) $result = $objecttmp->delete($objecttmp->id, $user, 1);
+			if (in_array($objecttmp->element, array('societe', 'member'))) $result = $objecttmp->delete($objecttmp->id, $user, 1);
 			else $result = $objecttmp->delete($user);
 
 			if ($result <= 0)
 			{
-				setEventMessages($objecttmp->error, $objecttmp->errors, 'errors');
-				$error++;
-				break;
+			    setEventMessages($objecttmp->error, $objecttmp->errors, 'errors');
+			    $error++;
+			    break;
 			}
 			else $nbok++;
 		}

@@ -32,8 +32,8 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
 
-$langs->load("categories");
-$langs->load("bills");
+// Load translation files required by the page
+$langs->loadlangs(array('categories', 'bills'));
 
 
 $id=GETPOST('id','int');
@@ -41,6 +41,8 @@ $ref=GETPOST('ref');
 $type=GETPOST('type');
 $action=GETPOST('action','aZ09');
 $confirm=GETPOST('confirm');
+
+if (is_numeric($type)) $type=Categorie::$MAP_ID_TO_CODE[$type];	// For backward compatibility
 
 if (is_numeric($type)) $type=Categorie::$MAP_ID_TO_CODE[$type];	// For backward compatibility
 

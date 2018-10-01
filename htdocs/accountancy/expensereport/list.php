@@ -27,7 +27,6 @@
  */
 require '../../main.inc.php';
 
-// Class
 require_once DOL_DOCUMENT_ROOT . '/expensereport/class/expensereport.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formaccounting.class.php';
 require_once DOL_DOCUMENT_ROOT . '/accountancy/class/accountingaccount.class.php';
@@ -35,14 +34,8 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/accounting.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 
-// Langs
-$langs->load("compta");
-$langs->load("bills");
-$langs->load("other");
-$langs->load("trips");
-$langs->load("main");
-$langs->load("accountancy");
-$langs->load("productbatch");
+// Load translation files required by the page
+$langs->loadLangs(array("bills","compta","accountancy","other","trips","productbatch"));
 
 $action=GETPOST('action','alpha');
 $massaction=GETPOST('massaction','alpha');
@@ -200,8 +193,8 @@ $sql.= " aa.rowid as aarowid";
 $sql.= " FROM " . MAIN_DB_PREFIX . "expensereport as er";
 $sql.= " INNER JOIN " . MAIN_DB_PREFIX . "expensereport_det as erd ON er.rowid = erd.fk_expensereport";
 $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "c_type_fees as f ON f.id = erd.fk_c_type_fees";
-$sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "accounting_account as aa ON f.accountancy_code = aa.account_number AND aa.fk_pcg_version = '" . $chartaccountcode."'";
-$sql.= " WHERE er.fk_statut > 4 AND erd.fk_code_ventilation <= 0";
+$sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "accounting_account as aa ON f.accountancy_code = aa.account_number AND aa.fk_pcg_version = '" . $chartaccountcode."' AND aa.entity = " . $conf->entity;
+$sql.= " WHERE er.fk_statut IN (".ExpenseReport::STATUS_APPROVED.", ".ExpenseReport::STATUS_CLOSED.") AND erd.fk_code_ventilation <= 0";
 // Add search filter like
 if (strlen(trim($search_expensereport))) {
     $sql .= natural_search("er.ref",$search_expensereport);
@@ -234,6 +227,19 @@ else if ($search_year > 0)
 {
 	$sql.= " AND erd.date BETWEEN '".$db->idate(dol_get_first_day($search_year,1,false))."' AND '".$db->idate(dol_get_last_day($search_year,12,false))."'";
 }
+if ($search_month > 0)
+{
+	if ($search_year > 0 && empty($search_day))
+		$sql.= " AND erd.date BETWEEN '".$db->idate(dol_get_first_day($search_year,$search_month,false))."' AND '".$db->idate(dol_get_last_day($search_year,$search_month,false))."'";
+		else if ($search_year > 0 && ! empty($search_day))
+			$sql.= " AND erd.date BETWEEN '".$db->idate(dol_mktime(0, 0, 0, $search_month, $search_day, $search_year))."' AND '".$db->idate(dol_mktime(23, 59, 59, $search_month, $search_day, $search_year))."'";
+			else
+				$sql.= " AND date_format(erd.date, '%m') = '".$db->escape($search_month)."'";
+}
+else if ($search_year > 0)
+{
+	$sql.= " AND erd.date BETWEEN '".$db->idate(dol_get_first_day($search_year,1,false))."' AND '".$db->idate(dol_get_last_day($search_year,12,false))."'";
+}
 $sql .= " AND er.entity IN (" . getEntity('expensereport', 0) . ")";  // We don't share object for accountancy
 
 $sql .= $db->order($sortfield, $sortorder);
@@ -244,6 +250,11 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 {
     $result = $db->query($sql);
     $nbtotalofrecords = $db->num_rows($result);
+    if (($page * $limit) > $nbtotalofrecords)	// if total resultset is smaller then paging size (filtering), goto and load page 0
+    {
+    	$page = 0;
+    	$offset = 0;
+    }
 }
 
 $sql .= $db->plimit($limit + 1, $offset);
@@ -310,8 +321,8 @@ if ($result) {
 	print '<td class="liste_titre"></td>';
 	print '<td class="liste_titre"><input type="text" class="flat maxwidth50" name="search_expensereport" value="' . dol_escape_htmltag($search_expensereport) . '"></td>';
 	print '<td class="liste_titre center">';
-   	if (! empty($conf->global->MAIN_LIST_FILTER_ON_DAY)) print '<input class="flat" type="text" size="1" maxlength="2" name="search_day" value="'.$search_day.'">';
-   	print '<input class="flat" type="text" size="1" maxlength="2" name="search_month" value="'.$search_month.'">';
+   	if (! empty($conf->global->MAIN_LIST_FILTER_ON_DAY)) print '<input class="flat valignmiddle" type="text" size="1" maxlength="2" name="search_day" value="'.$search_day.'">';
+   	print '<input class="flat valignmiddle" type="text" size="1" maxlength="2" name="search_month" value="'.$search_month.'">';
    	$formother->select_year($search_year,'search_year',1, 20, 5);
 	print '</td>';
 	print '<td class="liste_titre"><input type="text" class="flat maxwidth50" name="search_label" value="' . dol_escape_htmltag($search_label) . '"></td>';
@@ -345,7 +356,6 @@ if ($result) {
 	$expensereport_static = new ExpenseReport($db);
 	$form = new Form($db);
 
-	$var = true;
 	while ( $i < min($num_lines, $limit) ) {
 		$objp = $db->fetch_object($result);
 

@@ -117,14 +117,14 @@ abstract class DoliDB implements Database
 			{
 				$this->transaction_opened++;
 				dol_syslog("BEGIN Transaction",LOG_DEBUG);
-				/*mod drsi dol_syslog('',0,1);  fmod drsi*/
+				dol_syslog('',0,1);
 			}
 			return $ret;
 		}
 		else
 		{
 			$this->transaction_opened++;
-			/*mod drsi dol_syslog('',0,1);  fmod drsi*/
+			dol_syslog('',0,1);
 			return 1;
 		}
 	}
@@ -137,7 +137,7 @@ abstract class DoliDB implements Database
 	 */
 	function commit($log='')
 	{
-		/*mod drsi dol_syslog('',0,-1);  fmoddrsi*/
+		dol_syslog('',0,-1);
 		if ($this->transaction_opened<=1)
 		{
 			$ret=$this->query("COMMIT");
@@ -167,7 +167,7 @@ abstract class DoliDB implements Database
 	 */
 	function rollback($log='')
 	{
-		/*mod drsi dol_syslog('',0,-1); fmod drsi*/
+		dol_syslog('',0,-1);
 		if ($this->transaction_opened<=1)
 		{
 			$ret=$this->query("ROLLBACK");
@@ -221,8 +221,8 @@ abstract class DoliDB implements Database
 	/**
 	 * Define sort criteria of request
 	 *
-	 * @param	string		$sortfield		List of sort fields, separated by comma. Example: 't1.fielda, t2.fieldb'
-	 * @param	string		$sortorder		Sort order, separated by comma. Example: 'ASC, DESC';
+	 * @param	string		$sortfield		List of sort fields, separated by comma. Example: 't1.fielda,t2.fieldb'
+	 * @param	string		$sortorder		Sort order, separated by comma. Example: 'ASC,DESC';
 	 * @return	string						String to provide syntax of a sort sql string
 	 */
 	function order($sortfield=null,$sortorder=null)

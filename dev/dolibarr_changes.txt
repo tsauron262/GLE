@@ -90,6 +90,21 @@ var vTmpNode=this.newNode(vTmpCell, 'div', null, '');
 vTmpNode=this.newNode(vTmpNode, 'a', null, '', vLangs[vLang]['moreinfo']);
 vTmpNode.setAttribute('href',vTaskList[i].getLink());
                         
+* Replace '% Comp.' to have a smaller text column header
+'comp':'% Comp.'
+with
+'comp':'%'
+
+
+
+
+* Replace
+vTmpDiv=this.newNode(vTmpCell, 'div', null, null, vTaskList[i].getResource());
+with                       
+var vTmpNode=this.newNode(vTmpCell, 'div', null, '');
+vTmpNode=this.newNode(vTmpNode, 'a', null, '', vLangs[vLang]['moreinfo']);
+vTmpNode.setAttribute('href',vTaskList[i].getLink());
+                        
 
 JCROP:
 ------

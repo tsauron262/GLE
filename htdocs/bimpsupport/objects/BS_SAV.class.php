@@ -2777,7 +2777,7 @@ class BS_SAV extends BimpObject
                         $facture->array_options['options_type'] = "S";
                         $facture->array_options['options_entrepot'] = $this->getData('id_entrepot');
 
-                        if ($facture->createFromOrder($propal->dol_object) <= 0) {
+                        if ($facture->createFromOrder($propal->dol_object, $user) <= 0) {
                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
                         } else {
                             $facture->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);

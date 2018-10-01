@@ -27,10 +27,9 @@
 if (! isset($usedbyinclude) || empty($usedbyinclude))
 {
     if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL',1); // Disables token renewal
-    //if (! defined('NOREQUIRETRAN')) define('NOREQUIRETRAN','1');
-    if (! defined('NOREQUIREMENU')) define('NOREQUIREMENU','1');
-    if (! defined('NOREQUIREHTML')) define('NOREQUIREHTML','1');
-    if (! defined('NOREQUIREAJAX')) define('NOREQUIREAJAX','1');
+    if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU','1');
+    if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');
+    if (! defined('NOREQUIREAJAX'))  define('NOREQUIREAJAX','1');
     if (! defined('NOREDIRECTBYMAINTOLOGIN')) define('NOREDIRECTBYMAINTOLOGIN','1');
 
     $res=@include '../../main.inc.php';
@@ -126,7 +125,7 @@ if (! empty($conf->ficheinter->enabled) && empty($conf->global->MAIN_SEARCHFORM_
 // HR
 if (! empty($conf->user->enabled) && empty($conf->global->MAIN_SEARCHFORM_USER_DISABLED) && $user->rights->user->user->lire)
 {
-	$arrayresult['searchintouser']=array('position'=>200, 'shortcut'=>'U', 'img'=>'object_user', 'label'=>$langs->trans("SearchIntoUsers", $search_boxvalue), 'text'=>img_picto('','object_user').' '.$langs->trans("SearchIntoUsers", $search_boxvalue), 'url'=>DOL_URL_ROOT.'/user/index.php'.($search_boxvalue?'?sall='.urlencode($search_boxvalue):''));
+	$arrayresult['searchintouser']=array('position'=>200, 'shortcut'=>'U', 'img'=>'object_user', 'label'=>$langs->trans("SearchIntoUsers", $search_boxvalue), 'text'=>img_picto('','object_user').' '.$langs->trans("SearchIntoUsers", $search_boxvalue), 'url'=>DOL_URL_ROOT.'/user/list.php'.($search_boxvalue?'?sall='.urlencode($search_boxvalue):''));
 }
 if (! empty($conf->expensereport->enabled) && empty($conf->global->MAIN_SEARCHFORM_EXPENSEREPORT_DISABLED) && $user->rights->expensereport->lire)
 {
@@ -161,29 +160,6 @@ $arrayresult = dol_sort_array($arrayresult, 'position');
 // Print output if called by ajax or do nothing (var $arrayresult will be used) if called by an include
 if (! isset($usedbyinclude) || empty($usedbyinclude))
 {
-    
-/*mod drsi pour le trie*/
-if((strlen($search_boxvalue) > 10 && strlen($search_boxvalue) < 16) && isset($arrayresult["searchintosn"]))
-	$arrayresult=array_merge(array($arrayresult["searchintosn"]), $arrayresult);
-if((strlen($search_boxvalue) > 10) && strlen($search_boxvalue) < 14 && is_numeric($search_boxvalue) && isset($arrayresult["searchintoproduct"]))
-	$arrayresult=array_merge(array($arrayresult["searchintoproduct"]), $arrayresult);
-if(stripos($search_boxvalue, "fa") === 0 OR 
-        stripos($search_boxvalue, "av") === 0 OR
-        stripos($search_boxvalue, "ac") === 0)
-	$arrayresult=array_merge(array($arrayresult["searchintoinvoice"]), $arrayresult);
-if(stripos($search_boxvalue, "pr") === 0)
-	$arrayresult=array_merge(array($arrayresult["searchintopropal"]), $arrayresult);
-if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintochrono"]))
-	$arrayresult=array_merge(array($arrayresult["searchintochrono"]), $arrayresult);
-if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintosav"]))
-	$arrayresult=array_merge(array($arrayresult["searchintosav"]), $arrayresult);
-if(stripos($search_boxvalue, "co") === 0 && isset($arrayresult["searchintoorder"]))
-	$arrayresult=array_merge(array($arrayresult["searchintoorder"]), $arrayresult);
-/*fmod drsi*/
-    
-    
-    
-    
     print json_encode($arrayresult);
     if (is_object($db)) $db->close();
 }

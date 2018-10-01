@@ -708,9 +708,10 @@ function array2table($data,$tableMarkup=1,$tableoptions='',$troptions='',$tdopti
  * @param   string		$mode			'next' for next value or 'last' for last value
  * @param   bool		$bentityon		Activate the entity filter. Default is true (for modules not compatible with multicompany)
  * @param	User		$objuser		Object user we need data from.
+ * @param	int			$forceentity	Entity id to force
  * @return 	string						New value (numeric) or error message
  */
-function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$mode='next', $bentityon=true, $objuser=null)
+function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$mode='next', $bentityon=true, $objuser=null, $forceentity=null)
 {
     global $conf,$user;
 
@@ -987,7 +988,8 @@ function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$m
 	$sql.= " AND ".$field." NOT LIKE '(PROV%)'";
     if ($bentityon) // only if entity enable
     	$sql.= " AND entity IN (".getEntity($sharetable).")";
-
+    else if (! empty($forceentity))
+    	$sql.= " AND entity = ".(int) $forceentity;
     if ($where) $sql.=$where;
     if ($sqlwhere) $sql.=' AND '.$sqlwhere;
 
@@ -1000,32 +1002,6 @@ function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$m
         $counter = $obj->val;
     }
     else dol_print_error($db);
-    
-    
-    /* mod drsi */
-    if ($mode == 'next' && $table == "societe") {
-        $tabResa = getElementElement("resa", $table . $maskLike);
-        for ($i = 1; $i < 100; $i++) {
-            $numTemp = $counter + 1;
-            $change = false;
-            foreach ($tabResa as $resa) {
-                if ($resa['s'] == $numTemp) {
-                    if ($resa['d'] == 1)
-                        setElementElement("resa", $table . $maskLike, $numTemp, "2");
-                    else {
-                        $counter++;
-                        $change = true;
-                    }
-                }
-            }
-            if (!$change) {
-                addElementElement("resa", $table . $maskLike, $numTemp, "1");
-                break;
-            }
-        }
-    }
-    /* fmod drsi */
-    
 
     // Check if we must force counter to maskoffset
     if (empty($counter)) $counter=$maskoffset;
@@ -1061,6 +1037,8 @@ function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$m
     	$sql.= " AND ".$field." NOT LIKE '%PROV%'";
     	if ($bentityon) // only if entity enable
         	$sql.= " AND entity IN (".getEntity($sharetable).")";
+        else if (! empty($forceentity))
+        	$sql.= " AND entity = ".(int) $forceentity;
         if ($where) $sql.=$where;
         if ($sqlwhere) $sql.=' AND '.$sqlwhere;
 
@@ -1115,6 +1093,8 @@ function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$m
             $maskrefclient_sql.= " WHERE ".$field." LIKE '".$maskrefclient_maskLike."'";
             if ($bentityon) // only if entity enable
             	$maskrefclient_sql.= " AND entity IN (".getEntity($sharetable).")";
+            else if (! empty($forceentity))
+            	$sql.= " AND entity = ".(int) $forceentity;
             if ($where) $maskrefclient_sql.=$where; //use the same optional where as general mask
             if ($sqlwhere) $maskrefclient_sql.=' AND '.$sqlwhere; //use the same sqlwhere as general mask
             $maskrefclient_sql.=' AND (SUBSTRING('.$field.', '.(strpos($maskwithnocode,$maskrefclient)+1).', '.dol_strlen($maskrefclient_maskclientcode).")='".$maskrefclient_clientcode."')";
@@ -1790,7 +1770,7 @@ function getSoapParams()
  */
 function dolGetElementUrl($objectid,$objecttype,$withpicto=0,$option='')
 {
-	global $db,$conf;
+	global $db, $conf, $langs;
 
 	$ret='';
 
@@ -1856,6 +1836,11 @@ function dolGetElementUrl($objectid,$objecttype,$withpicto=0,$option='')
 		$module='projet';
 		$subelement='task';
 	}
+	if ($objecttype == 'stock') {
+		$classpath = 'product/stock/class';
+		$module='stock';
+		$subelement='stock';
+	}
 
 	//print "objecttype=".$objecttype." module=".$module." subelement=".$subelement;
 
@@ -1866,22 +1851,30 @@ function dolGetElementUrl($objectid,$objecttype,$withpicto=0,$option='')
 		$classpath = 'fourn/class';
 		$module='fournisseur';
 	}
-	if ($objecttype == 'order_supplier')   {
+	elseif ($objecttype == 'order_supplier')   {
 		$classfile = 'fournisseur.commande';
 		$classname='CommandeFournisseur';
 		$classpath = 'fourn/class';
 		$module='fournisseur';
 	}
-
+	elseif ($objecttype == 'stock')   {
+		$classpath = 'product/stock/class';
+		$classfile='entrepot';
+		$classname='Entrepot';
+	}
 	if (! empty($conf->$module->enabled))
 	{
 		$res=dol_include_once('/'.$classpath.'/'.$classfile.'.class.php');
 		if ($res)
 		{
-			$object = new $classname($db);
-			$res=$object->fetch($objectid);
-			if ($res > 0) $ret=$object->getNomUrl($withpicto,$option);
-			unset($object);
+			if (class_exists($classname))
+			{
+				$object = new $classname($db);
+				$res=$object->fetch($objectid);
+				if ($res > 0) $ret=$object->getNomUrl($withpicto,$option);
+				unset($object);
+			}
+			else dol_syslog("Class with classname ".$classname." is unknown even after the include", LOG_ERR);
 		}
 	}
 	return $ret;
@@ -2293,6 +2286,9 @@ function getModuleDirForApiClass($module)
     }
     elseif ($module == 'ficheinter' || $module == 'interventions') {
     	$moduledirforclass = 'fichinter';
+    }
+    elseif ($module == 'tickets') {
+    	$moduledirforclass = 'ticket';
     }
 
     return $moduledirforclass;

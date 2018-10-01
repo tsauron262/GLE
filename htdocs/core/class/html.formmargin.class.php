@@ -85,7 +85,7 @@ class FormMargin
                         /*mod drsi*/ if($line->pa_ht <0 ) $line->pa_ht = -$line->pa_ht; /*fmod drsi*/
 			$pa_ht = ($pv < 0 ? - $line->pa_ht : $line->pa_ht);      // We choosed to have line->pa_ht always positive in database, so we guess the correct sign
 			$pa = $line->qty * $pa_ht;
-			
+
 			// calcul des marges
 			if (isset($line->fk_remise_except) && isset($conf->global->MARGIN_METHODE_FOR_DISCOUNT)) {    // remise
 				if ($conf->global->MARGIN_METHODE_FOR_DISCOUNT == '1') { // remise globale considérée comme produit
@@ -192,7 +192,10 @@ class FormMargin
       	        });</script>';
     	    if (!empty($hidemargininfos)) print '<script>$(document).ready(function() {$(".margininfos").hide();});</script>';
 		}
+
+		print '<div class="div-table-responsive-no-min">';
 		print '<!-- Margin table -->'."\n";
+
 		print '<table class="noborder margintable centpercent">';
 		print '<tr class="liste_titre">';
 		print '<td class="liste_titre">'.$langs->trans('Margins').'</td>';
@@ -248,5 +251,6 @@ class FormMargin
 			print '</tr>';
 		}
 		print '</table>';
+		print '</div>';
 	}
 }

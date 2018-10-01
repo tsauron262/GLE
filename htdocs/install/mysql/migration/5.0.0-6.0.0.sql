@@ -242,7 +242,7 @@ UPDATE llx_bank_account SET accountancy_journal = 'OD' WHERE accountancy_journal
 ALTER TABLE llx_bank_account ADD COLUMN fk_accountancy_journal integer;
 ALTER TABLE llx_bank_account ADD INDEX idx_fk_accountancy_journal (fk_accountancy_journal);
 
-UPDATE llx_bank_account AS ba SET fk_accountancy_journal = (SELECT rowid FROM llx_accounting_journal AS aj WHERE ba.accountancy_journal = aj.code) WHERE accountancy_journal NOT IN ('1', '2', '3', '4', '5', '6', '5', '8', '9', '10', '11', '12', '13', '14', '15');
+UPDATE llx_bank_account AS ba SET fk_accountancy_journal = (SELECT rowid FROM llx_accounting_journal AS aj WHERE ba.accountancy_journal = aj.code AND aj.entity = ba.entity) WHERE accountancy_journal NOT IN ('1', '2', '3', '4', '5', '6', '5', '8', '9', '10', '11', '12', '13', '14', '15');
 ALTER TABLE llx_bank_account ADD CONSTRAINT fk_bank_account_accountancy_journal FOREIGN KEY (fk_accountancy_journal) REFERENCES llx_accounting_journal (rowid);
 
 --Update general ledger for FEC format & harmonization
@@ -381,6 +381,8 @@ ALTER TABLE llx_product_fournisseur_price_log ADD COLUMN multicurrency_code		 va
 ALTER TABLE llx_product_fournisseur_price_log ADD COLUMN multicurrency_tx	     double(24,8) DEFAULT 1;
 ALTER TABLE llx_product_fournisseur_price_log ADD COLUMN multicurrency_price	 double(24,8) DEFAULT NULL;
 ALTER TABLE llx_product_fournisseur_price_log ADD COLUMN multicurrency_price_ttc double(24,8) DEFAULT NULL;
+
+ALTER TABLE llx_product_customer_price_log ADD COLUMN default_vat_code varchar(10);
 
 UPDATE llx_contrat SET ref = rowid WHERE ref IS NULL OR ref = '';
 ALTER TABLE llx_contratdet ADD COLUMN vat_src_code varchar(10) DEFAULT '';
@@ -604,6 +606,27 @@ ALTER TABLE llx_mailing_cibles MODIFY COLUMN source_url varchar(255);
 
 -- VPGSQL8.2 CREATE TRIGGER update_customer_modtime BEFORE UPDATE ON llx_website FOR EACH ROW EXECUTE PROCEDURE update_modified_column_tms();
 -- VPGSQL8.2 CREATE TRIGGER update_customer_modtime BEFORE UPDATE ON llx_website_page FOR EACH ROW EXECUTE PROCEDURE update_modified_column_tms();
+
+
+CREATE TABLE llx_facture_rec_extrafields
+(
+  rowid                     integer AUTO_INCREMENT PRIMARY KEY,
+  tms                       timestamp,
+  fk_object                 integer NOT NULL,
+  import_key                varchar(14)
+) ENGINE=innodb;
+
+ALTER TABLE llx_facture_rec_extrafields ADD INDEX idx_facture_rec_extrafields (fk_object);
+
+CREATE TABLE llx_facturedet_rec_extrafields
+(
+  rowid            integer AUTO_INCREMENT PRIMARY KEY,
+  tms              timestamp,
+  fk_object        integer NOT NULL,
+  import_key       varchar(14)
+)ENGINE=innodb;
+
+ALTER TABLE llx_facturedet_rec_extrafields ADD INDEX idx_facturedet_rec_extrafields (fk_object);
 
 insert into llx_c_tva(rowid,fk_pays,code,taux,localtax1,localtax1_type,localtax2,localtax2_type,recuperableonly,note,active) values (1178, 117, 'C+S-5',   0, 2.5, '1', 2.5, '1', 0, 'CGST+SGST - Same state sales', 1);
 insert into llx_c_tva(rowid,fk_pays,code,taux,localtax1,localtax1_type,localtax2,localtax2_type,recuperableonly,note,active) values (1179, 117, 'I-5'     ,   5,   0, '0',   0, '0', 0, 'IGST',      1);

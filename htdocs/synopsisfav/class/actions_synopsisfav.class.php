@@ -62,7 +62,7 @@ class favoriCli {
 //        if ($conf->global->MAIN_MODULE_synopsisfav && $user->rights->MiniHisto->all->Afficher) {
         $return = '<div class="blockvmenufirst blockvmenupair' . ($context == 1 ? ' vmenu' : '') . '">';
         $return .= '<div class="menu_titre">';
-        $return .= '<a href="#" class="vmenu">' . $langs->trans("HISTOFAV") . "<br/>" . $soc->getNomUrl(0) . '</a>';
+        $return .= '<a href="#" class="vmenu">' . $langs->trans("HISTOFAV") . "</a><br/>" . $soc->name . '';
         $return .= "</div>";
         $requete = "SELECT *
                       FROM " . MAIN_DB_PREFIX . "Synopsis_Fav_User

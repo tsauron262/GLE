@@ -20,6 +20,13 @@ class clientPropalsController extends BimpController
 
     public function renderHtml()
     {
+        
+//        $obj = BimpObject::getInstance('bimpsupport', 'BS_SAV',864);
+//        
+//        echo "<pre>";print_r($obj->getExport());die;
+        
+        
+        
         if (!BimpTools::isSubmit('id')) {
             return BimpRender::renderAlerts('ID du client absent');
         }

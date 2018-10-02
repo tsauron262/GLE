@@ -50,7 +50,9 @@ class modSalaries extends DolibarrModules
 		$this->db = $db;
 		$this->numero = 510; // Perms from 501..519
 
-		$this->family = "hr";
+		// Family can be 'base' (core modules),'crm','financial','hr','projects','products','ecm','technic' (transverse modules),'interface' (link with external tools),'other','...'
+		// It is used to group modules by family in module setup page
+		$this->family = "financial";
 		// Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		// Module description used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
@@ -60,14 +62,14 @@ class modSalaries extends DolibarrModules
 		$this->version = 'dolibarr';
 
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
-		$this->special = 0;
 		$this->picto='bill';
 
 		// Data directories to create when module is enabled
 		$this->dirs = array("/salaries/temp");
 
 		// Config pages
-		$this->config_page_url = array('salaries.php');
+		//$this->config_page_url = array('salaries.php');
+		$this->config_page_url = array();
 
 		// Dependencies
 		$this->depends = array();
@@ -97,40 +99,24 @@ class modSalaries extends DolibarrModules
 		$r=0;
 
 		$r++;
-		$this->rights[$r][0] = 501;
-		$this->rights[$r][1] = 'Read employee contracts/salaries';
+		$this->rights[$r][0] = 511;
+		$this->rights[$r][1] = 'Read payments of employee salaries';
 		$this->rights[$r][2] = 'r';
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'read';
 		$this->rights[$r][5] = '';
 
 		$r++;
-		$this->rights[$r][0] = 502;
-		$this->rights[$r][1] = 'Create/modify employee contracts/salaries';
+		$this->rights[$r][0] = 512;
+		$this->rights[$r][1] = 'Create/modify payments of empoyee salaries';
 		$this->rights[$r][2] = 'w';
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'write';
 		$this->rights[$r][5] = '';
 
 		$r++;
-		$this->rights[$r][0] = 511;
-		$this->rights[$r][1] = 'Read payment of salaries';
-		$this->rights[$r][2] = 'w';
-		$this->rights[$r][3] = 0;
-		$this->rights[$r][4] = 'payment';
-		$this->rights[$r][5] = 'read';
-
-		$r++;
-		$this->rights[$r][0] = 512;
-		$this->rights[$r][1] = 'Create/modify payment of salaries';
-		$this->rights[$r][2] = 'w';
-		$this->rights[$r][3] = 0;
-		$this->rights[$r][4] = 'payment';
-		$this->rights[$r][5] = 'write';
-
-		$r++;
 		$this->rights[$r][0] = 514;
-		$this->rights[$r][1] = 'Delete contracts/salaries';
+		$this->rights[$r][1] = 'Delete payments of employee salary';
 		$this->rights[$r][2] = 'd';
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'delete';
@@ -138,7 +124,7 @@ class modSalaries extends DolibarrModules
 
 		$r++;
 		$this->rights[$r][0] = 517;
-		$this->rights[$r][1] = 'Export employee contracts and salaries payments';
+		$this->rights[$r][1] = 'Export payments of employee salaries';
 		$this->rights[$r][2] = 'r';
 		$this->rights[$r][3] = 0;
 		$this->rights[$r][4] = 'export';

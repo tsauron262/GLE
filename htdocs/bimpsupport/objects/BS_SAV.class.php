@@ -1112,7 +1112,7 @@ class BS_SAV extends BimpObject
                 $prop->array_options['options_type'] = "S";
                 $prop->array_options['options_entrepot'] = (int) $this->getData("id_entrepot");
                 $prop->array_options['options_libelle'] = $this->getRef();
-                $prop->update_extrafields($user);
+                $prop->insertExtraFields();
                 if ($id_contact) {
                     $prop->add_contact($id_contact, 40);
                     $prop->add_contact($id_contact, 41);
@@ -2777,7 +2777,7 @@ class BS_SAV extends BimpObject
                         $facture->array_options['options_type'] = "S";
                         $facture->array_options['options_entrepot'] = $this->getData('id_entrepot');
 
-                        if ($facture->createFromOrder($propal->dol_object) <= 0) {
+                        if ($facture->createFromOrder($propal->dol_object, $user) <= 0) {
                             $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
                         } else {
                             $facture->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);

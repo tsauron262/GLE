@@ -54,6 +54,120 @@ class BimpObject extends BimpCache
     public $dol_object = null;
     public $children = array();
     public $extends = array();
+    
+    
+    public function getExport($niveau = 10, $pref = "", $format = "xml", $sep = ";", $sautLn = "\n"){
+        if(!$this->isLoaded())
+            return "Objet non loadé";
+        
+        
+        $tabResult = array();
+        foreach($this->config->params['fields'] as $nom => $info){
+            $value = $this->getData($nom);
+            
+            if($info['type'] == "int"){
+                $value = intval($value);
+                if(is_array($info['values']['array']) && isset($info['values']['array'][$value]))
+                      $value = $info['values']['array'][$value];
+            }
+            elseif($info['type'] == "id_object"){
+                continue;//Car on les retrouve enssuite de nouveau dans $this->params['objects']
+                $obj = $this->getChildObject($info['object']);
+                $value = $this->recursiveGetExport($niveau, $pref, $obj);
+            }
+            elseif($info['type'] == "bool")
+                $value = ($value? "OUI" : "NON");
+            
+            
+            $tabResult[$nom] = $value;
+        }
+        
+        foreach($this->params['objects'] as $nom => $infoObj){
+            $value = "";
+            if($infoObj['relation'] == "hasMany"){
+                $html.= "<".$nom.">";
+                    $lines = $this->getChildrenObjects($nom);
+                    $i = 0;
+                    $value = array();
+                    foreach($lines as $obj){
+                        $i++;
+                        $value[$nom."-".$i] = $this->recursiveGetExport($niveau, $pref."-".$i, $obj);
+                    }
+            }
+            elseif($infoObj['relation'] == "hasOne"){
+                    $obj = $this->getChildObject($nom);
+                    $value = $this->recursiveGetExport($niveau, $pref."-".$i, $obj);
+            }
+            elseif($infoObj['relation'] == "none"){
+//                    $lines = $this->get($nom);
+//                    $i = 0;
+//                    $value = array();
+//                    foreach($lines as $obj){
+//                        die;
+//                        $i++;
+//                        $value[$nom."-".$i] = $this->recursiveGetExport($niveau, $pref."-".$i, $obj);
+//                    }
+                
+                if($nom == "files"){
+                    $value = $this->getObjectFilesArray($this);
+                }
+//                 elseif($nom == "contact"){
+////                    $value = $this->($name);
+//                }
+                 else{  
+                    $obj = $this->getChildObject($nom);
+                    $value = $this->recursiveGetExport($niveau, $pref, $obj);
+                 }
+                
+                
+            }
+            else{
+                print_r($infoObj);
+            }
+                    $tabResult[$nom] = $value;
+        }
+        
+        return $tabResult;
+    }
+    
+    function recursiveGetExport($niveau, $pref, $obj){
+        $value = "";
+        if($niveau > 0){
+             if(is_a($obj, "BimpObject")){
+                if(method_exists($obj, "isLoaded"))
+                    if($obj->isLoaded())
+                        $value = $obj->getExport($niveau-1, $pref."-");
+                    else
+                        echo "ERR Objet non loadé";
+                else
+                    echo "ERR Objet bizarre";
+             }
+             elseif(is_a($obj, "CommonObject")){
+                 $id = 0;
+                 if(property_exists($obj, 'id'))
+                     $id = $obj->id;
+                 else
+                     $value = "ERR pas de champ ID".$nom;
+                 if($id > 0){
+                    $value = array();
+                    if(method_exists($obj, "getNomUrl"))
+                        if(isset($obj->id) && $obj->id > 0)
+                            $value['lien'] = $obj->getNomUrl(1);
+                    if(method_exists($obj, "fetch_optionals") && count($obj->array_options) < 1)
+                            $obj->fetch_optionals();
+                    foreach($obj as $clef => $val){
+                        if(!in_array($clef, array("db", "error", "errors", "context", "oldcopy")))
+                            $value[$clef] = $val;
+                    }
+                 }
+             }
+             else{
+                 echo "ERR Type objet inconnue ".get_class($obj);
+                 $value = "ERR Type objet inconnue ".get_class($obj);
+             }
+        }
+        return $value;
+    }
 
     public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {

@@ -59,7 +59,7 @@ abstract class DoliDB implements Database
 	public $lastqueryerror;
 	/** @var string Last error message */
 	public $lasterror;
-	/** @var int Last error number */
+	/** @var string Last error number. For example: 'DB_ERROR_RECORD_ALREADY_EXISTS', '12345', ... */
 	public $lasterrno;
 
 	/** @var bool Status */
@@ -84,12 +84,13 @@ abstract class DoliDB implements Database
 	 *   Convert (by PHP) a GM Timestamp date into a string date with PHP server TZ to insert into a date field.
 	 *   Function to use to build INSERT, UPDATE or WHERE predica
 	 *
-	 *   @param	    int		$param      Date TMS to convert
-	 *   @return	string      		Date in a string YYYYMMDDHHMMSS
+	 *   @param	    int		$param      	Date TMS to convert
+	 *   @return	string      			Date in a string YYYY-MM-DD HH:MM:SS
 	 */
 	function idate($param)
 	{
-		return dol_print_date($param,"%Y%m%d%H%M%S");
+		// TODO GMT $param should be gmt, so we should add tzouptut to 'gmt'
+		return dol_print_date($param,"%Y-%m-%d %H:%M:%S");
 	}
 
 	/**
@@ -116,14 +117,14 @@ abstract class DoliDB implements Database
 			{
 				$this->transaction_opened++;
 				dol_syslog("BEGIN Transaction",LOG_DEBUG);
-				/*mod drsi dol_syslog('',0,1);  fmod drsi*/
+				dol_syslog('',0,1);
 			}
 			return $ret;
 		}
 		else
 		{
 			$this->transaction_opened++;
-			/*mod drsi dol_syslog('',0,1);  fmod drsi*/
+			dol_syslog('',0,1);
 			return 1;
 		}
 	}
@@ -136,7 +137,7 @@ abstract class DoliDB implements Database
 	 */
 	function commit($log='')
 	{
-		/*mod drsi dol_syslog('',0,-1);  fmoddrsi*/
+		dol_syslog('',0,-1);
 		if ($this->transaction_opened<=1)
 		{
 			$ret=$this->query("COMMIT");
@@ -166,7 +167,7 @@ abstract class DoliDB implements Database
 	 */
 	function rollback($log='')
 	{
-		/*mod drsi dol_syslog('',0,-1); fmod drsi*/
+		dol_syslog('',0,-1);
 		if ($this->transaction_opened<=1)
 		{
 			$ret=$this->query("ROLLBACK");
@@ -220,9 +221,9 @@ abstract class DoliDB implements Database
 	/**
 	 * Define sort criteria of request
 	 *
-	 * @param	string	        $sortfield  List of sort fields, separated by comma. Example: 't1.fielda, t2.fieldb'
-	 * @param	'ASC'|'DESC'	$sortorder  Sort order
-	 * @return	string      		        String to provide syntax of a sort sql string
+	 * @param	string		$sortfield		List of sort fields, separated by comma. Example: 't1.fielda,t2.fieldb'
+	 * @param	string		$sortorder		Sort order, separated by comma. Example: 'ASC,DESC';
+	 * @return	string						String to provide syntax of a sort sql string
 	 */
 	function order($sortfield=null,$sortorder=null)
 	{
@@ -238,16 +239,16 @@ abstract class DoliDB implements Database
 				else $return.=', ';
 
 				$return.=preg_replace('/[^0-9a-z_\.]/i','',$val);
-				
+
 				$tmpsortorder = trim($orders[$i]);
-				
+
 				// Only ASC and DESC values are valid SQL
 				if (strtoupper($tmpsortorder) === 'ASC') {
 					$return .= ' ASC';
 				} elseif (strtoupper($tmpsortorder) === 'DESC') {
 					$return .= ' DESC';
 				}
-				
+
 				$i++;
 			}
 			return $return;
@@ -279,6 +280,7 @@ abstract class DoliDB implements Database
 	 */
 	function jdate($string, $gm=false)
 	{
+		// TODO GMT must set param gm to true by default
 		if ($string==0 || $string=="0000-00-00 00:00:00") return '';
 		$string=preg_replace('/([^0-9])/i','',$string);
 		$tmp=$string.'000000';

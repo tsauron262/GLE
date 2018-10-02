@@ -61,18 +61,23 @@ class PDOBasicAuth extends \Sabre\DAV\Auth\Backend\AbstractBasic {
      */
     public function validateUserPass($username, $password) {
 
-        $stmt = $this->pdo->prepare('SELECT username, digesta1 FROM '.$this->tableName.' WHERE username = ?');
-        $stmt->execute(array($username));
-        $result = $stmt->fetchAll();
-
-
-        if (!count($result)) return false;
-
-        if(BAIKAL_DAV_AUTH_TYPE == 'Digest')
-        $hash = md5( $username . ':' . $this->authRealm . ':' . $password );
-        else
-            $hash = $password;
-        if( $result[0]['digesta1'] == $hash )
+//        $stmt = $this->pdo->prepare('SELECT username, digesta1 FROM '.$this->tableName.' WHERE username = ?');
+//        $stmt->execute(array($username));
+//        $result = $stmt->fetchAll();
+//
+//
+//        if (!count($result)) return false;
+//
+//        if(BAIKAL_DAV_AUTH_TYPE == 'Digest')
+//        $hash = md5( $username . ':' . $this->authRealm . ':' . $password );
+//        else
+//            $hash = $password;
+        
+        
+        
+        require_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php'; 
+        
+        if(checkLoginPassEntity($username, $password, 1, array("dolibarr")))
         {
             $this->currentUser = $username;
             return true;

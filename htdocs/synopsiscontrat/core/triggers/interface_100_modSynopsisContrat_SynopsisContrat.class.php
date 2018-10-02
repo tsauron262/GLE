@@ -99,7 +99,7 @@ class InterfaceSynopsisContrat {
      *      @param  conf		$conf       Object conf
      *      @return int         			<0 if KO, 0 if no triggered ran, >0 if OK
      */
-    function run_trigger($action, $object, $user, $langs, $conf) {
+    function runTrigger($action, $object, $user, $langs, $conf) {
         global $db, $infoEvent;
         if ($action == "CONTRACT_MODIFY") {
             $object->fetch($object->id);

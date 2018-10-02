@@ -78,14 +78,6 @@ $conffiletoshow = "htdocs/conf/conf.php";
 //$conffiletoshow = "/etc/dolibarr/conf.php";
 
 
-/*mod drsi*/
-$conffileT = str_replace(".php", "-".$_SERVER['HTTP_HOST'].".php", $conffile);
-$conffileT = str_replace(basename(__FILE__), $conffileT, __FILE__);
-if(is_file($conffileT))
-    $conffile = $conffileT;
-/*fmod drsi*/ 
-
-
 // Load conf file if it is already defined
 if (! defined('DONOTLOADCONF') && file_exists($conffile) && filesize($conffile) > 8) // Test on filesize is to ensure that conf file is more that an empty template with just <?php in first line
 {
@@ -177,15 +169,20 @@ if (! empty($dolibarr_main_document_root_alt))
 }
 
 
-// Security check
-if (preg_match('/install.lock/i',$_SERVER["SCRIPT_FILENAME"]))
+// Security check (old method, when directory is renamed /install.lock)
+if (preg_match('/install\.lock/i',$_SERVER["SCRIPT_FILENAME"]))
 {
-    print 'Install pages have been disabled for security reason (directory renamed with .lock suffix).';
+	if (! is_object($langs))
+	{
+		$langs = new Translate('..', $conf);
+		$langs->setDefaultLang('auto');
+	}
+	$langs->load("install");
+	print $langs->trans("YouTryInstallDisabledByDirLock");
     if (! empty($dolibarr_main_url_root))
     {
-        print 'Click on following link. ';
-        print '<a href="'.$dolibarr_main_url_root .'/admin/index.php?mainmenu=home&leftmenu=setup'.(isset($_POST["login"])?'&username='.urlencode($_POST["login"]):'').'">';
-        print 'Click here to go to Dolibarr';
+        print 'Click on following link, <a href="'.$dolibarr_main_url_root .'/admin/index.php?mainmenu=home&leftmenu=setup'.(isset($_POST["login"])?'&username='.urlencode($_POST["login"]):'').'">';
+        print $langs->trans("ClickHereToGoToApp");
         print '</a>';
     }
     exit;
@@ -199,13 +196,18 @@ if (constant('DOL_DATA_ROOT') === null) {
 }
 if (@file_exists($lockfile))
 {
-    print 'Install pages have been disabled for security reason (by lock file install.lock into dolibarr documents directory).<br>';
+	if (! is_object($langs))
+	{
+		$langs = new Translate('..', $conf);
+		$langs->setDefaultLang('auto');
+	}
+	$langs->load("install");
+	print $langs->trans("YouTryInstallDisabledByFileLock");
     if (! empty($dolibarr_main_url_root))
     {
-        print 'Click on following link. ';
-        print 'If you always reach this page, you must remove install.lock file manually.<br>';
+        print $langs->trans("ClickOnLinkOrRemoveManualy").'<br>';
         print '<a href="'.$dolibarr_main_url_root .'/admin/index.php?mainmenu=home&leftmenu=setup'.(isset($_POST["login"])?'&username='.urlencode($_POST["login"]):'').'">';
-        print 'Click here to go to Dolibarr';
+        print $langs->trans("ClickHereToGoToApp");
         print '</a>';
     }
     else
@@ -228,8 +230,8 @@ if (! defined('SYSLOG_FILE'))	// To avoid warning on systems with constant alrea
 	else if (@is_writable('../../../../') && @file_exists('../../../../startdoliwamp.bat')) define('SYSLOG_FILE','../../../../dolibarr_install.log');	// For DoliWamp
 	else if (@is_writable('../../')) define('SYSLOG_FILE','../../dolibarr_install.log');				// For others
 	//print 'SYSLOG_FILE='.SYSLOG_FILE;exit;
-	if (defined('SYSLOG_FILE')) $conf->global->SYSLOG_FILE=constant('SYSLOG_FILE');
 }
+if (defined('SYSLOG_FILE')) $conf->global->SYSLOG_FILE=constant('SYSLOG_FILE');
 if (! defined('SYSLOG_FILE_NO_ERROR')) define('SYSLOG_FILE_NO_ERROR',1);
 // We init log handler for install
 $handlers = array('mod_syslog_file');
@@ -334,8 +336,8 @@ function conf($dolibarr_main_document_root)
         else if (@is_writable('../../../../') && @file_exists('../../../../startdoliwamp.bat')) define('SYSLOG_FILE','../../../../dolibarr_install.log');	// For DoliWamp
         else if (@is_writable('../../')) define('SYSLOG_FILE','../../dolibarr_install.log');				// For others
         //print 'SYSLOG_FILE='.SYSLOG_FILE;exit;
-        if (defined('SYSLOG_FILE')) $conf->global->SYSLOG_FILE=constant('SYSLOG_FILE');
     }
+    if (defined('SYSLOG_FILE')) $conf->global->SYSLOG_FILE=constant('SYSLOG_FILE');
     if (! defined('SYSLOG_FILE_NO_ERROR')) define('SYSLOG_FILE_NO_ERROR',1);
     // We init log handler for install
     $handlers = array('mod_syslog_file');
@@ -378,8 +380,9 @@ function pHeader($subtitle,$next,$action='set',$param='',$forcejqueryurl='',$css
     global $langs;
     $langs->load("main");
     $langs->load("admin");
+	$langs->load("install");
 
-    $jquerytheme='smoothness';
+    $jquerytheme='base';
 
     if ($forcejqueryurl)
     {
@@ -399,8 +402,9 @@ function pHeader($subtitle,$next,$action='set',$param='',$forcejqueryurl='',$css
     print '<!DOCTYPE HTML>'."\n";
     print '<html>'."\n";
     print '<head>'."\n";
-    print '<meta charset='.$conf->file->character_set_client.'">'."\n";
+    print '<meta charset="'.$conf->file->character_set_client.'">'."\n";
     print '<meta name="viewport" content="width=device-width, initial-scale=1.0">'."\n";
+    print '<meta name="generator" content="Dolibarr installer">'."\n";
     print '<link rel="stylesheet" type="text/css" href="default.css">'."\n";
 
     print '<!-- Includes CSS for JQuery -->'."\n";

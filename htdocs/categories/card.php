@@ -31,7 +31,7 @@ require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 
-ini_set('display_errors', 1);
+// Load translation files required by the page
 $langs->load("categories");
 
 // Security check
@@ -269,7 +269,7 @@ if ($user->rights->categorie->creer)
 		$parameters=array();
 		$reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
         print $hookmanager->resPrint;
-		if (empty($reshook) && ! empty($extrafields->attribute_label))
+		if (empty($reshook))
 		{
 			print $object->showOptionals($extrafields,'edit');
 		}

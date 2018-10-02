@@ -304,14 +304,14 @@ class doc_generic_user_odt extends ModelePDFUser
 					// On peut utiliser le nom de la societe du contact
 					if (! empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) $socobject = $object->contact;
 					else {
-                        			$socobject = $object->client;
+                        			$socobject = $object->thirdparty;
                         			// if we have a CUSTOMER contact and we dont use it as recipient we store the contact object for later use
                         			$contactobject = $object->contact;
                     			}
 				}
 				else
 				{
-					$socobject=$object->client;
+					$socobject=$object->thirdparty;
 				}
 
 				// Open and load template
@@ -408,6 +408,8 @@ class doc_generic_user_odt extends ModelePDFUser
 
 				$odfHandler=null;	// Destroy object
 
+				$this->result = array('fullpath'=>$file);
+				
 				return 1;   // Success
 			}
 			else

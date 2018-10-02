@@ -29,7 +29,7 @@ fields:
         required: 1
         
     rate:
-        label: taux
+        label: Taux
         type: percent
         
     coef:

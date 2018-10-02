@@ -103,7 +103,7 @@ class BC_ListTable extends BC_List
         if (!count($this->errors)) {
             $this->fetchCols();
             $this->colspan = 2 + count($this->cols);
-            
+
             if ($this->params['positions_open']) {
                 $this->colspan++;
             }
@@ -112,30 +112,19 @@ class BC_ListTable extends BC_List
 
     protected function fetchCols()
     {
-        $prev_path = $this->object->config->current_path;
-        $this->setConfPath();
+        $cols = array();
 
-        //        $listConfig = BimpObject::getInstance('BimpCore', 'ListConfig');
-//
-//        global $user;
-//
-//        if (!is_null($listConfig) && isset($user->id) && $user->id) {
-//            if ($listConfig->find(array(
-//                        'module_name' => $object->module,
-//                        'object_name' => $object->object_name,
-//                        'list_name'   => $list_name,
-//                        'id_user'     => $user->id
-//                    ))) {
-//                $this->user_config = null; // Todo
-//            }
-//        }
-
-        $this->cols = array();
+        if ($this->params['configurable']) {
+            if ($this->object->config->isDefined('lists_cols')) {
+                foreach ($this->object->config->params['lists_cols'] as $col_name => $col_params) {
+                    $cols[] = $col_name;
+                }
+            }
+        }
 
         foreach ($this->params['cols'] as $col_name) {
-            $show = (int) $this->object->getCurrentConf('cols/' . $col_name . '/show', 1, false, 'bool');
-            if ($show) {
-                $this->cols[] = $col_name;
+            if (!in_array($col_name, $cols)) {
+                $cols[] = $col_name;
             }
         }
 
@@ -144,12 +133,38 @@ class BC_ListTable extends BC_List
                 if (isset($col_params['show']) && !(bool) $col_params['show']) {
                     continue;
                 }
-                $this->cols[] = $col_name;
+                if (!in_array($col_name, $cols)) {
+                    $cols[] = $col_name;
+                    $this->params['cols'][] = $col_name;
+                }
             }
             $this->object->config->addParams($this->config_path . '/cols', $this->params['extra_cols']);
         }
 
-        $this->object->config->setCurrentPath($prev_path);
+        $list_cols = array();
+
+        if ($this->params['configurable']) {
+            global $user;
+            $list_cols = $this->object->getListConfigCols(2, $user->id, $this->name);
+        }
+
+        if (!is_array($list_cols) || !count($list_cols)) {
+            $list_cols = $this->params['cols'];
+        }
+
+        $this->cols = array();
+
+        foreach ($list_cols as $col_name) {
+            if (!in_array($col_name, $cols)) {
+                continue;
+            }
+            $show = (int) $this->object->getConf('lists_cols/' . $col_name . '/show', 1, false, 'bool');
+            $show = (int) $this->object->getConf($this->config_path . '/cols/' . $col_name . '/show', $show, false, 'bool');
+
+            if ($show) {
+                $this->cols[] = $col_name;
+            }
+        }
     }
 
     protected function fetchRows()
@@ -211,7 +226,13 @@ class BC_ListTable extends BC_List
                     if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
                         continue;
                     }
-                    $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params);
+
+                    $col_params = array();
+                    if ($this->object->config->isDefined('lists_cols/' . $col_name)) {
+                        $col_params = $this->fetchParams('lists_cols/' . $col_name, $this->col_params);
+                    }
+
+                    $col_params = $this->config->mergeParams($col_params, $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params));
 
                     $row['cols'][$col_name] = array(
                         'content'   => '',
@@ -222,7 +243,7 @@ class BC_ListTable extends BC_List
                         'col_style' => $col_params['col_style'],
                     );
 
-                    if (!$row['cols'][$col_name]['show']) {
+                    if (!(int) $row['cols'][$col_name]['show']) {
                         continue;
                     }
 

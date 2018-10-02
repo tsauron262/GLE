@@ -285,6 +285,19 @@ class BimpInput
                 }
                 break;
 
+            case 'switch_options':
+                if (is_null($options['options']) || !is_array($options['options'])) {
+                    $options['options'] = array();
+                }
+
+                if (count($options['options'])) {
+                    $vertical = isset($options['vertical']) ? (int) $options['vertical'] : 0;
+                    $html = self::renderSwitchOptionsInput($field_name, $options['options'], $value, $input_id, $vertical);
+                } else {
+                    $html .= '<p class="alert alert-warning">Aucune option disponible</p>';
+                }
+                break;
+
             case 'select_payment':
                 if (!isset($options['value_type'])) {
                     $option['value_type'] = 'id';

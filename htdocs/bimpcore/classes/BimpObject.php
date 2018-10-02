@@ -614,6 +614,30 @@ class BimpObject extends BimpCache
         return DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($file);
     }
 
+    public function getListConfig($owner_type, $id_owner, $list_name = 'default')
+    {
+        return self::getObjectListConfig($this->module, $this->object_name, $owner_type, $id_owner, $list_name);
+    }
+
+    public function getListConfigCols($owner_type, $id_owner, $list_name = 'default')
+    {
+        $cols = array();
+        $config = $this->getListConfig($owner_type, $id_owner, $list_name);
+        if (BimpObject::objectLoaded($config)) {
+            $list_cols = $config->getData('cols');
+            if (is_array($list_cols)) {
+                foreach ($list_cols as $col_name => $values) {
+                    if ((int) $values[1]) {
+                        $cols[(int) $values[0]] = $col_name;
+                    }
+                }
+                ksort($cols);
+            }
+        }
+
+        return $cols;
+    }
+
     // Gestion des objets enfants:
 
     public function setChild($child)
@@ -2220,7 +2244,7 @@ class BimpObject extends BimpCache
         }
 
         $rows = $this->db->executeS($sql, $return);
-        
+
         if (is_null($rows)) {
             $rows = array();
         }
@@ -3428,6 +3452,13 @@ class BimpObject extends BimpCache
         return BimpRender::renderAlerts($errors);
     }
 
+    public function renderListConfigColsInput()
+    {
+        $html = '';
+
+        return $html;
+    }
+
     // Gestion des intitulés (labels):
 
     public function getLabels()
@@ -3828,6 +3859,20 @@ class BimpObject extends BimpCache
         return array();
     }
 
+    public function getSortableFieldsArray()
+    {        
+        $fields = array();
+     
+        foreach ($this->params['fields'] as $field_name) {
+            $bc_field = new BC_Field($this, $field_name);
+            if ($bc_field->params['sortable']) {
+                $fields[$field_name]
+            }
+        }
+        
+        return $fields;
+    }
+
     // Liens et url: 
 
     public function getUrl()
@@ -3940,12 +3985,26 @@ class BimpObject extends BimpCache
     {
         $errors = array();
         $warnings = array();
-        $success = '';
+        $success = 'Lien supprimé avec succès';
 
         if (!isset($data['id_link']) || !(int) $data['link_id']) {
             
         }
 
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function actionSetListConfig($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Paramètres mis à jour';
+
+        
+        
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

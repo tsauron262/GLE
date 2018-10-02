@@ -43,6 +43,10 @@ class BC_Input extends BimpComponent
             'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
             'select_first' => array('data_type' => 'bool', 'default_value' => 0)
         ),
+        'switch_options'              => array(
+            'options'  => array('data_type' => 'array', 'compile' => true, 'default' => array()),
+            'vertical' => array('data_type' => 'bool', 'default_value' => 0)
+        ),
         'toggle'                      => array(
             'toggle_on'  => array('default' => 'OUI'),
             'toggle_off' => array('default' => 'NON')
@@ -146,6 +150,7 @@ class BC_Input extends BimpComponent
 
         switch ($this->params['type']) {
             case 'select':
+            case 'switch_options':
                 if (is_null($this->params['options']) || !count($this->params['options'])) {
                     if (isset($this->field_params['values']) && !is_null($this->field_params['values'])) {
                         $this->params['options'] = $this->field_params['values'];
@@ -235,6 +240,11 @@ class BC_Input extends BimpComponent
             case 'select':
                 $options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
                 $options['select_first'] = isset($this->params['select_first']) ? $this->params['select_first'] : 0;
+                break;
+
+            case 'switch_options':
+                $options['options'] = isset($this->params['options']) ? $this->params['options'] : array();
+                $options['vertical'] = isset($this->params['vertical']) ? $this->params['vertical'] : 0;
                 break;
 
             case 'toggle':

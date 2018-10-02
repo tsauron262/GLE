@@ -1,21 +1,63 @@
 table: bimp_list_config
-label:
+
+labels: 
     name: configuration de liste
     name_plur: configurations de liste
     is_female: 1
-
-fields:
-    module_name:
-        type: string
-        required: 1
-    object_name:
-        type: string
-        required: 1
-    list_name:
-        type: string
-        required: 1
-        default_value: default
-    id_user: 
+    
+fields: 
+    owner_type: 
+        label: Type objet propriétaire
+        values: 
+            1: Groupe
+            2: Utilisateur
+        
+    id_owner: 
+        label: Propriétaire
         type: id_object
-        dol_object: user
         required: 1
+        
+    obj_module: 
+        label: Module
+        required: 1
+        
+    obj_name: 
+        label: Objet
+        required: 1
+        
+    list_name: 
+        label: Code liste
+        default_value: default
+        
+    cols: 
+        label: Cols
+        data_type: json
+        
+    sort_field: 
+        label: Trie
+        default_value: id
+        
+    sort_way:
+        label: Ordre
+        values: 
+            asc: Croissant
+            desc: Décroissant
+        default_value: desc
+        
+    n: 
+        label: Nombre d'éléments par page
+        type: int
+        values: 
+            10: 10
+            25: 25
+            50: 50
+            100: 100
+            250: 250
+            500: 500
+        input: 
+            type: switch_options
+        default_value: 10
+        
+    filters: 
+        label: Filtres
+        type: json

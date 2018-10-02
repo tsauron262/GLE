@@ -917,6 +917,12 @@ class BimpTools
                     return true;
                 }
                 return false;
+                
+            case 'json':
+                if (is_string($value)) {
+                    $value = json_decode($value);
+                }
+                return is_array($value);
         }
         return true;
     }

@@ -354,6 +354,10 @@ class BC_Display extends BimpComponent
                         }
                         break;
 
+                    case 'json':
+                        $html = BimpRender::renderAlerts('Erreur technique: champ de type JSON non affichable');
+                        break;
+
                     case 'string':
                     case 'html':
                     default:

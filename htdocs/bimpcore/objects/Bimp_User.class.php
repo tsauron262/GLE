@@ -9,14 +9,7 @@ class Bimp_User extends BimpObject
         'woman' => 'Femme'
     );
 
-    public function displayCountry()
-    {
-        $id = $this->getData('fk_country');
-        if (!is_null($id) && $id) {
-            return $this->db->getValue('c_country', 'label', '`rowid` = ' . (int) $id);
-        }
-        return '';
-    }
+    // Getters: 
 
     public function getInstanceName()
     {
@@ -25,5 +18,16 @@ class Bimp_User extends BimpObject
         }
 
         return ' ';
+    }
+
+    // Affichage: 
+
+    public function displayCountry()
+    {
+        $id = $this->getData('fk_country');
+        if (!is_null($id) && $id) {
+            return $this->db->getValue('c_country', 'label', '`rowid` = ' . (int) $id);
+        }
+        return '';
     }
 }

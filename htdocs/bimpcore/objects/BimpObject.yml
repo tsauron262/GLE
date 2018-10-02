@@ -1,0 +1,49 @@
+forms: 
+    list_config: 
+        title: Paramètres de la liste
+        icon: fas_user-cog
+        rows: 
+            - custom: 1
+              label: Type propriétaire
+              input_name: type_object
+              hidden: 1
+              input: 
+                  type: hidden
+            - custom: 1
+              label: ID propriétaire
+              input_name: id_object
+              data_type: int
+              hidden: 1
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Module
+              input_name: obj_module
+              hidden: 1
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Nom Objet
+              input_name: obj_name
+              hidden: 1
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Nom liste
+              input_name: list_name
+              hidden: 1
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Trie par défaut
+              input_name: sort_field
+              input: 
+                  type: select
+                  options: 
+                      array: sortableFields
+            - custom: 1
+              label: Colonnes
+              input_name: cols
+              data_type: array
+              content: 
+                  callback: renderListConfigColsInput

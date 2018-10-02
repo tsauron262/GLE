@@ -15,14 +15,14 @@ class BimpCache
 
         return self::$bdb;
     }
-    
+
     public static function getCacheArray($cache_key, $include_empty = false, $empty_value = 0, $empty_label = '')
     {
         if ($include_empty) {
             $return = array(
                 $empty_value => $empty_label
             );
-            
+
             if (isset(self::$cache[$cache_key])) {
                 foreach (self::$cache[$cache_key] as $value => $label) {
                     $return[$value] = $label;
@@ -30,11 +30,11 @@ class BimpCache
             }
             return $return;
         }
-        
+
         if (isset(self::$cache[$cache_key])) {
             return self::$cache[$cache_key];
         }
-        
+
         return array();
     }
 
@@ -81,7 +81,7 @@ class BimpCache
     public static function getSocieteContactsArray($id_societe, $include_empty = false)
     {
         $cache_key = '';
-        
+
         if ((int) $id_societe) {
             $cache_key = 'societe_' . $id_societe . '_contacts_array';
             if (!isset(self::$cache[$cache_key])) {
@@ -468,5 +468,26 @@ class BimpCache
             2    => "Indéterminé",
             1    => "Autre"
         );
+    }
+
+    public static function getObjectListConfig($module, $object_name, $owner_type, $id_owner, $list_name)
+    {
+        $cache_key = $module . '_' . $object_name . '_' . $owner_type . '_' . $id_owner . '_' . $list_name . '_list_config';
+        if (!isset(self::$cache[$cache_key])) {
+            $config = BimpObject::getInstance('bimpcore', 'ListConfig');
+            if ($config->find(array(
+                        'type'       => $owner_type,
+                        'id_object'  => (int) $id_owner,
+                        'obj_module' => $module,
+                        'obj_name'   => $object_name,
+                        'list_name'  => $list_name
+                            ), true)) {
+                self::$cache[$cache_key] = $config;
+            } else {
+                self::$cache[$cache_key] = null;
+            }
+        }
+
+        return $cache_key[$cache_key];
     }
 }

@@ -101,7 +101,7 @@ class InterfaceCaldav {
      *      @param  conf		$conf       Object conf
      *      @return int         			<0 if KO, 0 if no triggered ran, >0 if OK
      */
-    function run_trigger($action, $object, $user, $langs, $conf) {
+    function runTrigger($action, $object, $user, $langs, $conf) {
         global $db, $infoEvent;
         if ($action == "ACTION_MODIFY" || $action == "ACTION_CREATE" || $action == "ACTION_DELETE") {
 //                if(!in_array($object->type_id, array(3,8,9,10,30,31,40)))

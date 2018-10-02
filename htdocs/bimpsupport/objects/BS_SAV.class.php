@@ -1112,7 +1112,7 @@ class BS_SAV extends BimpObject
                 $prop->array_options['options_type'] = "S";
                 $prop->array_options['options_entrepot'] = (int) $this->getData("id_entrepot");
                 $prop->array_options['options_libelle'] = $this->getRef();
-                $prop->update_extrafields($user);
+                $prop->insertExtraFields();
                 if ($id_contact) {
                     $prop->add_contact($id_contact, 40);
                     $prop->add_contact($id_contact, 41);

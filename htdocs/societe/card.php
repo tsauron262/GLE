@@ -671,12 +671,6 @@ if (empty($reshook))
                     setEventMessages($object->error, $object->errors, 'errors');
                     $error++;
                 }
-				// Prevent thirdparty's emptying if a user hasn't rights $user->rights->categorie->lire (in such a case, post of 'custcats' is not defined)
-				if (!empty($user->rights->categorie->lire))
-				{
-					// Customer categories association
-					$categories = GETPOST( 'custcats', 'array' );
-					$object->setCategories($categories, 'customer');
 
 				// Links with users
 				$salesreps = GETPOST('commercial', 'array');
@@ -1975,7 +1969,7 @@ else
 			$userlist = $form->select_dolusers('', '', 0, null, 0, '', '', 0, 0, 0, '', 0, '', '', 0, 1);
 			$arrayselected = GETPOST('commercial', 'array');
 			if (empty($arrayselected)) $arrayselected = $object->getSalesRepresentatives($user, 1);
-            print $form->multiselectarray('commercial', $userlist, $arrayselected, null, null, null, null, "90%");
+            print $form->multiselectarray('commercial', $userlist, $arrayselected, null, null, null, null, "90%", ($user->rights->bimpcommercial->commerciauxToSoc)? "" : "diasabled");
             print '</td></tr>';
 
             // Default language

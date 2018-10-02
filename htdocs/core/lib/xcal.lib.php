@@ -85,7 +85,7 @@ function build_calfile($format,$title,$desc,$events_array,$outputfile)
                 $priority     = $event['priority'];
                 $fulldayevent = $event['fulldayevent'];
 				$location     = $event['location'];
-				$email 		  = $event['email'];
+				$email 		  = (isset($event['email']) ? $event['email'] : "");
 				$url		  = $event['url'];
 				$transparency = $event['transparency'];		// OPAQUE (busy) or TRANSPARENT (not busy)
 				$description=preg_replace('/<br[\s\/]?>/i',"\n",$event['desc']);

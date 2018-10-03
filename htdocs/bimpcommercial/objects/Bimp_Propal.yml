@@ -84,16 +84,19 @@ fields:
         dol_extra_field: 1
         type: bool
         default_value: 0
+        sortable: 0
     pdf_hide_total: 
         label: Masquer les totaux dans le PDF
         dol_extra_field: 1
         type: bool
         default_value: 0 
+        sortable: 0
     pdf_hide_ref:
         label: Masquer les références des produits dans le PDF
         dol_extra_field: 1
         type: bool
         default_value: 0
+        sortable: 0
         
 forms: 
     default: 
@@ -248,6 +251,7 @@ lists:
     default: 
         title: Propositions commerciales
         icon: fas_file-invoice
+        configurable: 1
         checkboxes: 1
         bulk_actions:
             - label: supprimer les propositions commerciales sélectionnées

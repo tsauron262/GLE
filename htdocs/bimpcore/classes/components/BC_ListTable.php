@@ -6,9 +6,9 @@ class BC_ListTable extends BC_List
     public $component_name = 'Tableau';
     public static $type = 'list_table';
     public $search = false;
-    protected $rows = null;
-    protected $colspan = 0;
-    protected $cols = null;
+    public $rows = null;
+    public $colspan = 0;
+    public $cols = null;
     public $item_params = array(
         'update_btn'      => array('data_type' => 'bool', 'default' => 0),
         'edit_btn'        => array('data_type' => 'bool', 'default' => 0),
@@ -143,9 +143,8 @@ class BC_ListTable extends BC_List
 
         $list_cols = array();
 
-        if ($this->params['configurable']) {
-            global $user;
-            $list_cols = $this->object->getListConfigCols(2, $user->id, $this->name);
+        if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
+            $list_cols = explode(',', $this->userConfig->getData('cols'));
         }
 
         if (!is_array($list_cols) || !count($list_cols)) {
@@ -232,7 +231,7 @@ class BC_ListTable extends BC_List
                         $col_params = $this->fetchParams('lists_cols/' . $col_name, $this->col_params);
                     }
 
-                    $col_params = $this->config->mergeParams($col_params, $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params));
+                    $col_params = $this->object->config->mergeParams($col_params, $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params));
 
                     $row['cols'][$col_name] = array(
                         'content'   => '',
@@ -735,20 +734,58 @@ class BC_ListTable extends BC_List
     public function renderParametersPopup()
     {
         $html = '';
-        $nb_Items = '';
+        $content = '';
 
         if ($this->params['pagination']) {
-            $nb_Items .= '<div class="title">';
-            $nb_Items .= 'Nombre d\'items par page';
-            $nb_Items .= '</div>';
+            $content .= '<div class="title">';
+            $content .= 'Nombre d\'items par page';
+            $content .= '</div>';
 
-            $nb_Items .= BimpInput::renderSwitchOptionsInput('select_n', array(
+            $content .= '<div style="margin-bottom: 15px">';
+            $content .= BimpInput::renderSwitchOptionsInput('select_n', array(
                         10  => '10', 25  => '25', 50  => '50', 100 => '100', 250 => '250', 500 => '500'), $this->params['n'], $this->identifier . '_n');
+            $content .= '</div>';
         }
 
-        if ($nb_Items) {
+        global $user;
+        if (BimpObject::objectLoaded($user) && $this->params['configurable']) {
+            $content .= '<div class="title">';
+            $content .= 'Paramètres utilisateur';
+            $content .= '</div>';
+
+            $values = array(
+                'owner_type' => 2,
+                'id_owner'   => $user->id,
+                'list_name'  => $this->name,
+            );
+
+            if (BimpObject::objectLoaded($this->userConfig)) {
+                $values['sort_field'] = $this->userConfig->getData('sort_field');
+                $values['sort_way'] = $this->userConfig->getData('sort_way');
+                $values['nb_items'] = $this->userConfig->getData('nb_items');
+            } else {
+                $values['sort_field'] = $this->params['sort_field'];
+                $values['sort_way'] = $this->params['sort_way'];
+                $values['nb_items'] = $this->params['n'];
+            }
+
+            $content .= '<div style="margin-bottom: 15px; text-align: center">';
+            $content .= BimpRender::renderButton(array(
+                        'classes'     => array('btn', 'btn-default'),
+                        'label'       => 'Editer les paramètres utilisateur',
+                        'icon_before' => 'fas_user-cog',
+                        'attr'        => array(
+                            'onclick' => $this->object->getJsActionOnclick('setListConfig', $values, array(
+                                'form_name' => 'list_config'
+                            ))
+                        )
+            ));
+            $content .= '</div>';
+        }
+
+        if ($content) {
             $html .= '<div id="' . $this->identifier . '_parametersPopup" class="tinyPopup listPopup">';
-            $html .= $nb_Items;
+            $html .= $content;
             $html .= '</div>';
         }
 

@@ -31,7 +31,7 @@ fields:
         
     cols: 
         label: Cols
-        data_type: json
+        data_type: list
         
     sort_field: 
         label: Trie
@@ -44,7 +44,7 @@ fields:
             desc: Décroissant
         default_value: desc
         
-    n: 
+    nb_items: 
         label: Nombre d'éléments par page
         type: int
         values: 

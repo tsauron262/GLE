@@ -10,7 +10,8 @@ abstract class BimpComponent
     public static $type = '';
     public static $config_required = true;
     public $params_def = array(
-        'show' => array('data_type' => 'bool', 'default' => 1)
+        'extends' => array('default' => ''),
+        'show'    => array('data_type' => 'bool', 'default' => 1)
     );
     public static $type_params_def = array();
     public $params;
@@ -267,6 +268,11 @@ abstract class BimpComponent
         }
 
         return true;
+    }
+
+    public function fetchExtendedParams(BimpComponent $extension)
+    {
+        $this->params = $this->object->config->mergeParams($extension->params, $this->params);
     }
 
     // Rendus:

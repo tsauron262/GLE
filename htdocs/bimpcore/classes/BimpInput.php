@@ -1042,7 +1042,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0)
+    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0)
     {
         if (is_null($values) || $values === '') {
             $values = array();
@@ -1071,7 +1071,7 @@ class BimpInput
             }
         }
 
-        $html .= '<div class="inputMultipleValuesContainer" data-field_name="' . $field_name . '"';
+        $html .= '<div class="inputMultipleValuesContainer" data-field_name="' . $field_name . '" data-sortable="' . (int) $sortable . '"';
         if ($autosave) {
             $html .= ' data-module="' . $object->module . '"';
             $html .= ' data-object_name="' . $object->object_name . '"';
@@ -1101,6 +1101,9 @@ class BimpInput
             $html .= '<td style="display: none">';
             $html .= '<input class="item_value" type="hidden" name="' . $field_name . '[]" value="' . $value . '"/>';
             $html .= '</td>';
+            if ((int) $sortable) {
+                $html .= '<td class="positionHandle"><span></span></td>';
+            }
             $html .= '<td>' . $label . '</td>';
             $html .= '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn" onclick="';
             if ($autosave) {

@@ -130,7 +130,7 @@ table.objectlistTable {
         text-align: right;
         padding: 5px 12px 5px 6px;
     }
-    
+
     & > tfoot > tr > td {
         background-color: #E6E6E6;
         font-weight: bold;
@@ -375,6 +375,10 @@ td.buttons {
         color: #fff!important;
         background-color: #EF7D00;
         text-decoration: none;
+
+        i {
+            color: #fff!important;
+        }
     }
     &:before {
         font-family: 'FontAwesome';
@@ -390,6 +394,10 @@ td.buttons {
     }
     &.viewButton:before {
         content: '\f06e';
+    }
+
+    i {
+        color: #636363!important;
     }
 }
 

@@ -44,7 +44,15 @@ class BimpConfig
             return false;
         }
 
-        $this->params = $this->getParamsFromFile($dir . $file_name, $this->errors);
+        $this->params = array();
+
+        if (is_a($this->instance, 'BimpObject')) {
+            if (!isset(self::$params_cache['BimpObject.yml'])) {
+                self::$params_cache['BimpObject.yml'] = $this->getParamsFromFile(DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpObject.yml');
+            }
+            $this->params = self::$params_cache['BimpObject.yml'];
+        }
+        $this->params = $this->mergeParams($this->params, $this->getParamsFromFile($dir . $file_name, $this->errors));
 
         if (is_array($this->params) && count($this->params)) {
             self::$params_cache[$dir . $file_name] = $this->params;

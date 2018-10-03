@@ -488,6 +488,6 @@ class BimpCache
             }
         }
 
-        return $cache_key[$cache_key];
+        return self::$cache[$cache_key];
     }
 }

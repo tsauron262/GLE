@@ -54,51 +54,48 @@ class BimpObject extends BimpCache
     public $dol_object = null;
     public $children = array();
     public $extends = array();
-    
-    
-    public function getExport($niveau = 10, $pref = "", $format = "xml", $sep = ";", $sautLn = "\n"){
-        if(!$this->isLoaded())
+
+    public function getExport($niveau = 10, $pref = "", $format = "xml", $sep = ";", $sautLn = "\n")
+    {
+        if (!$this->isLoaded())
             return "Objet non loadé";
-        
-        
+
+
         $tabResult = array();
-        foreach($this->config->params['fields'] as $nom => $info){
+        foreach ($this->config->params['fields'] as $nom => $info) {
             $value = $this->getData($nom);
-            
-            if($info['type'] == "int"){
+
+            if ($info['type'] == "int") {
                 $value = intval($value);
-                if(is_array($info['values']['array']) && isset($info['values']['array'][$value]))
-                      $value = $info['values']['array'][$value];
+                if (is_array($info['values']['array']) && isset($info['values']['array'][$value]))
+                    $value = $info['values']['array'][$value];
             }
-            elseif($info['type'] == "id_object"){
-                continue;//Car on les retrouve enssuite de nouveau dans $this->params['objects']
+            elseif ($info['type'] == "id_object") {
+                continue; //Car on les retrouve enssuite de nouveau dans $this->params['objects']
                 $obj = $this->getChildObject($info['object']);
                 $value = $this->recursiveGetExport($niveau, $pref, $obj);
-            }
-            elseif($info['type'] == "bool")
-                $value = ($value? "OUI" : "NON");
-            
-            
+            } elseif ($info['type'] == "bool")
+                $value = ($value ? "OUI" : "NON");
+
+
             $tabResult[$nom] = $value;
         }
-        
-        foreach($this->params['objects'] as $nom => $infoObj){
+
+        foreach ($this->params['objects'] as $nom => $infoObj) {
             $value = "";
-            if($infoObj['relation'] == "hasMany"){
-                $html.= "<".$nom.">";
-                    $lines = $this->getChildrenObjects($nom);
-                    $i = 0;
-                    $value = array();
-                    foreach($lines as $obj){
-                        $i++;
-                        $value[$nom."-".$i] = $this->recursiveGetExport($niveau, $pref."-".$i, $obj);
-                    }
-            }
-            elseif($infoObj['relation'] == "hasOne"){
-                    $obj = $this->getChildObject($nom);
-                    $value = $this->recursiveGetExport($niveau, $pref."-".$i, $obj);
-            }
-            elseif($infoObj['relation'] == "none"){
+            if ($infoObj['relation'] == "hasMany") {
+                $html.= "<" . $nom . ">";
+                $lines = $this->getChildrenObjects($nom);
+                $i = 0;
+                $value = array();
+                foreach ($lines as $obj) {
+                    $i++;
+                    $value[$nom . "-" . $i] = $this->recursiveGetExport($niveau, $pref . "-" . $i, $obj);
+                }
+            } elseif ($infoObj['relation'] == "hasOne") {
+                $obj = $this->getChildObject($nom);
+                $value = $this->recursiveGetExport($niveau, $pref . "-" . $i, $obj);
+            } elseif ($infoObj['relation'] == "none") {
 //                    $lines = $this->get($nom);
 //                    $i = 0;
 //                    $value = array();
@@ -107,64 +104,62 @@ class BimpObject extends BimpCache
 //                        $i++;
 //                        $value[$nom."-".$i] = $this->recursiveGetExport($niveau, $pref."-".$i, $obj);
 //                    }
-                
-                if($nom == "files"){
+
+                if ($nom == "files") {
                     $value = $this->getObjectFilesArray($this);
                 }
 //                 elseif($nom == "contact"){
 ////                    $value = $this->($name);
 //                }
-                 else{  
+                else {
                     $obj = $this->getChildObject($nom);
                     $value = $this->recursiveGetExport($niveau, $pref, $obj);
-                 }
-                
-                
-            }
-            else{
+                }
+            } else {
                 print_r($infoObj);
             }
-                    $tabResult[$nom] = $value;
+            $tabResult[$nom] = $value;
         }
-        
+
         return $tabResult;
     }
-    
-    function recursiveGetExport($niveau, $pref, $obj){
+
+    function recursiveGetExport($niveau, $pref, $obj)
+    {
         $value = "";
-        if($niveau > 0){
-             if(is_a($obj, "BimpObject")){
-                if(method_exists($obj, "isLoaded"))
-                    if($obj->isLoaded())
-                        $value = $obj->getExport($niveau-1, $pref."-");
+        if ($niveau > 0) {
+            if (is_a($obj, "BimpObject")) {
+                if (method_exists($obj, "isLoaded"))
+                    if ($obj->isLoaded())
+                        $value = $obj->getExport($niveau - 1, $pref . "-");
                     else
                         echo "ERR Objet non loadé";
                 else
                     echo "ERR Objet bizarre";
-             }
-             elseif(is_a($obj, "CommonObject")){
-                 $id = 0;
-                 if(property_exists($obj, 'id'))
-                     $id = $obj->id;
-                 else
-                     $value = "ERR pas de champ ID".$nom;
-                 if($id > 0){
+            }
+            elseif (is_a($obj, "CommonObject")) {
+                $id = 0;
+                if (property_exists($obj, 'id'))
+                    $id = $obj->id;
+                else
+                    $value = "ERR pas de champ ID" . $nom;
+                if ($id > 0) {
                     $value = array();
-                    if(method_exists($obj, "getNomUrl"))
-                        if(isset($obj->id) && $obj->id > 0)
+                    if (method_exists($obj, "getNomUrl"))
+                        if (isset($obj->id) && $obj->id > 0)
                             $value['lien'] = $obj->getNomUrl(1);
-                    if(method_exists($obj, "fetch_optionals") && count($obj->array_options) < 1)
-                            $obj->fetch_optionals();
-                    foreach($obj as $clef => $val){
-                        if(!in_array($clef, array("db", "error", "errors", "context", "oldcopy")))
+                    if (method_exists($obj, "fetch_optionals") && count($obj->array_options) < 1)
+                        $obj->fetch_optionals();
+                    foreach ($obj as $clef => $val) {
+                        if (!in_array($clef, array("db", "error", "errors", "context", "oldcopy")))
                             $value[$clef] = $val;
                     }
-                 }
-             }
-             else{
-                 echo "ERR Type objet inconnue ".get_class($obj);
-                 $value = "ERR Type objet inconnue ".get_class($obj);
-             }
+                }
+            }
+            else {
+                echo "ERR Type objet inconnue " . get_class($obj);
+                $value = "ERR Type objet inconnue " . get_class($obj);
+            }
         }
         return $value;
     }
@@ -731,25 +726,6 @@ class BimpObject extends BimpCache
     public function getListConfig($owner_type, $id_owner, $list_name = 'default')
     {
         return self::getObjectListConfig($this->module, $this->object_name, $owner_type, $id_owner, $list_name);
-    }
-
-    public function getListConfigCols($owner_type, $id_owner, $list_name = 'default')
-    {
-        $cols = array();
-        $config = $this->getListConfig($owner_type, $id_owner, $list_name);
-        if (BimpObject::objectLoaded($config)) {
-            $list_cols = $config->getData('cols');
-            if (is_array($list_cols)) {
-                foreach ($list_cols as $col_name => $values) {
-                    if ((int) $values[1]) {
-                        $cols[(int) $values[0]] = $col_name;
-                    }
-                }
-                ksort($cols);
-            }
-        }
-
-        return $cols;
     }
 
     // Gestion des objets enfants:
@@ -3570,6 +3546,42 @@ class BimpObject extends BimpCache
     {
         $html = '';
 
+        $list_name = BimpTools::getPostFieldValue('list_name');
+        $cols = $this->getListColsArray($list_name);
+        
+        $cols[''] = '';
+
+        if (count($cols)) {
+            $owner_type = BimpTools::getPostFieldValue('owner_type', '');
+            $id_owner = BimpTools::getPostFieldValue('id_owner', 0);
+
+            $values = array();
+            if ($owner_type && $id_owner) {
+                $userConfig = $this->getListConfig($owner_type, $id_owner);
+                if (BimpObject::objectLoaded($userConfig)) {
+                    foreach (explode(',', $userConfig->getData('cols')) as $col_name) {
+                        if (isset($cols[$col_name])) {
+                            $values[$col_name] = $cols[$col_name];
+                            unset($cols[$col_name]);
+                        }
+                    }
+                } else {
+                    $bc_list = new BC_ListTable($this, $list_name);
+                    foreach ($bc_list->cols as $col_name) {
+                        if (isset($cols[$col_name])) {
+                            $values[$col_name] = $cols[$col_name];
+                            unset($cols[$col_name]);
+                        }
+                    }
+                }
+            }
+            
+            $html .= BimpInput::renderInput('select', 'cols_add_value', '', array('options' => $cols));
+            $html .= BimpInput::renderMultipleValuesList($this, 'cols', $values, 'cols_add_value', 0, 0, 1);
+        } else {
+            $html .= BimpRender::renderAlerts('Aucune option disponible', 'warnings');
+        }
+
         return $html;
     }
 
@@ -3974,17 +3986,51 @@ class BimpObject extends BimpCache
     }
 
     public function getSortableFieldsArray()
-    {        
+    {
         $fields = array();
-     
+
         foreach ($this->params['fields'] as $field_name) {
             $bc_field = new BC_Field($this, $field_name);
             if ($bc_field->params['sortable']) {
-                $fields[$field_name]
+                $fields[$field_name] = $bc_field->params['label'];
             }
         }
-        
+
         return $fields;
+    }
+
+    public function getListColsArray($list_name = 'default')
+    {
+        $cols = array();
+
+        $bc_list = new BC_ListTable($this, $list_name);
+
+        if ((int) $bc_list->params['configurable'] &&
+                $this->config->isDefined('lists_cols')) {
+            foreach ($this->config->getCompiledParams('lists_cols') as $col_name => $col_params) {
+                if (isset($col_params['label']) && $col_params['label']) {
+                    $cols[$col_name] = $col_params['label'];
+                } elseif (isset($col_params['field']) && $col_params['field'] && $this->config->isDefined('fields/' . $col_params['field'] . '/label')) {
+                    $cols[$col_name] = $this->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+                } else {
+                    $cols[$col_name] = $col_name;
+                }
+            }
+        }
+
+        foreach ($bc_list->params['cols'] as $col_name) {
+            $col_params = $bc_list->fetchParams($bc_list->config_path . '/cols/' . $col_name, $bc_list->col_params);
+
+            if ($col_params['label']) {
+                $cols[$col_name] = $col_params['label'];
+            } elseif ($col_params['field'] && $this->config->isDefined('fields/' . $col_params['field'] . '/label')) {
+                $cols[$col_name] = $this->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+            } else {
+                $cols[$col_name] = $col_name;
+            }
+        }
+
+        return $cols;
     }
 
     // Liens et url: 
@@ -4110,15 +4156,15 @@ class BimpObject extends BimpCache
             'warnings' => $warnings
         );
     }
-    
+
     public function actionSetListConfig($data, &$success)
     {
         $errors = array();
         $warnings = array();
         $success = 'Paramètres mis à jour';
 
-        
-        
+
+
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

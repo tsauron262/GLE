@@ -31,11 +31,12 @@ class BC_Form extends BC_Panel
         'depends_on' => array(),
     );
     public static $custom_row_params = array(
-        'input_name' => array('required' => true, 'default' => ''),
-        'display_if' => array('data_type' => 'array'),
-        'depends_on' => array(),
-        'data_type'  => array('default' => 'string'),
-        'value'      => array('data_type' => 'any', 'default' => '')
+        'input_name'   => array('required' => true, 'default' => ''),
+        'display_if'   => array('data_type' => 'array'),
+        'depends_on'   => array(),
+        'data_type'    => array('default' => 'string'),
+        'value'        => array('data_type' => 'any', 'default' => ''),
+        'no_container' => array('data_type' => 'bool', 'default' => 0)
     );
     public static $object_params = array(
         'form_name'   => array('default' => 'default'),
@@ -377,17 +378,8 @@ class BC_Form extends BC_Panel
             $html .= BimpRender::renderAlerts($asso->errors);
         } else {
             if ($this->object->config->isDefined('associations/' . $params['association'] . '/list')) {
-                $html .= '<div class="inputContainer ' . $this->fields_prefix . $params['association'] . '_inputContainer"';
-                $html .= ' data-field_name="' . $this->fields_prefix . $params['association'] . '"';
-                $html .= ' data-initial_value="' . implode(',', $items) . '"';
-                $html .= ' data-multiple="1"';
-                $html .= ' data-field_prefix="' . $this->fields_prefix . '"';
-                $html .= ' data-required="' . $params['required'] . '"';
-                $html .= '>';
-
-                $html .= $asso->renderAssociatesCheckList($this->fields_prefix);
-
-                $html .= '</div>';
+                $content = $asso->renderAssociatesCheckList($this->fields_prefix);
+                $html .= BimpInput::renderInputContainer($params['association'], implode(',', $items), $content, $this->fields_prefix, $params['required'], 1);
             } elseif ($this->object->config->isDefined('associations/' . $params['association'] . '/input')) {
                 $input_name = $params['association'] . '_add_value';
 
@@ -658,18 +650,12 @@ class BC_Form extends BC_Panel
             $html .= $input->renderHtml();
             unset($input);
         } elseif ($this->object->config->isDefined($this->config_path . '/rows/' . $row . '/content')) {
-            $html .= '<div class="inputContainer ' . $this->fields_prefix . $params['input_name'] . '_inputContainer customField"';
-            $html .= ' data-field_name="' . $this->fields_prefix . $params['input_name'] . '"';
-            $html .= ' data-initial_value="' . $params['value'] . '"';
-            $html .= ' data-multiple="0"';
-            $html .= ' data-form_row="' . $row . '"';
-            $html .= ' data-field_prefix="' . $this->fields_prefix . '"';
-            $html .= ' data-required="' . (int) $params['required'] . '"';
-            $html .= '>';
-
-            $html .= str_replace('name="' . $params['input_name'] . '"', 'name="' . $this->fields_prefix . $params['input_name'] . '"', $this->object->getConf($row_path . '/content', '', true));
-
-            $html .= '</div>';
+            $content = str_replace('name="' . $params['input_name'] . '"', 'name="' . $this->fields_prefix . $params['input_name'] . '"', $this->object->getConf($row_path . '/content', '', true));
+            if (!(int) $params['no_container']) {
+                $html .= BimpInput::renderInputContainer($params['input_name'], $params['value'], $content, $this->fields_prefix, $params['required'], 0, 'customField', array('row' => $row));
+            } else {
+                $html .= $content;
+            }
         } else {
             $html .= BimpRender::renderAlerts('Erreur de configuration: aucun contenu défini pour ce champ');
         }

@@ -347,14 +347,6 @@ class BC_Input extends BimpComponent
         if (is_null($this->new_value)) {
             $this->new_value = $this->value;
         }
-
-        $html .= '<div class="inputContainer ' . $this->name_prefix . $this->input_name . '_inputContainer';
-        if (count($this->extraClasses)) {
-            foreach ($this->extraClasses as $extraClass) {
-                $html .= ' ' . $extraClass;
-            }
-        }
-
         $required = isset($this->field_params['required']) ? (int) $this->field_params['required'] : 0;
 
         $input_name = $this->name_prefix . $this->input_name;
@@ -366,39 +358,26 @@ class BC_Input extends BimpComponent
             $input_id .= '_add_value';
         }
 
-        $html .= '"';
-        $html .= ' data-field_name="' . $input_name . '"';
-        $html .= ' data-initial_value="' . htmlentities($this->value) . '"';
-        $html .= ' data-multiple="' . ((int) $this->params['multiple'] ? 1 : 0) . '"';
-        $html .= ' data-required="' . $required . '"';
-        $html .= ' data-data_type="' . $this->data_type . '"';
-        if (count($this->extraData)) {
-            foreach ($this->extraData as $data_name => $data_value) {
-                $html .= ' data-' . $data_name . '="' . $data_value . '"';
-            }
-        }
-        $html .= ' data-field_prefix="' . $this->name_prefix . '"';
-        $html .= '>';
-
+        $content = '';
         switch ($this->params['type']) {
             case 'search_list':
-                $html .= $this->renderSearchListInput();
+                $content = $this->renderSearchListInput();
                 break;
 
             case 'custom':
-                $html .= isset($this->params['content']) ? $this->params['content'] : '';
+                $content = isset($this->params['content']) ? $this->params['content'] : '';
                 break;
 
             default:
-                $html .= BimpInput::renderInput($this->params['type'], $input_name, $this->new_value, $options, null, $option, $input_id);
+                $content = BimpInput::renderInput($this->params['type'], $input_name, $this->new_value, $options, null, $option, $input_id);
                 break;
         }
 
         if ($this->params['help']) {
-            $html .= '<p class="inputHelp">' . $this->params['help'] . '</p>';
+            $content .= '<p class="inputHelp">' . $this->params['help'] . '</p>';
         }
 
-        $html .= '</div>';
+        $html .= BimpInput::renderInputContainer($input_name, htmlentities($this->value), $content, $this->name_prefix, $required, (int) $this->params['multiple'], implode(' ', $this->extraClasses), array_merge(array('data_type' => $this->data_type), $this->extraData));
 
         if ((int) $this->params['multiple']) {
             if ($this->params['type'] === 'search_list') {

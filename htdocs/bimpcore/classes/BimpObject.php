@@ -885,9 +885,9 @@ class BimpObject extends BimpCache
     public function isLoaded()
     {
         if ($this->isDolObject()) {
-            return (isset($this->id) && $this->id && isset($this->dol_object->id) && $this->dol_object->id);
+            return (isset($this->id) && (int) $this->id && isset($this->dol_object->id) && (int) $this->dol_object->id);
         }
-        return (isset($this->id) && $this->id);
+        return (isset($this->id) && (int) $this->id);
     }
 
     public function isNotLoaded()
@@ -3548,8 +3548,6 @@ class BimpObject extends BimpCache
 
         $list_name = BimpTools::getPostFieldValue('list_name');
         $cols = $this->getListColsArray($list_name);
-        
-        $cols[''] = '';
 
         if (count($cols)) {
             $owner_type = BimpTools::getPostFieldValue('owner_type', '');
@@ -3562,7 +3560,6 @@ class BimpObject extends BimpCache
                     foreach (explode(',', $userConfig->getData('cols')) as $col_name) {
                         if (isset($cols[$col_name])) {
                             $values[$col_name] = $cols[$col_name];
-                            unset($cols[$col_name]);
                         }
                     }
                 } else {
@@ -3570,13 +3567,14 @@ class BimpObject extends BimpCache
                     foreach ($bc_list->cols as $col_name) {
                         if (isset($cols[$col_name])) {
                             $values[$col_name] = $cols[$col_name];
-                            unset($cols[$col_name]);
                         }
                     }
                 }
             }
-            
-            $html .= BimpInput::renderInput('select', 'cols_add_value', '', array('options' => $cols));
+
+            $content = BimpInput::renderInput('select', 'cols_add_value', '', array('options' => $cols));
+
+            $html .= BimpInput::renderInputContainer('cols_add_value', '', $content, '', 0, 1, '', array('values_field' => 'cols'));
             $html .= BimpInput::renderMultipleValuesList($this, 'cols', $values, 'cols_add_value', 0, 0, 1);
         } else {
             $html .= BimpRender::renderAlerts('Aucune option disponible', 'warnings');
@@ -4161,13 +4159,64 @@ class BimpObject extends BimpCache
     {
         $errors = array();
         $warnings = array();
-        $success = 'Paramètres mis à jour';
+        $success = 'Paramètres enregistrés avec succès';
 
+        if (!isset($data['owner_type']) || !$data['owner_type']) {
+            $errors[] = 'Type de propriétaire absent';
+        }
+        if (!isset($data['id_owner']) || !$data['id_owner']) {
+            $errors[] = 'ID du propriétaire absent';
+        }
+        if (!isset($data['list_name']) || !$data['list_name']) {
+            $errors[] = 'Nom de la liste absent';
+        }
 
+        if (!count($errors)) {
+            $config = BimpObject::getInstance('bimpcore', 'ListConfig');
+            $config->find(array(
+                'owner_type' => $data['owner_type'],
+                'id_owner'   => $data['id_owner'],
+                'obj_module' => $this->module,
+                'obj_name'   => $this->object_name,
+                'list_name'  => $data['list_name']
+            ));
+
+            if (isset($data['nb_items'])) {
+                $config->set('nb_items', (int) $data['nb_items']);
+            }
+
+            if (isset($data['sort_field'])) {
+                $config->set('sort_field', $data['sort_field']);
+            }
+
+            if (isset($data['sort_way'])) {
+                $config->set('sort_way', $data['sort_way']);
+            }
+
+            if (isset($data['sort_option'])) {
+                $config->set('sort_option', $data['sort_option']);
+            }
+
+            if (isset($data['cols'])) {
+                $config->set('cols', implode(',', $data['cols']));
+            }
+
+            if ($config->isLoaded()) {
+                $errors = $config->update($warnings, true);
+            } else {
+                $config->set('owner_type', $data['owner_type']);
+                $config->set('id_owner', $data['id_owner']);
+                $config->set('obj_module', $this->module);
+                $config->set('obj_name', $this->object_name);
+                $config->set('list_name', $data['list_name']);
+                $errors = $config->create($warnings, true);
+            }
+        }
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'window.location.reload();'
         );
     }
 }

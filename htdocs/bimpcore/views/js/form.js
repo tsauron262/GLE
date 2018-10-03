@@ -870,6 +870,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     }
 
     if (value || value === 0) {
+        var sortable = parseInt($container.data('sortable'));
         var values_field_name = $inputContainer.data('values_field');
         var check = true;
         $container.find('.multipleValuesList').find('input[name="' + values_field_name + '[]"]').each(function () {
@@ -893,8 +894,11 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
         var html = '<tr class="itemRow">';
         html += '<td style="display: none"><input class="item_value" type="hidden" value="' + value + '" name="' + values_field_name + '[]"/></td>';
-        html += '<td>' + label + '</td>';
-        html += '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn"';
+        if (sortable) {
+            html += '<td class="positionHandle"><span></span></td>';
+        }
+        html += '<td class="item_label">' + label + '</td>';
+        html += '<td class="removeButton"><button type="button" class="btn btn-light-danger iconBtn"';
         html += ' onclick="';
         if (ajax_save) {
             html += 'var $button = $(this); deleteObjectMultipleValuesItem(\'' + $container.data('module') + '\', ';
@@ -913,6 +917,9 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         if (ajax_save) {
             addObjectMultipleValuesItem($container.data('module'), $container.data('object_name'), $container.data('id_object'), values_field_name, value, null, function () {
                 $container.find('table').find('tbody.multipleValuesList').append(html);
+                if (sortable) {
+                    setSortableMultipleValuesHandlesEvents($container);
+                }
                 checkMultipleValues();
                 $('body').trigger($.Event('inputMultipleValuesChange', {
                     input_name: values_field_name,
@@ -921,6 +928,9 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
             });
         } else {
             $container.find('table').find('tbody.multipleValuesList').append(html);
+            if (sortable) {
+                setSortableMultipleValuesHandlesEvents($container);
+            }
             checkMultipleValues();
             $('body').trigger($.Event('inputMultipleValuesChange', {
                 input_name: values_field_name,
@@ -1583,6 +1593,11 @@ function setInputsEvents($container) {
             $(this).data('ziptown_event_init', 1);
         }
     });
+    $container.find('.inputMultipleValuesContainer').each(function () {
+        if (parseInt($(this).data('sortable'))) {
+            setSortableMultipleValuesHandlesEvents($(this));
+        }
+    });
 }
 
 function setInputEvents($form, $input) {
@@ -1814,6 +1829,31 @@ function setSelectDisplayHelpEvents($container, $input) {
             $input.data('select_help_event_init', 1);
             $input.change();
         }
+    }
+}
+
+function setSortableMultipleValuesHandlesEvents($container) {
+    var $tbody = $container.find('tbody.multipleValuesList');
+    var $handles = $tbody.find('td.positionHandle');
+    var $rows = $handles.parent('tr');
+    
+    if ($tbody.hasClass('ui-sortable')) {
+        $tbody.sortable('destroy');
+    }
+    
+    if ($handles.length) {
+        $tbody.sortable({
+            appendTo: $tbody,
+            axis: 'y',
+            cursor: 'move',
+            handle: 'td.positionHandle',
+            items: $rows,
+            opacity: 1,
+            start: function (e, ui) {
+            },
+            update: function (e, ui) {
+            }
+        });
     }
 }
 

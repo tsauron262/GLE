@@ -1,4 +1,5 @@
 table: bimp_list_config
+common_fields: 0
 
 labels: 
     name: configuration de liste

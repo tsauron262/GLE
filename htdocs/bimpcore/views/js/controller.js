@@ -99,6 +99,4 @@ $(document).ready(function () {
             $(this).data('event_init', 1);
         }
     });
-    
-    
 });

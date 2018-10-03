@@ -1104,8 +1104,8 @@ class BimpInput
             if ((int) $sortable) {
                 $html .= '<td class="positionHandle"><span></span></td>';
             }
-            $html .= '<td>' . $label . '</td>';
-            $html .= '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn" onclick="';
+            $html .= '<td class="item_label">' . $label . '</td>';
+            $html .= '<td class="removeButton"><button type="button" class="btn btn-light-danger iconBtn" onclick="';
             if ($autosave) {
                 $html .= 'var $button = $(this); deleteObjectMultipleValuesItem(\'' . $object->module . '\', \'' . $object->object_name . '\', ';
                 $html .= $object->id . ', \'' . $field_name . '\', \'' . $value . '\', null, function() {';
@@ -1126,6 +1126,28 @@ class BimpInput
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderInputContainer($input_name, $value, $content = '', $field_prefix = '', $required = 0, $multiple = 0, $extra_class = '', $extra_data = array())
+    {
+        $html .= '<div class="inputContainer ' . $field_prefix . $input_name . '_inputContainer ' . $extra_class . '"';
+        $html .= ' data-field_name="' . $field_prefix . $input_name . '"';
+        $html .= ' data-initial_value="' . $value . '"';
+        $html .= ' data-multiple="' . (int) $multiple . '"';
+        $html .= ' data-field_prefix="' . $field_prefix . '"';
+        $html .= ' data-required="' . (int) $required . '"';
+
+        foreach ($extra_data as $data_key => $data_value) {
+            $html .= ' data-' . $data_key . '="' . $data_value . '"';
+        }
+
+        $html .= '>';
+
+        $html .= $content;
 
         $html .= '</div>';
 

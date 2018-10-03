@@ -52,6 +52,6 @@ forms:
             - custom: 1
               label: Colonnes
               input_name: cols
-              data_type: array
+              no_container: 1
               content: 
                   callback: renderListConfigColsInput

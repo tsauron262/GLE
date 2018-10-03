@@ -476,8 +476,8 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             $config = BimpObject::getInstance('bimpcore', 'ListConfig');
             if ($config->find(array(
-                        'type'       => $owner_type,
-                        'id_object'  => (int) $id_owner,
+                        'owner_type'       => $owner_type,
+                        'id_owner'  => (int) $id_owner,
                         'obj_module' => $module,
                         'obj_name'   => $object_name,
                         'list_name'  => $list_name

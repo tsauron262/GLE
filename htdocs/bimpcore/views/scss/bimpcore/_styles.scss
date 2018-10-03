@@ -811,3 +811,21 @@ i.iconRight {
         }
     }
 }
+
+/*Position handles*/
+
+.positionHandle {
+    cursor: grab;
+    text-align: center;
+    
+    span {
+        display: inline-block;
+        font-size: 15px;
+        margin: 0 6px;
+    }
+
+    span:before {
+        font-family: 'FontAwesome';
+        content: '\f07d';
+    }
+}

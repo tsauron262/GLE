@@ -27,7 +27,7 @@
   margin: 0 3px;
   border-left: 1px solid #636363;
   border-right: 1px solid #636363;
-  border-top: 3px solid #ef7d00;
+  border-top: 3px solid #EF7D00;
   background-color: #fff;
   box-shadow: 0 0 4px #636363;
   cursor: pointer;
@@ -44,7 +44,7 @@
 }
 /* line 42, ../scss/fixeTabs.scss */
 #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption.active, #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption:hover {
-  background-color: #ef7d00;
+  background-color: #EF7D00;
 }
 /* line 44, ../scss/fixeTabs.scss */
 #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption.active .title, #bimp_fixe_tabs #bimp_fixe_tabs_captions .fixe_tab_caption:hover .title {
@@ -59,7 +59,7 @@
 }
 /* line 57, ../scss/fixeTabs.scss */
 #bimp_fixe_tabs #bimp_fixe_tabs_contents .fixe_tab_content {
-  background-color: gainsboro;
+  background-color: #DCDCDC;
   display: none;
   padding: 8px;
   text-align: right;

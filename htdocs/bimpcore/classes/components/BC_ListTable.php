@@ -664,7 +664,7 @@ class BC_ListTable extends BC_List
                             'type'    => 'button',
                             'onclick' => 'saveAllRowsModifications(\'' . $this->identifier . '\', $(this))'
                         ),
-                        'icon_before' => 'save'
+                        'icon_before' => 'fas_save'
                             ), 'button');
             $buttons[] = BimpRender::renderButton(array(
                         'classes'     => array('btn', 'btn-light-default'),
@@ -678,7 +678,7 @@ class BC_ListTable extends BC_List
             $title = BimpTools::ucfirst($this->object->getLabel('name_plur')) . ' modifié' . ($this->object->isLabelFemale() ? 'e' : '') . 's';
             $html .= '<span class="modifiedRowsActions" style="display: none">';
             $html .= BimpRender::renderDropDownButton($title, $buttons, array(
-                        'icon' => 'edit'
+                        'icon' => 'fas_edit'
             ));
             $html .= '</span>';
         }
@@ -928,7 +928,7 @@ class BC_ListTable extends BC_List
                     if ($this->params['enable_edit'] && (int) $item_params['update_btn']) {
                         $rowButtons[] = array(
                             'class'   => 'cancelModificationsButton hidden',
-                            'icon'    => 'undo',
+                            'icon'    => 'fas_undo',
                             'label'   => 'Annuler les modifications',
                             'onclick' => 'cancelObjectRowModifications(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
                         );
@@ -965,7 +965,7 @@ class BC_ListTable extends BC_List
                         $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $id_object . ', \'' . $item_params['modal_view'] . '\', $(this), \'' . $title . '\')';
                         $rowButtons[] = array(
                             'label'   => 'Vue rapide',
-                            'icon'    => 'eye',
+                            'icon'    => 'far_eye',
                             'onclick' => $onclick
                         );
                     }
@@ -975,7 +975,7 @@ class BC_ListTable extends BC_List
                         $onclick .= ');';
                         $rowButtons[] = array(
                             'label'   => 'Afficher',
-                            'icon'    => 'eye',
+                            'icon'    => 'far_eye',
                             'onclick' => $onclick
                         );
                     }
@@ -983,12 +983,12 @@ class BC_ListTable extends BC_List
                         $rowButtons[] = array(
                             'label'   => $row['params']['page_btn_label'],
                             'onclick' => 'window.location = \'' . $row['params']['url'] . '\';',
-                            'icon'    => 'file-o'
+                            'icon'    => 'far_file'
                         );
                         $rowButtons[] = array(
                             'label'   => $row['params']['page_btn_label'] . ' dans un nouvel onglet',
                             'onclick' => 'window.open(\'' . $row['params']['url'] . '\');',
-                            'icon'    => 'external-link'
+                            'icon'    => 'fas_external-link-alt'
                         );
                     }
                 }

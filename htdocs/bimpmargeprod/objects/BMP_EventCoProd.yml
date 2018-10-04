@@ -49,7 +49,7 @@ list:
         callback: isEventEditable
     bulk_actions:
         - label: supprimer les partenaires sélectionnés
-          icon: trash
+          icon: fas_trash-alt
           onclick: deleteSelectedObjects('list_id', $(this))
     enable_search: 0
     sort_field: id

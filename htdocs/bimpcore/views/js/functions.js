@@ -319,14 +319,17 @@ function checkSelectColor($select) {
 function inputQtyUp($qtyInputContainer) {
     var $input = $qtyInputContainer.find('input.qtyInput');
     if ($input.length) {
-        var val = 0;
+        var val = $input.val();
+        if (val === '') {
+            val = 0;
+        }
         var step = 1;
         var decimals = parseInt($input.data('decimals'));
         if (decimals > 0) {
-            val = Math.round10(parseFloat($input.val()), -decimals);
+            val = Math.round10(parseFloat(val), -decimals);
             step = parseFloat($input.data('step'));
         } else {
-            val = parseInt($input.val());
+            val = parseInt(val);
             step = parseInt($input.data('step'));
         }
         if (isNaN(step) || typeof (step) === 'undefined') {
@@ -346,14 +349,18 @@ function inputQtyUp($qtyInputContainer) {
 function inputQtyDown($qtyInputContainer) {
     var $input = $qtyInputContainer.find('input.qtyInput');
     if ($input.length) {
-        var val = 0;
+        var val = $input.val();
+        if (val === '') {
+            val = 0;
+        }
         var step = 1;
         var decimals = parseInt($input.data('decimals'));
+        
         if (decimals > 0) {
-            val = Math.round10(parseFloat($input.val()), -decimals);
+            val = Math.round10(parseFloat(val), -decimals);
             step = parseFloat($input.data('step'));
         } else {
-            val = parseInt($input.val());
+            val = parseInt(val);
             step = parseInt($input.data('step'));
         }
         if (isNaN(step) || typeof (step) === 'undefined') {

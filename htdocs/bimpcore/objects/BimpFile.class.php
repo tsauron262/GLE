@@ -95,7 +95,7 @@ class BimpFile extends BimpObject
                 if ($url) {
                     $buttons[] = array(
                         'label'   => 'Afficher l\'image',
-                        'icon'    => 'eye',
+                        'icon'    => 'far_eye',
                         'onclick' => 'loadImageModal($(this), \'' . $url . '\', \'' . $this->getData('file_name') . '\')'
                     );
                 }

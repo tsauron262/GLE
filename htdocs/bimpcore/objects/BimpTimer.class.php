@@ -105,10 +105,10 @@ class BimpTimer extends BimpObject
         $button .= '<i class="fa fa-times iconLeft"></i>Annuler la dernière réinitialisation</button>';
         $buttons[] = $button;
 
-        $html .= BimpRender::renderDropDownButton('Actions', $buttons, array('icon' => 'cogs', 'drop_up' => $drop_up));
+        $html .= BimpRender::renderDropDownButton('Actions', $buttons, array('icon' => 'fas_cogs', 'drop_up' => $drop_up));
 
         $html .= '<button type="button" class="btn btn-primary bimp_timer_save_btn" onclick="bimp_timers[\'' . $timer_id . '\'].save();">';
-        $html .= '<i class="fa fa-save iconLeft"></i>Enregistrer</button>';
+        $html .= '<i class="fas fa5-save iconLeft"></i>Enregistrer</button>';
         $html .= '<button type="button" class="btn btn-success bimp_timer_start_btn" onclick="bimp_timers[\'' . $timer_id . '\'].start();"><i class="fa fa-play iconLeft"></i>Démarrer</button>';
         $html .= '<button type="button" class="btn btn-warning bimp_timer_pause_btn" style="display: none" onclick="bimp_timers[\'' . $timer_id . '\'].pause();"><i class="fa fa-pause iconLeft"></i>Suspendre</button>';
 

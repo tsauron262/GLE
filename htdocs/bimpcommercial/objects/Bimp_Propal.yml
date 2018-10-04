@@ -43,7 +43,7 @@ objects:
                 fields: 
                     parent_object_name: Bimp_Propal
                 
-fields:     
+fields: 
     datec: 
         label: Créée le
         type: datetime
@@ -108,6 +108,11 @@ forms:
                   type: search_user
               show: 
                   callback: isNotLoaded
+              value: 
+                  prop: 
+                      object: 
+                          global: user
+                      name: id
             - field: entrepot
             - field: ef_type
             - field: fk_soc
@@ -134,9 +139,10 @@ forms:
               value: 
                   callback: getDureeValidite
               input_name: duree_validite
+              data_type: int
+              min: 0
               input: 
                   type: qty
-                  min: 1
             - field: fk_availability
               show: 
                   callback: isEditable
@@ -246,7 +252,7 @@ views:
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise
     content: 
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise
-
+        
 lists: 
     default: 
         title: Propositions commerciales
@@ -255,7 +261,7 @@ lists:
         checkboxes: 1
         bulk_actions:
             - label: supprimer les propositions commerciales sélectionnées
-              icon: trash
+              icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
         list_filters: 
             callback: getListFilters
@@ -286,7 +292,6 @@ lists:
             ref: 
                 field: ref
             libelle: 
-                field: libelle
             statut: 
                 field: fk_statut
             entrepot: 
@@ -310,114 +315,14 @@ lists:
                 field: total
         
     user: 
-        title: Propositions commerciales
-        icon: fas_file-invoice
-        checkboxes: 1
-        bulk_actions:
-            - label: supprimer les propositions commerciales sélectionnées
-              icon: trash
-              onclick: deleteSelectedObjects('list_id', $(this))
-        list_filters: 
-            callback: getListFilters
-        sort_field: datec
-        sort_way: desc
-        n: 10
-        add_form_name: default
-        add_form_values: 
-            fields: 
-                entrepot: 
-                    request: id_entrepot
-                fk_soc:
-                    request: id_client
-        edit_btn: 1
-        edit_form: default
-        delete_btn: 
-            callback: isDeletable
-        modal_view: default
-        page_btn: 1
-        joins: 
-            - table: element_contact
-              on: ec.element_id = a.rowid
-              alias: ec
-            - table: c_type_contact
-              on: ec.fk_c_type_contact = tc.rowid
-              alias: tc
+        extends: default
         cols: 
-            ref: 
-                field: ref
-            libelle: 
-                field: libelle
-            statut: 
-                field: fk_statut
-            entrepot: 
-                field: entrepot
-                display: nom_url
-            secteur: 
-                field: ef_type
-            client: 
-                field: fk_soc
-                display: nom_url
-            date_create: 
-                field: datec
-            total: 
-                field: total
+            commercial: unset
                 
     client: 
-        title: Propositions commerciales
-        icon: fas_file-invoice
-        checkboxes: 1
-        bulk_actions:
-            - label: supprimer les propositions commerciales sélectionnées
-              icon: trash
-              onclick: deleteSelectedObjects('list_id', $(this))
-        list_filters: 
-            callback: getListFilters
-        sort_field: datec
-        sort_way: desc
-        n: 10
-        add_form_name: default
-        add_form_values: 
-            fields: 
-                entrepot: 
-                    request: id_entrepot
-                fk_soc:
-                    request: id_client
-        edit_btn: 1
-        edit_form: default
-        delete_btn: 
-            callback: isDeletable
-        modal_view: default
-        page_btn: 1
-        joins: 
-            - table: element_contact
-              on: ec.element_id = a.rowid
-              alias: ec
-            - table: c_type_contact
-              on: ec.fk_c_type_contact = tc.rowid
-              alias: tc
+        extends: default
         cols: 
-            ref: 
-                field: ref
-            libelle: 
-                field: libelle
-            statut: 
-                field: fk_statut
-            entrepot: 
-                field: entrepot
-                display: nom_url
-            secteur: 
-                field: ef_type
-            commercial: 
-                label: Commercial
-                value: 
-                    callback: displayCommercial
-                search: 
-                    input: 
-                        type: search_user
-            date_create: 
-                field: datec
-            total: 
-                field: total
+            client: unset
                 
 cards: 
     default: 

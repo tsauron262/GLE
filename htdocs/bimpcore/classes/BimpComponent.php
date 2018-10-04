@@ -270,11 +270,6 @@ abstract class BimpComponent
         return true;
     }
 
-    public function fetchExtendedParams(BimpComponent $extension)
-    {
-        $this->params = $this->object->config->mergeParams($extension->params, $this->params);
-    }
-
     // Rendus:
 
     public function renderHtml()

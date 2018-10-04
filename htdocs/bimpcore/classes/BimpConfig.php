@@ -55,6 +55,9 @@ class BimpConfig
         $this->params = $this->mergeParams($this->params, $this->getParamsFromFile($dir . $file_name, $this->errors));
 
         if (is_array($this->params) && count($this->params)) {
+            foreach ($this->params as $param_name => $param) {
+                $this->checkParamsExtensions($param, $param_name);
+            }
             self::$params_cache[$dir . $file_name] = $this->params;
             return true;
         }
@@ -115,7 +118,6 @@ class BimpConfig
                 }
             }
         }
-
         return $params;
     }
 
@@ -136,6 +138,24 @@ class BimpConfig
         }
 
         return $parent_params;
+    }
+
+    public function checkParamsExtensions($params, $path)
+    {
+        if (is_array($params)) {
+            if (isset($params['extends']) && $params['extends']) {
+                $prev_path = $this->getPathPrevLevel($path);
+                if ($prev_path && $this->isDefined($prev_path . '/' . $params['extends'])) {
+                    $extended_params = $this->getParams($prev_path . '/' . $params['extends']);
+                    unset($params['extends']);
+                    $params = $this->mergeParams($extended_params, $params);
+                    $this->setParams($path, $params);
+                }
+            }
+            foreach ($params as $param_name => $param) {
+                $this->checkParamsExtensions($param, $path . '/' . $param_name);
+            }
+        }
     }
 
     // Gestion des chemins de configuration: 
@@ -327,6 +347,35 @@ class BimpConfig
 
         if (isset($current)) {
             $current = array_merge($current, $params);
+            return true;
+        }
+
+        return false;
+    }
+
+    public function setParams($path, $params)
+    {
+        if (is_null($path) || !$path) {
+            return false;
+        }
+
+        $path = explode('/', $path);
+
+        $current = &$this->params;
+
+        foreach ($path as $key) {
+            if ($key === '') {
+                continue;
+            }
+            if (isset($current[$key])) {
+                $current = &$current[$key];
+            } else {
+                return false;
+            }
+        }
+
+        if (isset($current)) {
+            $current = $params;
             return true;
         }
 

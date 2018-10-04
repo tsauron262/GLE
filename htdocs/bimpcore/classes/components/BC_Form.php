@@ -273,7 +273,7 @@ class BC_Form extends BC_Panel
                         ), 'button');
         $html .= BimpRender::renderButton(array(
                     'label'       => 'Enregistrer',
-                    'icon_before' => 'save',
+                    'icon_before' => 'fas_save',
                     'classes'     => array('btn', 'btn-primary', 'pull-right', 'save_object_button'),
                     'attr'        => array(
                         'onclick' => 'saveObjectFromForm(\'' . $this->identifier . '\')'
@@ -535,7 +535,7 @@ class BC_Form extends BC_Panel
             $html .= '</div>';
             $html .= '<div class="formGroupButtons">';
             $html .= '<span class="btn btn-default" onclick="removeSubObjectForm($(this))">';
-            $html .= '<i class="fa fa-trash iconLeft"></i>Supprimer</span>';
+            $html .= '<i class="fas fa5-trash-alt iconLeft"></i>Supprimer</span>';
             $html .= '</div>';
             $html .= '</div>';
             $form->fields_prefix .= 'sub_object_idx_';
@@ -568,7 +568,7 @@ class BC_Form extends BC_Panel
                     $html .= '</div>';
                     $html .= '<div class="formGroupButtons">';
                     $html .= '<span class="btn btn-default" onclick="removeSubObjectForm($(this))">';
-                    $html .= '<i class="fa fa-trash iconLeft"></i>Supprimer</span>';
+                    $html .= '<i class="fas fa5-trash-alt iconLeft"></i>Supprimer</span>';
                     $html .= '</div>';
                     $html .= '</div>';
                     $form->setFieldsPrefix($this->fields_prefix . $object_name . '_' . $nb_items . '_');

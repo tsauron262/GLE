@@ -169,12 +169,12 @@ class BC_Display extends BimpComponent
 
                                         if ($url) {
                                             $html .= '<span class="objectIcon" onclick="window.open(\'' . $url . '\')">';
-                                            $html .= '<i class="fa fa-external-link"></i>';
+                                            $html .= '<i class="fas fa5-external-link-alt"></i>';
                                             $html .= '</span>';
                                             if (is_null($this->params['modal_view'])) {
                                                 $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . addslashes(BimpObject::getInstanceNom($instance)) . '\')';
                                                 $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
-                                                $html .= '<i class="fa fa-eye"></i>';
+                                                $html .= '<i class="far fa5-eye"></i>';
                                                 $html .= '</span>';
                                             }
                                         }
@@ -183,7 +183,7 @@ class BC_Display extends BimpComponent
                                         $title = htmlentities(addslashes($instance->getInstanceName()));
                                         $onclick = 'loadModalView(\'' . $instance->module . '\', \'' . $instance->object_name . '\', ' . $instance->id . ', \'' . $this->params['modal_view'] . '\', $(this), \'' . $title . '\')';
                                         $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
-                                        $html .= '<i class="fa fa-eye"></i>';
+                                        $html .= '<i class="far fa5-eye"></i>';
                                         $html .= '</span>';
                                     }
                                     if (!$this->no_html && method_exists($instance, 'getNomExtraIcons')) {

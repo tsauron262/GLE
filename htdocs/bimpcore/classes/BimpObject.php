@@ -3144,7 +3144,7 @@ class BimpObject extends BimpCache
                     );
                     $items[] = BimpRender::renderButton(array(
                                 'label'       => 'Vue rapide',
-                                'icon_before' => 'eye',
+                                'icon_before' => 'far_eye',
                                 'classes'     => array(
                                     'btn', 'btn-light-default'
                                 ),
@@ -3164,7 +3164,7 @@ class BimpObject extends BimpCache
                                     ), 'button');
                     $items[] = BimpRender::renderButton(array(
                                 'label'       => 'Afficher la page dans un nouvel onglet',
-                                'icon_before' => 'external-link',
+                                'icon_before' => 'fas_external-link-alt',
                                 'classes'     => array(
                                     'btn', 'btn-light-default'
                                 ),
@@ -3304,7 +3304,7 @@ class BimpObject extends BimpCache
                     if (count($header_buttons) > 4) {
 
                         $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
-                                    'icon'       => 'cogs',
+                                    'icon'       => 'fas_cogs',
                                     'menu_right' => 1
                         ));
                     } else {

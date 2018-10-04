@@ -107,7 +107,7 @@ lists:
             callback: isPropalEditable
         bulk_actions:
             - label: Retirer les produits / services sélectionnés
-              icon: trash
+              icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
         enable_search: 0
         enable_edit: 

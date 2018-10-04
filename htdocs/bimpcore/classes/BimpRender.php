@@ -454,7 +454,7 @@ class BimpRender
                     $html .= ' data-trigger="hover" ';
                     $html .= ' data-content="Afficher dans une popup"';
                     $html .= ' onclick="loadModalObjectPage($(this), \'' . $url . '\', \'' . htmlentities(addslashes($title)) . '\')">';
-                    $html .= '<i class="fa fa-file-o iconLeft"></i>';
+                    $html .= '<i class="far fa5-file iconLeft"></i>';
                     $html .= 'Afficher</button>';
                 }
                 if ($url) {
@@ -463,7 +463,7 @@ class BimpRender
                     $html .= ' data-trigger="hover"';
                     $html .= ' data-content="Afficher dans un nouvel onglet"';
                     $html .= '>';
-                    $html .= '<i class="fa fa-external-link"></i>';
+                    $html .= '<i class="'.BimpRender::renderIconClass('fas_external-link-alt').'"></i>';
                     if (!$file) {
                         $html .= '&nbsp;&nbsp;Afficher';
                     }
@@ -610,12 +610,12 @@ class BimpRender
             }
             if ($url) {
                 $html .= '<span class="objectIcon" onclick="window.open(\'' . $url . '\')">';
-                $html .= '<i class="fa fa-external-link"></i>';
+                $html .= '<i class="fas fa5-external-link-alt"></i>';
                 $html .= '</span>';
                 if (!$modal_view) {
                     $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . addslashes(BimpObject::getInstanceNom($object)) . '\')';
                     $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
-                    $html .= '<i class="fa fa-eye"></i>';
+                    $html .= '<i class="far fa5-eye"></i>';
                     $html .= '</span>';
                 }
             }
@@ -624,7 +624,7 @@ class BimpRender
             $title = htmlentities(addslashes($object->getInstanceName()));
             $onclick = 'loadModalView(\'' . $object->module . '\', \'' . $object->object_name . '\', ' . $object->id . ', \'' . $modal_view . '\', $(this), \'' . $title . '\')';
             $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
-            $html .= '<i class="fa fa-eye"></i>';
+            $html .= '<i class="far fa5-eye"></i>';
             $html .= '</span>';
         }
 

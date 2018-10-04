@@ -71,7 +71,7 @@ class Bimp_Paiement extends BimpObject
                 $html .= BimpRender::renderAlerts('Vous n\'êtes connecté à aucune caisse', 'warning');
                 $html .= '<div style="text-align: center; margin: 15px 0">';
                 $url = DOL_URL_ROOT . '/bimpcaisse/index.php';
-                $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank"><i class="fa fa-external-link iconLeft"></i>Se connecter à une caisse</a>';
+                $html .= '<a class="btn btn-default" href="' . $url . '" target="_blank"><i class="fas fa5-external-link-alt iconLeft"></i>Se connecter à une caisse</a>';
                 $html .= '</div>';
             }
         } else {

@@ -143,7 +143,7 @@ lists:
             callback: getListRowStyle
         bulk_actions:
             - label: supprimer les lignes sélectionnées
-              icon: trash
+              icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: id_category_montant
         sort_way: asc
@@ -198,7 +198,7 @@ lists:
             callback: getListRowStyle
         bulk_actions:
             - label: supprimer les lignes sélectionnées
-              icon: trash
+              icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: id_category_montant
         sort_way: asc

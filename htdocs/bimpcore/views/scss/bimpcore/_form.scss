@@ -343,8 +343,8 @@ select.switch {
 .switchOption {
     &.selected {
         color: #fff!important;
-        background-color: $primary!important;
-        border-color: $primary!important;
+        background-color: $selection!important;
+        border-color: $selection!important;
     }
 }
 .timer_input {

@@ -127,7 +127,7 @@ class BC_ListViews extends BC_List
                     if ($this->params['edit_form']) {
                         $item_footer .= '<button type="button" class="btn btn-primary"';
                         $item_footer .= ' onclick="loadModalFormFromView(\'' . $view->identifier . '\', \'' . $this->params['edit_form'] . '\', $(this));"';
-                        $item_footer .= '><i class="fa fa-edit iconLeft"></i>Editer</button>';
+                        $item_footer .= '><i class="fas fa5-edit iconLeft"></i>Editer</button>';
                     }
                     if ($this->params['view_btn']) {
                         $item_footer .= '<div class="btn-group">';
@@ -142,7 +142,7 @@ class BC_ListViews extends BC_List
                             $item_footer .= ' data-container="body"';
                             $item_footer .= ' data-content="Afficher les données"';
                             $item_footer .= ' data-placement="top"';
-                            $item_footer .= '><i class="fa fa-file-o iconLeft"></i>Afficher</button>';
+                            $item_footer .= '><i class="far fa5-file iconLeft"></i>Afficher</button>';
                         }
                         if ($this->params['item_modal_view']) {
                             $item_footer .= '<button type="button" class="btn btn-default bs-popover" onclick="';
@@ -152,13 +152,13 @@ class BC_ListViews extends BC_List
                             $item_footer .= ' data-container="body"';
                             $item_footer .= ' data-content="Vue rapide"';
                             $item_footer .= ' data-placement="top"';
-                            $item_footer .= '><i class="fa fa-eye"></i>';
+                            $item_footer .= '><i class="far fa5-eye"></i>';
                             $item_footer .= '</button>';
                         }
                         if ($controller) {
                             $url = DOL_URL_ROOT . '/' . $this->object->module . '/index.php?fc=' . $controller . '&id=' . $this->object->id;
                             $item_footer .= '<a class="btn btn-default" href="' . $url . '" target="_blank" title="Afficher dans une nouvel onglet">';
-                            $item_footer .= '<i class="fa fa-external-link"></i>';
+                            $item_footer .= '<i class="fas fa5-external-link-alt"></i>';
                             $item_footer .= '</a>';
                         }
                         $item_footer .= '</div>';

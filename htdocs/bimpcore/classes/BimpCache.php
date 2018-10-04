@@ -188,6 +188,54 @@ class BimpCache
 
     // User: 
 
+    public static function getUsersArray($include_empty = 0)
+    {
+        global $conf, $langs;
+
+        if ($conf->global->USER_HIDE_INACTIVE_IN_COMBOBOX) {
+            $active_only = true;
+        } else {
+            $active_only = false;
+        }
+
+        $cache_key = 'users';
+        if ($active_only) {
+            $cache_key .= '_active_only';
+        }
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            if ($active_only) {
+                $where = '`statut` != 0';
+            } else {
+                $where = '1';
+            }
+            if (empty($conf->global->MAIN_FIRSTNAME_NAME_POSITION)) {
+                $order_by = 'firstname';
+            } else {
+                $order_by = 'lastname';
+            }
+            $rows = self::getBdb()->getRows('user', $where, null, 'object', array('rowid', 'firstname', 'lastname'), $order_by, 'asc');
+            if (!is_null($rows)) {
+                $userstatic = new User(self::getBdb()->db);
+                foreach ($rows as $r) {
+                    $userstatic->id = $r->rowid;
+                    $userstatic->lastname = $r->lastname;
+                    $userstatic->firstname = $r->firstname;
+
+                    if (empty($conf->global->MAIN_FIRSTNAME_NAME_POSITION)) {
+                        $fullNameMode = 1;
+                    } else {
+                        $fullNameMode = 0;
+                    }
+                    self::$cache[$cache_key][$r->rowid] = $userstatic->getFullName($langs, $fullNameMode, -1);
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
     public static function getUserCentresArray()
     {
 
@@ -223,6 +271,24 @@ class BimpCache
         }
 
         return array();
+    }
+
+    // MySoc: 
+
+    public static function getComptesArray()
+    {
+        if (!isset(self::$cache['comptes'])) {
+            self::$cache['comptes'] = array();
+
+            $rows = self::getBdb()->getRows('bank_account');
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache['comtpes'][(int) $r->rowid] = $r->label;
+                }
+            }
+        }
+
+        return self::$cache['comptes'];
     }
 
     // Emails: 
@@ -335,6 +401,22 @@ class BimpCache
         return self::$cache['centres_array'];
     }
 
+    public static function getEntrepotsArray($include_empty = false)
+    {
+        if (!isset(self::$cache['entrepots'])) {
+            self::$cache['entrepots'] = array();
+
+            $rows = self::getBdb()->getRows('entrepot', '1', null, 'object', array('rowid', 'ref', 'description'), 'ref', 'asc');
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache['entrepots'][(int) $r->rowid] = $r->ref;
+                }
+            }
+        }
+
+        return self::getCacheArray('entrepots', $include_empty);
+    }
+
     public static function getCondReglementsArray()
     {
         if (!isset(self::$cache['cond_reglements_array'])) {
@@ -348,7 +430,7 @@ class BimpCache
             }
         }
 
-        return self::$cache['cond_reglements_array'];
+        return self::getCacheArray('cond_reglements_array', 1);
     }
 
     public static function getModeReglementsArray($key = 'id', $active_only = true)
@@ -382,7 +464,7 @@ class BimpCache
             }
         }
 
-        return self::$cache[$cache_key];
+        return self::getCacheArray($cache_key, 1);
     }
 
     public static function getAvailabilitiesArray()
@@ -402,7 +484,7 @@ class BimpCache
             }
         }
 
-        return self::$cache['availabilities_array'];
+        return self::getCacheArray('availabilities_array', 1);        
     }
 
     public static function getDemandReasonsArray()
@@ -476,8 +558,8 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             $config = BimpObject::getInstance('bimpcore', 'ListConfig');
             if ($config->find(array(
-                        'owner_type'       => $owner_type,
-                        'id_owner'  => (int) $id_owner,
+                        'owner_type' => $owner_type,
+                        'id_owner'   => (int) $id_owner,
                         'obj_module' => $module,
                         'obj_name'   => $object_name,
                         'list_name'  => $list_name

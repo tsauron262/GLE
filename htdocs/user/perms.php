@@ -89,6 +89,7 @@ if (empty($reshook)) {
 	if ($action == 'addrights' && $caneditperms) {
 		$edituser = new User($db);
 		$edituser->fetch($object->id);
+                $edituser->oldcopy = clone $edituser;
 		$edituser->addrights($rights, $module, '', $entity);
 
 		// Si on a touche a ses propres droits, on recharge
@@ -102,6 +103,7 @@ if (empty($reshook)) {
 	if ($action == 'delrights' && $caneditperms) {
 		$edituser = new User($db);
 		$edituser->fetch($object->id);
+                $edituser->oldcopy = clone $edituser;
 		$edituser->delrights($rights, $module, '', $entity);
 
 		// Si on a touche a ses propres droits, on recharge

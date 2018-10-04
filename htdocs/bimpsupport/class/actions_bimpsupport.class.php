@@ -112,7 +112,7 @@ class ActionsBimpsupport {
             $return .= '<div class="menu_titre">' . img_object("SAV", "drap0@synopsistools") . ' Fiche SAV</div>';
             $return .= '<div class="menu_contenu">';
             $return .= '<a class="vsmenu" title="Acces SAV" href="'.$urlAcces.'"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="" title=""> Acces SAV</a>';
-            $return .= '<br/><a class="vsmenu" title="Garantie Apple" href="' . DOL_URL_ROOT . '/synopsisapple/test.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/on.png" border="0" alt="" title=""> Garantie Apple</a>';
+            $return .= '<br/><a class="vsmenu" title="Garantie Apple" href="' . DOL_URL_ROOT . '/synopsisapple/test.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/star.png" border="0" alt="" title=""> Garantie Apple</a>';
             $return .= '</div>';
 
             foreach($tabCentre as $idGr => $tabOneCentr){

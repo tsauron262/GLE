@@ -1765,7 +1765,7 @@ else
 					$exclude = array();
 
 					$usergroup=new UserGroup($db);
-					$groupslist = $usergroup->listGroupsForUser($object->id);
+					$groupslist = $usergroup->listGroupsForUser($object->id, false);
 
 					if (! empty($groupslist))
 					{

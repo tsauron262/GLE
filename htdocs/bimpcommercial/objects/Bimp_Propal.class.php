@@ -777,15 +777,18 @@ class Bimp_Propal extends BimpComm
 
     public function isActionAllowed($action, &$errors = array())
     {
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-            return 0;
-        }
-
         global $conf;
         $status = $this->getData('fk_statut');
-        if (is_null($status)) {
-            return 0;
+
+        if (in_array($action, array('modify', 'modify', 'close', 'reopen', 'sendEmail', 'createOrder', 'createContract', 'createInvoice', 'classifyBilled'))) {
+            if (!$this->isLoaded()) {
+                $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+                return 0;
+            }
+            if (is_null($status)) {
+                $errors[] = 'Statut absent';
+                return 0;
+            }
         }
         $status = (int) $status;
         $soc = $this->getChildObject('client');

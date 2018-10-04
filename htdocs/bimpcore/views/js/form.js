@@ -140,8 +140,8 @@ function loadModalForm($button, data, title, successCallback, on_save) {
         var modal_idx = parseInt(bimpAjax.$resultContainer.data('idx'));
         $form.data('modal_idx', modal_idx);
         bimpModal.removeComponentContent($form.attr('id'));
-        bimpModal.addButton('<i class="fa fa-save iconLeft"></i>Enregistrer', 'saveObjectFromForm(\'' + result.form_id + '\', $(this), null, \'' + on_save + '\');', 'primary', 'save_object_button', modal_idx);
-        bimpModal.addlink('<i class="fa fa-file-o iconLeft"></i>Afficher', '', 'primary', 'hidden objectViewLink', modal_idx);
+        bimpModal.addButton('<i class="fas fa5-save iconLeft"></i>Enregistrer', 'saveObjectFromForm(\'' + result.form_id + '\', $(this), null, \'' + on_save + '\');', 'primary', 'save_object_button', modal_idx);
+        bimpModal.addlink('<i class="far fa5-file iconLeft"></i>Afficher', '', 'primary', 'hidden objectViewLink', modal_idx);
 
         if ($form.length) {
             $form.each(function () {
@@ -360,7 +360,7 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                     html += '<button class="cancel_button btn btn-default">';
                     html += '<i class="fa fa-times iconLeft"></i>Annuler';
                     html += '<button class="save_object_button btn btn-primary">';
-                    html += '<i class="fa fa-save iconLeft"></i>Enregistrer';
+                    html += '<i class="fas fa5-save iconLeft"></i>Enregistrer';
                     html += '</div>';
 
                     html += '</div>';
@@ -870,6 +870,7 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     }
 
     if (value || value === 0) {
+        var sortable = parseInt($container.data('sortable'));
         var values_field_name = $inputContainer.data('values_field');
         var check = true;
         $container.find('.multipleValuesList').find('input[name="' + values_field_name + '[]"]').each(function () {
@@ -893,8 +894,11 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
         var html = '<tr class="itemRow">';
         html += '<td style="display: none"><input class="item_value" type="hidden" value="' + value + '" name="' + values_field_name + '[]"/></td>';
-        html += '<td>' + label + '</td>';
-        html += '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn"';
+        if (sortable) {
+            html += '<td class="positionHandle"><span></span></td>';
+        }
+        html += '<td class="item_label">' + label + '</td>';
+        html += '<td class="removeButton"><button type="button" class="btn btn-light-danger iconBtn"';
         html += ' onclick="';
         if (ajax_save) {
             html += 'var $button = $(this); deleteObjectMultipleValuesItem(\'' + $container.data('module') + '\', ';
@@ -904,15 +908,22 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         } else {
             html += 'removeMultipleInputValue($(this), \'' + value_input_name + '\');';
         }
-        html += '"><i class="fa fa-trash"></i></button></td>';
+        html += '"><i class="fas fa5-trash-alt"></i></button></td>';
         html += '</tr>';
 
         $value_input.val('');
         $label_input.val('');
 
+        if ($value_input.hasClass('select2-hidden-accessible')) {
+            $inputContainer.find('.select2-selection__rendered').html('');
+        }
+
         if (ajax_save) {
             addObjectMultipleValuesItem($container.data('module'), $container.data('object_name'), $container.data('id_object'), values_field_name, value, null, function () {
                 $container.find('table').find('tbody.multipleValuesList').append(html);
+                if (sortable) {
+                    setSortableMultipleValuesHandlesEvents($container);
+                }
                 checkMultipleValues();
                 $('body').trigger($.Event('inputMultipleValuesChange', {
                     input_name: values_field_name,
@@ -921,6 +932,9 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
             });
         } else {
             $container.find('table').find('tbody.multipleValuesList').append(html);
+            if (sortable) {
+                setSortableMultipleValuesHandlesEvents($container);
+            }
             checkMultipleValues();
             $('body').trigger($.Event('inputMultipleValuesChange', {
                 input_name: values_field_name,
@@ -971,12 +985,21 @@ function checkMultipleValues() {
                             }
                         });
                         if (show_input) {
-                            $input.show();
+                            if ($input.hasClass('select2-hidden-accessible')) {
+                                $inputContainer.find('.select2-container').show();
+                            } else {
+                                $input.show();
+                            }
                             $container.find('.addValueBtn').parent('div').show();
                         } else {
-                            $input.hide();
+                            if ($input.hasClass('select2-hidden-accessible')) {
+                                $inputContainer.find('.select2-container').hide();
+                            } else {
+                                $input.hide();
+                            }
                             $container.find('.addValueBtn').parent('div').hide();
                         }
+                        $inputContainer.find('.select2-selection__rendered').html('');
                     }
                 }
             }
@@ -1465,6 +1488,76 @@ function setFormEvents($form) {
 }
 
 function setInputsEvents($container) {
+    var in_modal = $.isOk($container.findParentByClass('modal'));
+    $container.find('select').each(function () {
+        var dropdownCssClass = 'ui-dialog';
+        if (in_modal) {
+            dropdownCssClass += ' modal-ui-dialog';
+        }
+        var options = {
+            dir: 'ltr',
+            width: 'resolve',
+            minimumResultsForSearch: 15,
+            minimumInputLength: 0,
+            language: select2arrayoflanguage,
+            containerCssClass: ':all:',
+            dropdownCssClass: dropdownCssClass,
+            templateResult: function (data, container) {
+                if (data.element) {
+                    $(container).addClass($(data.element).attr("class"));
+                }
+
+                if (data.loading) {
+                    return data.text;
+                }
+
+                var $option = $(data.element);
+
+                if ($option.css('display') === 'none') {
+                    $(container).remove();
+                    return;
+                }
+
+                if ($option.data('html')) {
+                    return htmlEntityDecodeJs($(data.element).attr("data-html"));
+                }
+
+                var html = '<span style="';
+                if ($option.data('color')) {
+                    html += 'color: #' + $option.data('color') + '; font-weight: bold;';
+                }
+                html += '">';
+                if ($option.data('icon_class')) {
+                    html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
+                }
+
+                html += data.text + '</span>';
+                return html;
+            },
+            templateSelection: function (selection) {
+                var $option = $(selection.element);
+
+                var html = '<span style="';
+                if ($option.data('color')) {
+                    html += 'color: #' + $option.data('color') + '; font-weight: bold;';
+                }
+                html += '">';
+                if ($option.data('icon_class')) {
+                    html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
+                }
+
+                html += selection.text + '</span>';
+                return html;
+            },
+            escapeMarkup: function (markup) {
+                return markup;
+            }
+        };
+        if (in_modal) {
+            options.dropdownParent = $('#page_modal');
+        }
+        $(this).select2(options);
+    });
     $container.find('.switch').each(function () {
         if (!parseInt($(this).data('switch_event_init'))) {
             setSwitchInputEvents($(this));
@@ -1581,6 +1674,11 @@ function setInputsEvents($container) {
                 searchZipTown($(this));
             });
             $(this).data('ziptown_event_init', 1);
+        }
+    });
+    $container.find('.inputMultipleValuesContainer').each(function () {
+        if (parseInt($(this).data('sortable'))) {
+            setSortableMultipleValuesHandlesEvents($(this));
         }
     });
 }
@@ -1814,6 +1912,31 @@ function setSelectDisplayHelpEvents($container, $input) {
             $input.data('select_help_event_init', 1);
             $input.change();
         }
+    }
+}
+
+function setSortableMultipleValuesHandlesEvents($container) {
+    var $tbody = $container.find('tbody.multipleValuesList');
+    var $handles = $tbody.find('td.positionHandle');
+    var $rows = $handles.parent('tr');
+
+    if ($tbody.hasClass('ui-sortable')) {
+        $tbody.sortable('destroy');
+    }
+
+    if ($handles.length) {
+        $tbody.sortable({
+            appendTo: $tbody,
+            axis: 'y',
+            cursor: 'move',
+            handle: 'td.positionHandle',
+            items: $rows,
+            opacity: 1,
+            start: function (e, ui) {
+            },
+            update: function (e, ui) {
+            }
+        });
     }
 }
 

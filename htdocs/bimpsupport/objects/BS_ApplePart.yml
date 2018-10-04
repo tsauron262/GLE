@@ -59,7 +59,7 @@ lists:
             callback: isCartEditable
         bulk_actions:
             - label: supprimer les composants sélectionnés
-              icon: trash
+              icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
         enable_search: 0
         sort_field: id

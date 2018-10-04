@@ -195,6 +195,11 @@ class BC_Field extends BimpComponent
                         );
                         break;
 
+                    case 'list':
+                        $input_type = 'text';
+                        $search_type = 'value_part';
+                        break;
+
                     default:
                         if ($this->object->config->isDefined($this->config_path . '/search/input')) {
                             $input_path = $this->config_path . '/search/input';

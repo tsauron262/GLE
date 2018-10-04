@@ -169,7 +169,7 @@ class BC_FieldsTable extends BC_Panel
                         'type'    => 'button',
                         'onclick' => 'saveObjectfromFieldsTable(\'' . $this->identifier . '\', $(this))'
                     ),
-                    'icon_before' => 'save'
+                    'icon_before' => 'fas_save'
                         ), 'button');
 
         $html .= parent::renderFooterExtraBtn();

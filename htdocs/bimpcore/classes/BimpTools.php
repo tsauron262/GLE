@@ -82,16 +82,16 @@ class BimpTools
     {
         // Chargement d'un formulaire:
         if (BimpTools::isSubmit('param_values/fields/' . $field_name)) {
-            return BimpTools::getValue('params_values/fields/' . $field_name);
+            return BimpTools::getValue('param_values/fields/' . $field_name);
         }
 
         // Chargement d'un input: 
         if (BimpTools::isSubmit('fields/' . $field_name)) {
             return BimpTools::getValue('fields/' . $field_name);
         }
-        
+
         // Action ajax: 
-         if (BimpTools::isSubmit('extra_data/' . $field_name)) {
+        if (BimpTools::isSubmit('extra_data/' . $field_name)) {
             return BimpTools::getValue('extra_data/' . $field_name);
         }
 
@@ -99,8 +99,8 @@ class BimpTools
         if (BimpTools::isSubmit($field_name)) {
             return BimpTools::getValue($field_name);
         }
-        
-        return $default_value; 
+
+        return $default_value;
     }
 
     // Gestion des objects Dolibarr:
@@ -917,6 +917,12 @@ class BimpTools
                     return true;
                 }
                 return false;
+
+            case 'json':
+                if (is_string($value)) {
+                    $value = json_decode($value);
+                }
+                return is_array($value);
         }
         return true;
     }

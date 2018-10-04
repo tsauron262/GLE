@@ -13,9 +13,11 @@ class BC_List extends BC_Panel
     protected $items = null;
     public $nbTotalPages = 1;
     protected $nbItems = null;
+    public $userConfig = null;
 
     public function __construct(BimpObject $object, $path, $list_name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
     {
+        $this->params_def['configurable'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['pagination'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['n'] = array('data_type' => 'int', 'default' => 10, 'request' => true);
         $this->params_def['p'] = array('data_type' => 'int', 'default' => 1, 'request' => true);
@@ -67,6 +69,37 @@ class BC_List extends BC_Panel
             if (!$this->object->canCreate()) {
                 $this->params['add_btn'] = 0;
                 $this->params['add_form_name'] = null;
+            }
+
+            if ($this->params['configurable']) {
+                global $user;
+                $this->userConfig = $this->object->getListConfig(2, $user->id, $this->name);
+                if (BimpObject::objectLoaded($this->userConfig)) {
+                    if (!BimpTools::isSubmit('param_sort_field')) {
+                        $sort_field = $this->userConfig->getData('sort_field');
+                        if (!is_null($sort_field)) {
+                            $this->params['sort_field'] = $sort_field;
+                        }
+                    }
+                    if (!BimpTools::isSubmit('param_sort_way')) {
+                        $sort_way = $this->userConfig->getData('sort_way');
+                        if (!is_null($sort_way)) {
+                            $this->params['sort_way'] = $sort_way;
+                        }
+                    }
+                    if (!BimpTools::isSubmit('param_sort_option')) {
+                        $sort_option = $this->userConfig->getData('sort_option');
+                        if (!is_null($sort_option)) {
+                            $this->params['sort_option'] = $sort_option;
+                        }
+                    }
+                    if (!BimpTools::isSubmit('param_n')) {
+                        $n = $this->userConfig->getData('nb_items');
+                        if (!is_null($n)) {
+                            $this->params['n'] = $n;
+                        }
+                    }
+                }
             }
         }
 

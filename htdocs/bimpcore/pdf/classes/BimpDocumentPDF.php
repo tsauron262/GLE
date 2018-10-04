@@ -38,6 +38,9 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (isset($this->object->array_options['options_pdf_hide_reduc'])) {
                     $this->hideReduc = (int) $this->object->array_options['options_pdf_hide_reduc'];
                 }
+                if (isset($this->object->array_options['options_pdf_hide_ttc'])) {
+                    $this->hideTtc = (int) $this->object->array_options['options_pdf_hide_ttc'];
+                }
                 if (isset($this->object->array_options['options_pdf_hide_total'])) {
                     $this->hideTotal = (int) $this->object->array_options['options_pdf_hide_total'];
                 }

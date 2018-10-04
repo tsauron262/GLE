@@ -202,13 +202,17 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($this->fromCompany->forme_juridique_code) {
             $line1 .= $this->langs->convToOutputCharset(getFormeJuridiqueLabel($this->fromCompany->forme_juridique_code));
         }
+        
+        if ($this->fromCompany->name) {
+            $line1 .= " ".$this->langs->convToOutputCharset($this->fromCompany->name);
+        }
 
         if ($this->fromCompany->capital) {
             $captital = price2num($this->fromCompany->capital);
             if (is_numeric($captital) && $captital > 0) {
                 $line1 .= ($line1 ? " - " : "") . $this->langs->transnoentities("CapitalOf", price($captital, 0, $this->langs, 0, 0, 0, $conf->currency));
             } else {
-                $line1 .= ($line1 ? " - " : "") . $this->langs->transnoentities("CapitalOf", $captital, $this->langs);
+                $line1 .= ($line1 ? " - " : "") . $this->langs->transnoentities("CapitalOf", $this->fromCompany->capital, $this->langs);
             }
         }
 
@@ -217,7 +221,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line1 .= ($line1 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof1);
+            $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof1);
         }
 
         if ($this->fromCompany->idprof2) {
@@ -225,7 +229,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line1 .= ($line1 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof2);
+            $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof2);
         }
 
         if ($this->fromCompany->idprof3) {
@@ -235,7 +239,7 @@ class BimpDocumentPDF extends BimpModelPDF
 //                $field = $reg[1];
 //                
 //            }
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof3);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof3);
         }
 
         if ($this->fromCompany->idprof4) {
@@ -243,7 +247,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof4);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof4);
         }
 
         if ($this->fromCompany->idprof5) {
@@ -251,18 +255,18 @@ class BimpDocumentPDF extends BimpModelPDF
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof5);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof5);
         }
 
         if ($this->fromCompany->idprof6) {
             $field = $this->langs->transcountrynoentities("ProfId6", $this->fromCompany->country_code);
             if (preg_match('/\((.*)\)/i', $field, $reg))
                 $field = $reg[1];
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof6);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof6);
         }
         // IntraCommunautary VAT
         if ($this->fromCompany->tva_intra != '') {
-            $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . ": " . $this->langs->convToOutputCharset($this->fromCompany->tva_intra);
+            $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . " : " . $this->langs->convToOutputCharset($this->fromCompany->tva_intra);
         }
 
         $this->footer_vars = array(
@@ -560,30 +564,35 @@ class BimpDocumentPDF extends BimpModelPDF
         $html = '';
         
         if($this->totals['RPCP'] > 0){
-            $html .= '<p style="font-size: 6px; font-style: italic"><span style="font-weight: bold;">Rémunération Copie Privée : '.price($this->totals['RPCP']).' € HT</span>
-<br/>Notice officielle d\'information sur la copie privée à : http://www.copieprivee.culture.gouv.fr<br/>
-Remboursement/exonération de la rémunération pour usage professionnel : http://www.copiefrance.fr</p>';
+            $html .= '<p style="font-size: 6px; font-style: italic">';
+            $html .= '<span style="font-weight: bold;">Rémunération Copie Privée : '.price($this->totals['RPCP']).' € HT</span>
+<br/>Notice officielle d\'information sur la copie privée à : http://www.copieprivee.culture.gouv.fr.
+  Remboursement/exonération de la rémunération pour usage professionnel : http://www.copiefrance.fr';
         }
         
         
 
 //        $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
 //        $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
-//
-//        $html .= '<p style="font-size: 6px; font-style: italic">La Société ' . $this->fromCompany->nom . ' ne peut être tenue pour responsable de la perte éventuelles de données informatiques.';
-//        $html .= ' Il appartient au client d’effectuer des sauvegardes régulières de ses informations. En aucun cas les soucis systèmes, logiciels, paramétrages internet';
-//        $html .= ' et périphériques et les déplacements ne rentrent dans le cadre de la garantie constructeur.</p>';
-        
-        $html .= '<span style="font-size: 6px; font-weight: bold; font-style: italic">';
-            $html .= 'Aucun escompte pour paiement anticipé ne sera accordé.';
+
+  
+        $html .= '<br/><span style="font-weight: bold;">';
         if($this->pdf->addCgvPages)
             $html .= '<br/>La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et disponibles sur www.bimp.fr';
         else
             $html .= '<br/>Nos Conditions Générales de Vente sont consultables sur le site www.bimp.fr';
         $html .= "</span>";
-        $html .= '<br/><span style="font-size: 6px; font-style: italic">Les marchandises vendues sont soumises à une clause de réserve de propriété.
-<br/>En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).</span>';
-//        $html .= "</p>";
+        $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
+ En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';
+                $html .= 'La Société ' . $this->fromCompany->name . ' ne peut être tenue pour responsable de la perte éventuelles de données informatiques. ';
+        $html .= ' Il appartient au client d’effectuer des sauvegardes régulières de ses informations. En aucun cas les soucis systèmes, logiciels, paramétrages internet';
+        $html .= ' et périphériques et les déplacements ne rentrent dans le cadre de la garantie constructeur.';
+      
+        
+        $html .= '<span style="font-weight: bold;">';
+            $html .= ' Aucun escompte pour paiement anticipé ne sera accordé.';
+            $html .= "</span>";
+        $html .= "</p>";
         $this->writeContent($html);
     }
 

@@ -14,12 +14,13 @@ class BimpPDF_AmountsTable extends BimpPDF_Table
         'reduc'     => array('label' => 'Remise.', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
         'total_ht'  => array('label' => 'Total HT', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
         'tva'       => array('label' => 'TVA', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
-        'total_ttc' => array('label' => 'Total TTC', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;')
+        'total_ttc' => array('label' => 'Total TTC', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;'),
+        'pu_remise' => array('label' => 'P.U remisé', 'active' => 0, 'style' => 'text-align: right;', 'head_style' => 'text-align: center;')
     );
 
     public function __construct($pdf)
     {
-        $this->setCols(array('desc', 'tva', 'pu_ht', 'qte', 'progress', 'reduc', 'total_ht', 'total_ttc'));
+        $this->setCols(array('desc', 'pu_ht', 'reduc', 'pu_remise', 'qte', 'progress', 'total_ht', 'tva', 'total_ttc'));
 
         parent::__construct($pdf);
     }

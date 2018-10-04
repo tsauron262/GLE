@@ -18,6 +18,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $acompteTva20 = 0;
     public $tva = array();
     public $hideReduc = false;
+    public $hideTtc = true;
     public $hideTotal = false;
     public $hideRef = false;
     public $hideLabelProd = true;
@@ -36,6 +37,9 @@ class BimpDocumentPDF extends BimpModelPDF
             if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
                 if (isset($this->object->array_options['options_pdf_hide_reduc'])) {
                     $this->hideReduc = (int) $this->object->array_options['options_pdf_hide_reduc'];
+                }
+                if (isset($this->object->array_options['options_pdf_hide_ttc'])) {
+                    $this->hideTtc = (int) $this->object->array_options['options_pdf_hide_ttc'];
                 }
                 if (isset($this->object->array_options['options_pdf_hide_total'])) {
                     $this->hideTotal = (int) $this->object->array_options['options_pdf_hide_total'];
@@ -198,13 +202,17 @@ class BimpDocumentPDF extends BimpModelPDF
         if ($this->fromCompany->forme_juridique_code) {
             $line1 .= $this->langs->convToOutputCharset(getFormeJuridiqueLabel($this->fromCompany->forme_juridique_code));
         }
+        
+        if ($this->fromCompany->name) {
+            $line1 .= " ".$this->langs->convToOutputCharset($this->fromCompany->name);
+        }
 
         if ($this->fromCompany->capital) {
             $captital = price2num($this->fromCompany->capital);
             if (is_numeric($captital) && $captital > 0) {
                 $line1 .= ($line1 ? " - " : "") . $this->langs->transnoentities("CapitalOf", price($captital, 0, $this->langs, 0, 0, 0, $conf->currency));
             } else {
-                $line1 .= ($line1 ? " - " : "") . $this->langs->transnoentities("CapitalOf", $captital, $this->langs);
+                $line1 .= ($line1 ? " - " : "") . $this->langs->transnoentities("CapitalOf", $this->fromCompany->capital, $this->langs);
             }
         }
 
@@ -213,7 +221,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line1 .= ($line1 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof1);
+            $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof1);
         }
 
         if ($this->fromCompany->idprof2) {
@@ -221,7 +229,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line1 .= ($line1 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof2);
+            $line1 .= ($line1 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof2);
         }
 
         if ($this->fromCompany->idprof3) {
@@ -231,7 +239,7 @@ class BimpDocumentPDF extends BimpModelPDF
 //                $field = $reg[1];
 //                
 //            }
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof3);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof3);
         }
 
         if ($this->fromCompany->idprof4) {
@@ -239,7 +247,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof4);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof4);
         }
 
         if ($this->fromCompany->idprof5) {
@@ -247,18 +255,18 @@ class BimpDocumentPDF extends BimpModelPDF
             if (preg_match('/\((.*)\)/i', $field, $reg)) {
                 $field = $reg[1];
             }
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof5);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof5);
         }
 
         if ($this->fromCompany->idprof6) {
             $field = $this->langs->transcountrynoentities("ProfId6", $this->fromCompany->country_code);
             if (preg_match('/\((.*)\)/i', $field, $reg))
                 $field = $reg[1];
-            $line2 .= ($line2 ? " - " : "") . $field . ": " . $this->langs->convToOutputCharset($this->fromCompany->idprof6);
+            $line2 .= ($line2 ? " - " : "") . $field . " : " . $this->langs->convToOutputCharset($this->fromCompany->idprof6);
         }
         // IntraCommunautary VAT
         if ($this->fromCompany->tva_intra != '') {
-            $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . ": " . $this->langs->convToOutputCharset($this->fromCompany->tva_intra);
+            $line2 .= ($line2 ? " - " : "") . $this->langs->transnoentities("VATIntraShort") . " : " . $this->langs->convToOutputCharset($this->fromCompany->tva_intra);
         }
 
         $this->footer_vars = array(
@@ -479,7 +487,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 } else {
                     $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
                 }
-
+                
                 $row['qte'] = pdf_getlineqty($this->object, $i, $this->langs);
 
                 if (isset($this->object->situation_cycle_ref) && $this->object->situation_cycle_ref) {
@@ -505,7 +513,12 @@ class BimpDocumentPDF extends BimpModelPDF
                 $row_total_ttc = BimpTools::calculatePriceTaxIn($row_total_ht, $line->tva_tx);
 
                 $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '');
-                $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
+                
+                
+                if($this->hideTtc)
+                    $row['pu_remise'] = price($pu_ht_with_remise, 0, $this->langs);
+                else
+                    $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
 
                 $total_ht_without_remises += $line->subprice * (float) $line->qty;
                 $total_ttc_without_remises += BimpTools::calculatePriceTaxIn($line->subprice * (float) $line->qty, (float) $line->tva_tx);
@@ -524,14 +537,19 @@ class BimpDocumentPDF extends BimpModelPDF
 
         if ($remise_globale) {
             $remise_infos = $this->bimpCommObject->getRemisesInfos();
-            $table->rows[] = array(
+            $ln = array(
                 'desc'      => 'Remise exceptionnelle sur l\'intégralité ' . $this->bimpCommObject->getLabel('of_the'),
                 'qte'       => 1,
                 'tva'       => '',
                 'pu_ht'     => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], ''),
-                'total_ht'  => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], ''),
-                'total_ttc' => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ttc'], '')
+                'total_ht'  => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], '')
             );
+            if(!$this->hideTtc)
+                $ln['total_ttc'] = BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ttc'], '');
+            else
+                $ln['pu_remise'] = BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], '');
+            
+            $table->rows[] = $ln;
         }
 
         $this->writeContent('<div style="text-align: right; font-size: 6px;">Montants exprimés en Euros</div>');
@@ -546,20 +564,35 @@ class BimpDocumentPDF extends BimpModelPDF
         $html = '';
         
         if($this->totals['RPCP'] > 0){
-            $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">Rémunération Copie Privée : '.price($this->totals['RPCP']).' € HT</p>
-<p style="font-size: 6px; font-style: italic">Notice officielle d\'information sur la copie privée à : http://www.copieprivee.culture.gouv.fr<br/>
-Remboursement/exonération de la rémunération pour usage professionnel : http://www.copiefrance.fr</p>';
+            $html .= '<p style="font-size: 6px; font-style: italic">';
+            $html .= '<span style="font-weight: bold;">Rémunération Copie Privée : '.price($this->totals['RPCP']).' € HT</span>
+<br/>Notice officielle d\'information sur la copie privée à : http://www.copieprivee.culture.gouv.fr.
+  Remboursement/exonération de la rémunération pour usage professionnel : http://www.copiefrance.fr';
         }
         
         
 
-        $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
-        $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
+//        $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
+//        $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
 
-        $html .= '<p style="font-size: 6px; font-style: italic">La Société ' . $this->fromCompany->nom . ' ne peut être tenue pour responsable de la perte éventuelles de données informatiques.';
+  
+        $html .= '<br/><span style="font-weight: bold;">';
+        if($this->pdf->addCgvPages)
+            $html .= '<br/>La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et disponibles sur www.bimp.fr';
+        else
+            $html .= '<br/>Nos Conditions Générales de Vente sont consultables sur le site www.bimp.fr';
+        $html .= "</span>";
+        $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
+ En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';
+                $html .= 'La Société ' . $this->fromCompany->name . ' ne peut être tenue pour responsable de la perte éventuelles de données informatiques. ';
         $html .= ' Il appartient au client d’effectuer des sauvegardes régulières de ses informations. En aucun cas les soucis systèmes, logiciels, paramétrages internet';
-        $html .= ' et périphériques et les déplacements ne rentrent dans le cadre de la garantie constructeur.</p>';
-
+        $html .= ' et périphériques et les déplacements ne rentrent dans le cadre de la garantie constructeur.';
+      
+        
+        $html .= '<span style="font-weight: bold;">';
+            $html .= ' Aucun escompte pour paiement anticipé ne sera accordé.';
+            $html .= "</span>";
+        $html .= "</p>";
         $this->writeContent($html);
     }
 
@@ -803,13 +836,6 @@ Remboursement/exonération de la rémunération pour usage professionnel : http:
         }
         
         
-        // Total DEEE
-        if($this->totals['DEEE'] > 0){
-        $html .= '<tr>';
-        $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("Total éco-participation HT") . '</td>';
-        $html .= '<td style="background-color: #DCDCDC;text-align: right;">' . price($this->totals['DEEE']) . '</td>';
-        $html .= '</tr>';
-        }
 
         // Total HT:
         $total_ht = ($conf->multicurrency->enabled && $this->object->mylticurrency_tx != 1 ? $this->object->multicurrency_total_ht : $this->object->total_ht);
@@ -817,6 +843,15 @@ Remboursement/exonération de la rémunération pour usage professionnel : http:
         $html .= '<td style="">' . $this->langs->transnoentities("TotalHT") . '</td>';
         $html .= '<td style="text-align: right;">' . price($total_ht + (!empty($this->object->remise) ? $this->object->remise : 0) + $this->acompteHt, 0, $this->langs) . '</td>';
         $html .= '</tr>';
+        
+        
+        // Total DEEE
+        if($this->totals['DEEE'] > 0){
+        $html .= '<tr>';
+        $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("Dont éco-participation HT") . '</td>';
+        $html .= '<td style="background-color: #DCDCDC;text-align: right;">' . price($this->totals['DEEE']) . '</td>';
+        $html .= '</tr>';
+        }
 
         if (empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT)) {
             $tvaisnull = ((!empty($this->tva) && count($this->tva) == 1 && isset($this->tva['0.000']) && is_float($this->tva['0.000'])) ? true : false);

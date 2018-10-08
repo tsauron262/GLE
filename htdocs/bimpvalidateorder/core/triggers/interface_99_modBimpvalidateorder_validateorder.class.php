@@ -60,6 +60,19 @@ class Interfacevalidateorder extends DolibarrTriggers {
                     return -2;
                 }
             }
+        }
+        if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE')) {
+            $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
+            if (count($tabConatact) < 1) {
+                if (!is_object($object->thirdparty)) {
+                    $object->thirdparty = new Societe($this->db);
+                    $object->thirdparty->fetch($object->socid);
+                }
+                $tabComm = $object->thirdparty->getSalesRepresentatives($user);
+                if (count($tabComm) > 0) {
+                    $object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
+                }
+            }
 
             if ($object->cond_reglement_code == "VIDE") {
                 setEventMessages("Merci de séléctionner les Conditions de règlement", null, 'errors');

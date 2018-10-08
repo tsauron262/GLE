@@ -7,7 +7,10 @@ objects:
     lines: 
         relation: hasMany
         delete: 1
-        instance: ObjectLine
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: ObjectLine
         
     client: 
         relation: hasOne
@@ -26,6 +29,8 @@ objects:
                 name: Bimp_Contact
                 
     files:
+        relation: hasMany
+        delete: 1
         instance:
             bimp_object:
                 module: bimpcore

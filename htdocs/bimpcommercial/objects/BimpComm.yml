@@ -111,12 +111,15 @@ fields:
         dol_prop: modelpdf
         values: 
             array: modelsPdf
+        sortable: 0
     note_private: 
         label: Note privée
         type: html
+        sortable: 0
     note_public: 
         label: Note publique
-        type: html   
+        type: html  
+        sortable: 0
     remise_globale: 
         label: Remise globale
         type: percent

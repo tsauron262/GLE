@@ -243,9 +243,13 @@ class BimpInput
                 }
 
                 if (count($options['options'])) {
+                    if (count($options['options']) > 15) {
+                        $extra_class .= ($extra_class ? ' ' : '') . 'searchable_select';
+                    }
                     $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '">';
                     foreach ($options['options'] as $option_value => $option) {
                         $color = null;
+                        $icon = null;
                         if (is_array($option)) {
                             if (isset($option['label'])) {
                                 $label = $option['label'];
@@ -259,6 +263,9 @@ class BimpInput
                             } elseif (isset($option['classes'])) {
                                 $color = BimpTools::getAlertColor($option['classes'][0]);
                             }
+                            if (isset($option['icon'])) {
+                                $icon = BimpRender::renderIconClass($option['icon']);
+                            }
                         } else {
                             $label = $option;
                         }
@@ -268,6 +275,9 @@ class BimpInput
                         }
                         if (!is_null($color)) {
                             $html .= ' data-color="' . $color . '" style="color: #' . $color . '"';
+                        }
+                        if (!is_null($icon)) {
+                            $html .= ' data-icon_class="' . $icon . '"';
                         }
                         $html .= '>' . $label . '</option>';
                     }
@@ -280,6 +290,19 @@ class BimpInput
                             $html .= '</div>';
                         }
                     }
+                } else {
+                    $html .= '<p class="alert alert-warning">Aucune option disponible</p>';
+                }
+                break;
+
+            case 'switch_options':
+                if (is_null($options['options']) || !is_array($options['options'])) {
+                    $options['options'] = array();
+                }
+
+                if (count($options['options'])) {
+                    $vertical = isset($options['vertical']) ? (int) $options['vertical'] : 0;
+                    $html = self::renderSwitchOptionsInput($field_name, $options['options'], $value, $input_id, $vertical);
                 } else {
                     $html .= '<p class="alert alert-warning">Aucune option disponible</p>';
                 }
@@ -320,24 +343,12 @@ class BimpInput
                 break;
 
             case 'select_cond_reglement':
-                $bdb = new BimpDb($db);
-                $rows = $bdb->getRows('c_payment_term', '`active` > 0', null, 'array', array('rowid', 'libelle'), 'sortorder');
-
-                $conds = array();
-                if (!is_null($rows)) {
-                    foreach ($rows as $r) {
-                        $conds[(int) $r['rowid']] = $r['libelle'];
-                    }
-                }
-                unset($bdb);
-                $options['options'] = $conds;
+                $options['options'] = BimpCache::getCondReglementsArray();
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'select_mysoc_account':
-                ob_start();
-                $form->select_comptes((int) $value, $field_name, 0, '', 1);
-                $html .= ob_get_clean();
-                break;
+                $options['options'] = BimpCache::getComptesArray();
+                return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'select_remises':
                 if (!isset($options['id_client'])) {
@@ -349,31 +360,18 @@ class BimpInput
                     $filter .= ' AND ' . $options['extra_filters'];
                 }
 
-//                echo $filter; exit;
                 ob_start();
                 $form->select_remises((int) $value, $field_name, $filter, (int) $options['id_client']);
                 $html .= ob_get_clean();
                 break;
 
             case 'select_availability':
-                $options = array(0 => '');
-                $form->load_cache_availability();
-                foreach ($form->cache_availability as $id => $availability) {
-                    $options[(int) $id] = $availability['label'];
-                }
-                return self::renderInput('select', $field_name, $value, array(
-                            'options' => $options
-                                ), $form, $option, $input_id);
+                $options['options'] = BimpCache::getAvailabilitiesArray();
+                return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'select_input_reasons':
-                $options = array(0 => '');
-                $form->loadCacheInputReason();
-                foreach ($form->cache_demand_reason as $id => $reason) {
-                    $options[(int) $id] = $reason['label'];
-                }
-                return self::renderInput('select', $field_name, $value, array(
-                            'options' => $options
-                                ), $form, $option, $input_id);
+                $options['options'] = BimpCache::getDemandReasonsArray();
+                return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'search_ziptown':
                 $html = '<div class="searchZiptownInputContainer">';
@@ -444,21 +442,16 @@ class BimpInput
                 break;
 
             case 'search_user':
-                $html .= $form->select_dolusers((int) $value, $field_name, 0);
-                break;
+                $options['options'] = BimpCache::getUsersArray();
+                return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'search_contact':
                 $html .= $form->selectcontacts(0, (int) $value, $field_name);
                 break;
 
             case 'search_entrepot':
-                if (!class_exists('FormProduct')) {
-                    require_once DOL_DOCUMENT_ROOT . '/product/class/html.formproduct.class.php';
-                }
-                global $db;
-                $formProduct = new FormProduct($db);
-//                echo $value; exit;
-                $html .= $formProduct->selectWarehouses((int) $value, $field_name);
+                $options['options'] = BimpCache::getEntrepotsArray();
+                $html .= self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
                 break;
 
             case 'search_country':
@@ -1029,7 +1022,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0)
+    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0)
     {
         if (is_null($values) || $values === '') {
             $values = array();
@@ -1058,7 +1051,7 @@ class BimpInput
             }
         }
 
-        $html .= '<div class="inputMultipleValuesContainer" data-field_name="' . $field_name . '"';
+        $html .= '<div class="inputMultipleValuesContainer" data-field_name="' . $field_name . '" data-sortable="' . (int) $sortable . '"';
         if ($autosave) {
             $html .= ' data-module="' . $object->module . '"';
             $html .= ' data-object_name="' . $object->object_name . '"';
@@ -1088,8 +1081,11 @@ class BimpInput
             $html .= '<td style="display: none">';
             $html .= '<input class="item_value" type="hidden" name="' . $field_name . '[]" value="' . $value . '"/>';
             $html .= '</td>';
-            $html .= '<td>' . $label . '</td>';
-            $html .= '<td style="width: 62px"><button type="button" class="btn btn-light-danger iconBtn" onclick="';
+            if ((int) $sortable) {
+                $html .= '<td class="positionHandle"><span></span></td>';
+            }
+            $html .= '<td class="item_label">' . $label . '</td>';
+            $html .= '<td class="removeButton"><button type="button" class="btn btn-light-danger iconBtn" onclick="';
             if ($autosave) {
                 $html .= 'var $button = $(this); deleteObjectMultipleValuesItem(\'' . $object->module . '\', \'' . $object->object_name . '\', ';
                 $html .= $object->id . ', \'' . $field_name . '\', \'' . $value . '\', null, function() {';
@@ -1097,7 +1093,7 @@ class BimpInput
             } else {
                 $html .= 'removeMultipleInputValue($(this), \'' . $value_input_name . '\');';
             }
-            $html .= '"><i class="fa fa-trash"></i></button></td>';
+            $html .= '"><i class="fas fa5-trash-alt"></i></button></td>';
             $html .= '</tr>';
         }
 
@@ -1110,6 +1106,28 @@ class BimpInput
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderInputContainer($input_name, $value, $content = '', $field_prefix = '', $required = 0, $multiple = 0, $extra_class = '', $extra_data = array())
+    {
+        $html .= '<div class="inputContainer ' . $field_prefix . $input_name . '_inputContainer ' . $extra_class . '"';
+        $html .= ' data-field_name="' . $field_prefix . $input_name . '"';
+        $html .= ' data-initial_value="' . $value . '"';
+        $html .= ' data-multiple="' . (int) $multiple . '"';
+        $html .= ' data-field_prefix="' . $field_prefix . '"';
+        $html .= ' data-required="' . (int) $required . '"';
+
+        foreach ($extra_data as $data_key => $data_value) {
+            $html .= ' data-' . $data_key . '="' . $data_value . '"';
+        }
+
+        $html .= '>';
+
+        $html .= $content;
 
         $html .= '</div>';
 

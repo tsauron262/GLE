@@ -343,8 +343,8 @@ select.switch {
 .switchOption {
     &.selected {
         color: #fff!important;
-        background-color: $primary!important;
-        border-color: $primary!important;
+        background-color: $selection!important;
+        border-color: $selection!important;
     }
 }
 .timer_input {
@@ -399,12 +399,37 @@ select.switch {
         width: 100%;
     }
     & > table > tbody > tr.itemRow {
+        background-color: #fff;
         border: 1px solid $gray;
-
+        width: 100%;
         & > td {
+            background-color: #fff;
             color: #3c3c3c;
             font-weight: bold;
             padding: 3px 12px;
+        }
+        
+        & > td.item_label {
+            width: 80%;
+        }
+        & > td.positionHandle {
+            width: 10%;
+        }
+        
+        & > td.removeButton {
+            width: 10%
+        }
+        
+        &.ui-sortable-helper {
+            box-shadow: 0 0 2px 2px #2F7EA0;
+            
+            & > td {
+                background-color: #fff;
+            }
+        }
+        
+        &.ui-sortable-placeholder {
+            height: 30px;
         }
     }
 }

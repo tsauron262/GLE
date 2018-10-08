@@ -29,6 +29,9 @@ table.objectlistTable {
     }
 
     & > tbody > tr {
+        @include transition(all 0.3s ease);
+        background-color: #fff!important;
+
         & > th {
             padding: 5px 12px 5px 6px;
             background-color: $primary;
@@ -40,6 +43,14 @@ table.objectlistTable {
         & > td {
             padding: 5px 6px;
             border-bottom: 1px solid #ddd;
+            background-color: #fff!important;
+
+            @media (max-width: $screen-sm) {
+                .toggle-label-off,
+                .toggle-label-on {
+                    display: none;
+                }
+            }
 
             .inputContainer {
                 display: inline-block;
@@ -58,22 +69,6 @@ table.objectlistTable {
 
             .popover {
                 color: $gray-darker;
-            }
-        }
-    }
-
-    & > tbody > tr {
-        @include transition(all 0.3s ease);
-
-        background-color: #fff!important;
-        & > td {
-            background-color: #fff!important;
-
-            @media (max-width: $screen-sm) {
-                .toggle-label-off,
-                .toggle-label-on {
-                    display: none;
-                }
             }
         }
 
@@ -130,7 +125,7 @@ table.objectlistTable {
         text-align: right;
         padding: 5px 12px 5px 6px;
     }
-    
+
     & > tfoot > tr > td {
         background-color: #E6E6E6;
         font-weight: bold;
@@ -211,9 +206,14 @@ table.objectlistTable {
 
     }
 }
+
 .listSearchRow {
     display: none;
     background-color: #DCDCDC;
+
+    & > td {
+        background-color: #DCDCDC;    
+    }
 
     i.fa-search {
         font-size: 16px;
@@ -239,8 +239,11 @@ table.objectlistTable {
         width: 100%;
         padding: 2px;
 
-        input, select, .input-group {
-            width: 100%;
+        input, select, .input-group, span.select2 {
+            width: 100% !important;
+        }
+        span.select2 {
+            min-width: 160px!important;
         }
 
         .optionsContainer {
@@ -250,7 +253,12 @@ table.objectlistTable {
         .loading {
             display: none;
         }
+
+        .minwidth200 {
+            min-width: 0;
+        }
     }
+
 }
 .addObjectRow {
     display: none;
@@ -275,6 +283,7 @@ table.objectlistTable {
         }
     }
 }
+
 th.th_tools {
     margin-right: 25px;
 }
@@ -345,6 +354,7 @@ th.th_tools {
         }
     }
 }
+
 td.buttons {
     text-align: right;
     min-width: 160px;
@@ -354,6 +364,7 @@ td.buttons {
         margin-right: 4px;
     }
 }
+
 .rowButton {
     color: #636363!important;
     text-align: center;
@@ -365,7 +376,7 @@ td.buttons {
     cursor: pointer;
     display: inline-block;
     margin: 0 1px;
-    font-size: 16px;
+    font-size: 14px;
     font-weight: normal;
 
     transition: all 0.3s ease;
@@ -375,9 +386,13 @@ td.buttons {
         color: #fff!important;
         background-color: #EF7D00;
         text-decoration: none;
+
+        i {
+            color: #fff!important;
+        }
     }
     &:before {
-        font-family: 'FontAwesome';
+        font-family: 'FA5S';
     }
     &.editButton:before {
         content: '\f044';
@@ -386,36 +401,15 @@ td.buttons {
         content: '\f0c7';
     }
     &.deleteButton:before {
-        content: '\f1f8';
+        content: '\f2ed';
     }
     &.viewButton:before {
         content: '\f06e';
     }
-}
 
-.select2-container {
-    max-width: 160px!important;
-}
-
-.positionHandle {
-    text-align: center;
-}
-
-td.positionHandle {
-    span {
-        display: inline-block;
-        font-size: 15px;
-        margin: 0 6px;
+    i {
+        color: #636363!important;
     }
-
-    span:before {
-        font-family: 'FontAwesome';
-        content: '\f07d';
-    }
-}
-
-tbody td.positionHandle {
-    cursor: grab;
 }
 
 .ajaxResultContainer {
@@ -428,6 +422,7 @@ tbody td.positionHandle {
 .paginationContainer td {
     background-color: #fff;
 }
+
 .listPagination {
     &:empty {
         display: none;

@@ -45,7 +45,7 @@ class Import
 
 	var $error;
 	var $errors;
-	
+
 
 	/**
 	 *    Constructor
@@ -71,7 +71,6 @@ class Import
 
 		dol_syslog(get_class($this)."::load_arrays user=".$user->id." filter=".$filter);
 
-        $var=true;
         $i=0;
 
         require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
@@ -242,7 +241,7 @@ class Import
 		$sql = 'INSERT INTO '.MAIN_DB_PREFIX.'import_model (';
 		$sql.= 'fk_user, label, type, field';
 		$sql.= ')';
-		$sql.= " VALUES (".($user->id > 0 ? $user->id : 0).", '".$this->db->escape($this->model_name)."', '".$this->datatoimport."', '".$this->hexa."')";
+		$sql.= " VALUES (".($user->id > 0 ? $user->id : 0).", '".$this->db->escape($this->model_name)."', '".$this->db->escape($this->datatoimport)."', '".$this->db->escape($this->hexa)."')";
 
 		dol_syslog(get_class($this)."::create", LOG_DEBUG);
 		$resql=$this->db->query($sql);

@@ -14,6 +14,7 @@ dolibarr_install.log
 upgrade.log
 doxygen_warnings.log
 /.project
+/.vscode
 .DS_Store
 .idea
 *.iml
@@ -26,9 +27,5 @@ Thumbs.db
 htdocs/includes/autoload.php
 htdocs/includes/bin/
 htdocs/includes/composer/
+/.pydevproject
 /htdocs/synopsissignature/temp/
-/htdocs/conf/
-/.gitignore
-/autreprojet/bimpcheckbillet/img/qrcode/
-/autreprojet/bimpcheckbillet/img/event/
-/autreprojet/bimpcheckbillet/img/tickets/

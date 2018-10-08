@@ -362,7 +362,7 @@ lists:
             callback: isDeletable
         bulk_actions: 
             - label: Supprimer les ventes sélectionnées
-              icon: trash
+              icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this));
               btn_class: deleteSelectedObjects
         sort_field: date_create

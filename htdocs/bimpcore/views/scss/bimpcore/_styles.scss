@@ -193,6 +193,7 @@ div.alert {
     margin-left: 10px;
     cursor: pointer;
     display: inline-block;
+    font-size: 11px;
 
     color: $gray-dark;
 
@@ -410,12 +411,20 @@ i.iconRight {
         max-height: 650px;
         padding-bottom: 60px;
         overflow-y: auto;
-        
+
         .page_modal_img {
             max-width: 100%;
             height: auto;
         }
     }
+
+    .select2-container {
+        z-index: 11000;
+    }
+}
+
+.modal-ui-dialog {
+    margin-top: 1px;
 }
 
 #openModalBtn {
@@ -800,14 +809,45 @@ i.iconRight {
 #bimpControllerDebugTimeInfos {
     padding: 30px;
     background-color: #fff;
-    
+
     table {
         tr td {
             padding: 5px 8px;
         }
-        
+
         tr td:first-child {
             font-weight: bold;
+        }
+    }
+}
+
+/*Position handles*/
+
+.positionHandle {
+    cursor: grab;
+    text-align: center;
+
+    span {
+        display: inline-block;
+        font-size: 15px;
+        margin: 0 6px;
+    }
+
+    span:before {
+        font-family: 'FontAwesome';
+        content: '\f07d';
+    }
+}
+
+.select2-results ul li {
+    min-height: 30px;
+
+    &.select2-results__option:hover, 
+        &.select2-results__option--highlighted {
+        color: #fff!important;
+
+        span {
+            color: #fff!important;    
         }
     }
 }

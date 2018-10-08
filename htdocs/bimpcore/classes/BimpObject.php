@@ -55,6 +55,115 @@ class BimpObject extends BimpCache
     public $children = array();
     public $extends = array();
 
+    public function getExport($niveau = 10, $pref = "", $format = "xml", $sep = ";", $sautLn = "\n")
+    {
+        if (!$this->isLoaded())
+            return "Objet non loadé";
+
+
+        $tabResult = array();
+        foreach ($this->config->params['fields'] as $nom => $info) {
+            $value = $this->getData($nom);
+
+            if ($info['type'] == "int") {
+                $value = intval($value);
+                if (is_array($info['values']['array']) && isset($info['values']['array'][$value]))
+                    $value = $info['values']['array'][$value];
+            }
+            elseif ($info['type'] == "id_object") {
+                continue; //Car on les retrouve enssuite de nouveau dans $this->params['objects']
+                $obj = $this->getChildObject($info['object']);
+                $value = $this->recursiveGetExport($niveau, $pref, $obj);
+            } elseif ($info['type'] == "bool")
+                $value = ($value ? "OUI" : "NON");
+
+
+            $tabResult[$nom] = $value;
+        }
+
+        foreach ($this->params['objects'] as $nom => $infoObj) {
+            $value = "";
+            if ($infoObj['relation'] == "hasMany") {
+                $html.= "<" . $nom . ">";
+                $lines = $this->getChildrenObjects($nom);
+                $i = 0;
+                $value = array();
+                foreach ($lines as $obj) {
+                    $i++;
+                    $value[$nom . "-" . $i] = $this->recursiveGetExport($niveau, $pref . "-" . $i, $obj);
+                }
+            } elseif ($infoObj['relation'] == "hasOne") {
+                $obj = $this->getChildObject($nom);
+                $value = $this->recursiveGetExport($niveau, $pref . "-" . $i, $obj);
+            } elseif ($infoObj['relation'] == "none") {
+//                    $lines = $this->get($nom);
+//                    $i = 0;
+//                    $value = array();
+//                    foreach($lines as $obj){
+//                        die;
+//                        $i++;
+//                        $value[$nom."-".$i] = $this->recursiveGetExport($niveau, $pref."-".$i, $obj);
+//                    }
+
+                if ($nom == "files") {
+                    $value = $this->getObjectFilesArray($this);
+                }
+//                 elseif($nom == "contact"){
+////                    $value = $this->($name);
+//                }
+                else {
+                    $obj = $this->getChildObject($nom);
+                    $value = $this->recursiveGetExport($niveau, $pref, $obj);
+                }
+            } else {
+                print_r($infoObj);
+            }
+            $tabResult[$nom] = $value;
+        }
+
+        return $tabResult;
+    }
+
+    function recursiveGetExport($niveau, $pref, $obj)
+    {
+        $value = "";
+        if ($niveau > 0) {
+            if (is_a($obj, "BimpObject")) {
+                if (method_exists($obj, "isLoaded"))
+                    if ($obj->isLoaded())
+                        $value = $obj->getExport($niveau - 1, $pref . "-");
+                    else
+                        echo "ERR Objet non loadé";
+                else
+                    echo "ERR Objet bizarre";
+            }
+            elseif (is_a($obj, "CommonObject")) {
+                $id = 0;
+                if (property_exists($obj, 'id'))
+                    $id = $obj->id;
+                else
+                    $value = "ERR pas de champ ID" . $nom;
+                if ($id > 0) {
+                    $value = array();
+                    if (method_exists($obj, "getNomUrl"))
+                        if (isset($obj->id) && $obj->id > 0)
+                            $value['lien'] = $obj->getNomUrl(1);
+                    if (method_exists($obj, "fetch_optionals") && count($obj->array_options) < 1)
+                        $obj->fetch_optionals();
+                    foreach ($obj as $clef => $val) {
+                        if (!in_array($clef, array("db", "error", "errors", "context", "oldcopy")))
+                            $value[$clef] = $val;
+                    }
+                }
+            }
+            else {
+                echo "ERR Type objet inconnue " . get_class($obj);
+                $value = "ERR Type objet inconnue " . get_class($obj);
+            }
+        }
+        return $value;
+    }
+
     public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {
         $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
@@ -614,6 +723,11 @@ class BimpObject extends BimpCache
         return DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($file);
     }
 
+    public function getListConfig($owner_type, $id_owner, $list_name = 'default')
+    {
+        return self::getObjectListConfig($this->module, $this->object_name, $owner_type, $id_owner, $list_name);
+    }
+
     // Gestion des objets enfants:
 
     public function setChild($child)
@@ -771,9 +885,9 @@ class BimpObject extends BimpCache
     public function isLoaded()
     {
         if ($this->isDolObject()) {
-            return (isset($this->id) && $this->id && isset($this->dol_object->id) && $this->dol_object->id);
+            return (isset($this->id) && (int) $this->id && isset($this->dol_object->id) && (int) $this->dol_object->id);
         }
-        return (isset($this->id) && $this->id);
+        return (isset($this->id) && (int) $this->id);
     }
 
     public function isNotLoaded()
@@ -2220,7 +2334,7 @@ class BimpObject extends BimpCache
         }
 
         $rows = $this->db->executeS($sql, $return);
-        
+
         if (is_null($rows)) {
             $rows = array();
         }
@@ -3030,7 +3144,7 @@ class BimpObject extends BimpCache
                     );
                     $items[] = BimpRender::renderButton(array(
                                 'label'       => 'Vue rapide',
-                                'icon_before' => 'eye',
+                                'icon_before' => 'far_eye',
                                 'classes'     => array(
                                     'btn', 'btn-light-default'
                                 ),
@@ -3050,7 +3164,7 @@ class BimpObject extends BimpCache
                                     ), 'button');
                     $items[] = BimpRender::renderButton(array(
                                 'label'       => 'Afficher la page dans un nouvel onglet',
-                                'icon_before' => 'external-link',
+                                'icon_before' => 'fas_external-link-alt',
                                 'classes'     => array(
                                     'btn', 'btn-light-default'
                                 ),
@@ -3190,7 +3304,7 @@ class BimpObject extends BimpCache
                     if (count($header_buttons) > 4) {
 
                         $html .= BimpRender::renderDropDownButton('Actions', $header_buttons, array(
-                                    'icon'       => 'cogs',
+                                    'icon'       => 'fas_cogs',
                                     'menu_right' => 1
                         ));
                     } else {
@@ -3426,6 +3540,47 @@ class BimpObject extends BimpCache
         }
 
         return BimpRender::renderAlerts($errors);
+    }
+
+    public function renderListConfigColsInput()
+    {
+        $html = '';
+
+        $list_name = BimpTools::getPostFieldValue('list_name');
+        $cols = $this->getListColsArray($list_name);
+
+        if (count($cols)) {
+            $owner_type = BimpTools::getPostFieldValue('owner_type', '');
+            $id_owner = BimpTools::getPostFieldValue('id_owner', 0);
+
+            $values = array();
+            if ($owner_type && $id_owner) {
+                $userConfig = $this->getListConfig($owner_type, $id_owner);
+                if (BimpObject::objectLoaded($userConfig)) {
+                    foreach (explode(',', $userConfig->getData('cols')) as $col_name) {
+                        if (isset($cols[$col_name])) {
+                            $values[$col_name] = $cols[$col_name];
+                        }
+                    }
+                } else {
+                    $bc_list = new BC_ListTable($this, $list_name);
+                    foreach ($bc_list->cols as $col_name) {
+                        if (isset($cols[$col_name])) {
+                            $values[$col_name] = $cols[$col_name];
+                        }
+                    }
+                }
+            }
+
+            $content = BimpInput::renderInput('select', 'cols_add_value', '', array('options' => $cols));
+
+            $html .= BimpInput::renderInputContainer('cols_add_value', '', $content, '', 0, 1, '', array('values_field' => 'cols'));
+            $html .= BimpInput::renderMultipleValuesList($this, 'cols', $values, 'cols_add_value', 0, 0, 1);
+        } else {
+            $html .= BimpRender::renderAlerts('Aucune option disponible', 'warnings');
+        }
+
+        return $html;
     }
 
     // Gestion des intitulés (labels):
@@ -3828,6 +3983,54 @@ class BimpObject extends BimpCache
         return array();
     }
 
+    public function getSortableFieldsArray()
+    {
+        $fields = array();
+
+        foreach ($this->params['fields'] as $field_name) {
+            $bc_field = new BC_Field($this, $field_name);
+            if ($bc_field->params['sortable']) {
+                $fields[$field_name] = $bc_field->params['label'];
+            }
+        }
+
+        return $fields;
+    }
+
+    public function getListColsArray($list_name = 'default')
+    {
+        $cols = array();
+
+        $bc_list = new BC_ListTable($this, $list_name);
+
+        if ((int) $bc_list->params['configurable'] &&
+                $this->config->isDefined('lists_cols')) {
+            foreach ($this->config->getCompiledParams('lists_cols') as $col_name => $col_params) {
+                if (isset($col_params['label']) && $col_params['label']) {
+                    $cols[$col_name] = $col_params['label'];
+                } elseif (isset($col_params['field']) && $col_params['field'] && $this->config->isDefined('fields/' . $col_params['field'] . '/label')) {
+                    $cols[$col_name] = $this->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+                } else {
+                    $cols[$col_name] = $col_name;
+                }
+            }
+        }
+
+        foreach ($bc_list->params['cols'] as $col_name) {
+            $col_params = $bc_list->fetchParams($bc_list->config_path . '/cols/' . $col_name, $bc_list->col_params);
+
+            if ($col_params['label']) {
+                $cols[$col_name] = $col_params['label'];
+            } elseif ($col_params['field'] && $this->config->isDefined('fields/' . $col_params['field'] . '/label')) {
+                $cols[$col_name] = $this->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+            } else {
+                $cols[$col_name] = $col_name;
+            }
+        }
+
+        return $cols;
+    }
+
     // Liens et url: 
 
     public function getUrl()
@@ -3940,7 +4143,7 @@ class BimpObject extends BimpCache
     {
         $errors = array();
         $warnings = array();
-        $success = '';
+        $success = 'Lien supprimé avec succès';
 
         if (!isset($data['id_link']) || !(int) $data['link_id']) {
             
@@ -3949,6 +4152,71 @@ class BimpObject extends BimpCache
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionSetListConfig($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Paramètres enregistrés avec succès';
+
+        if (!isset($data['owner_type']) || !$data['owner_type']) {
+            $errors[] = 'Type de propriétaire absent';
+        }
+        if (!isset($data['id_owner']) || !$data['id_owner']) {
+            $errors[] = 'ID du propriétaire absent';
+        }
+        if (!isset($data['list_name']) || !$data['list_name']) {
+            $errors[] = 'Nom de la liste absent';
+        }
+
+        if (!count($errors)) {
+            $config = BimpObject::getInstance('bimpcore', 'ListConfig');
+            $config->find(array(
+                'owner_type' => $data['owner_type'],
+                'id_owner'   => $data['id_owner'],
+                'obj_module' => $this->module,
+                'obj_name'   => $this->object_name,
+                'list_name'  => $data['list_name']
+            ));
+
+            if (isset($data['nb_items'])) {
+                $config->set('nb_items', (int) $data['nb_items']);
+            }
+
+            if (isset($data['sort_field'])) {
+                $config->set('sort_field', $data['sort_field']);
+            }
+
+            if (isset($data['sort_way'])) {
+                $config->set('sort_way', $data['sort_way']);
+            }
+
+            if (isset($data['sort_option'])) {
+                $config->set('sort_option', $data['sort_option']);
+            }
+
+            if (isset($data['cols'])) {
+                $config->set('cols', implode(',', $data['cols']));
+            }
+
+            if ($config->isLoaded()) {
+                $errors = $config->update($warnings, true);
+            } else {
+                $config->set('owner_type', $data['owner_type']);
+                $config->set('id_owner', $data['id_owner']);
+                $config->set('obj_module', $this->module);
+                $config->set('obj_name', $this->object_name);
+                $config->set('list_name', $data['list_name']);
+                $errors = $config->create($warnings, true);
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'success_callback' => 'window.location.reload();'
         );
     }
 }

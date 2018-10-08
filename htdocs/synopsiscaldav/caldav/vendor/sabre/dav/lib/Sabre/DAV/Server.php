@@ -165,7 +165,6 @@ class Server {
      * @param Tree|INode|array|null $treeOrNode The tree object
      */
     public function __construct($treeOrNode = null) {
-dol_syslog("ddd construct server",3);
         if ($treeOrNode instanceof Tree) {
             $this->tree = $treeOrNode;
         } elseif ($treeOrNode instanceof INode) {
@@ -710,7 +709,6 @@ dol_syslog("ddd construct server",3);
      * @return void
      */
     protected function httpPropfind($uri) {
-        dol_syslog("fin prop debut".print_r($uri),3);
 
         $requestedProperties = $this->parsePropFindRequest($this->httpRequest->getBody(true));
 
@@ -736,7 +734,7 @@ dol_syslog("ddd construct server",3);
         $minimal = $prefer['return-minimal'];
 
         $data = $this->generateMultiStatus($newProperties, $minimal);
-        dol_syslog("fin prop find".print_r($data),3);
+        
         $this->httpResponse->sendBody($data);
 
     }

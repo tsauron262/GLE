@@ -227,7 +227,7 @@ class BC_Panel extends BimpComponent
             if (count($items)) {
                 if (count($items) > 1) {
                     return BimpRender::renderDropDownButton('Actions', $items, array(
-                                'icon'       => 'cogs',
+                                'icon'       => 'fas_cogs',
                                 'menu_right' => 1
                     ));
                 }

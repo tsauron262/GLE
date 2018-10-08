@@ -2,7 +2,7 @@
  * Font Awesome Free 5.1.1 by @fontawesome - https://fontawesome.com
  * License - https://fontawesome.com/license (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
  */
-/* line 8, ../../scss/fontawesome5/_core.scss */
+/* line 4, ../../scss/fontawesome5/_core.scss */
 .fa5,
 .fas,
 .far,
@@ -112,7 +112,7 @@
 
 /* line 4, ../../scss/fontawesome5/_bordered-pulled.scss */
 .fa5-border {
-  border: solid 0.08em #eeeeee;
+  border: solid 0.08em #eee;
   border-radius: .1em;
   padding: .2em .25em .15em;
 }
@@ -155,17 +155,13 @@
 }
 
 @keyframes fa-spin {
-  /* line 13, ../../scss/fontawesome5/_animated.scss */
   0% {
     transform: rotate(0deg);
   }
-
-  /* line 17, ../../scss/fontawesome5/_animated.scss */
   100% {
     transform: rotate(360deg);
   }
 }
-
 /* line 4, ../../scss/fontawesome5/_rotated-flipped.scss */
 .fa5-rotate-90 {
   -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(rotation=1)";
@@ -202,7 +198,7 @@
   transform: scale(-1, -1);
 }
 
-/* line 20, ../../scss/fontawesome5/_rotated-flipped.scss */
+/* line 16, ../../scss/fontawesome5/_rotated-flipped.scss */
 :root .fa5-rotate-90,
 :root .fa5-rotate-180,
 :root .fa5-rotate-270,
@@ -221,7 +217,7 @@
   width: 2em;
 }
 
-/* line 14, ../../scss/fontawesome5/_stacked.scss */
+/* line 13, ../../scss/fontawesome5/_stacked.scss */
 .fa5-stack-1x,
 .fa5-stack-2x {
   left: 0;
@@ -242,7 +238,7 @@
 
 /* line 29, ../../scss/fontawesome5/_stacked.scss */
 .fa5-inverse {
-  color: white;
+  color: #fff;
 }
 
 /* Font Awesome uses the Unicode Private Use Area (PUA) to ensure screen
@@ -5819,7 +5815,7 @@ readers do not read off random characters that represent icons */
   width: 1px;
 }
 
-/* line 49, ../../scss/fontawesome5/_mixins.scss */
+/* line 48, ../../scss/fontawesome5/_mixins.scss */
 .sr-only-focusable:active, .sr-only-focusable:focus {
   clip: auto;
   height: auto;
@@ -5840,7 +5836,6 @@ readers do not read off random characters that represent icons */
   src: url("../fonts/fa5/fa-brands-400.eot");
   src: url("../fonts/fa5/fa-brands-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5/fa-brands-400.woff2") format("woff2"), url("../fonts/fa5/fa-brands-400.woff") format("woff"), url("../fonts/fa5/fa-brands-400.ttf") format("truetype"), url("../fonts/fa5/fa-brands-400.svg#fontawesome") format("svg");
 }
-
 /* line 19, ../../scss/fontawesome5/_fa-brands.scss */
 .fab {
   font-family: 'FA5B';
@@ -5857,7 +5852,6 @@ readers do not read off random characters that represent icons */
   src: url("../fonts/fa5/fa-regular-400.eot");
   src: url("../fonts/fa5/fa-regular-400.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5/fa-regular-400.woff2") format("woff2"), url("../fonts/fa5/fa-regular-400.woff") format("woff"), url("../fonts/fa5/fa-regular-400.ttf") format("truetype"), url("../fonts/fa5/fa-regular-400.svg#fontawesome") format("svg");
 }
-
 /* line 19, ../../scss/fontawesome5/_fa-regular.scss */
 .far {
   font-family: 'FA5';
@@ -5875,7 +5869,6 @@ readers do not read off random characters that represent icons */
   src: url("../fonts/fa5/fa-solid-900.eot");
   src: url("../fonts/fa5/fa-solid-900.eot?#iefix") format("embedded-opentype"), url("../fonts/fa5/fa-solid-900.woff2") format("woff2"), url("../fonts/fa5/fa-solid-900.woff") format("woff"), url("../fonts/fa5/fa-solid-900.ttf") format("truetype"), url("../fonts/fa5/fa-solid-900.svg#fontawesome") format("svg");
 }
-
 /* line 19, ../../scss/fontawesome5/_fa-solid.scss */
 .fas {
   font-family: 'FA5S';

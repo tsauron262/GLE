@@ -48,7 +48,7 @@ lists:
         icon: calendar
         bulk_actions: 
             - label: Supprimer les lignes sélectionnées
-              icon: trash
+              icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this));
               btn_class: deleteSelectedObjects
         sort_field: position

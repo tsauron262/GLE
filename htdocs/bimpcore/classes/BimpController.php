@@ -36,6 +36,12 @@ class BimpController
         $this->module = $module;
         $this->controller = $controller;
 
+        global $user, $bimpUser;
+        $bimpUser = BimpObject::getInstance('bimpcore', 'Bimp_User');
+        if (BimpObject::objectLoaded($user)) {
+            $bimpUser->fetch((int) $user->id);
+        }
+        
         $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
 
         $this->current_tab = BimpTools::getValue('tab', 'default');

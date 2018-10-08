@@ -6,9 +6,9 @@ class BC_ListTable extends BC_List
     public $component_name = 'Tableau';
     public static $type = 'list_table';
     public $search = false;
-    protected $rows = null;
-    protected $colspan = 0;
-    protected $cols = null;
+    public $rows = null;
+    public $colspan = 0;
+    public $cols = null;
     public $item_params = array(
         'update_btn'      => array('data_type' => 'bool', 'default' => 0),
         'edit_btn'        => array('data_type' => 'bool', 'default' => 0),
@@ -103,7 +103,7 @@ class BC_ListTable extends BC_List
         if (!count($this->errors)) {
             $this->fetchCols();
             $this->colspan = 2 + count($this->cols);
-            
+
             if ($this->params['positions_open']) {
                 $this->colspan++;
             }
@@ -112,30 +112,19 @@ class BC_ListTable extends BC_List
 
     protected function fetchCols()
     {
-        $prev_path = $this->object->config->current_path;
-        $this->setConfPath();
+        $cols = array();
 
-        //        $listConfig = BimpObject::getInstance('BimpCore', 'ListConfig');
-//
-//        global $user;
-//
-//        if (!is_null($listConfig) && isset($user->id) && $user->id) {
-//            if ($listConfig->find(array(
-//                        'module_name' => $object->module,
-//                        'object_name' => $object->object_name,
-//                        'list_name'   => $list_name,
-//                        'id_user'     => $user->id
-//                    ))) {
-//                $this->user_config = null; // Todo
-//            }
-//        }
-
-        $this->cols = array();
+        if ($this->params['configurable']) {
+            if ($this->object->config->isDefined('lists_cols')) {
+                foreach ($this->object->config->params['lists_cols'] as $col_name => $col_params) {
+                    $cols[] = $col_name;
+                }
+            }
+        }
 
         foreach ($this->params['cols'] as $col_name) {
-            $show = (int) $this->object->getCurrentConf('cols/' . $col_name . '/show', 1, false, 'bool');
-            if ($show) {
-                $this->cols[] = $col_name;
+            if (!in_array($col_name, $cols)) {
+                $cols[] = $col_name;
             }
         }
 
@@ -144,12 +133,37 @@ class BC_ListTable extends BC_List
                 if (isset($col_params['show']) && !(bool) $col_params['show']) {
                     continue;
                 }
-                $this->cols[] = $col_name;
+                if (!in_array($col_name, $cols)) {
+                    $cols[] = $col_name;
+                    $this->params['cols'][] = $col_name;
+                }
             }
             $this->object->config->addParams($this->config_path . '/cols', $this->params['extra_cols']);
         }
 
-        $this->object->config->setCurrentPath($prev_path);
+        $list_cols = array();
+
+        if ($this->params['configurable'] && BimpObject::objectLoaded($this->userConfig)) {
+            $list_cols = explode(',', $this->userConfig->getData('cols'));
+        }
+
+        if (!is_array($list_cols) || !count($list_cols)) {
+            $list_cols = $this->params['cols'];
+        }
+
+        $this->cols = array();
+
+        foreach ($list_cols as $col_name) {
+            if (!in_array($col_name, $cols)) {
+                continue;
+            }
+            $show = (int) $this->object->getConf('lists_cols/' . $col_name . '/show', 1, false, 'bool');
+            $show = (int) $this->object->getConf($this->config_path . '/cols/' . $col_name . '/show', $show, false, 'bool');
+
+            if ($show) {
+                $this->cols[] = $col_name;
+            }
+        }
     }
 
     protected function fetchRows()
@@ -211,7 +225,13 @@ class BC_ListTable extends BC_List
                     if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
                         continue;
                     }
-                    $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params);
+
+                    $col_params = array();
+                    if ($this->object->config->isDefined('lists_cols/' . $col_name)) {
+                        $col_params = $this->fetchParams('lists_cols/' . $col_name, $this->col_params);
+                    }
+
+                    $col_params = $this->object->config->mergeParams($col_params, $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params));
 
                     $row['cols'][$col_name] = array(
                         'content'   => '',
@@ -222,7 +242,7 @@ class BC_ListTable extends BC_List
                         'col_style' => $col_params['col_style'],
                     );
 
-                    if (!$row['cols'][$col_name]['show']) {
+                    if (!(int) $row['cols'][$col_name]['show']) {
                         continue;
                     }
 
@@ -644,7 +664,7 @@ class BC_ListTable extends BC_List
                             'type'    => 'button',
                             'onclick' => 'saveAllRowsModifications(\'' . $this->identifier . '\', $(this))'
                         ),
-                        'icon_before' => 'save'
+                        'icon_before' => 'fas_save'
                             ), 'button');
             $buttons[] = BimpRender::renderButton(array(
                         'classes'     => array('btn', 'btn-light-default'),
@@ -658,7 +678,7 @@ class BC_ListTable extends BC_List
             $title = BimpTools::ucfirst($this->object->getLabel('name_plur')) . ' modifié' . ($this->object->isLabelFemale() ? 'e' : '') . 's';
             $html .= '<span class="modifiedRowsActions" style="display: none">';
             $html .= BimpRender::renderDropDownButton($title, $buttons, array(
-                        'icon' => 'edit'
+                        'icon' => 'fas_edit'
             ));
             $html .= '</span>';
         }
@@ -714,20 +734,58 @@ class BC_ListTable extends BC_List
     public function renderParametersPopup()
     {
         $html = '';
-        $nb_Items = '';
+        $content = '';
 
         if ($this->params['pagination']) {
-            $nb_Items .= '<div class="title">';
-            $nb_Items .= 'Nombre d\'items par page';
-            $nb_Items .= '</div>';
+            $content .= '<div class="title">';
+            $content .= 'Nombre d\'items par page';
+            $content .= '</div>';
 
-            $nb_Items .= BimpInput::renderSwitchOptionsInput('select_n', array(
+            $content .= '<div style="margin-bottom: 15px">';
+            $content .= BimpInput::renderSwitchOptionsInput('select_n', array(
                         10  => '10', 25  => '25', 50  => '50', 100 => '100', 250 => '250', 500 => '500'), $this->params['n'], $this->identifier . '_n');
+            $content .= '</div>';
         }
 
-        if ($nb_Items) {
+        global $user;
+        if (BimpObject::objectLoaded($user) && $this->params['configurable']) {
+            $content .= '<div class="title">';
+            $content .= 'Paramètres utilisateur';
+            $content .= '</div>';
+
+            $values = array(
+                'owner_type' => 2,
+                'id_owner'   => $user->id,
+                'list_name'  => $this->name,
+            );
+
+            if (BimpObject::objectLoaded($this->userConfig)) {
+                $values['sort_field'] = $this->userConfig->getData('sort_field');
+                $values['sort_way'] = $this->userConfig->getData('sort_way');
+                $values['nb_items'] = $this->userConfig->getData('nb_items');
+            } else {
+                $values['sort_field'] = $this->params['sort_field'];
+                $values['sort_way'] = $this->params['sort_way'];
+                $values['nb_items'] = $this->params['n'];
+            }
+
+            $content .= '<div style="margin-bottom: 15px; text-align: center">';
+            $content .= BimpRender::renderButton(array(
+                        'classes'     => array('btn', 'btn-default'),
+                        'label'       => 'Editer les paramètres utilisateur',
+                        'icon_before' => 'fas_user-cog',
+                        'attr'        => array(
+                            'onclick' => $this->object->getJsActionOnclick('setListConfig', $values, array(
+                                'form_name' => 'list_config'
+                            ))
+                        )
+            ));
+            $content .= '</div>';
+        }
+
+        if ($content) {
             $html .= '<div id="' . $this->identifier . '_parametersPopup" class="tinyPopup listPopup">';
-            $html .= $nb_Items;
+            $html .= $content;
             $html .= '</div>';
         }
 
@@ -870,7 +928,7 @@ class BC_ListTable extends BC_List
                     if ($this->params['enable_edit'] && (int) $item_params['update_btn']) {
                         $rowButtons[] = array(
                             'class'   => 'cancelModificationsButton hidden',
-                            'icon'    => 'undo',
+                            'icon'    => 'fas_undo',
                             'label'   => 'Annuler les modifications',
                             'onclick' => 'cancelObjectRowModifications(\'' . $this->identifier . '\', ' . $id_object . ', $(this))'
                         );
@@ -907,7 +965,7 @@ class BC_ListTable extends BC_List
                         $onclick = 'loadModalView(\'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $id_object . ', \'' . $item_params['modal_view'] . '\', $(this), \'' . $title . '\')';
                         $rowButtons[] = array(
                             'label'   => 'Vue rapide',
-                            'icon'    => 'eye',
+                            'icon'    => 'far_eye',
                             'onclick' => $onclick
                         );
                     }
@@ -917,7 +975,7 @@ class BC_ListTable extends BC_List
                         $onclick .= ');';
                         $rowButtons[] = array(
                             'label'   => 'Afficher',
-                            'icon'    => 'eye',
+                            'icon'    => 'far_eye',
                             'onclick' => $onclick
                         );
                     }
@@ -925,12 +983,12 @@ class BC_ListTable extends BC_List
                         $rowButtons[] = array(
                             'label'   => $row['params']['page_btn_label'],
                             'onclick' => 'window.location = \'' . $row['params']['url'] . '\';',
-                            'icon'    => 'file-o'
+                            'icon'    => 'far_file'
                         );
                         $rowButtons[] = array(
                             'label'   => $row['params']['page_btn_label'] . ' dans un nouvel onglet',
                             'onclick' => 'window.open(\'' . $row['params']['url'] . '\');',
-                            'icon'    => 'external-link'
+                            'icon'    => 'fas_external-link-alt'
                         );
                     }
                 }

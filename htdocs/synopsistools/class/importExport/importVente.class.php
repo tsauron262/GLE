@@ -14,6 +14,9 @@ class importVente extends import8sens {
 
     var $tabResultInt = array();
     var $logOld = false;
+    
+    var $dateDepart = "30/09/2018";
+    var $dateAchatDef = "05/10/2014";
 
     public function __construct($db) {
         $this->last = true;
@@ -78,7 +81,7 @@ class importVente extends import8sens {
 
     function addTab($ref) {
         if (!isset($this->tabResultInt['prod'][$ref]))
-            $this->tabResultInt['prod'][$ref] = array("ref" => $ref, "tot" => 0, "1an" => 0, "3mois" => 0, "6mois" => 0, "12mois" => 0, "derDate" => 0, "derPrix" => 0, "derDateA" => "05/10/2014", "prixCat" => 0);
+            $this->tabResultInt['prod'][$ref] = array("ref" => $ref, "tot" => 0, "1an" => 0, "3mois" => 0, "6mois" => 0, "12mois" => 0, "derDate" => 0, "derPrix" => 0, "derDateA" => $this->dateAchatDef, "prixCat" => "0");
     }
 
     function traiteLnInvent($ln) {
@@ -100,7 +103,7 @@ class importVente extends import8sens {
         if (substr($ln['PlvCodePcv'], 0, 1) == "F") {
             $qty = $ln['PlvQteUV'];
 
-            $datetime2 = DateTime::createFromFormat("d/m/Y", "31/03/2018");
+            $datetime2 = DateTime::createFromFormat("d/m/Y", $this->dateDepart);
             $interval = $dateP->diff($datetime2);
             $nbmonth = $interval->format('%m'); //Retourne le nombre de mois
             $nbyear = $interval->format('%y'); //Retourne le nombre de mois

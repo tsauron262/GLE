@@ -629,7 +629,7 @@ class BC_Card extends BimpComponent
                 $html .= ' data-content="Afficher la page"';
                 $html .= ' data-container="body"';
                 $html .= ' data-placement="top">';
-                $html .= '<i class="fa fa-file-o iconLeft"></i>';
+                $html .= '<i class="far fa5-file iconLeft"></i>';
                 $html .= 'Afficher</a>';
 
                 $html .= '<button type="button" class="btn btn-default bs-popover" ';
@@ -639,7 +639,7 @@ class BC_Card extends BimpComponent
                 $html .= ' data-container="body"';
                 $html .= ' data-placement="top"';
                 $html .= 'onclick="loadModalObjectPage($(this), \'' . $url . '\', \'' . htmlentities(addslashes($title)) . '\')">';
-                $html .= '<i class="fa fa-eye"></i></button>';
+                $html .= '<i class="far fa5-eye"></i></button>';
 
                 $html .= '<a href="' . $url . '" class="btn btn-default bs-popover" target="_blank"';
                 $html .= 'data-toggle="popover"';
@@ -648,7 +648,7 @@ class BC_Card extends BimpComponent
                 $html .= ' data-container="body"';
                 $html .= ' data-placement="top"';
                 $html .= '>';
-                $html .= '<i class="fa fa-external-link"></i>';
+                $html .= '<i class="fas fa5-external-link-alt"></i>';
                 $html .= '</a>';
 
                 $html .= '</div>';

@@ -952,7 +952,7 @@ function resetListSearchInputs(list_id) {
         });
         $row.find('.ui-autocomplete-input').val('');
         $row.find('.search_list_input').val('');
-        $row.find('.select2-chosen').text('');
+        $row.find('.select2-selection__rendered').html('');
         $row.find('.bs_datetimepicker').each(function () {
             $(this).data('DateTimePicker').clear();
             $(this).parent().find('.datepicker_value').val('');

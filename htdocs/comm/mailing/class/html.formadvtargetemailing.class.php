@@ -1,20 +1,19 @@
 <?php
 /* Copyright (C) 2014  Florian Henry   <florian.henry@open-concept.pro>
-*
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 
 /**
  * \file    comm/mailing/class/html.formadvtragetemaling.class.php
@@ -50,31 +49,31 @@ class FormAdvTargetEmailing extends Form
 	 */
 	function multiselectProspectionStatus($selected_array = array(), $htmlname = 'cust_prospect_status') {
 		global $conf, $langs;
-		$options_array = array ();
+		$options_array = array();
 
 		$sql = "SELECT code, label";
 		$sql .= " FROM " . MAIN_DB_PREFIX . "c_prospectlevel";
 		$sql .= " WHERE active > 0";
 		$sql .= " ORDER BY sortorder";
-		dol_syslog ( get_class ( $this ) . '::multiselectProspectionStatus sql=' . $sql, LOG_DEBUG );
-		$resql = $this->db->query ( $sql );
+		dol_syslog ( get_class( $this ) . '::multiselectProspectionStatus sql=' . $sql, LOG_DEBUG );
+		$resql = $this->db->query( $sql );
 		if ($resql) {
-			$num = $this->db->num_rows ( $resql );
+			$num = $this->db->num_rows( $resql );
 			$i = 0;
 			while ( $i < $num ) {
-				$obj = $this->db->fetch_object ( $resql );
+				$obj = $this->db->fetch_object( $resql );
 
-				$level = $langs->trans ( $obj->code );
+				$level = $langs->trans( $obj->code );
 				if ($level == $obj->code)
-					$level = $langs->trans ( $obj->label );
-				$options_array [$obj->code] = $level;
+					$level = $langs->trans( $obj->label );
+				$options_array[$obj->code] = $level;
 
 				$i ++;
 			}
 		} else {
-			dol_print_error ( $this->db );
+			dol_print_error($this->db);
 		}
-		return $this->advMultiselectarray ( $htmlname, $options_array, $selected_array );
+		return $this->advMultiselectarray($htmlname, $options_array, $selected_array);
 	}
 
 	/**
@@ -211,11 +210,12 @@ class FormAdvTargetEmailing extends Form
 	 *
 	 *  @return	string HTML combo
 	 */
-	function advMultiselectarraySelllist($htmlname, $sqlqueryparam = array(), $selected_array = array()) {
+	function advMultiselectarraySelllist($htmlname, $sqlqueryparam = array(), $selected_array = array())
+	{
+		$options_array=array();
 
-		if (is_array ( $sqlqueryparam )) {
-			$options_array=array();
-
+		if (is_array($sqlqueryparam))
+		{
 			$param_list = array_keys ( $sqlqueryparam );
 			$InfoFieldList = explode ( ":", $param_list [0] );
 
@@ -250,8 +250,6 @@ class FormAdvTargetEmailing extends Form
 				$sql .= " ORDER BY nom";
 			}
 			// $sql.= ' WHERE entity = '.$conf->entity;
-
-			$options_array = array();
 
 			dol_syslog(get_class($this) . "::".__METHOD__,LOG_DEBUG);
 			$resql = $this->db->query($sql);
@@ -411,21 +409,22 @@ class FormAdvTargetEmailing extends Form
 	}
 
 	/**
-	 * selectAdvtargetemailingTemplate
+	 * Return a combo list to select emailing target selector
 	 *
-	 * @param string $htmlname control name
-	 * @param integer $selected  defaut selected
-	 * @param integer $showempty empty lines
-	 *
-	 * @return	string HTML combo
+	 * @param	string 		$htmlname 		control name
+	 * @param	integer 	$selected  		defaut selected
+	 * @param	integer 	$showempty 		empty lines
+	 * @param	string		$type_element	Type element. Example: 'mailing'
+	 * @return	string 						HTML combo
 	 */
-	public function selectAdvtargetemailingTemplate($htmlname='template_id',$selected=0,$showempty=0) {
+	public function selectAdvtargetemailingTemplate($htmlname='template_id', $selected=0, $showempty=0, $type_element='mailing') {
 		global $conf, $user, $langs;
 
 		$out = '';
 
-		$sql = "SELECT c.rowid, c.name, c.fk_mailing";
+		$sql = "SELECT c.rowid, c.name, c.fk_element";
 		$sql .= " FROM " . MAIN_DB_PREFIX . "advtargetemailing as c";
+		$sql .= " WHERE type_element='$type_element'";
 		$sql .= " ORDER BY c.name";
 
 		dol_syslog ( get_class ( $this ) . "::".__METHOD__, LOG_DEBUG );
@@ -443,7 +442,7 @@ class FormAdvTargetEmailing extends Form
 					$obj = $this->db->fetch_object ( $resql );
 					$label = $obj->name;
 					if (empty($label)) {
-						$label=$obj->fk_mailing;
+						$label=$obj->fk_element;
 					}
 
 					if ($selected > 0 && $selected == $obj->rowid) {

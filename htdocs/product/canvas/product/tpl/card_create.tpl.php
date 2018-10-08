@@ -15,6 +15,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+// Protection to avoid direct call of template
+if (empty($conf) || ! is_object($conf))
+{
+	print "Error, template page can't be called as URL";
+	exit;
+}
+
+
 $object=$GLOBALS['object'];
 
 $statutarray=array('1' => $langs->trans("OnSell"), '0' => $langs->trans("NotOnSell"));
@@ -47,7 +55,7 @@ $statutarray=array('1' => $langs->trans("OnSell"), '0' => $langs->trans("NotOnSe
 
 <tr>
 <td class="fieldrequired"><?php echo $langs->trans("Label"); ?></td>
-<td><input name="libelle" size="40" value="<?php echo $object->label; ?>"></td>
+<td><input name="label" size="40" value="<?php echo $object->label; ?>"></td>
 </tr>
 
 <tr>

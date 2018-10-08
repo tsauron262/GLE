@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `llx_object_line_remise` (
   `percent` float NOT NULL DEFAULT '0',
   `montant` float NOT NULL DEFAULT '0',
   `per_unit` tinyint(1) NOT NULL DEFAULT '0'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB;
 
 
 ALTER TABLE `llx_bimp_file`

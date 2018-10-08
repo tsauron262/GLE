@@ -31,7 +31,7 @@ class BC_View extends BC_Panel
         }
 
         if (is_null($this->params['icon']) || !$this->params['icon']) {
-            $this->params['icon'] = 'file-o';
+            $this->params['icon'] = 'far_file';
         }
 
         if ($this->params['title'] === 'nom') {
@@ -82,12 +82,12 @@ class BC_View extends BC_Panel
                 $title = 'Edition ' . $this->object->getLabel('of_the') . ' ' . $this->object->getInstanceName();
                 $html .= '<button type="button" class="btn btn-primary"';
                 $html .= ' onclick="loadModalFormFromView(\'' . $this->identifier . '\', \'' . $this->params['edit_form'] . '\', $(this), \'' . addslashes($title) . '\');"';
-                $html .= '><i class="fa fa-edit iconLeft"></i>Editer</button>';
+                $html .= '><i class="fas fa5-edit iconLeft"></i>Editer</button>';
             }
             if ($this->params['delete_btn'] && $this->object->canDelete()) {
                 $html .= '<button type="button" class="btn btn-danger"';
                 $html .= ' onclick="deleteObject($(this), \'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', $(\'#' . $this->identifier . '_result\'));"';
-                $html .= '><i class="fa fa-trash iconLeft"></i>Supprimer</button>';
+                $html .= '><i class="fas fa5-trash-alt iconLeft"></i>Supprimer</button>';
             }
 
             $buttons = $this->object->getCurrentConf('buttons', array(), false, 'array');

@@ -16,7 +16,7 @@ class BimpPDF extends TCPDF
     public static $mmPerPx = 0.353; // Pour 72 dpi
     public static $pxPerMm = 2.835;
     
-    public $addCgvPages = true;
+    public $addCgvPages = false;
 
     public function __construct($orientation = 'P', $format = 'A4')
     {
@@ -98,10 +98,10 @@ class BimpPDF extends TCPDF
         $addCgvPages = $this->addCgvPages;
         $this->Output($filename, $output);
         
-        if($addCgvPages){
-            $fpdfi = new BimpConcatPdf();
-            $fpdfi->addCGVPages($filename,$output);
-        }
+//        if($addCgvPages){
+//            $fpdfi = new BimpConcatPdf();
+//            $fpdfi->addCGVPages($filename,$output);
+//        }
         return 1;
     }
 
@@ -113,28 +113,28 @@ class BimpPDF extends TCPDF
 }
 
 
-use setasign\Fpdi\Fpdi;
-
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/fpdf.php';
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/autoload.php';
-
-class BimpConcatPdf extends Fpdi
-{
-    public function addCGVPages($fileOrig, $output){
-        $file = $fileOrig;
-        $pagecount = $this->setSourceFile($file);  
-        for($i=0; $i<$pagecount; $i++){
-            $this->AddPage();
-            $tplidx = $this->importPage($i+1, '/MediaBox');
-            $this->useTemplate($tplidx); 
-        }
-        $file = DOL_DOCUMENT_ROOT."/bimpcore/pdf/cgv.pdf";
-        $pagecount = $this->setSourceFile($file);  
-        for($i=0; $i<$pagecount; $i++){
-            $this->AddPage();
-            $tplidx = $this->importPage($i+1, '/MediaBox');
-            $this->useTemplate($tplidx); 
-        }
-        $this->Output($fileOrig, $output);
-    }
-}
+//use setasign\Fpdi\Fpdi;
+//
+//require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/fpdf.php';
+//require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/autoload.php';
+//
+//class BimpConcatPdf extends Fpdi
+//{
+//    public function addCGVPages($fileOrig, $output){
+//        $file = $fileOrig;
+//        $pagecount = $this->setSourceFile($file);  
+//        for($i=0; $i<$pagecount; $i++){
+//            $this->AddPage();
+//            $tplidx = $this->importPage($i+1, '/MediaBox');
+//            $this->useTemplate($tplidx); 
+//        }
+//        $file = DOL_DOCUMENT_ROOT."/bimpcore/pdf/cgv.pdf";
+//        $pagecount = $this->setSourceFile($file);  
+//        for($i=0; $i<$pagecount; $i++){
+//            $this->AddPage();
+//            $tplidx = $this->importPage($i+1, '/MediaBox');
+//            $this->useTemplate($tplidx); 
+//        }
+//        $this->Output($fileOrig, $output);
+//    }
+//}

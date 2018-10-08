@@ -288,6 +288,7 @@ if (empty($reshook)) {
 			$editgroup->oldcopy=clone $editgroup;
 
 			$object->fetch($id);
+			$object->oldcopy=clone $object;
 			if ($action == 'addgroup') {
 				$object->SetInGroup($group, (! empty($conf->global->MULTICOMPANY_TRANSVERSE_MODE) ? GETPOST('entity', 'int') : $editgroup->entity));
 			}

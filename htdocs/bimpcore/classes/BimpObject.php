@@ -2005,7 +2005,7 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    public function find($filters, $return_first = false)
+    public function find($filters, $return_first = false, $delete_if_multiple = false)
     {
         $this->reset();
 
@@ -2036,7 +2036,24 @@ class BimpObject extends BimpCache
 
         if (!is_null($rows) && count($rows)) {
             if (count($rows) > 1 && !$return_first) {
-                return false;
+                if ($delete_if_multiple) {
+                    $fl = true;
+                    foreach ($rows as $r) {
+                        if ($fl) {
+                            $fl = false;
+                            if ($return_first) {
+                                continue;
+                            }
+                        }
+                        if ($this->fetch((int) $r[$primary])) {
+                            $this->delete();
+                        }
+                    }
+                    $this->reset();
+                }
+                if (!$return_first) {
+                    return false;
+                }
             }
             $id_object = $rows[0][$primary];
         }
@@ -2220,7 +2237,7 @@ class BimpObject extends BimpCache
         }
 
         $rows = $this->db->executeS($sql, $return);
-        
+
         if (is_null($rows)) {
             $rows = array();
         }

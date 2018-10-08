@@ -135,35 +135,23 @@ class BimpDocumentPDF extends BimpModelPDF
             if ($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0) {
                 $usertmp = new User($this->db);
                 $usertmp->fetch($comm1);
-                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' client : ' . $usertmp->getFullName($this->langs) . '</div>';
+                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' client : ' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
                 $nRows++;
                 $usertmp = new User($this->db);
                 $usertmp->fetch($comm2);
-                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' devis : ' . $usertmp->getFullName($this->langs) . '</div>';
+                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' devis : ' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
                 $nRows++;
             } else {
                 if ($comm1 > 0) {
                     $usertmp = new User($this->db);
                     $usertmp->fetch($comm1);
-                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' client : ' . $usertmp->getFullName($this->langs) . '</div>';
+                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs, 0, -1, 25) . '</div>';
                     $nRows++;
                 } elseif ($comm2 > 0) {
                     $usertmp = new User($this->db);
                     $usertmp->fetch($comm2);
-                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' devis : ' . $usertmp->getFullName($this->langs) . '</div>';
+                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs, 0, -1, 25) . '</div>';
                     $nRows++;
-                } else {
-                    if ($comm1 > 0) {
-                        $usertmp = new User($this->db);
-                        $usertmp->fetch($comm1);
-                        $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
-                        $nRows++;
-                    } elseif ($comm2 > 0) {
-                        $usertmp = new User($this->db);
-                        $usertmp->fetch($comm2);
-                        $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
-                        $nRows++;
-                    }
                 }
             }
             if (isset($usertmp)) {

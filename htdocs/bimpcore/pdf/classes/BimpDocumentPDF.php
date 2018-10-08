@@ -551,8 +551,8 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->pdf->addVMargin(2);
         $html = '';
         
+        $html .= '<p style="font-size: 6px; font-style: italic">';
         if($this->totals['RPCP'] > 0){
-            $html .= '<p style="font-size: 6px; font-style: italic">';
             $html .= '<span style="font-weight: bold;">Rémunération Copie Privée : '.price($this->totals['RPCP']).' € HT</span>
 <br/>Notice officielle d\'information sur la copie privée à : http://www.copieprivee.culture.gouv.fr.
   Remboursement/exonération de la rémunération pour usage professionnel : http://www.copiefrance.fr';

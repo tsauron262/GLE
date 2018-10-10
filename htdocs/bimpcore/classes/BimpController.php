@@ -15,7 +15,7 @@ class BimpController
     protected $cssFiles = array();
     public $extends = array();
     private $nbBouclePush = 1;
-    private $maxBouclePush = 100;
+    private $maxBouclePush = 10;
 
     public static function getInstance($module)
     {
@@ -1634,8 +1634,6 @@ class BimpController
         
         if($_SESSION[$hashCash]['html'] != $html || $i > $_SESSION[$hashCash]['nbBouclePush']){
             $_SESSION[$hashCash]['html'] = $html;
-            
-//            die($_SESSION[$hashCash]['nbBouclePush']);
             
             
             die(json_encode(array(

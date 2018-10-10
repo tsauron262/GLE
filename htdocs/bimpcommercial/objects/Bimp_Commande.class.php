@@ -9,7 +9,7 @@ class Bimp_Commande extends BimpComm
     public static $status_list = array(
         -3 => array('label' => 'Stock insuffisant', 'icon' => 'exclamation-triangle', 'classes' => array('warning')),
         -1 => array('label' => 'Abandonnée', 'icon' => 'times-circle', 'classes' => array('danger')),
-        0  => array('label' => 'Brouillon', 'icon' => 'file-text', 'classes' => array('warning')),
+        0  => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1  => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
         2  => array('label' => 'Acceptée', 'icon' => 'check-circle', 'classes' => array('success')),
         3  => array('label' => 'Fermée', 'icon' => 'times', 'classes' => array('danger')),

@@ -720,7 +720,7 @@ class BC_ListTable extends BC_List
                 }
                 $html .= '" onclick="' . $onclick . '">';
                 if ($icon) {
-                    $html .= '<i class="fa fa-' . $icon . ' left"></i>';
+                    $html .= '<i class="' . BimpRender::renderIconClass($icon) . ' iconLeft"></i>';
                 }
                 $html .= $label . '</span></div>';
             }

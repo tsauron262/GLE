@@ -649,7 +649,7 @@ fields_tables:
               
     suivi:
         title: Suivi
-        icon: file-text
+        icon: fas_file-alt
         rows: 
 #            - field: date_problem
             - field: symptomes

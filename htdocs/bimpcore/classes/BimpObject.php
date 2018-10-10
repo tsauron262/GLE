@@ -1171,7 +1171,7 @@ class BimpObject extends BimpCache
             if ($this->isDolObject()) {
                 if (in_array($type, array('datetime', 'date', 'time'))) {
                     $value = $this->db->db->idate($value);
-                    if (preg_match('/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/', $value, $matches)) {
+                    if (preg_match('/^(\d{4})\-?(\d{2})\-?(\d{2}) ?(\d{2})?:?(\d{2})?:?(\d{2})?$/', $value, $matches)) {
                         switch ($type) {
                             case 'datetime':
                                 $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3] . ' ' . $matches[4] . ':' . $matches[5] . ':' . $matches[6];
@@ -3154,7 +3154,7 @@ class BimpObject extends BimpCache
                                     ), 'button');
                     $items[] = BimpRender::renderButton(array(
                                 'label'       => 'Afficher la page',
-                                'icon_before' => 'file-text-o',
+                                'icon_before' => 'far_file-alt',
                                 'classes'     => array(
                                     'btn', 'btn-light-default'
                                 ),
@@ -3437,6 +3437,8 @@ class BimpObject extends BimpCache
             $msg .= ' - ID ' . $this->getLabel('of_the') . ' absent';
             return BimpRender::renderAlerts($msg);
         }
+        
+        $children_instance->parent = $this;
 
         if (!is_null($children_instance) && is_a($children_instance, 'BimpObject')) {
             $title = (is_null($title) ? $this->getConf('objects/' . $children_object . '/list/title') : $title);

@@ -49,7 +49,7 @@ forms:
 lists:
     default: 
         title: Notes
-        icon: file-text
+        icon: fas_file-alt
         checkboxes: 1
         bulk_actions: 
             - label: Supprimer les notes sélectionnées

@@ -249,9 +249,9 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
     content: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
         
 lists: 
     default: 

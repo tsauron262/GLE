@@ -959,7 +959,7 @@ class BMP_Event extends BimpObject
                         'id_montant' => $m['id_type_montant'],
                         'id_coprod'  => 0
                     ))) {
-                $html = $eventMontant->renderChildrenList('details', 'default', true, $m['title'], 'file-text-o');
+                $html = $eventMontant->renderChildrenList('details', 'default', true, $m['title'], 'far_file-alt');
             } else {
                 $html .= BimpRender::renderAlerts($m['title'] . ': montant correspondant non trouvé');
             }

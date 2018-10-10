@@ -126,11 +126,19 @@ class BimpFile extends BimpObject
 
     public function getParentObjectName()
     {
+        if (!is_null($this->parent) && is_a($this->parent, 'BimpObject')) {
+            return $this->parent->object_name;
+        }
+
         return $this->getData('parent_object_name');
     }
 
     public function getParentModule()
     {
+        if (!is_null($this->parent) && is_a($this->parent, 'BimpObject')) {
+            return $this->parent->module;
+        }
+
         return $this->getData('parent_module');
     }
 
@@ -366,7 +374,7 @@ class BimpFile extends BimpObject
         $this->set('deleted', 1);
         $this->set('user_delete', (int) $user->id);
         $this->set('date_delete', date('Y-m-d H:i:s'));
-        $this->set('file_name', $this->getData('file_name') . '_deleted');
+        $this->set('file_name', $this->getData('file_name') . $this->id . '_deleted');
 
         $errors = $this->update($warnings, true);
 
@@ -375,7 +383,7 @@ class BimpFile extends BimpObject
             $file = $this->getData('file_name') . '.' . $this->getData('file_ext');
 
             if (file_exists($dir . $file)) {
-                BimpTools::renameFile($dir, $file, $this->getData('file_name') . '_deleted' . '.' . $this->getData('file_ext'));
+                BimpTools::renameFile($dir, $file, $this->getData('file_name') . $this->id . '_deleted.' . $this->getData('file_ext'));
             }
         }
 

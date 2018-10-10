@@ -842,8 +842,7 @@ i.iconRight {
 .select2-results ul li {
     min-height: 30px;
 
-    &.select2-results__option:hover, 
-        &.select2-results__option--highlighted {
+    &.select2-results__option--highlighted {
         color: #fff!important;
 
         span {

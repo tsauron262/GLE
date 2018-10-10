@@ -7,7 +7,7 @@ class BC_Vente extends BimpObject
     public static $facture_default_bank_account_id = 1;
     public static $states = array(
         0 => array('label' => 'Abandonnée', 'icon' => 'times', 'classes' => array('danger')),
-        1 => array('label' => 'Brouillon', 'icon' => 'file-text', 'classes' => array('warning')),
+        1 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         2 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('success'))
     );
 

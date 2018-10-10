@@ -2,9 +2,29 @@
     color: #787878!important;
 }
 
+.Bimp_Propal_form {
+    select {
+        min-width: 200px;
+    }
+}
+
+.select2-search--dropdown {
+    padding-right: 28px;
+
+    &:after {
+        font-family: 'FA5S';
+        content: '\f002';
+        color: $gray-dark;
+        position: absolute;
+        top: 9px;
+        right: 8px;
+        font-size: 14px;
+    }
+}
+
 .formInputGroup {
     padding-left: 25px;
-    border-left: 3px solid $gray-dark;
+    border-left: 3px solid $gray;
     margin: 30px 0;
 
     .formGroupHeading {
@@ -408,26 +428,26 @@ select.switch {
             font-weight: bold;
             padding: 3px 12px;
         }
-        
+
         & > td.item_label {
             width: 80%;
         }
         & > td.positionHandle {
             width: 10%;
         }
-        
+
         & > td.removeButton {
             width: 10%
         }
-        
+
         &.ui-sortable-helper {
             box-shadow: 0 0 2px 2px #2F7EA0;
-            
+
             & > td {
                 background-color: #fff;
             }
         }
-        
+
         &.ui-sortable-placeholder {
             height: 30px;
         }

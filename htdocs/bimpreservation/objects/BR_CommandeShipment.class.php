@@ -4,7 +4,7 @@ class BR_CommandeShipment extends BimpObject
 {
 
     public static $status_list = array(
-        1 => array('label' => 'Brouillon', 'icon' => 'file-text', 'classes' => array('warning')),
+        1 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         2 => array('label' => 'Expédiée', 'icon' => 'check', 'classes' => array('success')),
         3 => array('label' => 'Annulée', 'icon' => 'times', 'classes' => array('danger')),
         4 => array('label' => 'Vérouillée', 'icon' => 'lock', 'classes' => array('important'))
@@ -138,7 +138,7 @@ class BR_CommandeShipment extends BimpObject
                         if (!(int) $commande->getData('id_facture')) {
                             $buttons[] = array(
                                 'label'   => 'Créer une facture',
-                                'icon'    => 'file-text-o',
+                                'icon'    => 'far_file-alt',
                                 'onclick' => $this->getJsActionOnclick('createFacture', array(), array(
                                     'form_name' => 'facture'
                                 ))
@@ -176,7 +176,7 @@ class BR_CommandeShipment extends BimpObject
         return array(
             array(
                 'label'   => 'Créer une facture unique',
-                'icon'    => 'file-text-o',
+                'icon'    => 'far_file-alt',
                 'onclick' => 'setSelectedObjectsAction($(this), \'list_id\', \'createBulkFacture\', {id_commande_client: ' . $id_commande . '}, \'facture\', null, true)'
             )
         );

@@ -10,7 +10,7 @@ class Bimp_Propal extends BimpComm
     public $id_sav = null;
     public $sav = null;
     public static $status_list = array(
-        0 => array('label' => 'Brouillon', 'icon' => 'file-text', 'classes' => array('warning')),
+        0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
         2 => array('label' => 'Signée (A facturer)', 'icon' => 'check', 'classes' => array('info')),
         3 => array('label' => 'Non signée (fermée)', 'icon' => 'exclamation-circle', 'classes' => array('important')),
@@ -435,21 +435,43 @@ class Bimp_Propal extends BimpComm
             return array(BimpTools::ucfirst($this->getLabel('this')) . ' est invalide. Copie impossible');
         }
 
+        $date_diff = 0;
         if (isset($new_data['date_livraison']) && $new_data['date_livraison'] !== $this->getData('date_livraison')) {
-            $this->dol_object->date_livraison = BimpTools::getDateForDolDate($new_data['date_livraison']);
-
             $date_diff = (int) BimpTools::getDateForDolDate($new_data['date_livraison']) - (BimpTools::getDateForDolDate($this->getData('date_livraison')));
-            foreach ($this->dol_object->lines as $line) {
-                if (isset($line->date_start) && (int) $line->date_start) {
-                    $line->date_start = $line->date_start + $date_diff;
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $new_data['datep'] = $now;
+        $new_data['datec'] = $now;
+        $fin_validite = BimpTools::getDateForDolDate($now) + ($this->dol_object->duree_validite * 24 * 3600);
+        $new_data['fin_validite'] = BimpTools::getDateFromDolDate($fin_validite);
+
+        $errors = parent::duplicate($new_data, $warnings, $force_create);
+
+        if ($date_diff) {
+            $lines = $this->getChildrenObjects('lines');
+            foreach ($lines as $line) {
+                $update = false;
+                if (isset($line->date_from) && (string) $line->date_from) {
+                    $new_date_from = (BimpTools::getDateForDolDate($line->date_from) + $date_diff);
+                    $line->date_from = BimpTools::getDateFromDolDate($new_date_from);
+                    $update = true;
                 }
-                if (isset($line->date_end) && (int) $line->date_start) {
-                    $line->date_end = $line->date_end + $date_diff;
+                
+                if (isset($line->date_to) && (string) $line->date_to) {
+                    $new_date_to = (BimpTools::getDateForDolDate($line->date_to) + $date_diff);
+                    $line->date_to = BimpTools::getDateFromDolDate($new_date_to);
+                    $update = true;
+                }
+                
+                if ($update) {
+                    $line_warnings = array();
+                    $line->update($line_warnings, true);
                 }
             }
         }
 
-        return parent::duplicate($new_data, $warnings, $force_create);
+        return $errors;
     }
 
     // Actions:
@@ -677,10 +699,9 @@ class Bimp_Propal extends BimpComm
         }
 
         // Mise à jour des extra_fields: 
-        if ($this->dol_object->update_extrafields($user) <= 0) {
+        if ($this->dol_object->insertExtraFields('', $user) <= 0) {
             $errors[] = 'Echec de la mise à jour des champs supplémentaires';
         }
-
         if (!count($errors)) {
             return 1;
         }

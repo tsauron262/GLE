@@ -464,7 +464,7 @@ class BMP_EventMontant extends BimpObject
             if ($editDetails) {
                 $buttons[] = array(
                     'label'   => 'Editer les détails',
-                    'icon'    => 'file-text-o',
+                    'icon'    => 'far_file-alt',
                     'onclick' => 'loadModalView(\'' . $this->module . '\', \'' . $this->object_name . '\', ' . $this->id . ',\'' . 'details_list' . '\', $(this));'
                 );
             }
@@ -497,7 +497,7 @@ class BMP_EventMontant extends BimpObject
                     return array(
                         array(
                             'label'   => 'Détails',
-                            'icon'    => 'file-text-o',
+                            'icon'    => 'far_file-alt',
                             'onclick' => 'loadModalView(\'' . $this->module . '\', \'BMP_Event\', ' . $this->getData('id_event') . ',\'' . 'billets_list' . '\', $(this));'
                         )
                     );

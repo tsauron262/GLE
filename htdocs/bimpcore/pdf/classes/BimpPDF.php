@@ -118,8 +118,7 @@ use setasign\Fpdi\Fpdi;
 
 
 require_once DOL_DOCUMENT_ROOT.'/includes/tcpdi/tcpdi.php';
-if(!class_exists('FPDF'))
-    require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/fpdf.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/fpdf2.php';
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/autoload.php';
 
 class BimpConcatPdf extends Fpdi

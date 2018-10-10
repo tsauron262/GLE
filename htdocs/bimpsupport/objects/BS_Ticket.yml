@@ -375,7 +375,7 @@ lists:
         cols:
             ticket:
                 field: ticket_number
-            status: 
+            status:
                 field: status
             priorite:
                 label: Prio.

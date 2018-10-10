@@ -204,20 +204,33 @@ function displayObjectView($container, module_name, object_name, view_name, id_o
         'panel_type': panel_type
     };
 
-    $container.html(renderLoading('Chargement'));
-    $container.find('.content-loading').show();
-    $container.slideDown(250);
-
     BimpAjax('loadObjectView', data, $container, {
         append_html: true,
+        display_processing: true,
         success: function (result) {
             if (typeof (result.html) !== 'undefined') {
                 if (result.html) {
+                    var $viewContainer = $('#' + result.view_id + '_container');
+                    if ($viewContainer.length) {
+                        var button = '<button class="btn btn-default" type="button" onclick="';
+                        button += 'closeObjectView(\'' + $container.attr('id') + '\')';
+                        button += '"><i class="fa fa-times iconLeft"></i>Fermer</button>';
+                        $viewContainer.find('.panel-footer .panelFooterButtons').append(button);
+                    }
                     onViewLoaded($('#' + result.view_id));
                 }
             }
         }
     });
+}
+
+function closeObjectView(container_id) {
+    var $container = $('#' + container_id);
+    if ($container.length) {
+        $container.stop().slideUp(250, function () {
+            $container.html('');
+        });
+    }
 }
 
 function loadModalObjectPage($button, url, title) {
@@ -249,7 +262,7 @@ function checkFieldsTableModifications($fieldsTable) {
         }
     });
 
-    var $footer = $('#' + $fieldsTable.attr('id') + '_container').find('.panel-footer');
+    var $footer = $('#' + $fieldsTable.attr('id') + '_container').find('.fieldsTableFooter');
     if ($footer.length) {
         if (hasModifications) {
             $footer.find('.saveButton').show();
@@ -403,23 +416,23 @@ function onViewRefreshed($view) {
 
 function setFieldsTableEvents($fieldsTable) {
     if (!parseInt($fieldsTable.data('events_init'))) {
-
         $fieldsTable.find('.inputContainer').each(function () {
             var field_name = $(this).data('field_name');
             if (field_name) {
                 var $input = $(this).find('[name="' + field_name + '"]');
-                $input.change(function () {
-                    checkFieldsTableModifications($fieldsTable);
-                });
+                if ($input.length) {
+                    $input.on('change', function () {
+                        checkFieldsTableModifications($fieldsTable);
+                    });
+                    $input.keyup(function () {
+                        $input.change();
+                    });
+                }
             }
-            $input.keyup(function () {
-                $input.change();
-            });
         });
         checkFieldsTableModifications($fieldsTable);
         $fieldsTable.data('events_init', 1);
     }
-
 }
 
 $(document).ready(function () {

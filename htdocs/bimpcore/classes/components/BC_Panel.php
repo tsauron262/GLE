@@ -22,6 +22,8 @@ class BC_Panel extends BimpComponent
         $this->params_def['title'] = array();
         $this->params_def['icon'] = array();
         $this->params_def['panel'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['panel_header'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['panel_footer'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['objects_change_reload'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['no_reload'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['footer_extra_btn'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
@@ -127,13 +129,6 @@ class BC_Panel extends BimpComponent
             $content .= '</div>';
 
             $content .= '<div class="container-fluid object_component_content object_' . static::$type . '_content">';
-
-            if (!is_null($this->params['msgs']) && count($this->params['msgs'])) {
-                foreach ($this->params['msgs'] as $msg) {
-                    $html .= BimpRender::renderAlerts($msg['content'], $msg['type']);
-                }
-            }
-
             $content .= $this->renderHtmlContent();
             $content .= '</div>';
 
@@ -151,7 +146,9 @@ class BC_Panel extends BimpComponent
                             'foldable'       => true,
                             'id'             => $this->identifier . '_panel',
                             'icon'           => $icon,
-                            'header_buttons' => $this->getHeaderButtons()
+                            'header_buttons' => $this->getHeaderButtons(),
+                            'no_header'      => (int) !$this->params['panel_header'],
+                            'no_footer'      => (int) !$this->params['panel_footer']
                 ));
             } else {
                 $html .= $content;
@@ -165,12 +162,20 @@ class BC_Panel extends BimpComponent
 
     public function renderHtmlContent()
     {
-        return '';
+        $html = '';
+        
+        if (!is_null($this->params['msgs']) && count($this->params['msgs'])) {
+            foreach ($this->params['msgs'] as $msg) {
+                $html .= BimpRender::renderAlerts($msg['content'], $msg['type']);
+            }
+        }
+
+        return $html;
     }
 
     public function renderHtmlFooter()
     {
-        $html = '<div style="text-align: right">';
+        $html = '<div class="panelFooterButtons" style="text-align: right">';
         $html .= $this->renderFooterExtraBtn();
         $html .= '</div>';
 

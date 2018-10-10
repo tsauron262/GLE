@@ -273,7 +273,7 @@ class BC_Display extends BimpComponent
                                         $html .= BimpRender::displayTagAttrs($array[$this->value]);
                                         $html .= '>';
                                         if (isset($array[$this->value]['icon'])) {
-                                            $html .= '<i class="fa fa-' . $array[$this->value]['icon'] . ' iconLeft"></i>';
+                                            $html .= '<i class="' . BimpRender::renderIconClass($array[$this->value]['icon']) . ' iconLeft"></i>';
                                         }
                                         if (isset($array[$this->value]['label'])) {
                                             $html .= $array[$this->value]['label'];

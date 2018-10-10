@@ -1,13 +1,14 @@
 var reload_fixe_tabs_hold = false;
-var reload_fixe_tabs_delay = 3000;
+var randomId = getRandomInt(9999999999999); 
 
-function reloadFixeTabs(iterate) {
+
+function reloadFixeTabs(iterate, reload_fixe_tabs_delay = 1000) {
     if (reload_fixe_tabs_hold) {
         setTimeout(function () {
             reloadFixeTabs(iterate);
         }, 3000);
     } else {
-        BimpAjax('loadFixeTabs', {}, null, {
+        BimpAjax('loadFixeTabs', {randomId}, null, {
             display_success: false,
             display_errors_in_popup_only: true,
             display_warnings_in_popup_only: true,
@@ -16,14 +17,23 @@ function reloadFixeTabs(iterate) {
                     $('#bimp_fixe_tabs').html(result.html);
                 }
                 setFixeTabsEvents();
+                
+                if (iterate) {
+                    setTimeout(function () {
+                        reloadFixeTabs(true);
+                    }, reload_fixe_tabs_delay);
+                }
+            },
+            error: function(){
+                if (iterate) {
+                    setTimeout(function () {
+                        reloadFixeTabs(true, reload_fixe_tabs_delay*1.4);
+                    }, reload_fixe_tabs_delay);
+                }
             }
+            
         });
 
-        if (iterate) {
-            setTimeout(function () {
-                reloadFixeTabs(true);
-            }, reload_fixe_tabs_delay);
-        }
     }
 }
 
@@ -78,5 +88,10 @@ $(document).ready(function () {
     });
     setTimeout(function () {
         reloadFixeTabs(true);
-    }, reload_fixe_tabs_delay);
+    }, 2000);
 });
+
+
+function getRandomInt(max) {
+  return Math.floor(Math.random() * Math.floor(max));
+}

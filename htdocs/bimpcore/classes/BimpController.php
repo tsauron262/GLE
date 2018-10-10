@@ -14,6 +14,8 @@ class BimpController
     protected $jsFiles = array();
     protected $cssFiles = array();
     public $extends = array();
+    private $nbBouclePush = 1;
+    private $maxBouclePush = 100;
 
     public static function getInstance($module)
     {
@@ -1616,20 +1618,39 @@ class BimpController
         )));
     }
 
-    protected function ajaxProcessLoadFixeTabs()
+    protected function ajaxProcessLoadFixeTabs($i = 0)
     {
         global $bimp_fixe_tabs;
 
-        if (!is_a($bimp_fixe_tabs, 'FixeTabs')) {
-            $bimp_fixe_tabs = new FixeTabs();
-            $bimp_fixe_tabs->init();
+        $bimp_fixe_tabs = new FixeTabs();
+        $bimp_fixe_tabs->init();
+        
+        $html = $bimp_fixe_tabs->render(true);
+        $hashCash = 'fixeTabsHtml'.$_POST['randomId'];//Pour ne regardé que sur l'ongelt actuel
+        if(!isset($_SESSION[$hashCash]) || !is_array($_SESSION[$hashCash]))
+            $_SESSION[$hashCash] = array('nbBouclePush'=> $this->nbBouclePush, 'html'=> '');
+        if($_SESSION[$hashCash]['nbBouclePush'] < $this->maxBouclePush)
+            $_SESSION[$hashCash]['nbBouclePush'] = $_SESSION[$hashCash]['nbBouclePush'] * 1.1;//Pour ne pas surchargé quand navigateur resté ouvert, mais ne pas avoir des boucle morte quand navigation rapide
+        
+        if($_SESSION[$hashCash]['html'] != $html || $i > $_SESSION[$hashCash]['nbBouclePush']){
+            $_SESSION[$hashCash]['html'] = $html;
+            
+//            die($_SESSION[$hashCash]['nbBouclePush']);
+            
+            
+            die(json_encode(array(
+                'errors'     => $bimp_fixe_tabs->errors,
+                'html'       => $html,
+                'request_id' => BimpTools::getValue('request_id', 0)
+            )));
+        }
+        else{
+            $i++;
+            session_write_close();//Pour eviter les blockages navigateur
+            sleep(1);
+            return $this->ajaxProcessLoadFixeTabs($i);
         }
 
-        die(json_encode(array(
-            'errors'     => $bimp_fixe_tabs->errors,
-            'html'       => $bimp_fixe_tabs->render(true),
-            'request_id' => BimpTools::getValue('request_id', 0)
-        )));
     }
 
     // Callbacks:

@@ -27,7 +27,7 @@ class BimpObject extends BimpCache
         'icon'                     => array('default' => ''),
         'primary'                  => array('default' => 'id'),
         'common_fields'            => array('data_type' => 'bool', 'default' => 1),
-        'header_list_name'         => array('default' => 'default'),
+        'header_list_name'         => array('default' => ''),
         'header_btn'               => array('data_type' => 'array', 'default' => array()),
         'list_page_url'            => array('data_type' => 'array'),
         'parent_object'            => array('default' => ''),
@@ -2119,7 +2119,7 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    public function find($filters, $return_first = false)
+    public function find($filters, $return_first = false, $delete_if_multiple = false)
     {
         $this->reset();
 
@@ -2150,7 +2150,24 @@ class BimpObject extends BimpCache
 
         if (!is_null($rows) && count($rows)) {
             if (count($rows) > 1 && !$return_first) {
-                return false;
+                if ($delete_if_multiple) {
+                    $fl = true;
+                    foreach ($rows as $r) {
+                        if ($fl) {
+                            $fl = false;
+                            if ($return_first) {
+                                continue;
+                            }
+                        }
+                        if ($this->fetch((int) $r[$primary])) {
+                            $this->delete();
+                        }
+                    }
+                    $this->reset();
+                }
+                if (!$return_first) {
+                    return false;
+                }
             }
             $id_object = $rows[0][$primary];
         }

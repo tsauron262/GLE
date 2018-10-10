@@ -15,8 +15,8 @@ class importVente extends import8sens {
     var $tabResultInt = array();
     var $logOld = false;
     
-    var $dateDepart = "30/09/2018";
-    var $dateAchatDef = "05/10/2014";
+    var $dateDepart = "";
+    var $dateAchatDef = "";
 
     public function __construct($db) {
         $this->last = true;
@@ -25,8 +25,17 @@ class importVente extends import8sens {
     }
 
     public function go() {
+        $this->dateDepart = "30/09/2018";
+//        $this->dateAchatDef = "05/10/2014";
+//        $this->path .= "../inventaire/olys/exportVente/";
+        $this->dateAchatDef = "01/01/2016";
+        $this->path .= "../inventaire/comp/exportVente/";
+        
+        
+        
+        
+        
         $this->action = 1;
-        $this->path .= "../inventaire/exportVente/";
         parent::go();
 
         if ($this->logOld) {

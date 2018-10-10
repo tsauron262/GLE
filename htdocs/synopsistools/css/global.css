@@ -515,3 +515,7 @@ input, input.flat, textarea, textarea.flat, form.flat select, select, select.fla
 .fullScreen{
     z-index: 10002!important;
 }
+
+input[name='options_libelle']{
+    width: 300px;
+}

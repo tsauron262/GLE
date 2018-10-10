@@ -18,7 +18,7 @@ class BimpDocumentPDF extends BimpModelPDF
     public $acompteTva20 = 0;
     public $tva = array();
     public $hideReduc = false;
-    public $hideTtc = true;
+    public $hideTtc = false;
     public $hideTotal = false;
     public $hideRef = false;
     public $hideLabelProd = true;
@@ -135,35 +135,23 @@ class BimpDocumentPDF extends BimpModelPDF
             if ($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0) {
                 $usertmp = new User($this->db);
                 $usertmp->fetch($comm1);
-                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' client : ' . $usertmp->getFullName($this->langs) . '</div>';
+                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' client : ' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
                 $nRows++;
                 $usertmp = new User($this->db);
                 $usertmp->fetch($comm2);
-                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' devis : ' . $usertmp->getFullName($this->langs) . '</div>';
+                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' devis : ' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
                 $nRows++;
             } else {
                 if ($comm1 > 0) {
                     $usertmp = new User($this->db);
                     $usertmp->fetch($comm1);
-                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' client : ' . $usertmp->getFullName($this->langs) . '</div>';
+                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs, 0, -1, 25) . '</div>';
                     $nRows++;
                 } elseif ($comm2 > 0) {
                     $usertmp = new User($this->db);
                     $usertmp->fetch($comm2);
-                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' devis : ' . $usertmp->getFullName($this->langs) . '</div>';
+                    $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs, 0, -1, 25) . '</div>';
                     $nRows++;
-                } else {
-                    if ($comm1 > 0) {
-                        $usertmp = new User($this->db);
-                        $usertmp->fetch($comm1);
-                        $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
-                        $nRows++;
-                    } elseif ($comm2 > 0) {
-                        $usertmp = new User($this->db);
-                        $usertmp->fetch($comm2);
-                        $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
-                        $nRows++;
-                    }
                 }
             }
             if (isset($usertmp)) {
@@ -463,7 +451,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $row['desc'] = array(
                     'colspan' => 99,
                     'content' => $desc,
-                    'style'   => 'font-weight: bold; background-color: #F5F5F5;'
+                    'style'   => ' background-color: #F5F5F5;'
                 );
             } else {
                 $line_remise = $line->remise_percent;
@@ -563,11 +551,11 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->pdf->addVMargin(2);
         $html = '';
         
+        $html .= '<p style="font-size: 6px; font-style: italic">';
         if($this->totals['RPCP'] > 0){
-            $html .= '<p style="font-size: 6px; font-style: italic">';
             $html .= '<span style="font-weight: bold;">Rémunération Copie Privée : '.price($this->totals['RPCP']).' € HT</span>
 <br/>Notice officielle d\'information sur la copie privée à : http://www.copieprivee.culture.gouv.fr.
-  Remboursement/exonération de la rémunération pour usage professionnel : http://www.copiefrance.fr';
+  Remboursement/exonération de la rémunération pour usage professionnel : http://www.copiefrance.fr<br/>';
         }
         
         
@@ -576,11 +564,11 @@ class BimpDocumentPDF extends BimpModelPDF
 //        $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
 
   
-        $html .= '<br/><span style="font-weight: bold;">';
+        $html .= '<span style="font-weight: bold;">';
         if($this->pdf->addCgvPages)
-            $html .= '<br/>La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et disponibles sur www.bimp.fr';
+            $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et disponibles sur www.bimp.fr';
         else
-            $html .= '<br/>Nos Conditions Générales de Vente sont consultables sur le site www.bimp.fr';
+            $html .= 'Nos Conditions Générales de Vente sont consultables sur le site www.bimp.fr';
         $html .= "</span>";
         $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
  En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';

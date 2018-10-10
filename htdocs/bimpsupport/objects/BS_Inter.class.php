@@ -3,6 +3,9 @@
 class BS_Inter extends BimpObject
 {
 
+    const BS_INTER_OPEN = 1;
+    const BS_INTER_CLOSED = 2;
+
     public static $priorities = array(
         1 => array('label' => 'Non urgent', 'classes' => array('success'), 'icon' => 'hourglass-start'),
         2 => array('label' => 'Urgent', 'classes' => array('warning'), 'icon' => 'hourglass-half'),
@@ -17,7 +20,7 @@ class BS_Inter extends BimpObject
     {
         $status = (int) $this->getData('status');
 
-        if ($status !== 2) {
+        if ($status !== self::BS_INTER_CLOSED) {
             $tech_id_user = (int) $this->getData('tech_id_user');
             global $user;
 
@@ -28,7 +31,7 @@ class BS_Inter extends BimpObject
             }
         }
 
-        return $this->renderView('data', false);
+        return $this->renderView('data_only', false);
     }
 
     public function renderChronoView()

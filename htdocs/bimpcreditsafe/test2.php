@@ -76,7 +76,10 @@ else{
         $champ = "rating".$annee;
         if($summary->$champ > 0){
             if($annee != "")
-                $note .= "[Attention note de ".$annee."]";
+                if($note != "")
+                    $note .= "[Note de ".$annee."]";
+                else
+                    $note .= "[Attention note de ".$annee."]";
             foreach(array("", "desc1", "desc2") as $champ2){
                 $champT = $champ.$champ2;
                 if(isset($summary->$champT))
@@ -119,7 +122,10 @@ else{
         "CodeP" => "".$codeP,
         "Ville" => "".$ville,
         "Siret" => "".$siret,
+        "limit" => "".price(intval($summary->creditlimit)),
+        "tradename" => "".$summary->tradename,
+        "info" => ""."",
         "Capital" => "".str_replace(" Euros", "", $summary->sharecapital));
-    //$return = $result;
+    $return = $result;
     echo json_encode($return);
 }

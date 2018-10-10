@@ -286,8 +286,8 @@ class BC_ListTable extends BC_List
     {
         $html = '';
 
-        $html .= '<div class="objectViewContainer" style="display: none"></div>';
-        $html .= '<div class="objectFormContainer" style="display: none"></div>';
+        $html .= '<div id="'.$this->identifier.'_objectViewContainer" class="objectViewContainer" style="display: none"></div>';
+        $html .= '<div id="'.$this->identifier.'_objectFormContainer" class="objectFormContainer" style="display: none"></div>';
 
         $html .= $this->renderListParamsInputs();
 

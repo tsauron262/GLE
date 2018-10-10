@@ -219,31 +219,34 @@ class BimpRender
             $html .= ' id="' . $params['panel_id'] . '"';
         }
         $html .= '>';
-        $html .= '<div class="panel-heading">';
 
-        // Titre:
-        $html .= '<div class="panel-title">';
-        if (isset($params['icon']) && $params['icon']) {
-            $html .= self::renderIcon($params['icon'], 'iconLeft');
-        }
-        $html .= $title;
-        $html .= '</div>';
+        if (!isset($params['no_header']) || !(int) $params['no_header']) {
+            $html .= '<div class="panel-heading">';
 
-        // Bouttons en en-tête:
-
-        $html .= '<div class="header_buttons">';
-        if (isset($params['header_buttons']) && is_array($params['header_buttons']) && count($params['header_buttons'])) {
-            foreach ($params['header_buttons'] as $button) {
-                $button['classes'][] = 'headerBtn';
-                $html .= self::renderButton($button);
+            // Titre:
+            $html .= '<div class="panel-title">';
+            if (isset($params['icon']) && $params['icon']) {
+                $html .= self::renderIcon($params['icon'], 'iconLeft');
             }
-        }
+            $html .= $title;
+            $html .= '</div>';
 
-        if ($params['foldable']) {
-            $html .= '<span class="panel-caret"></span>';
+            // Bouttons en en-tête:
+
+            $html .= '<div class="header_buttons">';
+            if (isset($params['header_buttons']) && is_array($params['header_buttons']) && count($params['header_buttons'])) {
+                foreach ($params['header_buttons'] as $button) {
+                    $button['classes'][] = 'headerBtn';
+                    $html .= self::renderButton($button);
+                }
+            }
+
+            if ($params['foldable']) {
+                $html .= '<span class="panel-caret"></span>';
+            }
+            $html .= '</div>';
+            $html .= '</div>';
         }
-        $html .= '</div>';
-        $html .= '</div>';
 
         // Corps:
         $html .= '<div class="panel-body"' . ($params['foldable'] && !$params['open'] ? ' style="display: none"' : '') . '>';
@@ -251,7 +254,7 @@ class BimpRender
         $html .= '</div>';
 
         // Footer:
-        if ($footer_content) {
+        if ($footer_content && (!isset($params['no_footer']) || !(int) $params['no_footer'])) {
             $html .= '<div class="panel-footer"' . ($params['foldable'] && !$params['open'] ? ' style="display: none"' : '') . '>';
             $html .= $footer_content;
             $html .= '</div>';

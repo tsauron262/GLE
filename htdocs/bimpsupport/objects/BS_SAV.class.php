@@ -1182,7 +1182,7 @@ class BS_SAV extends BimpObject
                 'id_obj'             => $prop->id,
                 'linked_object_name' => 'sav_discount',
                 'linked_id_object'   => (int) $discount->id
-            ));
+            ), false, true);
 
             $line_errors = $line->validateArray(array(
                 'id_obj'             => (int) $prop->id,
@@ -1259,10 +1259,10 @@ class BS_SAV extends BimpObject
 //            $line_errors = $line->update($line_warnings, true);
 //        }
 
-        $line_errors = array_merge($line_errors, $line_warnings);
-        if (count($line_errors)) {
-            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne de prise en charge');
-        }
+//        $line_errors = array_merge($line_errors, $line_warnings);
+//        if (count($line_errors)) {
+//            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne de prise en charge');
+//        }
 
         // Service prioritaire: 
         if ((int) $this->getData('prioritaire')) {
@@ -1276,7 +1276,7 @@ class BS_SAV extends BimpObject
                 'id_obj'             => $prop->id,
                 'linked_object_name' => 'sav_prioritaire',
                 'linked_id_object'   => (int) $this->id
-            ));
+            ), false, true);
 
             $line->validateArray(array(
                 'id_obj'             => (int) $prop->id,
@@ -1324,7 +1324,7 @@ class BS_SAV extends BimpObject
             'id_obj'             => $prop->id,
             'linked_object_name' => 'sav_diagnostic',
             'linked_id_object'   => (int) $this->id
-        ));
+        ), false, true);
 
         $line_errors = array();
 
@@ -1367,7 +1367,7 @@ class BS_SAV extends BimpObject
             'id_obj'             => $prop->id,
             'linked_object_name' => 'sav_extra_infos',
             'linked_id_object'   => (int) $this->id
-        ));
+        ), false, true);
 
         $line_errors = array();
         if ((string) $this->getData('extra_infos')) {

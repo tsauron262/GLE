@@ -5,7 +5,7 @@ function getTabTypeObject($typeFiltre = null) {
         'propal' => array("path" => "/comm/propal/class/propal.class.php",
             "tabMenu1" => "commercial",
             "tabMenu2" => "propals",
-            "urls" => array("comm/propal.php")),
+            "urls" => array("comm/propal/card.php")),
         'facture' => array("path" => "/compta/facture/class/facture.class.php",
             "tabMenu1" => "accountancy",
             "urls" => array("compta/facture/card.php"),

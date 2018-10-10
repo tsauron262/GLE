@@ -25,12 +25,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+
 /**
  *	\file       htdocs/main.inc.php
  *	\ingroup	core
  *	\brief      File that defines environment for Dolibarr GUI pages only (file not required by scripts)
  */
+
 //@ini_set('memory_limit', '128M');	// This may be useless if memory is hard limited by your PHP
+
 // For optional tuning. Enabled if environment variable MAIN_SHOW_TUNING_INFO is defined.
 $micro_start_time=0;
 if (! empty($_SERVER['MAIN_SHOW_TUNING_INFO']))
@@ -43,6 +46,7 @@ if (! empty($_SERVER['MAIN_SHOW_TUNING_INFO']))
 		xdebug_start_code_coverage();
 	}
 }
+
 // Removed magic_quotes
 if (function_exists('get_magic_quotes_gpc'))	// magic_quotes_* deprecated in PHP 5.0 and removed in PHP 5.5
 {
@@ -63,6 +67,7 @@ if (function_exists('get_magic_quotes_gpc'))	// magic_quotes_* deprecated in PHP
 		@set_magic_quotes_runtime(0);
 	}
 }
+
 /**
  * Security: SQL Injection and XSS Injection (scripts) protection (Filters on GET, POST, PHP_SELF).
  *
@@ -125,6 +130,7 @@ function test_sql_and_script_inject($val, $type)
 	if ($type == 2) $inj += preg_match('/[;"]/', $val);		// PHP_SELF is a file system path. It can contains spaces.
 	return $inj;
 }
+
 /**
  * Return true if security check on parameters are OK, false otherwise.
  *
@@ -155,6 +161,8 @@ function analyseVarsForSqlAndScriptsInjection(&$var, $type)
 		return (test_sql_and_script_inject($var, $type) <= 0);
 	}
 }
+
+
 // Check consistency of NOREQUIREXXX DEFINES
 if ((defined('NOREQUIREDB') || defined('NOREQUIRETRAN')) && ! defined('NOREQUIREMENU'))
 {
@@ -179,11 +187,13 @@ if (! defined('NOSCANPOSTFORINJECTION'))
 {
 	analyseVarsForSqlAndScriptsInjection($_POST,0);
 }
+
 // This is to make Dolibarr working with Plesk
 if (! empty($_SERVER['DOCUMENT_ROOT']) && substr($_SERVER['DOCUMENT_ROOT'], -6) !== 'htdocs')
 {
 	set_include_path($_SERVER['DOCUMENT_ROOT'] . '/htdocs');
 }
+
 // Include the conf.php and functions.lib.php
 require_once 'filefunc.inc.php';
 
@@ -231,10 +241,9 @@ if (! defined('NOSESSION'))
 		}
 	}*/
 }
+
 // Init the 5 global objects, this include will make the new and set properties for: $conf, $db, $langs, $user, $mysoc
 require_once 'master.inc.php';
-
-
 
 /* Mod drsi */
 include_once(DOL_DOCUMENT_ROOT . "/synopsistools/class/divers.class.php");
@@ -242,10 +251,9 @@ $synopsisHook = new synopsisHook();
 global $synopsisHook; //Pour vision global de l'objet
 /* FMod Drsi */
 
-
-
 // Activate end of page function
 register_shutdown_function('dol_shutdown');
+
 // Detection browser
 if (isset($_SERVER["HTTP_USER_AGENT"]))
 {
@@ -261,6 +269,7 @@ if (isset($_SERVER["HTTP_USER_AGENT"]))
 	if ($conf->browser->layout == 'phone') $conf->dol_no_mouse_hover=1;
 	if ($conf->browser->layout == 'phone') $conf->global->MAIN_TESTMENUHIDER=1;
 }
+
 // Force HTTPS if required ($conf->file->main_force_https is 0/1 or https dolibarr root url)
 // $_SERVER["HTTPS"] is 'on' when link is https, otherwise $_SERVER["HTTPS"] is empty or 'off'
 if (! empty($conf->file->main_force_https) && (empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] != 'on'))
@@ -321,6 +330,7 @@ if (! defined('NOLOGIN') && ! defined('NOIPCHECK') && ! empty($dolibarr_main_res
 // Loading of additional presentation includes
 if (! defined('NOREQUIREHTML')) require_once DOL_DOCUMENT_ROOT .'/core/class/html.form.class.php';	    // Need 660ko memory (800ko in 2.2)
 if (! defined('NOREQUIREAJAX') && $conf->use_javascript_ajax) require_once DOL_DOCUMENT_ROOT.'/core/lib/ajax.lib.php';	// Need 22ko memory
+
 // If install or upgrade process not done or not completely finished, we call the install page.
 if (! empty($conf->global->MAIN_NOT_INSTALLED) || ! empty($conf->global->MAIN_NOT_UPGRADED))
 {
@@ -344,6 +354,7 @@ if ((! empty($conf->global->MAIN_VERSION_LAST_UPGRADE) && ($conf->global->MAIN_V
 		exit;
 	}
 }
+
 // Creation of a token against CSRF vulnerabilities
 if (! defined('NOTOKENRENEWAL'))
 {
@@ -373,6 +384,7 @@ if ((! defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && ! empty($conf->
 		}
 	}
 }
+
 // Disable modules (this must be after session_start and after conf has been loaded)
 if (GETPOST('disablemodules','alpha'))  $_SESSION["disablemodules"]=GETPOST('disablemodules','alpha');
 if (! empty($_SESSION["disablemodules"]))
@@ -844,12 +856,15 @@ if (! defined('NOLOGIN'))
 		$conf->css  = "/theme/".$conf->theme."/style.css.php";
 	}
 }
+
 // Case forcing style from url
 if (GETPOST('theme','alpha'))
 {
 	$conf->theme=GETPOST('theme','alpha',1);
 	$conf->css  = "/theme/".$conf->theme."/style.css.php";
 }
+
+
 // Set javascript option
 if (! GETPOST('nojs','int'))   // If javascript was not disabled on URL
 {
@@ -868,10 +883,7 @@ elseif (! empty($user->conf->MAIN_OPTIMIZEFORTEXTBROWSER))
 {
 	$conf->global->MAIN_OPTIMIZEFORTEXTBROWSER=$user->conf->MAIN_OPTIMIZEFORTEXTBROWSER;
 }
-elseif (! empty($user->conf->MAIN_OPTIMIZEFORTEXTBROWSER))
-{
-	$conf->global->MAIN_OPTIMIZEFORTEXTBROWSER=$user->conf->MAIN_OPTIMIZEFORTEXTBROWSER;
-}
+
 // Set terminal output option according to conf->browser.
 if (GETPOST('dol_hide_leftmenu','int') || ! empty($_SESSION['dol_hide_leftmenu']))               $conf->dol_hide_leftmenu=1;
 if (GETPOST('dol_hide_topmenu','int') || ! empty($_SESSION['dol_hide_topmenu']))                 $conf->dol_hide_topmenu=1;
@@ -895,6 +907,7 @@ if (! empty($conf->dol_use_jmobile) && in_array($conf->theme,array('bureau2crea'
 	$conf->css  =  "/theme/".$conf->theme."/style.css.php";
 }
 //var_dump($conf->browser->phone);
+
 if (! defined('NOREQUIRETRAN'))
 {
 	if (! GETPOST('lang','aZ09'))	// If language was not forced on URL
@@ -911,6 +924,7 @@ if (! defined('NOREQUIRETRAN'))
 		}
 	}
 }
+
 if (! defined('NOLOGIN'))
 {
 	// If the login is not recovered, it is identified with an account that does not exist.
@@ -930,24 +944,30 @@ if (! defined('NOLOGIN'))
 	// Load permissions
 	$user->getrights();
 }
+
+
 dol_syslog("--- Access to ".$_SERVER["PHP_SELF"].' - action='.GETPOST('action','az09').', massaction='.GETPOST('massaction','az09'));
 //Another call for easy debugg
 //dol_syslog("Access to ".$_SERVER["PHP_SELF"].' GET='.join(',',array_keys($_GET)).'->'.join(',',$_GET).' POST:'.join(',',array_keys($_POST)).'->'.join(',',$_POST));
+
 // Load main languages files
 if (! defined('NOREQUIRETRAN'))
 {
 	// Load translation files required by page
 	$langs->loadLangs(array('main', 'dict'));
 }
+
 // Define some constants used for style of arrays
 $bc=array(0=>'class="impair"',1=>'class="pair"');
 $bcdd=array(0=>'class="drag drop oddeven"',1=>'class="drag drop oddeven"');
 $bcnd=array(0=>'class="nodrag nodrop nohover"',1=>'class="nodrag nodrop nohoverpair"');		// Used for tr to add new lines
 $bctag=array(0=>'class="impair tagtr"',1=>'class="pair tagtr"');
+
 // Define messages variables
 $mesg=''; $warning=''; $error=0;
 // deprecated, see setEventMessages() and dol_htmloutput_events()
 $mesgs=array(); $warnings=array(); $errors=array();
+
 // Constants used to defined number of lines in textarea
 if (empty($conf->browser->firefox))
 {
@@ -973,7 +993,9 @@ else
 	define('ROWS_8',7);
 	define('ROWS_9',8);
 }
+
 $heightforframes=48;
+
 // Init menu manager
 if (! defined('NOREQUIREMENU'))
 {
@@ -985,6 +1007,7 @@ if (! defined('NOREQUIREMENU'))
 	{
 		$conf->standard_menu=(empty($conf->global->MAIN_MENUFRONT_STANDARD_FORCED)?(empty($conf->global->MAIN_MENUFRONT_STANDARD)?'eldy_menu.php':$conf->global->MAIN_MENUFRONT_STANDARD):$conf->global->MAIN_MENUFRONT_STANDARD_FORCED);
 	}
+
 	// Load the menu manager (only if not already done)
 	$file_menu=$conf->standard_menu;
 	if (GETPOST('menu','alpha')) $file_menu=GETPOST('menu','alpha');     // example: menu=eldy_menu.php
@@ -1007,7 +1030,11 @@ if (! defined('NOREQUIREMENU'))
 	$menumanager = new MenuManager($db, empty($user->societe_id)?0:1);
 	$menumanager->loadMenu();
 }
+
+
+
 // Functions
+
 if (! function_exists("llxHeader"))
 {
 	/**
@@ -1042,10 +1069,12 @@ if (! function_exists("llxHeader"))
 		{
 			top_menu($head, $title, $target, $disablejs, $disablehead, $arrayofjs, $arrayofcss, $morequerystring, $help_url);
 		}
+
 		if (empty($conf->dol_hide_leftmenu))
 		{
 			left_menu('', $help_url, '', '', 1, $title, 1);
 		}
+
 		// main area
 		if ($replacemainareaby)
 		{
@@ -1055,6 +1084,8 @@ if (! function_exists("llxHeader"))
 		main_area($title);
 	}
 }
+
+
 /**
  *  Show HTTP header
  *
@@ -1112,6 +1143,7 @@ function top_httphead($contenttype='text/html', $forcenocache=0)
 		header("Cache-Control: no-cache, no-store, must-revalidate, max-age=0");
 	}
 }
+
 /**
  * Ouput html header of a page.
  * This code is also duplicated into security2.lib.php::dol_loginfunction
@@ -1332,6 +1364,7 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
             	print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/'.$tmpplugin.'/dist/js/'.$tmpplugin.'.full.min.js'.($ext?'?'.$ext:'').'"></script>'."\n";	// We include full because we need the support of containerCssClass
             }
         }
+
         if (! $disablejs && ! empty($conf->use_javascript_ajax))
         {
             // CKEditor
@@ -1352,6 +1385,7 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
                 print '</script>'."\n";
                 print '<script type="text/javascript" src="'.$pathckeditor.$jsckeditor.($ext?'?'.$ext:'').'"></script>'."\n";
             }
+
             // Browser notifications
             if (! defined('DISABLE_BROWSER_NOTIF'))
             {
@@ -1364,6 +1398,7 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
                     print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/lib_notification.js.php'.($ext?'?'.$ext:'').'"></script>'."\n";
                 }
             }
+
             // Global js function
             print '<!-- Includes JS of Dolibarr -->'."\n";
             print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/lib_head.js.php?lang='.$langs->defaultlang.($ext?'&'.$ext:'').'"></script>'."\n";
@@ -1399,22 +1434,39 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
                     }
                 }
             }
-            
-            
-            /* modrsi */
-            if (stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1) {
-                require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-                BimpCore::displayHeaderFiles();
-            }
-            /* fmoddrsi */
-            
         }
+        
+        /* modrsi */
+        if (stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1) {
+            if (!defined('BIMP_CONTROLLER_INIT')) {
+                require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+                echo '<script type="text/javascript">';
+                echo 'var ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpcore/index.php;\'';
+                echo '</script>';
+                BimpCore::displayHeaderFiles();
+            } else {
+                global $main_controller;
+                if (is_a($main_controller, 'BimpController')) {
+                    $main_controller->displayHeaderFiles();
+                }
+            }
+            global $bimp_fixe_tabs;
+            $bimp_fixe_tabs = new FixeTabs();
+            $bimp_fixe_tabs->init();
+            $bimp_fixe_tabs->displayHead();
+        }
+        /* fmoddrsi */
+
         if (! empty($head)) print $head."\n";
         if (! empty($conf->global->MAIN_HTML_HEADER)) print $conf->global->MAIN_HTML_HEADER."\n";
+
         print "</head>\n\n";
     }
+
     $conf->headerdone=1;	// To tell header was output
 }
+
+
 /**
  *  Show an HTML header + a BODY + The top menu bar
  *
@@ -1620,6 +1672,8 @@ function top_menu($head, $title='', $target='', $disablejs=0, $disablehead=0, $a
 
 	if (empty($conf->dol_hide_leftmenu) && empty($conf->dol_use_jmobile)) print '<!-- Begin div id-container --><div id="id-container" class="id-container'.($morecss?' '.$morecss:'').'">';
 }
+
+
 /**
  *  Show left menu bar
  *
@@ -1761,6 +1815,7 @@ function left_menu($menu_array_before, $helppagename='', $notused='', $menu_arra
 		if (! empty($conf->global->MAIN_BUGTRACK_ENABLELINK))
 		{
 			require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+
 			$bugbaseurl = 'https://github.com/Dolibarr/dolibarr/issues/new';
 			$bugbaseurl.= '?title=';
 			$bugbaseurl.= urlencode("Bug: ");
@@ -1803,6 +1858,8 @@ function left_menu($menu_array_before, $helppagename='', $notused='', $menu_arra
 
 	if (empty($leftmenuwithoutmainarea)) main_area($title);
 }
+
+
 /**
  *  Begin main area
  *
@@ -1821,6 +1878,8 @@ function main_area($title='')
 
 	if (! empty($conf->global->MAIN_ONLY_LOGIN_ALLOWED)) print info_admin($langs->trans("WarningYouAreInMaintenanceMode",$conf->global->MAIN_ONLY_LOGIN_ALLOWED));
 }
+
+
 /**
  *  Return helpbaseurl, helppage and mode
  *
@@ -1863,6 +1922,8 @@ function getHelpParamFor($helppagename,$langs)
 	}
 	return array('helpbaseurl'=>$helpbaseurl,'helppage'=>$helppage,'mode'=>$mode);
 }
+
+
 /**
  *  Show a search area.
  *  Used when the javascript quick search is not used.
@@ -1900,6 +1961,8 @@ function printSearchForm($urlaction, $urlobject, $title, $htmlmorecss, $htmlinpu
 	$ret.="</form>\n";
 	return $ret;
 }
+
+
 if (! function_exists("llxFooter"))
 {
 	/**
@@ -2030,8 +2093,17 @@ if (! function_exists("llxFooter"))
 		// A div for the address popup
 		print "\n<!-- A div to allow dialog popup -->\n";
 		print '<div id="dialogforpopup" style="display: none;"></div>'."\n";
+                
+                
+                /* modrsi */
+                global $bimp_fixe_tabs;
+                if (is_a($bimp_fixe_tabs, 'FixeTabs')) {
+                    print $bimp_fixe_tabs->render();
+                }
+                /* fmoddrsi */
 
 		print "</body>\n";
 		print "</html>\n";
 	}
 }
+

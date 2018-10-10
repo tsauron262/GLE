@@ -16,7 +16,7 @@ namespace setasign\Fpdi;
  *
  * @package setasign\Fpdi
  */
-class FpdfTpl extends \FPDF
+class FpdfTpl extends \FPDF2
 {
     use FpdfTplTrait;
 }

@@ -212,7 +212,7 @@ class Interfaces
 
         if ($nbko)
         {
-            dol_syslog(get_class($this)."::run_triggers action=".$action." Files found: ".$nbfile.", Files launched: ".$nbtotal.", Done: ".$nbok.", Failed: ".$nbko." - Nb of error string returned in this->errors = ".count($this->errors), LOG_ERR);
+            //dol_syslog(get_class($this)."::run_triggers action=".$action." Files found: ".$nbfile.", Files launched: ".$nbtotal.", Done: ".$nbok.", Failed: ".$nbko." - Nb of error string returned in this->errors = ".count($this->errors), LOG_ERR);
             return -$nbko;
         }
         else

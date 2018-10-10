@@ -77,7 +77,7 @@ class BC_View extends BC_Panel
     {
         $html = '';
         if ($this->params['edit_form'] || $this->params['delete_btn']) {
-            $html .= '<div style="text-align: right">';
+            $html .= '<div class="panelFooterButtons" style="text-align: right">';
             if ($this->params['edit_form'] && $this->object->canEdit()) {
                 $title = 'Edition ' . $this->object->getLabel('of_the') . ' ' . $this->object->getInstanceName();
                 $html .= '<button type="button" class="btn btn-primary"';

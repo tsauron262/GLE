@@ -1,8 +1,17 @@
 table: bs_ticket
 controller: ticket
 
+icon: fas_headset
+header_list_name: default
+
+list_page_url: 
+    controller: index
+    url_params: 
+        tab: default
+            
 labels:
-    name: ticket
+    name: ticket hotline
+    name_plur: tickets hotline
 
 objects:
     contrat:
@@ -23,7 +32,7 @@ objects:
         instance: 
             bimp_object:
                 module: bimpcore
-                name: Bimp_Societe
+                name: Bimp_Client
             id_object:
                 field_value: id_client
     
@@ -224,7 +233,6 @@ fields:
         searchable: 0 
     sujet:
         label: Sujet ticket
-        type: text
         
 forms: 
     default:
@@ -327,9 +335,6 @@ views:
                     col_md: 6
                     col_sm: 12
                     rows: 
-                        - cols:
-                            - type: object_common_fields
-                              col_lg: 12
                         - cols:
                             - type: fields_table
                               col_lg: 12

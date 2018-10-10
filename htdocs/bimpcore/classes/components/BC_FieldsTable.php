@@ -148,10 +148,10 @@ class BC_FieldsTable extends BC_Panel
 
     public function renderHtmlFooter()
     {
-        $html = '<div style="text-align: right">';
+        $html = '<div class="fieldsTableFooter" style="text-align: right">';
 
         $html .= BimpRender::renderButton(array(
-                    'classes'     => array('btn', 'btn-light-default', 'cancelmodificationsButton'),
+                    'classes'     => array('btn', 'btn-default', 'cancelmodificationsButton'),
                     'label'       => 'Annuler les modifications',
                     'attr'        => array(
                         'style'   => 'display: none',

@@ -2,6 +2,7 @@ table: bs_inter
 parent_id_property: id_ticket
 parent_object: BS_Ticket
 
+icon: fas_user-clock
 labels:
     name: intervention
     is_female: 1
@@ -122,82 +123,48 @@ list:
 
 fields_tables: 
     infos: 
+        panel_header: 0
         rows:
             - field: id_ticket
               display: card
             - field: tech_id_user
-              display: nom_url
+              display: card
             - field: timer
             - field: priorite
+              edit: 1
             - field: status
+              edit: 1
             - field: description
-
+              edit: 1
+                
 views:
     default: 
         title: nom
         edit_form: default
         delete_btn: 1
-        no_reload: 1
-        buttons:
-            - label: Fermer
-              icon_before: times
-              classes: btn,btn-default
-              attr:
-                  onclick: closeInterView($(this));
+        panel_header: 0
         rows: 
             - cols:
-                - type: custom
-                  custom:
-                      callback: renderDefaultView
-                      
-    full:
-        no_reload: 1
-        rows: 
-            - cols:
-                - type: view
-                  col_lg: 5
-                  col_md: 8
-                  col_sm: 12
-                  view: 
-                      name: chrono
-                      panel: 0
-                      
-                - type: view
-                  col_lg: 7
+                - type: object_header
+            - cols: 
+                - type: fields_table
+                  col_lg: 8
                   col_md: 12
-                  col_sm: 12
-                  view: 
-                      name: data
-                      panel: 0
-                      
-    chrono: 
-        no_reload: 1
-        rows:
-            - cols:
+                  fields_table:
+                      name: infos
                 - type: custom
+                  col_lg: 4
+                  col_md: 12
                   custom:
                       callback: renderChronoView
                       
-    data: 
-        rows:
-            - cols:
-                  - type: object_common_fields
-                    col_lg: 4
-                    col_sm: 12
-                  - type: fields_table
-                    col_lg: 8
-                    col_sm: 12
-                    fields_table:
-                        name: infos
-
     card:
-        panel: 0
         rows:
             - cols:
                   - type: fields_table
                     col_lg: 12
                     fields_table:
-                        panel: 0
+                        panel: 1
                         name: infos
         
 views_lists: 
@@ -211,6 +178,5 @@ views_lists:
         item_col_md: 6
         item_modal_view: default
         list_filters: 
-            callback: 
-                method: getUserCurrentIntersFilters
+            callback: getUserCurrentIntersFilters
         

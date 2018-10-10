@@ -1633,10 +1633,10 @@ class BimpController
             $_SESSION[$hashCash] = array('nbBouclePush'=> $this->nbBouclePush, 'html'=> '');
         
         if($_SESSION[$hashCash]['html'] != $html || $i > $_SESSION[$hashCash]['nbBouclePush'] || $i > $this->maxBouclePush){
-            if($_SESSION[$hashCash]['html'] == $html)
-                $html = "";
             $_SESSION[$hashCash]['html'] = $html;
             $_SESSION[$hashCash]['nbBouclePush'] = $_SESSION[$hashCash]['nbBouclePush'] * 1.1;//Pour ne pas surchargé quand navigateur resté ouvert, mais ne pas avoir des boucle morte quand navigation rapide
+            if($_SESSION[$hashCash]['html'] == $html)//On ne renvoie pas, pas de refeesh
+                $html = "";
             
             
             die(json_encode(array(

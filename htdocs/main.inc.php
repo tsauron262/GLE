@@ -1441,7 +1441,7 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
             if (!defined('BIMP_CONTROLLER_INIT')) {
                 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
                 echo '<script type="text/javascript">';
-                echo 'var ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpcore/index.php;';
+                echo 'var ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpcore/index.php;\'';
                 echo '</script>';
                 BimpCore::displayHeaderFiles();
             } else {

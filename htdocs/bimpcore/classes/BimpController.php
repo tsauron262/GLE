@@ -15,7 +15,7 @@ class BimpController
     protected $cssFiles = array();
     public $extends = array();
     private $nbBouclePush = 2;
-    private $maxBouclePush = 20;
+    private $maxBouclePush = 40;
 
     public static function getInstance($module)
     {

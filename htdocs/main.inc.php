@@ -271,6 +271,8 @@ if (!defined('NOREQUIREAJAX') && $conf->use_javascript_ajax)
 
 
 
+
+
     
 // If install or upgrade process not done or not completely finished, we call the install page.
 if (!empty($conf->global->MAIN_NOT_INSTALLED) || !empty($conf->global->MAIN_NOT_UPGRADED)) {
@@ -760,6 +762,8 @@ if (!defined('NOLOGIN')) {
 
 
 
+
+
         
 // Replace conf->css by personalized value if theme not forced
     if (empty($conf->global->MAIN_FORCETHEME) && !empty($user->conf->MAIN_THEME)) {
@@ -1052,6 +1056,8 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
             $favicon = $conf->global->MAIN_FAVICON_URL;
         if (empty($conf->dol_use_jmobile))
             print '<link rel="shortcut icon" type="image/x-icon" href="' . $favicon . '"/>' . "\n"; // Not required into an Android webview
+
+
 
 
 
@@ -1355,7 +1361,7 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
                     require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
                     echo '<script type="text/javascript">';
                     echo 'if (!dol_url_root) {';
-                    echo 'var dol_url_root = \''.DOL_URL_ROOT.'\';}';
+                    echo 'var dol_url_root = \'' . DOL_URL_ROOT . '\';}';
                     echo 'var ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpcore/index.php\';';
                     echo '</script>';
                     BimpCore::displayHeaderFiles();
@@ -1365,10 +1371,12 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
                         $main_controller->displayHeaderFiles();
                     }
                 }
-                global $bimp_fixe_tabs;
-                $bimp_fixe_tabs = new FixeTabs();
-                $bimp_fixe_tabs->init();
-                $bimp_fixe_tabs->displayHead();
+                global $bimp_fixe_tabs, $user;
+                if (isset($user->id) && (int) $user->id) {
+                    $bimp_fixe_tabs = new FixeTabs();
+                    $bimp_fixe_tabs->init();
+                    $bimp_fixe_tabs->displayHead();
+                }
             }
             /* fmoddrsi */
         }
@@ -1490,6 +1498,8 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
                 $toprightmenu = $hookmanager->resPrint;      // replace
         } else
             $toprightmenu .= $result; // For backward compatibility
+
+
 
 
 
@@ -2082,9 +2092,11 @@ if (!function_exists("llxFooter")) {
         print '<div id="dialogforpopup" style="display: none;"></div>' . "\n";
 
         /* modrsi */
-        global $bimp_fixe_tabs;
-        if (is_a($bimp_fixe_tabs, 'FixeTabs')) {
-            print $bimp_fixe_tabs->render();
+        global $bimp_fixe_tabs, $usertxt;
+        if (isset($user->id) && (int) $user->id) {
+            if (is_a($bimp_fixe_tabs, 'FixeTabs')) {
+                print $bimp_fixe_tabs->render();
+            }
         }
         /* fmoddrsi */
 

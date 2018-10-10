@@ -16,6 +16,7 @@ class BimpController
     public $extends = array();
     private $nbBouclePush = 2;
     private $maxBouclePush = 40;
+    private $errorMsg = false;
 
     public static function getInstance($module)
     {
@@ -1627,8 +1628,10 @@ class BimpController
         $bimp_fixe_tabs->init();
         
         $html = $bimp_fixe_tabs->render(true);
-        $returnHtml = "";
         $hashCash = 'fixeTabsHtml'.$_POST['randomId'];//Pour ne regardé que sur l'ongelt actuel
+        if($this->errorMsg)
+            $html = "<div class='error jnotify-container'>".$this->errorMsg."</div><div class='error'>".$this->errorMsg."</div>";
+        
         session_start();
         if(!isset($_SESSION[$hashCash]) || !is_array($_SESSION[$hashCash]))
             $_SESSION[$hashCash] = array('nbBouclePush'=> $this->nbBouclePush, 'html'=> '');
@@ -1638,6 +1641,8 @@ class BimpController
                 $returnHtml = $html;
             $_SESSION[$hashCash]['html'] = $html;
             $_SESSION[$hashCash]['nbBouclePush'] = $_SESSION[$hashCash]['nbBouclePush'] * 1.1;//Pour ne pas surchargé quand navigateur resté ouvert, mais ne pas avoir des boucle morte quand navigation rapide
+            
+            
             
             
             die(json_encode(array(

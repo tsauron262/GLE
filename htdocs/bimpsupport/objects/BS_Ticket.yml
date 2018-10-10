@@ -73,7 +73,6 @@ objects:
             bimp_object: 
                 module: bimpequipment
                 name: Equipment
-                
             
 associations:
     equipments:
@@ -268,9 +267,12 @@ forms:
                       array: comm,client,tech
             - custom: 1
               label: Appel payant du client en cours
+              data_type: bool
+              input_name: start_timer
               input:
-                  name: start_timer
                   type: toggle
+            - object: inters
+              multiple: 1
     
     edit:
         rows:
@@ -373,6 +375,8 @@ lists:
         cols:
             ticket:
                 field: ticket_number
+            status: 
+                field: status
             priorite:
                 label: Prio.
                 field: priorite

@@ -69,7 +69,7 @@ fields:
         type: int
         values: 
             array: status
-        required: 1
+        default_value: 1
                     
     description:
         label: Description
@@ -79,7 +79,29 @@ fields:
             auto_expand: 1
         sortable: 1
         searchable: 1
-    
+
+forms: 
+    default:
+        rows: 
+            - field: tech_id_user
+            - field: priorite
+            - field: description
+            - custom: 1
+              show: 
+                  callback: isNotLoaded
+              label: Déclencher le chrono
+              data_type: bool
+              input_name: start_timer
+              value: 0
+              input:
+                  type: toggle
+            - field: status
+              show: 
+                  callback: isLoaded
+            - field: timer
+              show: 
+                  callback: isLoaded
+                  
 list:
     title: Interventions
     checkboxes: 1

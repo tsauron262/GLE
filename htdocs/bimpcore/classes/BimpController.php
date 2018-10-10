@@ -1610,6 +1610,22 @@ class BimpController
         )));
     }
 
+    protected function ajaxProcessLoadFixeTabs()
+    {
+        global $bimp_fixe_tabs;
+
+        if (!is_a($bimp_fixe_tabs, 'FixeTabs')) {
+            $bimp_fixe_tabs = new FixeTabs();
+            $bimp_fixe_tabs->init();
+        }
+
+        die(json_encode(array(
+            'errors'     => $bimp_fixe_tabs->errors,
+            'html'       => $bimp_fixe_tabs->render(true),
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
     // Callbacks:
 
     protected function getObjectIdFromPost($object_name)

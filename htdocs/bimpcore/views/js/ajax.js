@@ -1,4 +1,7 @@
-var ajaxRequestsUrl = './index.php';
+if (!ajaxRequestsUrl) {
+    var ajaxRequestsUrl = dol_url_root + '/bimpcore/index.php';
+}
+
 var bimp_requests = [];
 var bimp_nologged_requests = [];
 var bimp_is_logged = true;
@@ -41,6 +44,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.display_warnings_in_popup_only = false;
 
     this.append_html = false;
+    this.remove_current_content = true;
 
     this.processing_msg = 'Traitement en cours';
     this.success_msg = 'Opération effectuée avec succès';
@@ -85,7 +89,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         } else {
             bimp_msg(this.processing_msg, 'info');
         }
-    } else if ((bimpAjax.display_success || bimpAjax.display_errors)) {
+    } else if ((bimpAjax.display_success || bimpAjax.display_errors) && bimpAjax.remove_current_content) {
         if (this.$resultContainer) {
             this.$resultContainer.html('').slideUp(250);
         }

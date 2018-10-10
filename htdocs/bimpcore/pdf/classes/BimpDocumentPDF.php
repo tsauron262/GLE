@@ -451,7 +451,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $row['desc'] = array(
                     'colspan' => 99,
                     'content' => $desc,
-                    'style'   => 'font-weight: bold; background-color: #F5F5F5;'
+                    'style'   => ' background-color: #F5F5F5;'
                 );
             } else {
                 $line_remise = $line->remise_percent;

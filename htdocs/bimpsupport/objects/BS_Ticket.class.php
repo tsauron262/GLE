@@ -29,6 +29,8 @@ class BS_Ticket extends BimpObject
         self::BS_TICKET_CLOT            => array('label' => 'Clôt', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
 
+    // Getters: 
+
     public function getClient_contactsArray()
     {
         $contacts = array();
@@ -120,11 +122,6 @@ class BS_Ticket extends BimpObject
         }
     }
 
-    public function displayDureeTotale()
-    {
-        return BimpTools::displayTimefromSeconds($this->getDureeTotale());
-    }
-
     public function getInstanceName()
     {
         if ($this->isLoaded()) {
@@ -133,6 +130,34 @@ class BS_Ticket extends BimpObject
 
         return 'Ticket';
     }
+
+    // Affichages: 
+
+    public function displayDureeTotale()
+    {
+        return BimpTools::displayTimefromSeconds($this->getDureeTotale());
+    }
+
+    public function defaultDisplayEquipmentsItem($id_equipment)
+    {
+        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+        if ($equipment->fetch($id_equipment)) {
+            $label = '';
+            $product = $equipment->config->getObject('', 'product');
+            if (!is_null($product) && isset($product->id) && $product->id) {
+                $label = $product->label;
+            } else {
+                return BimpRender::renderAlerts('Equipement ' . $id_equipment . ': Produit associé non trouvé');
+            }
+
+            $label .= ' - N° série: ' . $equipment->getData('serial');
+
+            return $label;
+        }
+        return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
+    }
+
+    // Rendus HTML: 
 
     public function renderChronoView()
     {
@@ -161,6 +186,8 @@ class BS_Ticket extends BimpObject
 
         return $html;
     }
+
+    // Traitements: 
 
     public function onInterUpdate()
     {
@@ -228,31 +255,45 @@ class BS_Ticket extends BimpObject
         }
     }
 
-    public function defaultDisplayEquipmentsItem($id_equipment)
-    {
-        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
-        if ($equipment->fetch($id_equipment)) {
-            $label = '';
-            $product = $equipment->config->getObject('', 'product');
-            if (!is_null($product) && isset($product->id) && $product->id) {
-                $label = $product->label;
-            } else {
-                return BimpRender::renderAlerts('Equipement ' . $id_equipment . ': Produit associé non trouvé');
-            }
+    // Overrides: 
 
-            $label .= ' - N° série: ' . $equipment->getData('serial');
-
-            return $label;
-        }
-        return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
-    }
-
-    public function create()
+    public function create($warnings, $force_create = false)
     {
         global $user;
         $this->data['ticket_number'] = 'BH' . date('ymdhis');
         $this->data['id_user_resp'] = (int) $user - id;
 
-        return parent::create();
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            if ((int) BimpTools::getValue('start_timer', 0)) {
+                $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+                if (!$timer->setObject($this, 'appels_timer', true)) {
+                    $warnings[] = 'Echec de l\'initialisation du chrono appel payant';
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function delete($force_delete = false)
+    {
+        $id = (int) $this->id;
+        $errors = parent::delete($force_delete);
+
+        if (!count($errors)) {
+            $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+            if ($timer->find(array(
+                        'obj_module' => $this->module,
+                        'obj_name'   => $this->object_name,
+                        'id_obj'     => $id,
+                        'field_name' => 'appels_timer'
+                    ), false, true)) {
+                $timer->delete(true);
+            }
+        }
+
+        return $errors;
     }
 }

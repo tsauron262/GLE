@@ -474,7 +474,14 @@ select.switch {
     display: none;
     margin: 10px 0;
 }
-
+.search_input_selected_label {
+    font-weight: bold;
+    color: $gray-dark;
+    
+    i.fa-check {
+        color: $success;
+    }
+}
 .check_list_container {
     max-height: 450px;
     overflow-y: auto;

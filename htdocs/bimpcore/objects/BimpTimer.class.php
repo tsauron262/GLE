@@ -3,7 +3,7 @@
 class BimpTimer extends BimpObject
 {
 
-    public function setObject(Bimpobject $object, $object_time_field)
+    public function setObject(Bimpobject $object, $object_time_field, $start = false)
     {
         $this->reset();
         if (is_null($object) || !isset($object->id) || !$object->id) {
@@ -19,10 +19,32 @@ class BimpTimer extends BimpObject
         $this->set('time_session', 0);
         $this->set('id_user', $user->id);
 
-        if (count($this->create())) {
+        if ($start) {
+            $this->set('session_start', time());
+        }
+
+        if (count($this->create($warnings, true))) {
             return false;
         }
         return true;
+    }
+
+    public function hold()
+    {
+        $errors = array();
+
+        if ($this->isLoaded()) {
+            $session_start = $this->getData('session_start');
+            if ($session_start) {
+                $this->set('time_session', time() - $session_start);
+                $this->set('session_start', 0);
+                $errors = $this->update();
+            }
+        } else {
+            $errors[] = 'ID du Timer absent';
+        }
+
+        return $errors;
     }
 
     public function getTimes($object)
@@ -152,7 +174,7 @@ class BimpTimer extends BimpObject
         $html .= '<span class="bimp_timer_label bimp_timer_minutes_label"' . ($hideMinutes ? ' style="display: none' : '') . '">min</span>';
         $html .= '<span class="bimp_timer_secondes bimp_timer_value">' . $timer['secondes'] . '</span>';
         $html .= '<span class="bimp_timer_label bimp_timer_secondes_label">sec</span>';
-        
+
         return $html;
     }
 }

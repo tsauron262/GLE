@@ -3,6 +3,7 @@
 class FixeTabs
 {
 
+    public $errors = array();
     protected $tabs = array();
 
     public function addTab($id, $caption, $content, $classes = array())
@@ -22,24 +23,18 @@ class FixeTabs
 
     public function displayHead()
     {
-        if (!count($this->tabs)) {
-            return;
-        }
-
         echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpcore/views/css/fixeTabs.css"/>';
         echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/fixeTabs.js"></script>';
         echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/BimpTimer.js"></script>';
     }
 
-    public function render()
+    public function render($content_only = false)
     {
-        if (!count($this->tabs)) {
-            return '';
-        }
-        
         $html = '';
 
-        $html .= '<div id="bimp_fixe_tabs">';
+        if (!$content_only) {
+            $html .= '<div id="bimp_fixe_tabs">';
+        }
 
         $html .= '<div id="bimp_fixe_tabs_captions">';
         foreach ($this->tabs as $tab) {
@@ -64,7 +59,10 @@ class FixeTabs
         }
         $html .= '</div>';
 
-        $html .= '</div>';
+        if (!$content_only) {
+            $html .= '</div>';
+        }
+
         return $html;
     }
 }

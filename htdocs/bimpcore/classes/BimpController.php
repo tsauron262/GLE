@@ -14,8 +14,8 @@ class BimpController
     protected $jsFiles = array();
     protected $cssFiles = array();
     public $extends = array();
-    private $nbBouclePush = 1;
-    private $maxBouclePush = 10;
+    private $nbBouclePush = 2;
+    private $maxBouclePush = 20;
 
     public static function getInstance($module)
     {
@@ -1621,6 +1621,7 @@ class BimpController
     protected function ajaxProcessLoadFixeTabs($i = 0)
     {
         global $bimp_fixe_tabs;
+        $i++;
 
         $bimp_fixe_tabs = new FixeTabs();
         $bimp_fixe_tabs->init();
@@ -1643,9 +1644,8 @@ class BimpController
             )));
         }
         else{
-            $i++;
             session_write_close();//Pour eviter les blockages navigateur
-            sleep(1);
+            usleep(930000);
             return $this->ajaxProcessLoadFixeTabs($i);
         }
 

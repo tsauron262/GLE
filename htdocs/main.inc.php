@@ -2092,7 +2092,7 @@ if (!function_exists("llxFooter")) {
         print '<div id="dialogforpopup" style="display: none;"></div>' . "\n";
 
         /* modrsi */
-        global $bimp_fixe_tabs, $usertxt;
+        global $bimp_fixe_tabs, $user;
         if (isset($user->id) && (int) $user->id) {
             if (is_a($bimp_fixe_tabs, 'FixeTabs')) {
                 print $bimp_fixe_tabs->render();

@@ -26,9 +26,10 @@ function InfoSoc(elem,elem2) {
         $("#town").val(result.Ville);
         $("#intra_vat").val(result.Tva);
         $("#phone").val(result.Tel);
+        $("#name_alias_input").val(result.tradename);
         $("#idprof3").val(result.Naf);
-        if($("input[name='options_notecreditsafe']").length > 0)
-            $("input[name='options_notecreditsafe']").val("Note : " + result.Note);
+        if($("#options_notecreditsafe").length > 0)
+            $("#options_notecreditsafe").val("Limite : "+result.limit+" €\nNote : " + result.Note+"\n" + result.info);
         else
             $("#name_alias_input").val("Note : " + result.Note); 
         if(result.Siret != this.elem.val() && result.Siret != this.elem2.val())

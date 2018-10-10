@@ -266,6 +266,11 @@ if (!defined('NOREQUIREAJAX') && $conf->use_javascript_ajax)
     require_once DOL_DOCUMENT_ROOT . '/core/lib/ajax.lib.php'; // Need 22ko memory
 
 
+
+
+
+
+
     
 // If install or upgrade process not done or not completely finished, we call the install page.
 if (!empty($conf->global->MAIN_NOT_INSTALLED) || !empty($conf->global->MAIN_NOT_UPGRADED)) {
@@ -750,6 +755,11 @@ if (!defined('NOLOGIN')) {
         $conf->product->limit_size = $user->conf->PRODUIT_LIMIT_SIZE; // Can be 0
 
 
+
+
+
+
+
         
 // Replace conf->css by personalized value if theme not forced
     if (empty($conf->global->MAIN_FORCETHEME) && !empty($user->conf->MAIN_THEME)) {
@@ -1042,6 +1052,11 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
             $favicon = $conf->global->MAIN_FAVICON_URL;
         if (empty($conf->dol_use_jmobile))
             print '<link rel="shortcut icon" type="image/x-icon" href="' . $favicon . '"/>' . "\n"; // Not required into an Android webview
+
+
+
+
+
 
             
 //if (empty($conf->global->MAIN_OPTIMIZEFORTEXTBROWSER) && ! GETPOST('textbrowser','int')) print '<link rel="top" title="'.$langs->trans("Home").'" href="'.(DOL_URL_ROOT?DOL_URL_ROOT:'/').'">'."\n";
@@ -1336,8 +1351,22 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
 
             /* modrsi */
             if (stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1) {
-                require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-                BimpCore::displayHeaderFiles();
+                if (!defined('BIMP_CONTROLLER_INIT')) {
+                    require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+                    echo '<script type="text/javascript">';
+                    echo 'var ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpcore/index.php;';
+                    echo '</script>';
+                    BimpCore::displayHeaderFiles();
+                } else {
+                    global $main_controller;
+                    if (is_a($main_controller, 'BimpController')) {
+                        $main_controller->displayHeaderFiles();
+                    }
+                }
+                global $bimp_fixe_tabs;
+                $bimp_fixe_tabs = new FixeTabs();
+                $bimp_fixe_tabs->init();
+                $bimp_fixe_tabs->displayHead();
             }
             /* fmoddrsi */
         }
@@ -1459,6 +1488,11 @@ function top_menu($head, $title = '', $target = '', $disablejs = 0, $disablehead
                 $toprightmenu = $hookmanager->resPrint;      // replace
         } else
             $toprightmenu .= $result; // For backward compatibility
+
+
+
+
+
 
 
             
@@ -2044,6 +2078,13 @@ if (!function_exists("llxFooter")) {
         // A div for the address popup
         print "\n<!-- A div to allow dialog popup -->\n";
         print '<div id="dialogforpopup" style="display: none;"></div>' . "\n";
+
+        /* modrsi */
+        global $bimp_fixe_tabs;
+        if (is_a($bimp_fixe_tabs, 'FixeTabs')) {
+            print $bimp_fixe_tabs->render();
+        }
+        /* fmoddrsi */
 
         print "</body>\n";
         print "</html>\n";

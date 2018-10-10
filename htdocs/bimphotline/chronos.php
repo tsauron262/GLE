@@ -35,8 +35,6 @@ function displayTimers($timer, $timers)
         return;
     }
 
-    $bimp_fixe_tabs->addJsFile('/bimpcore/views/js/BimpTimer.js');
-
     $ticket = BimpObject::getInstance('bimphotline', 'BH_Ticket');
     $inter = BimpObject::getInstance('bimphotline', 'BH_Inter');
 
@@ -140,5 +138,7 @@ function displayTimers($timer, $timers)
         }
     }
 
-    $bimp_fixe_tabs->errors = array_merge($bimp_fixe_tabs->errors, $errors);
+    if (count($errors)) {
+        $bimp_fixe_tabs->errors[] = BimpTools::getMsgFromArray($errors);
+    }
 }

@@ -425,6 +425,7 @@ forms:
             - field: id_client
             - field: id_contact
             - field: id_equipment
+            - field: prioritaire
             - field: id_contrat
             - field: prestataire_number
 #            - field: id_propal
@@ -853,6 +854,7 @@ searches:
             - e.serial
             - a.ref
             - s.nom
+            - r.repair_confirm_number
         joins: 
             - table: be_equipment
               on: a.id_equipment = e.id
@@ -860,3 +862,6 @@ searches:
             - table: societe
               on: a.id_client = s.rowid
               alias: s
+            - table: bimp_gsx_repair
+              alias: r
+              on: a.id = r.id_sav

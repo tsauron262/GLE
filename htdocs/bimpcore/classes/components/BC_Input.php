@@ -40,7 +40,7 @@ class BC_Input extends BimpComponent
             'values'      => array('data_type' => 'array', 'default' => array()),
         ),
         'select'                      => array(
-            'options'      => array('data_type' => 'array', 'compile' => true),
+            'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
             'select_first' => array('data_type' => 'bool', 'default_value' => 0)
         ),
         'toggle'                      => array(
@@ -48,7 +48,7 @@ class BC_Input extends BimpComponent
             'toggle_off' => array('default' => 'NON')
         ),
         'check_list'                  => array(
-            'items' => array('data_type' => 'array', 'default' => array(), 'compile' => 0)
+            'items' => array('data_type' => 'array', 'default' => array(), 'compile' => true)
         ),
         'custom'                      => array(
             'content' => array('default' => '')

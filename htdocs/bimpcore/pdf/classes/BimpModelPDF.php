@@ -1,7 +1,6 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpDb.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpTools.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 require_once __DIR__ . '/BimpPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
@@ -13,6 +12,7 @@ Abstract class BimpModelPDF
     public $db;
     protected $pdf = null;
     public static $tpl_dir = DOL_DOCUMENT_ROOT . '/bimpcore/pdf/templates/';
+    public $result = array();
     public static $type = '';
     public $header_vars = array();
     public $footer_vars = array();
@@ -236,6 +236,7 @@ Abstract class BimpModelPDF
         $file = $this->getFilePath() . $this->getFileName();
 
         $this->render($file, false);
+        $this->result["fullpath"] = $file;
         return 1;
     }
 

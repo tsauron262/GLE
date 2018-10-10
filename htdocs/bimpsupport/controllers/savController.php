@@ -13,22 +13,20 @@ class savController extends gsxController
 
     public function renderGsx()
     {
-        $sav = BimpObject::getInstance($this->module, 'BS_SAV', (int) BimpTools::getValue('id'));
+        $sav = $this->config->getObject('', 'sav');
 
         if (!$sav->isLoaded()) {
             return BimpRender::renderAlerts('ID du SAV absent ou invalide');
         }
 
-        $id_equipment = (int) $sav->getData('id_equipment');
-
-        if (!$id_equipment) {
-            return BimpRender::renderAlerts('Aucun équipement associé à ce SAV');
+        if (!(int) $sav->getData('id_equipment')) {
+            return BimpRender::renderAlerts('Equipement absent pour ce SAV');
         }
 
-        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', $id_equipment);
+        $equipment = $sav->getChildObject('equipment');
 
         if (!$equipment->isLoaded()) {
-            return BimpRender::renderAlerts('L\'équipement ' . $id_equipment . ' n\'existe pas');
+            return BimpRender::renderAlerts('L\'équipement d\'ID ' . $sav->getData('id_equipment') . ' n\'existe pas');
         }
 
         $html = '';

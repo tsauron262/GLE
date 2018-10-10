@@ -11,34 +11,35 @@ objects:
                 request: id
         
 sections:
-    - type: buttons
-      buttons:
-          - label: Liste des tickets
-            url:
-                controller: index
-                url_params: 
-                    tab: default
-            icon_before: chevron-left
-            classes: 
-                array: btn,btn-primary
-                
-    - type: view
-      view:
-          name: default
-          panel: 1
-          object: ticket
-    
-    - type: list
-      list: 
-          panel: 1
-          object: ticket
-          children: inters
-            
-    - type: list
-      list: 
-          panel: 1
-          object: ticket
-          children: notes
+    - type: object_header
+      object_header:
+          object: ticket              
+    - type: nav_tabs
+      nav_tabs: 
+          - id: card
+            title: Fiche ticket
+            struct: 
+                type: view
+                view: 
+                    name: default
+                    panel: 1
+                    object: ticket
+          - id: inters
+            title: Interventions
+            struct: 
+                type: list
+                list: 
+                    panel: 1
+                    object: ticket
+                    children: inters
+          - id: notes
+            title: Notes
+            struct: 
+                type: list
+                list: 
+                    panel: 1
+                    object: ticket
+                    children: notes
               
     - type: buttons
       buttons:

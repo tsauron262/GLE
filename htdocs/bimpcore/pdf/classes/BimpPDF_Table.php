@@ -188,7 +188,7 @@ class BimpPDF_Table
             
             
             if(is_object($row['object'])){
-                $content .= $this->addDEEEandRPCP($key, $row['object']);
+                $content .= $this->addDEEEandRPCP($key, $row['object'], $row['qte']);
             }
             
 
@@ -209,30 +209,36 @@ class BimpPDF_Table
         $pdf->writeHTML('<style>' . $this->styles . '</style>' . "\n" . $html."", false, false, true, false, '');
     }
     
-    public function addDEEEandRPCP($key, $object){
+    public function addDEEEandRPCP($key, $object, $qty){
         $content = "";
-        $htmlAv = '<br/><span style="text-align:right;font-style: italic; font-weight: bold;">';
+        $htmlAv = '<br/><span style="text-align:right;font-style: italic; font-size: 5px; font-weight: bold;">';
         $htmlAp = '</span>';
         $eco = 0;
         if(isset($object->array_options['options_deee']) && $object->array_options['options_deee'] > 0)
             $eco = $object->array_options['options_deee'];
-        $rpcp = 0;
-        if(isset($object->array_options['options_rpcp']) && $object->array_options['options_rpcp'] > 0)
-            $rpcp = $object->array_options['options_rpcp'];
 
         if($key == "desc" && $eco > 0)
                 $content .= $htmlAv.'Dont écotaxe'.$htmlAp;
         if($key == "pu_ht" && $eco > 0)
                 $content .= $htmlAv.price($eco).$htmlAp;
         if($key == "total_ht" && $eco > 0)
-                $content .= $htmlAv.price($eco*$row["qte"]).$htmlAp;
+                $content .= $htmlAv.price($eco*$qty).$htmlAp;
+        if($key == "total_ttc" && $eco > 0)
+                $content .= $htmlAv.price($eco*$qty*1.2).$htmlAp;
 
+        
+        
+        $rpcp = 0;
+        if(isset($object->array_options['options_rpcp']) && $object->array_options['options_rpcp'] > 0)
+            $rpcp = $object->array_options['options_rpcp'];
         if($key == "desc" && $rpcp > 0)
                 $content .= $htmlAv.'Dont droit copie privé'.$htmlAp;
         if($key == "pu_ht" && $rpcp > 0)
                 $content .= $htmlAv.price($rpcp).$htmlAp;
         if($key == "total_ht" && $rpcp > 0)
-                $content .= $htmlAv.price($rpcp*$row["qte"]).$htmlAp;
+                $content .= $htmlAv.price($rpcp*$qty).$htmlAp;
+        if($key == "total_ttc" && $rpcp > 0)
+                $content .= $htmlAv.price($rpcp*$qty*1.2).$htmlAp;
         return $content;
     }
 

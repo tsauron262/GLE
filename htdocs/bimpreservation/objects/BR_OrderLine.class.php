@@ -170,7 +170,7 @@ class BR_OrderLine extends BimpObject
             'type'          => ((int) $product_type === 0 ? self::PRODUIT : self::SERVICE)
         ));
 
-        $errors = $this->create();
+        $errors = $this->create($warnings, true);
 
         return $errors;
     }

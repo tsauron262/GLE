@@ -115,75 +115,43 @@ class BimpController
     }
 
     // Affichages:
+    public function displayHeaderFiles()
+    {
+        $id_object = BimpTools::getValue('id');
+
+        echo '<script type="text/javascript">';
+        echo 'ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
+        echo '</script>';
+
+        BimpCore::displayHeaderFiles();
+
+        foreach ($this->cssFiles as $css_file) {
+            echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $css_file . '"/>';
+        }
+
+        foreach ($this->jsFiles as $js_file) {
+            echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
+        }
+    }
 
     public function display()
     {
-        $this->addDebugTime('Début affichage page');
         if (BimpTools::isSubmit('ajax')) {
             $this->ajaxProcess();
             return;
         }
 
+        global $main_controller;
+
+        $display_footer = false;
+
         if (!defined('BIMP_CONTROLLER_INIT')) {
             define('BIMP_CONTROLLER_INIT', 1);
-            global $main_controller;
+            $this->addDebugTime('Début affichage page');
             $main_controller = $this;
             llxHeader('', '', '', false, false, false);
-
-            BimpCore::displayHeaderFiles();
-
-            $id_object = BimpTools::getValue('id');
-
-            echo '<script type="text/javascript">';
-            echo ' ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
-            echo '</script>';
-
-            foreach ($this->cssFiles as $css_file) {
-                echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $css_file . '"/>';
-            }
-
-            foreach ($this->jsFiles as $js_file) {
-                echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
-            }
-
-            if (count($this->errors)) {
-                echo BimpRender::renderAlerts($this->errors);
-                if (count($this->msgs)) {
-                    foreach ($this->msgs as $msg) {
-                        echo BimpRender::renderAlerts($msg['text'], $msg['type']);
-                    }
-                }
-            } else {
-                if (method_exists($this, 'displayHead')) {
-                    $this->displayHead();
-                } else {
-                    $title = $this->getConf('title', '');
-                    if ($title) {
-                        print load_fiche_titre($title, '', 'title_generic.png');
-                    }
-                }
-
-                if (count($this->msgs)) {
-                    foreach ($this->msgs as $msg) {
-                        echo BimpRender::renderAlerts($msg['text'], $msg['type']);
-                    }
-                }
-
-                if (!$this->canView()) {
-                    echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
-                } elseif (BimpTools::isSubmit('search')) {
-                    echo $this->renderSearchResults();
-                } elseif (method_exists($this, 'renderHtml')) {
-                    echo $this->renderHtml();
-                } else {
-                    echo $this->renderSections('sections');
-                }
-            }
-
-            echo BimpRender::renderAjaxModal('page_modal');
-            llxFooter();
+            $display_footer = true;
         } else {
-            global $main_controller;
             $cssFiles = $this->getConf('css', array(), false, 'array');
             foreach ($cssFiles as $cssFile) {
                 if (!is_null($main_controller) && is_a($main_controller, 'BimpController')) {
@@ -203,6 +171,24 @@ class BimpController
                 }
                 echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $jsFile . '"></script>';
             }
+        }
+
+        if (count($this->errors)) {
+            echo BimpRender::renderAlerts($this->errors);
+            if (count($this->msgs)) {
+                foreach ($this->msgs as $msg) {
+                    echo BimpRender::renderAlerts($msg['text'], $msg['type']);
+                }
+            }
+        } else {
+            if (method_exists($this, 'displayHead')) {
+                $this->displayHead();
+            } else {
+                $title = $this->getConf('title', '');
+                if ($title) {
+                    print load_fiche_titre($title, '', 'title_generic.png');
+                }
+            }
 
             if (count($this->msgs)) {
                 foreach ($this->msgs as $msg) {
@@ -220,10 +206,17 @@ class BimpController
                 echo $this->renderSections('sections');
             }
         }
-        $this->addDebugTime('Fin affichage page');
 
-        if (self::$debug_time) {
-            echo $this->renderDebugTime();
+        if ($display_footer) {
+            echo BimpRender::renderAjaxModal('page_modal');
+
+            $this->addDebugTime('Fin affichage page');
+
+            if (self::$debug_time) {
+                echo $this->renderDebugTime();
+            }
+
+            llxFooter();
         }
     }
 
@@ -1086,7 +1079,7 @@ class BimpController
                         $field = new BC_Field($object, $field_name, true);
                         $field->name_prefix = $field_prefix;
                         if ($field->params['type'] === 'id_object' && $field->params['create_form']) {
-                            $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], true);
+                            $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);
                         }
                         $html .= $field->renderInput();
                         unset($field);
@@ -1222,7 +1215,13 @@ class BimpController
             $view = new BC_View($object, $view_name, $content_only, 1);
             $view->content_only = $content_only;
             $view->setNewValues($new_values);
-            $html = $view->renderHtml();
+
+            if ($content_only) {
+                $html = $view->renderHtmlContent();
+            } else {
+                $html = $view->renderHtml();
+            }
+
             $header_html = $object->renderHeader(true);
             $view_id = $view->identifier;
         }

@@ -91,13 +91,13 @@ objects:
         list: 
             filters:
                 parent_module: bimpfinancement
-                parent_object_name: demande
+                parent_object_name: BF_Demande
         add_form: 
             name: upload
             values:
                 fields: 
                     parent_module: bimpfinancement
-                    parent_object_name: demande
+                    parent_object_name: BF_Demande
             
 #associations:
 #    files: 
@@ -179,7 +179,11 @@ fields:
         default_value: 0
                 
     vr: 
-        label: VR demandée
+        label: VR achat
+        type: money
+        default_value: 0
+    vr_vente: 
+        label: VR vente
         type: money
         default_value: 0
                 
@@ -278,23 +282,19 @@ lists:
                 label: ID
                 field: id
             date_create:
-                label: Créée le
                 field: date_create
             client: 
-                label: Client
                 field: id_client
                 display: nom_url
             duration:
-                label: Durée
                 field: duration
             periodicity:
-                label: Périodicité
                 field: periodicity
             vr:
-                label: VR demandée
                 field: vr
+            vr_vente:
+                field: vr_vente
             status:
-                label: Etat
                 field: status
                 edit: 1
       
@@ -327,6 +327,8 @@ fields_tables:
             - field: mode_calcul
               edit: 1 
             - field: vr
+              edit: 1    
+            - field: vr_vente
               edit: 1    
             - field: ca_prevu
               edit: 1
@@ -364,6 +366,10 @@ fields_tables:
             - field: montant_services
               edit: 1
             - field: montant_logiciels
+              edit: 1
+            - field: vr
+              edit: 1
+            - field: vr_vente
               edit: 1
             - label: Montant total
               value: <span id="montant_total"></span>

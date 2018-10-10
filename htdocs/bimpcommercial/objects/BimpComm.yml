@@ -7,7 +7,10 @@ objects:
     lines: 
         relation: hasMany
         delete: 1
-        instance: ObjectLine
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: ObjectLine
         
     client: 
         relation: hasOne
@@ -24,6 +27,25 @@ objects:
             bimp_object: 
                 module: bimpcore
                 name: Bimp_Contact
+                
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpcommercial
+                parent_object_name: BimpComm
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpcommercial
+                    parent_object_name: BimpComm
             
 fields:
     ref: 
@@ -100,6 +122,14 @@ fields:
     note_public: 
         label: Note publique
         type: html   
+    remise_globale: 
+        label: Remise globale
+        type: percent
+        default_value: 0
+        decimals: 8
+        display_if: 
+            field_name: use_amount
+            show_values: 0
         
 forms: 
     contact:
@@ -133,7 +163,7 @@ forms:
               create_form_values:
                   fields: 
                       fk_soc: 
-                          field_value: fk_soc
+                          callback: getAddContactIdClient
               value: 
                   request: fields/id_contact
               input: 
@@ -143,6 +173,7 @@ forms:
               display_if: 
                   field_name: type
                   show_values: 1
+              depends_on: id_client
             - custom: 1
               label: Utilisateur
               input_name: id_user
@@ -194,6 +225,122 @@ forms:
                   extra_filters:
                       callback: getRequestSelectRemisesFilters
         
+    remise_globale: 
+        title: Remise Globale
+        icon: percent
+        rows: 
+            - custom: 1
+              label: Définir à partir d'un montant fixe
+              input_name: use_amount
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 0
+            - field: remise_globale
+            - custom: 1
+              label: Montant de la remise
+              input_name: remise_globale_amount
+              data_type: money
+              input: 
+                  help: Ce montant sera déduit du Total TTC et sera converti en pourcentage global. 
+              value: 
+                  callback: getRemiseGlobaleAmount
+              display_if: 
+                  field_name: use_amount
+                  show_values: 1
+            
+    email: 
+        rows: 
+            - custom: 1
+              label: Emmetteur
+              input_name: from
+              input: 
+                  type: select
+                  options: 
+                      array: emailUsersFrom
+                      
+            - custom: 1
+              label: Destinataires
+              input_name: mail_to
+              input: 
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderMailToInputs
+                          params: 
+                              - mail_to
+                  multiple: 1
+              required: 1
+              
+            - custom: 1
+              label: Copies à
+              input_name: copy_to
+              input: 
+                  type: custom
+                  content: 
+                      callback: 
+                          method: renderMailToInputs
+                          params: 
+                              - copy_to
+                  multiple: 1
+                          
+            - custom: 1
+              label: Accusé de réception
+              input_name: confirm_reception
+              data_type: bool
+              input: 
+                  type: toggle
+              default_value: 0
+              
+            - custom: 1
+              label: Modèle de courriel
+              input_name: id_model
+              input: 
+                  type: select
+                  options: 
+                      array: emailModels
+                      
+            - custom: 1
+              label: Objet
+              input_name: mail_object
+              input: 
+                  type: text
+              value: 
+                  callback: getEmailTopicByModel
+              depends_on: id_model
+              
+            - custom: 1
+              label: Message
+              data_type: html
+              input_name: msg_html
+              input: 
+                  type: html
+              value: 
+                  callback: getEmailContentByModel
+              depends_on: id_model
+              
+            - custom: 1
+              label: Fichiers joints
+              input_name: join_files
+              data_type: id_object
+              input: 
+                  type: check_list
+                  items: 
+                      array: files
+              value: 
+                  callback: getJoinFilesValues
+              object: files
+              create_form: upload
+              create_form_label: Ajouter
+              create_form_values: 
+                  fields: 
+                      parent_module: 
+                          prop: module
+                      parent_object_name: 
+                          prop: object_name
+                      id_parent: 
+                          prop: id
+                  
 fields_tables: 
     infos: 
         title: Informations

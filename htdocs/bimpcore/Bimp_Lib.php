@@ -2,16 +2,23 @@
 
 if (!defined('BIMP_LIB')) {
     define('BIMP_LIB', 1);
+    
+    global $bimp_start_time;
+    $bimp_start_time = microtime(1);
+
+    ini_set('display_errors', 1);
+    
     $dir = __DIR__ . '/classes/';
 
     require_once __DIR__ . '/libs/spyc/Spyc.php';
 
     require_once $dir . 'BimpDb.php';
+    require_once $dir . 'BimpValidate.php';
+    require_once $dir . 'BimpCache.php';
     require_once $dir . 'BimpTools.php';
     require_once $dir . 'BimpConfig.php';
     require_once $dir . 'BimpInput.php';
     require_once $dir . 'BimpRender.php';
-    require_once $dir . 'BimpCache.php';
     require_once $dir . 'BimpConfigDefinitions.php';
     require_once $dir . 'BimpComponent.php';
 
@@ -33,6 +40,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpAssociation.php';
     require_once $dir . 'BimpObject.php';
     require_once $dir . 'BimpCore.php';
+    require_once $dir . 'FixeTabs.php';
     require_once $dir . 'BimpController.php';
 
     checkBimpCoreVersion();

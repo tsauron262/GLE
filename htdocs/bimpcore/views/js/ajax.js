@@ -194,7 +194,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 if (typeof (result.request_id) !== 'undefined') {
                     bimpAjax = bimp_requests[parseInt(result.request_id)];
                 } else {
-                    bimp_msg('Erreur: ID de requête invalide');
+                    bimp_msg('Erreur: ID de requête invalide', 'danger');
                     return;
                 }
 

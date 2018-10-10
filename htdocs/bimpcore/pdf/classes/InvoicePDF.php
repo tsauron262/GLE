@@ -23,6 +23,7 @@ class InvoicePDF extends BimpDocumentPDF
     {
         if (isset($this->object) && is_a($this->object, 'Facture')) {
             if (isset($this->object->id) && $this->object->id) {
+                $this->bimpCommObject = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $this->object->id);
                 $this->facture = $this->object;
                 $this->facture->fetch_thirdparty();
 

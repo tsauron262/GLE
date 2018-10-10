@@ -37,7 +37,7 @@ class userPropalsController extends BimpController
 
         $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal');
 
-        $list = new BC_ListTable($propal, 'default', 1, null, 'Vos proposition commerciales');
+        $list = new BC_ListTable($propal, 'user', 1, null, 'Vos proposition commerciales');
         $list->addFieldFilterValue('ec.fk_socpeople', (int) $user->id);
         $list->addFieldFilterValue('tc.element', 'propal');
         $list->addFieldFilterValue('tc.source', 'internal');

@@ -145,6 +145,7 @@ function reloadObjectList(list_id, callback) {
         success: function (result, bimpAjax) {
             $list.find('.headerTools').find('.loadingIcon').css('opacity', 0);
             if (result.rows_html) {
+                hidePopovers($list);
                 bimpAjax.$list.find('tbody.listRows').html(result.rows_html);
                 if (result.pagination_html) {
                     bimpAjax.$list.find('.listPagination').each(function () {
@@ -393,13 +394,14 @@ function deleteObjects(list_id, objects_list, $button) {
         BimpAjax('deleteObjects', data, null, {
             $button: $button,
             success: function (result) {
-                for (var i in result.objects_list) {
+//                for (var i in result.objects_list) {
                     $('body').trigger($.Event('objectDelete', {
                         module: result.module,
                         object_name: result.object_name,
-                        id_object: result.objects_list[i]
+                        id_object: 0
+//                        id_object: result.objects_list[i]
                     }));
-                }
+//                }
             }
         });
     }

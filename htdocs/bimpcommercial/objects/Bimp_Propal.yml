@@ -34,6 +34,15 @@ objects:
             id_object:
                 field_value: entrepot
                 
+    files:
+        list: 
+            filters:
+                parent_object_name: Bimp_Propal
+        add_form: 
+            values:
+                fields: 
+                    parent_object_name: Bimp_Propal
+                
 fields:     
     datec: 
         label: Créée le
@@ -80,6 +89,11 @@ fields:
         dol_extra_field: 1
         type: bool
         default_value: 0 
+    pdf_hide_ref:
+        label: Masquer les références des produits dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
         
 forms: 
     default: 
@@ -127,6 +141,7 @@ forms:
             - field: model_pdf
             - field: pdf_hide_reduc
             - field: pdf_hide_total
+            - field: pdf_hide_ref
             - field: note_private
             - field: note_public
             
@@ -189,9 +204,9 @@ fields_tables:
             - field: ref_client
               edit: 
                   callback: isEditable
-#            - label: Remises client
-#              value: 
-#                  callback: displayRemisesClient
+            - label: Remises client
+              value: 
+                  callback: displayRemisesClient
                   
     payment:
         rows:
@@ -208,12 +223,17 @@ fields_tables:
               edit: 1
             - field: pdf_hide_total
               edit: 1
+            - field: pdf_hide_ref
+              edit: 1
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
                   
     totals: 
         rows: 
+            - label: Remises
+              value: 
+                  callback: displayTotalRemises
             - field: total_ht
             - field: tva
             - field: total
@@ -285,6 +305,116 @@ lists:
             total: 
                 field: total
         
+    user: 
+        title: Propositions commerciales
+        icon: fas_file-invoice
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les propositions commerciales sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        list_filters: 
+            callback: getListFilters
+        sort_field: datec
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        add_form_values: 
+            fields: 
+                entrepot: 
+                    request: id_entrepot
+                fk_soc:
+                    request: id_client
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 
+            callback: isDeletable
+        modal_view: default
+        page_btn: 1
+        joins: 
+            - table: element_contact
+              on: ec.element_id = a.rowid
+              alias: ec
+            - table: c_type_contact
+              on: ec.fk_c_type_contact = tc.rowid
+              alias: tc
+        cols: 
+            ref: 
+                field: ref
+            libelle: 
+                field: libelle
+            statut: 
+                field: fk_statut
+            entrepot: 
+                field: entrepot
+                display: nom_url
+            secteur: 
+                field: ef_type
+            client: 
+                field: fk_soc
+                display: nom_url
+            date_create: 
+                field: datec
+            total: 
+                field: total
+                
+    client: 
+        title: Propositions commerciales
+        icon: fas_file-invoice
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les propositions commerciales sélectionnées
+              icon: trash
+              onclick: deleteSelectedObjects('list_id', $(this))
+        list_filters: 
+            callback: getListFilters
+        sort_field: datec
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        add_form_values: 
+            fields: 
+                entrepot: 
+                    request: id_entrepot
+                fk_soc:
+                    request: id_client
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 
+            callback: isDeletable
+        modal_view: default
+        page_btn: 1
+        joins: 
+            - table: element_contact
+              on: ec.element_id = a.rowid
+              alias: ec
+            - table: c_type_contact
+              on: ec.fk_c_type_contact = tc.rowid
+              alias: tc
+        cols: 
+            ref: 
+                field: ref
+            libelle: 
+                field: libelle
+            statut: 
+                field: fk_statut
+            entrepot: 
+                field: entrepot
+                display: nom_url
+            secteur: 
+                field: ef_type
+            commercial: 
+                label: Commercial
+                value: 
+                    callback: displayCommercial
+                search: 
+                    input: 
+                        type: search_user
+            date_create: 
+                field: datec
+            total: 
+                field: total
+                
 cards: 
     default: 
         title: 

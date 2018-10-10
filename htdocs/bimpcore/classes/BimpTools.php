@@ -78,6 +78,31 @@ class BimpTools
         return $value;
     }
 
+    public static function getPostFieldValue($field_name, $default_value = null)
+    {
+        // Chargement d'un formulaire:
+        if (BimpTools::isSubmit('param_values/fields/' . $field_name)) {
+            return BimpTools::getValue('params_values/fields/' . $field_name);
+        }
+
+        // Chargement d'un input: 
+        if (BimpTools::isSubmit('fields/' . $field_name)) {
+            return BimpTools::getValue('fields/' . $field_name);
+        }
+        
+        // Action ajax: 
+         if (BimpTools::isSubmit('extra_data/' . $field_name)) {
+            return BimpTools::getValue('extra_data/' . $field_name);
+        }
+
+        // Envoi des données d'un formulaire: 
+        if (BimpTools::isSubmit($field_name)) {
+            return BimpTools::getValue($field_name);
+        }
+        
+        return $default_value; 
+    }
+
     // Gestion des objects Dolibarr:
 
     public static function loadDolClass($module, $file = null, $class = null)
@@ -1093,12 +1118,12 @@ class BimpTools
         }
     }
 
-    public static function getDolEventsMsgs($types = array('mesgs, errors, warnings'), $clean = true)
+    public static function getDolEventsMsgs($types = array('mesgs', 'errors', 'warnings'), $clean = true)
     {
         $return = array();
         foreach ($types as $type) {
             if (isset($_SESSION['dol_events'][$type])) {
-                $return = array_merge($_SESSION['dol_events'][$type]);
+                $return = array_merge($_SESSION['dol_events'][$type], $return);
                 if ($clean) {
                     unset($_SESSION['dol_events'][$type]);
                 }
@@ -1106,6 +1131,15 @@ class BimpTools
         }
 
         return $return;
+    }
+
+    public static function cleanDolEventsMsgs($types = array('mesgs', 'errors', 'warnings'))
+    {
+        foreach ($types as $type) {
+            if (isset($_SESSION['dol_events'][$type])) {
+                unset($_SESSION['dol_events'][$type]);
+            }
+        }
     }
 
     public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)

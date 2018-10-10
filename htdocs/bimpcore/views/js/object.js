@@ -232,28 +232,12 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                 bimpModal.$footer.find('.set_action_button.modal_' + modal_idx).click(function () {
                     if (validateForm($form)) {
                         $form.find('.inputContainer').each(function () {
+                            field_name = $(this).data('field_name');
                             if ($(this).data('multiple')) {
-                                var field_name = $(this).data('values_field');
-                                var $valuesContainer = $(this).parent().find('.inputMultipleValuesContainer');
-                                if (!$valuesContainer.length) {
-                                    bimp_msg('Erreur: liste de valeurs absente pour le champ "' + field_name + '"', 'danger');
-                                    return;
-                                } else {
-                                    extra_data[field_name] = [];
-                                    $valuesContainer.find('[name="' + field_name + '[]"]').each(function () {
-                                        var value = $(this).val();
-                                        if (value !== '') {
-                                            extra_data[field_name].push(value);
-                                        }
-                                    });
-                                }
-                            } else {
-                                var field_name = $(this).data('field_name');
-                                if ($(this).find('.cke').length) {
-                                    var html_value = $('#cke_' + field_name).find('iframe').contents().find('body').html();
-                                    $(this).find('[name="' + field_name + '"]').val(html_value);
-                                }
-                                extra_data[field_name] = $(this).find('[name="' + field_name + '"]').val();
+                                field_name = $(this).data('values_field');
+                            }
+                            if (field_name) {
+                                extra_data[field_name] = getInputValue($(this));
                             }
                         });
                         setObjectAction($(this), object_data, action, extra_data, null, $('#' + $form.attr('id') + '_result'), function (result) {

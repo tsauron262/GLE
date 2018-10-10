@@ -6,6 +6,9 @@ class Bimp_Propal extends BimpComm
 {
 
     public static $comm_type = 'propal';
+    public static $email_type = 'propal_send';
+    public $id_sav = null;
+    public $sav = null;
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'file-text', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
@@ -18,11 +21,27 @@ class Bimp_Propal extends BimpComm
 
     public function getIdSav()
     {
-        if ($this->isLoaded()) {
-            return (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $this->id);
+        if (is_null($this->id_sav)) {
+            if ($this->isLoaded()) {
+                $this->id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $this->id);
+            } else {
+                return 0;
+            }
         }
 
-        return 0;
+        return $this->id_sav;
+    }
+
+    public function getSav()
+    {
+        if (is_null($this->sav)) {
+            $id_sav = (int) $this->getIdSav();
+            if ($id_sav) {
+                $this->sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
+            }
+        }
+
+        return $this->sav;
     }
 
     public function getDureeValidite()
@@ -75,20 +94,6 @@ class Bimp_Propal extends BimpComm
         $buttons = array();
 
         if ($this->isLoaded()) {
-
-            $pdf_dir = $this->getDirOutput();
-            $ref = dol_sanitizeFileName($this->getRef());
-            $pdf_file = $pdf_dir . '/' . $ref . '/' . $ref . '.pdf';
-            if (file_exists($pdf_file)) {
-                $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
-                $onclick = 'window.open(\'' . $url . '\');';
-                $buttons[] = array(
-                    'label'   => "Voir " . $ref . '.pdf',
-                    'icon'    => 'fas_file-pdf',
-                    'onclick' => $onclick
-                );
-            }
-
             $buttons[] = array(
                 'label'   => 'Générer le PDF',
                 'icon'    => 'fas_sync',
@@ -161,7 +166,7 @@ class Bimp_Propal extends BimpComm
                 if ($this->isActionAllowed('close')) {
                     if ($this->canSetAction('close')) {
                         $buttons[] = array(
-                            'label'   => 'Fermer',
+                            'label'   => 'Fermer (Accepter/Refuser)',
                             'icon'    => 'times',
                             'onclick' => $this->getJsActionOnclick('close', array(), array(
                                 'form_name' => 'close'
@@ -201,11 +206,10 @@ class Bimp_Propal extends BimpComm
                 }
 
                 // Envoi mail:
-                if ($this->isActionAllowed('sendMail') && $this->canSetAction('sendMail')) {
-//                    comm/propal/card.php?id=123513&action=presend&mode=init#formmailbeforetitle
-//                    $onclick = 'bimpModal.loadAjaxContent($(this), \'loadMailForm\', {id: ' . $this->id . '}, \'Envoyer par email\')';
-                    $url = DOL_URL_ROOT . '/comm/propal/card.php?id=' . $this->id . '&action=presend&mode=init#formmailbeforetitle';
-                    $onclick = 'window.location = \'' . $url . '\'';
+                if ($this->isActionAllowed('sendEmail') && $this->canSetAction('sendEmail')) {
+                    $onclick = $this->getJsActionOnclick('sendEmail', array(), array(
+                        'form_name' => 'email'
+                    ));
                     $buttons[] = array(
                         'label'   => 'Envoyer par email',
                         'icon'    => 'envelope',
@@ -273,14 +277,24 @@ class Bimp_Propal extends BimpComm
                     );
                 }
 
+                // Remise globale: 
+                if ($this->isActionAllowed('setRemiseGlobale') && $this->canSetAction('setRemiseGlobale')) {
+                    $buttons[] = array(
+                        'label'   => 'Remise globale',
+                        'icon'    => 'percent',
+                        'onclick' => $this->getJsActionOnclick('setRemiseGlobale', array('remise_globale' => (float) $this->getData('remise_globale')), array(
+                            'form_name' => 'remise_globale'
+                        ))
+                    );
+                }
+
                 // Cloner: 
                 if ($this->canCreate()) {
                     $buttons[] = array(
                         'label'   => 'Cloner',
                         'icon'    => 'copy',
                         'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
-                            'form_name'   => 'duplicate_propal',
-                            'confirm_msg' => 'Etes-vous sûr de vouloir cloner la proposition commerciale ' . $this->getRef()
+                            'form_name' => 'duplicate_propal'
                         ))
                     );
                 }
@@ -328,122 +342,6 @@ class Bimp_Propal extends BimpComm
     public function renderMailForm()
     {
         return BimpRender::renderAlerts('L\'envoi par email est désactivé pour le moment', 'warning');
-
-//        if (!$this->isLoaded()) {
-//            return BimpRender::renderAlerts('ID ' . $this->getLabel('of_the') . ' absent');
-//        }
-//
-//        global $conf, $langs, $user;
-//        $errors = array();
-//
-//        $object = $this->dol_object;
-//
-//        $object->fetch_projet();
-//
-//        $ref = dol_sanitizeFileName($object->ref);
-//
-//        include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-//
-//        $fileparams = dol_most_recent_file($conf->propal->dir_output . '/' . $ref, preg_quote($ref, '/') . '[^\-]+');
-//
-//        $file = $fileparams['fullname'];
-//
-//        // Define output language
-//        $outputlangs = $langs;
-//        $newlang = '';
-//        if ($conf->global->MAIN_MULTILANGS && empty($newlang) && !empty($_REQUEST['lang_id']))
-//            $newlang = $_REQUEST['lang_id'];
-//        if ($conf->global->MAIN_MULTILANGS && empty($newlang))
-//            $newlang = $object->thirdparty->default_lang;
-//
-//        if (!empty($newlang)) {
-//            $outputlangs = new Translate('', $conf);
-//            $outputlangs->setDefaultLang($newlang);
-//            $outputlangs->load('commercial');
-//        }
-//
-//        // Build document if it not exists
-//        if (!$file || !is_readable($file)) {
-//            $result = $object->generateDocument($this->getModelPdf(), $outputlangs);
-//            if ($result <= 0) {
-//                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Echec de la génération du document PDF');
-//            } else {
-//                $fileparams = dol_most_recent_file($conf->propal->dir_output . '/' . $ref, preg_quote($ref, '/') . '[^\-]+');
-//                $file = $fileparams['fullname'];
-//            }
-//        }
-//
-//        if (!count($errors)) {
-//            // Create form object
-//            include_once DOL_DOCUMENT_ROOT . '/core/class/html.formmail.class.php';
-//            $formmail = new FormMail($this->db->db);
-//            $formmail->param['langsmodels'] = (empty($newlang) ? $langs->defaultlang : $newlang);
-//            $formmail->fromtype = !empty($conf->global->MAIN_MAIL_DEFAULT_FROMTYPE) ? $conf->global->MAIN_MAIL_DEFAULT_FROMTYPE : 'user';
-//
-//            if ($formmail->fromtype === 'user') {
-//                $formmail->fromid = $user->id;
-//            }
-//            $formmail->trackid = 'pro' . $object->id;
-//            if (!empty($conf->global->MAIN_EMAIL_ADD_TRACK_ID) && ($conf->global->MAIN_EMAIL_ADD_TRACK_ID & 2)) { // If bit 2 is set
-//                include DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
-//                $formmail->frommail = dolAddEmailTrackId($formmail->frommail, 'pro' . $object->id);
-//            }
-//            $formmail->withfrom = 1;
-//            $liste = array();
-//            $object->fetch_thirdparty();
-//            foreach ($object->thirdparty->thirdparty_and_contact_email_array(1) as $key => $value)
-//                $liste [$key] = $value;
-//            $formmail->withto = GETPOST("sendto") ? GETPOST("sendto") : $liste;
-//            $formmail->withtocc = $liste;
-//            $formmail->withtoccc = (!empty($conf->global->MAIN_EMAIL_USECCC) ? $conf->global->MAIN_EMAIL_USECCC : false);
-//            if (empty($object->ref_client)) {
-//                $formmail->withtopic = $outputlangs->trans('SendPropalRef', '__PROPREF__');
-//            } else if (!empty($object->ref_client)) {
-//                $formmail->withtopic = $outputlangs->trans('SendPropalRef', '__PROPREF__ (__REFCLIENT__)');
-//            }
-//            $formmail->withfile = 2;
-//            $formmail->withbody = 1;
-//            $formmail->withdeliveryreceipt = 1;
-//            $formmail->withcancel = 1;
-//
-//            // Tableau des substitutions
-//            $formmail->setSubstitFromObject($object);
-//            $formmail->substit['__PROPREF__'] = $object->ref; // For backward compatibility
-//            // Find the good contact adress
-//            $custcontact = '';
-//            $contactarr = array();
-//            $contactarr = $object->liste_contact(- 1, 'external');
-//
-//            if (is_array($contactarr) && count($contactarr) > 0) {
-//                foreach ($contactarr as $contact) {
-//                    if ($contact ['libelle'] == $langs->trans('TypeContact_propal_external_CUSTOMER')) { // TODO Use code and not label
-//                        $contactstatic = new Contact($this->db->db);
-//                        $contactstatic->fetch($contact ['id']);
-//                        $custcontact = $contactstatic->getFullName($langs, 1);
-//                        if ($contactstatic->email != "" && !isset($_REQUEST["receiver"]))
-//                            $_POST["receiver"] = array($contactstatic->id, "");
-//                    }
-//                }
-//
-//                if (!empty($custcontact)) {
-//                    $formmail->substit['__CONTACTCIVNAME__'] = $custcontact;
-//                }
-//            }
-//
-//            // Tableau des parametres complementaires
-//            $formmail->param['action'] = 'send';
-//            $formmail->param['models'] = 'propal_send';
-//            $formmail->param['models_id'] = GETPOST('modelmailselected', 'int');
-//            $formmail->param['id'] = $object->id;
-//            $formmail->param['returnurl'] = $_SERVER["PHP_SELF"] . '?fc=propal&id=' . $object->id;
-//            // Init list of files
-//            if (GETPOST("mode") == 'init') {
-//                $formmail->clear_attached_files();
-//                $formmail->add_attached_files($file, basename($file), dol_mimetype($file));
-//            }
-//
-//            return $formmail->get_form();
-//        }
     }
 
     // Rendus HTML - overrides BimpObject
@@ -451,10 +349,6 @@ class Bimp_Propal extends BimpComm
     public function renderHeaderExtraLeft()
     {
         $html = '';
-
-        $html .= '<div class="buttonsContainer">';
-        $html .= "<a class='btn btn-default' href='../comm/propal/card.php?id=" . $this->id . "'><i class='fa fa-file iconLeft'></i>Ancienne version</a>";
-        $html .= '</div>';
 
         if ($this->isLoaded()) {
             $user = new User($this->db->db);
@@ -485,7 +379,45 @@ class Bimp_Propal extends BimpComm
                     $html .= '</div>';
                 }
             }
+
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $html .= '<div style="margin-top: 10px">';
+                $html .= '<strong>Client: </strong>';
+                $html .= BimpObject::getInstanceNomUrlWithIcons($client);
+                $html .= '</div>';
+            }
         }
+
+        return $html;
+    }
+
+    public function renderHeaderExtraRight()
+    {
+        $html = '';
+
+        $html .= '<div class="buttonsContainer">';
+
+        $pdf_dir = $this->getDirOutput();
+        $ref = dol_sanitizeFileName($this->getRef());
+        $pdf_file = $pdf_dir . '/' . $ref . '/' . $ref . '.pdf';
+        if (file_exists($pdf_file)) {
+            $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
+            $onclick = 'window.open(\'' . $url . '\');';
+
+            $html .= BimpRender::renderButton(array(
+                        'classes'     => array('btn', 'btn-default'),
+                        'label'       => $ref . '.pdf',
+                        'icon_before' => 'fas_file-pdf',
+                        'attr'        => array(
+                            'onclick' => $onclick
+                        )
+            ));
+        }
+
+        $html .= "<a class='btn btn-default' href='../comm/propal/card.php?id=" . $this->id . "'><i class='fa fa-file iconLeft'></i>Ancienne version</a>";
+
+        $html .= '</div>';
 
         return $html;
     }
@@ -836,6 +768,9 @@ class Bimp_Propal extends BimpComm
             case 'createInvoice':
                 $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
                 return $facture->canCreate();
+
+            case 'setRemiseGlobale':
+                return $this->canEdit();
         }
         return 1;
     }
@@ -886,7 +821,7 @@ class Bimp_Propal extends BimpComm
                 }
                 return 1;
 
-            case 'sendMail':
+            case 'sendEmail':
                 if (!in_array($status, array(Propal::STATUS_VALIDATED, Propal::STATUS_SIGNED))) {
                     $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
                     return 0;
@@ -938,6 +873,9 @@ class Bimp_Propal extends BimpComm
                     return 0;
                 }
                 return 1;
+
+            default:
+                return (int) parent::isActionAllowed($action, $errors);
         }
 
         return 1;

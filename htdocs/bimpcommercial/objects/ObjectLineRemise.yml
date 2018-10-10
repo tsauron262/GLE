@@ -37,7 +37,7 @@ fields:
         display_if: 
             field_name: type
             show_values: 1
-        decimals: 6
+        decimals: 8
         min: 0
         max: 100
             
@@ -86,7 +86,7 @@ forms:
                   
 lists: 
     default: 
-        title: Remises
+        title: Remises de la ligne (hors remise globale)
         icon: percent
         checkboxes: 1
         bulk_actions:

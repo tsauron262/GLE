@@ -17,12 +17,14 @@ class BC_Field extends BimpComponent
         'id_parent' => array(
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
-            'create_form_values' => array('data_type' => 'array')
+            'create_form_values' => array('data_type' => 'array'),
+            'create_form_label'  => array('default' => 'Créer')
         ),
         'id_object' => array(
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
-            'create_form_values' => array('data_type' => 'array')
+            'create_form_values' => array('data_type' => 'array'),
+            'create_form_label'  => array('default' => 'Créer')
         ),
         'number'    => array(
             'min'      => array('data_type' => 'float'),
@@ -175,11 +177,11 @@ class BC_Field extends BimpComponent
                     case 'date':
                         $search_type = $input_type = 'date_range';
                         break;
-                    
+
                     case 'time':
                         $search_type = $input_type = 'time_range';
                         break;
-                    
+
                     case 'datetime':
                         $search_type = $input_type = 'datetime_range';
                         break;

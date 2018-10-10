@@ -45,13 +45,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
             return array('ID du devis Absent');
         }
 
-        $id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $propal->id);
-
-        if (!(int) $id_sav) {
-            return array('ID du SAV absent - ' . $this->db->db->lasterror());
-        }
-
-        $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
+        $sav = $propal->getSav();
 
         if (!BimpObject::objectLoaded($sav)) {
             return array('ID du SAV invalide');
@@ -165,13 +159,10 @@ class BS_SavPropalLine extends Bimp_PropalLine
         $propal = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($propal)) {
-            $id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $propal->id);
-            if ((int) $id_sav) {
-                $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
-                if (BimpObject::objectLoaded($sav)) {
-                    if (!in_array($sav->getData('status'), array(9, 999))) {
-                        return 1;
-                    }
+            $sav = $propal->getSav();
+            if (BimpObject::objectLoaded($sav)) {
+                if (!in_array($sav->getData('status'), array(9, 999))) {
+                    return 1;
                 }
             }
         }
@@ -205,14 +196,8 @@ class BS_SavPropalLine extends Bimp_PropalLine
         if (!BimpObject::objectLoaded($propal)) {
             return array('ID du devis Absent');
         }
-
-        $id_sav = (int) $this->db->getValue('bs_sav', 'id', '`id_propal` = ' . (int) $propal->id);
-
-        if (!(int) $id_sav) {
-            return array('ID du SAV absent');
-        }
-
-        $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
+        
+        $sav = $propal->getSav();
 
         if (!BimpObject::objectLoaded($sav)) {
             return array('ID du SAV invalide');
@@ -239,6 +224,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
                     }
                 }
                 $client = $sav->getChildObject('client');
+                // todo: remanier la remise client
                 if (BimpObject::objectLoaded($client) && isset($client->dol_object->remise_percent)) {
                     $remise += (float) $client->dol_object->remise_percent;
                 }

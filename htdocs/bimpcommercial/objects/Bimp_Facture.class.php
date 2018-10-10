@@ -161,21 +161,6 @@ class Bimp_Facture extends BimpComm
         return ModelePDFFactures::liste_modeles($this->db->db);
     }
 
-    public function getCentresArray()
-    {
-        global $tabCentre;
-
-        $centres = array(
-            '' => ''
-        );
-
-        foreach ($tabCentre as $code => $centre) {
-            $centres[$code] = $centre[2];
-        }
-
-        return $centres;
-    }
-
     public function getCloseReasonsArray()
     {
         global $langs, $conf;

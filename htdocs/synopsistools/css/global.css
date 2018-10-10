@@ -3,7 +3,7 @@
 *BIMP CORE
 */
 body.modal-open ul.ui-autocomplete{
-    overflow: scroll;
+    overflow: auto;
     max-height: 400px;
 }
 
@@ -514,4 +514,8 @@ input, input.flat, textarea, textarea.flat, form.flat select, select, select.fla
 
 .fullScreen{
     z-index: 10002!important;
+}
+
+input[name='options_libelle']{
+    width: 300px;
 }

@@ -93,12 +93,12 @@ class GSX_Repair extends BimpObject
                 break;
         }
 
-        if (is_null($this->gsx)) {
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (2)');
         }
 
         $this->set('id_sav', (int) $id_sav);
@@ -122,12 +122,16 @@ class GSX_Repair extends BimpObject
 
     public function loadPartsPending()
     {
-        if (is_null($this->gsx)) {
+        if($this->getData('canceled'))
+            return array("Réparation annulée");
+        if($this->getData('closed') || $this->getData('repair_complete'))
+            return array("Réparation fermée");
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (3)');
         }
 
         $this->partsPending = array();
@@ -141,8 +145,8 @@ class GSX_Repair extends BimpObject
             'repairType'               => '',
             'repairStatus'             => '',
             'purchaseOrderNumber'      => '',
-            'sroNumber'                => isset($repairNumber) ? $repairNumber : '',
-            'repairConfirmationNumber' => isset($repairConfirmNumber) ? $repairConfirmNumber : '',
+            'sroNumber'                =>  '',
+            'repairConfirmationNumber' =>  '',
             'serialNumbers'            => array(
                 'serialNumber' => ''
             ),
@@ -156,6 +160,13 @@ class GSX_Repair extends BimpObject
             'kbbSerialNumberFlag'      => '',
             'comptiaCode'              => '',
         );
+        
+        if (!is_null($repairConfirmNumber) && $repairConfirmNumber) {
+                $data['repairConfirmationNumber'] = $repairConfirmNumber;
+        }
+        elseif (!is_null($repairNumber) && $repairNumber) {
+            $data['sroNumber'] = $repairNumber;
+        }
 
         if ($this->isIphone) {
             $client = 'IPhonePartsPendingReturn';
@@ -221,12 +232,12 @@ class GSX_Repair extends BimpObject
 
     public function lookup($number = null, $number_type = null)
     {
-        if (is_null($this->gsx)) {
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (4)'.print_r($this->gsx->errors,1));
         }
 
         $n_soap_errors = count($this->gsx->errors['soap']);
@@ -252,26 +263,26 @@ class GSX_Repair extends BimpObject
             'unreceivedModules'        => '',
         );
 
-        if (is_null($number)) {
+        if (isset($number) && $number && isset($number_type) && $number_type && isset($look_up_data[$number_type])) {
+                $look_up_data[$number_type] = $number;
+        }
+        else {
             $repairNumber = $this->getData('repair_number');
             $repairConfirmNumber = $this->getData('repair_confirm_number');
-            if (!is_null($repairNumber) && $repairNumber) {
-                $look_up_data['repairNumber'] = $repairNumber;
-            }
             if (!is_null($repairConfirmNumber) && $repairConfirmNumber) {
                 $look_up_data['repairConfirmationNumber'] = $repairConfirmNumber;
             }
+            elseif (!is_null($repairNumber) && $repairNumber) {
+                $look_up_data['repairNumber'] = $repairNumber;
+            }
+            else
+                return array("Aucune info pour le repairLookup ".print_r($look_up_data,1));
         }
 
         if ($this->isIphone) {
             $look_up_data['imeiNumber'] = '';
         }
 
-        if (isset($number) && $number && isset($number_type) && $number_type) {
-            if (isset($look_up_data[$number_type])) {
-                $look_up_data[$number_type] = $number;
-            }
-        }
 
         $client = '';
         $requestName = '';
@@ -284,11 +295,21 @@ class GSX_Repair extends BimpObject
         }
         $request = $this->gsx->_requestBuilder($requestName, 'lookupRequestData', $look_up_data);
         $response = $this->gsx->request($request, $client);
+        
+        $canceled = $this->getData('canceled');
 
         if (count($this->gsx->errors['soap']) > $n_soap_errors) {
+            if(!$canceled && stripos($this->gsx->errors['soap'][$n_soap_errors], "SOAP Error:  (Code: RPR.LKP.01)") !== false){
+                $this->set('canceled', 1);
+                $this->update();
+            }
             return $this->gsx->errors['soap'];
         } else if (!isset($response[$client . 'Response']['lookupResponseData'])) {
             return array('Echec de la requête "lookup" pour une raison inconnue');
+        }
+        if($canceled){
+            $this->set('canceled', 0);
+            $update = true;
         }
 
         $this->repairLookUp = $response[$client . 'Response']['lookupResponseData']['repairLookup'];
@@ -398,12 +419,12 @@ class GSX_Repair extends BimpObject
             return array('Statut de la réparation à mettre à jour invalide (' . $status . ')');
         }
 
-        if (is_null($this->gsx)) {
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (5)');
         }
 
         $repair_type = $this->getData('repair_type');
@@ -429,7 +450,7 @@ class GSX_Repair extends BimpObject
         switch ($repair_type) {
             case 'carry_in':
                 $data['statusCode'] = $status;
-                if ($this->isIphone) 
+                if (0 != $this->gsx->isIphone) 
                     $this->gsx = new GSX(false);//force not iphone
                 $client = 'CarryInRepairUpdate';
                 $requestName = 'UpdateCarryInRequest';
@@ -438,13 +459,16 @@ class GSX_Repair extends BimpObject
                 break;
             case 'repair_or_replace':
                 $data['repairStatusCode'] = $status;
-                if ($this->isIphone) {
-                    $client = 'IPhoneUpdateRepairOrReplaceRequest';
-                    $requestName = 'IPhoneUpdateRepairOrReplaceRequest';
-                } else {
+                /*if ($this->isIphone) {
+                    $client = 'UpdateIPhoneRepairOrReplaceRequest';
+                    $requestName = 'UpdateIPhoneRepairOrReplaceRequest';
+                } else {*/
+                    
+                    if (0 != $this->gsx->isIphone) 
+                        $this->gsx = new GSX(false);//force not iphone
                     $client = 'UpdateRepairOrReplace';
                     $requestName = 'UpdateRepairOrReplaceRequest';
-                }
+//                }
                 $data['repairStatusCode'] = $status;
                 $clientRep = $client . 'Response';
                 break;
@@ -456,7 +480,7 @@ class GSX_Repair extends BimpObject
         $response = $this->gsx->request($request, $client);
 
         if (count($this->gsx->errors['soap']) > $n_soap_errors) {
-            $errors[] = 'Echec de la requête "' . $requestName . '"';
+            $errors[] = 'Echec de la requête "' . $requestName . '" WSDL : '.$this->gsx->wsdlUrl;
             $errors = array_merge($errors, $this->gsx->errors['soap']);
         }
 
@@ -483,12 +507,12 @@ class GSX_Repair extends BimpObject
             }
         }
 
-        if (is_null($this->gsx)) {
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (6)');
         }
 
         $repair_confirm_number = $this->getData('repair_confirm_number');
@@ -589,12 +613,12 @@ class GSX_Repair extends BimpObject
             }
         }
 
-        if (is_null($this->gsx)) {
+        if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX');
+            return array('Echec de la connexion à GSX (7)');
         }
 
         $repair_confirm_number = $this->getData('repair_confirm_number');
@@ -648,7 +672,7 @@ class GSX_Repair extends BimpObject
             $response = $this->gsx->request($request, $client);
 
             if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {
-                return array('Echec de la requête de fermeture de la réparation');
+                return array_merge($this->gsx->errors['soap'], array('Echec de la requête de fermeture de la réparation'));
             }
         }
 
@@ -938,6 +962,7 @@ class GSX_Repair extends BimpObject
 
     public function fetch($id, $parent = null)
     {
+        //$this->gsx->errors['soap'] = array();
         if (parent::fetch($id, $parent)) {
             $this->setSerial($this->getData('serial'));
             $this->lookup();

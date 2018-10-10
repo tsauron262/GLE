@@ -2,7 +2,14 @@
 
 class BS_Ticket extends BimpObject
 {
-    
+
+    const BS_TICKET_EN_COURS = 1;
+    const BS_TICKET_ATT_CLIENT = 2;
+    const BS_TICKET_ATT_COMMERCIAL = 3;
+    const BS_TICKET_ATT_TECHNICIEN = 4;
+    const BS_TICKET_ATT_PRESTATAIRE = 5;
+    const BS_TICKET_CLOT = 999;
+
     public static $impacts = array(
         1 => array('label' => 'Faible', 'classes' => array('info'), 'icon' => 'star-o'),
         2 => array('label' => 'Moyen', 'classes' => array('warning'), 'icon' => 'star-half-o'),
@@ -14,12 +21,12 @@ class BS_Ticket extends BimpObject
         3 => 'Non couvert'
     );
     public static $status_list = array(
-        1 => 'En cours',
-        2 => 'En attente client',
-        3 => 'En attente commercial',
-        4 => 'En attente technicien',
-        5 => 'En attente prestataire',
-        6 => 'Clôt'
+        self::BS_TICKET_EN_COURS        => array('label' => 'En cours', 'icon' => 'fas_cogs', 'classes' => array('info')),
+        self::BS_TICKET_ATT_CLIENT      => array('label' => 'En attente client', 'icon' => 'fas_hourglass-start', 'classes' => array('important')),
+        self::BS_TICKET_ATT_COMMERCIAL  => array('label' => 'En attente commercial', 'icon' => 'fas_hourglass-start', 'classes' => array('important')),
+        self::BS_TICKET_ATT_TECHNICIEN  => array('label' => 'En attente technicien', 'icon' => 'fas_hourglass-start', 'classes' => array('important')),
+        self::BS_TICKET_ATT_PRESTATAIRE => array('label' => 'En attente prestataire', 'icon' => 'fas_hourglass-start', 'classes' => array('important')),
+        self::BS_TICKET_CLOT            => array('label' => 'Clôt', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
 
     public function getClient_contactsArray()
@@ -126,7 +133,7 @@ class BS_Ticket extends BimpObject
 
         return 'Ticket';
     }
-    
+
     public function renderChronoView()
     {
         if (!isset($this->id) || !$this->id) {

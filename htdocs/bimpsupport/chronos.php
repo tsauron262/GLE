@@ -21,9 +21,9 @@ $timers = $timer->getList(array(
     )
         ), null, null, 'id', 'desc', 'array', array('id', 'obj_name'));
 
-displayTimers($timer, $timers);
+initTimers($timer, $timers);
 
-function displayTimers($timer, $timers)
+function initTimers($timer, $timers)
 {
     if (!count($timers)) {
         return;
@@ -34,8 +34,6 @@ function displayTimers($timer, $timers)
     if (!isset($user->id) || !$user->id) {
         return;
     }
-
-    $bimp_fixe_tabs->addJsFile('/bimpcore/views/js/BimpTimer.js');
 
     $ticket = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
     $inter = BimpObject::getInstance('bimpsupport', 'BS_Inter');
@@ -82,7 +80,8 @@ function displayTimers($timer, $timers)
 
             $id = 'inter_chrono_' . $inter->id . '_fixe_tab';
             $times = $timer->getTimes($inter);
-            $caption = 'Inter hotline ' . $inter->id;
+            $caption = '<i class="' . BimpRender::renderIconClass('fas_user-clock') . ' iconLeft"></i>';
+            $caption .= 'Inter ' . $inter->id;
             $caption .= '&nbsp;&nbsp;<span class="BS_Inter_' . $inter->id . '_timer_total_time chrono bold">';
             $caption .= $timer->renderTime(BimpTools::getTimeDataFromSeconds($times['total']));
             $caption .= '</span>';
@@ -92,8 +91,8 @@ function displayTimers($timer, $timers)
             $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-primary" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
 
             $client = $ticket->getChildObject('client');
-            if (!is_null($client) && isset($client->id) && $client->id) {
-                $timer_title .= '<br/>Client: <span class="bold">' . $client->nom . '</span>';
+            if (BimpObject::objectLoaded($client)) {
+                $timer_title .= '<br/>Client: <span class="bold">' . $client->getData('nom') . '</span>';
             }
             $timer_title .= '<br/>Ticket: <span class="bold">' . $ticket->getData('ticket_number') . '</span>';
             $content = $timer->render($timer_title, true);
@@ -120,7 +119,8 @@ function displayTimers($timer, $timers)
 
             $id = 'appel_chrono_' . $ticket->id . '_fixe_tab';
             $times = $timer->getTimes($ticket);
-            $caption = 'Appel hotline - Ticket ' . $ticket->id;
+            $caption = '<i class="' . BimpRender::renderIconClass('fas_headset') . ' iconLeft"></i>';
+            $caption .= 'Ticket '.$ticket->id;
             $caption .= '&nbsp;&nbsp;<span class="BS_Ticket_' . $ticket->id . '_timer_total_time chrono bold">';
             $caption .= $timer->renderTime(BimpTools::getTimeDataFromSeconds($times['total']));
             $caption .= '</span>';
@@ -130,8 +130,8 @@ function displayTimers($timer, $timers)
             $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-primary" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
 
             $client = $ticket->getChildObject('client');
-            if (!is_null($client) && isset($client->id) && $client->id) {
-                $timer_title .= '<br/>Client: <span class="bold">' . $client->nom . '</span>';
+            if (BimpObject::objectLoaded($client)) {
+                $timer_title .= '<br/>Client: <span class="bold">' . $client->getData('nom') . '</span>';
             }
             $timer_title .= '<br/>Ticket: <span class="bold">' . $ticket->getData('ticket_number') . '</span>';
             $content = $timer->render($timer_title, true);
@@ -140,5 +140,7 @@ function displayTimers($timer, $timers)
         }
     }
 
-    $bimp_fixe_tabs->errors = array_merge($bimp_fixe_tabs->errors, $errors);
+    if (count($errors)) {
+        $bimp_fixe_tabs->errors[] = BimpTools::getMsgFromArray($errors);
+    }
 }

@@ -1627,6 +1627,7 @@ class BimpController
         $bimp_fixe_tabs->init();
         
         $html = $bimp_fixe_tabs->render(true);
+        $returnHtml = "";
         $hashCash = 'fixeTabsHtml'.$_POST['randomId'];//Pour ne regardé que sur l'ongelt actuel
         session_start();
         if(!isset($_SESSION[$hashCash]) || !is_array($_SESSION[$hashCash]))
@@ -1635,13 +1636,13 @@ class BimpController
         if($_SESSION[$hashCash]['html'] != $html || $i > $_SESSION[$hashCash]['nbBouclePush'] || $i > $this->maxBouclePush){
             $_SESSION[$hashCash]['html'] = $html;
             $_SESSION[$hashCash]['nbBouclePush'] = $_SESSION[$hashCash]['nbBouclePush'] * 1.1;//Pour ne pas surchargé quand navigateur resté ouvert, mais ne pas avoir des boucle morte quand navigation rapide
-            if($_SESSION[$hashCash]['html'] == $html)//On ne renvoie pas, pas de refeesh
-                $html = "";
+            if($_SESSION[$hashCash]['html'] != $html)//On ne renvoie pas, pas de refeesh
+                $returnHtml = $html;
             
             
             die(json_encode(array(
                 'errors'     => $bimp_fixe_tabs->errors,
-                'html'       => $html,
+                'html'       => $returnHtml,
                 'request_id' => BimpTools::getValue('request_id', 0)
             )));
         }

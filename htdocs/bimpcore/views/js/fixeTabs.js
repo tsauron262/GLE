@@ -3,11 +3,11 @@ var randomId = getRandomInt(9999999999999);
 
 
 function reloadFixeTabs(iterate, reload_fixe_tabs_delay = 1000) {
-    if (reload_fixe_tabs_hold) {
-        setTimeout(function () {
-            reloadFixeTabs(iterate);
-        }, 3000);
-    } else {
+//    if (reload_fixe_tabs_hold) {
+//        setTimeout(function () {
+//            reloadFixeTabs(iterate);
+//        }, 3000);
+//    } else {
         BimpAjax('loadFixeTabs', {randomId}, null, {
             display_success: false,
             display_errors_in_popup_only: true,
@@ -34,7 +34,7 @@ function reloadFixeTabs(iterate, reload_fixe_tabs_delay = 1000) {
             
         });
 
-    }
+//    }
 }
 
 function setFixeTabsEvents() {

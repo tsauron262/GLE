@@ -2097,7 +2097,6 @@ if (!function_exists("llxFooter")) {
             if (is_a($bimp_fixe_tabs, 'FixeTabs')) {
                 print $bimp_fixe_tabs->render();
             }
-            
         }
         /* fmoddrsi */
 

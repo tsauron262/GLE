@@ -88,7 +88,7 @@ function initTimers($timer, $timers)
 
             $timer_title = 'Inter ' . $inter->id;
             $ticket_url = DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $ticket->id;
-            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-primary" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
+            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-default" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
 
             $client = $ticket->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
@@ -127,7 +127,7 @@ function initTimers($timer, $timers)
 
             $timer_title = 'Appel Ticket ' . $ticket->id;
             $ticket_url = DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $ticket->id;
-            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-primary" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
+            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-default" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
 
             $client = $ticket->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {

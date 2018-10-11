@@ -771,9 +771,9 @@ class BimpObject extends BimpCache
     public function isLoaded()
     {
         if ($this->isDolObject()) {
-            return (isset($this->id) && $this->id && isset($this->dol_object->id) && $this->dol_object->id);
+            return (int) (isset($this->id) && $this->id && isset($this->dol_object->id) && $this->dol_object->id);
         }
-        return (isset($this->id) && $this->id);
+        return (int) (isset($this->id) && $this->id);
     }
 
     public function isNotLoaded()

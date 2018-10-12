@@ -5,7 +5,7 @@ function reloadFixeTabs(iterate) {
     if (reload_fixe_tabs_hold) {
         setTimeout(function () {
             reloadFixeTabs(iterate);
-        }, 3000);
+        }, 30000);
     } else {
         BimpAjax('loadFixeTabs', {}, null, {
             display_success: false,

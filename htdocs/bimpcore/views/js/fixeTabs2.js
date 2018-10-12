@@ -22,7 +22,7 @@ function reloadFixeTabs(iterate) {
         if (iterate) {
             setTimeout(function () {
                 reloadFixeTabs(true);
-            }, reload_fixe_tabs_delay);
+            }, reload_fixe_tabs_delay*10);
         }
     }
 }

@@ -5,7 +5,7 @@ function reloadFixeTabs(iterate) {
     if (reload_fixe_tabs_hold) {
         setTimeout(function () {
             reloadFixeTabs(iterate);
-        }, 30000);
+        }, 3000);
     } else {
         BimpAjax('loadFixeTabs', {}, null, {
             display_success: false,
@@ -22,7 +22,7 @@ function reloadFixeTabs(iterate) {
         if (iterate) {
             setTimeout(function () {
                 reloadFixeTabs(true);
-            }, reload_fixe_tabs_delay);
+            }, reload_fixe_tabs_delay*10);
         }
     }
 }

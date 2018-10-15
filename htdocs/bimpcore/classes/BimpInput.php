@@ -562,7 +562,11 @@ class BimpInput
                     $html = BimpRender::renderAlerts('Aucun élément diponible', 'warning');
                 } else {
                     if (!is_array($value)) {
-                        $value = array($value);
+                        if (is_string($value)) {
+                            $value = explode(',', $value);
+                        } else {
+                            $value = array($value);
+                        }
                     }
 
                     $html = '<div class="check_list_container">';
@@ -990,21 +994,21 @@ class BimpInput
         $html .= '<input type="text" class="' . $field_name . '_time_value time_input_value" value="' . (int) $timer['days'] . '" name="' . $field_name . '_days"/>';
         $html .= '<span>j</span>';
 
-        $html .= '<select name="' . $field_name . '_hours" class="' . $field_name . '_time_value time_input_value">';
+        $html .= '<select name="' . $field_name . '_hours" class="' . $field_name . '_time_value time_input_value no_select2">';
         for ($i = 0; $i < 24; $i++) {
             $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['hours']) ? ' selected' : '') . '>' . $i . '</option>';
         }
         $html .= '</select>';
         $html .= '<span>h</span>';
 
-        $html .= '<select name="' . $field_name . '_minutes" class="' . $field_name . '_time_value time_input_value">';
+        $html .= '<select name="' . $field_name . '_minutes" class="' . $field_name . '_time_value time_input_value no_select2">';
         for ($i = 0; $i < 60; $i++) {
             $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['minutes']) ? ' selected' : '') . '>' . $i . '</option>';
         }
         $html .= '</select>';
         $html .= '<span>min</span>';
 
-        $html .= '<select name="' . $field_name . '_secondes" class="' . $field_name . '_time_value time_input_value">';
+        $html .= '<select name="' . $field_name . '_secondes" class="' . $field_name . '_time_value time_input_value no_select2">';
         for ($i = 0; $i < 60; $i++) {
             $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['secondes']) ? ' selected' : '') . '>' . $i . '</option>';
         }

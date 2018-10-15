@@ -99,7 +99,7 @@ function loadModalView(module, object_name, id_object, view_name, $button, title
         'object_name': object_name,
         'view_name': view_name,
         'id_object': id_object,
-        'content_only': 1
+        'panel': 0
     };
 
     bimpModal.loadAjaxContent($button, 'loadObjectView', data, title, null, function (result, bimpAjax) {

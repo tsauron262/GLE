@@ -31,7 +31,7 @@ class BC_View extends BC_Panel
         }
 
         if (is_null($this->params['icon']) || !$this->params['icon']) {
-            $this->params['icon'] = 'far_file';
+            $this->params['icon'] = 'fas_file-alt';
         }
 
         if ($this->params['title'] === 'nom') {

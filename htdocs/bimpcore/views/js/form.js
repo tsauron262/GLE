@@ -1490,7 +1490,8 @@ function setFormEvents($form) {
 function setInputsEvents($container) {
     var in_modal = $.isOk($container.findParentByClass('modal'));
     $container.find('select').each(function () {
-        if (!$.isOk($(this).findParentByClass('subObjectFormTemplate'))) {
+        if (!$.isOk($(this).findParentByClass('subObjectFormTemplate')) && 
+                !$(this).hasClass('no_select2')) {
             if ($(this).hasClass('select2-hidden-accessible')) {
                 $(this).select2('destroy');
             }

@@ -131,6 +131,58 @@ class BS_Ticket extends BimpObject
         return 'Ticket';
     }
 
+    public function getTimer()
+    {
+        if ($this->isLoaded()) {
+            $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+            if ($timer->find(array(
+                        'obj_module' => $this->module,
+                        'obj_name'   => $this->object_name,
+                        'id_obj'     => $this->id,
+                        'field_name' => 'appels_timer'
+                            ), false, true)) {
+                return $timer;
+            }
+        }
+        return null;
+    }
+
+    public function getOpenIntersArray()
+    {
+        $inters = array();
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpsupport', 'BS_Inter');
+            foreach ($this->getChildrenList('inters', array(
+                'status' => array(
+                    'operator' => '!=',
+                    'value' => BS_Inter::BS_INTER_CLOSED
+                )
+                )) as $id_inter) {
+                $inters[(int) $id_inter] = 'Intervention '.$id_inter;
+            }
+        }
+        return $inters;
+    }
+
+    public function getHeaderButtons()
+    {
+        $buttons = array();
+        if ($this->isLoaded()) {
+            $openInters = $this->getOpenIntersArray();
+            if (count($openInters)) {
+                $buttons[] = array(
+                    'label' => 'Fermer des interventions',
+                    'icon' => 'fas_times',
+                    'onclick' => $this->getJsActionOnclick('closeInter', array(), array(
+                        'form_name' => 'close_inters'
+                    ))
+                );
+            }
+        }
+        
+        return $buttons;
+    }
+    
     // Affichages: 
 
     public function displayDureeTotale()
@@ -255,9 +307,52 @@ class BS_Ticket extends BimpObject
         }
     }
 
+    // Actions:
+
+    public function actionCloseInter($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $inters = array();
+        if (isset($data['close_all'])) {
+            $success = 'Toutes les interventions on été fermées avec succès';
+            foreach ($this->getOpenIntersArray() as $id_inter => $label) {
+                $inters[] = (int) $id_inter;
+            }
+
+            
+        } elseif (isset($data['inters_to_close'])) {
+            $success = 'Interventions sélectionnées fermées avec succès';
+            $inters = $data['inters_to_close'];
+            if (!count($inters)) {
+                $errors[] = 'Aucune intervention sélectionnée';
+            }
+        }
+        
+        if (count($inters) && !count($errors)) {
+                $inter = BimpObject::getInstance('bimpsupport', 'BS_Inter');
+                foreach ($inters as $id_inter) {
+                    if ($inter->fetch($id_inter)) {
+                        $inter->set('status', BS_Inter::BS_INTER_CLOSED);
+                        $inter_errors = $inter->update();
+                        if (count($inter_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($inter_errors, 'Echec de la fermeture du statut de l\'intervention ' . $inter->id);
+                        }
+                    }
+                }
+            }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
 
-    public function create($warnings, $force_create = false)
+    public function create(&$warnings, $force_create = false)
     {
         global $user;
         $this->data['ticket_number'] = 'BH' . date('ymdhis');
@@ -277,21 +372,52 @@ class BS_Ticket extends BimpObject
         return $errors;
     }
 
+    public function update(&$warnings, $force_update = false)
+    {
+        if ((int) $this->getData('status') === self::BS_TICKET_CLOT) {
+            $open_inters = $this->getOpenIntersArray();
+            if (count($open_inters)) {
+                $msg = 'Il n\'est pas possible de fermer ce ticket car des interventions sont encore ouvertes';
+                $msg .= '<span style="display: inline-block; width: 100%; text-align: center; margin: 10px 0;">';
+                $msg .= '<button class="btn btn-default" onclick="' . $this->getJsActionOnclick('closeInter', array('close_all' => 1)) . '">';
+                $msg .= '<i class="' . BimpRender::renderIconClass('times') . ' iconLeft"></i>Fermer toutes les interventions';
+                $msg .= '</button>';
+                $msg .= '</span>';
+                $errors[] = $msg;
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors) && (int) $this->getData('status') === self::BS_TICKET_CLOT) {
+            $timer = $this->getTimer();
+            if (BimpObject::objectLoaded($timer)) {
+                if ((int) $timer->getData('session_start')) {
+                    $timer_errors = $timer->hold();
+                    if (count($timer_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($timer_errors, 'Echec de l\'arrêt du chronomètre');
+                    } else {
+                        $times = $timer->getTimes($this);
+                        $this->updateField('appels_timer', (int) $times['total']);
+                        $timer->updateField('time_session', 0);
+                    }
+                }
+            }
+        }
+    }
+
     public function delete($force_delete = false)
     {
-        $id = (int) $this->id;
+        $timer = $this->getTimer();
+
         $errors = parent::delete($force_delete);
 
-        if (!count($errors)) {
-            $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
-            if ($timer->find(array(
-                        'obj_module' => $this->module,
-                        'obj_name'   => $this->object_name,
-                        'id_obj'     => $id,
-                        'field_name' => 'appels_timer'
-                    ), false, true)) {
-                $timer->delete(true);
-            }
+        if (!count($errors) && BimpObject::objectLoaded($timer)) {
+            $timer->delete(true);
         }
 
         return $errors;

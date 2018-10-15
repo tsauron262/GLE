@@ -63,7 +63,7 @@ class BS_Inter extends BimpObject
         return null;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderDefaultView()
     {
@@ -87,6 +87,10 @@ class BS_Inter extends BimpObject
     {
         if (!isset($this->id) || !$this->id) {
             return BimpRender::renderAlerts('intervention non enregistrée');
+        }
+        
+        if ((int) $this->getData('status') === self::BS_INTER_CLOSED) {
+            return '';
         }
 
         $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
@@ -129,6 +133,20 @@ class BS_Inter extends BimpObject
 
     public function update(&$warnings, $force_update = false)
     {
+        $errors = array();
+        
+        if ($this->getData('status') === self::BS_INTER_OPEN) {
+            $ticket = $this->getParentInstance();
+            if (BimpObject::objectLoaded($ticket)) {
+                if ((int) $ticket->getData('status') === BS_Ticket::BS_TICKET_CLOT) {
+                    $errors[] = 'Cette intervention ne peut pas être ouverte car le ticket hotline est clôt';
+                }
+            }
+        }
+        
+        if (count($errors)) {
+            return $errors;
+        }
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
@@ -141,6 +159,7 @@ class BS_Inter extends BimpObject
                     } else {
                         $times = $timer->getTimes($this);
                         $this->updateField('timer', (int) $times['total']);
+                        $timer->updateField('time_session', 0);
                     }
                 }
             }
@@ -149,15 +168,12 @@ class BS_Inter extends BimpObject
 
     public function delete($force_delete = false)
     {
-        $id = (int) $this->id;
+        $timer = $this->getTimer();
 
         $errors = parent::delete($force_delete);
 
-        if (!count($errors)) {
-            $timer = $this->getTimer();
-            if (BimpObject::objectLoaded($timer)) {
-                $timer->delete(true);
-            }
+        if (!count($errors) && BimpObject::objectLoaded($timer)) {
+            $timer->delete(true);
         }
 
         return $errors;

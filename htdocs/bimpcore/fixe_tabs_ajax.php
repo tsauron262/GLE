@@ -1,17 +1,12 @@
 <?php
 
-require_once '../main.inc.php';
+$random_id = (int) $_POST['randomId'];
 
-ini_set('display_errors', 1);
+if (!$random_id) {
+    die(-1);
+}
 
-define('BIMP_OLD', 1);
+require_once __DIR__ . "/../main.inc.php";
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/controllers/fixeTabsController.php';
+$key = 'fixe_tabs_reload';
 
-global $bimp_fixe_tabs;
-$bimp_fixe_tabs = new fixeTabsController('bimpcore', 'fixeTabs');
-
-require DOL_DOCUMENT_ROOT . '/bimphotline/inter_chronos.php';
-
-$bimp_fixe_tabs->display();

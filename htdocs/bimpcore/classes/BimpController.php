@@ -338,8 +338,16 @@ class BimpController
             } else {
                 $head[$h][0] = $url;
             }
+            
+            $label = '';
+            
+            if (isset($params['icon']) && $params['icon']) {
+                $label .= '<i class="'.BimpRender::renderIconClass($params['icon']).' iconLeft"></i>';
+            }
+            
+            $label .= $params['label'];
 
-            $head[$h][1] = $params['label'];
+            $head[$h][1] = $label;
             $head[$h][2] = $tab_name;
             $h++;
         }
@@ -1209,6 +1217,8 @@ class BimpController
         $view_name = BimpTools::getValue('view_name', 'default');
         $content_only = BimpTools::getValue('content_only', false);
         $new_values = BimpTools::getValue('new_values', array());
+        $panel = BimpTools::getValue('panel');
+        $panel_header = BimpTools::getValue('panel_header');
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -1223,6 +1233,14 @@ class BimpController
             $view = new BC_View($object, $view_name, $content_only, 1);
             $view->content_only = $content_only;
             $view->setNewValues($new_values);
+            
+            if (!is_null($panel)) {
+                $view->params['panel'] = (int) $panel;
+            }
+            
+            if (!is_null($panel_header)) {
+                $view->params['panel_header'] = (int) $panel_header;
+            }
 
             if ($content_only) {
                 $html = $view->renderHtmlContent();

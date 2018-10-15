@@ -8,10 +8,10 @@ class BC_Panel extends BimpComponent
     public $content_only = false;
     public $level = 1;
     public $data = array(
-        'component_type'        => '',
-        'component_name'        => '',
         'identifier'            => '',
-        'module_name'           => '',
+        'type'                  => '',
+        'name'                  => '',
+        'module'                => '',
         'object_name'           => '',
         'id_object'             => '',
         'objects_change_reload' => ''
@@ -92,6 +92,7 @@ class BC_Panel extends BimpComponent
         $html .= $this->object->object_name . '_' . static::$type . '_container"';
         $html .= '>';
 
+        
         if (count($this->errors)) {
             $html .= BimpRender::renderAlerts($this->errors);
         } else {
@@ -135,6 +136,8 @@ class BC_Panel extends BimpComponent
             $content .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result" style="display: none"></div>';
             $content .= '</div>';
 
+            $html .= $this->renderBeforePanelHtml();
+            
             if (!$this->content_only && (int) $this->params['panel']) {
                 $title = $this->getTitle();
                 $icon = $this->getIcon();
@@ -160,10 +163,15 @@ class BC_Panel extends BimpComponent
         return $html;
     }
 
+    public function renderBeforePanelHtml()
+    {
+        return '';
+    }
+
     public function renderHtmlContent()
     {
         $html = '';
-        
+
         if (!is_null($this->params['msgs']) && count($this->params['msgs'])) {
             foreach ($this->params['msgs'] as $msg) {
                 $html .= BimpRender::renderAlerts($msg['content'], $msg['type']);

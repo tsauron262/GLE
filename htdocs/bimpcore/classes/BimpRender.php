@@ -316,31 +316,26 @@ class BimpRender
     {
         $html = '';
 
+        if (is_array($tabs) && count($tabs)) {
+            $active = BimpTools::getValue('navtab', $tabs[0]['id']);
+        }
+        
         $html .= '<ul class="nav nav-tabs" role="tablist">';
-        $first = true;
+        
         foreach ($tabs as $tab) {
-            $html .= '<li role="presentation"' . ($first ? ' class="active"' : '') . '>';
+            $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . '>';
             $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab">';
             $html .= $tab['title'];
             $html .= '</a>';
             $html .= '</li>';
-
-            if ($first) {
-                $first = false;
-            }
         }
         $html .= '</ul>';
 
-        $first = true;
-
         $html .= '<div class="tab-content">';
         foreach ($tabs as $tab) {
-            $html .= '<div class="tab-pane fade' . ($first ? ' in active' : '') . '" role="tabpanel" id="' . $tab['id'] . '">';
+            $html .= '<div class="tab-pane fade' . ($tab['id'] === $active ? ' in active' : '') . '" role="tabpanel" id="' . $tab['id'] . '">';
             $html .= $tab['content'];
             $html .= '</div>';
-            if ($first) {
-                $first = false;
-            }
         }
         $html .= '</div>';
 

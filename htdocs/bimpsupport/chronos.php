@@ -1,7 +1,7 @@
 <?php
 
-
-function runBimpSupportChrono(){
+function runBimpSupportChrono()
+{
     $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
 
     $timers = $timer->getList(array(
@@ -90,8 +90,8 @@ function initTimers($timer, $timers)
             $caption .= '</span>';
 
             $timer_title = 'Inter ' . $inter->id;
-            $ticket_url = DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $ticket->id;
-            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-primary" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
+            $ticket_url = DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $ticket->id.'&navtab=inters&id_inter='.$inter->id;
+            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-default" href="' . $ticket_url . '"><i class="far fa5-file iconLeft"></i>Afficher</a>';
 
             $client = $ticket->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
@@ -123,7 +123,7 @@ function initTimers($timer, $timers)
             $id = 'appel_chrono_' . $ticket->id . '_fixe_tab';
             $times = $timer->getTimes($ticket);
             $caption = '<i class="' . BimpRender::renderIconClass('fas_headset') . ' iconLeft"></i>';
-            $caption .= 'Ticket '.$ticket->id;
+            $caption .= 'Ticket ' . $ticket->id;
             $caption .= '&nbsp;&nbsp;<span class="BS_Ticket_' . $ticket->id . '_timer_total_time chrono bold">';
             $caption .= $timer->renderTime(BimpTools::getTimeDataFromSeconds($times['total']));
             $caption .= '</span>';

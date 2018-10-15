@@ -3,7 +3,9 @@ controller: ticket
 
 icon: fas_headset
 header_list_name: default
-
+header_btn: 
+    callback: getHeaderButtons
+    
 list_page_url: 
     controller: index
     url_params: 
@@ -73,6 +75,22 @@ objects:
             bimp_object: 
                 module: bimpequipment
                 name: Equipment
+                
+    files:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpsupport
+                parent_object_name: BS_Ticket
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpsupport
+                    parent_object_name: BS_Ticket
             
 associations:
     equipments:
@@ -287,7 +305,26 @@ forms:
                   field_name: id_contrat
                   hide_values: 0,
               depends_on: id_contrat
-                      
+              
+    close_inters: 
+        rows: 
+            - custom: 1
+              label: Interventions à fermer
+              input_name: inters_to_close
+              input: 
+                  type: check_list
+                  items: 
+                      array: openInters
+              value: 
+                  callback: 
+                      method: getChildrenList
+                      params: 
+                          name: inters
+                          filters: 
+                              status: 
+                                  operator: !=
+                                  value: 2
+                                                
 fields_tables: 
     infos: 
         title: Informations
@@ -353,6 +390,45 @@ views:
                     fields_table:
                         name: objects
                         
+    full: 
+        objects_change_reload: BS_Inter
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: rows
+                  col_lg: 5
+                  col_md: 6
+                  col_sm: 12
+                  rows: 
+                      - cols:
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: infos
+                      - cols: 
+                          - type: custom
+                            col_lg: 12
+                            custom:
+                                callback: renderChronoView
+                - type: fields_table
+                  col_lg: 7
+                  col_md: 6
+                  fields_table:
+                      name: objects
+            - cols: 
+                - type: list
+                  list: 
+                      children: inters
+            - cols: 
+                - type: list
+                  list: 
+                      children: notes
+            - cols: 
+                - type: list
+                  list: 
+                      children: files
+                        
 lists:
     default: 
         title: Tickets Hotline
@@ -371,7 +447,7 @@ lists:
         edit_form: edit
         delete_btn: 1
         page_btn: 1
-        modal_view: default
+        modal_view: full
         cols:
             ticket:
                 field: ticket_number

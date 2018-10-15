@@ -5,6 +5,7 @@ if (!ajaxRequestsUrl) {
 var bimp_requests = [];
 var bimp_nologged_requests = [];
 var bimp_is_logged = true;
+var bimp_is_unloaded = false;
 
 function BimpAjax(action, data, $resultContainer, params) {
     if (typeof (params.$button) === 'object') {
@@ -253,16 +254,18 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                 delete bimp_requests[bimpAjax.request_id];
             },
             error: function () {
-                if (bimpAjax.display_errors) {
-                    bimpAjax.display_result_errors(bimpAjax.error_msg);
+                if (!bimp_is_unloaded) {
+                    if (bimpAjax.display_errors) {
+                        bimpAjax.display_result_errors(bimpAjax.error_msg);
+                    }
+                    if (typeof (bimpAjax.error) === 'function') {
+                        bimpAjax.error(null, bimpAjax);
+                    }
+                    if ($.isOk(bimpAjax.$button)) {
+                        bimpAjax.$button.removeClass('disabled');
+                    }
+                    delete bimp_requests[bimpAjax.request_id];
                 }
-                if (typeof (bimpAjax.error) === 'function') {
-                    bimpAjax.error(null, bimpAjax);
-                }
-                if ($.isOk(bimpAjax.$button)) {
-                    bimpAjax.$button.removeClass('disabled')
-                }
-                delete bimp_requests[bimpAjax.request_id];
             }
         });
     };
@@ -313,3 +316,7 @@ function bimp_on_login_success() {
     }
     bimp_nologged_requests = [];
 }
+
+window.addEventListener('beforeunload', function (e) {
+    bimp_is_unloaded = true;
+});

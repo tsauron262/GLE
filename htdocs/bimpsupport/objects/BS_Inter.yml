@@ -40,6 +40,11 @@ fields:
         type: id_object
         input: 
             type: search_user
+        default_value: 
+            prop: 
+                name: id
+                object: 
+                    global: user
         object: tech_user
         sort_option: 
             default: 
@@ -84,6 +89,8 @@ forms:
     default:
         rows: 
             - field: tech_id_user
+              show: 
+                  callback: isNotLoaded
             - field: priorite
             - field: description
             - custom: 1
@@ -103,13 +110,14 @@ forms:
                   callback: isLoaded
                   
 list:
-    title: Interventions
+    title: Liste des interventions
     checkboxes: 1
     bulk_actions: 
         - label: Supprimer les interventions sélectionnées
           icon: fas_trash-alt
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
+    objects_change_reload: BS_Ticket
     sort_field: id
     sort_way: desc
     n: 10
@@ -141,6 +149,8 @@ list:
     update_btn: 1
     delete_btn: 1
     inline_view: default
+    inline_view_item: 
+        request: id_inter
     page_btn: 1
 
 fields_tables: 
@@ -164,7 +174,7 @@ views:
         title: nom
         edit_form: default
         delete_btn: 1
-        panel_header: 0
+        objects_change_reload: BS_Ticket
         rows: 
             - cols:
                 - type: object_header

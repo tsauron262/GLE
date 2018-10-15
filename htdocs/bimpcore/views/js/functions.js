@@ -355,7 +355,7 @@ function inputQtyDown($qtyInputContainer) {
         }
         var step = 1;
         var decimals = parseInt($input.data('decimals'));
-        
+
         if (decimals > 0) {
             val = Math.round10(parseFloat(val), -decimals);
             step = parseFloat($input.data('step'));
@@ -503,6 +503,9 @@ function lisibilite_nombre(nbr) {
     }
 })();
 
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+}
 // Divers:
 
 function getUrlParam(param) {

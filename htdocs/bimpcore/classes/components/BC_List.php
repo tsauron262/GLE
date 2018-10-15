@@ -63,7 +63,7 @@ class BC_List extends BC_Panel
                 $this->params['title'] = 'Listes des ' . $this->object->getLabel('name_plur');
             }
             if (is_null($this->params['icon']) || !$this->params['icon']) {
-                $this->params['icon'] = 'bars';
+                $this->params['icon'] = 'fas_list';
             }
 
             if (!$this->object->canCreate()) {

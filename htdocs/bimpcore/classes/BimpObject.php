@@ -885,14 +885,14 @@ class BimpObject extends BimpCache
     public function isLoaded()
     {
         if ($this->isDolObject()) {
-            return (isset($this->id) && (int) $this->id && isset($this->dol_object->id) && (int) $this->dol_object->id);
+            return (int) (isset($this->id) && (int) $this->id && isset($this->dol_object->id) && (int) $this->dol_object->id);
         }
-        return (isset($this->id) && (int) $this->id);
+        return (int) (isset($this->id) && (int) $this->id);
     }
 
     public function isNotLoaded()
     {
-        return ($this->isLoaded() ? 0 : 1);
+        return (int) ($this->isLoaded() ? 0 : 1);
     }
 
     public function getData($field)
@@ -3454,7 +3454,7 @@ class BimpObject extends BimpCache
             $msg .= ' - ID ' . $this->getLabel('of_the') . ' absent';
             return BimpRender::renderAlerts($msg);
         }
-        
+
         $children_instance->parent = $this;
 
         if (!is_null($children_instance) && is_a($children_instance, 'BimpObject')) {
@@ -4233,8 +4233,8 @@ class BimpObject extends BimpCache
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => 'window.location.reload();'
         );
     }

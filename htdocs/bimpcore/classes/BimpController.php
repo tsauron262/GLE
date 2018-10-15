@@ -1635,7 +1635,7 @@ class BimpController
         if(!isset($_SESSION[$hashCash]) || !is_array($_SESSION[$hashCash]))
             $_SESSION[$hashCash] = array('nbBouclePush'=> $this->nbBouclePush, 'html'=> '');
         
-        if(count($errors)>0 || $_SESSION[$hashCash]['html'] != $html || $i > $_SESSION[$hashCash]['nbBouclePush'] || $i > $this->maxBouclePush){
+        if(count($errors)>0 || $i > $_SESSION[$hashCash]['nbBouclePush'] || $i > $this->maxBouclePush || $_SESSION[$hashCash]['html'] != $html){
             if($_SESSION[$hashCash]['html'] != $html)//On ne renvoie rien, pas de refeesh
                 $returnHtml = $html;
             $_SESSION[$hashCash]['html'] = $html;
@@ -1650,7 +1650,7 @@ class BimpController
         }
         else{
             session_write_close();//Pour eviter les blockages navigateur
-            usleep(930000);
+            usleep(930000);//un tous petit peu moins d'une seconde + temps d'execution = 1s
             return $this->ajaxProcessLoadFixeTabs($i);
         }
 

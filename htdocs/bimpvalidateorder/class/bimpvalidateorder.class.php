@@ -235,7 +235,7 @@ class BimpValidateOrder {
         $okRemise = ($order->array_options['options_type'] != "P" ? $this->checkRemise($order, $user) : 1);
         if (!$okRemise){
             if (in_array($order->array_options['options_type'], $this->tabSecteurEduc)) {
-                foreach ($this->tabValideCommeduc as $idUser => $tabMont) {
+                foreach ($this->tabValideCommEduc as $idUser => $tabMont) {
                     $tabUserOk[] = $idUser;
                     if($idUser == $user->id)//on peut validé
                         return array();

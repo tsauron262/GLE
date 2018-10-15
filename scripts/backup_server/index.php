@@ -14,10 +14,10 @@ print '<div class="greyBorder">';
 print "<h3>Restaurer une sauvegarde</h3>";
 $files = glob('dump_*/*.sql');
 usort($files, function($a, $b) {
-    
+
     $tms1 = array();
     preg_match('/([0-9]+)/', $a, $tms1);
-    
+
     $tms2 = array();
     preg_match('/([0-9]+)/', $b, $tms2);
 
@@ -29,16 +29,22 @@ foreach ($files as $ind => $file) {
     $tms = array();
     preg_match('/([0-9]+)/', $file, $tms);
 
+
     if (strpos($file, 'monthly') !== false)
+        $class = 'month';
+    else if (strpos($file, 'daily') !== false)
         $class = 'day';
-    else
-        $class = '';
+
 
     if ($ind == 0)
         print '<input id="' . $file . '" name="file" type="radio" value="' . $file . '" checked>';
     else
         print '<input id="' . $file . '" name="file" type="radio" value="' . $file . '">';
-    print '<label class="' . $class . '" for="' . $file . '">Sauvegarde du ' . date("d/m/Y G:i:s", $tms[0]) . '</label ><br/><br/>';
+
+    if ($class == 'month')
+        print '<label class="' . $class . '" for="' . $file . '">Sauvegarde bimensuelle du ' . date("d/m/Y G:i:s", $tms[0]) . ' (' . human_filesize(filesize($file)) . 'o)</label ><br/><br/>';
+    elseif ($class == 'day')
+        print '<label class="' . $class . '" for="' . $file . '">Sauvegarde temporaire du ' . date("d/m/Y G:i:s", $tms[0]) . ' (' . human_filesize(filesize($file)) . 'o)</label ><br/><br/>';
 }
 
 print '<button style="width:200px" type="submit">Valider</button>';
@@ -82,3 +88,10 @@ print '<button style="width:200px" type="submit">Se déconnecter</button>';
 print '</form>';
 
 print '</div>';
+
+// functions
+function human_filesize($bytes, $decimals = 2) {
+    $sz = 'BKMGTP';
+    $factor = floor((strlen($bytes) - 1) / 3);
+    return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . @$sz[$factor];
+}

@@ -87,7 +87,7 @@ if ($user->status != $user::STATUT_SUPER_ADMIN and $user->create_event_tariff ==
     print '<img id="img_display" src="#" alt="&nbsp Aucune image sélectionnée" style="max-height: 600px ; max-width: 800px"/><br/><br/><br/>';
 
     // custom image
-    print '<label for="event">Image sur ticket (.bmp, .jpg ou .png)</label>&nbsp';
+    print '<label for="event">Image sur ticket (.bmp, .jpg ou .png)</label><br/>';
     print '<div class="btn-group btn-group-toggle" data-toggle="buttons">';
     print '<label class="btn btn-primary active"><input value=0 type="radio" name="input_cust_img" checked>Logo Zoomdici</label>';
     print '<label class="btn btn-primary">       <input value=1 type="radio" name="input_cust_img">Image personnalisée</label>';

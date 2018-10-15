@@ -18,7 +18,7 @@ include_once 'param.inc.php';
  */
 function createBackup($file_name) {
 
-    $command = 'mysqldump --user=\'' . DB_USER . '\' --password=\'' . DB_PASSWORD . '\' ' . '--host=\'' . DB_HOST . '\' \'' . DB_NAME . '\'> \'' . $file_name . '\'';
+    $command = 'mysqldump --user=\'' . DB_USER . '\' --password=\'' . DB_PASSWORD . '\' --host=\'' . DB_HOST . '\' -B \'' . DB_NAME . '\' > \'' . $file_name . '\'';
 
     exec($command, $errors, $ret_val);
 
@@ -47,8 +47,8 @@ function createDaily($now) {
 /**
  * @param type $now date today
  * @return  1 if a backup as been created
- *         -1 if not created
- *         -2 if error
+ *         -1 if error
+ *         -0 if not created
  */
 function createMonthly($now) {
 
@@ -61,15 +61,17 @@ function createMonthly($now) {
     });
 
     $time_gap = $now - filectime($files_m[0]);
-    $time_15_day = 30; //60 * 60 * 24 * 15;
+    $time_15_day = 60 * 60 * 24 * 15;
+//                 ss   mm   hh   15day 
+//    $time_15_day = 30 // dev
 
     if ($time_gap > $time_15_day) {
         if (createBackup(PATH . '/dump_monthly/backup-' . $now . '.sql') == 1)
             return 1;
         else
-            return -2;
+            return -1;
     } else
-        return -1;
+        return 0;
 }
 
 /**
@@ -78,7 +80,8 @@ function createMonthly($now) {
 $now = time();
 $date = new DateTime();
 
-if (createMonthly($now) == -1) // not created but no error
+$res_create_monthly = createMonthly($now);
+if ($res_create_monthly == 0) // not created but no error
     createDaily($now);
 
 

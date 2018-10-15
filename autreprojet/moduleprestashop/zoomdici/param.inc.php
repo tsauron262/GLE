@@ -1,6 +1,6 @@
 <?php
 
-define('URL_CHECK', 'http://localhost/~tilito/bimp-erp/autreprojet/bimpcheckbillet/');
+define('URL_CHECK', 'http://127.0.0.1/bimp-erp/autreprojet/bimpcheckbillet/');
 
 // TODO uncomment that line
 //define('PATH_TO_MODULE', dirname(__FILE__));
@@ -14,10 +14,10 @@ define('PATH_TO_PRESTA', '/home/tilito/public_html/prestashop/');
 
 
 // Id feature month
-define('ID_FEATURE_MONTH', 7);
+define('ID_FEATURE_MONTH', 6);
 
 // Id feature date end sale
-define('ID_FEATURE_DATE_END_SALE', 8);
+define('ID_FEATURE_DATE_END_SALE', 7);
 
 // Array feature (feature)
 define('ARRAY_MONTH', array(

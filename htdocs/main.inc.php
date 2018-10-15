@@ -1434,29 +1434,33 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
                     }
                 }
             }
-        }
-        
-        /* modrsi */
-        if (stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1) {
-            if (!defined('BIMP_CONTROLLER_INIT')) {
-                require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-                echo '<script type="text/javascript">';
-                echo 'var ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpcore/index.php;\'';
-                echo '</script>';
-                BimpCore::displayHeaderFiles();
-            } else {
-                global $main_controller;
-                if (is_a($main_controller, 'BimpController')) {
-                    $main_controller->displayHeaderFiles();
+            
+            /* modrsi */
+            if (stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1) {
+                if (!defined('BIMP_CONTROLLER_INIT')) {
+                    require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+                    echo '<script type="text/javascript">';
+                    echo 'if (!dol_url_root) {';
+                    echo 'var dol_url_root = \'' . DOL_URL_ROOT . '\';}';
+                    echo 'var ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpcore/index.php\';';
+                    echo '</script>';
+                    BimpCore::displayHeaderFiles();
+                } else {
+                    global $main_controller;
+                    if (is_a($main_controller, 'BimpController')) {
+                        $main_controller->displayHeaderFiles();
+                    }
+                }
+                global $bimp_fixe_tabs, $user;
+                if (isset($user->id) && (int) $user->id) {
+                    $bimp_fixe_tabs = new FixeTabs();
+                    $bimp_fixe_tabs->init();
+                    $bimp_fixe_tabs->displayHead();
                 }
             }
-            global $bimp_fixe_tabs;
-            $bimp_fixe_tabs = new FixeTabs();
-            $bimp_fixe_tabs->init();
-            $bimp_fixe_tabs->displayHead();
+            /* fmoddrsi */
         }
-        /* fmoddrsi */
-
+               
         if (! empty($head)) print $head."\n";
         if (! empty($conf->global->MAIN_HTML_HEADER)) print $conf->global->MAIN_HTML_HEADER."\n";
 

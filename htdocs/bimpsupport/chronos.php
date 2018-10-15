@@ -1,27 +1,30 @@
 <?php
 
-$timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
 
-$timers = $timer->getList(array(
-    'obj_module' => 'bimpsupport',
-    'obj_name'   => array(
-        'in' => array('\'BS_Ticket\'', '\'BS_Inter\'')
-    ),
-    'session'    => array(
-        'or' => array(
-            'time_session'  => array(
-                'operator' => '>',
-                'value'    => 0
-            ),
-            'session_start' => array(
-                'operator' => '>',
-                'value'    => 0
+function runBimpSupportChrono(){
+    $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+
+    $timers = $timer->getList(array(
+        'obj_module' => 'bimpsupport',
+        'obj_name'   => array(
+            'in' => array('\'BS_Ticket\'', '\'BS_Inter\'')
+        ),
+        'session'    => array(
+            'or' => array(
+                'time_session'  => array(
+                    'operator' => '>',
+                    'value'    => 0
+                ),
+                'session_start' => array(
+                    'operator' => '>',
+                    'value'    => 0
+                )
             )
         )
-    )
-        ), null, null, 'id', 'desc', 'array', array('id', 'obj_name'));
+            ), null, null, 'id', 'desc', 'array', array('id', 'obj_name'));
 
-initTimers($timer, $timers);
+    initTimers($timer, $timers);
+}
 
 function initTimers($timer, $timers)
 {

@@ -14,6 +14,8 @@ class BimpController
     protected $jsFiles = array();
     protected $cssFiles = array();
     public $extends = array();
+    private $nbBouclePush = 2;
+    private $maxBouclePush = 40;
 
     public static function getInstance($module)
     {
@@ -1614,6 +1616,44 @@ class BimpController
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
         )));
+    }
+
+    protected function ajaxProcessLoadFixeTabs($i = 0)
+    {
+        global $bimp_fixe_tabs;
+        $i++;
+
+        $bimp_fixe_tabs = new FixeTabs();
+        $bimp_fixe_tabs->init();
+        
+        $html = $bimp_fixe_tabs->render(true);
+        
+        $errors = array_merge($bimp_fixe_tabs->errors,array(/*ici recup erreur global ou message genre application ferme dans 10min*/));
+        $returnHtml = "";
+        $hashCash = 'fixeTabsHtml'.$_POST['randomId'];//Pour ne regardé que sur l'ongelt actuel
+        session_start();
+        if(!isset($_SESSION[$hashCash]) || !is_array($_SESSION[$hashCash]))
+            $_SESSION[$hashCash] = array('nbBouclePush'=> $this->nbBouclePush, 'html'=> '');
+        
+        if(count($errors)>0 || $_SESSION[$hashCash]['html'] != $html || $i > $_SESSION[$hashCash]['nbBouclePush'] || $i > $this->maxBouclePush){
+            if($_SESSION[$hashCash]['html'] != $html)//On ne renvoie rien, pas de refeesh
+                $returnHtml = $html;
+            $_SESSION[$hashCash]['html'] = $html;
+            $_SESSION[$hashCash]['nbBouclePush'] = $_SESSION[$hashCash]['nbBouclePush'] * 1.1;//Pour ne pas surchargé quand navigateur resté ouvert, mais ne pas avoir des boucle morte quand navigation rapide
+            
+            
+            die(json_encode(array(
+                'errors'     => $errors,
+                'html'       => $returnHtml,
+                'request_id' => BimpTools::getValue('request_id', 0)
+            )));
+        }
+        else{
+            session_write_close();//Pour eviter les blockages navigateur
+            usleep(930000);
+            return $this->ajaxProcessLoadFixeTabs($i);
+        }
+
     }
 
     // Callbacks:

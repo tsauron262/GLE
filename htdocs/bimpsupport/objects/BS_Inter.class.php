@@ -16,6 +16,55 @@ class BS_Inter extends BimpObject
         2 => array('label' => 'Fermé', 'classes' => array('danger'))
     );
 
+    // Getters: 
+
+    public function getUserCurrentIntersFilters()
+    {
+        global $user;
+        if (isset($user->id) && $user->id) {
+            return array(
+                array(
+                    'name'   => 'or_user',
+                    'filter' => array(
+                        'or' => array(
+                            'a.tech_id_user' => (int) $user->id,
+                            'a.user_create'  => (int) $user->id
+                        )
+                    )
+                ),
+                array(
+                    'name'   => 'a.status',
+                    'filter' => array(
+                        'operator' => '!=',
+                        'value'    => 2
+                    )
+                )
+            );
+        }
+
+        return array(
+            'a.id' => 0
+        );
+    }
+
+    public function getTimer()
+    {
+        if ($this->isLoaded()) {
+            $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+            if ($timer->find(array(
+                        'obj_module' => $this->module,
+                        'obj_name'   => $this->object_name,
+                        'id_obj'     => $this->id,
+                        'field_name' => 'timer'
+                            ), false, true)) {
+                return $timer;
+            }
+        }
+        return null;
+    }
+
+    // Rendus HTML: 
+
     public function renderDefaultView()
     {
         $status = (int) $this->getData('status');
@@ -62,32 +111,55 @@ class BS_Inter extends BimpObject
         return $html;
     }
 
-    public function getUserCurrentIntersFilters()
+    // Overrides
+
+    public function create(&$warnings, $force_create = false)
     {
-        global $user;
-        if (isset($user->id) && $user->id) {
-            return array(
-                array(
-                    'name'   => 'or_user',
-                    'filter' => array(
-                        'or' => array(
-                            'a.tech_id_user' => (int) $user->id,
-                            'a.user_create'  => (int) $user->id
-                        )
-                    )
-                ),
-                array(
-                    'name'   => 'a.status',
-                    'filter' => array(
-                        'operator' => '!=',
-                        'value'    => 2
-                    )
-                )
-            );
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            if ((int) BimpTools::getValue('start_timer', 0)) {
+                $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+                if (!$timer->setObject($this, 'timer', true)) {
+                    $warnings[] = 'Echec de l\'initialisation du chrono appel payant';
+                }
+            }
+        }
+    }
+
+    public function update(&$warnings, $force_update = false)
+    {
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ((int) $this->getData('status') === self::BS_INTER_CLOSED) {
+                $timer = $this->getTimer();
+                if (BimpObject::objectLoaded($timer)) {
+                    $timer_errors = $timer->hold();
+                    if (count($timer_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($timer_errors, 'Echec de l\'arrêt du chronomètre');
+                    } else {
+                        $times = $timer->getTimes($this);
+                        $this->updateField('timer', (int) $times['total']);
+                    }
+                }
+            }
+        }
+    }
+
+    public function delete($force_delete = false)
+    {
+        $id = (int) $this->id;
+
+        $errors = parent::delete($force_delete);
+
+        if (!count($errors)) {
+            $timer = $this->getTimer();
+            if (BimpObject::objectLoaded($timer)) {
+                $timer->delete(true);
+            }
         }
 
-        return array(
-            'a.id' => 0
-        );
+        return $errors;
     }
 }

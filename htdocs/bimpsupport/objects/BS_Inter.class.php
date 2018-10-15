@@ -117,7 +117,7 @@ class BS_Inter extends BimpObject
 
     // Overrides
 
-    public function create(&$warnings, $force_create = false)
+    public function create(&$warnings = array(), $force_create = false)
     {
         $errors = parent::create($warnings, $force_create);
 
@@ -131,7 +131,7 @@ class BS_Inter extends BimpObject
         }
     }
 
-    public function update(&$warnings, $force_update = false)
+    public function update(&$warnings = array(), $force_update = false)
     {
         $errors = array();
         

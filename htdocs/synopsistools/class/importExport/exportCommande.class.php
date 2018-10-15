@@ -40,7 +40,7 @@ class exportCommande extends export8sens {
 
 
     public function exportCommandeNormal() {
-        $this->type = "sav";
+//        $this->type = "sav";
         $result = $this->db->query("SELECT comm.rowid as id, fk_user_author "
                 . "FROM `" . MAIN_DB_PREFIX . "commande` comm, `" . MAIN_DB_PREFIX . "commande_extrafields` fe "
                 . "WHERE fe.fk_object = comm.rowid " . $this->where);

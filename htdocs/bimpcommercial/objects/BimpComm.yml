@@ -76,7 +76,6 @@ fields:
             array: condReglements
         input: 
             type: select_cond_reglement
-        required: 1
     fk_mode_reglement: 
         label: Mode de règlement
         dol_prop: mode_reglement_id

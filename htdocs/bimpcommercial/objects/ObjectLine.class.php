@@ -1000,7 +1000,10 @@ class ObjectLine extends BimpObject
 
             if (isset($line->fk_product) && (int) $line->fk_product) {
                 $type = 1;
-                $remisable = (int) $this->db->getValue('product_extrafields', 'remisable', '`fk_object` = ' . (int) $line->fk_product);
+                $remisable = $this->db->getValue('product_extrafields', 'remisable', '`fk_object` = ' . (int) $line->fk_product);
+                if (is_null($remisable)) {
+                    $remisable = 1;
+                }
             } elseif ((float) $line->subprice) {
                 $type = 3;
             } else {

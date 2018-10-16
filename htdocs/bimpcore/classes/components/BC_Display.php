@@ -103,6 +103,12 @@ class BC_Display extends BimpComponent
         if (is_null($this->value)) {
             $this->value = '';
         }
+        
+        if ($this->object->isDolObject()) {
+            if (!$this->object->dol_field_exists($this->name)) {
+                return '';
+            }
+        }
 
         if (($this->value === '') && ($this->params['type'] !== 'callback')) {
             $html .= '';

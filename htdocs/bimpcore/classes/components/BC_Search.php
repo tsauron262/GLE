@@ -53,6 +53,11 @@ class BC_Search extends BimpComponent
         }
 
         foreach ($this->params['fields_search'] as $field) {
+            if ($this->object->isDolobject()) {
+                if (!$this->object->dol_field_exists($field)) {
+                    continue;
+                }
+            }
             $filters['or_search']['or'][$field] = array(
                 'part_type' => 'middle',
                 'part'      => addslashes($this->search_value)

@@ -43,7 +43,7 @@ objects:
                 fields: 
                     parent_object_name: Bimp_Propal
                 
-fields: 
+fields:
     datec: 
         label: Créée le
         type: datetime
@@ -83,7 +83,7 @@ fields:
         label: Masquer les remises dans le PDF
         dol_extra_field: 1
         type: bool
-        default_value: 0
+        default_value: 1
         sortable: 0
     pdf_hide_total: 
         label: Masquer les totaux dans le PDF

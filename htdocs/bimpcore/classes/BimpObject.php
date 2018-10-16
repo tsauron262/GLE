@@ -526,6 +526,33 @@ class BimpObject extends BimpCache
                 in_array($field_name, $this->params['fields']);
     }
 
+    public function dol_field_exists($field_name)
+    {
+        if (!$this->field_exists($field_name)) {
+            return false;    
+        }
+        
+        if ($this->isDolObject()) {
+            if ((int) $this->getConf('fields/'.$field_name.'/dol_extra_field', 0, false, 'bool')) {
+                if (preg_match('/^ef_(.*)$/', $field_name, $matches)) {
+                    $field_name = $matches[1];
+                }
+                
+                $extra_fields = self::getExtraFieldsArray($this->dol_object->table_element);
+                if (!is_array($extra_fields) || !isset($extra_fields[$field_name])) {
+                    return false;
+                }
+            } else  {
+                $field_name = $this->getConf('fields/'.$field_name.'/dol_prop', $field_name);
+                if (!property_exists($this->dol_object, $field_name)) {
+                    return false;
+                }
+            }
+        }
+        
+        return true;
+    }
+    
     public function object_exists($object_name)
     {
         return array_key_exists($object_name, $this->params['objects']);
@@ -906,6 +933,9 @@ class BimpObject extends BimpCache
         }
 
         if ($this->field_exists($field)) {
+            if ($field === 'pdf_hide_reduc') {
+                echo 'ici'; exit;
+            }
             return $this->getConf('fields/' . $field . '/default_value');
         }
 
@@ -933,16 +963,21 @@ class BimpObject extends BimpCache
             return null;
         }
 
-        if ($this->isDolObject()) {
-            if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
-                if (preg_match('/^ef_(.*)$/', $field, $matches)) {
-                    $field = $matches[1];
-                }
-                return $this->db->getValue($this->getTable() . '_extrafields', $field, '`fk_object` = ' . (int) $id_object);
+        if ($this->isDolObject() && (int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+            if (preg_match('/^ef_(.*)$/', $field, $matches)) {
+                $field = $matches[1];
             }
+            $value = $this->db->getValue($this->getTable() . '_extrafields', $field, '`fk_object` = ' . (int) $id_object);
+        } else {
+            $primary = $this->getPrimary();
+            $value = $this->db->getValue($this->getTable(), $field, '`' . $primary . '` = ' . (int) $id_object);
         }
-        $primary = $this->getPrimary();
-        return $this->db->getValue($this->getTable(), $field, '`' . $primary . '` = ' . (int) $id_object);
+        
+        if (is_null($value)) {
+            $value = $this->getConf('fields/'.$field.'/default_value', null, false, 'any');
+        }
+        
+        return $value;
     }
 
     public function set($field, $value)
@@ -2762,7 +2797,7 @@ class BimpObject extends BimpCache
                 if (isset($this->dol_object->array_options['options_' . $extrafield])) {
                     $value = $this->dol_object->array_options['options_' . $extrafield];
                 } else {
-                    $value = '';
+                    $value = null;
                 }
             } else {
                 $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);

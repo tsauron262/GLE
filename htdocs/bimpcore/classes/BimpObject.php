@@ -933,9 +933,6 @@ class BimpObject extends BimpCache
         }
 
         if ($this->field_exists($field)) {
-            if ($field === 'pdf_hide_reduc') {
-                echo 'ici'; exit;
-            }
             return $this->getConf('fields/' . $field . '/default_value');
         }
 

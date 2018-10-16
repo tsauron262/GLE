@@ -177,8 +177,6 @@ class BimpCache
     public static function getSocieteEmails(Societe $societe, $with_contacts = true, $with_societe = true)
     {
         if (!BimpObject::objectLoaded($societe)) {
-            echo 'ici';
-            exit;
             return array();
         }
 

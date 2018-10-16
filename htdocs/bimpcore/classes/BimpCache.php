@@ -283,7 +283,7 @@ class BimpCache
             $rows = self::getBdb()->getRows('bank_account');
             if (!is_null($rows)) {
                 foreach ($rows as $r) {
-                    self::$cache['comtpes'][(int) $r->rowid] = $r->label;
+                    self::$cache['comptes'][(int) $r->rowid] = $r->label;
                 }
             }
         }

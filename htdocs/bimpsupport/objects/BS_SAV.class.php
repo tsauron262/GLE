@@ -2376,7 +2376,7 @@ class BS_SAV extends BimpObject
 
                 $old_id_propal = $propal->id;
                 $revision = new BimpRevisionPropal($propal->dol_object);
-                $new_id_propal = $revision->reviserPropal(false, true, self::$propal_model_pdf, $errors);
+                $new_id_propal = $revision->reviserPropal(false, true, self::$propal_model_pdf, $errors, $this->getData("id_client"));
 
                 if ($new_id_propal && !count($errors)) {
                     //Anulation du montant de la propal

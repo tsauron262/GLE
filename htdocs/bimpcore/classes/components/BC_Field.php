@@ -93,6 +93,12 @@ class BC_Field extends BimpComponent
         if (!$this->params['editable'] && !$this->params['viewable'] || !$this->params['show']) {
             return '';
         }
+        
+        if ($this->object->isDolObject()) {
+            if (!$this->object->dol_field_exists($this->name)) {
+                return '';
+            }
+        }
 
         $html = parent::renderHtml();
 

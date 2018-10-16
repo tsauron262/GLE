@@ -76,6 +76,25 @@ class BimpCache
         return array();
     }
 
+    public static function getExtraFieldsArray($element)
+    {
+        $cache_key = $element . '_extrafields_array';
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $where = '`elementtype` = \''.$element.'\'';
+            $rows = self::getBdb()->getRows('extrafields', $where, null, 'array', array('name', 'label'));
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][$r['name']] = $r['label'];
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
+    }
+
     // Sociétés: 
 
     public static function getSocieteContactsArray($id_societe, $include_empty = false)
@@ -484,7 +503,7 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray('availabilities_array', 1);        
+        return self::getCacheArray('availabilities_array', 1);
     }
 
     public static function getDemandReasonsArray()

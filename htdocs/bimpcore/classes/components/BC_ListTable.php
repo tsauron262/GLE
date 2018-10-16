@@ -162,6 +162,13 @@ class BC_ListTable extends BC_List
             $show = (int) $this->object->getConf($this->config_path . '/cols/' . $col_name . '/show', $show, false, 'bool');
 
             if ($show) {
+                $field = $this->object->getConf('lists_cols/' . $col_name . '/field', '');
+                $field = $this->object->getConf($this->config_path . '/cols/' . $col_name . '/field', $field);
+                if ($field && $this->object->isDolObject()) {
+                    if (!$this->object->dol_field_exists($field)) {
+                        continue;
+                    }
+                }
                 $this->cols[] = $col_name;
             }
         }

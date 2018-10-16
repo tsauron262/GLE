@@ -291,6 +291,12 @@ class BC_Form extends BC_Panel
             return '';
         }
 
+        if ($this->object->isDolObject()) {
+            if (!$this->object->dol_field_exists($field_name)) {
+                return '';
+            }
+        }
+
         $label = (isset($params['label']) && $params['label']) ? $params['label'] : $field->params['label'];
         $required = (!is_null($params['required']) ? (int) $params['required'] : (int) $field->params['required']);
         $input_type = $this->object->getConf('fields/' . $field_name . '/input/type', 'text', false);

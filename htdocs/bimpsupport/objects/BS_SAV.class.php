@@ -2332,7 +2332,6 @@ class BS_SAV extends BimpObject
             $this->removeReservations();
             $warnings = array_merge($warnings, $this->sendMsg('commercialRefuse'));
         }
-
         return array(
             'errors'   => $errors,
             'warnings' => $warnings

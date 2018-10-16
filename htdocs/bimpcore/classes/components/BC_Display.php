@@ -105,7 +105,7 @@ class BC_Display extends BimpComponent
         }
         
         if ($this->object->isDolObject()) {
-            if (!$this->object->dol_field_exists($this->name)) {
+            if (!$this->object->dol_field_exists($this->field_name)) {
                 return '';
             }
         }

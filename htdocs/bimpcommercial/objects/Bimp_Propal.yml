@@ -342,7 +342,7 @@ searches:
             - a.ref
             - ef.libelle
             - s.nom
-        joins: 
+        joins:
             - table: propal_extrafields
               on: a.rowid = ef.fk_object
               alias: ef

@@ -29,7 +29,7 @@ class BS_Ticket extends BimpObject
         self::BS_TICKET_CLOT            => array('label' => 'Clôt', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
 
-    // Getters: 
+    // Getters:
 
     public function getClient_contactsArray()
     {
@@ -157,7 +157,7 @@ class BS_Ticket extends BimpObject
         return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderChronoView()
     {
@@ -257,7 +257,7 @@ class BS_Ticket extends BimpObject
 
     // Overrides: 
 
-    public function create($warnings, $force_create = false)
+    public function create(&$warnings, $force_create = false)
     {
         global $user;
         $this->data['ticket_number'] = 'BH' . date('ymdhis');
@@ -277,6 +277,28 @@ class BS_Ticket extends BimpObject
         return $errors;
     }
 
+    public function update(&$warnings, $force_update = false)
+    {
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            if ((int) $this->getData('status') === self::BS_TICKET_CLOT) {
+                if (BimpObject::objectLoaded($timer)) {
+                    if ((int) $timer->getData('session_start')) {
+                        $timer_errors = $timer->hold();
+                        if (count($timer_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($timer_errors, 'Echec de l\'arrêt du chronomètre');
+                        } else {
+                            $times = $timer->getTimes($this);
+                            $this->updateField('appels_timer', (int) $times['total']);
+                            $timer->updateField('time_session', 0);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     public function delete($force_delete = false)
     {
         $id = (int) $this->id;
@@ -289,7 +311,7 @@ class BS_Ticket extends BimpObject
                         'obj_name'   => $this->object_name,
                         'id_obj'     => $id,
                         'field_name' => 'appels_timer'
-                    ), false, true)) {
+                            ), false, true)) {
                 $timer->delete(true);
             }
         }

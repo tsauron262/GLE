@@ -60,6 +60,7 @@ function initTimers($timer, $timers)
 
             if (!$inter->fetch((int) $timer->getData('id_obj'))) {
                 $errors[] = 'Echec du chargement de l\'intervention n°' . $timer->getData('id_obj');
+                $timer->delete();
                 continue;
             }
 
@@ -75,6 +76,7 @@ function initTimers($timer, $timers)
 
             if (!$ticket->fetch((int) $id_ticket)) {
                 $errors[] = 'Echec du chargement du ticket n°' . $id_ticket;
+                $timer->delete();
                 continue;
             }
 
@@ -108,6 +110,7 @@ function initTimers($timer, $timers)
 
             if (!$ticket->fetch((int) $id_ticket)) {
                 $errors[] = 'Echec du chargement du ticket n°' . $id_ticket;
+                $timer->delete();
                 continue;
             }
 
@@ -120,7 +123,7 @@ function initTimers($timer, $timers)
             $id = 'appel_chrono_' . $ticket->id . '_fixe_tab';
             $times = $timer->getTimes($ticket);
             $caption = '<i class="' . BimpRender::renderIconClass('fas_headset') . ' iconLeft"></i>';
-            $caption .= 'Ticket '.$ticket->id;
+            $caption .= 'Ticket ' . $ticket->id;
             $caption .= '&nbsp;&nbsp;<span class="BS_Ticket_' . $ticket->id . '_timer_total_time chrono bold">';
             $caption .= $timer->renderTime(BimpTools::getTimeDataFromSeconds($times['total']));
             $caption .= '</span>';

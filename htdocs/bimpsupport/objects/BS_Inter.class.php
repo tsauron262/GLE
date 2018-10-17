@@ -70,13 +70,13 @@ class BS_Inter extends BimpObject
         if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('intervention non enregistrée');
         }
-        
+
         if ((int) $this->getData('status') === self::BS_INTER_CLOSED) {
             return '';
         }
-        
+
         global $user;
-        
+
         if ((int) $user->id !== (int) $this->getData('tech_id_user')) {
             return '';
         }
@@ -137,12 +137,11 @@ class BS_Inter extends BimpObject
 
     public function delete($force_delete = false)
     {
-        $id = (int) $this->id;
+        $timer = $this->getTimer();
 
         $errors = parent::delete($force_delete);
 
         if (!count($errors)) {
-            $timer = $this->getTimer();
             if (BimpObject::objectLoaded($timer)) {
                 $timer->delete(true);
             }

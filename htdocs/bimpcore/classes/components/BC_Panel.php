@@ -27,7 +27,7 @@ class BC_Panel extends BimpComponent
         $this->params_def['objects_change_reload'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['no_reload'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['footer_extra_btn'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
-        $this->params_def['msgs'] = array('type' => 'definitions', 'defs_type' => 'msgs', 'multiple' => true, 'default' => null);
+        $this->params_def['msgs'] = array('data_type' => 'array', 'default' => null, 'compile' => true);
 
         $this->content_only = (int) $content_only;
         $this->level = $level;

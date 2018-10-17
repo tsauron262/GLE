@@ -1032,11 +1032,12 @@ class ObjectLine extends BimpObject
                     }
                     $errors[] = $msg;
                 } else {
-                    $this->fetch($id);
+                    $this->parent->set("fk_statut", 0);
+                    $this->fetch($id, $this->parent);
 
                     if ($remisable && isset($line->remise_percent) && (float) $line->remise_percent) {
                         if (static::$parent_comm_type) {
-                            $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+                            $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise', null, $this);
                             $remise->validateArray(array(
                                 'id_object_line' => (int) $id,
                                 'object_type'    => static::$parent_comm_type,

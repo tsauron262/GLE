@@ -1238,11 +1238,14 @@ class BimpComm extends BimpObject
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la récupération des données pour la ligne n° ' . $i);
                     }
-                } elseif ((int) $bimp_lines[(int) $id_dol_line]['position'] !== (int) $dol_line->rang) {
-                    $bimp_line->updateField('position', (int) $dol_line->rang, $bimp_lines[(int) $id_dol_line]['id']);
-                } elseif ((float) $bimp_lines[(int) $id_dol_line]['remise'] !== (float) $dol_line->remise_percent) {
-                    if ($bimp_line->fetch((int) $bimp_lines[(int) $id_dol_line]['id'], $this)) {
-                        $bimp_line->checkRemises();
+                } else {
+                    if ((int) $bimp_lines[(int) $id_dol_line]['position'] !== (int) $dol_line->rang) {
+                        $bimp_line->updateField('position', (int) $dol_line->rang, $bimp_lines[(int) $id_dol_line]['id']);
+                    }
+                    if ((float) $bimp_lines[(int) $id_dol_line]['remise'] !== (float) $dol_line->remise_percent) {
+                        if ($bimp_line->fetch((int) $bimp_lines[(int) $id_dol_line]['id'], $this)) {
+                            $bimp_line->checkRemises();
+                        }
                     }
                 }
             }

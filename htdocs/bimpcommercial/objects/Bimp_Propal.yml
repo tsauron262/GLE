@@ -83,7 +83,7 @@ fields:
         label: Masquer les remises dans le PDF
         dol_extra_field: 1
         type: bool
-        default_value: 1
+        default_value: 0
         sortable: 0
     pdf_hide_total: 
         label: Masquer les totaux dans le PDF

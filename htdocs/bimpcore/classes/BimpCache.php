@@ -82,7 +82,7 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = array();
 
-            $where = '`elementtype` = \''.$element.'\'';
+            $where = '`elementtype` = \'' . $element . '\'';
             $rows = self::getBdb()->getRows('extrafields', $where, null, 'array', array('name', 'label'));
 
             if (is_array($rows)) {
@@ -450,7 +450,7 @@ class BimpCache
         return self::getCacheArray('cond_reglements_array', 1);
     }
 
-    public static function getModeReglementsArray($key = 'id', $active_only = true)
+    public static function getModeReglementsArray($key = 'id', $active_only = false)
     {
         $cache_key = 'mode_reglements_by_' . $key;
         if ($active_only) {
@@ -526,6 +526,130 @@ class BimpCache
         return self::$cache['demand_reasons_array'];
     }
 
+    public static function getCountriesArray($active_only = false, $key_field = 'rowid', $include_empty = false)
+    {
+        $cache_key = 'countries_array_by' . $key_field;
+        if ($include_empty) {
+            $cache_key .= '_active_only';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            if ($active_only) {
+                $where = '`active` > 0';
+            } else {
+                $where = '1';
+            }
+            $rows = self::getBdb()->getRows('c_country', $where, null, 'array', array($key_field, 'label'));
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][$r[$key_field]] = $r['label'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getStatesArray($country = 0, $country_key_field = 'rowid', $active_only = false, $include_empty = false)
+    {
+        $cache_key = 'states_array';
+        if ($country) {
+            $cache_key .= '_country_' . $country;
+        }
+        if ($active_only) {
+            $cache_key .= 'active_only';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $filters = array();
+
+            if ($country) {
+                $filters['c.' . $country_key_field] = $country;
+            }
+            if ($active_only) {
+                $filters['a.active'] = 1;
+                $filters['r.active'] = 1;
+                $filters['c.active'] = 1;
+            }
+
+            $sql = BimpTools::getSqlSelect(array('rowid', 'nom'));
+            $sql .= BimpTools::getSqlFrom('c_departements', array(
+                        array(
+                            'table' => 'c_regions',
+                            'alias' => 'r',
+                            'on'    => 'a.fk_region = r.code_region',
+                        ), array(
+                            'table' => 'c_country',
+                            'alias' => 'c',
+                            'on'    => 'r.fk_pays = c.rowid'
+                        )
+            ));
+            $sql .= BimpTools::getSqlWhere($filters);
+            $sql .= BimpTools::getSqlOrderBy('c.code', 'asc', 'a', 'code_departement', 'asc');
+
+            $rows = self::getBdb()->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['rowid']] = $r['nom'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getJuridicalstatusArray($country = 0, $country_key_field = 'code', $active_only = false, $include_empty = false)
+    {
+        $cache_key = 'juridicalstatus_array';
+        if ($country) {
+            $cache_key .= '_country_' . $country;
+        }
+        if ($active_only) {
+            $cache_key .= 'active_only';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $filters = array();
+
+            if ($country) {
+                $filters['c.' . $country_key_field] = $country;
+            }
+            if ($active_only) {
+                $filters['a.active'] = 1;
+                $filters['c.active'] = 1;
+            }
+
+            $sql = BimpTools::getSqlSelect(array('code', 'libelle'));
+            $sql .= BimpTools::getSqlFrom('c_forme_juridique', array(
+                        array(
+                            'table' => 'c_country',
+                            'alias' => 'c',
+                            'on'    => 'a.fk_pays = c.rowid'
+                        )
+            ));
+            $sql .= BimpTools::getSqlWhere($filters);
+            $sql .= BimpTools::getSqlOrderBy('c.code', 'asc');
+
+            $rows = self::getBdb()->executeS($sql, 'array');
+
+            if (is_array($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['code']] = $r['libelle'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
     public static function getSecteursArray()
     {
         if (!isset(self::$cache['secteurs_array'])) {
@@ -584,6 +708,33 @@ class BimpCache
                 self::$cache[$cache_key] = $config;
             } else {
                 self::$cache[$cache_key] = null;
+            }
+        }
+
+        return self::$cache[$cache_key];
+    }
+
+    public static function getDolListArray($id_list, $include_empty = false)
+    {
+        if (!class_exists('listform')) {
+            require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Process/class/process.class.php');
+        }
+
+        if (!(int) $id_list) {
+            return array();
+        }
+
+        $cache_key = 'dol_list_' . $id_list;
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            global $db;
+            $list = new listform($db);
+            $list->fetch($id_list);
+
+            foreach ($list->lignes as $ligne) {
+                self::$cache[$cache_key][$ligne->valeur] = $ligne->label;
             }
         }
 

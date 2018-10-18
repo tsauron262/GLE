@@ -6,7 +6,7 @@ class BimpCommController extends BimpController
     // Overrides: 
 
     public function display()
-    {
+    {        
         $object = $this->config->getObject('', 'bimp_comm');
         if (BimpObject::objectLoaded($object) &&
                 method_exists($object, 'checkLines')) {

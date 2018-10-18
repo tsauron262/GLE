@@ -455,28 +455,26 @@ class BimpInput
                 break;
 
             case 'search_country':
-                $html .= $form->select_country((int) $value, $field_name);
-                break;
+                $options['options'] = BimpCache::getCountriesArray((isset($options['active_only']) ? (int) $options['active_only'] : 1), (isset($options['key_field']) ? $options['key_field'] : 'rowid'));
+                return self::renderInput('select', $field_name, $value, $options);
 
             case 'search_state':
-                if (!class_exists('FormCompany')) {
-                    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
-                }
-                global $db;
-                $formCompany = new FormCompany($db);
-                $id_country = isset($options['id_country']) ? $options['id_country'] : 0;
-                $html .= $formCompany->select_state((int) $value, $id_country, $field_name);
-                break;
+                $country = isset($options['id_country']) ? $options['id_country'] : 0;
+                $active_only = isset($options['active_only']) ? $options['active_only'] : 1;
+                $country_key_field = isset($options['country_key_field']) ? $options['country_key_field'] : 'rowid';
+                $include_empty = isset($options['include_empty']) ? $options['include_empty'] : 1;
+                $options['options'] = BimpCache::getStatesArray($country, $country_key_field, $active_only, $include_empty);
+                
+                return self::renderInput('select', $field_name, $value, $options);
 
             case 'search_juridicalstatus':
-                if (!class_exists('FormCompany')) {
-                    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
-                }
-                global $db;
-                $formCompany = new FormCompany($db);
-                $country_code = isset($options['country_code']) ? $options['country_code'] : 0;
-                $html .= $formCompany->select_juridicalstatus((int) $value, $country_code, '', $field_name);
-                break;
+                $country = isset($options['country_code']) ? $options['country_code'] : 0;
+                $active_only = isset($options['active_only']) ? $options['active_only'] : 1;
+                $country_key_field = isset($options['country_key_field']) ? $options['country_key_field'] : 'code';
+                $include_empty = isset($options['include_empty']) ? $options['include_empty'] : 1;
+
+                $options['options'] = BimpCache::getJuridicalstatusArray($country, $country_key_field, $active_only, $include_empty);
+                return self::renderInput('select', $field_name, $value, $options);
 
             case 'search_commande_client':
                 if (isset($options['id_client']) && $options['id_client']) {

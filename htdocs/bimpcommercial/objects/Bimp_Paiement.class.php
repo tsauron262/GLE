@@ -272,7 +272,15 @@ class Bimp_Paiement extends BimpObject
         $errors = parent::validatePost();
 
         if (BimpTools::isSubmit('id_mode_paiement')) {
-            $this->dol_object->paiementid = (int) BimpTools::getValue('id_mode_paiement', 0);
+            $id_paiement = BimpTools::getValue('id_mode_paiement', 0);
+            if (is_string($id_paiement)) {
+                if (preg_match('/^\d+$/', $id_paiement)) {
+                    $id_paiement = (int) $id_paiement;
+                } else {
+                    $id_paiement = (int) dol_getIdFromCode($this->db->db, $id_paiement, 'c_paiement', 'code', 'id');
+                }
+            }
+            $this->dol_object->paiementid = (int) $id_paiement;
         }
 
 //        if (BimpTools::isSubmit('id_account')) {

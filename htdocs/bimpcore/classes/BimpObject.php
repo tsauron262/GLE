@@ -27,7 +27,7 @@ class BimpObject extends BimpCache
         'icon'                     => array('default' => ''),
         'primary'                  => array('default' => 'id'),
         'common_fields'            => array('data_type' => 'bool', 'default' => 1),
-        'header_list_name'         => array('default' => ''),
+        'header_list_name'         => array('default' => 'default'),
         'header_btn'               => array('data_type' => 'array', 'default' => array()),
         'list_page_url'            => array('data_type' => 'array'),
         'parent_object'            => array('default' => ''),
@@ -529,30 +529,25 @@ class BimpObject extends BimpCache
     public function dol_field_exists($field_name)
     {
         if (!$this->field_exists($field_name)) {
-            return false;    
+            return false;
         }
-        
+
         if ($this->isDolObject()) {
-            if ((int) $this->getConf('fields/'.$field_name.'/dol_extra_field', 0, false, 'bool')) {
+            if ((int) $this->getConf('fields/' . $field_name . '/dol_extra_field', 0, false, 'bool')) {
                 if (preg_match('/^ef_(.*)$/', $field_name, $matches)) {
                     $field_name = $matches[1];
                 }
-                
+
                 $extra_fields = self::getExtraFieldsArray($this->dol_object->table_element);
                 if (!is_array($extra_fields) || !isset($extra_fields[$field_name])) {
                     return false;
                 }
-            } else  {
-                $field_name = $this->getConf('fields/'.$field_name.'/dol_prop', $field_name);
-                if (!property_exists($this->dol_object, $field_name)) {
-                    return false;
-                }
             }
         }
-        
+
         return true;
     }
-    
+
     public function object_exists($object_name)
     {
         return array_key_exists($object_name, $this->params['objects']);
@@ -969,11 +964,11 @@ class BimpObject extends BimpCache
             $primary = $this->getPrimary();
             $value = $this->db->getValue($this->getTable(), $field, '`' . $primary . '` = ' . (int) $id_object);
         }
-        
+
         if (is_null($value)) {
-            $value = $this->getConf('fields/'.$field.'/default_value', null, false, 'any');
+            $value = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
         }
-        
+
         return $value;
     }
 
@@ -3189,7 +3184,7 @@ class BimpObject extends BimpCache
                 $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
                 if ($url) {
                     $items = array(
-                        '<span class="dropdown-title">Liste des ' . $this->getLabel('name_plur') . '</span>'
+                        '<span class="dropdown-title">' . BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur') . '</span>'
                     );
                     $items[] = BimpRender::renderButton(array(
                                 'label'       => 'Vue rapide',
@@ -3222,7 +3217,7 @@ class BimpObject extends BimpCache
                                 )
                                     ), 'button');
                     $html .= BimpRender::renderDropDownButton('', $items, array(
-                                'icon' => 'bars'
+                                'icon' => 'fas_list'
                     ));
                 } else {
                     $html .= BimpRender::renderButton(array(

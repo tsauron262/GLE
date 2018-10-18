@@ -238,7 +238,7 @@ forms:
               data_type: bool
               input: 
                   type: toggle
-              value: 0
+              value: 1
             - field: remise_globale
             - custom: 1
               label: Montant de la remise

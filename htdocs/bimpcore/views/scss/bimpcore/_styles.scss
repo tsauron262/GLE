@@ -87,7 +87,8 @@ div.tabBar {
 }
 
 .ui-autocomplete,
-.select2-drop {
+.select2-drop,
+.select2-container {
     z-index: 10250!important;
 }
 
@@ -96,7 +97,8 @@ body.has_fullscreen {
         z-index: 11100!important;
     }
     .ui-autocomplete,
-    .select2-drop {
+    .select2-drop,
+    .select2-container {
         z-index: 11250!important;
     }
 }

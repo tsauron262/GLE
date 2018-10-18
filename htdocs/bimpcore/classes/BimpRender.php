@@ -611,7 +611,9 @@ class BimpRender
                 $html .= '<i class="fas fa5-external-link-alt"></i>';
                 $html .= '</span>';
                 if (!$modal_view) {
-                    $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . addslashes(BimpObject::getInstanceNom($object)) . '\')';
+//                    $title = str_replace('"', '\\\'\\\'', (BimpObject::getInstanceNom($object)));
+                    $title = '';
+                    $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . $title . '\')';
                     $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
                     $html .= '<i class="far fa5-eye"></i>';
                     $html .= '</span>';
@@ -619,7 +621,7 @@ class BimpRender
             }
         }
         if ($modal_view && is_a($object, 'BimpObject')) {
-            $title = htmlentities(addslashes($object->getInstanceName()));
+            $title = str_replace('"', '\\\'\\\'', ($object->getInstanceName()));
             $onclick = 'loadModalView(\'' . $object->module . '\', \'' . $object->object_name . '\', ' . $object->id . ', \'' . $modal_view . '\', $(this), \'' . $title . '\')';
             $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
             $html .= '<i class="far fa5-eye"></i>';

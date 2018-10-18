@@ -160,23 +160,9 @@ class BimpTools
         return '';
     }
 
-    public static function getDolListArray($id_list)
+    public static function getDolListArray($id_list, $include_empty)
     {
-        if (!class_exists('listform')) {
-            require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Process/class/process.class.php');
-        }
-
-        $return = array();
-
-        global $db;
-        $list = new listform($db);
-        $list->fetch($id_list);
-
-        foreach ($list->lignes as $ligne) {
-            $return[$ligne->valeur] = $return[$ligne->label];
-        }
-
-        return $return;
+        return BimpCache::getDolListArray($id_list, $include_empty);
     }
 
     public static function getProductImagesDir($product)

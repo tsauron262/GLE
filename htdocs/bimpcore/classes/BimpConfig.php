@@ -12,7 +12,7 @@ class BimpConfig
     public $current = null;
     public $errors = array();
     public static $keywords = array(
-        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'dol_list', 'conf', 'bimpcore_conf'
+        'prop', 'field_value', 'array', 'array_value', 'instance', 'callback', 'global', 'request', 'request_field', 'dol_list', 'conf', 'bimpcore_conf'
     );
     public static $params_cache = array();
 
@@ -384,9 +384,6 @@ class BimpConfig
 
     protected function getvalue($value, $path)
     {
-        if (is_string($value)) {
-            return $value;
-        }
         if (is_array($value)) {
             if (array_key_exists('prop', $value)) {
                 return $this->getProp($value['prop'], $path . '/prop');
@@ -423,7 +420,10 @@ class BimpConfig
                 }
             }
             if (array_key_exists('request', $value)) {
-                return $this->getRequestValue($value['request'], $path . '/request');
+                return $this->getRequestValue($value['request'], $path . '/request', false);
+            }
+            if (array_key_exists('request_field', $value)) {
+                return $this->getRequestValue($value['request_field'], $path . '/request_field', true);
             }
         }
         return $value;
@@ -705,17 +705,26 @@ class BimpConfig
     protected function getDolList($dol_list, $path)
     {
         $id_list = null;
-        if (is_int($dol_list) || preg_match('/^\d+$/', $dol_list)) {
+        $include_empty = false;
+
+        $params = $this->getvalue($dol_list, $path);
+
+        if (is_int($params) || preg_match('/^\d+$/', $params)) {
             $id_list = (int) $dol_list;
-        } elseif (is_array($dol_list)) {
-            $id_list = (int) $this->getvalue($dol_list, $path);
+        } elseif (is_array($params)) {
+            if (isset($params['id_list'])) {
+                $id_list = (int) $this->getvalue($params['id_list'], $path . '/id_list');
+            }
+            if (isset($params['include_empty'])) {
+                $include_empty = (int) $this->getvalue($params['include_empty'], $path . '/include_empty');
+            }
         }
 
         if (is_null($id_list) || !($id_list) || !is_int($id_list)) {
             return array();
         }
 
-        return BimpTools::getDolListArray($id_list);
+        return BimpCache::getDolListArray($id_list, $include_empty);
     }
 
     protected function getConfValue($conf, $path)
@@ -742,25 +751,32 @@ class BimpConfig
         return null;
     }
 
-    protected function getRequestValue($request, $path)
+    protected function getRequestValue($request, $path, $is_field = false)
     {
-        $request_name = $this->getvalue($request, $path);
+        $params = $this->getvalue($request, $path);
+
+        $request_name = null;
+        $default_value = null;
+
+        if (is_string($params)) {
+            $request_name = $params;
+        } elseif (is_array($params)) {
+            if (isset($params['name'])) {
+                $request_name = $this->getvalue($params['name'], $path . '/name');
+            }
+            if (isset($params['default_value'])) {
+                $default_value = $this->getvalue($params['default_value'], $path . '/default_value');
+            }
+        }
+
 
         if (!is_null($request_name) && is_string($request_name)) {
-            $requests = explode('/', $request_name);
-            $value = BimpTools::getValue($requests[0], null);
-            if (!is_null($value)) {
-                foreach ($requests as $i => $key) {
-                    if ($i === 0) {
-                        continue;
-                    }
-
-                    if (isset($value[$key])) {
-                        $value = $value[$key];
-                    }
-                }
-                return $value;
+            if ($is_field) {
+                $value = BimpTools::getPostFieldValue($request_name, $default_value);
+            } else {
+                $value = BimpTools::getValue($request_name, $default_value);
             }
+            return $value;
         }
 
         return null;

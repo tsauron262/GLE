@@ -15590,7 +15590,7 @@ div.tabBar {
 /* line 89, ../scss/bimpcore/_styles.scss */
 .ui-autocomplete,
 .select2-drop,
-.select2-container {
+.select2-dropdown {
   z-index: 10250 !important;
 }
 
@@ -15601,7 +15601,7 @@ body.has_fullscreen .modal {
 /* line 99, ../scss/bimpcore/_styles.scss */
 body.has_fullscreen .ui-autocomplete,
 body.has_fullscreen .select2-drop,
-body.has_fullscreen .select2-container {
+body.has_fullscreen .select2-dropdown {
   z-index: 11250 !important;
 }
 

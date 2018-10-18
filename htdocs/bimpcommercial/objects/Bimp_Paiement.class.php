@@ -124,15 +124,13 @@ class Bimp_Paiement extends BimpObject
             $list = $facture->getList(array(
                 'fk_soc'    => $id_client,
                 'paye'      => 0,
-                'fk_statut' => array(
-                    'operator' => '>',
-                    'value'    => 0
-                )
+                'type'      => Facture::TYPE_STANDARD,
+                'fk_statut' => 1
                     ), null, null, 'id', 'asc', 'array', array('rowid'));
         }
 
         if (!count($list)) {
-            return BimpRender::renderAlerts('Aucune facture à payer trouvée pour ce client');
+            return BimpRender::renderAlerts('Aucune facture à payer trouvée pour ce client', 'warning');
         }
 
         $rand = rand(111111, 999999);
@@ -176,6 +174,7 @@ class Bimp_Paiement extends BimpObject
         $total_paid = 0;
         $total_to_pay = 0;
 
+        $at_least_one = false;
         foreach ($list as $item) {
             if ($facture->fetch((int) $item['rowid'])) {
                 $montant_ttc = (float) $facture->dol_object->total_ttc;
@@ -185,9 +184,12 @@ class Bimp_Paiement extends BimpObject
                 $to_pay = $montant_ttc - $paid;
                 $to_pay = round($to_pay, 2);
 
-                if ($to_pay < 0.01) {
+                if ($to_pay < 0.01 && $to_pay > -0.01) {
+                    $facture->setObjectAction('classifyPaid');
                     continue;
                 }
+
+                $at_least_one = true;
 
                 $options['data']['to_pay'] = $to_pay;
 
@@ -221,6 +223,10 @@ class Bimp_Paiement extends BimpObject
                 unset($DT);
                 $i++;
             }
+        }
+
+        if (!$at_least_one) {
+            return BimpRender::renderAlerts('Aucune facture à payer trouvée pour ce client', 'warning');
         }
 
         $html .= '</tbody>';
@@ -300,6 +306,9 @@ class Bimp_Paiement extends BimpObject
 
     public function create(&$warnings = array())
     {
+//        echo '<pre>';
+//        print_r($_POST);
+//        exit;
         $errors = array();
 
         global $db, $user, $conf;
@@ -331,9 +340,12 @@ class Bimp_Paiement extends BimpObject
             $errors[] = 'Compte bancaire invalide';
         }
 
+        $total_to_pay = (float) BimpTools::getValue('total_to_pay', 0);
+        $total_avoirs = (float) BimpTools::getValue('total_avoirs', 0);
         $total_paid = (float) BimpTools::getValue('total_paid_amount');
+
         $avoirs = json_decode(BimpTools::getValue('avoirs_amounts', ''), true);
-        $total_factures = 0;
+        $total_factures_versements = 0;
 
         if ((is_null($total_paid) || !$total_paid) && (is_null($avoirs) || !count($avoirs))) {
             $errors[] = 'Montant total payé absent';
@@ -342,10 +354,22 @@ class Bimp_Paiement extends BimpObject
         $type_paiement = $this->db->getValue('c_paiement', 'code', '`id` = ' . (int) $this->dol_object->paiementid);
         if (is_null($type_paiement) || !(string) $type_paiement) {
             $errors[] = 'Mode paiement invalide';
+        } elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ') {
+            $errors[] = 'Le versement d\'une somme supérieure au total des factures n\'est possible que pour un paiement en espèce';
         }
 
         if (count($errors)) {
             return $errors;
+        }
+
+        $nom_emetteur = '';
+        $banque_emetteur = '';
+
+        if (in_array($type_paiement, array('CHQ', 'VIR'))) {
+            $nom_emetteur = BimpTools::getPostFieldValue('nom_emetteur', '');
+        }
+        if ($type_paiement === 'CHQ') {
+            $banque_emetteur = BimpTools::getPostFieldValue('banque_emetteur', '');
         }
 
         $this->dol_object->datepaye = dol_now();
@@ -354,8 +378,9 @@ class Bimp_Paiement extends BimpObject
         $i = 1;
 
         BimpTools::loadDolClass('compta/facture', 'facture');
-        $facture = new Facture($this->db->db);
+        $factures = array();
 
+        // Calcul du total payé par facture. 
         while (BimpTools::isSubmit('amount_' . $i)) {
             $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0);
             $amount = (float) BimpTools::getValue('amount_' . $i, 0);
@@ -363,97 +388,111 @@ class Bimp_Paiement extends BimpObject
             if ($id_facture <= 0) {
                 $errors[] = 'ID facture invalide (ligne ' . $i . ')';
             } elseif ($amount !== 0) {
-                if ($facture->fetch($id_facture) <= 0) {
+                $factures[$id_facture] = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+
+                if (!$factures[$id_facture]->isLoaded()) {
                     $errors[] = 'Facture d\'ID ' . $id_facture . ' inexistante';
+                    unset($factures[$id_facture]);
                 } else {
-                    // Insertion des avoirs éventuels: 
+                    $avoir_used = 0;
+                    $paid = (float) $factures[$id_facture]->dol_object->getSommePaiement();
+                    $paid += (float) $factures[$id_facture]->dol_object->getSumCreditNotesUsed();
+                    $paid += (float) $factures[$id_facture]->dol_object->getSumDepositsUsed();
+                    $paid = round($paid, 2);
+
                     foreach ($avoirs as $avoir) {
                         if ($avoir['input_name'] === 'amount_' . $i) {
-                            $facture->error = '';
-                            $facture->errors = array();
-
-                            if ($facture->insert_discount((int) $avoir['id_discount']) <= 0) {
-                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de l\'insertion de l\'avoir client d\'ID ' . $avoir['id_discount']);
-                            }
+                            $avoir_used += (float) $avoir['amount'];
                         }
                     }
 
-                    $paid = (float) $facture->getSommePaiement();
-                    $paid += (float) $facture->getSumCreditNotesUsed();
-                    $paid += (float) $facture->getSumDepositsUsed();
-                    $paid = round($paid, 2);
-
-                    $diff = $facture->total_ttc - $paid - $amount;
+                    $diff = $factures[$id_facture]->dol_object->total_ttc - $paid - $avoir_used - $amount;
                     if ($diff > -0.01 && $diff < 0.01) {
-                        $amount = ($facture->total_ttc - $paid); // Eviter les problèmes d'arrondis
+                        $amount = ($factures[$id_facture]->dol_object->total_ttc - $paid - $avoir_used); // Eviter les problèmes d'arrondis
                     }
 
                     $this->dol_object->amounts[$id_facture] = $amount;
-                    $total_factures += round($amount, 2);
+                    $total_factures_versements += $amount;
                 }
             }
             $i++;
         }
 
-        $total_factures = round($total_factures, 2);
+        $total_factures_versements = round($total_factures_versements, 2);
         $total_paid = round($total_paid, 2);
 
-        if ($total_factures > $total_paid) {
-            $errors[] = 'Le champ "Somme totale versée" (' . $total_paid . ') est inférieur au total des réglements des factures (' . $total_factures . ')';
+        if ($total_factures_versements > $total_paid) {
+            $errors[] = 'Le champ "Somme totale versée" (' . $total_paid . ') est inférieur au total des réglements des factures (' . $total_factures_versements . ')';
             return $errors;
         }
 
-        $errors = parent::create($warnings);
+        if ($total_factures_versements > 0) {
+            $errors = parent::create($warnings);
+        }
 
         if (!count($errors)) {
-            if ($this->useCaisse) {
-                $bc_paiement = BimpObject::getInstance('bimpcaisse', 'BC_Paiement');
-                $paiement_errors = $bc_paiement->validateArray(array(
-                    'id_caisse'         => (int) $caisse->id,
-                    'id_caisse_session' => (int) $caisse->getData('id_current_session'),
-                    'id_facture'        => (int) 0,
-                    'id_paiement'       => (int) $this->id
-                ));
-                if (!count($paiement_errors)) {
-                    $paiement_errors = $bc_paiement->create();
-                }
-
-                if (count($paiement_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($paiement_errors, 'Echec de l\'enregistrement du paiement en caisse');
-                }
-            }
-
-            // Ajout du paiement au compte financier:
-            if (!empty($conf->banque->enabled)) {
-                $this->dol_object->error = '';
-                $this->dol_object->errors = array();
-                $label = 'Paiement facture client';
-
-                if ($this->useCaisse) {
-                    $centre = $this->db->getValue('entrepot', 'label', '`rowid` = ' . (int) $caisse->getData('id_entrepot'));
-                    if (is_null($centre)) {
-                        $centre = 'inconnu';
+            // Insertion des avoirs éventuels: 
+            $i = 1;
+            while (BimpTools::isSubmit('amount_' . $i)) {
+                $id_facture = (int) BimpTools::getValue('amount_' . $i . '_id_facture', 0);
+                if (isset($factures[$id_facture]) && $factures[$id_facture]->isLoaded()) {
+                    foreach ($avoirs as $avoir) {
+                        if ($avoir['input_name'] === 'amount_' . $i) {
+                            $factures[$id_facture]->dol_object->error = '';
+                            $factures[$id_facture]->dol_object->errors = array();
+                            if ($factures[$id_facture]->dol_object->insert_discount((int) $avoir['id_discount']) <= 0) {
+                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factures[$id_facture]->dol_object), 'Echec de l\'insertion de l\'avoir client d\'ID ' . $avoir['id_discount']);
+                            } else {
+                                $factures[$id_facture]->checkIsPaid();
+                            }
+                        }
                     }
-                    $label .= '(Caisse "' . $caisse->getData('name') . '" - Centre "' . $centre . '")';
                 }
-
-                if ($this->dol_object->addPaymentToBank($user, 'payment', $label, $this->dol_object->fk_account, '', '') <= 0) { // todo: ajouter nom émetteur et banque émetteur. 
-                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du paiement au compte bancaire "' . $account->bank . '"');
-                }
+                $i++;
             }
 
-            // Correction fonds de caisse:
-            if ($this->useCaisse) {
-                $caisse_mvt = 0;
-                if ($type_paiement === 'LIQ') {
-                    $caisse_mvt = $total_factures;
-                } elseif ($total_paid > $total_factures) {
-                    $caisse_mvt = $total_factures - $total_paid;
+            // Enregistrement du paiement en caisse: 
+            if ($this->isLoaded()) {
+                if ($this->useCaisse) {
+                    $bc_paiement = BimpObject::getInstance('bimpcaisse', 'BC_Paiement');
+                    $paiement_errors = $bc_paiement->validateArray(array(
+                        'id_caisse'         => (int) $caisse->id,
+                        'id_caisse_session' => (int) $caisse->getData('id_current_session'),
+                        'id_facture'        => (int) 0,
+                        'id_paiement'       => (int) $this->id
+                    ));
+                    if (!count($paiement_errors)) {
+                        $paiement_errors = $bc_paiement->create();
+                    }
+
+                    if (count($paiement_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($paiement_errors, 'Echec de l\'enregistrement du paiement en caisse');
+                    }
                 }
 
-                if ($caisse_mvt !== 0) {
+                // Ajout du paiement au compte financier:
+                if (!empty($conf->banque->enabled)) {
+                    $this->dol_object->error = '';
+                    $this->dol_object->errors = array();
+                    $label = 'Paiement facture client';
+
+                    if ($this->useCaisse) {
+                        $centre = $this->db->getValue('entrepot', 'label', '`rowid` = ' . (int) $caisse->getData('id_entrepot'));
+                        if (is_null($centre)) {
+                            $centre = 'inconnu';
+                        }
+                        $label .= '(Caisse "' . $caisse->getData('name') . '" - Centre "' . $centre . '")';
+                    }
+
+                    if ($this->dol_object->addPaymentToBank($user, 'payment', $label, $this->dol_object->fk_account, $nom_emetteur, $banque_emetteur) <= 0) {
+                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du paiement au compte bancaire "' . $account->bank . '"');
+                    }
+                }
+
+                // Correction fonds de caisse:
+                if ($this->useCaisse && $total_factures_versements !== 0 && $type_paiement === 'LIQ') {
                     $fonds = (float) $caisse->getData('fonds');
-                    $fonds += $caisse_mvt;
+                    $fonds += $total_factures_versements;
                     $caisse->set('fonds', $fonds);
                     $update_errors = $caisse->update();
                     if (count($update_errors)) {
@@ -464,5 +503,31 @@ class Bimp_Paiement extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function updateDolObject(&$errors)
+    {
+        // Màj du n°:
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+        if (is_null($this->dol_object)) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return 0;
+        }
+
+        if (!isset($this->dol_object->id) || !$this->dol_object->id) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return 0;
+        }
+
+        $this->dol_object->error = '';
+        $this->dol_object->errors = array();
+
+        if ($this->dol_object->update_num($this->getData('num_paiement')) <= 0) {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour du numéro');
+        }
+
+        return (count($errors) ? 0 : 1);
     }
 }

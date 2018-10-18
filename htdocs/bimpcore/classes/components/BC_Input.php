@@ -74,7 +74,7 @@ class BC_Input extends BimpComponent
             'key_field'   => array('default' => 'rowid')
         ),
         'search_juridicalstatus'      => array(
-            'country_code'        => array('data_type' => 'int', 'default' => ''),
+            'country_code'      => array('data_type' => 'int', 'default' => ''),
             'active_only'       => array('data_type' => 'bool', 'default' => 1),
             'country_key_field' => array('default' => 'code'),
             'include_empty'     => array('data_type' => 'bool', 'default' => 1)
@@ -375,6 +375,7 @@ class BC_Input extends BimpComponent
 
         if ($this->params['multiple']) {
             $this->extraData['values_field'] = $input_name;
+            $this->extraClasses[] = $input_name . '_inputContainer';
             $input_name .= '_add_value';
             $input_id .= '_add_value';
         }

@@ -25,7 +25,7 @@ fields:
         type: money
     num_paiement: 
         label: Num.
-        dol_prop: numero
+        dol_prop: num_paiement
         display_if: 
             field_name: id_mode_paiement
             show_values: CHQ,VIR
@@ -68,14 +68,26 @@ forms:
               value: 
                   request_field: id_mode_paiement
               required: 1
-#            - field: num_paiement
-#              label: N° (Chèque ou virement)
-#            - custom: 1
-#              label: Emetetteur (Chèque ou virement)
-#              data_type: string
-#              input_name: chq_emetteur
-#              input: 
-#                  type: text
+            - field: num_paiement
+              label: N° (Chèque ou virement)
+            - custom: 1
+              label: Emetetteur (Chèque ou virement)
+              data_type: string
+              input_name: nom_emetteur
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: CHQ,VIR
+            - custom: 1
+              label: Banque émetteur (chèque)
+              data_type: string
+              input_name: banque_emetteur
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: CHQ
             - field: note
             - custom: 1
               label: Avoirs client

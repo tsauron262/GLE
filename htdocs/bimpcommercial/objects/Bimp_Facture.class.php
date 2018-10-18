@@ -1441,6 +1441,16 @@ class Bimp_Facture extends BimpComm
 
         return $errors;
     }
+    
+    public function checkIsPaid()
+    {
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') === 1) {
+            $remain_to_pay = (float) $this->getRemainToPay();
+            if ($remain_to_pay > -0.01 && $remain_to_pay < 0.01) {
+                $this->setObjectAction('classifyPaid');
+            }
+        }
+    }
 
     // Actions - Overrides BimpComm:
 
@@ -1836,6 +1846,9 @@ class Bimp_Facture extends BimpComm
 
         $type = (int) $this->getData('type');
         $remainToPay = (float) $this->getRemainToPay();
+        if ($remainToPay < 0.01 && $remainToPay > -0.01) {
+            $remainToPay = 0;
+        }
 
         $discount = new DiscountAbsolute($this->db->db);
         $discount->fetch(0, $this->id);

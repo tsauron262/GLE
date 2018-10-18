@@ -1481,10 +1481,8 @@ class BimpComm extends BimpObject
 
     // Actions:
 
-    public function actionGeneratePdf($data, &$success)
+    public function actionGeneratePdf($data, &$success, $errors = array(), $warnings = array())
     {
-        $errors = array();
-        $warnings = array();
         $success = 'PDF généré avec succès';
 
         if ($this->isLoaded()) {

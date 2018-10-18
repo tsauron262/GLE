@@ -21,6 +21,7 @@
 include_once DOL_DOCUMENT_ROOT . '/core/triggers/dolibarrtriggers.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.class.php';
 
+
 /**
  *  Class of triggers for validateorder module
  */

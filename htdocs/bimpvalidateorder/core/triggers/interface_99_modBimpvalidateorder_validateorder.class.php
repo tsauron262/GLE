@@ -25,6 +25,7 @@ include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.cla
  *  Class of triggers for validateorder module
  */
 class Interfacevalidateorder extends DolibarrTriggers {
+    private $defaultCommEgalUser = true;
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         global $conf, $user;
@@ -72,6 +73,8 @@ class Interfacevalidateorder extends DolibarrTriggers {
                 if (count($tabComm) > 0) {
                     $object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                 }
+                elseif($this->defaultCommEgalUser)
+                    $object->add_contact($user->id, 'SALESREPFOLL', 'internal');
             }
 
             if ($object->cond_reglement_code == "VIDE") {

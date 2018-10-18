@@ -2373,8 +2373,7 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlLimit($n, $p);
 
         if (BimpTools::isSubmit('list_sql')) {
-            echo $sql;
-            exit;
+            echo $sql.'<br/><br/>';
         }
 
         $rows = $this->db->executeS($sql, $return);

@@ -80,6 +80,9 @@ fields:
     libelle: 
         label: Libellé
         dol_extra_field: 1
+    datec: 
+        label: Créée le
+        type: datetime
     datef: 
         label: Date facturation
         dol_prop: date
@@ -365,7 +368,7 @@ lists:
         icon: fas_file-invoice-dollar
         list_filters: 
             callback: getListFilters
-        sort_field: id
+        sort_field: datec
         sort_way: desc
         n: 10
         add_form_name: default

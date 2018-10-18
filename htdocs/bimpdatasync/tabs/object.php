@@ -65,9 +65,9 @@ switch ($object_name) {
         $object = new Categorie($db);
         if ($id > 0) {
             $object->fetch($id);
-            $object->fetch_optionals($id, $extralabels);
-            $extrafields = new ExtraFields($db);
-            $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
+            $object->fetch_optionals($id);
+//            $extrafields = new ExtraFields($db);
+//            $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
             $head = categories_prepare_head($object, 0);
         }
         break;
@@ -85,8 +85,8 @@ switch ($object_name) {
         $object = new Societe($db);
         if ($id > 0) {
             $object->fetch($id);
-            $extrafields = new ExtraFields($db);
-            $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
+//            $extrafields = new ExtraFields($db);
+//            $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
             $head = societe_prepare_head($object);
         }
         break;
@@ -105,8 +105,8 @@ switch ($object_name) {
         $object = new Contact($db);
         if ($id > 0) {
             $object->fetch($id);
-            $extrafields = new ExtraFields($db);
-            $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
+//            $extrafields = new ExtraFields($db);
+//            $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
             $head = contact_prepare_head($object);
         }
         break;
@@ -125,8 +125,8 @@ switch ($object_name) {
         $object = new Commande($db);
         if ($id > 0) {
             $object->fetch($id);
-            $extrafields = new ExtraFields($db);
-            $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
+//            $extrafields = new ExtraFields($db);
+//            $extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
             $head = commande_prepare_head($object);
         }
         break;

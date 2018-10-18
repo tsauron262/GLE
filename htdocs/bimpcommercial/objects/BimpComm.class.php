@@ -374,6 +374,47 @@ class BimpComm extends BimpObject
         return $this->remise_globale_line_rate;
     }
 
+    public function getCreateFromOriginCheckMsg()
+    {
+        if (!$this->isLoaded()) {
+            $origin = BimpTools::getPostFieldValue('origin');
+            $origin_id = BimpTools::getPostFieldValue('origin_id');
+
+            if ($origin && $origin_id) {
+                $where = '`fk_source` = ' . (int) $origin_id . ' AND `sourcetype` = \'' . $origin . '\'';
+                $where .= ' AND `targettype` = \'' . $this->dol_object->element.'\'';
+
+                
+                $result = $this->db->getValue('element_element', 'rowid', $where);
+                
+                if (!is_null($result) && (int) $result) {
+                    $content = 'Attention: ' . $this->getLabel('a') . ' a déjà été créé' . ($this->isLabelFemale() ? 'e' : '') . ' à partir de ';
+                    switch ($origin) {
+                        case 'propal':
+                            $content .= 'cette proposition commerciale';
+                            break;
+
+                        default:
+                            $content .= 'l\'objet "' . $origin . '"';
+                            break;
+                    }
+//                    echo '<pre>';
+//                    print_r(array(
+//                            'content' => $content,
+//                            'type'    => 'warning'
+//                    ));
+//                    exit;
+                    return array(array(
+                            'content' => $content,
+                            'type'    => 'warning'
+                    ));
+                }
+            }
+        }
+
+        return null;
+    }
+
     // Getters - Overrides BimpObject
 
     public function getFilesDir()
@@ -1223,7 +1264,7 @@ class BimpComm extends BimpObject
             // Suppression des lignes absentes de l'objet dolibarr:
             foreach ($bimp_lines as $id_dol_line => $data) {
                 if (!array_key_exists((int) $id_dol_line, $dol_lines)) {
-                    if ($bimp_line->fetch($data['id'])) {
+                    if ($bimp_line->fetch($data['id'], $this)) {
                         $bimp_line->delete();
                         unset($bimp_lines[$id_dol_line]);
                     }

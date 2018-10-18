@@ -85,7 +85,7 @@ class BS_Inter extends BimpObject
 
     public function renderChronoView()
     {
-        if (!isset($this->id) || !$this->id) {
+        if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('intervention non enregistrée');
         }
         
@@ -93,20 +93,25 @@ class BS_Inter extends BimpObject
             return '';
         }
 
-        $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+        if ((int) $this->getData('status') === self::BS_INTER_CLOSED) {
+            return '';
+        }
 
-        if (!$timer->find(array(
-                    'obj_module' => $this->module,
-                    'obj_name'   => $this->object_name,
-                    'id_obj'     => (int) $this->id,
-                    'field_name' => 'timer'
-                ))) {
+        global $user;
+
+        if ((int) $user->id !== (int) $this->getData('tech_id_user')) {
+            return '';
+        }
+
+        $timer = $this->getTimer();
+
+        if (!BimpObject::objectLoaded($timer)) {
             if (!$timer->setObject($this, 'timer')) {
                 return BimpRender::renderAlerts('Echec de la création du timer');
             }
         }
 
-        if (!isset($timer->id) || !$timer->id) {
+        if (!BimpObject::objectLoaded($timer)) {
             return BimpRender::renderAlerts('Echec de l\'initialisation du timer');
         }
 

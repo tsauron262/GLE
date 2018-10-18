@@ -214,6 +214,8 @@ fields_tables:
                   
 forms: 
     default: 
+        msgs:
+            callback: getCreateFromOriginCheckMsg
         rows: 
             - field: libelle
             - field: entrepot

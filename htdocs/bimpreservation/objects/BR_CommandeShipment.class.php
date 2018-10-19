@@ -285,7 +285,7 @@ class BR_CommandeShipment extends BimpObject
     {
         $commande = $this->getParentInstance();
         if (BimpObject::objectLoaded($commande)) {
-            $users = $commande->dol_object->getIdContact('internal', 'SALESREPSIGN');
+            $users = $commande->dol_object->getIdContact('internal', 'SALESREPFOLL');
             if (isset($users[0]) && $users[0]) {
                 $comm_user = new User($this->db->db);
                 if ($comm_user->fetch((int) $users[0]) > 0) {

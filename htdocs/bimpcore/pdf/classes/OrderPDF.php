@@ -93,7 +93,7 @@ class OrderPDF extends BimpDocumentPDF
                 }
 
                 if (is_null($this->user_commercial)) {
-                    $contacts = $this->commande->getIdContact('internal', 'SALESREPSIGN');
+                    $contacts = $this->commande->getIdContact('internal', 'SALESREPFOLL');
                     if (isset($contacts[0]) && $contacts[0]) {
                         BimpTools::loadDolClass('contact');
                         $new_user = new User($this->db);

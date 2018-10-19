@@ -81,10 +81,12 @@ objects:
             bimp_object:
                 module: bimpcore
                 name: BimpFile
+                
         list: 
             filters:
                 parent_module: bimpsupport
                 parent_object_name: BS_Ticket
+                
         add_form: 
             name: upload
             values:
@@ -133,14 +135,6 @@ fields:
                         join_on: c.fk_soc = s.rowid
                         join_return_label: s.nom
                         help: Entrez le nom ou le code d'un client
-        sort_options:
-            by_ref: 
-                label: référence
-                value:
-                    join:
-                        table: contrat
-                        field_value: ref
-                        field_on: rowid
     id_client:
         label: Client
         type: id_object
@@ -156,7 +150,7 @@ fields:
         search:
             input: 
                 type: search_societe
-                societe_type: customer           
+                societe_type: customer         
     id_contact:
         label: Contact
         type: id_object
@@ -217,7 +211,6 @@ fields:
                 type: select
                 options:
                     array: priorities
-        sortable: 1
     impact:
         label: Impact
         type: int
@@ -232,6 +225,9 @@ fields:
         type: int
         values: 
             array: cover_types
+        display: 
+            icon:
+                icon_only: 1
     status: 
         label: Statut
         type: int
@@ -428,10 +424,50 @@ views:
                 - type: list
                   list: 
                       children: files
-                        
+            
+lists_cols:
+    ticket:
+        field: ticket_number
+    status:
+        field: status
+    priorite:
+        label: Prio.
+        field: priorite
+        display: icon
+        max_width: 40px
+        min_width: 40px
+    impact:
+        label: Imp.
+        field: impact
+        display: icon
+        max_width: 40px
+        min_width: 40px
+    sujet:
+        field: sujet
+    date_create:
+        field: date_create
+    resp:
+        field: id_user_resp
+        display: nom_url
+    contrat:
+        field: id_contrat
+        display: nom_url
+    client: 
+        field: id_client
+        display: nom_url
+    timer: 
+        field: appels_timer
+        label: Chrono
+    cover: 
+        field: cover
+        label: Couvert
+        display: icon
+        min_width: 60px
+                
 lists:
     default: 
         title: Tickets Hotline
+        configurable: 1
         checkboxes: 1
         bulk_actions:
             - label: supprimer les tickets sélectionnés
@@ -450,36 +486,15 @@ lists:
         modal_view: full
         cols:
             ticket:
-                field: ticket_number
             status:
-                field: status
             priorite:
-                label: Prio.
-                field: priorite
-                display: icon
-                max_width: 40px
-                min_width: 40px
             impact:
-                label: Imp.
-                field: impact
-                display: icon
-                max_width: 40px
-                min_width: 40px
             sujet:
-                field: sujet
             date_create:
-                label: Créé le
-                field: date_create
             resp:
-                field: id_user_resp
-                display: nom_url
             contrat:
-                field: id_contrat
-                display: nom_url
             client: 
-                field: id_client
-                display: nom_url
-    
+                
 cards:
     default:
         title: nom

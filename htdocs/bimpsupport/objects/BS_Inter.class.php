@@ -18,6 +18,18 @@ class BS_Inter extends BimpObject
 
     // Getters: 
 
+    public function isCreatable()
+    {
+        $parent = $this->getParentInstance();
+        if (BimpObject::objectLoaded($parent) && is_a($parent, 'BS_Ticket')) {
+            if ((int) $parent->getData('status') !== BS_Ticket::BS_TICKET_CLOT) {
+                return 1;
+            }
+        }
+        
+        return 0;
+    }
+    
     public function getUserCurrentIntersFilters()
     {
         global $user;
@@ -119,6 +131,10 @@ class BS_Inter extends BimpObject
 
     public function create(&$warnings, $force_create = false)
     {
+        if (!$this->isCreatable()) {
+            return array('Ticket clôt. Impossible de créer une nouvelle intervention');
+        }
+        
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {

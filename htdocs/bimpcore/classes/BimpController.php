@@ -43,7 +43,7 @@ class BimpController
         if (BimpObject::objectLoaded($user)) {
             $bimpUser->fetch((int) $user->id);
         }
-        
+
         $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
 
         $this->current_tab = BimpTools::getValue('tab', 'default');
@@ -338,13 +338,13 @@ class BimpController
             } else {
                 $head[$h][0] = $url;
             }
-            
+
             $label = '';
-            
+
             if (isset($params['icon']) && $params['icon']) {
-                $label .= '<i class="'.BimpRender::renderIconClass($params['icon']).' iconLeft"></i>';
+                $label .= '<i class="' . BimpRender::renderIconClass($params['icon']) . ' iconLeft"></i>';
             }
-            
+
             $label .= $params['label'];
 
             $head[$h][1] = $label;
@@ -1057,12 +1057,12 @@ class BimpController
             }
 
             if (!count($errors)) {
-                if ($value) {
+                if ($value && $object->field_exists($field_name)) {
                     $object->set($field_name, $value);
                 }
 
-                foreach ($fields as $field => $value) {
-                    $object->set($field, $value);
+                foreach ($fields as $field => $field_value) {
+                    $object->set($field, $field_value);
                 }
 
                 if (count($object->errors)) {
@@ -1087,6 +1087,11 @@ class BimpController
                         if (!is_null($form_row)) {
                             $form = new BC_Form($object, $id_parent, $form_name, 1, true);
                             $form->fields_prefix = $field_prefix;
+                            $form->setValues(array(
+                                'fields' => array(
+                                    $field_name => $value
+                                )
+                            ));
                             $html = $form->renderCustomInput($form_row);
                         } else {
                             $html = BimpRender::renderAlerts('Erreur de configuration - contenu du champ personnalisé non défini');
@@ -1233,11 +1238,11 @@ class BimpController
             $view = new BC_View($object, $view_name, $content_only, 1);
             $view->content_only = $content_only;
             $view->setNewValues($new_values);
-            
+
             if (!is_null($panel)) {
                 $view->params['panel'] = (int) $panel;
             }
-            
+
             if (!is_null($panel_header)) {
                 $view->params['panel_header'] = (int) $panel_header;
             }
@@ -1643,35 +1648,34 @@ class BimpController
 
         $bimp_fixe_tabs = new FixeTabs();
         $bimp_fixe_tabs->init();
-        
+
         $html = $bimp_fixe_tabs->render(true);
-        
-        $errors = array_merge($bimp_fixe_tabs->errors,array(/*ici recup erreur global ou message genre application ferme dans 10min*/));
+
+        $errors = array_merge($bimp_fixe_tabs->errors, array(/* ici recup erreur global ou message genre application ferme dans 10min */));
         $returnHtml = "";
-        $hashCash = 'fixeTabsHtml'.$_POST['randomId'];//Pour ne regardé que sur l'ongelt actuel
+        $hashCash = 'fixeTabsHtml' . $_POST['randomId']; //Pour ne regardé que sur l'ongelt actuel
         session_start();
-        if(!isset($_SESSION[$hashCash]) || !is_array($_SESSION[$hashCash]))
-            $_SESSION[$hashCash] = array('nbBouclePush'=> $this->nbBouclePush, 'html'=> '');
-        
-        if(count($errors)>0 || $i > $_SESSION[$hashCash]['nbBouclePush'] || $i > $this->maxBouclePush || $_SESSION[$hashCash]['html'] != $html){
-            if($_SESSION[$hashCash]['html'] != $html)//On ne renvoie rien, pas de refeesh
+        if (!isset($_SESSION[$hashCash]) || !is_array($_SESSION[$hashCash]))
+            $_SESSION[$hashCash] = array('nbBouclePush' => $this->nbBouclePush, 'html' => '');
+
+        if (count($errors) > 0 || $i > $_SESSION[$hashCash]['nbBouclePush'] || $i > $this->maxBouclePush || $_SESSION[$hashCash]['html'] != $html) {
+            if ($_SESSION[$hashCash]['html'] != $html)//On ne renvoie rien, pas de refeesh
                 $returnHtml = $html;
             $_SESSION[$hashCash]['html'] = $html;
-            $_SESSION[$hashCash]['nbBouclePush'] = $_SESSION[$hashCash]['nbBouclePush'] * 1.1;//Pour ne pas surchargé quand navigateur resté ouvert, mais ne pas avoir des boucle morte quand navigation rapide
-            
-            
+            $_SESSION[$hashCash]['nbBouclePush'] = $_SESSION[$hashCash]['nbBouclePush'] * 1.1; //Pour ne pas surchargé quand navigateur resté ouvert, mais ne pas avoir des boucle morte quand navigation rapide
+
+
             die(json_encode(array(
                 'errors'     => $errors,
                 'html'       => $returnHtml,
                 'request_id' => BimpTools::getValue('request_id', 0)
             )));
         }
-        else{
-            session_write_close();//Pour eviter les blockages navigateur
-            usleep(930000);//un tous petit peu moins d'une seconde + temps d'execution = 1s
+        else {
+            session_write_close(); //Pour eviter les blockages navigateur
+            usleep(930000); //un tous petit peu moins d'une seconde + temps d'execution = 1s
             return $this->ajaxProcessLoadFixeTabs($i);
         }
-
     }
 
     // Callbacks:

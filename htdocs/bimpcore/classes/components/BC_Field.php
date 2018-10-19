@@ -81,6 +81,7 @@ class BC_Field extends BimpComponent
 
         if ($this->isObjectValid()) {
             $this->params['editable'] = (int) $this->object->canEditField($name);
+            $this->params['viewable'] = (int) $this->object->canViewField($name);
         }
 
         if (in_array($this->params['type'], array('qty', 'int', 'float', 'money', 'percent'))) {

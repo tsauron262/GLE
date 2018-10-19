@@ -27,7 +27,7 @@ class BimpObject extends BimpCache
         'icon'                     => array('default' => ''),
         'primary'                  => array('default' => 'id'),
         'common_fields'            => array('data_type' => 'bool', 'default' => 1),
-        'header_list_name'         => array('default' => 'default'),
+        'header_list_name'         => array('default' => ''),
         'header_btn'               => array('data_type' => 'array', 'default' => array()),
         'list_page_url'            => array('data_type' => 'array'),
         'parent_object'            => array('default' => ''),
@@ -2373,7 +2373,7 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlLimit($n, $p);
 
         if (BimpTools::isSubmit('list_sql')) {
-            echo $sql.'<br/><br/>';
+            echo $sql . '<br/><br/>';
         }
 
         $rows = $this->db->executeS($sql, $return);
@@ -2961,6 +2961,11 @@ class BimpObject extends BimpCache
     public function canEditField($field_name)
     {
         return (int) $this->canEdit();
+    }
+
+    public function canViewField($field_name)
+    {
+        return (int) $this->canView();
     }
 
     public function canCreateChild($child_name)
@@ -4042,34 +4047,78 @@ class BimpObject extends BimpCache
         return $fields;
     }
 
+    public function getSortOptionsArray($field = null)
+    {
+        $options = array();
+
+        if (is_null($field)) {
+            $field = BimpTools::getPostFieldValue('sort_field');
+        }
+
+        if ($this->config->isDefined('fields/' . $field . '/sort_options')) {
+            foreach ($this->config->getCompiledParams('fields/' . $field . '/sort_options') as $option_name => $params) {
+                $options[$option_name] = $params['label'];
+            }
+        } elseif ($this->getConf('fields/' . $field . '/type', 'string') === 'id_object') {
+            $obj = $this->config->getObject('fields/' . $field . '/object');
+            if (!is_null($obj) && is_a($obj, 'BimpObject')) {
+                $obj_label = $this->getConf('fields/' . $field . '/label') . ': ';
+                foreach ($obj->params['fields'] as $field_name) {
+                    if ((int) $obj->getConf('fields/' . $field_name . '/sortable', 1, false, 'bool')) {
+                        $options[$field_name] = $obj_label . $obj->getConf('fields/' . $field_name . '/label', $field_name);
+                    }
+                }
+            }
+        }
+
+        return $options;
+    }
+
     public function getListColsArray($list_name = 'default')
     {
         $cols = array();
 
         $bc_list = new BC_ListTable($this, $list_name);
 
-        if ((int) $bc_list->params['configurable'] &&
-                $this->config->isDefined('lists_cols')) {
-            foreach ($this->config->getCompiledParams('lists_cols') as $col_name => $col_params) {
-                if (isset($col_params['label']) && $col_params['label']) {
-                    $cols[$col_name] = $col_params['label'];
-                } elseif (isset($col_params['field']) && $col_params['field'] && $this->config->isDefined('fields/' . $col_params['field'] . '/label')) {
-                    $cols[$col_name] = $this->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                } else {
-                    $cols[$col_name] = $col_name;
-                }
-            }
-        }
-
         foreach ($bc_list->params['cols'] as $col_name) {
             $col_params = $bc_list->fetchParams($bc_list->config_path . '/cols/' . $col_name, $bc_list->col_params);
 
-            if ($col_params['label']) {
-                $cols[$col_name] = $col_params['label'];
-            } elseif ($col_params['field'] && $this->config->isDefined('fields/' . $col_params['field'] . '/label')) {
-                $cols[$col_name] = $this->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-            } else {
-                $cols[$col_name] = $col_name;
+            $label = '';
+            if (isset($col_params['label']) && $col_params['label']) {
+                $label = $col_params['label'];
+            }
+            if (isset($col_params['field']) && $col_params['field'] && $this->config->isDefined('fields/' . $col_params['field'] . '/label')) {
+                if ($label) {
+                    $label .= ' (Champ: ' . $this->getConf('fields/' . $col_params['field'] . '/label', $col_name) . ')';
+                } else {
+                    $label = $this->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+                }
+            }
+            if (!$label) {
+                $label = $col_name;
+            }
+        }
+
+        if ((int) $bc_list->params['configurable'] &&
+                $this->config->isDefined('lists_cols')) {
+            foreach ($this->config->getCompiledParams('lists_cols') as $col_name => $col_params) {
+                if (!isset($cols[$col_name])) {
+                    $label = '';
+                    if (isset($col_params['label']) && $col_params['label']) {
+                        $label = $col_params['label'];
+                    }
+                    if (isset($col_params['field']) && $col_params['field'] && $this->config->isDefined('fields/' . $col_params['field'] . '/label')) {
+                        if ($label) {
+                            $label .= ' (Champ: ' . $this->getConf('fields/' . $col_params['field'] . '/label', $col_name) . ')';
+                        } else {
+                            $label = $this->getConf('fields/' . $col_params['field'] . '/label', $col_name);
+                        }
+                    }
+                    if (!$label) {
+                        $label = $col_name;
+                    }
+                    $cols[$col_name] = $label;
+                }
             }
         }
 
@@ -4238,8 +4287,12 @@ class BimpObject extends BimpCache
                 $config->set('sort_way', $data['sort_way']);
             }
 
-            if (isset($data['sort_option'])) {
+            $sort_options = $this->getSortOptionsArray();
+
+            if (isset($data['sort_option']) && array_key_exists($data['sort_option'], $sort_options)) {
                 $config->set('sort_option', $data['sort_option']);
+            } else {
+                $config->set('sort_option', '');
             }
 
             if (isset($data['cols'])) {

@@ -57,10 +57,16 @@ class Interfacevalidateorder extends DolibarrTriggers {
                 if (count($tabComm) > 0) {
                     $object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                 }
+                elseif($this->defaultCommEgalUser)
+                    $object->add_contact($user->id, 'SALESREPFOLL', 'internal');
+                else {
+                    setEventMessages("Impossible de validé, pas de Commercial Suivie", null, 'errors');
+                    return -2;
+                }
             }
             
             
-            $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');
+            $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');//signataire
             if (count($tabConatact) < 1) {
                 if (!is_object($object->thirdparty)) {
                     $object->thirdparty = new Societe($this->db);
@@ -70,12 +76,7 @@ class Interfacevalidateorder extends DolibarrTriggers {
                 if (count($tabComm) > 0) {
                     $object->add_contact($tabComm[0]['id'], 'SALESREPSIGN', 'internal');
                 }
-                elseif($this->defaultCommEgalUser)
                     $object->add_contact($user->id, 'SALESREPSIGN', 'internal');
-                else {
-                    setEventMessages("Impossible de validé, pas de Commercial signataire", null, 'errors');
-                    return -2;
-                }
             }
             
 

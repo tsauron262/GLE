@@ -54,7 +54,7 @@ class exportCommande extends export8sens {
 
     public function getId8sensByCommande($id, $userCr) {
         $this->id8sens = 0;
-        $sql = $this->db->query("SELECT * FROM `llx_element_contact` WHERE `element_id` = " . $id . " AND `fk_c_type_contact` = 90 ORDER BY `rowid` DESC");
+        $sql = $this->db->query("SELECT * FROM `llx_element_contact` WHERE `element_id` = " . $id . " AND `fk_c_type_contact` = 91 ORDER BY `rowid` DESC");
         if ($this->db->num_rows($sql) > 0) {
             $ligne = $this->db->fetch_object($sql);
             $userC = new User($this->db);

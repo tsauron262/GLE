@@ -63,46 +63,33 @@ class BS_Inter extends BimpObject
         return null;
     }
 
-    // Rendus HTML: 
-
-    public function renderDefaultView()
-    {
-        $status = (int) $this->getData('status');
-
-        if ($status !== self::BS_INTER_CLOSED) {
-            $tech_id_user = (int) $this->getData('tech_id_user');
-            global $user;
-
-            if (isset($user->id) && $user->id && !is_null($tech_id_user) && $tech_id_user) {
-                if ($tech_id_user === (int) $user->id) {
-                    return $this->renderView('full', false);
-                }
-            }
-        }
-
-        return $this->renderView('data_only', false);
-    }
+    // Rendus HTML:
 
     public function renderChronoView()
     {
-        if (!isset($this->id) || !$this->id) {
+        if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('intervention non enregistrée');
         }
 
-        $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+        if ((int) $this->getData('status') === self::BS_INTER_CLOSED) {
+            return '';
+        }
 
-        if (!$timer->find(array(
-                    'obj_module' => $this->module,
-                    'obj_name'   => $this->object_name,
-                    'id_obj'     => (int) $this->id,
-                    'field_name' => 'timer'
-                ))) {
+        global $user;
+
+        if ((int) $user->id !== (int) $this->getData('tech_id_user')) {
+            return '';
+        }
+
+        $timer = $this->getTimer();
+
+        if (!BimpObject::objectLoaded($timer)) {
             if (!$timer->setObject($this, 'timer')) {
                 return BimpRender::renderAlerts('Echec de la création du timer');
             }
         }
 
-        if (!isset($timer->id) || !$timer->id) {
+        if (!BimpObject::objectLoaded($timer)) {
             return BimpRender::renderAlerts('Echec de l\'initialisation du timer');
         }
 
@@ -141,6 +128,7 @@ class BS_Inter extends BimpObject
                     } else {
                         $times = $timer->getTimes($this);
                         $this->updateField('timer', (int) $times['total']);
+                        $timer->updateField('time_session', 0);
                     }
                 }
             }
@@ -149,12 +137,11 @@ class BS_Inter extends BimpObject
 
     public function delete($force_delete = false)
     {
-        $id = (int) $this->id;
+        $timer = $this->getTimer();
 
         $errors = parent::delete($force_delete);
 
         if (!count($errors)) {
-            $timer = $this->getTimer();
             if (BimpObject::objectLoaded($timer)) {
                 $timer->delete(true);
             }

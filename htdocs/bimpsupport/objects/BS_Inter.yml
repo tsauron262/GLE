@@ -84,6 +84,8 @@ forms:
     default:
         rows: 
             - field: tech_id_user
+              show: 
+                  callback: isNotLoaded
             - field: priorite
             - field: description
             - custom: 1

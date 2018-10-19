@@ -9,8 +9,8 @@ function reloadFixeTabs(iterate) {
     } else {
         BimpAjax('loadFixeTabs', {}, null, {
             display_success: false,
-            display_errors_in_popup_only: true,
-            display_warnings_in_popup_only: true,
+            display_errors: false,
+            display_warnings: false,
             success: function (result, bimpAjax) {
                 if (result.html) {
                     $('#bimp_fixe_tabs').html(result.html);

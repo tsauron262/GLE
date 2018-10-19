@@ -66,13 +66,13 @@ class BimpComm extends BimpObject
         if (!$id_client) {
             $id_client = (int) $this->getData('fk_soc');
         }
-        
+
         return $id_client;
     }
-    
+
     public function getClientContactsArray()
-    {        
-        
+    {
+
         $id_client = $this->getAddContactIdClient();
         return self::getSocieteContactsArray($id_client, false);
     }
@@ -368,6 +368,47 @@ class BimpComm extends BimpObject
         }
 
         return $this->remise_globale_line_rate;
+    }
+
+    public function getCreateFromOriginCheckMsg()
+    {
+        if (!$this->isLoaded()) {
+            $origin = BimpTools::getPostFieldValue('origin');
+            $origin_id = BimpTools::getPostFieldValue('origin_id');
+
+            if ($origin && $origin_id) {
+                $where = '`fk_source` = ' . (int) $origin_id . ' AND `sourcetype` = \'' . $origin . '\'';
+                $where .= ' AND `targettype` = \'' . $this->dol_object->element.'\'';
+
+                
+                $result = $this->db->getValue('element_element', 'rowid', $where);
+                
+                if (!is_null($result) && (int) $result) {
+                    $content = 'Attention: ' . $this->getLabel('a') . ' a déjà été créé' . ($this->isLabelFemale() ? 'e' : '') . ' à partir de ';
+                    switch ($origin) {
+                        case 'propal':
+                            $content .= 'cette proposition commerciale';
+                            break;
+
+                        default:
+                            $content .= 'l\'objet "' . $origin . '"';
+                            break;
+                    }
+//                    echo '<pre>';
+//                    print_r(array(
+//                            'content' => $content,
+//                            'type'    => 'warning'
+//                    ));
+//                    exit;
+                    return array(array(
+                            'content' => $content,
+                            'type'    => 'warning'
+                    ));
+                }
+            }
+        }
+
+        return null;
     }
 
     // Getters - Overrides BimpObject
@@ -1202,10 +1243,10 @@ class BimpComm extends BimpObject
             foreach ($this->dol_object->lines as $line) {
                 $dol_lines[(int) $line->id] = $line;
             }
-            
+
             $bimp_line = $this->getChildObject('lines');
             $rows = $this->db->getRows($bimp_line->getTable(), '`id_obj` = ' . (int) $this->id, null, 'array', array('id', 'id_line', 'position', 'remise'));
-            
+
             if (is_array($rows)) {
                 foreach ($rows as $r) {
                     $bimp_lines[(int) $r['id_line']] = array(
@@ -1219,7 +1260,7 @@ class BimpComm extends BimpObject
             // Suppression des lignes absentes de l'objet dolibarr:
             foreach ($bimp_lines as $id_dol_line => $data) {
                 if (!array_key_exists((int) $id_dol_line, $dol_lines)) {
-                    if ($bimp_line->fetch($data['id'])) {
+                    if ($bimp_line->fetch($data['id'], $this)) {
                         $bimp_line->delete();
                         unset($bimp_lines[$id_dol_line]);
                     }
@@ -1824,7 +1865,7 @@ class BimpComm extends BimpObject
 
         if ($origin && $origin_id) {
             $origin_object = self::getInstanceByType($origin, $origin_id);
-            
+
             if (!BimpObject::objectLoaded($origin_object)) {
                 return array('Elément d\'origine invalide');
             }

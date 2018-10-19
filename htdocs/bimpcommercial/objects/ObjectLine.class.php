@@ -994,7 +994,9 @@ class ObjectLine extends BimpObject
         $errors = array();
 
         if (BimpObject::objectLoaded($line)) {
+            $parent = $this->parent;
             $this->reset();
+            $this->parent = $parent;
 
             $remisable = 1;
 

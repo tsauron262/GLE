@@ -82,7 +82,7 @@ class BimpTools
     {
         // Chargement d'un formulaire:
         if (BimpTools::isSubmit('param_values/fields/' . $field_name)) {
-            return BimpTools::getValue('params_values/fields/' . $field_name);
+            return BimpTools::getValue('param_values/fields/' . $field_name);
         }
 
         // Chargement d'un input: 

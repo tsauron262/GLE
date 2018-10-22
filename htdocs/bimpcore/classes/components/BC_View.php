@@ -13,15 +13,19 @@ class BC_View extends BC_Panel
         $this->params_def['buttons'] = array('type' => 'definitions', 'defs_type' => 'button', 'multiple' => true);
         $this->params_def['edit_form'] = array();
 
-        if (!$name || $name === 'default') {
-            if ($object->config->isDefined('view')) {
-                $path = 'view';
-            } elseif ($object->config->isDefined('views/default')) {
+        $path = '';
+        
+        if (!is_null($object) && is_a($object, 'BimpObject')) {
+            if (!$name || $name === 'default') {
+                if ($object->config->isDefined('view')) {
+                    $path = 'view';
+                } elseif ($object->config->isDefined('views/default')) {
+                    $path = 'views';
+                    $name = 'default';
+                }
+            } else {
                 $path = 'views';
-                $name = 'default';
             }
-        } else {
-            $path = 'views';
         }
 
         parent::__construct($object, $name, $path, $content_only, $level, $title, $icon);

@@ -245,9 +245,7 @@ table.objectlistTable {
 
         input, select, .input-group, span.select2 {
             width: 100% !important;
-        }
-        span.select2 {
-            min-width: 160px!important;
+            min-width: 100px!important;
         }
 
         .optionsContainer {
@@ -264,6 +262,7 @@ table.objectlistTable {
     }
 
 }
+
 .addObjectRow {
     display: none;
     background-color: #A0A0A0;

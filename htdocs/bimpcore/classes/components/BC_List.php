@@ -380,6 +380,24 @@ class BC_List extends BC_Panel
                                 }
                             }
                         }
+                    } elseif ($this->object->getConf('fields/' . $this->params['sort_field'] . '/type', 'string') === 'id_object') {
+                        $sort_obj = $this->object->config->getObject('fields/' . $this->params['sort_field'] . '/object');
+                        if (!is_null($sort_obj) && is_a($sort_obj, 'BimpObject')) {
+                            if (in_array($this->params['sort_option'], $sort_obj->params['fields'])) {
+                                if ((int) $sort_obj->getConf('fields/' . $this->params['sort_option'] . '/sortable', 1, false, 'bool')) {
+                                    $table = $sort_obj->getTable();
+                                    $field_on = $sort_obj->getPrimary();
+                                    if (!is_null($table) && !is_null($field_on)) {
+                                        $order_by = $table . '.' . $this->params['sort_option'];
+                                        $joins[] = array(
+                                            'alias' => $table,
+                                            'table' => $table,
+                                            'on'    => $table . '.' . $field_on . ' = a.' . $this->params['sort_field']
+                                        );
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 

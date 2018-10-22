@@ -3,6 +3,7 @@
 class BimpCore
 {
 
+    public static $conf_cache = array();
     public static $files = array(
         'js'  => array(
             '/includes/jquery/plugins/jpicker/jpicker-1.1.6.js',
@@ -32,22 +33,30 @@ class BimpCore
             foreach (self::$files['css'] as $css_file) {
                 echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $css_file . '"/>';
             }
+
+            global $user;
+
+            echo '<script type="text/javascript">';
+            echo ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
+            echo ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
+            echo '</script>';
+
             foreach (self::$files['js'] as $js_file) {
                 echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
             }
 
-            echo '<script type="text/javascript">';
-            echo ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
-            echo '</script>';
             self::$filesInit = true;
         }
     }
 
     public static function getConf($name)
     {
-        global $db;
+        if (!isset(self::$conf_cache[$name])) {
+            global $db;
+            $bdb = new BimpDb($db);
+            self::$conf_cache[$name] = $bdb->getValue('bimpcore_conf', 'value', '`name` = \'' . $name . '\'');
+        }
 
-        $bdb = new BimpDb($db);
-        return $bdb->getValue('bimpcore_conf', 'value', '`name` = \'' . $name . '\'');
+        return self::$conf_cache[$name];
     }
 }

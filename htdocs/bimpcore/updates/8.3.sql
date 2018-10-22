@@ -1,1 +1,2 @@
-ALTER TABLE `llx_bf_demande` ADD `id_contrat` INT NOT NULL DEFAULT '0';
+
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('bimpcomm_tx_marque', 1)

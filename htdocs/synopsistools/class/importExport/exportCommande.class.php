@@ -54,7 +54,7 @@ class exportCommande extends export8sens {
 
     public function getId8sensByCommande($id, $userCr) {
         $this->id8sens = 0;
-        $sql = $this->db->query("SELECT * FROM `llx_element_contact` WHERE `element_id` = " . $id . " AND `fk_c_type_contact` = 90 ORDER BY `rowid` DESC");
+        $sql = $this->db->query("SELECT * FROM `llx_element_contact` WHERE `element_id` = " . $id . " AND `fk_c_type_contact` = 91 ORDER BY `rowid` DESC");
         if ($this->db->num_rows($sql) > 0) {
             $ligne = $this->db->fetch_object($sql);
             $userC = new User($this->db);
@@ -126,7 +126,44 @@ class exportCommande extends export8sens {
 
 
             $tabCommande = $tabCommandeDet = array();
-            $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $societe->name, "phone" => $societe->phone, "address" => $societe->address, "zip" => $societe->zip, "town" => $societe->town, "ref" => $commande->ref, "date" => dol_print_date($commande->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label, "secteur" => $secteur);
+            
+            
+            $PcvLAdpTitleEnu = $PcvPAdpTitleEnu = "";
+            $PcvLAdpLib = $PcvPAdpLib = $societe->name;
+            $PcvLAdpRue1 = $PcvPAdpRue1 = $societe->address;
+            $PcvLAdpZip = $PcvPAdpZip = $societe->zip;
+            $PcvLAdpCity = $PcvPAdpCity = $societe->town;
+            $listContactLiv = $commande->liste_contact(-1, 'external', 0, 'SHIPPING');
+            if(count($listContactLiv)){
+                $contactLiv = $listContactLiv[0];
+                $contact = new Contact($this->db);
+                $contact->fetch($contactLiv['id']);
+                $PcvLAdpTitleEnu = $contactLiv['civility'];
+                $PcvLAdpLib = $contactLiv['lastname']. " ".$contactLiv['firstname'];
+                $PcvLAdpRue1 = ($contact->address != "") ? $contact->address : $societe->address;
+                $PcvLAdpZip = ($contact->zip != "") ? $contact->zip : $societe->zip;
+                $PcvLAdpCity = ($contact->town != "") ? $contact->town : $societe->town;
+            }
+            
+            $listContactFact = $commande->liste_contact(-1, 'external', 0, 'BILLING');
+            if(count($listContactLiv)){
+                $contactFact = $listContactFact[0];
+                $contact = new Contact($this->db);
+                $contact->fetch($contactFact['id']);
+                $PcvPAdpTitleEnu = $contactFact['civility'];
+                $PcvPAdpLib = $contactFact['lastname']. " ".$contactFact['firstname'];
+                $PcvPAdpRue1 = ($contact->address != "") ?$contact->address : $societe->address;
+                $PcvPAdpZip = ($contact->zip != "") ?$contact->zip : $societe->zip;
+                $PcvPAdpCity = ($contact->town != "") ?$contact->town : $societe->town;
+            }
+            
+//            echo "<pre>";
+//            print_r($contact);
+//            
+//            die();
+            $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $societe->name." ".$PcvPAdpLib, "phone" => $societe->phone, "address" => $PcvPAdpRue1, "zip" => $PcvPAdpZip, "town" => $PcvPAdpCity, "ref" => $commande->ref, "date" => dol_print_date($commande->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label, "secteur" => $secteur, "CodeCli"=>"",
+                "PcvPAdpTitleEnu"=>$PcvPAdpTitleEnu,
+                "PcvLAdpTitleEnu"=>$PcvLAdpTitleEnu, "PcvLAdpLib" => $societe->name." ".$PcvLAdpLib, "PcvLAdpRue1"=> $PcvLAdpRue1, "PcvLAdpZip" => $PcvLAdpZip, "PcvLAdpCity" => $PcvLAdpCity);
             $commande->fetch_lines();
             foreach ($commande->lines as $line) {
                 $type = $this->getRef($line);

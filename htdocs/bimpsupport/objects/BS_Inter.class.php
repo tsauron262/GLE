@@ -18,6 +18,18 @@ class BS_Inter extends BimpObject
 
     // Getters: 
 
+    public function isCreatable()
+    {
+        $parent = $this->getParentInstance();
+        if (BimpObject::objectLoaded($parent) && is_a($parent, 'BS_Ticket')) {
+            if ((int) $parent->getData('status') !== BS_Ticket::BS_TICKET_CLOT) {
+                return 1;
+            }
+        }
+        
+        return 0;
+    }
+    
     public function getUserCurrentIntersFilters()
     {
         global $user;
@@ -124,12 +136,16 @@ class BS_Inter extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        if (!$this->isCreatable()) {
+            return array('Ticket clôt. Impossible de créer une nouvelle intervention');
+        }
+        
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
             if ((int) BimpTools::getValue('start_timer', 0)) {
                 $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
-                if (!$timer->setObject($this, 'timer', true)) {
+                if (!$timer->setObject($this, 'timer', true, (int) $this->getData('tech_id_user'))) {
                     $warnings[] = 'Echec de l\'initialisation du chrono appel payant';
                 }
             }

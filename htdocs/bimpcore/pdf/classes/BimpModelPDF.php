@@ -242,6 +242,7 @@ Abstract class BimpModelPDF
     }
 
     // Affichages erreurs: 
+    
     public function displayErrors()
     {
         if (count($this->errors)) {

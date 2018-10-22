@@ -1,1 +1,1 @@
-ALTER TABLE `llx_bf_demande` ADD `id_commercial` INT NOT NULL DEFAULT '0';
+ALTER TABLE `llx_bimp_list_config` ADD `sort_option` VARCHAR(128) NOT NULL DEFAULT '' AFTER `sort_field`;

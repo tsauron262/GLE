@@ -80,21 +80,25 @@ class BimpPDF extends TCPDF
                 $this->Output($filename, 'F');
                 $display = 'D';
             } elseif ($display == 'IS') {//On enregistre et on affiche
-                $this->Output($filename, 'F');
+                //$this->Output($filename, 'F');
                 $display = 'I';
             }
-
-            $filename = $nomPure;
+            
             if ($display == 'D') { //On download
                 $output = 'D';
             } elseif ($display == 'S') { // retour en châine de caractères
                 $output = 'S';
             } else {               //On affiche
                 $output = 'I';
-                $filename = $nomPure;
             }
         }
-
+        
+        
+        if($output == "I"){
+            $afficher = true;
+            $output = "F";
+        }
+        
         $addCgvPages = $this->addCgvPages;
         $this->Output($filename, $output);
         
@@ -102,6 +106,14 @@ class BimpPDF extends TCPDF
             $fpdfi = new BimpConcatPdf();
             $fpdfi->addCGVPages($filename,$output);
         }
+        
+        if($afficher){
+            header("Content-type: application/pdf");
+            header("Content-Disposition: inline; filename=".$nomPure);
+            @readfile($filename);
+            die;
+        }
+        
         return 1;
     }
 
@@ -114,8 +126,6 @@ class BimpPDF extends TCPDF
 
 
 use setasign\Fpdi\Fpdi;
-
-
 
 require_once DOL_DOCUMENT_ROOT.'/includes/tcpdi/tcpdi.php';
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/fpdf2.php';

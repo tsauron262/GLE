@@ -119,12 +119,12 @@ class BimpDocumentPDF extends BimpModelPDF
             $comm1 = $comm2 = 0;
             $contacts = array();
             if (method_exists($this->object, 'getIdContact')) {
-                $contacts = $this->object->getIdContact('internal', 'SALESREPSIGN');
+                $contacts = $this->object->getIdContact('internal', 'SALESREPFOLL');
                 if (count($contacts)) {
                     $comm1 = $contacts[0];
                 }
 
-                $contacts = $this->object->getIdContact('internal', 'SALESREPFOLL');
+                $contacts = $this->object->getIdContact('internal', 'SALESREPSIGN');
                 if (count($contacts)) {
                     $comm2 = $contacts[0];
                 }
@@ -139,7 +139,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 $nRows++;
                 $usertmp = new User($this->db);
                 $usertmp->fetch($comm2);
-                $rows .= '<div class="row">' . $this->langs->transnoentities('Emetteur') . ' devis : ' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
+                $rows .= '<div class="row">' . $this->langs->transnoentities('Émetteur') . ' devis : ' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
                 $nRows++;
             } else {
                 if ($comm1 > 0) {

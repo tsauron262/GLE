@@ -265,7 +265,7 @@ class BC_Display extends BimpComponent
                                         if (!isset($array[$this->value]['classes'])) {
                                             $array[$this->value]['classes'] = array();
                                         }
-                                        $array[$this->value]['classes'] = array_merge($array[$this->value]['classes'], array('fa', 'fa-' . $array[$this->value]['icon'], 'iconLeft', 'bs-popover'));
+                                        $array[$this->value]['classes'] = array_merge($array[$this->value]['classes'], array(BimpRender::renderIconClass($array[$this->value]['icon']), 'iconLeft', 'bs-popover'));
                                         $html .= '<div style="text-align: center">';
                                         $html .= '<i ' . BimpRender::displayTagAttrs($array[$this->value]);
                                         $html .= ' data-toggle="popover"';

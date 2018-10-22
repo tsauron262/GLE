@@ -145,6 +145,8 @@ list:
             field: status
             edit: 1
     add_form_name: default
+    add_btn: 
+        callback: isCreatable
     edit_btn: 1
     update_btn: 1
     delete_btn: 1

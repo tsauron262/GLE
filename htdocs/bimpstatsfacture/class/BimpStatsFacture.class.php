@@ -537,13 +537,17 @@ class BimpStatsFacture {
                     $title .= ($row['type_garantie'] != '' ? $row['type_garantie'] . ' - ' : 'Sans type de garantie - ');
                 }
                 if ($sortEquipement != '') {
-                    $ind = array_search($row['equip_ref'], $allEquipement);
+                    $filtreStr = $row['equip_ref'];
+                    $filtreStr = str_replace("~", "", $filtreStr);
+                    $filtreStr = str_replace("VIN,", "", $filtreStr);
+                    $filtreStr = lcfirst($filtreStr);
+                    $ind = array_search($filtreStr, $allEquipement);
                     if($ind < 1){
-                        $allEquipement[] = $row['equip_ref'];
+                        $allEquipement[] = $filtreStr;
                         $ind = count($allEquipement) - 1;
                     }
                     $filtre .= $ind . '_';
-                    $title .= ($row['equip_ref'] != '' ? $row['equip_ref'] . ' - ' : 'Sans équipement - ');
+                    $title .= ($filtreStr != '' ? $filtreStr . ' - ' : 'Sans équipement - ');
                 }
                 $title = substr($title, 0, -2);
             }

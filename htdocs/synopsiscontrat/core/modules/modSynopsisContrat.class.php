@@ -220,7 +220,18 @@ class modSynopsisContrat extends DolibarrModules {
   KEY `fk_user_author` (`fk_user_author`)
 )");
 //    $this->dirs[0] = $conf->chrono->dir_output;
-$tabModel = array("contrat_BIMP" => "Modèle BIMP", "contrat_courrierBIMPavenant" => "BIMP Courrier - Avenant", "contrat_courrierBIMPconfirmation" => "BIMP Courrier - Confirmation", "contrat_courrierBIMPrenouvellement" => "BIMP Courrier - Renouvellement", "contrat_courrierBIMPresiliation" => "BIMP Courrier - Resiliation", "contrat_courrierBIMPsignature" => "BIMP Courrier - Signature", "contrat_courrierBIMPresiliationAvoir" => "BIMP Courrier - Resiliation & avoir", "contrat_courrierBIMPAutoPrelevement" => "BIMP Courrier - Prelevement automatique");
+$tabModel = array(
+  "contrat_BIMP" => "Modèle BIMP", 
+  "contrat_courrierBIMPfinapro" => "BIMP Contrat - Financement", 
+  "contrat_courrierBIMPavenant" => "BIMP Courrier - Avenant", 
+  "contrat_courrierBIMPconfirmation" => "BIMP Courrier - Confirmation", 
+  "contrat_courrierBIMPrenouvellement" => "BIMP Courrier - Renouvellement", 
+  "contrat_courrierBIMPresiliation" => "BIMP Courrier - Resiliation", 
+  "contrat_courrierBIMPsignature" => "BIMP Courrier - Signature", 
+  "contrat_courrierBIMPresiliationAvoir" => "BIMP Courrier - Resiliation & avoir", 
+  "contrat_courrierBIMPAutoPrelevement" => "BIMP Courrier - Prelevement automatique",
+  "contrat_courrierBIMPfinapro" => "BIMP contrat - Financement + Proces Verbal"
+);
 
         foreach($tabModel as $result => $nom){
             $sql[] = "DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE nom = '".$result."'";        

@@ -55,6 +55,7 @@ class Bimp_ProductFournisseurPrice extends BimpObject
             $tva_tx = (float) $this->getData('tva_tx');
             $remise = (float) $this->getData('remise_percent');
 
+            $pf->product_fourn_id = $fourn->id;
             $result = $pf->update_buyprice($qty, $buyprice, $user, 'HT', $fourn->dol_object, 0, $ref, $tva_tx, 0, $remise);
             if ($result <= 0) {
                 $msg = '';

@@ -64,10 +64,20 @@ class BC_Input extends BimpComponent
             'societe_type' => array('default' => '')
         ),
         'search_state'                => array(
-            'id_country' => array('data_type' => 'int', 'default' => 0)
+            'id_country'        => array('data_type' => 'int', 'default' => 0),
+            'active_only'       => array('data_type' => 'bool', 'default' => 1),
+            'country_key_field' => array('default' => 'rowid'),
+            'include_empty'     => array('data_type' => 'bool', 'default' => 1)
+        ),
+        'search_country'              => array(
+            'active_only' => array('data_type' => 'bool', 'default' => 1),
+            'key_field'   => array('default' => 'rowid')
         ),
         'search_juridicalstatus'      => array(
-            'country_code' => array('default' => '0')
+            'country_code'      => array('data_type' => 'int', 'default' => ''),
+            'active_only'       => array('data_type' => 'bool', 'default' => 1),
+            'country_key_field' => array('default' => 'code'),
+            'include_empty'     => array('data_type' => 'bool', 'default' => 1)
         ),
         'search_commande_client'      => array(
             'id_client' => array('data_type' => 'int', 'default' => 0)
@@ -265,11 +275,22 @@ class BC_Input extends BimpComponent
                 break;
 
             case 'search_state':
-                $options['id_country'] = isset($this->params['id_country']) ? $this->params['id_country'] : '';
+                $options['id_country'] = isset($this->params['id_country']) ? $this->params['id_country'] : 0;
+                $options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
+                $options['country_key_field'] = isset($this->params['country_key_field']) ? $this->params['country_key_field'] : 'rowid';
+                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
+                break;
+
+            case 'search_country':
+                $options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
+                $options['key_field'] = isset($this->params['key_field']) ? $this->params['key_field'] : 'rowid';
                 break;
 
             case 'search_juridicalstatus':
                 $options['country_code'] = isset($this->params['country_code']) ? $this->params['country_code'] : '';
+                $options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
+                $options['country_key_field'] = isset($this->params['country_key_field']) ? $this->params['country_key_field'] : 'code';
+                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 1;
                 break;
 
             case 'search_commande_client':
@@ -354,6 +375,7 @@ class BC_Input extends BimpComponent
 
         if ($this->params['multiple']) {
             $this->extraData['values_field'] = $input_name;
+            $this->extraClasses[] = $input_name . '_inputContainer';
             $input_name .= '_add_value';
             $input_id .= '_add_value';
         }

@@ -27,7 +27,7 @@ class BimpObject extends BimpCache
         'icon'                     => array('default' => ''),
         'primary'                  => array('default' => 'id'),
         'common_fields'            => array('data_type' => 'bool', 'default' => 1),
-        'header_list_name'         => array('default' => ''),
+        'header_list_name'         => array('default' => 'default'),
         'header_btn'               => array('data_type' => 'array', 'default' => array()),
         'list_page_url'            => array('data_type' => 'array'),
         'parent_object'            => array('default' => ''),
@@ -526,6 +526,28 @@ class BimpObject extends BimpCache
                 in_array($field_name, $this->params['fields']);
     }
 
+    public function dol_field_exists($field_name)
+    {
+        if (!$this->field_exists($field_name)) {
+            return false;
+        }
+
+        if ($this->isDolObject()) {
+            if ((int) $this->getConf('fields/' . $field_name . '/dol_extra_field', 0, false, 'bool')) {
+                if (preg_match('/^ef_(.*)$/', $field_name, $matches)) {
+                    $field_name = $matches[1];
+                }
+
+                $extra_fields = self::getExtraFieldsArray($this->dol_object->table_element);
+                if (!is_array($extra_fields) || !isset($extra_fields[$field_name])) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     public function object_exists($object_name)
     {
         return array_key_exists($object_name, $this->params['objects']);
@@ -885,14 +907,14 @@ class BimpObject extends BimpCache
     public function isLoaded()
     {
         if ($this->isDolObject()) {
-            return (isset($this->id) && (int) $this->id && isset($this->dol_object->id) && (int) $this->dol_object->id);
+            return (int) (isset($this->id) && (int) $this->id && isset($this->dol_object->id) && (int) $this->dol_object->id);
         }
-        return (isset($this->id) && (int) $this->id);
+        return (int) (isset($this->id) && (int) $this->id);
     }
 
     public function isNotLoaded()
     {
-        return ($this->isLoaded() ? 0 : 1);
+        return (int) ($this->isLoaded() ? 0 : 1);
     }
 
     public function getData($field)
@@ -933,16 +955,21 @@ class BimpObject extends BimpCache
             return null;
         }
 
-        if ($this->isDolObject()) {
-            if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
-                if (preg_match('/^ef_(.*)$/', $field, $matches)) {
-                    $field = $matches[1];
-                }
-                return $this->db->getValue($this->getTable() . '_extrafields', $field, '`fk_object` = ' . (int) $id_object);
+        if ($this->isDolObject() && (int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+            if (preg_match('/^ef_(.*)$/', $field, $matches)) {
+                $field = $matches[1];
             }
+            $value = $this->db->getValue($this->getTable() . '_extrafields', $field, '`fk_object` = ' . (int) $id_object);
+        } else {
+            $primary = $this->getPrimary();
+            $value = $this->db->getValue($this->getTable(), $field, '`' . $primary . '` = ' . (int) $id_object);
         }
-        $primary = $this->getPrimary();
-        return $this->db->getValue($this->getTable(), $field, '`' . $primary . '` = ' . (int) $id_object);
+
+        if (is_null($value)) {
+            $value = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
+        }
+
+        return $value;
     }
 
     public function set($field, $value)
@@ -1171,7 +1198,7 @@ class BimpObject extends BimpCache
             if ($this->isDolObject()) {
                 if (in_array($type, array('datetime', 'date', 'time'))) {
                     $value = $this->db->db->idate($value);
-                    if (preg_match('/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/', $value, $matches)) {
+                    if (preg_match('/^(\d{4})\-?(\d{2})\-?(\d{2}) ?(\d{2})?:?(\d{2})?:?(\d{2})?$/', $value, $matches)) {
                         switch ($type) {
                             case 'datetime':
                                 $value = $matches[1] . '-' . $matches[2] . '-' . $matches[3] . ' ' . $matches[4] . ':' . $matches[5] . ':' . $matches[6];
@@ -2346,8 +2373,7 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlLimit($n, $p);
 
         if (BimpTools::isSubmit('list_sql')) {
-            echo $sql;
-            exit;
+            echo $sql.'<br/><br/>';
         }
 
         $rows = $this->db->executeS($sql, $return);
@@ -2762,7 +2788,7 @@ class BimpObject extends BimpCache
                 if (isset($this->dol_object->array_options['options_' . $extrafield])) {
                     $value = $this->dol_object->array_options['options_' . $extrafield];
                 } else {
-                    $value = '';
+                    $value = null;
                 }
             } else {
                 $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
@@ -3157,7 +3183,7 @@ class BimpObject extends BimpCache
                 $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
                 if ($url) {
                     $items = array(
-                        '<span class="dropdown-title">Liste des ' . $this->getLabel('name_plur') . '</span>'
+                        '<span class="dropdown-title">' . BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur') . '</span>'
                     );
                     $items[] = BimpRender::renderButton(array(
                                 'label'       => 'Vue rapide',
@@ -3171,7 +3197,7 @@ class BimpObject extends BimpCache
                                     ), 'button');
                     $items[] = BimpRender::renderButton(array(
                                 'label'       => 'Afficher la page',
-                                'icon_before' => 'file-text-o',
+                                'icon_before' => 'far_file-alt',
                                 'classes'     => array(
                                     'btn', 'btn-light-default'
                                 ),
@@ -3190,7 +3216,7 @@ class BimpObject extends BimpCache
                                 )
                                     ), 'button');
                     $html .= BimpRender::renderDropDownButton('', $items, array(
-                                'icon' => 'bars'
+                                'icon' => 'fas_list'
                     ));
                 } else {
                     $html .= BimpRender::renderButton(array(
@@ -3454,6 +3480,8 @@ class BimpObject extends BimpCache
             $msg .= ' - ID ' . $this->getLabel('of_the') . ' absent';
             return BimpRender::renderAlerts($msg);
         }
+
+        $children_instance->parent = $this;
 
         if (!is_null($children_instance) && is_a($children_instance, 'BimpObject')) {
             $title = (is_null($title) ? $this->getConf('objects/' . $children_object . '/list/title') : $title);
@@ -4231,8 +4259,8 @@ class BimpObject extends BimpCache
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => 'window.location.reload();'
         );
     }

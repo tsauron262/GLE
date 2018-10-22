@@ -455,28 +455,26 @@ class BimpInput
                 break;
 
             case 'search_country':
-                $html .= $form->select_country((int) $value, $field_name);
-                break;
+                $options['options'] = BimpCache::getCountriesArray((isset($options['active_only']) ? (int) $options['active_only'] : 1), (isset($options['key_field']) ? $options['key_field'] : 'rowid'));
+                return self::renderInput('select', $field_name, $value, $options);
 
             case 'search_state':
-                if (!class_exists('FormCompany')) {
-                    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
-                }
-                global $db;
-                $formCompany = new FormCompany($db);
-                $id_country = isset($options['id_country']) ? $options['id_country'] : 0;
-                $html .= $formCompany->select_state((int) $value, $id_country, $field_name);
-                break;
+                $country = isset($options['id_country']) ? $options['id_country'] : 0;
+                $active_only = isset($options['active_only']) ? $options['active_only'] : 1;
+                $country_key_field = isset($options['country_key_field']) ? $options['country_key_field'] : 'rowid';
+                $include_empty = isset($options['include_empty']) ? $options['include_empty'] : 1;
+                $options['options'] = BimpCache::getStatesArray($country, $country_key_field, $active_only, $include_empty);
+                
+                return self::renderInput('select', $field_name, $value, $options);
 
             case 'search_juridicalstatus':
-                if (!class_exists('FormCompany')) {
-                    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formcompany.class.php';
-                }
-                global $db;
-                $formCompany = new FormCompany($db);
-                $country_code = isset($options['country_code']) ? $options['country_code'] : 0;
-                $html .= $formCompany->select_juridicalstatus((int) $value, $country_code, '', $field_name);
-                break;
+                $country = isset($options['country_code']) ? $options['country_code'] : 0;
+                $active_only = isset($options['active_only']) ? $options['active_only'] : 1;
+                $country_key_field = isset($options['country_key_field']) ? $options['country_key_field'] : 'code';
+                $include_empty = isset($options['include_empty']) ? $options['include_empty'] : 1;
+
+                $options['options'] = BimpCache::getJuridicalstatusArray($country, $country_key_field, $active_only, $include_empty);
+                return self::renderInput('select', $field_name, $value, $options);
 
             case 'search_commande_client':
                 if (isset($options['id_client']) && $options['id_client']) {
@@ -562,7 +560,11 @@ class BimpInput
                     $html = BimpRender::renderAlerts('Aucun élément diponible', 'warning');
                 } else {
                     if (!is_array($value)) {
-                        $value = array($value);
+                        if (is_string($value)) {
+                            $value = explode(',', $value);
+                        } else {
+                            $value = array($value);
+                        }
                     }
 
                     $html = '<div class="check_list_container">';
@@ -990,21 +992,21 @@ class BimpInput
         $html .= '<input type="text" class="' . $field_name . '_time_value time_input_value" value="' . (int) $timer['days'] . '" name="' . $field_name . '_days"/>';
         $html .= '<span>j</span>';
 
-        $html .= '<select name="' . $field_name . '_hours" class="' . $field_name . '_time_value time_input_value">';
+        $html .= '<select name="' . $field_name . '_hours" class="' . $field_name . '_time_value time_input_value no_select2">';
         for ($i = 0; $i < 24; $i++) {
             $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['hours']) ? ' selected' : '') . '>' . $i . '</option>';
         }
         $html .= '</select>';
         $html .= '<span>h</span>';
 
-        $html .= '<select name="' . $field_name . '_minutes" class="' . $field_name . '_time_value time_input_value">';
+        $html .= '<select name="' . $field_name . '_minutes" class="' . $field_name . '_time_value time_input_value no_select2">';
         for ($i = 0; $i < 60; $i++) {
             $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['minutes']) ? ' selected' : '') . '>' . $i . '</option>';
         }
         $html .= '</select>';
         $html .= '<span>min</span>';
 
-        $html .= '<select name="' . $field_name . '_secondes" class="' . $field_name . '_time_value time_input_value">';
+        $html .= '<select name="' . $field_name . '_secondes" class="' . $field_name . '_time_value time_input_value no_select2">';
         for ($i = 0; $i < 60; $i++) {
             $html .= '<option value="' . $i . '"' . ((int) $i === (int) ($timer['secondes']) ? ' selected' : '') . '>' . $i . '</option>';
         }

@@ -338,8 +338,16 @@ class BimpController
             } else {
                 $head[$h][0] = $url;
             }
+            
+            $label = '';
+            
+            if (isset($params['icon']) && $params['icon']) {
+                $label .= '<i class="'.BimpRender::renderIconClass($params['icon']).' iconLeft"></i>';
+            }
+            
+            $label .= $params['label'];
 
-            $head[$h][1] = $params['label'];
+            $head[$h][1] = $label;
             $head[$h][2] = $tab_name;
             $h++;
         }
@@ -1209,6 +1217,8 @@ class BimpController
         $view_name = BimpTools::getValue('view_name', 'default');
         $content_only = BimpTools::getValue('content_only', false);
         $new_values = BimpTools::getValue('new_values', array());
+        $panel = BimpTools::getValue('panel');
+        $panel_header = BimpTools::getValue('panel_header');
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -1223,6 +1233,14 @@ class BimpController
             $view = new BC_View($object, $view_name, $content_only, 1);
             $view->content_only = $content_only;
             $view->setNewValues($new_values);
+            
+            if (!is_null($panel)) {
+                $view->params['panel'] = (int) $panel;
+            }
+            
+            if (!is_null($panel_header)) {
+                $view->params['panel_header'] = (int) $panel_header;
+            }
 
             if ($content_only) {
                 $html = $view->renderHtmlContent();
@@ -1635,7 +1653,7 @@ class BimpController
         if(!isset($_SESSION[$hashCash]) || !is_array($_SESSION[$hashCash]))
             $_SESSION[$hashCash] = array('nbBouclePush'=> $this->nbBouclePush, 'html'=> '');
         
-        if(count($errors)>0 || $_SESSION[$hashCash]['html'] != $html || $i > $_SESSION[$hashCash]['nbBouclePush'] || $i > $this->maxBouclePush){
+        if(count($errors)>0 || $i > $_SESSION[$hashCash]['nbBouclePush'] || $i > $this->maxBouclePush || $_SESSION[$hashCash]['html'] != $html){
             if($_SESSION[$hashCash]['html'] != $html)//On ne renvoie rien, pas de refeesh
                 $returnHtml = $html;
             $_SESSION[$hashCash]['html'] = $html;
@@ -1650,7 +1668,7 @@ class BimpController
         }
         else{
             session_write_close();//Pour eviter les blockages navigateur
-            usleep(930000);
+            usleep(930000);//un tous petit peu moins d'une seconde + temps d'execution = 1s
             return $this->ajaxProcessLoadFixeTabs($i);
         }
 

@@ -2,6 +2,7 @@ primary: rowid
 
 header_btn: 
     callback: getActionsButtons
+header_list_name: default
     
 objects:
     lines: 
@@ -18,7 +19,7 @@ objects:
         instance: 
             bimp_object: 
                 module: bimpcore
-                name: Bimp_Societe
+                name: Bimp_Client
             id_object: 
                 field_value: fk_soc
                 
@@ -65,6 +66,7 @@ fields:
             type: search_societe
             societe_type: customer
         required: 1
+        create_form: client_light
     ref_client: 
         label: Référence client
     fk_cond_reglement: 
@@ -75,7 +77,6 @@ fields:
             array: condReglements
         input: 
             type: select_cond_reglement
-        required: 1
     fk_mode_reglement: 
         label: Mode de règlement
         dol_prop: mode_reglement_id
@@ -238,7 +239,7 @@ forms:
               data_type: bool
               input: 
                   type: toggle
-              value: 0
+              value: 1
             - field: remise_globale
             - custom: 1
               label: Montant de la remise
@@ -379,6 +380,7 @@ fields_tables:
             
 views: 
     default: 
+        objects_change_reload: Bimp_File
         delete_btn: 
             callback: isDeletable
         edit_form: default
@@ -461,7 +463,7 @@ views:
                       
     notes: 
         title: Notes
-        icon: file-text
+        icon: fas_file-alt
         rows: 
             - cols:
                 - type: fields_table

@@ -843,7 +843,7 @@ class GSX_Repair extends BimpObject
                 $html .= '<td>' . $part['registeredForReturn'] . '</td>';
                 $html .= '<td><span title="' . $part['vendorName'] . " " . $part['vendorAddress'] . " " . $part['vendorState'] . " " . $part['vendorCity'] . '">' . $part['vendorAddress'] . '</span></td>';
                 $html .= '<td><span title="' . $part['kbbSerialNumber'] . '">' . dol_trunc($part['kbbSerialNumber'], 6) . '</span></td>';
-                $html .= '<td>' . ($part['fileName'] != "" ? '<a class="btn btn-default" target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '"><i class="fa fa-file-text iconLeft"></i>Etiquette</a>' : '') . '</td>';
+                $html .= '<td>' . ($part['fileName'] != "" ? '<a class="btn btn-default" target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '"><i class="fas fa5-file-alt iconLeft"></i>Etiquette</a>' : '') . '</td>';
                 if (file_exists(DOL_DATA_ROOT . '/bimpcore/bimpsupport/sav/' . (int) $this->getData('id_sav') . '/' . $part['fileName'])) {
                     $html .= '<a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="btn btn-default">';
                     $html .= '<i class="fa fa-file-o iconLeft"></i>Etiquette de retour</a>';

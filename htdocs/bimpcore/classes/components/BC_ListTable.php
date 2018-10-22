@@ -55,6 +55,7 @@ class BC_ListTable extends BC_List
         $this->params_def['enable_refresh'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['enable_edit'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['single_cell'] = array('type' => 'definitions', 'defs_type' => 'single_cell', 'default' => null);
+        $this->params_def['inline_view_item'] = array('data_type' => 'int', 'default' => 0);
 
         $path = null;
 
@@ -161,6 +162,13 @@ class BC_ListTable extends BC_List
             $show = (int) $this->object->getConf($this->config_path . '/cols/' . $col_name . '/show', $show, false, 'bool');
 
             if ($show) {
+                $field = $this->object->getConf('lists_cols/' . $col_name . '/field', '');
+                $field = $this->object->getConf($this->config_path . '/cols/' . $col_name . '/field', $field);
+                if ($field && $this->object->isDolObject()) {
+                    if (!$this->object->dol_field_exists($field)) {
+                        continue;
+                    }
+                }
                 $this->cols[] = $col_name;
             }
         }
@@ -282,12 +290,46 @@ class BC_ListTable extends BC_List
 
     // Rendus HTML:
 
+    public function renderBeforePanelHtml()
+    {
+        $html = '';
+        $html .= '<div id="' . $this->identifier . '_objectViewContainer" class="objectViewContainer"';
+
+        $view_check = false;
+        if ((int) $this->params['inline_view_item']) {
+            if ($this->object->fetch((int) $this->params['inline_view_item'])) {
+                if ($this->object->canView()) {
+                    $view_name = $this->object->getConf($this->config_path . '/inline_view', '');
+                    if ($view_name) {
+                        $view = new BC_View($this->object, $view_name, false);
+                        $onclick = 'closeObjectView(\'' . $this->identifier . '_objectViewContainer\');';
+                        $view->params['footer_extra_btn'][] = array(
+                            'label'   => 'Fermer',
+                            'icon'    => 'times',
+                            'onclick' => $onclick
+                        );
+                        $html .= '>' . $view->renderHtml();
+                        unset($view);
+                        $view_check = true;
+                    }
+                }
+                $this->object->reset();
+            }
+        }
+
+        if (!$view_check) {
+            $html .= ' style="display: none">';
+        }
+
+        $html .= '</div>';
+
+        $html .= '<div id="' . $this->identifier . '_objectFormContainer" class="objectFormContainer" style="display: none"></div>';
+        return $html;
+    }
+
     public function renderHtmlContent()
     {
         $html = '';
-
-        $html .= '<div id="'.$this->identifier.'_objectViewContainer" class="objectViewContainer" style="display: none"></div>';
-        $html .= '<div id="'.$this->identifier.'_objectFormContainer" class="objectFormContainer" style="display: none"></div>';
 
         $html .= $this->renderListParamsInputs();
 
@@ -720,7 +762,7 @@ class BC_ListTable extends BC_List
                 }
                 $html .= '" onclick="' . $onclick . '">';
                 if ($icon) {
-                    $html .= '<i class="fa fa-' . $icon . ' left"></i>';
+                    $html .= '<i class="' . BimpRender::renderIconClass($icon) . ' iconLeft"></i>';
                 }
                 $html .= $label . '</span></div>';
             }

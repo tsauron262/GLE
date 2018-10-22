@@ -34,6 +34,10 @@ class BC_ListViews extends BC_List
 
         parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon);
 
+        if (is_null($this->params['icon']) || !$this->params['icon'] || $this->params['icon'] === 'fas_list') {
+                $this->params['icon'] = 'fas_th-large';
+            }
+            
         $this->data['item_view_name'] = $this->params['item_view'];
 
         if (is_null($this->params['item_col_lg'])) {

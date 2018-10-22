@@ -103,6 +103,12 @@ class BC_Display extends BimpComponent
         if (is_null($this->value)) {
             $this->value = '';
         }
+        
+        if ($this->object->isDolObject()) {
+            if (!$this->object->dol_field_exists($this->field_name)) {
+                return '';
+            }
+        }
 
         if (($this->value === '') && ($this->params['type'] !== 'callback')) {
             $html .= '';
@@ -160,35 +166,36 @@ class BC_Display extends BimpComponent
 
                                 case 'nom_url':
                                     $html .= BimpObject::getInstanceNomUrl($instance);
-                                    if ($this->params['external_link']) {
-                                        if (isset($this->field_params['object'])) {
-                                            $url = $this->object->getChildObjectUrl($this->field_params['object'], $instance);
-                                        } else {
-                                            $url = BimpObject::getInstanceUrl($instance);
-                                        }
-
-                                        if ($url) {
-                                            $html .= '<span class="objectIcon" onclick="window.open(\'' . $url . '\')">';
-                                            $html .= '<i class="fas fa5-external-link-alt"></i>';
-                                            $html .= '</span>';
-                                            if (is_null($this->params['modal_view'])) {
-                                                $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . addslashes(BimpObject::getInstanceNom($instance)) . '\')';
-                                                $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
-                                                $html .= '<i class="far fa5-eye"></i>';
-                                                $html .= '</span>';
-                                            }
-                                        }
-                                    }
-                                    if (!is_null($this->params['modal_view']) && is_a($instance, 'BimpObject')) {
-                                        $title = htmlentities(addslashes($instance->getInstanceName()));
-                                        $onclick = 'loadModalView(\'' . $instance->module . '\', \'' . $instance->object_name . '\', ' . $instance->id . ', \'' . $this->params['modal_view'] . '\', $(this), \'' . $title . '\')';
-                                        $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
-                                        $html .= '<i class="far fa5-eye"></i>';
-                                        $html .= '</span>';
-                                    }
-                                    if (!$this->no_html && method_exists($instance, 'getNomExtraIcons')) {
-                                        $html .= $instance->getNomExtraIcons();
-                                    }
+                                    $html .= BimpRender::renderObjectIcons($instance, (int) $this->params['external_link'], $this->params['modal_view']);
+//                                    if ($this->params['external_link']) {
+//                                        if (isset($this->field_params['object'])) {
+//                                            $url = $this->object->getChildObjectUrl($this->field_params['object'], $instance);
+//                                        } else {
+//                                            $url = BimpObject::getInstanceUrl($instance);
+//                                        }
+//
+//                                        if ($url) {
+//                                            $html .= '<span class="objectIcon" onclick="window.open(\'' . $url . '\')">';
+//                                            $html .= '<i class="fas fa5-external-link-alt"></i>';
+//                                            $html .= '</span>';
+//                                            if (is_null($this->params['modal_view'])) {
+//                                                $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . addslashes(BimpObject::getInstanceNom($instance)) . '\')';
+//                                                $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
+//                                                $html .= '<i class="far fa5-eye"></i>';
+//                                                $html .= '</span>';
+//                                            }
+//                                        }
+//                                    }
+//                                    if (!is_null($this->params['modal_view']) && is_a($instance, 'BimpObject')) {
+//                                        $title = htmlentities(addslashes($instance->getInstanceName()));
+//                                        $onclick = 'loadModalView(\'' . $instance->module . '\', \'' . $instance->object_name . '\', ' . $instance->id . ', \'' . $this->params['modal_view'] . '\', $(this), \'' . $title . '\')';
+//                                        $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
+//                                        $html .= '<i class="far fa5-eye"></i>';
+//                                        $html .= '</span>';
+//                                    }
+//                                    if (!$this->no_html && method_exists($instance, 'getNomExtraIcons')) {
+//                                        $html .= $instance->getNomExtraIcons();
+//                                    }
                                     break;
                             }
                             self::$cache[$cache_key] = $html;

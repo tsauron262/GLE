@@ -588,7 +588,7 @@ class ObjectLine extends BimpObject
                 unset($this->remises);
                 $this->remises = null;
             }
-            
+
             return $this->remises;
         }
 
@@ -765,17 +765,7 @@ class ObjectLine extends BimpObject
                                     $html = BimpObject::getInstanceNom($product);
                                 } else {
                                     $html .= BimpObject::getInstanceNomUrl($product);
-                                    $url = BimpObject::getInstanceUrl($product);
-                                    if ($url) {
-                                        $html .= '<span class="objectIcon" onclick="window.open(\'' . $url . '\')">';
-                                        $html .= '<i class="fa fa-external-link"></i>';
-                                        $html .= '</span>';
-
-                                        $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . addslashes(BimpObject::getInstanceNom($product)) . '\')';
-                                        $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
-                                        $html .= '<i class="fa fa-eye"></i>';
-                                        $html .= '</span>';
-                                    }
+                                    $html .= BimpRender::renderObjectIcons($product, true);
                                 }
 
                                 break;
@@ -814,6 +804,19 @@ class ObjectLine extends BimpObject
 //                                    $html .= 'Equipement: ' . $this->displayEquipment();
 //                                }
 //                            }
+                            if ((int) $product->getData('fk_product_type')) {
+                                if ($this->date_from && $this->date_to) {
+                                    if ($no_html) {
+                                        $html .= "\n";
+                                    } else {
+                                        $html .= '<br/>';
+                                    }
+//                                    $html .= $this->date_from.', '.$this->date_to;
+                                    $dt_from = new DateTime($this->date_from);
+                                    $dt_to = new DateTime($this->date_to);
+                                    $html .= '(Du ' . $dt_from->format('d/m/Y') . ' au ' . $dt_to->format('d/m/Y') . ')';
+                                }
+                            }
                             if ((string) $this->desc) {
                                 if ($no_html) {
                                     $html .= "\n";
@@ -994,13 +997,18 @@ class ObjectLine extends BimpObject
         $errors = array();
 
         if (BimpObject::objectLoaded($line)) {
+            $parent = $this->parent;
             $this->reset();
+            $this->parent = $parent;
 
             $remisable = 1;
 
             if (isset($line->fk_product) && (int) $line->fk_product) {
                 $type = 1;
-                $remisable = (int) $this->db->getValue('product_extrafields', 'remisable', '`fk_object` = ' . (int) $line->fk_product);
+                $remisable = $this->db->getValue('product_extrafields', 'remisable', '`fk_object` = ' . (int) $line->fk_product);
+                if (is_null($remisable)) {
+                    $remisable = 1;
+                }
             } elseif ((float) $line->subprice) {
                 $type = 3;
             } else {
@@ -1029,11 +1037,12 @@ class ObjectLine extends BimpObject
                     }
                     $errors[] = $msg;
                 } else {
-                    $this->fetch($id);
+                    $this->parent->set("fk_statut", 0);
+                    $this->fetch($id, $this->parent);
 
                     if ($remisable && isset($line->remise_percent) && (float) $line->remise_percent) {
                         if (static::$parent_comm_type) {
-                            $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+                            $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise', null, $this);
                             $remise->validateArray(array(
                                 'id_object_line' => (int) $id,
                                 'object_type'    => static::$parent_comm_type,

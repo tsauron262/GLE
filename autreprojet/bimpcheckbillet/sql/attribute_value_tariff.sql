@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `attribute_value_tariff` (
     `fk_tariff`             INTEGER NOT NULL,
     `fk_attribute_value`    INTEGER NOT NULL,
     `price`                 FLOAT,
-    `number-place`          INTEGER,
+    `number_place`          INTEGER,
     FOREIGN KEY (`fk_tariff`) REFERENCES `tariff` (`id`),
     FOREIGN KEY (`fk_attribute_value`) REFERENCES `attribute_value` (`id`)
 ) ENGINE=innodb;

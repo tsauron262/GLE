@@ -69,6 +69,11 @@ class BC_FieldsTable extends BC_Panel
             $label = $row_params['label'];
             $content = '';
             if ($row_params['field']) {
+                if ($this->object->isDolObject()) {
+                    if (!$this->object->dol_field_exists($row_params['field'])) {
+                        continue;
+                    }
+                }
                 $field = new BC_Field($this->object, $row_params['field'], (int) $row_params['edit']);
                 $field->display_name = $row_params['display'];
 

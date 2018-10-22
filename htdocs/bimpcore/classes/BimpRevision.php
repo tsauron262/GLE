@@ -70,9 +70,9 @@ class BimpRevisionPropal extends BimpRevision
 
     private static $oldRefCli = "";
 
-    function BimpRevisionPropal($propal)
+    public function __construct($propal)
     {
-        global $db;
+       global $db;
         $this->propal = $propal;
         $result = $db->query("SELECT import_key as pre, extraparams as sui FROM " . MAIN_DB_PREFIX . "propal WHERE rowid = " . $propal->id);
         $obj = $db->fetch_object($result);
@@ -83,14 +83,15 @@ class BimpRevisionPropal extends BimpRevision
 
         $this->propalSui = new propal($db);
         if ($obj->sui > 0)
-            $this->propalSui->fetch($obj->sui);
+            $this->propalSui->fetch($obj->sui); 
     }
 
-    function reviserPropal($ajoutLigne = true, $qteZeroSaufAccomte = false, $pdfModel = 'azurSAV', &$errors = array())
+    function reviserPropal($ajoutLigne = true, $qteZeroSaufAccomte = false, $pdfModel = 'azurSAV', &$errors = array(), $socid = 0)
     {
         global $langs, $db;
         $propal = $this->propal;
-        $socid = $propal->socid;
+        if($socid < 1)
+            $socid = $propal->socid;
         $parameters = array('socid' => $socid);
         $oldRef = $propal->ref;
         $oldId = $propal->id;

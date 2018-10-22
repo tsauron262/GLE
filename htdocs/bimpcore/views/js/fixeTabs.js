@@ -1,38 +1,41 @@
 var reload_fixe_tabs_hold = false;
-var randomId = getRandomInt(9999999999999); 
+var randomId = getRandomInt(9999999999999);
 
 
-function reloadFixeTabs(iterate, reload_fixe_tabs_delay = 1000) {
+function reloadFixeTabs(iterate, reload_fixe_tabs_delay) {
+    if (!reload_fixe_tabs_delay) {
+        reload_fixe_tabs_delay = 1000;
+    }
 //    if (reload_fixe_tabs_hold) {
 //        setTimeout(function () {
 //            reloadFixeTabs(iterate);
 //        }, 3000);
 //    } else {
-        BimpAjax('loadFixeTabs', {randomId}, null, {
-            display_success: false,
-            display_errors_in_popup_only: true,
-            display_warnings_in_popup_only: true,
-            success: function (result, bimpAjax) {
-                if (result.html) {
-                    $('#bimp_fixe_tabs').html(result.html);
-                }
-                setFixeTabsEvents();
-                
-                if (iterate) {
-                    setTimeout(function () {
-                        reloadFixeTabs(true);
-                    }, reload_fixe_tabs_delay);
-                }
-            },
-            error: function(){
-                if (iterate) {
-                    setTimeout(function () {
-                        reloadFixeTabs(true, reload_fixe_tabs_delay*1.4);
-                    }, reload_fixe_tabs_delay);
-                }
+    BimpAjax('loadFixeTabs', {randomId: randomId}, null, {
+        display_success: false,
+        display_errors: false,
+        display_warnings: false,
+        success: function (result, bimpAjax) {
+            if (result.html) {
+                $('#bimp_fixe_tabs').html(result.html);
             }
-            
-        });
+            setFixeTabsEvents();
+
+            if (iterate) {
+                setTimeout(function () {
+                    reloadFixeTabs(true);
+                }, reload_fixe_tabs_delay);
+            }
+        },
+        error: function () {
+            if (iterate) {
+                setTimeout(function () {
+                    reloadFixeTabs(true, reload_fixe_tabs_delay * 1.4);
+                }, reload_fixe_tabs_delay);
+            }
+        }
+
+    });
 
 //    }
 }
@@ -91,7 +94,6 @@ $(document).ready(function () {
     }, 2000);
 });
 
-
 function getRandomInt(max) {
-  return Math.floor(Math.random() * Math.floor(max));
+    return Math.floor(Math.random() * Math.floor(max));
 }

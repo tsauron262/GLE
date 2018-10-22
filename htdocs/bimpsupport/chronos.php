@@ -1,7 +1,7 @@
 <?php
 
-
-function runBimpSupportChrono(){
+function runBimpSupportChrono()
+{
     $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
 
     $timers = $timer->getList(array(
@@ -63,6 +63,7 @@ function initTimers($timer, $timers)
 
             if (!$inter->fetch((int) $timer->getData('id_obj'))) {
                 $errors[] = 'Echec du chargement de l\'intervention n°' . $timer->getData('id_obj');
+                $timer->delete();
                 continue;
             }
 
@@ -78,6 +79,7 @@ function initTimers($timer, $timers)
 
             if (!$ticket->fetch((int) $id_ticket)) {
                 $errors[] = 'Echec du chargement du ticket n°' . $id_ticket;
+                $timer->delete();
                 continue;
             }
 
@@ -90,8 +92,8 @@ function initTimers($timer, $timers)
             $caption .= '</span>';
 
             $timer_title = 'Inter ' . $inter->id;
-            $ticket_url = DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $ticket->id;
-            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-primary" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
+            $ticket_url = DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $ticket->id.'&navtab=inters&id_inter='.$inter->id;
+            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-default" href="' . $ticket_url . '"><i class="far fa5-file iconLeft"></i>Afficher</a>';
 
             $client = $ticket->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
@@ -111,6 +113,7 @@ function initTimers($timer, $timers)
 
             if (!$ticket->fetch((int) $id_ticket)) {
                 $errors[] = 'Echec du chargement du ticket n°' . $id_ticket;
+                $timer->delete();
                 continue;
             }
 
@@ -123,14 +126,14 @@ function initTimers($timer, $timers)
             $id = 'appel_chrono_' . $ticket->id . '_fixe_tab';
             $times = $timer->getTimes($ticket);
             $caption = '<i class="' . BimpRender::renderIconClass('fas_headset') . ' iconLeft"></i>';
-            $caption .= 'Ticket '.$ticket->id;
+            $caption .= 'Ticket ' . $ticket->id;
             $caption .= '&nbsp;&nbsp;<span class="BS_Ticket_' . $ticket->id . '_timer_total_time chrono bold">';
             $caption .= $timer->renderTime(BimpTools::getTimeDataFromSeconds($times['total']));
             $caption .= '</span>';
 
             $timer_title = 'Appel Ticket ' . $ticket->id;
             $ticket_url = DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $ticket->id;
-            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-primary" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
+            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-default" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
 
             $client = $ticket->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {

@@ -121,7 +121,6 @@ fields:
     volume_units:
         label: Unité de volume
         type: int
-        
     serialisable: 
         label: Sérialisable
         type: bool

@@ -43,7 +43,7 @@ objects:
                 fields: 
                     parent_object_name: Bimp_Propal
                 
-fields: 
+fields:
     datec: 
         label: Créée le
         type: datetime
@@ -249,9 +249,9 @@ fields_tables:
             
 views: 
     default: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
     content: 
-        objects_change_reload: Bimp_PropalLine,ObjectLineRemise
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
         
 lists: 
     default: 
@@ -342,7 +342,7 @@ searches:
             - a.ref
             - ef.libelle
             - s.nom
-        joins: 
+        joins:
             - table: propal_extrafields
               on: a.rowid = ef.fk_object
               alias: ef

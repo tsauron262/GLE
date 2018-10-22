@@ -113,6 +113,16 @@ fields:
         input: 
             type: search_entrepot
             
+    validComm:
+        label: Validation Commerciale
+        type: bool
+        edit: 0
+            
+    validFin:
+        label: Validation Financiére
+        type: bool
+        edit: 0
+            
     ef_type: 
         label: Secteur
         dol_extra_field: 1
@@ -167,6 +177,8 @@ fields_tables:
             - field: fk_availability
               edit: 
                   callback: isEditable
+            - field: validComm
+            - field: validFin
                   
     payment:
         rows:
@@ -202,6 +214,8 @@ fields_tables:
                   
 forms: 
     default: 
+        msgs:
+            callback: getCreateFromOriginCheckMsg
         rows: 
             - field: libelle
             - field: entrepot

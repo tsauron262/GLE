@@ -29,3 +29,7 @@ htdocs/includes/bin/
 htdocs/includes/composer/
 /.pydevproject
 /htdocs/synopsissignature/temp/
+/scripts/backup_server/dump_daily/
+/scripts/backup_server/dump_monthly/
+/autreprojet/bimpcheckbillet/img/tariff_custom/
+/autreprojet/bimpcheckbillet/img/multiple_print.pdf

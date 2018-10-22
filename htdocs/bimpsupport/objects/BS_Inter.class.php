@@ -63,7 +63,7 @@ class BS_Inter extends BimpObject
         return null;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderDefaultView()
     {
@@ -85,24 +85,33 @@ class BS_Inter extends BimpObject
 
     public function renderChronoView()
     {
-        if (!isset($this->id) || !$this->id) {
+        if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('intervention non enregistrée');
         }
+        
+        if ((int) $this->getData('status') === self::BS_INTER_CLOSED) {
+            return '';
+        }
 
-        $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+        if ((int) $this->getData('status') === self::BS_INTER_CLOSED) {
+            return '';
+        }
 
-        if (!$timer->find(array(
-                    'obj_module' => $this->module,
-                    'obj_name'   => $this->object_name,
-                    'id_obj'     => (int) $this->id,
-                    'field_name' => 'timer'
-                ))) {
+        global $user;
+
+        if ((int) $user->id !== (int) $this->getData('tech_id_user')) {
+            return '';
+        }
+
+        $timer = $this->getTimer();
+
+        if (!BimpObject::objectLoaded($timer)) {
             if (!$timer->setObject($this, 'timer')) {
                 return BimpRender::renderAlerts('Echec de la création du timer');
             }
         }
 
-        if (!isset($timer->id) || !$timer->id) {
+        if (!BimpObject::objectLoaded($timer)) {
             return BimpRender::renderAlerts('Echec de l\'initialisation du timer');
         }
 
@@ -113,7 +122,7 @@ class BS_Inter extends BimpObject
 
     // Overrides
 
-    public function create(&$warnings, $force_create = false)
+    public function create(&$warnings = array(), $force_create = false)
     {
         $errors = parent::create($warnings, $force_create);
 
@@ -127,8 +136,22 @@ class BS_Inter extends BimpObject
         }
     }
 
-    public function update(&$warnings, $force_update = false)
+    public function update(&$warnings = array(), $force_update = false)
     {
+        $errors = array();
+        
+        if ($this->getData('status') === self::BS_INTER_OPEN) {
+            $ticket = $this->getParentInstance();
+            if (BimpObject::objectLoaded($ticket)) {
+                if ((int) $ticket->getData('status') === BS_Ticket::BS_TICKET_CLOT) {
+                    $errors[] = 'Cette intervention ne peut pas être ouverte car le ticket hotline est clôt';
+                }
+            }
+        }
+        
+        if (count($errors)) {
+            return $errors;
+        }
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
@@ -141,6 +164,7 @@ class BS_Inter extends BimpObject
                     } else {
                         $times = $timer->getTimes($this);
                         $this->updateField('timer', (int) $times['total']);
+                        $timer->updateField('time_session', 0);
                     }
                 }
             }
@@ -149,15 +173,12 @@ class BS_Inter extends BimpObject
 
     public function delete($force_delete = false)
     {
-        $id = (int) $this->id;
+        $timer = $this->getTimer();
 
         $errors = parent::delete($force_delete);
 
-        if (!count($errors)) {
-            $timer = $this->getTimer();
-            if (BimpObject::objectLoaded($timer)) {
-                $timer->delete(true);
-            }
+        if (!count($errors) && BimpObject::objectLoaded($timer)) {
+            $timer->delete(true);
         }
 
         return $errors;

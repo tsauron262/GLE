@@ -93,7 +93,7 @@ class ObjectLineRemise extends BimpObject
 
     // Overrrides: 
 
-    public function create(&$warnings, $force_create = false)
+    public function create(&$warnings = array(), $force_create = false)
     {
         $parent = $this->getParentInstance();
         if (!BimpObject::objectLoaded($parent)) {

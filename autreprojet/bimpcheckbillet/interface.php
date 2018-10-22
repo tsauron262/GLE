@@ -1,4 +1,5 @@
 <?php
+
 error_reporting(E_ERROR);
 ini_set('display_errors', 1);
 
@@ -54,11 +55,13 @@ switch ($action) {
      * home.php
      */
     case 'get_events_user': {
-            $user_session = json_decode($_SESSION['user']);
-            $user->fetch($user_session->id);
-            echo json_encode(array(
-                'events' => $event->getEvents($user->id, true, $user->status == $user::STATUT_SUPER_ADMIN),
-                'errors' => $event->errors));
+            if (isset($_SESSION['user'])) {
+                $user_session = json_decode($_SESSION['user']);
+                $user->fetch($user_session->id);
+                echo json_encode(array(
+                    'events' => $event->getEvents($user->id, true, $user->status == $user::STATUT_SUPER_ADMIN),
+                    'errors' => $event->errors));
+            }
             break;
         }
 
@@ -147,7 +150,7 @@ switch ($action) {
     case 'draft_event': {
             $user_session = json_decode($_SESSION['user']);
             $user->fetch($user_session->id);
-            if ($user->validate_event != 1) {
+            if ($user->validate_event != 1 and $user->status != 2) {
                 echo json_encode(array('errors' => "Vous n'avez pas le droit de définir comme brouillon un évènement."));
                 break;
             } else {
@@ -161,7 +164,7 @@ switch ($action) {
     case 'validate_event': {
             $user_session = json_decode($_SESSION['user']);
             $user->fetch($user_session->id);
-            if ($user->validate_event != 1) {
+            if ($user->validate_event != 1 and $user->status != 2) {
                 echo json_encode(array('errors' => "Vous n'avez pas le droit de valider un évènement."));
                 break;
             } else {
@@ -175,7 +178,7 @@ switch ($action) {
     case 'close_event': {
             $user_session = json_decode($_SESSION['user']);
             $user->fetch($user_session->id);
-            if ($user->validate_event != 1) {
+            if ($user->validate_event != 1 and $user->status != 2) {
                 echo json_encode(array('errors' => "Vous n'avez pas le droit de fermer un évènement."));
                 break;
             } else {
@@ -221,7 +224,7 @@ switch ($action) {
      */
     case 'create_tariff': {
             echo json_encode(array(
-                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_FILES['custom_img'], $_POST['input_cust_img'], $_POST['require_names'], '', $_POST['date_stop_sale'], $_POST['time_end_sale'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'],  $_POST['email_text'],$_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
+                'code_return' => $tariff->create($_POST['label'], $_POST['price'], $_POST['number_place'], $_POST['id_event'], $_FILES['file'], $_FILES['custom_img'], $_POST['input_cust_img'], $_POST['require_names'], '', $_POST['date_stop_sale'], $_POST['time_end_sale'], $_POST['date_start'], $_POST['time_start'], $_POST['date_end'], $_POST['time_end'], $_POST['email_text'], $_POST['type_extra_1'], $_POST['name_extra_1'], $_POST['require_extra_1'], $_POST['type_extra_2'], $_POST['name_extra_2'], $_POST['require_extra_2'], $_POST['type_extra_3'], $_POST['name_extra_3'], $_POST['require_extra_3'], $_POST['type_extra_4'], $_POST['name_extra_4'], $_POST['require_extra_4'], $_POST['type_extra_5'], $_POST['name_extra_5'], $_POST['require_extra_5'], $_POST['type_extra_6'], $_POST['name_extra_6'], $_POST['require_extra_6']),
                 'errors' => $tariff->errors));
             break;
         }
@@ -417,11 +420,13 @@ switch ($action) {
         }
 
     case 'get_events': {
-            $user_session = json_decode($_SESSION['user']);
-            $user->fetch($user_session->id);
-            echo json_encode(array(
-                'events' => $event->getEvents($user->id, false, $user->status == $user::STATUT_SUPER_ADMIN),
-                'errors' => $event->errors));
+            if (isset($_SESSION['user'])) {
+                $user_session = json_decode($_SESSION['user']);
+                $user->fetch($user_session->id);
+                echo json_encode(array(
+                    'events' => $event->getEvents($user->id, false, $user->status == $user::STATUT_SUPER_ADMIN),
+                    'errors' => $event->errors));
+            }
             break;
         }
 

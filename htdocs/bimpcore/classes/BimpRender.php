@@ -316,31 +316,26 @@ class BimpRender
     {
         $html = '';
 
+        if (is_array($tabs) && count($tabs)) {
+            $active = BimpTools::getValue('navtab', $tabs[0]['id']);
+        }
+        
         $html .= '<ul class="nav nav-tabs" role="tablist">';
-        $first = true;
+        
         foreach ($tabs as $tab) {
-            $html .= '<li role="presentation"' . ($first ? ' class="active"' : '') . '>';
+            $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . '>';
             $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab">';
             $html .= $tab['title'];
             $html .= '</a>';
             $html .= '</li>';
-
-            if ($first) {
-                $first = false;
-            }
         }
         $html .= '</ul>';
 
-        $first = true;
-
         $html .= '<div class="tab-content">';
         foreach ($tabs as $tab) {
-            $html .= '<div class="tab-pane fade' . ($first ? ' in active' : '') . '" role="tabpanel" id="' . $tab['id'] . '">';
+            $html .= '<div class="tab-pane fade' . ($tab['id'] === $active ? ' in active' : '') . '" role="tabpanel" id="' . $tab['id'] . '">';
             $html .= $tab['content'];
             $html .= '</div>';
-            if ($first) {
-                $first = false;
-            }
         }
         $html .= '</div>';
 
@@ -616,7 +611,9 @@ class BimpRender
                 $html .= '<i class="fas fa5-external-link-alt"></i>';
                 $html .= '</span>';
                 if (!$modal_view) {
-                    $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . addslashes(BimpObject::getInstanceNom($object)) . '\')';
+//                    $title = str_replace('"', '\\\'\\\'', (BimpObject::getInstanceNom($object)));
+                    $title = '';
+                    $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . $title . '\')';
                     $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
                     $html .= '<i class="far fa5-eye"></i>';
                     $html .= '</span>';
@@ -624,7 +621,7 @@ class BimpRender
             }
         }
         if ($modal_view && is_a($object, 'BimpObject')) {
-            $title = htmlentities(addslashes($object->getInstanceName()));
+            $title = str_replace('"', '\\\'\\\'', ($object->getInstanceName()));
             $onclick = 'loadModalView(\'' . $object->module . '\', \'' . $object->object_name . '\', ' . $object->id . ', \'' . $modal_view . '\', $(this), \'' . $title . '\')';
             $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
             $html .= '<i class="far fa5-eye"></i>';

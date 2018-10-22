@@ -40,6 +40,17 @@ sections:
                     panel: 1
                     object: ticket
                     children: notes
+                    
+          - id: fichiers
+            title: Fichiers
+            struct: 
+                type: list
+                list: 
+                    title: Fichier joints
+                    name: default
+                    panel: 1
+                    object: ticket
+                    children: files
               
     - type: buttons
       buttons:

@@ -247,6 +247,7 @@ fields:
         label: VR achat
         type: money
         default_value: 0
+        
     vr_vente: 
         label: VR vente
         type: money

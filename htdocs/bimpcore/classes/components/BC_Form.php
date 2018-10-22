@@ -199,7 +199,7 @@ class BC_Form extends BC_Panel
 
     public function renderHtmlContent($form_tag = true)
     {
-        $html = '';
+        $html = parent::renderHtmlContent();
 
         if ($form_tag) {
             $html .= '<form enctype="multipart/form-data" class="' . $this->object->object_name . '_form">';
@@ -289,6 +289,12 @@ class BC_Form extends BC_Panel
 
         if (!$field->params['editable'] || !$field->params['show']) {
             return '';
+        }
+
+        if ($this->object->isDolObject()) {
+            if (!$this->object->dol_field_exists($field_name)) {
+                return '';
+            }
         }
 
         $label = (isset($params['label']) && $params['label']) ? $params['label'] : $field->params['label'];
@@ -652,7 +658,7 @@ class BC_Form extends BC_Panel
         } elseif ($this->object->config->isDefined($this->config_path . '/rows/' . $row . '/content')) {
             $content = str_replace('name="' . $params['input_name'] . '"', 'name="' . $this->fields_prefix . $params['input_name'] . '"', $this->object->getConf($row_path . '/content', '', true));
             if (!(int) $params['no_container']) {
-                $html .= BimpInput::renderInputContainer($params['input_name'], $params['value'], $content, $this->fields_prefix, $params['required'], 0, 'customField', array('row' => $row));
+                $html .= BimpInput::renderInputContainer($params['input_name'], $params['value'], $content, $this->fields_prefix, $params['required'], 0, 'customField', array('form_row' => $row));
             } else {
                 $html .= $content;
             }

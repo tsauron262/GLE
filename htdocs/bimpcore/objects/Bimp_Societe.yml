@@ -276,7 +276,7 @@ fields_tables:
             
     notes: 
         title: Notes
-        icon: file-text
+        icon: fas_file-alt
         rows: 
             - field: note_public
             - field: note_private

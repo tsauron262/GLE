@@ -401,6 +401,6 @@ views:
                   list:
                       title: 
                           callback: getDetailsName
-                      icon: file-text-o
+                      icon: far_file-alt
                       panel: 0
                       children: details

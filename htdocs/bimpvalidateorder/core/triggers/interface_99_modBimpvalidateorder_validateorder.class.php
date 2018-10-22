@@ -25,6 +25,7 @@ include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.cla
  *  Class of triggers for validateorder module
  */
 class Interfacevalidateorder extends DolibarrTriggers {
+    private $defaultCommEgalUser = true;
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         global $conf, $user;
@@ -45,22 +46,6 @@ class Interfacevalidateorder extends DolibarrTriggers {
             }
         }
         
-        if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE')) {
-            $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');
-            if (count($tabConatact) < 1) {
-                if (!is_object($object->thirdparty)) {
-                    $object->thirdparty = new Societe($this->db);
-                    $object->thirdparty->fetch($object->socid);
-                }
-                $tabComm = $object->thirdparty->getSalesRepresentatives($user);
-                if (count($tabComm) > 0) {
-                    $object->add_contact($tabComm[0]['id'], 'SALESREPSIGN', 'internal');
-                } else {
-                    setEventMessages("Impossible de validé, pas de Commercial signataire", null, 'errors');
-                    return -2;
-                }
-            }
-        }
         if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE')) {
             $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
             if (count($tabConatact) < 1) {
@@ -73,12 +58,31 @@ class Interfacevalidateorder extends DolibarrTriggers {
                     $object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
                 }
             }
+            
+            
+            $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');
+            if (count($tabConatact) < 1) {
+                if (!is_object($object->thirdparty)) {
+                    $object->thirdparty = new Societe($this->db);
+                    $object->thirdparty->fetch($object->socid);
+                }
+                $tabComm = $object->thirdparty->getSalesRepresentatives($user);
+                if (count($tabComm) > 0) {
+                    $object->add_contact($tabComm[0]['id'], 'SALESREPSIGN', 'internal');
+                }
+                elseif($this->defaultCommEgalUser)
+                    $object->add_contact($user->id, 'SALESREPSIGN', 'internal');
+                else {
+                    setEventMessages("Impossible de validé, pas de Commercial signataire", null, 'errors');
+                    return -2;
+                }
+            }
+            
 
             if ($object->cond_reglement_code == "VIDE") {
                 setEventMessages("Merci de séléctionner les Conditions de règlement", null, 'errors');
                 return -2;
             }
-            
              
             $idEn = $object->array_options['options_entrepot'];
             if ($idEn < 1) {

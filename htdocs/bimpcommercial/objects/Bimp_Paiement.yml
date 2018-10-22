@@ -25,7 +25,10 @@ fields:
         type: money
     num_paiement: 
         label: Num.
-        dol_prop: numero
+        dol_prop: num_paiement
+        display_if: 
+            field_name: id_mode_paiement
+            show_values: CHQ,VIR
     fk_bank: 
         label: Opération sur compte
         type: int
@@ -58,20 +61,33 @@ forms:
                   prop: useCaisse
             - custom: 1
               label: Mode de paiement
-              data_type: id_object
               input_name: id_mode_paiement
               input: 
                   type: select_payment
+                  value_type: code
               value: 
-                  request: param_values/fields/id_mode_paiement
+                  request_field: id_mode_paiement
               required: 1
-#            - custom: 1
-#              label: Compte
-#              data_type: id_object
-#              input_name: id_account
-#              input: 
-#                  type: select_mysoc_account
-#              required: 1
+            - field: num_paiement
+              label: N° (Chèque ou virement)
+            - custom: 1
+              label: Emetetteur (Chèque ou virement)
+              data_type: string
+              input_name: nom_emetteur
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: CHQ,VIR
+            - custom: 1
+              label: Banque émetteur (chèque)
+              data_type: string
+              input_name: banque_emetteur
+              input: 
+                  type: text
+              display_if: 
+                  field_name: id_mode_paiement
+                  show_values: CHQ
             - field: note
             - custom: 1
               label: Avoirs client

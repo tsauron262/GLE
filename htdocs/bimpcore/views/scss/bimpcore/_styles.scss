@@ -87,7 +87,8 @@ div.tabBar {
 }
 
 .ui-autocomplete,
-.select2-drop {
+.select2-drop,
+.select2-dropdown {
     z-index: 10250!important;
 }
 
@@ -96,7 +97,8 @@ body.has_fullscreen {
         z-index: 11100!important;
     }
     .ui-autocomplete,
-    .select2-drop {
+    .select2-drop,
+    .select2-dropdown {
         z-index: 11250!important;
     }
 }
@@ -842,8 +844,7 @@ i.iconRight {
 .select2-results ul li {
     min-height: 30px;
 
-    &.select2-results__option:hover, 
-        &.select2-results__option--highlighted {
+    &.select2-results__option--highlighted {
         color: #fff!important;
 
         span {

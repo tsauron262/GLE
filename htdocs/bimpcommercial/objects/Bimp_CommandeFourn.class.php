@@ -7,7 +7,7 @@ class Bimp_CommandeFourn extends BimpComm
 
     public static $comm_type = 'commande_fourn';
     public static $status_list = array(
-//        0 => array('label' => 'Brouillon', 'icon' => 'file-text', 'classes' => array('warning')),
+//        0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
 //        1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
 //        2 => array('label' => 'Signée (A facturer)', 'icon' => 'check', 'classes' => array('info')),
 //        3 => array('label' => 'Non signée (fermée)', 'icon' => 'exclamation-circle', 'classes' => array('important')),

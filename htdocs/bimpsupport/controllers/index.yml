@@ -29,6 +29,7 @@ sections:
       tabs: 
         default:
             label: Hotline
+            icon: fas_headset
             sections:
                 - type: list
                   list: 
@@ -41,12 +42,14 @@ sections:
                       object: inters
         sav:
             label: SAV
+            icon: fas_wrench
             sections:
                 - type: list
                   list: 
                       object: sav
         sav_prets:
             label: Prêts
+            icon: fas_mobile-alt
             sections: 
                 - type: list
                   list: 

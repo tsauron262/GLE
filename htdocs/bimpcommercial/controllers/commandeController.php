@@ -113,7 +113,7 @@ class commandeController extends BimpCommController
 //        } else {
 //            $onclick = $commande->getJsActionOnclick('createFacture', array(), array('form_name' => 'facture'));
 //            $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
-//            $html .= '<i class="fa fa-file-text iconLeft"></i>Facturer tous les élements non facturés';
+//            $html .= '<i class="fas fa5-file-alt iconLeft"></i>Facturer tous les élements non facturés';
 //            $html .= '</button>';
 //
 //            $onclick = $commande->getJsActionOnclick('addLine', array(), array(
@@ -162,7 +162,7 @@ class commandeController extends BimpCommController
 //        } else {
 //            $onclick = $commande->getJsActionOnclick('createFacture', array(), array('form_name' => 'facture'));
 //            $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
-//            $html .= '<i class="fa fa-file-text iconLeft"></i>Facturer tous les élements non facturés';
+//            $html .= '<i class="fas fa5-file-alt iconLeft"></i>Facturer tous les élements non facturés';
 //            $html .= '</button>';
 //
 //            $onclick = $commande->getJsActionOnclick('addLine', array(), array(

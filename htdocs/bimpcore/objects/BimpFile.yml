@@ -104,6 +104,11 @@ lists:
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this));
               btn_class: deleteSelectedObjects
+        objects_change_reload: 
+            prop: 
+                name: object_name
+                object: 
+                    callback: getParentInstance
         add_form_name: upload
         edit_btn: 1
         edit_form: edit

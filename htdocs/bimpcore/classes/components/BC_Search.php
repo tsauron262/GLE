@@ -53,6 +53,17 @@ class BC_Search extends BimpComponent
         }
 
         foreach ($this->params['fields_search'] as $field) {
+            // todo
+//            if ($this->object->isDolobject()) {
+//                if (preg_match('/.*\.(.*)/', $field, $matches)) {
+//                    $field_name = $matches[1];
+//                } else {
+//                    $field_name = '';
+//                }
+//                if (!$this->object->dol_field_exists($field_name)) {
+//                    continue;
+//                }
+//            }
             $filters['or_search']['or'][$field] = array(
                 'part_type' => 'middle',
                 'part'      => addslashes($this->search_value)

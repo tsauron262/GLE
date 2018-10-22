@@ -126,6 +126,6 @@ else{
         "tradename" => "".$summary->tradename,
         "info" => ""."",
         "Capital" => "".str_replace(" Euros", "", $summary->sharecapital));
-    $return = $result;
+//    $return = $result;
     echo json_encode($return);
 }

@@ -646,8 +646,11 @@ class BimpComm extends BimpObject
             $form = new FormMargin($this->db->db);
             $marginInfo = $form->getMarginInfosArray($this->dol_object);
 
+            
+
             if (!empty($marginInfo)) {
                 global $conf;
+                $conf_tx_marque = (int) BimpCore::getConf('bimpcomm_tx_marque');
 
                 $html .= '<table class="bimp_list_table">';
 
@@ -656,7 +659,13 @@ class BimpComm extends BimpObject
                 $html .= '<th>Marges</th>';
                 $html .= '<th>Prix de vente</th>';
                 $html .= '<th>Prix de revient</th>';
-                $html .= '<th>Marge</th>';
+                $html .= '<th>Marge';
+                if ($conf_tx_marque) {
+                    $html .= ' (Tx marque)';
+                } else {
+                    $html .= ' (Tx marge)';
+                }
+                $html .= '</th>';
                 $html .= '</tr>';
                 $html .= '</thead>';
 
@@ -666,7 +675,13 @@ class BimpComm extends BimpObject
                     $html .= '<td>Marge / Produits</td>';
                     $html .= '<td>' . price($marginInfo['pv_products']) . '</td>';
                     $html .= '<td>' . price($marginInfo['pa_products']) . '</td>';
-                    $html .= '<td>' . price($marginInfo['margin_on_products']) . ' (' . (float) round($marginInfo['margin_rate_products'], 4) . ' %)</td>';
+                    $html .= '<td>' . price($marginInfo['margin_on_products']) . ' (';
+                    if ($conf_tx_marque) {
+                        $html .= round($marginInfo['mark_rate_products'], 4);
+                    } else {
+                        $html .= round($marginInfo['margin_rate_products'], 4);
+                    }
+                    $html .= ' %)</td>';
                     $html .= '</tr>';
                 }
 
@@ -675,7 +690,13 @@ class BimpComm extends BimpObject
                     $html .= '<td>Marge / Services</td>';
                     $html .= '<td>' . price($marginInfo['pv_services']) . '</td>';
                     $html .= '<td>' . price($marginInfo['pa_services']) . '</td>';
-                    $html .= '<td>' . price($marginInfo['margin_on_services']) . ' (' . (float) round($marginInfo['margin_rate_services'], 4) . ' %)</td>';
+                    $html .= '<td>' . price($marginInfo['margin_on_services']) . ' (';
+                    if ($conf_tx_marque) {
+                        $html .= round($marginInfo['mark_rate_services'], 4);
+                    } else {
+                        $html .= round($marginInfo['margin_rate_services'], 4);
+                    }
+                    $html .= ' %)</td>';
                     $html .= '</tr>';
                 }
                 $html .= '</tbody>';
@@ -686,7 +707,14 @@ class BimpComm extends BimpObject
                     $html .= '<td>Marge totale</td>';
                     $html .= '<td>' . price($marginInfo['pv_total']) . '</td>';
                     $html .= '<td>' . price($marginInfo['pa_total']) . '</td>';
-                    $html .= '<td>' . price($marginInfo['total_margin']) . ' (' . (float) round($marginInfo['total_margin_rate'], 4) . ' %)</td>';
+                    $html .= '<td>' . price($marginInfo['total_margin']) . ' (';
+                    if ($conf_tx_marque) {
+                        $html .= round($marginInfo['total_mark_rate'], 4);
+                    } else {
+                        $html .= round($marginInfo['total_margin_rate'], 4);
+                    }
+
+                    $html .= ' %)</td>';
                     $html .= '</tr>';
                 }
                 $html .= '</tfoot>';

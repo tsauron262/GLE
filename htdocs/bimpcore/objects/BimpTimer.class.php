@@ -3,21 +3,26 @@
 class BimpTimer extends BimpObject
 {
 
-    public function setObject(Bimpobject $object, $object_time_field, $start = false)
+    public function setObject(Bimpobject $object, $object_time_field, $start = false, $id_user = null)
     {
         $this->reset();
         if (is_null($object) || !isset($object->id) || !$object->id) {
             return false;
         }
 
-        global $user;
+        if (is_null($id_user)) {
+            global $user;
+            if (BimpObject::objectLoaded($user)) {
+                $id_user = (int) $user->id;
+            }
+        }
 
         $this->set('obj_module', $object->module);
         $this->set('obj_name', $object->object_name);
         $this->set('id_obj', $object->id);
         $this->set('field_name', $object_time_field);
         $this->set('time_session', 0);
-        $this->set('id_user', $user->id);
+        $this->set('id_user', $id_user);
 
         if ($start) {
             $this->set('session_start', time());
@@ -36,7 +41,8 @@ class BimpTimer extends BimpObject
         if ($this->isLoaded()) {
             $session_start = $this->getData('session_start');
             if ($session_start) {
-                $this->set('time_session', time() - $session_start);
+                $session_time = (int) $this->getData('time_session');
+                $this->set('time_session', $session_time + (time() - $session_start));
                 $this->set('session_start', 0);
                 $errors = $this->update();
             }
@@ -176,5 +182,79 @@ class BimpTimer extends BimpObject
         $html .= '<span class="bimp_timer_label bimp_timer_secondes_label">sec</span>';
 
         return $html;
+    }
+
+    public function onSave()
+    {
+        $errors = array();
+
+        if ($this->isLoaded()) {
+            // Si le chrono est actif, mise en pause de tous les autres chronos du même user. 
+            if ((int) $this->getData('session_start')) {
+                $list = $this->getList(array(
+                    'id_user'       => (int) $this->getData('id_user'),
+                    'session_start' => array(
+                        'operator' => '>',
+                        'value'    => 0
+                    ),
+                    'id'            => array(
+                        'operator' => '!=',
+                        'value'    => (int) $this->id
+                    )
+                        ), null, null, 'id', 'asc', 'array', array('id'));
+                if (!is_null($list) && count($list)) {
+                    $instance = BimpObject::getInstance($this->module, $this->object_name);
+                    foreach ($list as $item) {
+                        if ($instance->fetch((int) $item['id'])) {
+                            $hold_errors = $instance->hold();
+                            if (count($hold_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($hold_errors, 'Echec de la mise en pause du chrono ' . $instance->id);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    // Overrides: 
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = parent::create($warnings, $force_create);
+
+        if (!cont($errors)) {
+            $warnings = array_merge($warnings, $this->onSave());
+        }
+
+        return $errors;
+    }
+
+    public function update(&$warnings = array(), $force_update = false)
+    {
+        $errors = parent::update($warnings, $force_update);
+
+        if (!count($errors)) {
+            $warnings = array_merge($warnings, $this->onSave());
+        }
+
+        return $errors;
+    }
+
+    public function updateField($field, $value, $id_object = null)
+    {
+        $errors = parent::updateField($field, $value, $id_object);
+
+        if (!count($errors) && $field === 'session_start' && $value > 0) {
+            if (!$this->isLoaded() && (int) $id_object) {
+                $this->fetch((int) $id_object);
+            }
+
+            $errors = $this->onSave();
+        }
+
+        return $errors;
     }
 }

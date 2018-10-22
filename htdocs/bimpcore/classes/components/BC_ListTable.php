@@ -234,12 +234,7 @@ class BC_ListTable extends BC_List
                         continue;
                     }
 
-                    $col_params = array();
-                    if ($this->object->config->isDefined('lists_cols/' . $col_name)) {
-                        $col_params = $this->fetchParams('lists_cols/' . $col_name, $this->col_params);
-                    }
-
-                    $col_params = $this->object->config->mergeParams($col_params, $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params));
+                    $col_params = $this->getColParams($col_name);
 
                     $row['cols'][$col_name] = array(
                         'content'   => '',
@@ -286,6 +281,21 @@ class BC_ListTable extends BC_List
     public function setSelectedRows($selected_rows)
     {
         $this->selected_rows = $selected_rows;
+    }
+
+    public function getColParams($col_name)
+    {
+        $col_params = array();
+        if ($this->object->config->isDefined('lists_cols/' . $col_name)) {
+            $col_params = $this->fetchParams('lists_cols/' . $col_name, $this->col_params);
+            $col_overriden_params = $this->object->config->getCompiledParams($this->config_path . '/cols/' . $col_name);
+            if (is_array($col_overriden_params)) {
+                $col_params = $this->object->config->mergeParams($col_params, $col_overriden_params);
+            }
+        } else {
+            $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params);
+        }
+        return $col_params;
     }
 
     // Rendus HTML:
@@ -368,7 +378,6 @@ class BC_ListTable extends BC_List
     {
         $html = '';
 
-        $this->setConfPath();
         if ($this->isOk() && count($this->cols)) {
             $this->search = false;
             $default_sort_way = $this->params['sort_way'];
@@ -386,67 +395,64 @@ class BC_ListTable extends BC_List
             }
 
             foreach ($this->cols as $col_name) {
-                if ($this->setConfPath('cols/' . $col_name)) {
-                    $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params);
-                    if (!$col_params['label']) {
-                        if ($col_params['field']) {
-                            $col_params['label'] = $this->object->config->get('fields/' . $col_params['field'] . '/label', ucfirst($col_name));
-                        } else {
-                            $col_params['label'] = ucfirst($col_name);
-                        }
-                    }
-                    $sortable = ($col_params['field'] ? $this->object->getConf('fields/' . $col_params['field'] . '/sortable', 1, false, 'bool') : false);
+                $col_params = $this->getColParams($col_name);
 
-                    $html .= '<th';
-                    if (!is_null($col_params['width'])) {
-                        $html .= ' width="' . $col_params['width'] . '"';
-                    }
-
-                    $html .= ' style="';
-                    if (!is_null($col_params['min_width'])) {
-                        $html .= 'min-width: ' . $col_params['min_width'] . ';';
-                    }
-                    if (!is_null($col_params['max_width'])) {
-                        $html .= 'max-width: ' . $col_params['max_width'] . ';';
-                    }
-                    $html .= '"';
-
-                    $html .= ' data-col_name="' . $col_name . '"';
-                    $html .= ' data-field_name="' . ($col_params['field'] ? $col_params['field'] : '') . '"';
-                    $html .= '>';
-
-                    if ($sortable) {
-                        $html .= '<span id="' . $col_name . '_sortTitle" class="sortTitle sorted-';
-
-                        if ($col_params['field'] && $this->params['sort_field'] === $col_params['field']) {
-                            $html .= strtolower($this->params['sort_way']);
-                            if (!$this->params['positions_open']) {
-                                $html .= ' active';
-                            }
-                        } else {
-                            $html .= strtolower($default_sort_way);
-                        }
-                        if ($this->params['positions_open']) {
-                            $html .= ' deactivated';
-                        }
-                        $html .= '" onclick="if (!$(this).hasClass(\'deactivated\')) { sortList(\'' . $this->identifier . '\', \'' . $col_name . '\'); }">';
-
-                        $html .= $col_params['label'] . '</span>';
+                if (!$col_params['label']) {
+                    if ($col_params['field']) {
+                        $col_params['label'] = $this->object->config->get('fields/' . $col_params['field'] . '/label', ucfirst($col_name));
                     } else {
-                        $html .= $col_params['label'];
+                        $col_params['label'] = ucfirst($col_name);
                     }
-                    $html .= '</th>';
+                }
+                $sortable = ($col_params['field'] ? $this->object->getConf('fields/' . $col_params['field'] . '/sortable', 1, false, 'bool') : false);
 
-                    if (!$this->search && $col_params['field']) {
-                        $search = $this->object->getConf('fields/' . $col_params['field'] . '/search', 1, false, 'any');
-                        if (is_array($search) || (int) $search) {
-                            $this->search = true;
+                $html .= '<th';
+                if (!is_null($col_params['width'])) {
+                    $html .= ' width="' . $col_params['width'] . '"';
+                }
+
+                $html .= ' style="';
+                if (!is_null($col_params['min_width'])) {
+                    $html .= 'min-width: ' . $col_params['min_width'] . ';';
+                }
+                if (!is_null($col_params['max_width'])) {
+                    $html .= 'max-width: ' . $col_params['max_width'] . ';';
+                }
+                $html .= '"';
+
+                $html .= ' data-col_name="' . $col_name . '"';
+                $html .= ' data-field_name="' . ($col_params['field'] ? $col_params['field'] : '') . '"';
+                $html .= '>';
+
+                if ($sortable) {
+                    $html .= '<span id="' . $col_name . '_sortTitle" class="sortTitle sorted-';
+
+                    if ($col_params['field'] && $this->params['sort_field'] === $col_params['field']) {
+                        $html .= strtolower($this->params['sort_way']);
+                        if (!$this->params['positions_open']) {
+                            $html .= ' active';
                         }
+                    } else {
+                        $html .= strtolower($default_sort_way);
+                    }
+                    if ($this->params['positions_open']) {
+                        $html .= ' deactivated';
+                    }
+                    $html .= '" onclick="if (!$(this).hasClass(\'deactivated\')) { sortList(\'' . $this->identifier . '\', \'' . $col_name . '\'); }">';
+
+                    $html .= $col_params['label'] . '</span>';
+                } else {
+                    $html .= $col_params['label'];
+                }
+                $html .= '</th>';
+
+                if (!$this->search && $col_params['field']) {
+                    $search = $this->object->getConf('fields/' . $col_params['field'] . '/search', 1, false, 'any');
+                    if (is_array($search) || (int) $search) {
+                        $this->search = true;
                     }
                 }
             }
-
-            $this->setConfPath();
 
             $html .= '<th class="th_tools">';
             $html .= '<div class="headerTools">';
@@ -494,7 +500,6 @@ class BC_ListTable extends BC_List
             $html .= '</tr>';
         }
 
-        $this->setConfPath();
         return $html;
     }
 
@@ -523,41 +528,39 @@ class BC_ListTable extends BC_List
 
         foreach ($this->cols as $col_name) {
             $html .= '<td>';
-            if ($this->setConfPath('cols/' . $col_name)) {
-                $col_params = $this->fetchParams($this->config_path . '/cols/' . $col_name, $this->col_params);
+            $col_params = $this->getColParams($col_name);
 
-                if (in_array($col_params['field'], BimpObject::$common_fields)) {
-                    $html .= $this->object->getCommonFieldSearchInput($col_params['field']);
-                } elseif ($col_params['field']) {
-                    $field = new BC_Field($this->object, $col_params['field'], true);
-                    $html .= $field->renderSearchInput();
-                    unset($field);
-                } elseif (!is_null($col_params['search']) && method_exists($this->object, 'get' . ucfirst($col_name) . 'SearchFilters')) {
-                    $search_type = $col_params['search']['type'];
-                    $html .= '<div class="searchInputContainer"';
-                    $html .= ' data-field_name="' . $col_name . '"';
-                    $html .= ' data-search_type="' . $search_type . '"';
-                    $html .= ' data-search_on_key_up="' . $col_params['search']['search_on_key_up'] . '"';
-                    $html .= ' data-min_chars="1"';
-                    $html .= '>';
+            if (in_array($col_params['field'], BimpObject::$common_fields)) {
+                $html .= $this->object->getCommonFieldSearchInput($col_params['field']);
+            } elseif ($col_params['field']) {
+                $field = new BC_Field($this->object, $col_params['field'], true);
+                $html .= $field->renderSearchInput();
+                unset($field);
+            } elseif (!is_null($col_params['search']) && method_exists($this->object, 'get' . ucfirst($col_name) . 'SearchFilters')) {
+                $search_type = $col_params['search']['type'];
+                $html .= '<div class="searchInputContainer"';
+                $html .= ' data-field_name="' . $col_name . '"';
+                $html .= ' data-search_type="' . $search_type . '"';
+                $html .= ' data-search_on_key_up="' . $col_params['search']['search_on_key_up'] . '"';
+                $html .= ' data-min_chars="1"';
+                $html .= '>';
 
-                    $html .= BimpInput::renderInput($col_params['search']['input']['type'], $col_name, '', $col_params['search']['input']['options']);
+                $html .= BimpInput::renderInput($col_params['search']['input']['type'], $col_name, '', $col_params['search']['input']['options']);
 
-                    $html .= '</div>';
-                } elseif (!is_null($col_params['search_list']) && !is_null($col_params['field_name'])) {
-                    $input_name = 'search_' . $col_params['field_name'];
+                $html .= '</div>';
+            } elseif (!is_null($col_params['search_list']) && !is_null($col_params['field_name'])) {
+                $input_name = 'search_' . $col_params['field_name'];
 
-                    $html .= '<div class="searchInputContainer"';
-                    $html .= ' data-field_name="' . $input_name . '"';
-                    $html .= ' data-search_type="field_input"';
-                    $html .= ' data-search_on_key_up="0"';
-                    $html .= ' data-min_chars="1"';
-                    $html .= '>';
+                $html .= '<div class="searchInputContainer"';
+                $html .= ' data-field_name="' . $input_name . '"';
+                $html .= ' data-search_type="field_input"';
+                $html .= ' data-search_on_key_up="0"';
+                $html .= ' data-min_chars="1"';
+                $html .= '>';
 
-                    $html .= BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path . '/cols/' . $col_name, $input_name, '', null);
+                $html .= BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path . '/cols/' . $col_name, $input_name, '', null);
 
-                    $html .= '</div>';
-                }
+                $html .= '</div>';
             }
             $html .= '</td>';
         }
@@ -568,7 +571,6 @@ class BC_ListTable extends BC_List
         $html .= '</td>';
         $html .= '</tr>';
 
-        $this->setConfPath();
         $this->object->reset();
 
         return $html;
@@ -576,12 +578,17 @@ class BC_ListTable extends BC_List
 
     public function renderAddObjectRow()
     {
+        if (!$this->object->canCreate()) {
+            return '';
+        }
+
         $html = '';
 
         $this->object->reset();
 
         if (!is_null($this->id_parent)) {
             $this->object->setIdParent($this->id_parent);
+            $this->object->parent = $this->parent;
         }
 
         if ((int) $this->params['add_object_row'] && !is_null($this->config_path)) {
@@ -607,12 +614,11 @@ class BC_ListTable extends BC_List
             }
 
             foreach ($this->cols as $col_name) {
-                $this->setConfPath('cols/' . $col_name);
-                $field = $this->fetchParam('field', $this->col_params, $this->config_path . '/cols/' . $col_name);
+                $col_params = $this->getColParams($col_name);
 
                 $html .= '<td>';
-                if ($field && !in_array($field, BimpObject::$common_fields)) {
-                    $bc_field = new BC_Field($this->object, $field, true);
+                if (isset($col_params['field']) && $col_params['field'] && !in_array($col_params['field'], BimpObject::$common_fields)) {
+                    $bc_field = new BC_Field($this->object, $col_params['field'], true);
                     $default_value = $bc_field->params['default_value'];
                     $bc_field->value = $default_value;
                     if ($bc_field->params['editable']) {
@@ -628,7 +634,6 @@ class BC_ListTable extends BC_List
             $html .= '</td>';
             $html .= '</tr>';
         }
-        $this->setConfPath();
 
         return $html;
     }
@@ -804,10 +809,30 @@ class BC_ListTable extends BC_List
             if (BimpObject::objectLoaded($this->userConfig)) {
                 $values['sort_field'] = $this->userConfig->getData('sort_field');
                 $values['sort_way'] = $this->userConfig->getData('sort_way');
+                $values['sort_option'] = $this->userConfig->getData('sort_option');
                 $values['nb_items'] = $this->userConfig->getData('nb_items');
+
+                $content .= '<div style="margin: 10px; font-weight: normal; font-size: 11px">';
+
+                $content .= 'Nombre d\'éléments par page: <span class="bold">' . $values['nb_items'] . '</span><br/>';
+                
+                $sortable_fields = $this->object->getSortableFieldsArray();
+
+                if (array_key_exists($values['sort_field'], $sortable_fields)) {
+                    $content .= 'Trie par défaut: <span class="bold">' . $sortable_fields[$values['sort_field']] . '</span><br/>';
+                    if ((string) $values['sort_option']) {
+                        $sort_options = $this->object->getSortOptionsArray($values['sort_field']);
+                        if (array_key_exists($values['sort_option'], $sort_options)) {
+                            $content .= 'Option de trie: <span class="bold">' . $sort_options[$values['sort_option']] . '</span><br/>';
+                        }
+                    }
+                }
+                $content .= 'Ordre de trie: <span class="bold">' . $this->userConfig->displayData('sort_way') . '</span><br/>';
+                $content .= '</div>';
             } else {
                 $values['sort_field'] = $this->params['sort_field'];
                 $values['sort_way'] = $this->params['sort_way'];
+                $values['sort_option'] = $this->params['sort_option'];
                 $values['nb_items'] = $this->params['n'];
             }
 

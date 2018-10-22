@@ -38,6 +38,10 @@ fields:
         label: Trie
         default_value: id
         
+    sort_option:
+        label: Option de trie
+        default_value: 
+        
     sort_way:
         label: Ordre
         values: 

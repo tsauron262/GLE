@@ -72,7 +72,7 @@
                 .inputGroupContainer {
                     margin-right: 10px;
 
-                    textarea {
+                    textarea, input[type=text] {
                         width: 100%;
                     }
                     .select2 {

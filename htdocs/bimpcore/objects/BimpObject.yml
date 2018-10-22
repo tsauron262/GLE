@@ -42,6 +42,14 @@ forms:
                   options: 
                       array: sortableFields
             - custom: 1
+              label: Option de trie
+              input_name: sort_option
+              input: 
+                  type: select
+                  options: 
+                      array: sortOptions
+              depends_on: sort_field
+            - custom: 1
               label: Ordre par défaut
               input_name: sort_way
               input: 

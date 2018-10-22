@@ -127,8 +127,6 @@ class BimpPDF extends TCPDF
 
 use setasign\Fpdi\Fpdi;
 
-
-
 require_once DOL_DOCUMENT_ROOT.'/includes/tcpdi/tcpdi.php';
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/fpdf2.php';
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/autoload.php';

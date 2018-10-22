@@ -16,9 +16,9 @@ class BS_Ticket extends BimpObject
         3 => array('label' => 'Haut', 'classes' => array('danger'), 'icon' => 'star'),
     );
     public static $cover_types = array(
-        1 => 'Couvert',
-        2 => 'Payant',
-        3 => 'Non couvert'
+        1 => array('label' => 'Couvert', 'classes' => array('success'), 'icon' => 'fas_check'),
+        2 => array('label' => 'Payant', 'classes' => array('warning'), 'icon' => 'fas_euro-sign'),
+        3 => array('label' => 'Non couvert', 'classes' => array('danger'), 'icon' => 'fas_times'),
     );
     public static $status_list = array(
         self::BS_TICKET_EN_COURS        => array('label' => 'En cours', 'icon' => 'fas_cogs', 'classes' => array('info')),
@@ -356,7 +356,7 @@ class BS_Ticket extends BimpObject
     {
         global $user;
         $this->data['ticket_number'] = 'BH' . date('ymdhis');
-        $this->data['id_user_resp'] = (int) $user - id;
+        $this->data['id_user_resp'] = (int) $user->id;
 
         $errors = parent::create($warnings, $force_create);
 

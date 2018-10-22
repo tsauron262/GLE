@@ -19,7 +19,7 @@ abstract class BimpComponent
     public $infos = array();
     public $warnings = array();
 
-    public function __construct(BimpObject $object, $name, $path)
+    public function __construct(BimpObject $object, $name = '', $path = '')
     {
         $this->object = $object;
         $this->name = $name;
@@ -27,11 +27,25 @@ abstract class BimpComponent
         if (!$this->isObjectValid()) {
             $this->addError('Objet invalide');
         } else {
-            if ($this->object->config->isDefined($path . ($name ? '/' . $name : ''))) {
-                $this->config_path = $path . ($name ? '/' . $name : '');
-            } elseif (!$name && $this->object->config->isDefined($path . '/default')) {
-                $this->config_path = $path . '/default';
-                $this->name = 'default';
+            if (!$path && static::$type) {
+                if (!$name || $name === 'default') {
+                    if ($this->object->config->isDefined(static::$type)) {
+                        $path = static::$type;
+                    } elseif ($this->object->config->isDefined(static::$type . 's' . '/default')) {
+                        $path = static::$type . 's';
+                    }
+                } else {
+                    $path = static::$type . 's';
+                }
+            }
+
+            if ($path) {
+                if ($this->object->config->isDefined($path . ($name ? '/' . $name : ''))) {
+                    $this->config_path = $path . ($name ? '/' . $name : '');
+                } elseif (!$name && $this->object->config->isDefined($path . '/default')) {
+                    $this->config_path = $path . '/default';
+                    $this->name = 'default';
+                }
             }
         }
 

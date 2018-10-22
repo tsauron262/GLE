@@ -39,9 +39,32 @@ class Interfacevalidateorder extends DolibarrTriggers {
         }
         if($action == "BILL_CREATE"){
             $object->fetchObjectLinked();
-            if (isset($object->linkedObjects['commande'])) {
+            if (isset($object->linkedObjects['commande']) && count($object->linkedObjects['commande'])) {
                 foreach ($object->linkedObjects['commande'] as $comm) {
                     $object->addLine("Selon notre commande ".$comm->ref,0,0,0);
+                }
+            }
+            else{
+                $ok = false;
+                if (isset($object->linkedObjects['propal']) && count($object->linkedObjects['propal'])) {
+                    $ok = true;
+                    foreach ($object->linkedObjects['propal'] as $prop) {
+                        $object->addLine("Selon notre devis ".$prop->ref,0,0,0);
+                        if($prop->array_options['options_type'] != "S"){
+                            foreach($prop->lines as $ln){
+                                if($ln->fk_product > 0){
+                                    $prodTmp = new Product($this->db);
+                                    $prodTmp->fetch($ln->fk_product);
+                                    if(isset($prodTmp->array_options['options_serialisable']) && $prodTmp->array_options['options_serialisable'])
+                                        $ok = false;
+                                }
+                            }
+                        }
+                    }
+                }
+                if(!$ok){
+                    setEventMessages("Impossible de facturé sans commande, cette piéce contient des produit(s) sérialisable(s)", null, 'errors');
+                    return -1;
                 }
             }
         }

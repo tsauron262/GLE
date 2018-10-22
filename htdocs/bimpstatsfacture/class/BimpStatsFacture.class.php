@@ -512,7 +512,8 @@ class BimpStatsFacture {
             $allTypeGarantie = $this->getTypeGaranties();
         }
         if ($sortEquipement) {
-            $allEquipement = $this->getEquipements();
+            //$allEquipement = $this->getEquipements();
+            $allEquipement = array("fdsfdsfdsfd");//pour eviter l'indice 0
         }
 
         foreach ($hash as $row) {
@@ -537,6 +538,10 @@ class BimpStatsFacture {
                 }
                 if ($sortEquipement != '') {
                     $ind = array_search($row['equip_ref'], $allEquipement);
+                    if($ind < 1){
+                        $allEquipement[] = $row['equip_ref'];
+                        $ind = count($allEquipement) - 1;
+                    }
                     $filtre .= $ind . '_';
                     $title .= ($row['equip_ref'] != '' ? $row['equip_ref'] . ' - ' : 'Sans équipement - ');
                 }
@@ -605,20 +610,20 @@ class BimpStatsFacture {
         return $typesGarantie;
     }
 
-    function getEquipements() {
-        $equipements = array();
-        $sql = 'SELECT DISTINCT description';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'synopsischrono';
-
-        dol_syslog(get_class($this) . "::getEquipement sql=" . $sql, LOG_DEBUG);
-        $result = $this->db->query($sql);
-        if ($result and mysqli_num_rows($result) > 0) {
-            while ($obj = $this->db->fetch_object($result)) {
-                $equipements[] = $obj->description;
-            }
-        }
-        return $equipements;
-    }
+//    function getEquipements() {
+//        $equipements = array();
+//        $sql = 'SELECT DISTINCT description';
+//        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'synopsischrono';
+//
+//        dol_syslog(get_class($this) . "::getEquipement sql=" . $sql, LOG_DEBUG);
+//        $result = $this->db->query($sql);
+//        if ($result and mysqli_num_rows($result) > 0) {
+//            while ($obj = $this->db->fetch_object($result)) {
+//                $equipements[] = $obj->description;
+//            }
+//        }
+//        return $equipements;
+//    }
 
     public function parseCenter($user, $centers) {
 

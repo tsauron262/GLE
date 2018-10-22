@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bf_demande` ADD `id_contrat` INT NOT NULL DEFAULT '0';

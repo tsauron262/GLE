@@ -89,6 +89,7 @@ Abstract class BimpModelPDF
         }
 
         if (count($this->errors)) {
+            return 0;
             $this->displayErrors();
             exit;
         }

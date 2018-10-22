@@ -199,7 +199,7 @@ class BC_Form extends BC_Panel
 
     public function renderHtmlContent($form_tag = true)
     {
-        $html = '';
+        $html = parent::renderHtmlContent();
 
         if ($form_tag) {
             $html .= '<form enctype="multipart/form-data" class="' . $this->object->object_name . '_form">';

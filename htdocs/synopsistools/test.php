@@ -6,6 +6,18 @@ llxHeader();
 
 
 
+
+   $table_name = "employee";
+   $backup_file  = "/Applications/MAMP/documents/mmmmmm/test.sql";
+   $db->query("SELECT * INTO OUTFILE '$backup_file' FROM $table_name");
+
+
+
+
+die;
+
+
+
 $sql = $db->query("SELECT * FROM `llx_propal_extrafields` WHERE `type` IS NULL ORDER BY `fk_object` ASC");
 require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
 while($ligne = $db->fetch_object($sql)){

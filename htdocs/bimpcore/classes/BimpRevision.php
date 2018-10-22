@@ -86,11 +86,12 @@ class BimpRevisionPropal extends BimpRevision
             $this->propalSui->fetch($obj->sui); 
     }
 
-    function reviserPropal($ajoutLigne = true, $qteZeroSaufAccomte = false, $pdfModel = 'azurSAV', &$errors = array())
+    function reviserPropal($ajoutLigne = true, $qteZeroSaufAccomte = false, $pdfModel = 'azurSAV', &$errors = array(), $socid = 0)
     {
         global $langs, $db;
         $propal = $this->propal;
-        $socid = $propal->socid;
+        if($socid < 1)
+            $socid = $propal->socid;
         $parameters = array('socid' => $socid);
         $oldRef = $propal->ref;
         $oldId = $propal->id;

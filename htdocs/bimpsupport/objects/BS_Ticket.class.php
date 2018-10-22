@@ -29,7 +29,7 @@ class BS_Ticket extends BimpObject
         self::BS_TICKET_CLOT            => array('label' => 'Clôt', 'icon' => 'fas_times', 'classes' => array('danger')),
     );
 
-    // Getters: 
+    // Getters:
 
     public function getClient_contactsArray()
     {
@@ -209,7 +209,7 @@ class BS_Ticket extends BimpObject
         return BimpRender::renderAlerts('Equipement non trouvé (ID ' . $id_equipment . ')', 'warning');
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderChronoView()
     {

@@ -519,3 +519,7 @@ input, input.flat, textarea, textarea.flat, form.flat select, select, select.fla
 input[name='options_libelle']{
     width: 300px;
 }
+
+span.select2-container{
+        min-width: 100px;
+}

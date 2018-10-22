@@ -85,6 +85,19 @@ class Bimp_Propal extends BimpComm
     {
         return array();
     }
+    
+    public function actionGeneratePdf($data, &$success){
+        $wanings = array();
+        if ((int) $this->id && $data['model'] == "bimpdevissav") {
+            $this->sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+            if (!$this->sav->find(array('id_propal' => (int) $object->id))) {
+                $wanings[] = 'Aucun SAV associé à cette propale trouvé';
+                $data['model'] = "bimpdevis";
+            }
+        }
+        
+        return parent::actionGeneratePdf($data, $success, array(), $wanings);
+    }
 
     public function getActionsButtons()
     {

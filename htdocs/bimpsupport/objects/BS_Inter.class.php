@@ -97,7 +97,7 @@ class BS_Inter extends BimpObject
 
     public function renderChronoView()
     {
-        if (!isset($this->id) || !$this->id) {
+        if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('intervention non enregistrée');
         }
         
@@ -105,20 +105,25 @@ class BS_Inter extends BimpObject
             return '';
         }
 
-        $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
+        if ((int) $this->getData('status') === self::BS_INTER_CLOSED) {
+            return '';
+        }
 
-        if (!$timer->find(array(
-                    'obj_module' => $this->module,
-                    'obj_name'   => $this->object_name,
-                    'id_obj'     => (int) $this->id,
-                    'field_name' => 'timer'
-                ))) {
-            if (!$timer->setObject($this, 'timer', false, (int) $this->getData('tech_id_user'))) {
+        global $user;
+
+        if ((int) $user->id !== (int) $this->getData('tech_id_user')) {
+            return '';
+        }
+
+        $timer = $this->getTimer();
+
+        if (!BimpObject::objectLoaded($timer)) {
+            if (!$timer->setObject($this, 'timer')) {
                 return BimpRender::renderAlerts('Echec de la création du timer');
             }
         }
 
-        if (!isset($timer->id) || !$timer->id) {
+        if (!BimpObject::objectLoaded($timer)) {
             return BimpRender::renderAlerts('Echec de l\'initialisation du timer');
         }
 
@@ -129,7 +134,7 @@ class BS_Inter extends BimpObject
 
     // Overrides
 
-    public function create(&$warnings, $force_create = false)
+    public function create(&$warnings = array(), $force_create = false)
     {
         if (!$this->isCreatable()) {
             return array('Ticket clôt. Impossible de créer une nouvelle intervention');
@@ -147,7 +152,7 @@ class BS_Inter extends BimpObject
         }
     }
 
-    public function update(&$warnings, $force_update = false)
+    public function update(&$warnings = array(), $force_update = false)
     {
         $errors = array();
         

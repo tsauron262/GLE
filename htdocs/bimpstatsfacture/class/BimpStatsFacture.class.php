@@ -100,8 +100,8 @@ class BimpStatsFacture {
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_extrafields as e ON f.rowid = e.fk_object';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs ON f.rowid = fs.id_facture';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'bs_sav as fs2 ON f.rowid = fs2.id_facture_acompte';
-        $sql .= ' WHERE f.datef >= ' . $this->db->idate($dateStart);
-        $sql .= ' AND   f.datef <= ' . $this->db->idate($dateEnd);
+        $sql .= ' WHERE f.datef >= "' . $this->db->idate($dateStart).'"';
+        $sql .= ' AND   f.datef <= "' . $this->db->idate($dateEnd).'"';
 
         if (!empty($types) and in_array('NRS', $types)) {   // Non renseigné inclut selected
             $sql .= ' AND (e.type IN (\'' . implode("','", $types) . '\', "0", "1")';
@@ -384,13 +384,13 @@ class BimpStatsFacture {
 
         $entrepots = array();
 
-        $sql = 'SELECT rowid, label';
+        $sql = 'SELECT rowid, ref';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'entrepot';
 
         $result = $this->db->query($sql);
         if ($result and mysqli_num_rows($result) > 0) {
             while ($obj = $this->db->fetch_object($result)) {
-                $entrepots[$obj->rowid] = $obj->label;
+                $entrepots[$obj->rowid] = $obj->ref;
             }
         }
         return $entrepots;

@@ -438,7 +438,8 @@ lists:
                         params:
                             - total_ttc
             margin: 
-                label: Marge
+                label:
+                    callback: getMarginLabel
                 value: 
                     callback: 
                         method: displayLineData

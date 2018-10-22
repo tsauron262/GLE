@@ -356,7 +356,7 @@ class BS_Ticket extends BimpObject
     {
         global $user;
         $this->data['ticket_number'] = 'BH' . date('ymdhis');
-        $this->data['id_user_resp'] = (int) $user - id;
+        $this->data['id_user_resp'] = (int) $user->id;
 
         $errors = parent::create($warnings, $force_create);
 

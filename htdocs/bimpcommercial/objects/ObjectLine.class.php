@@ -264,21 +264,38 @@ class ObjectLine extends BimpObject
 
     public function getMarginRate()
     {
-        if (!(float) $this->pa_ht) {
-            return 0;
-        }
-
         $pu = (float) $this->pu_ht;
         if (!is_null($this->remise) && (float) $this->remise > 0) {
             $pu -= ($pu * ((float) $this->remise / 100));
         }
 
         $margin = $pu - (float) $this->pa_ht;
+
         if (!$margin) {
             return 0;
         }
 
-        return ($margin / (float) $this->pa_ht) * 100;
+        if ((int) BimpCore::getConf('bimpcomm_tx_marque')) {
+            if (!$pu) {
+                return 0;
+            }
+
+            return ($margin / $pu) * 100;
+        } else {
+            if (!(float) $this->pa_ht) {
+                return 0;
+            }
+
+            return ($margin / (float) $this->pa_ht) * 100;
+        }
+    }
+
+    public function getMarginLabel()
+    {
+        if ((int) BimpCore::getConf('bimpcomm_tx_marque')) {
+            return 'Marge (Tx marque)';
+        }
+        return 'Marge (Tx marge)';
     }
 
     public function getIdFournPriceFromPost()
@@ -912,7 +929,7 @@ class ObjectLine extends BimpObject
                     $margin = (float) $this->getMargin();
                     $margin_rate = 0;
                     if ($margin !== 0.0) {
-                        $margin_rate = round($this->getMarginRate(), 2);
+                        $margin_rate = round($this->getMarginRate(), 4);
                     }
 
                     if ($no_html) {
@@ -1003,7 +1020,9 @@ class ObjectLine extends BimpObject
 
             if (isset($line->fk_product) && (int) $line->fk_product) {
                 $type = 1;
-                $remisable = $this->db->getValue('product_extrafields', 'remisable', '`fk_object` = ' . (int) $line->fk_product);
+                if ($this->dol_field_exists('remisable')) {
+                    $remisable = $this->db->getValue('product_extrafields', 'remisable', '`fk_object` = ' . (int) $line->fk_product);
+                }
                 if (is_null($remisable)) {
                     $remisable = 1;
                 }
@@ -2030,21 +2049,32 @@ class ObjectLine extends BimpObject
             $line_pu -= ($line_pu * ((float) $line_remise / 100));
         }
 
-        $lineMargin = ($line_pu * $line_qty) - ($line_pa * $line_qty);
-        if ($line_pa) {
-            $lineMarginRate = round(($lineMargin / ($line_pa * $line_qty)) * 100, 4) . ' %';
-        } else {
-            $lineMarginRate = '&infin;';
-        }
-
         $total_vente += ($line_pu * $line_qty);
         $total_achat += ($line_pa * $line_qty);
 
+        $lineMargin = ($line_pu * $line_qty) - ($line_pa * $line_qty);
         $totalMargin = $total_vente - $total_achat;
-        if ($total_achat) {
-            $totalMarginRate = round(($totalMargin / $total_achat) * 100, 4) . ' %';
+
+        $lineMarginRate = '&infin;';
+        $totalMarginRate = '&infin;';
+        $tx_label = '';
+
+        if ((int) BimpCore::getConf('bimpcomm_tx_marque')) {
+            $tx_label = 'Taux de marque';
+            if ($lineMargin && $line_pu && $line_qty) {
+                $lineMarginRate = round(($lineMargin / ($line_pu * $line_qty)) * 100, 4) . ' %';
+            }
+            if ($total_vente) {
+                $totalMarginRate = round(($totalMargin / $total_vente) * 100, 4) . ' %';
+            }
         } else {
-            $totalMarginRate = '&infin;';
+            $tx_label = 'Taux de marge';
+            if ($lineMargin && $line_pa && $line_qty) {
+                $lineMarginRate = round(($lineMargin / ($line_pa * $line_qty)) * 100, 4) . ' %';
+            }
+            if ($total_achat) {
+                $totalMarginRate = round(($totalMargin / $total_achat) * 100, 4) . ' %';
+            }
         }
 
         $html .= '<div class="formMarginsContainer">';
@@ -2053,7 +2083,7 @@ class ObjectLine extends BimpObject
         $html .= '<tr>';
         $html .= '<th></th>';
         $html .= '<th>Marge</th>';
-        $html .= '<th>Taux de marge</th>';
+        $html .= '<th>' . $tx_label . '</th>';
         $html .= '</tr>';
         $html .= '</thead>';
 

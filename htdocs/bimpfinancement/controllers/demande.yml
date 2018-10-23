@@ -5,69 +5,50 @@ objects:
             bimp_object: BF_Demande
             id_object: 
                 request: id
-                
+    
 sections:
-    - type: buttons
-      buttons:
-          - label: Liste des demandes de financement
-            url:
-                controller: index
-            icon_before: chevron-left
-            classes: 
-                array: btn,btn-primary
-                
-    - type: tabs
-      tabs: 
-          default: 
-              label: Demande
-              url_params:
-                  id: 
-                      request: id
-              sections: 
-                  - type: view
-                    view: 
-                        panel: 1
-                        name: demande
-                        object: demande
-                        
-          montants: 
-              label: Montants
-              url_params:
-                  id: 
-                      request: id
-              sections: 
-                  - type: view
-                    view: 
-                        panel: 1
-                        name: montants
-                        object: demande
+    - type: object_header
+      object_header: 
+          object: demande
+    - type: nav_tabs
+      nav_tabs: 
+          - id: card
+            title: Fiche demande
+            struct: 
+                type: view
+                view: 
+                    panel: 1
+                    name: demande
+                    object: demande
           
-          fournisseurs: 
-              label: Factures fournisseurs
-              url_params:
-                  id: 
-                      request: id
-              sections: 
-                  - type: view
-                    view: 
-                        panel: 1
-                        name: fournisseurs
-                        object: demande
+          - id: montants
+            title: Montants
+            struct:
+                type: view
+                view: 
+                    panel: 1
+                    name: montants
+                    object: demande
+          
+          - id: fournisseurs
+            title: Factures fournisseurs
+            strutc: 
+                type: view
+                view: 
+                    panel: 1
+                    name: fournisseurs
+                    object: demande
                         
-          fichiers:
-              label: Fichiers
-              url_params:
-                  id: 
-                      request: id
-              sections:
-                  - type: list
-                    list: 
-                        title: Fichier joints
-                        name: default
-                        panel: 1
-                        object: demande
-                        children: files
-                        
+          - id: files
+            title: Fichiers
+            struct:
+                type: list
+                list: 
+                    title: Fichier joints
+                    name: default
+                    panel: 1
+                    object: demande
+                    children: files
     - type: list
       list:
           panel: 1

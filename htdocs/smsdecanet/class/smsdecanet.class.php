@@ -24,6 +24,10 @@
 			
 			global $langs, $conf;
 			$langs->load("smsdecanet@smsdecanet");
+                        
+                        if(substr($this->dest,0,1)!='+')
+                                $this->dest = '+33'.substr($this->dest,1);
+                        
 			$to = str_replace('+','00',$this->dest);
 			if(!preg_match('/^[0-9]+$/', $to)) {
 				$this->error = $langs->trans('errorRecipient');
@@ -40,6 +44,7 @@
 				'lang'=>$langs->defaultlang,
 				'deferred'=>$this->deferred
 			);
+        die($to);
 			if(isset($conf->global->DECANETSMS_TRANSACTIONAL) && intval($conf->global->DECANETSMS_TRANSACTIONAL)==1) {
 				$opts['TRANSACTIONAL']=1;
 			}

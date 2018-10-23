@@ -37,7 +37,7 @@ class Interfacevalidateorder extends DolibarrTriggers {
                     $object->addLine("Selon notre devis ".$prop->ref,0,0,0);
             }
         }
-        if($action == "BILL_CREATE"){
+        if($action == "BILL_CREATE" && $object->type == TYPE_STANDARD){
             $object->fetchObjectLinked();
             if (isset($object->linkedObjects['commande']) && count($object->linkedObjects['commande'])) {
                 foreach ($object->linkedObjects['commande'] as $comm) {
@@ -63,8 +63,8 @@ class Interfacevalidateorder extends DolibarrTriggers {
                     }
                 }
                 if(!$ok){
-                    setEventMessages("Impossible de facturé sans commande, cette piéce contient des produit(s) sérialisable(s)", null, 'errors');
-                    return -1;
+//                    setEventMessages("Impossible de facturé sans commande, cette piéce contient des produit(s) sérialisable(s)", null, 'errors');
+//                    return -1;
                 }
             }
         }
@@ -145,11 +145,17 @@ class Interfacevalidateorder extends DolibarrTriggers {
                         $facturee = true;
                         $comm->classifybilled($user);
                     }
+                    if (isset($comm->linkedObjects['propal']) && $facturee) {
+                        foreach ($comm->linkedObjects['propal'] as $prop){
+                            $prop->classifybilled($user);
+                        }
+                    }
                 }
             }
             if (isset($object->linkedObjects['propal']) && $facturee) {
-                foreach ($object->linkedObjects['propal'] as $prop)
+                foreach ($object->linkedObjects['propal'] as $prop){
                     $prop->classifybilled($user);
+                }
             }
         }
 

@@ -555,6 +555,10 @@ class BLPDF extends OrderPDF
     {
         $this->num_bl = $num_bl;
 
+        $this->prefName = "BL_".$num_bl."_";
+        
+        $this->typeObject = "commande";
+        
         parent::__construct($db, 'bl');
 
         if (is_null($this->num_bl)) {

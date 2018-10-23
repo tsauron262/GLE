@@ -230,7 +230,7 @@ class BimpDb
             $obj = $this->db->fetch_object($result);
             $this->db->free($result);
             return $obj->$field;
-        } else die('cbhdjscbhdjs');
+        }
         $this->db->free($result);
         return null;
     }

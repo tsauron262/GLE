@@ -145,11 +145,17 @@ class Interfacevalidateorder extends DolibarrTriggers {
                         $facturee = true;
                         $comm->classifybilled($user);
                     }
+                    if (isset($comm->linkedObjects['propal']) && $facturee) {
+                        foreach ($comm->linkedObjects['propal'] as $prop){
+                            $prop->classifybilled($user);
+                        }
+                    }
                 }
             }
             if (isset($object->linkedObjects['propal']) && $facturee) {
-                foreach ($object->linkedObjects['propal'] as $prop)
+                foreach ($object->linkedObjects['propal'] as $prop){
                     $prop->classifybilled($user);
+                }
             }
         }
 

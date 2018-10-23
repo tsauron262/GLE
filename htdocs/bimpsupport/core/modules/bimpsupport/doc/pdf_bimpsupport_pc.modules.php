@@ -289,7 +289,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 //                $pdf->SetX(6);
 //                $pdf->MultiCell(145, 6, $cgv, 0, 'L');
 //                $pdf->SetX(6);
-            $cgv.= "-Le client s'engage à venir récupérer son bien dans un délai d'un mois après mise à disposition, émission d'un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 0.75€ par jour.\n\n";
+            $cgv.= "-Le client s'engage à venir récupérer son bien dans un délai d'un mois après mise à disposition, émission d'un devis. Après expiration de ce délai, ce dernier accepte des frais de garde de 4€ par jour.\n\n";
 
             $cgv .= "-Comme l’autorise la loi du 31 décembre 1903, modifiée le 22 juin 2016, les produits qui n'auront pas 
 été retirés dans le délai de un an pourront être détruit, après accord du tribunal.\n

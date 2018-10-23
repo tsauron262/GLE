@@ -33,8 +33,8 @@ class BS_SavPret extends BimpObject
                 'p.type'        => 7,
                 'p.code_centre' => $code_centre
                     ), null, null, 'id', 'desc', 'array', array(
-                'a.id'
-                    ), array(
+                'a.id' =>
+                  F  ), array(
                 array(
                     'table' => 'be_equipment_place',
                     'alias' => 'p',

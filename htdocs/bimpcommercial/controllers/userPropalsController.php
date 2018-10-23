@@ -41,7 +41,7 @@ class userPropalsController extends BimpController
         $list->addFieldFilterValue('ec.fk_socpeople', (int) $user->id);
         $list->addFieldFilterValue('tc.element', 'propal');
         $list->addFieldFilterValue('tc.source', 'internal');
-        $list->addFieldFilterValue('tc.code', 'SALESREPSIGN');
+        $list->addFieldFilterValue('tc.code', 'SALESREPFOLL');
         $list->params['add_form_values']['fields']['id_user_commercial'] = (int) $user->id;
         return $list->renderHtml();
     }

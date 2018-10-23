@@ -328,7 +328,7 @@ class Bimp_Propal extends BimpComm
     {
         $filters['tc.element'] = 'propal';
         $filters['tc.source'] = 'internal';
-        $filters['tc.code'] = 'SALESREPSIGN';
+        $filters['tc.code'] = 'SALESREPFOLL';
         $filters['ec.fk_socpeople'] = (int) $value;
     }
 
@@ -337,7 +337,7 @@ class Bimp_Propal extends BimpComm
     public function displayCommercial()
     {
         if ($this->isLoaded()) {
-            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPSIGN');
+            $contacts = $this->dol_object->getIdContact('internal', 'SALESREPFOLL');
             if (isset($contacts[0]) && $contacts[0]) {
                 BimpTools::loadDolClass('contact');
                 $user = new User($this->db->db);
@@ -729,7 +729,7 @@ class Bimp_Propal extends BimpComm
         if (!count($errors)) {
             $id_user = (int) BimpTools::getValue('id_user_commercial', 0);
             if ($id_user) {
-                if ($this->dol_object->add_contact($id_user, 'SALESREPSIGN', 'internal') <= 0) {
+                if ($this->dol_object->add_contact($id_user, 'SALESREPFOLL', 'internal') <= 0) {
                     $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'enregistrement du commercial signataire');
                 }
             }

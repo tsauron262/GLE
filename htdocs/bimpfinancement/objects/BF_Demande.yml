@@ -7,6 +7,23 @@ labels:
     is_female: 1
 
 objects:
+    commande:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_Commande
+
+    contrat:
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: contrat
+            id_object:
+                field_value: id_contrat
+
+
     client: 
         relation: hasOne
         delete: 0
@@ -26,7 +43,19 @@ objects:
                 name: Bimp_Contact
             id_object:
                 field_value: id_client_contact
-                
+    
+    commercial:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                fiels_value: id_commercial
+
+   
+
     supplier:
         relation: hasOne
         delete: 0
@@ -99,16 +128,41 @@ objects:
                     parent_module: bimpfinancement
                     parent_object_name: BF_Demande
             
-#associations:
-#    files: 
-#        object: file
-#        label: Fichiers joints
-#        add_form:
-#            name: upload
-#            values: 
-#                array:
-#                    fields: 
-#                        files_dir: bimpfinancement/demande
+associations:
+    commandes:
+        object: commande
+        label: Ajouter une commande liée
+        display: 
+            default:
+                type: nom_url
+        input:
+            type: search_list
+            search_list:
+                table: commande c
+                field_return_value: c.rowid
+                field_return_label: c.ref
+                options:
+                    default:
+                        label: Recherche par référence de commande
+                        fields_search: c.ref,c.rowid
+                        join: societe s
+                        join_on: c.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez la référence de la commande
+                    by_client:
+                        label: Recherche par client
+                        fields_search: s.nom,s.code_client
+                        join: societe s
+                        join_on: c.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez le nom ou le code d'un client
+
+forms:
+    commandes:
+        title: Commandes associées
+        rows:
+            - association: commandes
+
 
 fields:
     id_client:
@@ -127,7 +181,22 @@ fields:
                         table: societe
                         field_value: ref
                         field_on: rowid
-    
+
+    id_commercial:
+        label: Commercial
+        type: id_object
+        object: commercial
+        input:
+            type: search_user
+        search:
+            input:
+                type: search_user
+
+    id_contrat:
+        label: Contrat
+        type: id_object
+        object: contrat
+
     id_client_contact:
         label: Contact client
         type: id_object
@@ -299,9 +368,12 @@ lists:
                 field: status
                 edit: 1
       
-fields_tables: 
+fields_tables:
+
     contrat: 
         title: Contrat
+        footer_extra_btn: 
+            callback: getInfosExtraBtn
         icon: fas_file-signature
         rows: 
             - field: status
@@ -314,7 +386,12 @@ fields_tables:
               edit: 1
             - field: date_loyer
               edit: 1
-              
+            - field: id_commercial
+              edit: 1
+            - field: id_contrat
+              edit: 0
+              display: nom_url
+
     options: 
         title: Options
         icon: check-square-o
@@ -437,7 +514,12 @@ views:
                   col_lg: 6
                   col_md: 6
                   fields_table:
-                      name: options   
+                      name: options  
+
+            - cols:
+                - type: custom
+                    custom:
+                        callback: renderCommandesList
                                       
             - cols: 
                   - type: fields_table
@@ -456,6 +538,8 @@ views:
                 
             - cols: 
                   - type: custom
+                    col_lg: 6
+                    col_md: 6
                     custom: 
                         callback: renderViewLoadedScript
                   
@@ -524,4 +608,3 @@ views:
                     list: 
                         children: frais_fournisseur
                         panel: 0
-        

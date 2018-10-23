@@ -60,8 +60,14 @@ function InfoSoc(elem,elem2) {
         
         var isParticulier = ($("#typent_id").length == 0 || this.typeTier.val() == 8);
         
-        if(!isParticulier && (this.elem.val() == "" || !this.isSiretSiren(this.elem.val()))){
-            this.promptSiren(this.elem.val());
+        var actu = this.elem.val();
+        if(actu == "")
+            actu = this.elem2.val();
+        for(var i = 0; i< 5; i++)
+            actu = actu.replace(" ", "").replace("-", "");
+        alert(actu);
+        if(!isParticulier && (actu == "" || !this.isSiretSiren(actu))){
+            this.promptSiren(actu);
         }
     }
     
@@ -94,8 +100,15 @@ function InfoSoc(elem,elem2) {
         }
     }
     
+    this.traiteSiren = function(siren){
+        for(var i = 0; i< 5; i++)
+            siren = siren.replace(" ", "").replace("-", "");
+        return siren;
+    }
+    
     
     this.isSiretSiren = function(siren) {
+        siren = this.traiteSiren(siren);
         this.erreur = "";
         if(siren == "" || siren == null){
             this.erreur = "SIRET/SIREN VIDE";
@@ -121,6 +134,7 @@ function InfoSoc(elem,elem2) {
         if(this.isSiretSiren(this.elem2.val()) && type == "siret")
             siren = this.elem2.val();
         if(this.isSiretSiren(siren)){
+            siren = this.traiteSiren(siren);
             datas = "siren=" + siren;
             jQuery.ajax({
                 url: DOL_URL_ROOT + "/bimpcreditsafe/test2.php",

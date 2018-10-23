@@ -680,7 +680,7 @@ class GsxUps
     {
         global $db;
         $ship = new shipment($db, $shipId);
-        require_once(DOL_DOCUMENT_ROOT . "/bimpapple/core/modules/bimpapple/modules_synopsisapple.php");
+        require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/core/modules/bimpapple/modules_synopsisapple.php");
         $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : 'appleretour');
         return synopsisapple_pdf_create($db, $ship, $model);
     }

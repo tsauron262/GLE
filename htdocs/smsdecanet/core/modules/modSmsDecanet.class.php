@@ -45,7 +45,7 @@ class modSmsDecanet extends DolibarrModules
 		$this->family = 'technic';
 		$this->name = preg_replace('/^mod/i','',get_class($this));
 		$this->description = "Envoi de SMS à vos clients";
-		$this->version = '5.0.4';
+		$this->version = '8.0.0';
 		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
 		$this->special = 1;
 		$this->picto='email';
@@ -151,7 +151,7 @@ class modSmsDecanet extends DolibarrModules
 	 *					It also creates data directories.
 	 *      \return     int             1 if OK, 0 if KO
 	 */
-	function init()
+	function init($options = '')
 	{
 		$sql = array();
 		$result=$this->load_tables();
@@ -165,7 +165,7 @@ class modSmsDecanet extends DolibarrModules
 	 *					Data directories are not deleted.
 	 *      \return     int             1 if OK, 0 if KO
 	 */
-	function remove()
+	function remove($options = '')
 	{
 		global $dolibarr_main_db_prefix;
 		$sql = array();

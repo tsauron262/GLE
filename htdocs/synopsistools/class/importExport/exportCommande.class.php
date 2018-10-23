@@ -23,6 +23,9 @@ class exportCommande extends export8sens {
     public function __construct($db, $sortie = 'html') {
         parent::__construct($db);
         $this->pathExport = $this->path."commande/";
+        $tabFiles = scandir($this->pathExport);
+        if(count($tabFiles) > 5)
+            mailSyn2("Synchro 8Sens OFF", "tommy@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".count($tabFiles));
     }
 
     public function exportTout() {

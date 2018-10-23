@@ -24,6 +24,9 @@ class exportfacture extends export8sens {
         parent::__construct($db);
         $this->pathExport = $this->path."fact/";
         $this->pathI = $this->path."../export/factures/";
+        $tabFiles = scandir($this->pathExport);
+        if(count($tabFiles) > 5)
+            mailSyn2("Synchro 8Sens OFF", "tommy@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".count($tabFiles));
     }
 
     public function exportTout() {

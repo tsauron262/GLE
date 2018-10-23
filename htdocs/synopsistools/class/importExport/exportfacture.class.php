@@ -25,12 +25,17 @@ class exportfacture extends export8sens {
         $this->pathExport = $this->path."fact/";
         $this->pathI = $this->path."../export/factures/";
         $tabFiles = scandir($this->pathExport);
-        $nbFile = 0;
+        $nbFiles = $nbFilesErr = 0;
         foreach($tabFiles as $file)
             if(stripos($file, ".txt"))
                     $nbFiles++;
+        foreach($tabFiles as $file)
+            if(stripos($file, ".ER8"))
+                    $nbFilesErr++;
         if($nbFiles > 5)
             mailSyn2("Synchro 8Sens OFF", "tommy@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
+        if($nbFilesErr > 5)
+            mailSyn2("Synchro 8Sens FICHIER ERREURS", "tommy@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFilesErr);
     }
 
     public function exportTout() {

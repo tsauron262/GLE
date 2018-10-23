@@ -128,7 +128,7 @@ class BF_Demande extends BimpObject
         if(!$id_commercial) { $errors[] = "Commercial obligatoire"; }
 
 
-        $loyers = $this->db->getRows('bf_rent', $where, null, 'array', array('id', 'quantity', 'amount_ht', 'payment', 'periodicity', 'position'));
+        $loyers = $this->db->getRows('bf_rent', $where." ORDER BY id DESC", null, 'array', array('id', 'quantity', 'amount_ht', 'payment', 'periodicity', 'position'));
         $refinanceur = $this->db->getRows('bf_refinanceur', $where, null, 'array', array('id', 'position', 'name', 'status', 'rate', 'coef', 'comment'));
         $intercalaire = $this->db->getRows('bf_rent_except', $where, null, 'array', array('id', 'date', 'amount', 'payement'));
         $frais_divers = $this->db->getRows('bf_frais_divers', $where, null, 'array', array('id', 'date', 'amount'));
@@ -142,7 +142,6 @@ class BF_Demande extends BimpObject
                 $date_de_fin = new DateTime($this->getData('date_loyer'));
                 foreach ($loyers as $ligne) {
                     $date_de_fin->add(new DateInterval("P".$ligne['quantity']*$ligne['periodicity']."M"));
-                    //$errors[] = $ligne['position'];
                 }
             }
             BimpTools::loadDolClass('contrat');
@@ -158,36 +157,28 @@ class BF_Demande extends BimpObject
             $where_element_element = "`fk_source` = " . $id . " AND `sourcetype` = 'demande' AND `targettype` = 'contrat'";
             $ElementElement = $this->db->getRows('element_element', $where_element_element, null, 'array', array('fk_source', 'sourcetype', 'targettype'));
             if(!$ElementElement) {
-                if($contrat->create($user) > 0) {
-            // if(1 == 1) {
-            //     if(1 == 1) {
-                    $contrat->validate($user);
-                    addElementElement('demande', 'contrat', $id, $contrat->id);
+                if($contrat->create($user) > 0) { // Si le contrat est créer correstement
+                    addElementElement('demande', 'contrat', $id, $contrat->id); // On ajoute une ligne dans llx_element_element
+                    $this->updateField('id_contrat', (int) $contrat->id); // On met le numéro de contrat dans la demande
+                    $contrat->validate($user); // On valide le contrat
+                    // Définition de la date de début des loyers
+                    $start_date_dynamic = $date_loyer;
+                    // Tant qu'il y a des loyers
                     foreach ($loyers as $ligne) {
+                        // Mise en forme de la description
                         $suite_desc = ($ligne['periodicity'] == 1) ? "Mois" :
                         $suite_desc = ($ligne['periodicity'] == 3) ? "Trimestres" :
                         $suite_desc = ($ligne['periodicity'] == 6) ? "Semestres" :
                         $suite_desc = ($ligne['periodicity'] == 12) ? "Ans" : "";
-
                         $description = "Payement " . BF_demande::$periodicities[$ligne['periodicity']] . " de " . $ligne['amount_ht'] . "€ sur " . $ligne['quantity'] . " " . $suite_desc;
-
-
-                        if($ligne['position'] == 1) {
-                            $start_date = $date_livraison;
-                            $end_date = new DateTime($start_date);
-                            $end_date->add(new DateInterval("P".$ligne['quantity']*$ligne['periodicity']."M"));
-                        } else {
-                            $start_date = (!empty($end_date)) ? $end_date : $date_livraison;
-                            $end_date = new DateTime($start_date);
-                            $end_date->add(new DateInterval("P".$ligne['quantity']*$ligne['periodicity']."M"));
-                        }
-                        $date_fin = $end_date->format('Y-m-d');
-                        
-                        if($contrat->addline($description, $ligne['amount_ht'], $ligne['quantity'], 0, 0, 0, 0, 0, $start_date, $date_fin) > 0){
-
-                        } else {
-                            $errors[] = $contrat->error;
-                        }
+                        $start_date = new DateTime($start_date_dynamic);
+                        $start_date = $start_date->format('Y-m-d');
+                        $end_date = new DateTime($start_date);
+                        $end_date->add(new DateInterval("P" . $ligne['quantity'] * $ligne["periodicity"] . "M"));
+                        $end_date = $end_date->format('Y-m-d');
+                        $contrat->addline($description, $ligne['amount_ht'], $ligne['quantity'], 0, 0, 0, 0, 0, $start_date, $end_date);
+                        $contrat->activateAll($user, $start_date);
+                        $start_date_dynamic = $end_date;
                     }
                     $success = "Contrat créer avec success";
                 } else {
@@ -206,6 +197,7 @@ class BF_Demande extends BimpObject
 
         );
     }
+
 
     public function renderCommandesList()
     {
@@ -266,34 +258,6 @@ class BF_Demande extends BimpObject
         return $html;
     }
 
-    public function d() {
-
-       $asso = new BimpAssociation($this, 'commandes');
-           $list = $asso->getAssociatesList();
-
-       // Créer la liste sur le modèle de BS_SAV.class.php->renderPropalesList()
-
-       // à la fin:
-
-       $button = array( // bouton pour afficher formulaire associations
-           'label' => 'Gérer les commandes associées',
-           'classes' => array('btn', 'btn-default'),
-           'attr' => array(
-               'onclick' => $this->getJsLoadModalForm('commandes')
-           )
-       );
-
-       $html = BimpRender::renderPanel('Commandes associées', $html, '', array(
-                           'type'     => 'secondary',
-                           'foldable' => true,
-                           'icon'     => 'fas_dolly',
-               'header_buttons' => array($button)
-               ));
-
-       return $html;
-    }
-
-
     public function getInfosExtraBtn()
     {
         $buttons = array();
@@ -301,7 +265,7 @@ class BF_Demande extends BimpObject
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 
         $buttons[] = array(
-            'label'   => 'Créer un contrat',
+            'label'   => 'Générer le contrat',
             'icon'    => 'fas_file-contract',
             'onclick' => $this->getJsActionOnclick('generateContrat', array(
                 'file_type' => 'pret'

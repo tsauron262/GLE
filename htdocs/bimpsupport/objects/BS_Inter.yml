@@ -99,7 +99,7 @@ forms:
               label: Déclencher le chrono
               data_type: bool
               input_name: start_timer
-              value: 0
+              value: 1
               input:
                   type: toggle
             - field: status

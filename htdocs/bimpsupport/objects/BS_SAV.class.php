@@ -1665,19 +1665,19 @@ class BS_SAV extends BimpObject
                 $mail_msg = "Merci d'avoir choisi BIMP en tant que Centre de Services Agréé Apple.\n";
                 $mail_msg .= 'La référence de votre dossier de réparation est : ' . $this->getData('ref') . ", ";
                 $mail_msg .= "si vous souhaitez communiquer d'autres informations merci de répondre à ce mail ou de contacter le " . $tel . ".\n";
-                $sms = "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre \"" . $nomMachine . "\" commence, nous vous recontacterons quand celui-ci sera fini.\nL'équipe BIMP";
+                $sms = "Bonjour, le diagnostic de votre \"" . $nomMachine . "\" commence, nous vous recontacterons quand celui-ci sera fini.\nL'équipe BIMP";
                 break;
 
             case 'debDiago':
                 $subject = "Prise en charge " . $this->getData('ref');
                 $mail_msg = "Nous avons commencé le diagnostic de votre \"$nomMachine\", vous aurez rapidement des nouvelles de notre part. ";
-                $sms = "Nous avons commencé le diagnostic de votre \" $nomMachine \", vous aurez rapidement des nouvelles de notre part.\nVotre centre de services Apple.";
+                $sms = "Nous avons commencé le diagnostic de votre \" $nomMachine \", vous aurez rapidement des nouvelles de notre part.\nL'équipe BIMP";
                 break;
 
             case 'commOk':
                 $subject = 'Commande piece(s) ' . $this->getData('ref');
                 $mail_msg = "Nous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. Nous restons à votre disposition pour toutes questions au " . $tel;
-                $sms = "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci.\nL'équipe BIMP.";
+                $sms = "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci.\nL'équipe BIMP";
                 break;
 
             case 'repOk':

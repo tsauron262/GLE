@@ -29,7 +29,7 @@ if (!defined('EURO'))
 
 ini_set('max_execution_time', 600);
 
-class pdf_synopsisapple_appleretour extends ModeleSynopsisapple {
+class pdf_synopsisapple_appleretour extends ModelePDFSynopsisapple {
 
     public $emetteur;    // Objet societe qui emet
 

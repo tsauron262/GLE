@@ -140,11 +140,11 @@ echo "  <td align=\"left\" ></td>";
 echo "  <td >&nbsp;</td></tr>";
 $var=!$var;
 
-$result = $api->get('/sms/details?limit=50');
+$result = $api->get('/sms?limit=50');
 if(count($result)>0) {
 	foreach($result as $k=>$s) {
 		echo "<tr ".$bc[$var].">";
-		echo '<td>'.$s->date.'</td>';
+		echo '<td>'.$s->date->date.'</td>';
 		echo '<td align="left">'.$s->details.' ('.$s->Country.')</td>';
 		echo '<td align="right">'.$s->StatusText.'</td>';
 		echo '</tr>';

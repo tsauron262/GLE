@@ -1,0 +1,12 @@
+extends: 
+    module: bimpcore
+    object_name: BimpLine
+
+table: bf_demande_line
+    
+parent_module: bimpfinancement
+parent_object: BF_Demande
+
+
+
+

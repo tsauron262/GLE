@@ -32,7 +32,6 @@ objects:
                 object_prop: ref
             view_btn: 1
 
-
     client: 
         relation: hasOne
         delete: 0
@@ -62,8 +61,6 @@ objects:
                 name: Bimp_User
             id_object:
                 fiels_value: id_commercial
-
-   
 
     supplier:
         relation: hasOne
@@ -136,6 +133,12 @@ objects:
                 fields: 
                     parent_module: bimpfinancement
                     parent_object_name: BF_Demande
+                    
+    lines: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BF_Line
             
 associations:
     commandes:
@@ -534,11 +537,6 @@ views:
                   col_md: 6
                   fields_table:
                       name: options  
-
-            - cols:
-                - type: custom
-                  custom:
-                      callback: renderCommandesList
                                       
             - cols: 
                   - type: fields_table
@@ -554,6 +552,13 @@ views:
                     col_sm: 12
                     fields_table:
                         name: apporteur
+                        
+            - cols:
+                  - type: list
+                    col_lg: 12
+                    list: 
+                        children: refinanceurs
+                        panel: 0
                 
             - cols: 
                   - type: custom
@@ -563,44 +568,31 @@ views:
                         callback: renderViewLoadedScript
                   
     montants:
-        title: nom
-        edit_form: default
-        delete_btn: 1
+        panel: 0
         rows:
             - cols:  
                   - type: fields_table
-                    col_lg: 6
-                    col_md: 6
+                    col_lg: 4
+                    col_md: 5
                     fields_table:
                         name: montants
-                            
-                  - type: list
-                    col_lg: 6
-                    col_md: 6
-                    list: 
-                        children: frais_divers
-                        panel: 0  
-                        
-                  - type: list
-                    col_lg: 6
-                    col_md: 12
-                    list: 
-                        children: rents
-                        panel: 0
-                        
-                  - type: list
-                    col_lg: 6
-                    col_md: 12
-                    list: 
-                        children: rents_except
-                        panel: 0
-                        
-            - cols:
-                  - type: list
-                    col_lg: 12
-                    list: 
-                        children: refinanceurs
-                        panel: 0
+                  - type: rows
+                    col_lg: 8
+                    col_md: 7
+                    rows: 
+                        - cols: 
+                            - type: list
+                              list: 
+                                  children: frais_divers
+                                  panel: 0  
+                            - type: list
+                              list: 
+                                  children: rents
+                                  panel: 0
+                            - type: list
+                              list: 
+                                  children: rents_except
+                                  panel: 0
                         
             - cols: 
                   - type: custom

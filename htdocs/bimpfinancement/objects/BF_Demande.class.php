@@ -12,18 +12,17 @@ class BF_Demande extends BimpObject
     const BF_DEMANDE_RECONDUIT = 6;
     const BF_DEMANDE_REMPLACE = 7;
     const BF_DEMANDE_TERMINE = 999;
-    
+
     public static $status_list = array(
-        self::BF_DEMANDE_BROUILLON => array('label' => 'Brouillon', 'classes' => array('warning')),
-        self::BF_DEMANDE_ATT_RETOUR => array('label' => 'En attente de retour', 'classes' => array('important')),
+        self::BF_DEMANDE_BROUILLON         => array('label' => 'Brouillon', 'classes' => array('warning')),
+        self::BF_DEMANDE_ATT_RETOUR        => array('label' => 'En attente de retour', 'classes' => array('important')),
         self::BF_DEMANDE_SIGNE_ATT_CESSION => array('label' => 'Signé - en attente de cession', 'classes' => array('important')),
-        self::BF_DEMANDE_CEDE => array('label' => 'Cédé', 'classes' => array('danger')),
-        self::BF_DEMANDE_SANS_SUITE => array('label' => 'Sans suite', 'classes' => array('danger')),
-        self::BF_DEMANDE_RECONDUIT => array('label' => 'Reconduit', 'classes' => array('danger')),
-        self::BF_DEMANDE_REMPLACE => array('label' => 'Remplacé', 'classes' => array('danger')),
-        self::BF_DEMANDE_TERMINE => array('label' => 'Terminé', 'classes' => array('success')),
+        self::BF_DEMANDE_CEDE              => array('label' => 'Cédé', 'classes' => array('danger')),
+        self::BF_DEMANDE_SANS_SUITE        => array('label' => 'Sans suite', 'classes' => array('danger')),
+        self::BF_DEMANDE_RECONDUIT         => array('label' => 'Reconduit', 'classes' => array('danger')),
+        self::BF_DEMANDE_REMPLACE          => array('label' => 'Remplacé', 'classes' => array('danger')),
+        self::BF_DEMANDE_TERMINE           => array('label' => 'Terminé', 'classes' => array('success')),
     );
-    
     public static $durations = array(
         24 => '24 mois',
         36 => '36 mois',
@@ -48,6 +47,8 @@ class BF_Demande extends BimpObject
         1 => 'A terme échu',
         2 => 'A terme à échoir'
     );
+
+    // Getters: 
 
     public function getClient_contactsArray()
     {
@@ -85,156 +86,6 @@ class BF_Demande extends BimpObject
         return $contacts;
     }
 
-    public function renderViewLoadedScript()
-    {
-        if ($this->isLoaded()) {
-            return '<script type="text/javascript">onBFDemandeViewLoaded(' . $this->id . ');</script>';
-        }
-        return '';
-    }
-    
-    public function actionGenerateContrat($success){
-
-        if (!$this->isLoaded()) { 
-            return array("La demande de financement n'à pas d'ID");
-        } else { 
-            (int) $id = $this->getData('id'); 
-            $errors = array();
-            $where = '`id_demande` = ' . $id;
-        }
-
-        $id_client = (int) $this->getData('id_client');
-        $id_commercial = (int) $this->getData('id_commercial');
-        $montant_materiels = $this->getData('montant_materiels');
-        $montant_services = $this->getData('montant_services');
-        $montant_logiciels = $this->getData('montant_logiciels');
-        $id_status = $this->getData('status');
-        $accepted = $this->getData('accepted');
-        $duree_prevu = $this->getData('duration');
-        $periodicite_prevu = $this->getData('periodicity');
-        $id_client_contact = $this->getData('id_client_contact');
-        $assurance = $this->getData('insurance');
-        $id_supplier = $this->getData('id_supplier');
-        $id_supplier_contact = $this->getData('id_supplier_contact');
-        $date_loyer = $this->getData('date_loyer');
-        $date_livraison = $this->getdata('date_livraison');
-        $date_creation = $this->getData('date_create');
-
-        if(!$accepted) { $errors[] = "La banque doit avoir valider"; }
-        if(!$date_livraison) { $errors[] = "Date de livraison manquante"; }
-        if(!$date_loyer){ $errors[] = "Date de mise en loyer manquante"; } 
-        if(!$montant_materiels && !$montant_logiciels && !$montant_services) { $errors[] = 'Logiciels, Services ou Matériels non rensseignés'; }
-        if(!$id_client) { $errors[] = "Pas de client";}
-        if(!$id_commercial) { $errors[] = "Commercial obligatoire"; }
-
-
-        $loyers = $this->db->getRows('bf_rent', $where, null, 'array', array('id', 'quantity', 'amount_ht', 'payment', 'periodicity', 'position'));
-        $refinanceur = $this->db->getRows('bf_refinanceur', $where, null, 'array', array('id', 'position', 'name', 'status', 'rate', 'coef', 'comment'));
-        $intercalaire = $this->db->getRows('bf_rent_except', $where, null, 'array', array('id', 'date', 'amount', 'payement'));
-        $frais_divers = $this->db->getRows('bf_frais_divers', $where, null, 'array', array('id', 'date', 'amount'));
-        if(is_null($refinanceur)) { 
-            $errors[] = "Refinanceur manquant"; 
-        }
-
-        if(!count($errors)) {
-            global $langs, $user;
-            if(!is_null($loyers)) {
-                $date_de_fin = new DateTime($this->getData('date_loyer'));
-                foreach ($loyers as $ligne) {
-                    $date_de_fin->add(new DateInterval("P".$ligne['quantity']*$ligne['periodicity']."M"));
-                    //$errors[] = $ligne['position'];
-                }
-            }
-            BimpTools::loadDolClass('contrat');
-            $contrat = new Contrat($this->db->db);
-            $contrat->socid = $id_client;
-            $contrat->date_contrat = $date_creation;
-            $contrat->commercial_signature_id = $id_commercial;
-            $contrat->commercial_suivi_id = $id_commercial;
-            $contrat->mise_en_service = $date_livraison;
-            $contrat->fin_validite = $date_de_fin;
-
-            
-            $where_element_element = "`fk_source` = " . $id . " AND `sourcetype` = 'demande' AND `targettype` = 'contrat'";
-            $ElementElement = $this->db->getRows('element_element', $where_element_element, null, 'array', array('fk_source', 'sourcetype', 'targettype'));
-            if(!$ElementElement) {
-                if($contrat->create($user) > 0) {
-            // if(1 == 1) {
-            //     if(1 == 1) {
-                    $contrat->validate($user);
-                    addElementElement('demande', 'contrat', $id, $contrat->id);
-                    foreach ($loyers as $ligne) {
-                        $suite_desc = ($ligne['periodicity'] == 1) ? "Mois" :
-                        $suite_desc = ($ligne['periodicity'] == 3) ? "Trimestres" :
-                        $suite_desc = ($ligne['periodicity'] == 6) ? "Semestres" :
-                        $suite_desc = ($ligne['periodicity'] == 12) ? "Ans" : "";
-
-                        $description = "Payement " . BF_demande::$periodicities[$ligne['periodicity']] . " de " . $ligne['amount_ht'] . "€ sur " . $ligne['quantity'] . " " . $suite_desc;
-
-
-                        if($ligne['position'] == 1) {
-                            $start_date = $date_livraison;
-                            $end_date = new DateTime($start_date);
-                            $end_date->add(new DateInterval("P".$ligne['quantity']*$ligne['periodicity']."M"));
-                        } else {
-                            $start_date = (!empty($end_date)) ? $end_date : $date_livraison;
-                            $end_date = new DateTime($start_date);
-                            $end_date->add(new DateInterval("P".$ligne['quantity']*$ligne['periodicity']."M"));
-                        }
-                        $date_fin = $end_date->format('Y-m-d');
-                        
-                        if($contrat->addline($description, $ligne['amount_ht'], $ligne['quantity'], 0, 0, 0, 0, 0, $start_date, $date_fin) > 0){
-
-                        } else {
-                            $errors[] = $contrat->error;
-                        }
-                    }
-                    $success = "Contrat créer avec success";
-                } else {
-                    $errors[] = $contrat->error;
-                }
-                
-            } else {
-                // On met à jours le contrat
-                $warnings = "Le contrat existe";
-            }
-        }
-        return array(
-            'warnings' => $warnings,
-            'errors' => $errors,
-            'success' => $success,
-
-        );
-    }
-
-    public function renderCommandesList() {
-
-       $asso = new BimpAssociation($this, 'commandes');
-           $list = $asso->getAssociatesList();
-
-       // Créer la liste sur le modèle de BS_SAV.class.php->renderPropalesList()
-
-       // à la fin:
-
-       $button = array( // bouton pour afficher formulaire associations
-           'label' => 'Gérer les commandes associées',
-           'classes' => array('btn', 'btn-default'),
-           'attr' => array(
-               'onclick' => $this->getJsLoadModalForm('commandes')
-           )
-       );
-
-       $html = BimpRender::renderPanel('Commandes associées', $html, '', array(
-                           'type'     => 'secondary',
-                           'foldable' => true,
-                           'icon'     => 'fas_dolly',
-               'header_buttons' => array($button)
-               ));
-
-       return $html;
-    }
-
-
     public function getInfosExtraBtn()
     {
         $buttons = array();
@@ -252,5 +103,155 @@ class BF_Demande extends BimpObject
         );
 
         return $buttons;
+    }
+
+    // Rendus HTML: 
+
+    public function renderViewLoadedScript()
+    {
+        if ($this->isLoaded()) {
+            return '<script type="text/javascript">onBFDemandeViewLoaded(' . $this->id . ');</script>';
+        }
+        return '';
+    }
+
+    public function renderCommandesList()
+    {
+
+        $asso = new BimpAssociation($this, 'commandes');
+        $list = $asso->getAssociatesList();
+
+        // Créer la liste sur le modèle de BS_SAV.class.php->renderPropalesList()
+        // à la fin:
+
+        $html = '';
+
+        $button = array(// bouton pour afficher formulaire associations
+            'label'   => 'Gérer les commandes associées',
+            'classes' => array('btn', 'btn-default'),
+            'attr'    => array(
+                'onclick' => $this->getJsLoadModalForm('commandes')
+            )
+        );
+
+        $html = BimpRender::renderPanel('Commandes associées', $html, '', array(
+                    'type'           => 'secondary',
+                    'foldable'       => true,
+                    'icon'           => 'fas_dolly',
+                    'header_buttons' => array($button)
+        ));
+
+        return $html;
+    }
+
+    // Actions: 
+
+    public function actionGenerateContrat($data, &$success)
+    {
+        if (!$this->isLoaded()) {
+            return array("ID de la demande de financement absent");
+        }
+
+        $errors = array();
+        $warnings = array();
+        $success = "Contrat créé avec succès";
+
+        $id_client = (int) $this->getData('id_client');
+        $id_commercial = (int) $this->getData('id_commercial');
+        $montant_materiels = $this->getData('montant_materiels');
+        $montant_services = $this->getData('montant_services');
+        $montant_logiciels = $this->getData('montant_logiciels');
+        $accepted = $this->getData('accepted');
+        $date_loyer = $this->getData('date_loyer');
+        $date_livraison = $this->getdata('date_livraison');
+        $date_creation = $this->getData('date_create');
+
+        if (!$accepted) {
+            $errors[] = "La banque doit avoir validé";
+        }
+        if (!$date_livraison) {
+            $errors[] = "Date de livraison manquante";
+        }
+        if (!$date_loyer) {
+            $errors[] = "Date de mise en loyer manquante";
+        }
+        if (!$montant_materiels && !$montant_logiciels && !$montant_services) {
+            $errors[] = 'Logiciels, Services ou Matériels non renseignés';
+        }
+        if (!$id_client) {
+            $errors[] = "Pas de client";
+        }
+        if (!$id_commercial) {
+            $errors[] = "Commercial obligatoire";
+        }
+
+        $loyers = $this->getChildrenObjects('rents', array(), 'position', 'asc');
+        $refinanceur = $this->getChildrenObjects('refinanceurs');
+
+        if (is_null($refinanceur)) {
+            $errors[] = "Refinanceur manquant";
+        }
+
+        if (!count($errors)) {
+            global $user;
+            if (!is_null($loyers) && count($loyers)) {
+                $date_de_fin = new DateTime($this->getData('date_loyer'));
+                foreach ($loyers as $loyer) {
+                    $date_de_fin->add(new DateInterval("P" . $loyer->getData('quantity') * $loyer->getData('periodicity') . "M"));
+                }
+            }
+
+            BimpTools::loadDolClass('contrat');
+            $contrat = new Contrat($this->db->db);
+            $contrat->socid = $id_client;
+            $contrat->date_contrat = $date_creation;
+            $contrat->commercial_signature_id = $id_commercial;
+            $contrat->commercial_suivi_id = $id_commercial;
+            $contrat->mise_en_service = $date_livraison;
+            $contrat->fin_validite = $date_de_fin;
+//
+//            $where_element_element = "`fk_source` = " . $this->id . " AND `sourcetype` = 'demande' AND `targettype` = 'contrat'";
+//            $ElementElement = $this->db->getRows('element_element', $where_element_element, null, 'array', array('fk_source', 'sourcetype', 'targettype'));
+
+            if (!(int) $this->getData('id_contrat')) {
+                if ($contrat->create($user) > 0) {
+                    $contrat->validate($user);
+                    addElementElement('demande', 'contrat', $this->id, $contrat->id);
+
+                    $DT = new DateTime($date_livraison);
+
+                    $i = 0;
+                    foreach ($loyers as $loyer) {
+                        $i++;
+                        $loyer_periodicity = (int) $loyer->getData('periodicity');
+                        $loyer_qty = (int) $loyer->getData('quantity');
+                        $description = 'Paiement ' . BF_Rent::$periodicities[$loyer_periodicity] . ' de ';
+                        $description .= BimpTools::displayMoneyValue($loyer->getData('amount_ht'), 'EUR');
+                        $description .= ' sur ' . $loyer_qty . ' ';
+                        $description .= ($loyer_qty === 1 ? BF_Rent::$period_label[$loyer_periodicity] : BF_Rent::$period_label_plur[$loyer_periodicity]);
+
+                        $start_date = $DT->format('Y-m-d');
+                        $DT->add(new DateInterval("P" . $loyer_qty * $loyer_periodicity . "M"));
+
+                        $contrat->error = '';
+                        $contrat->errors = array();
+
+                        if ($contrat->addline($description, (float) $loyer->getData('amount_ht'), $loyer_qty, 0, 0, 0, 0, 0, $start_date, $DT->format('Y-m-d')) <= 0) {
+                            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat), 'Echec de l\'ajout d\'une ligne au contrat pour le loyer n° ' . $i);
+                        }
+                    }
+                    $this->updateField('id_contrat', (int) $contrat->id);
+                } else {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($contrat), 'Echec de la création du contrat');
+                }
+            } else {
+                // On met à jours le contrat
+                $errors[] = "Le contrat existe déjà";
+            }
+        }
+        return array(
+            'warnings' => $warnings,
+            'errors'   => $errors,
+        );
     }
 }

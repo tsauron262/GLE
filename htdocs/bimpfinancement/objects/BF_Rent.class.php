@@ -15,5 +15,23 @@ class BF_Rent extends BimpObject
         6  => 'Semestrielle',
         12 => 'Annuelle'
     );
+    public static $periodicities_masc = array(
+        1  => 'mensuel',
+        3  => 'trimestriel',
+        6  => 'semestriel',
+        12 => 'annuel'
+    );
+    public static $period_label = array(
+        1  => 'mois',
+        3  => 'trimestre',
+        6  => 'semestre',
+        12 => 'an'
+    );
+    public static $period_label_plur = array(
+        1  => 'mois',
+        3  => 'trimestres',
+        6  => 'semestres',
+        12 => 'ans'
+    );
 
 }

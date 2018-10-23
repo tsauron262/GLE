@@ -1,0 +1,163 @@
+positions: 1
+position_insert: after
+common_fields: 0
+
+parent_id_property: id_parent
+
+labels:
+    name: ligne
+    is_female: 1
+    
+objects: 
+    product: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: bimp_Product
+            id_object: 
+                field_value: id_product
+                
+    fourn_price:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductFournisseurPrice
+            id_object: 
+                field_value: id_fourn_price
+                
+    fournisseur: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Societe
+            id_object: 
+                field_value: id_fournisseur
+            
+fields: 
+    id_parent: 
+        label: Objet parent
+        type: id_parent
+        
+    type: 
+        label: Type
+        type: int
+        values: 
+            array: types
+            
+    description: 
+        label: Description
+        
+    id_product: 
+        label: Produit
+        type: id_object
+        object: product
+        
+    qty: 
+        label: Quantité
+        type: qty
+        
+    pu_ht: 
+        label: Prix unitaire HT
+        type: money
+        
+    tva_tx: 
+        label: Taux de TVA
+        type: percent
+        
+    pa_ht: 
+        label: Prix d'achat HT
+        type: money
+        
+    id_fourn_price: 
+        label: Prix d'achat fournisseur
+        type: id_object
+        object: fourn_price
+        
+    id_fournisseur: 
+        label: Fournisseur
+        type: id_object
+        object: fournisseur
+        
+    equipments: 
+        label: Equipements
+        type: list
+        
+lists_cols: 
+    desc:
+        field: desc
+        max_width: 460px
+    pu_ht: 
+        label: PU HT
+        field: pu_ht
+    tva:
+        label: TVA
+        field: tva_tx
+    pa_ht: 
+        label: PA HT
+        field: pa_ht
+    qty: 
+        label: Qté
+        field: qty        
+    fourn_price: 
+        label: PA fournisseur
+        field: id_fourn_price
+        display: nom_url
+    fourn: 
+        label: Fournisseur
+        field: id_fournisseur
+        display: nom_url
+    total_ht: 
+        label: Total HT
+        value: 
+            callback: displayTotalHT
+    total_ttc: 
+        label: Total TTC
+        value: 
+            callback: displayTotalTTC
+                
+lists: 
+    default: 
+        checkboxes: 1
+        positions: 1
+        positions_open: 1
+        enable_search: 0
+        enable_sort: 0
+        pagination: 0
+        bulk_actions:
+            - label: supprimer les lignes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: position
+        sort_way: asc
+        n: 0
+        single_cell:
+            filters:
+                type: 2
+            col: desc
+        add_btn: 
+            callback: isParentEditable
+        add_form_name: default
+        add_btn_label: Ajouter une ligne
+        edit_btn: 
+            callback: isEditable
+        update_btn: 
+            callback: isEditable
+        delete_btn: 
+            callback: isDeletable
+        item_checkbox: 
+            callback: isDeletable
+        extra_btn: 
+            callback: getListExtraBtn
+        cols:
+            desc:
+            pu_ht: 
+            tva:
+            pa_ht: 
+            qty: 
+            total_ttc:

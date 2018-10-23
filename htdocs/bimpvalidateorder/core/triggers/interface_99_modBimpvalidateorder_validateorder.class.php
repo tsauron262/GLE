@@ -63,8 +63,8 @@ class Interfacevalidateorder extends DolibarrTriggers {
                     }
                 }
                 if(!$ok){
-                    setEventMessages("Impossible de facturé sans commande, cette piéce contient des produit(s) sérialisable(s)", null, 'errors');
-                    return -1;
+//                    setEventMessages("Impossible de facturé sans commande, cette piéce contient des produit(s) sérialisable(s)", null, 'errors');
+//                    return -1;
                 }
             }
         }

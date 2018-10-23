@@ -207,7 +207,66 @@ class BF_Demande extends BimpObject
         );
     }
 
-    public function renderCommandesList() {
+    public function renderCommandesList()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $asso = new BimpAssociation($this, 'commandes');
+            $list = $asso->getAssociatesList();
+
+//            echo '<pre>';
+//            print_r($list);
+//            exit;
+            if (count($list)) {
+                krsort($list);
+                $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th>Réf.</th>';
+                $html .= '<th>Statut</th>';
+                $html .= '<th>Montant TTC</th>';
+                $html .= '<th>Fichier</th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+                $html .= '<tbody>';
+
+                foreach ($list as $id_propal) {
+                    if ($propal->fetch($id_propal)) {
+                        $html .= '<tr>';
+                        $html .= '<td>' . $propal->getRef() . '</td>';
+                        $html .= '<td>' . $propal->displayData('fk_statut') . '</td>';
+                        $html .= '<td>' . $propal->displayData('total_ttc') . '</td>';
+                        $html .= '<td>' . $propal->displayPDFButton(false) . '</td>';
+                        $html .= '</tr>';
+                    }
+                }
+
+                $html .= '</tbody>';
+                $html .= '</table>';
+            }
+
+            $button = array( // bouton pour afficher formulaire associations
+           'label' => 'Gérer les commandes associées',
+           'classes' => array('btn', 'btn-default'),
+           'attr' => array(
+               'onclick' => $this->getJsLoadModalForm('commandes')
+           )
+       );
+
+       $html = BimpRender::renderPanel('Commandes associées', $html, '', array(
+                           'type'     => 'secondary',
+                           'foldable' => true,
+                           'icon'     => 'fas_dolly',
+               'header_buttons' => array($button)
+               ));
+        }
+
+        return $html;
+    }
+
+    public function d() {
 
        $asso = new BimpAssociation($this, 'commandes');
            $list = $asso->getAssociatesList();

@@ -507,9 +507,9 @@ class shipment {
             $html .= '</p>';
         }
 
-//        if ($this->checkPartsLabels()) {
+        if ($this->checkPartsLabels()) {
             $html .= $this->getFilesList();
-//        }
+        }
 
         if (isset($this->gsxInfos['bulkReturnId']) && !$this->checkPartsLabels()) {
             $html .= '<div id="partsLabelRequestInfos" style="text-align: center">';

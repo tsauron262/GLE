@@ -88,8 +88,8 @@ class BimpStatsFactureFournisseur {
         $sql = 'SELECT f.rowid as facid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'facture_fourn as f';
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'facture_fourn_extrafields as e ON f.rowid = e.fk_object';
-        $sql .= ' WHERE f.datef >= "' . $this->db->idate($dateStart)."'";
-        $sql .= ' AND   f.datef <= "' . $this->db->idate($dateEnd)."'";
+        $sql .= ' WHERE f.datef >= "' . $this->db->idate($dateStart).'"';
+        $sql .= ' AND   f.datef <= "' . $this->db->idate($dateEnd).'"';
 
         $sql .= " AND (";
         if (!empty($centres)) {

@@ -37,7 +37,7 @@ class Interfacevalidateorder extends DolibarrTriggers {
                     $object->addLine("Selon notre devis ".$prop->ref,0,0,0);
             }
         }
-        if($action == "BILL_CREATE"){
+        if($action == "BILL_CREATE" && $object->type == TYPE_STANDARD){
             $object->fetchObjectLinked();
             if (isset($object->linkedObjects['commande']) && count($object->linkedObjects['commande'])) {
                 foreach ($object->linkedObjects['commande'] as $comm) {

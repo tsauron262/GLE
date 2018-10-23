@@ -317,7 +317,9 @@ class Bimp_Commande extends BimpComm
             return Bimp_Product::getFournisseursPriceArray($id_product);
         }
 
-        return array();
+        return array(
+            0 => ''
+        );
     }
 
     // Traitements: 

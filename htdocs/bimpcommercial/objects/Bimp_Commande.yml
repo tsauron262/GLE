@@ -368,7 +368,6 @@ forms:
                   type: select
                   options:
                       array: productFournisseursPrices
-              required: 1
               display_if: 
                   field_name: id_product
                   hide_values: 0,

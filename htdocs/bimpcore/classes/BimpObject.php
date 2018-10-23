@@ -4097,6 +4097,7 @@ class BimpObject extends BimpCache
             if (!$label) {
                 $label = $col_name;
             }
+            $cols[$col_name] = $label;
         }
 
         if ((int) $bc_list->params['configurable'] &&

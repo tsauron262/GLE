@@ -3,6 +3,27 @@
 class BF_Demande extends BimpObject
 {
 
+    const BF_DEMANDE_BROUILLON = 0;
+    const BF_DEMANDE_ATT_RETOUR = 1;
+    const BF_DEMANDE_SIGNE = 2;
+    const BF_DEMANDE_SIGNE_ATT_CESSION = 3;
+    const BF_DEMANDE_CEDE = 4;
+    const BF_DEMANDE_SANS_SUITE = 5;
+    const BF_DEMANDE_RECONDUIT = 6;
+    const BF_DEMANDE_REMPLACE = 7;
+    const BF_DEMANDE_TERMINE = 999;
+    
+    public static $status_list = array(
+        self::BF_DEMANDE_BROUILLON => array('label' => 'Brouillon', 'classes' => array('warning')),
+        self::BF_DEMANDE_ATT_RETOUR => array('label' => 'En attente de retour', 'classes' => array('important')),
+        self::BF_DEMANDE_SIGNE_ATT_CESSION => array('label' => 'Signé - en attente de cession', 'classes' => array('important')),
+        self::BF_DEMANDE_CEDE => array('label' => 'Cédé', 'classes' => array('danger')),
+        self::BF_DEMANDE_SANS_SUITE => array('label' => 'Sans suite', 'classes' => array('danger')),
+        self::BF_DEMANDE_RECONDUIT => array('label' => 'Reconduit', 'classes' => array('danger')),
+        self::BF_DEMANDE_REMPLACE => array('label' => 'Remplacé', 'classes' => array('danger')),
+        self::BF_DEMANDE_TERMINE => array('label' => 'Terminé', 'classes' => array('success')),
+    );
+    
     public static $durations = array(
         24 => '24 mois',
         36 => '36 mois',
@@ -26,16 +47,6 @@ class BF_Demande extends BimpObject
         0 => '-',
         1 => 'A terme échu',
         2 => 'A terme à échoir'
-    );
-    public static $status_list = array(
-        0 => '-',
-        1 => 'Cédé',
-        2 => 'Signé - en attente de cession',
-        3 => 'En attente de retour',
-        4 => 'Sans suite',
-        5 => 'Terminé',
-        6 => 'Reconduit',
-        7 => 'Remplacé'
     );
 
     public function getClient_contactsArray()
@@ -81,13 +92,7 @@ class BF_Demande extends BimpObject
         }
         return '';
     }
-
-
-
-
-
-
-
+    
     public function actionGenerateContrat($success){
 
         if (!$this->isLoaded()) { 
@@ -98,8 +103,6 @@ class BF_Demande extends BimpObject
             $where = '`id_demande` = ' . $id;
         }
 
-
-        
         $id_client = (int) $this->getData('id_client');
         $id_commercial = (int) $this->getData('id_commercial');
         $montant_materiels = $this->getData('montant_materiels');
@@ -230,12 +233,6 @@ class BF_Demande extends BimpObject
 
        return $html;
     }
-
-
-
-
-
-
 
 
     public function getInfosExtraBtn()

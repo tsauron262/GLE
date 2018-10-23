@@ -151,7 +151,7 @@ class BC_ListTable extends BC_List
         if (!is_array($list_cols) || !count($list_cols)) {
             $list_cols = $this->params['cols'];
         }
-
+        
         $this->cols = array();
 
         foreach ($list_cols as $col_name) {
@@ -341,6 +341,10 @@ class BC_ListTable extends BC_List
     {
         $html = '';
 
+        if (count($this->errors)) {
+            return parent::renderHtml();
+        }
+        
         $html .= $this->renderListParamsInputs();
 
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';

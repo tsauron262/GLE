@@ -1,5 +1,4 @@
 <?php
-
 class BF_Demande extends BimpObject
 {
 
@@ -180,6 +179,7 @@ class BF_Demande extends BimpObject
                         $contrat->activateAll($user, $start_date);
                         $start_date_dynamic = $end_date;
                     }
+                    // Création du contrat OK
                     $success = "Contrat créer avec success";
                 } else {
                     $errors[] = $contrat->error;

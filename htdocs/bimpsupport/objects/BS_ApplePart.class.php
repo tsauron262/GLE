@@ -139,7 +139,7 @@ class BS_ApplePart extends BimpObject
         elseif($type == "ecran"){
             foreach(self::$tabRefCommencePrixEcran as $refT => $prixT)
                 if($ref == $refT)
-                    $newPrix = $prixT;
+                    $newPrix = str_replace(",",".", $prixT);
         }
         else {
             if ($prix > 300)

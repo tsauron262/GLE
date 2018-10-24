@@ -140,6 +140,8 @@ class BS_ApplePart extends BimpObject
             foreach(self::$tabRefCommencePrixEcran as $refT => $prixT)
                 if($ref == $refT)
                     $newPrix = $prixT;
+                if($newPrix == 0)
+                    die("dans foreach".print_r(self::$tabRefCommencePrixEcran ,1));
         }
         else {
             if ($prix > 300)
@@ -153,6 +155,8 @@ class BS_ApplePart extends BimpObject
                 $constPrix = 10;
             }
         }
+                if($newPrix == 0)
+                    die(print_r(self::$tabRefCommencePrixEcran ,1));
 
 
         if ($newPrix > 0)

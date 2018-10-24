@@ -431,8 +431,10 @@ class Reservations
             $ac->socid = $customer->id;
         }
 
+        $ac->array_options['options_resgsx'] = $resa->reservationId;
+//        $ac->insertExtraFields();
 //        date_default_timezone_set("GMT");
-        $fk_ac = $ac->add($user);
+        $fk_ac = $ac->create($user);
 //        date_default_timezone_set("Europe/Paris");
 
         if (!$fk_ac) {
@@ -440,8 +442,6 @@ class Reservations
             return;
         }
 
-        $ac->array_options['options_resgsx'] = $resa->reservationId;
-        $ac->insertExtraFields();
 
         $dateBegin->setTimezone(new DateTimeZone("Europe/Paris"));
         $dateEnd->setTimezone(new DateTimeZone("Europe/Paris"));

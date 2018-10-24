@@ -786,7 +786,7 @@ class ExtraFields
 		$sql.= " WHERE entity IN (0,".$conf->entity.")";
 		if ($elementtype) $sql.= " AND elementtype = '".$elementtype."'";	// Filed with object->table_element
 		$sql.= " ORDER BY pos";
-
+die($sql);
 		$resql=$this->db->query($sql);
 		if ($resql)
 		{

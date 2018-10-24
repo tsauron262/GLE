@@ -5010,6 +5010,9 @@ abstract class CommonObject
 				}
 			}
 			$sql.=")";
+                        echo "<pre>";
+                        print_r($target_extrafields);
+                        print_r($this->array_options);
 die($sql);
 			dol_syslog(get_class($this)."::insertExtraFields insert", LOG_DEBUG);
 			$resql = $this->db->query($sql);

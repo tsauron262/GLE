@@ -45,6 +45,8 @@ require_once ($path."../../htdocs/master.inc.php");
 require_once (DOL_DOCUMENT_ROOT."/cron/class/cronjob.class.php");
 require_once (DOL_DOCUMENT_ROOT.'/user/class/user.class.php');
 
+$conf->entity = 1;
+
 // Check parameters
 if (! isset($argv[1]) || ! $argv[1]) {
 	usage($path,$script_file);

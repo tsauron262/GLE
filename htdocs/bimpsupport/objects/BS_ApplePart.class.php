@@ -62,45 +62,89 @@ class BS_ApplePart extends BimpObject
         BimpObject::loadClass('bimpapple', 'GSX_CompTIA');
         return GSX_CompTIA::getCompTIAModifiers();
     }
+    
+    public static function getCategProdApple($ref, $desc){
+        $type = "autre";
+        
+        
+        $tabRefCommenceIos = array("661-05511", "DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
+        $tabDescCommenceIos = array("SVC,IPOD", "Ipod nano");
+        
+        $tabRefCommenceIosDouble = array("661", "Z661");
+        $tabDescCommenceIosDouble = array("iphone", "BAT,IPHONE", "SVC,IPHONE"); //design commence par
+        $tabDescContientIosDouble = array("Ipad Pro", "Ipad mini", "Apple Watc"); //design contient
+        
+        $tabRefCommenceBatterie = array("661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755"); //Prix a 29
+        
+        $tabRefCommencePrixEcran = array("661-07285" => "142,58", "661-07286" => "142,58", "661-07287" => "142,58", "661-07288" => "142,58", "661-07289" => "159,25", "661-07290" => "159,25", "661-07291" => "159,25", "661-07292" => "159,25", "661-07293" => "142,58", "661-07294" => "142,58", "661-07295" => "142,58", "661-07296" => "142,58", "661-07297" => "159,25", "661-07298" => "159,25", "661-07299" => "159,25", "661-07300" => "159,25", "661-08933" => "142,58", "661-08934" => "142,58", "661-09081" => "142,58", "661-10102" => "142,58", "661-09032" => "159,25", "661-09033" => "159,25", "661-09034" => "159,25", "661-10103" => "159,25", "661-09294" => "259,25", "661-10608" => "259,25", "661-11037" => "300,91");
+        
+        self::$tabRefCommencePrixEcran = $tabRefCommencePrixEcran;
+        
+        
+        //Premier cas les ios
+        foreach ($tabDescCommenceIos as $val)//desc commence par rajout 45€
+            if (stripos($desc, $val) === 0)
+                $type = "ios";
+        foreach ($tabRefCommenceIos as $val)//ref commence par rajout 45€
+            if (stripos($ref, $val) === 0)
+                $type = "ios";
+        foreach ($tabRefCommenceIosDouble as $val){//ref commence par rajout 45€
+            if (stripos($ref, $val) === 0){
+                foreach ($tabDescCommenceIosDouble as $val)
+                    if (stripos($desc, $val) === 0)
+                        $type = "ios";
+                foreach ($tabDescContientIosDouble as $val)
+                    if (stripos($desc, $val) !== false)
+                        $type = "ios";
+            }
+        }
+        
+        
+        //deuxieme cas les Batterie
+        
+        foreach ($tabRefCommenceBatterie as $val)
+            if (stripos($ref, $val) === 0) 
+                    $type = "batt";
+            
+        
+        //troisieme cas les ecran
+        
+        foreach ($tabRefCommencePrixEcran as $val)
+            if (stripos($ref, $val) === 0) 
+                    $type = "ecran";
+            
+        return $type;
+    }
 
     public static function convertPrix($prix, $ref, $desc)
     {
         $coefPrix = 1;
         $constPrix = 0;
         $newPrix = 0;
-        $tabCas1 = array("661-05511", "DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
-        $tabCas2 = array("SVC,IPOD", "Ipod nano");
-        $tabCas3 = array("661", "Z661");
-        $tabCas35 = array("iphone", "BAT,IPHONE", "SVC,IPHONE"); //design commence par
-        $tabCas36 = array("Ipad Pro", "Ipad mini", "Apple Watc"); //design contient
-        $tabCas9 = array("661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755"); //Prix a 29
+        
+        $type = self::getCategProdApple($ref, $desc);
 
+        
+        //ou batterie
+        //ou ecran
+        // ou  ios cas 1
+        //ou autre
+        
+        
         $cas = 0;
-        foreach ($tabCas2 as $val)
-            if (stripos($desc, $val) === 0)
-                $cas = 1;
-        foreach ($tabCas3 as $val)
-            if (stripos($ref, $val) === 0)
-                $cas = 3;
-        foreach ($tabCas1 as $val)
-            if (stripos($ref, $val) === 0)
-                $cas = 1;
-
-
-        //Application double contrainte    
-        if ($cas == 3) {
-            foreach ($tabCas35 as $val)
-                if (stripos($desc, $val) === 0)
-                    $cas = 1;
-            foreach ($tabCas36 as $val)
-                if (stripos($desc, $val) !== false)
-                    $cas = 1;
-        }
 
         //Application des coef et constantes
-        if ($cas == 1) {
+        if ($type == "ios") {
             $constPrix = 45;
-        } else {
+        } elseif($type == "batt"){
+            $newPrix = 32.5;
+        } 
+        elseif($type == "ecran"){
+            foreach(self::$tabRefCommencePrixEcran as $refT => $prixT)
+                if($ref == $refT)
+                    $newPrix = $prixT;
+        }
+        else {
             if ($prix > 300)
                 $coefPrix = 0.8;
             elseif ($prix > 150)
@@ -113,12 +157,6 @@ class BS_ApplePart extends BimpObject
             }
         }
 
-        foreach ($tabCas9 as $val) {
-            if (stripos($ref, $val) === 0) {
-                $coefPrix = 1;
-                $constPrix = 28.15;
-            }
-        }
 
         if ($newPrix > 0)
             $prix = $newPrix;

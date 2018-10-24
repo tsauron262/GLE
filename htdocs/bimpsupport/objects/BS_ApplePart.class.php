@@ -121,14 +121,6 @@ class BS_ApplePart extends BimpObject
         
         $type = self::getCategProdApple($ref, $desc);
 
-        
-        //ou batterie
-        //ou ecran
-        // ou  ios cas 1
-        //ou autre
-        
-        
-        $cas = 0;
 
         //Application des coef et constantes
         if ($type == "ios") {
@@ -160,10 +152,6 @@ class BS_ApplePart extends BimpObject
         else
             $prix = (($prix + $constPrix) / $coefPrix);
 
-//        if (($cas == 1) && $this->fraisP < 1)
-//            $this->fraisP = 0;
-//        else
-//            $this->fraisP = 1;
 
         return $prix;
     }

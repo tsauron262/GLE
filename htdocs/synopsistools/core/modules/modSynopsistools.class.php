@@ -265,6 +265,7 @@ class modSynopsistools extends DolibarrModules
             'societe' => 'synopsistools/core/modules/societe/', 
             'triggers' => 1
         );
+        
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.

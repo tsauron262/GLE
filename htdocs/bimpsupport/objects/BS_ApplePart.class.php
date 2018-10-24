@@ -106,7 +106,7 @@ class BS_ApplePart extends BimpObject
         
         //troisieme cas les ecran
         
-        foreach (self::$tabRefCommencePrixEcran as $val)
+        foreach (self::$tabRefCommencePrixEcran as $val => $inut)
             if (stripos($ref, $val) === 0) 
                     $type = "ecran";
             
@@ -153,8 +153,6 @@ class BS_ApplePart extends BimpObject
                 $constPrix = 10;
             }
         }
-                if($newPrix == 0)
-                    die($type ." | ". $ref." |" . print_r(self::$tabRefCommencePrixEcran ,1));
 
 
         if ($newPrix > 0)

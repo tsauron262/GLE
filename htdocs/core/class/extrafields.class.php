@@ -747,7 +747,7 @@ class ExtraFields
 	 * 	@param	boolean		$forceload			Force load of extra fields whatever is option MAIN_EXTRAFIELDS_DISABLED. Deprecated. Should not be required.
 	 * 	@return	array							Array of attributes keys+label for all extra fields.
 	 */
-	function fetch_name_optionals_label($elementtype,$forceload=false)
+	function fetch_name_optionals_label($elementtype,$forceload=false, $die = false)
 	{
 		global $conf;
 
@@ -786,6 +786,7 @@ class ExtraFields
 		$sql.= " WHERE entity IN (0,".$conf->entity.")";
 		if ($elementtype) $sql.= " AND elementtype = '".$elementtype."'";	// Filed with object->table_element
 		$sql.= " ORDER BY pos";
+                if($die)
 die($sql);
 		$resql=$this->db->query($sql);
 		if ($resql)

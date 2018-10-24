@@ -4821,7 +4821,7 @@ abstract class CommonObject
 			$langs->load('admin');
 			require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 			$extrafields = new ExtraFields($this->db);
-			$target_extrafields=$extrafields->fetch_name_optionals_label($this->table_element, false, true);
+			$target_extrafields=$extrafields->fetch_name_optionals_label($this->table_element);
 
 			//Eliminate copied source object extra_fields that do not exist in target object
 			$new_array_options=array();
@@ -5010,10 +5010,7 @@ abstract class CommonObject
 				}
 			}
 			$sql.=")";
-                        echo "<pre>";
-                        print_r($target_extrafields);
-                        print_r($this->array_options);
-die($sql);
+
 			dol_syslog(get_class($this)."::insertExtraFields insert", LOG_DEBUG);
 			$resql = $this->db->query($sql);
 			if (! $resql)

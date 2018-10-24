@@ -5010,7 +5010,7 @@ abstract class CommonObject
 				}
 			}
 			$sql.=")";
-
+die($sql);
 			dol_syslog(get_class($this)."::insertExtraFields insert", LOG_DEBUG);
 			$resql = $this->db->query($sql);
 			if (! $resql)

@@ -2,6 +2,17 @@
 
 class BS_ApplePart extends BimpObject
 {
+    
+        private static $tabRefCommenceIos = array("661-05511", "DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
+        private static $tabDescCommenceIos = array("SVC,IPOD", "Ipod nano");
+        
+        private static $tabRefCommenceIosDouble = array("661", "Z661");
+        private static $tabDescCommenceIosDouble = array("iphone", "BAT,IPHONE", "SVC,IPHONE"); //design commence par
+        private static $tabDescContientIosDouble = array("Ipad Pro", "Ipad mini", "Apple Watc"); //design contient
+        
+        private static $tabRefCommenceBatterie = array("661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755"); //Prix a 29
+        
+        private static $tabRefCommencePrixEcran = array("661-07285" => "142,58", "661-07286" => "142,58", "661-07287" => "142,58", "661-07288" => "142,58", "661-07289" => "159,25", "661-07290" => "159,25", "661-07291" => "159,25", "661-07292" => "159,25", "661-07293" => "142,58", "661-07294" => "142,58", "661-07295" => "142,58", "661-07296" => "142,58", "661-07297" => "159,25", "661-07298" => "159,25", "661-07299" => "159,25", "661-07300" => "159,25", "661-08933" => "142,58", "661-08934" => "142,58", "661-09081" => "142,58", "661-10102" => "142,58", "661-09032" => "159,25", "661-09033" => "159,25", "661-09034" => "159,25", "661-10103" => "159,25", "661-09294" => "259,25", "661-10608" => "259,25", "661-11037" => "300,91");
 
     public static $componentsTypes = array(
         0   => 'Général',
@@ -67,33 +78,19 @@ class BS_ApplePart extends BimpObject
         $type = "autre";
         
         
-        $tabRefCommenceIos = array("661-05511", "DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
-        $tabDescCommenceIos = array("SVC,IPOD", "Ipod nano");
-        
-        $tabRefCommenceIosDouble = array("661", "Z661");
-        $tabDescCommenceIosDouble = array("iphone", "BAT,IPHONE", "SVC,IPHONE"); //design commence par
-        $tabDescContientIosDouble = array("Ipad Pro", "Ipad mini", "Apple Watc"); //design contient
-        
-        $tabRefCommenceBatterie = array("661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755"); //Prix a 29
-        
-        $tabRefCommencePrixEcran = array("661-07285" => "142,58", "661-07286" => "142,58", "661-07287" => "142,58", "661-07288" => "142,58", "661-07289" => "159,25", "661-07290" => "159,25", "661-07291" => "159,25", "661-07292" => "159,25", "661-07293" => "142,58", "661-07294" => "142,58", "661-07295" => "142,58", "661-07296" => "142,58", "661-07297" => "159,25", "661-07298" => "159,25", "661-07299" => "159,25", "661-07300" => "159,25", "661-08933" => "142,58", "661-08934" => "142,58", "661-09081" => "142,58", "661-10102" => "142,58", "661-09032" => "159,25", "661-09033" => "159,25", "661-09034" => "159,25", "661-10103" => "159,25", "661-09294" => "259,25", "661-10608" => "259,25", "661-11037" => "300,91");
-        
-        self::$tabRefCommencePrixEcran = $tabRefCommencePrixEcran;
-        
-        
         //Premier cas les ios
-        foreach ($tabDescCommenceIos as $val)//desc commence par rajout 45€
+        foreach (self::$tabDescCommenceIos as $val)//desc commence par rajout 45€
             if (stripos($desc, $val) === 0)
                 $type = "ios";
-        foreach ($tabRefCommenceIos as $val)//ref commence par rajout 45€
+        foreach (self::$tabRefCommenceIos as $val)//ref commence par rajout 45€
             if (stripos($ref, $val) === 0)
                 $type = "ios";
-        foreach ($tabRefCommenceIosDouble as $val){//ref commence par rajout 45€
+        foreach (self::$tabRefCommenceIosDouble as $val){//ref commence par rajout 45€
             if (stripos($ref, $val) === 0){
-                foreach ($tabDescCommenceIosDouble as $val)
+                foreach (self::$tabDescCommenceIosDouble as $val)
                     if (stripos($desc, $val) === 0)
                         $type = "ios";
-                foreach ($tabDescContientIosDouble as $val)
+                foreach (self::$tabDescContientIosDouble as $val)
                     if (stripos($desc, $val) !== false)
                         $type = "ios";
             }
@@ -102,14 +99,14 @@ class BS_ApplePart extends BimpObject
         
         //deuxieme cas les Batterie
         
-        foreach ($tabRefCommenceBatterie as $val)
+        foreach (self::$tabRefCommenceBatterie as $val)
             if (stripos($ref, $val) === 0) 
                     $type = "batt";
             
         
         //troisieme cas les ecran
         
-        foreach ($tabRefCommencePrixEcran as $val)
+        foreach (self::$tabRefCommencePrixEcran as $val)
             if (stripos($ref, $val) === 0) 
                     $type = "ecran";
             

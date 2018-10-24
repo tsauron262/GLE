@@ -23,6 +23,18 @@ class exportCommande extends export8sens {
     public function __construct($db, $sortie = 'html') {
         parent::__construct($db);
         $this->pathExport = $this->path."commande/";
+        $tabFiles = scandir($this->pathExport);
+        $nbFiles = $nbFilesErr = 0;
+        foreach($tabFiles as $file)
+            if(stripos($file, ".txt"))
+                    $nbFiles++;
+        foreach($tabFiles as $file)
+            if(stripos($file, ".ER8"))
+                    $nbFilesErr++;
+        if($nbFiles > 5)
+            mailSyn2("Synchro 8Sens OFF", "tommy@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
+        if($nbFilesErr > 0)
+            mailSyn2("Synchro 8Sens FICHIER ERREURS", "tommy@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFilesErr);
     }
 
     public function exportTout() {
@@ -139,6 +151,7 @@ class exportCommande extends export8sens {
                 $contact = new Contact($this->db);
                 $contact->fetch($contactLiv['id']);
                 $PcvLAdpTitleEnu = $contactLiv['civility'];
+                if($contactFact['lastname'] != $PcvLAdpLib && $PcvLAdpLib != $contactFact['firstname'])
                 $PcvLAdpLib = $contactLiv['lastname']. " ".$contactLiv['firstname'];
                 $PcvLAdpRue1 = ($contact->address != "") ? $contact->address : $societe->address;
                 $PcvLAdpZip = ($contact->zip != "") ? $contact->zip : $societe->zip;
@@ -151,7 +164,8 @@ class exportCommande extends export8sens {
                 $contact = new Contact($this->db);
                 $contact->fetch($contactFact['id']);
                 $PcvPAdpTitleEnu = $contactFact['civility'];
-                $PcvPAdpLib = $contactFact['lastname']. " ".$contactFact['firstname'];
+                if($contactFact['lastname'] != $PcvPAdpLib && $PcvPAdpLib != $contactFact['firstname'])
+                    $PcvPAdpLib = $contactFact['lastname']. " ".$contactFact['firstname'];
                 $PcvPAdpRue1 = ($contact->address != "") ?$contact->address : $societe->address;
                 $PcvPAdpZip = ($contact->zip != "") ?$contact->zip : $societe->zip;
                 $PcvPAdpCity = ($contact->town != "") ?$contact->town : $societe->town;
@@ -161,7 +175,7 @@ class exportCommande extends export8sens {
 //            print_r($contact);
 //            
 //            die();
-            $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $societe->name." ".$PcvPAdpLib, "phone" => $societe->phone, "address" => $PcvPAdpRue1, "zip" => $PcvPAdpZip, "town" => $PcvPAdpCity, "ref" => $commande->ref, "date" => dol_print_date($commande->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label, "secteur" => $secteur, "CodeCli"=>"",
+            $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $PcvPAdpLib, "phone" => $societe->phone, "address" => $PcvPAdpRue1, "zip" => $PcvPAdpZip, "town" => $PcvPAdpCity, "ref" => $commande->ref, "date" => dol_print_date($commande->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label, "secteur" => $secteur, "CodeCli"=>"",
                 "PcvPAdpTitleEnu"=>$PcvPAdpTitleEnu,
                 "PcvLAdpTitleEnu"=>$PcvLAdpTitleEnu, "PcvLAdpLib" => $societe->name." ".$PcvLAdpLib, "PcvLAdpRue1"=> $PcvLAdpRue1, "PcvLAdpZip" => $PcvLAdpZip, "PcvLAdpCity" => $PcvLAdpCity);
             $commande->fetch_lines();

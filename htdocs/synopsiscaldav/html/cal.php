@@ -24,6 +24,7 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+include_once '../../conf/conf.php';
 if(defined("REDIRECT_URL")){
     header("Location: ".REDIRECT_URL);
     die;

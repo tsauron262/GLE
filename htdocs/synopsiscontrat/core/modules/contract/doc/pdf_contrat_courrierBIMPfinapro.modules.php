@@ -59,6 +59,7 @@
         // print chapter body
         $this->ChapterBody($file, $mode);
     }
+
     
     public function addLogo(&$pdf, $size){
         global $conf;
@@ -500,7 +501,12 @@
                 $X = $X + $W;
                 $pdf->SetXY($X, $this->page_hauteur - 50);
                 $pdf->MultiCell($W, 6, "Pour le Cessionnaire" . "\n" . "Signature et cachet", 0, 'L');
-                
+                    // Footer
+                    $pdf->SetXY(95, 289);
+                    $pdf->SetTextColor(200, 200, 200);
+                    $pdf->MultiCell(100, 3, 'Contrat location sans service V3 du 01/05/2018', 0, 'R', 0);
+                    $pdf->SetXY(15, 289);
+                    $pdf->MultiCell(100, 3, 'Mandat SEPA FINAPRO V3 du 01/05/2018', 0, 'L', 0);
                 $pdf->SetAutoPageBreak(1, 55);
 
 //                $this->_pagefoot($pdf,Pour le loueur $outputlangs);
@@ -679,6 +685,7 @@
                 $y = $pdf->GetY();
                 $y+=6;
                 $pdf->SetXY($x, $y);
+
                 
 
 
@@ -694,7 +701,12 @@
                     
 
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
-
+                    // Footer
+                    $pdf->SetXY(95, 289);
+                    $pdf->SetTextColor(200, 200, 200);
+                    $pdf->MultiCell(100, 3, 'Contrat location sans service V3 du 01/05/2018', 0, 'R', 0);
+                    $pdf->SetXY(15, 289);
+                    $pdf->MultiCell(100, 3, 'Mandat SEPA FINAPRO V3 du 01/05/2018', 0, 'L', 0);
 
 
                 if (method_exists($pdf, 'AliasNbPages'))
@@ -742,6 +754,7 @@
                 $pdf->SetCreator("BIMP-ERP " . DOL_VERSION);
                 $pdf->SetAuthor($user->getFullName($langs));
                 $this->marge_haute = 10;
+                $this->marge_basse = 10;
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
 
 
@@ -754,9 +767,12 @@
                 $pdf->SetXY($x, $y);
                 $this->pdf->setEqualColumns(2, 98);
                 $pdf->setFont('','B',10);
-                //$pdf->MultiCell($W, 6, "Mandat de Prélèvement SEPA", 0, 'C',false,0);
-                //$pdf->MultiCell($W, 6, "Mandat de Prélèvement SEPA", 0, 'C',false,0);
-                $pdf->setFont('','',6);
+                $pdf->MultiCell($W, 6, "Mandat de Prélèvement SEPA", 0, 'C',false,0);
+                $pdf->MultiCell($W, 6, "Mandat de Prélèvement SEPA", 0, 'C',false,0);
+                $this->pdf->setEqualColumns(2, 98);
+                $y = $this->marge_haute + 8;
+                $pdf->setXY($x, $y);
+                $pdf->setFont('','',6.5);
                 $pdf->MultiCell($W, 6, "En signant ce formulaire de mandat, vous autorisez le créancier à envoyer des instructions à votre banque pour débiter votre compte, et votre banque à débiter votre compte conformément aux instructions du créancier. Vous bénéficiez du droit d’être remboursé par votre banque selon les conditions décrites dans la convention que vous avez passée avec elle. Une demande de remboursement doit être présentée dans les 8 semaines suivant la date de débit de votre compte pour un prélèvement autorisé. Vos droits concernant
 le présent mandat sont expliqués dans un document que vous pouvez obtenir auprès de votre banque.
 Le présent mandat est donné pour le débiteur en référence, il sera utilisable pour les contrats conclus avec celui-ci et aux termes desquels le débiteur donne autorisation de paiement en utilisant le présent mandat.  Les informations contenues dans le présent mandat, qui doit être complété, sont destinées à n'être utilisées par le créancier que pour la gestion de sa relation avec son client. Elles pourront donner lieu à l'exercice, par ce dernier, de ses droits d'opposition, d’accès et de rectification tels que prévus aux articles 38 et suivants de la Loi n° 78-17 du 6 janvier 1978 relative à l'informatique, aux fichiers et aux libertés. En signant ce mandat le débiteur, par dérogation à la règle de pré-notification de 14 jours, déclare que le délai de pré-notification des prélèvements par le créancier est fixé à 2 jours avant la date d’échéance du prélèvement
@@ -765,28 +781,145 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
 le présent mandat sont expliqués dans un document que vous pouvez obtenir auprès de votre banque.
 Le présent mandat est donné pour le débiteur en référence, il sera utilisable pour les contrats conclus avec celui-ci et aux termes desquels le débiteur donne autorisation de paiement en utilisant le présent mandat.  Les informations contenues dans le présent mandat, qui doit être complété, sont destinées à n'être utilisées par le créancier que pour la gestion de sa relation avec son client. Elles pourront donner lieu à l'exercice, par ce dernier, de ses droits d'opposition, d’accès et de rectification tels que prévus aux articles 38 et suivants de la Loi n° 78-17 du 6 janvier 1978 relative à l'informatique, aux fichiers et aux libertés. En signant ce mandat le débiteur, par dérogation à la règle de pré-notification de 14 jours, déclare que le délai de pré-notification des prélèvements par le créancier est fixé à 2 jours avant la date d’échéance du prélèvement
 " , 0, 'J', false, 0);
-                
+                $pdf->setXY($x, $y +62);
+                $pdf->setFont('','b',8);
+                $pdf->MultiCell($W, 6, "Informations Débiteur", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Informations Débiteur", 0, 'L',false,0);
+                $pdf->Line($x+1, $y+66, $x+81, $y+66);
+                $pdf->Line($x+83, $y+66, $x+163, $y+66);
+                $pdf->setXY($x, $y +68);
+                $pdf->setFont('','',8);
+                $pdf->MultiCell($W, 6, "Raison social : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Raison social : ", 0, 'L',false,0);
+                $pdf->setXY($x, $y +72);
+                $pdf->MultiCell($W, 6, "Adresse : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Adresse : ", 0, 'L',false,0);
+                $pdf->setXY($x, $y +80);
+                $pdf->MultiCell($W, 6, "Code postal et ville : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Code postal et ville : ", 0, 'L',false,0);
+                $pdf->setXY($x, $y +88);
+                $pdf->MultiCell($W, 6, "SIREN : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "SIREN : ", 0, 'L',false,0);
+                $pdf->setXY($x, $y +92);
+                $pdf->MultiCell($W, 6, "Pays : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Pays : ", 0, 'L',false,0);
+                $pdf->setXY($x, $y +96);
+                $pdf->MultiCell($W, 6, "Email : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Email : ", 0, 'L',false,0);
+
+                $pdf->setXY($x, $y +101);
+                $pdf->setFont('','b',8);
+                $pdf->MultiCell($W, 6, "Coordonnées Bancaire débiteur : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Coordonnées Bancaire débiteur : ", 0, 'L',false,0);
+                $pdf->Line($x+1, $y+105, $x+81, $y+105);
+                $pdf->Line($x+83, $y+105, $x+163, $y+105);
+                $pdf->setXY($x, $y +107);
+                $pdf->setFont('','',8);
+                $pdf->MultiCell($W, 6, "IBAN : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "IBAN : ", 0, 'L',false,0);
+                $pdf->setXY($x, $y +111);
+                $pdf->MultiCell($W, 6, "BIC : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "BIC : ", 0, 'L',false,0);
+
+                $pdf->setXY($x, $y +116);
+                $pdf->setFont('','b',8);
+                $pdf->MultiCell($W, 6, "Coordonnées Bancaire Créancier : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Coordonnées Bancaire Créancier : ", 0, 'L',false,0);
+                $pdf->Line($x+1, $y+120, $x+81, $y+120);
+                $pdf->Line($x+83, $y+120, $x+163, $y+120);
+                $pdf->setXY($x, $y +122);
+                $pdf->setFont('','',8);
+                $pdf->MultiCell($W, 6, "Raison social : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Raison social : ", 0, 'L',false,0);
+                $pdf->setXY($x, $y +126);
+                $pdf->MultiCell($W, 6, "Adresse : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Adresse : ", 0, 'L',false,0);
+                $pdf->setXY($x, $y +134);
+                $pdf->MultiCell($W, 6, "Code postal et ville : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Code postal et ville : ", 0, 'L',false,0);
+                $pdf->setXY($x, $y +138);
+                $pdf->MultiCell($W, 6, "Pays : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Pays : ", 0, 'L',false,0);
+                $pdf->setXY($x, $y +142);
+                $pdf->MultiCell($W, 6, "ICS : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "ICS : ", 0, 'L',false,0);
+
+                $pdf->setXY($x, $y +147);
+                $pdf->setFont('','b',8);
+                $pdf->MultiCell($W, 6, "Référence Unique du Mandat (RUM) : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Référence Unique du Mandat (RUM) : ", 0, 'L',false,0);
+                $pdf->Line($x+1, $y+151, $x+81, $y+151);
+                $pdf->Line($x+83, $y+151, $x+163, $y+151);
+
+                $pdf->setXY($x, $y +160);
+                $pdf->setFont('','b',8);
+                $pdf->MultiCell($W, 6, "Informations Type de Paiement : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Informations type de Paiement : ", 0, 'L',false,0);
+                $pdf->Line($x+1, $y+164, $x+81, $y+164);
+                $pdf->Line($x+83, $y+164, $x+163, $y+164);
+                $pdf->setFont('','',8);
+                $pdf->setXY($x, $y +168);
+                $pdf->MultiCell($W, 6, "Paiement: Récurent / Unique", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Paiement: Récurent / Unique", 0, 'L',false,0);
+
+                $pdf->setXY($x, $y +176);
+                $pdf->setFont('','b',8);
+                $pdf->MultiCell($W, 6, "Signature : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Signature : ", 0, 'L',false,0);
+                $pdf->Line($x+1, $y+180, $x+81, $y+180);
+                $pdf->Line($x+83, $y+180, $x+163, $y+180);
+                $pdf->setFont('','',8);
+                $pdf->setXY($x, $y +184);
+                $pdf->MultiCell($W, 6, "Date : ", 0, 'L',false,0);
+                $pdf->MultiCell($W, 6, "Date : ", 0, 'L',false,0);
+
+                $pdf->SetAutoPageBreak(1, 0);
+                $pdf->setXY($x, $y +194);
+                $pdf->SetDrawColor(0,0,0);
+                $pdf->setColor('fill', 255, 255, 255);
+                $pdf->Cell($W - 5, 40, '', 1, null, 'C', true);
+                $pdf->setX($x+84);
+                $pdf->SetDrawColor(0,0,0);
+                $pdf->setColor('fill', 255, 255, 255);
+                $pdf->Cell($W - 5, 40, '', 1, null, 'C', true);
+                $pdf->setXY($x, $y +195);
+                $pdf->setFont('','I',7);
+                $pdf->MultiCell($W, 6, "Signature", 0, 'L',false,0);
+                $pdf->setX($x+84);
+                $pdf->MultiCell($W, 6, "Signature", 0, 'L',false,0);
+                $pdf->setFont('','',8);
+
+                $pdf->setXY($x, $y +234);
+                $pdf->setFont('','I',7);
+                $pdf->MultiCell($W, 6, "Joindre un RIB", 0, 'L',false,0);
+                $pdf->setX($x+84);
+                $pdf->MultiCell($W, 6, "Joindre un RIB", 0, 'L',false,0);
+                $pdf->setFont('','',8);
+
+                // Footer
+                $pdf->SetXY(95, 289);
+                $pdf->SetTextColor(200, 200, 200);
+                $pdf->MultiCell(100, 3, 'Contrat location sans service V3 du 01/05/2018', 0, 'R', 0);
+                $pdf->SetXY(15, 289);
+                $pdf->MultiCell(100, 3, 'Mandat SEPA FINAPRO V3 du 01/05/2018', 0, 'L', 0);
+
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
                 $pdf->Close();
                 $pdf->Output($file, 'f');
-                //$langs->setPhpLang();    // On restaure langue session
 
 
                 return 1;   // Pas d'erreur
             } else {
                 $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
-                //$langs->setPhpLang();    // On restaure langue session
                 return 0;
             }
         } else {
             $this->error = $langs->trans("ErrorConstantNotDefined", "CONTRACT_OUTPUTDIR");
-            //$langs->setPhpLang();    // On restaure langue session
             return 0;
         }
 
         $this->error = $langs->trans("ErrorUnknown");
-        //$langs->setPhpLang();    // On restaure langue session
         return 0;   // Erreur par defaut
     } 
 
@@ -1119,3 +1252,5 @@ function getNewPdf($format,$logo_B) {
     $return->logoB=$logo_B;
     return $return;
 	}
+
+    

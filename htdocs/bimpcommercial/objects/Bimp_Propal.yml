@@ -97,6 +97,12 @@ fields:
         type: bool
         default_value: 0
         sortable: 0
+    pdf_hide_ttc:
+        label: Masquer le TTC dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
         
 forms: 
     default: 

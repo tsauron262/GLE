@@ -249,8 +249,6 @@ dol_syslog("deb beforeMethod".$method,3);
      * @return bool
      */
     public function httpPropfind($tempLocation, $uri) {
-
-        dol_syslog("httpPropfind  debut".print_r($uri),3);
         if (!file_exists($tempLocation)) return true;
 
         $hR = $this->server->httpResponse;

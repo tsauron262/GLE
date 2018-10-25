@@ -1124,9 +1124,6 @@ class Plugin extends DAV\ServerPlugin {
      * @return void
      */
     protected function expandPropertyReport($dom) {
-
-
-        dol_syslog("expandPropertyReport  debut".print_r($dom,1),3);
         $requestedProperties = $this->parseExpandPropertyReportRequest($dom->firstChild->firstChild);
         $depth = $this->server->getHTTPDepth(0);
         $requestUri = $this->server->getRequestUri();
@@ -1313,8 +1310,6 @@ class Plugin extends DAV\ServerPlugin {
      * @return void
      */
     protected function principalPropertySearchReport(\DOMDocument $dom) {
-
-        dol_syslog("principalPropertySearchReport  debut".print_r($dom,1),3);
         list($searchProperties, $requestedProperties, $applyToPrincipalCollectionSet) = $this->parsePrincipalPropertySearchReportRequest($dom);
 
         $uri = null;

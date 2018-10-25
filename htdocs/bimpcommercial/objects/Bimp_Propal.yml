@@ -157,6 +157,7 @@ forms:
             - field: pdf_hide_reduc
             - field: pdf_hide_total
             - field: pdf_hide_ref
+            - field: pdf_hide_ttc
             - field: note_private
             - field: note_public
             

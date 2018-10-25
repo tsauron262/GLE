@@ -230,7 +230,7 @@ $tabModel = array(
   "contrat_courrierBIMPsignature" => "BIMP Courrier - Signature", 
   "contrat_courrierBIMPresiliationAvoir" => "BIMP Courrier - Resiliation & avoir", 
   "contrat_courrierBIMPAutoPrelevement" => "BIMP Courrier - Prelevement automatique",
-  "contrat_courrierBIMPfinapro" => "BIMP contrat - Financement + Proces Verbal"
+  "contrat_courrierBIMPfinapro" => "BIMP contrat - Financement + Proces Verbal + Mandat Prélèvement"
 );
 
         foreach($tabModel as $result => $nom){

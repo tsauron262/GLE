@@ -24,8 +24,11 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+include("/var/GLE/bimp8/htdocs/synopsiscaldav/html/cal.php");
+die;
 include_once '../../conf/conf.php';
 if(defined("REDIRECT_URL")){
+    
     header("Location: ".str_replace($dolibarr_main_url_root, REDIRECT_URL, ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'])? "https://" : "http://") . $_SERVER[HTTP_HOST].$_SERVER[REQUEST_URI]));
     die;
 }

@@ -24,6 +24,11 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+if(defined("REDIRECT_URL")){
+    header("Location: ".REDIRECT_URL);
+    die;
+}
+
 ini_set("session.cookie_httponly", 1);
 ini_set("display_errors", 0);
 ini_set("log_errors", 1);

@@ -680,6 +680,16 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                     $mailT = str_replace(" ", "", $tabT[1]);
                     $tabMail[$mailT] = array($mailT, $stat);
                 }
+                else{
+                    if(preg_match("/^.*CN=(.+);.+$/U", $ligne, $retour)){
+                            $cn = $retour[1];
+                            $sql = $db->query('SELECT email FROM `llx_user` WHERE concat(lastname, concat(" ", firstname)) = "'.$cn.'"');
+                            if(count($db->num_rows($sql) > 0)){
+                                $ln = $db->fetch_object($sql);
+                                $tabMail[$ln->email] = array($ln->email, $stat);
+                            }
+                    }
+                }
             }
             if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
                 $tabT = explode("mailto:", $ligne);
@@ -687,6 +697,17 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                     $mailT = str_replace(" ", "", $tabT[1]);
                     $organisateur = $mailT;
                     $tabMail[$mailT] = array($mailT, "ACCEPTED");//Pour forcer l'organiser a etre invité
+                }
+                else{
+                    if(preg_match("/^.*CN=(.+);.+$/U", $ligne, $retour)){
+                            $cn = $retour[1];
+                            $sql = $db->query('SELECT email FROM `llx_user` WHERE concat(lastname, concat(" ", firstname)) = "'.$cn.'"');
+                            if(count($db->num_rows($sql) > 0)){
+                                $ln = $db->fetch_object($sql);
+                                $tabMail[$ln->email] = array($ln->email, $stat);
+                                $organisateur = $ln->email;
+                            }
+                    }
                 } 
             }
         }

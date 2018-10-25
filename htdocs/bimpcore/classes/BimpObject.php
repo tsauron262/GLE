@@ -955,7 +955,9 @@ class BimpObject extends BimpCache
             return null;
         }
 
-        if ($this->isDolObject() && (int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+        $value = null;
+        if ($this->isDolObject() && $this->dol_field_exists($field) &&
+                (int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
             if (preg_match('/^ef_(.*)$/', $field, $matches)) {
                 $field = $matches[1];
             }

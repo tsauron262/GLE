@@ -198,6 +198,112 @@ class BF_Demande extends BimpObject
         );
     }
 
+    public function actionGenerateFacture($success) {
+
+         if (!$this->isLoaded()) { 
+            return array("La demande de financement n'à pas d'ID");
+        } else { 
+            (int) $id = $this->getData('id'); 
+            $errors = array();
+            $where = '`id_demande` = ' . $id;
+        }
+
+        $id_client = (int) $this->getData('id_client');
+        $id_commercial = (int) $this->getData('id_commercial');
+        $montant_materiels = $this->getData('montant_materiels');
+        $montant_services = $this->getData('montant_services');
+        $montant_logiciels = $this->getData('montant_logiciels');
+        $vr_vente = $this->getData('vr_vente');
+        $id_status = $this->getData('status');
+        $accepted = $this->getData('accepted');
+        $duree_prevu = $this->getData('duration');
+        $periodicite_prevu = $this->getData('periodicity');
+        $id_client_contact = $this->getData('id_client_contact');
+        $assurance = $this->getData('insurance');
+        $id_supplier = $this->getData('id_supplier');
+        $id_supplier_contact = $this->getData('id_supplier_contact');
+        $date_loyer = $this->getData('date_loyer');
+        $date_livraison = $this->getdata('date_livraison');
+        $date_creation = $this->getData('date_create');
+        $id_contrat = $this->getData('id_contrat');
+        $commission_commerciale = $this->getData('commission_commerciale');
+        $commission_financiere = $this->getData('commission_financiere');
+
+        if(!$accepted) { $errors[] = "La banque doit avoir valider"; }
+        if(!$date_livraison) { $errors[] = "Date de livraison manquante"; }
+        if(!$date_loyer){ $errors[] = "Date de mise en loyer manquante"; } 
+        if(!$montant_materiels && !$montant_logiciels && !$montant_services) { $errors[] = 'Logiciels, Services ou Matériels non rensseignés'; }
+        if(!$id_client) { $errors[] = "Pas de client";}
+        if(!$id_commercial) { $errors[] = "Commercial obligatoire"; }
+        if($id_contrat == 0) { $errors[] = "Impossible de créer une facture car il n'y à pas de contrat"; }
+
+        
+
+        if(!$errors) {
+            global $langs, $user;
+            $liste_refinanceur = $this->db->getRows('bf_refinanceur', $where . " AND status = 2", null, 'array', array('id', 'position', 'name', 'status', 'rate', 'coef', 'comment'));
+            if($liste_refinanceur) {
+                $where_element_element = "`fk_source` = " . $id . " AND `sourcetype` = 'demande' AND `targettype` = 'facture'";
+                $ElementElement = $this->db->getRows('element_element', $where_element_element, null, 'array', array('fk_source', 'sourcetype', 'targettype'));
+                if(!$ElementElement) {
+                    $cout_banque = 10; // A MODIFIER EN FONCTION DU TAUX ET COEF
+                    $taux_tva = 0; // A MOFIFIER EN FONCTION DE SI ON A UN TAUX
+                    $success = 'Montant enprum : ';
+                    foreach ($liste_refinanceur as $refinanceur) {
+                        $refinanceur = (object) $refinanceur;
+
+                        // Calcule du total de l'emprun
+                        $total_emprun = $montant_logiciels + $montant_services + $montant_materiels;
+                        $pourcentage_commercial = $total_emprun * ($commission_commerciale/100);
+                        $total_emprun += $pourcentage_commercial;
+                        $pourcentage_financiere = $total_emprun * ($commission_financiere/100);
+                        $total_emprun += $pourcentage_financiere + $cout_banque;
+
+                        BimpTools::loadDolClass('compta/facture', 'facture');
+                        $facture = new Facture($this->db->db);
+                        $facture->socid = $refinanceur->id;
+                        $facture->total_ht = $total_emprun;
+                        $facture->total_tva = 0;
+                        $facture->date = date('Y-m-d');
+
+                        if($facture->create($user) > 0) {
+                            $this->updateField('id_facture', (int) $facture->id);
+                            addElementElement('demande', 'facture', $id, $facture->id);
+                            $description = "Montant total de l'emprun";
+                            $facture->addLine($description, $total_emprun, 1, $taux_tva);
+                            $facture->validate($user);
+                            // $success = 'Creation : ' . $facture->id;
+                        } else {
+                            return $facture->error;
+                        }
+
+
+                        $success .= $total_emprun . ", ";
+
+                    }
+                    
+                } else {
+                    return array('La facture éxiste déjà');
+                }
+               
+            } else {
+                return array('Un refinanceur est obligatoire');
+            }
+            
+            return array(
+                'warnings' => $warnings,
+                'errors' => $errors,
+                'success' => $success
+            );
+
+        } else {
+            return $errors;
+        }
+
+
+
+    }
+
 
     public function renderCommandesList()
     {
@@ -206,10 +312,6 @@ class BF_Demande extends BimpObject
         if ($this->isLoaded()) {
             $asso = new BimpAssociation($this, 'commandes');
             $list = $asso->getAssociatesList();
-
-//            echo '<pre>';
-//            print_r($list);
-//            exit;
             if (count($list)) {
                 krsort($list);
                 $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
@@ -268,6 +370,25 @@ class BF_Demande extends BimpObject
             'label'   => 'Générer le contrat',
             'icon'    => 'fas_file-contract',
             'onclick' => $this->getJsActionOnclick('generateContrat', array(
+                'file_type' => 'pret'
+                    ), array(
+                'success_callback' => $callback
+            ))
+        );
+
+        return $buttons;
+    }
+
+    public function genFacture()
+    {
+        $buttons = array();
+
+        $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+
+        $buttons[] = array(
+            'label'   => 'Générer la facture',
+            'icon'    => 'fas_file-invoice-dollar',
+            'onclick' => $this->getJsActionOnclick('generateFacture', array(
                 'file_type' => 'pret'
                     ), array(
                 'success_callback' => $callback

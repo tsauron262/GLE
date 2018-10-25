@@ -27,6 +27,16 @@ objects:
             dol_object: contrat
             id_object:
                 field_value: id_contrat
+
+    facture:
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: facture
+            id_object:
+                field_value: id_facture
+
+
         card: 
             title: 
                 object_prop: ref
@@ -201,6 +211,13 @@ fields:
         type: id_object
         object: contrat
         input: 
+            type: hidden
+
+    id_facture:
+        label: Facture
+        type: id_object
+        object: facture
+        input:
             type: hidden
 
     id_client_contact:
@@ -413,9 +430,12 @@ fields_tables:
             - field: id_contrat
               edit: 0
               display: nom_url
+            
 
     options: 
         title: Options
+        footer_extra_btn:
+            callback: genFacture
         icon: check-square-o
         rows: 
             - field: duration
@@ -433,7 +453,10 @@ fields_tables:
             - field: ca_prevu
               edit: 1
             - field: pba_prevu
-              edit: 1    
+              edit: 1
+            - field: id_facture
+              edit: 0
+              display: nom_url   
               
     client: 
         title: Client

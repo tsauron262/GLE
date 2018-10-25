@@ -241,6 +241,8 @@ fields_tables:
               edit: 1
             - field: pdf_hide_ref
               edit: 1
+            - field: pdf_hide_ttc
+              edit: 1
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton

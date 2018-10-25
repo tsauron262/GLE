@@ -97,6 +97,12 @@ fields:
         type: bool
         default_value: 0
         sortable: 0
+    pdf_hide_ttc:
+        label: Masquer le TTC dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
         
 forms: 
     default: 
@@ -151,6 +157,7 @@ forms:
             - field: pdf_hide_reduc
             - field: pdf_hide_total
             - field: pdf_hide_ref
+            - field: pdf_hide_ttc
             - field: note_private
             - field: note_public
             
@@ -233,6 +240,8 @@ fields_tables:
             - field: pdf_hide_total
               edit: 1
             - field: pdf_hide_ref
+              edit: 1
+            - field: pdf_hide_ttc
               edit: 1
             - label: Fichier PDF
               value: 

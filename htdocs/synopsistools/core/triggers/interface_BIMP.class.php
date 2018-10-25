@@ -30,10 +30,9 @@ class InterfaceSpecialSoc extends DolibarrTriggers {
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         global $conf, $user;
         
-        die('oo'.$action);
         
-        if($action == "USER_UPDATE"){
-            
+        
+        if($action == "USER_CREATE"){
             $msg = "Bonjour, un nouveau collaborateur : ".$object->getFullName($langs)." viens de rejoindre l'équipe";
             $msg .= "<br/>à ".$user->getFullAddress();
             $msg .= "<br/>en tant que ".$user->job;

@@ -2120,7 +2120,7 @@ EOF;
 
     $var = true;
     print "<br>\n";
-    $somethingshown = $formfile->show_documents('synopsisdemandeinterv', $filename, $filedir, $urlsource, $genallowed, $delallowed, $synopsisdemandeinterv->modelpdf);
+   // $somethingshown = $formfile->show_documents('synopsisdemandeinterv', $filename, $filedir, $urlsource, $genallowed, $delallowed, $synopsisdemandeinterv->modelpdf);
 
     print "</td><td>";
     print "&nbsp;</td>";

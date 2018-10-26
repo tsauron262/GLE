@@ -269,8 +269,8 @@ forms:
               depends_on: id_contrat
             - custom: 1
               label: Notifier par e-mail
+              input_name: mails_to
               input: 
-                  name: mails_to
                   type: check_list
                   items: 
                       callback:

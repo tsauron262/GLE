@@ -71,6 +71,7 @@ class exportCommande extends export8sens {
             $ligne = $this->db->fetch_object($sql);
             $userC = new User($this->db);
             $userC->fetch($ligne->fk_socpeople);
+            $userC->fetch_optionals();
             $this->id8sens = $userC->array_options['options_id8sens'];
             if ($this->id8sens < 1) {
                 if ($this->debug)

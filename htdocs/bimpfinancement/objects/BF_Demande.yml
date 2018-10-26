@@ -584,6 +584,7 @@ views:
                     col_md: 6
                     custom: 
                         callback: renderViewLoadedScript
+                 
                   
     montants:
         title: nom

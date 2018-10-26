@@ -599,6 +599,8 @@ class pdf_azurSAV extends ModelePDFPropales
 				$pdf->Close();
 
 				$pdf->Output($file,'F');
+                    
+                                $this->result["fullpath"] = $file;
 
 				//Add pdfgeneration hook
 				$hookmanager->initHooks(array('pdfgeneration'));

@@ -2059,6 +2059,8 @@ class User extends CommonObject
 		global $conf, $langs, $user;
 
 		$error=0;
+                
+                $this->oldcopy = clone $this;
 
 		$this->db->begin();
 
@@ -2119,6 +2121,7 @@ class User extends CommonObject
 		global $conf,$langs,$user;
 
 		$error=0;
+                $this->oldcopy = clone $this;
 
 		$this->db->begin();
 

@@ -7,7 +7,7 @@ print '<head>
     <title>Accueil sauvegarde</title>
 </head>';
 
-print '<div class="container" style="text-align: center">';
+print '<div class="container" style="text-align: center;">';
 print '<form action="restore.php"  method="post">';
 print '<div class="greyBorder">';
 
@@ -23,6 +23,8 @@ usort($files, function($a, $b) {
 
     return $tms1 < $tms2;
 });
+
+//$_SESSION = array();
 
 
 foreach ($files as $ind => $file) {

@@ -135,7 +135,7 @@ function dol_hash($chain, $type='0')
         
                 /*mod drsi*/
 	else if (! empty($conf->global->MAIN_SECURITY_HASH_ALGO) && $conf->global->MAIN_SECURITY_HASH_ALGO == 'SSHA') {
-            $chain = str_replace ($conf->global->MAIN_SECURITY_SALT, "", $chain);
+            $chain = str_replace ((isset($conf->global->MAIN_SECURITY_SALT)? $conf->global->MAIN_SECURITY_SALT : ""), "", $chain);
             $salt = substr(str_shuffle(str_repeat('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',4)),0,4);
             return '{SSHA}' . base64_encode(sha1( $chain.$salt, TRUE ). $salt);
         }

@@ -32,7 +32,7 @@ foreach($tabUser as $user){
                                 array("Host" => "erp.bimp.fr",
                                         "Port" => "443",
                                         "Protocol" => "https",
-                                        "Path" => "/bimp6/synopsiscaldav/html/cal.php/calendars/".$user[0]."/Calendar/",
+                                        "Path" => "/bimp8/synopsiscaldav/html/cal.php/calendars/".$user[0]."/Calendar/",
                                         "Login" => "gle_suivi",
                                         "Password" => "{3DES}UjUdKx13cbo/ZyMe8sUwAQ==",
                                         "Filter" => $filter),

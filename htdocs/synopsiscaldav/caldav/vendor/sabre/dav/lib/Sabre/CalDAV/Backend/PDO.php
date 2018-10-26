@@ -686,7 +686,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                             if(stripos($cn, '"') === false)
                                     $cn = '"'.$cn.'"';
                             $sql = $db->query('SELECT email FROM `llx_user` WHERE concat(lastname, concat(" ", firstname)) = '.$cn);
-                            if(count($db->num_rows($sql) > 0)){
+                            if($db->num_rows($sql) > 0){
                                 $ln = $db->fetch_object($sql);
                                 if($ln->email != "")
                                     $tabMail[$ln->email] = array($ln->email, $stat);
@@ -707,9 +707,9 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                             if(stripos($cn, '"') === false)
                                     $cn = '"'.$cn.'"';
                             $sql = $db->query('SELECT email FROM `llx_user` WHERE concat(lastname, concat(" ", firstname)) = '.$cn);
-                            if(count($db->num_rows($sql) > 0)){
+                            if($db->num_rows($sql) > 0){
+                                $ln = $db->fetch_object($sql);
                                 if($ln->email != ""){
-                                    $ln = $db->fetch_object($sql);
                                     $tabMail[$ln->email] = array($ln->email, $stat);
                                     $organisateur = $ln->email;
                                 }

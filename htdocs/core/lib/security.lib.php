@@ -132,6 +132,16 @@ function dol_hash($chain, $type='0')
 	else if (! empty($conf->global->MAIN_SECURITY_HASH_ALGO) && $conf->global->MAIN_SECURITY_HASH_ALGO == 'sha1') return sha1($chain);
 	else if (! empty($conf->global->MAIN_SECURITY_HASH_ALGO) && $conf->global->MAIN_SECURITY_HASH_ALGO == 'sha1md5') return sha1(md5($chain));
 
+        
+                /*mod drsi*/
+	else if (! empty($conf->global->MAIN_SECURITY_HASH_ALGO) && $conf->global->MAIN_SECURITY_HASH_ALGO == 'SSHA') {
+            $chain = str_replace ($conf->global->MAIN_SECURITY_SALT, "", $chain);
+            $salt = substr(str_shuffle(str_repeat('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789',4)),0,4);
+            return '{SSHA}' . base64_encode(sha1( $chain.$salt, TRUE ). $salt);
+        }
+        /*fmod drsi*/
+        
+        
 	// No particular encoding defined, use default
 	return md5($chain);
 }

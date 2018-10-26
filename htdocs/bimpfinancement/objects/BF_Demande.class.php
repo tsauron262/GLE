@@ -247,7 +247,7 @@ class BF_Demande extends BimpObject
                 $ElementElement = $this->db->getRows('element_element', $where_element_element, null, 'array', array('fk_source', 'sourcetype', 'targettype'));
                 if(!$ElementElement) {
                     $cout_banque = 10; // A MODIFIER EN FONCTION DU TAUX ET COEF
-                    $taux_tva = 0; // A MOFIFIER EN FONCTION DE SI ON A UN TAUX
+                    $taux_tva = 0; // A MOFIFIER EN FONCTION DE SI ON A UN TAUX POUR LES EMPRUNS
                     $success = 'Montant enprum : ';
                     foreach ($liste_refinanceur as $refinanceur) {
                         $refinanceur = (object) $refinanceur;
@@ -271,7 +271,9 @@ class BF_Demande extends BimpObject
                             addElementElement('demande', 'facture', $id, $facture->id);
                             $description = "Montant total de l'emprun";
                             $facture->addLine($description, $total_emprun, 1, $taux_tva);
-                            $facture->validate($user);
+                            // A CHANGER 
+                            //$sql = $this->db->db->query("INSERT INTO `llx_facture_extrafields` (`fk_object`, `entrepot`) VALUES (" . $facture->id . ", 50)");
+                            //$facture->validate($user);
                             // $success = 'Creation : ' . $facture->id;
                         } else {
                             return $facture->error;

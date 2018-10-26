@@ -896,7 +896,7 @@ class Product extends CommonObject
 			$sql.= ", fk_user_modif = ".($user->id > 0 ? $user->id : 'NULL');
 			// stock field is not here because it is a denormalized value from product_stock.
 			$sql.= " WHERE rowid = " . $id;
-die($sql);
+
 			dol_syslog(get_class($this)."::update", LOG_DEBUG);
 
 			$resql=$this->db->query($sql);

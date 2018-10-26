@@ -433,7 +433,7 @@ class Bimp_Commande extends BimpComm
                     if ($line->fetch((int) $id_line) <= 0) {
                         $errors[] = 'Ligne de commande d\'ID ' . $id_line . ' non trouvée';
                     } else {
-                        if ($this->dol_object->updateline((int) $id_line, $line->desc, $line->subprice, $new_qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, 'HT') <= 0) {
+                        if ($this->dol_object->updateline((int) $id_line, $line->desc, (float) $line->subprice, $new_qty, $line->remise_percent, $line->tva_tx, $line->localtax1_tx, $line->localtax2_tx, 'HT') <= 0) {
                             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour des quantités pour la ligne de commande d\'ID ' . $id_line);
                         } else {
                             $up_errors = $orderLine->updateField('qty', $new_qty);

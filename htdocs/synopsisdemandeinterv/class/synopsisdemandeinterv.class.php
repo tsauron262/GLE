@@ -1363,7 +1363,7 @@ class synopsisdemandeintervLigne {
         $sql.= ')';
         $sql.= " VALUES (" . $this->fk_synopsisdemandeinterv . ",";
         $sql.= " '" . addslashes($this->desc) . "',";
-        $sql.= " " . $this->db->idate($this->datei) . ",";
+        $sql.= " '" . $this->db->idate($this->datei) . "',";
         $sql.= " " . $this->duration . ",";
         $sql.= ' ' . $rangToUse . ",";
         $sql.= ' ' . ($this->fk_typeinterv > 0 ? $this->fk_typeinterv : 'NULL') . ",";

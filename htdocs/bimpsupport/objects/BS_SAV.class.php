@@ -1706,12 +1706,22 @@ class BS_SAV extends BimpObject
                 $text = "Notre client « " . $client->dol_object->getNomUrl(1) . " » a refusé le devis de réparation sur son « " . $nomMachine . " » pour un montant de «  " . price($propal->dol_object->total) . "€ »";
                 $id_user_tech = (int) $this->getData('id_user_tech');
                 if ($id_user_tech) {
-                    $where = "rowid IN (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'";
-                    $rows = $this->db->getRows('usergroup', $where, null, 'object', array('nom'));
+                    $where = " (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'";
+                    $rows = $this->db->getRows('usergroup_extrafields', "fk_object IN ".$where, null, 'object', array('mail'));
+                    
                     if (!is_null($rows)) {
                         foreach ($rows as $r) {
-                            $toMail = str_ireplace("Sav", "Boutique", $r->nom) . "@bimp.fr";
+                            $toMail = str_ireplace("Sav", "Boutique", $r->mail) . "@bimp.fr";
                             mailSyn2($subject, $toMail, $fromMail, $text);
+                        }
+                    }
+                    else{
+                        $rows2 = $this->db->getRows('usergroup', "rowid IN ".$where, null, 'object', array('nom'));
+                        if (!is_null($rows2)) {
+                            foreach ($rows2 as $r) {
+                                $toMail = str_ireplace("Sav", "Boutique", $r->nom) . "@bimp.fr";
+                                mailSyn2($subject, $toMail, $fromMail, $text);
+                            }
                         }
                     }
                 }

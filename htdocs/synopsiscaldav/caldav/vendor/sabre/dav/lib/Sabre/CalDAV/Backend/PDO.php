@@ -683,7 +683,9 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 else{
                     if(preg_match("/^.*CN=(.+);.+$/U", $ligne, $retour)){
                             $cn = $retour[1];
-                            $sql = $db->query('SELECT email FROM `llx_user` WHERE concat(lastname, concat(" ", firstname)) = "'.$cn.'"');
+                            if(stripos($cn, '"') === false)
+                                    $cn = '"'.$cn.'"';
+                            $sql = $db->query('SELECT email FROM `llx_user` WHERE concat(lastname, concat(" ", firstname)) = '.$cn);
                             if(count($db->num_rows($sql) > 0)){
                                 $ln = $db->fetch_object($sql);
                                 $tabMail[$ln->email] = array($ln->email, $stat);
@@ -701,7 +703,9 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 else{
                     if(preg_match("/^.*CN=(.+);.+$/U", $ligne, $retour)){
                             $cn = $retour[1];
-                            $sql = $db->query('SELECT email FROM `llx_user` WHERE concat(lastname, concat(" ", firstname)) = "'.$cn.'"');
+                            if(stripos($cn, '"') === false)
+                                    $cn = '"'.$cn.'"';
+                            $sql = $db->query('SELECT email FROM `llx_user` WHERE concat(lastname, concat(" ", firstname)) = '.$cn);
                             if(count($db->num_rows($sql) > 0)){
                                 $ln = $db->fetch_object($sql);
                                 $tabMail[$ln->email] = array($ln->email, $stat);

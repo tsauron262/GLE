@@ -18,6 +18,8 @@ class Reservations
     public $createProductAndChrono = false;
     
     private $currentReservations = array();
+    
+    var $nbNew = 0;
 
     function __construct($db)
     {
@@ -72,6 +74,8 @@ class Reservations
                         break;
             }
         }
+        
+        $this->output .= ($this->nbNew>0)? $nbNew." nouvelle réservations" : "Pas de nouvelle reservations";
 
         return "OK";
     }
@@ -533,6 +537,7 @@ L’équipe BIMP";
             } else if ($this->display_debug) {
                 echo '[OK].<br/>';
             }
+            $this->nbNew++;
         }
         if ($this->display_debug) {
             echo '[OK]<br/><br/>';

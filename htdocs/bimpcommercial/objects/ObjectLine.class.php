@@ -2315,7 +2315,8 @@ class ObjectLine extends BimpObject
                         if (BimpObject::objectLoaded($fournPrice)) {
                             $this->pa_ht = (float) $fournPrice->getData('price');
                         } else {
-                            $errors[] = 'Prix fournisseur d\'ID ' . $this->id_fourn_price . ' inexistant';
+                            $this->id_fourn_price = 0;
+//                            $errors[] = 'Prix fournisseur d\'ID ' . $this->id_fourn_price . ' inexistant';
                         }
                     }
 

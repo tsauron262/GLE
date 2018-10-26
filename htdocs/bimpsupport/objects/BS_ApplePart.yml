@@ -78,7 +78,8 @@ lists:
             compTIAcode: 
                 field: comptia_code
                 edit: 1
-                max_width: 180px
+                max_width: 250px
+                min_width: 250px
             compTIAmod: 
                 field: comptia_modifier
                 max_width: 180px

@@ -65,7 +65,6 @@ function InfoSoc(elem,elem2) {
             actu = this.elem2.val();
         for(var i = 0; i< 5; i++)
             actu = actu.replace(" ", "").replace("-", "");
-        alert(actu);
         if(!isParticulier && (actu == "" || !this.isSiretSiren(actu))){
             this.promptSiren(actu);
         }

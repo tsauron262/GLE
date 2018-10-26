@@ -1709,13 +1709,17 @@ class BS_SAV extends BimpObject
                     $where = " (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'";
                     $rows = $this->db->getRows('usergroup_extrafields', "fk_object IN ".$where, null, 'object', array('mail'));
                     
+                    $mailOk = false;
                     if (!is_null($rows)) {
                         foreach ($rows as $r) {
-                            $toMail = str_ireplace("Sav", "Boutique", $r->mail) . "@bimp.fr";
-                            mailSyn2($subject, $toMail, $fromMail, $text);
+                            if(isset($r->mail) && $r->mail != ""){
+                                $toMail = str_ireplace("Sav", "Boutique", $r->mail) . "@bimp.fr";
+                                mailSyn2($subject, $toMail, $fromMail, $text);
+                                $mailOk = true;
+                            }
                         }
                     }
-                    else{
+                    if(!$mailOk){
                         $rows2 = $this->db->getRows('usergroup', "rowid IN ".$where, null, 'object', array('nom'));
                         if (!is_null($rows2)) {
                             foreach ($rows2 as $r) {

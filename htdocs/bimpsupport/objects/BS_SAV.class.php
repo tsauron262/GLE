@@ -1707,18 +1707,21 @@ class BS_SAV extends BimpObject
                 $id_user_tech = (int) $this->getData('id_user_tech');
                 if ($id_user_tech) {
                     $where = " (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'";
-                    $rows = $this->db->getRows('usergroup_extrafields', "fk_object IN ".$where, null, 'object', array('mail'));
+//                    $rows = $this->db->getRows(array('usergroup_extrafields ge', ), "fk_object IN ".$where, null, 'object', array('mail'));
+                    
+                    $sql = $this->db->db->query("SELECT `mail` FROM llx_usergroup_extrafields ge, llx_usergroup g WHERE fk_object IN  (SELECT `fk_usergroup` FROM `llx_usergroup_user` WHERE ge.fk_object = g.rowid AND `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'");
                     
                     $mailOk = false;
-                    if (!is_null($rows)) {
-                        foreach ($rows as $r) {
-                            if(isset($r->mail) && $r->mail != ""){
-                                $toMail = str_ireplace("Sav", "Boutique", $r->mail) . "@bimp.fr";
+                    if($this->db->db->num_rows($sql)> 0){
+                        while($ln = $this->db->db->fetch_object($sql)){
+                            if(isset($ln->mail) && $ln->mail != ""){
+                                $toMail = str_ireplace("Sav", "Boutique", $ln->mail) . "@bimp.fr";
                                 mailSyn2($subject, $toMail, $fromMail, $text);
                                 $mailOk = true;
                             }
                         }
                     }
+                    
                     if(!$mailOk){
                         $rows2 = $this->db->getRows('usergroup', "rowid IN ".$where, null, 'object', array('nom'));
                         if (!is_null($rows2)) {

@@ -2111,7 +2111,7 @@ class ObjectLine extends BimpObject
 
         if ($this->isLoaded() && $this->equipment_required) {
             $product = $this->getProduct();
-            if ($product->isSerialisable()) {
+            if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
                 $msg = 'Attention: produit sérialisable. Ce calcul de marges est basé sur les montants par défaut de la ligne ';
                 $msg .= 'et ne tient pas compte des éventuels prix de vente et prix d\'achat exceptionnels des équipements attribués';
                 $html .= BimpRender::renderAlerts($msg, 'warning');

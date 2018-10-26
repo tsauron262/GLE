@@ -2400,7 +2400,7 @@ class BS_SAV extends BimpObject
 
                 if ($new_id_propal && !count($errors)) {
                     //Anulation du montant de la propal
-                    $totHt = $propal->dol_object->total_ht;
+                    $totHt = (float) $propal->dol_object->total_ht;
                     if ($totHt == 0)
                         $tTva = 0;
                     else {

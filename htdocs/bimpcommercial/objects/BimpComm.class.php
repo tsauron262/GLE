@@ -382,11 +382,11 @@ class BimpComm extends BimpObject
 
             if ($origin && $origin_id) {
                 $where = '`fk_source` = ' . (int) $origin_id . ' AND `sourcetype` = \'' . $origin . '\'';
-                $where .= ' AND `targettype` = \'' . $this->dol_object->element.'\'';
+                $where .= ' AND `targettype` = \'' . $this->dol_object->element . '\'';
 
-                
+
                 $result = $this->db->getValue('element_element', 'rowid', $where);
-                
+
                 if (!is_null($result) && (int) $result) {
                     $content = 'Attention: ' . $this->getLabel('a') . ' a déjà été créé' . ($this->isLabelFemale() ? 'e' : '') . ' à partir de ';
                     switch ($origin) {
@@ -413,6 +413,105 @@ class BimpComm extends BimpObject
         }
 
         return null;
+    }
+
+    function getMarginInfosArray($force_price = false)
+    {
+        global $conf, $db;
+
+        // Default returned array
+        $marginInfos = array(
+            'pa_products'          => 0,
+            'pv_products'          => 0,
+            'margin_on_products'   => 0,
+            'margin_rate_products' => '',
+            'mark_rate_products'   => '',
+            'pa_services'          => 0,
+            'pv_services'          => 0,
+            'margin_on_services'   => 0,
+            'margin_rate_services' => '',
+            'mark_rate_services'   => '',
+            'pa_total'             => 0,
+            'pv_total'             => 0,
+            'total_margin'         => 0,
+            'total_margin_rate'    => '',
+            'total_mark_rate'      => ''
+        );
+        
+        if (!$this->isLoaded()) {
+            return $marginInfos;
+        }
+        
+        $object = $this->dol_object;
+
+        foreach ($object->lines as $line) {
+            if (empty($line->pa_ht) && isset($line->fk_fournprice) && !$force_price) {
+                require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
+                $product = new ProductFournisseur($db);
+                if ($product->fetch_product_fournisseur_price($line->fk_fournprice))
+                    $line->pa_ht = $product->fourn_unitprice * (1 - $product->fourn_remise_percent / 100);
+            }
+            // si prix d'achat non renseigné et devrait l'être, alors prix achat = prix vente
+            if ((!isset($line->pa_ht) || $line->pa_ht == 0) && $line->subprice > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)) {
+                $line->pa_ht = $line->subprice * (1 - ($line->remise_percent / 100));
+            }
+
+            $pv = $line->qty * $line->subprice * (1 - $line->remise_percent / 100);
+            $pa_ht = $line->pa_ht;
+            $pa = $line->qty * $pa_ht;
+
+            // calcul des marges
+            if (isset($line->fk_remise_except) && isset($conf->global->MARGIN_METHODE_FOR_DISCOUNT)) {    // remise
+                if ($conf->global->MARGIN_METHODE_FOR_DISCOUNT == '1') { // remise globale considérée comme produit
+                    $marginInfos['pa_products'] += $pa;
+                    $marginInfos['pv_products'] += $pv;
+                    $marginInfos['pa_total'] += $pa;
+                    $marginInfos['pv_total'] += $pv;
+                    $marginInfos['margin_on_products'] += $pv - $pa;
+                } elseif ($conf->global->MARGIN_METHODE_FOR_DISCOUNT == '2') { // remise globale considérée comme service
+                    $marginInfos['pa_services'] += $pa;
+                    $marginInfos['pv_services'] += $pv;
+                    $marginInfos['pa_total'] += $pa;
+                    $marginInfos['pv_total'] += $pv;
+                    $marginInfos['margin_on_services'] += $pv - $pa;
+                } elseif ($conf->global->MARGIN_METHODE_FOR_DISCOUNT == '3') { // remise globale prise en compte uniqt sur total
+                    $marginInfos['pa_total'] += $pa;
+                    $marginInfos['pv_total'] += $pv;
+                }
+            } else {
+                $type = $line->product_type ? $line->product_type : $line->fk_product_type;
+                if ($type == 0) {  // product
+                    $marginInfos['pa_products'] += $pa;
+                    $marginInfos['pv_products'] += $pv;
+                    $marginInfos['pa_total'] += $pa;
+                    $marginInfos['pv_total'] += $pv;
+                    $marginInfos['margin_on_products'] += $pv - $pa;
+                } elseif ($type == 1) {  // service
+                    $marginInfos['pa_services'] += $pa;
+                    $marginInfos['pv_services'] += $pv;
+                    $marginInfos['pa_total'] += $pa;
+                    $marginInfos['pv_total'] += $pv;
+                    $marginInfos['margin_on_services'] += $pv - $pa;
+                }
+            }
+        }
+        if ($marginInfos['pa_products'] > 0)
+            $marginInfos['margin_rate_products'] = 100 * $marginInfos['margin_on_products'] / $marginInfos['pa_products'];
+        if ($marginInfos['pv_products'] > 0)
+            $marginInfos['mark_rate_products'] = 100 * $marginInfos['margin_on_products'] / $marginInfos['pv_products'];
+
+        if ($marginInfos['pa_services'] > 0)
+            $marginInfos['margin_rate_services'] = 100 * $marginInfos['margin_on_services'] / $marginInfos['pa_services'];
+        if ($marginInfos['pv_services'] > 0)
+            $marginInfos['mark_rate_services'] = 100 * $marginInfos['margin_on_services'] / $marginInfos['pv_services'];
+
+        $marginInfos['total_margin'] = $marginInfos['pv_total'] - $marginInfos['pa_total'];
+        if ($marginInfos['pa_total'] > 0)
+            $marginInfos['total_margin_rate'] = 100 * $marginInfos['total_margin'] / $marginInfos['pa_total'];
+        if ($marginInfos['pv_total'] > 0)
+            $marginInfos['total_mark_rate'] = 100 * $marginInfos['total_margin'] / $marginInfos['pv_total'];
+
+        return $marginInfos;
     }
 
     // Getters - Overrides BimpObject
@@ -643,10 +742,7 @@ class BimpComm extends BimpObject
                 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formmargin.class.php';
             }
 
-            $form = new FormMargin($this->db->db);
-            $marginInfo = $form->getMarginInfosArray($this->dol_object);
-
-            
+            $marginInfo = $this->getMarginInfosArray();
 
             if (!empty($marginInfo)) {
                 global $conf;

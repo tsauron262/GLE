@@ -385,7 +385,7 @@ class ProductFournisseur extends Product
                     $sql.= (isset($fk_multicurrency)?"'".$this->db->escape($fk_multicurrency)."'":'null').",";
                     $sql.= (isset($multicurrency_code)?"'".$this->db->escape($multicurrency_code)."'":'null').",";
                     $sql .= " '" . $this->db->idate($now) . "',";
-                    $sql .= " " . $this->product_fourn_id . ",";
+                    $sql .= " " . $this->id . ",";
                     $sql .= " " . $user->id . ",";
                     $sql .= " " . price2num($buyprice) . ",";
                     $sql .= " " . $qty;

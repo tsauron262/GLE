@@ -437,11 +437,11 @@ class BimpComm extends BimpObject
             'total_margin_rate'    => '',
             'total_mark_rate'      => ''
         );
-        
+
         if (!$this->isLoaded()) {
             return $marginInfos;
         }
-        
+
         $object = $this->dol_object;
 
         foreach ($object->lines as $line) {
@@ -1460,7 +1460,10 @@ class BimpComm extends BimpObject
         $new_object->set('fk_statut', 0);
         $new_object->set('remise_globale', 0);
 
+        $new_soc = false;
+
         if (isset($new_data['fk_soc']) && ((int) $new_data['fk_soc'] !== (int) $this->getData('fk_soc'))) {
+            $new_soc = true;
             $new_object->set('ref_client', '');
             $new_object->dol_object->fk_project = '';
             $new_object->dol_object->fk_delivery_address = '';
@@ -1485,10 +1488,12 @@ class BimpComm extends BimpObject
             if ($new_object->dol_object->copy_linked_contact($this->dol_object, 'internal') < 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_object->dol_object), 'Echec de la copie des contacts internes');
             }
-            $new_object->dol_object->error = '';
-            $new_object->dol_object->errors = array();
-            if ($new_object->dol_object->copy_linked_contact($this->dol_object, 'external') < 0) {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_object->dol_object), 'Echec de la copie des contacts externes');
+            if (!$new_soc) {
+                $new_object->dol_object->error = '';
+                $new_object->dol_object->errors = array();
+                if ($new_object->dol_object->copy_linked_contact($this->dol_object, 'external') < 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_object->dol_object), 'Echec de la copie des contacts externes');
+                }
             }
             $lines_errors = $new_object->createLinesFromOrigin($this);
             if (count($lines_errors)) {

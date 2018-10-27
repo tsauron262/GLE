@@ -75,7 +75,7 @@ class Reservations
             }
         }
         
-        $this->output .= ($this->nbNew>0)? $nbNew." nouvelle réservations" : "Pas de nouvelle reservations";
+        $this->output .= ($this->nbNew>0)? $this->nbNew." nouvelle réservations" : "Pas de nouvelle reservations";
 
         return "OK";
     }

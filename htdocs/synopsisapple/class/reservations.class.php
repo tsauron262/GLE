@@ -534,9 +534,9 @@ L’équipe BIMP";
             $mailsCli = $customer->email;
             if ($mailsCli && $mailsCli != "" && !mailSyn2("RDV SAV BIMP", $mailsCli.", tommy@bimp.fr,".$mails, '', str_replace("\n", "<br/>", $messageClient))) {
                 $this->logError('Echec de l\'envoi du mail au client de notification (ID réservation: ' . $resa->reservationId . ')');
+                mailSyn2("resa sans email", "tommy@bimp.fr", "admin@bimp.fr", "Resa sans mail client ".print_r($resa,1));
             }
             else{
-                mailSyn2("resa sans email", "tommy@bimp.fr", "admin@bimp.fr", "Resa sans mail client ".print_r($resa,1));
                 if ($this->display_debug) {
                     echo '[OK].<br/>';
                 }

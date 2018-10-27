@@ -28,7 +28,7 @@ class ActionsSynopsischrono {
 
     function addSearchEntry($parameters, &$object, &$action, $hookmanager) {
         global $langs;
-	$hookmanager->resArray['searchintochrono']=array('text'=>img_object("Chrono", "chrono@synopsischrono") . $langs->trans("Chrono"), 'url'=>DOL_URL_ROOT.'/synopsischrono/liste.php?mainmenu=Process&filtre='.GETPOST('q'));
+	$hookmanager->resArray['searchintochrono']=array('position' =>34, 'text'=>img_object("Chrono", "chrono@synopsischrono") . $langs->trans("Chrono"), 'url'=>DOL_URL_ROOT.'/synopsischrono/liste.php?mainmenu=Process&filtre='.GETPOST('q'));
         return 0;
     }
     

@@ -145,6 +145,7 @@ $fieldstosearchall = array(
 	'f.note_public'=>'NotePublic',
 );
 $searchAllDescLine= 0;
+$affchePaye = 0;//ne sert a rien et oblige a faire un group by
 if($searchAllDescLine)
     $fieldstosearchall["pd.description"]="Description";
 if (empty($user->socid)) $fieldstosearchall["f.note_private"]="NotePrivate";
@@ -374,7 +375,7 @@ $sql.= " country.code as country_code,";
 $sql.= " p.rowid as project_id, p.ref as project_ref, p.title as project_label";
 // We need dynamount_payed to be able to sort on status (value is surely wrong because we can count several lines several times due to other left join or link with contacts. But what we need is just 0 or > 0)
 // TODO Better solution to be able to sort on already payed or remain to pay is to store amount_payed in a denormalized field.
-if (! $sall) $sql.= ', SUM(pf.amount) as dynamount_payed';
+if (! $sall && $affchePaye) $sql.= ', SUM(pf.amount) as dynamount_payed';
 if ($search_categ_cus) $sql .= ", cc.fk_categorie, cc.fk_soc";
 
 // Add fields from extrafields
@@ -391,7 +392,7 @@ if (! empty($search_categ_cus)) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_s
 
 $sql.= ', '.MAIN_DB_PREFIX.'facture f';
 if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafields as ef on (f.rowid = ef.fk_object)";
-if (! $sall) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'paiement_facture as pf ON pf.fk_facture = f.rowid';
+if (! $sall && $affchePaye) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'paiement_facture as pf ON pf.fk_facture = f.rowid';
 if (($sall && $searchAllDescLine) || $search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'facturedet as pd ON f.rowid=pd.fk_facture';
 if ($search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON cp.fk_product=pd.fk_product';
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."projet as p ON p.rowid = f.fk_projet";
@@ -503,7 +504,7 @@ $sql.=$hookmanager->resPrint;
 
 if (! $sall)
 {
-    $sql .= " GROUP BY f.rowid ";
+//    $sql .= " GROUP BY f.rowid ";
 //	$sql.= ' GROUP BY f.rowid, f.facnumber, ref_client, f.type, f.note_private, f.note_public, f.increment, f.fk_mode_reglement, f.total, f.tva, f.total_ttc,';
 //	$sql.= ' f.localtax1, f.localtax2,';
 //	$sql.= ' f.datef, f.date_lim_reglement,';
@@ -540,7 +541,7 @@ if(count($listfield) > 0){
 }
 else
     $sql.= ' f.rowid DESC ';
-
+die($sql);
 $nbtotalofrecords = '';
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 {

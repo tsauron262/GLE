@@ -536,7 +536,7 @@ L’équipe BIMP";
                 $this->logError('Echec de l\'envoi du mail au client de notification (ID réservation: ' . $resa->reservationId . ')');
             }
             else{
-                mailSyn2("resa sans email", "tommy@bimp.fr", "admin@bimp.fr", "Resa sans mail client ".ptint_r($resa,1));
+                mailSyn2("resa sans email", "tommy@bimp.fr", "admin@bimp.fr", "Resa sans mail client ".print_r($resa,1));
                 if ($this->display_debug) {
                     echo '[OK].<br/>';
                 }
@@ -544,7 +544,7 @@ L’équipe BIMP";
             $this->nbNew++;
         }
         else{
-            mailSyn2("resa sans email", "tommy@bimp.fr", "admin@bimp.fr", "Resa sans mail user ".ptint_r($resa,1));
+            mailSyn2("resa sans email", "tommy@bimp.fr", "admin@bimp.fr", "Resa sans mail user ".print_r($resa,1));
         }
         if ($this->display_debug) {
             echo '[OK]<br/><br/>';

@@ -140,10 +140,13 @@ $search_array_options=$extrafields->getOptionalsFromPost($extralabels,'','search
 $fieldstosearchall = array(
 	'f.facnumber'=>'Ref',
 	'f.ref_client'=>'RefCustomer',
-	'pd.description'=>'Description',
+//	'pd.description'=>'Description',
 	's.nom'=>"ThirdParty",
 	'f.note_public'=>'NotePublic',
 );
+$searchAllDescLine= 0;
+if($searchAllDescLine)
+    $fieldstosearchall["pd.description"]="Description";
 if (empty($user->socid)) $fieldstosearchall["f.note_private"]="NotePrivate";
 
 $checkedtypetiers=0;
@@ -389,7 +392,7 @@ if (! empty($search_categ_cus)) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_s
 $sql.= ', '.MAIN_DB_PREFIX.'facture as f';
 if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafields as ef on (f.rowid = ef.fk_object)";
 if (! $sall) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'paiement_facture as pf ON pf.fk_facture = f.rowid';
-if ($sall || $search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'facturedet as pd ON f.rowid=pd.fk_facture';
+if (($sall && $searchAllDescLine) || $search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'facturedet as pd ON f.rowid=pd.fk_facture';
 if ($search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON cp.fk_product=pd.fk_product';
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."projet as p ON p.rowid = f.fk_projet";
 // We'll need this table joined to the select in order to filter by sale
@@ -529,7 +532,6 @@ foreach ($listfield as $key => $value) $sql.= $listfield[$key].' '.($listorder[$
 $sql.= ' f.rowid DESC ';
 
 $nbtotalofrecords = '';
-$result = null;
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 {
 	$result = $db->query($sql);
@@ -543,13 +545,8 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 
 $sql.= $db->plimit($limit+1,$offset);
 //print $sql;
-$lnDeb = 0;
-if( isset($result) && $result != null){
-    $resql = $result;
-    $lnDeb = $offset;
-}
-else
-    $resql = $db->query($sql);
+
+$resql = $db->query($sql);
 if ($resql)
 {
 	$num = $db->num_rows($resql);
@@ -916,17 +913,14 @@ if ($resql)
 
 	$projectstatic=new Project($db);
 	$discount = new DiscountAbsolute($db);
+	
 	if ($num > 0)
 	{
 		$i=0;
 		$totalarray=array();
-		while ($i < min($num,$limit+$lnDeb))
+		while ($i < min($num,$limit))
 		{
 			$obj = $db->fetch_object($resql);
-                        if($i < $lnDeb){
-                            $i++;
-                            continue;
-                        }
 
 			$datelimit=$db->jdate($obj->datelimite);
 			$facturestatic->id=$obj->id;

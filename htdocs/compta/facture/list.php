@@ -503,22 +503,22 @@ $sql.=$hookmanager->resPrint;
 
 if (! $sall)
 {
-	$sql.= ' GROUP BY f.rowid, f.facnumber, ref_client, f.type, f.note_private, f.note_public, f.increment, f.fk_mode_reglement, f.total, f.tva, f.total_ttc,';
-	$sql.= ' f.localtax1, f.localtax2,';
-	$sql.= ' f.datef, f.date_lim_reglement,';
-	$sql.= ' f.paye, f.fk_statut,';
-	$sql.= ' f.datec, f.tms,';
-	$sql.= ' s.rowid, s.nom, s.email, s.town, s.zip, s.fk_pays, s.client, s.fournisseur, s.code_client, s.code_fournisseur, s.code_compta, s.code_compta_fournisseur,';
-	$sql.= ' typent.code,';
-	$sql.= ' state.code_departement, state.nom,';
-	$sql.= ' country.code,';
-	$sql.= " p.rowid, p.ref, p.title";
-	if ($search_categ_cus) $sql .= ", cc.fk_categorie, cc.fk_soc";
+//	$sql.= ' GROUP BY f.rowid, f.facnumber, ref_client, f.type, f.note_private, f.note_public, f.increment, f.fk_mode_reglement, f.total, f.tva, f.total_ttc,';
+//	$sql.= ' f.localtax1, f.localtax2,';
+//	$sql.= ' f.datef, f.date_lim_reglement,';
+//	$sql.= ' f.paye, f.fk_statut,';
+//	$sql.= ' f.datec, f.tms,';
+//	$sql.= ' s.rowid, s.nom, s.email, s.town, s.zip, s.fk_pays, s.client, s.fournisseur, s.code_client, s.code_fournisseur, s.code_compta, s.code_compta_fournisseur,';
+//	$sql.= ' typent.code,';
+//	$sql.= ' state.code_departement, state.nom,';
+//	$sql.= ' country.code,';
+//	$sql.= " p.rowid, p.ref, p.title";
+//	if ($search_categ_cus) $sql .= ", cc.fk_categorie, cc.fk_soc";
 	// Add fields from extrafields
-	foreach ($extrafields->attribute_label as $key => $val) //prevent error with sql_mode=only_full_group_by
-	{
-		$sql.=($extrafields->attribute_type[$key] != 'separate' ? ",ef.".$key : '');
-	}
+//	foreach ($extrafields->attribute_label as $key => $val) //prevent error with sql_mode=only_full_group_by
+//	{
+//		$sql.=($extrafields->attribute_type[$key] != 'separate' ? ",ef.".$key : '');
+//	}
 }
 else
 {
@@ -528,7 +528,11 @@ else
 $sql.= ' ORDER BY ';
 $listfield=explode(',',$sortfield);
 $listorder=explode(',',$sortorder);
+if(count($listfield) > 0){
 foreach ($listfield as $key => $value) $sql.= $listfield[$key].' '.($listorder[$key]?$listorder[$key]:'DESC').',';
+$sql .= "1";
+}
+else
 $sql.= ' f.rowid DESC ';
 
 $nbtotalofrecords = '';

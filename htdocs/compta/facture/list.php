@@ -529,6 +529,7 @@ foreach ($listfield as $key => $value) $sql.= $listfield[$key].' '.($listorder[$
 $sql.= ' f.rowid DESC ';
 
 $nbtotalofrecords = '';
+$result = null;
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 {
 	$result = $db->query($sql);
@@ -542,8 +543,13 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 
 $sql.= $db->plimit($limit+1,$offset);
 //print $sql;
-
-$resql = $db->query($sql);
+$lnDeb = 0;
+if( isset($result) && $result != null){
+    $resql = $result;
+    $lnDeb = $offset;
+}
+else
+    $resql = $db->query($sql);
 if ($resql)
 {
 	$num = $db->num_rows($resql);
@@ -910,14 +916,17 @@ if ($resql)
 
 	$projectstatic=new Project($db);
 	$discount = new DiscountAbsolute($db);
-	
 	if ($num > 0)
 	{
 		$i=0;
 		$totalarray=array();
-		while ($i < min($num,$limit))
+		while ($i < min($num,$limit+$lnDeb))
 		{
 			$obj = $db->fetch_object($resql);
+                        if($i < $lnDeb){
+                            $i++;
+                            continue;
+                        }
 
 			$datelimit=$db->jdate($obj->datelimite);
 			$facturestatic->id=$obj->id;

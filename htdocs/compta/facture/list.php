@@ -541,7 +541,7 @@ if(count($listfield) > 0){
 }
 else
     $sql.= ' f.rowid DESC ';
-die($sql);
+//die($sql);
 $nbtotalofrecords = '';
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 {

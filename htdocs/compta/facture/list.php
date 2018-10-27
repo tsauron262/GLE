@@ -389,7 +389,7 @@ $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_typent as typent on (typent.id = s.fk_typ
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_departements as state on (state.rowid = s.fk_departement)";
 if (! empty($search_categ_cus)) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_societe as cc ON s.rowid = cc.fk_soc"; // We'll need this table joined to the select in order to filter by categ
 
-$sql.= ', '.MAIN_DB_PREFIX.'facture as f';
+$sql.= ', '.MAIN_DB_PREFIX.'facture f';
 if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafields as ef on (f.rowid = ef.fk_object)";
 if (! $sall) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'paiement_facture as pf ON pf.fk_facture = f.rowid';
 if (($sall && $searchAllDescLine) || $search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'facturedet as pd ON f.rowid=pd.fk_facture';
@@ -503,6 +503,7 @@ $sql.=$hookmanager->resPrint;
 
 if (! $sall)
 {
+    $sql .= " GROUP BY f.rowid ";
 //	$sql.= ' GROUP BY f.rowid, f.facnumber, ref_client, f.type, f.note_private, f.note_public, f.increment, f.fk_mode_reglement, f.total, f.tva, f.total_ttc,';
 //	$sql.= ' f.localtax1, f.localtax2,';
 //	$sql.= ' f.datef, f.date_lim_reglement,';
@@ -529,11 +530,16 @@ $sql.= ' ORDER BY ';
 $listfield=explode(',',$sortfield);
 $listorder=explode(',',$sortorder);
 if(count($listfield) > 0){
-foreach ($listfield as $key => $value) $sql.= $listfield[$key].' '.($listorder[$key]?$listorder[$key]:'DESC').',';
-$sql .= "1";
+    $i == 0;
+    foreach ($listfield as $key => $value){
+        $i++;
+        if($i> 1)
+            $sql.= ',';
+        $sql.= $listfield[$key].' '.($listorder[$key]?$listorder[$key]:'DESC');
+    }
 }
 else
-$sql.= ' f.rowid DESC ';
+    $sql.= ' f.rowid DESC ';
 
 $nbtotalofrecords = '';
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))

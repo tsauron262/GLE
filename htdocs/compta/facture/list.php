@@ -384,6 +384,9 @@ foreach ($extrafields->attribute_label as $key => $val) $sql.=($extrafields->att
 $parameters=array();
 $reshook=$hookmanager->executeHooks('printFieldListSelect',$parameters);    // Note that $action and $object may have been modified by hook
 $sql.=$hookmanager->resPrint;
+
+$selectSql = $sql;
+$sql = "";
 $sql.= ' FROM '.MAIN_DB_PREFIX.'societe as s';
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as country on (country.rowid = s.fk_pays)";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_typent as typent on (typent.id = s.fk_typent)";
@@ -545,8 +548,9 @@ else
 $nbtotalofrecords = '';
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 {
-	$result = $db->query($sql);
-	$nbtotalofrecords = $db->num_rows($result);
+	$result = $db->query("SELECT count(DISTINCT(f.rowid)) as nb ".$sql);
+        $ln = $db->fetch_object($result);
+	$nbtotalofrecords = $ln->nb;
 	if (($page * $limit) > $nbtotalofrecords)	// if total resultset is smaller then paging size (filtering), goto and load page 0
 	{
 		$page = 0;
@@ -557,7 +561,7 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 $sql.= $db->plimit($limit+1,$offset);
 //print $sql;
 
-$resql = $db->query($sql);
+$resql = $db->query($selectSql.$sql);
 if ($resql)
 {
 	$num = $db->num_rows($resql);

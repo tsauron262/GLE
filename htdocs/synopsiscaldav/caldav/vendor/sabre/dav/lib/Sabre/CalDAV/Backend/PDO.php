@@ -718,19 +718,15 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
                 } 
             }
         }
-        if($organisateur == "" && isset($tabMail[0][0]))
-            $organisateur = $tabMail[0][0];
+//        if($organisateur == "" && isset($tabMail[0][0]))
+//            $organisateur = $tabMail[0][0];
         $organisateur = str_replace(array("\n", 
 ), "", $organisateur);
         $organisateur = str_replace("\n", "", $organisateur);
         $organisateur = str_replace("\r", "", $organisateur);
 
         $tabMailInc = array();
-        $action->userassigned = array($user => array('id' => $user));
-        if(count($tabMail) > 1)
-            $action->userownerid = USER_EXTERNE_ID;
-        else
-            $action->userownerid = $user;
+        $okOrga = false;
         foreach ($tabMail as $tmp) {
             $mail = $tmp[0];
             $statut = (isset($tmp[1])? $tmp[1] : "NEEDS-ACTION");
@@ -746,6 +742,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
                     $action->userdoneid = $ligne->rowid;
                     $action->userownerid = $ligne->rowid;
                     $statut = "ACCEPTED";
+                    $okOrga = true;
                 }
                 
                 
@@ -755,6 +752,22 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 
             } else {
                 $tabMailInc[] = $mail."|".$statut;
+            }
+        }
+        if(!$okOrga){
+            if(count($tabMail) != 1){
+                $action->userownerid = USER_EXTERNE_ID;
+                $action->userassigned = array(USER_EXTERNE_ID => array('id' => USER_EXTERNE_ID));
+                $organisateur = "gle_suivi@bimp.fr";
+            }
+            elseif(isset($tabMail[0])){
+                $action->userownerid = $user;
+                $action->userassigned = array($user => array('id' => $user));
+                $organisateur = $tabMail[0][0];
+            }
+            
+            else{
+                dol_syslog("pas de user pas d'orga event caldav",3);
             }
         }
         

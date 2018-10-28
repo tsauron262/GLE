@@ -725,6 +725,7 @@ dol_syslog("Create : ".$calendarId."    |   ".$objectUri."   |".print_r($calenda
         $organisateur = str_replace("\n", "", $organisateur);
         $organisateur = str_replace("\r", "", $organisateur);
 
+            dol_syslog("traite part orga : ".$organisateur.print_r($calendarData2,1),3);
         $tabMailInc = array();
         $okOrga = false;
         foreach ($tabMail as $tmp) {

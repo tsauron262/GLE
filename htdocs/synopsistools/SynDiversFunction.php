@@ -1005,7 +1005,7 @@ function userInGroupe($groupe, $idUser) {
     }
 }
 
-function cashVal($hash, $val = null, $delay = 115){
+function cashVal($hash, $val = null, $delay = 15){
     $path = DOL_DATA_ROOT."/cacheSyn/";
     if(!is_dir($path))
         mkdir($path);

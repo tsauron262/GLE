@@ -273,10 +273,10 @@ class DoliDBMysqli extends DoliDB
         $debugTime = false;
         if($debugTime){
             $timestamp_debut = microtime(true);
-            if(!isset($this->timestamp_debut))
+            if(!isset($this->timestamp_debut)){
                 $this->timestamp_debut = $timestamp_debut;
-            echo $this->countReq." ";
-            echo $query." <br/>";
+                $this->timestamp_derfin = $timestamp_debut;
+            }
         }
         /*fmoddrsi*/
         
@@ -316,7 +316,14 @@ class DoliDBMysqli extends DoliDB
             $timestamp_fin = microtime(true);
             $difference_ms = $timestamp_fin - $timestamp_debut;
             $difference_ms2 = $timestamp_fin - $this->timestamp_debut;
-            echo "||".$this->num_rows($ret)." en ".$difference_ms."ms depuis deb ".$difference_ms2." <br/><br/>";
+            $difference_ms3 = $timestamp_debut - $this->timestamp_derfin;
+            
+            if($difference_ms > 0.08 || $difference_ms3 > 0.1){
+                echo $this->countReq." ";
+                echo $query." <br/>";
+                echo "||".$this->num_rows($ret)." en ".$difference_ms."s depuis deb ".$difference_ms2." <br/><br/>";
+            }
+            $this->timestamp_derfin = $timestamp_fin;
         }
 
         return $ret;

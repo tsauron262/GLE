@@ -720,7 +720,7 @@ class PDO extends AbstractBackend {
         $organisateur = str_replace("\n", "", $organisateur);
         $organisateur = str_replace("\r", "", $organisateur);
 
-        dol_syslog("traite part orga : " . $organisateur . print_r($calendarData2, 1), 3);
+        dol_syslog("traite part orga : " . $organisateur . print_r($user, 1), 3);
         $tabMailInc = array();
         $action->userownerid = $user;
         $action->userassigned = array($user => array('id' => $user));

@@ -443,7 +443,7 @@ class PDO extends AbstractBackend {
                         $row['organisateur'] = $tmpMail;
 
                     if ($tmpMail == $row['organisateur']) {
-                        $extra = ";ROLE=CHAIR";
+                        $extra = ";ROLE=REQ-PARTICIPANT";
                         $tmpEtat = "ACCEPTED";
                     } else
                         $extra = ";ROLE=REQ-PARTICIPANT";

@@ -334,7 +334,7 @@ class ActionComm extends CommonObject
         $sql.= (! empty($this->extraparams)?"'".$this->db->escape($this->extraparams)."'":"null");
         $sql.= ")";
 
-        dol_syslog(get_class($this)."::add", 3);
+        dol_syslog(get_class($this)."::add", LOG_DEBUG);
         $resql=$this->db->query($sql);
         if ($resql)
         {

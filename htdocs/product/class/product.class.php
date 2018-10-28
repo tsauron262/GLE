@@ -4258,6 +4258,11 @@ class Product extends CommonObject
 	 */
 	function load_state_board()
 	{
+                $val1 = cashVal("statTotproducts");
+                 if($val1){
+                     $this->nb["products"] = $val1;
+                     return 1;
+                 }  
 		global $conf, $user, $hookmanager;
 
 		$this->nb=array();
@@ -4283,6 +4288,7 @@ class Product extends CommonObject
 				else $this->nb["products"]=$obj->nb;
 			}
             $this->db->free($resql);
+            cashVal("statTotproducts", $this->nb["products"]);
 			return 1;
 		}
 		else

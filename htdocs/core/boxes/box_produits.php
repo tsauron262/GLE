@@ -82,6 +82,15 @@ class box_produits extends ModeleBoxes
 
 		if ($user->rights->produit->lire || $user->rights->service->lire)
 		{
+                    
+                    $val1 = cashVal("boxProduits");
+                 if($val1){
+                     foreach($val1 as $id => $val)
+                        foreach($val as $id2 => $val2)
+                           $val1[$id][$id2] = (array) $val2;
+                     $this->info_box_contents = $val1;
+                     return 1;
+                 }  
 			$sql = "SELECT p.rowid, p.label, p.ref, p.price, p.price_base_type, p.price_ttc, p.fk_product_type, p.tms, p.tosell, p.tobuy, p.fk_price_expression, p.entity";
 			$sql.= " FROM ".MAIN_DB_PREFIX."product as p";
 			$sql.= ' WHERE p.entity IN ('.getEntity($productstatic->element).')';
@@ -198,6 +207,7 @@ class box_produits extends ModeleBoxes
                         'text'=>$langs->trans("NoRecordedProducts"),
                     );
 
+            cashVal("boxProduits", $this->info_box_contents);
                 $db->free($result);
             } else {
                 $this->info_box_contents[0][0] = array(

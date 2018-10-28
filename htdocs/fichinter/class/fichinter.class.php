@@ -100,6 +100,11 @@ class Fichinter extends CommonObject
 	 */
 	function load_state_board()
 	{
+            $val1 = cashVal("statTotfichinters");
+                 if($val1){
+                     $this->nb["fichinters"] = $val1;
+                     return 1;
+                 } 
 		global $user;
 
 		$this->nb=array();
@@ -124,6 +129,7 @@ class Fichinter extends CommonObject
 				$this->nb["fichinters"]=$obj->nb;
 			}
 			$this->db->free($resql);
+            cashVal("statTotfichinters", $this->nb["fichinters"]);
 			return 1;
 		}
 		else

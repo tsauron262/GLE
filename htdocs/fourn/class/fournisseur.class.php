@@ -110,6 +110,12 @@ class Fournisseur extends Societe
 	function load_state_board()
 	{
 		global $conf, $user;
+                
+                $val1 = cashVal("statTotFourn");
+                 if($val1){
+                     $this->nb["suppliers"] = $val1;
+                     return 1;
+                 } 
 
 		$this->nb=array();
 		$clause = "WHERE";
@@ -133,6 +139,7 @@ class Fournisseur extends Societe
 				$this->nb["suppliers"]=$obj->nb;
 			}
             $this->db->free($resql);
+            cashVal("statTotFourn", $this->nb["suppliers"]);
 			return 1;
 		}
 		else

@@ -77,14 +77,14 @@ if (! empty($conf->global->MAIN_APPLICATION_TITLE)) $title=$langs->trans("HomeAr
 
 llxHeader('',$title);
 
-/*moddrsi*/$cache = cachePage("index?user=".$user->id, "1", isset($_REQUEST['action']));
+/*moddrsi*/$cache = cachePage("index?user=".$user->id, "1", /*isset($_REQUEST['action'])*/1);
 if(!$cache){/*fmoddrsi*/
     
 
 $resultboxes=FormOther::getBoxesArea($user,"0");    // Load $resultboxes (selectboxlist + boxactivated + boxlista + boxlistb)
 
 
-print load_fiche_titre($langs->trans("HomeArea")." (en cache pendant 1h)",$resultboxes['selectboxlist'],'title_home');
+print load_fiche_titre($langs->trans("HomeArea")." (en cache pendant depuis ".date("H:i:s").")",$resultboxes['selectboxlist'],'title_home');
 
 if (! empty($conf->global->MAIN_MOTD))
 {
@@ -375,7 +375,7 @@ if (! empty($conf->agenda->enabled) && $user->rights->agenda->myactions->read)
 	include_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
 	$board=new ActionComm($db);
 
-	$dashboardlines[] = $board->load_board($user);
+	//$dashboardlines[] = $board->load_board($user);
 }
 
 // Number of project opened

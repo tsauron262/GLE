@@ -80,6 +80,14 @@ class box_propales extends ModeleBoxes
 
     	if ($user->rights->propale->lire)
     	{
+                $val1 = cashVal("boxPropales");
+                 if($val1){
+                     foreach($val1 as $id => $val)
+                        foreach($val as $id2 => $val2)
+                           $val1[$id][$id2] = (array) $val2;
+                     $this->info_box_contents = $val1;
+                     return 1;
+                 }  
     		$sql = "SELECT s.nom as name, s.rowid as socid, s.code_client, s.logo,";
     		$sql.= " p.rowid, p.ref, p.fk_statut, p.datep as dp, p.datec, p.fin_validite, p.date_cloture, p.total_ht, p.tva as total_tva, p.total as total_ttc, p.tms";
     		$sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
@@ -160,6 +168,8 @@ class box_propales extends ModeleBoxes
                         'text'=>$langs->trans("NoRecordedProposals"),
                     );
 
+            cashVal("boxPropales", $this->info_box_contents);
+//                     echo "<pre>";print_r($this->info_box_contents);die;
                 $db->free($result);
             } else {
                 $this->info_box_contents[0][0] = array(

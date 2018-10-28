@@ -3240,7 +3240,19 @@ class Commande extends CommonOrder
     function load_board($user)
     {
         global $conf, $langs;
+        $val1 = cashVal("statCommande".$mode);
+         if($val1){
 
+                $response = new WorkboardResponse();
+                $response->warning_delay = $val1->warning_delay;
+                $response->label = $val1->label;
+                $response->url = $val1->url;
+                $response->url_late = $val1->url_late;
+                $response->img = img_object('',"propal");
+                $response->nbtodolate = $val1->nbtodolate;
+                $response->nbtodo = $val1->nbtodo;
+            return $response;
+         } 
         $clause = " WHERE";
 
         $sql = "SELECT c.rowid, c.date_creation as datec, c.date_commande, c.date_livraison as delivery_date, c.fk_statut";
@@ -3280,6 +3292,7 @@ class Commande extends CommonOrder
 	            }
             }
 
+            cashVal("statCommande".$mode, $response);
             return $response;
         }
         else

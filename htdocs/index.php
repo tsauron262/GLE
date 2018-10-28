@@ -84,7 +84,7 @@ if(!$cache){/*fmoddrsi*/
 $resultboxes=FormOther::getBoxesArea($user,"0");    // Load $resultboxes (selectboxlist + boxactivated + boxlista + boxlistb)
 
 
-print load_fiche_titre($langs->trans("HomeArea")." (en cache pendant depuis ".date("H:i:s").")",$resultboxes['selectboxlist'],'title_home');
+print load_fiche_titre($langs->trans("HomeArea")." (en cache depuis  maximum ".date("H:i:s", strtotime("-15 minutes")).")",$resultboxes['selectboxlist'],'title_home');
 
 if (! empty($conf->global->MAIN_MOTD))
 {

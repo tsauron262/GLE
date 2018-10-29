@@ -53,7 +53,7 @@ $result = restrictedArea($user, 'categorie', $id, '&category');
 
 $object = new Categorie($db);
 $result = $object->fetch($id, $label);
-$object->fetch_optionals($id, $extralabels);
+$object->fetch_optionals($id);
 if ($result <= 0) {
     dol_print_error($db, $object->error);
     exit;
@@ -67,8 +67,8 @@ else
 
 $type = $object->type;
 
-$extrafields = new ExtraFields($db);
-$extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
+//$extrafields = new ExtraFields($db);
+//$extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
 
 /*
  * View

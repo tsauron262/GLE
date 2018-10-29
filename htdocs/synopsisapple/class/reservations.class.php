@@ -532,7 +532,7 @@ Votre satisfaction est notre objectif, nous mettrons tout en œuvre pour vous sa
 Bien cordialement
 L’équipe BIMP";
             $mailsCli = $customer->email;
-            if ($mailsCli && $mailsCli != "" && mailSyn2("RDV SAV BIMP", $mailsCli.", tommy@bimp.fr,".$mails, '', str_replace("\n", "<br/>", $messageClient))) {
+            if ($mailsCli && $mailsCli != "" && mailSyn2("RDV SAV BIMP", $mailsCli, '', str_replace("\n", "<br/>", $messageClient))) {
                 if ($this->display_debug) {
                     echo '[OK].<br/>';
                 }

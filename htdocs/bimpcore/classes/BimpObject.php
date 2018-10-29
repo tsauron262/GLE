@@ -1226,7 +1226,7 @@ class BimpObject extends BimpCache
         return false;
     }
 
-    public function getSearchFilters(&$joins = array(), $fields = null, $alias = 'a')
+    public function getSearchFilters(&$joins = array(), $fields = null, $alias = '')
     {
         $filters = array();
 
@@ -1256,6 +1256,12 @@ class BimpObject extends BimpCache
                 if ($value === '') {
                     continue;
                 }
+                $filter_key = '';
+                if ($alias) {
+                    $filter_key .= $alias . '.';
+                }
+                $filter_key .= $field_name;
+                
                 $method = 'get' . ucfirst($field_name) . 'SearchFilters';
                 if (method_exists($this, $method)) {
                     $this->{$method}($filters, $value);
@@ -1264,7 +1270,7 @@ class BimpObject extends BimpCache
                 if (in_array($field_name, self::$common_fields)) {
                     switch ($field_name) {
                         case 'id':
-                            $filters[$alias . '.' . $field_name] = array(
+                            $filters[$filter_key] = array(
                                 'part_type' => 'beginning',
                                 'part'      => $value
                             );
@@ -1272,7 +1278,7 @@ class BimpObject extends BimpCache
 
                         case 'user_create':
                         case 'user_update':
-                            $filters[$alias . '.' . $field_name] = $value;
+                            $filters[$filter_key] = $value;
                             break;
 
                         case 'date_create':
@@ -1283,7 +1289,7 @@ class BimpObject extends BimpCache
                             if (!isset($value['from']) || !$value['from']) {
                                 $value['from'] = '0000-00-00 00:00:00';
                             }
-                            $filters[$alias . '.' . $field_name] = array(
+                            $filters[$filter_key] = array(
                                 'min' => $value['from'],
                                 'max' => $value['to']
                             );
@@ -1329,7 +1335,7 @@ class BimpObject extends BimpCache
                                     isset($value['to']) && $value['to'] &&
                                     isset($value['from']) && $value['from']) {
                                 if ($value['from'] <= $value['to']) {
-                                    $filters[$alias . '.' . $field_name] = array(
+                                    $filters[$filter_key] = array(
                                         'min' => $value['from'],
                                         'max' => $value['to']
                                     );
@@ -1339,13 +1345,13 @@ class BimpObject extends BimpCache
 
                         case 'values_range':
                             if (isset($value['min']) && isset($value['max'])) {
-                                $filters[$alias . '.' . $field_name] = $value;
+                                $filters[$filter_key] = $value;
                             }
                             break;
 
                         case 'value_part':
                             $part_type = $this->getCurrentConf('search/part_type', 'middle');
-                            $filters[$alias . '.' . $field_name] = array(
+                            $filters[$filter_key] = array(
                                 'part_type' => $part_type,
                                 'part'      => $value
                             );
@@ -1354,7 +1360,7 @@ class BimpObject extends BimpCache
                         case 'field_input':
                         case 'values':
                         default:
-                            $filters[$alias . '.' . $field_name] = $value;
+                            $filters[$filter_key] = $value;
                             break;
                     }
                 }

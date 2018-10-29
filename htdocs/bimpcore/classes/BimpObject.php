@@ -1199,9 +1199,9 @@ class BimpObject extends BimpCache
         if ($type) {
             if ($this->isDolObject()) {
                 if (in_array($type, array('datetime', 'date', 'time'))) {
-                    if(stripos($value, "-") || stripos($value, "/"))
+                    if (stripos($value, "-") || stripos($value, "/"))
                         $value = $this->db->db->jdate($value);
-                    
+
                     $value = $this->db->db->idate($value);
                     if (preg_match('/^(\d{4})\-?(\d{2})\-?(\d{2}) ?(\d{2})?:?(\d{2})?:?(\d{2})?$/', $value, $matches)) {
                         switch ($type) {
@@ -1226,12 +1226,29 @@ class BimpObject extends BimpCache
         return false;
     }
 
-    public function getSearchFilters($fields = null)
+    public function getSearchFilters(&$joins = array(), $fields = null, $alias = 'a')
     {
         $filters = array();
 
         if (is_null($fields) && BimpTools::isSubmit('search_fields')) {
             $fields = BimpTools::getValue('search_fields', null);
+
+            if (BimpTools::isSubmit('search_children')) {
+                foreach (BimpTools::getValue('search_children') as $child_name => $child_fields) {
+                    if ($this->config->isDefined('objects/' . $child_name . '/instance/id_object/field_value')) {
+                        $on_field = $this->config->params['objects'][$child_name]['instance']['id_object']['field_value'];
+                        $instance = $this->getChildObject($child_name);
+                        if ($on_field && !is_null($instance) && is_a($instance, 'BimpObject')) {
+                            $joins[] = array(
+                                'table' => $instance->getTable(),
+                                'alias' => $child_name,
+                                'on'    => $alias . '.' . $on_field . ' = ' . $child_name . '.' . $instance->getPrimary()
+                            );
+                            $filters = array_merge($filters, $instance->getSearchFilters($joins, $child_fields, $child_name));
+                        }
+                    }
+                }
+            }
         }
         if (!is_null($fields)) {
             $prev_path = $this->config->current_path;
@@ -1247,7 +1264,7 @@ class BimpObject extends BimpCache
                 if (in_array($field_name, self::$common_fields)) {
                     switch ($field_name) {
                         case 'id':
-                            $filters[$field_name] = array(
+                            $filters[$alias . '.' . $field_name] = array(
                                 'part_type' => 'beginning',
                                 'part'      => $value
                             );
@@ -1255,7 +1272,7 @@ class BimpObject extends BimpCache
 
                         case 'user_create':
                         case 'user_update':
-                            $filters[$field_name] = $value;
+                            $filters[$alias . '.' . $field_name] = $value;
                             break;
 
                         case 'date_create':
@@ -1266,7 +1283,7 @@ class BimpObject extends BimpCache
                             if (!isset($value['from']) || !$value['from']) {
                                 $value['from'] = '0000-00-00 00:00:00';
                             }
-                            $filters[$field_name] = array(
+                            $filters[$alias . '.' . $field_name] = array(
                                 'min' => $value['from'],
                                 'max' => $value['to']
                             );
@@ -1312,7 +1329,7 @@ class BimpObject extends BimpCache
                                     isset($value['to']) && $value['to'] &&
                                     isset($value['from']) && $value['from']) {
                                 if ($value['from'] <= $value['to']) {
-                                    $filters[$field_name] = array(
+                                    $filters[$alias . '.' . $field_name] = array(
                                         'min' => $value['from'],
                                         'max' => $value['to']
                                     );
@@ -1322,13 +1339,13 @@ class BimpObject extends BimpCache
 
                         case 'values_range':
                             if (isset($value['min']) && isset($value['max'])) {
-                                $filters[$field_name] = $value;
+                                $filters[$alias . '.' . $field_name] = $value;
                             }
                             break;
 
                         case 'value_part':
                             $part_type = $this->getCurrentConf('search/part_type', 'middle');
-                            $filters[$field_name] = array(
+                            $filters[$alias . '.' . $field_name] = array(
                                 'part_type' => $part_type,
                                 'part'      => $value
                             );
@@ -1337,7 +1354,7 @@ class BimpObject extends BimpCache
                         case 'field_input':
                         case 'values':
                         default:
-                            $filters[$field_name] = $value;
+                            $filters[$alias . '.' . $field_name] = $value;
                             break;
                     }
                 }
@@ -4081,54 +4098,7 @@ class BimpObject extends BimpCache
 
     public function getListColsArray($list_name = 'default')
     {
-        $cols = array();
-
-        $bc_list = new BC_ListTable($this, $list_name);
-
-        foreach ($bc_list->params['cols'] as $col_name) {
-            $col_params = $bc_list->fetchParams($bc_list->config_path . '/cols/' . $col_name, $bc_list->col_params);
-
-            $label = '';
-            if (isset($col_params['label']) && $col_params['label']) {
-                $label = $col_params['label'];
-            }
-            if (isset($col_params['field']) && $col_params['field'] && $this->config->isDefined('fields/' . $col_params['field'] . '/label')) {
-                if ($label) {
-                    $label .= ' (Champ: ' . $this->getConf('fields/' . $col_params['field'] . '/label', $col_name) . ')';
-                } else {
-                    $label = $this->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                }
-            }
-            if (!$label) {
-                $label = $col_name;
-            }
-            $cols[$col_name] = $label;
-        }
-
-        if ((int) $bc_list->params['configurable'] &&
-                $this->config->isDefined('lists_cols')) {
-            foreach ($this->config->getCompiledParams('lists_cols') as $col_name => $col_params) {
-                if (!isset($cols[$col_name])) {
-                    $label = '';
-                    if (isset($col_params['label']) && $col_params['label']) {
-                        $label = $col_params['label'];
-                    }
-                    if (isset($col_params['field']) && $col_params['field'] && $this->config->isDefined('fields/' . $col_params['field'] . '/label')) {
-                        if ($label) {
-                            $label .= ' (Champ: ' . $this->getConf('fields/' . $col_params['field'] . '/label', $col_name) . ')';
-                        } else {
-                            $label = $this->getConf('fields/' . $col_params['field'] . '/label', $col_name);
-                        }
-                    }
-                    if (!$label) {
-                        $label = $col_name;
-                    }
-                    $cols[$col_name] = $label;
-                }
-            }
-        }
-
-        return $cols;
+        return self::getObjectListColsArray($this, $list_name);
     }
 
     // Liens et url: 

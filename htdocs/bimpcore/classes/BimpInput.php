@@ -464,7 +464,7 @@ class BimpInput
                 $country_key_field = isset($options['country_key_field']) ? $options['country_key_field'] : 'rowid';
                 $include_empty = isset($options['include_empty']) ? $options['include_empty'] : 1;
                 $options['options'] = BimpCache::getStatesArray($country, $country_key_field, $active_only, $include_empty);
-                
+
                 return self::renderInput('select', $field_name, $value, $options);
 
             case 'search_juridicalstatus':
@@ -1127,6 +1127,27 @@ class BimpInput
             $html .= ' data-' . $data_key . '="' . $data_value . '"';
         }
 
+        $html .= '>';
+
+        $html .= $content;
+
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public static function renderSearchInputContainer($input_name, $search_type, $search_on_key_up, $min_chars = 1, $content = '', $extra_data = array())
+    {
+        $html = '';
+        $html .= '<div class="searchInputContainer"';
+        $html .= ' data-field_name="' . $input_name . '"';
+        $html .= ' data-search_type="' . $search_type . '"';
+        $html .= ' data-search_on_key_up="' . $search_on_key_up . '"';
+        $html .= ' data-min_chars="'.$min_chars.'"';
+        
+        foreach ($extra_data as $data_name => $data_value) {
+            $html .= ' data-' . $data_name . '="' . $data_value . '"';
+        }
         $html .= '>';
 
         $html .= $content;

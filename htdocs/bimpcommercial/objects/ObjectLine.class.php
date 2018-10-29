@@ -459,7 +459,7 @@ class ObjectLine extends BimpObject
                     }
                     return $id_fourn_price;
 
-                case 'remisable':;
+                case 'remisable':
                     if ($id_product && (int) $this->id_product !== $id_product) {
                         return (int) $product->getData('remisable');
                     }
@@ -468,7 +468,7 @@ class ObjectLine extends BimpObject
         }
 
         if ($field === 'remisable') {
-            return 1;
+            return (int) $this->getData('remisable');
         }
         return 0;
     }
@@ -535,7 +535,7 @@ class ObjectLine extends BimpObject
                     }
                 }
             }
-            if ($this->isRemisable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE)) && (int) $this->getData('editable')) {
+            if ($this->isRemisable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
                 $onclick = 'loadModalList(\'bimpcommercial\', \'ObjectLineRemise\', \'default\', ' . $this->id . ', $(this), \'Remises\', {parent_object_type: \'' . static::$parent_comm_type . '\'})';
                 $buttons[] = array(
                     'label'   => 'Remises ligne',
@@ -2633,8 +2633,6 @@ class ObjectLine extends BimpObject
         $errors = $this->deleteLine();
 
         if (!count($errors)) {
-            $errors = parent::delete($force_delete);
-
             if (!count($errors)) {
                 $lines = $this->getEquipmentLines();
 

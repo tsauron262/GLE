@@ -85,19 +85,6 @@ class Bimp_Propal extends BimpComm
     {
         return array();
     }
-    
-    public function actionGeneratePdf($data, &$success){
-        $wanings = array();
-        if ((int) $this->id && $data['model'] == "bimpdevissav") {
-            $this->sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-            if (!$this->sav->find(array('id_propal' => (int) $object->id))) {
-                $wanings[] = 'Aucun SAV associé à cette propale trouvé';
-                $data['model'] = "bimpdevis";
-            }
-        }
-        
-        return parent::actionGeneratePdf($data, $success, array(), $wanings);
-    }
 
     public function getActionsButtons()
     {
@@ -470,13 +457,13 @@ class Bimp_Propal extends BimpComm
                     $line->date_from = BimpTools::getDateFromDolDate($new_date_from);
                     $update = true;
                 }
-                
+
                 if (isset($line->date_to) && (string) $line->date_to) {
                     $new_date_to = (BimpTools::getDateForDolDate($line->date_to) + $date_diff);
                     $line->date_to = BimpTools::getDateFromDolDate($new_date_to);
                     $update = true;
                 }
-                
+
                 if ($update) {
                     $line_warnings = array();
                     $line->update($line_warnings, true);
@@ -549,6 +536,20 @@ class Bimp_Propal extends BimpComm
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+    
+    public function actionGeneratePdf($data, &$success)
+    {
+        $wanings = array();
+        if ((int) $this->id && $data['model'] == "bimpdevissav") {
+            $this->sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
+            if (!$this->sav->find(array('id_propal' => (int) $object->id))) {
+                $wanings[] = 'Aucun SAV associé à cette propale trouvé';
+                $data['model'] = "bimpdevis";
+            }
+        }
+
+        return parent::actionGeneratePdf($data, $success, array(), $wanings);
     }
 
     // Overrides BimpObject: 

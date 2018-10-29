@@ -534,10 +534,8 @@ $sql.= ' ORDER BY ';
 $listfield=explode(',',$sortfield);
 $listorder=explode(',',$sortorder);
 if(count($listfield) > 0){
-    $i == 0;
     $sqlT = "";
     foreach ($listfield as $key => $value){
-        $i++;
         if($sqlT != "")
             $sqlT.= ',';
         $sqlT.= $listfield[$key].' '.($listorder[$key]?$listorder[$key]:'DESC');

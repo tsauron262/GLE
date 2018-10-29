@@ -48,9 +48,7 @@ sections:
                           custom: 
                               callback: 
                                   method: renderPropalesList
-                                  object: sav
-                        
-                              
+                                  object: sav                              
           - id: materiel
             title: Matériel
             struct: 
@@ -98,13 +96,10 @@ sections:
                 notes: 
                     object: sav
                     visibility: 4
-                    
           - id: gsx
             title: <i class="fa fa-apple iconLeft"></i>GSX
             content: 
                 callback: renderGsx
-          
-            
     - type: buttons
       buttons:
           - label: Liste des SAV

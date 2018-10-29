@@ -36,7 +36,7 @@ class Bimp_User extends BimpObject
     public function update(&$warnings = array(), $force_update = false)
     {
         if ($this->isLoaded()) {
-            $this->dol_object->olcopy = clone $this->dol_object;
+            $this->dol_object->oldcopy = clone $this->dol_object;
         }
 
         return parent::update($warnings, $force_update);

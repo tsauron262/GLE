@@ -9,6 +9,26 @@ class BS_SavPropalLine extends Bimp_PropalLine
     public $equipment_required = true;
 
     // Getters: 
+    
+    public function isEditable($force_edit = false)
+    {
+        if (!$force_edit && !(int) $this->getData('editable') && ($this->getData('linked_object_name') !== 'sav_apple_part')) {
+            return 0;
+        }
+
+        $parent = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($parent)) {
+            return 0;
+        }
+
+        if ($parent->field_exists('fk_statut') && (int) $parent->getData('fk_statut') === 0) {
+            return 1;
+        } elseif (isset($parent->dol_object->statut) && (int) $parent->dol_object->statut === 0) {
+            return 1;
+        }
+
+        return 0;
+    }
 
     public function showWarranty()
     {
@@ -31,6 +51,15 @@ class BS_SavPropalLine extends Bimp_PropalLine
         return 0;
     }
 
+    public function getListEditForm()
+    {
+        if ($this->getData('linked_object_name') === 'sav_apple_part') {
+            return 'apple_part';
+        }
+        
+        return 'default';
+    }
+    
     // Traitements:
 
     public function updateSav()

@@ -892,10 +892,10 @@ else
         $res=$object->fetch($id,$ref);
         if ($res < 0) { dol_print_error($db,$object->error); exit; }
         /*mod drsi*/
-        $extrafields = new ExtraFields($db);
-        $extralabels=$extrafields->fetch_name_optionals_label('product', $object->type);
+//        $extrafields = new ExtraFields($db);
+//        $extralabels=$extrafields->fetch_name_optionals_label('product', $object->type);
         /*fin mod drsi */
-        $res=$object->fetch_optionals($object->id,$extralabels);
+        $res=$object->fetch_optionals($object->id);
 
         // Fiche en mode edition
         if ($action == 'edit' && ($user->rights->produit->creer || $user->rights->service->creer))

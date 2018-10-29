@@ -100,6 +100,8 @@ class BF_Demande extends BimpObject
             (int) $id = $this->getData('id'); 
             $errors = array();
             $where = '`id_demande` = ' . $id;
+            BimpTools::loadDolClass('contrat');
+            $contrat = new Contrat($this->db->db);
         }
 
         $id_client = (int) $this->getData('id_client');
@@ -127,14 +129,14 @@ class BF_Demande extends BimpObject
         if(!$id_commercial) { $errors[] = "Commercial obligatoire"; }
 
 
-        $loyers = $this->db->getRows('bf_rent', $where." ORDER BY id DESC", null, 'array', array('id', 'quantity', 'amount_ht', 'payment', 'periodicity', 'position'));
+        $loyers = $this->db->getRows('bf_rent', $where." ORDER BY position", null, 'array', array('id', 'quantity', 'amount_ht', 'payment', 'periodicity', 'position'));
         $refinanceur = $this->db->getRows('bf_refinanceur', $where, null, 'array', array('id', 'position', 'name', 'status', 'rate', 'coef', 'comment'));
         $intercalaire = $this->db->getRows('bf_rent_except', $where, null, 'array', array('id', 'date', 'amount', 'payement'));
         $frais_divers = $this->db->getRows('bf_frais_divers', $where, null, 'array', array('id', 'date', 'amount'));
         if(is_null($refinanceur)) { 
             $errors[] = "Refinanceur manquant"; 
         }
-
+        
         if(!count($errors)) {
             global $langs, $user;
             if(!is_null($loyers)) {
@@ -186,8 +188,29 @@ class BF_Demande extends BimpObject
                 }
                 
             } else {
-                // On met à jours le contrat
-                $warnings = "Le contrat existe";
+                // Récupération du contrat
+                $contrat->fetch($this->getData('id_contrat'));
+                //récupération et parcourt des lignes
+                foreach ((object) $contrat->fetch_lines() as $line) {
+                    $contrat->deleteline($line->id, $user);
+                }
+                foreach ($loyers as $ligne) {
+                        // Mise en forme de la description
+                        $suite_desc = ($ligne['periodicity'] == 1) ? "Mois" :
+                        $suite_desc = ($ligne['periodicity'] == 3) ? "Trimestres" :
+                        $suite_desc = ($ligne['periodicity'] == 6) ? "Semestres" :
+                        $suite_desc = ($ligne['periodicity'] == 12) ? "Ans" : "";
+                        $description = "Payement " . BF_demande::$periodicities[$ligne['periodicity']] . " de " . $ligne['amount_ht'] . "€ sur " . $ligne['quantity'] . " " . $suite_desc;
+                        $start_date = new DateTime($start_date_dynamic);
+                        $start_date = $start_date->format('Y-m-d');
+                        $end_date = new DateTime($start_date);
+                        $end_date->add(new DateInterval("P" . $ligne['quantity'] * $ligne["periodicity"] . "M"));
+                        $end_date = $end_date->format('Y-m-d');
+                        $contrat->addline($description, $ligne['amount_ht'], $ligne['quantity'], 0, 0, 0, 0, 0, $start_date, $end_date);
+                        $contrat->activateAll($user, $start_date);
+                        $start_date_dynamic = $end_date;
+                    }
+                $success = "Contrat mis à jours avec succes";
             }
         }
         return array(
@@ -206,6 +229,7 @@ class BF_Demande extends BimpObject
             (int) $id = $this->getData('id'); 
             $errors = array();
             $where = '`id_demande` = ' . $id;
+            $reference = $this->getData('reference');
         }
 
         $id_client = (int) $this->getData('id_client');
@@ -252,29 +276,28 @@ class BF_Demande extends BimpObject
                     foreach ($liste_refinanceur as $refinanceur) {
                         $refinanceur = (object) $refinanceur;
 
-                        // Calcule du total de l'emprun
-                        $total_emprun = $montant_logiciels + $montant_services + $montant_materiels;
-                        $pourcentage_commercial = $total_emprun * ($commission_commerciale/100);
-                        $total_emprun += $pourcentage_commercial;
-                        $pourcentage_financiere = $total_emprun * ($commission_financiere/100);
-                        $total_emprun += $pourcentage_financiere + $cout_banque;
+                        $total_emprun = $montant_materiels + $montant_logiciels + $montant_services - $vr_vente;
+                        $total_emprun += $total_emprun * $commission_commerciale / 100;
+                        $total_emprun += $total_emprun * $commission_financiere / 100;
+
+                        $total_emprun += $cout_banque;
+
 
                         BimpTools::loadDolClass('compta/facture', 'facture');
                         $facture = new Facture($this->db->db);
-                        $facture->socid = $refinanceur->id;
+                        $facture->socid = $refinanceur->name;
                         $facture->total_ht = $total_emprun;
                         $facture->total_tva = 0;
                         $facture->date = date('Y-m-d');
+                        $facture->date_lim_reglement = date('Y-m-d');
 
                         if($facture->create($user) > 0) {
                             $this->updateField('id_facture', (int) $facture->id);
                             addElementElement('demande', 'facture', $id, $facture->id);
-                            $description = "Montant total de l'emprun";
+                            $description = "Demande de financement numéro : ";
+                            $description .= $ref;
                             $facture->addLine($description, $total_emprun, 1, $taux_tva);
-                            // A CHANGER 
-                            //$sql = $this->db->db->query("INSERT INTO `llx_facture_extrafields` (`fk_object`, `entrepot`) VALUES (" . $facture->id . ", 50)");
-                            //$facture->validate($user);
-                            // $success = 'Creation : ' . $facture->id;
+                          
                         } else {
                             return $facture->error;
                         }

@@ -12,6 +12,9 @@ labels:
     is_female: 1
 
 objects:
+
+    
+
     commande:
         relation: hasOne
         delete: 0

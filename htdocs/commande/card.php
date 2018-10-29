@@ -1217,6 +1217,8 @@ if (empty($reshook))
 			}
 			else
 			{
+                            if($object->error == "")
+                               $object->error = "Non Validée"; 
 				setEventMessages($object->error, $object->errors, 'errors');
 			}
 		}

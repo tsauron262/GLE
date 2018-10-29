@@ -145,6 +145,12 @@ class Contact extends CommonObject
 	function load_state_board()
 	{
 		global $user;
+                
+                $val1 = cashVal("statTotContact");
+                 if($val1){
+                     $this->nb["contacts"] = $val1;
+                     return 1;
+                 } 
 
 		$this->nb=array();
 		$clause = "WHERE";
@@ -169,6 +175,7 @@ class Contact extends CommonObject
 			{
 				$this->nb["contacts"]=$obj->nb;
 			}
+            cashVal("statTotContact", $this->nb["contacts"]);
 			$this->db->free($resql);
 			return 1;
 		}

@@ -79,6 +79,14 @@ class box_actions extends ModeleBoxes
 		$this->info_box_head = array('text' => $langs->trans("BoxTitleLastActionsToDo",$max));
 
         if ($user->rights->agenda->myactions->read) {
+            $val1 = cashVal("boxActions");
+                 if($val1){
+                     foreach($val1 as $id => $val)
+                        foreach($val as $id2 => $val2)
+                           $val1[$id][$id2] = (array) $val2;
+                     $this->info_box_contents = $val1;
+                     return 1;
+                 }  
 			$sql = "SELECT a.id, a.label, a.datep as dp, a.percent as percentage";
             $sql.= ", ta.code";
             $sql.= ", ta.libelle as type_label";
@@ -161,6 +169,7 @@ class box_actions extends ModeleBoxes
                         'text'=>$langs->trans("NoActionsToDo"),
                     );
 
+            cashVal("boxActions", $this->info_box_contents);
                 $db->free($result);
             } else {
                 $this->info_box_contents[0][0] = array(

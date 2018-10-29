@@ -84,7 +84,7 @@ class Synopsis_Contrat extends Contrat {
             $this->date_contrat = $commande->date;
         } else
             $this->date_contrat = time();
-        $this->cloture($user);
+        $this->closeAll($user);
 
         $oldRef = $this->ref;
         $this->oldId = $this->id;

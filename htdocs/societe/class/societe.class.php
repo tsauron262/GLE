@@ -447,6 +447,47 @@ class Societe extends CommonObject
 		global $langs,$conf,$mysoc;
 
 		$error=0;
+                
+                /*mod drsi*/
+                if (empty($this->code_client) ){
+                    // Load object modCodeTiers
+                    $module=(! empty($conf->global->SOCIETE_CODECLIENT_ADDON)?$conf->global->SOCIETE_CODECLIENT_ADDON:'mod_codeclient_leopard');
+                    if (substr($module, 0, 15) == 'mod_codeclient_' && substr($module, -3) == 'php')
+                    {
+                        $module = substr($module, 0, dol_strlen($module)-4);
+                    }
+                    $dirsociete=array_merge(array('/core/modules/societe/'),$conf->modules_parts['societe']);
+                    foreach ($dirsociete as $dirroot)
+                    {
+                        $res=dol_include_once($dirroot.$module.'.php');
+                        if ($res) break;
+                    }
+                    $modCodeClient = new $module;
+                    if( ! empty($modCodeClient->code_auto)) 
+                        $this->code_client=$modCodeClient->getNextValue($this,0);
+                }
+                
+                
+                
+                
+                if (empty($this->code_fournisseur) ){
+                    // Load object modCodeFournisseur
+                    $module=(! empty($conf->global->SOCIETE_CODECLIENT_ADDON)?$conf->global->SOCIETE_CODECLIENT_ADDON:'mod_codeclient_leopard');
+                    if (substr($module, 0, 15) == 'mod_codeclient_' && substr($module, -3) == 'php')
+                    {
+                        $module = substr($module, 0, dol_strlen($module)-4);
+                    }
+                    $dirsociete=array_merge(array('/core/modules/societe/'),$conf->modules_parts['societe']);
+                    foreach ($dirsociete as $dirroot)
+                    {
+                        $res=dol_include_once($dirroot.$module.'.php');
+                        if ($res) break;
+                    }
+                    $modCodeFournisseur = new $module;
+                    if( ! empty($modCodeClient->code_auto)) 
+                        $this->code_fournisseur=$modCodeFournisseur->getNextValue($this,0);
+                }
+                /*fmoddrsdi*/
 
 		// Clean parameters
 		if (empty($this->status)) $this->status=0;

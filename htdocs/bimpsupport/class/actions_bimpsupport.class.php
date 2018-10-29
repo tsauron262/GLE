@@ -28,7 +28,8 @@ class ActionsBimpsupport {
 
     function addSearchEntry($parameters, &$object, &$action, $hookmanager) {
         global $langs;
-	$hookmanager->resArray['searchintosav']=array('text'=>img_object("Chrono", "chrono@synopsischrono") . $langs->trans("SAV"), 'url'=>DOL_URL_ROOT.'/bimpsupport/?search=1&object=sav&sall='.GETPOST('q'));
+	$hookmanager->resArray['searchintosav']=array('position' => 33, 'img'=>"object_chrono@synopsischrono", 'text'=>img_object("Chrono", "chrono@synopsischrono") . $langs->trans("SAV"), 'url'=>DOL_URL_ROOT.'/bimpsupport/?search=1&object=sav&sall='.GETPOST('q'), 'label'=>'SAV');
+	$hookmanager->resArray['searchintosn']=array('position' => 32, 'img'=>"object_chrono@synopsischrono", 'text'=>img_object("Chrono", "chrono@synopsischrono") . $langs->trans("S/N"), 'url'=>DOL_URL_ROOT.'/bimpequipment/?search=1&object=equipment&sall='.GETPOST('q'), 'label'=>"S/N");
         return 0;
     }
     

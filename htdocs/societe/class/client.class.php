@@ -55,6 +55,16 @@ class Client extends Societe
     function load_state_board()
     {
         global $user;
+        
+        
+        $val1 = cashVal("statTotCli");
+        $val2 = cashVal("statTotProspect");
+         if($val1 && $val2){
+             $this->nb["customers"] = $val1;
+             $this->nb["prospects"] = $val2;
+             return 1;
+         } 
+         
 
         $this->nb=array("customers" => 0,"prospects" => 0);
         $clause = "WHERE";
@@ -80,6 +90,10 @@ class Client extends Societe
                 if ($obj->client == 2 || $obj->client == 3) $this->nb["prospects"]+=$obj->nb;
             }
             $this->db->free($resql);
+            
+            
+            cashVal("statTotCli", $this->nb["customers"]);
+            cashVal("statTotProspect", $this->nb["prospects"]);
             return 1;
         }
         else

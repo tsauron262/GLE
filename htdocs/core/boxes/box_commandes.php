@@ -82,6 +82,14 @@ class box_commandes extends ModeleBoxes
 
         if ($user->rights->commande->lire)
         {
+                    $val1 = cashVal("boxCommandes");
+                 if($val1){
+                     foreach($val1 as $id => $val)
+                        foreach($val as $id2 => $val2)
+                           $val1[$id][$id2] = (array) $val2;
+                     $this->info_box_contents = $val1;
+                     return 1;
+                 }  
             $sql = "SELECT s.nom as name";
             $sql.= ", s.rowid as socid";
             $sql.= ", s.code_client";
@@ -170,6 +178,7 @@ class box_commandes extends ModeleBoxes
 
                 if ($num==0) $this->info_box_contents[$line][0] = array('td' => 'align="center"','text'=>$langs->trans("NoRecordedOrders"));
 
+            cashVal("boxCommandes", $this->info_box_contents);
                 $db->free($result);
             } else {
                 $this->info_box_contents[0][0] = array(

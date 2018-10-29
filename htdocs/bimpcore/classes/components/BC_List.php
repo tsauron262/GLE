@@ -105,7 +105,7 @@ class BC_List extends BC_Panel
 
         $this->setConfPath();
 
-        $this->filters = $this->object->getSearchFilters();
+        $this->filters = $this->object->getSearchFilters($this->params['joins']);
     }
 
     // Gestion des filtres: 

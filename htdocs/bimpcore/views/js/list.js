@@ -34,31 +34,43 @@ function reloadObjectList(list_id, callback) {
 
     if ($row.length) {
         data['search_fields'] = {};
+        data['search_children'] = {};
         $row.find('.searchInputContainer').each(function () {
             var search_type = $(this).data('search_type');
             var field_name = $(this).data('field_name');
+            var child = $(this).data('child');
             if (field_name) {
+                if (child && !data['search_children'][child]) {
+                    data['search_children'][child] = {};
+                }
                 var field = field_name.replace(/^search_(.+)$/, '$1');
+                var search_data = '';
                 switch (search_type) {
                     case 'time_range':
                     case 'date_range':
                     case 'datetime_range':
+                        search_data = {};
                         var $from = $(this).find('[name=' + field_name + '_from]');
                         var $to = $(this).find('[name=' + field_name + '_to]');
                         data['search_fields'][field] = {};
                         if ($from.length) {
-                            data['search_fields'][field]['from'] = $from.val();
+                            search_data['from'] = $from.val();
                         }
                         if ($to.length) {
-                            data['search_fields'][field]['to'] = $to.val();
+                            search_data['to'] = $to.val();
                         }
                         break;
 
                     default:
                         var $input = $(this).find('[name=' + field_name + ']');
                         if ($input.length) {
-                            data['search_fields'][field] = $input.val();
+                            search_data = $input.val();
                         }
+                }
+                if (child) {
+                    data['search_children'][child][field] = search_data;
+                } else {
+                    data['search_fields'][field] = search_data;
                 }
             }
         });
@@ -198,7 +210,7 @@ function loadModalList(module, object_name, list_name, id_parent, $button, title
         'list_name': list_name,
         'id_parent': id_parent
     };
-    
+
     if (extra_data) {
         data['extra_data'] = extra_data;
     }
@@ -395,12 +407,12 @@ function deleteObjects(list_id, objects_list, $button) {
             $button: $button,
             success: function (result) {
 //                for (var i in result.objects_list) {
-                    $('body').trigger($.Event('objectDelete', {
-                        module: result.module,
-                        object_name: result.object_name,
-                        id_object: 0
+                $('body').trigger($.Event('objectDelete', {
+                    module: result.module,
+                    object_name: result.object_name,
+                    id_object: 0
 //                        id_object: result.objects_list[i]
-                    }));
+                }));
 //                }
             }
         });

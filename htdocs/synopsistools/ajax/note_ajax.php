@@ -86,7 +86,7 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
     if (!isset($id))
         $id = getIdInUrl($url, $nomId);
 
-    if ((!isset($id) || !is_int($id)) && $nomId != "id") {
+    if ((!isset($id) || !is_int((int)$id)) && $nomId != "id") {
         //On reesseille avec id standard
         $nomId = "id";
         $id = getIdInUrl($url, $nomId);

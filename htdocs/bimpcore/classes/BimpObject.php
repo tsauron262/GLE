@@ -1242,7 +1242,7 @@ class BimpObject extends BimpCache
                             $joins[] = array(
                                 'table' => $instance->getTable(),
                                 'alias' => $child_name,
-                                'on'    => $alias . '.' . $on_field . ' = ' . $child_name . '.' . $instance->getPrimary()
+                                'on'    => ($alias ? $alias : 'a') . '.' . $on_field . ' = ' . $child_name . '.' . $instance->getPrimary()
                             );
                             $filters = array_merge($filters, $instance->getSearchFilters($joins, $child_fields, $child_name));
                         }
@@ -1261,10 +1261,10 @@ class BimpObject extends BimpCache
                     $filter_key .= $alias . '.';
                 }
                 $filter_key .= $field_name;
-                
+
                 $method = 'get' . ucfirst($field_name) . 'SearchFilters';
                 if (method_exists($this, $method)) {
-                    $this->{$method}($filters, $value);
+                    $this->{$method}($filters, $value, $joins);
                     continue;
                 }
                 if (in_array($field_name, self::$common_fields)) {
@@ -1297,9 +1297,9 @@ class BimpObject extends BimpCache
                     }
                 } else if ($this->config->setCurrentPath('fields/' . $field_name)) {
                     $search_type = $this->getCurrentConf('search/type', 'field_input', false);
-
+                    $data_type = $this->getCurrentConf('type', '');
+                    
                     if ($value === '') {
-                        $data_type = $this->getCurrentConf('type', '');
                         if (in_array($data_type, array('id_object', 'id'))) {
                             continue;
                         }
@@ -1350,7 +1350,12 @@ class BimpObject extends BimpCache
                             break;
 
                         case 'value_part':
-                            $part_type = $this->getCurrentConf('search/part_type', 'middle');
+                            $def_part_type = 'middle';
+                            if (in_array($data_type, array('int', 'float', 'money', 'percent', 'qty'))) {
+                                $def_part_type = 'beginning';
+                            }
+
+                            $part_type = $this->getCurrentConf('search/part_type', $def_part_type);
                             $filters[$filter_key] = array(
                                 'part_type' => $part_type,
                                 'part'      => $value
@@ -1367,7 +1372,6 @@ class BimpObject extends BimpCache
             }
             $this->config->setCurrentPath($prev_path);
         }
-
         return $filters;
     }
 
@@ -2385,7 +2389,7 @@ class BimpObject extends BimpCache
                 if (is_null($joins)) {
                     $joins = array();
                 }
-                $joins[] = array(
+                $joins['ef'] = array(
                     'alias' => 'ef',
                     'table' => $table . '_extrafields',
                     'on'    => 'a.rowid = ef.fk_object'

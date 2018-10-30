@@ -352,19 +352,6 @@ list:
     sort_field: date_create
     sort_way: desc
     n: 10
-    joins: 
-        - table: be_equipment_place
-          alias: place
-          on: place.id_equipment = a.id
-        - table: entrepot
-          alias: place_entrepot
-          on: place_entrepot.rowid = place.id_entrepot
-        - table: user
-          alias: place_user
-          on: place_user.rowid = place.id_user
-        - table: societe
-          alias: place_client
-          on: place_client.rowid = place.id_client
     cols:
         id:
             label: ID

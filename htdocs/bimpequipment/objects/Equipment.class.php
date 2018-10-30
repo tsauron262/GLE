@@ -199,7 +199,7 @@ class Equipment extends BimpObject
         return '';
     }
 
-    public function getProductSearchFilters(&$filters, $value)
+    public function getProductSearchFilters(&$filters, $value, &$joins = array())
     {
         $where = 'p.ref LIKE \'%' . (string) $value . '%\' OR p.label LIKE \'%' . (string) $value . '%\' OR p.barcode = \'' . (string) $value . '\'';
 
@@ -220,40 +220,63 @@ class Equipment extends BimpObject
         );
     }
 
-    public function getPlaceSearchFilters(&$filters, $value)
+    public function getPlaceSearchFilters(&$filters, $value, &$joins = array())
     {
-        $filters['place.position'] = 1;
-        $filters['or_place'] = array(
-            'or' => array(
-                'place.place_name'         => array(
-                    'part_type' => 'middle',
-                    'part'      => $value
-                ),
-                'place_entrepot.label'     => array(
-                    'part_type' => 'middle',
-                    'part'      => $value
-                ),
-                'place_user.firstname'     => array(
-                    'part_type' => 'middle',
-                    'part'      => $value
-                ),
-                'place_user.lastname'      => array(
-                    'part_type' => 'middle',
-                    'part'      => $value
-                ),
-                'place_client.nom'         => array(
-                    'part_type' => 'middle',
-                    'part'      => $value
-                ),
-                'place_client.code_client' => array(
-                    'part_type' => 'middle',
-                    'part'      => $value
-                ),
-            )
-        );
+        if ((string) $value) {
+            $joins['place'] = array(
+                'table' => 'be_equipment_place',
+                'alias' => 'place',
+                'on'    => 'place.id_equipment = a.id'
+            );
+            $joins['place_entrepot'] = array(
+                'table' => 'entrepot',
+                'alias' => 'place_entrepot',
+                'on'    => 'place_entrepot.rowid = place.id_entrepot'
+            );
+            $joins['place_user'] = array(
+                'table' => 'user',
+                'alias' => 'place_user',
+                'on'    => 'place_user.rowid = place.id_user'
+            );
+            $joins['place_client'] = array(
+                'table' => 'societe',
+                'alias' => 'place_client',
+                'on'    => 'place_client.rowid = place.id_client'
+            );
+
+            $filters['place.position'] = 1;
+            $filters['or_place'] = array(
+                'or' => array(
+                    'place.place_name'         => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'place_entrepot.lieu'     => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'place_user.firstname'     => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'place_user.lastname'      => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'place_client.nom'         => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'place_client.code_client' => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                )
+            );
+        }
     }
 
-    public function getReservedSearchFilters(&$filters, $value)
+    public function getReservedSearchFilters(&$filters, $value, &$joins = array())
     {
         $sql = '(SELECT COUNT(reservation.id) FROM ' . MAIN_DB_PREFIX . 'br_reservation reservation WHERE reservation.id_equipment = a.id';
         $sql .= ' AND reservation.status < 300 AND reservation.status >= 200)';

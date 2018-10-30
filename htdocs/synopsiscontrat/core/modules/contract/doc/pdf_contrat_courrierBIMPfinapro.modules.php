@@ -495,12 +495,67 @@
 
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
                
-               if($new_page) {
-                // SI ON A PLUS DE 5 PRODUITS DANS LA LISTE DE MATERIELS
-               }
+               
 
                $pdf->SetAutoPageBreak(1, $this->margin_bottom);
+               if($new_page) {
+                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
+                    $pdf->setFont('','b', 12);
+                    $pdf->MultiCell($W, 10, "", 0, 'C');
+                    $pdf->MultiCell($W, 10, "ANNEXE : Liste et détails du matériel", 0, 'C');
+                    $pdf->MultiCell($W, 10, "", 0, 'C');
+                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                    $X = $this->marge_gauche;
+                    $pdf->SetX($X);
+                    $pdf->SetDrawColor(255, 255, 255);
+                    $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                    $pdf->setColor('fill', 237, 124, 28);
+                    $pdf->SetTextColor(255,255,255);
+                    $pdf->Cell($W, 8, "Quantité", 1, null, 'L', true);
+                    $pdf->SetTextColor(0,0,0);
+                    $X = $this->marge_gauche + $W;
+                    $pdf->setX($X);
+                    $pdf->setColor('fill', 237, 124, 28);
+                    $pdf->SetTextColor(255,255,255);
+                    $pdf->Cell($W * 9, 8, "Désignation du matériels", 1, null, 'L', true);
+                    $pdf->SetTextColor(0,0,0);
+                    $X = $this->marge_gauche + $W * 8;
+                
+                    $pdf->setX($X);
+                    $pdf->setColor('fill', 237, 124, 28);
+                    $pdf->SetTextColor(255,255,255);
+                    $pdf->MultiCell(0, 8, "", 1, null, 'L', true);
+                    $pdf->SetTextColor(0,0,0);
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                    while($res = $this->db->fetch_object($req)) {
+                                $taille_description = strlen($res->description);
+                                $description = ($taille_description < 80) ? $res->description : substr($res->description, 0, $taille_description).' ...';
+                                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                                $pdf->SetX($this->marge_gauche);
+                                $pdf->SetFont(''/* 'Arial' */, '', 9);
+                                $pdf->setColor('fill', 248, 248, 248);
+                                $pdf->SetTextColor(0,0,0);
+                                $pdf->Cell($W, 8, $res->qty, 1, null, 'L', true);
+                                $pdf->SetTextColor(0,0,0);
 
+                                $X = $this->marge_gauche + $W;
+                                $pdf->setX($X);
+                                $pdf->setColor('fill', 248, 248, 248);
+                                $pdf->SetTextColor(0,0,0);
+                                $pdf->Cell($W * 9, 8, $description, 1, null, 'L', true);
+                                $pdf->SetTextColor(0,0,0);
+                                $M_N = false;
+
+                                $X = $this->marge_gauche + $W * 8;
+                            
+                                $pdf->setX($X);
+                                $pdf->setColor('fill', 248, 248, 248);
+                                $pdf->SetTextColor(0,0,0);
+                                $pdf->MultiCell(0, 8, "", 1, null, 'L', true);
+                                $pdf->SetTextColor(0,0,0);
+                            }
+
+               }
                 $X = $this->marge_gauche;
                 $pdf->SetX($X);
 

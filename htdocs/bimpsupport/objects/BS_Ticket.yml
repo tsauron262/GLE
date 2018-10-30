@@ -457,7 +457,11 @@ lists_cols:
         display: nom_url
     timer: 
         field: appels_timer
-        label: Chrono
+        label: Chrono appels
+    timer_inters:
+        label: Chrono inters
+        value:
+            callback: displayDureeTotale
     cover: 
         field: cover
         label: Couvert

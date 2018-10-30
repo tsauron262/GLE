@@ -33,7 +33,7 @@ class exportfacture extends export8sens {
             if(stripos($file, ".ER8"))
                     $nbFilesErr++;
         if($nbFiles > 5)
-            mailSyn2("Synchro 8Sens OFF", "tommy@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
+            mailSyn2("Synchro 8Sens OFF", "dev@bimp.fr, gsx@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
         if($nbFilesErr > 0)
             mailSyn2("Synchro 8Sens FICHIER ERREURS", "tommy@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFilesErr);
     }

@@ -260,10 +260,10 @@ class DoliDBMysqli extends DoliDB
 
         /*moddrsi*/
         $tabRemplacement = array(
-            "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid" =>
-                "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a ",
-            "SELECT DISTINCT (a.rowid) FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid ORDER BY a." =>
-                "SELECT DISTINCT (a.rowid) FROM llx_propal a ORDER BY a."
+//            "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid" =>
+//                "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a ",
+//            "SELECT DISTINCT (a.rowid) FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid ORDER BY a." =>
+//                "SELECT DISTINCT (a.rowid) FROM llx_propal a ORDER BY a."
         );
         foreach ($tabRemplacement as $old=> $new){
                 $query = str_replace($old, $new, $query);

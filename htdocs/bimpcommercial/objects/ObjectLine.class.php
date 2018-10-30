@@ -1069,7 +1069,10 @@ class ObjectLine extends BimpObject
                                 'type'           => ObjectLineRemise::OL_REMISE_PERCENT,
                                 'percent'        => (float) $line->remise_percent
                             ));
-                            $remise->create();
+                            $remise_errors = $remise->create($remise_warnings, true);
+                            if (count($remise_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise de ' . $line->remise_percent . ' % pour la ligne n° ' . $line->rang);
+                            }
                         }
                     }
 
@@ -1649,6 +1652,7 @@ class ObjectLine extends BimpObject
 
     public function checkRemises()
     {
+        $errors = array();
         $remises = $this->getRemises();
 
         // On suppose que "$this->remise" a pu être modifié via l'ancienne interface Dolibarr: 
@@ -1685,8 +1689,10 @@ class ObjectLine extends BimpObject
                     'type'           => ObjectLineRemise::OL_REMISE_PERCENT,
                     'percent'        => (float) $remise_percent
                 ));
-                $remise->create($warnings, true);
-
+                $remise_errors = $remise->create($warnings, true);
+                if (count($remise_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise de '.$remise_percent.' %');
+                }
                 $this->calcRemise();
             }
         }

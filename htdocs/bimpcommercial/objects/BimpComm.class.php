@@ -1413,7 +1413,10 @@ class BimpComm extends BimpObject
                     }
                     if ((float) $bimp_lines[(int) $id_dol_line]['remise'] !== (float) $dol_line->remise_percent) {
                         if ($bimp_line->fetch((int) $bimp_lines[(int) $id_dol_line]['id'], $this)) {
-                            $bimp_line->checkRemises();
+                            $remises_errors = $bimp_line->checkRemises();
+                            if (count($remises_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($remises_errors, 'Des erreurs sont survenues lors de la synchronisation des remises pour la ligne n° '.$i);
+                            }
                         }
                     }
                 }
@@ -1435,14 +1438,16 @@ class BimpComm extends BimpObject
             return array('ID ' . $this->getLabel('of_the') . ' absent');
         }
 
-//        if (!$this->fetch($this->id)) {
-//            return array(BimpTools::ucfirst($this->getLabel('this')) . ' est invalide. Copie impossible');
-//        }
-
         if (!method_exists($this->dol_object, 'createFromClone')) {
             return array('Cette fonction n\'est pas disponible pour ' . $this->getLabel('the_plur'));
         }
 
+        $lines_errors = $this->checkLines();
+        
+        if (count($lines_errors)) {
+            return BimpTools::getMsgFromArray($lines_errors, 'Copie impossible');
+        }
+        
         $validate_errors = $this->validate();
         if (count($validate_errors)) {
             return array(BimpTools::getMsgFromArray($validate_errors), BimpTools::ucfirst($this->getLabel('this')) . ' comporte des erreurs. Copie impossible');

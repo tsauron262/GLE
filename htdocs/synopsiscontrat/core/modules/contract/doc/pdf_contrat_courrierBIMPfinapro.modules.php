@@ -292,35 +292,53 @@
                 foreach($liste as $commande) {
                     $the_commande = BimpObject::getInstance('bimpcommercial', 'BF_Commande', (int) $commande);
                     $req = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande = " . $commande);
-                    while($res = $this->db->fetch_object($req)) {
-                        $taille_description = strlen($res->description);
-                        $description = ($taille_description < 80) ? $res->description : substr($res->description, 0, $taille_description).' ...';
+                    $reqCount = $this->db->query("SELECT COUNT(*) as res FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande = " . $commande);
+                    $count = $this->db->fetch_object($reqCount);
+                     // Si 
+                    //print_r(count($list));
+                   
+                        if($count->res <= 5) {
+                            $new_page = false;
+                            while($res = $this->db->fetch_object($req)) {
+                                $taille_description = strlen($res->description);
+                                $description = ($taille_description < 80) ? $res->description : substr($res->description, 0, $taille_description).' ...';
+                                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                                $pdf->SetX($this->marge_gauche);
+                                $pdf->SetFont(''/* 'Arial' */, '', 9);
+                                $pdf->setColor('fill', 248, 248, 248);
+                                $pdf->SetTextColor(0,0,0);
+                                $pdf->Cell($W, 8, $res->qty, 1, null, 'L', true);
+                                $pdf->SetTextColor(0,0,0);
 
-                        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
-                        $pdf->SetX($this->marge_gauche);
-                        $pdf->SetFont(''/* 'Arial' */, '', 9);
-                        $pdf->setColor('fill', 248, 248, 248);
-                        $pdf->SetTextColor(0,0,0);
-                        $pdf->Cell($W, 8, $res->qty, 1, null, 'L', true);
-                        $pdf->SetTextColor(0,0,0);
+                                $X = $this->marge_gauche + $W;
+                                $pdf->setX($X);
+                                $pdf->setColor('fill', 248, 248, 248);
+                                $pdf->SetTextColor(0,0,0);
+                                $pdf->Cell($W * 9, 8, $description, 1, null, 'L', true);
+                                $pdf->SetTextColor(0,0,0);
+                                $M_N = false;
 
-                        $X = $this->marge_gauche + $W;
-                        $pdf->setX($X);
-                        $pdf->setColor('fill', 248, 248, 248);
-                        $pdf->SetTextColor(0,0,0);
-                        $pdf->Cell($W * 9, 8, $description, 1, null, 'L', true);
-                        $pdf->SetTextColor(0,0,0);
-                        $M_N = false;
-
-                        $X = $this->marge_gauche + $W * 8;
-                    
-                        $pdf->setX($X);
-                        $pdf->setColor('fill', 248, 248, 248);
-                        $pdf->SetTextColor(0,0,0);
-                        $pdf->MultiCell(0, 8, "", 1, null, 'L', true);
-                        $pdf->SetTextColor(0,0,0);
+                                $X = $this->marge_gauche + $W * 8;
+                            
+                                $pdf->setX($X);
+                                $pdf->setColor('fill', 248, 248, 248);
+                                $pdf->SetTextColor(0,0,0);
+                                $pdf->MultiCell(0, 8, "", 1, null, 'L', true);
+                                $pdf->SetTextColor(0,0,0);
+                            }
+                        } else {
+                            $new_page = true;
+                            $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
+                            $pdf->SetX($this->marge_gauche);
+                            $pdf->SetFont(''/* 'Arial' */, '', 9);
+                            $pdf->setColor('fill', 248, 248, 248);
+                            $pdf->SetTextColor(0,0,0);
+                            $pdf->Cell($W, 8, "Liste et détails du matériel en annexe", 1, null, 'C', true);
+                            $pdf->SetTextColor(0,0,0);
+                            $pdf->setXY($this->marge_gauche, 120);
+                        }
+                        
                     }
-                }
                 $X = $this->marge_gauche;
 //fin corps tableau/////////////////////////////////////////////////////////////
 //fin tableau///////////////////////////////////////////////////////////////////
@@ -328,7 +346,8 @@
 //
 //évolution de l'équipement/////////////////////////////////////////////////////
                 $pdf->SetFont(''/* 'Arial' */, 'U, B', 9);
-                $pdf->SetX($this->marge_gauche);
+                //$pdf->SetX($this->marge_gauche);
+                
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Evolution de l'équipement:", 0, 'L');
                 $pdf->SetFont(''/* 'Arial' */, '', 8);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Le locataire pourra demander au bailleur, au cours de la période de validité du présent contrat la modification de l’équipement informatique remis en location. Les modifications éventuelles du contrat seront déterminées par l’accord des parties.", 0, 'L');
@@ -476,6 +495,9 @@
 
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
                
+               if($new_page) {
+                // SI ON A PLUS DE 5 PRODUITS DANS LA LISTE DE MATERIELS
+               }
 
                $pdf->SetAutoPageBreak(1, $this->margin_bottom);
 

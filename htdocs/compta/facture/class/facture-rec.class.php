@@ -314,8 +314,8 @@ class FactureRec extends CommonInvoice
 		$sql.= ', c.code as cond_reglement_code, c.libelle as cond_reglement_libelle, c.libelle_facture as cond_reglement_libelle_doc';
 		//$sql.= ', el.fk_source';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'facture_rec as f';
-		$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_payment_term as c ON f.fk_cond_reglement = c.rowid AND c.entity IN ('.getEntity('c_payment_term').')';
-		$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_paiement as p ON f.fk_mode_reglement = p.id AND p.entity IN ('.getEntity('c_paiement').')';
+		$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_payment_term as c ON f.fk_cond_reglement = c.rowid';
+		$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_paiement as p ON f.fk_mode_reglement = p.id';
 		//$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."element_element as el ON el.fk_target = f.rowid AND el.targettype = 'facture'";
 		$sql.= ' WHERE f.entity IN ('.getEntity('facture').')';
 		if ($rowid) $sql.= ' AND f.rowid='.$rowid;
@@ -443,9 +443,6 @@ class FactureRec extends CommonInvoice
 
 		// Retreive all extrafield for line
 		// fetch optionals attributes and labels
-		require_once(DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php');
-		$extrafieldsline=new ExtraFields($this->db);
-		$extrafieldsline=$extrafieldsline->fetch_name_optionals_label('facturedet_rec',true);
 
 		$sql = 'SELECT l.rowid, l.fk_product, l.product_type, l.label as custom_label, l.description, l.product_type, l.price, l.qty, l.vat_src_code, l.tva_tx, ';
 		$sql.= ' l.localtax1_tx, l.localtax2_tx, l.localtax1_type, l.localtax2_type, l.remise, l.remise_percent, l.subprice,';
@@ -515,16 +512,6 @@ class FactureRec extends CommonInvoice
 				$line->remise           = $objp->remise;
 
 				$extralabelsline = $line->fetch_optionals($line->id);
-
-				// Multicurrency
-				$line->fk_multicurrency 		= $objp->fk_multicurrency;
-				$line->multicurrency_code 		= $objp->multicurrency_code;
-				$line->multicurrency_subprice 	= $objp->multicurrency_subprice;
-				$line->multicurrency_total_ht 	= $objp->multicurrency_total_ht;
-				$line->multicurrency_total_tva 	= $objp->multicurrency_total_tva;
-				$line->multicurrency_total_ttc 	= $objp->multicurrency_total_ttc;
-
-				$extralabelsline = $line->fetch_optionals($line->id,$extrafieldsline);
 
 				// Multicurrency
 				$line->fk_multicurrency 		= $objp->fk_multicurrency;

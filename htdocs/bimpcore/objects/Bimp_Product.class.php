@@ -100,7 +100,7 @@ class Bimp_Product extends BimpObject
 
         $where = '`statut` > 0';
         $rows = $this->db->getRows('entrepot', $where, null, 'array', array(
-            'rowid', 'label'
+            'rowid', 'ref'
         ));
 
 
@@ -108,7 +108,7 @@ class Bimp_Product extends BimpObject
             foreach ($rows as $r) {
                 $stocks = $this->getStocksForEntrepot((int) $r['rowid']);
                 $this->stocks[(int) $r['rowid']] = array(
-                    'entrepot_label' => $r['label'],
+                    'entrepot_label' => $r['ref'],
                     'reel'           => $stocks['reel'],
                     'dispo'          => $stocks['dispo'],
                     'virtuel'        => $stocks['virtuel'],

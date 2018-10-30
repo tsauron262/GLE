@@ -1130,7 +1130,7 @@ class BS_SAV extends BimpObject
         return $errors;
     }
 
-    public function generatePropalLines()
+    public function generatePropalLines(&$warnings = array())
     {
         if (!$this->isLoaded()) {
             return array('ID du SAV absent');
@@ -1182,13 +1182,14 @@ class BS_SAV extends BimpObject
                 'id_obj'             => $prop->id,
                 'linked_object_name' => 'sav_discount',
                 'linked_id_object'   => (int) $discount->id
-            ), false, true);
+                    ), false, true);
 
             $line_errors = $line->validateArray(array(
                 'id_obj'             => (int) $prop->id,
                 'type'               => BS_SavPropalLine::LINE_FREE,
                 'deletable'          => 0,
                 'editable'           => 0,
+                'remisable'          => 0,
                 'linked_id_object'   => (int) $discount->id,
                 'linked_object_name' => 'sav_discount'
             ));
@@ -1214,9 +1215,12 @@ class BS_SAV extends BimpObject
                     $line_errors = $line->update($line_warnings, true);
                 }
 
-                $line_errors = array_merge($line_errors, $line_warnings);
                 if (count($line_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne d\'acompte');
+                }
+
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings);
                 }
             }
         }
@@ -1258,12 +1262,10 @@ class BS_SAV extends BimpObject
 //            $error_label = 'mise à jour';
 //            $line_errors = $line->update($line_warnings, true);
 //        }
-
 //        $line_errors = array_merge($line_errors, $line_warnings);
 //        if (count($line_errors)) {
 //            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne de prise en charge');
 //        }
-
         // Service prioritaire: 
         if ((int) $this->getData('prioritaire')) {
             require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
@@ -1276,13 +1278,14 @@ class BS_SAV extends BimpObject
                 'id_obj'             => $prop->id,
                 'linked_object_name' => 'sav_prioritaire',
                 'linked_id_object'   => (int) $this->id
-            ), false, true);
+                    ), false, true);
 
             $line->validateArray(array(
                 'id_obj'             => (int) $prop->id,
                 'type'               => BS_SavPropalLine::LINE_PRODUCT,
                 'deletable'          => 0,
                 'editable'           => 0,
+                'remisable'          => 0,
                 'linked_id_object'   => (int) $this->id,
                 'linked_object_name' => 'sav_prioritaire',
                 'out_of_warranty'    => 1
@@ -1307,9 +1310,11 @@ class BS_SAV extends BimpObject
                 $line_errors = $line->update($line_warnings, true);
             }
 
-            $line_errors = array_merge($line_errors, $line_warnings);
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne "SAV prioritaire"');
+            }
+            if (count($line_warnings)) {
+                $warnings[] = BimpTools::getMsgFromArray($line_warnings);
             }
         }
 
@@ -1324,7 +1329,7 @@ class BS_SAV extends BimpObject
             'id_obj'             => $prop->id,
             'linked_object_name' => 'sav_diagnostic',
             'linked_id_object'   => (int) $this->id
-        ), false, true);
+                ), false, true);
 
         $line_errors = array();
 
@@ -1334,6 +1339,7 @@ class BS_SAV extends BimpObject
                 'type'               => BS_SavPropalLine::LINE_TEXT,
                 'deletable'          => 0,
                 'editable'           => 0,
+                'remisable'          => 0,
                 'linked_id_object'   => (int) $this->id,
                 'linked_object_name' => 'sav_diagnostic'
             ));
@@ -1349,8 +1355,6 @@ class BS_SAV extends BimpObject
                 $error_label = 'mise à jour';
                 $line_errors = $line->update($line_warnings, true);
             }
-
-            $line_errors = array_merge($line_errors, $line_warnings);
         } else {
             if ($line->isLoaded()) {
                 $error_label = 'suppression';
@@ -1361,13 +1365,16 @@ class BS_SAV extends BimpObject
         if (count($line_errors)) {
             $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne "Diagnostic"');
         }
+        if (count($line_warnings)) {
+            $warnings[] = BimpTools::getMsgFromArray($line_warnings);
+        }
 
         // Infos Suppl: 
         $line->find(array(
             'id_obj'             => $prop->id,
             'linked_object_name' => 'sav_extra_infos',
             'linked_id_object'   => (int) $this->id
-        ), false, true);
+                ), false, true);
 
         $line_errors = array();
         if ((string) $this->getData('extra_infos')) {
@@ -1376,6 +1383,7 @@ class BS_SAV extends BimpObject
                 'type'               => BS_SavPropalLine::LINE_TEXT,
                 'deletable'          => 0,
                 'editable'           => 0,
+                'remisable'          => 0,
                 'linked_id_object'   => (int) $this->id,
                 'linked_object_name' => 'sav_extra_infos'
             ));
@@ -1391,7 +1399,6 @@ class BS_SAV extends BimpObject
                 $error_label = 'mise à jour';
                 $line_errors = $line->update($line_warnings, true);
             }
-            $line_errors = array_merge($line_errors, $line_warnings);
         } else {
             if ($line->isLoaded()) {
                 $error_label = 'suppression';
@@ -1401,6 +1408,9 @@ class BS_SAV extends BimpObject
 
         if (count($line_errors)) {
             $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la ' . $error_label . ' de la ligne "Informations supplémentaires"');
+        }
+        if (count($line_warnings)) {
+            $warnings[] = BimpTools::getMsgFromArray($line_warnings);
         }
 
         return $errors;
@@ -1495,7 +1505,8 @@ class BS_SAV extends BimpObject
                 'deletable'          => 0,
                 'editable'           => 0,
                 'linked_id_object'   => (int) $this->id,
-                'linked_object_name' => 'sav_garantie'
+                'linked_object_name' => 'sav_garantie',
+                'remisable'          => 0
             ));
 
             $line->desc = 'Garantie';
@@ -1558,12 +1569,12 @@ class BS_SAV extends BimpObject
             return array($error_msg . ' - Centre absent');
         }
 
-        
+
         $signature = file_get_contents("http://bimp.fr/emailing/signatures/signevenementiel2.php?prenomnom=BIMP%20SAV&adresse=Centre%20de%20Services%20Agr%C3%A9%C3%A9%20Apple", stream_context_create(array(
-	    'http' => array(
-	        'timeout' => 2   // Timeout in seconds
-	    ))));
-        
+            'http' => array(
+                'timeout' => 2   // Timeout in seconds
+        ))));
+
         $propal = $this->getChildObject('propal');
 
         $tabFile = $tabFile2 = $tabFile3 = array();
@@ -1706,12 +1717,29 @@ class BS_SAV extends BimpObject
                 $text = "Notre client « " . $client->dol_object->getNomUrl(1) . " » a refusé le devis de réparation sur son « " . $nomMachine . " » pour un montant de «  " . price($propal->dol_object->total) . "€ »";
                 $id_user_tech = (int) $this->getData('id_user_tech');
                 if ($id_user_tech) {
-                    $where = "rowid IN (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'";
-                    $rows = $this->db->getRows('usergroup', $where, null, 'object', array('nom'));
-                    if (!is_null($rows)) {
-                        foreach ($rows as $r) {
-                            $toMail = str_ireplace("Sav", "Boutique", $r->nom) . "@bimp.fr";
-                            mailSyn2($subject, $toMail, $fromMail, $text);
+                    $where = " (SELECT `fk_usergroup` FROM `" . MAIN_DB_PREFIX . "usergroup_user` WHERE `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'";
+//                    $rows = $this->db->getRows(array('usergroup_extrafields ge', ), "fk_object IN ".$where, null, 'object', array('mail'));
+
+                    $sql = $this->db->db->query("SELECT `mail` FROM llx_usergroup_extrafields ge, llx_usergroup g WHERE fk_object IN  (SELECT `fk_usergroup` FROM `llx_usergroup_user` WHERE ge.fk_object = g.rowid AND `fk_user` = " . $id_user_tech . ") AND `nom` REGEXP 'Sav([0-9])'");
+
+                    $mailOk = false;
+                    if ($this->db->db->num_rows($sql) > 0) {
+                        while ($ln = $this->db->db->fetch_object($sql)) {
+                            if (isset($ln->mail) && $ln->mail != "") {
+                                $toMail = str_ireplace("Sav", "Boutique", $ln->mail) . "@bimp.fr";
+                                mailSyn2($subject, $toMail, $fromMail, $text);
+                                $mailOk = true;
+                            }
+                        }
+                    }
+
+                    if (!$mailOk) {
+                        $rows2 = $this->db->getRows('usergroup', "rowid IN " . $where, null, 'object', array('nom'));
+                        if (!is_null($rows2)) {
+                            foreach ($rows2 as $r) {
+                                $toMail = str_ireplace("Sav", "Boutique", $r->nom) . "@bimp.fr";
+                                mailSyn2($subject, $toMail, $fromMail, $text);
+                            }
                         }
                     }
                 }
@@ -2383,7 +2411,7 @@ class BS_SAV extends BimpObject
 
                 if ($new_id_propal && !count($errors)) {
                     //Anulation du montant de la propal
-                    $totHt = $propal->dol_object->total_ht;
+                    $totHt = (float) $propal->dol_object->total_ht;
                     if ($totHt == 0)
                         $tTva = 0;
                     else {

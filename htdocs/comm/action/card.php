@@ -818,7 +818,7 @@ if ($action == 'create')
 	{
 		$assignedtouser=GETPOST("assignedtouser")?GETPOST("assignedtouser"):(! empty($object->userownerid) && $object->userownerid > 0 ? $object->userownerid : $user->id);
 		if ($assignedtouser) $listofuserid[$assignedtouser]=array('id'=>$assignedtouser,'mandatory'=>0,'transparency'=>$object->transparency);	// Owner first
-		$listofuserid[$user->id]['transparency']=GETPOSTISSET('transparency')?GETPOST('transparency','alpha'):1;	// 1 by default at first init
+		//$listofuserid[$user->id]['transparency']=GETPOSTISSET('transparency')?GETPOST('transparency','alpha'):1;	// 1 by default at first init
 		$_SESSION['assignedtouser']=json_encode($listofuserid);
 	}
 	else

@@ -24,6 +24,16 @@
 *  This copyright notice MUST APPEAR in all copies of the script!
 ***************************************************************/
 
+//include("/var/GLE/bimp8/htdocs/synopsiscaldav/html/cal.php");
+//die;
+//include_once '../../conf/conf.php';
+//if(defined("REDIRECT_URL")){
+//    header("Status: 301 Moved Permanently", false, 301);
+//    header("Location: ".str_replace("bimp6", "bimp8", $_SERVER[REQUEST_URI]));
+////    header("Location: ".str_replace($dolibarr_main_url_root, REDIRECT_URL, ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'])? "https://" : "http://") . $_SERVER[HTTP_HOST].$_SERVER[REQUEST_URI]));
+//    exit();
+//}
+
 ini_set("session.cookie_httponly", 1);
 ini_set("display_errors", 0);
 ini_set("log_errors", 1);

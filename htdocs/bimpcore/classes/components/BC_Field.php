@@ -165,7 +165,7 @@ class BC_Field extends BimpComponent
         return $html;
     }
 
-    public function renderSearchInput()
+    public function renderSearchInput($extra_data = array())
     {
         if (!$this->params['show']) {
             return '';
@@ -174,9 +174,7 @@ class BC_Field extends BimpComponent
         if (!$this->params['searchable']) {
             return '';
         }
-
-        $html = '';
-
+        
         $input_id = $this->object->object_name . '_search_' . $this->name;
         $input_name = 'search_' . $this->name;
 
@@ -221,7 +219,7 @@ class BC_Field extends BimpComponent
                         } else {
                             $input_path = $this->config_path . '/input';
                         }
-                        $input = new BC_Input($this->object, $this->params['type'], $this->name, $input_path, $this->value, $this->params);
+                        $input = new BC_Input($this->object, $this->params['type'], $this->name_prefix . $this->name, $input_path, $this->value, $this->params);
                         $input_type = $input->params['type'];
                         $options = $input->getOptions();
                         unset($input);
@@ -242,22 +240,13 @@ class BC_Field extends BimpComponent
             }
         }
 
-        $html .= '<div class="searchInputContainer"';
-        $html .= ' data-field_name="' . $input_name . '"';
-        $html .= ' data-search_type="' . $search_type . '"';
-        $html .= ' data-search_on_key_up="' . $this->params['search']['search_on_key_up'] . '"';
-        $html .= ' data-min_chars="1"';
-        $html .= '>';
-
         if ($input_type === 'search_list') {
-            $html .= BimpInput::renderSearchListInputFromConfig($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
+            $content = BimpInput::renderSearchListInputFromConfig($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
         } else {
-            $html .= BimpInput::renderInput($input_type, $input_name, null, $options, null, 'default', $input_id);
+            $content = BimpInput::renderInput($input_type, $input_name, null, $options, null, 'default', $input_id);
         }
 
-        $html .= '</div>';
-
-        return $html;
+        return BimpInput::renderSearchInputContainer($input_name, $search_type, $this->params['search']['search_on_key_up'], 1, $content, $extra_data);
     }
 
     public function displayValue()

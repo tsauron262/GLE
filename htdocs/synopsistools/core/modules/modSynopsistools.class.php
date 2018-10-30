@@ -262,8 +262,10 @@ class modSynopsistools extends DolibarrModules
 
         $this->module_parts = array(
             'hooks' => array('printTopRightMenu', 'toprightmenu', 'printSearchForm'),  // Set here all hooks context you want to support
-            'societe' => 'synopsistools/core/modules/societe/'
+            'societe' => 'synopsistools/core/modules/societe/', 
+            'triggers' => 1
         );
+        
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.

@@ -603,6 +603,12 @@ if (empty($reshook))
 					$action='create';
 				}
 			}
+                        else
+                        {
+                                setEventMessages("Création impossible", $object->errors, 'errors');
+                                $db->rollback();
+                                $action='create';
+                        }
 		}
 	}
 

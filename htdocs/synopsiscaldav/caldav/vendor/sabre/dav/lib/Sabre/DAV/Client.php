@@ -150,8 +150,6 @@ class Client {
      * @return array
      */
     public function propFind($url, array $properties, $depth = 0) {
-        dol_syslog(" proFind debut",3);
-
         $body = '<?xml version="1.0"?>' . "\n";
         $body.= '<d:propfind xmlns:d="DAV:">' . "\n";
         $body.= '  <d:prop>' . "\n";

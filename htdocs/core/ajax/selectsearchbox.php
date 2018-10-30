@@ -26,6 +26,7 @@
 
 if (! isset($usedbyinclude) || empty($usedbyinclude))
 {
+    
     if (! defined('NOTOKENRENEWAL')) define('NOTOKENRENEWAL',1); // Disables token renewal
     if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU','1');
     if (! defined('NOREQUIREHTML'))  define('NOREQUIREHTML','1');
@@ -155,7 +156,32 @@ if (empty($reshook))
 else $arrayresult=$hookmanager->resArray;
 
 // Sort on position
-$arrayresult = dol_sort_array($arrayresult, 'position');
+$arrayresult = dol_sort_array($arrayresult, 'position' );
+
+
+
+/*mod drsi pour le trie*/
+if(strlen($search_boxvalue) > 10 && strlen($search_boxvalue) < 16 && stripos($search_boxvalue, " ") === false && isset($arrayresult["searchintosn"]))
+	$arrayresult=array_merge(array($arrayresult["searchintosn"]), $arrayresult);
+if((strlen($search_boxvalue) > 10) && strlen($search_boxvalue) < 14 && is_numeric($search_boxvalue) && isset($arrayresult["searchintoproduct"]))
+	$arrayresult=array_merge(array($arrayresult["searchintoproduct"]), $arrayresult);
+if(stripos($search_boxvalue, "fa") === 0 OR 
+        stripos($search_boxvalue, "av") === 0 OR
+        stripos($search_boxvalue, "ac") === 0)
+	$arrayresult=array_merge(array($arrayresult["searchintoinvoice"]), $arrayresult);
+if(stripos($search_boxvalue, "pr") === 0)
+	$arrayresult=array_merge(array($arrayresult["searchintopropal"]), $arrayresult);
+if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintochrono"]))
+	$arrayresult=array_merge(array($arrayresult["searchintochrono"]), $arrayresult);
+if(stripos($search_boxvalue, "sav") === 0 && isset($arrayresult["searchintosav"]))
+	$arrayresult=array_merge(array($arrayresult["searchintosav"]), $arrayresult);
+if(stripos($search_boxvalue, "co") === 0 && isset($arrayresult["searchintoorder"]))
+	$arrayresult=array_merge(array($arrayresult["searchintoorder"]), $arrayresult);
+/*fmod drsi*/
+
+
+
+
 
 // Print output if called by ajax or do nothing (var $arrayresult will be used) if called by an include
 if (! isset($usedbyinclude) || empty($usedbyinclude))

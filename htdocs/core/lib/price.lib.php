@@ -169,7 +169,7 @@ function calcul_price_total($qty, $pu, $remise_percent_ligne, $txtva, $uselocalt
 		if (is_numeric($pu) && is_numeric($multicurrency_tx)) $pu_devise = $pu * $multicurrency_tx;
 		else
 		{
-			dol_syslog('Price.lib::calcul_price_total function called with bad parameters combination (pu or multicurrency_tx are not numeric)', LOG_ERR);
+			dol_syslog('Price.lib::calcul_price_total function called with bad parameters combination (pu or multicurrency_tx are not numeric) PU : '.$pu." multicurrency_tx : ".$multicurrency_tx.print_r(debug_backtrace(),1), LOG_ERR);
 			return array();
 		}
 	}

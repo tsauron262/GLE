@@ -3961,6 +3961,12 @@ class Facture extends CommonInvoice
 	function load_state_board()
 	{
 		global $conf, $user;
+                
+                $val1 = cashVal("statTotinvoices");
+                 if($val1){
+                     $this->nb["invoices"] = $val1;
+                     return 1;
+                 } 
 
 		$this->nb=array();
 
@@ -3985,6 +3991,7 @@ class Facture extends CommonInvoice
 				$this->nb["invoices"]=$obj->nb;
 			}
             $this->db->free($resql);
+            cashVal("statTotinvoices", $this->nb["invoices"]);
 			return 1;
 		}
 		else

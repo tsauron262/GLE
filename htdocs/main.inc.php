@@ -1453,9 +1453,9 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
                 }
                 global $bimp_fixe_tabs, $user;
                 if (isset($user->id) && (int) $user->id) {
-                    $bimp_fixe_tabs = new FixeTabs();
-                    $bimp_fixe_tabs->init();
-                    $bimp_fixe_tabs->displayHead();
+//                    $bimp_fixe_tabs = new FixeTabs();
+//                    $bimp_fixe_tabs->init();
+//                    $bimp_fixe_tabs->displayHead();
                 }
             }
             /* fmoddrsi */
@@ -1720,8 +1720,8 @@ function left_menu($menu_array_before, $helppagename='', $notused='', $menu_arra
 
 		if ($conf->use_javascript_ajax && empty($conf->global->MAIN_USE_OLD_SEARCH_FORM))
 		{
-			//$searchform.=$form->selectArrayAjax('searchselectcombo', DOL_URL_ROOT.'/core/ajax/selectsearchbox.php', $selected, '', '', 0, 1, 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
-			$searchform.=$form->selectArrayFilter('searchselectcombo', $arrayresult, $selected, '', 1, 0, (empty($conf->global->MAIN_SEARCHBOX_CONTENT_LOADED_BEFORE_KEY)?1:0), 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
+			$searchform.=$form->selectArrayAjax('searchselectcombo', DOL_URL_ROOT.'/core/ajax/selectsearchbox.php', $selected, '', '', 0, 1, 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
+//			$searchform.=$form->selectArrayFilter('searchselectcombo', $arrayresult, $selected, '', 1, 0, (empty($conf->global->MAIN_SEARCHBOX_CONTENT_LOADED_BEFORE_KEY)?1:0), 'vmenusearchselectcombo', 1, $langs->trans("Search"), 1);
 		}
 		else
 		{

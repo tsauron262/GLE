@@ -105,7 +105,7 @@ class BC_List extends BC_Panel
 
         $this->setConfPath();
 
-        $this->filters = $this->object->getSearchFilters();
+        $this->filters = $this->object->getSearchFilters($this->params['joins']);
     }
 
     // Gestion des filtres: 
@@ -509,8 +509,8 @@ class BC_List extends BC_Panel
 
     public function getHeaderButtons()
     {
-        $buttons = array();
-
+        $buttons = parent::getHeaderButtons();
+        
         if ((int) $this->params['add_btn'] && !is_null($this->params['add_form_name']) && $this->params['add_form_name']) {
             $label = '';
             if ($this->object->config->isDefined('forms/' . $this->params['add_form_name'] . '/label')) {
@@ -542,6 +542,7 @@ class BC_List extends BC_Panel
                 )
             );
         }
+        
         return $buttons;
     }
 }

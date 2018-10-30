@@ -232,11 +232,29 @@ forms:
                       hide_values: 0
               show: 
                   callback: isNotLoaded
+                
+    apple_part:
+        rows: 
+            - custom: 1
+              label: Remises autorisées
+              input_name: remisable
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params:
+                          - remisable
                       
 lists: 
     default: 
-        objects_change_reload: BS_SAV,BS_ApplePart,ObjectLineRemise
+        objects_change_reload: BS_SAV,BS_SavPropal,BS_ApplePart,ObjectLineRemise
         add_form_name: sav
+        edit_form: 
+            callback: getListEditForm
+        header_buttons:
+            callback: 
+                method: getLinesListHeaderExtraBtn
+                object: 
+                    callback: getParentInstance
         cols: 
             warranty: 
                 field: out_of_warranty

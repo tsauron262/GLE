@@ -253,13 +253,31 @@ class DoliDBMysqli extends DoliDB
      *  @param  string	$type           Type of SQL order ('ddl' for insert, update, select, delete or 'dml' for create, alter...)
      *	@return	bool|mysqli_result		Resultset of answer
      */
-    function query($query,$usesavepoint=0,$type='auto')
+    function query($query,$usesavepoint=0,$type='auto', $donRecur = false)
     {
     	global $conf;
+        
 
-                /*moddrsi*/
+        /*moddrsi*/
+        $tabRemplacement = array(
+            "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid" =>
+                "SELECT COUNT(DISTINCT a.rowid) as nb_rows FROM llx_propal a ",
+            "SELECT DISTINCT (a.rowid) FROM llx_propal a LEFT JOIN llx_element_contact ec ON ec.element_id = a.rowid LEFT JOIN llx_c_type_contact tc ON ec.fk_c_type_contact = tc.rowid ORDER BY a." =>
+                "SELECT DISTINCT (a.rowid) FROM llx_propal a ORDER BY a."
+        );
+        foreach ($tabRemplacement as $old=> $new){
+                $query = str_replace($old, $new, $query);
+        }
+        
         $this->countReq ++;
-//        echo $this->countReq." ";
+        $debugTime = false;
+        if($debugTime){
+            $timestamp_debut = microtime(true);
+            if(!isset($this->timestamp_debut)){
+                $this->timestamp_debut = $timestamp_debut;
+                $this->timestamp_derfin = $timestamp_debut;
+            }
+        }
         /*fmoddrsi*/
         
         $query = trim($query);
@@ -290,6 +308,22 @@ class DoliDBMysqli extends DoliDB
             }
             $this->lastquery=$query;
             $this->_results = $ret;
+        }
+        
+        
+        /*mod drsi*/
+        if($debugTime){
+            $timestamp_fin = microtime(true);
+            $difference_ms = $timestamp_fin - $timestamp_debut;
+            $difference_ms2 = $timestamp_fin - $this->timestamp_debut;
+            $difference_ms3 = $timestamp_debut - $this->timestamp_derfin;
+            
+            if($difference_ms > 0.08 || $difference_ms3 > 0.1){
+                echo $this->countReq." ";
+                echo $query." <br/>";
+                echo "||".$this->num_rows($ret)." en ".$difference_ms."s depuis deb ".$difference_ms2." <br/><br/>";
+            }
+            $this->timestamp_derfin = $timestamp_fin;
         }
 
         return $ret;

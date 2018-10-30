@@ -97,6 +97,12 @@ fields:
         type: bool
         default_value: 0
         sortable: 0
+    pdf_hide_ttc:
+        label: Masquer le TTC dans le PDF
+        dol_extra_field: 1
+        type: bool
+        default_value: 0
+        sortable: 0
         
 forms: 
     default: 
@@ -151,6 +157,7 @@ forms:
             - field: pdf_hide_reduc
             - field: pdf_hide_total
             - field: pdf_hide_ref
+            - field: pdf_hide_ttc
             - field: note_private
             - field: note_public
             
@@ -234,6 +241,8 @@ fields_tables:
               edit: 1
             - field: pdf_hide_ref
               edit: 1
+            - field: pdf_hide_ttc
+              edit: 1
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
@@ -252,7 +261,45 @@ views:
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
     content: 
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
-        
+     
+lists_cols: 
+    libelle: 
+        field: libelle
+    ref: 
+        field: ref
+        label: Réf. 
+    statut: 
+        field: fk_statut
+    secteur:
+        field: ef_type
+    entrepot: 
+        field: entrepot
+        display: nom_url
+    client: 
+        field: fk_soc
+        display: nom_url
+    commercial: 
+        label: Commercial
+        value: 
+            callback: displayCommercial
+        search: 
+            input: 
+                type: search_user
+    date_create: 
+        field: datec
+    date: 
+        field: datep
+    fin: 
+        field: fin_validite
+        label: Fin validité
+    livraison: 
+        field: date_livraison
+        label: Livraison
+    total_ht: 
+        field: total_ht
+    total: 
+        field: total
+                
 lists: 
     default: 
         title: Propositions commerciales
@@ -290,30 +337,15 @@ lists:
               alias: tc
         cols: 
             ref: 
-                field: ref
             libelle: 
                 field: libelle
             statut: 
-                field: fk_statut
             entrepot: 
-                field: entrepot
-                display: nom_url
             secteur: 
-                field: ef_type
-            client: 
-                field: fk_soc
-                display: nom_url
-            commercial: 
-                label: Commercial
-                value: 
-                    callback: displayCommercial
-                search: 
-                    input: 
-                        type: search_user
+            client:
+            commercial:
             date_create: 
-                field: datec
             total: 
-                field: total
         
     user: 
         extends: default

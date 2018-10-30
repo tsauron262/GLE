@@ -749,7 +749,6 @@ class Server {
      * @return void
      */
     protected function httpPropPatch($uri) {
-        dol_syslog("httpPropPatch debut".print_r($uri),3);
 
         $newProperties = $this->parsePropPatchRequest($this->httpRequest->getBody(true));
 
@@ -918,8 +917,6 @@ class Server {
      * @return void
      */
     protected function httpMkcol($uri) {
-        dol_syslog("httpMkcol debut".print_r($uri),3);
-
         $requestBody = $this->httpRequest->getBody(true);
 
         if ($requestBody) {

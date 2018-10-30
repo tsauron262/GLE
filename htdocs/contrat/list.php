@@ -45,10 +45,6 @@ $confirm=GETPOST('confirm','alpha');
 $toselect = GETPOST('toselect', 'array');
 $contextpage= GETPOST('contextpage','aZ')?GETPOST('contextpage','aZ'):'contractlist';   // To manage different context of search
 
-$dfmonth=GETPOST('dfmonth')?GETPOST('dfmonth'):date("n");
-$dfyear=GETPOST('dfyear');
-$filter_op2df=GETPOST('filter_op2df');
-
 $search_name=GETPOST('search_name');
 $search_email=GETPOST('search_email');
 $search_town=GETPOST('search_town','alpha');
@@ -111,7 +107,6 @@ $fieldstosearchall = array(
 	'c.ref_customer'=>'RefCustomer',
 	'c.ref_supplier'=>'RefSupplier',
 	's.nom'=>"ThirdParty",
-	'cd.description'=>'Description',
 	'c.note_public'=>'NotePublic',
 );
 if (empty($user->socid)) $fieldstosearchall["c.note_private"]="NotePrivate";
@@ -256,7 +251,7 @@ else if ($year > 0)
 	$sql.= " AND c.date_contrat BETWEEN '".$db->idate(dol_get_first_day($year,1,false))."' AND '".$db->idate(dol_get_last_day($year,12,false))."'";
 }
 if ($search_name) $sql .= natural_search('s.nom', $search_name);
-if ($search_email) $sql .= natural_search('s.email', $search_name);
+if ($search_email) $sql .= natural_search('s.email', $search_email);
 if ($search_contract) $sql .= natural_search(array('c.rowid', 'c.ref'), $search_contract);
 if (!empty($search_ref_customer)) $sql .= natural_search(array('c.ref_customer'), $search_ref_customer);
 if (!empty($search_ref_supplier)) $sql .= natural_search(array('c.ref_supplier'), $search_ref_supplier);
@@ -620,6 +615,23 @@ while ($i < min($num,$limit))
 	print '<tr class="oddeven">';
 	if (! empty($arrayfields['c.ref']['checked']))
 	{
+		print '<td class="nowrap">';
+		print $contracttmp->getNomUrl(1);
+		if ($obj->nb_late) print img_warning($langs->trans("Late"));
+		if (!empty($obj->note_private) || !empty($obj->note_public))
+		{
+			print ' <span class="note">';
+			print '<a href="'.DOL_URL_ROOT.'/contrat/note.php?id='.$obj->rowid.'">'.img_picto($langs->trans("ViewPrivateNote"),'object_generic').'</a>';
+			print '</span>';
+		}
+
+		$filename=dol_sanitizeFileName($obj->ref);
+		$filedir=$conf->contrat->dir_output . '/' . dol_sanitizeFileName($obj->ref);
+		$urlsource=$_SERVER['PHP_SELF'].'?id='.$obj->rowid;
+		print $formfile->getDocumentsLink($contracttmp->element, $filename, $filedir);
+		print '</td>';
+
+		print '</td>';
 	}
 	if (! empty($arrayfields['c.ref_customer']['checked']))
 	{
@@ -712,32 +724,8 @@ while ($i < min($num,$limit))
 					$userstatic->entity=$val['entity'];
 					$userstatic->photo=$val['photo'];
 
-		print '<td class="nowrap">';
-		print $contracttmp->getNomUrl(1);
-		if ($obj->nb_late) print img_warning($langs->trans("Late"));
-		if (!empty($obj->note_private) || !empty($obj->note_public))
-		{
-			print ' <span class="note">';
-			print '<a href="'.DOL_URL_ROOT.'/contrat/note.php?id='.$obj->rowid.'">'.img_picto($langs->trans("ViewPrivateNote"),'object_generic').'</a>';
-			print '</span>';
-		}
-
-		$filename=dol_sanitizeFileName($obj->ref);
-		$filedir=$conf->contrat->dir_output . '/' . dol_sanitizeFileName($obj->ref);
-		$urlsource=$_SERVER['PHP_SELF'].'?id='.$obj->rowid;
-		print $formfile->getDocumentsLink($contracttmp->element, $filename, $filedir);
-		print '</td>';
-
-		print '</td>';
-	// Extra fields
-
-}
-
-
-llxFooter();
-$db->close();
 					//print '<div class="float">':
-					print $userstatic->getNomUrl(-2);
+					print $userstatic->getNomUrl(1);
 					$j++;
 					if ($j < $nbofsalesrepresentative) print ' ';
 					//print '</div>';
@@ -756,3 +744,78 @@ $db->close();
 	{
 		print '<td align="center">'.dol_print_date($db->jdate($obj->date_contrat), 'day', 'tzuser').'</td>';
 	}
+	// Extra fields
+	include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_print_fields.tpl.php';
+	// Fields from hook
+	$parameters=array('arrayfields'=>$arrayfields, 'obj'=>$obj);
+	$reshook=$hookmanager->executeHooks('printFieldListValue',$parameters);    // Note that $action and $object may have been modified by hook
+	print $hookmanager->resPrint;
+	// Date creation
+	if (! empty($arrayfields['c.datec']['checked']))
+	{
+		print '<td align="center" class="nowrap">';
+		print dol_print_date($db->jdate($obj->date_creation), 'dayhour', 'tzuser');
+		print '</td>';
+		if (! $i) $totalarray['nbfield']++;
+	}
+	// Date modification
+	if (! empty($arrayfields['c.tms']['checked']))
+	{
+		print '<td align="center" class="nowrap">';
+		print dol_print_date($db->jdate($obj->date_update), 'dayhour', 'tzuser');
+		print '</td>';
+		if (! $i) $totalarray['nbfield']++;
+	}
+	// Date lower end date
+	if (! empty($arrayfields['lower_planned_end_date']['checked']))
+	{
+		print '<td align="center" class="nowrapforall">';
+		print dol_print_date($db->jdate($obj->lower_planned_end_date), 'day', 'tzuser');
+		print '</td>';
+		if (! $i) $totalarray['nbfield']++;
+	}
+	// Status
+	if (! empty($arrayfields['status']['checked']))
+	{
+		print '<td align="center">'.($obj->nb_initial>0?$obj->nb_initial:'').'</td>';
+		print '<td align="center">'.($obj->nb_running>0?$obj->nb_running:'').'</td>';
+		print '<td align="center">'.($obj->nb_expired>0?$obj->nb_expired:'').'</td>';
+		print '<td align="center">'.($obj->nb_closed>0 ?$obj->nb_closed:'').'</td>';
+	}
+	// Action column
+	print '<td class="nowrap" align="center">';
+	if ($massactionbutton || $massaction)   // If we are in select mode (massactionbutton defined) or if we have already selected and sent an action ($massaction) defined
+	{
+		$selected=0;
+		if (in_array($obj->rowid, $arrayofselected)) $selected=1;
+		print '<input id="cb'.$obj->rowid.'" class="flat checkforselect" type="checkbox" name="toselect[]" value="'.$obj->rowid.'"'.($selected?' checked="checked"':'').'>';
+	}
+	print '</td>';
+	if (! $i) $totalarray['nbfield']++;
+
+	print "</tr>\n";
+	$i++;
+}
+$db->free($resql);
+
+print '</table>';
+print '</div>';
+
+print '</form>';
+
+$hidegeneratedfilelistifempty=1;
+if ($massaction == 'builddoc' || $action == 'remove_file' || $show_files) $hidegeneratedfilelistifempty=0;
+
+// Show list of available documents
+$urlsource=$_SERVER['PHP_SELF'].'?sortfield='.$sortfield.'&sortorder='.$sortorder;
+$urlsource.=str_replace('&amp;','&',$param);
+
+$filedir=$diroutputmassaction;
+$genallowed=$user->rights->contrat->lire;
+$delallowed=$user->rights->contrat->lire;
+
+print $formfile->showdocuments('massfilesarea_contract','',$filedir,$urlsource,0,$delallowed,'',1,1,0,48,1,$param,$title,'','','',null,$hidegeneratedfilelistifempty);
+
+
+llxFooter();
+$db->close();

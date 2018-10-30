@@ -338,7 +338,7 @@ class Product extends CommonObject
 	 */
 	function check()
 	{
-		$this->ref = dol_sanitizeFileName(stripslashes($this->ref));
+		$this->ref = dol_string_nospecial(stripslashes($this->ref));
 
 		$err = 0;
 		if (dol_strlen(trim($this->ref)) == 0)
@@ -861,6 +861,7 @@ class Product extends CommonObject
 
 			$sql.= ", tosell = " . $this->status;
 			$sql.= ", tobuy = " . $this->status_buy;
+			$sql.= ", import_key = '" . $this->import_key."'";
 			$sql.= ", tobatch = " . ((empty($this->status_batch) || $this->status_batch < 0) ? '0' : $this->status_batch);
 			$sql.= ", finished = " . ((! isset($this->finished) || $this->finished < 0) ? "null" : (int) $this->finished);
 			$sql.= ", weight = " . ($this->weight!='' ? "'".$this->db->escape($this->weight)."'" : 'null');
@@ -888,7 +889,7 @@ class Product extends CommonObject
 			$sql.= ", accountancy_code_sell_intra= '" . $this->db->escape($this->accountancy_code_sell_intra)."'";
 			$sql.= ", accountancy_code_sell_export= '" . $this->db->escape($this->accountancy_code_sell_export)."'";
 			$sql.= ", desiredstock = " . ((isset($this->desiredstock) && $this->desiredstock != '') ? $this->desiredstock : "null");
-			$sql.= ", cost_price = " . ($this->cost_price != '' ? $this->db->escape($this->cost_price) : 'null');
+			$sql.= ", cost_price = " . ($this->cost_price != '' ? $this->db->escape(str_replace(" ", "", $this->cost_price)) : 'null');
 	        $sql.= ", fk_unit= " . (!$this->fk_unit ? 'NULL' : $this->fk_unit);
 	        $sql.= ", price_autogen = " . (!$this->price_autogen ? 0 : 1);
 			$sql.= ", fk_price_expression = ".($this->fk_price_expression != 0 ? $this->fk_price_expression : 'NULL');
@@ -4257,6 +4258,11 @@ class Product extends CommonObject
 	 */
 	function load_state_board()
 	{
+                $val1 = cashVal("statTotproducts");
+                 if($val1){
+                     $this->nb["products"] = $val1;
+                     return 1;
+                 }  
 		global $conf, $user, $hookmanager;
 
 		$this->nb=array();
@@ -4282,6 +4288,7 @@ class Product extends CommonObject
 				else $this->nb["products"]=$obj->nb;
 			}
             $this->db->free($resql);
+            cashVal("statTotproducts", $this->nb["products"]);
 			return 1;
 		}
 		else

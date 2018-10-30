@@ -7,10 +7,10 @@ class BimpValidateOrder {
     private $db;
     public $errors;
     private $tabValideComm = array(62 => 100);
-    private $tabValideCommEduc = array(51 => 100);
+    private $tabValideCommEduc = array(51 => 100, 201 => 100);
     private $tabValideMontant = array(2 => array(0, 1000000000000), 68 => array(50000, 100000000000));
     private $tabValideMontantPart = array(7 => array(0, 100000), 2 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
-    private $tabValideMontantEduc = array(51 => array(0, 100000), 2 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
+    private $tabValideMontantEduc = array(201 => array(0,100000), 51 => array(0, 100000), 2 => array(100000, 1000000000000), 68 => array(100000, 100000000000));
     private $tabSecteurEduc = array("E", "ENS", "EBTS");
 
     function __construct($db) {
@@ -69,12 +69,12 @@ class BimpValidateOrder {
             }
             else{
                 $ok = false;
-                $error = false;
+                $error2 = false;
                 foreach ($id_responsiblesComm as $id_responsible) {
                     if (!$this->sendEmailToResponsible($id_responsible, $user, $order) == true)
-                        $error = true;
+                        $error2 = true;
                 }
-                if (!$error) {
+                if (!$error2) {
                     setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande commercialement.", null, 'warnings');
                 }
                 else
@@ -83,7 +83,8 @@ class BimpValidateOrder {
         }
         
         
-        
+        if($error || $error2)
+            setEventMessages("Validation non permise", null, "errors");
 
      
         

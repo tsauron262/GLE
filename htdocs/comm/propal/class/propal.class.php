@@ -3138,7 +3138,19 @@ class Propal extends CommonObject
 	function load_board($user,$mode)
 	{
 		global $conf, $langs;
-
+                $val1 = cashVal("statPropal".$mode);
+                 if($val1){
+                     
+			$response = new WorkboardResponse();
+			$response->warning_delay = $val1->warning_delay;
+			$response->label = $val1->label;
+			$response->url = $val1->url;
+			$response->url_late = $val1->url_late;
+			$response->img = img_object('',"propal");
+                        $response->nbtodolate = $val1->nbtodolate;
+                        $response->nbtodo = $val1->nbtodo;
+                    return $response;
+                 } 
 		$clause = " WHERE";
 
 		$sql = "SELECT p.rowid, p.ref, p.datec as datec, p.fin_validite as datefin";
@@ -3196,7 +3208,7 @@ class Propal extends CommonObject
 				// TODO Definir regle des propales a facturer en retard
 				// if ($mode == 'signed' && ! count($this->FactureListeArray($obj->rowid))) $this->nbtodolate++;
 			}
-
+            cashVal("statPropal".$mode, $response);
 			return $response;
 		}
 		else
@@ -3309,6 +3321,11 @@ class Propal extends CommonObject
 	{
 		global $user;
 
+                $val1 = cashVal("statTotproposals");
+                 if($val1){
+                     $this->nb["proposals"] = $val1;
+                     return 1;
+                 } 
 		$this->nb=array();
 		$clause = "WHERE";
 
@@ -3332,6 +3349,7 @@ class Propal extends CommonObject
 				$this->nb["proposals"]=$obj->nb;
 			}
 			$this->db->free($resql);
+            cashVal("statTotproposals", $this->nb["proposals"]);
 			return 1;
 		}
 		else

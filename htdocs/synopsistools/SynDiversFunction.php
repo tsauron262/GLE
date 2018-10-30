@@ -1005,6 +1005,23 @@ function userInGroupe($groupe, $idUser) {
     }
 }
 
+function cashVal($hash, $val = null, $delay = 15){
+    $path = DOL_DATA_ROOT."/cacheSyn/";
+    if(!is_dir($path))
+        mkdir($path);
+    $file = $path.$hash;
+    
+    if($val == null){
+        if(is_file($file) && filemtime($file) > strtotime("-".$delay."minutes")){
+            return json_decode(file_get_contents ($file));
+        }
+        return 0;
+    }
+    else{
+        file_put_contents($file, json_encode($val));
+    }
+}
+
 function cachePage($page, $delay = 0, $mode = 2){//Mod 0 = get, 1 = force refresh, 2 = set
     $path = DOL_DATA_ROOT."/cacheSyn/";
     if(!is_dir($path))

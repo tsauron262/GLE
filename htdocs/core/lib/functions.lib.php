@@ -907,7 +907,7 @@ function dol_string_unaccent($str)
  */
 function dol_string_nospecial($str,$newstr='_',$badcharstoreplace='')
 {
-	$forbidden_chars_to_replace=array(" ", "'", "/", "\\", ":", "*", "?", "\"", "<", ">", "|", "[", "]", ",", ";", "=", '°');  // more complete than dol_sanitizeFileName
+	$forbidden_chars_to_replace=array(" ", "'", "\\", ":", "*", "?", "\"", "<", ">", "|", "[", "]", ",", ";", "=", '°');  // more complete than dol_sanitizeFileName
 	$forbidden_chars_to_remove=array();
 	if (is_array($badcharstoreplace)) $forbidden_chars_to_replace=$badcharstoreplace;
 	//$forbidden_chars_to_remove=array("(",")");
@@ -1838,7 +1838,8 @@ function dol_print_date($time,$format='',$tzoutput='tzserver',$outputlangs='',$e
 	{
 		// TODO Remove this.
 		// This part of code should not be used.
-		dol_syslog("Functions.lib::dol_print_date function call with deprecated value of time add db->jdate in page ".$_SERVER["PHP_SELF"], LOG_ERR);
+            //throw new Exception('Division par zéro.');
+		dol_syslog("Functions.lib::dol_print_date function call with deprecated value of time add db->jdate in page ".$_SERVER["PHP_SELF"]. " date :".$time, LOG_ERR);
 		// Date has format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' or 'YYYYMMDDHHMMSS'
 		$syear	= (! empty($reg[1]) ? $reg[1] : '');
 		$smonth	= (! empty($reg[2]) ? $reg[2] : '');

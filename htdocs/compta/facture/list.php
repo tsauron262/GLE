@@ -140,10 +140,14 @@ $search_array_options=$extrafields->getOptionalsFromPost($extralabels,'','search
 $fieldstosearchall = array(
 	'f.facnumber'=>'Ref',
 	'f.ref_client'=>'RefCustomer',
-	'pd.description'=>'Description',
+//	'pd.description'=>'Description',
 	's.nom'=>"ThirdParty",
 	'f.note_public'=>'NotePublic',
 );
+$searchAllDescLine= 0;
+$affchePaye = 0;//ne sert a rien et oblige a faire un group by
+if($searchAllDescLine)
+    $fieldstosearchall["pd.description"]="Description";
 if (empty($user->socid)) $fieldstosearchall["f.note_private"]="NotePrivate";
 
 $checkedtypetiers=0;
@@ -371,7 +375,7 @@ $sql.= " country.code as country_code,";
 $sql.= " p.rowid as project_id, p.ref as project_ref, p.title as project_label";
 // We need dynamount_payed to be able to sort on status (value is surely wrong because we can count several lines several times due to other left join or link with contacts. But what we need is just 0 or > 0)
 // TODO Better solution to be able to sort on already payed or remain to pay is to store amount_payed in a denormalized field.
-if (! $sall) $sql.= ', SUM(pf.amount) as dynamount_payed';
+if (! $sall && $affchePaye) $sql.= ', SUM(pf.amount) as dynamount_payed';
 if ($search_categ_cus) $sql .= ", cc.fk_categorie, cc.fk_soc";
 
 // Add fields from extrafields
@@ -380,16 +384,19 @@ foreach ($extrafields->attribute_label as $key => $val) $sql.=($extrafields->att
 $parameters=array();
 $reshook=$hookmanager->executeHooks('printFieldListSelect',$parameters);    // Note that $action and $object may have been modified by hook
 $sql.=$hookmanager->resPrint;
+
+$selectSql = $sql;
+$sql = "";
 $sql.= ' FROM '.MAIN_DB_PREFIX.'societe as s';
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_country as country on (country.rowid = s.fk_pays)";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_typent as typent on (typent.id = s.fk_typent)";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_departements as state on (state.rowid = s.fk_departement)";
 if (! empty($search_categ_cus)) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_societe as cc ON s.rowid = cc.fk_soc"; // We'll need this table joined to the select in order to filter by categ
 
-$sql.= ', '.MAIN_DB_PREFIX.'facture as f';
+$sql.= ', '.MAIN_DB_PREFIX.'facture f';
 if (is_array($extrafields->attribute_label) && count($extrafields->attribute_label)) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."facture_extrafields as ef on (f.rowid = ef.fk_object)";
-if (! $sall) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'paiement_facture as pf ON pf.fk_facture = f.rowid';
-if ($sall || $search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'facturedet as pd ON f.rowid=pd.fk_facture';
+if (! $sall && $affchePaye) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'paiement_facture as pf ON pf.fk_facture = f.rowid';
+if (($sall && $searchAllDescLine) || $search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'facturedet as pd ON f.rowid=pd.fk_facture';
 if ($search_product_category > 0) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON cp.fk_product=pd.fk_product';
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."projet as p ON p.rowid = f.fk_projet";
 // We'll need this table joined to the select in order to filter by sale
@@ -500,22 +507,23 @@ $sql.=$hookmanager->resPrint;
 
 if (! $sall)
 {
-	$sql.= ' GROUP BY f.rowid, f.facnumber, ref_client, f.type, f.note_private, f.note_public, f.increment, f.fk_mode_reglement, f.total, f.tva, f.total_ttc,';
-	$sql.= ' f.localtax1, f.localtax2,';
-	$sql.= ' f.datef, f.date_lim_reglement,';
-	$sql.= ' f.paye, f.fk_statut,';
-	$sql.= ' f.datec, f.tms,';
-	$sql.= ' s.rowid, s.nom, s.email, s.town, s.zip, s.fk_pays, s.client, s.fournisseur, s.code_client, s.code_fournisseur, s.code_compta, s.code_compta_fournisseur,';
-	$sql.= ' typent.code,';
-	$sql.= ' state.code_departement, state.nom,';
-	$sql.= ' country.code,';
-	$sql.= " p.rowid, p.ref, p.title";
-	if ($search_categ_cus) $sql .= ", cc.fk_categorie, cc.fk_soc";
+//    $sql .= " GROUP BY f.rowid ";
+//	$sql.= ' GROUP BY f.rowid, f.facnumber, ref_client, f.type, f.note_private, f.note_public, f.increment, f.fk_mode_reglement, f.total, f.tva, f.total_ttc,';
+//	$sql.= ' f.localtax1, f.localtax2,';
+//	$sql.= ' f.datef, f.date_lim_reglement,';
+//	$sql.= ' f.paye, f.fk_statut,';
+//	$sql.= ' f.datec, f.tms,';
+//	$sql.= ' s.rowid, s.nom, s.email, s.town, s.zip, s.fk_pays, s.client, s.fournisseur, s.code_client, s.code_fournisseur, s.code_compta, s.code_compta_fournisseur,';
+//	$sql.= ' typent.code,';
+//	$sql.= ' state.code_departement, state.nom,';
+//	$sql.= ' country.code,';
+//	$sql.= " p.rowid, p.ref, p.title";
+//	if ($search_categ_cus) $sql .= ", cc.fk_categorie, cc.fk_soc";
 	// Add fields from extrafields
-	foreach ($extrafields->attribute_label as $key => $val) //prevent error with sql_mode=only_full_group_by
-	{
-		$sql.=($extrafields->attribute_type[$key] != 'separate' ? ",ef.".$key : '');
-	}
+//	foreach ($extrafields->attribute_label as $key => $val) //prevent error with sql_mode=only_full_group_by
+//	{
+//		$sql.=($extrafields->attribute_type[$key] != 'separate' ? ",ef.".$key : '');
+//	}
 }
 else
 {
@@ -525,14 +533,24 @@ else
 $sql.= ' ORDER BY ';
 $listfield=explode(',',$sortfield);
 $listorder=explode(',',$sortorder);
-foreach ($listfield as $key => $value) $sql.= $listfield[$key].' '.($listorder[$key]?$listorder[$key]:'DESC').',';
-$sql.= ' f.rowid DESC ';
-
+if(count($listfield) > 0){
+    $sqlT = "";
+    foreach ($listfield as $key => $value){
+        if($sqlT != "")
+            $sqlT.= ',';
+        $sqlT.= $listfield[$key].' '.($listorder[$key]?$listorder[$key]:'DESC');
+    }
+    $sql .= $sqlT;
+}
+else
+    $sql.= ' f.rowid DESC ';
+//die($sql);
 $nbtotalofrecords = '';
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 {
-	$result = $db->query($sql);
-	$nbtotalofrecords = $db->num_rows($result);
+	$result = $db->query("SELECT count(DISTINCT(f.rowid)) as nb ".$sql);
+        $ln = $db->fetch_object($result);
+	$nbtotalofrecords = $ln->nb;
 	if (($page * $limit) > $nbtotalofrecords)	// if total resultset is smaller then paging size (filtering), goto and load page 0
 	{
 		$page = 0;
@@ -543,7 +561,7 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 $sql.= $db->plimit($limit+1,$offset);
 //print $sql;
 
-$resql = $db->query($sql);
+$resql = $db->query($selectSql.$sql);
 if ($resql)
 {
 	$num = $db->num_rows($resql);

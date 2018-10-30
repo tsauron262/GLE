@@ -468,7 +468,7 @@ class ObjectLine extends BimpObject
         }
 
         if ($field === 'remisable') {
-            return 1;
+            return (int) $this->getData('remisable');
         }
         return 0;
     }
@@ -535,7 +535,7 @@ class ObjectLine extends BimpObject
                     }
                 }
             }
-            if ($this->isRemisable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE)) && (int) $this->getData('editable')) {
+            if ($this->isRemisable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
                 $onclick = 'loadModalList(\'bimpcommercial\', \'ObjectLineRemise\', \'default\', ' . $this->id . ', $(this), \'Remises\', {parent_object_type: \'' . static::$parent_comm_type . '\'})';
                 $buttons[] = array(
                     'label'   => 'Remises ligne',
@@ -1069,7 +1069,10 @@ class ObjectLine extends BimpObject
                                 'type'           => ObjectLineRemise::OL_REMISE_PERCENT,
                                 'percent'        => (float) $line->remise_percent
                             ));
-                            $remise->create();
+                            $remise_errors = $remise->create($remise_warnings, true);
+                            if (count($remise_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise de ' . $line->remise_percent . ' % pour la ligne n° ' . $line->rang);
+                            }
                         }
                     }
 
@@ -1649,6 +1652,7 @@ class ObjectLine extends BimpObject
 
     public function checkRemises()
     {
+        $errors = array();
         $remises = $this->getRemises();
 
         // On suppose que "$this->remise" a pu être modifié via l'ancienne interface Dolibarr: 
@@ -1685,8 +1689,10 @@ class ObjectLine extends BimpObject
                     'type'           => ObjectLineRemise::OL_REMISE_PERCENT,
                     'percent'        => (float) $remise_percent
                 ));
-                $remise->create($warnings, true);
-
+                $remise_errors = $remise->create($warnings, true);
+                if (count($remise_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise de '.$remise_percent.' %');
+                }
                 $this->calcRemise();
             }
         }
@@ -2111,7 +2117,7 @@ class ObjectLine extends BimpObject
 
         if ($this->isLoaded() && $this->equipment_required) {
             $product = $this->getProduct();
-            if ($product->isSerialisable()) {
+            if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
                 $msg = 'Attention: produit sérialisable. Ce calcul de marges est basé sur les montants par défaut de la ligne ';
                 $msg .= 'et ne tient pas compte des éventuels prix de vente et prix d\'achat exceptionnels des équipements attribués';
                 $html .= BimpRender::renderAlerts($msg, 'warning');
@@ -2315,7 +2321,8 @@ class ObjectLine extends BimpObject
                         if (BimpObject::objectLoaded($fournPrice)) {
                             $this->pa_ht = (float) $fournPrice->getData('price');
                         } else {
-                            $errors[] = 'Prix fournisseur d\'ID ' . $this->id_fourn_price . ' inexistant';
+                            $this->id_fourn_price = 0;
+//                            $errors[] = 'Prix fournisseur d\'ID ' . $this->id_fourn_price . ' inexistant';
                         }
                     }
 
@@ -2632,8 +2639,6 @@ class ObjectLine extends BimpObject
         $errors = $this->deleteLine();
 
         if (!count($errors)) {
-            $errors = parent::delete($force_delete);
-
             if (!count($errors)) {
                 $lines = $this->getEquipmentLines();
 

@@ -270,8 +270,8 @@ forms:
               depends_on: id_contrat
             - custom: 1
               label: Notifier par e-mail
+              input_name: mails_to
               input: 
-                  name: mails_to
                   type: check_list
                   items: 
                       callback:
@@ -462,9 +462,13 @@ lists_cols:
     client: 
         field: id_client
         display: nom_url
-#    timer: 
-#        field: appels_timer
-#        label: Chrono
+    timer: 
+        field: appels_timer
+        label: Chrono appels
+    timer_inters:
+        label: Chrono inters
+        value:
+            callback: displayDureeTotale
     cover: 
         field: cover
         label: Couvert

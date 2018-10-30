@@ -36,17 +36,17 @@ if (file_exists($file)) {
 
     global $db;
     $bdb = new BimpDb($db);
-    $rows = $bdb->getRows('entrepot', '1', null, 'array', array('rowid', 'label'));
+    $rows = $bdb->getRows('entrepot', '1', null, 'array', array('rowid', 'ref'));
 
     if (is_null($rows) || !count($rows)) {
         die('Aucun entrepot trouvé ou échec récupération des entrepots');
     }
 
     foreach ($rows as $r) {
-        if (array_key_exists($r['label'], $entrepots)) {
-            echo 'Code Entrepot en double: ' . $r['label'] . '<br/>';
+        if (array_key_exists($r['ref'], $entrepots)) {
+            echo 'Code Entrepot en double: ' . $r['ref'] . '<br/>';
         } else {
-            $entrepots[$r['label']] = (int) $r['rowid'];
+            $entrepots[$r['ref']] = (int) $r['rowid'];
         }
     }
 

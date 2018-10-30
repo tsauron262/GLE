@@ -397,7 +397,7 @@ class Bimp_Paiement extends BimpObject
                 $label = 'Paiement facture client';
 
                 if ($this->useCaisse) {
-                    $centre = $this->db->getValue('entrepot', 'label', '`rowid` = ' . (int) $caisse->getData('id_entrepot'));
+                    $centre = $this->db->getValue('entrepot', 'ref', '`rowid` = ' . (int) $caisse->getData('id_entrepot'));
                     if (is_null($centre)) {
                         $centre = 'inconnu';
                     }

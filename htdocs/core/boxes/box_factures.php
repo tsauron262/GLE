@@ -82,6 +82,15 @@ class box_factures extends ModeleBoxes
 		);
 
         if ($user->rights->facture->lire) {
+            
+            $val1 = cashVal("boxFactures");
+                 if($val1){
+                     foreach($val1 as $id => $val)
+                        foreach($val as $id2 => $val2)
+                           $val1[$id][$id2] = (array) $val2;
+                     $this->info_box_contents = $val1;
+                     return 1;
+                 }  
             $sql = "SELECT f.rowid as facid";
             $sql.= ", f.facnumber, f.type, f.total as total_ht";
             $sql.= ", f.tva as total_tva";
@@ -173,6 +182,7 @@ class box_factures extends ModeleBoxes
                         'text'=>$langs->trans("NoRecordedInvoices"),
                     );
 
+            cashVal("boxFactures", $this->info_box_contents);
                 $db->free($result);
             } else {
                 $this->info_box_contents[0][0] = array(

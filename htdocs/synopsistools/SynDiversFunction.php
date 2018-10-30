@@ -707,6 +707,22 @@ function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
     mailSyn2($sujet, $to, '', $text, array(), array(), array(), $cc, "", 0, 1);
 }
 
+function synGetDebug(){
+    $debugT = debug_backtrace();
+                    foreach($debugT as $id=>$ln){
+                        if($ln['function'] != "synGetDebug"){
+                            $debug[$id] = $debugT[$id];
+                            foreach($debug [$id]['args'] as $id2=>$ln2)
+                                if(is_object($ln2))
+                                $debug [$id]['args'][$id2] = get_class($ln2);
+
+                            if(is_object($debug [$id]['object']))
+                                $debug [$id]['object'] = get_class($debug [$id]['object']);
+                        }
+                    }
+                    return print_r($debug,1);
+}
+
 function utf8_encodeRien($str) {
     return $str;
 }
@@ -1005,16 +1021,19 @@ function userInGroupe($groupe, $idUser) {
     }
 }
 
-function cashVal($hash, $val = null, $delay = 15){
+function cashVal($hash, $val = null, $delay = 14){
     $path = DOL_DATA_ROOT."/cacheSyn/";
     if(!is_dir($path))
         mkdir($path);
     $file = $path.$hash;
     
     if($val == null){
+        $delay = rand((int)$delay/2, $delay);
+        echo "<br/>".$hash." ".$delay;
         if(is_file($file) && filemtime($file) > strtotime("-".$delay."minutes")){
             return json_decode(file_get_contents ($file));
         }
+        echo "non";
         return 0;
     }
     else{

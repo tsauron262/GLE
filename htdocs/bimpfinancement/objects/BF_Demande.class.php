@@ -91,7 +91,33 @@ class BF_Demande extends BimpObject
         }
         return '';
     }
+
+    public function getDemandeData() {
+        return (object) $data = array(
+            'id_demande' => $this->getData('id'),
+            'id_client' => $this->getData('id_client'),
+            'id_contact_client' => $this->getData('id_client_contact'),
+            'id_fournisseur' => $this->getData('id_supplier_contact')
+        );
+    }
     
+    public function actiongenfactFourn($success) {
+        if(!$this->isLoaded()) {
+            return array('La demande financement n\'à pas d\'id');
+        } else {
+            // Récupération de l'id de la commande
+            $data = $this->getDemandeData();
+            return array($data->client);
+            (int) $id = $this->getData('id');
+            // Récupération des infos nécéssaire
+            (int) $id_client = $this->getData('id_client');
+            (double) $montant_materiel = $this->getData('montant_materiel');
+            (double) $montant_logiciels = $this->getData('montant_logiciels');
+            (double) $montant_services = $this->getData('montant_services');
+        }
+    }
+
+
     public function actionGenerateContrat($success){
 
         if (!$this->isLoaded()) { 
@@ -295,7 +321,7 @@ class BF_Demande extends BimpObject
                             $this->updateField('id_facture', (int) $facture->id);
                             addElementElement('demande', 'facture', $id, $facture->id);
                             $description = "Demande de financement numéro : ";
-                            $description .= $ref;
+                            $description .= "$id";
                             $facture->addLine($description, $total_emprun, 1, $taux_tva);
                           
                         } else {
@@ -388,10 +414,42 @@ class BF_Demande extends BimpObject
     public function getInfosExtraBtn()
     {
         $buttons = array();
-
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+        $getEtatContrat = $this->getData('status');
 
-        $buttons[] = array(
+        if($getEtatContrat == 999) {
+
+            // On récupère les VR
+            $vr_achat = $this->getData('vr');
+            $vr_vente = $this->getData('vr_vente');
+
+            if($vr_achat != 0) {
+                $buttons[] = array(
+                    'label'   => 'Générer le facture client',
+                    'icon'    => 'fas_file-contract',
+                    'onclick' => $this->getJsActionOnclick('genFactClient', array(
+                        'file_type' => 'pret'
+                            ), array(
+                        'success_callback' => $callback
+                    ))
+                );
+            }
+            
+            if($vr_vente != 0) {
+                $buttons[] = array(
+                    'label'   => 'Générer le facture fournisseur',
+                    'icon'    => 'fas_file-contract',
+                    'onclick' => $this->getJsActionOnclick('genfactFourn', array(
+                        'file_type' => 'pret'
+                            ), array(
+                        'success_callback' => $callback
+                    ))
+                );
+            }
+
+            
+        } elseif($getEtatContrat == 4) {
+            $buttons[] = array(
             'label'   => 'Générer le contrat',
             'icon'    => 'fas_file-contract',
             'onclick' => $this->getJsActionOnclick('generateContrat', array(
@@ -400,6 +458,7 @@ class BF_Demande extends BimpObject
                 'success_callback' => $callback
             ))
         );
+        }
 
         return $buttons;
     }
@@ -411,7 +470,7 @@ class BF_Demande extends BimpObject
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 
         $buttons[] = array(
-            'label'   => 'Générer la facture',
+            'label'   => 'Générer la facture pour la banque',
             'icon'    => 'fas_file-invoice-dollar',
             'onclick' => $this->getJsActionOnclick('generateFacture', array(
                 'file_type' => 'pret'

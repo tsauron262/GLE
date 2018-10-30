@@ -793,10 +793,6 @@ lists:
             fields: 
                 id_entrepot: 
                     request: id_entrepot
-        joins: 
-            - table: be_equipment
-              alias: e
-              on: a.id_equipment = e.id
         add_btn_label: Nouveau SAV
         edit_btn: 1
         edit_form: edit

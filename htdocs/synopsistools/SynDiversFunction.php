@@ -1029,11 +1029,9 @@ function cashVal($hash, $val = null, $delay = 14){
     
     if($val == null){
         $delay = rand((int)$delay/2, $delay);
-        echo "<br/>".$hash." ".$delay;
         if(is_file($file) && filemtime($file) > strtotime("-".$delay."minutes")){
             return json_decode(file_get_contents ($file));
         }
-        echo "non";
         return 0;
     }
     else{

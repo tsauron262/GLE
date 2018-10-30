@@ -151,7 +151,7 @@ class BC_ListTable extends BC_List
         if (!is_array($list_cols) || !count($list_cols)) {
             $list_cols = $this->params['cols'];
         }
-        
+
         $this->cols = array();
 
         foreach ($list_cols as $col_name) {
@@ -344,7 +344,7 @@ class BC_ListTable extends BC_List
         if (count($this->errors)) {
             return parent::renderHtml();
         }
-        
+
         $html .= $this->renderListParamsInputs();
 
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
@@ -819,7 +819,7 @@ class BC_ListTable extends BC_List
                 $content .= '<div style="margin: 10px; font-weight: normal; font-size: 11px">';
 
                 $content .= 'Nombre d\'éléments par page: <span class="bold">' . $values['nb_items'] . '</span><br/>';
-                
+
                 $sortable_fields = $this->object->getSortableFieldsArray();
 
                 if (array_key_exists($values['sort_field'], $sortable_fields)) {

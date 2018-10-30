@@ -225,7 +225,7 @@ class BimpTimer extends BimpObject
     {
         $errors = parent::create($warnings, $force_create);
 
-        if (!cont($errors)) {
+        if (!count($errors)) {
             $warnings = array_merge($warnings, $this->onSave());
         }
 

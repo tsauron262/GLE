@@ -55,115 +55,6 @@ class BimpObject extends BimpCache
     public $children = array();
     public $extends = array();
 
-    public function getExport($niveau = 10, $pref = "", $format = "xml", $sep = ";", $sautLn = "\n")
-    {
-        if (!$this->isLoaded())
-            return "Objet non loadé";
-
-
-        $tabResult = array();
-        foreach ($this->config->params['fields'] as $nom => $info) {
-            $value = $this->getData($nom);
-
-            if ($info['type'] == "int") {
-                $value = intval($value);
-                if (is_array($info['values']['array']) && isset($info['values']['array'][$value]))
-                    $value = $info['values']['array'][$value];
-            }
-            elseif ($info['type'] == "id_object") {
-                continue; //Car on les retrouve enssuite de nouveau dans $this->params['objects']
-                $obj = $this->getChildObject($info['object']);
-                $value = $this->recursiveGetExport($niveau, $pref, $obj);
-            } elseif ($info['type'] == "bool")
-                $value = ($value ? "OUI" : "NON");
-
-
-            $tabResult[$nom] = $value;
-        }
-
-        foreach ($this->params['objects'] as $nom => $infoObj) {
-            $value = "";
-            if ($infoObj['relation'] == "hasMany") {
-                $html.= "<" . $nom . ">";
-                $lines = $this->getChildrenObjects($nom);
-                $i = 0;
-                $value = array();
-                foreach ($lines as $obj) {
-                    $i++;
-                    $value[$nom . "-" . $i] = $this->recursiveGetExport($niveau, $pref . "-" . $i, $obj);
-                }
-            } elseif ($infoObj['relation'] == "hasOne") {
-                $obj = $this->getChildObject($nom);
-                $value = $this->recursiveGetExport($niveau, $pref . "-" . $i, $obj);
-            } elseif ($infoObj['relation'] == "none") {
-//                    $lines = $this->get($nom);
-//                    $i = 0;
-//                    $value = array();
-//                    foreach($lines as $obj){
-//                        die;
-//                        $i++;
-//                        $value[$nom."-".$i] = $this->recursiveGetExport($niveau, $pref."-".$i, $obj);
-//                    }
-
-                if ($nom == "files") {
-                    $value = $this->getObjectFilesArray($this);
-                }
-//                 elseif($nom == "contact"){
-////                    $value = $this->($name);
-//                }
-                else {
-                    $obj = $this->getChildObject($nom);
-                    $value = $this->recursiveGetExport($niveau, $pref, $obj);
-                }
-            } else {
-                print_r($infoObj);
-            }
-            $tabResult[$nom] = $value;
-        }
-
-        return $tabResult;
-    }
-
-    function recursiveGetExport($niveau, $pref, $obj)
-    {
-        $value = "";
-        if ($niveau > 0) {
-            if (is_a($obj, "BimpObject")) {
-                if (method_exists($obj, "isLoaded"))
-                    if ($obj->isLoaded())
-                        $value = $obj->getExport($niveau - 1, $pref . "-");
-                    else
-                        echo "ERR Objet non loadé";
-                else
-                    echo "ERR Objet bizarre";
-            }
-            elseif (is_a($obj, "CommonObject")) {
-                $id = 0;
-                if (property_exists($obj, 'id'))
-                    $id = $obj->id;
-                else
-                    $value = "ERR pas de champ ID" . $nom;
-                if ($id > 0) {
-                    $value = array();
-                    if (method_exists($obj, "getNomUrl"))
-                        if (isset($obj->id) && $obj->id > 0)
-                            $value['lien'] = $obj->getNomUrl(1);
-                    if (method_exists($obj, "fetch_optionals") && count($obj->array_options) < 1)
-                        $obj->fetch_optionals();
-                    foreach ($obj as $clef => $val) {
-                        if (!in_array($clef, array("db", "error", "errors", "context", "oldcopy")))
-                            $value[$clef] = $val;
-                    }
-                }
-            }
-            else {
-                echo "ERR Type objet inconnue " . get_class($obj);
-                $value = "ERR Type objet inconnue " . get_class($obj);
-            }
-        }
-        return $value;
-    }
-
     public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {
         $file = DOL_DOCUMENT_ROOT . '/' . $module . '/objects/' . $object_name . '.class.php';
@@ -716,11 +607,6 @@ class BimpObject extends BimpCache
         return $value;
     }
 
-    public function isActionAllowed($action, &$errors = array())
-    {
-        return 1;
-    }
-
     public function getFilesDir()
     {
         if ($this->isLoaded()) {
@@ -748,6 +634,36 @@ class BimpObject extends BimpCache
     public function getListConfig($owner_type, $id_owner, $list_name = 'default')
     {
         return self::getObjectListConfig($this->module, $this->object_name, $owner_type, $id_owner, $list_name);
+    }
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        return 1;
+    }
+
+    public function isParentEditable()
+    {
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent)) {
+            if (is_a($parent, 'BimpObject')) {
+                return (int) $parent->isEditable();
+            }
+
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function isEditable()
+    {
+        return 1;
+    }
+
+    public function isDeletable()
+    {
+        return 1;
     }
 
     // Gestion des objets enfants:
@@ -955,7 +871,9 @@ class BimpObject extends BimpCache
             return null;
         }
 
-        if ($this->isDolObject() && (int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+        $value = null;
+        if ($this->isDolObject() && $this->dol_field_exists($field) &&
+                (int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
             if (preg_match('/^ef_(.*)$/', $field, $matches)) {
                 $field = $matches[1];
             }
@@ -975,6 +893,113 @@ class BimpObject extends BimpCache
     public function set($field, $value)
     {
         return $this->validateValue($field, $value);
+    }
+
+    public function getExport($niveau = 10, $pref = "", $format = "xml", $sep = ";", $sautLn = "\n")
+    {
+        if (!$this->isLoaded())
+            return "Objet non loadé";
+
+        $tabResult = array();
+        foreach ($this->config->getCompiledParams('fields') as $nom => $info) {
+            $value = $this->getData($nom);
+
+            if ($info['type'] == "int") {
+                $value = intval($value);
+                if (is_array($info['values']['array']) && isset($info['values']['array'][$value]))
+                    $value = $info['values']['array'][$value];
+            }
+            elseif ($info['type'] == "id_object") {
+                continue; //Car on les retrouve enssuite de nouveau dans $this->params['objects']
+//                $obj = $this->getChildObject($info['object']);
+//                $value = $this->recursiveGetExport($niveau, $pref, $obj);
+            } elseif ($info['type'] == "bool")
+                $value = ($value ? "OUI" : "NON");
+
+            $tabResult[$nom] = $value;
+        }
+
+        foreach ($this->params['objects'] as $nom => $infoObj) {
+            $value = "";
+            if ($infoObj['relation'] == "hasMany") {
+                $html.= "<" . $nom . ">";
+                $lines = $this->getChildrenObjects($nom);
+                $i = 0;
+                $value = array();
+                foreach ($lines as $obj) {
+                    $i++;
+                    $value[$nom . "-" . $i] = $this->recursiveGetExport($niveau, $pref . "-" . $i, $obj);
+                }
+            } elseif ($infoObj['relation'] == "hasOne") {
+                $obj = $this->getChildObject($nom);
+                $value = $this->recursiveGetExport($niveau, $pref . "-" . $i, $obj);
+            } elseif ($infoObj['relation'] == "none") {
+//                    $lines = $this->get($nom);
+//                    $i = 0;
+//                    $value = array();
+//                    foreach($lines as $obj){
+//                        die;
+//                        $i++;
+//                        $value[$nom."-".$i] = $this->recursiveGetExport($niveau, $pref."-".$i, $obj);
+//                    }
+
+                if ($nom == "files") {
+                    $value = $this->getObjectFilesArray($this);
+                }
+//                 elseif($nom == "contact"){
+////                    $value = $this->($name);
+//                }
+                else {
+                    $obj = $this->getChildObject($nom);
+                    $value = $this->recursiveGetExport($niveau, $pref, $obj);
+                }
+            } else {
+                print_r($infoObj);
+            }
+            $tabResult[$nom] = $value;
+        }
+
+        return $tabResult;
+    }
+
+    public function recursiveGetExport($niveau, $pref, $obj)
+    {
+        $value = "";
+        if ($niveau > 0) {
+            if (is_a($obj, "BimpObject")) {
+                if (method_exists($obj, "isLoaded"))
+                    if ($obj->isLoaded())
+                        $value = $obj->getExport($niveau - 1, $pref . "-");
+                    else
+                        echo "ERR Objet non loadé";
+                else
+                    echo "ERR Objet bizarre";
+            }
+            elseif (is_a($obj, "CommonObject")) {
+                $id = 0;
+                if (property_exists($obj, 'id'))
+                    $id = $obj->id;
+                else
+                    $value = "ERR pas de champ ID" . $nom;
+                if ($id > 0) {
+                    $value = array();
+                    if (method_exists($obj, "getNomUrl"))
+                        if (isset($obj->id) && $obj->id > 0)
+                            $value['lien'] = $obj->getNomUrl(1);
+                    if (method_exists($obj, "fetch_optionals") && count($obj->array_options) < 1)
+                        $obj->fetch_optionals();
+                    foreach ($obj as $clef => $val) {
+                        if (!in_array($clef, array("db", "error", "errors", "context", "oldcopy")))
+                            $value[$clef] = $val;
+                    }
+                }
+            }
+            else {
+                echo "ERR Type objet inconnue " . get_class($obj);
+                $value = "ERR Type objet inconnue " . get_class($obj);
+            }
+        }
+        return $value;
     }
 
     public function addMultipleValuesItem($name, $value)
@@ -1197,9 +1222,9 @@ class BimpObject extends BimpCache
         if ($type) {
             if ($this->isDolObject()) {
                 if (in_array($type, array('datetime', 'date', 'time'))) {
-                    if(stripos($value, "-") || stripos($value, "/"))
+                    if (stripos($value, "-") || stripos($value, "/"))
                         $value = $this->db->db->jdate($value);
-                    
+
                     $value = $this->db->db->idate($value);
                     if (preg_match('/^(\d{4})\-?(\d{2})\-?(\d{2}) ?(\d{2})?:?(\d{2})?:?(\d{2})?$/', $value, $matches)) {
                         switch ($type) {
@@ -2790,8 +2815,6 @@ class BimpObject extends BimpCache
                 }
                 if (isset($this->dol_object->array_options['options_' . $extrafield])) {
                     $value = $this->dol_object->array_options['options_' . $extrafield];
-                } else {
-                    $value = null;
                 }
             } else {
                 $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
@@ -2915,7 +2938,7 @@ class BimpObject extends BimpCache
         );
     }
 
-    // Gestion des droits: 
+    // Gestion des droits users: 
 
     public function canCreate()
     {
@@ -3624,11 +3647,10 @@ class BimpObject extends BimpCache
                     }
                 }
             }
-
-            $content = BimpInput::renderInput('select', 'cols_add_value', '', array('options' => $cols));
-
-            $html .= BimpInput::renderInputContainer('cols_add_value', '', $content, '', 0, 1, '', array('values_field' => 'cols'));
-            $html .= BimpInput::renderMultipleValuesList($this, 'cols', $values, 'cols_add_value', 0, 0, 1);
+            
+            $input = BimpInput::renderInput('select', 'cols_add_value', '', array('options' => $cols));
+            $content = BimpInput::renderMultipleValuesInput($this, 'cols', $input, $values, '', 0, 1, 1);
+            $html .= BimpInput::renderInputContainer('cols', '', $content, '', 0, 1, '', array('values_field' => 'cols'));
         } else {
             $html .= BimpRender::renderAlerts('Aucune option disponible', 'warnings');
         }

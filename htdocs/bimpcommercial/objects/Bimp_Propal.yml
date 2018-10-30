@@ -103,7 +103,7 @@ forms:
         rows: 
             - custom: 1
               input_name: id_user_commercial
-              label: Commercial signataire
+              label: Commercial suivi proposition
               input: 
                   type: search_user
               show: 
@@ -292,6 +292,7 @@ lists:
             ref: 
                 field: ref
             libelle: 
+                field: libelle
             statut: 
                 field: fk_statut
             entrepot: 

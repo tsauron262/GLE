@@ -373,7 +373,7 @@ class BimpAssociation
             $msg .= ' à ' . $this->object->getLabel('the') . ' ' . $id_object;
             $errors[] = $msg;
         }
-        
+
         return $errors;
     }
 
@@ -579,7 +579,7 @@ class BimpAssociation
 
     // Rendus HTML 
 
-    public function renderAddAssociateInput($item_display = 'default', $autosave = false, $name_prefix = '')
+    public function renderAddAssociateInput($item_display = 'default', $autosave = false, $name_prefix = '', $required = 0)
     {
         if (count($this->errors)) {
             return BimpRender::renderAlerts($this->errors);
@@ -587,22 +587,6 @@ class BimpAssociation
 
         if (!$this->object->config->isDefined('associations/' . $this->association . '/input')) {
             return BimpRender::renderAlerts('Input non défini dans la configuration pour cette association');
-        }
-
-        $html = '';
-
-        $input_name = $this->association . '_add_value';
-        $input = new BC_Input($this->object, 'int', $input_name, 'associations/' . $this->association . '/input');
-        $input->setNamePrefix($name_prefix);
-        $input->extraClasses[] = 'no-modified';
-        $input->extraData['values_field'] = $name_prefix . $this->association;
-
-        $html .= $input->renderHtml();
-
-        if ($input->params['type'] === 'search_list') {
-            $label_input_name = $name_prefix . $input_name . '_search';
-        } else {
-            $label_input_name = $name_prefix . $this->association;
         }
 
         $values = array();
@@ -619,9 +603,17 @@ class BimpAssociation
             }
         }
 
-        $html .= BimpInput::renderMultipleValuesList($this->object, $name_prefix . $this->association, $values, $label_input_name, $autosave);
+        $field_params = array(
+                'required' => $required
+        );
+        
+        $input = new BC_Input($this->object, 'int', $this->association, 'associations/' . $this->association . '/input', $values, $field_params);
+        $input->setNamePrefix($name_prefix);
+        $input->extraClasses[] = 'no-modified';
+        $input->extraData['values_field'] = $name_prefix . $this->association;
+        $input->setParam('multiple', 1);
 
-        return $html;
+        return $input->renderHtml();
     }
 
     public function renderAssociatesCheckList($name_prefix = '')

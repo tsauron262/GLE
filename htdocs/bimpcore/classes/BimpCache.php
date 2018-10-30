@@ -23,7 +23,7 @@ class BimpCache
                 $empty_value => $empty_label
             );
 
-            if (isset(self::$cache[$cache_key])) {
+            if ($cache_key && isset(self::$cache[$cache_key])) {
                 foreach (self::$cache[$cache_key] as $value => $label) {
                     $return[$value] = $label;
                 }
@@ -31,7 +31,7 @@ class BimpCache
             return $return;
         }
 
-        if (isset(self::$cache[$cache_key])) {
+        if ($cache_key && isset(self::$cache[$cache_key])) {
             return self::$cache[$cache_key];
         }
 
@@ -306,6 +306,48 @@ class BimpCache
         }
 
         return self::$cache['comptes'];
+    }
+
+    // Product: 
+
+    public static function getProductEquipmentsArray($id_product, $include_empty = false, $empty_label = '')
+    {
+        if ((int) $id_product) {
+            $cache_key = 'product_' . $id_product . '_equipments_array';
+
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+
+                $rows = self::getBdb()->getRows('be_equipment', '`id_product` = ' . (int) $id_product, null, 'array', array('id', 'serial'));
+
+                if (!is_null($rows) && count($rows)) {
+                    foreach ($rows as $r) {
+                        self::$cache[$cache_key][(int) $r['id']] = $r['serial'];
+                    }
+                }
+            }
+        } else {
+            $cache_key = '';
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
+    }
+
+    public static function getProductFournPricesArray($id_product, $include_empty = false, $empty_label = '')
+    {
+        if (((int) $id_product)) {
+            $cache_key = 'product_' . $id_product . '_fourn_prices_array';
+
+            if (!isset(self::$cache[$cache_key])) {
+                BimpObject::loadClass('bimpcore', 'Bimp_Product');
+
+                self::$cache[$cache_key] = Bimp_Product::getFournisseursPriceArray((int) $id_product, 0, 0, false);
+            }
+        } else {
+            $cache_key = '';
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
     // Emails: 

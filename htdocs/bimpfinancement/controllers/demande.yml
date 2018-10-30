@@ -41,7 +41,7 @@ sections:
           
           - id: fournisseurs
             title: Factures fournisseurs
-            strutc: 
+            struct: 
                 type: view
                 view: 
                     panel: 1

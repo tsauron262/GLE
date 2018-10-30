@@ -7,6 +7,7 @@ table: bf_demande_line
 parent_module: bimpfinancement
 parent_object: BF_Demande
 
-
+fields: 
+    remisable: unset
 
 

@@ -8,8 +8,8 @@ class ObjectLine extends BimpObject
     public $equipment_required = false;
 
     const LINE_PRODUCT = 1;
-    const LINE_TEXT = 2;
-    const LINE_FREE = 3;
+    const LINE_FREE = 2;
+    const LINE_TEXT = 3;
 
     public $desc = null;
     public $id_product = null;
@@ -459,7 +459,7 @@ class ObjectLine extends BimpObject
                     }
                     return $id_fourn_price;
 
-                case 'remisable':;
+                case 'remisable':
                     if ($id_product && (int) $this->id_product !== $id_product) {
                         return (int) $product->getData('remisable');
                     }
@@ -2584,7 +2584,7 @@ class ObjectLine extends BimpObject
         $errors = parent::updateField($field, $value, $id_object);
 
         if (!count($errors)) {
-            if ($field === 'remisable' && !$value) {
+            if ($field === 'remisable' && !(int) $value) {
                 $instance = $this;
                 if (!$this->isLoaded()) {
                     $instance = BimpObject::getInstance($this->module, $this->object_name, $id_object);

@@ -327,7 +327,7 @@ forms:
             - field: warranty_type
             - field: date_warranty_end
             - field: note
-            - association: contrats        
+            - association: contrats
             - object: places
             
     light:

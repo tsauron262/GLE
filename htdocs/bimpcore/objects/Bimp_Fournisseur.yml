@@ -1,0 +1,7 @@
+extends: 
+    module: bimpcore
+    object_name: Bimp_Societe
+    
+labels: 
+    name: fournisseur
+    is_female: 0

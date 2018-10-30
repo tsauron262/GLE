@@ -15,7 +15,7 @@ objects:
         instance: 
             bimp_object:
                 module: bimpcore
-                name: bimp_Product
+                name: Bimp_Product
             id_object: 
                 field_value: id_product
                 
@@ -35,10 +35,16 @@ objects:
         instance: 
             bimp_object: 
                 module: bimpcore
-                name: Bimp_Societe
+                name: Bimp_Fournisseur
             id_object: 
                 field_value: id_fournisseur
             
+    equipment: 
+        instance:
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+                
 fields: 
     id_parent: 
         label: Objet parent
@@ -50,47 +56,129 @@ fields:
         values: 
             array: types
             
-    description: 
-        label: Description
-        
+    label: 
+        label: Libellé
+        display_if: 
+            field_name: type
+            show_values: 2
+    
     id_product: 
         label: Produit
         type: id_object
         object: product
+        input: 
+            type: search_product
+            help: Entrez la référence d'un produit
+        display_if: 
+            field_name: type
+            show_values: 1
+        depends_on: type
         
     qty: 
         label: Quantité
         type: qty
+        input: 
+            step: 
+                callback: getQtyStep
+        decimals: 
+            callback: getQtyDecimals
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        default_value: 1
+        depends_on: id_product
         
     pu_ht: 
         label: Prix unitaire HT
         type: money
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        default_value: 0
+        depends_on: id_product
         
     tva_tx: 
         label: Taux de TVA
         type: percent
-        
-    pa_ht: 
-        label: Prix d'achat HT
-        type: money
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        default_value: 0
+        depends_on: id_product
         
     id_fourn_price: 
         label: Prix d'achat fournisseur
         type: id_object
         object: fourn_price
+        values: 
+            array: fournPrices
+        display_if: 
+            field_name: type
+            show_values: 1
+        default_value: 0
+        depends_on: id_product
         
     id_fournisseur: 
         label: Fournisseur
         type: id_object
         object: fournisseur
+        input: 
+            type: search_societe
+            societe_type: supplier
+            help: Entrez le nom ou la référence d'un fournisseur
+        create_form: default
+        display_if: 
+            field_name: type
+            show_values: 2
+        default_value: 0
+        
+    pa_ht: 
+        label: Prix d'achat HT
+        type: money
+        display_if: 
+            fields_names: type,id_fourn_price
+            type: 
+                hide_values: 3
+            id_fourn_price: 
+                show_values: 0
+        default_value: 0
+        depends_on: id_fourn_price
         
     equipments: 
         label: Equipements
-        type: list
+        type: items_list
+        items_data_type: id_object
+        items_sortable: 1
+        object: equipment
+        create_form: default
+        create_form_values: 
+            fields: 
+                id_product: 
+                    field_value: id_product
+        values: 
+            array: equipments
+        display_if: 
+            fields_names: type,id_product
+            type:
+                show_values: 1
+            id_product: 
+                hide_values: 0
+        depends_on: id_product
+        
+    description: 
+        label: Description
+        type: html
+        
+    remisable: 
+        label: Remisable
+        type: bool
+        default_value: 1
         
 lists_cols: 
     desc:
-        field: desc
+        label: Description
+        value: 
+            callback: displayDescription
         max_width: 460px
     pu_ht: 
         label: PU HT
@@ -123,6 +211,7 @@ lists_cols:
                 
 lists: 
     default: 
+        configurable: 1
         checkboxes: 1
         positions: 1
         positions_open: 1

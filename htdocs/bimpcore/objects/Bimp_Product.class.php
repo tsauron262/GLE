@@ -14,8 +14,8 @@ class Bimp_Product extends BimpObject
     );
     public static $product_type = array(
         "" => '',
-        0 => 'Product',
-        1 => 'Service'
+        0  => 'Product',
+        1  => 'Service'
     );
 
     public function isSerialisable()
@@ -203,15 +203,17 @@ class Bimp_Product extends BimpObject
         return $html;
     }
 
-    public static function getFournisseursPriceArray($id_product, $id_fournisseur = 0, $id_price = 0)
+    public static function getFournisseursPriceArray($id_product, $id_fournisseur = 0, $id_price = 0, $include_empty = true)
     {
         if (!(int) $id_product) {
             return array();
         }
 
-        $prices = array(
-            0 => ''
-        );
+        $prices = array();
+
+        if ($include_empty) {
+            $prices[0] = '';
+        }
 
         $filters = array(
             'fp.fk_product' => (int) $id_product
@@ -230,10 +232,10 @@ class Bimp_Product extends BimpObject
         $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe s ON fp.fk_soc = s.rowid';
         $sql .= BimpTools::getSqlWhere($filters);
         $sql .= ' ORDER BY fp.unitprice ASC';
-        
+
         global $db;
         $bdb = new BimpDb($db);
-        
+
         $rows = $bdb->executeS($sql, 'array');
 
         if (!is_null($rows) && count($rows)) {

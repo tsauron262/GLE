@@ -311,12 +311,25 @@ class Bimp_Propal extends BimpComm
         return $conf->propal->dir_output;
     }
 
-    public function getCommercialSearchFilters(&$filters, $value)
+    public function getCommercialSearchFilters(&$filters, $value, &$joins = array())
     {
-        $filters['tc.element'] = 'propal';
-        $filters['tc.source'] = 'internal';
-        $filters['tc.code'] = 'SALESREPFOLL';
-        $filters['ec.fk_socpeople'] = (int) $value;
+        if ((int) $value) {
+            $filters['tc.element'] = 'propal';
+            $filters['tc.source'] = 'internal';
+            $filters['tc.code'] = 'SALESREPFOLL';
+            $filters['ec.fk_socpeople'] = (int) $value;
+
+            $joins['ec'] = array(
+                'table' => 'element_contact',
+                'on'    => 'ec.element_id = a.rowid',
+                'alias' => 'ec'
+            );
+            $joins['tc'] = array(
+                'table' => 'c_type_contact',
+                'on'    => 'ec.fk_c_type_contact = tc.rowid',
+                'alias' => 'tc'
+            );
+        }
     }
 
     // Affichages: 

@@ -599,27 +599,34 @@ class BS_SAV extends BimpObject
         return $buttons;
     }
 
-    public function getEquipmentSearchFilters(&$filters, $value)
+    public function getEquipmentSearchFilters(&$filters, $value, &$joins = array())
     {
-        $filters['or_equipment'] = array(
-            'or' => array(
-                'e.serial'        => array(
-                    'part_type' => 'middle', // ou middle ou end
-                    'part'      => $value
-                ),
-                'e.product_label' => array(
-                    'part_type' => 'middle',
-                    'part'      => $value
-                ),
-                'e.warranty_type' => array(
-                    'part_type' => 'middle',
-                    'part'      => $value
+        if ((string) $value) {
+            $joins['e'] = array(
+                'table' => 'be_equipment',
+                'alias' => 'e',
+                'on'    => 'a.id_equipment = e.id'
+            );
+            $filters['or_equipment'] = array(
+                'or' => array(
+                    'e.serial'        => array(
+                        'part_type' => 'middle', // ou middle ou end
+                        'part'      => $value
+                    ),
+                    'e.product_label' => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
+                    'e.warranty_type' => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    )
                 )
-            )
-        );
+            );
+        }
     }
 
-    public function getEquipementSearchFilters(&$filters, $value)
+    public function getEquipementSearchFilters(&$filters, $value, &$joins = array())
     {
         $filters['or_equipment'] = array(
             'or' => array(
@@ -1771,11 +1778,15 @@ class BS_SAV extends BimpObject
 
             $mail_msg .= "\n" . $textSuivie . "\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
 
-            if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
-                $errors[] = 'Echec envoi du mail';
+            if($this->testMail($toMail)){
+                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) 
+                    $errors[] = 'Echec envoi du mail';
+            }
+            else{
+                $errors[] = "Pas d'email correct ".$toMail;
             }
         } else {
-            $errors[] = 'pas de mail';
+            $errors[] = 'pas de message';
         }
 
         if ($contact_pref === 3 && $sms) {

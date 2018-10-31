@@ -1665,6 +1665,8 @@ if (empty($reshook))
 			$action = 'create';
 			$_GET["origin"] = $_POST["origin"];
 			$_GET["originid"] = $_POST["originid"];
+                        if($object->error == "" && count($object->errors) < 1)
+                            $object->error = "Création impossible";
 			setEventMessages($object->error, $object->errors, 'errors');
 		}
 	}

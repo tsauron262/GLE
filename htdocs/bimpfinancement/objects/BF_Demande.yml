@@ -13,8 +13,6 @@ labels:
 
 objects:
 
-    
-
     commande:
         relation: hasOne
         delete: 0
@@ -22,6 +20,14 @@ objects:
             bimp_object:
                 module: bimpcommercial
                 name: Bimp_Commande
+
+    reference:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpfinancement
+                name: Bimp_Demande
 
     contrat:
         relation: hasOne
@@ -38,6 +44,22 @@ objects:
             dol_object: facture
             id_object:
                 field_value: id_facture
+
+    facture_client:
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: facture
+            id_object:
+                field_value: id_facture_client
+
+    facture_fournisseur:
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: facture
+            id_object:
+                field_value: id_facture_fournisseur
 
 
         card: 
@@ -221,6 +243,20 @@ fields:
 
     id_facture:
         label: Facture
+        type: id_object
+        object: facture
+        input:
+            type: hidden
+
+    id_facture_client:
+        label: Facture client
+        type: id_object
+        object: facture
+        input:
+            type: hidden
+
+    id_facture_fournisseur:
+        label: Facture fournisseur
         type: id_object
         object: facture
         input:
@@ -434,6 +470,12 @@ fields_tables:
             - field: id_commercial
               edit: 1
             - field: id_contrat
+              edit: 0
+              display: nom_url
+            - field: id_facture_client
+              edit: 0
+              display: nom_url
+            - field: id_facture_fournisseur
               edit: 0
               display: nom_url
             

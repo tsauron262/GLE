@@ -28,7 +28,6 @@ class importDepot extends import8sens {
             $entrepot->lieu = $ln['DepLib'];
             $entrepot->description = $ln['DepLib'];
             $entrepot->statut = 1;
-            $entrepot->update($entrepot->id, $user);
             
             
             if ($entrepot->id > 0){

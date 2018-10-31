@@ -393,7 +393,7 @@
                 $sql = $this->db->query($requete);
 
                 while($res = $this->db->fetch_object($sql)) {
-
+                    
                 	$periodicite = explode(' ', $res->description);
                 	switch ($periodicite[1]) {
                 		case 'Mensuelle':
@@ -447,7 +447,11 @@
                 $pdf->SetFont(''/* 'Arial' */, 'u', 8);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche, 6, "Fait en autant d'exemplaires que de parties, un pour chacune des parties", 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
                 $pdf->SetFont(''/* 'Arial' */, '', 8);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche, 6, "ANNEXE : Conditions Générales composées de quatres pages recto", 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
+                if($new_page) {
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche, 6, "ANNEXE : Liste du matériel et Conditions Générales composées de quatres pages recto", 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
+                } else {
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - $this->marge_gauche, 6, "ANNEXE : Conditions Générales composées de quatres pages recto", 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
+                }
 
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 200), 6, "Fait à Lyon le " . dol_print_date($contrat->date_contrat), 0, 'L', false, 1, NULL, null, null, null, null, null, null, 'M');
 
@@ -495,12 +499,67 @@
 
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
                
-               if($new_page) {
-                // SI ON A PLUS DE 5 PRODUITS DANS LA LISTE DE MATERIELS
-               }
+               
 
                $pdf->SetAutoPageBreak(1, $this->margin_bottom);
+               if($new_page) {
 
+                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
+                    $this->PrintChapter($this->contrat->ref, 'ANNEXE: LISTE DU MATERIEL DU CONTRAT DE LOCATION N° ','', false);
+                    $pdf->setFont('','b', 12);
+                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                    $X = $this->marge_gauche;
+                    $pdf->SetX($X);
+                    $pdf->SetDrawColor(255, 255, 255);
+                    $pdf->SetFont(''/* 'Arial' */, 'B', 9);
+                    $pdf->setColor('fill', 237, 124, 28);
+                    $pdf->SetTextColor(255,255,255);
+                    $pdf->Cell($W, 8, "Quantité", 1, null, 'L', true);
+                    $pdf->SetTextColor(0,0,0);
+                    $X = $this->marge_gauche + $W;
+                    $pdf->setX($X);
+                    $pdf->setColor('fill', 237, 124, 28);
+                    $pdf->SetTextColor(255,255,255);
+                    $pdf->Cell($W * 9, 8, "Désignation du matériels", 1, null, 'L', true);
+                    $pdf->SetTextColor(0,0,0);
+                    $X = $this->marge_gauche + $W * 8;
+                
+                    $pdf->setX($X);
+                    $pdf->setColor('fill', 237, 124, 28);
+                    $pdf->SetTextColor(255,255,255);
+                    $pdf->MultiCell(0, 8, "", 1, null, 'L', true);
+                    $pdf->SetTextColor(0,0,0);
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                    while($res = $this->db->fetch_object($req)) {
+                                $taille_description = strlen($res->description);
+                                $description = ($taille_description < 80) ? $res->description : substr($res->description, 0, $taille_description).' ...';
+                                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                                $pdf->SetX($this->marge_gauche);
+                                $pdf->SetFont(''/* 'Arial' */, '', 9);
+                                $pdf->setColor('fill', 248, 248, 248);
+                                $pdf->SetTextColor(0,0,0);
+                                $pdf->Cell($W, 8, $res->qty, 1, null, 'L', true);
+                                $pdf->SetTextColor(0,0,0);
+
+                                $X = $this->marge_gauche + $W;
+                                $pdf->setX($X);
+                                $pdf->setColor('fill', 248, 248, 248);
+                                $pdf->SetTextColor(0,0,0);
+                                $pdf->Cell($W * 9, 8, $description, 1, null, 'L', true);
+                                $pdf->SetTextColor(0,0,0);
+                                $M_N = false;
+
+                                $X = $this->marge_gauche + $W * 8;
+                            
+                                $pdf->setX($X);
+                                $pdf->setColor('fill', 248, 248, 248);
+                                $pdf->SetTextColor(0,0,0);
+                                $pdf->MultiCell(0, 8, "", 1, null, 'L', true);
+                                $pdf->SetTextColor(0,0,0);
+                            }
+
+               }
+               $pdf->SetAutoPageBreak(1, $this->margin_bottom);
                 $X = $this->marge_gauche;
                 $pdf->SetX($X);
 
@@ -526,9 +585,9 @@
                     // Footer
                     $pdf->SetXY(95, 289);
                     $pdf->SetTextColor(200, 200, 200);
-                    $pdf->MultiCell(100, 3, 'Contrat location sans service V3 du 01/05/2018', 0, 'R', 0);
+                    $pdf->MultiCell(100, 3, 'Conditions Générales de Location FINAPRO V3 du 10/10/2018', 0, 'R', 0);
                     $pdf->SetXY(15, 289);
-                    $pdf->MultiCell(100, 3, 'Mandat SEPA FINAPRO V3 du 01/05/2018', 0, 'L', 0);
+                    $pdf->MultiCell(100, 3, 'Contrat location sans service V3 du 01/05/2018', 0, 'L', 0);
                 $pdf->SetAutoPageBreak(1, 55);
 
 //                $this->_pagefoot($pdf,Pour le loueur $outputlangs);
@@ -601,7 +660,7 @@
 
                  //adresse du locataire
                 $pdf->setFont('', '', 9);
-                $y+=28;
+                $y+=24;
                 $pdf->SetXY($x, $y);
                 $w = ($this->page_largeur - $this->marge_gauche - $this->marge_droite) / 2;
                 $pdf->MultiCell($w, 6, "ADRESSE DU LOCATAIRE:" . "\n" . $contrat->societe->nom . "\n" . $contrat->societe->address . "\n" . $contrat->societe->zip . " " . $contrat->societe->town . "\n", 0, 'L', FALSE, 0);

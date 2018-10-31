@@ -328,13 +328,6 @@ lists:
             callback: isDeletable
         modal_view: default
         page_btn: 1
-        joins: 
-            - table: element_contact
-              on: ec.element_id = a.rowid
-              alias: ec
-            - table: c_type_contact
-              on: ec.fk_c_type_contact = tc.rowid
-              alias: tc
         cols: 
             ref: 
             libelle: 

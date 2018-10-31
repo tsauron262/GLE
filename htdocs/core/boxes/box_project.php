@@ -97,7 +97,7 @@ class box_project extends ModeleBoxes
 			if ($user->socid) $sql.= " AND s.rowid = ".$user->socid;
             $sql.= " AND p.fk_statut = 1"; // Seulement les projets ouverts
             if ($socid) $sql.= " AND (p.fk_soc IS NULL OR p.fk_soc = 0 OR p.fk_soc = ".$socid.")";
-            if (! $user->rights->societe->client->voir && ! $socid) $sql.= " AND ((s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id.") OR (s.rowid IS NULL))";
+//            if (! $user->rights->societe->client->voir && ! $socid) $sql.= " AND ((s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id.") OR (s.rowid IS NULL))";
 
             $sql.= " ORDER BY p.datec DESC";
 			//$sql.= $db->plimit($max, 0);

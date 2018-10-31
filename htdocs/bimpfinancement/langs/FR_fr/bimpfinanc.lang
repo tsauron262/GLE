@@ -1,0 +1,16 @@
+# File : /bimpfinancement/langs/FR_fr/bimpfianc.lang
+# Create date : 31/10/2018
+
+# Les success
+successContratCreate= Le contrat à été créer avec success
+successContratUpdate= Le contrat à été mis à jour avec success
+
+# Les erreurs
+erreurDemandeId= La demande de financement n'à pas d'id
+erreurBanqueValid= La banque doit avoir validé définitivement
+erreurLivraisonDate= Une date de livraison est obligatoire
+erreurLoyerDate = Une date de mise en loyer est obligatoire
+erreurMontant= Au moin un montant (Logiciels, Services ou Matériels) est obligatoire
+erreurIdClient= La demande de financement n'à pas de client
+erreurIdCommercial= La demande de financement n'à pas de commercial
+erreurIdRefinanceur= La demande de financement n'à pas de refinanceur

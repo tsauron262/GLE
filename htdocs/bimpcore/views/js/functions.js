@@ -237,7 +237,20 @@ function setCommonEvents($container) {
             $(this).data('event_init', 1);
         }
     });
+    
+    $container.find('.classfortooltip').each(function() {
+        $(this).removeClass('classfortooltip');
+        $(this).popover({
+            container: 'body',
+            placement: 'bottom',
+            html: true,
+            trigger: 'hover',
+            content: $(this).data('title')
+        });
+    });
     checkMultipleValues();
+    
+    
 }
 
 function setDisplayPopupButtonEvents($button) {

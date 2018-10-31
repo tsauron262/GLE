@@ -855,6 +855,9 @@ class BimpTools
                 return is_int($value);
 
             case 'float':
+            case 'money':
+            case 'percent': 
+            case 'qty':
                 if (is_string($value)) {
                     if ($value === '') {
                         $value = 0;

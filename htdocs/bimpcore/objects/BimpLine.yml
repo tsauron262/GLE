@@ -128,8 +128,11 @@ fields:
             help: Entrez le nom ou la référence d'un fournisseur
         create_form: default
         display_if: 
-            field_name: type
-            show_values: 2
+            fields_names: type,id_fourn_price
+            type: 
+                hide_values: 3
+            id_fourn_price: 
+                show_values: 0
         default_value: 0
         
     pa_ht: 
@@ -172,14 +175,18 @@ fields:
     remisable: 
         label: Remisable
         type: bool
-        default_value: 1
-        
+        default_value: 1            
+                
 lists_cols: 
-    desc:
-        label: Description
+    label:
+        label: Désignation
         value: 
             callback: displayDescription
         max_width: 460px
+    desc: 
+        field: description
+    type: 
+        field: type
     pu_ht: 
         label: PU HT
         field: pu_ht
@@ -191,7 +198,8 @@ lists_cols:
         field: pa_ht
     qty: 
         label: Qté
-        field: qty        
+        field: qty
+        edit: 1
     fourn_price: 
         label: PA fournisseur
         field: id_fourn_price
@@ -199,6 +207,9 @@ lists_cols:
     fourn: 
         label: Fournisseur
         field: id_fournisseur
+        display: nom_url
+    equipments: 
+        field: equipments
         display: nom_url
     total_ht: 
         label: Total HT
@@ -227,24 +238,21 @@ lists:
         n: 0
         single_cell:
             filters:
-                type: 2
-            col: desc
+                type: 3
+            col: label
         add_btn: 
             callback: isParentEditable
         add_form_name: default
         add_btn_label: Ajouter une ligne
-        edit_btn: 
-            callback: isEditable
-        update_btn: 
-            callback: isEditable
-        delete_btn: 
-            callback: isDeletable
+        edit_btn: 1
+        update_btn: 1
+        delete_btn: 1
         item_checkbox: 
             callback: isDeletable
         extra_btn: 
             callback: getListExtraBtn
         cols:
-            desc:
+            label:
             pu_ht: 
             tva:
             pa_ht: 

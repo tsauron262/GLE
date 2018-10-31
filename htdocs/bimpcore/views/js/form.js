@@ -980,6 +980,7 @@ function checkMultipleValues() {
                 var $input = $inputContainer.find('[name="' + input_name + '"]');
                 if ($input.length) {
                     if ($input.tagName() === 'select') {
+                        $inputContainer.find('.addValueInputContainer').find('button.addValueBtn').show();
                         $input.find('option').show();
                         $container.find('.itemRow').each(function () {
                             $input.find('option[value="' + $(this).find('.item_value').val() + '"]').hide();
@@ -1007,6 +1008,8 @@ function checkMultipleValues() {
                         }
                         $inputContainer.find('.select2-selection__rendered').html('');
                     }
+                } else {
+                    $inputContainer.find('.addValueInputContainer').find('button.addValueBtn').hide();
                 }
             }
         }

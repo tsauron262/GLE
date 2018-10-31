@@ -343,11 +343,6 @@ class BC_Input extends BimpComponent
 
     public function renderHtml()
     {
-//        if ($this->input_name === 'equipments') {
-//            echo $this->data_type . '<pre>';
-//            print_r($this->params);
-//            exit;
-//        }
         $options = $this->getOptions();
         $option = '';
 
@@ -431,7 +426,28 @@ class BC_Input extends BimpComponent
             $sortable = (isset($this->params['sortable']) ? (int) $this->params['sortable'] : 0);
             $autosave = false;
 
-            $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $this->value, $label_input_suffixe, $autosave, $required, $sortable);
+            $values = array();
+            
+            if (is_string($this->value)) {
+                $this->value = explode(',', $this->value);
+            }
+            
+            foreach ($this->value as $value) {
+                if (isset($this->field_params['values'][$value])) {
+                    if (is_array($this->field_params['values'][$value])) {
+                        if (isset($this->field_params['values'][$value]['label'])) {
+                            $values[$value] = $this->field_params['values'][$value]['label'];
+                        } 
+                    } else {
+                        $values[$value] = $this->field_params['values'][$value];
+                    }
+                }
+                if (!isset($values[$value])) {
+                    $values[$value] = $value;
+                }
+            }
+            
+            $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable);
         }
 
         $html .= BimpInput::renderInputContainer($this->input_name, htmlentities($this->value), $content, $this->name_prefix, $required, (int) $this->params['multiple'], implode(' ', $this->extraClasses), array_merge(array('data_type' => $this->data_type), $this->extraData));

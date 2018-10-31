@@ -28,7 +28,8 @@ class BC_Field extends BimpComponent
         ),
         'items_list' => array(
             'items_data_type' => array('default' => 'string'),
-            'items_sortable'  => array('data_type' => 'bool', 'default' => 0)
+            'items_sortable'  => array('data_type' => 'bool', 'default' => 0),
+            'items_delimiter' => array('default' => ',')
         ),
         'number'     => array(
             'min'      => array('data_type' => 'float'),
@@ -84,7 +85,7 @@ class BC_Field extends BimpComponent
         $this->params['viewable'] = 1;
 
         if ($this->isObjectValid()) {
-            $this->params['editable'] = (int) $this->object->canEditField($name);
+            $this->params['editable'] = (int) ($this->object->canEditField($name) && $this->object->isFieldEditable($name));
             $this->params['viewable'] = (int) $this->object->canViewField($name);
         }
 
@@ -174,7 +175,7 @@ class BC_Field extends BimpComponent
         if (!$this->params['searchable']) {
             return '';
         }
-        
+
         $input_id = $this->object->object_name . '_search_' . $this->name;
         $input_name = 'search_' . $this->name;
 
@@ -271,7 +272,11 @@ class BC_Field extends BimpComponent
         }
 
         if ($this->display_input_value) {
-            $html .= '<input type="hidden" name="' . $this->name_prefix . $this->name . '" value="' . htmlentities($this->value) . '">';
+            $value = $this->value;
+            if ($this->params['type'] === 'items_list' && is_array($this->value)) {
+                $value = implode($this->params['items_delimiter'], $this->value);
+            } 
+            $html .= '<input type="hidden" name="' . $this->name_prefix . $this->name . '" value="' . htmlentities($value) . '">';
         }
 
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $this->params, $this->value);

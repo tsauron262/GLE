@@ -43,12 +43,22 @@ class BimpLine extends BimpObject
 
     public function getTotalHT()
     {
-        return 0;
+        if ((int) $this->getData('type') === self::BL_TEXT) {
+            return 0;
+        }
+
+        return (float) $this->getData('pu_ht') * (float) $this->getData('qty');
     }
 
     public function getTotalTTC()
     {
-        return 0;
+        if ((int) $this->getData('type') === self::BL_TEXT) {
+            return 0;
+        }
+
+        $pu_ttc = (float) BimpTools::calculatePriceTaxIn((float) $this->getData('pu_ht'), (float) $this->getData('tva_tx'));
+
+        return $pu_ttc * (float) $this->getData('qty');
     }
 
     public function getListExtraBtn()
@@ -71,11 +81,6 @@ class BimpLine extends BimpObject
 
     public function getEquipmentsArray()
     {
-        return array(
-            1 => '1',
-            2 => '2',
-            3 => '3'
-        );
         $product = $this->getProduct();
 
         if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
@@ -136,30 +141,57 @@ class BimpLine extends BimpObject
             }
             return (int) $this->getData('id_product');
         }
-        if (in_array($field_name, array('pu_ht', 'tva_tx', 'id_fourn_price'))) {
+        if (in_array($field_name, array('pu_ht', 'tva_tx', 'id_fourn_price', 'equipments'))) {
+            $product = $this->getProduct();
             if ($this->isLoaded()) {
-                return $this->getData($field_name);
-            } else {
-                $product = $this->getProduct();
-
-                if (BimpObject::objectLoaded($product)) {
-                    switch ($field_name) {
-                        case 'pu_ht':
-                            return (float) $product->getData('price');
-
-                        case 'tva_tx':
-                            return (float) $product->getData('tva_tx');
-
-                        case 'id_fourn_price':
-                            $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . (int) $product->id;
-                            $result = $this->db->executeS($sql);
-                            if (isset($result[0]->id)) {
-                                return (int) $result[0]->id;
-                            }
-                            return 0;
-                    }
+                $current_id_product = (int) $this->getSavedData('id_product');
+                $id_product = (isset($product->id) ? (int) $product->id : 0);
+                if ($current_id_product === $id_product) {
+                    return $this->getData($field_name);
                 }
-                return 0;
+            }
+            switch ($field_name) {
+                case 'pu_ht':
+                    if (BimpObject::objectLoaded($product)) {
+                        return (float) $product->getData('price');
+                    }
+                    return 0;
+
+
+                case 'tva_tx':
+                    if (BimpObject::objectLoaded($product)) {
+                        return (float) $product->getData('tva_tx');
+                    }
+                    return 0;
+
+                case 'id_fourn_price':
+                    if (BimpObject::objectLoaded($product)) {
+                        $sql = 'SELECT MAX(fp.rowid) as id FROM ' . MAIN_DB_PREFIX . 'product_fournisseur_price fp WHERE fp.fk_product = ' . (int) $product->id;
+                        $result = $this->db->executeS($sql);
+                        if (isset($result[0]->id)) {
+                            return (int) $result[0]->id;
+                        }
+                    }
+                    return 0;
+
+                case 'equipments':
+                    $equipments = array();
+                    if (BimpObject::objectLoaded($product)) {
+                        $equipments = $this->getData('equipments');
+                        if (!is_array($equipments)) {
+                            $equipments = array();
+                        }
+                        if (count($equipments)) {
+                            $product_equipments = $this->getEquipmentsArray();
+                            foreach ($equipments as $key => $id_equipment) {
+                                $id_equipment = (int) $id_equipment;
+                                if (!$id_equipment || !array_key_exists($id_equipment, $product_equipments)) {
+                                    unset($equipments[$key]);
+                                }
+                            }
+                        }
+                    }
+                    return $equipments;
             }
         }
 
@@ -174,6 +206,7 @@ class BimpLine extends BimpObject
             case self::BL_PRODUCT:
                 return $this->displayData('id_product', 'nom_url', $display_input_value, $no_html);
             case self::BL_FREE:
+                return $this->displayData('label', 'default', $display_input_value, $no_html);
             case self::BL_TEXT:
                 return $this->displayData('description', 'default', $display_input_value, $no_html);
         }
@@ -189,5 +222,79 @@ class BimpLine extends BimpObject
     public function displayTotalTTC()
     {
         return BimpTools::displayMoneyValue($this->getTotalTTC(), 'EUR');
+    }
+
+    // Overrides: 
+
+    public function validate()
+    {
+        $errors = parent::validate();
+
+        if (!count($errors)) {
+            switch ((int) $this->getData('type')) {
+
+                case self::BL_PRODUCT:
+                    $product = $this->getProduct();
+                    if (!BimpObject::objectLoaded($product)) {
+                        $errors[] = 'Produit absent ou invalide';
+                    } else {
+                        $this->set('label', '');
+                        if (!$product->isSerialisable()) {
+                            $this->set('equipments', array());
+                        } else {
+                            $equipments = $this->getData('equipments');
+                            if (!is_array($equipments)) {
+                                $equipments = array($equipments);
+                            }
+                            $product_equipments = $this->getEquipmentsArray();
+                            foreach ($equipments as $key => $id_equipment) {
+                                $id_equipment = (int) $id_equipment;
+                                if (!$id_equipment || !array_key_exists($id_equipment, $product_equipments)) {
+                                    unset($equipments[$key]);
+                                }
+                            }
+                            $this->set('equipments', $equipments);
+                        }
+                        $id_fourn_price = (int) $this->getData('id_fourn_price');
+                        if ($id_fourn_price) {
+                            $pfp = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_fourn_price);
+                            if (!$pfp->isLoaded()) {
+                                $this->set('id_fourn_price', 0);
+                            } elseif ((int) $pfp->getData('fk_product') !== (int) $product->id) {
+                                $errors[] = 'Le prix d\'achat fournisseur sélectionné ne correspond pas au produit sélectionné';
+                            } else {
+                                $this->set('pa_ht', (float) $pfp->getData('price'));
+                                $this->set('id_fournisseur', (int) $pfp->getData('fk_soc'));
+                            }
+                        }
+                    }
+                    break;
+
+                case self::BL_FREE:
+                    if (!(string) $this->getData('label')) {
+                        $errors[] = 'Libellé absent';
+                    } else {
+                        $this->set('id_product', 0);
+                        $this->set('equipments', array());
+                        $this->set('id_fourn_price', 0);
+                    }
+                    break;
+
+                case self::BL_TEXT:
+                    $this->set('id_product', 0);
+                    $this->set('label', '');
+                    $this->set('equipments', array());
+                    $this->set('qty', 0);
+                    $this->set('pu_ht', 0);
+                    $this->set('tva_tx', 0);
+                    $this->set('id_fourn_price', 0);
+                    $this->set('id_fournisseur', 0);
+                    $this->set('pa_ht', 0);
+//                    $this->set('remisable', 0);
+                    break;
+            }
+        }
+
+        return $errors;
     }
 }

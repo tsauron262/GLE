@@ -248,14 +248,14 @@ fields:
     id_facture_client:
         label: Facture client
         type: id_object
-        object: facture
+        object: facture_client
         input:
             type: hidden
 
     id_facture_fournisseur:
         label: Facture fournisseur
         type: id_object
-        object: facture
+        object: facture_fournisseur
         input:
             type: hidden
 

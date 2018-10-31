@@ -2043,7 +2043,8 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
 
                         $sql = $db->query($req);
                         while ($ln = $db->fetch_object($sql))
-                            $tabExclude[] = $ln->idUser;
+                            if($ln->idUser > 0)
+                                $tabExclude[] = $ln->idUser;
 
 
                         print $form->select_dolusers((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id', 1, $tabExclude, null, null, null, null, null, null, null, null, null, null, 1);

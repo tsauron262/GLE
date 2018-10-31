@@ -2698,7 +2698,8 @@ abstract class CommonObject
 			while ($i < $num)
 			{
 				$obj = $this->db->fetch_object($resql);
-
+if($obj->up == null)
+    $obj->up = 0;
 				// Note: There is no check on detail line and no check on total, if $forcedroundingmode = 'none'
 				if ($forcedroundingmode == '0')	// Check if data on line are consistent. This may solve lines that were not consistent because set with $forcedroundingmode='auto'
 				{
@@ -4703,7 +4704,7 @@ abstract class CommonObject
 		else
 		{
 			global $extrafields;
-			dol_syslog("Warning: fetch_optionals was called with param optionsArray defined when you should pass null now", LOG_WARNING);
+			dol_syslog("Warning: fetch_optionals was called with param optionsArray defined when you should pass null now : ".print_r(debug_backtrace(),1), LOG_WARNING);
 		}
 
 		$table_element = $this->table_element;

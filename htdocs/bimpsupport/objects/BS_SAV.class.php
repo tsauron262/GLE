@@ -1778,11 +1778,15 @@ class BS_SAV extends BimpObject
 
             $mail_msg .= "\n" . $textSuivie . "\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
 
-            if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
-                $errors[] = 'Echec envoi du mail';
+            if($this->testMail($toMail)){
+                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) 
+                    $errors[] = 'Echec envoi du mail';
+            }
+            else{
+                $errors[] = "Pas d'email correct ".$toMail;
             }
         } else {
-            $errors[] = 'pas de mail';
+            $errors[] = 'pas de message';
         }
 
         if ($contact_pref === 3 && $sms) {

@@ -291,6 +291,29 @@ class ActionComm extends CommonObject
         }
 
         $this->db->begin();
+        
+        
+        /*Moddrsi*/
+        define('USER_EXTERNE_ID',  215);
+        if(count($this->userassigned)>1 && $this->userownerid != $user->id){//PLusieurs user et ce n'est pas l'orga qu'il la fait
+            $ok = false;
+            
+            foreach($this->userassigned as $tab){
+                if((isset($tab['id']) && $tab['id'] == $user->id)){
+                    $userownerid = $tab['id'];
+                    $ok = true;
+                }
+            }
+            
+            if(!$ok){
+                $this->userassigned[USER_EXTERNE_ID] = array("id"=>USER_EXTERNE_ID);
+                $userownerid = USER_EXTERNE_ID;
+            }
+        }
+        /*fmdodrsi*/
+        
+        
+        
 
         $sql = "INSERT INTO ".MAIN_DB_PREFIX."actioncomm";
         $sql.= "(datec,";

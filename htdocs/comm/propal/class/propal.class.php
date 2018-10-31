@@ -2759,7 +2759,7 @@ class Propal extends CommonObject
 	 */
 	function delete($user, $notrigger=0)
 	{
-		global $conf;
+		global $conf, $user;
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 		$error=0;

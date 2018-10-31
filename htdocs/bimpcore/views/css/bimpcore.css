@@ -7507,42 +7507,56 @@ input[type=text].large_input:focus {
 .freeForm .freeFormInput {
   margin-left: 30px;
 }
-/* line 642, ../scss/bimpcore/_form.scss */
+/* line 641, ../scss/bimpcore/_form.scss */
+.freeForm .freeFormInput .select2-container {
+  width: 100% !important;
+}
+/* line 646, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormAjaxResult {
   margin: 15px 0;
   display: none;
 }
-/* line 647, ../scss/bimpcore/_form.scss */
+/* line 651, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit {
   margin-top: 20px;
 }
-/* line 650, ../scss/bimpcore/_form.scss */
+/* line 654, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.rightAlign {
   text-align: right;
 }
-/* line 653, ../scss/bimpcore/_form.scss */
+/* line 657, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.rightAlign .btn {
   margin-left: 15px;
 }
-/* line 657, ../scss/bimpcore/_form.scss */
+/* line 661, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.rightAlign .buttonLeft {
   float: left;
   margin-left: 0;
   margin-right: 15px;
 }
-/* line 664, ../scss/bimpcore/_form.scss */
+/* line 668, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.leftAlign {
   text-align: left;
 }
-/* line 667, ../scss/bimpcore/_form.scss */
+/* line 671, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.leftAlign .btn {
   margin-right: 15px;
 }
-/* line 671, ../scss/bimpcore/_form.scss */
+/* line 675, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.leftAlign .buttonRight {
   float: right;
   margin-right: 0;
   margin-left: 15px;
+}
+
+/* line 686, ../scss/bimpcore/_form.scss */
+.ui-menu .ui-menu-item a {
+  padding: 0.12em 0.4em !important;
+}
+
+/* line 690, ../scss/bimpcore/_form.scss */
+.ui-menu .ui-menu-item:last-child a {
+  padding-bottom: 1em !important;
 }
 
 /* line 1, ../scss/bimpcore/_list.scss */

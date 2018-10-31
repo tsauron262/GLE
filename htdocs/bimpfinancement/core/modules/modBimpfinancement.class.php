@@ -99,7 +99,7 @@ class modBimpfinancement extends DolibarrModules
 		$this->conflictwith = array();	// List of module class names as string this module is in conflict with
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(4,0);	// Minimum version of Dolibarr required by module
-		//$this->langfiles = array("bimpcommercial@bimpcommercial");
+		$this->langfiles = array("bimpfinancement@bimpfinancement");
 		$this->warnings_activation = array();                     // Warning to show when we activate module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 		$this->warnings_activation_ext = array();                 // Warning to show when we activate an external module. array('always'='text') or array('FR'='textfr','ES'='textes'...)
 
@@ -211,7 +211,7 @@ class modBimpfinancement extends DolibarrModules
 								'mainmenu'=>'',
 								'leftmenu'=>'',
 								'url'=>'/bimpfinancement',
-								'langs'=>'bimpcomm@bimpcommercial',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
+								'langs'=>'bimpfinanc@bimpfinancement',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 								'position'=>1000+$r,
 								'enabled'=>'1',	// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
 								'perms'=>'1',			                // Use 'perms'=>'$user->rights->mymodule->level1->level2' if you want your menu with a permission rules

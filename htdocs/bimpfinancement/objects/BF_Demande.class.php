@@ -117,11 +117,10 @@ class BF_Demande extends BimpObject
         }
     }
 
-
     public function actionGenerateContrat($success){
-
+        global $langs, $user;
         if (!$this->isLoaded()) { 
-            return array("La demande de financement n'à pas d'ID");
+            return array($langs->trans('erreurDemandeId'));
         } else { 
             (int) $id = $this->getData('id'); 
             $errors = array();
@@ -147,12 +146,12 @@ class BF_Demande extends BimpObject
         $date_livraison = $this->getdata('date_livraison');
         $date_creation = $this->getData('date_create');
 
-        if(!$accepted) { $errors[] = "La banque doit avoir valider"; }
-        if(!$date_livraison) { $errors[] = "Date de livraison manquante"; }
-        if(!$date_loyer){ $errors[] = "Date de mise en loyer manquante"; } 
-        if(!$montant_materiels && !$montant_logiciels && !$montant_services) { $errors[] = 'Logiciels, Services ou Matériels non rensseignés'; }
-        if(!$id_client) { $errors[] = "Pas de client";}
-        if(!$id_commercial) { $errors[] = "Commercial obligatoire"; }
+        if(!$accepted) { $errors[] = $langs->trans('erreurBanqueValid'); }
+        if(!$date_livraison) { $errors[] = $langs->trans('erreurLivraisonDate'); }
+        if(!$date_loyer){ $errors[] = $langs->trans('erreurLoyerDate'); } 
+        if(!$montant_materiels && !$montant_logiciels && !$montant_services) { $errors[] = $langs->trans('erreurMontant'); }
+        if(!$id_client) { $errors[] = $langs->trans('erreurIdClient');}
+        if(!$id_commercial) { $errors[] = $langs->trans('erreurIdCommercial'); }
 
 
         $loyers = $this->db->getRows('bf_rent', $where." ORDER BY position", null, 'array', array('id', 'quantity', 'amount_ht', 'payment', 'periodicity', 'position'));
@@ -160,11 +159,10 @@ class BF_Demande extends BimpObject
         $intercalaire = $this->db->getRows('bf_rent_except', $where, null, 'array', array('id', 'date', 'amount', 'payement'));
         $frais_divers = $this->db->getRows('bf_frais_divers', $where, null, 'array', array('id', 'date', 'amount'));
         if(is_null($refinanceur)) { 
-            $errors[] = "Refinanceur manquant"; 
+            $errors[] = $langs->trans('erreurIdRefinanceur'); 
         }
         
         if(!count($errors)) {
-            global $langs, $user;
             if(!is_null($loyers)) {
                 $date_de_fin = new DateTime($this->getData('date_loyer'));
                 foreach ($loyers as $ligne) {
@@ -208,7 +206,7 @@ class BF_Demande extends BimpObject
                         $start_date_dynamic = $end_date;
                     }
                     // Création du contrat OK
-                    $success = "Contrat créer avec success";
+                    $success = $langs->trans('successContratCreate');
                 } else {
                     $errors[] = $contrat->error;
                 }
@@ -236,7 +234,7 @@ class BF_Demande extends BimpObject
                         $contrat->activateAll($user, $start_date);
                         $start_date_dynamic = $end_date;
                     }
-                $success = "Contrat mis à jours avec succes";
+                $success = $langs->trans('successContratUpdate');
             }
         }
         return array(
@@ -250,7 +248,7 @@ class BF_Demande extends BimpObject
     public function actionGenerateFacture($success) {
 
          if (!$this->isLoaded()) { 
-            return array("La demande de financement n'à pas d'ID");
+            return array($langs->trans('erreurDemandeId'));
         } else { 
             (int) $id = $this->getData('id'); 
             $errors = array();
@@ -279,7 +277,7 @@ class BF_Demande extends BimpObject
         $commission_commerciale = $this->getData('commission_commerciale');
         $commission_financiere = $this->getData('commission_financiere');
 
-        if(!$accepted) { $errors[] = "La banque doit avoir valider"; }
+        if(!$accepted) { $errors[] = $langs->trans('erreurBanqueValid'); }
         if(!$date_livraison) { $errors[] = "Date de livraison manquante"; }
         if(!$date_loyer){ $errors[] = "Date de mise en loyer manquante"; } 
         if(!$montant_materiels && !$montant_logiciels && !$montant_services) { $errors[] = 'Logiciels, Services ou Matériels non rensseignés'; }

@@ -2,15 +2,36 @@
 # Create date : 31/10/2018
 
 # Les success
-successContratCreate= Le contrat à été créer avec success
-successContratUpdate= Le contrat à été mis à jour avec success
+successContratCreate= Le contrat à été créer avec succes
+successContratUpdate= Le contrat à été mis à jour avec succes
+successInvoiceCreate= La facture à été créer avec succes
+successInvoiceUpdate= La facture à été mis à jour avec succes
 
 # Les erreurs
 erreurDemandeId= La demande de financement n'à pas d'id
-erreurBanqueValid= La banque doit avoir validé définitivement
+erreurBanqueValid= Génération impossible car la banque doit avoir validé définitivement
 erreurLivraisonDate= Une date de livraison est obligatoire
 erreurLoyerDate = Une date de mise en loyer est obligatoire
 erreurMontant= Au moin un montant (Logiciels, Services ou Matériels) est obligatoire
 erreurIdClient= La demande de financement n'à pas de client
 erreurIdCommercial= La demande de financement n'à pas de commercial
 erreurIdRefinanceur= La demande de financement n'à pas de refinanceur
+
+# Les bouttons
+buttonGenContrat= Générer le contrat
+buttonGenCustomerInvoice= Générer la facture client
+buttonGenSupplierInvoice= Générer la facture fournisseur
+buttonGenBankInvoice= Générer la facture pour la banque
+manageRelatedOrders= Gérer les commandes associées
+
+# Les titres des tableaux
+tabOrderRef= Reférence
+tabOrderStatus= Statut
+tabOrderAmount= Montant TTC
+tabOrderFile= Fichier
+
+# Les mois
+wordMonth= Mois
+word3Month= Trimestres
+word6Month= Semestres
+word12Month= Ans

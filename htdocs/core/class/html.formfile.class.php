@@ -620,7 +620,7 @@ class FormFile
 				}
 				else
 				{
-					dol_print_error($this->db,'Bad value for modulepart in showdocuments');
+					dol_print_error($this->db,'Bad value for modulepart in showdocuments file : '.$file." class :".$class);
 					return -1;
 				}
 			}

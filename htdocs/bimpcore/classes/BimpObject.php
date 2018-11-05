@@ -1058,7 +1058,7 @@ class BimpObject extends BimpCache
                             $joins[] = array(
                                 'table' => $instance->getTable(),
                                 'alias' => $child_name,
-                                'on'    => $alias . '.' . $on_field . ' = ' . $child_name . '.' . $instance->getPrimary()
+                                'on'    => ($alias ? $alias : 'a') . '.' . $on_field . ' = ' . $child_name . '.' . $instance->getPrimary()
                             );
                             $filters = array_merge($filters, $instance->getSearchFilters($joins, $child_fields, $child_name));
                         }
@@ -4425,11 +4425,11 @@ class BimpObject extends BimpCache
             'success_callback' => 'window.location.reload();'
         );
     }
-    
-    
-    public static function testMail($mail){
-        if(filter_var($mail, FILTER_VALIDATE_EMAIL))
-                return true;
+
+    public static function testMail($mail)
+    {
+        if (filter_var($mail, FILTER_VALIDATE_EMAIL))
+            return true;
         return false;
     }
 }

@@ -428,8 +428,16 @@ class BC_Input extends BimpComponent
 
             $values = array();
             
+            if (is_null($this->value)) {
+                $this->value = array();
+            }
+            
             if (is_string($this->value)) {
+                if ($this->value) {
                 $this->value = explode(',', $this->value);
+                } else {
+                    $this->value = array();
+                }
             }
             
             foreach ($this->value as $value) {

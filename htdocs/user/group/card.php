@@ -110,7 +110,7 @@ if (empty($reshook)) {
 		{
 			$object->fetch($id);
 			$object->delete();
-			header("Location: index.php?restore_lastsearch_values=1");
+			header("Location: list.php?restore_lastsearch_values=1");
 			exit;
 		}
 		else

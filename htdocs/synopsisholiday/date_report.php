@@ -145,8 +145,15 @@ if($num == '0') {
 
 	while ($holiday = $db->fetch_array($result))
 	{
-		$user = new User($db);
-		$user->fetch($holiday['fk_user']);
+                if($holiday['fk_user'] > 0){
+                    $user = new User($db);
+                    $user->fetch($holiday['fk_user']);
+                }
+                elseif($holiday['fk_group'] > 0){
+                    include_once(DOL_DOCUMENT_ROOT."/user/group/class/usergroup.class.php");
+                    $user = new UserGroup($db);
+                    $user->fetch($holiday['fk_group']);
+                }
 		$var=!$var;
 
                 if ($mode != 2){

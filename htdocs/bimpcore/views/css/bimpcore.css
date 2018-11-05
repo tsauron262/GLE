@@ -7511,6 +7511,10 @@ input[type=text].large_input:focus {
 .freeForm .freeFormInput {
   margin-left: 30px;
 }
+/* line 641, ../scss/bimpcore/_form.scss */
+.freeForm .freeFormInput .select2-container {
+  width: 100% !important;
+}
 /* line 646, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormAjaxResult {
   margin: 15px 0;
@@ -7547,6 +7551,16 @@ input[type=text].large_input:focus {
   float: right;
   margin-right: 0;
   margin-left: 15px;
+}
+
+/* line 686, ../scss/bimpcore/_form.scss */
+.ui-menu .ui-menu-item a {
+  padding: 0.12em 0.4em !important;
+}
+
+/* line 690, ../scss/bimpcore/_form.scss */
+.ui-menu .ui-menu-item:last-child a {
+  padding-bottom: 1em !important;
 }
 
 /* line 1, ../scss/bimpcore/_list.scss */

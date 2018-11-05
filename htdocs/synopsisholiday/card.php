@@ -2039,7 +2039,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                                 . "(h2.`date_debut` >= h1.`date_debut` AND h2.`date_debut` <= h1.`date_fin`) || "//date deb dans la periode
                                 . "(h2.`date_fin` <= h1.`date_fin` AND h2.`date_fin` >= h1.`date_debut`) || "//date fin dans la periode
                                 . "(h2.`date_debut` <= h1.`date_debut` AND h2.`date_fin` >= h1.`date_fin`)"//date a cheval
-                                . ") AND h2.`statut` = 6";
+                                . ") AND h2.`statut` = 6 AND h2.fk_user > 0";
 
                         $sql = $db->query($req);
                         while ($ln = $db->fetch_object($sql))

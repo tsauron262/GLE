@@ -1,4 +1,5 @@
 <?php
+
 class BF_Demande extends BimpObject
 {
 
@@ -49,6 +50,27 @@ class BF_Demande extends BimpObject
 
     // Getters: 
 
+    public function renderHeaderExtraLeft()
+    {
+        // VOIR OU LE PLACER
+
+
+
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $html .= '<div style="margin-top: 10px">';
+                $html .= '<strong>Notre crédit safe du client: </strong>';
+                $html .= BimpObject::getInstanceNomUrlWithIcons($client);
+                $html .= '</div>';
+            }
+        }
+
+        return $html;
+    }
+
     public function getClient_contactsArray()
     {
         $contacts = array();
@@ -85,29 +107,111 @@ class BF_Demande extends BimpObject
         return $contacts;
     }
 
-    public function getDemandeData() {
-        return (object) $data = array(
-            'id_demande' => $this->getData('id'),
-            'id_client' => $this->getData('id_client'),
-            'id_contact_client' => $this->getData('id_client_contact'),
-            'id_fournisseur' => $this->getData('id_supplier_contact')
-        );
-    }
-    
-    public function actiongenfactFourn($success) {
-        if(!$this->isLoaded()) {
-            return array('La demande financement n\'à pas d\'id');
-        } else {
-            // Récupération de l'id de la commande
-            $data = $this->getDemandeData();
-            return array($data->client);
-            (int) $id = $this->getData('id');
-            // Récupération des infos nécéssaire
-            (int) $id_client = $this->getData('id_client');
-            (double) $montant_materiel = $this->getData('montant_materiel');
-            (double) $montant_logiciels = $this->getData('montant_logiciels');
-            (double) $montant_services = $this->getData('montant_services');
+
+        public function getDemandeData($object = null) {
+            global $langs;
+
+            $id_demande = (int) $this->getData('id');
+            $id_client = (int) $this->getData('id_client');
+            $id_client_contact = $this->getData('id_client_contact');
+            $id_fournisseur = $this->getData('id_supplier');
+            $id_commercial = (int) $this->getData('id_commercial');
+            $montant_materiels = $this->getData('montant_materiels'); 
+            $montant_services = $this->getData('montant_services'); 
+            $montant_logiciels = $this->getData('montant_logiciels');
+            $id_status = $this->getData('status'); 
+            $accepted = $this->getData('accepted');
+            $duree_prevu = $this->getData('duration');
+            $periodicite_prevu = $this->getData('periodicity');
+            $assurance = $this->getData('insurance');
+            $id_supplier_contact = $this->getData('id_supplier_contact'); 
+            $date_loyer = $this->getData('date_loyer'); 
+            $date_livraison = $this->getdata('date_livraison');
+            $date_creation = $this->getData('date_create');
+            $id_contrat = $this->getData('id_contrat');
+            $id_facture_client = $this->getData('id_facture_client');
+            $id_facture_fournisseur = $this->getData('id_facture_fournisseur');
+            $commission_commerciale = $this->getData('commission_commerciale');
+            $commission_financiere = $this->getData('commission_financiere');
+
+            $leContrat = $this->db->getRows('contrat', 'rowid = ' . $id_contrat, null, 'array', array('rowid'));
+            if(!$leContrat){
+                $this->updateField('id_contrat', 0);
+                $id_contrat = 0;
+            }
+            
+                if(!$accepted) { $errors[] = $langs->trans('erreurBanqueValid'); }
+                if(!$date_livraison) { $errors[] = $langs->trans('erreurLivraisonDate'); }
+                if(!$date_loyer){ $errors[] = $langs->trans('erreurLoyerDate'); } 
+                if(!$montant_materiels && !$montant_logiciels && !$montant_services) { $errors[] = $langs->trans('erreurMontant'); }
+                if(!$id_client) { $errors[] = $langs->trans('erreurIdClient');}
+                if(!$id_commercial) { $errors[] = $langs->trans('erreurIdCommercial'); }
+                
+                if(!count($errors)) {
+                    $data = array(
+                        'id_demande' => $id_demande,
+                        'id_client' => $id_client,
+                        'id_contact_client' => $id_client_contact,
+                        'id_fournisseur' => $id_fournisseur,
+                        'id_contact_fournisseur' => $id_supplier_contact,
+                        'id_commercial' => $id_commercial,
+                        'id_contrat' => $id_contrat,
+                        'id_facture_client' => $id_facture_client,
+                        'id_facture_fournisseur' => $id_facture_fournisseur,
+                        'com_com' => $commission_commerciale,
+                        'com_fin' => $commission_financiere,
+                        'materiels' => $montant_materiels,
+                        'logiciels' => $montant_logiciels,
+                        'services' => $montant_services,
+                        'statut' => $id_status,
+                        'accepted' => $accepted,
+                        'duree_prevu' => $duree_prevu ,
+                        'periode_prevu' => $periodicite_prevu,
+                        'date_loyer' => $date_loyer,
+                        'date_livraison' => $date_livraison,
+                        'date_creation' => $date_creation,
+                        'assurance' => $assurance,
+                        'where' => '`id_demande` = ' . $id_demande,
+                    );
+
+
+                    if($id_contrat != 0 && $object == 'contrat')
+                        $data["modif_contrat"] = true;
+                    else
+                        $data["modif_contrat"] = false;
+                    if(!$id_facture_client && $object == 'factureC')
+                        $data["modif_factureC"] = true;
+                    else
+                        $data["modif_factureC"] = false;
+                    if(!$id_facture_fournisseur && $object == 'factureF')
+                        $data["modif_factureF"] = true;
+                    else
+                        $data["modif_factureF"] = false;
+                   
+                    return (object) $data; 
+                } else {
+                    return $errors;
+                }
+            
         }
+    
+    public function actiongenfactClient($success) {
+        global $langs;
+        if(!$this->isLoaded()) {
+            return array($langs->trans('erreurDemandeId'));
+        } else {
+            $data = $this->getDemandeData('factureC');
+            if(is_array($data)) {return $data; } 
+            else {
+                BimpTools::loadDolClass('compta/facture', 'facture');
+                $facture = new Facture($this->db->db);
+            }
+        }
+
+        return array(
+            'success' => $success,
+            'errors' => $errors
+        );
     }
 
     public function actionGenerateContrat($success){
@@ -115,66 +219,35 @@ class BF_Demande extends BimpObject
         if (!$this->isLoaded()) { 
             return array($langs->trans('erreurDemandeId'));
         } else { 
-            (int) $id = $this->getData('id'); 
-            $errors = array();
-            $where = '`id_demande` = ' . $id;
-            BimpTools::loadDolClass('contrat');
-            $contrat = new Contrat($this->db->db);
+            $data = $this->getDemandeData('contrat');
+            if(is_array($data))
+                return $data;
         }
 
-        $id_client = (int) $this->getData('id_client');
-        $id_commercial = (int) $this->getData('id_commercial');
-        $montant_materiels = $this->getData('montant_materiels');
-        $montant_services = $this->getData('montant_services');
-        $montant_logiciels = $this->getData('montant_logiciels');
-        $id_status = $this->getData('status');
-        $accepted = $this->getData('accepted');
-        $duree_prevu = $this->getData('duration');
-        $periodicite_prevu = $this->getData('periodicity');
-        $id_client_contact = $this->getData('id_client_contact');
-        $assurance = $this->getData('insurance');
-        $id_supplier = $this->getData('id_supplier');
-        $id_supplier_contact = $this->getData('id_supplier_contact');
-        $date_loyer = $this->getData('date_loyer');
-        $date_livraison = $this->getdata('date_livraison');
-        $date_creation = $this->getData('date_create');
-
-        if(!$accepted) { $errors[] = $langs->trans('erreurBanqueValid'); }
-        if(!$date_livraison) { $errors[] = $langs->trans('erreurLivraisonDate'); }
-        if(!$date_loyer){ $errors[] = $langs->trans('erreurLoyerDate'); } 
-        if(!$montant_materiels && !$montant_logiciels && !$montant_services) { $errors[] = $langs->trans('erreurMontant'); }
-        if(!$id_client) { $errors[] = $langs->trans('erreurIdClient');}
-        if(!$id_commercial) { $errors[] = $langs->trans('erreurIdCommercial'); }
-
-
-        $loyers = $this->db->getRows('bf_rent', $where." ORDER BY position", null, 'array', array('id', 'quantity', 'amount_ht', 'payment', 'periodicity', 'position'));
-        $refinanceur = $this->db->getRows('bf_refinanceur', $where, null, 'array', array('id', 'position', 'name', 'status', 'rate', 'coef', 'comment'));
-        $intercalaire = $this->db->getRows('bf_rent_except', $where, null, 'array', array('id', 'date', 'amount', 'payement'));
-        $frais_divers = $this->db->getRows('bf_frais_divers', $where, null, 'array', array('id', 'date', 'amount'));
+        $loyers = $this->db->getRows('bf_rent', $data->where." ORDER BY position", null, 'array', array('id', 'quantity', 'amount_ht', 'payment', 'periodicity', 'position'));
+        $refinanceur = $this->db->getRows('bf_refinanceur', $data->where, null, 'array', array('id', 'position', 'name', 'status', 'rate', 'coef', 'comment'));
+        $intercalaire = $this->db->getRows('bf_rent_except', $data->where, null, 'array', array('id', 'date', 'amount', 'payement'));
+        $frais_divers = $this->db->getRows('bf_frais_divers', $data->where, null, 'array', array('id', 'date', 'amount'));
         if(is_null($refinanceur)) { 
             $errors[] = $langs->trans('erreurIdRefinanceur'); 
         }
-        
         if(!count($errors)) {
             if(!is_null($loyers)) {
-                $date_de_fin = new DateTime($this->getData('date_loyer'));
+                $date_de_fin = new DateTime($data->date_loyer);
                 foreach ($loyers as $ligne) {
                     $date_de_fin->add(new DateInterval("P".$ligne['quantity']*$ligne['periodicity']."M"));
                 }
             }
             BimpTools::loadDolClass('contrat');
             $contrat = new Contrat($this->db->db);
-            $contrat->socid = $id_client;
-            $contrat->date_contrat = $date_creation;
-            $contrat->commercial_signature_id = $id_commercial;
-            $contrat->commercial_suivi_id = $id_commercial;
-            $contrat->mise_en_service = $date_livraison;
+            $contrat->socid = $data->id_client;
+            $contrat->date_contrat = $data->date_creation;
+            $contrat->commercial_signature_id = $data->id_commercial;
+            $contrat->commercial_suivi_id = $data->id_commercial;
+            $contrat->mise_en_service = $data->date_livraison;
             $contrat->fin_validite = $date_de_fin;
-
-            
-            $where_element_element = "`fk_source` = " . $id . " AND `sourcetype` = 'demande' AND `targettype` = 'contrat'";
-            $ElementElement = $this->db->getRows('element_element', $where_element_element, null, 'array', array('fk_source', 'sourcetype', 'targettype'));
-            if(!$ElementElement) {
+            //return array($data->modif_contrat);
+            if(!$data->modif_contrat) {
                 if($contrat->create($user) > 0) { // Si le contrat est créer correstement
                     addElementElement('demande', 'contrat', $id, $contrat->id); // On ajoute une ligne dans llx_element_element
                     $this->updateField('id_contrat', (int) $contrat->id); // On met le numéro de contrat dans la demande
@@ -249,26 +322,26 @@ class BF_Demande extends BimpObject
             $reference = $this->getData('reference');
         }
 
-        $id_client = (int) $this->getData('id_client');
-        $id_commercial = (int) $this->getData('id_commercial');
+        $id_client = (int) $this->getData('id_client'); //
+        $id_commercial = (int) $this->getData('id_commercial');//
         $montant_materiels = $this->getData('montant_materiels');
         $montant_services = $this->getData('montant_services');
         $montant_logiciels = $this->getData('montant_logiciels');
         $vr_vente = $this->getData('vr_vente');
-        $id_status = $this->getData('status');
+        $id_status = $this->getData('status'); 
         $accepted = $this->getData('accepted');
         $duree_prevu = $this->getData('duration');
         $periodicite_prevu = $this->getData('periodicity');
-        $id_client_contact = $this->getData('id_client_contact');
+        $id_client_contact = $this->getData('id_client_contact'); //
         $assurance = $this->getData('insurance');
-        $id_supplier = $this->getData('id_supplier');
-        $id_supplier_contact = $this->getData('id_supplier_contact');
+        $id_supplier = $this->getData('id_supplier'); //
+        $id_supplier_contact = $this->getData('id_supplier_contact'); //
         $date_loyer = $this->getData('date_loyer');
         $date_livraison = $this->getdata('date_livraison');
         $date_creation = $this->getData('date_create');
-        $id_contrat = $this->getData('id_contrat');
-        $commission_commerciale = $this->getData('commission_commerciale');
-        $commission_financiere = $this->getData('commission_financiere');
+        $id_contrat = $this->getData('id_contrat'); //
+        $commission_commerciale = $this->getData('commission_commerciale');//
+        $commission_financiere = $this->getData('commission_financiere');//
 
         if(!$accepted) { $errors[] = $langs->trans('erreurBanqueValid'); }
         if(!$date_livraison) { $errors[] = "Date de livraison manquante"; }
@@ -348,7 +421,8 @@ class BF_Demande extends BimpObject
 
 
     public function renderCommandesList()
-    {
+    {   
+        global $langs;
         $html = '';
 
         if ($this->isLoaded()) {
@@ -360,10 +434,10 @@ class BF_Demande extends BimpObject
                 $html .= '<table class="bimp_list_table">';
                 $html .= '<thead>';
                 $html .= '<tr>';
-                $html .= '<th>Réf.</th>';
-                $html .= '<th>Statut</th>';
-                $html .= '<th>Montant TTC</th>';
-                $html .= '<th>Fichier</th>';
+                $html .= '<th>' . $langs->trans('tabOrderRef') . '</th>';
+                $html .= '<th>'. $langs->trans('tabOrderStatus') .'</th>';
+                $html .= '<th>' . $langs->trans('tabOrderAmount') . '</th>';
+                $html .= '<th>' . $langs->trans('tabOrderFile') . '</th>';
                 $html .= '</tr>';
                 $html .= '</thead>';
                 $html .= '<tbody>';
@@ -384,7 +458,7 @@ class BF_Demande extends BimpObject
             }
 
             $button = array( // bouton pour afficher formulaire associations
-           'label' => 'Gérer les commandes associées',
+           'label' => $langs->trans('manageRelatedOrders'),
            'classes' => array('btn', 'btn-default'),
            'attr' => array(
                'onclick' => $this->getJsLoadModalForm('commandes')
@@ -404,6 +478,7 @@ class BF_Demande extends BimpObject
 
     public function getInfosExtraBtn()
     {
+        global $langs;
         $buttons = array();
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
         $getEtatContrat = $this->getData('status');
@@ -416,7 +491,7 @@ class BF_Demande extends BimpObject
 
             if($vr_achat != 0) {
                 $buttons[] = array(
-                    'label'   => 'Générer le facture client',
+                    'label'   => $langs->trans('buttonGenCustomerInvoice'),
                     'icon'    => 'fas_file-contract',
                     'onclick' => $this->getJsActionOnclick('genFactClient', array(
                         'file_type' => 'pret'
@@ -428,7 +503,7 @@ class BF_Demande extends BimpObject
             
             if($vr_vente != 0) {
                 $buttons[] = array(
-                    'label'   => 'Générer le facture fournisseur',
+                    'label'   => $langs->trans('buttonGenSupplierInvoice'),
                     'icon'    => 'fas_file-contract',
                     'onclick' => $this->getJsActionOnclick('genfactFourn', array(
                         'file_type' => 'pret'
@@ -441,7 +516,7 @@ class BF_Demande extends BimpObject
             
         } elseif($getEtatContrat == 4) {
             $buttons[] = array(
-            'label'   => 'Générer le contrat',
+            'label'   => $langs->trans('buttonGenContrat'),
             'icon'    => 'fas_file-contract',
             'onclick' => $this->getJsActionOnclick('generateContrat', array(
                 'file_type' => 'pret'
@@ -455,13 +530,14 @@ class BF_Demande extends BimpObject
     }
 
     public function genFacture()
-    {
+    {   
+        global $langs;
         $buttons = array();
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 
         $buttons[] = array(
-            'label'   => 'Générer la facture pour la banque',
+            'label'   => $langs->trans('buttonGenBankInvoice'),
             'icon'    => 'fas_file-invoice-dollar',
             'onclick' => $this->getJsActionOnclick('generateFacture', array(
                 'file_type' => 'pret'

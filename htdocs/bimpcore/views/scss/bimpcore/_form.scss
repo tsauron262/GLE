@@ -641,6 +641,10 @@ input[type=text].large_input {
 
     .freeFormInput {
         margin-left: 30px;
+        
+        .select2-container {
+            width: 100%!important;
+        }
     }
 
     .freeFormAjaxResult {
@@ -681,4 +685,12 @@ input[type=text].large_input {
 
 
     }
+}
+
+.ui-menu .ui-menu-item a {
+    padding: .12em .4em!important;
+}
+
+.ui-menu .ui-menu-item:last-child a {
+    padding-bottom: 1em!important;
 }

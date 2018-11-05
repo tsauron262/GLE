@@ -152,7 +152,7 @@ if($num == '0') {
                     $newNom = $user->getNomUrl(1);
                 }
                 elseif($holiday['fk_group'] > 0){
-                    include_once(DOL_DOCUMENT_ROOT."/user/group/class/usergroup.class.php");
+                    include_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
                     $userG = new UserGroup($db);
                     $userG->fetch($holiday['fk_group']);
                     $newNom = $userG->getNomUrl(1);

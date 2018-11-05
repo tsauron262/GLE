@@ -194,9 +194,9 @@ class InterfaceLdapsynchro extends DolibarrTriggers
 				{
 					// Must edit $object->newgroupid
 					$usergroup=new UserGroup($this->db);
-					if ($object->newgroupid > 0)
+					if ($object->context['newgroupid'] > 0)
 					{
-						$usergroup->fetch($object->newgroupid);
+						$usergroup->fetch($object->context['newgroupid']);
 
 						$oldinfo=$usergroup->_load_ldap_info();
 						$olddn=$usergroup->_load_ldap_dn($oldinfo);

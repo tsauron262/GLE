@@ -85,14 +85,6 @@ class BF_Demande extends BimpObject
         return $contacts;
     }
 
-    public function renderViewLoadedScript()
-    {
-        if ($this->isLoaded()) {
-            return '<script type="text/javascript">onBFDemandeViewLoaded(' . $this->id . ');</script>';
-        }
-        return '';
-    }
-
     public function getDemandeData() {
         return (object) $data = array(
             'id_demande' => $this->getData('id'),

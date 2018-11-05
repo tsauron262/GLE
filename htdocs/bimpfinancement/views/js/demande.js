@@ -1,11 +1,11 @@
 $(document).ready(function () {
     $('body').on('viewLoaded', function (e) {
-        if (e.$view.hasClass('BF_Demande_view')) {
+        if (e.$view.hasClass('BF_Demande_view_montants')) {
             onBFDemandeViewLoaded(e.$view);
         }
     });
     $('body').on('viewRefresh', function (e) {
-        if (e.$view.hasClass('BF_Demande_view')) {
+        if (e.$view.hasClass('BF_Demande_view_montants')) {
             onBFDemandeViewLoaded(e.$view);
         }
     });
@@ -13,15 +13,15 @@ $(document).ready(function () {
 
 function onBFDemandeViewLoaded($view) {
     if ($view.length) {
-        initEvents($view);
+        bf_demande_initEvents($view);
         $("body").on("listRefresh", function (event) {
-            initEvents($view);
+            bf_demande_initEvents($view);
         });
         hideShowAvance($view.attr('id'), true);
     }
 }
 
-function initEvents($view) {
+function bf_demande_initEvents($view) {
     var selecteur = '[name="montant_materiels"], [name="montant_services"], [name="montant_logiciels"],' +
             '[name="commission_commerciale"], [name="commission_financiere"],' +
             '[name="quantity"], [name="amount"], [name="amount_ht"],' +
@@ -30,16 +30,19 @@ function initEvents($view) {
             '[name="periodicity"],' +
             '[name="periode2"],' +
             '[name="vr"],[name="vr_vente"]';
+
     $view.find(selecteur).change(function () {
-        calculateMontantTotal($view);
+        bf_demande_calculateMontantTotal($view);
     });
+
     $view.find(selecteur).keyup(function () {
-        calculateMontantTotal($view, this);
+        bf_demande_calculateMontantTotal($view, this);
     });
-    calculateMontantTotal($view);
+
+    bf_demande_calculateMontantTotal($view);
 }
 
-function calculateMontantTotal($view, champ) {
+function bf_demande_calculateMontantTotal($view, champ) {
     if (champ != undefined)
         $(champ).val($(champ).val().replace(",", ".").replace(" ", "").replace("€", ""));
 
@@ -71,7 +74,7 @@ function calculateMontantTotal($view, champ) {
     if (montant_logiciels) {
         total += montant_logiciels;
     }
-    
+
     //Calcul du VR
     var VR_vente = parseFloat($view.find('[name="vr_vente"]').val());
     total = total - VR_vente;
@@ -108,7 +111,7 @@ function calculateMontantTotal($view, champ) {
     var duree = 0;
     $view.find(".BF_Rent_row").each(function () {
         totalLoyer += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
-        if($(this).find('input[name="periode2"]').val() == 0)
+        if ($(this).find('input[name="periode2"]').val() == 0)
             duree += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('select[name="periodicity"]').val());
     });
     displayMoneyValue(totalLoyer, $view.find('#total_loyer'));
@@ -136,10 +139,10 @@ function calculateMontantTotal($view, champ) {
     var periodicity = $view.find('input[name="periodicity"]').val();
 
     var coupBanque = 0;
-    if(coef > 0)
+    if (coef > 0)
         coupBanque += (duree * periodicity) * total2 * coef / 100 - total2;
 
-    if(taux > 0){
+    if (taux > 0) {
         var echoir = ($view.find('input[name="mode_calcul"]').val() == 2);
         coupBanque += calculInteret(total2, duree, taux, echoir);
     }
@@ -172,7 +175,7 @@ function calculateMontantTotal($view, champ) {
     //CA Calculé
     var caCalc = commF + totalLoyI + totalFD + difBanqFinan;
     displayMoneyValue(caCalc, $view.find('#ca_calc'), (caCalc < 0) ? "redT" : "");
-    
+
 
 
     //Reste a payé
@@ -221,12 +224,12 @@ function hideShowAvance(view_id, hide) {
         var selecteur2 = "#montant_total, #montant_total2, #duree_total, #cout_banque, #loy_inter, #frais_div, #total_loyer,"
                 + "#periodicity_inputContainer, #mode_calcul_inputContainer, #duration_inputContainer,"
                 + '[name="periodicity"], [name="mode_calcul"], [name="duration"]';
-        
+
         var elems = $container.find(selecteur).parent().parent();
         var elemsACacher = $container.find(selecteur2).parent().parent();
         var elem2 = elems.parent().parent().parent().parent().parent().parent().find(".panel-footer");
         var moreBut = "erreur";
-        
+
         $("#plusMoinsAvance").remove();
         if (hide == true) {
             elemsACacher.hide();

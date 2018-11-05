@@ -140,6 +140,10 @@ class BimpController
         foreach ($this->jsFiles as $js_file) {
             echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
         }
+
+        echo '<script type="text/javascript">';
+        echo '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
+        echo '</script>';
     }
 
     public function display()

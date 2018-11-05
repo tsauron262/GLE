@@ -6,11 +6,20 @@ class BimpLine extends BimpObject
     const BL_PRODUCT = 1;
     const BL_FREE = 2;
     const BL_TEXT = 3;
+    const BL_PRODUIT = 1;
+    const BL_SERVICE = 2;
+    const BL_LOGICIEL = 3;
 
     public static $types = array(
         self::BL_PRODUCT => 'Produit / Service',
         self::BL_FREE    => 'Ligne libre',
         self::BL_TEXT    => 'Texte seulement'
+    );
+    public static $product_types = array(
+        0                 => '',
+        self::BL_PRODUIT  => array('label' => 'Produit', 'icon' => 'fas_box'),
+        self::BL_SERVICE  => array('label' => 'Service', 'icon' => 'fas_hand-holding'),
+        self::BL_LOGICIEL => array('label' => 'Logiciel', 'icon' => 'fas_cogs')
     );
     protected $product = null;
 
@@ -64,6 +73,33 @@ class BimpLine extends BimpObject
     public function getListExtraBtn()
     {
         return array();
+    }
+
+    public function getProductTypesArray()
+    {
+        $product = $this->getProduct();
+
+        $values = array();
+        switch ((int) $this->getData('type')) {
+            case self::BL_PRODUCT:
+                if (BimpObject::objectLoaded($product)) {
+                    if (!(int) $product->getData('fk_product_type')) {
+                        $values[self::BL_PRODUIT] = self::$product_types[self::BL_PRODUIT];
+                        $values[self::BL_LOGICIEL] = self::$product_types[self::BL_LOGICIEL];
+                    } else {
+                        $values[self::BL_SERVICE] = self::$product_types[self::BL_SERVICE];
+                    }
+                }
+                break;
+
+            case self::BL_FREE:
+                $values[self::BL_PRODUIT] = self::$product_types[self::BL_PRODUIT];
+                $values[self::BL_LOGICIEL] = self::$product_types[self::BL_LOGICIEL];
+                $values[self::BL_SERVICE] = self::$product_types[self::BL_SERVICE];
+                break;
+        }
+
+        return $values;
     }
 
     public function getFournPricesArray()
@@ -202,16 +238,52 @@ class BimpLine extends BimpObject
 
     public function displayDescription($display_input_value = true, $no_html = false)
     {
+        $html = '';
+
         switch ((int) $this->getData('type')) {
             case self::BL_PRODUCT:
-                return $this->displayData('id_product', 'nom_url', $display_input_value, $no_html);
+                $html .= $this->displayData('id_product', 'nom_url', $display_input_value, $no_html);
             case self::BL_FREE:
-                return $this->displayData('label', 'default', $display_input_value, $no_html);
-            case self::BL_TEXT:
-                return $this->displayData('description', 'default', $display_input_value, $no_html);
+                $html .= $this->displayData('label', 'default', $display_input_value, $no_html);
         }
 
-        return '';
+        $desc = (string) $this->displayData('description', 'default', $display_input_value, $no_html);
+
+        if ($desc) {
+            if ($html) {
+                if ($no_html) {
+                    $html .= "\n";
+                } else {
+                    $html .= '<br/>';
+                }
+            }
+
+            $html .= $desc;
+        }
+
+        return $html;
+    }
+
+    public function displayEquipments($display_name = 'nom_url', $display_input_value = true, $no_html = false)
+    {
+        $html = '';
+
+        if ((int) $this->getData('type') === self::BL_PRODUCT) {
+            $html .= $this->displayData('equipments', $display_name, $display_input_value, $no_html);
+        }
+
+        $serials = (string) $this->getData('extra_serials');
+        if ($serials) {
+            if ($no_html) {
+                $html .= "\n";
+            } else {
+                $html .= '<br/>';
+            }
+
+            $html .= str_replace(',', ', ', $serials);
+        }
+
+        return $html;
     }
 
     public function displayTotalHT()
@@ -284,6 +356,7 @@ class BimpLine extends BimpObject
                     $this->set('id_product', 0);
                     $this->set('label', '');
                     $this->set('equipments', array());
+                    $this->set('extra_serials', '');
                     $this->set('qty', 0);
                     $this->set('pu_ht', 0);
                     $this->set('tva_tx', 0);
@@ -292,6 +365,15 @@ class BimpLine extends BimpObject
                     $this->set('pa_ht', 0);
 //                    $this->set('remisable', 0);
                     break;
+            }
+
+            if ((int) in_array($this->getData('type'), array(self::BL_PRODUCT, self::BL_FREE))) {
+                $serials = $this->getData('extra_serials');
+                if ($serials) {
+                    $serials = preg_replace('/[ ;\n\s\t]+/', ',', $serials);
+                    $serials = preg_replace('/,+/', ',', $serials);
+                    $this->set('extra_serials', $serials);
+                }
             }
         }
 

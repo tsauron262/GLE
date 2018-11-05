@@ -60,8 +60,6 @@ objects:
             dol_object: facture
             id_object:
                 field_value: id_facture_fournisseur
-
-
         card: 
             title: 
                 object_prop: ref
@@ -251,14 +249,14 @@ fields:
     id_facture_client:
         label: Facture client
         type: id_object
-        object: facture
+        object: facture_client
         input:
             type: hidden
 
     id_facture_fournisseur:
         label: Facture fournisseur
         type: id_object
-        object: facture
+        object: facture_fournisseur
         input:
             type: hidden
 
@@ -634,7 +632,6 @@ views:
                     col_md: 6
                     custom: 
                         callback: renderViewLoadedScript
-                 
                   
     montants:
         panel: 0

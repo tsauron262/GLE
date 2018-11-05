@@ -56,12 +56,6 @@ fields:
         values: 
             array: types
             
-    label: 
-        label: Libellé
-        display_if: 
-            field_name: type
-            show_values: 2
-    
     id_product: 
         label: Produit
         type: id_object
@@ -73,6 +67,27 @@ fields:
             field_name: type
             show_values: 1
         depends_on: type
+        
+    product_type: 
+        label: Type produit
+        type: int
+        values: 
+            array: product_types
+        input: 
+            type: select
+            options: 
+                array: productTypes
+        display_if: 
+            field_name: type
+            hide_values: 3
+        depends_on: id_product,type
+        default_value: 0
+        
+    label: 
+        label: Libellé
+        display_if: 
+            field_name: type
+            show_values: 2
         
     qty: 
         label: Quantité
@@ -167,6 +182,19 @@ fields:
             id_product: 
                 hide_values: 0
         depends_on: id_product
+        sortable: 0
+    
+    extra_serials: 
+        label: N° de série supplémentaires
+        type: text
+        input: 
+            rows: 3
+            auto_expand: 1
+            help: Entrez une liste de numéros de série séparés par une virgule, un point-virgule, un espace ou un saut de ligne
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        sortable: 0
         
     description: 
         label: Description
@@ -187,6 +215,8 @@ lists_cols:
         field: description
     type: 
         field: type
+    product_type:
+        field: product_type
     pu_ht: 
         label: PU HT
         field: pu_ht
@@ -209,8 +239,9 @@ lists_cols:
         field: id_fournisseur
         display: nom_url
     equipments: 
-        field: equipments
-        display: nom_url
+        label: Equipements / NS
+        value: 
+            callback: displayEquipments
     total_ht: 
         label: Total HT
         value: 

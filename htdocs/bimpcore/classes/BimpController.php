@@ -1357,7 +1357,7 @@ class BimpController
                 if (!preg_match('/\./', $field)) {
                     $field = '`' . $field . '`';
                 }
-                $where .= 'LOWER(' . $field . ')' . ' LIKE \'%' . strtolower($value) . '%\'';
+                $where .= 'LOWER(' . $field . ')' . ' LIKE \'%' . strtolower(addslashes($value)) . '%\'';
             }
 
             if ($where) {

@@ -255,8 +255,6 @@ class BC_Panel extends BimpComponent
     public function getTitle()
     {
         if (isset($this->params['title'])) {
-//            echo 'la:' . $this->params['title'];
-//            exit;
             return $this->params['title'];
         }
 

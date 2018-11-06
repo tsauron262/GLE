@@ -2636,7 +2636,7 @@ class ObjectLine extends BimpObject
             return $errors;
         }
 
-        if (!$this->isDeletable(true)) {
+        if (!$force_delete && !$this->isDeletable(true)) {
             return array('Suppression de la ligne impossible');
         }
 
@@ -2647,12 +2647,13 @@ class ObjectLine extends BimpObject
         }
 
         if (!count($errors)) {
+            $errors = parent::delete($force_delete);
             if (!count($errors)) {
                 $lines = $this->getEquipmentLines();
 
                 if (count($lines)) {
                     foreach ($lines as $line) {
-                        $line->delete($force_delete);
+                        $line->delete(true);
                     }
                 }
                 if (count($remises)) {

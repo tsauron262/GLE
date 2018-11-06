@@ -398,12 +398,6 @@ class BimpComm extends BimpObject
                             $content .= 'l\'objet "' . $origin . '"';
                             break;
                     }
-//                    echo '<pre>';
-//                    print_r(array(
-//                            'content' => $content,
-//                            'type'    => 'warning'
-//                    ));
-//                    exit;
                     return array(array(
                             'content' => $content,
                             'type'    => 'warning'
@@ -1389,7 +1383,10 @@ class BimpComm extends BimpObject
             foreach ($bimp_lines as $id_dol_line => $data) {
                 if (!array_key_exists((int) $id_dol_line, $dol_lines)) {
                     if ($bimp_line->fetch((int) $data['id'], $this, true)) {
-                        $bimp_line->delete();
+                        $line_errors = $bimp_line->delete(true);
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la suppression d\'une ligne supprimée depuis l\'ancienne version');
+                        }
                         unset($bimp_lines[$id_dol_line]);
                     }
                 }
@@ -1415,7 +1412,7 @@ class BimpComm extends BimpObject
                         if ($bimp_line->fetch((int) $bimp_lines[(int) $id_dol_line]['id'], $this)) {
                             $remises_errors = $bimp_line->checkRemises();
                             if (count($remises_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($remises_errors, 'Des erreurs sont survenues lors de la synchronisation des remises pour la ligne n° '.$i);
+                                $errors[] = BimpTools::getMsgFromArray($remises_errors, 'Des erreurs sont survenues lors de la synchronisation des remises pour la ligne n° ' . $i);
                             }
                         }
                     }
@@ -1443,11 +1440,11 @@ class BimpComm extends BimpObject
         }
 
         $lines_errors = $this->checkLines();
-        
+
         if (count($lines_errors)) {
             return BimpTools::getMsgFromArray($lines_errors, 'Copie impossible');
         }
-        
+
         $validate_errors = $this->validate();
         if (count($validate_errors)) {
             return array(BimpTools::getMsgFromArray($validate_errors), BimpTools::ucfirst($this->getLabel('this')) . ' comporte des erreurs. Copie impossible');

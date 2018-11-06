@@ -1085,6 +1085,8 @@ if (empty($reshook))
 					unset($_POST['date_endyear']);
 				} else {
 					$db->rollback();
+                                        
+                                        dol_syslog("addLinePropalImpossible request ".print_r($_REQUEST,1),3);
 
 					setEventMessages($object->error, $object->errors, 'errors');
 				}

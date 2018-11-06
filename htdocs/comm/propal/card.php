@@ -1839,6 +1839,7 @@ if ($action == 'create')
 
 	// Confirm validate proposal
 	else if ($action == 'validate') {
+            if($object->statut < 1){
 		$error = 0;
 
 		// We verifie whether the object is provisionally numbering
@@ -1863,6 +1864,9 @@ if ($action == 'create')
 
 		if (! $error)
 			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ValidateProp'), $text, 'confirm_validate', '', 0, 1);
+            }
+            else
+                setEventMessages("Déja validée", array(), 'warnings');
 	}
 
 	if (! $formconfirm) {

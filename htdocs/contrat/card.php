@@ -1322,8 +1322,8 @@ else
 
 		$nbofservices=count($object->lines);
 
-		$author = new User($db);
-		$author->fetch($object->user_author_id);
+//		$author = new User($db);
+//		$author->fetch($object->user_author_id);
 
 		$commercial_signature = new User($db);
 		$commercial_signature->fetch($object->commercial_signature_id);

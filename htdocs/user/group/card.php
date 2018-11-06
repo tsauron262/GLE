@@ -478,7 +478,7 @@ else
 						print '<td>'.$useringroup->firstname.'</td>';
 						print '<td align="center">'.$useringroup->getLibStatut(3).'</td>';
 						print '<td align="right">';
-						if (! empty($user->admin))
+						if (! empty($user->admin) || $user->rights->user->group_advance->write)
 						{
 							print '<a href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=removeuser&amp;user='.$useringroup->id.'">';
 							print img_picto($langs->trans("RemoveFromGroup"), 'unlink');

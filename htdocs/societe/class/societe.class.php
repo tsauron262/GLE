@@ -433,22 +433,12 @@ class Societe extends CommonObject
 		$this->tva_assuj = 1;
 		$this->status = 1;
 	}
-
-
-	/**
-	 *    Create third party in database.
-	 *    $this->code_client = -1 and $this->code_fournisseur = -1 means automatic assignement.
-	 *
-	 *    @param	User	$user       Object of user that ask creation
-	 *    @return   int         		>= 0 if OK, < 0 if KO
-	 */
-	function create(User $user)
-	{
-		global $langs,$conf,$mysoc;
-
-		$error=0;
-                
-                /*mod drsi*/
+        
+        
+        
+        /*mod drsi*/
+        function traiteCodeClientFourn(){
+            global $conf;
                 if (empty($this->code_client) ){
                     // Load object modCodeTiers
                     $module=(! empty($conf->global->SOCIETE_CODECLIENT_ADDON)?$conf->global->SOCIETE_CODECLIENT_ADDON:'mod_codeclient_leopard');
@@ -484,10 +474,27 @@ class Societe extends CommonObject
                         if ($res) break;
                     }
                     $modCodeFournisseur = new $module;
-                    if( ! empty($modCodeClient->code_auto)) 
-                        $this->code_fournisseur=$modCodeFournisseur->getNextValue($this,0);
+                    if( ! empty($modCodeFournisseur->code_auto)) 
+                        $this->code_fournisseur=$modCodeFournisseur->getNextValue($this,1);
                 }
-                /*fmoddrsdi*/
+        }
+        /*fmoddrsdi*/
+
+
+	/**
+	 *    Create third party in database.
+	 *    $this->code_client = -1 and $this->code_fournisseur = -1 means automatic assignement.
+	 *
+	 *    @param	User	$user       Object of user that ask creation
+	 *    @return   int         		>= 0 if OK, < 0 if KO
+	 */
+	function create(User $user)
+	{
+		global $langs,$conf,$mysoc;
+
+		$error=0;
+                
+                $this->traiteCodeClientFourn();
 
 		// Clean parameters
 		if (empty($this->status)) $this->status=0;
@@ -795,6 +802,8 @@ class Societe extends CommonObject
 	function update($id, $user='', $call_trigger=1, $allowmodcodeclient=0, $allowmodcodefournisseur=0, $action='update', $nosyncmember=1)
 	{
 		global $langs,$conf,$hookmanager;
+                
+                $this->traiteCodeClientFourn();
 
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 

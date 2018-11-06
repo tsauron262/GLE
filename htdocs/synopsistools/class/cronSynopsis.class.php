@@ -48,8 +48,8 @@ class CronSynopsis {
     
     
     public function callTrigerPeter(){
-        $result1 = $this->db->query("CALL refresh_llx_mat_view_propaldet();");
-        $result2 = $this->db->query("CALL refresh_llx_mat_view_facturedet();");
+//        $result1 = $this->db->query("CALL refresh_llx_mat_view_propaldet();");
+//        $result2 = $this->db->query("CALL refresh_llx_mat_view_facturedet();");
         $result3 = $this->db->query("CALL refresh_llx_mat_view_commandedet();");
         $result4 = $this->db->query("CALL refresh_llx_mat_view_categorie();");
         $result5 = $this->db->query("CALL refresh_llx_mat_view_product_cat();");

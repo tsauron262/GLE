@@ -321,7 +321,7 @@ class BimpGroupManager {
         if ($parentid == -1) {  // if there is no parent
             return 0;
         }
-        dol_syslog("Ajout au groupe ".$parentid . " le user ".$user->id, 3);
+        //dol_syslog("Ajout au groupe ".$parentid . " le user ".$user->id, 3);
         if (! is_object($user->oldcopy)) 
             $user->oldcopy = clone $user;
         if ($user->SetInGroup($parentid, 1)) {

@@ -319,14 +319,16 @@ class BC_Form extends BC_Panel
         $html .= '</div>';
 
         $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
-
-        if ($field->params['type'] === 'id_object') {
+        
+        if ($field->params['type'] === 'id_object' ||
+                ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) {
             $form_name = ($params['create_form'] ? $params['create_form'] : ($field->params['create_form'] ? $field->params['create_form'] : ''));
             $form_values = ($params['create_form_values'] ? $params['create_form_values'] : ($field->params['create_form_values'] ? $field->params['create_form_values'] : ''));
             $btn_label = ($params['create_form_label'] ? $params['create_form_label'] : ($field->params['create_form_label'] ? $field->params['create_form_label'] : 'Créer'));
+            
             if ($form_name) {
                 $html .= self::renderCreateObjectButton($this->object, $this->identifier, $field->params['object'], $this->fields_prefix . $field->name, $form_name, $form_values, $btn_label);
-            }
+            }            
         }
         $html .= $field->renderHtml();
 
@@ -387,36 +389,13 @@ class BC_Form extends BC_Panel
                 $content = $asso->renderAssociatesCheckList($this->fields_prefix);
                 $html .= BimpInput::renderInputContainer($params['association'], implode(',', $items), $content, $this->fields_prefix, $params['required'], 1);
             } elseif ($this->object->config->isDefined('associations/' . $params['association'] . '/input')) {
-                $input_name = $params['association'] . '_add_value';
-
                 if (is_a($associate, 'BimpObject')) {
                     $form_name = ($params['create_form'] ? $params['create_form'] : $this->object->getConf('associations/' . $params['association'] . '/create_form', ''));
                     if ($form_name) {
-//                        $html .= $this->renderCreateObjectButton('', $input_name . '_search', $form_name, false, $associate);
                         $html .= $this->renderCreateObjectButton($this->object, $this->identifier, '', '', $form_name, null, 'Créer', false, $associate);
                     }
                 }
-
-                $input = new BC_Input($this->object, 'int', $input_name, 'associations/' . $params['association'] . '/input');
-                $input->setNamePrefix($this->fields_prefix);
-                $input->extraData['values_field'] = $this->fields_prefix . $params['association'];
-                $html .= $input->renderHtml();
-
-                if ($input->params['type'] === 'search_list') {
-                    $label_input_name = $this->fields_prefix . $input_name . '_label';
-                } else {
-                    $label_input_name = $this->fields_prefix . $params['association'];
-                }
-
-                $values = array();
-
-                foreach ($items as $id_item) {
-                    if ($id_item) {
-                        $values[$id_item] = $this->object->displayAssociate($params['association'], $params['display'], $id_item);
-                    }
-                }
-
-                $html .= BimpInput::renderMultipleValuesList($this->object, $this->fields_prefix . $params['association'], $values, $label_input_name, false, (int) $params['required']);
+                $html .= $asso->renderAddAssociateInput($params['display'], false, $this->fields_prefix, (int) $params['required']);
             } else {
                 $html .= BimpRender::renderAlerts('Erreur de configuration - Champ non défini pour l\'association "' . $params['association'] . '"');
             }
@@ -441,6 +420,10 @@ class BC_Form extends BC_Panel
         $params = array_merge($params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$custom_row_params));
         if (is_array($params['value'])) {
             $params['value'] = implode(',', $params['value']);
+        }
+
+        if ($params['data_type'] === 'items_list') {
+            $params['items_data_type'] = $this->object->getConf($this->config_path . '/rows/' . $row . '/items_data_type', 'string');
         }
 
         $html .= '<div class="row formRow' . ($params['hidden'] ? ' hidden' : '') . (!is_null($params['display_if']) ? ' display_if' : '') . '"';
@@ -637,7 +620,7 @@ class BC_Form extends BC_Panel
 
         $html = '';
 
-        if ($params['data_type'] === 'id_object' && $params['object'] && $params['create_form']) {
+        if (($params['data_type'] === 'id_object' || (($params['data_type'] === 'items_list') && isset($params['items_data_type']) && $params['items_data_type'] === 'id_object')) && $params['object'] && $params['create_form']) {
             $html .= self::renderCreateObjectButton($this->object, $this->identifier, $params['object'], $this->fields_prefix . $params['input_name'], $params['create_form'], $params['create_form_values'], $params['create_form_label']);
         }
 
@@ -672,7 +655,7 @@ class BC_Form extends BC_Panel
     public static function renderCreateObjectButton(BimpObject $parent, $parent_form_id, $object_name, $result_input_name, $form_name, $form_values = null, $btn_label = 'Créer', $reload_input = true, $object = null, $successcallBack = '')
     {
         if (!$form_name) {
-            return '';
+            return 'LA';
         }
 
         if (is_null($object) && $object_name) {
@@ -680,7 +663,7 @@ class BC_Form extends BC_Panel
         }
 
         if (is_null($object) || !is_a($object, 'BimpObject')) {
-            return '';
+            return 'ICI';
         }
 
         $label = $btn_label . ' ' . $object->getLabel('a');

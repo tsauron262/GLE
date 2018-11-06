@@ -436,9 +436,12 @@ function setFieldsTableEvents($fieldsTable) {
 }
 
 $(document).ready(function () {
-    $('.object_view').each(function () {
-        onViewLoaded($(this));
+    $('body').on('bimp_ready', function (e) {
+        $('.object_view').each(function () {
+            onViewLoaded($(this));
+        });
     });
+
 
     $('body').on('controllerTabLoaded', function (e) {
         if (e.$container.length) {

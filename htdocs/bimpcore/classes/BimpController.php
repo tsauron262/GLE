@@ -140,6 +140,10 @@ class BimpController
         foreach ($this->jsFiles as $js_file) {
             echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
         }
+
+        echo '<script type="text/javascript">';
+        echo '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
+        echo '</script>';
     }
 
     public function display()
@@ -1099,7 +1103,8 @@ class BimpController
                     } elseif ($object->config->isDefined('fields/' . $field_name)) {
                         $field = new BC_Field($object, $field_name, true);
                         $field->name_prefix = $field_prefix;
-                        if ($field->params['type'] === 'id_object' && $field->params['create_form']) {
+                        if (($field->params['type'] === 'id_object' || ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) &&
+                                $field->params['create_form']) {
                             $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);
                         }
                         $html .= $field->renderInput();

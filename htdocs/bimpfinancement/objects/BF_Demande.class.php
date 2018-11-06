@@ -12,18 +12,17 @@ class BF_Demande extends BimpObject
     const BF_DEMANDE_RECONDUIT = 6;
     const BF_DEMANDE_REMPLACE = 7;
     const BF_DEMANDE_TERMINE = 999;
-    
+
     public static $status_list = array(
-        self::BF_DEMANDE_BROUILLON => array('label' => 'Brouillon', 'classes' => array('warning')),
-        self::BF_DEMANDE_ATT_RETOUR => array('label' => 'En attente de retour', 'classes' => array('important')),
+        self::BF_DEMANDE_BROUILLON         => array('label' => 'Brouillon', 'classes' => array('warning')),
+        self::BF_DEMANDE_ATT_RETOUR        => array('label' => 'En attente de retour', 'classes' => array('important')),
         self::BF_DEMANDE_SIGNE_ATT_CESSION => array('label' => 'Signé - en attente de cession', 'classes' => array('important')),
-        self::BF_DEMANDE_CEDE => array('label' => 'Cédé', 'classes' => array('danger')),
-        self::BF_DEMANDE_SANS_SUITE => array('label' => 'Sans suite', 'classes' => array('danger')),
-        self::BF_DEMANDE_RECONDUIT => array('label' => 'Reconduit', 'classes' => array('danger')),
-        self::BF_DEMANDE_REMPLACE => array('label' => 'Remplacé', 'classes' => array('danger')),
-        self::BF_DEMANDE_TERMINE => array('label' => 'Terminé', 'classes' => array('success')),
+        self::BF_DEMANDE_CEDE              => array('label' => 'Cédé', 'classes' => array('danger')),
+        self::BF_DEMANDE_SANS_SUITE        => array('label' => 'Sans suite', 'classes' => array('danger')),
+        self::BF_DEMANDE_RECONDUIT         => array('label' => 'Reconduit', 'classes' => array('danger')),
+        self::BF_DEMANDE_REMPLACE          => array('label' => 'Remplacé', 'classes' => array('danger')),
+        self::BF_DEMANDE_TERMINE           => array('label' => 'Terminé', 'classes' => array('success')),
     );
-    
     public static $durations = array(
         24 => '24 mois',
         36 => '36 mois',
@@ -48,6 +47,8 @@ class BF_Demande extends BimpObject
         1 => 'A terme échu',
         2 => 'A terme à échoir'
     );
+
+    // Getters: 
 
     public function renderHeaderExtraLeft()
     {   
@@ -103,14 +104,6 @@ class BF_Demande extends BimpObject
             }
         }
         return $contacts;
-    }
-
-    public function renderViewLoadedScript()
-    {
-        if ($this->isLoaded()) {
-            return '<script type="text/javascript">onBFDemandeViewLoaded(' . $this->id . ');</script>';
-        }
-        return '';
     }
 
     public function verif_exist_document(){

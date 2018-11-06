@@ -32,7 +32,7 @@ fields:
         
     cols: 
         label: Cols
-        data_type: list
+        type: list
         
     sort_field: 
         label: Trie

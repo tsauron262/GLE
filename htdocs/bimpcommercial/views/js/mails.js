@@ -7,12 +7,12 @@ function onEMailSelectChange($select) {
             if (field_name) {
                 if ($select.val() === 'custom') {
                     $inputContainer.find('.selectMailHelp').slideUp(250);
-                    $inputContainer.find('.mail_custom_value').find('input').attr('name', field_name);
-                    $select.attr('name', field_name + '_select');
+                    $inputContainer.find('.mail_custom_value').find('input').attr('name', field_name + '_add_value');
+                    $select.attr('name', field_name + 'add_value_select');
                     $inputContainer.find('.mail_custom_value').slideDown(250);
                 } else {
-                    $inputContainer.find('.mail_custom_value').find('input').attr('name', field_name + '_custom');
-                    $select.attr('name', field_name);
+                    $inputContainer.find('.mail_custom_value').find('input').attr('name', field_name + '_add_value_custom');
+                    $select.attr('name', field_name + '_add_value');
                     $inputContainer.find('.selectMailHelp').slideDown(250);
                     $inputContainer.find('.mail_custom_value').slideUp(250);
                 }

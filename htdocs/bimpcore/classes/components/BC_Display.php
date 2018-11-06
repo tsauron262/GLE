@@ -71,6 +71,7 @@ class BC_Display extends BimpComponent
                 case 'datetime':
                 case 'money':
                 case 'percent':
+                case 'qty':
                     $this->params_def['type']['default'] = $field_params['type'];
                     break;
 
@@ -103,11 +104,41 @@ class BC_Display extends BimpComponent
         if (is_null($this->value)) {
             $this->value = '';
         }
-        
+
         if ($this->object->isDolObject()) {
             if (!$this->object->dol_field_exists($this->field_name)) {
                 return '';
             }
+        }
+
+        if ($this->field_params['type'] === 'items_list') {
+            if (!is_array($this->value)) {
+                return BimpRender::renderAlerts('Valeurs invalides');
+            }
+            if (!count($this->value)) {
+                return '';
+            }
+            $field_params = $this->field_params;
+            $field_params['type'] = $this->field_params['items_data_type'];
+
+            $bc_display = new BC_Display($this->object, $this->name, '', $this->field_name, $field_params, '');
+            $bc_display->params = $this->params;
+
+            $fl = true;
+            foreach ($this->value as $item_value) {
+                $bc_display->value = $item_value;
+                if (!$fl) {
+                    if ($this->no_html) {
+                        $html .= "\n";
+                    } else {
+                        $html .= '<br/>';
+                    }
+                } else {
+                    $fl = false;
+                }
+                $html .= $bc_display->renderHtml();
+            }
+            return $html;
         }
 
         if (($this->value === '') && ($this->params['type'] !== 'callback')) {
@@ -135,6 +166,9 @@ class BC_Display extends BimpComponent
                             $instance = $this->object->getParentInstance();
                         } elseif (isset($this->field_params['object'])) {
                             $instance = $this->object->getChildObject($this->field_params['object']);
+                            if (is_object($instance) && (int) $this->value && (!BimpObject::objectLoaded($instance) || (int) $instance->id !== (int) $this->value)) {
+                                $instance->fetch((int) $this->value);
+                            }
                         } else {
                             $instance = null;
                         }
@@ -224,7 +258,6 @@ class BC_Display extends BimpComponent
                             }
                             break;
                         }
-
 
                     case 'yes_no':
                         if ($this->no_html) {
@@ -352,6 +385,10 @@ class BC_Display extends BimpComponent
 
                     case 'percent':
                         $html .= $this->value . ' %';
+                        break;
+
+                    case 'qty':
+                        $html .= (float) $this->value;
                         break;
 
                     case 'callback':

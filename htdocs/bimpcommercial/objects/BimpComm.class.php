@@ -1346,9 +1346,6 @@ class BimpComm extends BimpObject
         $html .= '<p class="inputHelp">Entrez une adresse e-mail valide puis cliquez sur "Ajouter"</p>';
         $html .= '</div>';
 
-//        $html .= '</div>';
-//        $html .= BimpInput::renderMultipleValuesList($this, $input_name . '_list', array(), $input_name . '_list_add_value');
-
         return $html;
     }
 

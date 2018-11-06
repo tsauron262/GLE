@@ -1390,9 +1390,10 @@ class BimpComm extends BimpObject
             }
 
             // Création des lignes absentes de l'objet bimp: 
-            $objectLine = $this->getChildObject('lines');
+            $objectLine = BimpObject::getInstance($bimp_line->module, $bimp_line->object_name);
+            $objectLine->parent = $this;
+//            $objectLine = $this->getChildObject('lines');
             $bimp_line->reset();
-
             $i = 0;
             foreach ($dol_lines as $id_dol_line => $dol_line) {
                 $i++;

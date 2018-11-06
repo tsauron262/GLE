@@ -46,6 +46,7 @@ class ObjectLine extends BimpObject
     protected $post_equipment = null;
     public $no_equipment_post = false;
     public $remises = null;
+    protected $bimp_line_only = false;
 
     // Getters: 
 
@@ -1691,7 +1692,7 @@ class ObjectLine extends BimpObject
                 ));
                 $remise_errors = $remise->create($warnings, true);
                 if (count($remise_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise de '.$remise_percent.' %');
+                    $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise de ' . $remise_percent . ' %');
                 }
                 $this->calcRemise();
             }
@@ -2611,12 +2612,16 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    public function fetch($id, $parent = null)
+    public function fetch($id, $parent = null, $bimp_line_only = false)
     {
+        $this->bimp_line_only = $bimp_line_only;
+
         if (parent::fetch($id, $parent)) {
-            if (!$this->fetchLine()) {
-                $this->reset();
-                return false;
+            if (!$this->bimp_line_only) {
+                if (!$this->fetchLine()) {
+                    $this->reset();
+                    return false;
+                }
             }
             return true;
         }
@@ -2636,7 +2641,10 @@ class ObjectLine extends BimpObject
         }
 
         $remises = $this->getRemises();
-        $errors = $this->deleteLine();
+
+        if (!$this->bimp_line_only) {
+            $errors = $this->deleteLine();
+        }
 
         if (!count($errors)) {
             if (!count($errors)) {

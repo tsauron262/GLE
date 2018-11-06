@@ -1388,7 +1388,7 @@ class BimpComm extends BimpObject
             // Suppression des lignes absentes de l'objet dolibarr:
             foreach ($bimp_lines as $id_dol_line => $data) {
                 if (!array_key_exists((int) $id_dol_line, $dol_lines)) {
-                    if ($bimp_line->fetch($data['id'], $this)) {
+                    if ($bimp_line->fetch((int) $data['id'], $this, true)) {
                         $bimp_line->delete();
                         unset($bimp_lines[$id_dol_line]);
                     }

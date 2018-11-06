@@ -237,8 +237,8 @@ function setCommonEvents($container) {
             $(this).data('event_init', 1);
         }
     });
-    
-    $container.find('.classfortooltip').each(function() {
+
+    $container.find('.classfortooltip').each(function () {
         $(this).removeClass('classfortooltip');
         $(this).popover({
             container: 'body',
@@ -249,8 +249,8 @@ function setCommonEvents($container) {
         });
     });
     checkMultipleValues();
-    
-    
+
+
 }
 
 function setDisplayPopupButtonEvents($button) {

@@ -1648,6 +1648,7 @@ class BS_SAV extends BimpObject
                 } elseif (!is_null($propal)) {
                     $tabT = getElementElement("propal", "facture", $propal->id);
                     if (count($tabT) > 0) {
+                        include_once DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php";
                         $facture = new Facture($this->db->db);
                         $facture->fetch($tabT[count($tabT) - 1]['d']);
                         $this->set('id_facture', $facture->id);

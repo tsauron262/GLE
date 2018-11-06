@@ -275,6 +275,7 @@ class InvoicePDF extends BimpDocumentPDF
                     $bankid = $this->object->fk_bank;
                 }
 
+                require_once(DOL_DOCUMENT_ROOT."/compta/bank/class/account.class.php");
                 $account = new Account($this->db);
                 $account->fetch($bankid);
                 $html .= $this->getBankHtml($account);

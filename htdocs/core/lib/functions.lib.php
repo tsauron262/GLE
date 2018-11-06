@@ -6412,7 +6412,8 @@ function setEventMessages($mesg, $mesgs, $style='mesgs')
 {
 	if (empty($mesg) && empty($mesgs))
 	{
-		dol_syslog("Try to add a message in stack with empty message", LOG_WARNING);
+                    $debug = synGetDebug();
+		dol_syslog("Try to add a message in stack with empty message ".$debug, LOG_WARNING);
 	}
 	else
 	{

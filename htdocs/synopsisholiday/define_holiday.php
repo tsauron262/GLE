@@ -173,27 +173,27 @@ $langs->load('users');
 $var = true;
 $i = 0;
 
-$cp_events = $holiday->fetchEventsCP();
-
-if ($cp_events == 1) {
-    print '<br><form method="POST" action="' . $_SERVER["PHP_SELF"] . '">' . "\n";
-    print '<input type="hidden" name="action" value="add_event" />';
-
-    print_fiche_titre($langs->trans('DefineEventUserCP'), '', '');
-
-    print $langs->trans('MotifCP') . ' : ';
-    print $holiday->selectEventCP();
-    print ' &nbsp; ' . $langs->trans('UserCP') . ' : ';
-    print $form->select_dolusers('', "userCP", 1, "", 0, '');
-    print '&nbsp; Solde à incrémenter&nbsp;:&nbsp;';
-    print '<select id="soldeType" name="soldeType" class="flat">';
-    print '<option value="currentYearSolde">Année en cours</option>';
-    print '<option value="nextYearSolde">Année n+1</option>';
-    print '</select>';
-    print ' <input type="submit" value="' . $langs->trans("addEventToUserCP") . '" name="bouton" class="button"/>';
-
-    print '</form><br>';
-}
+//$cp_events = $holiday->fetchEventsCP();
+//
+//if ($cp_events == 1) {
+//    print '<br><form method="POST" action="' . $_SERVER["PHP_SELF"] . '">' . "\n";
+//    print '<input type="hidden" name="action" value="add_event" />';
+//
+//    print_fiche_titre($langs->trans('DefineEventUserCP'), '', '');
+//
+//    print $langs->trans('MotifCP') . ' : ';
+//    print $holiday->selectEventCP();
+//    print ' &nbsp; ' . $langs->trans('UserCP') . ' : ';
+//    print $form->select_dolusers('', "userCP", 1, "", 0, '');
+//    print '&nbsp; Solde à incrémenter&nbsp;:&nbsp;';
+//    print '<select id="soldeType" name="soldeType" class="flat">';
+//    print '<option value="currentYearSolde">Année en cours</option>';
+//    print '<option value="nextYearSolde">Année n+1</option>';
+//    print '</select>';
+//    print ' <input type="submit" value="' . $langs->trans("addEventToUserCP") . '" name="bouton" class="button"/>';
+//
+//    print '</form><br>';
+//}
 
 dol_fiche_head();
 

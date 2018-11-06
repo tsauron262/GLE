@@ -182,7 +182,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
 				if ($result < 0) $this->error="ErrorLDAP ".$ldap->error;
 			}
 		}
-		elseif ($action == 'USER_SETINGROUP')
+		if ($action == 'USER_MODIFY' && isset($object->context['newgroupid']) && $object->context['newgroupid'] > 0)
 		{
 			dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 			if (! empty($conf->global->LDAP_SYNCHRO_ACTIVE) && $conf->global->LDAP_SYNCHRO_ACTIVE === 'dolibarr2ldap')
@@ -194,9 +194,9 @@ class InterfaceLdapsynchro extends DolibarrTriggers
 				{
 					// Must edit $object->newgroupid
 					$usergroup=new UserGroup($this->db);
-					if ($object->newgroupid > 0)
+					if ($object->context['newgroupid'] > 0)
 					{
-						$usergroup->fetch($object->newgroupid);
+						$usergroup->fetch($object->context['newgroupid']);
 
 						$oldinfo=$usergroup->_load_ldap_info();
 						$olddn=$usergroup->_load_ldap_dn($oldinfo);

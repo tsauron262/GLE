@@ -75,7 +75,7 @@ if(isset($_REQUEST['dateFin']))
 else
     $dateFin = $year."-". ($month ) ."-" ."24";
 
-$sql = "SELECT cp.rowid, cp.description, cp.fk_user, cp.date_debut, cp.date_fin, cp.halfday, cp.type_conges";
+$sql = "SELECT cp.rowid, cp.description, cp.fk_user, cp.fk_group, cp.date_debut, cp.date_fin, cp.halfday, cp.type_conges";
 $sql.= " FROM " . MAIN_DB_PREFIX . "holiday cp";
 $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "user u ON cp.fk_user = u.rowid";
 $sql.= " WHERE cp.statut = 6";	// Approved
@@ -145,8 +145,18 @@ if($num == '0') {
 
 	while ($holiday = $db->fetch_array($result))
 	{
-		$user = new User($db);
-		$user->fetch($holiday['fk_user']);
+            $newNom = "";
+                if($holiday['fk_user'] > 0){
+                    $user = new User($db);
+                    $user->fetch($holiday['fk_user']);
+                    $newNom = $user->getNomUrl(1);
+                }
+                elseif($holiday['fk_group'] > 0){
+                    include_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
+                    $userG = new UserGroup($db);
+                    $userG->fetch($holiday['fk_group']);
+                    $newNom = $userG->getNomUrl(1);
+                }
 		$var=!$var;
 
                 if ($mode != 2){
@@ -172,8 +182,8 @@ if(strtotime($holiday['date_fin']) > strtotime(date('Y-m-d', strtotime($dateFin)
                 }
 
                 $type = $holiday['type_conges'];
-                if($nom != $user->getNomUrl(1))
-                    $nom = $nomUser = $user->getNomUrl(1);
+                if($nom != $newNom)
+                    $nom = $nomUser = $newNom;
                 else
                     $nomUser = "----";
 		print '<tr '.$bc[$var].'>';

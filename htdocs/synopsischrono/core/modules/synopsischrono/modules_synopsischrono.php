@@ -49,7 +49,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php';
         \brief      Classe mere des modeles de deplacement
 */
 
-class ModeleSynopsischrono extends CommonDocGenerator
+class ModelePDFSynopsischrono extends CommonDocGenerator
 {
     var $error='';
 

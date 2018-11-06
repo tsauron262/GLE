@@ -433,52 +433,6 @@ class Societe extends CommonObject
 		$this->tva_assuj = 1;
 		$this->status = 1;
 	}
-        
-        
-        
-        /*mod drsi*/
-        function traiteCodeClientFourn(){
-            global $conf;
-                if (empty($this->code_client) ){
-                    // Load object modCodeTiers
-                    $module=(! empty($conf->global->SOCIETE_CODECLIENT_ADDON)?$conf->global->SOCIETE_CODECLIENT_ADDON:'mod_codeclient_leopard');
-                    if (substr($module, 0, 15) == 'mod_codeclient_' && substr($module, -3) == 'php')
-                    {
-                        $module = substr($module, 0, dol_strlen($module)-4);
-                    }
-                    $dirsociete=array_merge(array('/core/modules/societe/'),$conf->modules_parts['societe']);
-                    foreach ($dirsociete as $dirroot)
-                    {
-                        $res=dol_include_once($dirroot.$module.'.php');
-                        if ($res) break;
-                    }
-                    $modCodeClient = new $module;
-                    if( ! empty($modCodeClient->code_auto)) 
-                        $this->code_client=$modCodeClient->getNextValue($this,0);
-                }
-                
-                
-                
-                
-                if (empty($this->code_fournisseur) ){
-                    // Load object modCodeFournisseur
-                    $module=(! empty($conf->global->SOCIETE_CODECLIENT_ADDON)?$conf->global->SOCIETE_CODECLIENT_ADDON:'mod_codeclient_leopard');
-                    if (substr($module, 0, 15) == 'mod_codeclient_' && substr($module, -3) == 'php')
-                    {
-                        $module = substr($module, 0, dol_strlen($module)-4);
-                    }
-                    $dirsociete=array_merge(array('/core/modules/societe/'),$conf->modules_parts['societe']);
-                    foreach ($dirsociete as $dirroot)
-                    {
-                        $res=dol_include_once($dirroot.$module.'.php');
-                        if ($res) break;
-                    }
-                    $modCodeFournisseur = new $module;
-                    if( ! empty($modCodeFournisseur->code_auto)) 
-                        $this->code_fournisseur=$modCodeFournisseur->getNextValue($this,1);
-                }
-        }
-        /*fmoddrsdi*/
 
 
 	/**
@@ -494,7 +448,6 @@ class Societe extends CommonObject
 
 		$error=0;
                 
-                $this->traiteCodeClientFourn();
 
 		// Clean parameters
 		if (empty($this->status)) $this->status=0;
@@ -802,8 +755,6 @@ class Societe extends CommonObject
 	function update($id, $user='', $call_trigger=1, $allowmodcodeclient=0, $allowmodcodefournisseur=0, $action='update', $nosyncmember=1)
 	{
 		global $langs,$conf,$hookmanager;
-                
-                $this->traiteCodeClientFourn();
 
 		require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 
@@ -877,8 +828,8 @@ class Societe extends CommonObject
 		$this->barcode=trim($this->barcode);
 
 		// For automatic creation
-		if ($this->code_client == -1 || $this->code_client === 'auto')           $this->get_codeclient($this,0);
-		if ($this->code_fournisseur == -1 || $this->code_fournisseur === 'auto') $this->get_codefournisseur($this,1);
+		if ($this->code_client == -1 || $this->code_client === 'auto' || $this->code_client === '')           $this->get_codeclient($this,0);
+		if ($this->code_fournisseur == -1 || $this->code_fournisseur === 'auto' || $this->code_fournisseur === '') $this->get_codefournisseur($this,1);
 
 		$this->code_compta=trim($this->code_compta);
 		$this->code_compta_fournisseur=trim($this->code_compta_fournisseur);

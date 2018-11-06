@@ -1862,6 +1862,7 @@ if ($action == 'create' && $user->rights->commande->creer)
 		// Confirmation of validation
 		if ($action == 'validate')
 		{
+                    if($object->statut < 1){
 			// on verifie si l'objet est en numerotation provisoire
 			$ref = substr($object->ref, 1, 4);
 			if ($ref == 'PROV') {
@@ -1906,6 +1907,9 @@ if ($action == 'create' && $user->rights->commande->creer)
 			}
 
 			$formconfirm = $form->formconfirm($_SERVER["PHP_SELF"] . '?id=' . $object->id, $langs->trans('ValidateOrder'), $text, 'confirm_validate', $formquestion, 0, 1, 220);
+                    }   
+                    else
+                        setEventMessages("Déja validée", array(), 'warnings');
 		}
 
 		// Confirm back to draft status

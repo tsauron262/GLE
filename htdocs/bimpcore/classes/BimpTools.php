@@ -669,6 +669,7 @@ class BimpTools
                 } elseif (isset($filter['operator']) && isset($filter['value'])) {
                     $sql .= ' ' . $filter['operator'] . ' ' . (is_string($filter['value']) ? '\'' . $filter['value'] . '\'' : $filter['value']);
                 } elseif (isset($filter['part_type']) && isset($filter['part'])) {
+                    $filter['part'] = addslashes($filter['part']);
                     $sql .= ' LIKE \'';
                     switch ($filter['part_type']) {
                         case 'beginning':

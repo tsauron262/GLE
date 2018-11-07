@@ -277,7 +277,7 @@ class BimpObject extends BimpCache
 
     public function isDolObject()
     {
-        return !is_null($this->dol_object);
+        return $this->config->isDefined('dol_object');
     }
 
     protected function addCommonFieldsConfig()
@@ -1256,6 +1256,11 @@ class BimpObject extends BimpCache
                 if ($value === '') {
                     continue;
                 }
+                
+                if (is_string($value)) {
+                    $value = addslashes($value);
+                }
+                
                 $filter_key = '';
                 if ($alias) {
                     $filter_key .= $alias . '.';

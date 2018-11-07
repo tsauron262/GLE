@@ -319,7 +319,7 @@ class DoliDBMysqli extends DoliDB
             $difference_ms2 = $timestamp_fin - $this->timestamp_debut;
             $difference_ms3 = $timestamp_debut - $this->timestamp_derfin;
             
-            if($difference_ms > 0.08 || $difference_ms3 > 0.1){
+            if($difference_ms > 0.00 || $difference_ms3 > 0.1){
                 echo $this->countReq." ";
                 echo $query." <br/>";
                 echo "||".$this->num_rows($ret)." en ".$difference_ms."s depuis deb ".$difference_ms2." <br/><br/>";

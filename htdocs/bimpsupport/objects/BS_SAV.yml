@@ -592,6 +592,8 @@ fields_tables:
             - field: id_entrepot
               display: nom_url
             - field: id_user_tech
+              display: nom_url
+            - field: id_equipment
               display: card
             - field: prioritaire
             - field: sav_pro

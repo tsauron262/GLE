@@ -140,7 +140,7 @@ class BC_List extends BC_Panel
 
     public function addJoin($table, $on, $alias)
     {
-        $this->params['joins'][] = array(
+        $this->params['joins'][$alias] = array(
             'table' => $table,
             'on'    => $on,
             'alias' => $alias

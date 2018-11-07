@@ -156,7 +156,7 @@ class BimpLine extends BimpObject
         return 1;
     }
 
-    public function getQtyDecimals($param)
+    public function getQtyDecimals()
     {
         $product = $this->getProduct();
 

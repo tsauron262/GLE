@@ -1024,6 +1024,26 @@ class BimpInput
         return $html;
     }
 
+    public static function renderMultipleValuesInput($object, $input_name, $add_input_content, $values, $label_input_suffixe = '', $auto_save = false, $required = false, $sortable = false)
+    {
+        $html = '';
+
+        $add_value_input_name = $input_name . '_add_value';
+        $label_input_name = $add_value_input_name . $label_input_suffixe;
+
+        $content = '<div class="addValueInputContainer">';
+        $content .= $add_input_content;
+        $content .= '<button type="button" class="addValueBtn btn btn-primary" ';
+        $content .= 'onclick="addMultipleInputCurrentValue($(this), \'' . $add_value_input_name . '\', \'' . $label_input_name . '\', ' . ($auto_save ? 'true' : 'false') . ')">';
+        $content .= '<i class="fa fa-plus-circle iconLeft"></i>Ajouter</button>';
+        $content .= '</div>';
+
+        $html = $content;
+        $html .= self::renderMultipleValuesList($object, $input_name, $values, $label_input_name, $auto_save, $required, $sortable);
+
+        return $html;
+    }
+
     public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0)
     {
         if (is_null($values) || $values === '') {
@@ -1061,13 +1081,6 @@ class BimpInput
         }
         $html .= ' data-required="' . $required . '"';
         $html .= '>';
-
-        $html .= '<div style="text-align: right">';
-        $html .= '<button type="button" class="addValueBtn btn btn-primary" onclick="addMultipleInputCurrentValue($(this), \'' . $value_input_name . '\', \'' . $label_input_name . '\', ' . ($autosave ? 'true' : 'false') . ')">';
-        $html .= '<i class="fa fa-plus-circle iconLeft"></i>';
-        $html .= 'Ajouter';
-        $html .= '</button>';
-        $html .= '</div>';
 
         $html .= '<div class="inputMultipleValues">';
         $html .= '<table>';
@@ -1116,6 +1129,10 @@ class BimpInput
 
     public static function renderInputContainer($input_name, $value, $content = '', $field_prefix = '', $required = 0, $multiple = 0, $extra_class = '', $extra_data = array())
     {
+        if (is_array($value)) {
+            $value = implode(',', $value);
+        }
+        
         $html .= '<div class="inputContainer ' . $field_prefix . $input_name . '_inputContainer ' . $extra_class . '"';
         $html .= ' data-field_name="' . $field_prefix . $input_name . '"';
         $html .= ' data-initial_value="' . $value . '"';

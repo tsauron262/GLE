@@ -35,16 +35,6 @@ $mode=GETPOST('mode');
 $address='';
 
 // Load third party
-if (empty($mode) || $mode=='thirdparty')
-{
-	include_once(DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php');
-	$id = GETPOST('id','int');
-	$object = new Societe($db);
-	$object->id = $id;
-	$object->fetch($id);
-	$address = $object->getFullAddress(1,', ');
-	$url = $object->url;
-}
 if ($mode=='contact')
 {
 	include_once(DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php');
@@ -64,6 +54,17 @@ if ($mode=='member')
 	$object->fetch($id);
 	$address = $object->getFullAddress(1,', ');
 	$url = '';
+}
+//if (empty($mode) || $mode=='thirdparty')
+else
+{
+	include_once(DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php');
+	$id = GETPOST('id','int');
+	$object = new Societe($db);
+	$object->id = $id;
+	$object->fetch($id);
+	$address = $object->getFullAddress(1,', ');
+	$url = $object->url;
 }
 
 
@@ -169,7 +170,7 @@ if ($address && $address != $object->country)
 
 	// Detect if we use https
 	$sforhttps=(((empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] != 'on') && (empty($_SERVER["SERVER_PORT"])||$_SERVER["SERVER_PORT"]!=443))?'':'s');
-
+$sforhttps = true;
 	$jsgmapapi='http://maps.google.com/maps/api/js';
 	if ($sforhttps) $jsgmapapi=preg_replace('/^http:/','https:',$jsgmapapi);
 

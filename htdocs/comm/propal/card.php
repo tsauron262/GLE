@@ -1032,7 +1032,12 @@ if (empty($reshook))
 			if (! empty($price_min) && (price2num($pu_ht) * (1 - price2num($remise_percent) / 100) < price2num($price_min))) {
 				$mesg = $langs->trans("CantBeLessThanMinPrice", price(price2num($price_min, 'MU'), 0, $langs, 0, 0, - 1, $conf->currency));
 				setEventMessages($mesg, null, 'errors');
-			} else {
+			}
+                        else if($prod_entry_mode != "free" && $idprod < 1){
+                            setEventMessages("Produit non sélectionné", null, 'errors');
+                            $db->rollback();
+                        }
+                        else {
 				// Insert line
 				$result = $object->addline($desc, $pu_ht, $qty, $tva_tx, $localtax1_tx, $localtax2_tx, $idprod, $remise_percent, $price_base_type, $pu_ttc, $info_bits, $type, - 1, 0, GETPOST('fk_parent_line'), $fournprice, $buyingprice, $label, $date_start, $date_end, $array_options, $fk_unit, '', 0, $pu_ht_devise);
 
@@ -1085,6 +1090,8 @@ if (empty($reshook))
 					unset($_POST['date_endyear']);
 				} else {
 					$db->rollback();
+                                        
+                                        dol_syslog("addLinePropalImpossible request ".print_r($_REQUEST,1),3);
 
 					setEventMessages($object->error, $object->errors, 'errors');
 				}

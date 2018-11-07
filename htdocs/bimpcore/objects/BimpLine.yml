@@ -1,0 +1,291 @@
+positions: 1
+position_insert: after
+common_fields: 0
+
+parent_id_property: id_parent
+
+labels:
+    name: ligne
+    is_female: 1
+    
+objects: 
+    product: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Product
+            id_object: 
+                field_value: id_product
+                
+    fourn_price:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_ProductFournisseurPrice
+            id_object: 
+                field_value: id_fourn_price
+                
+    fournisseur: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Fournisseur
+            id_object: 
+                field_value: id_fournisseur
+            
+    equipment: 
+        instance:
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+                
+fields: 
+    id_parent: 
+        label: Objet parent
+        type: id_parent
+        
+    type: 
+        label: Type
+        type: int
+        values: 
+            array: types
+            
+    id_product: 
+        label: Produit
+        type: id_object
+        object: product
+        input: 
+            type: search_product
+            help: Entrez la référence d'un produit
+        display_if: 
+            field_name: type
+            show_values: 1
+        depends_on: type
+        
+    product_type: 
+        label: Type produit
+        type: int
+        values: 
+            array: product_types
+        input: 
+            type: select
+            options: 
+                array: productTypes
+        display_if: 
+            field_name: type
+            hide_values: 3
+        depends_on: id_product,type
+        default_value: 0
+        
+    label: 
+        label: Libellé
+        display_if: 
+            field_name: type
+            show_values: 2
+        
+    qty: 
+        label: Quantité
+        type: qty
+        input: 
+            step: 
+                callback: getQtyStep
+        decimals: 
+            callback: getQtyDecimals
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        default_value: 1
+        depends_on: id_product
+        
+    pu_ht: 
+        label: Prix unitaire HT
+        type: money
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        default_value: 0
+        depends_on: id_product
+        
+    tva_tx: 
+        label: Taux de TVA
+        type: percent
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        default_value: 0
+        depends_on: id_product
+        
+    id_fourn_price: 
+        label: Prix d'achat fournisseur
+        type: id_object
+        object: fourn_price
+        values: 
+            array: fournPrices
+        display_if: 
+            field_name: type
+            show_values: 1
+        default_value: 0
+        depends_on: id_product
+        
+    id_fournisseur: 
+        label: Fournisseur
+        type: id_object
+        object: fournisseur
+        input: 
+            type: search_societe
+            societe_type: supplier
+            help: Entrez le nom ou la référence d'un fournisseur
+        create_form: default
+        display_if: 
+            fields_names: type,id_fourn_price
+            type: 
+                hide_values: 3
+            id_fourn_price: 
+                show_values: 0
+        default_value: 0
+        
+    pa_ht: 
+        label: Prix d'achat HT
+        type: money
+        display_if: 
+            fields_names: type,id_fourn_price
+            type: 
+                hide_values: 3
+            id_fourn_price: 
+                show_values: 0
+        default_value: 0
+        depends_on: id_fourn_price
+        
+    equipments: 
+        label: Equipements
+        type: items_list
+        items_data_type: id_object
+        items_sortable: 1
+        object: equipment
+        create_form: default
+        create_form_values: 
+            fields: 
+                id_product: 
+                    field_value: id_product
+        values: 
+            array: equipments
+        display_if: 
+            fields_names: type,id_product
+            type:
+                show_values: 1
+            id_product: 
+                hide_values: 0
+        depends_on: id_product
+        sortable: 0
+    
+    extra_serials: 
+        label: N° de série supplémentaires
+        type: text
+        input: 
+            rows: 3
+            auto_expand: 1
+            help: Entrez une liste de numéros de série séparés par une virgule, un point-virgule, un espace ou un saut de ligne
+        display_if: 
+            field_name: type
+            show_values: 1,2
+        sortable: 0
+        
+    description: 
+        label: Description
+        type: html
+        
+    remisable: 
+        label: Remisable
+        type: bool
+        default_value: 1            
+                
+lists_cols: 
+    label:
+        label: Désignation
+        value: 
+            callback: displayDescription
+        max_width: 460px
+    desc: 
+        field: description
+    type: 
+        field: type
+    product_type:
+        field: product_type
+    pu_ht: 
+        label: PU HT
+        field: pu_ht
+    tva:
+        label: TVA
+        field: tva_tx
+    pa_ht: 
+        label: PA HT
+        field: pa_ht
+    qty: 
+        label: Qté
+        field: qty
+        edit: 1
+    fourn_price: 
+        label: PA fournisseur
+        field: id_fourn_price
+        display: nom_url
+    fourn: 
+        label: Fournisseur
+        field: id_fournisseur
+        display: nom_url
+    equipments: 
+        label: Equipements / NS
+        value: 
+            callback: displayEquipments
+    total_ht: 
+        label: Total HT
+        value: 
+            callback: displayTotalHT
+    total_ttc: 
+        label: Total TTC
+        value: 
+            callback: displayTotalTTC
+                
+lists: 
+    default: 
+        configurable: 1
+        checkboxes: 1
+        positions: 1
+        positions_open: 1
+        enable_search: 0
+        enable_sort: 0
+        pagination: 0
+        bulk_actions:
+            - label: supprimer les lignes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: position
+        sort_way: asc
+        n: 0
+        single_cell:
+            filters:
+                type: 3
+            col: label
+        add_btn: 
+            callback: isParentEditable
+        add_form_name: default
+        add_btn_label: Ajouter une ligne
+        edit_btn: 1
+        update_btn: 1
+        delete_btn: 1
+        item_checkbox: 
+            callback: isDeletable
+        extra_btn: 
+            callback: getListExtraBtn
+        cols:
+            label:
+            pu_ht: 
+            tva:
+            pa_ht: 
+            qty: 
+            total_ttc:

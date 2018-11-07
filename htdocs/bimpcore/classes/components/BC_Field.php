@@ -14,28 +14,33 @@ class BC_Field extends BimpComponent
     public $no_html = false;
     public $name_prefix = '';
     public static $type_params_def = array(
-        'id_parent' => array(
+        'id_parent'  => array(
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
             'create_form_label'  => array('default' => 'Créer')
         ),
-        'id_object' => array(
+        'id_object'  => array(
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
             'create_form_label'  => array('default' => 'Créer')
         ),
-        'number'    => array(
+        'items_list' => array(
+            'items_data_type' => array('default' => 'string'),
+            'items_sortable'  => array('data_type' => 'bool', 'default' => 0),
+            'items_delimiter' => array('default' => ',')
+        ),
+        'number'     => array(
             'min'      => array('data_type' => 'float'),
             'max'      => array('data_type' => 'float'),
             'unsigned' => array('data_type' => 'bool', 'default' => 1),
             'decimals' => array('data_type' => 'int', 'default' => 2)
         ),
-        'money'     => array(
+        'money'      => array(
             'currency' => array('default' => 'EUR')
         ),
-        'string'    => array(
+        'string'     => array(
             'size'            => array('data_type' => 'int', 'default' => 128),
             'forbidden_chars' => array('default' => ''),
             'regexp'          => array('default' => ''),
@@ -80,12 +85,16 @@ class BC_Field extends BimpComponent
         $this->params['viewable'] = 1;
 
         if ($this->isObjectValid()) {
-            $this->params['editable'] = (int) $this->object->canEditField($name);
+            $this->params['editable'] = (int) ($this->object->canEditField($name) && $this->object->isFieldEditable($name));
             $this->params['viewable'] = (int) $this->object->canViewField($name);
         }
 
         if (in_array($this->params['type'], array('qty', 'int', 'float', 'money', 'percent'))) {
             $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['number']));
+        } elseif ($this->params['type'] === 'items_list') {
+            if (isset($this->params['items_data_type']) && $this->params['items_data_type'] === 'id_object') {
+                $this->params = array_merge($this->params, parent::fetchParams($this->config_path, self::$type_params_def['id_object']));
+            }
         }
     }
 
@@ -166,7 +175,7 @@ class BC_Field extends BimpComponent
         if (!$this->params['searchable']) {
             return '';
         }
-        
+
         $input_id = $this->object->object_name . '_search_' . $this->name;
         $input_name = 'search_' . $this->name;
 
@@ -263,7 +272,11 @@ class BC_Field extends BimpComponent
         }
 
         if ($this->display_input_value) {
-            $html .= '<input type="hidden" name="' . $this->name_prefix . $this->name . '" value="' . htmlentities($this->value) . '">';
+            $value = $this->value;
+            if ($this->params['type'] === 'items_list' && is_array($this->value)) {
+                $value = implode($this->params['items_delimiter'], $this->value);
+            } 
+            $html .= '<input type="hidden" name="' . $this->name_prefix . $this->name . '" value="' . htmlentities($value) . '">';
         }
 
         $display = new BC_Display($this->object, $this->display_name, $this->config_path . '/display', $this->name, $this->params, $this->value);

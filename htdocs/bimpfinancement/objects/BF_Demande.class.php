@@ -12,18 +12,17 @@ class BF_Demande extends BimpObject
     const BF_DEMANDE_RECONDUIT = 6;
     const BF_DEMANDE_REMPLACE = 7;
     const BF_DEMANDE_TERMINE = 999;
-    
+
     public static $status_list = array(
-        self::BF_DEMANDE_BROUILLON => array('label' => 'Brouillon', 'classes' => array('warning')),
-        self::BF_DEMANDE_ATT_RETOUR => array('label' => 'En attente de retour', 'classes' => array('important')),
+        self::BF_DEMANDE_BROUILLON         => array('label' => 'Brouillon', 'classes' => array('warning')),
+        self::BF_DEMANDE_ATT_RETOUR        => array('label' => 'En attente de retour', 'classes' => array('important')),
         self::BF_DEMANDE_SIGNE_ATT_CESSION => array('label' => 'Signé - en attente de cession', 'classes' => array('important')),
-        self::BF_DEMANDE_CEDE => array('label' => 'Cédé', 'classes' => array('danger')),
-        self::BF_DEMANDE_SANS_SUITE => array('label' => 'Sans suite', 'classes' => array('danger')),
-        self::BF_DEMANDE_RECONDUIT => array('label' => 'Reconduit', 'classes' => array('danger')),
-        self::BF_DEMANDE_REMPLACE => array('label' => 'Remplacé', 'classes' => array('danger')),
-        self::BF_DEMANDE_TERMINE => array('label' => 'Terminé', 'classes' => array('success')),
+        self::BF_DEMANDE_CEDE              => array('label' => 'Cédé', 'classes' => array('danger')),
+        self::BF_DEMANDE_SANS_SUITE        => array('label' => 'Sans suite', 'classes' => array('danger')),
+        self::BF_DEMANDE_RECONDUIT         => array('label' => 'Reconduit', 'classes' => array('danger')),
+        self::BF_DEMANDE_REMPLACE          => array('label' => 'Remplacé', 'classes' => array('danger')),
+        self::BF_DEMANDE_TERMINE           => array('label' => 'Terminé', 'classes' => array('success')),
     );
-    
     public static $durations = array(
         24 => '24 mois',
         36 => '36 mois',
@@ -49,9 +48,10 @@ class BF_Demande extends BimpObject
         2 => 'A terme à échoir'
     );
 
+    // Getters: 
+
     public function renderHeaderExtraLeft()
     {   
-        $this->verif_exist_document();
         $html = '';
         if ($this->isLoaded()) {
             BimpTools::loadDolClass('societe');
@@ -105,27 +105,22 @@ class BF_Demande extends BimpObject
         return $contacts;
     }
 
-    public function renderViewLoadedScript()
-    {
-        if ($this->isLoaded()) {
-            return '<script type="text/javascript">onBFDemandeViewLoaded(' . $this->id . ');</script>';
-        }
-        return '';
-    }
-
-    public function verif_exist_document(){
+    public function verif_exist_document($object){
+        $modifiable = true;
         // Modification des champs de la bese de données si les documents ont été supprimer
         $leContrat = $this->db->getRows('contrat', 'rowid = ' . $this->getData('id_contrat'), null, 'array', array('rowid'));
         $laFacture = $this->db->getRows('facture', 'rowid = ' . $this->getData('id_facture'), null, 'array', array('rowid'));
         $laFactureClient = $this->db->getRows('facture', 'rowid = ' . $this->getData('id_facture_client'), null, 'array', array('rowid'));
         $laFactureFournisseur = $this->db->getRows('facture', 'rowid = ' . $this->getData('id_facture_fournisseur'), null, 'array', array('rowid'));
-        if(!$leContrat) $this->updateField('id_contrat', 0);
-        if(!$laFacture) $this->updateField('id_facture', 0);
-        if(!$laFactureClient) $this->updateField('id_facture_client', 0);
-        if(!$laFactureFournisseur) $this->updateField('id_facture_fournisseur', 0);
+        if(!$leContrat && $object == 'contrat') {$this->updateField('id_contrat', 0); $modifiable = false; }
+        if(!$laFacture && $object == 'facture') {$this->updateField('id_facture', 0); $modifiable = false; }
+        if(!$laFactureClient && $object == 'factureC') {$this->updateField('id_facture_client', 0); $modifiable = false;}
+        if(!$laFactureFournisseur && $object == 'factureF') {$this->updateField('id_facture_fournisseur', 0); $modifiable = false;}
+
+        return $modifiable;
     }
 
-        public function getDemandeData($object = null) {
+        public function getDemandeData($object) {
             global $langs;
 
             $id_demande = (int) $this->getData('id');
@@ -146,6 +141,7 @@ class BF_Demande extends BimpObject
             $date_livraison = $this->getdata('date_livraison');
             $date_creation = $this->getData('date_create');
             $id_contrat = $this->getData('id_contrat');
+            $id_facture = $this->getData('id_facture');
             $id_facture_client = $this->getData('id_facture_client');
             $id_facture_fournisseur = $this->getData('id_facture_fournisseur');
             $commission_commerciale = $this->getData('commission_commerciale');
@@ -153,9 +149,9 @@ class BF_Demande extends BimpObject
             $vr_achat = $this->getData('vr');
             $vr_vente = $this->getData('vr_vente');
 
-            $this->verif_exist_document();
+            $modif = $this->verif_exist_document($object);
             
-            
+                
                 if(!$accepted) { $errors[] = $langs->trans('erreurBanqueValid'); }
                 if(!$date_livraison) { $errors[] = $langs->trans('erreurLivraisonDate'); }
                 if(!$date_loyer){ $errors[] = $langs->trans('erreurLoyerDate'); } 
@@ -190,22 +186,9 @@ class BF_Demande extends BimpObject
                         'date_creation' => $date_creation,
                         'assurance' => $assurance,
                         'where' => '`id_demande` = ' . $id_demande,
+                        'modif' => $modif
                     );
 
-
-                    if($id_contrat != 0 && $object == 'contrat')
-                        $data["modif_contrat"] = true;
-                    else
-                        $data["modif_contrat"] = false;
-                    if(!$id_facture_client && $object == 'factureC')
-                        $data["modif_factureC"] = true;
-                    else
-                        $data["modif_factureC"] = false;
-                    if(!$id_facture_fournisseur && $object == 'factureF')
-                        $data["modif_factureF"] = true;
-                    else
-                        $data["modif_factureF"] = false;
-                   
                     return (object) $data; 
                 } else {
                     return $errors;
@@ -224,7 +207,7 @@ class BF_Demande extends BimpObject
                 // Si la facture n'existe pas
                 BimpTools::loadDolClass('compta/facture', 'facture');
                 $facture = new Facture($this->db->db);
-                if($data->modif_factureC) {
+                if(!$data->modif) {
                     $facture->socid = $data->id_client;
                     $facture->date = date('Y-m-d');
                     $facture->total_ht = $data->vr_achat;
@@ -239,8 +222,7 @@ class BF_Demande extends BimpObject
                     }
                 } else {
                     $facture->fetch($data->id_facture_client);
-                    
-                    $success = 'La facture client à bien été mis à jours';
+                    $success = $langs->trans('successInvoiceUpdate');
                 }
             }
         }
@@ -251,7 +233,6 @@ class BF_Demande extends BimpObject
             'success' => $success,
         );
     }
-
     public function actionGenerateContrat($success){
         global $langs, $user;
         if (!$this->isLoaded()) { 
@@ -285,7 +266,7 @@ class BF_Demande extends BimpObject
             $contrat->mise_en_service = $data->date_livraison;
             $contrat->fin_validite = $date_de_fin;
             //return array($data->modif_contrat);
-            if(!$data->modif_contrat) {
+            if(!$data->modif) {
                 if($contrat->create($user) > 0) { // Si le contrat est créer correstement
                     addElementElement('demande', 'contrat', $id, $contrat->id); // On ajoute une ligne dans llx_element_element
                     $this->updateField('id_contrat', (int) $contrat->id); // On met le numéro de contrat dans la demande
@@ -356,48 +337,19 @@ class BF_Demande extends BimpObject
         } else { 
             (int) $id = $this->getData('id'); 
             $errors = array();
-            $where = '`id_demande` = ' . $id;
-            $reference = $this->getData('reference');
+           $data = $this->getDemandeData('facture');
+           if(is_array($data)) return $data;
         }
 
-        $id_client = (int) $this->getData('id_client'); //
-        $id_commercial = (int) $this->getData('id_commercial');//
-        $montant_materiels = $this->getData('montant_materiels');
-        $montant_services = $this->getData('montant_services');
-        $montant_logiciels = $this->getData('montant_logiciels');
-        $vr_vente = $this->getData('vr_vente');
-        $id_status = $this->getData('status'); 
-        $accepted = $this->getData('accepted');
-        $duree_prevu = $this->getData('duration');
-        $periodicite_prevu = $this->getData('periodicity');
-        $id_client_contact = $this->getData('id_client_contact'); //
-        $assurance = $this->getData('insurance');
-        $id_supplier = $this->getData('id_supplier'); //
-        $id_supplier_contact = $this->getData('id_supplier_contact'); //
-        $date_loyer = $this->getData('date_loyer');
-        $date_livraison = $this->getdata('date_livraison');
-        $date_creation = $this->getData('date_create');
-        $id_contrat = $this->getData('id_contrat'); //
-        $commission_commerciale = $this->getData('commission_commerciale');//
-        $commission_financiere = $this->getData('commission_financiere');//
-
-        if(!$accepted) { $errors[] = $langs->trans('erreurBanqueValid'); }
-        if(!$date_livraison) { $errors[] = "Date de livraison manquante"; }
-        if(!$date_loyer){ $errors[] = "Date de mise en loyer manquante"; } 
-        if(!$montant_materiels && !$montant_logiciels && !$montant_services) { $errors[] = 'Logiciels, Services ou Matériels non rensseignés'; }
-        if(!$id_client) { $errors[] = "Pas de client";}
-        if(!$id_commercial) { $errors[] = "Commercial obligatoire"; }
-        if($id_contrat == 0) { $errors[] = "Impossible de créer une facture car il n'y à pas de contrat"; }
+        
 
         
 
         if(!$errors) {
             global $langs, $user;
-            $liste_refinanceur = $this->db->getRows('bf_refinanceur', $where . " AND status = 2", null, 'array', array('id', 'position', 'name', 'status', 'rate', 'coef', 'comment'));
+            $liste_refinanceur = $this->db->getRows('bf_refinanceur', $data->where . " AND status = 2", null, 'array', array('id', 'position', 'name', 'status', 'rate', 'coef', 'comment'));
             if($liste_refinanceur) {
-                $where_element_element = "`fk_source` = " . $id . " AND `sourcetype` = 'demande' AND `targettype` = 'facture'";
-                $ElementElement = $this->db->getRows('element_element', $where_element_element, null, 'array', array('fk_source', 'sourcetype', 'targettype'));
-                if(!$ElementElement) {
+                if(!$data->modif) {
                     $cout_banque = 10; // A MODIFIER EN FONCTION DU TAUX ET COEF
                     $taux_tva = 0; // A MOFIFIER EN FONCTION DE SI ON A UN TAUX POUR LES EMPRUNS
                     $success = 'Montant enprum : ';

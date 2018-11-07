@@ -842,16 +842,18 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
         return;
     }
 
-    var $container = $button.findParentByClass('inputMultipleValuesContainer');
-    if (!$container.length) {
-        bimp_msg('Une erreur est survenue. opération impossible (1)', 'danger');
-        return;
-    }
-    var $inputContainer = $container.parent().find('.inputContainer');
+    var $inputContainer = $button.findParentByClass('inputContainer');
     if (!$inputContainer.length) {
-        bimp_msg('Une erreur est survenue. opération impossible (2)', 'danger');
+        bimp_msg('Une erreur technique est survenue ("inputContainer" absent). opération impossible', 'danger');
         return;
     }
+
+    var $container = $inputContainer.find('.inputMultipleValuesContainer');
+    if (!$container.length) {
+        bimp_msg('Une erreur technique est survenue ("inputMultipleValuesContainer" absent). opération impossible', 'danger');
+        return;
+    }
+
     var $value_input = $inputContainer.find('[name=' + value_input_name + ']');
     var $label_input = $inputContainer.find('[name=' + label_input_name + ']');
 
@@ -913,6 +915,9 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 
         $value_input.val('');
         $label_input.val('');
+        if ($inputContainer.find('.search_input_selected_label').length) {
+            $inputContainer.find('.search_input_selected_label').hide().find('span').text('');
+        }
 
         if ($value_input.hasClass('select2-hidden-accessible')) {
             $inputContainer.find('.select2-selection__rendered').html('');
@@ -947,13 +952,14 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
 }
 
 function removeMultipleInputValue($button, value_input_name) {
-    var $multipleValues = $button.findParentByClass('inputMultipleValuesContainer');
+    var $inputContainer = $button.findParentByClass('inputContainer');
+    var $multipleValues = $inputContainer.find('.inputMultipleValuesContainer');
 
     $button.parent('td').parent('tr').fadeOut(250, function () {
         $(this).remove();
         checkMultipleValues();
         $('body').trigger($.Event('inputMultipleValuesChange', {
-            input_name: $multipleValues.data('field_name'),
+            input_name: $inputContainer.data('field_name'),
             $container: $multipleValues
         }));
     });
@@ -967,13 +973,14 @@ function checkMultipleValues() {
         } else {
             $(this).find('.noItemRow').show();
         }
-        var $inputContainer = $container.parent().find('.inputContainer');
+        var $inputContainer = $container.findParentByClass('inputContainer');
         if ($inputContainer.length) {
-            var input_name = $inputContainer.data('field_name');
+            var input_name = $inputContainer.data('field_name') + '_add_value';
             if (input_name) {
                 var $input = $inputContainer.find('[name="' + input_name + '"]');
                 if ($input.length) {
                     if ($input.tagName() === 'select') {
+                        $inputContainer.find('.addValueInputContainer').find('button.addValueBtn').show();
                         $input.find('option').show();
                         $container.find('.itemRow').each(function () {
                             $input.find('option[value="' + $(this).find('.item_value').val() + '"]').hide();
@@ -990,17 +997,19 @@ function checkMultipleValues() {
                             } else {
                                 $input.show();
                             }
-                            $container.find('.addValueBtn').parent('div').show();
+                            $inputContainer.find('.addValueInputContainer').show();
                         } else {
                             if ($input.hasClass('select2-hidden-accessible')) {
                                 $inputContainer.find('.select2-container').hide();
                             } else {
                                 $input.hide();
                             }
-                            $container.find('.addValueBtn').parent('div').hide();
+                            $inputContainer.find('.addValueInputContainer').hide();
                         }
                         $inputContainer.find('.select2-selection__rendered').html('');
                     }
+                } else {
+                    $inputContainer.find('.addValueInputContainer').find('button.addValueBtn').hide();
                 }
             }
         }
@@ -1490,7 +1499,7 @@ function setFormEvents($form) {
 function setInputsEvents($container) {
     var in_modal = $.isOk($container.findParentByClass('modal'));
     $container.find('select').each(function () {
-        if (!$.isOk($(this).findParentByClass('subObjectFormTemplate')) && 
+        if (!$.isOk($(this).findParentByClass('subObjectFormTemplate')) &&
                 !$(this).hasClass('no_select2')) {
             if ($(this).hasClass('select2-hidden-accessible')) {
                 $(this).select2('destroy');
@@ -1563,6 +1572,28 @@ function setInputsEvents($container) {
                 options.dropdownParent = $('#page_modal');
             }
             $(this).select2(options);
+
+            // Hack pour correction bug d'affichage:
+            $(this).on('select2:close', function (e) {
+                var $options = $(this).find('option');
+//
+                if ($options.length === 1) {
+                    var val = $(this).val();
+                    var $option = $(this).find('option[value="' + val + '"]');
+                    if ($option.length) {
+                        var html = '<span style="';
+                        if ($option.data('color')) {
+                            html += 'color: #' + $option.data('color') + '; font-weight: bold;';
+                        }
+                        html += '">';
+                        if ($option.data('icon_class')) {
+                            html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
+                        }
+                        html += $option.text() + '</span>';
+                        $(this).parent().find('span.select2-selection__rendered').html(html);
+                    }
+                }
+            });
         }
     });
     $container.find('.switch').each(function () {

@@ -1359,8 +1359,10 @@ function setPositionsHandlesEvents($list) {
 }
 
 $(document).ready(function () {
-    $('.object_list_table').each(function () {
-        onListLoaded($(this));
+    $('body').on('bimp_ready', function () {
+        $('.object_list_table').each(function () {
+            onListLoaded($(this));
+        });
     });
 
     $('body').on('controllerTabLoaded', function (e) {

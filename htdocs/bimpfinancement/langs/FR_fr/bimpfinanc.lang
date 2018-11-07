@@ -16,6 +16,8 @@ erreurMontant= Au moin un montant (Logiciels, Services ou Matériels) est obliga
 erreurIdClient= La demande de financement n'à pas de client
 erreurIdCommercial= La demande de financement n'à pas de commercial
 erreurIdRefinanceur= La demande de financement n'à pas de refinanceur
+erreurClientCreditSafe= Le client n'à pas de note crédit SAFE
+erreurCreateInvoiceContrat= Impossible de créer une facture car il n'y à pas de contrat
 
 # Les bouttons
 buttonGenContrat= Générer le contrat
@@ -35,3 +37,7 @@ wordMonth= Mois
 word3Month= Trimestres
 word6Month= Semestres
 word12Month= Ans
+
+
+# Description facture
+InvoiceDescriptionClient= Total de la valeur résiduelle d'achat pour la demans de financement

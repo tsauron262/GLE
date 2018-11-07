@@ -555,10 +555,9 @@ class Bimp_Propal extends BimpComm
     {
         $wanings = array();
         if ((int) $this->id && $data['model'] == "bimpdevissav") {
-            $this->sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-            if (!$this->sav->find(array('id_propal' => (int) $object->id))) {
-                $wanings[] = 'Aucun SAV associé à cette propale trouvé';
+            if (!(int) $this->getIdSav()) {
                 $data['model'] = "bimpdevis";
+                $wanings[] = 'Aucun SAV associé à cette propale trouvé';
             }
         }
 

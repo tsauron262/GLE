@@ -29,10 +29,19 @@ sections:
                     panel: 1
                     name: montants
                     object: demande
+                    
+          - id: elements
+            title: Elements financés
+            struct: 
+                type: list
+                list: 
+                    name: default
+                    object: demande
+                    children: lines
           
           - id: fournisseurs
             title: Factures fournisseurs
-            strutc: 
+            struct: 
                 type: view
                 view: 
                     panel: 1

@@ -137,7 +137,7 @@ class BS_Inter extends BimpObject
     public function create(&$warnings = array(), $force_create = false)
     {
         if (!$this->isCreatable()) {
-            return array('Ticket clôt. Impossible de créer une nouvelle intervention');
+            return array('Ticket clos. Impossible de créer une nouvelle intervention');
         }
         
         $errors = parent::create($warnings, $force_create);
@@ -160,7 +160,7 @@ class BS_Inter extends BimpObject
             $ticket = $this->getParentInstance();
             if (BimpObject::objectLoaded($ticket)) {
                 if ((int) $ticket->getData('status') === BS_Ticket::BS_TICKET_CLOT) {
-                    $errors[] = 'Cette intervention ne peut pas être ouverte car le ticket hotline est clôt';
+                    $errors[] = 'Cette intervention ne peut pas être ouverte car le ticket hotline est clos';
                 }
             }
         }

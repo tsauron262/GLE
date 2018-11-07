@@ -1080,7 +1080,7 @@ class BimpObject extends BimpCache
 
                 $method = 'get' . ucfirst($field_name) . 'SearchFilters';
                 if (method_exists($this, $method)) {
-                    $this->{$method}($filters, $value);
+                    $this->{$method}($filters, $value, $joins);
                     continue;
                 }
                 if (in_array($field_name, self::$common_fields)) {

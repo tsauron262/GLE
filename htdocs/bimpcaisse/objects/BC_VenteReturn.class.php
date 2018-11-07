@@ -2,12 +2,6 @@
 
 class BC_VenteReturn extends BimpObject
 {
-
-    public function getProductEquipmentsArray()
-    {
-        return array();
-    }
-
     public function getLabel()
     {
         $label = '';

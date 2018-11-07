@@ -8,8 +8,8 @@ class ObjectLine extends BimpObject
     public $equipment_required = false;
 
     const LINE_PRODUCT = 1;
-    const LINE_FREE = 2;
-    const LINE_TEXT = 3;
+    const LINE_TEXT = 2;
+    const LINE_FREE = 3;
 
     public $desc = null;
     public $id_product = null;

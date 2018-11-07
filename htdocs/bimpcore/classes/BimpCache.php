@@ -40,6 +40,52 @@ class BimpCache
 
     // Objets: 
 
+    public static function getBimpObjectInstance($module, $object_name, $id_object, $parent = null)
+    {
+        if (!(int) $id_object) {
+            return BimpObject::getInstance($module, $object_name, null, $parent);
+        }
+
+        $cache_key = 'bimp_object_' . $module . '_' . $object_name . '_' . $id_object;
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = BimpObject::getInstance($module, $object_name, $id_object, $parent);
+        }
+        
+        return self::$cache[$cache_key];
+    }
+    
+    public static function getDolObjectInstance($id_object, $module, $file = null, $class = null)
+    {
+        if (is_null($file)) {
+            $file = $module;
+        }
+        
+        if (is_null($class)) {
+            $class = ucfirst($file);
+        }
+        
+        BimpTools::loadDolClass($module, $file, $class);
+        
+        if (class_exists($class)) {
+            global $db;
+            
+            if (!(int) $id_object) {
+                return new $class($db);
+            }
+            
+            $cache_key = 'dol_object_'.$class.'_'.$id_object;
+            
+            if (!isset(self::$cache[$cache_key])) {
+                
+            }
+            
+            
+        }
+        
+        return null;
+    }
+
     public static function getObjectFilesArray($object, $with_deleted = false)
     {
         if (BimpObject::objectLoaded($object)) {
@@ -394,7 +440,7 @@ class BimpCache
 
     // Product: 
 
-    public static function getProductEquipmentsArray($id_product, $include_empty = false, $empty_label = '')
+    public static function getProductEquipmentsArray($id_product = 0, $include_empty = false, $empty_label = '')
     {
         if ((int) $id_product) {
             $cache_key = 'product_' . $id_product . '_equipments_array';

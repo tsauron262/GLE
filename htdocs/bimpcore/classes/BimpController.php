@@ -34,6 +34,12 @@ class BimpController
 
     public function __construct($module, $controller = 'index')
     {
+        global $main_controller;
+
+        if (is_null($main_controller)) {
+            $main_controller = $this;
+        }
+
         $this->addDebugTime('Début controller');
         $this->module = $module;
         $this->controller = $controller;
@@ -116,6 +122,7 @@ class BimpController
 
     public function addDebugTime($label)
     {
+//        echo $label . '<br/>';
         $this->times[] = array(
             'label' => $label,
             'time'  => round(microtime(1), 4)
@@ -160,7 +167,6 @@ class BimpController
         if (!defined('BIMP_CONTROLLER_INIT')) {
             define('BIMP_CONTROLLER_INIT', 1);
             $this->addDebugTime('Début affichage page');
-            $main_controller = $this;
             llxHeader('', '', '', false, false, false);
             $display_footer = true;
         } else {

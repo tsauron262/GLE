@@ -187,7 +187,8 @@ class synopsisHook {//FA1506-0369
         }
 
         if (defined("CLOSE_DATE") && !stripos($_SERVER['REQUEST_URI'], 'close.php') && !$admin) {
-            $langs->load("main");
+            if(is_object($langs))
+                $langs->load("main");
             require (DOL_DOCUMENT_ROOT . "/synopsistools/public/close.php");
             die;
         }

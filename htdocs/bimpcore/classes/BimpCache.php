@@ -394,7 +394,7 @@ class BimpCache
 
     // Product: 
 
-    public static function getProductEquipmentsArray($id_product, $include_empty = false, $empty_label = '')
+    public static function getProductEquipmentsArray($id_product = 0, $include_empty = false, $empty_label = '')
     {
         if ((int) $id_product) {
             $cache_key = 'product_' . $id_product . '_equipments_array';

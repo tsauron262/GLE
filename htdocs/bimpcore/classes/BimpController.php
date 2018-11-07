@@ -3,7 +3,7 @@
 class BimpController
 {
 
-    public static $debug_time = false;
+    public static $debug_time = true;
     public $times = array();
     public $module = '';
     public $controller = '';
@@ -116,6 +116,7 @@ class BimpController
 
     public function addDebugTime($label)
     {
+        echo $label . '<br/>';
         $this->times[] = array(
             'label' => $label,
             'time'  => round(microtime(1), 4)

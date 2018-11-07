@@ -3,7 +3,7 @@
 class BC_VenteReturn extends BimpObject
 {
 
-    public function getProductEquipmentsArray()
+    public static function getProductEquipmentsArray()
     {
         return array();
     }

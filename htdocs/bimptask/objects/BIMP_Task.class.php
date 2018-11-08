@@ -57,7 +57,8 @@ class BIMP_Task extends BimpObject
                 $msg .= $note;
             }
             
-            $msg .= $sep."Message original<br/>";
+            $msg .= $sep."Message original :";
+                $msg .= $note;
             $msg .= $this->getData("txt");
         }
         

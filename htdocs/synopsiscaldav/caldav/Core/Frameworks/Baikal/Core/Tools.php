@@ -57,7 +57,7 @@ class Tools {
 	public static function handleException($exception) {
             dol_syslog("exception caldav ".$exception,3);
             
-            file_put_contents("//Users/tommy/Desktop/tmpcdav/exception.txt", $exception);
+            file_put_contents("/var/GLE/logs/caldav.txt", $exception);
 		echo "<pre>" . $exception . "<pre>";
 	}
 	

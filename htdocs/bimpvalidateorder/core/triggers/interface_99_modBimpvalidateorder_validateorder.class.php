@@ -26,6 +26,7 @@ include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.cla
  */
 class Interfacevalidateorder extends DolibarrTriggers {
     private $defaultCommEgalUser = true;
+    public $errors = array();
 
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
         global $conf, $user;
@@ -116,6 +117,8 @@ class Interfacevalidateorder extends DolibarrTriggers {
             
             $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
             $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
+            if(count($this->errors) > 0)
+                return -2;
         }
         if ($action == 'ORDER_UNVALIDATE' || ($action == 'ORDER_DELETE' && $object->statut == 1)) {
             setEventMessages("Impossible de dévalidé", null, 'errors');

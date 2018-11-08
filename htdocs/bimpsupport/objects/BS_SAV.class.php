@@ -85,6 +85,11 @@ class BS_SAV extends BimpObject
 
         $this->useCaisseForPayments = BimpCore::getConf('sav_use_caisse_for_payments');
     }
+    
+    public function renderHeaderExtraLeft(){
+        $soc = $this->getChildObject("client");
+        return $soc->dol_object->getNomUrl(1);;
+    }
 
     // Getters:
 

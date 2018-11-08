@@ -1,0 +1,25 @@
+bootstrap: 1
+objects:
+    task: 
+        instance: 
+            bimp_object: BIMP_Task
+            id_object: 
+                request: id
+    
+sections:
+    - type: object_header
+      object_header: 
+          object: task
+    - type: list
+      list:
+          panel: 1
+          object: task
+          
+    - type: buttons
+      buttons:
+          - label: Liste des taches
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

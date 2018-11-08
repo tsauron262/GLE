@@ -1907,7 +1907,7 @@ class BimpObject extends BimpCache
             }
 
             if (!$value) {
-                if (in_array($type, array('string', 'text', 'id', 'id_object'))) {
+                if (in_array($type, BC_Field::$empty_not_allowed_types)) {
                     $missing = true;
                 }
             }

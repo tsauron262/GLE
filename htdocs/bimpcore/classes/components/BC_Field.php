@@ -49,6 +49,10 @@ class BC_Field extends BimpComponent
             'lowercase'       => array('data_type' => 'bool', 'default' => 0),
         )
     );
+    
+    public static $empty_not_allowed_types = array(
+        'string', 'text', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
+    );
 
     public function __construct(BimpObject $object, $name, $edit = false, $path = 'fields')
     {

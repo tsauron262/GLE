@@ -21,6 +21,23 @@ fields:
     src:
         label: Source email
         type: text
+    dst:
+        label: Destinataire email
+        type: text
+    subj:
+        label: Sujet email
+        type: text
+    txt:
+        label: Email
+        type: text
+    comment:
+        label: Commentaire
+        type: text
+    status:
+        label: Statut
+        type: int
+        values: 
+            array: status_list
      
         
 forms:
@@ -51,4 +68,14 @@ lists:
                 field: id
             src:
                 field: src
+            dst:
+                field: dst
+            subj:
+                field: subj
+            txt:
+                field: txt
+            comment:
+                field: comment
+            status:
+                field: status
 

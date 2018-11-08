@@ -2,7 +2,7 @@ bootstrap: 1
 title: Bimp Task
 
 objects:
-    demandes:
+    task:
         instance:
             bimp_object: BIMP_Task
     

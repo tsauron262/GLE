@@ -856,7 +856,7 @@ class Bimp_Commande extends BimpComm
             }
 
             if ((int) $nCommandeProducts !== (int) $nBrOrderProducts) {
-                $errors[] = 'Le nombre de produits enregistrés pour la commande ne correspond pas au nombre de produits enregistrés pour la logistique';
+                $errors[] = 'Le nombre de produits enregistrés pour la commande ('.$nCommandeProducts.') ne correspond pas au nombre de produits enregistrés pour la logistique ('.$nBrOrderProducts.')';
             }
 
             if ((int) $nCommandeServices !== (int) $nBrOrderServices) {

@@ -777,7 +777,7 @@ class BS_SAV extends BimpObject
     // Rendus HTML: 
 
     public function renderSavCheckup()
-    {
+    {        
         $html = '';
         if ($this->isLoaded()) {
             if ((int) $this->getData('id_facture_acompte')) {

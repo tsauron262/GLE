@@ -51,38 +51,36 @@ class BimpCache
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = BimpObject::getInstance($module, $object_name, $id_object, $parent);
         }
-        
+
         return self::$cache[$cache_key];
     }
-    
+
     public static function getDolObjectInstance($id_object, $module, $file = null, $class = null)
     {
         if (is_null($file)) {
             $file = $module;
         }
-        
+
         if (is_null($class)) {
             $class = ucfirst($file);
         }
-        
+
         BimpTools::loadDolClass($module, $file, $class);
-        
+
         if (class_exists($class)) {
             global $db;
-            
+
             if (!(int) $id_object) {
                 return new $class($db);
             }
-            
-            $cache_key = 'dol_object_'.$class.'_'.$id_object;
-            
+
+            $cache_key = 'dol_object_' . $class . '_' . $id_object;
+
             if (!isset(self::$cache[$cache_key])) {
                 
             }
-            
-            
         }
-        
+
         return null;
     }
 
@@ -223,6 +221,46 @@ class BimpCache
         }
 
         return array();
+    }
+
+    public static function getObjectNotes(BimpObject $object)
+    {
+        if (!BimpObject::objectLoaded($object)) {
+            return array();
+        }
+
+        global $user;
+
+        $cache_key = 'object_' . $object->module . '_' . $object->object_name . '_' . $object->id;
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $instance = BimpObject::getInstance('bimpcore', 'BimpNote');
+
+            $filters = array(
+                'obj_type'      => 'bimp_object',
+                'obj_module'    => $object->module,
+                'obj_name'      => $object->object_name,
+                'id_obj'        => $object->id
+            );
+            
+            $filters = array_merge($filters, BimpNote::getFiltersByUser());
+            
+            $list = $instance->getList($filters, null, null, 'date_create', 'desc', 'array', array('id'));
+            
+            echo '<pre>';
+            print_r($list);
+            exit;
+            
+            if (!is_null($list)) {
+                foreach ($list as $item) {
+                    self::$cache[$cache_key] = BimpObject::getInstance('bimpcore', 'BimpNote', (int) $item['id']);
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
     }
 
     // Sociétés: 

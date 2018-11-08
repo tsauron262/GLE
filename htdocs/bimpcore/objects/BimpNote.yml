@@ -6,6 +6,17 @@ labels:
     name: note
     is_female: 1
     
+objects: 
+    societe: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Societe
+            id_object: 
+                field_value: id_societe
+    
 fields: 
     obj_type: 
         label: Type objet
@@ -23,6 +34,26 @@ fields:
         label: ID objet
         input: 
             type: hidden
+    type_author: 
+        label: Type Auteur
+        type: int
+        values: 
+            array: types_author
+        default_value: 1
+    id_societe: 
+        label: Société
+        type: id_object
+        object: societe
+        input: 
+            type: search_societe
+        display_if: 
+            field_name: type_author
+            show_values: 2
+    email: 
+        label: E-mail
+        display_if: 
+            field_name: type_author
+            show_values: 3
     visibility: 
         label: Visibilité
         type: int
@@ -36,7 +67,11 @@ fields:
             auto_expand: 1
             rows: 1
             note: 1
-
+    viewed: 
+        label: Vue
+        type: bool
+        default_value: 0
+        
 forms: 
     default: 
         rows: 
@@ -44,9 +79,12 @@ forms:
             - field: obj_module
             - field: obj_name
             - field: id_obj
+            - field: type_author
+            - field: id_societe
+            - field: email
             - field: visibility
             - field: content
-            
+                            
 lists:
     default: 
         title: Notes
@@ -67,16 +105,19 @@ lists:
             date_create:
                 label: Date
                 field: date_create
-            user_create:
+            author:
                 label: Auteur
-                field: user_create
+                value: 
+                    callback: displayAuthor
             visibilite:
-                label: Visibilité
                 field: visibility
                 edit: 1
             content:
-                label: Contenu
                 field: content
                 edit: 1
                 min_width: 40%
+            viewed:
+                field: viewed
+                edit: 1
+            
         

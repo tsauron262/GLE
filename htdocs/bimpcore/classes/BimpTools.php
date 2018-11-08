@@ -650,6 +650,18 @@ class BimpTools
                 }
                 $sql .= self::getSqlFilter($field, $and_filter, $default_alias);
             }
+        } elseif (is_array($filter) && isset($filter['and_fields'])) {
+            $sql .= ' (';
+            $fl = true;
+            foreach ($filter['and'] as $and_field => $and_filter) {
+                if (!$fl) {
+                    $sql .= ' AND ';
+                } else {
+                    $fl = false;
+                }
+                $sql .= self::getSqlFilter($and_field, $and_filter, $default_alias);
+            }
+            $sql .= ')';
         } else {
             if (preg_match('/\./', $field)) {
                 $sql .= $field;
@@ -857,7 +869,7 @@ class BimpTools
 
             case 'float':
             case 'money':
-            case 'percent': 
+            case 'percent':
             case 'qty':
                 if (is_string($value)) {
                     if ($value === '') {

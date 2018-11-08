@@ -1,8 +1,10 @@
 table: bimp_task
 controller: task
 
-icon: fas_hand-holding-usd
+icon: fas_tasks
 header_list_name: default
+header_btn:
+    callback: getButtons
 list_page_url: 
     controller: index
         
@@ -27,8 +29,8 @@ fields:
         label: Sujet email
         type: text
     txt:
-        label: Email
-        type: text
+        label: Email originel
+        type: html
     comment:
         label: Commentaire
         type: text
@@ -60,7 +62,7 @@ fields_tables:
         title: Tache
         footer_extra_btn: 
             callback: getInfosExtraBtn
-        icon: fas_file-signature
+        icon: fas_tasks
         rows: 
             - field: status
               edit: 1
@@ -77,17 +79,29 @@ forms:
     default: 
         rows: 
             - field: status
-              edit: 1
             - field: src
             - field: dst
+              edit: 0
             - field: subj
             - field: txt
             - field: comment
-              edit: 1
             - field: id_user_owner
-              edit: 1
             
-            
+    newMail:
+        rows:
+            - custom: 1
+              input_name: email
+              data_type: html
+              label: Email
+              input:
+                  type: html
+            - custom: 1
+              input_name: include_file
+              data_type: bool
+              label: Inclure les fils de conversations
+              input: 
+                  type: toggle
+              value: 1
 lists:
     default:
         checkboxes: 1
@@ -101,6 +115,7 @@ lists:
         add_form_name: default
         delete_btn: 1
         page_btn: 1
+        edit_btn: 1
         modal_view: default
         edit_form: default
         update_btn: 1
@@ -120,6 +135,7 @@ lists:
                 field: comment
             status:
                 field: status
+                edit: 1
             id_user_owner:
                 field: id_user_owner
 
@@ -137,3 +153,11 @@ views:
                     col_sm: 12
                     fields_table:
                         name: default
+            - cols:
+                  - type: custom
+                    custom: 
+                        callback: 
+                            method: renderNotesList
+                            params:
+                                - 2
+                                - normal

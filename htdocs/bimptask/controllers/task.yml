@@ -14,7 +14,7 @@ sections:
       view:
           name: default
           object: task
-          
+          panel: 1
     - type: buttons
       buttons:
           - label: Liste des taches

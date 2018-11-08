@@ -38,6 +38,14 @@ class BIMP_Task extends BimpObject
         return self::$cache["status_list_task"];
     }
     
+    public function isEditable() {
+        return ($this->getData("status") < 4); 
+    }
+    
+//    public function isDeletable() {
+//        return 0;
+//    }
+    
     public function actionSendMail($data, &$success){
         $success = "impec";
         $errors = $warnings = array();
@@ -49,15 +57,17 @@ class BIMP_Task extends BimpObject
         $notes = array("msg1", "msg2", "msg3");
         
         
-        $msg = $data['txt2'];
+        $msg = $data['email'];
         
         
         $msg .= "<br/>".$sep."Merci d'inclure ces lignes dans les prochaines conversations<br/>".$idTask.$sep;
         
-        $msg .= "<br/>Fil de discution :";
-        foreach($notes as $note){
-            $msg .= $sep;
-            $msg .= $note;
+        if($data['include_file']){
+            $msg .= "<br/>Fil de discution :";
+            foreach($notes as $note){
+                $msg .= $sep;
+                $msg .= $note;
+            }
         }
         
         $sujet = "Re:".$this->getData("subj");
@@ -66,13 +76,23 @@ class BIMP_Task extends BimpObject
         
         $success .= "<br/>to:".$to."<br/>from:".$from."<br/>sujet:".$sujet."<br/>msg : ".$msg;
 //        if(!mailSyn2($sujet, $to, $from, $msg))
-        $msg .= "Destinataire tronqué ".$to."<br/>";
-        if(!mailSyn2($sujet, "tommy@bimp.fr", $from, $msg))
-                $errors[] = "Envoie email impossible";
+        $msg .= "Destinataire tronqué ".$to." remplcé par tommy et peter<br/>";
+        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
+                $errorss[] = "Envoie email impossible";
         else{
-            $this->addNote($data['txt2'], 4);
+            $this->addNote($data['email'], 4);
         }
         
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+    
+    public function actionClose($data, &$success){
+        $errors = $warnings = array();
+        $success = "Tache fermé";
+        $errors = $this->updateField("status", 4);
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
@@ -82,15 +102,23 @@ class BIMP_Task extends BimpObject
     
     public function getInfosExtraBtn()
     {
-        global $langs;
+        return $this->getButtons();
+    }
+    
+    public function getButtons(){
         $buttons = array();
-        
+        if($this->getData("status") < 4){
                 $buttons[] = array(
                     'label'   => 'Répondre par mail',
                     'icon'    => 'send',
                     'onclick' => $this->getJsActionOnclick('sendMail', array(), array('form_name' => 'newMail'))
                 );
-       
+                $buttons[] = array(
+                    'label'   => 'Classer terminé',
+                    'icon'    => 'send',
+                    'onclick' => $this->getJsActionOnclick('close')
+                );
+        }
         return $buttons;
     }
 }

@@ -10,9 +10,9 @@ sections:
     - type: object_header
       object_header: 
           object: task
-    - type: list
-      list:
-          panel: 1
+    - type: view
+      view:
+          name: default
           object: task
           
     - type: buttons

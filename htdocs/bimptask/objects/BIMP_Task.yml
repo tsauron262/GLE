@@ -11,7 +11,6 @@ labels:
     name_plur: taches
     is_female: 1
 
-objects:
     
             
 associations:
@@ -37,13 +36,52 @@ fields:
         label: Statut
         type: int
         values: 
-            array: status_list
-     
+            array: status_list_task
+    id_user_owner:
+        label: Attribué a
+        type: id_object
+        object: user_owner
+        input:
+            type: search_user
+                
+objects:
+    user_owner:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
+            id_object:
+                fiels_value: id_user_owner
+ 
+fields_tables:
+    default: 
+        title: Tache
+        footer_extra_btn: 
+            callback: getInfosExtraBtn
+        icon: fas_file-signature
+        rows: 
+            - field: src
+            - field: dst
+            - field: subj
+            - field: txt
+            - field: comment
+              edit: 1
+            - field: id_user_owner
+              edit: 1
         
 forms:
     default: 
         rows: 
             - field: src
+            - field: dst
+            - field: subj
+            - field: txt
+            - field: comment
+              edit: 1
+            - field: id_user_owner
+              edit: 1
             
             
 lists:
@@ -59,7 +97,7 @@ lists:
         add_form_name: default
         delete_btn: 1
         page_btn: 1
-        modal_view: task
+        modal_view: default
         edit_form: default
         update_btn: 1
         cols:
@@ -78,4 +116,20 @@ lists:
                 field: comment
             status:
                 field: status
+            id_user_owner:
+                field: id_user_owner
 
+  
+views:
+    default: 
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:    
+            - cols: 
+                  - type: fields_table
+                    col_lg: 12
+                    col_md: 12
+                    col_sm: 12
+                    fields_table:
+                        name: default

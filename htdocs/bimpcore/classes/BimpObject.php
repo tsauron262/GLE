@@ -1907,7 +1907,9 @@ class BimpObject extends BimpCache
             }
 
             if (!$value) {
-                $missing = true;
+                if (in_array($type, array('string', 'text', 'id', 'id_object'))) {
+                    $missing = true;
+                }
             }
         }
 

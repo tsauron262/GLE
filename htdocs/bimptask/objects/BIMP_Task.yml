@@ -62,6 +62,8 @@ fields_tables:
             callback: getInfosExtraBtn
         icon: fas_file-signature
         rows: 
+            - field: status
+              edit: 1
             - field: src
             - field: dst
             - field: subj
@@ -74,6 +76,8 @@ fields_tables:
 forms:
     default: 
         rows: 
+            - field: status
+              edit: 1
             - field: src
             - field: dst
             - field: subj

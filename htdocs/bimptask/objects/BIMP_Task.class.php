@@ -3,20 +3,7 @@
 class BIMP_Task extends BimpObject
 {
 
-    const BF_DEMANDE_BROUILLON = 0;
-    const BF_DEMANDE_ATT_RETOUR = 1;
-    const BF_DEMANDE_SIGNE = 2;
-    const BF_DEMANDE_SIGNE_ATT_CESSION = 3;
-    const BF_DEMANDE_CEDE = 4;
-    const BF_DEMANDE_SANS_SUITE = 5;
-    const BF_DEMANDE_RECONDUIT = 6;
-    const BF_DEMANDE_REMPLACE = 7;
-    const BF_DEMANDE_TERMINE = 999;
-
-   
-
-    // Getters: 
-
+  
     public function renderHeaderExtraLeft()
     {   
         $html = '';
@@ -78,7 +65,7 @@ class BIMP_Task extends BimpObject
 //        if(!mailSyn2($sujet, $to, $from, $msg))
         $msg .= "Destinataire tronqué ".$to." remplcé par tommy et peter<br/>";
         if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
-                $errorss[] = "Envoie email impossible";
+                $errors[] = "Envoie email impossible";
         else{
             $this->addNote($data['email'], 4);
         }

@@ -1889,7 +1889,7 @@ class BimpObject extends BimpCache
                 if ($item_value === '' && in_array($item_type, self::$numeric_types)) {
                     $item_value = 0;
                 }
-                if (!$item_value && in_array($item_type, BC_Field::$empty_not_allowed_types)) {
+                if (!$item_value && in_array($item_type, BC_Field::$missing_if_empty_types)) {
                     unset($value[$key]);
                 }
             }
@@ -1907,7 +1907,7 @@ class BimpObject extends BimpCache
             }
 
             if (!$value) {
-                if (in_array($type, BC_Field::$empty_not_allowed_types)) {
+                if (in_array($type, BC_Field::$missing_if_empty_types)) {
                     $missing = true;
                 }
             }

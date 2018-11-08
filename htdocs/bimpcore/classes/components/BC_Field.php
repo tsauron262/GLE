@@ -50,7 +50,7 @@ class BC_Field extends BimpComponent
         )
     );
     
-    public static $empty_not_allowed_types = array(
+    public static $missing_if_empty_types = array(
         'string', 'text', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
     );
 

@@ -3219,9 +3219,8 @@ class BimpObject extends BimpCache
                 )
                         );
             }
-            if($type == "normal")
+            
             return $list->renderHtml();
-            return "";
         }
 
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des notes (ID ' . $this->getLabel('of_the') . ' absent)');

@@ -38,6 +38,7 @@ class BIMP_Task extends BimpObject
         $errors = $warnings = array();
         $sep = "<br/>---------------------<br/>";
         $idTask = "IDTASK:5467856456".$this->getData("id");
+        $data['email'] = str_replace("<br>", "<br/>", $data['email']);
         
         
 //        $notes = $this->getChildrenObjects("bimp_note");

@@ -145,7 +145,7 @@ fields:
         input: 
             options: 
                 array: statusList
-        required: 0
+        required: 1
         depends_on: type
     
     id_commercial: 

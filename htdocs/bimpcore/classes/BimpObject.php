@@ -18,7 +18,7 @@ class BimpObject extends BimpCache
         'user_update',
         'position'
     );
-    public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent');
+    public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent', 'bool', 'qty');
     public $use_commom_fields = false;
     public $use_positions = false;
     public $params_defs = array(
@@ -1889,7 +1889,7 @@ class BimpObject extends BimpCache
                 if ($item_value === '' && in_array($item_type, self::$numeric_types)) {
                     $item_value = 0;
                 }
-                if (!$item_value && in_array($item_type, array('id', 'id_object'))) {
+                if (!$item_value && in_array($item_type, BC_Field::$empty_not_allowed_types)) {
                     unset($value[$key]);
                 }
             }

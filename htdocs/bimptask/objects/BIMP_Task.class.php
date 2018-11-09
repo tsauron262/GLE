@@ -2,6 +2,7 @@
 
 class BIMP_Task extends BimpObject
 {
+    public static $valSrc = array("task0001@bimp.fr", "task0002@bimp.fr", "auther");
 
   
     public function renderHeaderExtraLeft()
@@ -10,10 +11,6 @@ class BIMP_Task extends BimpObject
       
         return $html;
     }
-    
-//    public function canEdit(){
-//        return 0;
-//    }
     
     public function renderLight(){
         $html = "";
@@ -44,7 +41,32 @@ class BIMP_Task extends BimpObject
     }
     
     public function isEditable() {
-        return ($this->getData("status") < 4 && $this->canEdit()); 
+        return ($this->getData("status") < 4); 
+    }
+    
+    public function getRight($right){
+        global $user;
+        if($this->getData("id_user_owner") == $user->id)
+            return 1;
+        $classRight = "auther";
+        if(in_array($this->getData("dst"),  self::$valSrc)){
+            $classRight = $this->getData("dst");
+        }
+        return $user->rights->bimptask->$classRight->$right;
+    }
+    
+    public function canView(){
+        return $this->getRight("read");
+    }
+    
+    public function canEdit(){
+        return $this->getRight("write");
+    }
+    public function canDelete(){
+        return $this->getRight("delete");
+    }
+    public function canAttribute(){
+        return $this->getRight("attribute");
     }
     
 //    public function isDeletable() {
@@ -137,6 +159,7 @@ class BIMP_Task extends BimpObject
         global $user;
         $buttons = array();
         if($this->isEditable()){
+            if($this->canEdit()){
                 $buttons[] = array(
                     'label'   => 'Répondre par mail',
                     'labelShort'   => 'Rep Mail',
@@ -149,6 +172,8 @@ class BIMP_Task extends BimpObject
                     'icon'    => 'close',
                     'onclick' => $this->getJsActionOnclick('close')
                 );
+            }
+            if($this->canEdit() || $this->canAttribute()){
                 if($this->getData("id_user_owner") < 1){
                     $buttons[] = array(
                         'label'   => 'Attribué',
@@ -163,6 +188,7 @@ class BIMP_Task extends BimpObject
                         'onclick' => $this->getJsActionOnclick('attribute', array('id_user_owner'=>0))
                     );
                 }
+            }
         }
         return $buttons;
     }

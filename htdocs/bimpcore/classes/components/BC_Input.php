@@ -57,6 +57,9 @@ class BC_Input extends BimpComponent
         'custom'                      => array(
             'content' => array('default' => '')
         ),
+        'search_user'                 => array(
+            'include_empty' => array('data_type' => 'bool', 'default' => 0)
+        ),
         'search_product'              => array(
             'filter_type' => array('data_type' => 'any', 'default' => 0)
         ),
@@ -284,6 +287,10 @@ class BC_Input extends BimpComponent
                 $options['add_input'] = isset($this->params['add_input']) ? $this->params['add_input'] : null;
                 break;
 
+            case 'search_user':
+                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 0;
+                break;
+
             case 'search_product':
                 $options['filter_type'] = isset($this->params['filter_type']) ? $this->params['filter_type'] : 0;
                 break;
@@ -427,25 +434,25 @@ class BC_Input extends BimpComponent
             $autosave = false;
 
             $values = array();
-            
+
             if (is_null($this->value)) {
                 $this->value = array();
             }
-            
+
             if (is_string($this->value)) {
                 if ($this->value) {
-                $this->value = explode(',', $this->value);
+                    $this->value = explode(',', $this->value);
                 } else {
                     $this->value = array();
                 }
             }
-            
+
             foreach ($this->value as $value) {
                 if (isset($this->field_params['values'][$value])) {
                     if (is_array($this->field_params['values'][$value])) {
                         if (isset($this->field_params['values'][$value]['label'])) {
                             $values[$value] = $this->field_params['values'][$value]['label'];
-                        } 
+                        }
                     } else {
                         $values[$value] = $this->field_params['values'][$value];
                     }
@@ -454,7 +461,7 @@ class BC_Input extends BimpComponent
                     $values[$value] = $value;
                 }
             }
-            
+
             $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable);
         }
 

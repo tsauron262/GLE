@@ -229,8 +229,6 @@ class BimpCache
             return array();
         }
 
-        global $user;
-
         $cache_key = 'object_' . $object->module . '_' . $object->object_name . '_' . $object->id;
 
         if (!isset(self::$cache[$cache_key])) {
@@ -248,10 +246,6 @@ class BimpCache
             $filters = array_merge($filters, BimpNote::getFiltersByUser());
             
             $list = $instance->getList($filters, null, null, 'date_create', 'desc', 'array', array('id'));
-            
-            echo '<pre>';
-            print_r($list);
-            exit;
             
             if (!is_null($list)) {
                 foreach ($list as $item) {

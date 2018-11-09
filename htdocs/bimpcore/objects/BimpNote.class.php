@@ -25,6 +25,30 @@ class BimpNote extends BimpObject
         self::BN_AUTHOR_FREE => 'Libre'
     );
 
+    // Getters Overrides BimpObject: 
+
+    public function getParentInstance()
+    {
+        if (is_null($this->parent)) {
+            $object_type = (string) $this->getData('obj_type');
+            $module = (string) $this->getData('obj_module');
+            $object_name = (string) $this->getData('obj_name');
+            $id_object = (int) $this->getData('id_obj');
+
+            if ($object_type && $module && $object_name && $id_object) {
+                if ($object_type === 'bimp_object') {
+                    $this->parent = BimpObject::getInstance($module, $object_name, $id_object);
+                    if (BimpObject::objectLoaded($this->parent)) {
+                        unset($this->parent);
+                        $this->parent = null;
+                    }
+                }
+            }
+        }
+
+        return $this->parent;
+    }
+
     // Getters: 
 
     public static function getFiltersByUser($id_user = null)
@@ -57,9 +81,15 @@ class BimpNote extends BimpObject
 
         return $filters;
     }
-    
+
     public function isEditable()
     {
+        $parent = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
+            return (int) $parent->areNotesEditable();
+        }
+
         return 1;
     }
 

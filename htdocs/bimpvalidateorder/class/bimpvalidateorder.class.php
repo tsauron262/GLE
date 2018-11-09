@@ -94,8 +94,20 @@ class BimpValidateOrder {
         
         
         
-        if(!$ok)
+        if(!$ok){
                 $this->db->rollback();
+                global $conf;
+                if(isset($conf->global->MAIN_MODULE_BIMPTASK)){
+                    $task = BimpObject::getInstance("bimptask", "BIMP_Task");
+                    $test = "commande:rowid=".$order->id." && fk_statut>0";
+                    $tasks = $task->getList(array('test_ferme' => $test));
+                    if(count($tasks) == 0){
+                        $tab = array("src"=>$user->email, "dst"=>"validationcommande@bimp.fr", "subj"=>"Validation commande ".$order->ref, "txt"=>"Merci de validé la commande ".$order->getNomUrl(1), "test_ferme"=>$test);
+                        $this->errors = array_merge($this->errors, $task->validateArray($tab));
+                        $this->errors = array_merge($this->errors, $task->create());
+                    }
+                }
+        }
         if($updateValFin){
                 $this->db->query("UPDATE llx_commande SET validFin = 1 WHERE rowid = ".$order->id);
                 setEventMessages('Validation Financiére OK', array(), 'mesgs');

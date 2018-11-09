@@ -2100,6 +2100,9 @@ if (! function_exists("llxFooter"))
                 
                 
                 /* modrsi */
+                if (!defined('BIMP_CONTROLLER_INIT')) {
+                    print BimpRender::renderAjaxModal('page_modal');
+                }
                 global $bimp_fixe_tabs;
                 if (is_a($bimp_fixe_tabs, 'FixeTabs')) {
                     print $bimp_fixe_tabs->render();

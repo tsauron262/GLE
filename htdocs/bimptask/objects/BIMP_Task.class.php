@@ -61,6 +61,7 @@ class BIMP_Task extends BimpObject
         
 //        $notes = $this->getChildrenObjects("bimp_note");
         $notes = array("msg1", "msg2", "msg3");
+        $notes = $this->getNotes(1);
         
         
         $msg = $data['email'];
@@ -71,8 +72,12 @@ class BIMP_Task extends BimpObject
         if($data['include_file']){
             $msg .= "<br/>Fil de discution :";
             foreach($notes as $note){
-                $msg .= $sep;
-                $msg .= $note;
+                $msg .= get_class($note);
+                if(is_a($note, "BimpNote")){
+                $msg .= print_r($note);
+                    $msg .= $sep;
+                    $msg .= $note->getData("content");
+                }
             }
             
             $msg .= $sep."Message original :";
@@ -87,11 +92,11 @@ class BIMP_Task extends BimpObject
         $success .= "<br/>to:".$to."<br/>from:".$from."<br/>sujet:".$sujet."<br/>msg : ".$msg;
 //        if(!mailSyn2($sujet, $to, $from, $msg))
         $msg .= "Destinataire tronqué ".$to." remplcé par tommy et peter<br/>";
-        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
-                $errors[] = "Envoie email impossible";
-        else{
+//        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
+//                $errors[] = "Envoie email impossible";
+//        else{
             $this->addNote($data['email'], 4);
-        }
+//        }
         
         return array(
             'errors'   => $errors,
@@ -147,14 +152,14 @@ class BIMP_Task extends BimpObject
                 if($this->getData("id_user_owner") < 1){
                     $buttons[] = array(
                         'label'   => 'Attribué',
-                        'icon'    => 'walk',
+                        'icon'    => 'user',
                         'onclick' => $this->getJsActionOnclick('attribute', array(), array('form_name' => 'attribute'))
                     );
                 }
                 if($this->getData("id_user_owner") == $user->id){
                     $buttons[] = array(
-                        'label'   => 'refusé l\'attribution',
-                        'icon'    => 'cancel',
+                        'label'   => 'Refusé l\'attribution',
+                        'icon'    => 'window-close',
                         'onclick' => $this->getJsActionOnclick('attribute', array('id_user_owner'=>0))
                     );
                 }

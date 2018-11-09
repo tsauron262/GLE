@@ -80,6 +80,8 @@ forms:
         rows: 
             - field: status
             - field: src
+              show: 
+                 callback: canEditAll
             - field: dst
               edit: 0
             - field: subj
@@ -102,6 +104,10 @@ forms:
               input: 
                   type: toggle
               value: 1
+    attribute:
+        rows:
+            - field: id_user_owner
+            
 lists:
     default:
         checkboxes: 1

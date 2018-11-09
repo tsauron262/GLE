@@ -1,0 +1,13 @@
+bootstrap: 1
+title: Bimp Task
+
+objects:
+    task:
+        instance:
+            bimp_object: BIMP_Task
+    
+sections:
+     - type: list
+       list: 
+           panel: 1
+           object: task

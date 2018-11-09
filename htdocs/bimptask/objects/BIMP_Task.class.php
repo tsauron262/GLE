@@ -11,6 +11,24 @@ class BIMP_Task extends BimpObject
         return $html;
     }
     
+//    public function canEdit(){
+//        return 0;
+//    }
+    
+    public function renderLight(){
+        $html = "";
+        
+        $html .= "<a href='".DOL_URL_ROOT."/bimptask/index.php?fc=task&id=".$this->id."'>";
+        $html .= $this->getData("subj"). ' de "'.$this->getData("src").'" '.dol_trunc($this->getData("txt"));
+        $html .= "</a>";
+        foreach($this->getButtons() as $btn){
+            $html .= '<button class="btn btn-default" type="button" onclick="'.$btn["onclick"].'"><i class="fa fa-'.$btn['icon'].' iconLeft"></i>'.(isset($btn['labelShort'])? $btn['labelShort'] : $btn['label']).'</button>';
+        }
+        
+        return $html;
+    }
+    
+    
     public static function getStatus_list_taskArray(){
         global $db;
         if(!isset(self::$cache["status_list_task"])){
@@ -26,7 +44,7 @@ class BIMP_Task extends BimpObject
     }
     
     public function isEditable() {
-        return ($this->getData("status") < 4); 
+        return ($this->getData("status") < 4 && $this->canEdit()); 
     }
     
 //    public function isDeletable() {
@@ -90,6 +108,19 @@ class BIMP_Task extends BimpObject
             'warnings' => $warnings
         );
     }
+    
+    public function actionAttribute($data, &$success){
+        $errors = $warnings = array();
+        if($data['id_user_owner'] > 0)
+        $success = "Attribué";
+        else
+            $success = "Désattribué";
+        $this->updateField("id_user_owner", $data['id_user_owner']);
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
 
     
     public function getInfosExtraBtn()
@@ -98,18 +129,35 @@ class BIMP_Task extends BimpObject
     }
     
     public function getButtons(){
+        global $user;
         $buttons = array();
-        if($this->getData("status") < 4){
+        if($this->isEditable()){
                 $buttons[] = array(
                     'label'   => 'Répondre par mail',
+                    'labelShort'   => 'Rep Mail',
                     'icon'    => 'send',
                     'onclick' => $this->getJsActionOnclick('sendMail', array(), array('form_name' => 'newMail'))
                 );
                 $buttons[] = array(
                     'label'   => 'Classer terminé',
-                    'icon'    => 'send',
+                    'labelShort'   => 'Terminé',
+                    'icon'    => 'close',
                     'onclick' => $this->getJsActionOnclick('close')
                 );
+                if($this->getData("id_user_owner") < 1){
+                    $buttons[] = array(
+                        'label'   => 'Attribué',
+                        'icon'    => 'walk',
+                        'onclick' => $this->getJsActionOnclick('attribute', array(), array('form_name' => 'attribute'))
+                    );
+                }
+                if($this->getData("id_user_owner") == $user->id){
+                    $buttons[] = array(
+                        'label'   => 'refusé l\'attribution',
+                        'icon'    => 'cancel',
+                        'onclick' => $this->getJsActionOnclick('attribute', array('id_user_owner'=>0))
+                    );
+                }
         }
         return $buttons;
     }

@@ -156,8 +156,4 @@ views:
             - cols:
                   - type: custom
                     custom: 
-                        callback: 
-                            method: renderNotesList
-                            params:
-                                - 2
-                                - normal
+                        callback: renderNotesList

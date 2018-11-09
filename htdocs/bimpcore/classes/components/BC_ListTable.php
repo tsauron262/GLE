@@ -200,7 +200,7 @@ class BC_ListTable extends BC_List
                         'checkbox'       => (int) $this->object->getCurrentConf('item_checkbox', true, false, 'bool'),
                         'single_cell'    => false,
                         'item_params'    => $item_params,
-                        'canEdit'        => (int) $this->object->canEdit(),
+                        'canEdit'        => (int) ($this->object->canEdit()),
                         'canView'        => (int) $this->object->canView(),
                         'canDelete'      => (int) $this->object->canDelete(),
                         'instance_name'  => $this->object->getInstanceName(),

@@ -2945,7 +2945,7 @@ class BimpObject extends BimpCache
 
     public function isFieldEditable($field)
     {
-        return 1;
+        return $this->isEditable();
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -2954,6 +2954,11 @@ class BimpObject extends BimpCache
     }
 
     public function isNewStatusAllowed($new_status)
+    {
+        return 1;
+    }
+
+    public function areNotesEditable()
     {
         return 1;
     }
@@ -3197,12 +3202,12 @@ class BimpObject extends BimpCache
         return self::getObjectNotes($this, $visibility);
     }
 
-    public function renderNotesList($visibility = 2, $type = "normal")
+    public function renderNotesList($filter_by_user = true)
     {
-        global $user;
+//        global $user;
 
-        if (!$user->admin && $visibility == 2)
-            $visibility = 3;
+//        if (!$user->admin && $visibility == 2)
+//            $visibility = 3;
 
         if ($this->isLoaded()) {
             $note = BimpObject::getInstance('bimpcore', 'BimpNote');
@@ -3212,17 +3217,11 @@ class BimpObject extends BimpCache
             $list->addFieldFilterValue('obj_name', $this->object_name);
             $list->addFieldFilterValue('id_obj', $this->id);
             $list->addObjectChangeReload($this->object_name);
-            if (!is_null($visibility)) {
-                $list->addFieldFilterValue('or_visibility', array(
-                    'or' => array(
-                        'visibility'  => array(
-                            'operator' => '>=',
-                            'value'    => (int) $visibility
-                        ),
-                        'user_create' => $user->id
-                    )
-                ));
+            
+            if ($filter_by_user) {
+                
             }
+            
             if ($type == "normal")
                 return $list->renderHtml();
 

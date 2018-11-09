@@ -57,6 +57,11 @@ class BimpNote extends BimpObject
 
         return $filters;
     }
+    
+    public function isEditable()
+    {
+        return 1;
+    }
 
     // Affichage: 
 

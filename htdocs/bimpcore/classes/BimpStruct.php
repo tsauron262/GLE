@@ -407,9 +407,10 @@ class BimpStruct
     public static function renderNotes(BimpConfig $config, $path, &$parent_component = null)
     {
         $object = $config->getObject($path . '/object');
-        $visibility = $config->get($path . '/visibility', null);
+        
+        $filter_by_user = (int) $config->get($path . '/filter_by_user', 1, false, 'bool');
         if (!is_null($object) && is_a($object, 'BimpObject')) {
-            return $object->renderNotesList($visibility);
+            return $object->renderNotesList($filter_by_user);
         }
 
         return BimpRender::renderAlerts('Erreur de configuration, impossible d\'afficher la liste des notes (objet invalide)');

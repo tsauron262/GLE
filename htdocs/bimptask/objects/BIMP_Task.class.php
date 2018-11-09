@@ -7,7 +7,7 @@ class BIMP_Task extends BimpObject
 
     public function areNotesEditable()
     {
-        return 1;
+        return ($this->canEdit() && $this->isEditable());
     }
     
     public function fetch($id, $parent = null){
@@ -88,6 +88,11 @@ class BIMP_Task extends BimpObject
     }
     public function canAttribute(){
         return $this->getRight("attribute");
+    }
+    public function canEditField($field_name) {
+        if($field_name == "id_user_owner")
+            return $this->canAttribute();
+        return parent::canEditField($field_name);
     }
 
 

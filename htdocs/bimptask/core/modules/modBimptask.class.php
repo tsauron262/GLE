@@ -82,7 +82,7 @@ class modBimptask extends DolibarrModules {
         // for default path (eg: /mymodule/core/xxxxx) (0=disable, 1=enable)
         // for specific path of parts (eg: /mymodule/core/modules/barcode)
         // for specific css file (eg: /mymodule/css/mymodule.css.php)
-        $this->module_parts = array();
+        $this->module_parts = array(/*"triggers"=>1*/);
 
 
         // Data directories to create when module is enabled.

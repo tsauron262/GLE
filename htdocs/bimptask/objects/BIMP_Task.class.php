@@ -2,12 +2,28 @@
 
 class BIMP_Task extends BimpObject
 {
-    public static $valSrc = array("task0001@bimp.fr", "task0002@bimp.fr", "auther");
+    public static $valSrc = array("task0001@bimp.fr", "validationcommande@bimp.fr", "auther");
 
 
     public function areNotesEditable()
     {
         return 1;
+    }
+    
+    public function fetch($id, $parent = null){
+        $result = parent::fetch($id, $parent);
+        $test = $this->getData("test_ferme");
+        if($test != ""){
+            $tabTest = explode(":", $test);
+            if(count($tabTest) == 2){
+                $sql = $this->db->db->query("SELECT * FROM ".MAIN_DB_PREFIX.$tabTest[0]." WHERE ".$tabTest[1]);
+                if($this->db->db->num_rows($sql) > 0){
+                    $inut = "";
+                    $this->actionClose(array(), $inut);
+                }
+            }
+        }
+        return $result;
     }
 
     public function renderHeaderExtraLeft()
@@ -119,14 +135,14 @@ class BIMP_Task extends BimpObject
         $to = $this->getData("src");
         $from = $this->getData("dst");
 
-        $success .= "<br/>to:" . $to . "<br/>from:" . $from . "<br/>sujet:" . $sujet . "<br/>msg : " . $msg;
+        $success .= "<br/>dest:" . $to . "<br/>from:" . $from . "<br/>sujet:" . $sujet . "<br/>msg : " . $msg;
 //        if(!mailSyn2($sujet, $to, $from, $msg))
         $msg .= "Destinataire tronqué " . $to . " remplcé par tommy et peter<br/>";
-//        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
-//                $errors[] = "Envoie email impossible";
-//        else{
-        $this->addNote($data['email'], 4);
-//        }
+        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
+                $errors[] = "Envoie email impossible";
+        else{
+            $this->addNote($data['email'], 4);
+        }
 
         return array(
             'errors'   => $errors,

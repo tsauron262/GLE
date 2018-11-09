@@ -2,7 +2,7 @@
 
 class BIMP_Task extends BimpObject
 {
-    public static $valSrc = array("task0001@bimp.fr", "validationcommande@bimp.fr", "auther");
+    public static $valSrc = array("task0001@bimp.fr", "validationcommande@bimp.fr", "other");
 
 
     public function areNotesEditable()
@@ -69,7 +69,7 @@ class BIMP_Task extends BimpObject
         global $user;
         if($this->getData("id_user_owner") == $user->id)
             return 1;
-        $classRight = "auther";
+        $classRight = "other";
         if(in_array($this->getData("dst"),  self::$valSrc)){
             $classRight = $this->getData("dst");
         }
@@ -94,6 +94,21 @@ class BIMP_Task extends BimpObject
             return $this->canAttribute();
         return parent::canEditField($field_name);
     }
+    public static function getFiltreDstRight($user){
+        $tabDroit = $tabPasDroit = array();
+        foreach(self::$valSrc as $src){
+            if($src != "other"){
+                if($user->rights->bimptask->$src->read)
+                    $tabDroit[] = $src;
+                else
+                    $tabPasDroit[] = $src;
+            }
+        }
+        if($user->rights->bimptask->other->read)
+            return array("NOT IN", $tabPasDroit);
+        else
+            return array("IN", $tabDroit);
+    }
 
 
 
@@ -110,8 +125,6 @@ class BIMP_Task extends BimpObject
         $data['email'] = str_replace("<br>", "<br/>", $data['email']);
 
 
-//        $notes = $this->getChildrenObjects("bimp_note");
-        $notes = array("msg1", "msg2", "msg3");
         $notes = $this->getNotes(1);
 
 
@@ -143,11 +156,11 @@ class BIMP_Task extends BimpObject
         $success .= "<br/>dest:" . $to . "<br/>from:" . $from . "<br/>sujet:" . $sujet . "<br/>msg : " . $msg;
 //        if(!mailSyn2($sujet, $to, $from, $msg))
         $msg .= "Destinataire tronqué " . $to . " remplcé par tommy et peter<br/>";
-        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
-                $errors[] = "Envoie email impossible";
-        else{
+//        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
+//                $errors[] = "Envoie email impossible";
+//        else{
             $this->addNote($data['email'], 4);
-        }
+//        }
 
         return array(
             'errors'   => $errors,

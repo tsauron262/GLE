@@ -268,7 +268,7 @@
                 $pdf->setX($X);
                 $pdf->setColor('fill', 237, 124, 28);
                 $pdf->SetTextColor(255,255,255);
-                $pdf->Cell($W * 9, 8, "Désignation du matériels", 1, null, 'L', true);
+                $pdf->Cell($W * 7, 8, "Désignation du matériels", 1, null, 'L', true);
                 $pdf->SetTextColor(0,0,0);
                 $M_N = false;
 
@@ -279,66 +279,70 @@
                 $pdf->setX($X);
                 $pdf->setColor('fill', 237, 124, 28);
                 $pdf->SetTextColor(255,255,255);
-                $pdf->MultiCell(0, 8, "", 1, null, 'L', true);
+                $pdf->MultiCell($W * 2, 8, "Numéro de série", 1, null, 'L', true);
                 $pdf->SetTextColor(0,0,0);
                 $pdf->SetFont(''/* 'Arial' */, '', 9);
 ////////////////fin entete du tableau///////////////////////////////////////////
 ////////////////debut corps tableau/////////////////////////////////////////////
 
-                $demande = BimpObject::getInstance('bimpfinancement', 'BF_Demande', (int) $id_demande);
-                $asso = new BimpAssociation($demande, 'commandes');
-                $list = $asso->getAssociatesList(); // Liste des commandes
-                $liste = (object) $list;
-                foreach($liste as $commande) {
-                    $the_commande = BimpObject::getInstance('bimpcommercial', 'BF_Commande', (int) $commande);
-                    $req = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande = " . $commande);
-                    $reqCount = $this->db->query("SELECT COUNT(*) as res FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande = " . $commande);
-                    $count = $this->db->fetch_object($reqCount);
-                     // Si 
-                    //print_r(count($list));
-                   
-                        if($count->res <= 5) {
-                            $new_page = false;
-                            while($res = $this->db->fetch_object($req)) {
-                                $taille_description = strlen($res->description);
-                                $description = ($taille_description < 80) ? $res->description : substr($res->description, 0, $taille_description).' ...';
-                                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
-                                $pdf->SetX($this->marge_gauche);
-                                $pdf->SetFont(''/* 'Arial' */, '', 9);
-                                $pdf->setColor('fill', 248, 248, 248);
-                                $pdf->SetTextColor(0,0,0);
-                                $pdf->Cell($W, 8, $res->qty, 1, null, 'L', true);
-                                $pdf->SetTextColor(0,0,0);
-
-                                $X = $this->marge_gauche + $W;
-                                $pdf->setX($X);
-                                $pdf->setColor('fill', 248, 248, 248);
-                                $pdf->SetTextColor(0,0,0);
-                                $pdf->Cell($W * 9, 8, $description, 1, null, 'L', true);
-                                $pdf->SetTextColor(0,0,0);
-                                $M_N = false;
-
-                                $X = $this->marge_gauche + $W * 8;
-                            
-                                $pdf->setX($X);
-                                $pdf->setColor('fill', 248, 248, 248);
-                                $pdf->SetTextColor(0,0,0);
-                                $pdf->MultiCell(0, 8, "", 1, null, 'L', true);
-                                $pdf->SetTextColor(0,0,0);
-                            }
+                $sql_liste_materiel = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bf_demande_line WHERE id_parent = " . $id_demande);
+                $sql_count = $this->db->query("SELECT COUNT(*) as res FROM " . MAIN_DB_PREFIX . "bf_demande_line WHERE id_parent = " . $id_demande);
+                $count = $this->db->fetch_object($sql_count);
+                if($count->res <= 5) {
+                    $new_page = false;
+                    while ($liste = $this->db->fetch_object($sql_liste_materiel)) {
+                        if($liste->id_product > 0) {
+                            $sql = $this->db->query("SELECT label FROM " . MAIN_DB_PREFIX . "product WHERE rowid = " .  $liste->id_product);
+                            $res = $this->db->fetch_object($sql);
+                            $recupe_label = $res->label;
+                            $serial = $liste->extra_serials;
                         } else {
-                            $new_page = true;
-                            $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
-                            $pdf->SetX($this->marge_gauche);
-                            $pdf->SetFont(''/* 'Arial' */, '', 9);
-                            $pdf->setColor('fill', 248, 248, 248);
-                            $pdf->SetTextColor(0,0,0);
-                            $pdf->Cell($W, 8, "Liste et détails du matériel en annexe", 1, null, 'C', true);
-                            $pdf->SetTextColor(0,0,0);
-                            $pdf->setXY($this->marge_gauche, 120);
+                            $serial = $liste->extra_serials;
+                            $recupe_label = $liste->label;
                         }
-                        
+                        if($liste->equipments != ""){
+                               $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . 'be_equipment WHERE id = ' . $liste->equipments);
+                               $equipment = $this->db->fetch_object($sql);
+                               $serial .= ',' .$equipment->serial;
+                            }
+                        $taille_label = strlen($recupe_label);
+                        $label = ($taille_label < 80) ? $recupe_label : substr($recupe_label, 0, $taille_label).' ...';
+
+                        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                        $pdf->SetX($this->marge_gauche);
+                        $pdf->SetFont(''/* 'Arial' */, '', 9);
+                        $pdf->setColor('fill', 248, 248, 248);
+                        $pdf->SetTextColor(0,0,0);
+                        $pdf->Cell($W, 8, (int) $liste->qty, 1, null, 'L', true);
+                        $pdf->SetTextColor(0,0,0);
+
+                        $X = $this->marge_gauche + $W;
+                        $pdf->setX($X);
+                        $pdf->setColor('fill', 248, 248, 248);
+                        $pdf->SetTextColor(0,0,0);
+                        $pdf->Cell($W * 7, 8, $label, 1, null, 'L', true);
+                        $pdf->SetTextColor(0,0,0);
+                        $M_N = false;
+
+                        $X = $this->marge_gauche + $W * 8;
+                        $pdf->setX($X);
+                        $pdf->setColor('fill', 248, 248, 248);
+                        $pdf->SetTextColor(0,0,0);
+                        $pdf->MultiCell($W * 2, 8, $serial, 1, null, 'L', true);
+                        $pdf->SetTextColor(0,0,0);
+
                     }
+                } else {
+                    $new_page = true;
+                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
+                    $pdf->SetX($this->marge_gauche);
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                    $pdf->setColor('fill', 248, 248, 248);
+                    $pdf->SetTextColor(0,0,0);
+                    $pdf->Cell($W, 8, "Liste et détails du matériel en annexe", 1, null, 'C', true);
+                    $pdf->SetTextColor(0,0,0);
+                    $pdf->setXY($this->marge_gauche, 120);
+                }
                 $X = $this->marge_gauche;
 //fin corps tableau/////////////////////////////////////////////////////////////
 //fin tableau///////////////////////////////////////////////////////////////////
@@ -520,43 +524,58 @@
                     $pdf->setX($X);
                     $pdf->setColor('fill', 237, 124, 28);
                     $pdf->SetTextColor(255,255,255);
-                    $pdf->Cell($W * 9, 8, "Désignation du matériels", 1, null, 'L', true);
+                    $pdf->Cell($W * 7, 8, "Désignation du matériels", 1, null, 'L', true);
                     $pdf->SetTextColor(0,0,0);
                     $X = $this->marge_gauche + $W * 8;
                 
                     $pdf->setX($X);
                     $pdf->setColor('fill', 237, 124, 28);
                     $pdf->SetTextColor(255,255,255);
-                    $pdf->MultiCell(0, 8, "", 1, null, 'L', true);
+                    $pdf->MultiCell($W * 2, 8, "N° de série", 1, null, 'L', true);
                     $pdf->SetTextColor(0,0,0);
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
-                    while($res = $this->db->fetch_object($req)) {
-                                $taille_description = strlen($res->description);
-                                $description = ($taille_description < 80) ? $res->description : substr($res->description, 0, $taille_description).' ...';
-                                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
-                                $pdf->SetX($this->marge_gauche);
-                                $pdf->SetFont(''/* 'Arial' */, '', 9);
-                                $pdf->setColor('fill', 248, 248, 248);
-                                $pdf->SetTextColor(0,0,0);
-                                $pdf->Cell($W, 8, $res->qty, 1, null, 'L', true);
-                                $pdf->SetTextColor(0,0,0);
-
-                                $X = $this->marge_gauche + $W;
-                                $pdf->setX($X);
-                                $pdf->setColor('fill', 248, 248, 248);
-                                $pdf->SetTextColor(0,0,0);
-                                $pdf->Cell($W * 9, 8, $description, 1, null, 'L', true);
-                                $pdf->SetTextColor(0,0,0);
-                                $M_N = false;
-
-                                $X = $this->marge_gauche + $W * 8;
-                            
-                                $pdf->setX($X);
-                                $pdf->setColor('fill', 248, 248, 248);
-                                $pdf->SetTextColor(0,0,0);
-                                $pdf->MultiCell(0, 8, "", 1, null, 'L', true);
-                                $pdf->SetTextColor(0,0,0);
+                    while ($liste = $this->db->fetch_object($sql_liste_materiel)) {
+                        if($liste->id_product > 0) {
+                            $sql = $this->db->query("SELECT label FROM " . MAIN_DB_PREFIX . "product WHERE rowid = " .  $liste->id_product);
+                            $res = $this->db->fetch_object($sql);
+                            $recupe_label = $res->label;
+                            $serial = $liste->extra_serials;
+                        } else {
+                            $serial = $liste->extra_serials;
+                            $recupe_label = $liste->label;
+                        }
+                        if($liste->equipments != ""){
+                               $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . 'be_equipment WHERE id = ' . $liste->equipments);
+                               $equipment = $this->db->fetch_object($sql);
+                               $serial .= ',' .$equipment->serial;
                             }
+                        $taille_label = strlen($recupe_label);
+                        $label = ($taille_label < 80) ? $recupe_label : substr($recupe_label, 0, $taille_label).' ...';
+
+                        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                        $pdf->SetX($this->marge_gauche);
+                        $pdf->SetFont(''/* 'Arial' */, '', 9);
+                        $pdf->setColor('fill', 248, 248, 248);
+                        $pdf->SetTextColor(0,0,0);
+                        $pdf->Cell($W, 8, (int) $liste->qty, 1, null, 'L', true);
+                        $pdf->SetTextColor(0,0,0);
+
+                        $X = $this->marge_gauche + $W;
+                        $pdf->setX($X);
+                        $pdf->setColor('fill', 248, 248, 248);
+                        $pdf->SetTextColor(0,0,0);
+                        $pdf->Cell($W * 7, 8, $label, 1, null, 'L', true);
+                        $pdf->SetTextColor(0,0,0);
+                        $M_N = false;
+
+                        $X = $this->marge_gauche + $W * 8;
+                        $pdf->setX($X);
+                        $pdf->setColor('fill', 248, 248, 248);
+                        $pdf->SetTextColor(0,0,0);
+                        $pdf->MultiCell($W * 2, 8, $serial, 1, null, 'L', true);
+                        $pdf->SetTextColor(0,0,0);
+
+                    }
 
                }
                $pdf->SetAutoPageBreak(1, $this->margin_bottom);
@@ -707,38 +726,50 @@
                 $pdf->SetTextColor(0,0,0);
 ////////////////fin entete du tableau///////////////////////////////////////////
 ////////////////debut corps tableau/////////////////////////////////////////////
-                foreach($liste as $commande) {
-                    $the_commande = BimpObject::getInstance('bimpcommercial', 'BF_Commande', (int) $commande);
-                    $req = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande = " . $commande);
-                    while($res = $this->db->fetch_object($req)) {
-                        $taille_description = strlen($res->description);
-                        $description = ($taille_description < 70) ? $res->description : substr($res->description, 0, $taille_description).' ...';
+               $sql_liste_materiel = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bf_demande_line WHERE id_parent = " . $id_demande);
+                $sql_count = $this->db->query("SELECT COUNT(*) as res FROM " . MAIN_DB_PREFIX . "bf_demande_line WHERE id_parent = " . $id_demande);
+                $count = $this->db->fetch_object($sql_count);
+                    while ($liste = $this->db->fetch_object($sql_liste_materiel)) {
+                        if($liste->id_product > 0) {
+                            $sql = $this->db->query("SELECT label FROM " . MAIN_DB_PREFIX . "product WHERE rowid = " .  $liste->id_product);
+                            $res = $this->db->fetch_object($sql);
+                            $recupe_label = $res->label;
+                            $serial = $liste->extra_serials;
+                        } else {
+                            $serial = $liste->extra_serials;
+                            $recupe_label = $liste->label;
+                        }
+                        if($liste->equipments != ""){
+                               $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . 'be_equipment WHERE id = ' . $liste->equipments);
+                               $equipment = $this->db->fetch_object($sql);
+                               $serial .= ',' .$equipment->serial;
+                            }
+                        $taille_label = strlen($recupe_label);
+                        $label = ($taille_label < 80) ? $recupe_label : substr($recupe_label, 0, $taille_label).' ...';
 
                         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
                         $pdf->SetX($this->marge_gauche);
                         $pdf->SetFont(''/* 'Arial' */, '', 9);
                         $pdf->setColor('fill', 248, 248, 248);
                         $pdf->SetTextColor(0,0,0);
-                        $pdf->Cell($W, 8, $res->qty, 1, null, 'L', true);
+                        $pdf->Cell($W, 8, (int) $liste->qty, 1, null, 'L', true);
                         $pdf->SetTextColor(0,0,0);
 
                         $X = $this->marge_gauche + $W;
                         $pdf->setX($X);
                         $pdf->setColor('fill', 248, 248, 248);
                         $pdf->SetTextColor(0,0,0);
-                        $pdf->Cell($W * 7, 8, $description, 1, null, 'L', true);
+                        $pdf->Cell($W * 7, 8, $label, 1, null, 'L', true);
                         $pdf->SetTextColor(0,0,0);
                         $M_N = false;
 
                         $X = $this->marge_gauche + $W * 8;
-                    
                         $pdf->setX($X);
                         $pdf->setColor('fill', 248, 248, 248);
                         $pdf->SetTextColor(0,0,0);
-                        $pdf->MultiCell($W * 2, 8, "XxXxXxXxXxX", 1, null, 'L', true);
+                        $pdf->MultiCell($W * 2, 8, $serial, 1, null, 'L', true);
                         $pdf->SetTextColor(0,0,0);
                     }
-                }
                 $X = $this->marge_gauche;
 //fin corps tableau/////////////////////////////////////////////////////////////
 //fin tableau///////////////////////////////////////////////////////////////////

@@ -38,7 +38,7 @@ class BimpNote extends BimpObject
             if ($object_type && $module && $object_name && $id_object) {
                 if ($object_type === 'bimp_object') {
                     $this->parent = BimpObject::getInstance($module, $object_name, $id_object);
-                    if (BimpObject::objectLoaded($this->parent)) {
+                    if (!BimpObject::objectLoaded($this->parent)) {
                         unset($this->parent);
                         $this->parent = null;
                     }
@@ -82,6 +82,11 @@ class BimpNote extends BimpObject
         return $filters;
     }
 
+    public function isCreatable()
+    {        
+        return (int) $this->isEditable();
+    }
+
     public function isEditable()
     {
         $parent = $this->getParentInstance();
@@ -91,6 +96,11 @@ class BimpNote extends BimpObject
         }
 
         return 1;
+    }
+    
+    public function isDeletable()
+    {
+        return (int) $this->isEditable();
     }
 
     // Affichage: 

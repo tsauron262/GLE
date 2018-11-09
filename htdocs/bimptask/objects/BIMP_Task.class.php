@@ -3,9 +3,11 @@
 class BIMP_Task extends BimpObject
 {
 
+    public $valSrc = array("task0001@bimp.fr");
+
     public function areNotesEditable()
     {
-        // retour 1 ou 0
+        return 1;
     }
 
     public function renderHeaderExtraLeft()
@@ -15,6 +17,7 @@ class BIMP_Task extends BimpObject
         return $html;
     }
 
+    
 //    public function canEdit(){
 //        return 0;
 //    }
@@ -51,6 +54,17 @@ class BIMP_Task extends BimpObject
     public function isEditable()
     {
         return ($this->getData("status") < 4 && $this->canEdit());
+    }
+
+    public function canView()
+    {
+        global $user;
+        $classRight = "auther";
+        if (in_array($this->getData("src"), $this->valSrc)) {
+            $classRight = $this->getData("src");
+        }
+//        return $user->rights->bimptask->{$classRight}->read;
+        return 1;
     }
 
 //    public function isDeletable() {

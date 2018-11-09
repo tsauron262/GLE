@@ -510,39 +510,47 @@ class BC_List extends BC_Panel
     public function getHeaderButtons()
     {
         $buttons = parent::getHeaderButtons();
-        
-        if ((int) $this->params['add_btn'] && !is_null($this->params['add_form_name']) && $this->params['add_form_name']) {
-            $label = '';
-            if ($this->object->config->isDefined('forms/' . $this->params['add_form_name'] . '/label')) {
-                $label = $this->object->getConf('forms/' . $this->params['add_form_name'] . '/label', '');
-            } elseif ($this->params['add_btn_label']) {
-                $label = $this->params['add_btn_label'];
-            }
-            if (!$label) {
-                $label = 'Ajouter ' . $this->object->getLabel('a');
-            }
-            $title = '';
 
-            if (!is_null($this->params['add_form_title']) && $this->params['add_form_title']) {
-                $title = htmlentities(addslashes($this->params['add_form_title']));
-            } elseif ($this->object->config->isDefined('forms/' . $this->params['add_form_name'] . '/title')) {
-                $title = htmlentities(addslashes($this->object->getConf('forms/' . $this->params['add_form_name'] . '/title', '')));
+        if (isset($this->params['add_form_values']['fields'])) {
+            foreach ($this->params['add_form_values']['fields'] as $field_name => $value) {
+                $this->object->set($field_name, $value);
             }
-
-            $onclick = 'loadModalFormFromList(\'' . $this->identifier . '\', \'' . $this->params['add_form_name'] . '\', ';
-            $onclick .= '$(this), 0, ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ', \'' . $title . '\')';
-
-            $buttons[] = array(
-                'classes'     => array('btn', 'btn-default'),
-                'label'       => $label,
-                'icon_before' => 'plus-circle',
-                'attr'        => array(
-                    'type'    => 'button',
-                    'onclick' => $onclick
-                )
-            );
         }
-        
+
+        if ($this->object->isCreatable()) {
+            if ((int) $this->params['add_btn'] && !is_null($this->params['add_form_name']) && $this->params['add_form_name']) {
+                $label = '';
+                if ($this->object->config->isDefined('forms/' . $this->params['add_form_name'] . '/label')) {
+                    $label = $this->object->getConf('forms/' . $this->params['add_form_name'] . '/label', '');
+                } elseif ($this->params['add_btn_label']) {
+                    $label = $this->params['add_btn_label'];
+                }
+                if (!$label) {
+                    $label = 'Ajouter ' . $this->object->getLabel('a');
+                }
+                $title = '';
+
+                if (!is_null($this->params['add_form_title']) && $this->params['add_form_title']) {
+                    $title = htmlentities(addslashes($this->params['add_form_title']));
+                } elseif ($this->object->config->isDefined('forms/' . $this->params['add_form_name'] . '/title')) {
+                    $title = htmlentities(addslashes($this->object->getConf('forms/' . $this->params['add_form_name'] . '/title', '')));
+                }
+
+                $onclick = 'loadModalFormFromList(\'' . $this->identifier . '\', \'' . $this->params['add_form_name'] . '\', ';
+                $onclick .= '$(this), 0, ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ', \'' . $title . '\')';
+
+                $buttons[] = array(
+                    'classes'     => array('btn', 'btn-default'),
+                    'label'       => $label,
+                    'icon_before' => 'plus-circle',
+                    'attr'        => array(
+                        'type'    => 'button',
+                        'onclick' => $onclick
+                    )
+                );
+            }
+        }
+
         return $buttons;
     }
 }

@@ -45,6 +45,7 @@ fields:
         object: user_owner
         input:
             type: search_user
+            include_empty: 1
                 
 objects:
     user_owner:

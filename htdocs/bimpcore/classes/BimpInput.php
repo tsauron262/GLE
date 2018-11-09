@@ -442,7 +442,10 @@ class BimpInput
                 break;
 
             case 'search_user':
-                $options['options'] = BimpCache::getUsersArray();
+                if (!isset($options['include_empty'])) {
+                    $options['include_empty'] = 0;
+                }
+                $options['options'] = BimpCache::getUsersArray($options['include_empty']);
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'search_contact':
@@ -1132,7 +1135,7 @@ class BimpInput
         if (is_array($value)) {
             $value = implode(',', $value);
         }
-        
+
         $html .= '<div class="inputContainer ' . $field_prefix . $input_name . '_inputContainer ' . $extra_class . '"';
         $html .= ' data-field_name="' . $field_prefix . $input_name . '"';
         $html .= ' data-initial_value="' . $value . '"';
@@ -1160,8 +1163,8 @@ class BimpInput
         $html .= ' data-field_name="' . $input_name . '"';
         $html .= ' data-search_type="' . $search_type . '"';
         $html .= ' data-search_on_key_up="' . $search_on_key_up . '"';
-        $html .= ' data-min_chars="'.$min_chars.'"';
-        
+        $html .= ' data-min_chars="' . $min_chars . '"';
+
         foreach ($extra_data as $data_name => $data_value) {
             $html .= ' data-' . $data_name . '="' . $data_value . '"';
         }

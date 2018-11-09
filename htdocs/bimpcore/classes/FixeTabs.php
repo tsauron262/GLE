@@ -20,6 +20,10 @@ class FixeTabs
     {
         require_once DOL_DOCUMENT_ROOT . '/bimpsupport/chronos.php';
         runBimpSupportChrono();
+        
+        
+        require_once DOL_DOCUMENT_ROOT . '/bimptask/task.php';
+        runBimpTask();
     }
 
     public function displayHead()

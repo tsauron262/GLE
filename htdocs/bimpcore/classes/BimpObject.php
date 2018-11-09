@@ -3216,9 +3216,9 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    public function getNotes($visibility = 2)
+    public function getNotes()
     {
-        return self::getObjectNotes($this, $visibility);
+        return self::getObjectNotes($this);
     }
 
     public function renderNotesList($filter_by_user = true)

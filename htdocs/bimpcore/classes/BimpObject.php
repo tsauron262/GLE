@@ -3192,12 +3192,18 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
+    public function getNotes($visibility = 2)
+    {
+        return self::getObjectNotes($this, $visibility);
+    }
+
     public function renderNotesList($visibility = 2, $type = "normal")
     {
         global $user;
-        if(!$user->admin && $visibility == 2)
+
+        if (!$user->admin && $visibility == 2)
             $visibility = 3;
-        
+
         if ($this->isLoaded()) {
             $note = BimpObject::getInstance('bimpcore', 'BimpNote');
             $list = new BC_ListTable($note);
@@ -3207,20 +3213,20 @@ class BimpObject extends BimpCache
             $list->addFieldFilterValue('id_obj', $this->id);
             $list->addObjectChangeReload($this->object_name);
             if (!is_null($visibility)) {
-                $list->addFieldFilterValue('or_place', array(
+                $list->addFieldFilterValue('or_visibility', array(
                     'or' => array(
-                        'visibility'         => array(
-                        'operator' => '>=',
-                        'value'    => (int) $visibility
+                        'visibility'  => array(
+                            'operator' => '>=',
+                            'value'    => (int) $visibility
                         ),
-                        'user_create'     => $user->id
-                        
+                        'user_create' => $user->id
                     )
-                )
-                        );
+                ));
             }
-            
-            return $list->renderHtml();
+            if ($type == "normal")
+                return $list->renderHtml();
+
+            return "";
         }
 
         return BimpRender::renderAlerts('Impossible d\'afficher la liste des notes (ID ' . $this->getLabel('of_the') . ' absent)');

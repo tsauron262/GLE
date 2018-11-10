@@ -2,10 +2,12 @@
 # Create date : 31/10/2018
 
 # Les success
-successContratCreate= Le contrat à été créer avec succes
-successContratUpdate= Le contrat à été mis à jour avec succes
-successInvoiceCreate= La facture à été créer avec succes
-successInvoiceUpdate= La facture à été mis à jour avec succes
+successContratCreate= Le contrat à été créer avec succès
+successContratUpdate= Le contrat à été mis à jour avec succès
+successInvoiceCreate= La facture à été créer avec succès
+successInvoiceUpdate= La facture à été mis à jour avec succès
+successInvoiceDelete= La facture à été supprimé e avec succès
+successInvoiceValide= La facture à été valider avec succès
 
 # Les erreurs
 erreurDemandeId= La demande de financement n'à pas d'id
@@ -18,6 +20,9 @@ erreurIdCommercial= La demande de financement n'à pas de commercial
 erreurIdRefinanceur= La demande de financement n'à pas de refinanceur
 erreurClientCreditSafe= Le client n'à pas de note crédit SAFE
 erreurCreateInvoiceContrat= Impossible de créer une facture car il n'y à pas de contrat
+erreurLoadedObject= L'object n'est pas instancié
+erreurInvoiceExistFrais= Pas de facture
+erreurFraisId= Le frais divers n'à pas d'id
 
 # Les bouttons
 buttonGenContrat= Générer le contrat
@@ -27,7 +32,9 @@ buttonGenBankInvoice= Générer la facture pour la banque
 manageRelatedOrders= Gérer les commandes associées
 
 # Les titres des tableaux
-tabOrderRef= Reférence
+tabOrderDesc= Type facture
+tabOrderDate= Date
+tabOrderRef= Ref
 tabOrderStatus= Statut
 tabOrderAmount= Montant TTC
 tabOrderFile= Fichier
@@ -40,4 +47,4 @@ word12Month= Ans
 
 
 # Description facture
-InvoiceDescriptionClient= Total de la valeur résiduelle d'achat pour la demans de financement
+InvoiceDescriptionClient= Total de la valeur résiduelle d'achat pour la demande de financement

@@ -399,13 +399,6 @@ class BF_Demande extends BimpObject
 
     }
 
-    public function displayFacture() {
-        global $langs;
-        return 'ok';
-    }
-
-    
-
     public function getInfosExtraBtn()
     {
         global $langs;

@@ -49,15 +49,6 @@
  						))
 					);
 					$buttons[] = array(
-						'label' => 'Valider la facture',
-						'icon' => 'fas_check',
-						'onclick' => $this->getJsActionOnclick('valFacture', array(
-							'file_type' => 'pret'
-								), array(
-							'success_callback' => $callback
- 						))
-					);
-					$buttons[] = array(
 						'label' => 'Supprimer la facture',
 						'icon' => 'fas_times',
 						'onclick' => $this->getJsActionOnclick('delFacture', array(
@@ -113,28 +104,6 @@
 					$total = $this->getData('amount');
 					$facture->updateline($line, $description, $total, 1, 0, $facture->date, $dacture->date, 0);
 					$success = $langs->trans('successInvoiceUpdate');
-				} else {
-					return $facture->error;
-				}
-			} else {
-				$errors[] = $langs->trans('erreurFraisId');
-			}
-			return array(
-				'success' => $success,
-				'errors' => $errors
-			);
-		}
-
-		// A voir pour garder la validation de la facture directement dans BimpFinancement
-		public function actionvalFacture() {
-			if($this->isLoaded()) {
-				global $langs, $user;
-				$id_facture = $this->getData('id_facture');
-				BimpTools::loadDolClass('compta/facture', 'facture');
-				$facture = new Facture($this->db->db);
-				$facture->fetch($id_facture);
-				if($facture->validate($user)) {
-					$success = $langs->trans('successInvoiceValide');
 				} else {
 					return $facture->error;
 				}

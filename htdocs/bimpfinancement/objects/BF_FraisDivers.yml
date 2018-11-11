@@ -27,7 +27,7 @@ fields:
         required: 1
     id_facture:
         display: nom_url
-        type: hidden
+        type: text
 
         
 list:

@@ -70,6 +70,12 @@ function traiteTask($dst, $src, $subj, $txt) {
 
 
     if ($idTask < 1) {
+        $task = BimpObject::getInstance("bimptask", "BIMP_Task");
+        if(!$task->fetch($idTask))
+            $idTask = 0;
+    }
+    
+    if ($idTask < 1) {
         $user = new User($db);
         $sql = $db->query("SELECT u.rowid FROM `llx_user` u, llx_user_extrafields ue WHERE ue.fk_object = u.rowid AND (email LIKE '".$src."' || ue.alias LIKE '%".$src."%')");
         if($db->num_rows($sql) > 0){

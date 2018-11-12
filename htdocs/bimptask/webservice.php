@@ -31,6 +31,18 @@ $txt = $_REQUEST['txt']; /* "corp du mail
 
 
 
+if($_REQUEST["old"]){
+    $commande = new Commande($db);
+    $sql = $db->query("SELECT rowid FROM `llx_commande` WHERE `validComm` > 0 AND (`validFin` < 1 || validFin is NULL) AND fk_statut = 0 ORDER BY `llx_commande`.`tms` DESC");
+    while($ln=$db->fetch_object($sql)){
+        $commande->fetch($ln->rowid);
+        $commande->valid($user);
+        echo "Validation ".$commande->getNomUrl(1);
+    }
+}
+
+
+
 
 
 

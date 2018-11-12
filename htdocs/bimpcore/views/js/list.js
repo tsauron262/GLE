@@ -988,6 +988,12 @@ function onListLoaded($list) {
 
         var $tbody = $list.find('tbody.listRows');
 
+        if ($tbody.find('tr.objectListItemRow').length > 10) {
+            $list.find('tr.listFooterButtons').show();
+        } else {
+            $list.find('tr.listFooterButtons').hide();
+        }
+
         $tbody.find('a').each(function () {
 //        $(this).attr('target', '_blank');
             var link_title = $(this).attr('title');
@@ -1140,6 +1146,12 @@ function onListRefeshed($list) {
 //    });
 
     var $tbody = $list.find('tbody.listRows');
+
+    if ($tbody.find('tr.objectListItemRow').length > 10) {
+        $list.find('tr.listFooterButtons').show();
+    } else {
+        $list.find('tr.listFooterButtons').hide();
+    }
 
     $tbody.find('a').each(function () {
 //        $(this).attr('target', '_blank');

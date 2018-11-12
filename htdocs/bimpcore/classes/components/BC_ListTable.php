@@ -375,11 +375,23 @@ class BC_ListTable extends BC_List
 
         $html .= '</tbody>';
 
-        if ($this->params['pagination']) {
-            $html .= '<tfoot>';
-            $html .= $this->renderPaginationRow();
-            $html .= '</tfoot>';
+        $html .= '<tfoot>';
+
+        $html .= '<tr class="listFooterButtons">';
+        $html .= '<td colspan="' . $this->colspan . '">';
+        $html .= '<div style="text-align: right">';
+        foreach ($this->getHeaderButtons() as $button) {
+            $button['classes'][] = 'headerBtn';
+            $html .= BimpRender::renderButton($button);
         }
+        $html .= '</div>';
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        if ($this->params['pagination']) {
+            $html .= $this->renderPaginationRow();
+        }
+        $html .= '</tfoot>';
 
         $html .= '</table>';
         $html .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result"></div>';
@@ -672,7 +684,7 @@ class BC_ListTable extends BC_List
         $hide = (is_null($this->nbItems) || ($this->params['n'] <= 0) || ($this->params['n'] >= $this->nbItems));
 
         $html = '<tr class="paginationContainer"' . ($hide ? ' style="display: none"' : '') . '>';
-        $html .= '<td colspan="' . $this->colspan . '" style="padding: 15px 10px;">';
+        $html .= '<td colspan="' . $this->colspan . '" style="padding: 5px 10px 15px;">';
         $html .= '<div id="' . $this->identifier . '_pagination" class="listPagination">';
         $html .= $this->renderPagination();
         $html .= '</div>';

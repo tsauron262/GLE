@@ -247,7 +247,7 @@ class BIMP_Task extends BimpObject
                     'label'   => 'Classer terminé',
                     'labelShort'   => 'Terminé',
                     'icon'    => 'close',
-                    'onclick' => $this->getJsActionOnclick('close')
+                    'onclick' => $this->getJsActionOnclick('close', array(), array('confirm_msg' => 'Terminer la tache ?'))
                 );
             }
             if($this->canEdit() || $this->canAttribute()){

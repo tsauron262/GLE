@@ -1,31 +1,25 @@
-<?php
-class BF_rentExcept extends BimpObject {
+<?php 
 
-    public static $payments = array(
-        0 => '-',
-        1 => 'Prélévement auto',
-        2 => 'Virement',
-        3 => 'Mandat administratif'
-    );
+	class BF_FraisDivers extends BimpObject {
 
-    public function displayFacture() {
-		global $langs;
-		if($this->isLoaded()) {
-			$id_facture = $this->getData('id_facture');
-			BimpTools::loadDolClass('compta/facture', 'facture');
-			$facture = new Facture($this->db->db);
-			$facture->fetch($id_facture);
-			if($id_facture) {
-				return $facture->getNomUrl();
+		public function displayFacture() {
+			global $langs;
+			if($this->isLoaded()) {
+				$id_facture = $this->getData('id_facture');
+				BimpTools::loadDolClass('compta/facture', 'facture');
+				$facture = new Facture($this->db->db);
+				$facture->fetch($id_facture);
+				if($id_facture) {
+					return $facture->getNomUrl();
+				} else {
+					return $langs->trans('erreurInvoiceExistFrais');
+				}
 			} else {
-				return $langs->trans('erreurInvoiceExistFrais');
+				return $langs->trans('erreurLoadedObject');
 			}
-		} else {
-			return $langs->trans('erreurLoadedObject');
 		}
-	}
 
-    public function displayExtraButton() {
+		public function displayExtraButton() {
 			global $langs, $user;
 			$buttons = array();
 			$callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
@@ -67,9 +61,9 @@ class BF_rentExcept extends BimpObject {
 				
 			}
 			return $buttons;
-	}
+		}
 
-	public function actiongenFacture() {
+		public function actiongenFacture() {
 			if($this->isLoaded()) {
 				global $langs, $user;
 				$id = (int) $this->getData('id');
@@ -80,7 +74,7 @@ class BF_rentExcept extends BimpObject {
 				$facture->date = $this->getData('date');
 				if($facture->create($user) > 0) {
 					$this->updateField('id_facture', (int) $facture->id);
-					$description = "Loyer intercalaire pour la demande de financement N°DF" . $this->getData('id_demande');
+					$description = "Frais divers : " . $this->getData('description') . ' pour la demande de financement N°DF' . $this->getData('id_demande');
 					$total = $this->getData('amount');
 					$facture->addline($description, $total, 1, 0);
 					$success = $langs->trans('successInvoiceCreate');
@@ -96,8 +90,7 @@ class BF_rentExcept extends BimpObject {
 				'success' => $success,
 			);
 		}
-
-	public function actionupdFacture() {
+		public function actionupdFacture() {
 			if($this->isLoaded()) {
 				global $langs, $user;
 				$id_facture = $this->getData('id_facture');
@@ -107,7 +100,7 @@ class BF_rentExcept extends BimpObject {
 				$facture->date = $this->getData('date');
 				if($facture->update($user) > 0) {
 					$line = $this->db->getValue('facturedet', 'rowid', '`fk_facture` = ' . $facture->id);
-					$description = "Loyer intercalaire pour la demande de financement N°DF" . $this->getData('id_demande');
+					$description = "Frais divers : '" . $this->getData('description') . "' pour la demande de financement N°DF" . $this->getData('id_demande');
 					$total = $this->getData('amount');
 					$facture->updateline($line, $description, $total, 1, 0, $facture->date, $dacture->date, 0);
 					$success = $langs->trans('successInvoiceUpdate');
@@ -123,7 +116,7 @@ class BF_rentExcept extends BimpObject {
 			);
 		}
 
-	public function actiondelFacture() {
+		public function actiondelFacture() {
 			if($this->isLoaded()) {
 				global $langs;
 				$id_facture = (int) $this->getData('id_facture');
@@ -145,4 +138,4 @@ class BF_rentExcept extends BimpObject {
 				);
 		}
 
-}
+	}

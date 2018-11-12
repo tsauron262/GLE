@@ -60,6 +60,7 @@ class BF_Demande extends BimpObject
             $client->fetch($id_client);
             $note = $this->db->getRow('societe_extrafields', 'fk_object = ' . $id_client, null, 'object', array('notecreditsafe'));
             if (is_object($client)) {
+                $html .= '<b>Client : </b>' . $client->getNomUrl(1);
                 $html .= '<div style="margin-top: 10px">';
                 $html .= '<strong>Notre crédit safe du client: </strong>';
                 if($note->notecreditsafe) {
@@ -123,78 +124,70 @@ class BF_Demande extends BimpObject
         public function getDemandeData($object) {
             global $langs;
 
-            $id_demande = (int) $this->getData('id');
-            $id_client = (int) $this->getData('id_client');
-            $id_client_contact = $this->getData('id_client_contact');
-            $id_fournisseur = $this->getData('id_supplier');
-            $id_commercial = (int) $this->getData('id_commercial');
-            $montant_materiels = $this->getData('montant_materiels'); 
-            $montant_services = $this->getData('montant_services'); 
-            $montant_logiciels = $this->getData('montant_logiciels');
-            $id_status = $this->getData('status'); 
-            $accepted = $this->getData('accepted');
-            $duree_prevu = $this->getData('duration');
-            $periodicite_prevu = $this->getData('periodicity');
-            $assurance = $this->getData('insurance');
-            $id_supplier_contact = $this->getData('id_supplier_contact'); 
-            $date_loyer = $this->getData('date_loyer'); 
-            $date_livraison = $this->getdata('date_livraison');
-            $date_creation = $this->getData('date_create');
-            $id_contrat = $this->getData('id_contrat');
-            $id_facture = $this->getData('id_facture');
-            $id_facture_client = $this->getData('id_facture_client');
-            $id_facture_fournisseur = $this->getData('id_facture_fournisseur');
-            $commission_commerciale = $this->getData('commission_commerciale');
-            $commission_financiere = $this->getData('commission_financiere');
-            $vr_achat = $this->getData('vr');
-            $vr_vente = $this->getData('vr_vente');
+            $demande = $this->db->getRows('bf_demande', '`id` = ' . $this->getData('id'), null, 'object', array('*'));
+
+            // A VOIR
+            foreach ($demande as $nbr) { $demande = $nbr;}
+            /////////
 
             $modif = $this->verif_exist_document($object);
             
-                
-                if(!$accepted) { $errors[] = $langs->trans('erreurBanqueValid'); }
-                if(!$date_livraison) { $errors[] = $langs->trans('erreurLivraisonDate'); }
-                if(!$date_loyer){ $errors[] = $langs->trans('erreurLoyerDate'); } 
-                if(!$montant_materiels && !$montant_logiciels && !$montant_services) { $errors[] = $langs->trans('erreurMontant'); }
-                if(!$id_client) { $errors[] = $langs->trans('erreurIdClient');}
-                if(!$id_commercial) { $errors[] = $langs->trans('erreurIdCommercial'); }
-
+            if($object != 'render') {
+                if(!$demande->accepted) { $errors[] = $langs->trans('erreurBanqueValid'); }
+                if(!$demande->date_livraison) { $errors[] = $langs->trans('erreurLivraisonDate'); }
+                if(!$demande->date_loyer){ $errors[] = $langs->trans('erreurLoyerDate'); } 
+                if(!$demande->montant_materiels && !$demande->montant_services && !$demande->montant_logiciels) { $errors[] = $langs->trans('erreurMontant'); }
+                if(!$demande->id_client) { $errors[] = $langs->trans('erreurIdClient');}
+                if(!$demande->id_commercial) { $errors[] = $langs->trans('erreurIdCommercial'); }
+            }
                 if(!count($errors)) {
                     $data = array(
-                        'id_demande' => $id_demande,
-                        'id_client' => $id_client,
-                        'id_contact_client' => $id_client_contact,
-                        'id_fournisseur' => $id_fournisseur,
-                        'id_contact_fournisseur' => $id_supplier_contact,
-                        'id_commercial' => $id_commercial,
-                        'id_contrat' => $id_contrat,
-                        'id_facture_client' => $id_facture_client,
-                        'id_facture_fournisseur' => $id_facture_fournisseur,
-                        'vr_achat' => $vr_achat,
-                        'vr_vente' => $vr_vente,
-                        'com_com' => $commission_commerciale,
-                        'com_fin' => $commission_financiere,
-                        'materiels' => $montant_materiels,
-                        'logiciels' => $montant_logiciels,
-                        'services' => $montant_services,
-                        'statut' => $id_status,
-                        'accepted' => $accepted,
-                        'duree_prevu' => $duree_prevu ,
-                        'periode_prevu' => $periodicite_prevu,
-                        'date_loyer' => $date_loyer,
-                        'date_livraison' => $date_livraison,
-                        'date_creation' => $date_creation,
-                        'assurance' => $assurance,
-                        'where' => '`id_demande` = ' . $id_demande,
+                        'id_demande' => $demande->id,
+                        'id_client' => $demande->id_client,
+                        'id_contact_client' => $demande->id_client_contact,
+                        'id_fournisseur' => $demande->id_supplier,
+                        'id_contact_fournisseur' => $demande->id_supplier_contact,
+                        'id_commercial' => $demande->id_commercial,
+                        'id_contrat' => $demande->id_commercial,
+                        'id_facture_frais' => $demande->id_facture_frais,
+                        'id_facture_loyer_intercalaire' => $demande->id_facture_loyer_intercalaire,
+                        'id_facture_client' => $demande->id_facture_client,
+                        'id_facture_fournisseur' => $demande->id_facture_fournisseur,
+                        'vr_achat' => $demande->vr,
+                        'vr_vente' => $demande->vr_vente,
+                        'com_com' => $demande->commission_commerciale,
+                        'com_fin' => $demande->commission_financiere,
+                        'materiels' => $demande->montant_materiels,
+                        'logiciels' => $demande->montant_logiciels,
+                        'services' => $demande->montant_services,
+                        'statut' => $demande->status,
+                        'accepted' => $demande->accepted,
+                        'duree_prevu' => $demande->duration,
+                        'periode_prevu' => $demande->periodicity,
+                        'date_loyer' => $demande->date_loyer,
+                        'date_livraison' => $demande->date_livraison,
+                        'date_creation' => $demande->date_create,
+                        'assurance' => $demande->insurance,
+                        'where' => '`id_demande` = ' . $demande->id,
                         'modif' => $modif
                     );
-
                     return (object) $data; 
                 } else {
                     return $errors;
                 }
+           
             
         }
+
+    public function actiongenfactfrais($success) {
+        global $langs, $user;
+        if(!$this->isLoaded) {
+            return array($langs->trans('erreurDemandeId'));
+        } else {
+            $data = $this->getDemandeData('factureFrais');
+
+        }
+    }
     
     public function actiongenfactClient($success) {
         global $langs, $user;
@@ -215,8 +208,9 @@ class BF_Demande extends BimpObject
                     //return array($facture->socid);
                     if($facture->create($user) > 0) {
                         addElementElement('demande', 'facture', $id, $facture->id);
-                        $facture->addLine("Total de la valeur résiduelle d'achat", $data->vr_achat, 1, 0);
+                        $facture->addLine($langs->trans('InvoiceDescriptionClient') . " DF" . $data->id_demande, $data->vr_achat, 1, 0);
                         $this->updateField('id_facture_client', $facture->id);
+                        $success = $langs->trans('successInvoiceCreate');
                     } else {
                         return $facture->error;
                     }
@@ -341,10 +335,6 @@ class BF_Demande extends BimpObject
            if(is_array($data)) return $data;
         }
 
-        
-
-        
-
         if(!$errors) {
             global $langs, $user;
             $liste_refinanceur = $this->db->getRows('bf_refinanceur', $data->where . " AND status = 2", null, 'array', array('id', 'position', 'name', 'status', 'rate', 'coef', 'comment'));
@@ -407,63 +397,6 @@ class BF_Demande extends BimpObject
 
 
 
-    }
-
-
-    public function renderCommandesList()
-    {   
-        global $langs;
-        $html = '';
-
-        if ($this->isLoaded()) {
-            $asso = new BimpAssociation($this, 'commandes');
-            $list = $asso->getAssociatesList();
-            if (count($list)) {
-                krsort($list);
-                $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
-                $html .= '<table class="bimp_list_table">';
-                $html .= '<thead>';
-                $html .= '<tr>';
-                $html .= '<th>' . $langs->trans('tabOrderRef') . '</th>';
-                $html .= '<th>'. $langs->trans('tabOrderStatus') .'</th>';
-                $html .= '<th>' . $langs->trans('tabOrderAmount') . '</th>';
-                $html .= '<th>' . $langs->trans('tabOrderFile') . '</th>';
-                $html .= '</tr>';
-                $html .= '</thead>';
-                $html .= '<tbody>';
-
-                foreach ($list as $id_propal) {
-                    if ($propal->fetch($id_propal)) {
-                        $html .= '<tr>';
-                        $html .= '<td>' . $propal->getRef() . '</td>';
-                        $html .= '<td>' . $propal->displayData('fk_statut') . '</td>';
-                        $html .= '<td>' . $propal->displayData('total_ttc') . '</td>';
-                        $html .= '<td>' . $propal->displayPDFButton(false) . '</td>';
-                        $html .= '</tr>';
-                    }
-                }
-
-                $html .= '</tbody>';
-                $html .= '</table>';
-            }
-
-            $button = array( // bouton pour afficher formulaire associations
-           'label' => $langs->trans('manageRelatedOrders'),
-           'classes' => array('btn', 'btn-default'),
-           'attr' => array(
-               'onclick' => $this->getJsLoadModalForm('commandes')
-           )
-       );
-
-       $html = BimpRender::renderPanel('Commandes associées', $html, '', array(
-                           'type'     => 'secondary',
-                           'foldable' => true,
-                           'icon'     => 'fas_dolly',
-               'header_buttons' => array($button)
-               ));
-        }
-
-        return $html;
     }
 
     public function getInfosExtraBtn()

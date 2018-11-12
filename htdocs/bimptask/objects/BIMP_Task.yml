@@ -100,7 +100,7 @@ forms:
               data_type: text
               label: Email
               input:
-                  type: text
+                  type: textarea
             - custom: 1
               input_name: include_file
               data_type: bool

@@ -181,6 +181,10 @@ class BIMP_Task extends BimpObject
         $to = $this->getData("src");
         $from = $this->getData("dst");
 
+        $msg = str_replace("<br />", "\n", $msg);
+        $msg = str_replace("<br/>", "\n", $msg);
+        
+        
         $success .= "<br/>dest:" . $to . "<br/>from:" . $from . "<br/>sujet:" . $sujet . "<br/>msg : " . $msg;
 //        if(!mailSyn2($sujet, $to, $from, $msg))
         $msg .= "Destinataire tronqué " . $to . " remplcé par tommy et peter<br/>";

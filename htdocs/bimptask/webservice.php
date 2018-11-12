@@ -76,7 +76,8 @@ function traiteTask($dst, $src, $subj, $txt) {
     else
         $user->fetch(ID_USER_DEF);
     
-    $user->getrights();
+    $user->rights->$src->write = 1;
+    $user->rights->other->write = 1;
 
 
     if ($idTask > 0) {

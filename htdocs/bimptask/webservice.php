@@ -76,7 +76,7 @@ function traiteTask($dst, $src, $subj, $txt) {
     else
         $user->fetch(ID_USER_DEF);
 
-
+print_r($user);die;
 
 
     if ($idTask > 0) {

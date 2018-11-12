@@ -76,7 +76,7 @@ function traiteTask($dst, $src, $subj, $txt) {
     else
         $user->fetch(ID_USER_DEF);
     
-    $user->rights->bimptask->$src->write = 1;
+    $user->rights->bimptask->$dst->write = 1;
     $user->rights->bimptask->other->write = 1;
 
 

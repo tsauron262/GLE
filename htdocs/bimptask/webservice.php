@@ -75,7 +75,7 @@ function traiteTask($dst, $src, $subj, $txt) {
     }
     else
         $user->fetch(ID_USER_DEF);
-
+$user->getrights();
 print_r($user);die;
 
 

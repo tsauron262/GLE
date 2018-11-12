@@ -26,7 +26,6 @@ class BS_Inter extends BimpObject
                 return 1;
             }
         }
-        
         return 0;
     }
     

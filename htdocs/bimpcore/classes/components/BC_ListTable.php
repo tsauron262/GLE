@@ -280,8 +280,8 @@ class BC_ListTable extends BC_List
                 $this->object->reset();
             }
         }
-        if (!is_null($this->id_parent)) {
-            $this->object->setIdParent($this->id_parent);
+        if (!is_null($this->parent)) {
+            $this->object->parent = $this->parent;
         }
 
         $this->setConfPath();
@@ -942,8 +942,6 @@ class BC_ListTable extends BC_List
             $this->fetchRows();
         }
 
-        $this->object->reset();
-
         if (count($this->rows)) {
             foreach ($this->rows as $id_object => $row) {
                 $id_object = (int) $id_object;
@@ -1137,7 +1135,7 @@ class BC_ListTable extends BC_List
             $html .= '</td>';
             $html .= '</tr>';
         }
-
+        
         return $html;
     }
 }

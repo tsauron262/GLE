@@ -18,14 +18,13 @@ require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
 
 $controller = BimpController::getInstance('bimptask');
 
-$newTask = false;
 $dst = "task0001@bimp.fr";
 $src = "tommy@bimp.fr";
 $subj = "new task mail";
 $txt = "corp du mail";
-$idTask = 28;
+$idTask = 0;
 
-if($newTask){
+if($idTask < 1){
     $task = BimpObject::getInstance("bimptask", "BIMP_Task");
     $tab = array("src"=>$src, "dst"=>$dst, "subj"=>$subj, "txt"=>$txt, "test_ferme"=>"");
     $errors = array_merge($errors, $task->validateArray($tab));

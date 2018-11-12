@@ -46,6 +46,9 @@ fields:
         input:
             type: search_user
             include_empty: 1
+    test_ferme:
+        label: Test pour Fermeture
+        type: text
                 
 objects:
     user_owner:

@@ -2,12 +2,28 @@
 
 class BIMP_Task extends BimpObject
 {
+    public static $valSrc = array("task0001@bimp.fr", "validationcommande@bimp.fr", "other");
 
-    public $valSrc = array("task0001@bimp.fr");
 
     public function areNotesEditable()
     {
-        return 1;
+        return ($this->canEdit() && $this->isEditable());
+    }
+    
+    public function fetch($id, $parent = null){
+        $result = parent::fetch($id, $parent);
+        $test = $this->getData("test_ferme");
+        if($test != ""){
+            $tabTest = explode(":", $test);
+            if(count($tabTest) == 2){
+                $sql = $this->db->db->query("SELECT * FROM ".MAIN_DB_PREFIX.$tabTest[0]." WHERE ".$tabTest[1]);
+                if($this->db->db->num_rows($sql) > 0){
+                    $inut = "";
+                    $this->actionClose(array(), $inut);
+                }
+            }
+        }
+        return $result;
     }
 
     public function renderHeaderExtraLeft()
@@ -16,14 +32,8 @@ class BIMP_Task extends BimpObject
 
         return $html;
     }
-
     
-//    public function canEdit(){
-//        return 0;
-//    }
-
-    public function renderLight()
-    {
+    public function renderLight(){
         $html = "";
 
         $html .= "<a href='" . DOL_URL_ROOT . "/bimptask/index.php?fc=task&id=" . $this->id . "'>";
@@ -50,22 +60,57 @@ class BIMP_Task extends BimpObject
         //return array(0=>array('label'=>"cool", 'classes'=>array('info')));//sucess info dangerous important
         return self::$cache["status_list_task"];
     }
-
-    public function isEditable()
-    {
-        return ($this->getData("status") < 4 && $this->canEdit());
+    
+    public function isEditable() {
+        return ($this->getData("status") < 4); 
     }
-
-    public function canView()
-    {
+    
+    public function getRight($right){
         global $user;
-        $classRight = "auther";
-        if (in_array($this->getData("src"), $this->valSrc)) {
-            $classRight = $this->getData("src");
+        if($this->getData("id_user_owner") == $user->id)
+            return 1;
+        $classRight = "other";
+        if(in_array($this->getData("dst"),  self::$valSrc)){
+            $classRight = $this->getData("dst");
         }
-//        return $user->rights->bimptask->{$classRight}->read;
-        return 1;
+        return $user->rights->bimptask->$classRight->$right;
     }
+    
+    public function canView(){
+        return $this->getRight("read");
+    }
+    
+    public function canEdit(){
+        return $this->getRight("write");
+    }
+    public function canDelete(){
+        return $this->getRight("delete");
+    }
+    public function canAttribute(){
+        return $this->getRight("attribute");
+    }
+    public function canEditField($field_name) {
+        if($field_name == "id_user_owner")
+            return $this->canAttribute();
+        return parent::canEditField($field_name);
+    }
+    public static function getFiltreDstRight($user){
+        $tabDroit = $tabPasDroit = array();
+        foreach(self::$valSrc as $src){
+            if($src != "other"){
+                if($user->rights->bimptask->$src->read)
+                    $tabDroit[] = $src;
+                else
+                    $tabPasDroit[] = $src;
+            }
+        }
+        if($user->rights->bimptask->other->read)
+            return array("NOT IN", $tabPasDroit);
+        else
+            return array("IN", $tabDroit);
+    }
+
+
 
 //    public function isDeletable() {
 //        return 0;
@@ -114,13 +159,13 @@ class BIMP_Task extends BimpObject
         $to = $this->getData("src");
         $from = $this->getData("dst");
 
-        $success .= "<br/>to:" . $to . "<br/>from:" . $from . "<br/>sujet:" . $sujet . "<br/>msg : " . $msg;
+        $success .= "<br/>dest:" . $to . "<br/>from:" . $from . "<br/>sujet:" . $sujet . "<br/>msg : " . $msg;
 //        if(!mailSyn2($sujet, $to, $from, $msg))
         $msg .= "Destinataire tronqué " . $to . " remplcé par tommy et peter<br/>";
 //        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
 //                $errors[] = "Envoie email impossible";
 //        else{
-        $this->addNote($data['email'], 4);
+            $this->addNote($data['email'], 4);
 //        }
 
         return array(
@@ -159,36 +204,39 @@ class BIMP_Task extends BimpObject
         return $this->getButtons();
     }
 
-    public function getButtons()
-    {
+    public function getButtons(){
         global $user;
         $buttons = array();
-        if ($this->isEditable()) {
-            $buttons[] = array(
-                'label'      => 'Répondre par mail',
-                'labelShort' => 'Rep Mail',
-                'icon'       => 'send',
-                'onclick'    => $this->getJsActionOnclick('sendMail', array(), array('form_name' => 'newMail'))
-            );
-            $buttons[] = array(
-                'label'      => 'Classer terminé',
-                'labelShort' => 'Terminé',
-                'icon'       => 'close',
-                'onclick'    => $this->getJsActionOnclick('close')
-            );
-            if ($this->getData("id_user_owner") < 1) {
+        if($this->isEditable()){
+            if($this->canEdit()){
                 $buttons[] = array(
-                    'label'   => 'Attribué',
-                    'icon'    => 'user',
-                    'onclick' => $this->getJsActionOnclick('attribute', array(), array('form_name' => 'attribute'))
+                    'label'   => 'Répondre par mail',
+                    'labelShort'   => 'Rep Mail',
+                    'icon'    => 'send',
+                    'onclick' => $this->getJsActionOnclick('sendMail', array(), array('form_name' => 'newMail'))
+                );
+                $buttons[] = array(
+                    'label'   => 'Classer terminé',
+                    'labelShort'   => 'Terminé',
+                    'icon'    => 'close',
+                    'onclick' => $this->getJsActionOnclick('close')
                 );
             }
-            if ($this->getData("id_user_owner") == $user->id) {
-                $buttons[] = array(
-                    'label'   => 'Refusé l\'attribution',
-                    'icon'    => 'window-close',
-                    'onclick' => $this->getJsActionOnclick('attribute', array('id_user_owner' => 0))
-                );
+            if($this->canEdit() || $this->canAttribute()){
+                if($this->getData("id_user_owner") < 1){
+                    $buttons[] = array(
+                        'label'   => 'Attribué',
+                        'icon'    => 'user',
+                        'onclick' => $this->getJsActionOnclick('attribute', array(), array('form_name' => 'attribute'))
+                    );
+                }
+                if($this->getData("id_user_owner") == $user->id){
+                    $buttons[] = array(
+                        'label'   => 'Refusé l\'attribution',
+                        'icon'    => 'window-close',
+                        'onclick' => $this->getJsActionOnclick('attribute', array('id_user_owner'=>0))
+                    );
+                }
             }
         }
         return $buttons;

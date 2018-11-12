@@ -10,21 +10,21 @@ function runBimpTask() {
                     'operator' => '<',
                     'value'    => 4
                 )));
-    
+    $i=0;
     foreach($tasks as $taskData){
         $task->fetch($taskData["id"]);
-        $content .= $task->renderLight();
-        $content .= "<br/>";
-    }
-
-    $nbT = count($tasks);  
-    if ($nbT > 0)
-        $bimp_fixe_tabs->addTab("mYtask", $nbT . " tache(s) en attente", $content);
+        if($task->canView()){
+            $content .= $task->renderLight();
+            $content .= "<br/>";
+            $i++;
+        }
+    } 
+    if ($i > 0)
+        $bimp_fixe_tabs->addTab("mYtask", $i . " tache(s) en attente", $content);
     
     
     
 
-    
     $content = "";
     $tasks = $task->getList(array('id_user_owner' => 0, 
         'status' => array(
@@ -32,13 +32,15 @@ function runBimpTask() {
                     'value'    => 4
                 )));
     
+    $i = 0;
     foreach($tasks as $taskData){
         $task->fetch($taskData["id"]);
-        $content .= $task->renderLight();
-        $content .= "<br/>";
+        if($task->canView()){
+            $content .= $task->renderLight();
+            $content .= "<br/>";
+            $i++;
+        }
     }
-
-    $nbT = count($tasks);  
-    if ($nbT > 0)
-        $bimp_fixe_tabs->addTab("taskAPersonne", $nbT . " tache(s) non attribué", $content);
+    if ($i > 0)
+        $bimp_fixe_tabs->addTab("taskAPersonne", $i . " tache(s) non attribué", $content);
 }

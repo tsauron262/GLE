@@ -5,6 +5,7 @@ class allController extends BimpController
 
     public function displayHead()
     {
+        
     }
 
     public function renderHtml()

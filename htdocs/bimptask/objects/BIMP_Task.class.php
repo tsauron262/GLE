@@ -153,8 +153,9 @@ class BIMP_Task extends BimpObject
         $data['email'] = str_replace("<br>", "<br/>", $data['email']);
 
 
-        $notes = $this->getNotes(1);
-
+//        $notes = $this->getChildrenObjects("bimp_note");
+        $notes = array("msg1", "msg2", "msg3");
+        $notes = $this->getNotes();
 
         $msg = $data['email'];
 

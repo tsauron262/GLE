@@ -1780,17 +1780,19 @@ class BimpObject extends BimpCache
 
         foreach ($fields as $field => $params) {
             $this->config->setCurrentPath('fields/' . $field);
-            if (!(int) $this->getCurrentConf('editable', 1, false, 'bool')) {
-                continue;
-            }
-            $label = $this->getCurrentConf('label', $field, true);
-            if (!$this->canEditField($field)) {
-                $errors[] = 'Vous n\'avez pas la permission de modifier le champ "' . $label . '"';
-                continue;
-            }
-            if (!$this->isFieldEditable($field)) {
-                $errors[] = 'Le champ "' . $label . '" n\'est pas modifiable';
-                continue;
+            if ($this->isLoaded()) {
+                if (!(int) $this->getCurrentConf('editable', 1, false, 'bool')) {
+                    continue;
+                }
+                $label = $this->getCurrentConf('label', $field, true);
+                if (!$this->canEditField($field)) {
+                    $errors[] = 'Vous n\'avez pas la permission de modifier le champ "' . $label . '"';
+                    continue;
+                }
+                if (!$this->isFieldEditable($field)) {
+                    $errors[] = 'Le champ "' . $label . '" n\'est pas modifiable';
+                    continue;
+                }
             }
 
             $value = null;
@@ -2056,11 +2058,11 @@ class BimpObject extends BimpCache
         if (!$force_create && !$this->canCreate()) {
             return array('Vous n\'avez pas la permission de créer ' . $this->getLabel('a'));
         }
-        
+
         if (!$force_create && !$this->isCreatable()) {
             return array('Il n\'est pas possible de créer ' . $this->getLabel('a'));
         }
-        
+
         $errors = $this->validate();
 
         if (!count($errors)) {
@@ -2141,11 +2143,11 @@ class BimpObject extends BimpCache
         if (!$force_update && !$this->canEdit()) {
             return array('Vous n\'avez pas la permission de modifier ' . $this->getLabel('this'));
         }
-        
+
         if (!$force_update && !$this->isEditable()) {
             return array('Il n\'est pas possiblede modifier ' . $this->getLabel('this'));
         }
-        
+
         $errors = array();
 
         if (!$this->isLoaded()) {
@@ -2463,7 +2465,7 @@ class BimpObject extends BimpCache
         if (!$force_delete && !$this->canDelete()) {
             return array('Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this'));
         }
-        
+
         if (!$force_delete && !$this->isDeletable()) {
             return array('Il n\'est pas possible de supprimer ' . $this->getLabel('this'));
         }
@@ -2951,7 +2953,7 @@ class BimpObject extends BimpCache
     {
         return 1;
     }
-    
+
     public function isEditable()
     {
         return 1;
@@ -3216,9 +3218,9 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    public function getNotes($visibility = 2)
+    public function getNotes()
     {
-        return self::getObjectNotes($this, $visibility);
+        return self::getObjectNotes($this);
     }
 
     public function renderNotesList($filter_by_user = true)

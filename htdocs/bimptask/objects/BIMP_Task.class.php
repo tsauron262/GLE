@@ -3,6 +3,8 @@
 class BIMP_Task extends BimpObject
 {
     public static $valSrc = array("task0001@bimp.fr", "validationcommande@bimp.fr", "other");
+    
+    public static $valStatus = array(0=>array('label'=>"En cours", 'classes'=>array('error')), 4=>array('label'=>"Terminé", 'classes'=>array('info')));
 
 
     public function areNotesEditable()
@@ -48,17 +50,18 @@ class BIMP_Task extends BimpObject
 
     public static function getStatus_list_taskArray()
     {
-        global $db;
-        if (!isset(self::$cache["status_list_task"])) {
-            $result = array();
-            $sql = $db->query("SELECT * FROM `llx_bimp_task_status`");
-            while ($ln = $db->fetch_object($sql)) {
-                $result[$ln->status] = array('label' => $ln->ref);
-            }
-            self::$cache["status_list_task"] = $result;
-        }
-        //return array(0=>array('label'=>"cool", 'classes'=>array('info')));//sucess info dangerous important
-        return self::$cache["status_list_task"];
+        return self::$valStatus;
+//        global $db;
+//        if (!isset(self::$cache["status_list_task"])) {
+//            $result = array();
+//            $sql = $db->query("SELECT * FROM `llx_bimp_task_status`");
+//            while ($ln = $db->fetch_object($sql)) {
+//                $result[$ln->status] = array('label' => $ln->ref);
+//            }
+//            self::$cache["status_list_task"] = $result;
+//        }
+//        //return array(0=>array('label'=>"cool", 'classes'=>array('info')));//sucess info dangerous important
+//        return self::$cache["status_list_task"];
     }
     
     public function isEditable() {

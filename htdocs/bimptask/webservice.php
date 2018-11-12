@@ -62,6 +62,8 @@ function traiteTask($dst, $src, $subj, $txt) {
     }
 
     $tabTxt = explode("-------------", $txt);
+    $tabTxt = explode("> ", $tabTxt[0]);
+    
     $txt = rtrim($tabTxt[0]);
 
 

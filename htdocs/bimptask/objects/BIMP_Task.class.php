@@ -183,6 +183,7 @@ class BIMP_Task extends BimpObject
 
         $msg = str_replace("<br />", "\n", $msg);
         $msg = str_replace("<br/>", "\n", $msg);
+        $msg = str_replace("<br/>​​​​​", "\n", $msg);
         
         
         $success .= "<br/>dest:" . $to . "<br/>from:" . $from . "<br/>sujet:" . $sujet . "<br/>msg : " . $msg;

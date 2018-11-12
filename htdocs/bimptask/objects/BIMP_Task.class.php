@@ -3,6 +3,10 @@
 class BIMP_Task extends BimpObject
 {
     public static $valSrc = array("task0001@bimp.fr", "validationcommande@bimp.fr", "other");
+    
+    public static $nbNonLu = 0;
+    
+    public static $valStatus = array(0=>array('label'=>"En cours", 'classes'=>array('error')), 4=>array('label'=>"Terminé", 'classes'=>array('info')));
 
 
     public function areNotesEditable()
@@ -39,6 +43,20 @@ class BIMP_Task extends BimpObject
         $html .= "<a href='" . DOL_URL_ROOT . "/bimptask/index.php?fc=task&id=" . $this->id . "'>";
         $html .= $this->getData("subj") . ' de "' . $this->getData("src") . '" ' . dol_trunc($this->getData("txt"));
         $html .= "</a>";
+        
+        $notes = $this->getNotes();
+        $notViewed = 0;
+        foreach($notes as $note)
+            if(!$note->getData("viewed")){
+                $notViewed++;
+                self::$nbNonLu++;
+            }
+        $butViewShort = array();
+        if(count($notes))
+            $butViewShort[] = array("onclick"=>"loadModalView('bimptask', 'BIMP_Task', ".$this->id.", 'notes', $(this), 'Infos')", "icon"=>"fas fa-comments", "labelShort"=> count($notes)." Info(s)".($notViewed? " ".$notViewed." Non lue" : ""), "class"=>($notViewed == 0 ? "btn-default" : "btn-danger")) ;
+        foreach ($butViewShort as $btn) {
+            $html .= '<button class="btn  '.$btn['class'].'" type="button" onclick="' . $btn["onclick"] . '"><i class="fa fa-' . $btn['icon'] . ' iconLeft"></i>' . (isset($btn['labelShort']) ? $btn['labelShort'] : $btn['label']) . '</button>';
+        }
         foreach ($this->getButtons() as $btn) {
             $html .= '<button class="btn btn-default" type="button" onclick="' . $btn["onclick"] . '"><i class="fa fa-' . $btn['icon'] . ' iconLeft"></i>' . (isset($btn['labelShort']) ? $btn['labelShort'] : $btn['label']) . '</button>';
         }
@@ -48,17 +66,18 @@ class BIMP_Task extends BimpObject
 
     public static function getStatus_list_taskArray()
     {
-        global $db;
-        if (!isset(self::$cache["status_list_task"])) {
-            $result = array();
-            $sql = $db->query("SELECT * FROM `llx_bimp_task_status`");
-            while ($ln = $db->fetch_object($sql)) {
-                $result[$ln->status] = array('label' => $ln->ref);
-            }
-            self::$cache["status_list_task"] = $result;
-        }
-        //return array(0=>array('label'=>"cool", 'classes'=>array('info')));//sucess info dangerous important
-        return self::$cache["status_list_task"];
+        return self::$valStatus;
+//        global $db;
+//        if (!isset(self::$cache["status_list_task"])) {
+//            $result = array();
+//            $sql = $db->query("SELECT * FROM `llx_bimp_task_status`");
+//            while ($ln = $db->fetch_object($sql)) {
+//                $result[$ln->status] = array('label' => $ln->ref);
+//            }
+//            self::$cache["status_list_task"] = $result;
+//        }
+//        //return array(0=>array('label'=>"cool", 'classes'=>array('info')));//sucess info dangerous important
+//        return self::$cache["status_list_task"];
     }
     
     public function isEditable() {
@@ -146,15 +165,13 @@ class BIMP_Task extends BimpObject
 
     public function actionSendMail($data, &$success)
     {
-        $success = "impec";
+        $success = "Message envoyé";
         $errors = $warnings = array();
         $sep = "<br/>---------------------<br/>";
         $idTask = "IDTASK:5467856456" . $this->getData("id");
         $data['email'] = str_replace("<br>", "<br/>", $data['email']);
 
 
-//        $notes = $this->getChildrenObjects("bimp_note");
-        $notes = array("msg1", "msg2", "msg3");
         $notes = $this->getNotes();
 
         $msg = $data['email'];
@@ -165,12 +182,8 @@ class BIMP_Task extends BimpObject
         if ($data['include_file']) {
             $msg .= "<br/>Fil de discution :";
             foreach ($notes as $note) {
-//                $msg .= get_class($note);
-//                if (is_a($note, "BimpNote")) {
-//                    $msg .= print_r($note);
                     $msg .= $sep;
                     $msg .= $note->getData("content");
-//                }
             }
 
             $msg .= $sep . "Message original :";
@@ -187,13 +200,10 @@ class BIMP_Task extends BimpObject
 //        $msg = str_replace("<br/>", "\n", $msg);
         
         
-        $success .= "<br/>dest:" . $to . "<br/>from:" . $from . "<br/>sujet:" . $sujet . "<br/>msg : " . $msg;
         if(!mailSyn2($sujet, $to, $from, $msg))
-//        $msg .= "Destinataire tronqué " . $to . " remplcé par tommy et peter<br/>";
-//        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
                 $errors[] = "Envoie email impossible";
         else{
-            $this->addNote($data['email'], 4);
+            $this->addNote($data['email'], 4, 1);
         }
 
         return array(

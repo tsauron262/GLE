@@ -167,3 +167,12 @@ views:
                   - type: custom
                     custom: 
                         callback: renderNotesList
+    notes: 
+        title: nom
+        edit_form: 0
+        delete_btn: 0
+        rows:    
+            - cols:
+                  - type: custom
+                    custom: 
+                        callback: renderNotesList

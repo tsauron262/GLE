@@ -97,10 +97,10 @@ forms:
         rows:
             - custom: 1
               input_name: email
-              data_type: html
+              data_type: text
               label: Email
               input:
-                  type: html
+                  type: text
             - custom: 1
               input_name: include_file
               data_type: bool

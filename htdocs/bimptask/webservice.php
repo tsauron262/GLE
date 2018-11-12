@@ -31,6 +31,18 @@ $txt = $_REQUEST['txt']; /* "corp du mail
 
 
 
+if($_REQUEST["old"]){
+    $commande = new Commande($db);
+    $sql = $db->query("SELECT rowid FROM `llx_commande` WHERE `validComm` > 0 AND (`validFin` < 1 || validFin is NULL) AND fk_statut = 0 ORDER BY `llx_commande`.`tms` DESC");
+    while($ln=$db->fetch_object($sql)){
+        $commande->fetch($ln->rowid);
+        $commande->valid($user);
+        echo "Validation ".$commande->getNomUrl(1);
+    }
+}
+
+
+
 
 
 
@@ -65,25 +77,36 @@ function traiteTask($dst, $src, $subj, $txt) {
     $tabTxt = explode("\n> ", $tabTxt[0]);
     
     $txt = rtrim($tabTxt[0]);
+    
+    
+    $user = new User($db);
+    $sql = $db->query("SELECT u.rowid FROM `llx_user` u, llx_user_extrafields ue WHERE ue.fk_object = u.rowid AND (email LIKE '".$src."' || ue.alias LIKE '%".$src."%')");
+    if($db->num_rows($sql) > 0){
+        $ln = $db->fetch_object($sql);
+        $user->fetch($ln->rowid);
+    }
+    else
+        $user->fetch(ID_USER_DEF);
+    
+    $user->rights->bimptask->$dst->write = 1;
+    $user->rights->bimptask->other->write = 1;
 
 
-
-
+    if ($idTask > 0) {
+        $task = BimpObject::getInstance("bimptask", "BIMP_Task");
+        if(!$task->fetch($idTask) || $task->getData("status") > 3)
+            $idTask = 0;
+    }
+    
     if ($idTask < 1) {
-        $user = new User($db);
-        $sql = $db->query("SELECT u.rowid FROM `llx_user` u, llx_user_extrafields ue WHERE ue.fk_object = u.rowid AND (email LIKE '".$src."' || ue.alias LIKE '%".$src."%')");
-        if($db->num_rows($sql) > 0){
-            $ln = $db->fetch_object($sql);
-            $user->fetch($ln->rowid);
-        }
-        else
-            $user->fetch(ID_USER_DEF);
         
+        echo "<br/>Création task";
         $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "");
         $errors = array_merge($errors, $task->validateArray($tab));
         $errors = array_merge($errors, $task->create());
     } else {
+        echo "<br/>Création note, task : ".$idTask;
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $tab = array("obj_type" => "bimp_object", "obj_module" => "bimptask", "obj_name" => "BIMP_Task", "id_obj" => $idTask, "type_author" => "3", "email" => $src, "visibility" => 4, "content" => $txt);
         $errors = array_merge($errors, $note->validateArray($tab));

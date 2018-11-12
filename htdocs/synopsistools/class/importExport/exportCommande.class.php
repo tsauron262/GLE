@@ -152,21 +152,21 @@ class exportCommande extends export8sens {
                 $contact = new Contact($this->db);
                 $contact->fetch($contactLiv['id']);
                 $PcvLAdpTitleEnu = $contactLiv['civility'];
-                if($contactFact['lastname'] != $PcvLAdpLib && $PcvLAdpLib != $contactFact['firstname'])
-                $PcvLAdpLib = $contactLiv['lastname']. " ".$contactLiv['firstname'];
+                if($contactFact['lastname'] != $PcvLAdpLib && $PcvLAdpLib != $contactFact['firstname'] && $PcvLAdpLib != $contactLiv['lastname']. " ".$contactLiv['firstname'])
+                    $PcvLAdpLib .= $contactLiv['lastname']. " ".$contactLiv['firstname'];
                 $PcvLAdpRue1 = ($contact->address != "") ? $contact->address : $societe->address;
                 $PcvLAdpZip = ($contact->zip != "") ? $contact->zip : $societe->zip;
                 $PcvLAdpCity = ($contact->town != "") ? $contact->town : $societe->town;
             }
             
             $listContactFact = $commande->liste_contact(-1, 'external', 0, 'BILLING');
-            if(count($listContactLiv)){
+            if(count($listContactFact)){
                 $contactFact = $listContactFact[0];
                 $contact = new Contact($this->db);
                 $contact->fetch($contactFact['id']);
                 $PcvPAdpTitleEnu = $contactFact['civility'];
-                if($contactFact['lastname'] != $PcvPAdpLib && $PcvPAdpLib != $contactFact['firstname'])
-                    $PcvPAdpLib = $contactFact['lastname']. " ".$contactFact['firstname'];
+                if($contactFact['lastname'] != $PcvPAdpLib && $PcvPAdpLib != $contactFact['firstname'] && $PcvPAdpLib != $contactFact['lastname']. " ".$contactFact['firstname'])
+                    $PcvPAdpLib .= " ".$contactFact['lastname']. " ".$contactFact['firstname'];
                 $PcvPAdpRue1 = ($contact->address != "") ?$contact->address : $societe->address;
                 $PcvPAdpZip = ($contact->zip != "") ?$contact->zip : $societe->zip;
                 $PcvPAdpCity = ($contact->town != "") ?$contact->town : $societe->town;
@@ -178,7 +178,7 @@ class exportCommande extends export8sens {
 //            die();
             $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $PcvPAdpLib, "phone" => $societe->phone, "address" => $PcvPAdpRue1, "zip" => $PcvPAdpZip, "town" => $PcvPAdpCity, "ref" => $commande->ref, "date" => dol_print_date($commande->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label, "secteur" => $secteur, "CodeCli"=>"",
                 "PcvPAdpTitleEnu"=>$PcvPAdpTitleEnu,
-                "PcvLAdpTitleEnu"=>$PcvLAdpTitleEnu, "PcvLAdpLib" => $societe->name." ".$PcvLAdpLib, "PcvLAdpRue1"=> $PcvLAdpRue1, "PcvLAdpZip" => $PcvLAdpZip, "PcvLAdpCity" => $PcvLAdpCity);
+                "PcvLAdpTitleEnu"=>$PcvLAdpTitleEnu, "PcvLAdpLib" => $PcvLAdpLib, "PcvLAdpRue1"=> $PcvLAdpRue1, "PcvLAdpZip" => $PcvLAdpZip, "PcvLAdpCity" => $PcvLAdpCity);
             $commande->fetch_lines();
             foreach ($commande->lines as $line) {
                 $type = $this->getRef($line);

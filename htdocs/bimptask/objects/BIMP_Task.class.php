@@ -182,15 +182,15 @@ class BIMP_Task extends BimpObject
         $to = $this->getData("src");
         $from = $this->getData("dst");
 
-        $msg = str_replace("<br />", "\n", $msg);
-        $msg = str_replace("<br/>", "\n", $msg);
-        $msg = str_replace("<br/>​​​​​", "\n", $msg);
+//        $msg = str_replace("<br />", "\n", $msg);
+//        $msg = str_replace("<br/>", "\n", $msg);
+//        $msg = str_replace("<br/>", "\n", $msg);
         
         
         $success .= "<br/>dest:" . $to . "<br/>from:" . $from . "<br/>sujet:" . $sujet . "<br/>msg : " . $msg;
-//        if(!mailSyn2($sujet, $to, $from, $msg))
-        $msg .= "Destinataire tronqué " . $to . " remplcé par tommy et peter<br/>";
-        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
+        if(!mailSyn2($sujet, $to, $from, $msg))
+//        $msg .= "Destinataire tronqué " . $to . " remplcé par tommy et peter<br/>";
+//        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
                 $errors[] = "Envoie email impossible";
         else{
             $this->addNote($data['email'], 4);
@@ -247,7 +247,7 @@ class BIMP_Task extends BimpObject
                     'label'   => 'Classer terminé',
                     'labelShort'   => 'Terminé',
                     'icon'    => 'close',
-                    'onclick' => $this->getJsActionOnclick('close')
+                    'onclick' => $this->getJsActionOnclick('close', array(), array('confirm_msg' => 'Terminer la tache ?'))
                 );
             }
             if($this->canEdit() || $this->canAttribute()){

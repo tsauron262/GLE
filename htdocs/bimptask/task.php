@@ -11,6 +11,7 @@ function runBimpTask() {
                     'value'    => 4
                 )));
     $i=0;
+    BIMP_Task::$nbNonLu = 0;
     foreach($tasks as $taskData){
         $task->fetch($taskData["id"]);
         if($task->canView()){
@@ -20,7 +21,7 @@ function runBimpTask() {
         }
     } 
     if ($i > 0)
-        $bimp_fixe_tabs->addTab("mYtask", $i . " tache(s) en attente", $content);
+        $bimp_fixe_tabs->addTab("mYtask", $i . " tache(s) en attente" .(BIMP_Task::$nbNonLu > 0 ? " <span class='red'>".BIMP_Task::$nbNonLu." message non lu.</span>" : ""), $content);
     
     
     
@@ -33,6 +34,7 @@ function runBimpTask() {
                 )));
     
     $i = 0;
+    BIMP_Task::$nbNonLu = 0;
     foreach($tasks as $taskData){
         $task->fetch($taskData["id"]);
         if($task->canView()){
@@ -42,5 +44,5 @@ function runBimpTask() {
         }
     }
     if ($i > 0)
-        $bimp_fixe_tabs->addTab("taskAPersonne", $i . " tache(s) non attribué", $content);
+        $bimp_fixe_tabs->addTab("taskAPersonne", $i . " tache(s) non attribué" .(BIMP_Task::$nbNonLu > 0 ? " <span class='red'>".BIMP_Task::$nbNonLu." message non lu.</span>" : ""), $content);
 }

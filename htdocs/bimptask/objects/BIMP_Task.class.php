@@ -4,6 +4,8 @@ class BIMP_Task extends BimpObject
 {
     public static $valSrc = array("task0001@bimp.fr", "validationcommande@bimp.fr", "other");
     
+    public static $nbNonLu = 0;
+    
     public static $valStatus = array(0=>array('label'=>"En cours", 'classes'=>array('error')), 4=>array('label'=>"Terminé", 'classes'=>array('info')));
 
 
@@ -41,6 +43,20 @@ class BIMP_Task extends BimpObject
         $html .= "<a href='" . DOL_URL_ROOT . "/bimptask/index.php?fc=task&id=" . $this->id . "'>";
         $html .= $this->getData("subj") . ' de "' . $this->getData("src") . '" ' . dol_trunc($this->getData("txt"));
         $html .= "</a>";
+        
+        $notes = $this->getNotes();
+        $notViewed = 0;
+        foreach($notes as $note)
+            if(!$note->getData("viewed")){
+                $notViewed++;
+                self::$nbNonLu++;
+            }
+        $butViewShort = array();
+        if(count($notes))
+            $butViewShort[] = array("onclick"=>"loadModalView('bimptask', 'BIMP_Task', ".$this->id.", 'notes', $(this), 'Infos')", "icon"=>"fas fa-comments", "labelShort"=> count($notes)." Info(s)".($notViewed? " ".$notViewed." Non lue" : ""), "class"=>($notViewed == 0 ? "btn-default" : "btn-danger")) ;
+        foreach ($butViewShort as $btn) {
+            $html .= '<button class="btn  '.$btn['class'].'" type="button" onclick="' . $btn["onclick"] . '"><i class="fa fa-' . $btn['icon'] . ' iconLeft"></i>' . (isset($btn['labelShort']) ? $btn['labelShort'] : $btn['label']) . '</button>';
+        }
         foreach ($this->getButtons() as $btn) {
             $html .= '<button class="btn btn-default" type="button" onclick="' . $btn["onclick"] . '"><i class="fa fa-' . $btn['icon'] . ' iconLeft"></i>' . (isset($btn['labelShort']) ? $btn['labelShort'] : $btn['label']) . '</button>';
         }

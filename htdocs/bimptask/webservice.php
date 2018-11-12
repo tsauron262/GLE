@@ -85,11 +85,13 @@ function traiteTask($dst, $src, $subj, $txt) {
         else
             $user->fetch(ID_USER_DEF);
         
+        echo "<br/>Création task";
         $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "");
         $errors = array_merge($errors, $task->validateArray($tab));
         $errors = array_merge($errors, $task->create());
     } else {
+        echo "<br/>Création note, task : ".$idTask;
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $tab = array("obj_type" => "bimp_object", "obj_module" => "bimptask", "obj_name" => "BIMP_Task", "id_obj" => $idTask, "type_author" => "3", "email" => $src, "visibility" => 4, "content" => $txt);
         $errors = array_merge($errors, $note->validateArray($tab));

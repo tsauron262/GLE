@@ -31,34 +31,38 @@ IDTASK:546785645628";*/
 
 
 
-
-$idTask = 0;
-
-
-
-$const = "IDTASK:5467856456";
-preg_match("/".$const."[0-9]*/", $txt, $matches);
-if(isset($matches[0])){
-    $idTask = str_replace($const, "", $matches[0]);
-}
-
-$tabTxt = explode("-------------", $txt);
-$txt = rtrim($tabTxt[0]);
+if($dst != "" && $src != "" && $subj != "" && $txt != ""){
+    $idTask = 0;
 
 
 
+    $const = "IDTASK:5467856456";
+    preg_match("/".$const."[0-9]*/", $txt, $matches);
+    if(isset($matches[0])){
+        $idTask = str_replace($const, "", $matches[0]);
+    }
 
-if($idTask < 1){
-    $task = BimpObject::getInstance("bimptask", "BIMP_Task");
-    $tab = array("src"=>$src, "dst"=>$dst, "subj"=>$subj, "txt"=>$txt, "test_ferme"=>"");
-    $errors = array_merge($errors, $task->validateArray($tab));
-    $errors = array_merge($errors, $task->create());
+    $tabTxt = explode("-------------", $txt);
+    $txt = rtrim($tabTxt[0]);
+
+
+
+
+    if($idTask < 1){
+        $task = BimpObject::getInstance("bimptask", "BIMP_Task");
+        $tab = array("src"=>$src, "dst"=>$dst, "subj"=>$subj, "txt"=>$txt, "test_ferme"=>"");
+        $errors = array_merge($errors, $task->validateArray($tab));
+        $errors = array_merge($errors, $task->create());
+    }
+    else{
+        $note = BimpObject::getInstance("bimpcore", "BimpNote");
+        $tab = array("obj_type"=>"bimp_object", "obj_module"=>"bimptask", "obj_name"=>"BIMP_Task", "id_obj"=>$idTask, "type_author"=>"3", "email"=>$src, "visibility"=>4, "content"=>$txt);
+        $errors = array_merge($errors, $note->validateArray($tab));
+        $errors = array_merge($errors, $note->create());
+    }
+
+    print_r($errors);
 }
 else{
-    $note = BimpObject::getInstance("bimpcore", "BimpNote");
-    $tab = array("obj_type"=>"bimp_object", "obj_module"=>"bimptask", "obj_name"=>"BIMP_Task", "id_obj"=>$idTask, "type_author"=>"3", "email"=>$src, "visibility"=>4, "content"=>$txt);
-    $errors = array_merge($errors, $note->validateArray($tab));
-    $errors = array_merge($errors, $note->create());
+    echo "Pas de données <pre>".print_r($_REQUEST,1);
 }
-
-print_r($errors);

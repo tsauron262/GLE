@@ -228,6 +228,17 @@ class InterfaceActionsAuto extends DolibarrTriggers
 
 			$object->sendtoid=0;
 		}
+		elseif ($action == 'ORDER_DELETE')
+        {
+            $langs->load("agenda");
+            $langs->load("other");
+        	$langs->load("orders");
+
+            if (empty($object->actionmsg2)) $object->actionmsg2=$langs->transnoentities("OrderDeeltedInDolibarr",$object->ref);
+            $object->actionmsg=$langs->transnoentities("OrderDeeltedInDolibarr",$object->ref);
+
+			$object->sendtoid=0;
+		}
 		elseif ($action == 'ORDER_SENTBYMAIL')
         {
             $langs->load("agenda");

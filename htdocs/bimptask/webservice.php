@@ -71,7 +71,7 @@ function traiteTask($dst, $src, $subj, $txt) {
 
     if ($idTask < 1) {
         $task = BimpObject::getInstance("bimptask", "BIMP_Task");
-        if(!$task->fetch($idTask))
+        if(!$task->fetch($idTask) || $task->getData("status") > 3)
             $idTask = 0;
     }
     

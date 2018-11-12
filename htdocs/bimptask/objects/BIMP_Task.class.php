@@ -184,11 +184,11 @@ class BIMP_Task extends BimpObject
         $success .= "<br/>dest:" . $to . "<br/>from:" . $from . "<br/>sujet:" . $sujet . "<br/>msg : " . $msg;
 //        if(!mailSyn2($sujet, $to, $from, $msg))
         $msg .= "Destinataire tronqué " . $to . " remplcé par tommy et peter<br/>";
-//        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
-//                $errors[] = "Envoie email impossible";
-//        else{
+        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
+                $errors[] = "Envoie email impossible";
+        else{
             $this->addNote($data['email'], 4);
-//        }
+        }
 
         return array(
             'errors'   => $errors,

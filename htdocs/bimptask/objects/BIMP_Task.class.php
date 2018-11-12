@@ -128,11 +128,6 @@ class BIMP_Task extends BimpObject
 //        $notes = $this->getChildrenObjects("bimp_note");
         $notes = array("msg1", "msg2", "msg3");
         $notes = $this->getNotes();
-        
-        echo '<pre>';
-        print_r($notes);
-        exit;
-
 
         $msg = $data['email'];
 

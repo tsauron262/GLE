@@ -249,7 +249,7 @@ class BimpCache
             
             if (!is_null($list)) {
                 foreach ($list as $item) {
-                    self::$cache[$cache_key] = BimpObject::getInstance('bimpcore', 'BimpNote', (int) $item['id']);
+                    self::$cache[$cache_key][] = BimpObject::getInstance('bimpcore', 'BimpNote', (int) $item['id']);
                 }
             }
         }

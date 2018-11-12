@@ -653,7 +653,7 @@ class BimpTools
         } elseif (is_array($filter) && isset($filter['and_fields'])) {
             $sql .= ' (';
             $fl = true;
-            foreach ($filter['and'] as $and_field => $and_filter) {
+            foreach ($filter['and_fields'] as $and_field => $and_filter) {
                 if (!$fl) {
                     $sql .= ' AND ';
                 } else {

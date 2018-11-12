@@ -15,7 +15,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
         if (!$force_edit && !(int) $this->getData('editable') && ($this->getData('linked_object_name') !== 'sav_apple_part')) {
             return 0;
         }
-
+        
         $parent = $this->getParentInstance();
         if (!BimpObject::objectLoaded($parent)) {
             return 0;

@@ -11,6 +11,7 @@ $siren = substr($siret, 0,9);
 
 
 
+//header("Content-type: text/xml");
 
 $xml_data = file_get_contents('request.xml');
 
@@ -49,8 +50,10 @@ $link = 'https://www.creditsafe.fr/getdata/service/CSFRServices.asmx';
 //$returnData = file_get_contents($link, false, $context);
 
 $returnData = htmlspecialchars_decode($returnData->GetDataResult);
+$returnData = str_replace("&", "et", $returnData);
 
 $result = simplexml_load_string($returnData);
+//print_r($returnData);die;
 
 if(stripos($result->header->reportinformation->reporttype, "Error") !== false){
     //echo json_encode($result);
@@ -59,7 +62,6 @@ if(stripos($result->header->reportinformation->reporttype, "Error") !== false){
     echo json_encode (array("Erreur"=> "".$result->body->errors->errordetail->code));  
 }
 else{
-
     $summary = $result->body->company->summary;
     $base = $result->body->company->baseinformation;
     $branches = $base->branches->branch;

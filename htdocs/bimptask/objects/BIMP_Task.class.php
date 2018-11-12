@@ -65,6 +65,10 @@ class BIMP_Task extends BimpObject
         return ($this->getData("status") < 4); 
     }
     
+    public function isDeletable() {
+        return $this->isEditable(); 
+    }
+    
     public function getRight($right){
         global $user;
         if($this->getData("id_user_owner") == $user->id)
@@ -76,7 +80,31 @@ class BIMP_Task extends BimpObject
         return $user->rights->bimptask->$classRight->$right;
     }
     
+    public function getListFiltre($type = "normal"){
+        global $user;
+        $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes taches assignées' : 'Toutes les taches'));
+        $tabFiltre = self::getFiltreDstRight($user);
+        if(count($tabFiltre[1])>0)
+            $list->addFieldFilterValue('fgdg_dst', array(
+                    ($type == "my" ? 'and_fields' : 'or') => array(
+                        'dst'        => array(
+                             $tabFiltre[0] => $tabFiltre[1]
+                        ),
+                        'id_user_owner' => $user->id
+                    )
+                ));
+        elseif($type == "my")
+            $list->addFieldFilterValue('id_user_owner', (int) $user->id);
+        return $list;
+    }
+    
     public function canView(){
+        global $user;
+        if($this->isNotLoaded())
+            foreach(self::$valSrc as $src)
+                if($user->rights->bimptask->$src->read)
+                    return 1;
+        
         return $this->getRight("read");
     }
     
@@ -99,15 +127,15 @@ class BIMP_Task extends BimpObject
         foreach(self::$valSrc as $src){
             if($src != "other"){
                 if($user->rights->bimptask->$src->read)
-                    $tabDroit[] = $src;
+                    $tabDroit[] = '"'.$src.'"';
                 else
-                    $tabPasDroit[] = $src;
+                    $tabPasDroit[] = '"'.$src.'"';
             }
         }
         if($user->rights->bimptask->other->read)
-            return array("NOT IN", $tabPasDroit);
+            return array("not_in", $tabPasDroit);
         else
-            return array("IN", $tabDroit);
+            return array("in", $tabDroit);
     }
 
 
@@ -137,12 +165,12 @@ class BIMP_Task extends BimpObject
         if ($data['include_file']) {
             $msg .= "<br/>Fil de discution :";
             foreach ($notes as $note) {
-                $msg .= get_class($note);
-                if (is_a($note, "BimpNote")) {
-                    $msg .= print_r($note);
+//                $msg .= get_class($note);
+//                if (is_a($note, "BimpNote")) {
+//                    $msg .= print_r($note);
                     $msg .= $sep;
                     $msg .= $note->getData("content");
-                }
+//                }
             }
 
             $msg .= $sep . "Message original :";
@@ -154,14 +182,19 @@ class BIMP_Task extends BimpObject
         $to = $this->getData("src");
         $from = $this->getData("dst");
 
+        $msg = str_replace("<br />", "\n", $msg);
+        $msg = str_replace("<br/>", "\n", $msg);
+        $msg = str_replace("<br/>​​​​​", "\n", $msg);
+        
+        
         $success .= "<br/>dest:" . $to . "<br/>from:" . $from . "<br/>sujet:" . $sujet . "<br/>msg : " . $msg;
 //        if(!mailSyn2($sujet, $to, $from, $msg))
         $msg .= "Destinataire tronqué " . $to . " remplcé par tommy et peter<br/>";
-//        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
-//                $errors[] = "Envoie email impossible";
-//        else{
+        if(!mailSyn2($sujet, "tommy@bimp.fr, peter@bimp.fr", $from, $msg))
+                $errors[] = "Envoie email impossible";
+        else{
             $this->addNote($data['email'], 4);
-//        }
+        }
 
         return array(
             'errors'   => $errors,

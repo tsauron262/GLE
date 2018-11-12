@@ -239,21 +239,21 @@ fields:
             type: hidden
 
     id_facture:
-        label: Facture
+        label: Facture banque
         type: id_object
         object: facture
         input:
             type: hidden
 
     id_facture_client:
-        label: Facture client
+        label: Facture VR client
         type: id_object
         object: facture_client
         input:
             type: hidden
 
     id_facture_fournisseur:
-        label: Facture fournisseur
+        label: Facture VR fournisseur
         type: id_object
         object: facture_fournisseur
         input:
@@ -404,11 +404,6 @@ forms:
             - field: duration
             - field: periodicity
             
-    commandes:
-        title: Commandes associées
-        rows:
-            - association: commandes
-            
 lists:
     default:
         checkboxes: 1
@@ -447,7 +442,6 @@ lists:
                 edit: 1
       
 fields_tables:
-
     contrat: 
         title: Contrat
         footer_extra_btn: 
@@ -475,7 +469,7 @@ fields_tables:
             - field: id_facture_fournisseur
               edit: 0
               display: nom_url
-            
+    
 
     options: 
         title: Options
@@ -601,7 +595,9 @@ views:
                   col_lg: 6
                   col_md: 6
                   fields_table:
-                      name: options  
+                      name: options
+
+            
                                       
             - cols: 
                   - type: fields_table
@@ -641,6 +637,7 @@ views:
                     col_md: 5
                     fields_table:
                         name: montants
+                  
                   - type: rows
                     col_lg: 8
                     col_md: 7
@@ -649,7 +646,7 @@ views:
                             - type: list
                               list: 
                                   children: frais_divers
-                                  panel: 0  
+                                  panel: 0
                             - type: list
                               list: 
                                   children: rents
@@ -658,11 +655,12 @@ views:
                               list: 
                                   children: rents_except
                                   panel: 0
-                        
+                         
             - cols: 
                   - type: custom
                     custom: 
                         callback: renderViewLoadedScript
+            
     
     fournisseurs:
         title: nom

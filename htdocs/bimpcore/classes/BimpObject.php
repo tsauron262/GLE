@@ -3108,7 +3108,7 @@ class BimpObject extends BimpCache
 
     public function setPosition($position)
     {
-        if (!isset($this->id) || !$this->id) {
+        if (!isset($this->id) || !(int) $this->id) {
             return false;
         }
 
@@ -3137,6 +3137,7 @@ class BimpObject extends BimpCache
             }
 
             if ($check) {
+                $this->set('position', (int) $position);
                 $i = 1;
                 foreach ($items as $item) {
                     if ($i === (int) $position) {
@@ -3182,6 +3183,7 @@ class BimpObject extends BimpCache
             $sql .= BimpTools::getSqlWhere($filters);
 
             $result = $this->db->executeS($sql, 'array');
+
             if (!is_null($result)) {
                 return (int) ((int) $result[0]['max_pos'] + 1);
             }

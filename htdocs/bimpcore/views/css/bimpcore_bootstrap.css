@@ -17111,54 +17111,54 @@ input[type=text].large_input:focus {
 .freeForm .freeFormInput {
   margin-left: 30px;
 }
-/* line 641, ../scss/bimpcore/_form.scss */
+/* line 645, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormInput .select2-container {
   width: 100% !important;
 }
-/* line 646, ../scss/bimpcore/_form.scss */
+/* line 650, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormAjaxResult {
   margin: 15px 0;
   display: none;
 }
-/* line 651, ../scss/bimpcore/_form.scss */
+/* line 655, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit {
   margin-top: 20px;
 }
-/* line 654, ../scss/bimpcore/_form.scss */
+/* line 658, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.rightAlign {
   text-align: right;
 }
-/* line 657, ../scss/bimpcore/_form.scss */
+/* line 661, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.rightAlign .btn {
   margin-left: 15px;
 }
-/* line 661, ../scss/bimpcore/_form.scss */
+/* line 665, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.rightAlign .buttonLeft {
   float: left;
   margin-left: 0;
   margin-right: 15px;
 }
-/* line 668, ../scss/bimpcore/_form.scss */
+/* line 672, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.leftAlign {
   text-align: left;
 }
-/* line 671, ../scss/bimpcore/_form.scss */
+/* line 675, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.leftAlign .btn {
   margin-right: 15px;
 }
-/* line 675, ../scss/bimpcore/_form.scss */
+/* line 679, ../scss/bimpcore/_form.scss */
 .freeForm .freeFormSubmit.leftAlign .buttonRight {
   float: right;
   margin-right: 0;
   margin-left: 15px;
 }
 
-/* line 686, ../scss/bimpcore/_form.scss */
+/* line 690, ../scss/bimpcore/_form.scss */
 .ui-menu .ui-menu-item a {
   padding: 0.12em 0.4em !important;
 }
 
-/* line 690, ../scss/bimpcore/_form.scss */
+/* line 694, ../scss/bimpcore/_form.scss */
 .ui-menu .ui-menu-item:last-child a {
   padding-bottom: 1em !important;
 }
@@ -17363,12 +17363,18 @@ table.bimp_list_table > tfoot > tr.paginationContainer > td,
 table.objectlistTable > tfoot > tr.paginationContainer > td {
   background-color: #fff;
 }
+/* line 165, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .listFooterButtons > td,
+table.objectlistTable .listFooterButtons > td {
+  background-color: #fff;
+  padding: 10px 0 0;
+}
 
-/* line 166, ../scss/bimpcore/_list.scss */
+/* line 171, ../scss/bimpcore/_list.scss */
 .sortTitle {
   cursor: pointer;
 }
-/* line 169, ../scss/bimpcore/_list.scss */
+/* line 174, ../scss/bimpcore/_list.scss */
 .sortTitle:after {
   font-family: 'FontAwesome';
   margin-left: 8px;
@@ -17377,136 +17383,136 @@ table.objectlistTable > tfoot > tr.paginationContainer > td {
   transition: all 0.15s ease;
   -webkit-transition: all 0.15s ease;
 }
-/* line 177, ../scss/bimpcore/_list.scss */
+/* line 182, ../scss/bimpcore/_list.scss */
 .sortTitle:hover, .sortTitle.active {
   text-decoration: none !important;
 }
-/* line 180, ../scss/bimpcore/_list.scss */
+/* line 185, ../scss/bimpcore/_list.scss */
 .sortTitle:hover:after, .sortTitle.active:after {
   opacity: 1;
 }
-/* line 185, ../scss/bimpcore/_list.scss */
+/* line 190, ../scss/bimpcore/_list.scss */
 .sortTitle.sorted-asc:after {
   content: '\f0d7';
 }
-/* line 188, ../scss/bimpcore/_list.scss */
+/* line 193, ../scss/bimpcore/_list.scss */
 .sortTitle.sorted-desc:after {
   content: '\f0d8';
 }
-/* line 191, ../scss/bimpcore/_list.scss */
+/* line 196, ../scss/bimpcore/_list.scss */
 .sortTitle.active.sorted-asc:after {
   content: '\f0d8';
 }
-/* line 194, ../scss/bimpcore/_list.scss */
+/* line 199, ../scss/bimpcore/_list.scss */
 .sortTitle.active.sorted-desc:after {
   content: '\f0d7';
 }
-/* line 197, ../scss/bimpcore/_list.scss */
+/* line 202, ../scss/bimpcore/_list.scss */
 .sortTitle.active.sorted-asc:hover:after {
   content: '\f0d7';
 }
-/* line 200, ../scss/bimpcore/_list.scss */
+/* line 205, ../scss/bimpcore/_list.scss */
 .sortTitle.active.sorted-desc:hover:after {
   content: '\f0d8';
 }
-/* line 204, ../scss/bimpcore/_list.scss */
+/* line 209, ../scss/bimpcore/_list.scss */
 .sortTitle.deactivated, .sortTitle.deactivated:hover {
   cursor: not-allowed;
 }
-/* line 208, ../scss/bimpcore/_list.scss */
+/* line 213, ../scss/bimpcore/_list.scss */
 .sortTitle.deactivated:after, .sortTitle.deactivated:hover:after {
   opacity: 0 !important;
 }
 
-/* line 215, ../scss/bimpcore/_list.scss */
+/* line 220, ../scss/bimpcore/_list.scss */
 .listSearchRow {
   display: none;
   background-color: #DCDCDC;
 }
-/* line 219, ../scss/bimpcore/_list.scss */
+/* line 224, ../scss/bimpcore/_list.scss */
 .listSearchRow > td {
   background-color: #DCDCDC;
 }
-/* line 223, ../scss/bimpcore/_list.scss */
+/* line 228, ../scss/bimpcore/_list.scss */
 .listSearchRow i.fa-search {
   font-size: 16px;
   font-weight: bold;
   color: #787878;
 }
-/* line 228, ../scss/bimpcore/_list.scss */
+/* line 233, ../scss/bimpcore/_list.scss */
 .listSearchRow .inputHelp {
   display: none;
 }
-/* line 232, ../scss/bimpcore/_list.scss */
+/* line 237, ../scss/bimpcore/_list.scss */
 .listSearchRow #search_id {
   max-width: 45px;
 }
-/* line 235, ../scss/bimpcore/_list.scss */
+/* line 240, ../scss/bimpcore/_list.scss */
 .listSearchRow td.searchTools {
   text-align: right;
 }
-/* line 238, ../scss/bimpcore/_list.scss */
+/* line 243, ../scss/bimpcore/_list.scss */
 .listSearchRow td.searchTools .btn {
   margin-right: 10px;
 }
-/* line 243, ../scss/bimpcore/_list.scss */
+/* line 248, ../scss/bimpcore/_list.scss */
 .listSearchRow .searchInputContainer {
   width: 100%;
   padding: 2px;
 }
-/* line 247, ../scss/bimpcore/_list.scss */
+/* line 252, ../scss/bimpcore/_list.scss */
 .listSearchRow .searchInputContainer input, .listSearchRow .searchInputContainer select, .listSearchRow .searchInputContainer .input-group, .listSearchRow .searchInputContainer span.select2 {
   width: 100% !important;
   min-width: 100px !important;
 }
-/* line 252, ../scss/bimpcore/_list.scss */
+/* line 257, ../scss/bimpcore/_list.scss */
 .listSearchRow .searchInputContainer .optionsContainer {
   display: none;
 }
-/* line 256, ../scss/bimpcore/_list.scss */
+/* line 261, ../scss/bimpcore/_list.scss */
 .listSearchRow .searchInputContainer .loading {
   display: none;
 }
-/* line 260, ../scss/bimpcore/_list.scss */
+/* line 265, ../scss/bimpcore/_list.scss */
 .listSearchRow .searchInputContainer .minwidth200 {
   min-width: 0;
 }
 
-/* line 267, ../scss/bimpcore/_list.scss */
+/* line 272, ../scss/bimpcore/_list.scss */
 .addObjectRow {
   display: none;
   background-color: #A0A0A0;
 }
-/* line 271, ../scss/bimpcore/_list.scss */
+/* line 276, ../scss/bimpcore/_list.scss */
 .addObjectRow td:first-child {
   text-align: center;
 }
-/* line 274, ../scss/bimpcore/_list.scss */
+/* line 279, ../scss/bimpcore/_list.scss */
 .addObjectRow td:first-child i.fa-plus-circle {
   font-size: 20px;
   font-weight: normal;
   color: #DCDCDC;
 }
-/* line 280, ../scss/bimpcore/_list.scss */
+/* line 285, ../scss/bimpcore/_list.scss */
 .addObjectRow .inputHelp {
   display: none;
 }
-/* line 285, ../scss/bimpcore/_list.scss */
+/* line 290, ../scss/bimpcore/_list.scss */
 .addObjectRow .inputContainer input, .addObjectRow .inputContainer select, .addObjectRow .inputContainer textarea {
   width: 100%;
 }
 
-/* line 291, ../scss/bimpcore/_list.scss */
+/* line 296, ../scss/bimpcore/_list.scss */
 th.th_tools {
   margin-right: 25px;
 }
 
-/* line 295, ../scss/bimpcore/_list.scss */
+/* line 300, ../scss/bimpcore/_list.scss */
 .headerTools {
   text-align: right;
   height: 100%;
 }
-/* line 299, ../scss/bimpcore/_list.scss */
+/* line 304, ../scss/bimpcore/_list.scss */
 .headerTools .headerButton {
   display: inline-block;
   margin: 5px;
@@ -17520,40 +17526,40 @@ th.th_tools {
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 313, ../scss/bimpcore/_list.scss */
+/* line 318, ../scss/bimpcore/_list.scss */
 .headerTools .headerButton:hover {
   color: #EF7D00;
   background-color: #fff;
 }
-/* line 317, ../scss/bimpcore/_list.scss */
+/* line 322, ../scss/bimpcore/_list.scss */
 .headerTools .headerButton:before, .headerTools .headerButton:after {
   font-family: 'FontAwesome';
 }
-/* line 322, ../scss/bimpcore/_list.scss */
+/* line 327, ../scss/bimpcore/_list.scss */
 .headerTools .openSearchRowButton:before {
   content: '\f002';
 }
-/* line 325, ../scss/bimpcore/_list.scss */
+/* line 330, ../scss/bimpcore/_list.scss */
 .headerTools .openAddObjectRowButton:before {
   content: '\f055';
 }
-/* line 328, ../scss/bimpcore/_list.scss */
+/* line 333, ../scss/bimpcore/_list.scss */
 .headerTools .activatePositionsButton:before {
   content: '\f07d';
 }
-/* line 331, ../scss/bimpcore/_list.scss */
+/* line 336, ../scss/bimpcore/_list.scss */
 .headerTools .openBulkActionsPopupButton:before {
   content: '\f046';
 }
-/* line 334, ../scss/bimpcore/_list.scss */
+/* line 339, ../scss/bimpcore/_list.scss */
 .headerTools .openParametersPopupButton:before {
   content: '\f013';
 }
-/* line 337, ../scss/bimpcore/_list.scss */
+/* line 342, ../scss/bimpcore/_list.scss */
 .headerTools .refreshListButton:before {
   content: '\f01e';
 }
-/* line 340, ../scss/bimpcore/_list.scss */
+/* line 345, ../scss/bimpcore/_list.scss */
 .headerTools .loadingIcon {
   display: inline-block;
   margin: 5px;
@@ -17565,28 +17571,28 @@ th.th_tools {
   opacity: 0;
   font-size: 16px;
 }
-/* line 351, ../scss/bimpcore/_list.scss */
+/* line 356, ../scss/bimpcore/_list.scss */
 .headerTools .loadingIcon:before {
   font-family: 'FontAwesome';
   content: '\f110';
 }
-/* line 356, ../scss/bimpcore/_list.scss */
+/* line 361, ../scss/bimpcore/_list.scss */
 .headerTools .loadingIcon.visible {
   opacity: 1;
 }
 
-/* line 362, ../scss/bimpcore/_list.scss */
+/* line 367, ../scss/bimpcore/_list.scss */
 td.buttons {
   text-align: right;
   min-width: 160px;
   padding-right: 6px !important;
 }
-/* line 367, ../scss/bimpcore/_list.scss */
+/* line 372, ../scss/bimpcore/_list.scss */
 td.buttons .btn {
   margin-right: 4px;
 }
 
-/* line 372, ../scss/bimpcore/_list.scss */
+/* line 377, ../scss/bimpcore/_list.scss */
 .rowButton {
   color: #636363 !important;
   text-align: center;
@@ -17603,66 +17609,66 @@ td.buttons .btn {
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 389, ../scss/bimpcore/_list.scss */
+/* line 394, ../scss/bimpcore/_list.scss */
 .rowButton:hover {
   color: #fff !important;
   background-color: #EF7D00;
   text-decoration: none;
 }
-/* line 394, ../scss/bimpcore/_list.scss */
+/* line 399, ../scss/bimpcore/_list.scss */
 .rowButton:hover i {
   color: #fff !important;
 }
-/* line 398, ../scss/bimpcore/_list.scss */
+/* line 403, ../scss/bimpcore/_list.scss */
 .rowButton:before {
   font-family: 'FA5S';
 }
-/* line 401, ../scss/bimpcore/_list.scss */
+/* line 406, ../scss/bimpcore/_list.scss */
 .rowButton.editButton:before {
   content: '\f044';
 }
-/* line 404, ../scss/bimpcore/_list.scss */
+/* line 409, ../scss/bimpcore/_list.scss */
 .rowButton.updateButton:before {
   content: '\f0c7';
 }
-/* line 407, ../scss/bimpcore/_list.scss */
+/* line 412, ../scss/bimpcore/_list.scss */
 .rowButton.deleteButton:before {
   content: '\f2ed';
 }
-/* line 410, ../scss/bimpcore/_list.scss */
+/* line 415, ../scss/bimpcore/_list.scss */
 .rowButton.viewButton:before {
   content: '\f06e';
 }
-/* line 414, ../scss/bimpcore/_list.scss */
+/* line 419, ../scss/bimpcore/_list.scss */
 .rowButton i {
   color: #636363 !important;
 }
 
-/* line 419, ../scss/bimpcore/_list.scss */
+/* line 424, ../scss/bimpcore/_list.scss */
 .ajaxResultContainer {
   display: none;
   margin: 20px 15px;
 }
 
 /*Pagination*/
-/* line 426, ../scss/bimpcore/_list.scss */
+/* line 431, ../scss/bimpcore/_list.scss */
 .paginationContainer td {
   background-color: #fff;
 }
 
-/* line 430, ../scss/bimpcore/_list.scss */
+/* line 435, ../scss/bimpcore/_list.scss */
 .listPagination {
   text-align: center;
   background-color: #fff;
   padding: 10px;
-  margin-top: 20px;
+  margin: 10px 0;
   border-top: 1px solid #DCDCDC;
 }
-/* line 431, ../scss/bimpcore/_list.scss */
+/* line 436, ../scss/bimpcore/_list.scss */
 .listPagination:empty {
   display: none;
 }
-/* line 441, ../scss/bimpcore/_list.scss */
+/* line 446, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton {
   font-size: 13px;
   margin: 0 5px;
@@ -17676,48 +17682,48 @@ td.buttons .btn {
   line-height: 16px;
   vertical-align: middle;
 }
-/* line 454, ../scss/bimpcore/_list.scss */
+/* line 459, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton:hover {
   color: #EF7D00;
 }
-/* line 457, ../scss/bimpcore/_list.scss */
+/* line 462, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton:before, .listPagination span.navButton:after {
   font-family: 'FontAwesome';
   font-size: 12px;
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 464, ../scss/bimpcore/_list.scss */
+/* line 469, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton.disabled, .listPagination span.navButton.disabled:hover {
   color: #C8C8C8;
   cursor: default;
 }
-/* line 470, ../scss/bimpcore/_list.scss */
+/* line 475, ../scss/bimpcore/_list.scss */
 .listPagination span.prevButton:before {
   content: '\f053';
   margin-right: 8px;
 }
-/* line 474, ../scss/bimpcore/_list.scss */
+/* line 479, ../scss/bimpcore/_list.scss */
 .listPagination span.nextButton:after {
   content: '\f054';
   margin-left: 8px;
 }
-/* line 478, ../scss/bimpcore/_list.scss */
+/* line 483, ../scss/bimpcore/_list.scss */
 .listPagination .pages {
   display: inline-block;
   margin: 0 50px;
   color: #A0A0A0;
 }
-/* line 483, ../scss/bimpcore/_list.scss */
+/* line 488, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn {
   font-weight: bold;
   cursor: pointer;
 }
-/* line 486, ../scss/bimpcore/_list.scss */
+/* line 491, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn:hover {
   color: #505050;
 }
-/* line 489, ../scss/bimpcore/_list.scss */
+/* line 494, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn.active, .listPagination .pages .pageBtn.active:hover {
   color: #EF7D00;
   cursor: default;

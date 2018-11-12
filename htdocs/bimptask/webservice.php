@@ -18,11 +18,35 @@ require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
 
 $controller = BimpController::getInstance('bimptask');
 
-$dst = "task0001@bimp.fr";
-$src = "tommy@bimp.fr";
-$subj = "new task mail";
-$txt = "corp du mail";
+$dst = $_REQUEST['dst'];//"task0001@bimp.fr";
+$src = $_REQUEST['src'];//"tommy@bimp.fr";
+$subj = $_REQUEST['subj'];//"new task mail";
+$txt = $_REQUEST['txt'];/*"corp du mail
+fsfdfs
+dfdsfdsf
+-------------
+IDTASK:546785645628";*/
+
+
+
+
+
+
 $idTask = 0;
+
+
+
+$const = "IDTASK:5467856456";
+preg_match("/".$const."[0-9]*/", $txt, $matches);
+if(isset($matches[0])){
+    $idTask = str_replace($const, "", $matches[0]);
+}
+
+$tabTxt = explode("-------------", $txt);
+$txt = rtrim($tabTxt[0]);
+
+
+
 
 if($idTask < 1){
     $task = BimpObject::getInstance("bimptask", "BIMP_Task");

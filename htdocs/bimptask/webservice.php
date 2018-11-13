@@ -8,7 +8,7 @@ if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] != "synchro" 
 
 //header("Content-type: text/xml");
 }
-
+define("NOLOGIN", 1); 
 $errors = array();
 
 require_once '../bimpcore/main.php';

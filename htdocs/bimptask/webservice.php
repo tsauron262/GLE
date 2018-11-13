@@ -57,6 +57,7 @@ if (!($dst != "" && $src != "" && $subj != "" && $txt != "")) {
         }
     }
 } else {
+    dol_syslog(print_r($_REQUEST,1), 3);
     traiteTask($dst, $src, $subj, $txt);
 }
 

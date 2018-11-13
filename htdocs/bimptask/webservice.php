@@ -12,7 +12,7 @@ define("NOLOGIN", 1);
 $errors = array();
 
 require_once '../bimpcore/main.php';
-dol_syslog("debut", 3);
+
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
@@ -20,14 +20,10 @@ $controller = BimpController::getInstance('bimptask');
 
 define("ID_USER_DEF", 215);
 
-$dst = urldecode($_REQUEST['dst']); //"task0001@bimp.fr";
-$src = urldecode($_REQUEST['src']); //"tommy@bimp.fr";
-$subj = urldecode($_REQUEST['subj']); //"new task mail";
-$txt = urldecode($_REQUEST['txt']); /* "corp du mail
-  fsfdfs
-  dfdsfdsf
-  -------------
-  IDTASK:546785645628"; */
+$dst = urldecode($_REQUEST['dst']); 
+$src = urldecode($_REQUEST['src']); 
+$subj = urldecode($_REQUEST['subj']); 
+$txt = urldecode($_REQUEST['txt']); 
 
 
 
@@ -42,8 +38,6 @@ if($_REQUEST["old"]){
 }
 
 
-
-    dol_syslog(print_r($_REQUEST,1), 3);
 
 
 

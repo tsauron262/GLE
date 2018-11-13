@@ -614,12 +614,7 @@ views:
                     fields_table:
                         name: apporteur
                         
-            - cols:
-                  - type: list
-                    col_lg: 12
-                    list: 
-                        children: refinanceurs
-                        panel: 0
+            
                 
             - cols: 
                   - type: custom
@@ -660,6 +655,13 @@ views:
                   - type: custom
                     custom: 
                         callback: renderViewLoadedScript
+
+            - cols:
+                  - type: list
+                    col_lg: 12
+                    list: 
+                        children: refinanceurs
+                        panel: 0
             
     
     fournisseurs:

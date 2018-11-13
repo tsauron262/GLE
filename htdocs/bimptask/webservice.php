@@ -20,10 +20,10 @@ $controller = BimpController::getInstance('bimptask');
 
 define("ID_USER_DEF", 215);
 
-$dst = $_REQUEST['dst']; //"task0001@bimp.fr";
-$src = $_REQUEST['src']; //"tommy@bimp.fr";
-$subj = $_REQUEST['subj']; //"new task mail";
-$txt = $_REQUEST['txt']; /* "corp du mail
+$dst = urldecode($_REQUEST['dst']); //"task0001@bimp.fr";
+$src = urldecode($_REQUEST['src']); //"tommy@bimp.fr";
+$subj = urldecode($_REQUEST['subj']); //"new task mail";
+$txt = urldecode($_REQUEST['txt']); /* "corp du mail
   fsfdfs
   dfdsfdsf
   -------------

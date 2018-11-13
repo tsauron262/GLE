@@ -1,5 +1,4 @@
 <?php
-dol_syslog("debut", 3);
 if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] != "synchro" || $_SERVER['PHP_AUTH_PW'] != "9DDrvuNcWRdKClhTe2LGh0mbKVIV33I3") {
     header('WWW-Authenticate: Basic realm="My Realm"');
     header('HTTP/1.0 401 Unauthorized');
@@ -13,6 +12,7 @@ if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] != "synchro" 
 $errors = array();
 
 require_once '../bimpcore/main.php';
+dol_syslog("debut", 3);
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 

@@ -10,6 +10,11 @@ class BS_Ticket extends BimpObject
     const BS_TICKET_ATT_PRESTATAIRE = 5;
     const BS_TICKET_CLOT = 999;
 
+    public static $priorities = array(
+        1 => array('label' => 'Non urgent', 'classes' => array('success'), 'icon' => 'hourglass-start'),
+        2 => array('label' => 'Urgent', 'classes' => array('warning'), 'icon' => 'hourglass-half'),
+        3 => array('label' => 'Très urgent', 'classes' => array('danger'), 'icon' => 'hourglass-end'),
+    );
     public static $impacts = array(
         1 => array('label' => 'Faible', 'classes' => array('info'), 'icon' => 'star-o'),
         2 => array('label' => 'Moyen', 'classes' => array('warning'), 'icon' => 'star-half-o'),
@@ -31,24 +36,24 @@ class BS_Ticket extends BimpObject
 
     // Getters:
 
+    public function getPostIdClient()
+    {
+        $id_client = (int) BimpTools::getPostFieldValue('id_client_contrat', 0);
+        if (!$id_client) {
+            $id_client = (int) BimpTools::getPostFieldValue('id_client', (int) $this->getData('id_client'));
+        }
+        return $id_client;
+    }
+
     public function getClient_contactsArray()
     {
-        $contacts = array();
+        $id_client = (int) $this->getPostIdClient();
 
-        $contrat = $this->getChildObject('contrat');
-        if (!is_null($contrat)) {
-            if (isset($contrat->socid) && $contrat->socid) {
-                $where = '`fk_soc` = ' . (int) $contrat->socid;
-                $rows = $this->db->getRows('socpeople', $where, null, 'array', array('rowid', 'firstname', 'lastname'));
-                if (!is_null($rows)) {
-                    foreach ($rows as $r) {
-                        $contacts[(int) $r['rowid']] = BimpTools::ucfirst($r['firstname']) . ' ' . strtoupper($r['lastname']);
-                    }
-                }
-            }
+        if ($id_client) {
+            return self::getSocieteContactsArray($id_client, true);
         }
 
-        return $contacts;
+        return array();
     }
 
     public function getEquipmentsArray()
@@ -64,34 +69,34 @@ class BS_Ticket extends BimpObject
         return $equipments;
     }
 
-    public function getPrioritiesArray()
+    public function getClientContratInput()
     {
-        BimpObject::getInstance('bimpsupport', 'BS_Inter');
-        return BS_Inter::$priorities;
-    }
-
-    public function getClientFormInput()
-    {
-        $contrat = $this->getChildObject('contrat');
         $id_client = 0;
         $nom_url = '';
-        if (!is_null($contrat)) {
-            if (isset($contrat->societe) && is_a($contrat->societe, 'Societe')) {
-                if (isset($contrat->societe->id) && $contrat->societe->id) {
-                    $id_client = $contrat->societe->id;
-                    $nom_url = $contrat->getNomUrl(1);
-                }
-            } elseif (isset($contrat->socid) && $contrat->socid) {
-                $id_client = $contrat->socid;
-                global $db;
-                $soc = new Societe($db);
-                if ($soc->fetch($contrat->socid) > 0) {
-                    $nom_url = $soc->getNomUrl(1);
+        if ((int) BimpTools::getPostFieldValue('no_contrat', 0)) {
+            if (!(int) BimpTools::getPostFieldValue('no_client', 0)) {
+                $id_client = BimpTools::getPostFieldValue('id_client', 0);
+            }
+        } else {
+            $contrat = $this->getChildObject('contrat');
+            if (BimpObject::objectLoaded($contrat)) {
+                if (isset($contrat->societe) && is_a($contrat->societe, 'Societe')) {
+                    if (isset($contrat->societe->id) && $contrat->societe->id) {
+                        $id_client = $contrat->societe->id;
+                        $nom_url = $contrat->getNomUrl(1);
+                    }
+                } elseif (isset($contrat->socid) && $contrat->socid) {
+                    $id_client = $contrat->socid;
+                    global $db;
+                    $soc = new Societe($db);
+                    if ($soc->fetch($contrat->socid) > 0) {
+                        $nom_url = $soc->getNomUrl(1);
+                    }
                 }
             }
         }
 
-        return '<input type="hidden" value="' . $id_client . '" name="id_client"/>' . $nom_url;
+        return '<input type="hidden" value="' . $id_client . '" name="id_client_contrat"/>' . $nom_url . ': ' . $id_client;
     }
 
     public function getDureeTotale()
@@ -155,13 +160,27 @@ class BS_Ticket extends BimpObject
             foreach ($this->getChildrenList('inters', array(
                 'status' => array(
                     'operator' => '!=',
-                    'value' => BS_Inter::BS_INTER_CLOSED
+                    'value'    => BS_Inter::BS_INTER_CLOSED
                 )
-                )) as $id_inter) {
-                $inters[(int) $id_inter] = 'Intervention '.$id_inter;
+            )) as $id_inter) {
+                $inters[(int) $id_inter] = 'Intervention ' . $id_inter;
             }
         }
         return $inters;
+    }
+
+    public function getCoverTypesInputArray()
+    {
+        $covers = self::$cover_types;
+
+        if ((int) BimpTools::getPostFieldValue('no_contrat', 0) || ($this->isLoaded() && !(int) $this->getData('id_contrat'))) {
+            unset($covers[1]);
+        } else {
+            unset($covers[2]);
+            unset($covers[3]);
+        }
+
+        return $covers;
     }
 
     public function getHeaderButtons()
@@ -171,18 +190,63 @@ class BS_Ticket extends BimpObject
             $openInters = $this->getOpenIntersArray();
             if (count($openInters)) {
                 $buttons[] = array(
-                    'label' => 'Fermer des interventions',
-                    'icon' => 'fas_times',
+                    'label'   => 'Fermer des interventions',
+                    'icon'    => 'fas_times',
                     'onclick' => $this->getJsActionOnclick('closeInter', array(), array(
                         'form_name' => 'close_inters'
                     ))
                 );
             }
         }
-        
+
         return $buttons;
     }
-    
+
+    public function hasNoContrat()
+    {
+        if ($this->isLoaded()) {
+            if (!(int) $this->getData('id_contrat')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function hasNoClient()
+    {
+        if ($this->isLoaded()) {
+            if (!(int) $this->getData('id_client')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function getContratInputFilters()
+    {
+        $filters = array(
+            'c.date_cloture' => array(
+                'or_field' => array(
+                    'IS_NULL',
+                    array(
+                        'operator' => '>',
+                        'value'    => 'NOW()'
+                    )
+                )
+            )
+        );
+
+        $key = '(SELECT COUNT(DISTINCT cdet.rowid) FROM llx_contratdet cdet WHERE cdet.fk_contrat = c.rowid AND (cdet.date_cloture IS NULL OR cdet.date_cloture > NOW()))';
+        $filters[$key] = array(
+            'operator' => '>',
+            'value'    => '0'
+        );
+
+        return $filters;
+    }
+
     // Affichages: 
 
     public function displayDureeTotale()
@@ -250,7 +314,7 @@ class BS_Ticket extends BimpObject
         $id_user = 0;
         $inters = $this->getChildrenObjects('inters');
         $best_timer = 0;
-        $best_prio = 1;
+//        $best_prio = 1;
         foreach ($inters as $inter) {
             $inter_timer = (int) $inter->getData('timer');
             if (!$best_timer) {
@@ -260,12 +324,12 @@ class BS_Ticket extends BimpObject
                 $best_timer = $inter_timer;
                 $id_user = (int) $inter->getData('tech_id_user');
             }
-            if ((int) $inter->getData(('status')) !== 2) {
-                $inter_prio = $inter->getData('priorite');
-                if ($inter_prio > $best_prio) {
-                    $best_prio = $inter_prio;
-                }
-            }
+//            if ((int) $inter->getData(('status')) !== 2) {
+//                $inter_prio = $inter->getData('priorite');
+//                if ($inter_prio > $best_prio) {
+//                    $best_prio = $inter_prio;
+//                }
+//            }
         }
         if (!$id_user) {
             $id_user = $this->getData('user_create');
@@ -277,10 +341,11 @@ class BS_Ticket extends BimpObject
             $this->set('id_user_resp', (int) $id_user);
             $update = true;
         }
-        if ((int) $best_prio !== (int) $this->getData('priorite')) {
-            $this->set('priorite', (int) $best_prio);
-            $update = true;
-        }
+
+//        if ((int) $best_prio !== (int) $this->getData('priorite')) {
+//            $this->set('priorite', (int) $best_prio);
+//            $update = true;
+//        }
 
         return $update;
     }
@@ -321,8 +386,6 @@ class BS_Ticket extends BimpObject
             foreach ($this->getOpenIntersArray() as $id_inter => $label) {
                 $inters[] = (int) $id_inter;
             }
-
-            
         } elseif (isset($data['inters_to_close'])) {
             $success = 'Interventions sélectionnées fermées avec succès';
             $inters = $data['inters_to_close'];
@@ -330,19 +393,19 @@ class BS_Ticket extends BimpObject
                 $errors[] = 'Aucune intervention sélectionnée';
             }
         }
-        
+
         if (count($inters) && !count($errors)) {
-                $inter = BimpObject::getInstance('bimpsupport', 'BS_Inter');
-                foreach ($inters as $id_inter) {
-                    if ($inter->fetch($id_inter)) {
-                        $inter->set('status', BS_Inter::BS_INTER_CLOSED);
-                        $inter_errors = $inter->update();
-                        if (count($inter_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($inter_errors, 'Echec de la fermeture du statut de l\'intervention ' . $inter->id);
-                        }
+            $inter = BimpObject::getInstance('bimpsupport', 'BS_Inter');
+            foreach ($inters as $id_inter) {
+                if ($inter->fetch($id_inter)) {
+                    $inter->set('status', BS_Inter::BS_INTER_CLOSED);
+                    $inter_errors = $inter->update();
+                    if (count($inter_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($inter_errors, 'Echec de la fermeture du statut de l\'intervention ' . $inter->id);
                     }
                 }
             }
+        }
 
         return array(
             'errors'   => $errors,
@@ -351,6 +414,72 @@ class BS_Ticket extends BimpObject
     }
 
     // Overrides: 
+
+    public function validatePost()
+    {
+        $errors = parent::validatePost();
+
+        if (!count($errors)) {
+            if ((int) BimpTools::getPostFieldValue('no_contrat', 0)) {
+                $this->set('id_contrat', 0);
+
+                $id_client = (int) BimpTools::getPostFieldValue('id_client', 0);
+                if ($id_client) {
+                    $this->set('id_client', $id_client);
+                }
+
+                if (BimpTools::getPostFieldValue('no_client', 0)) {
+                    $this->set('id_client', 0);
+                    $this->set('id_contact', 0);
+                }
+            } else {
+                if ((int) $this->getData('id_contrat')) {
+                    $id_client = BimpTools::getPostFieldValue('id_client_contrat', 0);
+                    if ($id_client) {
+                        $this->set('id_client', $id_client);
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function validate()
+    {
+        $errors = parent::validate();
+
+        if (!count($errors)) {
+            if ($this->getData('id_contrat')) {
+                $contrat = $this->getChildObject('contrat');
+                if (!BimpObject::objectLoaded($contrat)) {
+                    $errors[] = 'Le contrat d\'ID ' . $this->getData('id_contrat') . ' n\'existe pas';
+                } else {
+                    // todo: check validité contrat
+                }
+            }
+
+            $id_client = (int) $this->getData('id_client');
+            if ($id_client) {
+                $client = $this->getChildObject('client');
+                if (!BimpObject::objectLoaded($client)) {
+                    $errors[] = 'Le client d\'ID ' . $id_client . 'n\'existe pas';
+                } else {
+                    $id_contact = (int) $this->getData('id_contact');
+                    if ($id_contact) {
+                        $contacts = self::getSocieteContactsArray($id_client);
+                        if (!array_key_exists($id_contact, $contacts)) {
+                            $this->set('id_contact', 0);
+                        }
+                    }
+                }
+            } else {
+                $this->set('id_contact', 0);
+            }
+        }
+
+        return $errors;
+    }
 
     public function create(&$warnings, $force_create = false)
     {

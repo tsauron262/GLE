@@ -59,6 +59,12 @@ function setFixeTabsEvents() {
             $(this).data('fixe_tab_caption_event_init', 1);
         }
     });
+
+    $('bimp_fixe_tabs_contents').each(function () {
+        if (!parseInt($(this).data('fixe_tab_content_event_init'))) {
+            setCommonEvents($(this));
+        }
+    });
 }
 
 $(document).ready(function () {

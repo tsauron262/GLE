@@ -256,6 +256,8 @@ function BimpModal($modal) {
             modal.$loading.hide();
             bimpAjax.$modal.modal('handleUpdate');
         };
+        
+        ajax_data['modal_idx'] = modal.idx;
 
         BimpAjax(ajax_action, ajax_data, modal.$contents.find('#modal_content_' + modal.idx), ajax_params);
     };

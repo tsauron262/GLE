@@ -1234,6 +1234,7 @@ class BimpController
         $content_only = BimpTools::getValue('content_only', false);
         $new_values = BimpTools::getValue('new_values', array());
         $panel = BimpTools::getValue('panel');
+        $modal_idx = BimpTools::getValue('modal_idx', 0);
         $panel_header = BimpTools::getValue('panel_header');
 
         if (is_null($object_name) || !$object_name) {
@@ -1247,6 +1248,9 @@ class BimpController
             $object = BimpObject::getInstance($module, $object_name);
             $object->fetch($id_object);
             $view = new BC_View($object, $view_name, $content_only, 1);
+            if ($modal_idx) {
+                $view->addIdentifierSuffix('modal_' . $modal_idx);
+            }
             $view->content_only = $content_only;
             $view->setNewValues($new_values);
 
@@ -1326,6 +1330,12 @@ class BimpController
         $join_return_label = BimpTools::getValue('join_return_label', '');
         $join_on = BimpTools::getValue('join_on', '');
         $value = BimpTools::getValue('value');
+
+        if ($filters) {
+            $filters = json_decode($filters, 1);
+        } else {
+            $filters = array();
+        }
 
         if (!is_null($table) && !is_null($fields_return_label) && !is_null($fields_return_value) && count($fields_search) && !is_null($value)) {
             global $db;

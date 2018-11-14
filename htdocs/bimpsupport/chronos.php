@@ -92,8 +92,23 @@ function initTimers($timer, $timers)
             $caption .= '</span>';
 
             $timer_title = 'Inter ' . $inter->id;
-            $ticket_url = DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $ticket->id.'&navtab=inters&id_inter='.$inter->id;
-            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-default" href="' . $ticket_url . '"><i class="far fa5-file iconLeft"></i>Afficher</a>';
+            $ticket_url = DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $ticket->id . '&navtab=inters&id_inter=' . $inter->id;
+            $timer_title .= '<div style="float: right">&nbsp;&nbsp;';
+            $timer_title .= '<a class="btn btn-default" href="' . $ticket_url . '"><i class="far fa5-file iconLeft"></i>Afficher</a>';
+            $timer_title .= '<span class="btn btn-default bs-popover" ';
+            $timer_title .= BimpRender::renderPopoverData('Vue rapide', 'top', 'true');
+            $timer_title .= ' onclick="' . $inter->getJsLoadModalView() . '"';
+            $timer_title .= '><i class="' . BimpRender::renderIconClass('fas_eye') . '"></i></span>';
+
+            if ($inter->isActionAllowed('close') && $inter->canSetAction('close')) {
+                $timer_title .= '<div style="text-align: right">';
+                $timer_title .= '<span class="btn btn-danger" ';
+                $timer_title .= 'onclick="' . $inter->getJsActionOnclick('close', array(), array('form_name' => 'resolution')) . '">';
+                $timer_title .= '<i class="' . BimpRender::renderIconClass('fas_times') . ' iconLeft"></i>Clôturer';
+                $timer_title .= '</span>';
+                $timer_title .= '</div>';
+            }
+            $timer_title .= '</div>';
 
             $client = $ticket->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {

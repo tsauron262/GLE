@@ -110,7 +110,6 @@ fields:
         label: Contrat
         type: id_object
         object: contrat
-        required: 1    
         input: 
             type: search_list
             search_list:
@@ -120,6 +119,8 @@ fields:
                 join: societe s
                 join_on: c.fk_soc s.rowid
                 join_return_label: s.nom
+                filters: 
+                    callback: getContratInputFilters
                 options:    
                     default:
                         label: Recherche par client
@@ -135,33 +136,45 @@ fields:
                         join_on: c.fk_soc = s.rowid
                         join_return_label: s.nom
                         help: Entrez la référence ou l'ID d'un contrat
-                        
+        display_if: 
+            field_name: no_contrat
+            hide_values: 1
     id_client:
         label: Client
         type: id_object
         object: client
+        create_form: client_light
         input: 
-            type: custom
-            content: 
-                callback: getClientFormInput
+            type: search_societe
+            societe_type: customer
+            help: Entrez le nom ou la référence d'un client pour effectuer une recherche
         display_if:
-            field_name: id_contrat
-            hide_values: 0,
+            fields_names: no_contrat,no_client
+            no_contrat:
+                show_values: 1
+            no_client:
+                hide_values: 1
         depends_on: id_contrat
         search:
             input: 
                 type: search_societe
-                societe_type: customer         
+                societe_type: customer       
     id_contact:
         label: Contact
         type: id_object
         object: contact
+        create_form: default
+        create_form_values: 
+            fields: 
+                fk_soc: 
+                    callback: getPostIdClient
+                
         values: 
             array: client_contacts
-        depends_on: id_contrat
-        display_if:
-            field_name: id_contrat
-            hide_values: 0,
+        depends_on: id_client_contrat,id_client
+        display_if: 
+            field_name: no_client
+            hide_values: 1
         search:
             input:
                 type: search_list
@@ -205,13 +218,6 @@ fields:
         display: 
             icon:
                 icon_only: 1
-        input: 
-            type: hidden
-        search:
-            input: 
-                type: select
-                options:
-                    array: priorities
     impact:
         label: Impact
         type: int
@@ -226,6 +232,10 @@ fields:
         type: int
         values: 
             array: cover_types
+        input: 
+            options:
+                array: coverTypesInput
+        depends_on: no_contrat
         display: 
             icon:
                 icon_only: 1
@@ -251,23 +261,52 @@ fields:
 forms: 
     default:
         rows: 
+            - custom: 1
+              label: Client sans contrat
+              input_name: no_contrat
+              data_type: bool
+              input: 
+                  type: toggle
+              value:
+                  callback: hasNoContrat
+            - custom: 1
+              label: Pas de client
+              input_name: no_client
+              data_type: bool
+              input: 
+                  type: toggle
+              value:
+                  callback: hasNoClient
+              display_if: 
+                  field_name: no_contrat
+                  show_values: 1
             - field: id_contrat
-            - field: id_client
+            - custom: 1
+              input_name: id_client_contrat
               content: 
-                  callback: getClientFormInput
+                  callback: getClientContratInput
               label: Client 
-              depends_on: id_contrat
+              depends_on: id_contrat,id_client,no_contrat,no_client
+              display_if: 
+                  fields_names: no_contrat,id_contrat
+                  no_contrat: 
+                      show_values: 0
+                  id_contrat: 
+                      hide_values: 0,
+              value: 0
+            - field: id_client
             - field: id_contact
             - field: sujet
+            - field: priorite
             - field: status
             - field: impact
             - field: cover
-            - association: equipments
-              label: Equipements concernés
-              display_if: 
-                  field_name: id_contrat
-                  hide_values: 0,
-              depends_on: id_contrat
+#            - association: equipments
+#              label: Equipements concernés
+#              display_if: 
+#                  field_name: id_contrat
+#                  hide_values: 0,
+#              depends_on: id_contrat
             - custom: 1
               label: Notifier par e-mail
               input_name: mails_to
@@ -289,19 +328,19 @@ forms:
             - object: inters
               multiple: 1
     
-    edit:
-        rows:
-            - field: id_contact
-            - field: status
-            - field: impact
-            - field: cover
-            - field: appels_timer
-            - association: equipments
-              label: Equipements concernés
-              display_if: 
-                  field_name: id_contrat
-                  hide_values: 0,
-              depends_on: id_contrat
+#    edit:
+#        rows:
+#            - field: id_contact
+#            - field: status
+#            - field: impact
+#            - field: cover
+#            - field: appels_timer
+#            - association: equipments
+#              label: Equipements concernés
+#              display_if: 
+#                  field_name: id_contrat
+#                  hide_values: 0,
+#              depends_on: id_contrat
               
     close_inters: 
         rows: 
@@ -333,6 +372,7 @@ fields_tables:
                   callback: displayDureeTotale
 #            - field: appels_timer
             - field: priorite
+              edit: 1
             - field: impact
               edit: 1
             - field: cover
@@ -362,7 +402,7 @@ fields_tables:
 views: 
     default:
         delete_btn: 1
-        edit_form: edit
+        edit_form: default
         objects_change_reload: BS_Inter
         rows:
             - cols: 
@@ -491,7 +531,7 @@ lists:
         add_form_name: default
         add_btn_label: Nouveau ticket hotline
         edit_btn: 1
-        edit_form: edit
+        edit_form: default
         delete_btn: 1
         page_btn: 1
         modal_view: full

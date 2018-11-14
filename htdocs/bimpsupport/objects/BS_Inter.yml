@@ -62,12 +62,12 @@ fields:
                 type: timer
         searchable: 0
         
-    priorite:
-        label: Priorité
-        type: int
-        values: 
-            array: priorities
-        required: 1
+#    priorite:
+#        label: Priorité
+#        type: int
+#        values: 
+#            array: priorities
+#        required: 1
     
     status: 
         label: Statut
@@ -77,13 +77,20 @@ fields:
         default_value: 1
                     
     description:
-        label: Description
+        label: Description problème
         type: text
         input:
             rows: 3
             auto_expand: 1
-        sortable: 1
-        searchable: 1
+        sortable: 0
+        searchable: 0
+        
+    resolution: 
+        label: Résolution
+        type: text
+        input: 
+            rows: 3
+            auto_expand: 1
 
 forms: 
     default:
@@ -91,7 +98,7 @@ forms:
             - field: tech_id_user
               show: 
                   callback: isNotLoaded
-            - field: priorite
+#            - field: priorite
             - field: description
             - custom: 1
               show: 
@@ -108,6 +115,10 @@ forms:
             - field: timer
               show: 
                   callback: isLoaded
+                  
+    resolution: 
+        rows: 
+            - field: resolution
                   
 list:
     title: Liste des interventions
@@ -138,9 +149,9 @@ list:
             field: tech_id_user
         duree:
             field: timer
-        priorite:
-            field: priorite
-            edit: 1
+#        priorite:
+#            field: priorite
+#            edit: 1
         status:
             field: status
             edit: 1
@@ -164,11 +175,13 @@ fields_tables:
             - field: tech_id_user
               display: card
             - field: timer
-            - field: priorite
-              edit: 1
+#            - field: priorite
+#              edit: 1
             - field: status
               edit: 1
             - field: description
+              edit: 1
+            - field: resolution
               edit: 1
                 
 views:
@@ -203,6 +216,7 @@ views:
         
 views_lists: 
     user_currents:
+        objects_change_reload: BS_Ticket
         title: Vos interventions en cours
         item_view: card
         view_btn: 1

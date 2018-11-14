@@ -888,7 +888,13 @@ class BimpInput
                     $opt_join_on = isset($opt_params['join_on']) ? $opt_params['join_on'] : '';
                     $opt_join_return_label = isset($opt_params['join_return_label']) ? $opt_params['join_return_label'] : '';
                     $opt_help = isset($opt_params['help']) ? $opt_params['help'] : '';
-                    $opt_filters = isset($opt_params['filters']) ? $opt_params['filters'] : '';
+                    $opt_filters = $filters;
+
+                    if (isset($opt_params['filters']) && is_array($opt_params['filters'])) {
+                        foreach ($opt_params['filters'] as $field => $filter) {
+                            $opt_filters = BimpTools::mergeSqlFilter($opt_filters, $field, $filter);
+                        }
+                    }
 
                     if (!is_null($opt_fields_search) && !is_null($opt_label)) {
                         $html .= '<input type="hidden" id="searchList_' . $opt_name . '_fields_search" value="' . $opt_fields_search . '"/>';
@@ -902,7 +908,7 @@ class BimpInput
                             $html .= '<input type="hidden" id="searchList_' . $opt_name . '_join_return_label" value="' . $opt_join_return_label . '"/>';
                         }
                         if (count($opt_filters)) {
-                            $html .= '<input type="hidden" id="searchList_' . $opt_name . '_filters" value="' . json_encode($opt_filters) . '"/>';
+                            $html .= '<input type="hidden" id="searchList_' . $opt_name . '_filters" value="' . htmlentities(json_encode($opt_filters)) . '"/>';
                         }
                         if ($opt_help) {
                             $html .= '<input type="hidden" id="searchList_' . $opt_name . '_help" value="' . htmlentities($opt_help) . '"/>';

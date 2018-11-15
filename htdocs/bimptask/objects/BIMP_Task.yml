@@ -39,6 +39,11 @@ fields:
         type: int
         values: 
             array: status_list_task
+    prio:
+        label: Priorité
+        type: int
+        values: 
+            array: prio_list_task
     id_user_owner:
         label: Attribué a
         type: id_object
@@ -70,6 +75,8 @@ fields_tables:
         rows: 
             - field: status
               edit: 1
+            - field: prio
+              edit: 0
             - field: src
             - field: dst
             - field: subj
@@ -83,6 +90,7 @@ forms:
     default: 
         rows: 
             - field: status
+            - field: prio
             - field: src
               show: 
                  callback: canEditAll

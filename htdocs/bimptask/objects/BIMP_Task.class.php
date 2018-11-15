@@ -2,11 +2,13 @@
 
 class BIMP_Task extends BimpObject
 {
-    public static $valSrc = array("task0001@bimp.fr", "validationcommande@bimp.fr", "other");
+    public static $valSrc = array("task0001@bimp.fr", "validationcommande@bimp.fr", "Synchro-8SENS", "other");
     
     public static $nbNonLu = 0;
+    public static $nbAlert = 0;
     
     public static $valStatus = array(0=>array('label'=>"En cours", 'classes'=>array('error')), 4=>array('label'=>"Terminé", 'classes'=>array('info')));
+    public static $valPrio = array(0=>array('label'=>"Normal", 'classes'=>array('info')), 20=>array('label'=>"Urgent", 'classes'=>array('error')));
 
 
     public function areNotesEditable()
@@ -37,10 +39,22 @@ class BIMP_Task extends BimpObject
         return $html;
     }
     
+    public function createIfNotActif(){
+        $tasks = $this->getList(array('dst'=>$this->getData('dst'), 'src'=>$this->getData('src'), 'subj'=>$this->getData('subj'), 'txt'=>$this->getData('txt'), 'prio'=>$this->getData('prio'), 'status'=>0));
+        if(count($tasks) == 0)
+            parent::create();
+    }
+    
     public function renderLight(){
         $html = "";
 
-        $html .= "<a href='" . DOL_URL_ROOT . "/bimptask/index.php?fc=task&id=" . $this->id . "'>";
+        $class = array();
+        if($this->getData("prio") == 20){
+            $class[] = 'clignote';
+            self::$nbAlert++;
+        }
+        
+        $html .= "<a class='".implode(" ", $class)."'  href='" . DOL_URL_ROOT . "/bimptask/index.php?fc=task&id=" . $this->id . "'>";
         $html .= $this->getData("subj") . ' de "' . $this->getData("src") . '" ' . dol_trunc($this->getData("txt"));
         $html .= "</a>";
         
@@ -64,6 +78,12 @@ class BIMP_Task extends BimpObject
         return $html;
     }
 
+    public static function getPrio_list_taskArray()
+    {
+        return self::$valPrio;
+    }
+        
+        
     public static function getStatus_list_taskArray()
     {
         return self::$valStatus;

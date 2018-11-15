@@ -10,6 +10,17 @@ class export8sens {
         $this->path = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/import/";
     }
     
+    function addTaskAlert($msg){
+        global $conf;
+        if(isset($conf->global->MAIN_MODULE_BIMPTASK)){
+            include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+            $task = BimpObject::getInstance("bimptask", "BIMP_Task");
+                $tab = array("src"=>"GLE-AUTO", "dst"=>"Synchro-8SENS", "subj"=>"Probléme import 8Sens ", "txt"=>$msg, "prio"=>20);
+                $this->errors = array_merge($this->errors, $task->validateArray($tab));
+                $this->errors = array_merge($this->errors, $task->createIfNotActif());        
+        }
+    }
+    
     function traiteStr($str){
         $str = html_entity_decode($str);
         $str = str_replace("&#39;", "'", $str);

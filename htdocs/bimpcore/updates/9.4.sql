@@ -1,2 +1,1 @@
-
-ALTER TABLE `llx_bs_inter` ADD `resolution` TEXT NOT NULL DEFAULT '' AFTER `description`;
+ALTER TABLE `llx_bimp_task` ADD `prio` INT NOT NULL AFTER `status`;

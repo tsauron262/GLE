@@ -1,5 +1,4 @@
 <?php
-
 if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] != "synchro" || $_SERVER['PHP_AUTH_PW'] != "9DDrvuNcWRdKClhTe2LGh0mbKVIV33I3") {
     header('WWW-Authenticate: Basic realm="My Realm"');
     header('HTTP/1.0 401 Unauthorized');
@@ -9,10 +8,11 @@ if (!isset($_SERVER['PHP_AUTH_USER']) || $_SERVER['PHP_AUTH_USER'] != "synchro" 
 
 //header("Content-type: text/xml");
 }
-
+define("NOLOGIN", 1); 
 $errors = array();
 
 require_once '../bimpcore/main.php';
+
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
@@ -20,14 +20,10 @@ $controller = BimpController::getInstance('bimptask');
 
 define("ID_USER_DEF", 215);
 
-$dst = $_REQUEST['dst']; //"task0001@bimp.fr";
-$src = $_REQUEST['src']; //"tommy@bimp.fr";
-$subj = $_REQUEST['subj']; //"new task mail";
-$txt = $_REQUEST['txt']; /* "corp du mail
-  fsfdfs
-  dfdsfdsf
-  -------------
-  IDTASK:546785645628"; */
+$dst = urldecode($_REQUEST['dst']); 
+$src = urldecode($_REQUEST['src']); 
+$subj = urldecode($_REQUEST['subj']); 
+$txt = urldecode($_REQUEST['txt']); 
 
 
 
@@ -40,7 +36,6 @@ if($_REQUEST["old"]){
         echo "Validation ".$commande->getNomUrl(1);
     }
 }
-
 
 
 

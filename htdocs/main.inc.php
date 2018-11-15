@@ -1393,7 +1393,7 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
                     }
                 }
                 global $bimp_fixe_tabs, $user;
-                if (isset($user->id) && (int) $user->id && userInGroupe(18, $user->id)) {
+                if(FixeTabs::canView()){
                     $bimp_fixe_tabs = new FixeTabs();
                     $bimp_fixe_tabs->init();
                     $bimp_fixe_tabs->displayHead();

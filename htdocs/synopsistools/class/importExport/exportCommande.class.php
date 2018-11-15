@@ -31,10 +31,14 @@ class exportCommande extends export8sens {
         foreach($tabFiles as $file)
             if(stripos($file, ".ER8"))
                     $nbFilesErr++;
-        if($nbFiles > 5)
-            mailSyn2("Synchro 8Sens OFF", "dev@bimp.fr, gsx@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
-        if($nbFilesErr > 0)
-            mailSyn2("Synchro 8Sens FICHIER ERREURS", "tommy@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFilesErr);
+        if($nbFiles > 5){
+            $this->addTaskAlert("commande import OFF");
+//            mailSyn2("Synchro 8Sens OFF", "dev@bimp.fr, gsx@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFiles);
+        }
+        if($nbFilesErr > 0){
+//            mailSyn2("Synchro 8Sens FICHIER ERREURS", "tommy@bimp.fr", "admin@bimp.fr", "Dossier : ".$this->pathExport." <br/><br/>Nb files : ".$nbFilesErr);
+            $this->addTaskAlert("commande import erreur");
+        }
     }
 
     public function exportTout() {

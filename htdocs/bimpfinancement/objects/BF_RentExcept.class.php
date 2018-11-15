@@ -69,6 +69,22 @@ class BF_rentExcept extends BimpObject {
 			return $buttons;
 	}
 
+	public function canEdit() {
+			$id_facture = $this->getData('id_facture');
+			$facture = BimpObject::getInstance('bimpcommercial', 'Bimp_facture');
+			if($id_facture > 0) {
+				$facture->fetch($id_facture);
+				if(!$facture->isDeletable()) {
+					return 0;
+				}
+			} 
+			return 1;
+		}
+
+		public function canDelete() {
+			return $this->canEdit();
+		}
+
 	public function actiongenFacture() {
 			if($this->isLoaded()) {
 				global $langs, $user;

@@ -35,6 +35,10 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         if (!count($this->errors)) {
             if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
+                if (isset($this->object->array_options['options_pdf_hide_price'])) {
+                    $this->hidePrice = true;
+                    $this->hideTotal = true;
+                }
                 if (isset($this->object->array_options['options_pdf_hide_reduc'])) {
                     $this->hideReduc = (int) $this->object->array_options['options_pdf_hide_reduc'];
                 }
@@ -391,6 +395,9 @@ class BimpDocumentPDF extends BimpModelPDF
         global $conf;
 
         $table = new BimpPDF_AmountsTable($this->pdf);
+        
+        if($this->hidePrice)
+            $table->setCols(array('desc'));
 
         if (method_exists($this, 'setAmountsTableParams')) {
             $this->setAmountsTableParams($table);

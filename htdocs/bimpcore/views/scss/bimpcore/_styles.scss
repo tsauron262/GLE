@@ -23,6 +23,10 @@
 
 /*Styles génériques*/
 
+.clearAfter:after {
+    clear: right;
+}
+
 #id-right {
     background-color: #F0F0F0;
 }
@@ -702,7 +706,12 @@ i.iconRight {
     }
 }
 
+/*FixeTabs*/
+
 .fixe_tab_content {
+    max-height: 500px;
+    overflow-y: scroll;
+
     .bimp_timer {
         display: inline-block;
     }

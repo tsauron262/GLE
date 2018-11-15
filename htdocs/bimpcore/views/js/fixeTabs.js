@@ -75,6 +75,7 @@ $(document).ready(function () {
         $(this).find('.fixe_tab_caption').removeClass('active');
         $('#bimp_fixe_tabs_contents').stop().slideUp(250, function () {
             $(this).find('.fixe_tab_content').hide();
+            $(this).removeAttr('style');
         });
     });
 
@@ -99,7 +100,3 @@ $(document).ready(function () {
         reloadFixeTabs(true);
     }, 2000);
 });
-
-function getRandomInt(max) {
-    return Math.floor(Math.random() * Math.floor(max));
-}

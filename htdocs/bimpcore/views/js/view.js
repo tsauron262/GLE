@@ -84,7 +84,7 @@ function loadModalFormFromView(view_id, form_name, $button, title) {
 function loadModalView(module, object_name, id_object, view_name, $button, title) {
     if (typeof (title) === 'undefined' || !title) {
         title = '<i class="far fa5-file iconLeft"></i>';
-        if (typeof (object_labels[object_name].name) !== 'undefined') {
+        if (object_labels[object_name] && typeof (object_labels[object_name].name) !== 'undefined') {
             title += object_labels[object_name].name;
         } else {
             title += 'Objet "' + object_name + '"';

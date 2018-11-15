@@ -101,7 +101,7 @@ function initTimers($timer, $timers)
             $timer_title .= '><i class="' . BimpRender::renderIconClass('fas_eye') . '"></i></span>';
 
             if ($inter->isActionAllowed('close') && $inter->canSetAction('close')) {
-                $timer_title .= '<div style="text-align: right">';
+                $timer_title .= '<div style="text-align: right; margin-bottom: 5px">';
                 $timer_title .= '<span class="btn btn-danger" ';
                 $timer_title .= 'onclick="' . $inter->getJsActionOnclick('close', array(), array('form_name' => 'resolution')) . '">';
                 $timer_title .= '<i class="' . BimpRender::renderIconClass('fas_times') . ' iconLeft"></i>Clôturer';
@@ -109,6 +109,7 @@ function initTimers($timer, $timers)
                 $timer_title .= '</div>';
             }
             $timer_title .= '</div>';
+            $timer_title .= '<div class="clearAfter"></div>';
 
             $client = $ticket->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
@@ -148,7 +149,7 @@ function initTimers($timer, $timers)
 
             $timer_title = 'Appel Ticket ' . $ticket->id;
             $ticket_url = DOL_URL_ROOT . '/bimpsupport/index.php?fc=ticket&id=' . $ticket->id;
-            $timer_title .= '&nbsp;&nbsp;<a style="float: right" class="btn btn-default" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
+            $timer_title .= '&nbsp;&nbsp;<a style="float: right" classclass="btn btn-default" href="' . $ticket_url . '"><i class="fa fa-file-o iconLeft"></i>Afficher</a>';
 
             $client = $ticket->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {

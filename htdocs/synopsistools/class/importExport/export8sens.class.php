@@ -11,9 +11,9 @@ class export8sens {
     }
     
     function addTaskAlert($msg){
-        global $conf, $user;
-        $user->fetch(1);
+        global $conf;
         if(isset($conf->global->MAIN_MODULE_BIMPTASK)){
+            include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
             $task = BimpObject::getInstance("bimptask", "BIMP_Task");
                 $tab = array("src"=>"GLE-AUTO", "dst"=>"Synchro-8SENS", "subj"=>"Probléme import 8Sens ", "txt"=>$msg, "prio"=>20);
                 $this->errors = array_merge($this->errors, $task->validateArray($tab));

@@ -99,7 +99,7 @@ class BimpPDF extends TCPDF
             $output = "F";
         }
         
-        $addCgvPages = $this->addCgvPages;//sinon $this->$addCgvPages ce fait exrasé.
+        $addCgvPages = ($this->addCgvPages && BimpCore::getConf("CGV_BIMP"));//sinon $this->$addCgvPages ce fait exrasé.
         $this->Output($filename, $output);
         
         if($addCgvPages){

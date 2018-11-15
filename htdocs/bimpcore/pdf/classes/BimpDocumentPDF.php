@@ -563,24 +563,25 @@ class BimpDocumentPDF extends BimpModelPDF
 //        $html .= '<p style="font-size: 6px; font-weight: bold; font-style: italic">RÉSERVES DE PROPRIÉTÉ : applicables selon la loi n°80.335 du 12 mai';
 //        $html .= ' 1980 et de l\'article L624-16 du code de commerce. Seul le Tribunal de Lyon est compétent.</p>';
 
-  
-        $html .= '<span style="font-weight: bold;">';
-        if($this->pdf->addCgvPages)
-            $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et disponibles sur www.bimp.fr';
-        else
-            $html .= 'Nos Conditions Générales de Vente sont consultables sur le site www.bimp.fr';
-        $html .= "</span>";
-        $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
- En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';
-                $html .= 'La Société ' . $this->fromCompany->name . ' ne peut être tenue pour responsable de la perte éventuelles de données informatiques. ';
-        $html .= ' Il appartient au client d’effectuer des sauvegardes régulières de ses informations. En aucun cas les soucis systèmes, logiciels, paramétrages internet';
-        $html .= ' et périphériques et les déplacements ne rentrent dans le cadre de la garantie constructeur.';
-      
-        
-        $html .= '<span style="font-weight: bold;">';
-            $html .= ' Aucun escompte pour paiement anticipé ne sera accordé.';
-            $html .= "</span>";
-        $html .= "</p>";
+    if(BimpCore::getConf("CGV_BIMP")){
+          $html .= '<span style="font-weight: bold;">';
+          if($this->pdf->addCgvPages)
+              $html .= 'La signature de ce document vaut acceptation de nos Conditions Générales de Vente annexées et disponibles sur www.bimp.fr';
+          else
+              $html .= 'Nos Conditions Générales de Vente sont consultables sur le site www.bimp.fr';
+          $html .= "</span>";
+          $html .= '<br/>Les marchandises vendues sont soumises à une clause de réserve de propriété.
+   En cas de retard de paiement, taux de pénalité de cinq fois le taux d’intérêt légal et indemnité forfaitaire pour frais de recouvrement de 40€ (article L.441-6 du code de commerce).';
+                  $html .= 'La Société ' . $this->fromCompany->name . ' ne peut être tenue pour responsable de la perte éventuelles de données informatiques. ';
+          $html .= ' Il appartient au client d’effectuer des sauvegardes régulières de ses informations. En aucun cas les soucis systèmes, logiciels, paramétrages internet';
+          $html .= ' et périphériques et les déplacements ne rentrent dans le cadre de la garantie constructeur.';
+
+
+          $html .= '<span style="font-weight: bold;">';
+              $html .= ' Aucun escompte pour paiement anticipé ne sera accordé.';
+              $html .= "</span>";
+          $html .= "</p>";
+    }
         $this->writeContent($html);
     }
 

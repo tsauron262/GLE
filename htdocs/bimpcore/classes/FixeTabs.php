@@ -77,7 +77,7 @@ class FixeTabs
         }
         $html .= '</div>';
 
-        $html .= '<div id="bimp_fixe_tabs_contents">';
+        $html .= '<div id="bimp_fixe_tabs_contents" style="max-height: 500px;overflow-y: scroll;">';
         foreach ($this->tabs as $tab) {
             $html .= '<div class="fixe_tab_content" id="fixe_tab_content_' . $tab['id'] . '" data-id_tab="' . $tab['id'] . '">';
             $html .= $tab['content'];

@@ -6,6 +6,33 @@ llxHeader();
 
 
 
+//$capital = 82640;
+$taux = 0;
+$duree = 2;
+$dureePeriode = 3;//mensuelle
+$loyer = 261892;
+$coef = 1.4;
+
+require_once(DOL_DOCUMENT_ROOT."/bimpfinancement/class/BIMP_TOOLS_FINANC.class.php");
+$capital = BIMP_TOOLS_FINANC::calculCapital($loyer, $duree*12, $taux, $coef, $dureePeriode);
+
+echo "<div class='textField blanc textecentrer'><h2>Capital : ". $capital ." € </h2></div>";
+
+ 
+  
+  
+  
+  
+
+  
+  
+ 
+ 
+ 
+ die;
+
+
+
 
    $table_name = "employee";
    $backup_file  = "/Applications/MAMP/documents/mmmmmm/test.sql";

@@ -84,7 +84,7 @@ function loadModalFormFromView(view_id, form_name, $button, title) {
 function loadModalView(module, object_name, id_object, view_name, $button, title) {
     if (typeof (title) === 'undefined' || !title) {
         title = '<i class="far fa5-file iconLeft"></i>';
-        if (typeof (object_labels[object_name].name) !== 'undefined') {
+        if (object_labels[object_name] && typeof (object_labels[object_name].name) !== 'undefined') {
             title += object_labels[object_name].name;
         } else {
             title += 'Objet "' + object_name + '"';
@@ -99,7 +99,7 @@ function loadModalView(module, object_name, id_object, view_name, $button, title
         'object_name': object_name,
         'view_name': view_name,
         'id_object': id_object,
-        'panel': 0
+        'panel': 0,
     };
 
     bimpModal.loadAjaxContent($button, 'loadObjectView', data, title, null, function (result, bimpAjax) {
@@ -160,7 +160,12 @@ function saveObjectFromViewModalForm(view_id, $button) {
 }
 
 function saveObjectfromFieldsTable(fields_table_id, $button) {
-    var $fieldsTable = $('#' + fields_table_id);
+    var $container = $button.findParentByClass('object_fields_table_container');
+
+    var $fieldsTable = $container.find('#' + fields_table_id);
+    if (!$fieldsTable.length) {
+        $fieldsTable = $('#' + fields_table_id);
+    }
     if (!$fieldsTable.length) {
         bimp_msg('Erreur: liste des champs non trouvée', 'danger');
         return;
@@ -262,14 +267,18 @@ function checkFieldsTableModifications($fieldsTable) {
         }
     });
 
-    var $footer = $('#' + $fieldsTable.attr('id') + '_container').find('.fieldsTableFooter');
-    if ($footer.length) {
-        if (hasModifications) {
-            $footer.find('.saveButton').show();
-            $footer.find('.cancelmodificationsButton').show();
-        } else {
-            $footer.find('.saveButton').hide();
-            $footer.find('.cancelmodificationsButton').hide();
+    var $container = $fieldsTable.findParentByClass('object_fields_table_container');
+
+    if ($container.length) {
+        var $footer = $container.find('.fieldsTableFooter');
+        if ($footer.length) {
+            if (hasModifications) {
+                $footer.find('.saveButton').show();
+                $footer.find('.cancelmodificationsButton').show();
+            } else {
+                $footer.find('.saveButton').hide();
+                $footer.find('.cancelmodificationsButton').hide();
+            }
         }
     }
 }

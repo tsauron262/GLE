@@ -16,6 +16,7 @@ fields:
         label: Societe
         dol_prop: socid
         type: id_parent
+        required: 1
     civility:
         label: Titre civilité
         dol_prop: civility_id

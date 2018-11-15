@@ -1264,6 +1264,30 @@ function selectZipTown($button) {
     }
 }
 
+function resetInputValue($container) {
+    var input_name = $container.data('field_name');
+    
+    if (!input_name) {
+        return;
+    }
+    var initial_value = $container.data('initial_value');
+
+    if (typeof (initial_value) !== 'undefined') {
+        var $input = $container.find('[name="' + input_name + '"]');
+        if ($input.length) {
+            $input.val(initial_value);
+
+            if (initial_value === 0 || initial_value === '') {
+                $container.find('.ui-autocomplete-input').val('');
+                if ($container.find('.search_list_input').length) {
+                    $container.find('.search_list_input').val('');
+                    $container.find('.search_input_selected_label').hide().find('span').html('');
+                }
+            }
+        }
+    }
+}
+
 // Gestion de l'affichage conditionnel des champs: 
 
 function toggleInputDisplay($container, $input) {
@@ -1342,14 +1366,7 @@ function toggleInputDisplay($container, $input) {
             $(this).css('height', 'auto');
         });
     } else {
-        var input_name = $container.find('.inputContainer').data('field_name');
-        if (input_name) {
-            var $input = $container.find('[name="' + input_name + '"]');
-            if ($input.length) {
-                var initial_value = $container.find('.inputContainer').data('initial_value');
-                $input.val(initial_value);
-            }
-        }
+        resetInputValue($container);
         $container.stop().slideUp(250, function () {
             $(this).css('height', 'auto');
         });
@@ -1921,7 +1938,7 @@ function setSearchListOptionsEvents($container) {
                 $input.data('filters', filters);
                 if (help) {
                     if (!$parent.find('.inputHelp').length) {
-                        $input.after('<p class="inputHelp">' + help + '</p>');
+                        $parent.append('<p class="inputHelp">' + help + '</p>');
                     } else {
                         $parent.find('.inputHelp').text(help);
                     }

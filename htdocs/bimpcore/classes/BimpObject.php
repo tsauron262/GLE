@@ -1408,19 +1408,19 @@ class BimpObject extends BimpCache
                 $instance = $this->config->getObject('', $object_name);
                 if (!is_null($instance)) {
                     if (is_a($instance, 'BimpObject')) {
-                        if ($instance->getParentObjectName() === $this->object_name) {
-                            $list_filters = $this->config->getCompiledParams('objects/' . $object_name . '/list/filters');
-                            if (!is_null($list_filters)) {
-                                foreach ($list_filters as $field => $filter) {
-                                    $filters = BimpTools::mergeSqlFilter($filters, $field, $filter);
-                                }
+                        $list_filters = $this->config->getCompiledParams('objects/' . $object_name . '/list/filters');
+                        if (!is_null($list_filters)) {
+                            foreach ($list_filters as $field => $filter) {
+                                $filters = BimpTools::mergeSqlFilter($filters, $field, $filter);
                             }
-                            $filters = BimpTools::mergeSqlFilter($filters, $instance->getParentIdProperty(), $this->id);
-                            $primary = $instance->getPrimary();
-                            $list = $instance->getList($filters, null, null, $order_by, $order_way, 'array', array($primary));
-                            foreach ($list as $item) {
-                                $children[] = (int) $item[$primary];
-                            }
+                        }
+                        if ($this->isChild($instance)) {
+                            $filters[$instance->getParentIdProperty()] = $this->id;
+                        }
+                        $primary = $instance->getPrimary();
+                        $list = $instance->getList($filters, null, null, $order_by, $order_way, 'array', array($primary));
+                        foreach ($list as $item) {
+                            $children[] = (int) $item[$primary];
                         }
                     }
                 }
@@ -3211,7 +3211,7 @@ class BimpObject extends BimpCache
             'id_obj'     => (int) $this->id,
             'visibility' => (int) $visibility,
             'content'    => $content,
-            'viewed'    => $viewed
+            'viewed'     => $viewed
         ));
 
         if (!count($errors)) {
@@ -3742,6 +3742,16 @@ class BimpObject extends BimpCache
         $data .= '}';
 
         $js = 'loadModalForm($(this), ' . htmlentities($data) . ', \'' . htmlentities($title) . '\', \'' . htmlentities($success_callback) . '\', \'' . $on_save . '\')';
+        return $js;
+    }
+
+    public function getJsLoadModalView($view_name = 'default', $title = '')
+    {
+        $js = '';
+
+        if ($this->isLoaded()) {
+            $js = 'loadModalView(\'' . $this->module . '\', \'' . $this->object_name . '\', ' . $this->id . ', \'' . $view_name . '\', $(this), \'' . htmlentities($title) . '\');';
+        }
         return $js;
     }
 

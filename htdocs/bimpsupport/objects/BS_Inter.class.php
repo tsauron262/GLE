@@ -6,14 +6,9 @@ class BS_Inter extends BimpObject
     const BS_INTER_OPEN = 1;
     const BS_INTER_CLOSED = 2;
 
-    public static $priorities = array(
-        1 => array('label' => 'Non urgent', 'classes' => array('success'), 'icon' => 'hourglass-start'),
-        2 => array('label' => 'Urgent', 'classes' => array('warning'), 'icon' => 'hourglass-half'),
-        3 => array('label' => 'Très urgent', 'classes' => array('danger'), 'icon' => 'hourglass-end'),
-    );
     public static $status = array(
-        1 => array('label' => 'Ouvert', 'classes' => array('success')),
-        2 => array('label' => 'Fermé', 'classes' => array('danger'))
+        1 => array('label' => 'En cours', 'classes' => array('success')),
+        2 => array('label' => 'Terminée', 'classes' => array('danger'))
     );
 
     // Getters: 
@@ -28,7 +23,7 @@ class BS_Inter extends BimpObject
         }
         return 0;
     }
-    
+
     public function getUserCurrentIntersFilters()
     {
         global $user;
@@ -99,7 +94,7 @@ class BS_Inter extends BimpObject
         if (!$this->isLoaded()) {
             return BimpRender::renderAlerts('intervention non enregistrée');
         }
-        
+
         if ((int) $this->getData('status') === self::BS_INTER_CLOSED) {
             return '';
         }
@@ -131,6 +126,25 @@ class BS_Inter extends BimpObject
         return $html;
     }
 
+    // Actions: 
+    public function actionClose($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Intervention fermée avec succès';
+
+        if (isset($data['resolution'])) {
+            $this->set('resolution', $data['resolution']);
+        }
+        $this->set('status', self::BS_INTER_CLOSED);
+        $errors = $this->update($warnings);
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides
 
     public function create(&$warnings = array(), $force_create = false)
@@ -138,7 +152,7 @@ class BS_Inter extends BimpObject
         if (!$this->isCreatable()) {
             return array('Ticket clos. Impossible de créer une nouvelle intervention');
         }
-        
+
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
@@ -154,7 +168,7 @@ class BS_Inter extends BimpObject
     public function update(&$warnings = array(), $force_update = false)
     {
         $errors = array();
-        
+
         if ($this->getData('status') === self::BS_INTER_OPEN) {
             $ticket = $this->getParentInstance();
             if (BimpObject::objectLoaded($ticket)) {
@@ -163,7 +177,7 @@ class BS_Inter extends BimpObject
                 }
             }
         }
-        
+
         if (count($errors)) {
             return $errors;
         }
@@ -197,5 +211,22 @@ class BS_Inter extends BimpObject
         }
 
         return $errors;
+    }
+
+    // Aurorisations:
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        switch ($action) {
+            case 'close':
+                if (!$this->isLoaded()) {
+                    return 0;
+                }
+                if ($this->getData('status') === self::BS_INTER_CLOSED) {
+                    return 0;
+                }
+                return 1;
+        }
+        parent::isActionAllowed($action, $errors);
     }
 }

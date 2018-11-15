@@ -641,6 +641,7 @@ class BimpTools
             }
             $sql .= ')';
         } elseif (is_array($filter) && isset($filter['and'])) {
+            $sql .= ' (';
             $fl = true;
             foreach ($filter['and'] as $and_filter) {
                 if (!$fl) {
@@ -650,6 +651,7 @@ class BimpTools
                 }
                 $sql .= self::getSqlFilter($field, $and_filter, $default_alias);
             }
+            $sql .= ')';
         } elseif (is_array($filter) && isset($filter['and_fields'])) {
             $sql .= ' (';
             $fl = true;
@@ -660,6 +662,18 @@ class BimpTools
                     $fl = false;
                 }
                 $sql .= self::getSqlFilter($and_field, $and_filter, $default_alias);
+            }
+            $sql .= ')';
+        } elseif (is_array($filter) && isset($filter['or_field'])) {
+            $sql .= ' (';
+            $fl = true;
+            foreach ($filter['or_field'] as $or_filter) {
+                if (!$fl) {
+                    $sql .= ' OR ';
+                } else {
+                    $fl = false;
+                }
+                $sql .= self::getSqlFilter($field, $or_filter, $default_alias);
             }
             $sql .= ')';
         } else {

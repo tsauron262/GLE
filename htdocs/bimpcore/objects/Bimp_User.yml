@@ -167,9 +167,71 @@ forms:
             - field: defaultentrepot
             - field: apple_centre
             
+lists_cols: 
+    id: 
+        field: id
+    gender:
+        field: gender
+    firstname:
+        field: firstname
+    lastname: 
+        field: lastname
+    login: 
+        field: login
+    job:
+        field: job
+    email: 
+        field: email
+    mail_sec: 
+        field: mail_sec
+    office_phone: 
+        field: office_phone
+    user_mobile: 
+        field: user_mobile
+    skype: 
+        field: skype
+    address: 
+        field: address
+    zip: 
+        field: zip
+    town: 
+        field: town
+    fk_country: 
+        field: fk_country
+    admin:
+        field: admin
+    job: 
+        field: job
+    employee: 
+        field: emplyee
+    dateemployment:
+        field: dateemployment
+    fk_user: 
+        field: fk_user
+        display: nom_url
+    apple_id: 
+        field: apple_id
+    apple_service: 
+        field: apple_service
+    apple_techid: 
+        field: apple_techid
+    apple_shipto: 
+        field: apple_shipto
+    id8sens: 
+        field: id8sens
+    idtech8sens: 
+        field: idtech8sens
+    comp:
+        field: comp
+    defaultentrepot: 
+        field: defaultentrepot
+    apple_centre: 
+        field: apple_centre
+        
 lists:
     default: 
         checkboxes: 1
+        configurable: 1
         bulk_actions:
             - label: supprimer les utilisateurs sélectionnés
               icon: fas_trash-alt
@@ -184,19 +246,12 @@ lists:
         edit_btn: 1
         cols:
             gender:
-                field: gender
             firstname:
-                field: firstname
             lastname: 
-                field: lastname
             login: 
-                field: login
             job:
-                field: job
             email: 
-                field: email
             office_phone: 
-                field: office_phone
                 
 fields_tables: 
     identity:

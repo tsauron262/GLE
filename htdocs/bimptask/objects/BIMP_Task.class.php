@@ -267,6 +267,7 @@ class BIMP_Task extends BimpObject
         $buttons = array();
         if($this->isEditable()){
             if($this->canEdit()){
+                if(filter_var($this->getData("src"), FILTER_VALIDATE_EMAIL) && filter_var($this->getData("dst"), FILTER_VALIDATE_EMAIL))
                 $buttons[] = array(
                     'label'   => 'Répondre par mail',
                     'labelShort'   => 'Rep Mail',

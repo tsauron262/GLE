@@ -11,13 +11,13 @@ class export8sens {
     }
     
     function addTaskAlert($msg){
-        global $conf;
+        global $conf, $user;
+        $user->fetch(1);
         if(isset($conf->global->MAIN_MODULE_BIMPTASK)){
             $task = BimpObject::getInstance("bimptask", "BIMP_Task");
                 $tab = array("src"=>"GLE-AUTO", "dst"=>"Synchro-8SENS", "subj"=>"Probléme import 8Sens ", "txt"=>$msg, "prio"=>20);
                 $this->errors = array_merge($this->errors, $task->validateArray($tab));
-                $this->errors = array_merge($this->errors, $task->createIfNotActif());
-            
+                $this->errors = array_merge($this->errors, $task->createIfNotActif());        
         }
     }
     

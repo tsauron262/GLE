@@ -15,15 +15,34 @@ class FixeTabs
             'classes' => $classes
         );
     }
+    
+    
+    public static function canView(){
+        global $user, $conf;
+        if (isset($user->id) && (int) $user->id){
+            if(userInGroupe(18, $user->id))
+                return 1;
+            
+            if(isset($conf->global->MAIN_MODULE_BIMPTASK)){
+                $task = BimpObject::getInstance("bimptask", "BIMP_Task");
+                if($task->canView())
+                    return 1;
+            }
+        }
+        return 0;
+    }
 
     public function init()
     {
+        global $conf;
         require_once DOL_DOCUMENT_ROOT . '/bimpsupport/chronos.php';
         runBimpSupportChrono();
         
         
-        require_once DOL_DOCUMENT_ROOT . '/bimptask/task.php';
-        runBimpTask();
+        if(isset($conf->global->MAIN_MODULE_BIMPTASK)){
+            require_once DOL_DOCUMENT_ROOT . '/bimptask/task.php';
+            runBimpTask();
+        }
     }
 
     public function displayHead()
@@ -31,6 +50,8 @@ class FixeTabs
         echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpcore/views/css/fixeTabs.css"/>';
         echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/fixeTabs.js"></script>';
         echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/BimpTimer.js"></script>';
+        echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimptask/views/css/task.css"/>';
+        echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimptask/views/js/task.js"></script>';
     }
 
     public function render($content_only = false)

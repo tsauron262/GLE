@@ -106,7 +106,7 @@ class gsxController extends BimpController
         return false;
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderGSxView($serial, $id_sav)
     {
@@ -371,13 +371,14 @@ class gsxController extends BimpController
         if (!is_null($id_sav)) {
             $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
             if (!is_null($sav) && $sav->isLoaded()) {
-//                if ($sav->isPropalEditable()) {
-                $add_btn = true;
-//                }
+                if ($sav->isPropalEditable()) {
+                    $add_btn = true;
+                }
             }
         }
 
         $parts = $this->getPartsListArray();
+//        return '<pre>' . print_r($parts, true) . '</pre>';
         $html = '';
         if (!is_null($parts) && is_array($parts) && count($parts)) {
             $html .= '<div class="partsSearchContainer">';
@@ -429,7 +430,8 @@ class gsxController extends BimpController
             $headers .= '<th style="min-width: 80px">eeeCode</th>';
             $headers .= '<th style="min-width: 80px">Type</th>';
             $headers .= '<th style="min-width: 80px">Prix commande</th>';
-            $headers .= '<th style="min-width: 80px">Prix achat</th>';
+            $headers .= '<th style="min-width: 80px">Prix stock</th>';
+            $headers .= '<th>Prix spéciaux</th>';
             $headers .= '<th></th>';
             $headers .= '</thead>';
 
@@ -449,6 +451,28 @@ class gsxController extends BimpController
                         $part['partNumber'] = $part['originalPartNumber'];
                     }
 
+                    $price_options = array();
+                    if (isset($part['pricingOptions']['pricingOption'])) {
+                        $price_options = array();
+                        if (is_array($part['pricingOptions']['pricingOption']) && isset($part['pricingOptions']['pricingOption']['code'])) {
+                            $price_options = array(
+                                $part['pricingOptions']['pricingOption']['code'] => array(
+                                    'price'       => $part['pricingOptions']['pricingOption']['price'],
+                                    'description' => $part['pricingOptions']['pricingOption']['description']
+                                )
+                            );
+                        } else {
+                            foreach ($price_options = $part['pricingOptions']['pricingOption'] as $price_option) {
+                                if (isset($price_option['code'])) {
+                                    $price_options[$price_option['code']] = array(
+                                        'price'       => $price_option['price'],
+                                        'description' => $price_option['description']
+                                    );
+                                }
+                            }
+                        }
+                    }
+
                     $content .= '<tr class="partRow_' . $i . ' partRow ' . ($odd ? 'odd' : 'even') . '"';
                     $content .= ' data-code="' . (isset($part['componentCode']) ? addslashes($part['componentCode']) : '') . '"';
                     $content .= ' data-eeeCode="' . (isset($part['eeeCode']) ? addslashes($part['eeeCode']) : '') . '"';
@@ -458,6 +482,7 @@ class gsxController extends BimpController
                     $content .= ' data-exchange_price="' . (isset($part['exchangePrice']) ? addslashes($part['exchangePrice']) : 0) . '"';
                     $content .= ' data-stock_price="' . (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : 0) . '"';
                     $content .= ' data-type="' . (isset($part['partType']) ? addslashes($part['partType']) : '') . '"';
+                    $content .= ' data-price_options="' . (count($price_options) ? htmlentities(json_encode($price_options)) : '') . '"';
                     $content .= '>';
                     $content .= '<td>' . (isset($part['partDescription']) ? addslashes(str_replace(" ", "", $part['partDescription'])) : '') . '</td>';
                     $content .= '<td>' . (isset($part['partNumber']) ? addslashes($part['partNumber']) : '') . '</td>';
@@ -466,7 +491,17 @@ class gsxController extends BimpController
                     $content .= '<td>' . (isset($part['partType']) ? addslashes($part['partType']) : '') . '</td>';
                     $content .= '<td>' . (isset($part['exchangePrice']) ? addslashes($part['exchangePrice']) : '0') . '</td>';
                     $content .= '<td>' . (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '0') . '</td>';
-
+                    $content .= '<td>';
+                    $fl = true;
+                    foreach ($price_options as $code => $option) {
+                        if (!$fl) {
+                            $content .= '<br/>';
+                        } else {
+                            $fl = false;
+                        }
+                        $content .= addslashes($option['price'] . ' (' . $code . ')');
+                    }
+                    $content .= '</td>';
                     $content .= '<td>';
 
                     if ($add_btn) {
@@ -660,6 +695,7 @@ class gsxController extends BimpController
                 if (isset($parts['ResponseArray']) && count($parts['ResponseArray'])) {
                     if (isset($parts['ResponseArray']['responseData']) && count($parts['ResponseArray']['responseData'])) {
                         $parts = $parts['ResponseArray']['responseData'];
+//                        return $parts;
                         if (isset($parts["partDescription"]))
                             $parts = array(0 => $parts);
                         if ($partNumberAsKey) {

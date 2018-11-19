@@ -3,7 +3,6 @@
 class BimpController
 {
 
-    public static $debug_time = false;
     public $times = array();
     public $module = '';
     public $controller = '';
@@ -230,7 +229,7 @@ class BimpController
 
             $this->addDebugTime('Fin affichage page');
 
-            if (self::$debug_time) {
+            if (BimpDebug::isActive('bimpcore/controller/display_times')) {
                 echo $this->renderDebugTime();
             }
 

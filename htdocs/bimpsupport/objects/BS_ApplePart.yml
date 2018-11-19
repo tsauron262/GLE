@@ -49,7 +49,16 @@ fields:
     no_order: 
         label: Commande de stock
         type: bool
-        default_value: 0
+        default_value: 
+    price_options: 
+        label: Prix Spéciaux
+        type: json
+    price_type: 
+        label: Prix applicable
+        values: 
+            array: price_types
+        default_value: EXCHANGE
+        
     
 lists: 
     default: 
@@ -63,7 +72,7 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this))
         enable_search: 0
         sort_field: id
-        sort_way: desc
+        sort_way: asc
         n: 25
         delete_btn: 
             callback: isCartEditable
@@ -93,12 +102,12 @@ lists:
                 field: out_of_warranty
                 edit: 
                     callback: isCartEditable
-            stock_price: 
-                field: stock_price
-            exchange_price: 
-                field: exchange_price
-            order: 
+            price: 
+                field: price_type
+                edit: 
+                    callback: isCartEditable
+            no_order: 
                 field: no_order
-                edit:
+                edit: 
                     callback: isCartEditable
                 

@@ -1543,8 +1543,8 @@ class BimpObject extends BimpCache
         $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, $order_by_alias, $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
-        if (BimpTools::isSubmit('list_sql')) {
-            echo $sql . '<br/><br/>';
+        if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
+            echo BimpRender::renderDebugInfo($sql, 'SQL Liste - Module: "' . $this->module . '" Objet: "' . $this->object_name . '"');
         }
 
         $rows = $this->db->executeS($sql, $return);
@@ -2379,12 +2379,10 @@ class BimpObject extends BimpCache
 
     public function fetch($id, $parent = null)
     {
-        if (BimpController::$debug_time) {
-            global $main_controller;
+        global $main_controller;
 
-            if (is_a($main_controller, 'BimpController')) {
-                $main_controller->addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
-            }
+        if (is_a($main_controller, 'BimpController')) {
+            $main_controller->addDebugTime('Fetch ' . $this->getLabel() . ' - ID ' . $id);
         }
 
         $this->reset();

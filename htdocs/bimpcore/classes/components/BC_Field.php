@@ -49,7 +49,6 @@ class BC_Field extends BimpComponent
             'lowercase'       => array('data_type' => 'bool', 'default' => 0),
         )
     );
-    
     public static $missing_if_empty_types = array(
         'string', 'text', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
     );
@@ -279,7 +278,7 @@ class BC_Field extends BimpComponent
             $value = $this->value;
             if ($this->params['type'] === 'items_list' && is_array($this->value)) {
                 $value = implode($this->params['items_delimiter'], $this->value);
-            } 
+            }
             $html .= '<input type="hidden" name="' . $this->name_prefix . $this->name . '" value="' . htmlentities($value) . '">';
         }
 

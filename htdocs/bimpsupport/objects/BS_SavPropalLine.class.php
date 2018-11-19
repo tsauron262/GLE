@@ -9,13 +9,13 @@ class BS_SavPropalLine extends Bimp_PropalLine
     public $equipment_required = true;
 
     // Getters: 
-    
+
     public function isEditable($force_edit = false)
     {
         if (!$force_edit && !(int) $this->getData('editable') && ($this->getData('linked_object_name') !== 'sav_apple_part')) {
             return 0;
         }
-        
+
         $parent = $this->getParentInstance();
         if (!BimpObject::objectLoaded($parent)) {
             return 0;
@@ -56,10 +56,10 @@ class BS_SavPropalLine extends Bimp_PropalLine
         if ($this->getData('linked_object_name') === 'sav_apple_part') {
             return 'apple_part';
         }
-        
+
         return 'default';
     }
-    
+
     // Traitements:
 
     public function updateSav()
@@ -218,6 +218,18 @@ class BS_SavPropalLine extends Bimp_PropalLine
         return parent::getValueByProduct($field);
     }
 
+    public function isFieldEditable($field)
+    {
+        if ($field === 'qty') {
+            if (!(int) $this->getData('editable')) {
+                return 0;
+            }
+            return 1;
+        }
+
+        return (int) parent::isFieldEditable($field);
+    }
+
     public function validate()
     {
         $propal = $this->getParentInstance();
@@ -225,7 +237,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
         if (!BimpObject::objectLoaded($propal)) {
             return array('ID du devis Absent');
         }
-        
+
         $sav = $propal->getSav();
 
         if (!BimpObject::objectLoaded($sav)) {

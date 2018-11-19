@@ -347,12 +347,17 @@ class GSX_Request
                                         'no_order' => 0
                                     ));
                                     foreach ($list as $part) {
+                                        $pricingOption = '';
+                                        if (isset($part['price_type']) && !in_array($part['price_type'], array('STOCK', 'EXCHANGE'))) {
+                                            $pricingOption = $part['price_type'];
+                                        }
                                         $orderLines[] = array(
                                             'partNumber'      => $part['part_number'],
                                             'comptiaCode'     => $part['comptia_code'],
                                             'comptiaModifier' => $part['comptia_modifier'],
                                             'partDescription' => $part['label'],
-                                            'componentCode'   => $part['component_code']
+                                            'componentCode'   => $part['component_code'],
+                                            'pricingOption'   => $pricingOption
                                         );
                                     }
                                 }
@@ -409,7 +414,7 @@ class GSX_Request
                                 FROM llx_bs_sav s, llx_be_equipment e
                                 LEFT JOIN llx_product p ON p.rowid = e.id_product AND e.id_product != 0
                                 WHERE s.id = ' . (int) $this->id_sav . ' AND s.id_equipment = e.id';
-                            
+
 
                             $res = $db->query($sql);
                             if ($db->num_rows($res) > 0) {

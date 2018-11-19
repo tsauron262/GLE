@@ -6800,6 +6800,27 @@ i.iconRight {
   color: #fff !important;
 }
 
+/*Debug infos*/
+/* line 867, ../scss/bimpcore/_styles.scss */
+.debug_info {
+  margin: 10px;
+  padding: 5px 5px 5px 40px;
+  border: 1px solid #FF6A00;
+  border-left-width: 3px;
+  background-color: #FFF4EB;
+}
+/* line 874, ../scss/bimpcore/_styles.scss */
+.debug_info i.debug_icon {
+  float: left;
+  margin-left: -30px;
+  font-size: 20px;
+  color: #C85300;
+}
+/* line 881, ../scss/bimpcore/_styles.scss */
+.debug_info .debug_info_title {
+  font-weight: bold;
+}
+
 /* line 1, ../scss/bimpcore/_form.scss */
 *::-moz-placeholder {
   color: #787878 !important;

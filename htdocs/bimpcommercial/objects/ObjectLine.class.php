@@ -745,7 +745,7 @@ class ObjectLine extends BimpObject
             }
         }
 
-        if ($edit && $this->isEditable() && $this->canEdit()) {
+        if ($edit && $this->isFieldEditable($field) && $this->canEditField($field)) {
             $dataDefs = $this->getLineDataDefs();
             if (!array_key_exists($field, $dataDefs)) {
                 return '';

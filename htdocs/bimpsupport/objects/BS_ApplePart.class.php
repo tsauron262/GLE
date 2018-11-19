@@ -1,19 +1,15 @@
 <?php
 
 class BS_ApplePart extends BimpObject
-{ 
+{
+
     private static $tabRefCommenceIos = array("661-05511", "DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "XG", "ZD661", "ZK661", "ZP661");
     private static $tabDescCommenceIos = array("SVC,IPOD", "Ipod nano");
-
     private static $tabRefCommenceIosDouble = array("661", "Z661");
     private static $tabDescCommenceIosDouble = array("iphone", "BAT,IPHONE", "SVC,IPHONE"); //design commence par
     private static $tabDescContientIosDouble = array("Ipad Pro", "Ipad mini", "Apple Watc"); //design contient
-
     private static $tabRefCommenceBatterie = array("661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755", "661-08935"); //Prix a 29
-
     private static $tabRefCommencePrixEcran = array("661-07285" => "142,58", "661-07286" => "142,58", "661-07287" => "142,58", "661-07288" => "142,58", "661-07289" => "159,25", "661-07290" => "159,25", "661-07291" => "159,25", "661-07292" => "159,25", "661-07293" => "142,58", "661-07294" => "142,58", "661-07295" => "142,58", "661-07296" => "142,58", "661-07297" => "159,25", "661-07298" => "159,25", "661-07299" => "159,25", "661-07300" => "159,25", "661-08933" => "142,58", "661-08934" => "142,58", "661-09081" => "142,58", "661-10102" => "142,58", "661-09032" => "159,25", "661-09033" => "159,25", "661-09034" => "159,25", "661-10103" => "159,25", "661-09294" => "259,25", "661-10608" => "259,25", "661-11037" => "300,91");
-
-
     public static $componentsTypes = array(
         0   => 'Général',
         1   => 'Visuel',
@@ -32,6 +28,8 @@ class BS_ApplePart extends BimpObject
         'W' => 'Watch'
     );
     protected static $compTIACodes = null;
+
+    // Getters: 
 
     public static function getCompTIACodes()
     {
@@ -62,10 +60,33 @@ class BS_ApplePart extends BimpObject
         return $compTIACodes;
     }
 
-    public function canDelete()
+    public function getPrice_typesArray()
     {
-        global $user;
-        return (int) $user->rights->BimpSupport->read;
+        $prices = array();
+        if ((float) $this->getData('exchange_price') !== 0.0 && !(int) $this->getData('no_order')) {
+            $prices['EXCHANGE'] = BimpTools::displayMoneyValue((float) $this->getData('exchange_price'), 'EUR') . ' (Prix d\'échange)';
+        }
+
+        if ((float) $this->getData('exchange_price') === 0.0 || (int) $this->getData('no_order')) {
+            $prices['STOCK'] = BimpTools::displayMoneyValue((float) $this->getData('stock_price'), 'EUR') . ' (Prix stock)';
+        }
+
+        $options = $this->getData('price_options');
+
+        if (is_array($options)) {
+            foreach ($options as $code => $option) {
+                if (isset($option['price'])) {
+                    $label = BimpTools::displayMoneyValue((float) $option['price'], 'EUR');
+
+                    if (isset($option['description'])) {
+                        $label .= ' (' . $option['description'] . ')';
+                    }
+                    $prices[$code] = $label;
+                }
+            }
+        }
+
+        return $prices;
     }
 
     public function getComptia_modifiersArray()
@@ -74,10 +95,11 @@ class BS_ApplePart extends BimpObject
         return GSX_CompTIA::getCompTIAModifiers();
     }
 
-    public static function getCategProdApple($ref, $desc){
+    public static function getCategProdApple($ref, $desc)
+    {
         $type = "autre";
-        
-        
+
+
         //Premier cas les ios
         foreach (self::$tabDescCommenceIos as $val)//desc commence par rajout 45€
             if (stripos($desc, $val) === 0)
@@ -85,8 +107,8 @@ class BS_ApplePart extends BimpObject
         foreach (self::$tabRefCommenceIos as $val)//ref commence par rajout 45€
             if (stripos($ref, $val) === 0)
                 $type = "ios";
-        foreach (self::$tabRefCommenceIosDouble as $val){//ref commence par rajout 45€
-            if (stripos($ref, $val) === 0){
+        foreach (self::$tabRefCommenceIosDouble as $val) {//ref commence par rajout 45€
+            if (stripos($ref, $val) === 0) {
                 foreach (self::$tabDescCommenceIosDouble as $val)
                     if (stripos($desc, $val) === 0)
                         $type = "ios";
@@ -95,43 +117,116 @@ class BS_ApplePart extends BimpObject
                         $type = "ios";
             }
         }
-        
-        
+
+
         //deuxieme cas les Batterie
-        
+
         foreach (self::$tabRefCommenceBatterie as $val)
-            if (stripos($ref, $val) === 0) 
-                    $type = "batt";
-            
-        
+            if (stripos($ref, $val) === 0)
+                $type = "batt";
+
+
         //troisieme cas les ecran
-        
+
         foreach (self::$tabRefCommencePrixEcran as $val => $inut)
-            if (stripos($ref, $val) === 0) 
-                    $type = "ecran";
-            
+            if (stripos($ref, $val) === 0)
+                $type = "ecran";
+
         return $type;
     }
+
+    public function isCartEditable()
+    {
+        $sav = $this->getParentInstance();
+        if (!is_null($sav) && $sav->isLoaded()) {
+            return (int) $sav->isPropalEditable();
+        }
+        return 0;
+    }
+
+    public function checkPrice($no_update = false)
+    {
+        $type = $this->getData('price_type');
+        $priceOptions = $this->getData('price_options');
+        if (!is_array($priceOptions)) {
+            $priceOptions = array();
+        }
+
+        if (!$type) {
+            $type = 'EXCHANGE';
+        }
+
+        if ($type === 'EXCHANGE') {
+            if (!(float) $this->getData('exchange_price')) {
+                $type = 'STOCK';
+            }
+        } elseif ($type === 'STOCK') {
+            if (!(float) $this->getData('stock_price')) {
+                $type = 'EXCHANGE';
+            }
+        } else {
+            if (!array_key_exists($type, $priceOptions)) {
+                $type = 'EXCHANGE';
+            }
+        }
+
+        if ($type === 'STOCK' && !(int) $this->getData('no_order') && (float) $this->getData('exchange_price') !== 0.0) {
+            $type = 'EXCHANGE';
+        }
+
+        if ($type === 'EXCHANGE' && (int) $this->getData('no_order') && (float) $this->getData('stock_price') !== 0.0) {
+            $type = 'STOCK';
+        }
+
+        if ($type !== $this->getData('price_type')) {
+            $this->set('price_type', $type);
+
+            if (!$no_update) {
+                $this->update();
+            }
+        }
+    }
+
+    public function getPrice()
+    {
+        $type = $this->getData('price_type');
+
+        switch ($type) {
+            case 'EXCHANGE':
+                return (float) $this->getData('exchange_price');
+
+            case 'STOCK':
+                return (float) $this->getData('stock_price');
+
+            default:
+                $priceOptions = $this->getData('price_options');
+                if (isset($priceOptions[$type]['price'])) {
+                    return (float) $priceOptions[$type]['price'];
+                }
+                return 0;
+        }
+    }
+
+    // Traitements: 
 
     public static function convertPrix($prix, $ref, $desc)
     {
         $coefPrix = 1;
         $constPrix = 0;
         $newPrix = 0;
-        
+
         $type = self::getCategProdApple($ref, $desc);
 
 
         //Application des coef et constantes
         if ($type == "ios") {
             $constPrix = 45;
-        } elseif($type == "batt"){
+        } elseif ($type == "batt") {
             $newPrix = 32.5;
-        } 
-        elseif($type == "ecran"){
-            foreach(self::$tabRefCommencePrixEcran as $refT => $prixT)
-                if($ref == $refT)
-                    $newPrix = str_replace(",",".", $prixT);
+        } elseif ($type == "ecran") {
+            foreach (self::$tabRefCommencePrixEcran as $refT => $prixT)
+                if ($ref == $refT)
+                    $newPrix = str_replace(",", ".", $prixT);
         }
         else {
             if ($prix > 300)
@@ -156,64 +251,65 @@ class BS_ApplePart extends BimpObject
         return $prix;
     }
 
-    public function isCartEditable()
-    {
-        $sav = $this->getParentInstance();
-        if (!is_null($sav) && $sav->isLoaded()) {
-            return (int) $sav->isPropalEditable();
-        }
-        return 0;
-    }
-
     // Overrides: 
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $errors = array();
+
+        $sav = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($sav)) {
+            $errors[] = 'ID du SAV absent';
+        } elseif (!is_a($sav, 'BS_SAV')) {
+            $errors[] = 'SAV invalide';
+        } elseif (!(int) $sav->getData('id_propal')) {
+            $errors[] = 'ID de la propal absent';
+        } elseif (!$sav->isPropalEditable()) {
+            $errors[] = 'Impossible d\'ajouter la pièce Apple au panier (le devis n\'est plus éditable)';
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
         if ($this->getData('component_code') === ' ') {
             $this->set('component_code', 0);
             $this->set('comptia_code', '000');
         }
 
+        $this->checkPrice(true);
+
         $errors = parent::create($warnings, $force_create);
 
         $line_errors = array();
         if (!count($errors)) {
-            $sav = $this->getParentInstance();
-            if (BimpObject::objectLoaded($sav)) {
-                if ((int) $sav->getData('id_propal')) {
-                    $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
-                    $line_errors = $line->validateArray(array(
-                        'id_obj'             => (int) $sav->getData('id_propal'),
-                        'type'               => BS_SavPropalLine::LINE_FREE,
-                        'deletable'          => 0,
-                        'editable'           => 0,
-                        'linked_id_object'   => (int) $this->id,
-                        'linked_object_name' => 'sav_apple_part',
-                        'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
-                    ));
-                    if (!count($line_errors)) {
-                        $label = $this->getData('part_number') . ' - ' . $this->getData('label');
-                        if ((int) $this->getData('no_order')) {
-                            $label .= ' APPRO';
-                        }
-                        $line->pa_ht = ((int) $this->getData('no_order') || ($this->getData('exchange_price') < 1)) ? (float) $this->getData('stock_price') : (float) $this->getData('exchange_price');
-                        $line->desc = $label;
-                        $line->qty = (int) $this->getData('qty');
-                        $line->tva_tx = 20;
-                        $line->pu_ht = self::convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
-
-                        $line_warnings = array();
-                        $line_errors = $line->create($line_warnings, true);
-
-                        if (count($line_warnings)) {
-                            $line_errors = array_merge($line_errors, $line_warnings);
-                        }
-                    }
-                } else {
-                    $line_errors[] = 'ID de la propal absent';
+            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+            $line_errors = $line->validateArray(array(
+                'id_obj'             => (int) $sav->getData('id_propal'),
+                'type'               => BS_SavPropalLine::LINE_FREE,
+                'deletable'          => 0,
+                'editable'           => 0,
+                'linked_id_object'   => (int) $this->id,
+                'linked_object_name' => 'sav_apple_part',
+                'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
+            ));
+            if (!count($line_errors)) {
+                $label = $this->getData('part_number') . ' - ' . $this->getData('label');
+                if ((int) $this->getData('no_order')) {
+                    $label .= ' APPRO';
                 }
-            } else {
-                $line_errors[] = 'ID du SAV absent';
+                $line->pa_ht = $this->getPrice();
+                $line->desc = $label;
+                $line->qty = (int) $this->getData('qty');
+                $line->tva_tx = 20;
+                $line->pu_ht = self::convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
+
+                $line_warnings = array();
+                $line_errors = $line->create($line_warnings, true);
+
+                if (count($line_warnings)) {
+                    $line_errors = array_merge($line_errors, $line_warnings);
+                }
             }
         }
 
@@ -226,69 +322,80 @@ class BS_ApplePart extends BimpObject
 
     public function update(&$warnings = array(), $force_update = false)
     {
+        $errors = array();
+
+        $sav = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($sav)) {
+            $errors[] = 'ID du SAV absent';
+        } elseif (!is_a($sav, 'BS_SAV')) {
+            $errors[] = 'SAV invalide';
+        } elseif (!(int) $sav->getData('id_propal')) {
+            $errors[] = 'ID de la propal absent';
+        } elseif (!$sav->isPropalEditable()) {
+            $errors[] = 'Impossible d\'ajouter la pièce Apple au panier (le devis n\'est plus éditable)';
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
         if ($this->getData('component_code') === ' ') {
             $this->set('component_code', 0);
             $this->set('comptia_code', '000');
         }
 
+        $this->checkPrice(true);
+
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
             $line_errors = array();
-            $sav = $this->getParentInstance();
             $id_line = 0;
-            if (BimpObject::objectLoaded($sav)) {
-                if ((int) $sav->getData('id_propal')) {
-                    $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
-                    if ($line->find(array(
-                                'id_obj'             => (int) $sav->getData('id_propal'),
-                                'linked_id_object'   => (int) $this->id,
-                                'linked_object_name' => 'sav_apple_part'
-                            ))) {
-                        $id_line = (int) $line->id;
-                    }
-
-                    $line_errors = $line->validateArray(array(
+            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+            if ($line->find(array(
                         'id_obj'             => (int) $sav->getData('id_propal'),
-                        'type'               => BS_SavPropalLine::LINE_FREE,
-                        'deletable'          => 0,
-                        'editable'           => 0,
                         'linked_id_object'   => (int) $this->id,
-                        'linked_object_name' => 'sav_apple_part',
-                        'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
-                    ));
+                        'linked_object_name' => 'sav_apple_part'
+                    ))) {
+                $id_line = (int) $line->id;
+            }
 
-                    if (!count($line_errors)) {
-                        $label = $this->getData('part_number') . ' - ' . $this->getData('label');
-                        if ((int) $this->getData('no_order')) {
-                            $label .= ' APPRO';
-                        }
-                        $line->pa_ht = ((int) $this->getData('no_order') || ($this->getData('exchange_price') < 1)) ? (float) $this->getData('stock_price') : (float) $this->getData('exchange_price');
-                        $line->desc = $this->getData('label');
-                        $line->qty = (int) $this->getData('qty');
-                        $line->tva_tx = 20;
-                        $line->pu_ht = self::convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
+            $line_errors = $line->validateArray(array(
+                'id_obj'             => (int) $sav->getData('id_propal'),
+                'type'               => BS_SavPropalLine::LINE_FREE,
+                'deletable'          => 0,
+                'editable'           => 0,
+                'linked_id_object'   => (int) $this->id,
+                'linked_object_name' => 'sav_apple_part',
+                'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
+            ));
 
-                        $line_warnings = array();
+            if (!count($line_errors)) {
+                $label = $this->getData('part_number') . ' - ' . $this->getData('label');
+                if ((int) $this->getData('no_order')) {
+                    $label .= ' APPRO';
+                }
+                $line->pa_ht = $this->getPrice();
+                $line->desc = $this->getData('label');
+                $line->qty = (int) $this->getData('qty');
+                $line->tva_tx = 20;
+                $line->pu_ht = self::convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
 
-                        if ($id_line) {
-                            if ($line->isEditable(true)) {
-                                $line_errors = $line->update($line_warnings, true);
-                            }
-                        } else {
-                            $line_errors = $line->create($line_warnings, true);
-                        }
+                $line_warnings = array();
 
-                        if (count($line_warnings)) {
-                            $line_errors = array_merge($line_errors, $line_warnings);
-                        }
+                if ($id_line) {
+                    if ($line->isEditable(true)) {
+                        $line_errors = $line->update($line_warnings, true);
                     }
                 } else {
-                    $line_errors[] = 'ID de la propal absent';
+                    $line_errors = $line->create($line_warnings, true);
                 }
-            } else {
-                $line_errors[] = 'ID du SAV absent';
+
+                if (count($line_warnings)) {
+                    $line_errors = array_merge($line_errors, $line_warnings);
+                }
             }
+
             if (count($line_errors)) {
                 if ($id_line) {
                     $title = 'Des erreurs sont survenues lors de la mise à jour de la ligne du devis';
@@ -331,5 +438,13 @@ class BS_ApplePart extends BimpObject
         }
 
         return $errors;
+    }
+
+    // Gestion des droits user: 
+
+    public function canDelete()
+    {
+        global $user;
+        return (int) $user->rights->BimpSupport->read;
     }
 }

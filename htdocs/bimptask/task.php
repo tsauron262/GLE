@@ -29,6 +29,7 @@ function runBimpTask()
         $alert = true;
     }
     
+    $nonLu1 = BIMP_Task::$nbNonLu;
     
 
     
@@ -72,11 +73,12 @@ function runBimpTask()
         $content2 .= $contentT;
     else
         $content .= $contentT;
+    $nonLu2 = BIMP_Task::$nbNonLu;
     
     
     if ($i > 0)
-        $bimp_fixe_tabs->addTab("mYtask", "<span class='".implode(" ", $class)."' >".$i . " tache(s) en attente" .(BIMP_Task::$nbNonLu > 0 ? " <span class='red'>".BIMP_Task::$nbNonLu." message non lu.</span>" : "")."</span>", $content);
+        $bimp_fixe_tabs->addTab("mYtask", "<span class='".implode(" ", $class)."' >".$i . " tache(s) en attente" .($nonLu1 > 0 ? " <span class='red'>".$nonLu1." message non lu.</span>" : "")."</span>", $content);
     
     if ($i2 > 0)
-        $bimp_fixe_tabs->addTab("taskAPersonne", "<span class='".implode(" ", $class)."' >".$i2 . " tache(s) non attribué" .(BIMP_Task::$nbNonLu > 0 ? " <span class='red'>".BIMP_Task::$nbNonLu." message non lu.</span>" : "")."</span>", $content2);
+        $bimp_fixe_tabs->addTab("taskAPersonne", "<span class='".implode(" ", $class)."' >".$i2 . " tache(s) non attribué" .($nonLu2 > 0 ? " <span class='red'>".$nonLu2." message non lu.</span>" : "")."</span>", $content2);
 }

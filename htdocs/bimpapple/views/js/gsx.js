@@ -349,7 +349,8 @@ function addPartToCart($button, id_sav) {
             part_number: $row.data('num'),
             component_code: $row.data('code'),
             stock_price: $row.data('stock_price'),
-            exchange_price: $row.data('exchange_price')
+            exchange_price: $row.data('exchange_price'),
+            price_options: $row.data('price_options')
         };
 
         BimpAjax('saveObject', data, null, {

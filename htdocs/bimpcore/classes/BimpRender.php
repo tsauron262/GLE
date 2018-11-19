@@ -319,9 +319,9 @@ class BimpRender
         if (is_array($tabs) && count($tabs)) {
             $active = BimpTools::getValue('navtab', $tabs[0]['id']);
         }
-        
+
         $html .= '<ul class="nav nav-tabs" role="tablist">';
-        
+
         foreach ($tabs as $tab) {
             $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . '>';
             $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab">';
@@ -461,7 +461,7 @@ class BimpRender
                     $html .= ' data-trigger="hover"';
                     $html .= ' data-content="Afficher dans un nouvel onglet"';
                     $html .= '>';
-                    $html .= '<i class="'.BimpRender::renderIconClass('fas_external-link-alt').'"></i>';
+                    $html .= '<i class="' . BimpRender::renderIconClass('fas_external-link-alt') . '"></i>';
                     if (!$file) {
                         $html .= '&nbsp;&nbsp;Afficher';
                     }
@@ -626,6 +626,37 @@ class BimpRender
             $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
             $html .= '<i class="far fa5-eye"></i>';
             $html .= '</span>';
+        }
+
+        return $html;
+    }
+
+    public static function renderDebugInfo($info, $title = '', $icon = 'fas_info-circle')
+    {
+        $html = '';
+
+        if (!empty($info) && $title) {
+            $html .= '<div class="debug_info">';
+            if ($icon) {
+                $html .= '<i class="' . BimpRender::renderIconClass($icon) . ' debug_icon"></i>';
+            }
+            if ($title) {
+                $html .= '<div class="debug_info_title">';
+                $html .= $title;
+                $html .= '</div>';
+            }
+
+            if (is_array($info)) {
+                $html .= '<ul>';
+                foreach ($info as $msg) {
+                    $html .= '<li>' . $msg . '</li>';
+                }
+                $html .= '</ul>';
+            } else {
+                $html .= '<div>' . $info . ' </div>';
+            }
+
+            $html .= '</div>';
         }
 
         return $html;

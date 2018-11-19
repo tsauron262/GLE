@@ -81,6 +81,7 @@
                     <data name="consignmentFlag" required="0" default="N"></data>
                     <data name="replacementSerialNumber" required="0" default=""></data>
                     <data name="replacementIMEINumber" required="0" default=""></data>
+                    <data name="pricingOption" required="0" default=""></data>
                 </datas>
             </data>
             <data name="componentCheckDetails" required="0" multiple="1">

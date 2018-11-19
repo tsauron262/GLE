@@ -46,7 +46,7 @@ class BimpConfig
 
         $this->params = array();
 
-        if (is_a($this->instance, 'BimpObject')) {
+        if (!is_null($this->instance) && is_a($this->instance, 'BimpObject')) {
             if (!isset(self::$params_cache['BimpObject.yml'])) {
                 self::$params_cache['BimpObject.yml'] = $this->getParamsFromFile(DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpObject.yml');
             }
@@ -77,10 +77,12 @@ class BimpConfig
             $params = spyc_load_file($file);
             if (isset($params['extends'])) {
                 $sub_dir = '';
-                if (is_a($this->instance, 'BimpObject')) {
-                    $sub_dir = 'objects';
-                } elseif (is_a($this->instance, 'BimpController')) {
-                    $sub_dir = 'controllers';
+                if (!is_null($this->instance)) {
+                    if (is_a($this->instance, 'BimpObject')) {
+                        $sub_dir = 'objects';
+                    } elseif (is_a($this->instance, 'BimpController')) {
+                        $sub_dir = 'controllers';
+                    }
                 }
                 $parent_file = DOL_DOCUMENT_ROOT . '/';
                 $extends_module = '';
@@ -106,7 +108,7 @@ class BimpConfig
                         $parent_params = $this->getParamsFromFile($parent_file, $errors);
                         $params = $this->mergeParams($parent_params, $params);
 
-                        if (property_exists($this->instance, 'extends')) {
+                        if (is_object($this->instance) && property_exists($this->instance, 'extends')) {
                             $this->instance->extends[] = array(
                                 'module'      => $extends_module,
                                 'object_name' => $extends_object
@@ -440,10 +442,12 @@ class BimpConfig
                 $module_name = null;
                 $object_name = null;
                 if (is_string($params['bimp_object'])) {
-                    if (is_a($this->instance, 'BimpObject')) {
-                        $module_name = $this->instance->module;
-                    } elseif (is_a($this->instance, 'BimpController')) {
-                        $module_name = $this->instance->module;
+                    if (!is_null($this->instance)) {
+                        if (is_a($this->instance, 'BimpObject')) {
+                            $module_name = $this->instance->module;
+                        } elseif (is_a($this->instance, 'BimpController')) {
+                            $module_name = $this->instance->module;
+                        }
                     }
                     $object_name = $params['bimp_object'];
                 } elseif (is_array($params['bimp_object'])) {
@@ -633,7 +637,7 @@ class BimpConfig
         }
 
         if (is_string($array)) {
-            if (!is_null($this->instance)) {
+            if (!is_null($this->instance) && is_object($this->instance)) {
                 if (property_exists($this->instance, $array)) {
                     $instance = $this->instance;
                     if (isset($instance->{$array}) && is_array($instance->{$array})) {
@@ -785,7 +789,7 @@ class BimpConfig
     protected function processCallback($callback, $path)
     {
         if (is_string($callback)) {
-            if (!is_null($this->instance)) {
+            if (!is_null($this->instance) && is_object($this->instance)) {
                 if (method_exists($this->instance, $callback)) {
                     return $this->instance->{$callback}();
                 } else {
@@ -900,7 +904,9 @@ class BimpConfig
             if (isset($params['bimp_object']['module'])) {
                 return $this->getvalue($params['bimp_object']['module'], $instance_path . '/bimp_object/module');
             }
-            return $this->instance->module;
+            if (!is_null($this->instance) && is_a($this->instance, 'BimpObject') || is_a($this->instance, 'BimpController')) {
+                return $this->instance->module;
+            }
         } elseif (isset($params['dol_object'])) {
             if (is_string($params['dol_object'])) {
                 return $params['dol_object'];
@@ -970,7 +976,9 @@ class BimpConfig
         }
 
         if ($object_name === 'default') {
-            return $this->instance->module;
+            if (!is_null($this->instance) && is_a($this->instance, 'BimpObject') || is_a($this->instance, 'BimpController')) {
+                return $this->instance->module;
+            }
         }
 
         if ($this->isDefined('objects/' . $object_name . '/instance')) {
@@ -998,7 +1006,7 @@ class BimpConfig
         }
 
         if ($object_name === 'default') {
-            if (is_a($this->instance, 'BimpObject')) {
+            if (!is_null($this->instance) && is_a($this->instance, 'BimpObject')) {
                 return $this->instance->object_name;
             }
             return '';

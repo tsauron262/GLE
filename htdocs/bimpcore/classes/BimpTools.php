@@ -936,7 +936,11 @@ class BimpTools
 
             case 'json':
                 if (is_string($value)) {
-                    $value = json_decode($value);
+                    if ($value) {
+                        $value = json_decode($value, true);
+                    } else {
+                        $value = array();
+                    }
                 }
                 return is_array($value);
         }

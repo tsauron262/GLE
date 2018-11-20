@@ -56,9 +56,9 @@ function runBimpTask()
         }
     }
     
-    $class = array();
+    $class2 = array();
     if(BIMP_Task::$nbAlert > 0){
-        $class[] = 'clignote';
+        $class2[] = 'clignote';
         $alert = true;
     }
     
@@ -80,5 +80,5 @@ function runBimpTask()
         $bimp_fixe_tabs->addTab("mYtask", "<span class='".implode(" ", $class)."' >".$i . " tache(s) en attente" .($nonLu1 > 0 ? " <span class='red'>".$nonLu1." message non lu.</span>" : "")."</span>", $content);
     
     if ($i2 > 0)
-        $bimp_fixe_tabs->addTab("taskAPersonne", "<span class='".implode(" ", $class)."' >".$i2 . " tache(s) non attribué" .($nonLu2 > 0 ? " <span class='red'>".$nonLu2." message non lu.</span>" : "")."</span>", $content2);
+        $bimp_fixe_tabs->addTab("taskAPersonne", "<span class='".implode(" ", $class2)."' >".$i2 . " tache(s) non attribué" .($nonLu2 > 0 ? " <span class='red'>".$nonLu2." message non lu.</span>" : "")."</span>", $content2);
 }

@@ -2501,14 +2501,14 @@ class User extends CommonObject
 		if ($this->zip && ! empty($conf->global->LDAP_FIELD_ZIP))					$info[$conf->global->LDAP_FIELD_ZIP] = $this->zip;
 		if ($this->town && ! empty($conf->global->LDAP_FIELD_TOWN))					$info[$conf->global->LDAP_FIELD_TOWN] = $this->town;
                 
-                if (! empty($conf->global->LDAP_FIELD_DESCRIPTION)){
-                    $info[$conf->global->LDAP_FIELD_DESCRIPTION] = "";
-//                    if ($this->job)
-//                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= dol_string_nohtmltag($this->job);
-//                    if($this->note_public)
-//                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= dol_string_nohtmltag($this->note_public,2);
-                }
-                
+//                if (! empty($conf->global->LDAP_FIELD_DESCRIPTION)){
+//                    $info[$conf->global->LDAP_FIELD_DESCRIPTION] = "";
+////                    if ($this->job)
+////                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= dol_string_nohtmltag($this->job);
+////                    if($this->note_public)
+////                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= dol_string_nohtmltag($this->note_public,2);
+//                }
+//                
 		if ($this->note_public && ! empty($conf->global->LDAP_FIELD_DESCRIPTION))	$info[$conf->global->LDAP_FIELD_DESCRIPTION] = dol_string_nohtmltag($this->note_public, 2);
 		if ($this->socid > 0)
 		{

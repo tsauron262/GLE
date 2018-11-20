@@ -8,68 +8,77 @@ function runBimpTask()
 
     $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
 
-    $tasks = $task->getList(array('id_user_owner' => (int) $user->id, 'status'        => array(
-            'operator' => '<',
-            'value'    => 4
-    )));
-    $i = 0;
+    $tasks = $task->getList(array('id_user_owner' => (int) $user->id, 'status' => array(
+                    'operator' => '<',
+                    'value'    => 4
+                )));
+    $i=0;
+    BIMP_Task::$nbNonLu = 0;
+    BIMP_Task::$nbAlert = 0;
+    foreach($tasks as $taskData){
+        $task->fetch($taskData["id"]);
+        if($task->canView()){
+            $content .= $task->renderLight();
+            $content .= "<br/>";
+            $i++;
+        }
+    } 
+    $class = array();
+    if(BIMP_Task::$nbAlert > 0){
+        $class[] = 'clignote';
+        $alert = true;
+    }
+    
+    $nonLu1 = BIMP_Task::$nbNonLu;
+    
+
+    
+    
+    
+    
+
+    $content2 = "";
+    $tasks = $task->getList(array('id_user_owner' => 0, 
+        'status' => array(
+                    'operator' => '<',
+                    'value'    => 4
+                )));
+    
+    $i2 = 0;
     BIMP_Task::$nbNonLu = 0;
     BIMP_Task::$nbAlert = 0;
     foreach ($tasks as $taskData) {
         $task->fetch($taskData["id"]);
         if ($task->canView()) {
-            $content .= $task->renderLight();
-            $content .= "<br/>";
-            $i++;
+            $content2 .= $task->renderLight();
+            $content2 .= "<br/>";
+            $i2++;
         }
     }
-    $class = array();
-    if (BIMP_Task::$nbAlert > 0) {
-        $class[] = 'clignote';
+    
+    $class2 = array();
+    if(BIMP_Task::$nbAlert > 0){
+        $class2[] = 'clignote';
         $alert = true;
     }
-
-
-
-
+    
+    if($alert){
+        $contentT .= "<script>playAlert();</script>";
+    }
+    else{
+        $contentT .= "<script>stopAlert();</script>";
+    }
+    
+    if($i2>0)
+        $content2 .= $contentT;
+    else
+        $content .= $contentT;
+    $nonLu2 = BIMP_Task::$nbNonLu;
+    
+    
     if ($i > 0)
-        $bimp_fixe_tabs->addTab("mYtask", "<span class='" . implode(" ", $class) . "' >" . $i . " tâche(s) en attente" . (BIMP_Task::$nbNonLu > 0 ? " <span class='red'>" . BIMP_Task::$nbNonLu . " message" . (BIMP_Task::$nbNonLu > 1 ? 's' : '') . " non lu" . (BIMP_Task::$nbNonLu > 1 ? 's' : '') . ".</span>" : "") . "</span>", $content);
-
-
-
-
-    $content = "";
-    $tasks = $task->getList(array('id_user_owner' => 0,
-        'status'        => array(
-            'operator' => '<',
-            'value'    => 4
-    )));
-
-    $i = 0;
-    BIMP_Task::$nbNonLu = 0;
-    BIMP_Task::$nbAlert = 0;
-    foreach ($tasks as $taskData) {
-        $task->fetch($taskData["id"]);
-        if ($task->canView()) {
-            $content .= $task->renderLight();
-            $content .= "<br/>";
-            $i++;
-        }
-    }
-
-    $class = array();
-    if (BIMP_Task::$nbAlert > 0) {
-        $class[] = 'clignote';
-        $alert = true;
-    }
-
-    if ($alert) {
-        $content .= "<script>playAlert();</script>";
-    } else {
-        $content .= "<script>stopAlert();</script>";
-    }
-
-
-    if ($i > 0)
-        $bimp_fixe_tabs->addTab("taskAPersonne", "<span class='" . implode(" ", $class) . "' >" . $i . " tâche(s) non attribuée(s)" . (BIMP_Task::$nbNonLu > 0 ? " <span class='red'>" . BIMP_Task::$nbNonLu . " message" . (BIMP_Task::$nbNonLu > 1 ? 's' : '') . " non lu" . (BIMP_Task::$nbNonLu > 1 ? 's' : '') . ".</span>" : "") . "</span>", $content);
+        $bimp_fixe_tabs->addTab("mYtask", "<span class='".implode(" ", $class)."' >".$i . " tache(s) en attente" .($nonLu1 > 0 ? " <span class='red'>".$nonLu1." message non lu.</span>" : "")."</span>", $content);
+    
+    if ($i2 > 0)
+        $bimp_fixe_tabs->addTab("taskAPersonne", "<span class='".implode(" ", $class2)."' >".$i2 . " tache(s) non attribué" .($nonLu2 > 0 ? " <span class='red'>".$nonLu2." message non lu.</span>" : "")."</span>", $content2);
 }

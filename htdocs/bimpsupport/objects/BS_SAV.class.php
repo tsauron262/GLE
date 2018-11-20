@@ -85,10 +85,12 @@ class BS_SAV extends BimpObject
 
         $this->useCaisseForPayments = BimpCore::getConf('sav_use_caisse_for_payments');
     }
-    
-    public function renderHeaderExtraLeft(){
+
+    public function renderHeaderExtraLeft()
+    {
         $soc = $this->getChildObject("client");
-        return $soc->dol_object->getNomUrl(1);;
+        return $soc->dol_object->getNomUrl(1);
+        ;
     }
 
     // Getters:
@@ -777,7 +779,7 @@ class BS_SAV extends BimpObject
     // Rendus HTML: 
 
     public function renderSavCheckup()
-    {        
+    {
         $html = '';
         if ($this->isLoaded()) {
             if ((int) $this->getData('id_facture_acompte')) {
@@ -1653,7 +1655,7 @@ class BS_SAV extends BimpObject
                 } elseif (!is_null($propal)) {
                     $tabT = getElementElement("propal", "facture", $propal->id);
                     if (count($tabT) > 0) {
-                        include_once DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php";
+                        include_once DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php";
                         $facture = new Facture($this->db->db);
                         $facture->fetch($tabT[count($tabT) - 1]['d']);
                         $this->set('id_facture', $facture->id);
@@ -1784,12 +1786,12 @@ class BS_SAV extends BimpObject
 
             $mail_msg .= "\n" . $textSuivie . "\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
 
-            if($this->testMail($toMail)){
-                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) 
+            if ($this->testMail($toMail)) {
+                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3))
                     $errors[] = 'Echec envoi du mail';
             }
-            else{
-                $errors[] = "Pas d'email correct ".$toMail;
+            else {
+                $errors[] = "Pas d'email correct " . $toMail;
             }
         } else {
             $errors[] = 'pas de message';
@@ -2466,6 +2468,18 @@ class BS_SAV extends BimpObject
                             $propalLine->set('id', 0);
                             $propalLine->remise = 0;
                             $propalLine->setIdParent($new_id_propal);
+
+                            $apple_part = null;
+                            if ($propalLine->getData('linked_object_name') === 'sav_apple_part') {
+                                $apple_part = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_ApplePart', (int) $propalLine->getData('linked_id_object'), $this);
+                                if (!BimpObject::objectLoaded($apple_part)) {
+                                    $propalLine->set('deletable', 1);
+                                    $propalLine->set('editable', 1);
+                                    $propalLine->set('linked_id_object', 0);
+                                    $propalLine->set('linked_object_name', '');
+                                }
+                            }
+
                             $line_errors = $propalLine->create();
                             if (count($line_errors)) {
                                 $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la copie de la ligne du devis n°' . $i);
@@ -2513,6 +2527,13 @@ class BS_SAV extends BimpObject
                             }
                         }
                     }
+
+                    $apple_parts = $this->getChildrenObjects('apple_parts');
+                    foreach ($apple_parts as $apple_part) {
+                        $apple_part_warnings = array();
+                        $apple_part->update($apple_part_warnings, true);
+                    }
+                    $this->processPropalGarantie();
                 } else {
                     $errors[] = 'Echec de la mise en révision du devis';
                 }

@@ -65,6 +65,7 @@ fields:
         input: 
             type: search_societe
             societe_type: customer
+            card: default
         required: 1
         create_form: client_light
     ref_client: 

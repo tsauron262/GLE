@@ -327,3 +327,25 @@ function displayProductStocks($button, id_product, id_entrepot) {
         }
     });
 }
+
+function loadObjectCard($container, module, object_name, id_object, card_name, successCallback) {
+    var data = {
+        module: module,
+        object_name: object_name,
+        id_object: id_object,
+        card_name: card_name
+    };
+    
+    BimpAjax('loadObjectCard', data, $container, {
+        display_success: false,
+        append_html: true,
+        display_processing: true,
+        processing_msg: '',
+        processing_padding: 10,
+        success: function (result, bimpAjax) {
+            if (typeof (successCallback) === 'function') {
+                successCallback(result, bimpAjax);
+            }
+        }
+    });
+}

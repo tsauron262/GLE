@@ -13,6 +13,7 @@ class BC_Field extends BimpComponent
     public $display_input_value = true;
     public $no_html = false;
     public $name_prefix = '';
+    public $display_card_mode = 'none'; // hint / visible
     public static $type_params_def = array(
         'id_parent'  => array(
             'object'             => array('default' => ''),
@@ -24,7 +25,7 @@ class BC_Field extends BimpComponent
             'object'             => array('default' => ''),
             'create_form'        => array('default' => ''),
             'create_form_values' => array('data_type' => 'array'),
-            'create_form_label'  => array('default' => 'Créer')
+            'create_form_label'  => array('default' => 'Créer'),
         ),
         'items_list' => array(
             'items_data_type' => array('default' => 'string'),
@@ -144,6 +145,7 @@ class BC_Field extends BimpComponent
 
         $input = new BC_Input($this->object, $this->params['type'], $this->name, $input_path, $this->value, $this->params);
         $input->setNamePrefix($this->name_prefix);
+        $input->display_card_mode = $this->display_card_mode;
 
         if (!is_null($this->new_value)) {
             $input->new_value = $this->new_value;

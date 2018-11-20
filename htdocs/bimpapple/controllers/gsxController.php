@@ -371,9 +371,9 @@ class gsxController extends BimpController
         if (!is_null($id_sav)) {
             $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
             if (!is_null($sav) && $sav->isLoaded()) {
-                if ($sav->isPropalEditable()) {
+//                if ($sav->isPropalEditable()) {
                     $add_btn = true;
-                }
+//                }
             }
         }
 

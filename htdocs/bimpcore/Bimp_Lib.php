@@ -2,12 +2,14 @@
 
 if (!defined('BIMP_LIB')) {
     define('BIMP_LIB', 1);
-    
+
     global $bimp_start_time;
     $bimp_start_time = microtime(1);
 
-    ini_set('display_errors', 1);
-    
+    if (defined('MOD_DEV')) {
+        ini_set('display_errors', 1);
+    }
+
     $dir = __DIR__ . '/classes/';
 
     require_once __DIR__ . '/libs/spyc/Spyc.php';

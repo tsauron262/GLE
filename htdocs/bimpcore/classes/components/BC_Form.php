@@ -286,6 +286,7 @@ class BC_Form extends BC_Panel
     {
         $field = new BC_Field($this->object, $field_name, true);
         $field->name_prefix = $this->fields_prefix;
+        $field->display_card_mode = 'visible';
 
         if (!$field->params['editable'] || !$field->params['show']) {
             return '';

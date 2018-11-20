@@ -1108,6 +1108,7 @@ class BimpController
                     } elseif ($object->config->isDefined('fields/' . $field_name)) {
                         $field = new BC_Field($object, $field_name, true);
                         $field->name_prefix = $field_prefix;
+                        $field->display_card_mode = 'visible';
                         if (($field->params['type'] === 'id_object' || ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) &&
                                 $field->params['create_form']) {
                             $html .= BC_Form::renderCreateObjectButton($object, $form_id, $field->params['object'], $field_prefix . $field_name, $field->params['create_form'], $field->params['create_form_values'], $field->params['create_form_label'], true);
@@ -1312,6 +1313,43 @@ class BimpController
             'pagination'    => $pagination,
             'views_list_id' => $views_list_id,
             'request_id'    => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessLoadObjectCard()
+    {
+        $errors = array();
+        $html = '';
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $id_object = BimpTools::getValue('id_object', 0);
+        $card_name = BimpTools::getValue('card_name', 'default');
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type de l\'objet absent';
+        }
+
+        if (!$id_object) {
+            $errors[] = 'ID de l\'objet absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
+            if (is_null($object)) {
+                $errors[] = 'Objet non trouvé';
+            } elseif (!$object->isLoaded()) {
+                $errors[] = BimpTools::ucfirst($object->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+            } else {
+                $card = new BC_Card($object, null, $card_name);
+                $html = $card->renderHtml();
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
         )));
     }
 

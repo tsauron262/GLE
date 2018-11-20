@@ -2503,8 +2503,8 @@ class User extends CommonObject
                 
                 if (! empty($conf->global->LDAP_FIELD_DESCRIPTION)){
                     $info[$conf->global->LDAP_FIELD_DESCRIPTION] = "";
-                    if ($this->job)
-                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= $this->job;
+//                    if ($this->job)
+//                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= $this->job;
                     if($this->note_public)
                         $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= "<br/>".$this->note_public;
                 }

@@ -2505,11 +2505,11 @@ class User extends CommonObject
                     $info[$conf->global->LDAP_FIELD_DESCRIPTION] = "";
 //                    if ($this->job)
 //                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= dol_string_nohtmltag($this->job);
-                    if($this->note_public)
-                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= dol_string_nohtmltag($this->note_public,2);
+//                    if($this->note_public)
+//                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= dol_string_nohtmltag($this->note_public,2);
                 }
                 
-//		if ($this->note_public && ! empty($conf->global->LDAP_FIELD_DESCRIPTION))	$info[$conf->global->LDAP_FIELD_DESCRIPTION] = dol_string_nohtmltag($this->note_public, 2);
+		if ($this->note_public && ! empty($conf->global->LDAP_FIELD_DESCRIPTION))	$info[$conf->global->LDAP_FIELD_DESCRIPTION] = dol_string_nohtmltag($this->note_public, 2);
 		if ($this->socid > 0)
 		{
 			$soc = new Societe($this->db);

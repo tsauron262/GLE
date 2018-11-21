@@ -21,6 +21,10 @@ class BR_reservationShipment extends BimpObject
 
     public function isEditable()
     {
+        if (!$this->isLoaded()) {
+            return 1;
+        }
+        
         $shipment = $this->getParentInstance();
         if (BimpObject::objectLoaded($shipment)) {
             if (in_array((int) $shipment->getData('status'), array(1, 4))) {

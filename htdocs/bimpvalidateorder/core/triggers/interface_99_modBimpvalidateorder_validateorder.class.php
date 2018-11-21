@@ -70,7 +70,7 @@ class Interfacevalidateorder extends DolibarrTriggers {
             }
         }
         
-        if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE')) {
+        if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE')  && !BimpDebug::isActive('bimpcommercial/no_validate')) {
             $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
             if (count($tabConatact) < 1) {
                 if (!is_object($object->thirdparty)) {
@@ -84,7 +84,7 @@ class Interfacevalidateorder extends DolibarrTriggers {
                 elseif($this->defaultCommEgalUser)
                     $object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                 else {
-                    setEventMessages("Impossible de validé, pas de Commercial Suivie", null, 'errors');
+                    setEventMessages("Impossible de valider, pas de Commercial Suivi", null, 'errors');
                     return -2;
                 }
             }
@@ -103,7 +103,7 @@ class Interfacevalidateorder extends DolibarrTriggers {
              
             $idEn = $object->array_options['options_entrepot'];
             if ($idEn < 1) {
-                setEventMessages("Pas d'entrepot associé", null, 'errors');
+                setEventMessages("Pas d'entrepôt associé", null, 'errors');
                 return -2;
             }
             

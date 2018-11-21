@@ -43,17 +43,19 @@ function synopsisfichinter_prepare_head($fichinter)
   $h = 0;
   $head = array();
 
-  $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/card.php?id='.$fichinter->id;
-  $head[$h][1] = $langs->trans("Card");
-  $head[$h][2] = 'card';
-  $h++;
-
   $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/ficheFast.php?id='.$fichinter->id;
   $head[$h][1] = "Fiche rapide";
   $head[$h][2] = 'cardFast';
   $h++;
 
-  $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/contact.php?id='.$fichinter->id;
+  complete_head_from_modules($conf,$langs,$fichinter,$head,$h,'intervention');
+
+  $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/card.php?id='.$fichinter->id;
+  $head[$h][1] = $langs->trans("Card");
+  $head[$h][2] = 'card';
+  $h++;
+
+    $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/contact.php?id='.$fichinter->id;
     $head[$h][1] = $langs->trans('InterventionContact');
     $head[$h][2] = 'contact';
     $h++;
@@ -94,7 +96,7 @@ function synopsisfichinter_prepare_head($fichinter)
     $head[$h][2] = 'info';
     $h++;
     
-    complete_head_from_modules($conf,$langs,$fichinter,$head,$h,'intervention');
+    
 
   return $head;
 }

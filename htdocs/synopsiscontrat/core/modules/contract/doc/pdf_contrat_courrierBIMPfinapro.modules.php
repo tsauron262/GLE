@@ -244,10 +244,12 @@
                                  
                 $where = "`id_parent` = " . $id_demande . " AND `in_contrat` = 1";
                 $liste_materiel = $BimpDb->getRows("bf_demande_line", $where, null, 'object', array('*'));
-                $count = $BimpDb->getValue('bf_demande_line', 'COUNT(*)', $where);
+                $count = $BimpDb->getRows('bf_demande_line', $where, null, 'object', array('COUNT(*) as res'));
+                $count = $this->db->query("SELECT COUNT(*) as res FROM " . MAIN_DB_PREFIX . "bf_demande_line WHERE " . $where);
+                $count = $this->db->fetch_object($count);
 
                  /* DEBUT CORP DU TABLEAU (QUANTITE, DESIGNATION DU MATERIEL, NUMERO DE SERIE) */
-                if($count <= 5) {
+                if($count->res <= 5) {
                     $new_page = false;
                     foreach ($liste_materiel as $liste) {
                         if($liste->id_product > 0) {
@@ -477,17 +479,15 @@
                         $pdf->SetTextColor(0,0,0);
                     }
                }
-               $pdf->SetAutoPageBreak(1, $this->margin_bottom);
+                $pdf->SetAutoPageBreak(1, $this->margin_bottom);
                 $X = $this->marge_gauche;
                 $pdf->SetX($X);
-
                 $this->marge_gauche = $this->marge_gauche - 25;
-                $this->marge_droite = $this->marge_droite - 5; /* TODO */
+                $this->marge_droite = $this->marge_droite - 5;
                 $this->marge_haute = $this->marge_haute - 5;
-                $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
+                $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
                 $pdf->setFont('', '', 5);
                     $this->PrintChapter($this->contrat->ref, 'ANNEXE: CONDITION GENERALES DU CONTRAT DE LOCATION N° ', DOL_DOCUMENT_ROOT . '/synopsisfinanc/doc/contrat_finapro.txt', false);
-
                 $pdf->SetAutoPageBreak(1, 0);
                 $pdf->setFont('', '', 8);
                 $X = $this->marge_gauche + 20;
@@ -500,24 +500,13 @@
                 $X = $X + $W;
                 $pdf->SetXY($X, $this->page_hauteur - 50);
                 $pdf->MultiCell($W, 6, "Pour le Cessionnaire" . "\n" . "Signature et cachet", 0, 'L');
-                    // Footer
-                    $pdf->SetXY(95, 289);
-                    $pdf->SetTextColor(200, 200, 200);
-                    $pdf->MultiCell(100, 3, 'Conditions Générales de Location FINAPRO V3 du 10/10/2018', 0, 'R', 0);
-                    $pdf->SetXY(15, 289);
-                    $pdf->MultiCell(100, 3, 'Contrat location sans service V3 du 01/05/2018', 0, 'L', 0);
+                $pdf->SetXY(95, 289);
+                $pdf->SetTextColor(200, 200, 200);
+                $pdf->MultiCell(100, 3, 'Conditions Générales de Location FINAPRO V3 du 10/10/2018', 0, 'R', 0);
+                $pdf->SetXY(15, 289);
+                $pdf->MultiCell(100, 3, 'Contrat location sans service V3 du 01/05/2018', 0, 'L', 0);
                 $pdf->SetAutoPageBreak(1, 55);
-
-//                $this->_pagefoot($pdf,Pour le loueur $outputlangs);
-
-                if (method_exists($pdf, 'AliasNbPages'))
-                    $pdf->AliasNbPages();
-                $pdf->Close();
-
-                $this->file = $file;
-                $pdf->Output($file, 'f');
-
-
+                $pdf->SetTextColor(0, 0, 0);
 /*
             .______   .______        ______     ______  _______     _______.
             |   _  \  |   _  \      /  __  \   /      ||   ____|   /       |
@@ -527,30 +516,9 @@
             | _|      | _| `._____| \______/   \______||_______|_______/
 
 */
-
-                $file = $dir . "/Proces_verbal_" . date("d_m_Y") . "_" . $propref . ".pdf";
-
-                if (file_exists($dir)) {
-                    $pdf = "";
-                    $nblignes = sizeof($contrat->lignes);
-                    // Protection et encryption du pdf
-                    $pdf = pdf_getInstance($this->format);
-                    $this->pdf = $pdf;
-                    if (class_exists('TCPDF')) {
-                        if (get_class($pdf) == "FPDI") {
-                            if($valfinance->banque!="Grenke")
-                            $logo_B="finapro";
-                        else
-                            $logo_B="lease";
-                        $pdf = getNewPdf($this->format,$logo_B);
-                            $this->pdf = $pdf;
-                        }
-                        $pdf->setPrintHeader(false);
-                        $pdf->setPrintFooter(true);
-                    }
-                }
+                $pdf->setPrintHeader(false);
+                $pdf->setPrintFooter(true);
                 $pdf->annulenb_page = true;
-                $pdf->Open();
                 $pdf->SetAutoPageBreak(1, 55);
                 $pdf->SetDrawColor(128, 128, 128);
                 $pdf->SetTitle($contrat->ref);
@@ -558,8 +526,6 @@
                 $pdf->SetCreator("BIMP-ERP " . DOL_VERSION);
                 $pdf->SetAuthor($user->getFullName($langs));
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
-
-
                 $pdf->AddPage();
                 $this->marge_gauche = 20;
                 $this->marge_droite = 25;
@@ -569,10 +535,9 @@
                 $this->addLogo($pdf, 30);
                 $pdf->SetXY($x, $y);
                 $pdf->setFont('', 'B', 13);
-                $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "PROCES VERBAL DE RECEPTION ET MISE EN SERVICE DE MATERIEL", 0, 'C');
+                $pdf->MultiCell($this->page_largeur - $this->marge_gauche - $this->marge_droite, 6, "PROCES VERBAL DE RECEPTION ET MISE EN SERVICE DE MATERIEL" . "\n\n" . "CONTRAT DE LOCATION N° " . $contrat->ref, 0, 'C');
                 $pdf->setFont('', 'B', 11);
                 $pdf->MultiCell($w, 6, '', 0, 'C');
-                $pdf->MultiCell($w, 6, "CONTRAT DE LOCATION N° " . $contrat->ref, 0, 'C');
                 $pdf->MultiCell($w, 6, '', 0, 'C');
                 $pdf->setFont('','',9);
 

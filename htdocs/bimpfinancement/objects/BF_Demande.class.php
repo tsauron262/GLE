@@ -11,12 +11,14 @@ class BF_Demande extends BimpObject
     const BF_DEMANDE_SANS_SUITE = 5;
     const BF_DEMANDE_RECONDUIT = 6;
     const BF_DEMANDE_REMPLACE = 7;
+    const BF_DEMANDE_SIGNE_ANOM = 888;
     const BF_DEMANDE_TERMINE = 999;
 
     public static $status_list = array(
         self::BF_DEMANDE_BROUILLON         => array('label' => 'Brouillon', 'classes' => array('warning')),
         self::BF_DEMANDE_ATT_RETOUR        => array('label' => 'Signé - en attente de retour', 'classes' => array('important')),
         self::BF_DEMANDE_SIGNE_ATT_CESSION => array('label' => 'Signé - en attente de cession', 'classes' => array('important')),
+        self::BF_DEMANDE_SIGNE_ANOM        => array('label' => 'Signé mais anomalie', 'classes' => array('danger')),
         self::BF_DEMANDE_CEDE              => array('label' => 'Cédé', 'classes' => array('danger')),
         self::BF_DEMANDE_SANS_SUITE        => array('label' => 'Sans suite', 'classes' => array('danger')),
         self::BF_DEMANDE_RECONDUIT         => array('label' => 'Reconduit', 'classes' => array('danger')),

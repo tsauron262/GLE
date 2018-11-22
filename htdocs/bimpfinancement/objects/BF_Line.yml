@@ -9,5 +9,3 @@ parent_object: BF_Demande
 
 fields:             
     remisable: unset
-
-

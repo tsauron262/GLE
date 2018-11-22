@@ -15,7 +15,7 @@ class BF_Demande extends BimpObject
 
     public static $status_list = array(
         self::BF_DEMANDE_BROUILLON         => array('label' => 'Brouillon', 'classes' => array('warning')),
-        self::BF_DEMANDE_ATT_RETOUR        => array('label' => 'En attente de retour', 'classes' => array('important')),
+        self::BF_DEMANDE_ATT_RETOUR        => array('label' => 'Signé - en attente de retour', 'classes' => array('important')),
         self::BF_DEMANDE_SIGNE_ATT_CESSION => array('label' => 'Signé - en attente de cession', 'classes' => array('important')),
         self::BF_DEMANDE_CEDE              => array('label' => 'Cédé', 'classes' => array('danger')),
         self::BF_DEMANDE_SANS_SUITE        => array('label' => 'Sans suite', 'classes' => array('danger')),
@@ -437,7 +437,7 @@ class BF_Demande extends BimpObject
             }
 
             
-        } elseif($getEtatContrat == 4) {
+        } elseif($getEtatContrat == 1) {
             $buttons[] = array(
             'label'   => $langs->trans('buttonGenContrat'),
             'icon'    => 'fas_file-contract',

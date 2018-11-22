@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bf_demande` CHANGE `reference` `reference` VARCHAR(20) CHARACTER SET utf8 COLLATE utf8_unicode_ci NULL DEFAULT NULL;

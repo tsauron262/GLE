@@ -351,8 +351,84 @@ forms:
               show: 
                   callback: isParentEditable
 
+lists_cols: 
+    desc:
+        label: Description
+        value: 
+            callback: 
+                method: displayLineData
+                params:
+                    - desc
+        max_width: 460px
+    pu_ht: 
+        label: PU HT
+        value: 
+            callback:
+                method: displayLineData
+                params:
+                    - pu_ht
+    tva:
+        label: TVA
+        value: 
+            callback:
+                method: displayLineData
+                params:
+                    - tva_tx
+    pa_ht: 
+        label: PA HT
+        value: 
+            callback:
+                method: displayLineData
+                params:
+                    - pa_ht
+    qty: 
+        label: Qté
+        value: 
+            callback: 
+                method: displayLineData
+                params:
+                    - qty
+                    - 1
+    remise: 
+        label: Remises<br/>HT / TTC (%)
+        value: 
+            callback: 
+                method: displayRemise
+        min_width: 130px
+        max_width: 130px
+    total_ht: 
+        label: Total HT (Hors remises)
+        value: 
+            callback: 
+                method: displayLineData
+                params:
+                    - total_ht
+    total_ht_w_remises: 
+        label: Total HT (Avec remises)
+        value: 
+            callback: 
+                method: displayLineData
+                params:
+                    - total_ht_w_remises
+    total_ttc: 
+        label: Total TTC
+        value: 
+            callback:
+                method: displayLineData
+                params:
+                    - total_ttc
+    margin: 
+        label:
+            callback: getMarginLabel
+        value: 
+            callback: 
+                method: displayLineData
+                params:
+                    - margin
+
 lists: 
     default: 
+        configurable: 1
         checkboxes: 1
         positions: 1
         positions_open: 1
@@ -387,62 +463,11 @@ lists:
             callback: getListExtraBtn
         cols:
             desc:
-                label: Description
-                value: 
-                    callback: 
-                        method: displayLineData
-                        params:
-                            - desc
-                max_width: 460px
             pu_ht: 
-                label: PU HT
-                value: 
-                    callback:
-                        method: displayLineData
-                        params:
-                            - pu_ht
             tva:
-                label: TVA
-                value: 
-                    callback:
-                        method: displayLineData
-                        params:
-                            - tva_tx
             pa_ht: 
-                label: PA HT
-                value: 
-                    callback:
-                        method: displayLineData
-                        params:
-                            - pa_ht
             qty: 
-                label: Qté
-                value: 
-                    callback: 
-                        method: displayLineData
-                        params:
-                            - qty
-                            - 1
             remise: 
-                label: Remises<br/>HT / TTC (%)
-                value: 
-                    callback: 
-                        method: displayRemise
-                min_width: 130px
-                max_width: 130px
             total_ttc: 
-                label: Total TTC
-                value: 
-                    callback:
-                        method: displayLineData
-                        params:
-                            - total_ttc
             margin: 
-                label:
-                    callback: getMarginLabel
-                value: 
-                    callback: 
-                        method: displayLineData
-                        params:
-                            - margin
                   

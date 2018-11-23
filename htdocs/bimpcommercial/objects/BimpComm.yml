@@ -424,7 +424,21 @@ views:
                   view: 
                       name: notes
                       panel: 1
-                                
+                            
+    full: 
+        objects_change_reload: Bimp_File
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: view
+                  view: 
+                      name: default
+            - cols: 
+                - type: view
+                  view: 
+                      name: content
+        
     content: 
         rows: 
             - cols: 

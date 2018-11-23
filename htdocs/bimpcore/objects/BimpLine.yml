@@ -204,11 +204,6 @@ fields:
         label: Remisable
         type: bool
         default_value: 1  
-
-    in_contrat:
-        label: Afficher dans le contrat
-        type: bool
-        default_value: 1     
                 
 lists_cols:
     in_contrat: 
@@ -258,6 +253,10 @@ lists_cols:
         label: Total TTC
         value: 
             callback: displayTotalTTC
+            
+    in_contrat:
+        field: in_contrat
+        edit: 1
 
 lists: 
     default: 
@@ -297,6 +296,3 @@ lists:
             pa_ht: 
             qty: 
             total_ttc:
-            in_contrat:
-                field: in_contrat
-                edit: 1

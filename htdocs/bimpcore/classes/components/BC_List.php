@@ -553,4 +553,5 @@ class BC_List extends BC_Panel
 
         return $buttons;
     }
+
 }

@@ -206,13 +206,13 @@ fields:
         default_value: 1  
 
     in_contrat:
-        label: Faire apparaitre dans le contrat
+        label: Afficher dans le contrat
         type: bool
         default_value: 1     
                 
 lists_cols:
     in_contrat: 
-        label: Faire apparaitre dans le contrat
+        label: Afficher dans le contrat
         type: bool
     label:
         label: Désignation

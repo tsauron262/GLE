@@ -45,6 +45,12 @@ class BimpComm extends BimpObject
     {
         return 1;
     }
+    
+    public function isFieldEditable($field)
+    {
+        return 1;
+    }
+    
 
     public function getModelPdf()
     {

@@ -30,13 +30,13 @@ class BimpComm extends BimpObject
 
     public function isEditable()
     {
-        if ($this->isLoaded()) {
-            if ((int) $this->getData('fk_statut') === 0) {
-                return 1;
-            }
-
-            return 0;
-        }
+//        if ($this->isLoaded()) {
+//            if ((int) $this->getData('fk_statut') === 0) {
+//                return 1;
+//            }
+//
+//            return 0;
+//        }
 
         return 1;
     }

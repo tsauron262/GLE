@@ -65,6 +65,7 @@ fields:
         input: 
             type: search_societe
             societe_type: customer
+            card: default
         required: 1
         create_form: client_light
     ref_client: 
@@ -423,7 +424,21 @@ views:
                   view: 
                       name: notes
                       panel: 1
-                                
+                            
+    full: 
+        objects_change_reload: Bimp_File
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: view
+                  view: 
+                      name: default
+            - cols: 
+                - type: view
+                  view: 
+                      name: content
+        
     content: 
         rows: 
             - cols: 

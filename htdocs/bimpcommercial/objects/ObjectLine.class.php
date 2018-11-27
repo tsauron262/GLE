@@ -236,6 +236,21 @@ class ObjectLine extends BimpObject
         return 0;
     }
 
+    public function getTotalHTWithRemises()
+    {
+        if (!is_null($this->pu_ht)) {
+            $pu_ht = $this->pu_ht;
+
+            if (!is_null($this->remise) && $this->remise > 0) {
+                $pu_ht -= (float) ($pu_ht * ($this->remise / 100));
+            }
+
+            return (float) ($pu_ht * (float) $this->qty);
+        }
+
+        return 0;
+    }
+
     public function getTotalTTC()
     {
         $pu_ttc = (float) $this->getUnitPriceTTC();
@@ -822,25 +837,25 @@ class ObjectLine extends BimpObject
 //                                    $html .= 'Equipement: ' . $this->displayEquipment();
 //                                }
 //                            }
-                            if ((int) $product->getData('fk_product_type')) {
+                            if ((int) $product->getData('fk_product_type') == 1) {
                                 if ($this->date_from && $this->date_to) {
                                     if ($no_html) {
                                         $html .= "\n";
                                     } else {
                                         $html .= '<br/>';
                                     }
-//                                    $html .= $this->date_from.', '.$this->date_to;
                                     $dt_from = new DateTime($this->date_from);
                                     $dt_to = new DateTime($this->date_to);
                                     $html .= '(Du ' . $dt_from->format('d/m/Y') . ' au ' . $dt_to->format('d/m/Y') . ')';
                                 }
                             }
-                            if ((string) $this->desc) {
-                                if ($no_html) {
+                            if ($no_html) {
                                     $html .= "\n";
                                 } else {
                                     $html .= '<br/>';
                                 }
+                            if (!(string) $this->desc) {
+                                $html .= $product->displayData('label');
                             }
                         }
                     }
@@ -915,6 +930,14 @@ class ObjectLine extends BimpObject
                         $html = price((float) $this->getTotalHT()) . ' €';
                     } else {
                         $html .= BimpTools::displayMoneyValue((float) $this->getTotalHT(), 'EUR');
+                    }
+                    break;
+
+                case 'total_ht_w_remises':
+                    if ($no_html) {
+                        $html = price((float) $this->getTotalHTWithRemises()) . ' €';
+                    } else {
+                        $html .= BimpTools::displayMoneyValue((float) $this->getTotalHTWithRemises(), 'EUR');
                     }
                     break;
 

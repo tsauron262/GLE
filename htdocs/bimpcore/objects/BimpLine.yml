@@ -115,10 +115,10 @@ fields:
     tva_tx: 
         label: Taux de TVA
         type: percent
+        default_value: 20
         display_if: 
             field_name: type
             show_values: 1,2
-        default_value: 0
         depends_on: id_product
         
     id_fourn_price: 
@@ -203,9 +203,12 @@ fields:
     remisable: 
         label: Remisable
         type: bool
-        default_value: 1            
+        default_value: 1  
                 
-lists_cols: 
+lists_cols:
+    in_contrat: 
+        label: Afficher dans le contrat
+        type: bool
     label:
         label: Désignation
         value: 
@@ -249,8 +252,11 @@ lists_cols:
     total_ttc: 
         label: Total TTC
         value: 
-            callback: displayTotalTTC
-                
+            callback: displayTotalTTC    
+    in_contrat:
+        field: in_contrat
+        edit: 1
+
 lists: 
     default: 
         configurable: 1
@@ -289,3 +295,4 @@ lists:
             pa_ht: 
             qty: 
             total_ttc:
+            in_contrat:

@@ -338,4 +338,27 @@ abstract class BimpComponent
         $label .= ' - ' . static::$type . ' - ' . $this->name . ': ';
         dol_syslog($label . $msg, 3);
     }
+
+    // Méthodes statiques: 
+
+    public static function getConfigPath($object, $name)
+    {
+        if (!is_a($object, 'BimpObject')) {
+            return '';
+        }
+
+        $path = '';
+        
+        if (!$name || $name === 'default') {
+            if ($object->config->isDefined(static::$type)) {
+                $path = static::$type;
+            } elseif ($object->config->isDefined(static::$type . 's' . '/default')) {
+                $path = static::$type . 's/default';
+            }
+        } else {
+            $path = static::$type . 's/' . $name;
+        }
+
+        return $path;
+    }
 }

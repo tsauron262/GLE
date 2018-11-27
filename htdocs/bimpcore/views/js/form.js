@@ -632,11 +632,11 @@ function reloadObjectInput(form_id, input_name, fields) {
                     $parent.removeAttr('style');
                 });
                 setCommonEvents($parent);
+                setInputContainerEvents($parent.find('.inputContainer'));
                 setInputsEvents($parent);
                 var $input = bimpAjax.$form.find('[name=' + bimpAjax.input_name + ']');
                 if ($input.length) {
                     setInputEvents($form, $input);
-                    setSelectDisplayHelpEvents(bimpAjax.$container, $input);
                     $('body').trigger($.Event('inputReloaded', {
                         $form: $form,
                         input_name: bimpAjax.input_name,
@@ -1266,7 +1266,7 @@ function selectZipTown($button) {
 
 function resetInputValue($container) {
     var input_name = $container.data('field_name');
-    
+
     if (!input_name) {
         return;
     }
@@ -1488,9 +1488,36 @@ function setFormEvents($form) {
     }
 
     $form.find('.inputContainer').each(function () {
-        var field_name = $(this).data('field_name');
-        var $input = $(this).find('[name="' + field_name + '"]');
-        if ($input.length) {
+        setInputContainerEvents($(this));
+    });
+
+    $form.find('form').first().submit(function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        submitForm($form.attr('id'));
+    });
+}
+
+function setInputContainerEvents($inputContainer) {
+    if (!$.isOk($inputContainer)) {
+        return;
+    }
+
+    if (!$inputContainer.hasClass('inputContainer')) {
+        return;
+    }
+
+    if (parseInt($inputContainer.data('input_container_events_init'))) {
+        return;
+    }
+
+
+    var $form = $inputContainer.findParentByClass('object_form');
+    var field_name = $inputContainer.data('field_name');
+    var data_type = $inputContainer.data('data_type');
+    var $input = $inputContainer.find('[name="' + field_name + '"]');
+    if ($input.length) {
+        if ($.isOk($form)) {
             if ($input.tagName() !== 'textarea') {
                 $input.keyup(function (e) {
                     if (e.key === 'Enter') {
@@ -1503,14 +1530,75 @@ function setFormEvents($form) {
                 });
             }
         }
-        setSelectDisplayHelpEvents($(this), $input);
-    });
 
-    $form.find('form').first().submit(function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        submitForm($form.attr('id'));
-    });
+        if (data_type && data_type === 'id_object') {
+            $input.change(function () {
+                var $input = $(this);
+                var $container = $input.findParentByClass('inputContainer');
+                if ($.isOk($container)) {
+                    var display_card_mode = $container.data('display_card_mode');
+                    if (display_card_mode && display_card_mode !== 'none') {
+                        var $cardContainer = null;
+                        var callback = null;
+                        if (display_card_mode === 'hint') {
+                            var $hint = $container.find('.input_hint');
+                            if ($isOk($hint)) {
+                                $hint.popover('destroy').hide();
+                            } else {
+                                $input.after('<span class="input_hint" style="display: none"></span>');
+                            }
+                            var $div = $container.find('div.hiddenCardContainer');
+                            if (!$.isOk($div)) {
+                                $container.append('<div class="hiddenCardContainer" style="display: none"></div>');
+                                $div = $container.find('div.hiddenCardContainer');
+                            }
+                            $div.html('<div class="input_card_container"></div>');
+                            $cardContainer = $div.find('.input_card_container');
+                            callback = function (result, bimpAjax) {
+                                if (result.html()) {
+                                    if ($.isOk(bimpAjax.resultContainer)) {
+                                        var $hint = bimpAjax.resultContainer.find('.input_hint');
+                                        if ($.isOk($hint)) {
+                                            $hint.show().popover({
+                                                container: 'body',
+                                                content: result.html,
+                                                html: true,
+                                                placement: 'bottom',
+                                                trigger: 'hover'
+                                            });
+                                        }
+                                    }
+                                }
+                            };
+                        } else if (display_card_mode === 'visible') {
+                            $cardContainer = $container.find('.input_card_container');
+                            if (!$.isOk($cardContainer)) {
+                                $container.append('<div class="input_card_container"></div>');
+                                $cardContainer = $container.find('.input_card_container');
+                            }
+                        }
+                        if ($.isOk($cardContainer)) {
+                            var id_object = parseInt($input.val());
+                            var module = $container.data('object_module');
+                            var object_name = $container.data('object_name');
+                            var card_name = $container.data('card');
+                            if (module && object_name && card_name && id_object && !isNaN(id_object)) {
+                                loadObjectCard($cardContainer, module, object_name, id_object, card_name);
+                            } else {
+                                $cardContainer.stop().slideUp(250, function () {
+                                    $(this).html('');
+                                });
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    setSelectDisplayHelpEvents($(this), $input);
+
+    $inputContainer.data('input_container_events_init', 1);
 }
 
 function setInputsEvents($container) {

@@ -25,6 +25,8 @@ forms:
             - custom: 1
               label: Nombre d'items par pages par défaut
               input_name: nb_items
+              show: 
+                  callback: showListConfigNbItems
               input: 
                   type: switch_options
                   options: 
@@ -37,12 +39,16 @@ forms:
             - custom: 1
               label: Trie par défaut
               input_name: sort_field
+              show: 
+                  callback: showListConfigSort
               input: 
                   type: select
                   options: 
                       array: sortableFields
             - custom: 1
               label: Option de trie
+              show: 
+                  callback: showListConfigSort
               input_name: sort_option
               input: 
                   type: select
@@ -57,6 +63,8 @@ forms:
                   options: 
                       asc: Croissant
                       desc: Décroissant
+              show: 
+                  callback: showListConfigSort
             - custom: 1
               label: Colonnes
               input_name: cols

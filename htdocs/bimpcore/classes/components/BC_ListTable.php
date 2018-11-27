@@ -851,7 +851,7 @@ class BC_ListTable extends BC_List
 
                 $content .= '<div style="margin: 10px; font-weight: normal; font-size: 11px">';
 
-                $content .= 'Nombre d\'éléments par page: <span class="bold">' . $values['nb_items'] . '</span><br/>';
+                $content .= 'Nombre d\'éléments par page: <span class="bold">' . ((int) $values['nb_items'] ? $values['nb_items'] : BimpRender::renderIcon('fas_infinity')) . '</span><br/>';
 
                 $sortable_fields = $this->object->getSortableFieldsArray();
 
@@ -1135,7 +1135,7 @@ class BC_ListTable extends BC_List
             $html .= '</td>';
             $html .= '</tr>';
         }
-        
+
         return $html;
     }
 }

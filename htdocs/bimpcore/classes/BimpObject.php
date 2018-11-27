@@ -503,6 +503,32 @@ class BimpObject extends BimpCache
         return 1;
     }
 
+    public function showListConfigNbItems()
+    {
+        $list_name = BimpTools::getPostFieldValue('list_name');
+
+        $path = BC_List::getConfigPath($this, $list_name);
+
+        if ($path) {
+            return (int) $this->config->get($path . '/pagination', 1, false, 'bool');
+        }
+
+        return 1;
+    }
+
+    public function showListConfigSort()
+    {
+        $list_name = BimpTools::getPostFieldValue('list_name');
+
+        $path = BC_List::getConfigPath($this, $list_name);
+
+        if ($path) {
+            return (int) $this->config->get($path . '/enable_sort', 1, false, 'bool');
+        }
+
+        return 1;
+    }
+
     // Getters données: 
 
     public function getData($field)

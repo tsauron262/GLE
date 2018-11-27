@@ -137,11 +137,12 @@ class BS_ApplePart extends BimpObject
 
     public function isCartEditable()
     {
-        $sav = $this->getParentInstance();
-        if (!is_null($sav) && $sav->isLoaded()) {
-            return (int) $sav->isPropalEditable();
-        }
-        return 0;
+//        $sav = $this->getParentInstance();
+//        if (!is_null($sav) && $sav->isLoaded()) {
+//            return (int) $sav->isPropalEditable();
+//        }
+//        return 0;
+        return 1;
     }
 
     public function checkPrice($no_update = false)
@@ -175,6 +176,10 @@ class BS_ApplePart extends BimpObject
         }
 
         if ($type === 'EXCHANGE' && (int) $this->getData('no_order') && (float) $this->getData('stock_price') !== 0.0) {
+            $type = 'STOCK';
+        }
+        
+        if ($type === 'EXCHANGE' && (float) $this->getData('exchange_price') === 0.0) {
             $type = 'STOCK';
         }
 
@@ -262,10 +267,6 @@ class BS_ApplePart extends BimpObject
             $errors[] = 'ID du SAV absent';
         } elseif (!is_a($sav, 'BS_SAV')) {
             $errors[] = 'SAV invalide';
-        } elseif (!(int) $sav->getData('id_propal')) {
-            $errors[] = 'ID de la propal absent';
-        } elseif (!$sav->isPropalEditable()) {
-            $errors[] = 'Impossible d\'ajouter la pièce Apple au panier (le devis n\'est plus éditable)';
         }
 
         if (count($errors)) {
@@ -281,40 +282,43 @@ class BS_ApplePart extends BimpObject
 
         $errors = parent::create($warnings, $force_create);
 
-        $line_errors = array();
-        if (!count($errors)) {
-            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
-            $line_errors = $line->validateArray(array(
-                'id_obj'             => (int) $sav->getData('id_propal'),
-                'type'               => BS_SavPropalLine::LINE_FREE,
-                'deletable'          => 0,
-                'editable'           => 0,
-                'linked_id_object'   => (int) $this->id,
-                'linked_object_name' => 'sav_apple_part',
-                'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
-            ));
-            if (!count($line_errors)) {
-                $label = $this->getData('part_number') . ' - ' . $this->getData('label');
-                if ((int) $this->getData('no_order')) {
-                    $label .= ' APPRO';
-                }
-                $line->pa_ht = $this->getPrice();
-                $line->desc = $label;
-                $line->qty = (int) $this->getData('qty');
-                $line->tva_tx = 20;
-                $line->pu_ht = self::convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
+        if (!count($errors) && $sav->isPropalEditable()) {
+            $line_errors = array();
+            if (!(int) $sav->getData('id_propal')) {
+                $line_errors[] = 'ID de la propal absent';
+            } else {
+                $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+                $line_errors = $line->validateArray(array(
+                    'id_obj'             => (int) $sav->getData('id_propal'),
+                    'type'               => BS_SavPropalLine::LINE_FREE,
+                    'deletable'          => 0,
+                    'editable'           => 0,
+                    'linked_id_object'   => (int) $this->id,
+                    'linked_object_name' => 'sav_apple_part',
+                    'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
+                ));
+                if (!count($line_errors)) {
+                    $label = $this->getData('part_number') . ' - ' . $this->getData('label');
+                    if ((int) $this->getData('no_order')) {
+                        $label .= ' APPRO';
+                    }
+                    $line->pa_ht = $this->getPrice();
+                    $line->desc = $label;
+                    $line->qty = (int) $this->getData('qty');
+                    $line->tva_tx = 20;
+                    $line->pu_ht = self::convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
 
-                $line_warnings = array();
-                $line_errors = $line->create($line_warnings, true);
+                    $line_warnings = array();
+                    $line_errors = $line->create($line_warnings, true);
 
-                if (count($line_warnings)) {
-                    $line_errors = array_merge($line_errors, $line_warnings);
+                    if (count($line_warnings)) {
+                        $line_errors = array_merge($line_errors, $line_warnings);
+                    }
                 }
             }
-        }
-
-        if (count($line_errors)) {
-            $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la création de la ligne du devis');
+            if (count($line_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la création de la ligne du devis');
+            }
         }
 
         return $errors;
@@ -329,10 +333,6 @@ class BS_ApplePart extends BimpObject
             $errors[] = 'ID du SAV absent';
         } elseif (!is_a($sav, 'BS_SAV')) {
             $errors[] = 'SAV invalide';
-        } elseif (!(int) $sav->getData('id_propal')) {
-            $errors[] = 'ID de la propal absent';
-        } elseif (!$sav->isPropalEditable()) {
-            $errors[] = 'Impossible d\'ajouter la pièce Apple au panier (le devis n\'est plus éditable)';
         }
 
         if (count($errors)) {
@@ -348,53 +348,59 @@ class BS_ApplePart extends BimpObject
 
         $errors = parent::update($warnings, $force_update);
 
-        if (!count($errors)) {
+        if (!count($errors) && $sav->isPropalEditable()) {
             $line_errors = array();
-            $id_line = 0;
-            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
-            if ($line->find(array(
-                        'id_obj'             => (int) $sav->getData('id_propal'),
-                        'linked_id_object'   => (int) $this->id,
-                        'linked_object_name' => 'sav_apple_part'
-                    ))) {
-                $id_line = (int) $line->id;
-            }
 
-            $line_errors = $line->validateArray(array(
-                'id_obj'             => (int) $sav->getData('id_propal'),
-                'type'               => BS_SavPropalLine::LINE_FREE,
-                'deletable'          => 0,
-                'editable'           => 0,
-                'linked_id_object'   => (int) $this->id,
-                'linked_object_name' => 'sav_apple_part',
-                'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
-            ));
-
-            if (!count($line_errors)) {
-                $label = $this->getData('part_number') . ' - ' . $this->getData('label');
-                if ((int) $this->getData('no_order')) {
-                    $label .= ' APPRO';
+            if (!(int) $sav->getData('id_propal')) {
+                $line_errors[] = 'ID de la propal absent';
+            } else {
+                $id_line = 0;
+                $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+                if ($line->find(array(
+                            'id_obj'             => (int) $sav->getData('id_propal'),
+                            'linked_id_object'   => (int) $this->id,
+                            'linked_object_name' => 'sav_apple_part'
+                        ))) {
+                    $id_line = (int) $line->id;
                 }
-                $line->pa_ht = $this->getPrice();
-                $line->desc = $this->getData('label');
-                $line->qty = (int) $this->getData('qty');
-                $line->tva_tx = 20;
-                $line->pu_ht = self::convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
 
-                $line_warnings = array();
+                $line_errors = $line->validateArray(array(
+                    'id_obj'             => (int) $sav->getData('id_propal'),
+                    'type'               => BS_SavPropalLine::LINE_FREE,
+                    'deletable'          => 0,
+                    'editable'           => 0,
+                    'linked_id_object'   => (int) $this->id,
+                    'linked_object_name' => 'sav_apple_part',
+                    'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
+                ));
 
-                if ($id_line) {
-                    if ($line->isEditable(true)) {
-                        $line_errors = $line->update($line_warnings, true);
+                if (!count($line_errors)) {
+                    $label = $this->getData('part_number') . ' - ' . $this->getData('label');
+                    if ((int) $this->getData('no_order')) {
+                        $label .= ' APPRO';
                     }
-                } else {
-                    $line_errors = $line->create($line_warnings, true);
-                }
+                    $line->pa_ht = $this->getPrice();
+                    $line->desc = $this->getData('label');
+                    $line->qty = (int) $this->getData('qty');
+                    $line->tva_tx = 20;
+                    $line->pu_ht = self::convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
 
-                if (count($line_warnings)) {
-                    $line_errors = array_merge($line_errors, $line_warnings);
+                    $line_warnings = array();
+
+                    if ($id_line) {
+                        if ($line->isEditable(true)) {
+                            $line_errors = $line->update($line_warnings, true);
+                        }
+                    } else {
+                        $line_errors = $line->create($line_warnings, true);
+                    }
+
+                    if (count($line_warnings)) {
+                        $line_errors = array_merge($line_errors, $line_warnings);
+                    }
                 }
             }
+
 
             if (count($line_errors)) {
                 if ($id_line) {
@@ -422,7 +428,7 @@ class BS_ApplePart extends BimpObject
         $errors = parent::delete($force_delete);
 
         if (!count($errors)) {
-            if ((int) $sav->getData('id_propal')) {
+            if ((int) $sav->isPropalEditable()) {
                 $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
                 if ($line->find(array(
                             'id_obj'             => (int) $sav->getData('id_propal'),

@@ -249,8 +249,6 @@ function setCommonEvents($container) {
         });
     });
     checkMultipleValues();
-
-
 }
 
 function setDisplayPopupButtonEvents($button) {

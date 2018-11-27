@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bf_demande_line` ADD `in_contrat` TINYINT(1) NOT NULL DEFAULT '1';

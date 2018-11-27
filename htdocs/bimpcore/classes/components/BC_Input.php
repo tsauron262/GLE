@@ -16,6 +16,7 @@ class BC_Input extends BimpComponent
     public $extraClasses = array();
     public $extraData = array();
     public $name_prefix = '';
+    public $display_card_mode = 'none'; // hint / visible
     public static $type_params_def = array(
         'text'                        => array(
             'values'       => array('data_type' => 'array', 'compile' => true, 'default' => array()),
@@ -118,6 +119,7 @@ class BC_Input extends BimpComponent
         $this->params_def['addon_left'] = array('data_type' => 'array');
         $this->params_def['multiple'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['help'] = array('default' => '');
+        $this->params_def['card'] = array('default' => '');
 
         parent::__construct($object, '', $path);
 
@@ -465,7 +467,22 @@ class BC_Input extends BimpComponent
             $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable);
         }
 
-        $html .= BimpInput::renderInputContainer($this->input_name, htmlentities($this->value), $content, $this->name_prefix, $required, (int) $this->params['multiple'], implode(' ', $this->extraClasses), array_merge(array('data_type' => $this->data_type), $this->extraData));
+        $extra_data = $this->extraData;
+        $extra_data['data_type'] = $this->data_type;
+
+        if ($this->data_type === 'id_object' && isset($this->field_params['object'])) {
+            $path = 'fields/' . $this->input_name . '/object';
+            $module = $this->object->config->getObjectModule($path);
+            $object_name = $this->object->config->getObjectName($path);
+            if ($module && $object_name) {
+                $extra_data['object_module'] = $module;
+                $extra_data['object_name'] = $object_name;
+                $extra_data['card'] = $this->params['card'];
+                $extra_data['display_card_mode'] = $this->display_card_mode;
+            }
+        }
+
+        $html .= BimpInput::renderInputContainer($this->input_name, htmlentities($this->value), $content, $this->name_prefix, $required, (int) $this->params['multiple'], implode(' ', $this->extraClasses), $extra_data);
 
         return $html;
     }

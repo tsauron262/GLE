@@ -67,7 +67,7 @@ class BIMP_Task extends BimpObject
             }
         $butViewShort = array();
         if(count($notes))
-            $butViewShort[] = array("onclick"=>"loadModalView('bimptask', 'BIMP_Task', ".$this->id.", 'notes', $(this), 'Infos')", "icon"=>"fas fa-comments", "labelShort"=> count($notes)." Info(s)".($notViewed? " ".$notViewed." Non lue" : ""), "class"=>($notViewed == 0 ? "btn-default" : "btn-danger")) ;
+            $butViewShort[] = array("onclick"=>"loadModalView('bimptask', 'BIMP_Task', ".$this->id.", 'notes', $(this), 'Infos')", "icon"=>"fas fa-comments", "labelShort"=> count($notes)." Info(s)".($notViewed? " ".$notViewed." Non lue(s)" : ""), "class"=>($notViewed == 0 ? "btn-default" : "btn-danger")) ;
         foreach ($butViewShort as $btn) {
             $html .= '<button class="btn  '.$btn['class'].'" type="button" onclick="' . $btn["onclick"] . '"><i class="fa fa-' . $btn['icon'] . ' iconLeft"></i>' . (isset($btn['labelShort']) ? $btn['labelShort'] : $btn['label']) . '</button>';
         }
@@ -121,7 +121,7 @@ class BIMP_Task extends BimpObject
     
     public function getListFiltre($type = "normal"){
         global $user;
-        $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes taches assignées' : 'Toutes les taches'));
+        $list = new BC_ListTable($this, 'default', 1, null, ($type == "my" ? 'Mes tâches assignées' : 'Toutes les tâches'));
         $tabFiltre = self::getFiltreDstRight($user);
         if(count($tabFiltre[1])>0)
             $list->addFieldFilterValue('fgdg_dst', array(
@@ -200,7 +200,7 @@ class BIMP_Task extends BimpObject
         $msg .= "<br/>" . $sep . "Merci d'inclure ces lignes dans les prochaines conversations<br/>" . $idTask . $sep;
 
         if ($data['include_file']) {
-            $msg .= "<br/>Fil de discution :";
+            $msg .= "<br/>Fil de discussion :";
             foreach ($notes as $note) {
                     $msg .= $sep;
                     $msg .= $note->getData("content");
@@ -221,7 +221,7 @@ class BIMP_Task extends BimpObject
         
         
         if(!mailSyn2($sujet, $to, $from, $msg))
-                $errors[] = "Envoie email impossible";
+                $errors[] = "Envoi email impossible";
         else{
             $this->addNote($data['email'], 4, 1);
         }
@@ -235,7 +235,7 @@ class BIMP_Task extends BimpObject
     public function actionClose($data, &$success)
     {
         $errors = $warnings = array();
-        $success = "Tache fermé";
+        $success = "Tâche fermée";
         $errors = $this->updateField("status", 4);
         return array(
             'errors'   => $errors,
@@ -276,7 +276,7 @@ class BIMP_Task extends BimpObject
                 );
                 $buttons[] = array(
                     'label'   => 'Classer terminé',
-                    'labelShort'   => 'Terminé',
+                    'labelShort'   => 'Terminer',
                     'icon'    => 'close',
                     'onclick' => $this->getJsActionOnclick('close', array(), array('confirm_msg' => 'Terminer la tache ?'))
                 );
@@ -284,14 +284,14 @@ class BIMP_Task extends BimpObject
             if($this->canEdit() || $this->canAttribute()){
                 if($this->getData("id_user_owner") < 1){
                     $buttons[] = array(
-                        'label'   => 'Attribué',
+                        'label'   => 'Attribuer',
                         'icon'    => 'user',
                         'onclick' => $this->getJsActionOnclick('attribute', array(), array('form_name' => 'attribute'))
                     );
                 }
                 if($this->getData("id_user_owner") == $user->id){
                     $buttons[] = array(
-                        'label'   => 'Refusé l\'attribution',
+                        'label'   => 'Refuser l\'attribution',
                         'icon'    => 'window-close',
                         'onclick' => $this->getJsActionOnclick('attribute', array('id_user_owner'=>0))
                     );

@@ -261,6 +261,8 @@ views:
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
     content: 
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
+    full: 
+        objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
      
 lists_cols: 
     libelle: 
@@ -326,7 +328,7 @@ lists:
         edit_form: default
         delete_btn: 
             callback: isDeletable
-        modal_view: default
+        modal_view: full
         page_btn: 1
         cols: 
             ref: 

@@ -1691,7 +1691,7 @@ class BS_SAV extends BimpObject
                 $mail_msg = "Merci d'avoir choisi BIMP en tant que Centre de Services Agréé Apple.\n";
                 $mail_msg .= 'La référence de votre dossier de réparation est : ' . $this->getData('ref') . ", ";
                 $mail_msg .= "si vous souhaitez communiquer d'autres informations merci de répondre à ce mail ou de contacter le " . $tel . ".\n";
-                $sms = "Bonjour, le diagnostic de votre \"" . $nomMachine . "\" commence, nous vous recontacterons quand celui-ci sera fini.\nL'équipe BIMP";
+                $sms = "Merci d'avoir choisi BIMP " . $nomMachine . "\nLa référence de votre dossier de réparation est : " . $this->getData('ref') . "\nL'équipe BIMP";
                 break;
 
             case 'debDiago':

@@ -1025,7 +1025,7 @@ class Bimp_Commande extends BimpComm
         $errors = array();
         $warnings = array();
         $success = 'Commande annulée avec succès';
-        $success_callback = 'window.location.reload();';
+        $success_callback = 'bimp_reloadPage();';
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la commande absent';
@@ -1062,7 +1062,7 @@ class Bimp_Commande extends BimpComm
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

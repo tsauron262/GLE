@@ -532,6 +532,82 @@ function getUrlParam(param) {
     return value;
 }
 
+function getUrlParams(param) {
+    var search = window.location.search.replace('?', '');
+    var args = search.split('&');
+    var params = {};
+    for (i in args) {
+        var regex = new RegExp('^(.*)=(.*)$');
+        if (regex.test(args[i])) {
+            var name = args[i].replace(regex, '$1');
+            var value = args[i].replace(regex, '$2');
+            if (name && value) {
+                params[name] = value;
+            }
+        }
+    }
+    return params;
+}
+
+function bimp_reloadPage() {
+    // Recharge la page en cours en tenant compte des onglets actifs: 
+
+    var url = window.location.pathname + '?';
+
+    var navtabs = {};
+
+    var $navtabs = $('body').find('.nav-tabs');
+    if ($navtabs.length) {
+        $navtabs.each(function () {
+            var name = 'navtab-' + $(this).data('navtabs_id');
+            var active = '';
+            $(this).find('li').each(function () {
+                if (!active) {
+                    if ($(this).hasClass('active')) {
+                        active = $(this).data('navtab_id');
+                    }
+                }
+            });
+            if (active) {
+                navtabs[name] = active;
+            }
+        });
+    }
+
+    var params = getUrlParams();
+
+    var first = true;
+    var hasParams = false;
+    for (var param_name in params) {
+        if (!/^navtab\-?.*$/.test(param_name)) {
+            if (!first) {
+                url += '&';
+            } else {
+                first = false;
+            }
+            url += param_name + '=' + params[param_name];
+            hasParams = true;
+        }
+    }
+
+    first = true;
+    for (var tabname in navtabs) {
+        if (!first) {
+            url += '&';
+        } else {
+            if (hasParams) {
+                url += '&';
+            }
+            first = false;
+        }
+        url += tabname + '=' + navtabs[tabname];
+    }
+
+    url += window.location.hash;
+
+    window.location = url;
+}
+
 // Ajouts jQuery:
 
 $.fn.tagName = function () {

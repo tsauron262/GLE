@@ -885,7 +885,7 @@ class BimpComm extends BimpObject
 
                     $onclick = $this->getJsActionOnclick('deleteFile', array('file' => htmlentities($file['fullname'])), array(
                         'confirm_msg'      => 'Veuillez confirmer la suppression de ce fichier',
-                        'success_callback' => 'function() {window.location.reload();}'
+                        'success_callback' => 'function() {bimp_reloadPage();}'
                     ));
                     $html .= BimpRender::renderRowButton('Supprimer', 'trash', $onclick);
                     $html .= '</td>';
@@ -1657,7 +1657,7 @@ class BimpComm extends BimpObject
             $success .= 'e';
         }
         $success .= ' avec succès';
-        $success_callback = 'window.location.reload();';
+        $success_callback = 'bimp_reloadPage();';
 
         global $conf, $langs, $user;
 
@@ -1709,7 +1709,7 @@ class BimpComm extends BimpObject
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1851,7 +1851,7 @@ class BimpComm extends BimpObject
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

@@ -312,18 +312,22 @@ class BimpRender
         return $html;
     }
 
-    public static function renderNavTabs($tabs)
+    public static function renderNavTabs($tabs, $tabs_id = 'maintabs')
     {
         $html = '';
 
         if (is_array($tabs) && count($tabs)) {
-            $active = BimpTools::getValue('navtab', $tabs[0]['id']);
+            if ($tabs_id === 'maintabs' && BimpTools::isSubmit('navtab')) {
+                $active = BimpTools::getValue('navtab', $tabs[0]['id']);
+            } else {
+                $active = BimpTools::getValue('navtab-' . $tabs_id, $tabs[0]['id']);
+            }
         }
 
-        $html .= '<ul class="nav nav-tabs" role="tablist">';
+        $html .= '<ul id="navtabs_' . $tabs_id . '" class="nav nav-tabs" role="tablist" data-navtabs_id="' . $tabs_id . '">';
 
         foreach ($tabs as $tab) {
-            $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . '>';
+            $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . ' data-navtab_id="' . $tab['id'] . '">';
             $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab">';
             $html .= $tab['title'];
             $html .= '</a>';
@@ -331,7 +335,7 @@ class BimpRender
         }
         $html .= '</ul>';
 
-        $html .= '<div class="tab-content">';
+        $html .= '<div id="navtabs_content_' . $tabs_id . '" class="tab-content">';
         foreach ($tabs as $tab) {
             $html .= '<div class="tab-pane fade' . ($tab['id'] === $active ? ' in active' : '') . '" role="tabpanel" id="' . $tab['id'] . '">';
             $html .= $tab['content'];

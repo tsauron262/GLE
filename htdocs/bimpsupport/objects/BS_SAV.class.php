@@ -558,7 +558,7 @@ class BS_SAV extends BimpObject
             // Réviser devis:  
             if (in_array($status, self::$propal_reviewable_status)) {
                 if (!is_null($propal_status) && $propal_status > 0) {
-                    $callback = 'function() {window.location.reload();}';
+                    $callback = 'function() {bimp_reloadPage();}';
                     $buttons[] = array(
                         'label'   => 'Réviser Devis',
                         'icon'    => 'edit',
@@ -572,7 +572,7 @@ class BS_SAV extends BimpObject
 
             // Envoyer devis: 
             if (!is_null($propal) && $propal_status === 0 && !in_array($status, array(self::BS_SAV_ATT_CLIENT_ACTION))) {
-                $callback = 'function() {window.location.reload();}';
+                $callback = 'function() {bimp_reloadPage();}';
                 $buttons[] = array(
                     'label'   => 'Envoyer devis',
                     'icon'    => 'arrow-circle-right',
@@ -794,7 +794,7 @@ class BS_SAV extends BimpObject
                     foreach ($rows as $r) {
                         $onclick = $this->getJsActionOnclick('correctAcompteModePaiement', array('id_paiement' => (int) $r['rowid']), array(
                             'form_name'        => 'acompte_mode_paiement',
-                            'success_callback' => 'function() {window.location.reload();}'
+                            'success_callback' => 'function() {bimp_reloadPage();}'
                         ));
 
                         $html .= '<div style="margin: 15px 0">';

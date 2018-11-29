@@ -4493,7 +4493,7 @@ class BimpObject extends BimpCache
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

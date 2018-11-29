@@ -343,7 +343,14 @@ class BimpStruct
     public static function renderNavTabs(BimpConfig $config, $path, &$parent_component = null)
     {
         $tabs = array();
-        $nav_tabs = $config->getParams($path);
+
+        if ($config->isDefined($path . '/tabs')) {
+            $tabs_id = $config->get($path . '/tabs_id', 'maintabs');
+            $nav_tabs = $config->getParams($path . '/tabs');
+        } else {
+            $nav_tabs = $config->getParams($path);
+            $tabs_id = 'maintabs';
+        }
         foreach ($nav_tabs as $idx => $nav_tab) {
             if (!(int) $config->get($path . '/' . $idx . '/show', 1, false, 'bool')) {
                 continue;
@@ -360,7 +367,7 @@ class BimpStruct
                 'content' => $content
             );
         }
-        return BimpRender::renderNavTabs($tabs);
+        return BimpRender::renderNavTabs($tabs, $tabs_id);
     }
 
     public static function renderPanel(BimpConfig $config, $path, &$parent_component = null)
@@ -407,7 +414,7 @@ class BimpStruct
     public static function renderNotes(BimpConfig $config, $path, &$parent_component = null)
     {
         $object = $config->getObject($path . '/object');
-        
+
         $filter_by_user = (int) $config->get($path . '/filter_by_user', 1, false, 'bool');
         if (!is_null($object) && is_a($object, 'BimpObject')) {
             return $object->renderNotesList($filter_by_user);

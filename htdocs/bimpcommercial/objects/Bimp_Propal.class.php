@@ -508,7 +508,7 @@ class Bimp_Propal extends BimpComm
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -526,7 +526,7 @@ class Bimp_Propal extends BimpComm
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

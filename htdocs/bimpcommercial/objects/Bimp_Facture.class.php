@@ -1464,7 +1464,7 @@ class Bimp_Facture extends BimpComm
         }
         $success .= ' avec succès';
 
-        $success_callback = 'window.location.reload();';
+        $success_callback = 'bimp_reloadPage();';
 
         global $conf, $langs, $user, $mysoc;
         $langs->load("errors");
@@ -1610,7 +1610,7 @@ class Bimp_Facture extends BimpComm
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1657,7 +1657,7 @@ class Bimp_Facture extends BimpComm
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1689,7 +1689,7 @@ class Bimp_Facture extends BimpComm
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1716,7 +1716,7 @@ class Bimp_Facture extends BimpComm
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1832,7 +1832,7 @@ class Bimp_Facture extends BimpComm
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -1870,7 +1870,7 @@ class Bimp_Facture extends BimpComm
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => 'window.location.reload();'
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

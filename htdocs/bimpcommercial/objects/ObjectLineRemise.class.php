@@ -50,6 +50,26 @@ class ObjectLineRemise extends BimpObject
 
         return 0;
     }
+    
+    public function getListFilters()
+    {
+        if (BimpTools::isSubmit('extra_data/parent_object_type')) {
+            return array(
+                array(
+                    'name'   => 'object_type',
+                    'filter' => BimpTools::getValue('extra_data/parent_object_type', '')
+                )
+            );
+        }
+
+        // Erreur: (parent_object_type est obligatoire) on bloque la liste par précaution
+        return array(
+            array(
+                'name'   => 'id',
+                'filter' => 0
+            )
+        );
+    }
 
     // Affichage: 
 

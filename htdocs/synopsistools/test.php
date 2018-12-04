@@ -2,24 +2,60 @@
 
 require("../main.inc.php");
 
+require_once(DOL_DOCUMENT_ROOT."/bimpfinancement/class/BIMP_TOOLS_FINANC.class.php");
 llxHeader();
 
 
 
 //$capital = 82640;
-$taux = 0;
-$duree = 2;
-$dureePeriode = 3;//mensuelle
-$loyer = 261892;
-$coef = 1.4;
+$taux =  0;
+$coef =  0;//7.283;//5.599;
+$duree = 4;
+$duree2 = 0;
+$dureePeriode = 1;//mensuelle
+$loyer1 = 3671.24;
+$loyer2 = 0;
+//$dureePeriode = 1;//mensuelle
+//$loyer = 22702.17;
+$echoir = true;
+$test = 150000;
 
-require_once(DOL_DOCUMENT_ROOT."/bimpfinancement/class/BIMP_TOOLS_FINANC.class.php");
-$capital = BIMP_TOOLS_FINANC::calculCapital($loyer, $duree*12, $taux, $coef, $dureePeriode);
+$coef = 2.447;
+
+
+
+$dureeTot = $duree + $duree2;
+$loyerMoy = ($loyer1 * $duree + $loyer2 * $duree2) / $dureeTot;
+
+echo "<div class='textField blanc textecentrer'><h2>loyer de base moyen : ". $loyerMoy ." € </h2></div>";
+
+
+//$capital1 = BIMP_TOOLS_FINANC::calculCapital($loyer1, $duree*12, $dureePeriode, $taux, $coef, $echoir);
+//
+//
+//$capital2 = BIMP_TOOLS_FINANC::calculCapital($loyer2, $duree2*12, $dureePeriode, $taux, $coef, $echoir);
+//
+//
+//$capital = $capital1 + $capital2;
+$capital = BIMP_TOOLS_FINANC::calculCapital($loyerMoy, $dureeTot*12, $dureePeriode, $taux, $coef, $echoir);
 
 echo "<div class='textField blanc textecentrer'><h2>Capital : ". $capital ." € </h2></div>";
+echo "<div class='textField blanc textecentrer'><h2>OK : ". (round($capital - $test) == 0? "OUI" : "NONNNNNNNNNN".round($capital - $test)) ." € </h2></div>";
+
+//
+//
+//$loyerC1 = BIMP_TOOLS_FINANC::calculInteret($capital1, $duree*12, $dureePeriode, $taux, $coef, $echoir);
+//
+//$loyerC2 = BIMP_TOOLS_FINANC::calculInteret($capital2, $duree2*12, $dureePeriode, $taux, $coef, $echoir);
+//
+//$loyerC = ($loyerC1 * $duree + $loyerC2 * $duree2) / $dureeTot;
+$loyerC = BIMP_TOOLS_FINANC::calculInteret($capital, $dureeTot*12, $dureePeriode, $taux, $coef, $echoir);
+
+echo "<div class='textField blanc textecentrer'><h2>Loyer calcule : ". $loyerC ." € </h2></div>";
+echo "<div class='textField blanc textecentrer'><h2>OK : ". (round($loyerC - $loyerMoy) == 0? "OUI" : "NONNNNNNNNNN".round($loyerC - $loyerMoy)) ." € </h2></div>";
 
  
-  
+
   
   
   

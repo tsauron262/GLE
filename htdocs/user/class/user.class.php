@@ -2136,7 +2136,7 @@ class User extends CommonObject
 			if (! $error && ! $notrigger)
 			{
 				$this->oldgroupid=$group;    // deprecated. Remove this.
-				$this->context = array('audit'=>$langs->trans("UserRemovedFromGroup"), 'oldgroupid'=>$group);
+				$this->context = array('audit'=>$langs->trans("UserRemovedFromGroup"), 'oldgroupid'=>$group, 'newgroupid'=>$group);
 
 				// Call trigger
 				$result=$this->call_trigger('USER_MODIFY',$user);

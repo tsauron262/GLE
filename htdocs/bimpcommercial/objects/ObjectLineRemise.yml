@@ -93,6 +93,8 @@ lists:
             - label: supprimer les remises sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
+        list_filters: 
+            callback: getListFilters
         enable_search: 0
         sort_field: id
         sort_way: desc

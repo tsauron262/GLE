@@ -74,6 +74,7 @@ class InterfaceLdapsynchro extends DolibarrTriggers
 
 				if ($result > 0)
 				{
+                                    $object->statut = 1;
 					$info=$object->_load_ldap_info();
 					$dn=$object->_load_ldap_dn($info);
 

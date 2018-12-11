@@ -425,7 +425,7 @@ class Ldap
 		$this->dump($dn,$info);
 
 		//print_r($info);
-		$result=ldap_add($this->connection, $dn, $info);
+		$result=@ldap_add($this->connection, $dn, $info);
 
 		if ($result)
 		{

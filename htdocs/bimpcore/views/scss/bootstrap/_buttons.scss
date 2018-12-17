@@ -149,6 +149,21 @@ a.btn {
     }
 }
 
+.btn.selected,
+.btn.selected:hover,
+.btn.selected:focus
+{
+    color: #fff!important;
+    background-color: #5897FB!important;
+    border-color: #5897FB!important;
+
+    &:disabled {
+        color: #787878!important;
+        background-color: #E6E6E6!important;
+        border-color: #E6E6E6!important;
+    }
+}
+
 // Link buttons
 // -------------------------
 

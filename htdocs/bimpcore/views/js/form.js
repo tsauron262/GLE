@@ -1813,8 +1813,10 @@ function setInputsEvents($container) {
     });
     $container.find('.search_ziptown').each(function () {
         if (!$(this).data('ziptown_event_init')) {
-            $(this).keyup(function () {
-                searchZipTown($(this));
+            $(this).keyup(function (e) {
+                if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') {
+                    searchZipTown($(this));
+                }
             });
             $(this).data('ziptown_event_init', 1);
         }
@@ -1822,6 +1824,69 @@ function setInputsEvents($container) {
     $container.find('.inputMultipleValuesContainer').each(function () {
         if (parseInt($(this).data('sortable'))) {
             setSortableMultipleValuesHandlesEvents($(this));
+        }
+    });
+    $container.find('.search_list_input').each(function() {
+        if (!parseInt($(this).data('search_list_input_events_init'))) {
+            $(this).keyup(function (e) {
+                if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') {
+                    searchObjectList($(this));
+                }
+            });
+            $(this).data('search_list_input_events_init', 1);
+        }
+    });
+    $container.find('.search_list_input').add('.search_ziptown').each(function () {
+        if (!parseInt($(this).data('input_choices_events_init'))) {
+            $(this).keyup(function (e) {
+                var $div = $(this).findParentByClass('inputContainer').find('.input_choices');
+                if ($div.length && $div.css('display') !== 'none') {
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                        var $btn = $div.find('.btn');
+                        if ($btn.length) {
+                            var n = 0;
+                            var i = 1;
+                            $btn.each(function () {
+                                if (!n) {
+                                    if ($(this).hasClass('selected')) {
+                                        n = i;
+                                    }
+                                }
+                                i++;
+                            });
+                            if (e.key === 'ArrowDown') {
+                                if (!n) {
+                                    n = 1;
+                                } else {
+                                    n++;
+                                }
+                                if (n > $btn.length) {
+                                    n = 1;
+                                }
+                            } else {
+                                if (n) {
+                                    n--;
+                                }
+                                if (!n) {
+                                    n = $btn.length;
+                                }
+                            }
+                            var $new = $div.find('.btn').eq(n - 1);
+                            if ($new.length) {
+                                $btn.removeClass('selected');
+                                $new.addClass('selected');
+                            }
+                        }
+                    } else if (e.key === 'Enter') {
+                        var $btn = $div.find('.btn.selected');
+                        if ($btn.length === 1) {
+                            $btn.click();
+                        }
+                    }
+                }
+            });
+
+            $(this).data('input_choices_events_init', 1);
         }
     });
 }

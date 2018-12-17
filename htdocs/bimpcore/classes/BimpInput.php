@@ -375,7 +375,7 @@ class BimpInput
 
             case 'search_ziptown':
                 $html = '<div class="searchZiptownInputContainer">';
-                $html .= '<input type="text" class="search_ziptown" name="' . $field_name . '" value="' . $value . '"';
+                $html .= '<input autocomplete="off" typetype="text" class="search_ziptown" name="' . $field_name . '" value="' . $value . '"';
                 if (isset($options['field_type'])) {
                     $html .= ' data-field_type="' . $options['field_type'] . '"';
                 }
@@ -399,7 +399,7 @@ class BimpInput
                 $html .= '/>';
                 $html .= '<i class="loading fa fa-spinner fa-spin"></i>';
                 $html .= '</div>';
-                $html .= '<div class="searchZipTownResults hideOnClickOut"></div>';
+                $html .= '<div class="searchZipTownResults hideOnClickOut input_choices"></div>';
                 break;
 
             case 'search_product':
@@ -967,7 +967,7 @@ class BimpInput
 
         $html .= '<input type="hidden" name="' . $input_name . '" value="' . $value . '"/>';
         $html .= '<input type="hidden" name="' . $input_name . '_label" value="' . $search . '"/>';
-        $html .= '<input type="text" name="' . $input_name . '_search" class="search_list_input" value="" onkeyup="searchObjectList($(this));"';
+        $html .= '<input type="text" name="' . $input_name . '_search" class="search_list_input" value="" autocomplete="off"';
         $html .= ' data-table="' . $table . '"';
         $html .= ' data-join="' . $join . '"';
         $html .= ' data-join_on="' . $join_on . '"';
@@ -979,7 +979,7 @@ class BimpInput
         $html .= ' data-filters="' . htmlentities(json_encode($filters)) . '"';
         $html .= '/>';
         $html .= '<i class="loading fa fa-spinner fa-spin"></i>';
-        $html .= '<div class="search_input_results hideOnClickOut"></div>';
+        $html .= '<div class="search_input_results input_choices hideOnClickOut"></div>';
         $html .= '<div class="search_input_selected_label"' . (!$search ? ' style="display: none"' : '') . '>';
         $html .= '<i class="fa fa-check iconLeft"></i>';
         $html .= '<span class="">' . $search . '</span>';

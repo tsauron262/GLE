@@ -1648,6 +1648,7 @@ class BC_Vente extends BimpObject
         $caisse = $this->getChildObject('caisse');
         $articles = $this->getChildrenObjects('articles');
         $returns = $this->getChildrenObjects('returns');
+        $total_ttc = (float) $this->getData('total_ttc');
 
         // Vérification de la validité de la vente:
 
@@ -1721,7 +1722,7 @@ class BC_Vente extends BimpObject
 
         $data = $this->getAjaxData();
 
-        if (($has_equipment || $has_returns || (int) $data['paiement_differe']) && (is_null($client) || !$client->isLoaded())) {
+        if (($has_equipment || ($has_returns && $total_ttc < 0) || (int) $data['paiement_differe']) && (is_null($client) || !$client->isLoaded())) {
             $errors[] = 'Compte client obligatoire pour cette vente';
         }
 
@@ -2189,10 +2190,10 @@ class BC_Vente extends BimpObject
                             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), 'Echec de l\'ajout du paiement n°' . $p->id . ' au compte bancaire ' . $account_label);
                         }
                     }
-                    
+
                     $paiement_errors = $caisse->addPaiement($p, $facture->id, $this->id);
                     if (count($paiement_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($paiement_errors, 'Des erreurs sont survenues lors de l\'enregistrement du paiement n°'.$n);
+                        $errors[] = BimpTools::getMsgFromArray($paiement_errors, 'Des erreurs sont survenues lors de l\'enregistrement du paiement n°' . $n);
                     }
                 }
             }
@@ -2222,7 +2223,7 @@ class BC_Vente extends BimpObject
                                 BimpTools::getErrorsFromDolObject($p, $errors, $langs);
                             }
                         }
-                        
+
                         $paiement_errors = $caisse->addPaiement($p, $facture->id, $this->id);
 
                         if (count($paiement_errors)) {
@@ -2289,7 +2290,7 @@ class BC_Vente extends BimpObject
                                     $rbt_errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($p), 'Echec de l\'ajout du remboursement au compte bancaire ' . $account_label);
                                 }
                             }
-                            
+
                             $paiement_errors = $caisse->addPaiement($p, $facture->id, $this->id);
 
                             if (count($paiement_errors)) {

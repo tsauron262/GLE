@@ -74,13 +74,14 @@ class InterfaceLdapsynchro extends DolibarrTriggers
 
 				if ($result > 0)
 				{
+                                    $object->statut = 1;
 					$info=$object->_load_ldap_info();
 					$dn=$object->_load_ldap_dn($info);
 
 					$result=$ldap->add($dn,$info,$user);
 				}
 
-				if ($result < 0) $this->error="ErrorLDAP ".$ldap->error;
+				if ($result < 0) $this->error="ErrorLDAP ".$ldap->error." <pre>".print_r($info,1)." dn : ".$dn;
 			}
 		}
 		elseif ($action == 'USER_MODIFY')

@@ -2136,7 +2136,7 @@ class User extends CommonObject
 			if (! $error && ! $notrigger)
 			{
 				$this->oldgroupid=$group;    // deprecated. Remove this.
-				$this->context = array('audit'=>$langs->trans("UserRemovedFromGroup"), 'oldgroupid'=>$group);
+				$this->context = array('audit'=>$langs->trans("UserRemovedFromGroup"), 'oldgroupid'=>$group, 'newgroupid'=>$group);
 
 				// Call trigger
 				$result=$this->call_trigger('USER_MODIFY',$user);
@@ -2506,7 +2506,9 @@ class User extends CommonObject
                     if ($this->job)
                         $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= $this->job;
                     if($this->note)
-                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= "<br/<".$this->note;
+                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= "<br/>".$this->note;
+                    if ($info[$conf->global->LDAP_FIELD_DESCRIPTION] == "")
+                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] = "n/c";
                 }
                 
 //		if ($this->note_public && ! empty($conf->global->LDAP_FIELD_DESCRIPTION))	$info[$conf->global->LDAP_FIELD_DESCRIPTION] = dol_string_nohtmltag($this->note_public, 2);
@@ -2613,11 +2615,11 @@ class User extends CommonObject
                 $info['enabledservice'] = array("internal");
                 if(isset($this->array_options['options_mtatransport']))
                     $info['mtaTransport'] = $this->array_options['options_mtatransport'];
-                else
+                elseif($notCreate)
                     $info['mtaTransport'] = "";
                 if(isset($this->array_options['options_mailforwardingaddress']))
                     $info['mailForwardingAddress'] = $this->array_options['options_mailforwardingaddress'];
-                else
+                elseif($notCreate)
                     $info['mailForwardingAddress'] = "";
                 
                 //$info['pager'] = array();

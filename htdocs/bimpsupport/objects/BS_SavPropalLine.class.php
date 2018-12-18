@@ -209,7 +209,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
                 case 'pu_ht':
                     $part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart', (int) $this->getData('linked_id_object'));
                     if ($part->isLoaded()) {
-                        return BS_ApplePart::convertPrix((float) $this->pa_ht, $part->getData('part_number'), $part->getData('label'));
+                        return $part->convertPrix((float) $this->pa_ht, $part->getData('part_number'), $part->getData('label'));
                     }
                     return 0;
             }

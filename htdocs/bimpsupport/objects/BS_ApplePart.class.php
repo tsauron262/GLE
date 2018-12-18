@@ -214,7 +214,7 @@ class BS_ApplePart extends BimpObject
 
     // Traitements: 
 
-    public static function convertPrix($prix, $ref, $desc)
+    public function convertPrix($prix, $ref, $desc)
     {
         $coefPrix = 1;
         $constPrix = 0;
@@ -309,7 +309,7 @@ class BS_ApplePart extends BimpObject
                     $line->desc = $label;
                     $line->qty = (int) $this->getData('qty');
                     $line->tva_tx = 20;
-                    $line->pu_ht = self::convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
+                    $line->pu_ht = $this->convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
 
                     $line_warnings = array();
                     $line_errors = $line->create($line_warnings, true);
@@ -386,7 +386,7 @@ class BS_ApplePart extends BimpObject
                     $line->desc = $this->getData('label');
                     $line->qty = (int) $this->getData('qty');
                     $line->tva_tx = 20;
-                    $line->pu_ht = self::convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
+                    $line->pu_ht = $this->convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
 
                     $line_warnings = array();
 

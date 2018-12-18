@@ -226,12 +226,15 @@ class BS_ApplePart extends BimpObject
         //Application des coef et constantes
         if ($type == "ios") {
             $constPrix = 45;
-        } elseif ($type == "batt") {
-            $newPrix = 32.5;
-        } elseif ($type == "ecran") {
-            foreach (self::$tabRefCommencePrixEcran as $refT => $prixT)
-                if ($ref == $refT)
-                    $newPrix = str_replace(",", ".", $prixT);
+        } 
+        elseif($this->getData('price_type') == "EXCHANGE"){    
+            if ($type == "batt") {
+                $newPrix = 32.5;
+            } elseif ($type == "ecran") {
+                foreach (self::$tabRefCommencePrixEcran as $refT => $prixT)
+                    if ($ref == $refT)
+                        $newPrix = str_replace(",", ".", $prixT);
+            }
         }
         else {
             if ($prix > 300)

@@ -119,7 +119,7 @@ function traiteTask($dst, $src, $subj, $txt) {
 
     if (count($errors) > 0) {
         echo "errors";
-        print_r($errors);
+        dol_syslog("erreur task".print_r($errors,1),3);
         return 0;
     }else{
         foreach($_FILES as $file){

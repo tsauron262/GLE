@@ -28,7 +28,7 @@ $src = urldecode($_REQUEST['src']);
 $subj = urldecode($_REQUEST['subj']); 
 $txt = urldecode($_REQUEST['txt']); 
 
-
+dol_syslog(print_r($_REQUEST,1),3);
 
 if($_REQUEST["old"]){
     $commande = new Commande($db);
@@ -127,9 +127,6 @@ function traiteTask($dst, $src, $subj, $txt) {
             $dir = "/data/DOCUMENTS/bimp/societe/154049/";
             $file = $fileT['name'];
             
-            dol_syslog("file".print_r($fileT,1),3);
-            if(!is_file($fileT['tmp_name']))
-                dol_syslog ("pas de fichier",3);
             
             move_uploaded_file($fileT['tmp_name'], $dir.$file);
         }

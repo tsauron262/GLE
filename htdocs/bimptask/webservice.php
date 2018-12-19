@@ -122,16 +122,16 @@ function traiteTask($dst, $src, $subj, $txt) {
         dol_syslog("erreur task".print_r($errors,1),3);
         return 0;
     }else{
-        foreach($_FILES as $file){
+        foreach($_FILES as $fileT){
 //            $dir = $task->getFilesDir()."/";
             $dir = "/data/DOCUMENTS/bimp/societe/154049/";
-            $file = $file['name'];
+            $file = $fileT['name'];
             
-            dol_syslog("file".print_r($file,1),3);
-            if(!is_file($file['tmp_name']))
+            dol_syslog("file".print_r($fileT,1),3);
+            if(!is_file($fileT['tmp_name']))
                 dol_syslog ("pas de fichier",3);
             
-            move_uploaded_file($file['tmp_name'], $dir.$file);
+            move_uploaded_file($fileT['tmp_name'], $dir.$file);
         }
     }
     return 1;

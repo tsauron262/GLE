@@ -16,8 +16,8 @@ require_once '../bimpcore/main.php';
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-dol_syslog(print_r($_REQUEST,1),3);
-dol_syslog(print_r($_FILES,1),3);
+//dol_syslog(print_r($_REQUEST,1),3);
+//dol_syslog(print_r($_FILES,1),3);
 
 $controller = BimpController::getInstance('bimptask');
 
@@ -115,6 +115,14 @@ function traiteTask($dst, $src, $subj, $txt) {
         echo "errors";
         print_r($errors);
         return 0;
+    }else{
+        foreach($_FILES as $file){
+//            $task->getFilesDir();
+            $dir = "/data/DOCUMENTS/bimp/societe/154049/";
+            $file = $file['name'];
+            
+            move_uploaded_file($file['tmp_name'], $dir.$file);
+        }
     }
     return 1;
 }

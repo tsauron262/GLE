@@ -62,7 +62,15 @@ function traiteTask($dst, $src, $subj, $txt) {
     global $db, $user;
     echo "traite" . $subj;
     $idTask = 0;
+    $task = BimpObject::getInstance("bimptask", "BIMP_Task");
 
+    
+    //verif destinataire
+    foreach($task->valSrc as $destCorrect){
+        if($destCorrect != "other" && stripos($dst, $destCorrect) !== false){
+            $dst = $destCorrect;
+        }
+    }
 
 
     $const = "IDTASK:5467856456";
@@ -91,7 +99,6 @@ function traiteTask($dst, $src, $subj, $txt) {
 
 
     if ($idTask > 0) {
-        $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         if(!$task->fetch($idTask) || $task->getData("status") > 3)
             $idTask = 0;
     }
@@ -99,7 +106,6 @@ function traiteTask($dst, $src, $subj, $txt) {
     if ($idTask < 1) {
         
         echo "<br/>Création task";
-        $task = BimpObject::getInstance("bimptask", "BIMP_Task");
         $tab = array("src" => $src, "dst" => $dst, "subj" => $subj, "txt" => $txt, "test_ferme" => "");
         $errors = array_merge($errors, $task->validateArray($tab));
         $errors = array_merge($errors, $task->create());
@@ -117,9 +123,11 @@ function traiteTask($dst, $src, $subj, $txt) {
         return 0;
     }else{
         foreach($_FILES as $file){
-//            $task->getFilesDir();
+//            $dir = $task->getFilesDir()."/";
             $dir = "/data/DOCUMENTS/bimp/societe/154049/";
             $file = $file['name'];
+            
+            dol_syslog("file".$dir.$file,3);
             
             move_uploaded_file($file['tmp_name'], $dir.$file);
         }

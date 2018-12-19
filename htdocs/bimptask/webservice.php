@@ -127,7 +127,9 @@ function traiteTask($dst, $src, $subj, $txt) {
             $dir = "/data/DOCUMENTS/bimp/societe/154049/";
             $file = $file['name'];
             
-            dol_syslog("file".$dir.$file,3);
+            dol_syslog("file".$file['tmp_name'],3);
+            if(!is_file($file['tmp_name']))
+                dol_syslog ("pas de fichier",3);
             
             move_uploaded_file($file['tmp_name'], $dir.$file);
         }

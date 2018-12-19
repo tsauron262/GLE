@@ -68,6 +68,7 @@ function traiteTask($dst, $src, $subj, $txt) {
     //verif destinataire
     foreach($task->valSrc as $destCorrect){
         if($destCorrect != "other" && stripos($dst, $destCorrect) !== false){
+            dol_syslog($destCorrect." !".$dst,3);
             $dst = $destCorrect;
         }
     }

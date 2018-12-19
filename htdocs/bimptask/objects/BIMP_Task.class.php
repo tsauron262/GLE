@@ -2,7 +2,7 @@
 
 class BIMP_Task extends BimpObject
 {
-    public static $valSrc = array("task0001@bimp.fr", "validationcommande@bimp.fr", "Synchro-8SENS", "supportyesss@bimp.fr", "consoles@bimp.fr", "licences@bimp.fr", "vols@bimp.fr", "other");
+    public static $valSrc = array("task0001@bimp.fr", "validationcommande@bimp.fr", "debugerp@bimp.fr", "Synchro-8SENS", "supportyesss@bimp.fr", "consoles@bimp.fr", "licences@bimp.fr", "vols@bimp.fr", "other");
     
     public static $nbNonLu = 0;
     public static $nbAlert = 0;

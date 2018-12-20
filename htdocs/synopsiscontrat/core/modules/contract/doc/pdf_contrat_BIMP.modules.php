@@ -933,7 +933,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
         $clause = "Entre les soussignés";
         $clause1 = "BIMP";
         $clause2 = "Société Anonyme OLYS au capital de 1 085 372 Euros, dont le siège social sis 51ter rue de Saint-Cyr 
-69009 LYON, représentée par Monsieur Christian CONSTANTIN-BERTIN, Président Directeur Général.
+69009 LYON, représentée par Monsieur Fabrice ARDUIN, Président Directeur Général.
 
 d'une part
 Et,";

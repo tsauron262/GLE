@@ -330,15 +330,16 @@ forms:
         icon: fas_file-export
         rows: 
             - custom: 1
+              hidden: 1
               data_type: int
               input_name: id_file
               input: 
                   type: hidden
             - custom: 1
-              label: Type d\'objet
+              label: Type d'objet
               input_name: move_to_object_name
               input: 
                   type: select
                   options: 
-                      array: fileParents
+                      array: filesParents
               

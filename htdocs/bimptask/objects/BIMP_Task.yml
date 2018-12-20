@@ -164,6 +164,7 @@ lists:
             id_user_owner:
                 field: id_user_owner
 
+
 views:
     default: 
         title: nom

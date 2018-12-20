@@ -256,6 +256,23 @@ class BimpCache
 
         return self::$cache[$cache_key];
     }
+    
+    public static function getFilesParentsArray($include_empty = false)
+    {
+        $cache_key = 'files_parents_array';
+        
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+            
+            $instance = BimpObject::getInstance('bimpcore', 'BimpObject');
+            
+            echo '<pre>';
+            print_r($instance->params['objects']);
+            exit;
+        }
+        
+        return self::getCacheArray($cache_key, $include_empty, '', '');
+    }
 
     // Sociétés: 
 

@@ -1459,7 +1459,7 @@ class BS_SAV extends BimpObject
         foreach ($this->getChildrenObjects('propal_lines', array(
             'type'               => BS_SavPropalLine::LINE_PRODUCT,
             'linked_id_object'   => 0,
-            'linked_object_name' => ''
+            'linked_object_name' => '0'
         )) as $line) {
             if ((int) $line->id_product) {
                 if ($product->fetch((int) $line->id_product)) {
@@ -2309,7 +2309,7 @@ class BS_SAV extends BimpObject
             global $user, $langs;
 
 
-            $this->processPropalGarantie();
+
             $new_status = null;
             if ($this->allGarantie) { // Déterminé par $this->generatePropal()
                 $this->addNote('Devis garantie validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));

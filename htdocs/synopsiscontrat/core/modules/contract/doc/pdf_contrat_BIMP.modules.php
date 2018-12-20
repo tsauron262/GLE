@@ -1043,7 +1043,7 @@ Le ...................,
         $pdf->MultiCell(155, 4, utf8_encodeRien($clause16), 0, 'L');
         $remY = $pdf->GetY();
         $signature2 = "Pour BIMP :
-M. Christian CONSTANTIN-BERTIN
+M. Fabrice ARDUIN
 Signature et cachet";
 
         $signature1 = "Pour  " . utf8_encodeRien($this->contrat->societe->nom) . ":

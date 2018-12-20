@@ -1457,7 +1457,7 @@ class BS_SAV extends BimpObject
 
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         foreach ($this->getChildrenObjects('propal_lines', array(
-            //'type'               => BS_SavPropalLine::LINE_PRODUCT,
+            'type'               => array("in", array(BS_SavPropalLine::LINE_PRODUCT, BS_SavPropalLine::LINE_FREE)),
             'linked_id_object'   => 0,
             'linked_object_name' => ''
         )) as $line) {

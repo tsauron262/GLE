@@ -171,90 +171,6 @@ class BC_Field extends BimpComponent
         return $html;
     }
 
-    public function renderSearchInput($extra_data = array())
-    {
-        if (!$this->params['show']) {
-            return '';
-        }
-
-        if (!$this->params['searchable']) {
-            return '';
-        }
-
-        $input_id = $this->object->object_name . '_search_' . $this->name;
-        $input_name = 'search_' . $this->name;
-
-        $input_type = '';
-        $options = array();
-
-        $search_type = (isset($this->params['search']['type']) ? $this->params['search']['type'] : 'field_input');
-
-        switch ($search_type) {
-            case 'field_input':
-            case 'value_part':
-                switch ($this->params['type']) {
-                    case 'date':
-                        $search_type = $input_type = 'date_range';
-                        break;
-
-                    case 'time':
-                        $search_type = $input_type = 'time_range';
-                        break;
-
-                    case 'datetime':
-                        $search_type = $input_type = 'datetime_range';
-                        break;
-
-                    case 'bool':
-                        $input_type = 'select';
-                        $options['options'] = array(
-                            '' => '',
-                            1  => $this->object->getConf('fields/' . $this->name . '/input/toggle_on', 'OUI'),
-                            0  => $this->object->getConf('fields/' . $this->name . '/input/toggle_off', 'NON')
-                        );
-                        break;
-
-                    case 'list':
-                        $input_type = 'text';
-                        $search_type = 'value_part';
-                        break;
-
-                    default:
-                        if ($this->object->config->isDefined($this->config_path . '/search/input')) {
-                            $input_path = $this->config_path . '/search/input';
-                        } else {
-                            $input_path = $this->config_path . '/input';
-                        }
-                        $input = new BC_Input($this->object, $this->params['type'], $this->name_prefix . $this->name, $input_path, $this->value, $this->params);
-                        $input_type = $input->params['type'];
-                        $options = $input->getOptions();
-                        unset($input);
-                        break;
-                }
-                break;
-
-            case 'time_range':
-            case 'date_range':
-            case 'datetime_range':
-                $input_type = $this->params['search']['type'];
-                break;
-        }
-
-        if ($search_type === 'field_input') {
-            if ($input_type === 'text') {
-                $search_type = 'value_part';
-            }
-        }
-
-        if ($input_type === 'search_list') {
-            $content = BimpInput::renderSearchListInputFromConfig($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
-        } else {
-            $content = BimpInput::renderInput($input_type, $input_name, null, $options, null, 'default', $input_id);
-        }
-
-        return BimpInput::renderSearchInputContainer($input_name, $search_type, $this->params['search']['search_on_key_up'], 1, $content, $extra_data);
-    }
-
     public function displayValue()
     {
         if (!$this->params['viewable']) {
@@ -437,5 +353,109 @@ class BC_Field extends BimpComponent
         }
 
         return '';
+    }
+
+    // Recherches: 
+
+    public function getSearchData()
+    {
+        $input_options = array();
+        $input_type = '';
+        $search_type = (isset($this->params['search']['type']) ? $this->params['search']['type'] : 'field_input');
+
+        switch ($search_type) {
+            case 'field_input':
+            case 'value_part':
+                switch ($this->params['type']) {
+                    case 'html':
+                    case 'text':
+                        $search_type = 'value_part';
+                        $input_type = 'text';
+                        break;
+
+                    case 'date':
+                        $search_type = $input_type = 'date_range';
+                        break;
+
+                    case 'time':
+                        $search_type = $input_type = 'time_range';
+                        break;
+
+                    case 'datetime':
+                        $search_type = $input_type = 'datetime_range';
+                        break;
+
+                    case 'bool':
+                        $input_type = 'select';
+                        $input_options['options'] = array(
+                            '' => '',
+                            1  => $this->object->getConf('fields/' . $this->name . '/input/toggle_on', 'OUI'),
+                            0  => $this->object->getConf('fields/' . $this->name . '/input/toggle_off', 'NON')
+                        );
+                        break;
+
+                    case 'list':
+                        $input_type = 'text';
+                        $search_type = 'value_part';
+                        break;
+
+                    default:
+                        if ($this->object->config->isDefined($this->config_path . '/search/input')) {
+                            $input_path = $this->config_path . '/search/input';
+                        } else {
+                            $input_path = $this->config_path . '/input';
+                        }
+                        $input = new BC_Input($this->object, $this->params['type'], $this->name_prefix . $this->name, $input_path, $this->value, $this->params);
+                        $input_type = $input->params['type'];
+                        $input_options = $input->getOptions();
+                        unset($input);
+                        break;
+                }
+                break;
+
+            case 'time_range':
+            case 'date_range':
+            case 'datetime_range':
+                $input_type = $this->params['search']['type'];
+                break;
+        }
+
+        return array(
+            'input_type'       => $input_type,
+            'search_type'      => $search_type,
+            'part_type'        => $this->params['search']['part_type'],
+            'search_on_key_up' => $this->params['search']['search_on_key_up'],
+            'search_option'    => $this->params['search']['option'],
+            'input_options'    => $input_options
+        );
+    }
+
+    public function renderSearchInput($extra_data = array())
+    {
+        if (!$this->params['show']) {
+            return '';
+        }
+
+        if (!$this->params['searchable']) {
+            return '';
+        }
+
+        $input_id = $this->object->object_name . '_search_' . $this->name;
+        $input_name = 'search_' . $this->name;
+
+        $search_data = $this->getSearchData();
+
+        if ($search_data['input_type'] === 'search_list') {
+            if ($this->object->config->isDefined($this->config_path . '/search/input')) {
+                $input_path = $this->config_path . '/search/input';
+            } else {
+                $input_path = $this->config_path . '/input';
+            }
+            $content = BimpInput::renderSearchListInputFromConfig($this->object, $input_path, $input_name, $this->value, $this->params['search']['option']);
+        } else {
+            $content = BimpInput::renderInput($search_data['input_type'], $input_name, null, $search_data['input_options'], null, 'default', $input_id);
+        }
+
+        return BimpInput::renderSearchInputContainer($input_name, $search_data['search_type'], $search_data['search_on_key_up'], 1, $content, $extra_data);
     }
 }

@@ -299,6 +299,9 @@ class BC_List extends BC_Panel
         $joins = $this->params['joins'];
 
         // Filtres: 
+//        echo '<pre>';
+//        print_r($this->params['list_filters']);
+//        exit;
         if (count($this->params['list_filters'])) {
             foreach ($this->params['list_filters'] as $list_filter) {
                 $this->mergeFilter($list_filter['name'], $list_filter['filter']);

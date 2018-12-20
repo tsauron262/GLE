@@ -165,7 +165,7 @@ abstract class BimpComponent
         if ($request) {
             $json = isset($defs['json']) ? (bool) $defs['json'] : false;
             if (BimpTools::isSubmit('param_' . $name)) {
-                $param = BimpTools::getValue('param_' . $name);
+                $param = BimpTools::getValue('param_' . $name, '', false);
                 if ($json && !is_null($param) && is_string($param)) {
                     $param = json_decode($param, true);
                 }
@@ -348,7 +348,7 @@ abstract class BimpComponent
         }
 
         $path = '';
-        
+
         if (!$name || $name === 'default') {
             if ($object->config->isDefined(static::$type)) {
                 $path = static::$type;

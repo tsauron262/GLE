@@ -13,7 +13,6 @@ class indexController extends BimpController
         $obj = BimpObject::getInstance('bimptask', 'BIMP_Task');
         
         $list = $obj->getListFiltre("my");
-
         
         return $list->renderHtml();
     }

@@ -1459,7 +1459,7 @@ class BS_SAV extends BimpObject
         foreach ($this->getChildrenObjects('propal_lines', array(
             'type'               => BS_SavPropalLine::LINE_PRODUCT,
             'linked_id_object'   => 0,
-            'linked_object_name' => '0'
+            'linked_object_name' => ''
         )) as $line) {
             if ((int) $line->id_product) {
                 if ($product->fetch((int) $line->id_product)) {

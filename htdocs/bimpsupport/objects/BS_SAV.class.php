@@ -2309,7 +2309,7 @@ class BS_SAV extends BimpObject
             global $user, $langs;
 
 
-
+            $this->processPropalGarantie();
             $new_status = null;
             if ($this->allGarantie) { // Déterminé par $this->generatePropal()
                 $this->addNote('Devis garantie validé auto le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));

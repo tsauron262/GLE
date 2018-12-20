@@ -227,6 +227,7 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: status
+                      
 lists: 
     default: 
         title: Produits

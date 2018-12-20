@@ -904,7 +904,7 @@ class BimpInput
                         if ($opt_join_on) {
                             $html .= '<input type="hidden" id="searchList_' . $opt_name . '_join_on" value="' . $opt_join_on . '"/>';
                         }
-                        if ($opt_join_on) {
+                        if ($opt_join_return_label) {
                             $html .= '<input type="hidden" id="searchList_' . $opt_name . '_join_return_label" value="' . $opt_join_return_label . '"/>';
                         }
                         if (count($opt_filters)) {

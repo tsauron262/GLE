@@ -7,22 +7,10 @@ labels:
     name: intervention
     is_female: 1
 
-objects: 
-    ticket: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BS_Ticket
-            id_object: 
-                field_value: id_ticket
-                
+objects:                 
     tech_user: 
-        relation: hasOne
-        delete: 0
+        extends: user
         instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_User
             id_object: 
                 field_value: tech_id_user
                 

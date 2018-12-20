@@ -80,26 +80,36 @@ class BimpFile extends BimpObject
     public function getDefaultListExtraButtons()
     {
         $buttons = array();
-        $url = $this->getFileUrl();
-        if ($this->isDownloadable()) {
-            if ($url) {
-                $buttons[] = array(
-                    'label'   => 'Télécharger',
-                    'icon'    => 'download',
-                    'onclick' => 'window.open(\'' . $url . '\', \'_blank\')'
-                );
+
+        if ($this->isLoaded()) {
+            $parent = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($parent)) {
+                if (method_exists($parent, 'getFilesListExtraBtn')) {
+                    $buttons = $parent->getFilesListExtraBtn($this);
+                }
             }
-        }
-        switch (BimpTools::getFileTypeCode('x.' . $this->getData('file_ext'))) {
-            case 'img':
+            
+            $url = $this->getFileUrl();
+            if ($this->isDownloadable()) {
                 if ($url) {
                     $buttons[] = array(
-                        'label'   => 'Afficher l\'image',
-                        'icon'    => 'far_eye',
-                        'onclick' => 'loadImageModal($(this), \'' . $url . '\', \'' . $this->getData('file_name') . '\')'
+                        'label'   => 'Télécharger',
+                        'icon'    => 'download',
+                        'onclick' => 'window.open(\'' . $url . '\', \'_blank\')'
                     );
                 }
-                break;
+            }
+            switch (BimpTools::getFileTypeCode('x.' . $this->getData('file_ext'))) {
+                case 'img':
+                    if ($url) {
+                        $buttons[] = array(
+                            'label'   => 'Afficher l\'image',
+                            'icon'    => 'far_eye',
+                            'onclick' => 'loadImageModal($(this), \'' . $url . '\', \'' . $this->getData('file_name') . '\')'
+                        );
+                    }
+                    break;
 
 //            case 'pdf':
 //                if ($url) {
@@ -118,11 +128,12 @@ class BimpFile extends BimpObject
 //                    );
 //                }
 //                break;
+            }
         }
         return $buttons;
     }
 
-    // Getters - Overrides BimpObject:
+    // Getters - Overrides BimpObject: 
 
     public function getParentObjectName()
     {
@@ -275,7 +286,7 @@ class BimpFile extends BimpObject
         }
     }
 
-    // Overrides :
+    // Overrides: 
 
     public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null)
     {

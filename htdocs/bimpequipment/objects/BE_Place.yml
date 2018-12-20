@@ -10,39 +10,20 @@ labels:
     
 objects: 
     client:
-        relation: hasOne
-        delete: 0
         instance: 
+            bimp_object: unset
             dol_object: societe
-            id_object:
-                field_value: id_client
         card: societe_card
         
     contact:
-        relation: hasOne
-        delete: 0
         instance: 
+            bimp_object: unset
             dol_object: contact
-            id_object:
-                field_value: id_contact
-                
-    entrepot:
-        relation: hasOne
-        delete: 0
-        instance: 
-            dol_object: 
-                module: product/stock
-                file: entrepot
-            id_object: 
-                field_value: id_entrepot
     
     user: 
-        relation: hasOne
-        delete: 0
         instance: 
+            bimp_object: unset
             dol_object: user
-            id_object: 
-                field_value: id_user
                 
 fields: 
     id_equipment: 

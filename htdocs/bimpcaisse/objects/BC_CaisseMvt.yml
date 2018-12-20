@@ -4,23 +4,6 @@ labels:
     name: Mouvement de fonds
     name_plur: Mouvements de fonds
     
-objects: 
-    entrepot: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            dol_object: 
-                module: product/stock
-                file: entrepot
-            id_object:
-                field_value: id_entrepot
-    caisse: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BC_Caisse
-            id_object:
-                field_value: id_caisse
 fields: 
     id_entrepot: 
         label: Centre

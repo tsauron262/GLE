@@ -18,12 +18,9 @@ objects:
             field_value: id_object
             
     user:
-        relation: hasOne
-        delete: 0
         instance: 
+            bimp_object: unset
             dol_object: user
-            id_object: 
-                field_value: id_user
                     
 fields: 
     module:

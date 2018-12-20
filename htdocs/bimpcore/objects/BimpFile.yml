@@ -12,12 +12,10 @@ labels:
 
 objects: 
     user_delete: 
-        relation: hasOne
-        delete: 0
+        extends: user
         instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_User
+            id_object: 
+                field_value: user_delete
                 
 fields:
     parent_module:

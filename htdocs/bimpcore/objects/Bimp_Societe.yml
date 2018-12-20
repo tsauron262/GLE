@@ -193,7 +193,6 @@ fields:
         input: 
             note: 1
         
-    
 #    *** Champs non gérés: ***
 #    entity
 #    ref_ext
@@ -431,6 +430,7 @@ cards:
     default: 
         type: societe_card
         view_btn: 1
+        
 searches:
     default: 
         fields_search: 

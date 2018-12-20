@@ -58,8 +58,7 @@ fields:
         values: 
             array: price_types
         default_value: EXCHANGE
-        
-    
+            
 lists: 
     default: 
         title: Panier de composants Apple

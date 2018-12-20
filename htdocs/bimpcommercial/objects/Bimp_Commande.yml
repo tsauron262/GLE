@@ -53,13 +53,6 @@ objects:
             filters: 
                 type: 2
                 
-    facture: 
-        instance: 
-            bimp_object: 
-                module: bimpcommercial
-                name: Bimp_Facture
-            id_object: 
-                field_value: id_facture
                 
     shipments: 
         relation: hasMany
@@ -78,12 +71,7 @@ objects:
                 name: Bimp_ProductFournisseurPrice
                 
     entrepot: 
-        relation: hasOne
-        delete: 0
         instance: 
-            dol_object: 
-                module: product/stock
-                file: entrepot
             id_object:
                 field_value: entrepot
                 

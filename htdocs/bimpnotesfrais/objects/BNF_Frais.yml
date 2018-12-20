@@ -6,17 +6,7 @@ labels:
     name_plur: notes de frais
     is_female: 1
     
-objects: 
-    user: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_User
-            id_object: 
-                field_value: id_user
-                
+objects:                 
     montants: 
         relation: hasMany
         delete: 1

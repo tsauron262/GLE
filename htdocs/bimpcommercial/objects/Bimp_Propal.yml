@@ -25,12 +25,7 @@ objects:
             bimp_object: Bimp_PropalLine
             
     entrepot: 
-        relation: hasOne
-        delete: 0
         instance: 
-            dol_object: 
-                module: product/stock
-                file: entrepot
             id_object:
                 field_value: entrepot
                 

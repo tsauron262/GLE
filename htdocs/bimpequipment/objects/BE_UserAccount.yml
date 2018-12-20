@@ -7,22 +7,19 @@ labels:
     
 objects: 
     client: 
-        relation: hasOne
-        delete: 0
         instance: 
+            bimp_object: unset
             dol_object: societe
-            id_object: 
-                field_value: id_client
         card:
             type: societe_card
             
     client_contact: 
-        relation: hasOne
-        delete: 0
+        extends: contact
         instance: 
+            bimp_object: unset
             dol_object: contact
             id_object: 
-            field_value: id_client_contact
+                field_value: id_client_contact
         card: 
             type: contact_card
             

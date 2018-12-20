@@ -17,35 +17,6 @@ objects:
             bimp_object: BR_CommandeShipment
             id_object: 
                 field_value: id_shipment
-    product: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Product
-            id_object: 
-                field_value: id_product
-                
-    equipment: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpequipment
-                name: Equipment
-            id_object: 
-                field_value: id_equipment
-                
-    user:
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_User
-            id_object: 
-                field_value: id_user
                 
 fields: 
     id_shipment: 

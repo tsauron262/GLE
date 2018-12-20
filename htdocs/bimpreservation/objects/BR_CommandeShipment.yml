@@ -11,34 +11,10 @@ labels:
         
 objects: 
     commande_client:
-        relation: hasOne
-        delete: 0
+        extends: commande
         instance: 
-            bimp_object:
-                module: bimpcommercial
-                name: Bimp_Commande
             id_object: 
                 field_value: id_commande_client
-                
-    entrepot:
-        relation: hasOne
-        delete: 0
-        instance: 
-            dol_object: 
-                module: product/stock
-                file: entrepot
-            id_object:
-                field_value: id_entrepot
-                
-    contact: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Contact
-            id_object: 
-                field_value: id_contact
                 
     reservation_shipments: 
         relation: hasMany
@@ -51,19 +27,6 @@ objects:
         delete: 1
         instance: 
             bimp_object: BR_ServiceShipment
-            
-    facture: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcommercial
-                name: Bimp_Facture
-            id_object: 
-                field_value: id_facture
-        cards: 
-            default: 
-                type: facture_card
     
 fields: 
     id_commande_client: 

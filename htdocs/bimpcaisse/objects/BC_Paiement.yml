@@ -4,50 +4,13 @@ labels:
     name: Paiement en caisse
     name_plur: paiements en caisse
     
-objects: 
-    caisse:
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BC_Caisse
-            id_object: 
-                field_value: id_caisse
-                
-    caisse_session: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BC_CaisseSession
-            id_object: 
-                field_value: id_caisse_session
-                
+objects:                                 
     facture:
-        relation: hasOne
-        delete: 0
         instance: 
+            bimp_object: unset
             dol_object: 
                 module: compta/facture
                 file: facture
-            id_object: 
-                field_value: id_facture
-                
-    vente: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BC_Vente
-            id_object: 
-                field_value: id_vente
-                
-    paiement: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcommercial
-                name: Bimp_Paiement
-            id_object: 
-                field_value: id_paiement
                 
 fields: 
     id_caisse: 

@@ -8,7 +8,6 @@ labels:
     name: détail de montant
     name_plur: détails de montant
 
-objects: 
 fields: 
     id_event_montant:
         label: Montant

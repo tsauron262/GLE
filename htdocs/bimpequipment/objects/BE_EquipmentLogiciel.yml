@@ -7,17 +7,7 @@ parent_id_property: id_equipment
 labels:
     name: logiciel
     
-objects: 
-    product: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Product
-            id_object: 
-                field_value: id_product
-                
+objects:                 
     user_account:
         instance: 
             bimp_object: BE_UserAccount

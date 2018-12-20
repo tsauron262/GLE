@@ -13,6 +13,29 @@ labels:
     name_plur: tâches
     is_female: 1    
 
+objects: 
+    user_owner:
+        extends: user
+        instance:
+            id_object:
+                fiels_value: id_user_owner
+                
+    files:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimptask
+                parent_object_name: BIMP_Task
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimptask
+                    parent_object_name: BIMP_Task
+                    
 fields:            
     src:
         label: Source email
@@ -49,17 +72,6 @@ fields:
     test_ferme:
         label: Test pour Fermeture
         type: text
-                
-objects:
-    user_owner:
-        relation: hasOne
-        delete: 0
-        instance:
-            bimp_object:
-                module: bimpcore
-                name: Bimp_User
-            id_object:
-                fiels_value: id_user_owner
  
 fields_tables:
     default: 
@@ -152,7 +164,6 @@ lists:
             id_user_owner:
                 field: id_user_owner
 
-  
 views:
     default: 
         title: nom
@@ -170,6 +181,10 @@ views:
                   - type: custom
                     custom: 
                         callback: renderNotesList
+            - cols: 
+                - type: list
+                  list: 
+                      children: files
     notes: 
         title: nom
         edit_form: 0

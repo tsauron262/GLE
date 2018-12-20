@@ -20,44 +20,14 @@ labels:
 
 objects:
     contrat:
-        relation: hasOne
-        delete: 0
-        instance:
-            dol_object: contrat
-            id_object:
-                field_value: id_contrat
         card: 
             title: 
                 object_prop: ref
             view_btn: 1
-    
-    client:
-        relation: none
-        delete: 0
-        instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Client
-            id_object:
-                field_value: id_client
-    
-    contact:
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Contact
-            id_object:
-                field_value: id_contact
                 
     user_tech: 
-        relation: hasOne
-        delete: 0
+        extends: user
         instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_User
             id_object: 
                 field_value: id_user_tech
         
@@ -66,58 +36,18 @@ objects:
         delete: 0
         instance:
             bimp_object: BS_Note
-
-    equipment: 
-        instance: 
-            bimp_object: 
-                module: bimpequipment
-                name: Equipment
-            id_object: 
-                field_value: id_equipment
-                
-    entrepot: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            dol_object: 
-                module: product/stock
-                file: entrepot
-            id_object:
-                field_value: id_entrepot
                 
     propal: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BS_SavPropal
-            id_object: 
-                field_value: id_propal
-                
-    facture: 
-        relation: hasOne
-        delete: 0
         instance: 
             bimp_object: 
-                module: bimpcommercial
-                name: Bimp_Facture
-            id_object: 
-                field_value: id_facture
-        cards: 
-            default: 
-                type: facture_card
+                module: bimpsupport
+                name: BS_SavPropal
                 
     facture_acompte: 
-        relation: hasOne
-        delete: 0
+        extends: facture
         instance: 
-            bimp_object: 
-                module: bimpcommercial
-                name: Bimp_Facture
             id_object: 
                 field_value: id_facture_acompte
-        cards: 
-            default: 
-                type: facture_card
                 
     propal_lines: 
         relation: hasMany

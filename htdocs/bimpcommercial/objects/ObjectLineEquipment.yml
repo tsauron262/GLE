@@ -5,24 +5,11 @@ parent_module: bimpcommercial
 parent_object: ObjectLine
 parent_id_property: id_object_line
 
-objects: 
-    equipment: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpequipment
-                name: Equipment
-            id_object: 
-                field_value: id_equipment
-                
+objects:                 
     fournisseur_price: 
-        relation: none
-        delete: 0
+        extends: fourn_price
         instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_ProductFournisseurPrice
+            id_object: unset
 
 fields:             
     id_object_line: 

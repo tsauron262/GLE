@@ -14,14 +14,7 @@ labels:
     
 objects: 
     reservation: 
-        relation: hasOne
         delete: 1
-        instance: 
-            bimp_object: 
-                module: bimpreservation
-                name: BR_Reservation
-            id_object: 
-                field_value: id_reservation
                 
 fields: 
     id_reservation: 

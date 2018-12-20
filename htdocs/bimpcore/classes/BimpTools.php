@@ -43,7 +43,7 @@ class BimpTools
         return 1;
     }
 
-    public static function getValue($key, $default_value = null)
+    public static function getValue($key, $default_value = null, $decode = true)
     {
         $keys = explode('/', $key);
 
@@ -71,7 +71,7 @@ class BimpTools
             return $default_value;
         }
 
-        if (is_string($value)) {
+        if (is_string($value, $decode)) {
             return stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
         }
 

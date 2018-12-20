@@ -11,12 +11,7 @@ list_page_url:
 labels:
     name: tâche
     name_plur: tâches
-    is_female: 1
-
-    
-            
-associations:
-    
+    is_female: 1    
 
 fields:            
     src:

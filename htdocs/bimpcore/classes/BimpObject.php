@@ -48,6 +48,7 @@ class BimpObject extends BimpCache
     );
     public $params = array();
     protected $data = array();
+    protected $initData = array();
     protected $associations = array();
     protected $history = array();
     public $parent = null;
@@ -529,6 +530,11 @@ class BimpObject extends BimpCache
         return 1;
     }
 
+    public function hasFieldChange($field)
+    {
+        return (int) ($this->getData($field) !== $this->getInitData($field));
+    }
+
     // Getters données: 
 
     public function getData($field)
@@ -539,6 +545,23 @@ class BimpObject extends BimpCache
 
         if (isset($this->data[$field])) {
             return $this->data[$field];
+        }
+
+        if ($this->field_exists($field)) {
+            return $this->getConf('fields/' . $field . '/default_value');
+        }
+
+        return null;
+    }
+
+    public function getInitData($field)
+    {
+        if ($field === 'id') {
+            return $this->id;
+        }
+
+        if (isset($this->initData[$field])) {
+            return $this->initData[$field];
         }
 
         if ($this->field_exists($field)) {
@@ -816,6 +839,7 @@ class BimpObject extends BimpCache
 
         $this->children = array();
         $this->data = array();
+        $this->initData = array();
         $this->associations = array();
         $this->id = null;
         $this->ref = '';
@@ -1137,9 +1161,7 @@ class BimpObject extends BimpCache
                             );
                             break;
                     }
-                } else if ($this->config->setCurrentPath('fields/' . $field_name)) {
-                    $search_type = $this->getCurrentConf('search/type', 'field_input', false);
-
+                } elseif ($this->field_exists($field_name)) {
                     if ($value === '') {
                         $data_type = $this->getCurrentConf('type', '');
                         if (in_array($data_type, array('id_object', 'id'))) {
@@ -1147,29 +1169,32 @@ class BimpObject extends BimpCache
                         }
                     }
 
-                    if ($search_type === 'field_input') {
-                        $input_type = BC_Field::getInputType($this, $field_name);
+//                    if ($search_type === 'field_input') {
+//                        $input_type = BC_Field::getInputType($this, $field_name);
+//
+//                        switch ($input_type) {
+//                            case 'text':
+//                                $search_type = 'value_part';
+//                                break;
+//
+//                            case 'time':
+//                                $search_type = 'time_range';
+//                                break;
+//
+//                            case 'date':
+//                                $search_type = 'date_range';
+//                                break;
+//
+//                            case 'datetime':
+//                                $search_type = 'datetime_range';
+//                                break;
+//                        }
+//                    }
+                    
+                    $bc_field = new BC_Field($this, $field_name);
+                    $seach_data = $bc_field->getSearchData();
 
-                        switch ($input_type) {
-                            case 'text':
-                                $search_type = 'value_part';
-                                break;
-
-                            case 'time':
-                                $search_type = 'time_range';
-                                break;
-
-                            case 'date':
-                                $search_type = 'date_range';
-                                break;
-
-                            case 'datetime':
-                                $search_type = 'datetime_range';
-                                break;
-                        }
-                    }
-
-                    switch ($search_type) {
+                    switch ($seach_data['search_type']) {
                         case 'time_range':
                         case 'date_range':
                         case 'datetime_range':
@@ -1192,9 +1217,8 @@ class BimpObject extends BimpCache
                             break;
 
                         case 'value_part':
-                            $part_type = $this->getCurrentConf('search/part_type', 'middle');
                             $filters[$filter_key] = array(
-                                'part_type' => $part_type,
+                                'part_type' => $seach_data['part_type'],
                                 'part'      => $value
                             );
                             break;
@@ -1810,13 +1834,13 @@ class BimpObject extends BimpCache
                 if (!(int) $this->getCurrentConf('editable', 1, false, 'bool')) {
                     continue;
                 }
-                $label = $this->getCurrentConf('label', $field, true);
+//                $label = $this->getCurrentConf('label', $field, true);
                 if (!$this->canEditField($field)) {
-                    $errors[] = 'Vous n\'avez pas la permission de modifier le champ "' . $label . '"';
+//                    $errors[] = 'Vous n\'avez pas la permission de modifier le champ "' . $label . '"';
                     continue;
                 }
                 if (!$this->isFieldEditable($field)) {
-                    $errors[] = 'Le champ "' . $label . '" n\'est pas modifiable';
+//                    $errors[] = 'Le champ "' . $label . '" n\'est pas modifiable';
                     continue;
                 }
             }
@@ -2021,9 +2045,9 @@ class BimpObject extends BimpCache
 
         $errors = array();
         foreach ($fields as $field => $params) {
-            if (!(int) $this->getConf('fields/' . $field . '/editable', 1, false, 'bool')) {
-                continue;
-            }
+//            if (!(int) $this->getConf('fields/' . $field . '/editable', 1, false, 'bool')) {
+//                continue;
+//            }
             $errors = array_merge($errors, $this->validateValue($field, isset($this->data[$field]) ? $this->data[$field] : null));
         }
         return $errors;
@@ -2139,6 +2163,8 @@ class BimpObject extends BimpCache
                     }
                 }
 
+                $this->initData = $this->data;
+
                 $warnings = array_merge($warnings, $this->updateAssociations());
                 $warnings = array_merge($warnings, $this->saveHistory());
 
@@ -2171,7 +2197,7 @@ class BimpObject extends BimpCache
         }
 
         if (!$force_update && !$this->isEditable()) {
-            return array('Il n\'est pas possiblede modifier ' . $this->getLabel('this'));
+            return array('Il n\'est pas possible de modifier ' . $this->getLabel('this'));
         }
 
         $errors = array();
@@ -2216,20 +2242,22 @@ class BimpObject extends BimpCache
                     $msg .= ' - Erreur SQL: ' . $sqlError;
                 }
                 $errors[] = $msg;
-            }
-        }
+            } else {
+                $this->initData = $this->data;
 
-        $warnings = array_merge($warnings, $this->updateAssociations());
-        $warnings = array_merge($warnings, $this->saveHistory());
+                $warnings = array_merge($warnings, $this->updateAssociations());
+                $warnings = array_merge($warnings, $this->saveHistory());
 
-        $parent = $this->getParentInstance();
+                $parent = $this->getParentInstance();
 
-        if (!is_null($parent)) {
-            if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
-                $parent->setChild($this);
-            }
-            if (method_exists($parent, 'onChildSave')) {
-                $warnings = array_merge($warnings, $parent->onChildSave($this));
+                if (!is_null($parent)) {
+                    if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
+                        $parent->setChild($this);
+                    }
+                    if (method_exists($parent, 'onChildSave')) {
+                        $warnings = array_merge($warnings, $parent->onChildSave($this));
+                    }
+                }
             }
         }
 
@@ -2309,6 +2337,7 @@ class BimpObject extends BimpCache
                 }
 
                 if (!count($errors)) {
+                    $this->initData[$field] = $this->data[$field];
                     if ($this->getConf('fields/' . $field . '/history', false, false, 'bool')) {
                         global $user;
                         $history = BimpObject::getInstance('bimpcore', 'BimpHistory');
@@ -2439,6 +2468,7 @@ class BimpObject extends BimpCache
                     $this->data[$field] = $value;
                 }
             }
+            $this->initData = $this->data;
             $this->ref = $this->getRef();
             return true;
         }
@@ -2849,6 +2879,8 @@ class BimpObject extends BimpCache
                 $this->data[$field] = $value;
             }
         }
+
+        $this->initData = $this->data;
 
         if (!count($errors)) {
             return true;

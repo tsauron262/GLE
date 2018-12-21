@@ -712,21 +712,30 @@ class BS_SAV extends BimpObject
 
     public function displayEquipment()
     {
-        $return = "";
-        $equipement = $this->getChildObject('equipment');
-        if ((int) $equipement->getData('id_product')) {
-            $return .= $equipement->displayProduct('nom') . '<br/>';
-        }
-        if ($equipement->getData("product_label") != "") {
-            $return .= $equipement->getData("product_label") . '<br/>';
-        }
-        $return .= BimpObject::getInstanceNomUrlWithIcons($equipement);
+        if ((int) $this->getData('id_equipment')) {
+            $equipement = $this->getChildObject('equipment');
 
-        if ((string) $equipement->getData('warranty_type') && (string) $equipement->getData('warranty_type') !== '0') {
-            $return .= '<br/>Type garantie: ' . $equipement->getData("warranty_type");
-        }
+            if (!BimpObject::objectLoaded($equipement)) {
+                return $this->renderChildUnfoundMsg('id_equipment', $equipement);
+            }
 
-        return $return;
+            $return = "";
+
+            if ((int) $equipement->getData('id_product')) {
+                $return .= $equipement->displayProduct('nom') . '<br/>';
+            }
+            if ($equipement->getData("product_label") != "") {
+                $return .= $equipement->getData("product_label") . '<br/>';
+            }
+            $return .= BimpObject::getInstanceNomUrlWithIcons($equipement);
+
+            if ((string) $equipement->getData('warranty_type') && (string) $equipement->getData('warranty_type') !== '0') {
+                $return .= '<br/>Type garantie: ' . $equipement->getData("warranty_type");
+            }
+
+            return $return;
+        }
+        return BimpRender::renderAlerts('Aucun équipement', 'warning');
     }
 
     public function displayExtraSav()

@@ -281,8 +281,8 @@ class commandeController extends reservationController
                 $html .= '<i class="fa fa-check iconLeft"></i>Valider la facture';
                 $html .= '</button>';
             }
-        } else {
-            $html .= BimpRender::renderAlerts('Erreur: ID de la facture hors expédition invalide');
+        } elseif ((int) $commande->getData('id_facture')) {
+            $html .= $commande->renderChildUnfoundMsg('id_facture', $facture, true, true);
         }
 
         return $html;

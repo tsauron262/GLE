@@ -2289,7 +2289,7 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
-    public function updateField($field, $value, $id_object = null)
+    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
     {
         if (is_null($id_object) || !$id_object) {
             if ($this->isLoaded()) {
@@ -2304,8 +2304,19 @@ class BimpObject extends BimpCache
         }
 
         if ($this->field_exists($field)) {
-
-            $errors = $this->validateValue($field, $value);
+            if (!$force_update) {
+                if (!$this->canEditField($field)) {
+                    $errors[] = 'Vous n\'avez pas la permission de modifier ce champ';
+                }
+                if ($this->isFieldEditable($field)) {
+                    $errors[] = 'Ce champ n\'est pas éditable';
+                }
+            }
+            if (!$do_not_validate) {
+                $errors = array_merge($errors, $this->validateValue($field, $value));
+            } else {
+                $this->data[$field] = $value;
+            }
             if (!count($errors)) {
                 $value = $this->getData($field);
                 $db_value = $value;
@@ -3769,6 +3780,59 @@ class BimpObject extends BimpCache
         return $html;
     }
 
+    public function renderRemoveChildObjectButton($field, $reload_page = false)
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            if ($this->field_exists($field)) {
+                if ($this->getConf('fields/' . $field . '/type', 'string') === 'id_object') {
+                    if ((int) $this->getData($field)) {
+                        $object = $this->config->getObject('fields/' . $field . '/object');
+                        $html .= '<button type="button" class="btn btn-danger" onclick="' . $this->getJsActionOnclick('removeChildObject', array(
+                                    'field'       => $field,
+                                    'reload_page' => (int) $reload_page
+                                )) . '">';
+                        $html .= BimpRender::renderIcon('fas_times', 'iconLeft') . 'Retirer';
+                        if (is_a($object, 'BimpObject')) {
+                            $html .= ' ' . $object->getLabel('the');
+                        }
+                        $html .= '</button>';
+                    }
+                }
+            }
+        }
+
+        return $html;
+    }
+
+    public function renderChildUnfoundMsg($field, $instance = null, $remove_button = true, $reload_page = false)
+    {
+        if ($this->field_exists($field)) {
+            if ($this->getConf('fields/' . $field . '/type', 'string') === 'id_object') {
+                $id_object = (int) $this->getData($field);
+
+                if (is_null($instance)) {
+                    $instance = $this->config->getObject('fields/' . $field . '/object');
+                }
+
+                if (is_a($instance, 'BimpObject')) {
+                    $msg = BimpTools::ucfirst($instance->getLabel('the')) . ' d\'ID ' . $id_object . ' semble avoir été supprimé' . ($instance->isLabelFemale() ? 'e' : '');
+                } elseif (is_object($instance)) {
+                    $msg .= 'L\'objet de type "' . get_class($instance) . '" d\'ID ' . $id_object . ' semble avoir été supprimé';
+                } else {
+                    $msg = 'Cet objet semble avoir été supprimé (ID: ' . $id_object . ')';
+                }
+
+                if ($remove_button) {
+                    $msg .= ' ' . $this->renderRemoveChildObjectButton($field, $reload_page);
+                }
+
+                return BimpRender::renderAlerts($msg);
+            }
+        }
+    }
+
     // Générations javascript: 
 
     public function getJsObjectData()
@@ -4533,9 +4597,11 @@ class BimpObject extends BimpCache
     {
         $errors = array();
         $warnings = array();
-        $success = '';
+        $success = 'Mise à jour effectuée avec succès';
 
-        if (!isset($data['field']) || !(string) $data['field']) {
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+        } elseif (!isset($data['field']) || !(string) $data['field']) {
             $errors[] = 'Champ contenant l\'ID de l\'objet non spécifié';
         } elseif (!$this->field_exists($data['field'])) {
             $errors[] = 'Le champ "' . $data['field'] . '" n\'existe pas pour les ' . $this->data['name_plur'];
@@ -4560,17 +4626,28 @@ class BimpObject extends BimpCache
                 $msg .= ' à ' . $this->getLabel('this');
                 $errors[] = $msg;
             } else {
-                $this->set($data['field'], 0);
-                $up_errors = $this->update($warnings, true);
+                $up_errors = array();
+                if (!(int) $this->getConf('fields/' . $data['field'] . '/required', 0, false, 'bool')) {
+                    $this->set($data['field'], 0);
+                    $up_errors = $this->update($warnings, true);
+                } else {
+                    $up_errors = $this->updateField($data['field'], 0, $this->id, true, true);
+                }
                 if (count($up_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour ' . $this->getLabel('of_the'));
                 }
             }
         }
 
+        $success_callback = '';
+        if (isset($data['reload_page']) && (int) $data['reload_page']) {
+            $success_callback = 'bimp_reloadPage();';
+        }
+
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

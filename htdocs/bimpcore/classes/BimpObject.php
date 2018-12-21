@@ -3789,7 +3789,7 @@ class BimpObject extends BimpCache
                 if ($this->getConf('fields/' . $field . '/type', 'string') === 'id_object') {
                     if ((int) $this->getData($field)) {
                         $object = $this->config->getObject('fields/' . $field . '/object');
-                        $html .= '<button type="button" class="btn btn-danger" onclick="' . $this->getJsActionOnclick('removeChildObject', array(
+                        $html .= '<span type="button" class="btn btn-danger" onclick="' . $this->getJsActionOnclick('removeChildObject', array(
                                     'field'       => $field,
                                     'reload_page' => (int) $reload_page
                                 )) . '">';
@@ -3797,7 +3797,7 @@ class BimpObject extends BimpCache
                         if (is_a($object, 'BimpObject')) {
                             $html .= ' ' . $object->getLabel('the');
                         }
-                        $html .= '</button>';
+                        $html .= '</span>';
                     }
                 }
             }

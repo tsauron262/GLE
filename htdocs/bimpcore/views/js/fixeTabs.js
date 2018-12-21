@@ -34,6 +34,8 @@ function reloadFixeTabs(iterate, reload_fixe_tabs_delay) {
                     reloadFixeTabs(true);
                 }, reload_fixe_tabs_delay);
             }
+
+            $('body').trigger($.Event('fixeTabsReloaded', {}));
         },
         error: function () {
             reload_fixe_tabs_processing = false;

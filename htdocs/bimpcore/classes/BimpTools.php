@@ -71,7 +71,7 @@ class BimpTools
             return $default_value;
         }
 
-        if (is_string($value, $decode)) {
+        if (is_string($value) && $decode) {
             return stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
         }
 

@@ -1190,7 +1190,7 @@ class BimpObject extends BimpCache
 //                                break;
 //                        }
 //                    }
-                    
+
                     $bc_field = new BC_Field($this, $field_name);
                     $seach_data = $bc_field->getSearchData();
 
@@ -4526,6 +4526,51 @@ class BimpObject extends BimpCache
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
+        );
+    }
+
+    public function actionRemoveChildObject($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        if (!isset($data['field']) || !(string) $data['field']) {
+            $errors[] = 'Champ contenant l\'ID de l\'objet non spécifié';
+        } elseif (!$this->field_exists($data['field'])) {
+            $errors[] = 'Le champ "' . $data['field'] . '" n\'existe pas pour les ' . $this->data['name_plur'];
+        } elseif ($this->getConf('fields/' . $data['field'] . '/type', 'string') !== 'id_object') {
+            $errors[] = 'Le champ "' . $data['field'] . '" ne contient pas l\'ID d\'un objet';
+        } else {
+            $id_object = (int) $this->getData($data['field']);
+            $instance = null;
+            if ($this->config->isDefined('fields/' . $data['field'] . '/object')) {
+                $instance = $this->config->getObject('fields/' . $data['field'] . '/object');
+            }
+
+            if (!$id_object) {
+                $msg = 'Aucun';
+                if (is_a($instance, 'BimpObject')) {
+                    $msg .= ($instance->isLabelFemale() ? 'e' : '') . ' ' . $instance->getLabel() . ' associé' . ($instance->isLabelFemale() ? 'e' : '');
+                } elseif (is_object($instance)) {
+                    $msg .= ' objet de type "' . get_class($instance) . '" associé';
+                } else {
+                    $msg .= ' objet associé';
+                }
+                $msg .= ' à ' . $this->getLabel('this');
+                $errors[] = $msg;
+            } else {
+                $this->set($data['field'], 0);
+                $up_errors = $this->update($warnings, true);
+                if (count($up_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour ' . $this->getLabel('of_the'));
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

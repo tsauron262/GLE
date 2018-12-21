@@ -101,4 +101,18 @@ $(document).ready(function () {
             $(this).data('event_init', 1);
         }
     });
+
+    $('body').on('fixeTabsReloaded', function (e) {
+        if ($('.fixe_tab_caption').length) {
+            $('#openModalBtn').css('bottom', '45px');
+        } else {
+            $('#openModalBtn').css('bottom', '0');
+        }
+    });
+
+    if ($('.fixe_tab_caption').length) {
+        $('#openModalBtn').css('bottom', '45px');
+    } else {
+        $('#openModalBtn').css('bottom', '0');
+    }
 });

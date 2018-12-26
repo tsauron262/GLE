@@ -936,6 +936,10 @@ class BimpInput
             return BimpRender::renderAlerts('Configuration invalide pour le champ  "' . $input_name . '" - Aucun champ de recherche défini');
         }
 
+        if (!is_array($field_return_label)) {
+            $field_return_label = explode(',', $field_return_label);
+        }
+
         $search = '';
         if ($value) {
             global $db;
@@ -944,7 +948,12 @@ class BimpInput
                 $fields_search = explode(',', $fields_search);
             }
 
-            $sql = 'SELECT ' . $field_return_label . ' as label';
+            $sql = 'SELECT ';
+            $i = 1;
+            foreach ($field_return_label as $field_name) {
+                $sql .= $field_name . ' as label_' . $i;
+                $i++;
+            }
             $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
             if ($join) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join . ' ON ' . $join_on;
@@ -956,7 +965,10 @@ class BimpInput
             if (is_null($result) || !isset($result[0]['label'])) {
                 $search = '';
             } else {
-                $search = $result[0]['label'];
+                $search = $label_syntaxe;
+                for ($n = 1; $n <= count($field_return_label); $n++) {
+                    $search = str_replace('<label_' . $n . '>', $result[$n - 1]['label_' . $n], $search);
+                }
             }
             unset($bdb);
         }
@@ -972,7 +984,7 @@ class BimpInput
         $html .= ' data-join="' . $join . '"';
         $html .= ' data-join_on="' . $join_on . '"';
         $html .= ' data-fields_search="' . $fields_search . '"';
-        $html .= ' data-field_return_label="' . $field_return_label . '"';
+        $html .= ' data-field_return_label="' . implode(',', $field_return_label) . '"';
         $html .= ' data-field_return_value="' . $field_return_value . '"';
         $html .= ' data-join_return_label="' . $join_return_label . '"';
         $html .= ' data-label_syntaxe="' . htmlentities($label_syntaxe) . '"';

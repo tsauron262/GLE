@@ -251,6 +251,20 @@ objects:
             id_object: 
                 field_value: id_reservation
                 
+#   Fichier
+    file: 
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: BimpFile
+                
+associations: 
+    files: 
+        label: Fichiers associés
+        object: file
+                
 forms: 
     list_config: 
         title: Paramètres de la liste
@@ -336,10 +350,42 @@ forms:
               input: 
                   type: hidden
             - custom: 1
-              label: Type d'objet
+              label: Type de destinataire
               input_name: move_to_object_name
               input: 
                   type: select
                   options: 
-                      array: filesParents
+                      callback: 
+                          method: getFilesParentsArray
+                          params: 
+                              - 1
+            - custom: 1
+              label: Destinataire
+              input_name: move_to_id_object
+              content: 
+                  callback: 
+                      method: renderSearchObjectInput
+                      params:
+                          - move_to_id_object
+                          - request_field: move_to_object_name
+              display_if: 
+                  field_name: move_to_object_name
+                  hide_values: ''
+              depends_on: move_to_object_name
+            - custom: 1
+              label: Conserver une copie du fichier
+              data_type: bool
+              input_name: keep_copy
+              input: 
+                  type: toggle
+            - custom: 1
+              label: Créer un lien vers le nouveau fichier
+              data_type: bool
+              input_name: create_link
+              input: 
+                  type: toggle
+              display_if: 
+                  field_name: keep_copy
+                  show_values: 0
+             
               

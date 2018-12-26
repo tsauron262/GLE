@@ -4,6 +4,7 @@ dol_object:
         
 table: product
 primary: rowid
+icon: fas_box
 
 labels: 
     name: produit

@@ -186,6 +186,14 @@ views:
                 - type: list
                   list: 
                       children: files
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: 
+                          method: renderAssociatesList
+                          params: 
+                              - files
+                              - associates
     notes: 
         title: nom
         edit_form: 0

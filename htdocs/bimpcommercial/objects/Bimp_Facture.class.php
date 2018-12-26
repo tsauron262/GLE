@@ -274,6 +274,10 @@ class Bimp_Facture extends BimpComm
     {
         return $this->getData('facnumber');
     }
+    
+    public function getRefProperty() {
+        return 'facnumber';
+    }
 
     public function getModelPdf()
     {

@@ -2505,6 +2505,8 @@ class User extends CommonObject
                     $info[$conf->global->LDAP_FIELD_DESCRIPTION] = "";
                     if ($this->job)
                         $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= $this->job;
+                    if(isset($this->array_options['options_comp']) && $this->array_options['options_comp'] != "")
+                        $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= "<br/>".$this->array_options['options_comp'];
                     if($this->note)
                         $info[$conf->global->LDAP_FIELD_DESCRIPTION] .= "<br/>".$this->note;
                     if ($info[$conf->global->LDAP_FIELD_DESCRIPTION] == "")

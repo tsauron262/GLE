@@ -14,14 +14,7 @@ labels:
     
 objects: 
     reservation: 
-        relation: hasOne
         delete: 1
-        instance: 
-            bimp_object: 
-                module: bimpreservation
-                name: BR_Reservation
-            id_object: 
-                field_value: id_reservation
                 
 fields: 
     id_reservation: 
@@ -57,6 +50,10 @@ fields:
         
 forms: 
     sav: 
+        values: 
+            objects: 
+                remises: 
+                    callback: getClientDefaultRemiseFormValues
         rows: 
             - field: type
               hidden: 
@@ -235,6 +232,16 @@ forms:
                 
     apple_part:
         rows: 
+            - custom: 1
+              label: Description
+              value: 
+                  prop: desc
+              input_name: desc
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params: 
+                          - desc
             - custom: 1
               label: Remises autorisées
               input_name: remisable

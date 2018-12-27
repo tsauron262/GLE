@@ -10,18 +10,16 @@ labels:
 
 objects:
     product:
-        relation: hasOne
         instance:
+            bimp_object: unset
             dol_object: product
-            id_object:
-                field_value: id_product
         cards: 
             default: 
                 type: product_card
                 
     contrat:
         instance:
-            dol_object: contrat
+            id_object: unset
             
     places: 
         instance: 
@@ -34,14 +32,11 @@ objects:
             bimp_object: BE_EquipmentLogiciel
             
     facture: 
-        relation: hasOne
-        delete: 0
         instance: 
+            bimp_object: unset
             dol_object: 
                 module: compta/facture
                 file: facture
-            id_object: 
-                field_value: id_facture
 
 associations:
     contrats:

@@ -2,6 +2,8 @@ extends:
     module: bimpcore
     object_name: Bimp_Societe
     
+icon: fas_building
+
 labels: 
     name: fournisseur
     is_female: 0

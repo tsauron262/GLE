@@ -26,22 +26,12 @@ objects:
             bimp_object: Bimp_FactureLine
             
     entrepot: 
-        relation: hasOne
-        delete: 0
         instance: 
-            dol_object: 
-                module: product/stock
-                file: entrepot
             id_object:
                 field_value: entrepot
                 
     account: 
-        relation: hasOne
-        delete: 0
         instance:
-            dol_object: 
-                module: compta/bank
-                file: account
             id_object: 
                 field_value: fk_account
     

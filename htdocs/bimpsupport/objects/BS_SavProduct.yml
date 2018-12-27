@@ -9,35 +9,8 @@ labels:
     name_plur: produits / services
     
 objects: 
-    product: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Product
-            id_object: 
-                field_value: id_product
-                
-    equipment: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpequipment
-                name: Equipment
-            id_object: 
-                field_value: id_equipment
-                
     reservation: 
-        relation: hasOne
         delete: 1
-        instance: 
-            bimp_object: 
-                module: bimpreservation
-                name: BR_Reservation
-            id_object: 
-                field_value: id_reservation
                 
 fields: 
     id_sav: 

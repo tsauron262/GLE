@@ -9,23 +9,8 @@ labels:
     
 objects: 
     equipment:
-        relation: hasOne
-        delete: 0
         instance: 
-            bimp_object: 
-                module: bimpequipment
-                name: Equipment
-            id_object: 
-                field_value: id_equipment
-    client: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Societe
-            id_object: 
-                field_value: id_client
+            id_object: unset
 
 associations: 
     equipments:

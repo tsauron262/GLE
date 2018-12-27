@@ -17,44 +17,14 @@ labels:
 
 objects:
     contrat:
-        relation: hasOne
-        delete: 0
-        instance:
-            dol_object: contrat
-            id_object:
-                field_value: id_contrat
         card: 
             title: 
                 object_prop: ref
             view_btn: 1
-    
-    client:
-        relation: none
-        delete: 0
-        instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Client
-            id_object:
-                field_value: id_client
-    
-    contact:
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Contact
-            id_object:
-                field_value: id_contact
                 
     user_resp: 
-        relation: hasOne
-        delete: 0
+        extends: user
         instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_User
             id_object: 
                 field_value: id_user_resp
                 
@@ -69,12 +39,6 @@ objects:
         delete: 0
         instance:
             bimp_object: BS_Note
-
-    equipment: 
-        instance: 
-            bimp_object: 
-                module: bimpequipment
-                name: Equipment
                 
     files:
         instance:

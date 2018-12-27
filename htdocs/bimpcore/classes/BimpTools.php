@@ -71,7 +71,7 @@ class BimpTools
             return $default_value;
         }
 
-        if (is_string($value, $decode)) {
+        if (is_string($value) && $decode) {
             return stripslashes(urldecode(preg_replace('/((\%5C0+)|(\%00+))/i', '', urlencode($value))));
         }
 
@@ -734,7 +734,7 @@ class BimpTools
             } elseif ($filter === 'IS_NOT_NULL') {
                 $sql .= ' IS NOT NULL';
             } else {
-                $sql .= ' = ' . (is_string($filter) ? '\'' . $filter . '\'' : $filter);
+                $sql .= ' = ' . (BimpTools::isString($filter) ? '\'' . $filter . '\'' : $filter);
             }
         }
         return $sql;
@@ -950,6 +950,15 @@ class BimpTools
     public static function isNumericType($value)
     {
         return (is_int($value) || is_float($value) || is_bool($value));
+    }
+    
+    public static function isString($value)
+    {
+        if (is_string($value) && !preg_match('/^[0-9]+$/', $value)) {
+            return 1;
+        }
+        
+        return 0;
     }
 
     // Gestion des durées:

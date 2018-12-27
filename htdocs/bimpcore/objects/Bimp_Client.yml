@@ -4,6 +4,7 @@ dol_object:
         
 table: societe
 primary: rowid
+icon: fas_user-circle
 
 labels: 
     name: 

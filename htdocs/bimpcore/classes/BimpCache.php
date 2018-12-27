@@ -237,16 +237,16 @@ class BimpCache
             $instance = BimpObject::getInstance('bimpcore', 'BimpNote');
 
             $filters = array(
-                'obj_type'      => 'bimp_object',
-                'obj_module'    => $object->module,
-                'obj_name'      => $object->object_name,
-                'id_obj'        => $object->id
+                'obj_type'   => 'bimp_object',
+                'obj_module' => $object->module,
+                'obj_name'   => $object->object_name,
+                'id_obj'     => $object->id
             );
-            
+
             $filters = array_merge($filters, BimpNote::getFiltersByUser());
-            
+
             $list = $instance->getList($filters, null, null, 'date_create', 'desc', 'array', array('id'));
-            
+
             if (!is_null($list)) {
                 foreach ($list as $item) {
                     self::$cache[$cache_key][] = BimpObject::getInstance('bimpcore', 'BimpNote', (int) $item['id']);
@@ -255,6 +255,35 @@ class BimpCache
         }
 
         return self::$cache[$cache_key];
+    }
+
+    public static function getFilesParentsArray($include_empty = false)
+    {
+        $cache_key = 'files_parents_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $bimpObject = BimpObject::getInstance('bimpcore', 'BimpObject');
+
+            foreach ($bimpObject->params['objects'] as $name => $params) {
+                if (isset($params['has_files']) && (int) $params['has_files']) {
+                    if (isset($params['instance']['bimp_object'])) {
+                        $instance = BimpObject::getInstance($params['instance']['bimp_object']['module'], $params['instance']['bimp_object']['name']);
+                        $icon = $instance->params['icon'];
+                        self::$cache[$cache_key][$name] = array('label' => BimpTools::ucfirst($instance->getLabel()), 'icon' => $icon);
+                    } elseif (isset($params['instance']['dol_object'])) {
+                        if (isset($params['instance']['dol_object']['label'])) {
+                            self::$cache[$cache_key][$name] = BimpTools::ucfirst($params['instance']['dol_object']['label']);
+                        } else {
+                            self::$cache[$cache_key][$name] = BimpTools::ucfirst($name);
+                        }
+                    }
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, '', '');
     }
 
     // Sociétés: 

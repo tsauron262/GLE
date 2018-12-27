@@ -94,6 +94,23 @@ class Bimp_Product extends BimpObject
         return $stocks;
     }
 
+    public function getFilesDir()
+    {
+        return DOL_DATA_ROOT . '/produit/' . dol_sanitizeFileName($this->getRef()) . '/';
+    }
+
+    public function getFileUrl($file_name)
+    {
+        $dir = $this->getFilesDir();
+        if ($dir) {
+            if (file_exists($dir . $file_name)) {
+                return DOL_URL_ROOT . '/document.php?modulepart=produit&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+            }
+        }
+
+        return '';
+    }
+
     public function fetchStocks()
     {
         $this->stocks = array();

@@ -310,4 +310,24 @@ class BIMP_Task extends BimpObject
         }
         return $buttons;
     }
+    
+    public function getFilesListExtraBtn(BimpFile $file)
+    {
+        $buttons = array();
+        
+        $buttons[] = array(
+            'label' => 'Déplacer',
+            'icon' => 'fas_file-export',
+            'onclick' => $this->getJsActionOnclick('moveFile', array(
+                'id_file' => $file->id,
+                'move_to_object_name' => 'client',
+                'keep_copy' => 0,
+                'create_link' => 1
+            ), array(
+                'form_name' => 'move_file'
+            ))
+        );
+        
+        return  $buttons;
+    }
 }

@@ -201,44 +201,32 @@ class BC_Display extends BimpComponent
                                 case 'nom_url':
                                     $html .= BimpObject::getInstanceNomUrl($instance);
                                     $html .= BimpRender::renderObjectIcons($instance, (int) $this->params['external_link'], $this->params['modal_view']);
-//                                    if ($this->params['external_link']) {
-//                                        if (isset($this->field_params['object'])) {
-//                                            $url = $this->object->getChildObjectUrl($this->field_params['object'], $instance);
-//                                        } else {
-//                                            $url = BimpObject::getInstanceUrl($instance);
-//                                        }
-//
-//                                        if ($url) {
-//                                            $html .= '<span class="objectIcon" onclick="window.open(\'' . $url . '\')">';
-//                                            $html .= '<i class="fas fa5-external-link-alt"></i>';
-//                                            $html .= '</span>';
-//                                            if (is_null($this->params['modal_view'])) {
-//                                                $onclick = 'loadModalObjectPage($(this), \'' . $url . '\', \'' . addslashes(BimpObject::getInstanceNom($instance)) . '\')';
-//                                                $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
-//                                                $html .= '<i class="far fa5-eye"></i>';
-//                                                $html .= '</span>';
-//                                            }
-//                                        }
-//                                    }
-//                                    if (!is_null($this->params['modal_view']) && is_a($instance, 'BimpObject')) {
-//                                        $title = htmlentities(addslashes($instance->getInstanceName()));
-//                                        $onclick = 'loadModalView(\'' . $instance->module . '\', \'' . $instance->object_name . '\', ' . $instance->id . ', \'' . $this->params['modal_view'] . '\', $(this), \'' . $title . '\')';
-//                                        $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
-//                                        $html .= '<i class="far fa5-eye"></i>';
-//                                        $html .= '</span>';
-//                                    }
-//                                    if (!$this->no_html && method_exists($instance, 'getNomExtraIcons')) {
-//                                        $html .= $instance->getNomExtraIcons();
-//                                    }
                                     break;
                             }
                             self::$cache[$cache_key] = $html;
+                        } elseif ((int) $this->value) {
+                            $html .= $this->object->renderChildUnfoundMsg($this->field_name, $instance);
                         }
                         break;
 
                     case 'card':
-                        $card = new BC_Card($this->object, $this->field_params['object'], $this->params['card']);
-                        $html .= $card->renderHtml();
+                        if ($this->field_name === $this->object->getParentIdProperty()) {
+                            $instance = $this->object->getParentInstance();
+                        } elseif (isset($this->field_params['object'])) {
+                            $instance = $this->object->getChildObject($this->field_params['object']);
+                            if (is_object($instance) && (int) $this->value && (!BimpObject::objectLoaded($instance) || (int) $instance->id !== (int) $this->value)) {
+                                $instance->fetch((int) $this->value);
+                            }
+                        } else {
+                            $instance = null;
+                        }
+
+                        if (BimpObject::objectLoaded($instance)) {
+                            $card = new BC_Card($this->object, $this->field_params['object'], $this->params['card']);
+                            $html .= $card->renderHtml();
+                        } elseif ((int) $this->value) {
+                            $html .= $this->object->renderChildUnfoundMsg($this->field_name, $instance);
+                        }
                         unset($card);
                         break;
 

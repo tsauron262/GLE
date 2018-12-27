@@ -574,12 +574,21 @@ function bimp_reloadPage() {
         });
     }
 
+    var tab = '';
+    if (window.location.hash) {
+        tab =  window.location.hash.replace('#', '');
+    }
+
     var params = getUrlParams();
 
     var first = true;
     var hasParams = false;
     for (var param_name in params) {
-        if (!/^navtab\-?.*$/.test(param_name)) {
+        if (param_name === 'tab') {
+            if (!tab) {
+                tab = params[param_name];
+            }
+        } else if (!/^navtab\-?.*$/.test(param_name)) {
             if (!first) {
                 url += '&';
             } else {
@@ -603,7 +612,12 @@ function bimp_reloadPage() {
         url += tabname + '=' + navtabs[tabname];
     }
 
-    url += window.location.hash;
+    if (tab) {
+        if (hasParams) {
+            url += '&';
+        }
+        url += 'tab=' + tab;
+    }
 
     window.location = url;
 }

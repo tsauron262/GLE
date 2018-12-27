@@ -10,21 +10,9 @@ labels:
     name_plur: produits / services
 objects: 
     commande: 
-        relation: hasOne
-        delete: 0
         instance: 
-            dol_object: commande
-            id_object: 
-                field_value: id_commande
-    product:
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Product
-            id_object: 
-                field_value: id_product              
+            bimp_object: unset
+            dol_object: commande            
               
 fields: 
     id_commande: 

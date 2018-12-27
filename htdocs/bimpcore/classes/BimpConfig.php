@@ -312,9 +312,8 @@ class BimpConfig
     {
         if (is_array($params)) {
             foreach ($params as $key => $value) {
-                if (in_array($key, self::$keywords)) {
+                if (in_array((string) $key, self::$keywords)) {
                     $params = $this->getvalue($params, $path);
-                    break;
                 } elseif ($key === 'object') {
                     $params[$key] = $this->getObject($path . '/object');
                 } elseif (is_array($value)) {

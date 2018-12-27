@@ -1878,11 +1878,17 @@ function setInputsEvents($container) {
                             }
                         }
                     } else if (e.key === 'Enter') {
+                        e.stopPropagation();
                         var $btn = $div.find('.btn.selected');
                         if ($btn.length === 1) {
                             $btn.click();
                         }
                     }
+                }
+            });
+            $(this).keydown(function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
                 }
             });
 

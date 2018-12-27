@@ -4,49 +4,10 @@ labels:
     name: vente
     is_female: 1
     
-objects: 
-    entrepot:
-        relation: hasOne
-        delete: 0
-        instance: 
-            dol_object: 
-                module: product/stock
-                file: entrepot
-            id_object:
-                field_value: id_entrepot
-                
-    caisse:
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BC_Caisse
-            id_object: 
-                field_value: id_caisse
-                
-    caisse_session:
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BC_CaisseSession
-            id_object: 
-                field_value: id_caisse_session
-    client: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Societe
-            id_object: 
-                field_value: id_client
-                
+objects:                                               
     client_contact:
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Contact
+        extends: contact
+        instance:
             id_object: 
                 field_value: id_client_contact
             
@@ -75,30 +36,20 @@ objects:
             bimp_object: BC_VenteReturn
             
     facture: 
-        relation: hasOne
-        delete: 0
         instance: 
+            bimp_object: unset
             dol_object: 
                 module: compta/facture
                 file: facture
-            id_object: 
-                field_value: id_facture
         cards: 
             default: 
                 type: facture_card
                 
     avoir:
-        relation: hasOne
-        delete: 0
+        extends: facture
         instance: 
-            dol_object: 
-                module: compta/facture
-                file: facture
             id_object: 
                 field_value: id_avoir
-        cards: 
-            default: 
-                type: facture_card
                 
     discount: 
         instance: 

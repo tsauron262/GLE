@@ -8,42 +8,11 @@ labels:
     name: ligne
     is_female: 1
     
-objects: 
-    product: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Product
-            id_object: 
-                field_value: id_product
-                
-    fourn_price:
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_ProductFournisseurPrice
-            id_object: 
-                field_value: id_fourn_price
-                
-    fournisseur: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Fournisseur
-            id_object: 
-                field_value: id_fournisseur
-            
+objects:       
     equipment: 
+        relation: none
         instance:
-            bimp_object: 
-                module: bimpequipment
-                name: Equipment
+            id_object: unset
                 
 fields: 
     id_parent: 

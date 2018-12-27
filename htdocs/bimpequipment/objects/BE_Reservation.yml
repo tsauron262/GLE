@@ -8,31 +8,17 @@ labels:
 
 objects: 
     user_origin: 
-        relation: hasOne
-        delete: 0
+        extends: user
         instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_User
             id_object: 
                 field_value: id_user_origin
     product: 
-        relation: hasOne
-        delete: 0
-        instance: 
+        instance:
+            bimp_object: unset
             dol_object: product
-            id_object: 
-                field_value: id_product
         cards: 
             default: 
                 type: product_card
-    equipment: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: Equipment
-            id_object: 
-                field_value: id_equipment
 
 fields: 
     id_user_origin: 

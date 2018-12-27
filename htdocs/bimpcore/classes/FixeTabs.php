@@ -15,17 +15,17 @@ class FixeTabs
             'classes' => $classes
         );
     }
-    
-    
-    public static function canView(){
+
+    public static function canView()
+    {
         global $user, $conf;
-        if (isset($user->id) && (int) $user->id){
-            if(userInGroupe(18, $user->id))
+        if (isset($user->id) && (int) $user->id) {
+            if (userInGroupe(18, $user->id))
                 return 1;
-            
-            if(isset($conf->global->MAIN_MODULE_BIMPTASK)){
+
+            if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
                 $task = BimpObject::getInstance("bimptask", "BIMP_Task");
-                if($task->canView())
+                if ($task->canView())
                     return 1;
             }
         }
@@ -37,9 +37,9 @@ class FixeTabs
         global $conf;
         require_once DOL_DOCUMENT_ROOT . '/bimpsupport/chronos.php';
         runBimpSupportChrono();
-        
-        
-        if(isset($conf->global->MAIN_MODULE_BIMPTASK)){
+
+
+        if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
             require_once DOL_DOCUMENT_ROOT . '/bimptask/task.php';
             runBimpTask();
         }

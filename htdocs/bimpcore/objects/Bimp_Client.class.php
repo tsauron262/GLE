@@ -10,4 +10,15 @@ class Bimp_Client extends Bimp_Societe
 //        $this->forceTpye = "";
         parent::__construct($module, $object_name);
     }
+    
+    public function getRefProperty() {
+        return 'code_client';
+    }
+    
+     public function getSearchListFilters()
+    {
+        return array(
+            'client' => 1
+        );
+    }
 }

@@ -4,32 +4,12 @@ labels:
     name: Caisse
     is_female: 1
 
-objects: 
-    entrepot:
-        relation: hasOne
-        delete: 0
-        instance: 
-            dol_object: 
-                module: product/stock
-                file: entrepot
-            id_object:
-                field_value: id_entrepot
+objects:                 
     current_session: 
-        relation: hasOne
-        delete: 0
+        extends: caisse_session
         instance: 
-            bimp_object: BC_CaisseSession
             id_object: 
                 field_value: id_current_session
-    account: 
-        relation: hasOne
-        delete: 0
-        instance:
-            dol_object: 
-                module: compta/bank
-                file: account
-            id_object: 
-                field_value: id_account
                 
 fields: 
     id_entrepot:

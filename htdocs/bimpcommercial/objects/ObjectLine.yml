@@ -6,22 +6,16 @@ parent_id_property: id_obj
 
 objects:    
     product: 
-        relation: hasOne
-        delete: 0
         instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Product
             id_object: 
+                field_value: unset
                 prop: id_product
 
     fournisseur_price: 
+        extends: fourn_price
         relation: none
-        delete: 0
         instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_ProductFournisseurPrice
+            id_object: unset
                 
     equipment_lines: 
         relation: hasMany

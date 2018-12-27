@@ -13504,7 +13504,7 @@ button.list-group-item-danger.active:focus {
 /* line 31, ../scss/bootstrap/_panels.scss */
 .panel-heading .header_buttons {
   float: right;
-  margin-top: -5px;
+  margin-top: -7px;
 }
 
 /* line 38, ../scss/bootstrap/_panels.scss */

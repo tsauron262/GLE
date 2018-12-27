@@ -110,6 +110,28 @@ class Bimp_Societe extends BimpObject
 
         return $contacts;
     }
+    
+    public function getFilesDir()
+    {
+        if ($this->isLoaded()) {
+            return DOL_DATA_ROOT . '/societe/' . $this->id . '/';
+        }
+    }
+
+    public function getFileUrl($file_name)
+    {
+        if (!$file_name) {
+            return '';
+        }
+
+        if (!$this->isLoaded()) {
+            return '';
+        }
+
+        $file = $this->id . '/' . $file_name;
+
+        return DOL_URL_ROOT . '/document.php?modulepart=societe&file=' . urlencode($file);
+    }
 
     public function displayCountry()
     {

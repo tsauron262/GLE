@@ -7,27 +7,6 @@ labels:
     
 parent_object: BC_Vente
 parent_id_property: id_vente
-
-objects: 
-    product: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Product
-            id_object: 
-                field_value: id_product
-                
-    equipment: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimpequipment
-                name: Equipment
-            id_object: 
-                field_value: id_equipment
                 
 fields: 
     id_vente:

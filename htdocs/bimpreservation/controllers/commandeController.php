@@ -131,14 +131,14 @@ class commandeController extends reservationController
         $html .= '<div class="row">';
         $html .= '<div class="col-lg-12">';
 
-        $html .= '<div class="buttonsContainer" style="display: inline-block">';
+        $html .= '<div class="buttonsContainer" style="display: inline-block; width: 49%;">';
         $html .= '<button id="openEquipmentsFormButton" type="button" class="btn btn-primary btn-large"';
         $html .= ' onclick="openEquipmentsForm();">';
         $html .= '<i class="fa fa-arrow-circle-down iconLeft"></i>Attribuer des équipements';
         $html .= '</button>';
         $html .= '</div>';
 
-        $html .= '<div class="buttonsContainer align-right" style="display: inline-block; float: right;">';
+        $html .= '<div class="buttonsContainer align-right" style="display: inline-block; width: 49%;">';
 
         if ((int) $commande->getData('id_facture')) {
             $html .= $this->renderGlobalFactureButton($commande);
@@ -281,8 +281,8 @@ class commandeController extends reservationController
                 $html .= '<i class="fa fa-check iconLeft"></i>Valider la facture';
                 $html .= '</button>';
             }
-        } else {
-            $html .= BimpRender::renderAlerts('Erreur: ID de la facture hors expédition invalide');
+        } elseif ((int) $commande->getData('id_facture')) {
+            $html .= '<div style="display: inline-block;">' . $commande->renderChildUnfoundMsg('id_facture', $facture, true, true) . '</div>';
         }
 
         return $html;

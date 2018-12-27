@@ -5,32 +5,6 @@ common_fields: 0
 labels: 
     name: utilisateur connecté
 
-objects: 
-    caisse: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BC_Caisse
-            id_object: 
-                field_value: id_caisse
-                
-    caisse_session: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object: BC_CaisseSession
-            id_object: 
-                field_value: id_caisse_session
-                
-    user:
-        relation: hasOne
-        delete: 0
-        instance: 
-            module: bimpcore
-            name: Bimp_User
-        id_object:
-            field_value: id_user
-
 fields: 
     id_caisse: 
         label: Caisse

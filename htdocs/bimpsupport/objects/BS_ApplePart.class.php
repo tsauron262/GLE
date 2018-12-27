@@ -178,7 +178,7 @@ class BS_ApplePart extends BimpObject
         if ($type === 'EXCHANGE' && (int) $this->getData('no_order') && (float) $this->getData('stock_price') !== 0.0) {
             $type = 'STOCK';
         }
-        
+
         if ($type === 'EXCHANGE' && (float) $this->getData('exchange_price') === 0.0) {
             $type = 'STOCK';
         }
@@ -226,8 +226,7 @@ class BS_ApplePart extends BimpObject
         //Application des coef et constantes
         if ($type == "ios") {
             $constPrix = 45;
-        }    
-        elseif ($type == "batt" && $this->getData('price_type') == "EXCHANGE") {
+        } elseif ($type == "batt" && $this->getData('price_type') == "EXCHANGE") {
             $newPrix = 32.5;
         } elseif ($type == "ecran" && $this->getData('price_type') == "EXCHANGE") {
             foreach (self::$tabRefCommencePrixEcran as $refT => $prixT)
@@ -380,8 +379,10 @@ class BS_ApplePart extends BimpObject
                     if ((int) $this->getData('no_order')) {
                         $label .= ' APPRO';
                     }
+                    if (!$id_line) {
+                        $line->desc = $this->getData('label');
+                    }
                     $line->pa_ht = $this->getPrice();
-                    $line->desc = $this->getData('label');
                     $line->qty = (int) $this->getData('qty');
                     $line->tva_tx = 20;
                     $line->pu_ht = $this->convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));

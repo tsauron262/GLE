@@ -80,26 +80,36 @@ class BimpFile extends BimpObject
     public function getDefaultListExtraButtons()
     {
         $buttons = array();
-        $url = $this->getFileUrl();
-        if ($this->isDownloadable()) {
-            if ($url) {
-                $buttons[] = array(
-                    'label'   => 'Télécharger',
-                    'icon'    => 'download',
-                    'onclick' => 'window.open(\'' . $url . '\', \'_blank\')'
-                );
+
+        if ($this->isLoaded()) {
+            $parent = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($parent)) {
+                if (method_exists($parent, 'getFilesListExtraBtn')) {
+                    $buttons = $parent->getFilesListExtraBtn($this);
+                }
             }
-        }
-        switch (BimpTools::getFileTypeCode('x.' . $this->getData('file_ext'))) {
-            case 'img':
+
+            $url = $this->getFileUrl();
+            if ($this->isDownloadable()) {
                 if ($url) {
                     $buttons[] = array(
-                        'label'   => 'Afficher l\'image',
-                        'icon'    => 'far_eye',
-                        'onclick' => 'loadImageModal($(this), \'' . $url . '\', \'' . $this->getData('file_name') . '\')'
+                        'label'   => 'Télécharger',
+                        'icon'    => 'download',
+                        'onclick' => 'window.open(\'' . $url . '\', \'_blank\')'
                     );
                 }
-                break;
+            }
+            switch (BimpTools::getFileTypeCode('x.' . $this->getData('file_ext'))) {
+                case 'img':
+                    if ($url) {
+                        $buttons[] = array(
+                            'label'   => 'Afficher l\'image',
+                            'icon'    => 'far_eye',
+                            'onclick' => 'loadImageModal($(this), \'' . $url . '\', \'' . $this->getData('file_name') . '\')'
+                        );
+                    }
+                    break;
 
 //            case 'pdf':
 //                if ($url) {
@@ -118,11 +128,12 @@ class BimpFile extends BimpObject
 //                    );
 //                }
 //                break;
+            }
         }
         return $buttons;
     }
 
-    // Getters - Overrides BimpObject:
+    // Getters - Overrides BimpObject: 
 
     public function getParentObjectName()
     {
@@ -143,7 +154,7 @@ class BimpFile extends BimpObject
     }
 
     // Affichages: 
-
+    
     public function displayType($text_only = 0, $icon_only = 0, $no_html = 0)
     {
         $ext = (string) $this->getData('file_ext');
@@ -275,14 +286,100 @@ class BimpFile extends BimpObject
         }
     }
 
-    // Overrides :
+    public function moveToObject(BimpObject $object, $keep_copy = false)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID du fichier absent';
+        } elseif (!is_a($object, 'BimpObject')) {
+            $errors[] = 'Objet invalide';
+        } elseif (!BimpObject::objectLoaded($object)) {
+            $errors[] = 'ID ' . $object->getLabel('of_the') . ' absent';
+        }
+
+        $src_file = $this->getFilePath();
+
+        if (!file_exists($src_file)) {
+            $errors[] = 'Le fichier à copier "' . $this->getData('file_name') . '.' . $this->getData('file_ext') . '" n\'existe pas';
+        } else {
+            $dst_dir = $object->getFilesDir();
+            if (!preg_match('/^.*\/$/', $dst_dir)) {
+                $dst_dir .= '/';
+            }
+
+            if (!file_exists($dst_dir)) {
+                if (dol_mkdir($dst_dir, DOL_DATA_ROOT) <= 0) {
+                    $errors[] = 'Echec de la création du dossier de destination';
+                }
+            }
+
+            $dst_file = $object->getFilesDir() . $this->getData('file_name') . '.' . $this->getData('file_ext');
+            if (file_exists($dst_file)) {
+                $errors[] = 'Le fichier de destination existe déjà';
+            }
+        }
+
+        if (!count($errors) && file_exists($dst_dir)) {
+            if ($keep_copy) {
+//                echo $dst_dir; exit;
+//                ini_set('display_errors', 1);
+//                error_reporting(E_ALL);
+                if (!copy($src_file, $dst_file)) {
+                    $errors[] = 'Echec de la copie du fichier';
+                } else {
+                    $data = array(
+                        'parent_module'      => $object->module,
+                        'parent_object_name' => $object->object_name,
+                        'id_parent'          => (int) $object->id,
+                        'file_name'          => $this->getData('file_name'),
+                        'file_ext'           => $this->getData('file_ext'),
+                        'description'        => $this->getData('description'),
+                        'deleted'            => (int) $this->getData('deleted'),
+                        'user_delete'        => (int) $this->getData('user_delete'),
+                        'date_delete'        => (int) $this->getData('date_delete')
+                    );
+
+                    $result = $this->db->insert($this->getTable(), $data, true);
+
+                    if ($result <= 0) {
+                        $msg = 'Echec de la création du nouveau fichier';
+                        $sqlerror = $this->db->db->lasterror();
+                        if ($sqlerror) {
+                            $msg .= ' - ' . $sqlerror;
+                        }
+                        $errors[] = $msg;
+                    }
+                }
+            } else {
+                if (!rename($src_file, $dst_file)) {
+                    $errors[] = 'Echec du déplacement du fichier';
+                } else {
+                    $this->set('parent_module', $object->module);
+                    $this->set('parent_object_name', $object->object_name);
+                    $this->set('id_parent', (int) $object->id);
+                    $up_warnings = array();
+                    $up_errors = $this->update($up_warnings, true);
+                    if (count($up_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour du propriétaire du fichier');
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    // Overrides: 
 
     public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null)
     {
-        if (isset($filters['parent_module']) &&
-                isset($filters['parent_object_name']) &&
-                isset($filters['id_parent'])) {
-            $this->checkObjectFiles($filters['parent_module'], $filters['parent_object_name'], $filters['id_parent']);
+        if (!$this->isLoaded()) {
+            if (isset($filters['parent_module']) &&
+                    isset($filters['parent_object_name']) &&
+                    isset($filters['id_parent'])) {
+                $this->checkObjectFiles($filters['parent_module'], $filters['parent_object_name'], $filters['id_parent']);
+            }
         }
         return parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins);
     }
@@ -334,7 +431,7 @@ class BimpFile extends BimpObject
             return array('ID Absent');
         }
 
-        $current_name = (string) $this->getSavedData('file_name');
+        $current_name = (string) $this->getInitData('file_name');
         if (!is_null($current_name)) {
             $new_name = (string) $this->getData('file_name');
             if ($new_name) {

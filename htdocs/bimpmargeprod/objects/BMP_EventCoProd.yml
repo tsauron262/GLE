@@ -9,9 +9,8 @@ labels:
     
 objects: 
     societe:
-        relation: hasOne
-        delete: 0
         instance: 
+            bimp_object: unset
             dol_object: societe
             id_object: 
                 field_value: id_soc

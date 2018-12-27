@@ -11,7 +11,8 @@ class BimpConfigDefinitions
     public static $object_child = array(
         'relation' => array('default' => 'none'),
         'delete'   => array('data_type' => 'bool', 'default' => 0),
-        'instance' => array('data_type' => 'array')
+        'instance' => array('data_type' => 'array'),
+        'has_files' => array('data_type' => 'bool', 'default' => 0)
     );
     public static $button = array(
         'id'          => array(),

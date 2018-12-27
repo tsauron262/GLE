@@ -1362,19 +1362,17 @@ class BimpController
         $fields_return_label = BimpTools::getValue('field_return_label', '');
         $label_syntaxe = html_entity_decode(BimpTools::getValue('label_syntaxe', '<label_1>'));
         $fields_return_value = BimpTools::getValue('field_return_value', '');
-        $filters = BimpTools::getValue('filters', '');
+        $filters = BimpTools::getValue('filters', array());
         $join = BimpTools::getValue('join', '');
         $join_return_label = BimpTools::getValue('join_return_label', '');
         $join_on = BimpTools::getValue('join_on', '');
-        $value = BimpTools::getValue('value');
+        $values = explode(' ', BimpTools::getValue('value'));
 
-        if ($filters) {
+        if (!is_array($filters)) {
             $filters = json_decode($filters, 1);
-        } else {
-            $filters = array();
         }
 
-        if (!is_null($table) && !is_null($fields_return_label) && !is_null($fields_return_value) && count($fields_search) && !is_null($value)) {
+        if (!is_null($table) && !is_null($fields_return_label) && !is_null($fields_return_value) && count($fields_search) && !is_null($values)) {
             global $db;
             $bdb = new BimpDb($db);
 
@@ -1383,14 +1381,14 @@ class BimpController
             $i = 1;
             foreach ($fields_return_label as $field_label) {
                 if (!preg_match('/\./', $field_label)) {
-                    $field_label = '`' . $field_label . '`';
+                    $field_label = 'a.' . $field_label;
                 }
                 $sql .= $field_label . ' as label_' . $i . ', ';
                 $i++;
             }
 
             if (!preg_match('/\./', $fields_return_value)) {
-                $fields_return_value = '`' . $fields_return_value . '`';
+                $fields_return_value = 'a.' . $fields_return_value;
             }
 
             $sql .= $fields_return_value . ' as value';
@@ -1399,7 +1397,7 @@ class BimpController
                 $sql .= ', ' . $join_return_label . ' as join_label';
             }
 
-            $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . $table . ' a';
             if ($join && $join_on) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join;
                 $sql .= ' ON ' . $join_on;
@@ -1413,9 +1411,19 @@ class BimpController
                     $fl = false;
                 }
                 if (!preg_match('/\./', $field)) {
-                    $field = '`' . $field . '`';
+                    $field = 'a.' . $field;
                 }
-                $where .= 'LOWER(' . $field . ')' . ' LIKE \'%' . strtolower(addslashes($value)) . '%\'';
+                $val_fl = true;
+                $where .= '(';
+                foreach ($values as $value) {
+                    if (!$val_fl) {
+                        $where .= ' AND ';
+                    } else {
+                        $val_fl = false;
+                    }
+                    $where .= 'LOWER(' . $field . ')' . ' LIKE \'%' . strtolower(addslashes($value)) . '%\'';
+                }
+                $where .= ')';
             }
 
             if ($where) {

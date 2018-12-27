@@ -13,86 +13,41 @@ labels:
 
 objects:
     commande:
-        relation: hasOne
-        delete: 0
         instance:
-            bimp_object:
-                module: bimpcommercial
-                name: Bimp_Commande
-
-    reference:
-        relation: hasOne
-        delete: 0
-        instance:
-            bimp_object:
-                module: bimpfinancement
-                name: Bimp_Demande
-
-    contrat:
-        relation: hasOne
-        delete: 0
-        instance:
-            dol_object: contrat
-            id_object:
-                field_value: id_contrat
+            id_object: unset
 
     facture:
-        relation: hasOne
-        delete: 0
         instance: 
+            bimp_object: unset
             dol_object: facture
-            id_object:
-                field_value: id_facture
 
     facture_client:
-        relation: hasOne
-        delete: 0
+        extends: facture
         instance:
-            dol_object: facture
             id_object:
                 field_value: id_facture_client
 
     facture_fournisseur:
-        relation: hasOne
-        delete: 0
+        extends: facture
         instance:
-            dol_object: facture
             id_object:
                 field_value: id_facture_fournisseur
         card: 
             title: 
                 object_prop: ref
             view_btn: 1
-
-    client: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Societe
-            id_object: 
-                field_value: id_client
                 
     client_contact: 
-        relation: hasOne
-        delete: 0
+        extends: contact
         instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Contact
             id_object:
                 field_value: id_client_contact
     
     commercial:
-        relation: hasOne
-        delete: 0
+        extends: user
         instance:
-            bimp_object:
-                module: bimpcore
-                name: Bimp_User
             id_object:
-                fiels_value: id_commercial
+                field_value: id_commercial
 
     supplier:
         relation: hasOne

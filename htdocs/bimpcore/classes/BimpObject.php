@@ -4788,7 +4788,6 @@ class BimpObject extends BimpCache
     {
         $errors = array();
         $warnings = array();
-        $success = 'Fichier déplacé avec succès';
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
@@ -4821,6 +4820,11 @@ class BimpObject extends BimpCache
                         $create_link = (int) isset($data['create_link']) ? $data['create_link'] : 0;
                         $errors = $file->moveToObject($moveTo, $keep_copy);
                         
+                        if ($keep_copy) {
+                            $success = 'Fichier copié avec succès';
+                        } else {
+                            $success = 'Fichier déplacé avec succès';
+                        }
                         if (!count($errors) && !$keep_copy && $create_link) {
                             $asso = new BimpAssociation($this, 'files');
                             $asso->addObjectAssociation((int) $file->id);

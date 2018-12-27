@@ -783,3 +783,72 @@ searches:
             - table: bimp_gsx_repair
               alias: r
               on: a.id = r.id_sav
+              
+pages: 
+    default: 
+        nav_tabs: 
+            - id: card
+              title: Fiche SAV
+              struct: 
+                  type: rows
+                  rows: 
+                      - cols: 
+                          - type: custom
+                            custom: 
+                                callback: renderSavCheckup
+                      - cols: 
+                          - type: view
+                            view:
+                                name: infos
+                              
+                      - cols: 
+                          - type: custom
+                            col_lg: 6
+                            col_md: 6
+                            custom: 
+                                callback: renderPropalesList
+            - id: materiel
+              title: Matériel
+              struct: 
+                  type: rows
+                  rows: 
+                      - cols: 
+                          - type: view
+                            view: 
+                                name: materiel
+                      - cols: 
+                          - type: list
+                            list:
+                                name: sav
+                                children: prets
+            - id: devis
+              title: Devis
+              struct: 
+                  type: rows
+                  rows: 
+                      - cols: 
+                          - type: custom
+                            custom: 
+                                callback: renderPropalView
+                                  
+                      - cols: 
+                          - type: list
+                            list: 
+                                children: apple_parts
+#                      - cols: 
+#                          - type: custom
+#                            custom: 
+#                                callback: 
+#                                    method: renderLoadPartsButton
+#                                    params:
+#                                        object: sav
+#            - id: notes
+#              title: Notes
+#              struct:
+#                  type: notes
+#                  notes: 
+#                      visibility: 4
+#            - id: gsx
+#              title: <i class="fa fa-apple iconLeft"></i>GSX
+#              content: 
+#                  callback: renderGsx

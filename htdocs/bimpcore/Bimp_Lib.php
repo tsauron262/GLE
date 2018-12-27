@@ -38,6 +38,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'components/BC_Form.php';
     require_once $dir . 'components/BC_View.php';
     require_once $dir . 'components/BC_Input.php';
+    require_once $dir . 'components/BC_Page.php';
 
     require_once $dir . 'BimpStruct.php';
     require_once $dir . 'BimpAssociation.php';

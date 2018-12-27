@@ -312,7 +312,7 @@ class BimpRender
         return $html;
     }
 
-    public static function renderNavTabs($tabs, $tabs_id = 'maintabs')
+    public static function renderNavTabs($tabs, $tabs_id = 'maintabs', $params = array())
     {
         $html = '';
 
@@ -324,24 +324,28 @@ class BimpRender
             }
         }
 
-        $html .= '<ul id="navtabs_' . $tabs_id . '" class="nav nav-tabs" role="tablist" data-navtabs_id="' . $tabs_id . '">';
+        if (!isset($params['content_only']) || !(int) $params['content_only']) {
+            $html .= '<ul id="navtabs_' . $tabs_id . '" class="nav nav-tabs" role="tablist" data-navtabs_id="' . $tabs_id . '">';
 
-        foreach ($tabs as $tab) {
-            $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . ' data-navtab_id="' . $tab['id'] . '">';
-            $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab">';
-            $html .= $tab['title'];
-            $html .= '</a>';
-            $html .= '</li>';
+            foreach ($tabs as $tab) {
+                $html .= '<li role="presentation"' . ($tab['id'] === $active ? ' class="active"' : '') . ' data-navtab_id="' . $tab['id'] . '">';
+                $html .= '<a href="#' . $tab['id'] . '" aria-controls="' . $tab['id'] . '" role="tab" data-toggle="tab">';
+                $html .= $tab['title'];
+                $html .= '</a>';
+                $html .= '</li>';
+            }
+            $html .= '</ul>';
         }
-        $html .= '</ul>';
 
-        $html .= '<div id="navtabs_content_' . $tabs_id . '" class="tab-content">';
-        foreach ($tabs as $tab) {
-            $html .= '<div class="tab-pane fade' . ($tab['id'] === $active ? ' in active' : '') . '" role="tabpanel" id="' . $tab['id'] . '">';
-            $html .= $tab['content'];
+        if (!isset($params['nav_only']) || !(int) $params['nav_only']) {
+            $html .= '<div id="navtabs_content_' . $tabs_id . '" class="tab-content">';
+            foreach ($tabs as $tab) {
+                $html .= '<div class="tab-pane fade' . ($tab['id'] === $active ? ' in active' : '') . '" role="tabpanel" id="' . $tab['id'] . '">';
+                $html .= $tab['content'];
+                $html .= '</div>';
+            }
             $html .= '</div>';
         }
-        $html .= '</div>';
 
         return $html;
     }

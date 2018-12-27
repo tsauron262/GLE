@@ -322,7 +322,10 @@ class BimpFile extends BimpObject
 
         if (!count($errors) && file_exists($dst_dir)) {
             if ($keep_copy) {
-                if (!copy($src_file, $dst_dir)) {
+//                echo $dst_dir; exit;
+//                ini_set('display_errors', 1);
+//                error_reporting(E_ALL);
+                if (!copy($src_file, $dst_file)) {
                     $errors[] = 'Echec de la copie du fichier';
                 } else {
                     $data = array(

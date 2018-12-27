@@ -9,6 +9,7 @@ class BC_Page extends BimpComponent
     public $identifier = '';
     public $content_only = false;
     public $current_navtab = '';
+    public $tabs = array();
 
     public function __construct(BimpObject $object, $name = '', $content_only = false)
     {
@@ -21,12 +22,38 @@ class BC_Page extends BimpComponent
 
         if ($this->isOk()) {
             if (!$this->object->isLoaded()) {
-                $this->errors[] = 'ID ' . $this->object('of_the') . ' absent';
+                $this->errors[] = 'ID ' . $this->object->getLabel('of_the') . ' absent';
             } else {
                 $this->identifier = $this->object->object_name . '_' . $this->object->id . '_page';
                 if ($this->name) {
                     $this->identifier .= '_' . $this->name;
                 }
+            }
+
+            $this->fetchTabs();
+        }
+    }
+
+    public function fetchTabs()
+    {
+        $this->tabs = array();
+        if (count($this->params['nav_tabs'])) {
+            $path = $this->config_path . '/nav_tabs';
+            foreach ($this->params['nav_tabs'] as $idx) {
+                if (!(int) $this->object->config->get($path . '/' . $idx . '/show', 1, false, 'bool')) {
+                    continue;
+                }
+                $content = '';
+                if ($this->object->config->isDefined($path . '/' . $idx . '/struct')) {
+                    $content = BimpStruct::renderStruct($this->object->config, $path . '/' . $idx . '/struct');
+                } elseif ($this->object->config->isDefined($path . '/' . $idx . '/content')) {
+                    $content = $this->object->config->get($path . '/' . $idx . '/content');
+                }
+                $this->tabs[] = array(
+                    'id'      => $this->object->config->get($path . '/' . $idx . '/id', '', true),
+                    'title'   => $this->object->config->get($path . '/' . $idx . '/title', '', true),
+                    'content' => $content
+                );
             }
         }
     }
@@ -48,13 +75,31 @@ class BC_Page extends BimpComponent
             $html .= '>';
         }
 
+        $html .= '<div class="object_page_header">';
+
         if ((int) $this->params['object_header']) {
             $html .= $this->object->renderHeader();
         }
-        
-        if (count($this->params['nav_tabs'])) {
-            
+
+        if (count($this->tabs)) {
+            $html .= BimpRender::renderNavTabs($this->tabs, 'maintabs', array(
+                        'nav_only' => 1
+            ));
         }
+
+        $html .= '</div>';
+
+        $html .= '<div class="object_page_content">';
+
+        if (count($this->tabs)) {
+            $html .= BimpRender::renderNavTabs($this->tabs, 'maintabs', array(
+                'content_only' => 1
+            ));
+        } elseif ($this->object->config->isDefined($this->config_path . '/content')) {
+            $html .= $this->object->getConf($this->config_path . '/content', '');
+        }
+
+        $html .= '</div>';
 
         if (!$this->content_only) {
             $html .= '</div>';

@@ -18,7 +18,8 @@ class BimpCore
             '/bimpcore/views/js/form.js',
             '/bimpcore/views/js/list.js',
             '/bimpcore/views/js/view.js',
-            '/bimpcore/views/js/viewsList.js'
+            '/bimpcore/views/js/viewsList.js',
+            '/bimpcore/views/js/page.js'
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',

@@ -1,0 +1,26 @@
+bootstrap: 1
+
+js:
+    - /bimpapple/views/js/gsx.js
+    - /bimpsupport/views/js/sav.js
+    - /bimpequipment/views/js/equipment.js
+    - /bimpcommercial/views/js/paiement.js
+    - /bimpcommercial/views/js/object_line.js
+    
+css:
+    - /bimpapple/views/css/gsx.css
+    - /bimpsupport/views/css/sav.css
+    
+objects: 
+    sav: 
+        instance: 
+            bimp_object:
+                module: bimpsupport
+                name: BS_SAV
+            id_object: 
+                request: id
+                
+sections:
+    - type: page
+      page: 
+          object: sav

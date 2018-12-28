@@ -92,13 +92,16 @@ class BIMP_Task extends BimpObject
         return self::$valPrio;
     }
     
-    public function displayType(){
+    public function getType(){
         $d = $this->getData("dst");
-        $ok = 'other';
+        $type = 'other';
         if(isset(self::$valSrc[$d]))
-            $ok = $d;
-            
-        return self::$valSrc[$ok];
+            $type = $d;
+        return $type;
+    }
+    
+    public function displayType(){
+        return self::$valSrc[$this->getType()];
     }
     
 
@@ -108,7 +111,7 @@ class BIMP_Task extends BimpObject
         if($value != 'other')
             $filters['dst'] = $value;
         else{
-            $tabsDroit =  self::getTableDroitPasDroit($user);
+            $tabsDroit =  self::getTableSqlDroitPasDroit($user);
 //            print_r($tabsDroit);die;
             $filters['dst'] = array("not_in"=> $tabsDroit[2]);
         }
@@ -137,10 +140,7 @@ class BIMP_Task extends BimpObject
         global $user;
         if ($this->getData("id_user_owner") == $user->id)
             return 1;
-        $classRight = "other";
-        if (isset(self::$valSrc[$this->getData("dst")])) {
-            $classRight = $this->getData("dst");
-        }
+        $classRight = $this->getType();
         
         return $user->rights->bimptask->$classRight->$right;
     }
@@ -197,7 +197,7 @@ class BIMP_Task extends BimpObject
         return parent::canEditField($field_name);
     }
     
-    public static function getTableDroitPasDroit($user){
+    public static function getTableSqlDroitPasDroit($user){
         $tabDroit = $tabPasDroit = $tabTous = array();
         foreach (self::$valSrc as $src => $nom) {
             if ($src != "other") {
@@ -214,7 +214,7 @@ class BIMP_Task extends BimpObject
 
     public static function getFiltreDstRight($user)
     {
-        $tabT = self::getTableDroitPasDroit($user);
+        $tabT = self::getTableSqlDroitPasDroit($user);
         if ($user->rights->bimptask->other->read)
             return array("not_in", $tabT[1]);
         else

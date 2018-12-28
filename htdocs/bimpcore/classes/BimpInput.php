@@ -954,15 +954,20 @@ class BimpInput
                 $sql .= $field_name . ' as label_' . $i;
                 $i++;
             }
+            
+            if (!preg_match('/ +/', $table)) {
+                $table .= ' a';
+            }
+            
             $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
             if ($join) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join . ' ON ' . $join_on;
             }
             $sql .= ' WHERE ' . $field_return_value . ' = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
-
+            
             $result = $bdb->executeS($sql, 'array');
 
-            if (is_null($result) || !isset($result[0]['label'])) {
+            if (is_null($result)) {
                 $search = '';
             } else {
                 $search = $label_syntaxe;

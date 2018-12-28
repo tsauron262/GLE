@@ -8,6 +8,7 @@ class BC_Page extends BimpComponent
     public $component_name = 'Page';
     public $identifier = '';
     public $content_only = false;
+    public $header_locked = true;
     public $current_navtab = '';
     public $tabs = array();
 
@@ -75,10 +76,13 @@ class BC_Page extends BimpComponent
             $html .= '>';
         }
 
-        $html .= '<div class="object_page_header">';
+        $html .= '<div class="object_page_header' . ($this->header_locked ? ' locked' : '') . '">';
 
         if ((int) $this->params['object_header']) {
-            $html .= $this->object->renderHeader();
+            $html .= $this->object->renderHeader(false, array(
+                'allow_lock' => 1,
+                'locked'     => (int) $this->header_locked
+            ));
         }
 
         if (count($this->tabs)) {
@@ -93,7 +97,7 @@ class BC_Page extends BimpComponent
 
         if (count($this->tabs)) {
             $html .= BimpRender::renderNavTabs($this->tabs, 'maintabs', array(
-                'content_only' => 1
+                        'content_only' => 1
             ));
         } elseif ($this->object->config->isDefined($this->config_path . '/content')) {
             $html .= $this->object->getConf($this->config_path . '/content', '');

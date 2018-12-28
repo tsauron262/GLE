@@ -96,7 +96,7 @@ class BS_Ticket extends BimpObject
             }
         }
 
-        return '<input type="hidden" value="' . $id_client . '" name="id_client_contrat"/>' . $nom_url . ': ' . $id_client;
+        return '<input type="hidden" value="' . $id_client . '" name="id_client_contrat"/>' . $nom_url;
     }
 
     public function getDureeTotale()
@@ -227,7 +227,7 @@ class BS_Ticket extends BimpObject
     public function getContratInputFilters()
     {
         $filters = array(
-            'c.date_cloture' => array(
+            'a.date_cloture' => array(
                 'or_field' => array(
                     'IS_NULL',
                     array(
@@ -238,7 +238,7 @@ class BS_Ticket extends BimpObject
             )
         );
 
-        $key = '(SELECT COUNT(DISTINCT cdet.rowid) FROM llx_contratdet cdet WHERE cdet.fk_contrat = c.rowid AND (cdet.date_cloture IS NULL OR cdet.date_cloture > NOW()))';
+        $key = '(SELECT COUNT(DISTINCT cdet.rowid) FROM llx_contratdet cdet WHERE cdet.fk_contrat = a.rowid AND (cdet.date_cloture IS NULL OR cdet.date_cloture > NOW()))';
         $filters[$key] = array(
             'operator' => '>',
             'value'    => '0'

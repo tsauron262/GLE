@@ -1396,14 +1396,18 @@ class BimpController
             if ($join_return_label) {
                 $sql .= ', ' . $join_return_label . ' as join_label';
             }
+            
+            if (stripos($table, " ") === false) {
+                $table .= ' a';
+            }
 
             $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
-            if(stripos($table, " ") === false)
-                    $sql .=  ' a';
+            
             if ($join && $join_on) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join;
                 $sql .= ' ON ' . $join_on;
             }
+            
             $where = '';
             $fl = true;
             foreach ($fields_search as $field) {

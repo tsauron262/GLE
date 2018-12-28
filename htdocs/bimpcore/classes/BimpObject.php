@@ -3414,7 +3414,7 @@ class BimpObject extends BimpCache
 
     // Rendus HTML
 
-    public function renderHeader($content_only = false)
+    public function renderHeader($content_only = false, $params = array())
     {
         $html = '';
         if ($this->isLoaded()) {
@@ -3538,6 +3538,24 @@ class BimpObject extends BimpCache
                 if (method_exists($this, 'renderHeaderStatusExtra')) {
                     $html .= $this->renderHeaderStatusExtra();
                 }
+                $html .= '</div>';
+                $html .= '<div class="header_tools">';
+                if (isset($params['allow_lock']) && (int) $params['allow_lock']) {
+                    $locked = (isset($params['locked']) ? (int) $params['locked'] : 1);
+
+                    $html .= '<span class="headerIconButton bs-popover unlock_object_header_button"';
+                    $html .= BimpRender::renderPopoverData('Dévérouiller l\'en-tête (Cesser de maintenir l\'affichage lors du défilement vertical)', 'bottom');
+                    $html .= (!$locked ? ' style="display: none;"' : '') . '>';
+                    $html .= BimpRender::renderIcon('fas_lock-open');
+                    $html .= '</span>';
+
+                    $html .= '<span class="headerIconButton bs-popover lock_object_header_button"';
+                    $html .= BimpRender::renderPopoverData('Vérouiller l\'en-tête (Maintenir l\'affichage lors du défilement vertical)', 'bottom');
+                    $html .= ($locked ? ' style="display: none;"' : '') . '>';
+                    $html .= BimpRender::renderIcon('fas_lock');
+                    $html .= '</span>';
+                }
+
                 $html .= '</div>';
             }
 
@@ -4819,7 +4837,7 @@ class BimpObject extends BimpCache
                         $keep_copy = (int) isset($data['keep_copy']) ? $data['keep_copy'] : 0;
                         $create_link = (int) isset($data['create_link']) ? $data['create_link'] : 0;
                         $errors = $file->moveToObject($moveTo, $keep_copy);
-                        
+
                         if ($keep_copy) {
                             $success = 'Fichier copié avec succès';
                         } else {

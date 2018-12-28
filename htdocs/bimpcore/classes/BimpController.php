@@ -1402,6 +1402,8 @@ class BimpController
             }
 
             $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
+            if(stripos($table, " ") === false)
+                    $sql .=  ' a';
             if ($join && $join_on) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join;
                 $sql .= ' ON ' . $join_on;

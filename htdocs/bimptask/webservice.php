@@ -122,11 +122,9 @@ function traiteTask($dst, $src, $subj, $txt) {
         dol_syslog("erreur task".print_r($errors,1),3);
         return 0;
     }else{
+        $dir = $task->getFilesDir()."/";
         foreach($_FILES as $fileT){
-//            $dir = $task->getFilesDir()."/";
-            $dir = "/data/DOCUMENTS/bimp/societe/154049/";
             $file = $fileT['name'];
-            
             
             move_uploaded_file($fileT['tmp_name'], $dir.$file);
         }

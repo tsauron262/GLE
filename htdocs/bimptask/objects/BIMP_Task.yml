@@ -86,7 +86,9 @@ fields_tables:
               edit: 0
             - field: src
             - field: dst
-            - field: type
+            - label: Type de tâche
+              value: 
+                  callback: displayType
             - field: subj
             - field: txt
             - field: comment

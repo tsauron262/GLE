@@ -137,22 +137,22 @@ associations:
         input:
             type: search_list
             search_list:
-                table: commande c
-                field_return_value: c.rowid
-                field_return_label: c.ref
+                table: commande
+                field_return_value: a.rowid
+                field_return_label: a.ref
                 options:
                     default:
                         label: Recherche par référence de commande
-                        fields_search: c.ref,c.rowid
+                        fields_search: a.ref,a.rowid
                         join: societe s
-                        join_on: c.fk_soc = s.rowid
+                        join_on: a.fk_soc = s.rowid
                         join_return_label: s.nom
                         help: Entrez la référence de la commande
                     by_client:
                         label: Recherche par client
                         fields_search: s.nom,s.code_client
                         join: societe s
-                        join_on: c.fk_soc = s.rowid
+                        join_on: a.fk_soc = s.rowid
                         join_return_label: s.nom
                         help: Entrez le nom ou le code d'un client
 

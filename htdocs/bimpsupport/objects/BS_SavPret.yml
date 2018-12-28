@@ -31,10 +31,10 @@ fields:
         input: 
             type: search_list
             search_list:
-                table: bs_sav s
-                field_return_value: s.id
-                field_return_label: s.ref
-                fields_search: s.id,s.ref
+                table: bs_sav
+                field_return_value: id
+                field_return_label: ref
+                fields_search: id,ref
     code_centre: 
         label: Centre
         values: 

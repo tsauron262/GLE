@@ -271,6 +271,14 @@ function setDisplayPopupButtonEvents($button) {
     $button.data('event_init', 1);
 }
 
+function onWindowScroll() {
+    $('.object_page_header').each(function() {
+        if (!$.isOk($(this).findParentByClass('modal'))) {
+            setObjectHeaderPosition($(this));
+        }
+    });
+}
+
 // Rendus HTML 
 
 function renderLoading(msg, id_container) {
@@ -741,4 +749,14 @@ $(document).ready(function () {
         setCommonEvents($(this));
     });
     setCommonEvents($('body'));
+    
+    $(window).scroll(function() {
+        onWindowScroll();
+    });
+    
+//    $('body').keyup(function(e) {
+//        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+//            bimp_msg('ici');
+//        }
+//    });
 });

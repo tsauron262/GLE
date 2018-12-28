@@ -109,7 +109,7 @@
     h1, h2 {
         margin-top: 0;
     }
-    
+
     .object_header_infos {
         margin: 3px 0 0 0;
         font-style: italic;
@@ -122,6 +122,22 @@
         font-size: 15px;
         margin: 5px 10px;
     }
+
+    .header_tools {
+        display: inline-block;
+        margin-left: 15px;
+    }
+
+    .headerIconButton {
+        @include transition(all 0.3s ease);
+        color: #C8C8C8;
+        cursor: pointer;
+        font-size: 18px;
+
+        &:hover {
+            color: $primary;
+        }
+    }    
 
     .header_button {
         vertical-align: top;
@@ -142,6 +158,53 @@
         margin-top: 10px;
         padding: 5px;
         border-top: 2px solid $gray-dark;
+    }
+}
+
+/*.object_page_header {
+    @include transition(all 0.3s ease);    
+}*/
+
+.object_page_header.locked.fixed {
+    position: fixed;
+    top: 48px;
+    right: 0;
+    left: 206px;
+    z-index: 9000;
+    box-shadow: 6px 4px 6px #787878;
+
+    .object_header {
+        padding-top: 5px;
+    }
+    
+    & .object_header_infos {
+        display: none;
+    }
+    
+    .header_buttons {
+        margin-top: 0;
+    }
+    h1 {
+        font-size: 18px;
+        display: inline-block;
+        margin-bottom: 5px
+    }
+    
+    h2 {
+        font-size: 15px;
+        display: inline-block;
+        margin-left: 15px;
+        margin-bottom: 5px
+    }
+    
+    .header_bottom {
+        padding: 0;
+        margin-top: 0;
+    }
+    
+    .nav-tabs li a {
+        padding-top: 5px;
+        padding-bottom: 5px;
     }
 }
 

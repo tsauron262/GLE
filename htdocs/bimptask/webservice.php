@@ -123,8 +123,10 @@ function traiteTask($dst, $src, $subj, $txt) {
         return 0;
     }else{
         $dir = $task->getFilesDir()."/";
+        if(!is_dir($dir))
+            mkdir($dir);
         foreach($_FILES as $fileT){
-            $dir = "/data/DOCUMENTS/bimp/societe/154049/";
+//            $dir = "/data/DOCUMENTS/bimp/societe/154049/";
             $file = $fileT['name'];
             
             

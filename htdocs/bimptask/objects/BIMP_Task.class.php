@@ -3,7 +3,14 @@
 class BIMP_Task extends BimpObject
 {
 
-    public static $valSrc = array('task0001@bimp.fr', 'validationcommande@bimp.fr', 'Synchro-8SENS', 'supportyesss@bimp.fr', 'consoles@bimp.fr', 'licences@bimp.fr', 'vols@bimp.fr', 'other');
+    public static $valSrc = array('task0001@bimp.fr' => 'tache test', 
+        'validationcommande@bimp.fr' => "Validation commande", 
+        'Synchro-8SENS' => "Synchro-8SENS", 
+        'supportyesss@bimp.fr' => "Support YESS", 
+        'consoles@bimp.fr' => "CONSOLES", 
+        'licences@bimp.fr' => "LICENCES", 
+        'vols@bimp.fr' => "VOLS", 
+        'other' => 'AUTRE');
     public static $nbNonLu = 0;
     public static $nbAlert = 0;
     public static $valStatus = array(0 => array('label' => "En cours", 'classes' => array('error')), 4 => array('label' => "Terminé", 'classes' => array('info')));
@@ -84,21 +91,35 @@ class BIMP_Task extends BimpObject
     {
         return self::$valPrio;
     }
+    
+    public function displayType(){
+        $d = $this->getData("dst");
+        $ok = 'other';
+        if(isset(self::$valSrc[$d]))
+            $ok = $d;
+            
+        return self::$valSrc[$ok];
+    }
+    
+
+    public function getTypeTacheSearchFilters(&$filters, $value, &$joins = array())
+    {
+        global $user;
+        if($value != 'other')
+            $filters['dst'] = $value;
+        else{
+            $tabsDroit =  self::getTableDroitPasDroit($user);
+//            print_r($tabsDroit);die;
+            $filters['dst'] = array("not_in"=> $tabsDroit[2]);
+        }
+        
+        return self::$valStatus;
+    }
+    
 
     public static function getStatus_list_taskArray()
     {
         return self::$valStatus;
-//        global $db;
-//        if (!isset(self::$cache["status_list_task"])) {
-//            $result = array();
-//            $sql = $db->query("SELECT * FROM `llx_bimp_task_status`");
-//            while ($ln = $db->fetch_object($sql)) {
-//                $result[$ln->status] = array('label' => $ln->ref);
-//            }
-//            self::$cache["status_list_task"] = $result;
-//        }
-//        //return array(0=>array('label'=>"cool", 'classes'=>array('info')));//sucess info dangerous important
-//        return self::$cache["status_list_task"];
     }
 
     public function isEditable()
@@ -117,9 +138,10 @@ class BIMP_Task extends BimpObject
         if ($this->getData("id_user_owner") == $user->id)
             return 1;
         $classRight = "other";
-        if (in_array($this->getData("dst"), self::$valSrc)) {
+        if (isset(self::$valSrc[$this->getData("dst")])) {
             $classRight = $this->getData("dst");
         }
+        
         return $user->rights->bimptask->$classRight->$right;
     }
 
@@ -146,7 +168,7 @@ class BIMP_Task extends BimpObject
     {
         global $user;
         if ($this->isNotLoaded())
-            foreach (self::$valSrc as $src)
+            foreach (self::$valSrc as $src => $nom)
                 if ($user->rights->bimptask->$src->read)
                     return 1;
 
@@ -174,22 +196,29 @@ class BIMP_Task extends BimpObject
             return $this->canAttribute();
         return parent::canEditField($field_name);
     }
-
-    public static function getFiltreDstRight($user)
-    {
-        $tabDroit = $tabPasDroit = array();
-        foreach (self::$valSrc as $src) {
+    
+    public static function getTableDroitPasDroit($user){
+        $tabDroit = $tabPasDroit = $tabTous = array();
+        foreach (self::$valSrc as $src => $nom) {
             if ($src != "other") {
                 if ($user->rights->bimptask->$src->read)
                     $tabDroit[] = '"' . $src . '"';
                 else
                     $tabPasDroit[] = '"' . $src . '"';
+                $tabTous[] = '"' . $src . '"';
+                
             }
         }
+        return array($tabDroit,$tabPasDroit, $tabTous);
+    }
+
+    public static function getFiltreDstRight($user)
+    {
+        $tabT = self::getTableDroitPasDroit($user);
         if ($user->rights->bimptask->other->read)
-            return array("not_in", $tabPasDroit);
+            return array("not_in", $tabT[1]);
         else
-            return array("in", $tabDroit);
+            return array("in", $tabT[0]);
     }
 
     public function actionSendMail($data, &$success)

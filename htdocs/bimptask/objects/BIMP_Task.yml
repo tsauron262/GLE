@@ -86,6 +86,7 @@ fields_tables:
               edit: 0
             - field: src
             - field: dst
+            - field: type
             - field: subj
             - field: txt
             - field: comment
@@ -152,6 +153,17 @@ lists:
                 field: src
             dst:
                 field: dst
+            typeTache:
+                label: Type de tâche
+                value:
+                    callback: displayType
+                search:
+                  input:
+                      type: select
+                      options:
+                        options:
+                            array: valSrc
+                    
             subj:
                 field: subj
             txt:

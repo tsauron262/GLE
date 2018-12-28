@@ -66,7 +66,7 @@ function traiteTask($dst, $src, $subj, $txt) {
 
     
     //verif destinataire
-    foreach(BIMP_Task::$valSrc as $destCorrect){
+    foreach(BIMP_Task::$valSrc as $destCorrect => $nom){
         if($destCorrect != "other" && stripos($dst, $destCorrect) !== false){
             $dst = $destCorrect;
         }

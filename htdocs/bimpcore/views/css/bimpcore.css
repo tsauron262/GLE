@@ -8367,55 +8367,54 @@ td.buttons .btn {
     @include transition(all 0.3s ease);    
 }*/
 /* line 168, ../scss/bimpcore/_view.scss */
-.object_page_header.locked.fixed {
+.object_page_header.fixed {
   position: fixed;
   top: 48px;
   right: 0;
   left: 206px;
   z-index: 9000;
   box-shadow: 6px 4px 6px #787878;
+  /*    .nav-tabs li a {
+          padding-top: 5px;
+          padding-bottom: 5px;
+      }*/
 }
 /* line 176, ../scss/bimpcore/_view.scss */
-.object_page_header.locked.fixed .object_header {
+.object_page_header.fixed .object_header {
   padding-top: 5px;
 }
 /* line 180, ../scss/bimpcore/_view.scss */
-.object_page_header.locked.fixed .object_header_infos {
+.object_page_header.fixed .object_header_infos {
   display: none;
 }
 /* line 184, ../scss/bimpcore/_view.scss */
-.object_page_header.locked.fixed .header_buttons {
+.object_page_header.fixed .header_buttons {
   margin-top: 0;
 }
 /* line 187, ../scss/bimpcore/_view.scss */
-.object_page_header.locked.fixed h1 {
+.object_page_header.fixed h1 {
   font-size: 18px;
   display: inline-block;
   margin-bottom: 5px;
 }
 /* line 193, ../scss/bimpcore/_view.scss */
-.object_page_header.locked.fixed h2 {
+.object_page_header.fixed h2 {
   font-size: 15px;
   display: inline-block;
   margin-left: 15px;
   margin-bottom: 5px;
 }
 /* line 200, ../scss/bimpcore/_view.scss */
-.object_page_header.locked.fixed .header_bottom {
+.object_page_header.fixed .header_bottom {
   padding: 0;
   margin-top: 0;
 }
-/* line 205, ../scss/bimpcore/_view.scss */
-.object_page_header.locked.fixed .nav-tabs li a {
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
 
-/* line 211, ../scss/bimpcore/_view.scss */
+/* line 212, ../scss/bimpcore/_view.scss */
 .object_card {
   margin-top: 0;
 }
-/* line 214, ../scss/bimpcore/_view.scss */
+/* line 215, ../scss/bimpcore/_view.scss */
 .object_card .object_card_status {
   display: inline-block;
   text-align: right;
@@ -8423,17 +8422,17 @@ td.buttons .btn {
   margin-left: 15px;
 }
 
-/* line 221, ../scss/bimpcore/_view.scss */
+/* line 222, ../scss/bimpcore/_view.scss */
 .object_card_table {
   width: 100%;
   margin-top: 5px;
 }
-/* line 226, ../scss/bimpcore/_view.scss */
+/* line 227, ../scss/bimpcore/_view.scss */
 .object_card_table tbody tr th, .object_card_table tbody tr td {
   padding: 0 5px;
   border-bottom: 1px solid #fff;
 }
-/* line 231, ../scss/bimpcore/_view.scss */
+/* line 232, ../scss/bimpcore/_view.scss */
 .object_card_table tbody tr th {
   width: 20%;
   min-width: 120px;
@@ -8443,29 +8442,29 @@ td.buttons .btn {
   background-color: #fff;
   color: #282828;
 }
-/* line 241, ../scss/bimpcore/_view.scss */
+/* line 242, ../scss/bimpcore/_view.scss */
 .object_card_table tbody tr td {
   color: #282828;
   background-color: #fff;
 }
 
-/* line 247, ../scss/bimpcore/_view.scss */
+/* line 248, ../scss/bimpcore/_view.scss */
 .object_common_fields {
   margin: 5px 0;
   background-color: #F5F5F5;
 }
-/* line 251, ../scss/bimpcore/_view.scss */
+/* line 252, ../scss/bimpcore/_view.scss */
 .object_common_fields table {
   width: 100%;
   border: none;
 }
-/* line 256, ../scss/bimpcore/_view.scss */
+/* line 257, ../scss/bimpcore/_view.scss */
 .object_common_fields table tbody tr th, .object_common_fields table tbody tr td {
   padding: 3px 5px;
   font-size: 12px;
   border-bottom: 1px solid #fff;
 }
-/* line 262, ../scss/bimpcore/_view.scss */
+/* line 263, ../scss/bimpcore/_view.scss */
 .object_common_fields table tbody tr th {
   font-weight: normal;
   color: #DCDCDC;
@@ -8476,18 +8475,18 @@ td.buttons .btn {
   vertical-align: top;
   background-color: #636363;
 }
-/* line 273, ../scss/bimpcore/_view.scss */
+/* line 274, ../scss/bimpcore/_view.scss */
 .object_common_fields table tbody tr td {
   color: #282828;
   border-bottom: 1px solid #DCDCDC;
   vertical-align: middle;
 }
 
-/* line 281, ../scss/bimpcore/_view.scss */
+/* line 282, ../scss/bimpcore/_view.scss */
 .multiple_values_items_list {
   padding: 5px;
 }
-/* line 284, ../scss/bimpcore/_view.scss */
+/* line 285, ../scss/bimpcore/_view.scss */
 .multiple_values_items_list .multiple_values_item {
   margin: 5px 0;
   border: 1px solid #B4B4B4;

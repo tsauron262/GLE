@@ -1,6 +1,10 @@
+var object_header_scroll_trigger = 30;
+
 function reloadPage(page_id) {
 
 }
+
+// Gestion en-tête des pages objets: 
 
 function reloadObjectHeader(object_data) {
 
@@ -12,20 +16,37 @@ function setObjectHeaderPosition($header) {
     }
 
     if ($header.hasClass('locked')) {
-        if ($(window).scrollTop() > 30) {
-            fixeObjectHeader($header);
+        if ($(window).scrollTop() > object_header_scroll_trigger) {
+            fixeObjectHeader($header, true);
         } else {
             unfixeObjectHeader($header);
         }
     } else {
-        unfixeObjectHeader($header);
+        if (ctrl_down && $(window).scrollTop() > $header.height()) {
+            fixeObjectHeader($header, false);
+        } else {
+            unfixeObjectHeader($header);
+        }
     }
 }
 
-function fixeObjectHeader($header) {
+function fixeObjectHeader($header, fixe_margin) {
+    if (typeof (fixe_margin) === 'undefined') {
+        fixe_margin = true;
+    }
+
+    var height = 0;
+    if (!fixe_margin) {
+        height = $header.height();
+    }
+
     $header.addClass('fixed');
-    var height = $header.height() + 30;
-    $header.findParentByClass('object_page').find('.object_page_content').css('margin-top', height+'px');
+
+    if (fixe_margin) {
+        height = $header.height() + 30;
+    }
+
+    $header.findParentByClass('object_page').find('.object_page_content').css('margin-top', height + 'px');
 }
 
 function unfixeObjectHeader($header) {
@@ -76,6 +97,7 @@ function setObjectHeaderEvents($header) {
                 $headerContainer.removeClass('locked');
                 $(this).hide();
                 $(this).findParentByClass('header_tools').find('.lock_object_header_button').show();
+                saveObjectField('bimpcore', 'Bimp_User', id_user, 'object_header_locked', 0, null, null, false);
                 setObjectHeaderPosition($headerContainer);
             });
             $header.find('.lock_object_header_button').click(function () {
@@ -83,11 +105,61 @@ function setObjectHeaderEvents($header) {
                 $headerContainer.addClass('locked');
                 $(this).hide();
                 $(this).findParentByClass('header_tools').find('.unlock_object_header_button').show();
+                saveObjectField('bimpcore', 'Bimp_User', id_user, 'object_header_locked', 1, null, null, false);
                 setObjectHeaderPosition($headerContainer);
             });
             $header.data('object_header_events_init', 1);
         }
         setObjectHeaderPosition($header.findParentByClass('object_page_header'));
+    }
+}
+
+// Gestion NavTabs: 
+
+function navTabNext(nav_tabs_id) {
+    var $nav = $('#navtabs_' + nav_tabs_id);
+
+    if ($.isOk($nav)) {
+        var activeNext = false;
+        var done = false;
+        $nav.children('li').each(function () {
+            if (!done) {
+                if (activeNext) {
+                    $(this).find('a').tab('show');
+                    done = true;
+                } else {
+                    if ($(this).hasClass('active')) {
+                        activeNext = true;
+                    }
+                }
+            }
+        });
+        if (!done) {
+            $nav.children('li').first().find('a').tab('show');
+        }
+    }
+}
+
+function navTabPrev(nav_tab_id) {
+    var $nav = $('#navtabs_' + nav_tab_id);
+
+    if ($.isOk($nav)) {
+        var $prev = null;
+        var done = false;
+        $nav.children('li').each(function () {
+            if (!done) {
+                if ($(this).hasClass('active')) {
+                    if ($.isOk($prev)) {
+                        $prev.find('a').tab('show');
+                    } else {
+                        $nav.children('li').last().find('a').tab('show');
+                    }
+                    done = true;
+                } else {
+                    $prev = $(this);
+                }
+            }
+        });
     }
 }
 

@@ -1,5 +1,6 @@
 // Notifications:
 var bimp_msg_enable = true;
+var ctrl_down = false;
 
 function bimp_msg(msg, className, $container) {
     if (!bimp_msg_enable) {
@@ -229,6 +230,22 @@ function setCommonEvents($container) {
             $(this).on('shown.bs.tab', function (e) {
                 var target = '' + e.target;
                 var tab_id = target.replace(/^.*#(.*)$/, '$1');
+
+                var $li = $('a[href="#' + tab_id + '"]').parent('li');
+                if ($li.length && $li.parent('ul').data('navtabs_id') === 'maintabs') {
+                    var prev = '' + e.relatedTarget;
+                    prev = prev.replace(/^.*#(.*)$/, '$1');
+
+                    var $prevLi = $('a[href="#' + prev + '"]').parent('li');
+                    $prevLi.data('scrollTop', parseInt($(window).scrollTop()));
+                    var scrollTop = parseInt($li.data('scrollTop'));
+                    if (!isNaN(scrollTop)) {
+                        $(window).scrollTop(scrollTop);
+                    } else if (object_header_scroll_trigger && $(window).scrollTop() > object_header_scroll_trigger) {
+                        $(window).scrollTop(object_header_scroll_trigger + 1);
+                    }
+                }
+
                 var $content = $('#' + tab_id);
                 if ($content.length) {
                     setCommonEvents($content);
@@ -272,7 +289,7 @@ function setDisplayPopupButtonEvents($button) {
 }
 
 function onWindowScroll() {
-    $('.object_page_header').each(function() {
+    $('.object_page_header').each(function () {
         if (!$.isOk($(this).findParentByClass('modal'))) {
             setObjectHeaderPosition($(this));
         }
@@ -525,6 +542,7 @@ function lisibilite_nombre(nbr) {
 function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
 }
+
 // Divers:
 
 function getUrlParam(param) {
@@ -584,7 +602,7 @@ function bimp_reloadPage() {
 
     var tab = '';
     if (window.location.hash) {
-        tab =  window.location.hash.replace('#', '');
+        tab = window.location.hash.replace('#', '');
     }
 
     var params = getUrlParams();
@@ -749,14 +767,31 @@ $(document).ready(function () {
         setCommonEvents($(this));
     });
     setCommonEvents($('body'));
-    
-    $(window).scroll(function() {
+
+    $(window).scroll(function () {
         onWindowScroll();
     });
-    
-//    $('body').keyup(function(e) {
-//        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-//            bimp_msg('ici');
-//        }
-//    });
+
+    $('body').keydown(function (e) {
+        if (e.key === 'Control') {
+            ctrl_down = true;
+            $(this).find('.object_page_header').each(function () {
+                setObjectHeaderPosition($(this));
+            });
+        } else if (ctrl_down) {
+            if (e.key === 'ArrowRight') {
+                navTabNext('maintabs');
+            } else if (e.key === 'ArrowLeft') {
+                navTabPrev('maintabs');
+            }
+        }
+    });
+    $('body').keyup(function (e) {
+        if (e.key === 'Control') {
+            ctrl_down = false;
+            $(this).find('.object_page_header').each(function () {
+                setObjectHeaderPosition($(this));
+            });
+        }
+    });
 });

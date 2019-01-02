@@ -146,6 +146,10 @@ fields:
     apple_centre: 
         label: Centre SAV
         dol_extra_field: 1
+    object_header_locked: 
+        label: Vérouiller les en-têtes
+        type: bool
+        default_value: 0
         
 forms:
     light: 

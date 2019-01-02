@@ -165,7 +165,7 @@
     @include transition(all 0.3s ease);    
 }*/
 
-.object_page_header.locked.fixed {
+.object_page_header.fixed {
     position: fixed;
     top: 48px;
     right: 0;
@@ -202,10 +202,11 @@
         margin-top: 0;
     }
     
-    .nav-tabs li a {
+/*    .nav-tabs li a {
         padding-top: 5px;
         padding-bottom: 5px;
-    }
+    }*/
+
 }
 
 .object_card {

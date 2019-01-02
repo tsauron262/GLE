@@ -183,27 +183,27 @@ class modBimptask extends DolibarrModules {
 //
                     require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         require_once(DOL_DOCUMENT_ROOT."/bimptask/objects/BIMP_Task.class.php");
-        foreach(BIMP_Task::$valSrc as $typeTask){
+        foreach(BIMP_Task::$valSrc as $typeTask => $nom){
             $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-            $this->rights[$r][1] = 'Read '.$typeTask; // Permission label
+            $this->rights[$r][1] = 'Read '.$nom; // Permission label
             $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
             $this->rights[$r][4] = $typeTask;    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
             $this->rights[$r][5] = 'read';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
             $r++;
             $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-            $this->rights[$r][1] = 'Write '.$typeTask; // Permission label
+            $this->rights[$r][1] = 'Write '.$nom; // Permission label
             $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
             $this->rights[$r][4] = $typeTask;    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
             $this->rights[$r][5] = 'write';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
             $r++;
             $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-            $this->rights[$r][1] = 'Supprimer '.$typeTask; // Permission label
+            $this->rights[$r][1] = 'Supprimer '.$nom; // Permission label
             $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
             $this->rights[$r][4] = $typeTask;    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
             $this->rights[$r][5] = 'delete';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
             $r++;
             $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
-            $this->rights[$r][1] = 'Attribué '.$typeTask; // Permission label
+            $this->rights[$r][1] = 'Attribué '.$nom; // Permission label
             $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)
             $this->rights[$r][4] = $typeTask;    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
             $this->rights[$r][5] = 'attribute';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)

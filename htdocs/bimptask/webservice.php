@@ -66,7 +66,7 @@ function traiteTask($dst, $src, $subj, $txt) {
 
     
     //verif destinataire
-    foreach(BIMP_Task::$valSrc as $destCorrect){
+    foreach(BIMP_Task::$valSrc as $destCorrect => $nom){
         if($destCorrect != "other" && stripos($dst, $destCorrect) !== false){
             $dst = $destCorrect;
         }
@@ -122,9 +122,11 @@ function traiteTask($dst, $src, $subj, $txt) {
         dol_syslog("erreur task".print_r($errors,1),3);
         return 0;
     }else{
+        $dir = $task->getFilesDir()."/";
+        if(!is_dir($dir))
+            mkdir($dir);
         foreach($_FILES as $fileT){
-//            $dir = $task->getFilesDir()."/";
-            $dir = "/data/DOCUMENTS/bimp/societe/154049/";
+//            $dir = "/data/DOCUMENTS/bimp/societe/154049/";
             $file = $fileT['name'];
             
             

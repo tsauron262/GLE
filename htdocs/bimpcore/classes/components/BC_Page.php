@@ -8,7 +8,7 @@ class BC_Page extends BimpComponent
     public $component_name = 'Page';
     public $identifier = '';
     public $content_only = false;
-    public $header_locked = true;
+    public $header_locked = false;
     public $current_navtab = '';
     public $tabs = array();
 
@@ -32,6 +32,13 @@ class BC_Page extends BimpComponent
             }
 
             $this->fetchTabs();
+        }
+        
+        global $bimpUser;
+        if (BimpObject::objectLoaded($bimpUser)) {
+            $this->header_locked = (int) $bimpUser->getData('object_header_locked');
+        } else {
+            echo 'KO'; exit;
         }
     }
 

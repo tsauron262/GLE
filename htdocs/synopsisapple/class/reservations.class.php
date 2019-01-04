@@ -517,10 +517,6 @@ Afin de préparer au mieux votre prise en charge, nous souhaitons attirer votre 
 
 Conditions particulières aux iPhones
 
-- !!!!! Programme Batterie : Nous proposons le changement de la batterie de votre iPhone suite à la campagne de rappel d’Apple au prix de 39,00€TTC. Notre stock étant très limité et l’approvisionnement de nouvelles batteries étant contraint, les délais peuvent varier pour atteindre une quinzaine de jours.
-pour les iPhone 6 et 6S plus. 
-Pour l’iPhone 6 plus, ce produit n’étant plus fabriqué, les batteries seront disponibles début avril. !!!!!
-
 - Vous devez désactiver la fonction « localiser mon iPhone » dans le menu iCloud de votre téléphone avec votre mot de passe iCloud.
 
 - Pour certains types de pannes sous garantie, un envoi de l’iPhone dans un centre Apple peut être nécessaire, entrainant un délai plus long (jusqu’à 10 jours ouvrés), dans ce cas un téléphone de prêt est possible (sous réserve de disponibilité). Si cela vous intéresse, merci de vous munir d’un chèque de caution.

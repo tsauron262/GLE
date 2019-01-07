@@ -906,6 +906,7 @@ class BimpCache
     {
         return array(
             300  => "iOs",
+            1014 => "MAC OS 10.14",
             1013 => "MAC OS 10.13",
             1012 => "MAC OS 10.12",
             1011 => "MAC OS 10.11",

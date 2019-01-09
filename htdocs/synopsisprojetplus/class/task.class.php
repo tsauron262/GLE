@@ -45,8 +45,18 @@ class TaskP extends CommonObject
     function verifUser($idUser){
         if(!$this->contactsoftask)
             $this->contactsoftask=$this->getListContactId('internal');
+        
         if(!in_array($idUser, $this->contactsoftask))
             $this->add_contact ($idUser, 181, 'internal');
+        
+        if($this->fk_project > 0){
+            $projet = new Project($this->db);
+            $projet->fetch($this->fk_project);
+            $contacts = $projet->getListContactId('internal');
+        
+            if(!in_array($idUser, $contacts))
+                $projet->add_contact ($idUser, 161, 'internal');
+        }
     }
     
     function getSummaryOfTimeSpentP($id='')

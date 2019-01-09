@@ -15,7 +15,7 @@ class ActionsSynopsisprojetplus
     
 	function printSearchForm($parameters, &$object, &$action, $hookmanager)
 	{
-            $this->resprints = '<script type="text/javascript" src="'.DOL_URL_ROOT.'/synopsisprojetplus/js/projetPlus.js"/>';
+            $this->resprints = '<script type="text/javascript" src="'.DOL_URL_ROOT.'/synopsisprojetplus/js/projetPlus.js"></script>';
             return 0;
 	}
 }

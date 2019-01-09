@@ -644,7 +644,10 @@ class Task extends CommonObject
 		$linkend='</a>';
 
 		$picto='projecttask';
-
+                
+                if($this->ref == "" && $this->id > 0)
+                    $this->ref = "Tache ".$this->id;
+                
 		$result .= $linkstart;
 		if ($withpicto) $result.=img_object(($notooltip?'':$label), $picto, ($notooltip?(($withpicto != 2) ? 'class="paddingright"' : ''):'class="'.(($withpicto != 2) ? 'paddingright ' : '').'classfortooltip"'), 0, 0, $notooltip?0:1);
 		if ($withpicto != 2) $result.= $this->ref;

@@ -903,6 +903,8 @@ echo "<br/>totale derive   ".$totderiveCoef."</br>";
     function getMenu() {
         global $user;
         $this->debutPara .= 'userid=' . $this->userId . '&';
+        $this->debutPara .= 'typeTableau=' . $this->typeTableau . '&';
+        $this->debutPara .= 'view=' . $this->formatView . '&';
 
         print_barre_liste("Imputations projet" . ($this->fromProj ? " : " . $this->projet->getNomUrl(1, '', 1) : "s"), $this->page, $_SERVER["PHP_SELF"], "&" . $this->debutPara);
 

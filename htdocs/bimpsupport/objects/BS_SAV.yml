@@ -329,9 +329,11 @@ forms:
               input_name: mode_paiement_acompte
               input: 
                   type: select_payment
+                  include_empty: 1
               display_if: 
                   field_name: acompte
                   hide_values: 0,
+              value: 6
             - field: system
             - field: login_admin
             - field: pword_admin
@@ -387,6 +389,8 @@ forms:
               input_name: mode_paiement
               input: 
                   type: select_payment
+                  include_empty: 1
+              value: 6
             - custom: 1
               label: Montant payé
               input_name: paid

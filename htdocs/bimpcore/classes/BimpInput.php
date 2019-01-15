@@ -315,8 +315,25 @@ class BimpInput
                 if (!isset($options['active_only'])) {
                     $options['active_only'] = 1;
                 }
+                if (!isset($options['include_empty'])) {
+                    $options['include_empty'] = 0;
+                }
                 $form->load_cache_types_paiements();
                 $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '">';
+
+                if ((int) $options['include_empty']) {
+                    $html .= '<option';
+                    switch ($options['value_type']) {
+                        case 'code':
+                            $html .= ' value="" data-id_payment="0">';
+                            break;
+
+                        case 'id':
+                            $html .= ' value="0" data-code="">';
+                    }
+                    $html .= '</option>';
+                }
+
                 foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
                     if (!(int) $options['active_only'] || ((int) $options['active_only'] && (int) $payment_data['active'])) {
                         switch ($options['value_type']) {
@@ -954,17 +971,17 @@ class BimpInput
                 $sql .= $field_name . ' as label_' . $i;
                 $i++;
             }
-            
+
             if (!preg_match('/ +/', $table)) {
                 $table .= ' a';
             }
-            
+
             $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
             if ($join) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join . ' ON ' . $join_on;
             }
             $sql .= ' WHERE ' . $field_return_value . ' = ' . (is_string($value) ? '\'' . $value . '\'' : $value);
-            
+
             $result = $bdb->executeS($sql, 'array');
 
             if (is_null($result)) {

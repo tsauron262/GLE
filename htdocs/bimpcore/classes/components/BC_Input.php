@@ -91,7 +91,8 @@ class BC_Input extends BimpComponent
         ),
         'select_payment'              => array(
             'value_type'  => array('default' => 'id'),
-            'active_only' => array('data_type' => 'bool', 'default' => 1)
+            'active_only' => array('data_type' => 'bool', 'default' => 1),
+            'include_empty' => array('data_type' => 'bool', 'default' => 0)
         ),
         'search_ziptown'              => array(
             'field_type'    => array('default' => ''),
@@ -331,6 +332,7 @@ class BC_Input extends BimpComponent
             case 'select_payment':
                 $options['value_type'] = isset($this->params['value_type']) ? $this->params['value_type'] : 'id';
                 $options['active_only'] = isset($this->params['active_only']) ? $this->params['active_only'] : 1;
+                $options['include_empty'] = isset($this->params['include_empty']) ? $this->params['include_empty'] : 0;
                 break;
 
             case 'search_ziptown':

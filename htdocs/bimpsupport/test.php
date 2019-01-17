@@ -36,11 +36,11 @@ C'est avec plaisir que nous vous acceuilllons désormais dans ce nouveau centre 
 
 Cordialement.";
 
-$to = implode("<br/>", $tabMail);
+$to = implode(",", $tabMail);
 
 $to = "Tommy@bimp.fr";
 
-$msg .= "<br/><br/>Mails : ".implode(",", $tabMail);
+$msg .= "<br/><br/>Mails : ".implode("<br/>", $tabMail);
 
 
 mailSyn2("Déménagement SAV BIMP", $to, 'SAV66@bimp.fr', $msg);

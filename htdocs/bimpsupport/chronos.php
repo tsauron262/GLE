@@ -23,10 +23,10 @@ function runBimpSupportChrono()
         )
             ), null, null, 'id', 'desc', 'array', array('id', 'obj_name'));
 
-    initTimers($timer, $timers);
+    initTimers($timers);
 }
 
-function initTimers($timer, $timers)
+function initTimers($timers)
 {
     if (!count($timers)) {
         return;
@@ -38,18 +38,12 @@ function initTimers($timer, $timers)
         return;
     }
 
-    $ticket = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
-    $inter = BimpObject::getInstance('bimpsupport', 'BS_Inter');
-
     foreach ($timers as $t) {
-        $timer->reset();
-        $ticket->reset();
-        $inter->reset();
         if (!isset($t['id']) || !(int) $t['id']) {
             continue;
         }
-
-        if (!$timer->fetch((int) $t['id'])) {
+        $timer = BimpCache::getBimpObjectInstance('bimpcore', 'BimpTimer', (int) $t['id']);
+        if (!$timer->isLoaded()) {
             $errors[] = 'Echec du chargement du timer d\'ID ' . $t['id'];
             continue;
         }
@@ -61,7 +55,8 @@ function initTimers($timer, $timers)
                 continue;
             }
 
-            if (!$inter->fetch((int) $timer->getData('id_obj'))) {
+            $inter = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Inter', (int) $timer->getData('id_obj'));
+            if (!$inter->isLoaded()) {
                 $errors[] = 'Echec du chargement de l\'intervention n°' . $timer->getData('id_obj');
                 $timer->delete();
                 continue;
@@ -77,7 +72,8 @@ function initTimers($timer, $timers)
                 continue;
             }
 
-            if (!$ticket->fetch((int) $id_ticket)) {
+            $ticket = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Ticket', (int) $id_ticket);
+            if (!$ticket->isLoaded()) {
                 $errors[] = 'Echec du chargement du ticket n°' . $id_ticket;
                 $timer->delete();
                 continue;

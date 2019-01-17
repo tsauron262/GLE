@@ -1,0 +1,76 @@
+table: bmp_event_tarif
+common_fields: 0
+
+parent_object: BMP_Event
+parent_id_property: id_event
+
+labels:
+    name: tarif
+    
+fields: 
+    id_event: 
+        label: Evénement
+        type: id_parent
+        
+    name: 
+        label: Nom
+        type: string
+        required: 1
+        
+    amount: 
+        label: Montant TTC
+        type: money
+        
+    previsionnel: 
+        label: Ventes prévisionnelles
+        type: int
+        
+#    droits_loc: 
+#        label: Droits de location (Le Fil)
+#        type: float
+#        decimals: 6
+#        
+#    droits_loc_coprods:
+#        label: Droits de location (Partenaires)
+#        type: money
+    
+list:
+    title: Tarifs
+    icon: euro
+    checkboxes: 
+        callback: isDeletable
+    pagination: 0
+    bulk_actions:
+        - label: supprimer les tarifs sélectionnés
+          icon: fas_trash-alt
+          onclick: deleteSelectedObjects('list_id', $(this))
+    enable_search: 0
+    sort_field: id
+    sort_way: asc
+    n: 0
+    add_object_row: 1
+    update_btn: 1
+    add_form_name: default
+    delete_btn: 1
+    cols: 
+        name: 
+            field: name
+            edit: 1
+        amount: 
+            field: amount
+            edit: 1
+        previsionnel:
+            show: 
+                callback: 
+                    method: isInPrevisionnelMode
+                    object: 
+                        callback: getParentInstance
+            field: previsionnel
+            edit: 1
+#        loc: 
+#            field: droits_loc
+#            edit: 1
+#        loc_coprods: 
+#            field: droits_loc_coprods
+#            edit: 1
+            

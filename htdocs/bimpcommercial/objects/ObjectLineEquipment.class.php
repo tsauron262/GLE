@@ -49,7 +49,7 @@ class ObjectLineEquipment extends BimpObject
         if ($this->isLoaded()) {
             $equipment = null;
             if ((int) $id_equipment) {
-                $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                 if (!$equipment->isLoaded()) {
                     $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
                 }
@@ -85,13 +85,13 @@ class ObjectLineEquipment extends BimpObject
 
     // Overrides: 
 
-    public function delete($force_delete = false)
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         $id_equipment = (int) $this->getData('id_equipment');
-        $errors = parent::delete($force_delete);
+        $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors) && $id_equipment) {
-            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', $id_equipment);
+            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
             if ($equipment->isLoaded()) {
                 $equipment->updateField('available', 1);
             }

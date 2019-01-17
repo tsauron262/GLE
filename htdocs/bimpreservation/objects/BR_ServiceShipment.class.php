@@ -77,7 +77,7 @@ class BR_ServiceShipment extends BimpObject
     public function getCommande()
     {
         if (is_null($this->commande)) {
-            $this->commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+            $this->commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
         }
 
         return $this->commande;
@@ -131,9 +131,9 @@ class BR_ServiceShipment extends BimpObject
 
         if (BimpObject::objectLoaded($commande)) {
             $asso = new BimpAssociation($commande, 'avoirs');
-            $avoir = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             foreach ($asso->getAssociatesList() as $id_avoir) {
-                if ($avoir->fetch((int) $id_avoir)) {
+                $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_avoir);
+                if ($avoir->isLoaded()) {
                     if ((int) $avoir->dol_object->statut === (int) Facture::STATUS_DRAFT) {
                         $DT = new DateTime($this->db->db->iDate($avoir->dol_object->date_creation));
                         $avoirs[(int) $id_avoir] = $avoir->dol_object->ref . ' - créé le ' . $DT->format('d / m / Y à H:i');
@@ -165,7 +165,7 @@ class BR_ServiceShipment extends BimpObject
     {
         $errors = array();
 
-        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
         $id_order_line = (int) $this->getData('id_commande_client_line');
         $shipment = $this->getParentInstance();
 
@@ -225,7 +225,8 @@ class BR_ServiceShipment extends BimpObject
             // Retrait de l'expédition: 
             $new_qty = (int) $this->getData('qty') - $qty;
             if ($removeFromOrder && ($new_qty === 0)) {
-                $del_errors = $this->delete(true);
+                $del_warnings = array();
+                $del_errors = $this->delete($del_warnings, true);
                 if (count($del_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression de la ligne d\'expédition');
                 }
@@ -331,9 +332,9 @@ class BR_ServiceShipment extends BimpObject
 
     // Overrides: 
 
-    public function create(&$warnings = array())
+    public function create(&$warnings = array(), $force_create = false)
     {
-        $errors = parent::create($warnings);
+        $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
             $qty = (int) $this->getData('qty');
@@ -348,11 +349,11 @@ class BR_ServiceShipment extends BimpObject
         return $errors;
     }
 
-    public function update(&$warnings = array())
+    public function update(&$warnings = array(), $force_update = false)
     {
         $current_qty = (int) $this->getSavedData('qty');
 
-        $errors = parent::update($warnings);
+        $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
             $new_qty = (int) $this->getData('qty');
@@ -368,12 +369,12 @@ class BR_ServiceShipment extends BimpObject
         return $errors;
     }
 
-    public function delete()
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         $errors = $this->removeFromShipment((int) $this->getData('qty'));
 
         if (!count($errors)) {
-            $errors = parent::delete();
+            $errors = parent::delete($warnings, $force_delete);
         }
 
         return $errors;

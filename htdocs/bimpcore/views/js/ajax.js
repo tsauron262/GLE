@@ -69,7 +69,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     }
 
     if ($.isOk(bimpAjax.$button)) {
-        bimpAjax.$button.addClass('disabled')
+        bimpAjax.$button.addClass('disabled');
     }
 
     if (!/\?/.test(bimpAjax.url)) {

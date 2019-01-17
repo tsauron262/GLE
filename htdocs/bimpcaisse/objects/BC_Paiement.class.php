@@ -44,7 +44,6 @@ class BC_Paiement extends BimpObject
 
         if (BimpObject::objectLoaded($p)) {
             $rows = $this->db->getRows('paiement_facture', '`fk_paiement` = ' . (int) $p->id, null, 'array', array('fk_facture', 'amount'));
-            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             if (!is_null($rows)) {
                 $html = '';
                 $fl = true;
@@ -54,8 +53,8 @@ class BC_Paiement extends BimpObject
                     } else {
                         $fl = false;
                     }
-
-                    if ($facture->fetch((int) $r['fk_facture'])) {
+                    $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture']);
+                    if ($facture->isLoaded()) {
                         $html .= BimpObject::getInstanceNomUrl($facture);
                     } else {
                         $html .= BimpRender::renderAlerts('Erreur: la facture d\'ID ' . $r['fk_facture'] . ' n\'existe pas');

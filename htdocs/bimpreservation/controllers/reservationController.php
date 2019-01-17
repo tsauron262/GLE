@@ -52,7 +52,7 @@ class reservationController extends BimpController
         }
 
         if (!count($errors)) {
-            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation', $id_reservation);
+            $reservation = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', $id_reservation);
             if (!$reservation->isLoaded()) {
                 $errors[] = 'Réservation d\'ID ' . $id_reservation . ' non trouvée';
             } else {
@@ -93,7 +93,7 @@ class reservationController extends BimpController
             $id_reservation = (int) BR_Reservation::findEquipmentToReceive($id_commande_client, $serial, $errors);
 
             if ($id_reservation) {
-                $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation', $id_reservation);
+                $reservation = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', $id_reservation);
                 if ($reservation->isLoaded()) {
                     $ref = $reservation->getData('ref') . '" (ID ' . $id_reservation . ')"';
                 } else {
@@ -121,7 +121,7 @@ class reservationController extends BimpController
         if (!$id_reservation_cmd_fourn) {
             $errors[] = 'ID de la la réservation absent';
         } else {
-            $reservation = BimpObject::getInstance('bimpreservation', 'BR_ReservationCmdFourn', $id_reservation_cmd_fourn);
+            $reservation = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_ReservationCmdFourn', $id_reservation_cmd_fourn);
             if (!$reservation->isLoaded()) {
                 $errors[] = 'ID de la réservation invalide';
             } else {

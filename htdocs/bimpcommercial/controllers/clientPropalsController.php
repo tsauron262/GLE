@@ -31,7 +31,7 @@ class clientPropalsController extends BimpController
             return BimpRender::renderAlerts('ID du client absent');
         }
 
-        $societe = BimpObject::getInstance('bimpcore', 'Bimp_Societe', (int) BimpTools::getValue('id', 0));
+        $societe = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) BimpTools::getValue('id', 0));
 
         if (!BimpObject::objectLoaded($societe)) {
             return BimpRender::renderAlerts('ID du client invalide');

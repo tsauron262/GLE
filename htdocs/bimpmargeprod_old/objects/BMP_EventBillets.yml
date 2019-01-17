@@ -1,0 +1,109 @@
+table: bmp_event_billets
+common_fields: 0
+
+parent_object: BMP_Event
+parent_id_property: id_event
+
+labels:
+    name: vente de billets
+    name_plur: ventes de billets
+    is_female: 1
+    
+objects: 
+    seller: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: societe
+            id_object: 
+                field_value: id_soc_seller
+    tarif:
+       relation: hasOne
+       delete: 0
+       instance: 
+           bimp_object: BMP_Tarif
+           id_object: 
+               field_value: id_tarif
+               
+fields: 
+    id_event: 
+        label: Evénement
+        type: id_parent
+    
+    id_soc_seller: 
+        label: Vendeur
+        type: id_object
+        object: seller
+        input: 
+            type: search_societe
+            help: Entrez une référence ou un nom pour rechercher un vendeur enregistré
+        display: 
+            type: nom_url
+            
+    seller_name:
+        label: Nom Vendeur
+        type: string
+        input: 
+            help: Utilisez ce champ si le vendeur n'est pas enregistré
+        display_if:
+            field_name: id_soc_seller
+            show_values: 0,
+        
+    id_tarif:
+        label: Tarif
+        type: id_object
+        object: tarif
+        values: 
+            array: tarifs
+        
+    quantity:
+        label: Quantité vendue
+        type: int
+        default_value: 0
+        history: 1
+            
+list:
+    title: Vente de billets
+    checkboxes: 
+        callback: isEventEditable
+    pagination: 0
+    objects_change_reload: BMP_Tarif
+    bulk_actions:
+        - label: supprimer les lignes sélectionnées
+          icon: fas_trash-alt
+          onclick: deleteSelectedObjects('list_id', $(this))
+    enable_search: 0
+    sort_field: id
+    sort_way: desc
+    n: 0
+    update_btn: 
+        callback: isEventEditable
+    add_form_name: 
+        callback: getCreateForm
+    edit_btn: 
+        callback: isEventEditable
+    delete_btn: 
+        callback: isEventEditable
+    cols: 
+        seller:
+            label: Vendeur
+            value: 
+                callback: displaySeller
+        tarif_name:
+            label: Tarif
+            value: 
+                callback: displayTarif
+        quantity: 
+            field: quantity
+            edit: 
+                callback: isEventEditable
+            history: 1
+            width: 120px
+        total_ttc: 
+            label: Total TTC
+            value:
+                callback: displayTotalTTC
+        total_ht: 
+            label: Total HT
+            value:
+                callback: displayTotalHT

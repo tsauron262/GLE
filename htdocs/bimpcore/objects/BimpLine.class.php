@@ -6,7 +6,6 @@ class BimpLine extends BimpObject
     const BL_PRODUCT = 1;
     const BL_FREE = 2;
     const BL_TEXT = 3;
-    
     const BL_PRODUIT = 1;
     const BL_SERVICE = 2;
     const BL_LOGICIEL = 3;
@@ -34,6 +33,18 @@ class BimpLine extends BimpObject
     public function isDeletable()
     {
         return $this->isParentEditable();
+    }
+
+    public function isFormAllowed($form_name, &$errors = array())
+    {
+        if ($form_name === 'default') {
+            if (!(int) $this->isEditable()) {
+                $errors[] = BimpTools::ucfirst($this->getLabel('this') . ' n\'est plus éditable');
+                return 0;
+            }
+        }
+
+        return parent::isFormAllowed($form_name);
     }
 
     public function isLineProduct()
@@ -137,7 +148,7 @@ class BimpLine extends BimpObject
             }
 
             if ($id_product) {
-                $this->product = BimpObject::getInstance('bimpcore', 'Bimp_Product', $id_product);
+                $this->product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
             }
         }
 
@@ -235,6 +246,24 @@ class BimpLine extends BimpObject
         return $this->getData($field_name);
     }
 
+    public function getTypeForObjectLine()
+    {
+        BimpObject::loadClass('bimpcommercial', 'ObjectLine');
+
+        switch ((int) $this->getData('type')) {
+            case self::BL_PRODUCT:
+                return ObjectLine::LINE_PRODUCT;
+
+            case self::BL_FREE:
+                return ObjectLine::LINE_FREE;
+
+            case self::BL_TEXT:
+                return ObjectLine::LINE_TEXT;
+        }
+
+        return 0;
+    }
+
     // Affichages: 
 
     public function displayDescription($display_input_value = true, $no_html = false)
@@ -243,7 +272,19 @@ class BimpLine extends BimpObject
 
         switch ((int) $this->getData('type')) {
             case self::BL_PRODUCT:
+                $product = $this->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    if ($no_html) {
+                        $html .= $this->displayData('id_product', 'nom', $display_input_value, $no_html);
+                        $html .= "\n";
+                        $html .= $product->getData('label');
+                    } else {
                 $html .= $this->displayData('id_product', 'nom_url', $display_input_value, $no_html);
+                        $html .= '<br/>';
+                        $html .= $product->getData('label');
+                    }
+                }
+
             case self::BL_FREE:
                 $html .= $this->displayData('label', 'default', $display_input_value, $no_html);
         }
@@ -297,6 +338,54 @@ class BimpLine extends BimpObject
         return BimpTools::displayMoneyValue($this->getTotalTTC(), 'EUR');
     }
 
+    // Traitements : 
+
+    public function hydrateObjectLine(ObjectLine $objectLine, $qty = null)
+    {
+        if (is_a($objectLine, 'ObjectLine')) {
+            switch ((int) $this->getData('type')) {
+                case self::BL_PRODUCT:
+                case self::BL_FREE:
+                    if ((int) $this->getData('type') === self::BL_PRODUCT) {
+                        $objectLine->id_product = (int) $this->getData('id_product');
+                        $objectLine->id_fourn_price = (int) $this->getData('id_fourn_price');
+                        $objectLine->desc = '';
+                    } else {
+                        $objectLine->desc = $this->getData('label');
+                        $objectLine->id_product = 0;
+                        $objectLine->id_fourn_price = 0;
+                    }
+                    $objectLine->pu_ht = (float) $this->getData('pu_ht');
+                    $objectLine->tva_tx = (float) $this->getData('tva_tx');
+                    $objectLine->pa_ht = (float) $this->getData('pa_ht');
+                    if (!is_null($qty)) {
+                        $objectLine->qty = (float) $qty;
+                    } else {
+                        $objectLine->qty = (float) $this->getData('qty');
+                    }
+
+                    $desc = $this->getData('description');
+                    if ($desc) {
+                        if ($objectLine->desc) {
+                            $objectLine->desc .= '<br/>';
+                        }
+                        $objectLine->desc .= $desc;
+                    }
+                    break;
+
+                case self::BL_TEXT:
+                    $objectLine->id_product = 0;
+                    $objectLine->id_fourn_price = 0;
+                    $objectLine->qty = 0;
+                    $objectLine->pu_ht = 0;
+                    $objectLine->tva_tx = 0;
+                    $objectLine->pa_ht = 0;
+                    $objectLine->desc = $this->getData('description');
+                    break;
+            }
+        }
+    }
+
     // Overrides: 
 
     public function validate()
@@ -330,7 +419,7 @@ class BimpLine extends BimpObject
                         }
                         $id_fourn_price = (int) $this->getData('id_fourn_price');
                         if ($id_fourn_price) {
-                            $pfp = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_fourn_price);
+                            $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_fourn_price);
                             if (!$pfp->isLoaded()) {
                                 $this->set('id_fourn_price', 0);
                             } elseif ((int) $pfp->getData('fk_product') !== (int) $product->id) {

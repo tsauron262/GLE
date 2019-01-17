@@ -59,7 +59,8 @@ class BC_Caisse extends BimpObject
         foreach ($list as $item) {
             if ((int) $item['id_caisse_session'] !== $id_session) {
                 if ($caisseUser->fetch((int) $item['item'])) {
-                    $caisseUser->delete(true);
+                    $warnings = array();
+                    $caisseUser->delete($warnings, true);
                 }
             } else {
                 $connected = 1;

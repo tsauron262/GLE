@@ -3,6 +3,6 @@ bootstrap: 1
 objects: 
     client: 
         instance: 
-            bimp_object: Bimp_Societe
+            bimp_object: Bimp_Client
             id_object: 
                 request: id

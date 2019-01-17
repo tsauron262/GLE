@@ -71,7 +71,7 @@ class gsxController extends BimpController
         $this->repairs = array();
 
         foreach ($list as $item) {
-            $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
+            $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
             if (!is_null($repair) && $repair->isLoaded())
                 $this->repairs[] = $repair;
         }
@@ -121,7 +121,7 @@ class gsxController extends BimpController
         if (!(int) $id_sav) {
             $errors[] = 'ID du SAV absent';
         } else {
-            $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', (int) $id_sav);
+            $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $id_sav);
             if (!$sav->isLoaded()) {
                 $errors[] = 'Le SAV d\'ID ' . $id_sav . ' n\'existe pas';
             }
@@ -369,7 +369,7 @@ class gsxController extends BimpController
 
         $add_btn = false;
         if (!is_null($id_sav)) {
-            $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
+            $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
             if (!is_null($sav) && $sav->isLoaded()) {
 //                if ($sav->isPropalEditable()) {
                     $add_btn = true;
@@ -561,14 +561,14 @@ class gsxController extends BimpController
         $valDef['serialNumber'] = $this->serial;
 
         if ($id_sav) {
-            $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', (int) $id_sav);
+            $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $id_sav);
 
             if ($sav->isLoaded()) {
                 $idUser = (int) $sav->getData('id_user_tech');
                 if (!$idUser) {
                     $idUser = $user->id;
                 }
-                $tech = BimpObject::getInstance('bimpcore', 'Bimp_User', $idUser);
+                $tech = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', $idUser);
             }
 
             $valDef['diagnosis'] = $sav->getData('diagnostic');
@@ -978,7 +978,7 @@ class gsxController extends BimpController
                         $html .= BimpRender::renderAlerts($mess, 'info');
                 }
 
-                $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair', $id_repair);
+                $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', $id_repair);
                 $repair->setSerial($this->serial);
 
                 $errors = array();
@@ -995,7 +995,7 @@ class gsxController extends BimpController
                                 $prixTot = 0;
                             }
                             if ((int) $id_sav) {
-                                $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', (int) $id_sav);
+                                $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $id_sav);
                                 if (!BimpObject::objectLoaded($sav)) {
                                     $errors[] = 'Erreur: SAV invalide';
                                 } else {
@@ -1182,7 +1182,7 @@ class gsxController extends BimpController
 
         $valDef = array();
 
-        $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair', $id_repair);
+        $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', $id_repair);
         if (!$repair->isLoaded()) {
             $errors[] = 'ID de la réparation absent ou invalide';
         } else {
@@ -1266,7 +1266,7 @@ class gsxController extends BimpController
         if (!$id_repair) {
             $errors[] = 'ID de la réparation absent';
         } else {
-            $repair = BimpObject::getInstance('bimpapple', 'GSX_Repair', $id_repair);
+            $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', $id_repair);
 
             if (is_null($repair) || !$repair->isLoaded()) {
                 $errors[] = 'Réparation d\'ID ' . $id_repair . ' non trouvée';
@@ -1292,7 +1292,7 @@ class gsxController extends BimpController
         if (!$id_sav) {
             $errors[] = 'ID du SAV absent';
         } else {
-            $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
+            $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
             if (is_null($sav) || !$sav->isLoaded()) {
                 $errors[] = 'ID du SAV invalide';
             } else {

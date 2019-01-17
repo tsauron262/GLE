@@ -5,3 +5,5 @@ require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
 
 $controller = BimpController::getInstance('bimpfinancement');
 $controller->display();
+
+// TEST

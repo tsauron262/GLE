@@ -122,9 +122,9 @@ class GSX_Repair extends BimpObject
 
     public function loadPartsPending()
     {
-        if($this->getData('canceled'))
+        if ($this->getData('canceled'))
             return array("Réparation annulée");
-        if($this->getData('closed') || $this->getData('repair_complete'))
+        if ($this->getData('closed') || $this->getData('repair_complete'))
             return array("Réparation fermée");
         if (is_null($this->gsx) || $this->isIphone != $this->gsx->isIphone) {
             $this->gsx = new GSX($this->isIphone);
@@ -145,8 +145,8 @@ class GSX_Repair extends BimpObject
             'repairType'               => '',
             'repairStatus'             => '',
             'purchaseOrderNumber'      => '',
-            'sroNumber'                =>  '',
-            'repairConfirmationNumber' =>  '',
+            'sroNumber'                => '',
+            'repairConfirmationNumber' => '',
             'serialNumbers'            => array(
                 'serialNumber' => ''
             ),
@@ -160,11 +160,10 @@ class GSX_Repair extends BimpObject
             'kbbSerialNumberFlag'      => '',
             'comptiaCode'              => '',
         );
-        
+
         if (!is_null($repairConfirmNumber) && $repairConfirmNumber) {
-                $data['repairConfirmationNumber'] = $repairConfirmNumber;
-        }
-        elseif (!is_null($repairNumber) && $repairNumber) {
+            $data['repairConfirmationNumber'] = $repairConfirmNumber;
+        } elseif (!is_null($repairNumber) && $repairNumber) {
             $data['sroNumber'] = $repairNumber;
         }
 
@@ -198,7 +197,7 @@ class GSX_Repair extends BimpObject
                 }
                 $fileUrl = "";
                 if (isset($part['returnOrderNumber']) && $part['returnOrderNumber'] != "" && isset($part['partNumber'])) {
-                    $fileName = "label_" . $part['returnOrderNumber'] . "-". $i . ".pdf";
+                    $fileName = "label_" . $part['returnOrderNumber'] . "-" . $i . ".pdf";
                     $fileNamePath = $labelDir . "/" . $fileName;
                     $fileUrl = "/document.php?modulepart=bimpcore&file=" . 'sav/' . $id_sav . "/" . $fileName;
                     if (!file_exists(DOL_DATA_ROOT . $fileNamePath)) {
@@ -237,7 +236,7 @@ class GSX_Repair extends BimpObject
         }
 
         if (!$this->gsx->connect) {
-            return array('Echec de la connexion à GSX (4)'.print_r($this->gsx->errors,1));
+            return array('Echec de la connexion à GSX (4)' . print_r($this->gsx->errors, 1));
         }
 
         $n_soap_errors = count($this->gsx->errors['soap']);
@@ -264,19 +263,16 @@ class GSX_Repair extends BimpObject
         );
 
         if (isset($number) && $number && isset($number_type) && $number_type && isset($look_up_data[$number_type])) {
-                $look_up_data[$number_type] = $number;
-        }
-        else {
+            $look_up_data[$number_type] = $number;
+        } else {
             $repairNumber = $this->getData('repair_number');
             $repairConfirmNumber = $this->getData('repair_confirm_number');
             if (!is_null($repairConfirmNumber) && $repairConfirmNumber) {
                 $look_up_data['repairConfirmationNumber'] = $repairConfirmNumber;
-            }
-            elseif (!is_null($repairNumber) && $repairNumber) {
+            } elseif (!is_null($repairNumber) && $repairNumber) {
                 $look_up_data['repairNumber'] = $repairNumber;
-            }
-            else
-                return array("Aucune info pour le repairLookup ".print_r($look_up_data,1));
+            } else
+                return array("Aucune info pour le repairLookup " . print_r($look_up_data, 1));
         }
 
         if ($this->isIphone) {
@@ -295,11 +291,11 @@ class GSX_Repair extends BimpObject
         }
         $request = $this->gsx->_requestBuilder($requestName, 'lookupRequestData', $look_up_data);
         $response = $this->gsx->request($request, $client);
-        
+
         $canceled = $this->getData('canceled');
 
         if (count($this->gsx->errors['soap']) > $n_soap_errors) {
-            if(!$canceled && stripos($this->gsx->errors['soap'][$n_soap_errors], "SOAP Error:  (Code: RPR.LKP.01)") !== false){
+            if (!$canceled && stripos($this->gsx->errors['soap'][$n_soap_errors], "SOAP Error:  (Code: RPR.LKP.01)") !== false) {
                 $this->set('canceled', 1);
                 $this->update();
             }
@@ -307,7 +303,7 @@ class GSX_Repair extends BimpObject
         } else if (!isset($response[$client . 'Response']['lookupResponseData'])) {
             return array('Echec de la requête "lookup" pour une raison inconnue');
         }
-        if($canceled){
+        if ($canceled) {
             $this->set('canceled', 0);
             $update = true;
         }
@@ -450,8 +446,8 @@ class GSX_Repair extends BimpObject
         switch ($repair_type) {
             case 'carry_in':
                 $data['statusCode'] = $status;
-                if (0 != $this->gsx->isIphone) 
-                    $this->gsx = new GSX(false);//force not iphone
+                if (0 != $this->gsx->isIphone)
+                    $this->gsx = new GSX(false); //force not iphone
                 $client = 'CarryInRepairUpdate';
                 $requestName = 'UpdateCarryInRequest';
                 $data['statusCode'] = $status;
@@ -459,15 +455,15 @@ class GSX_Repair extends BimpObject
                 break;
             case 'repair_or_replace':
                 $data['repairStatusCode'] = $status;
-                /*if ($this->isIphone) {
-                    $client = 'UpdateIPhoneRepairOrReplaceRequest';
-                    $requestName = 'UpdateIPhoneRepairOrReplaceRequest';
-                } else {*/
-                    
-                    if (0 != $this->gsx->isIphone) 
-                        $this->gsx = new GSX(false);//force not iphone
-                    $client = 'UpdateRepairOrReplace';
-                    $requestName = 'UpdateRepairOrReplaceRequest';
+                /* if ($this->isIphone) {
+                  $client = 'UpdateIPhoneRepairOrReplaceRequest';
+                  $requestName = 'UpdateIPhoneRepairOrReplaceRequest';
+                  } else { */
+
+                if (0 != $this->gsx->isIphone)
+                    $this->gsx = new GSX(false); //force not iphone
+                $client = 'UpdateRepairOrReplace';
+                $requestName = 'UpdateRepairOrReplaceRequest';
 //                }
                 $data['repairStatusCode'] = $status;
                 $clientRep = $client . 'Response';
@@ -480,7 +476,7 @@ class GSX_Repair extends BimpObject
         $response = $this->gsx->request($request, $client);
 
         if (count($this->gsx->errors['soap']) > $n_soap_errors) {
-            $errors[] = 'Echec de la requête "' . $requestName . '" WSDL : '.$this->gsx->wsdlUrl;
+            $errors[] = 'Echec de la requête "' . $requestName . '" WSDL : ' . $this->gsx->wsdlUrl;
             $errors = array_merge($errors, $this->gsx->errors['soap']);
         }
 
@@ -591,7 +587,7 @@ class GSX_Repair extends BimpObject
                     if (BimpObject::objectLoaded($equipment)) {
                         $equipment->set('serial', $response['newSerialNumber']);
                         $equipment->update();
-                        $sav->addNote('Mise à jour du numéro de série de l\'équipement effectué le '.date('d / m / Y à H:i'));
+                        $sav->addNote('Mise à jour du numéro de série de l\'équipement effectué le ' . date('d / m / Y à H:i'));
                     }
                 }
                 $force_repair_update = true;
@@ -931,7 +927,7 @@ class GSX_Repair extends BimpObject
 
     // Overrides: 
 
-    public function create()
+    public function create(&$warnings = array(), $force_create = false)
     {
         $serial = (string) $this->getData('serial');
         if (!$serial) {
@@ -949,9 +945,9 @@ class GSX_Repair extends BimpObject
         }
 
         $this->setSerial($serial);
-        $this->set('total_from_order', '1,2');//Pour qu'il y est forcément un changement aprés
+        $this->set('total_from_order', '1,2'); //Pour qu'il y est forcément un changement aprés
 
-        $errors = parent::create();
+        $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
             $errors = $this->lookup();

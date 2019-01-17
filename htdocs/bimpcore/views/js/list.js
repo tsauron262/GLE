@@ -225,7 +225,7 @@ function loadModalList(module, object_name, list_name, id_parent, $button, title
     });
 }
 
-function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent, title) {
+function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent, title, on_save) {
     var $list = $('#' + list_id);
     if (!$list.length) {
         bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
@@ -254,7 +254,11 @@ function loadModalFormFromList(list_id, form_name, $button, id_object, id_parent
         data['param_associations_params'] = $asso_filters_input.val();
     }
 
-    loadModalForm($button, data, title);
+    if (typeof (on_save) !== 'string') {
+        on_save = '';
+    }
+
+    loadModalForm($button, data, title, null, on_save);
 }
 
 function updateObjectFromRow(list_id, id_object, $button) {
@@ -547,15 +551,11 @@ function setSelectedObjectsNewStatus($button, list_id, new_status, extra_data, c
             }
         }
         $button.addClass('disabled');
-        var i = 1;
+        var ids = [];
         $selected.each(function () {
             var id_object = $(this).data('id_object');
             if (id_object) {
-                setObjectNewStatus(null, {
-                    module: $list.data('module'),
-                    object_name: object_name,
-                    id_object: id_object
-                }, new_status, extra_data, null, null, null);
+                ids.push(id_object);
             } else {
                 var msg = '';
                 if (object_labels[object_name]['is_female']) {
@@ -565,8 +565,15 @@ function setSelectedObjectsNewStatus($button, list_id, new_status, extra_data, c
                 }
                 bimp_msg(msg, 'danger');
             }
-            i++;
         });
+        if (ids.length) {
+            setObjectNewStatus(null, {
+                module: $list.data('module'),
+                object_name: object_name,
+                id_object: ids
+            }, new_status, extra_data, null, null, null);
+        }
+
         $button.removeClass('disabled');
     }
 }

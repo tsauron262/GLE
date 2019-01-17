@@ -165,7 +165,7 @@ class ObjectLineRemise extends BimpObject
         return parent::update($warnings, $force_update);
     }
 
-    public function delete($force_delete = false)
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         $parent = null;
 
@@ -186,7 +186,7 @@ class ObjectLineRemise extends BimpObject
             }
         }
 
-        $errors = parent::delete($force_delete);
+        $errors = parent::delete($warnings, $force_delete);
 
         if (BimpObject::objectLoaded($parent)) {
             $parent->calcRemise();

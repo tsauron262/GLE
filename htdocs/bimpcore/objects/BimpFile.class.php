@@ -279,7 +279,8 @@ class BimpFile extends BimpObject
         foreach ($current_files as $id_file => $file_name) {
             if (!in_array($file_name, $files)) {
                 if ($this->fetch((int) $id_file)) {
-                    $this->delete(true);
+                    $warnings = array();
+                    $this->delete($warnings, true);
                     $this->reset();
                 }
             }
@@ -450,7 +451,7 @@ class BimpFile extends BimpObject
         return parent::update($warnings, $force_update);
     }
 
-    public function delete($force_delete = false)
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         if (!$this->isLoaded()) {
             return array('ID ' . $this->getLabel('of_the') . ' absent');

@@ -30,7 +30,7 @@ class BC_VenteReturn extends BimpObject
                 } elseif ((float) $equipment->getData('prix_vente_except')) {
                     return round((float) $equipment->getData('prix_vente_except'), 2);
                 } else {
-                    $product = BimpObject::getInstance('bimpcore', 'Bimp_Product', (int) $equipment->getData('id_product'));
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $equipment->getData('id_product'));
                 }
             }
         } elseif ((int) $this->getData('id_product')) {
@@ -143,7 +143,7 @@ class BC_VenteReturn extends BimpObject
                 $id_product = (int) $equipment->getData('id_product');
                 if ($id_product) {
                     $this->set('id_product', $id_product);
-                    $product = BimpObject::getInstance('bimpcore', 'Bimp_Product', (int) $id_product);
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $id_product);
                     if (!BimpObject::objectLoaded($product)) {
                         $errors[] = 'Le produit associé à l\'équipement sélectionné semble ne plus exister';
                     } else {

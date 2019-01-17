@@ -7,7 +7,7 @@ class BMP_EventCoProdDefPart extends BimpObject
     {
         $event = $this->getParentInstance();
         if (!is_null($event) && $event->isLoaded()) {
-            return $event->isEditable();
+            return (int) $event->isInEditableStatus();
         }
 
         return 0;
@@ -36,69 +36,78 @@ class BMP_EventCoProdDefPart extends BimpObject
 
     // Overrides: 
 
-    public function create()
+    public function create(&$warnings = array(), $force_create = false)
     {
         $id_event = $this->getData('id_event');
         $id_cat = $this->getData('id_category_montant');
         $id_coprod = $this->getData('id_event_coprod');
 
-        if (!is_null($id_event) && !is_null($id_cat) && !is_null($id_coprod)) {
-            if (is_null($id_coprod) || !$id_coprod) {
-                $event = BimpObject::getInstance($this->module, 'BMP_Event');
-                if ($event->fetch($id_event)) {
-                    $coprods = $event->getCoProds();
+        $errors = array();
 
-                    $errors = array();
+        if (is_null($id_event)) {
+            $errors[] = 'ID de l\'événement absent';
+        }
 
-                    if (!count($coprods)) {
-                        $errors[] = 'Aucun co-producteur enregistré';
-                    } else {
-                        $cp_instance = BimpObject::getInstance($this->module, 'BMP_EventCoProd');
-                        foreach ($coprods as $id_coprod => $coprod_name) {
-                            $this->reset();
-                            $part = (float) $cp_instance->getSavedData('default_part', $id_coprod);
-                            $this->validateArray(array(
-                                'id_event'            => (int) $id_event,
-                                'id_category_montant' => (int) $id_cat,
-                                'id_event_coprod'     => (int) $id_coprod,
-                                'part'                => $part
-                            ));
-                            $errors = array_merge($errors, $this->create());
-                        }
+        if (is_null($id_cat)) {
+            $errors[] = 'ID de lacatégorie absent';
+        }
 
-                        $eventMontant = BimpObject::getInstance($this->module, 'BMP_EventMontant');
-                        $em_list = $eventMontant->getList(array(
+        if (count($errors)) {
+            return $errors;
+        }
+
+        if (is_null($id_coprod) || !$id_coprod) {
+            $event = BimpCache::getBimpObjectInstance($this->module, 'BMP_Event', $id_event);
+            if ($event->isLoaded()) {
+                $coprods = $event->getCoProds();
+                if (!count($coprods)) {
+                    $errors[] = 'Aucun co-producteur enregistré';
+                } else {
+                    $cp_instance = BimpObject::getInstance($this->module, 'BMP_EventCoProd');
+                    foreach ($coprods as $id_coprod => $coprod_name) {
+                        $new_instance = BimpObject::getInstance($this->module, $this->object_name);
+                        $part = (float) $cp_instance->getSavedData('default_part', $id_coprod);
+                        $new_instance->validateArray(array(
                             'id_event'            => (int) $id_event,
-                            'id_category_montant' => (int) $id_cat
+                            'id_category_montant' => (int) $id_cat,
+                            'id_event_coprod'     => (int) $id_coprod,
+                            'part'                => $part
                         ));
-                        foreach ($em_list as $em) {
-                            $eventMontant->reset();
-                            if ($eventMontant->fetch((int) $em['id'])) {
-                                $eventMontant->checkCoprodsParts();
-                            }
+                        $errors = array_merge($errors, $new_instance->create($warnings, $force_create));
+                    }
+
+                    $eventMontant = BimpObject::getInstance($this->module, 'BMP_EventMontant');
+                    $em_list = $eventMontant->getList(array(
+                        'id_event'            => (int) $id_event,
+                        'id_category_montant' => (int) $id_cat
+                    ));
+                    foreach ($em_list as $em) {
+                        $eventMontant = BimpCache::getBimpObjectInstance($this->module, 'BMP_EventMontant', (int) $em['id']);
+                        if ($eventMontant->isLoaded()) {
+                            $eventMontant->checkCoprodsParts();
                         }
                     }
-                    return $errors;
-                } else {
-                    return array('ID de l\'événement absent ou invalide');
                 }
+                return $errors;
             } else {
-                $result = $this->getList(array(
-                    'id_event'            => (int) $id_event,
-                    'id_category_montant' => (int) $id_cat,
-                    'id_event_coprod'     => (int) $id_coprod
-                ));
-
-                if (!is_null($result) && count($result)) {
-                    return array('Les parts par défaut sont déjà définies pour cette catégorie');
-                }
-
-                return parent::create();
+                return array('ID de l\'événement absent ou invalide');
             }
+        } else {
+            $result = $this->getList(array(
+                'id_event'            => (int) $id_event,
+                'id_category_montant' => (int) $id_cat,
+                'id_event_coprod'     => (int) $id_coprod
+            ));
+
+            if (!is_null($result) && count($result)) {
+                return array('Les parts par défaut sont déjà définies pour cette catégorie');
+            }
+
+            return parent::create($warnings, $force_create);
         }
     }
 
-    public function update()
+    public function update(&$warnings = array(), $force_update = false)
     {
         $part = (float) $this->getData('part');
         $id_category_montant = (int) $this->getData('id_category_montant');
@@ -107,7 +116,7 @@ class BMP_EventCoProdDefPart extends BimpObject
         $event = $this->getParentInstance();
 
         if ($part && $id_category_montant && $id_coprod) {
-            if (!is_null($event) && $event->isLoaded()) {
+            if (BimpObject::objectLoaded($event)) {
                 $coprods_parts = $this->getList(array(
                     'id_event'            => $event->id,
                     'id_category_montant' => $id_category_montant
@@ -130,17 +139,17 @@ class BMP_EventCoProdDefPart extends BimpObject
             }
         }
 
-        $errors = parent::update();
+        $errors = parent::update($warnings, $force_update);
 
-        if (!is_null($event) && $event->isLoaded() && $id_category_montant) {
+        if (BimpObject::objectLoaded($event) && $id_category_montant) {
             $eventMontant = BimpObject::getInstance($this->module, 'BMP_EventMontant');
             $em_list = $eventMontant->getList(array(
                 'id_event'            => (int) $event->id,
                 'id_category_montant' => (int) $id_category_montant
             ));
             foreach ($em_list as $em) {
-                $eventMontant->reset();
-                if ($eventMontant->fetch((int) $em['id'])) {
+                $eventMontant = BimpCache::getBimpObjectInstance($this->module, 'BMP_EventMontant', (int) $em['id']);
+                if ($eventMontant->isLoaded()) {
                     $eventMontant->checkCoprodsParts();
                 }
             }

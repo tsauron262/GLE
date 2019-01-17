@@ -4,6 +4,27 @@ extends:
     
 icon: fas_building
 
-labels: 
-    name: fournisseur
-    is_female: 0
+fields: 
+    client: 
+        default_value: 0
+    fournisseur:
+        default_value: 1
+                      
+forms: 
+    light: 
+        title: Ajout d'un fournisseur
+        rows: 
+            1: 
+                show: 0
+                
+lists:
+    default: 
+        title: Liste des Fournisseurs
+        icon: user
+        list_filters:
+            - name: client
+              filter: 0
+        add_btn_label: Nouveau fournisseur
+        bulk_actions:
+            0: 
+                label: supprimer les fournisseurs sélectionnés

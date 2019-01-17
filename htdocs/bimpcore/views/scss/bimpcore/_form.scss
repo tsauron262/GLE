@@ -108,7 +108,7 @@
                 width: 100%;
             }
         }
-        
+
         .select2 {
             min-width: 160px;
         }
@@ -219,11 +219,11 @@ input, select {
         margin: 8px 0;
         padding-left: 15px;
     }
-    
+
     .addValueInputContainer button.addValueBtn {
         margin-left: 15px;
     }
-    
+
     .input_card_container {
         padding-top: 15px;
         padding-left: 25px;
@@ -510,7 +510,7 @@ select.switch {
 .search_input_selected_label {
     font-weight: bold;
     color: $gray-dark;
-    
+
     i.fa-check {
         color: $success;
     }
@@ -519,42 +519,42 @@ select.switch {
     max-height: 450px;
     overflow-y: auto;
     margin: 10px;
+}
 
-    .check_list_item {
-        margin: 0;
-        padding: 0;
+.check_list_item {
+    margin: 0;
+    padding: 0;
 
-        input[type=checkbox] {
-            display: none;
+    input[type=checkbox] {
+        display: none;
+    }
+
+    label {
+        padding: 6px 6px 6px 30px;
+        background-color: #fff;
+        color: darken($gray, 20%);
+        cursor: pointer;
+        @include transition(all 0.3s ease);
+
+        &:before {
+            font-family: 'FontAwesome';
+            margin-left: -24px;
+            margin-right: 16px;
+            font-weight: normal;
+            content: '\f096';
+            font-size: 14px;
+            vertical-align: middle;
         }
+    }
 
-        label {
-            padding: 6px 6px 6px 30px;
-            background-color: #fff;
-            color: darken($gray, 20%);
-            cursor: pointer;
-            @include transition(all 0.3s ease);
+    input[type=checkbox]:checked + label {
+        color: $gray-darker;
 
-            &:before {
-                font-family: 'FontAwesome';
-                margin-left: -24px;
-                margin-right: 16px;
-                font-weight: normal;
-                content: '\f096';
-                font-size: 14px;
-                vertical-align: middle;
-            }
-        }
+        &:before {
+            font-size: 16px;
+            content: '\f046';
+            color: $primary;
 
-        input[type=checkbox]:checked + label {
-            color: $gray-darker;
-
-            &:before {
-                font-size: 16px;
-                content: '\f046';
-                color: $primary;
-
-            }
         }
     }
 }
@@ -646,7 +646,7 @@ input[type=text].large_input {
 
     .freeFormInput {
         margin-left: 30px;
-        
+
         .select2-container {
             width: 100%!important;
         }

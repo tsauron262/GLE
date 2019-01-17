@@ -1,11 +1,10 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/ObjectLine.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/FournObjectLine.class.php';
 
-class Bimp_CommandeFournLine extends ObjectLine
+class Bimp_CommandeFournLine extends FournObjectLine
 {
 
-    public static $dol_line_table = 'commande_fournisseurdet';
-    
-    // Traitements: 
+    public static $parent_comm_type = 'commande_fournisseur';
+    public static $dol_line_table = 'commande_fournisseurdet';    
 }

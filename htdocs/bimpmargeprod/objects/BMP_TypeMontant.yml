@@ -11,8 +11,6 @@ objects:
         delete: 0
         instance: 
             bimp_object: BMP_CategorieMontant
-            id_object: 
-                field_value: id_category
             
 fields: 
     name: 

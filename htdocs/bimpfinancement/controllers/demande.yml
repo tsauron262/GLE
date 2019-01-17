@@ -40,16 +40,23 @@ sections:
                     children: lines
           
           - id: fournisseurs
-            title: Factures fournisseurs
+            title: Commandes fournisseurs
             struct: 
                 type: view
                 view: 
-                    panel: 1
+                    panel: 0
                     name: fournisseurs
                     object: demande
-                        
+          - id: factures
+            title: Factures
+            struct: 
+                type: view
+                view: 
+                    object: demande
+                    name: factures
+                    panel: 0
           - id: files
-            title: Fichiers
+            title: Fichiers joints
             struct:
                 type: list
                 list: 

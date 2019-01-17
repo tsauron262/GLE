@@ -17,7 +17,8 @@ class BC_CaisseSession extends BimpObject
             'id_caisse_session' => (int) $this->id
                 ), null, null, 'id', 'asc', 'array', array('id'));
         foreach ($list as $item) {
-            if ($paiement->fetch((int) $item['id'])) {
+            $paiement = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Paiement', (int) $item['id']);
+            if ($paiement->isLoaded()) {
                 $obj = $paiement->getChildObject('paiement');
                 if (BimpObject::objectLoaded($obj)) {
                     if (!isset($infos[$obj->dol_object->type_code])) {

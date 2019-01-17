@@ -12,8 +12,6 @@ fields:
     name: 
         label: Nom
         type: string
-        sortable: 1
-        search: 1
         
     color: 
         label: Couleur

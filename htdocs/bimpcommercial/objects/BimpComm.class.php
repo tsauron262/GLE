@@ -5,6 +5,8 @@ class BimpComm extends BimpObject
 
     public static $comm_type = '';
     public static $email_type = '';
+    public static $external_contact_type_required = true;
+    public static $internal_contact_type_required = true;
     public $remise_globale_line_rate = null;
 
     // Getters: 
@@ -13,19 +15,27 @@ class BimpComm extends BimpObject
     {
         switch ($type) {
             case 'propal':
-                return BimpObject::getInstance('bimpcommercial', 'Bimp_Propal', $id_object);
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $id_object);
 
             case 'facture':
-                return BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', $id_object);
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_object);
 
             case 'commande':
-                return BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', $id_object);
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_object);
 
-            case 'commande_fourn':
-                return BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn', $id_object);
+            case 'commande_fournisseur':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', $id_object);
+
+            case 'facture_fourn':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $id_object);
         }
 
         return null;
+    }
+
+    public function getLineInstance()
+    {
+        return $this->getChildObject('lines');
     }
 
     public function isEditable()
@@ -45,12 +55,11 @@ class BimpComm extends BimpObject
     {
         return 1;
     }
-    
+
     public function isFieldEditable($field)
     {
         return 1;
     }
-    
 
     public function getModelPdf()
     {
@@ -78,7 +87,6 @@ class BimpComm extends BimpObject
 
     public function getClientContactsArray()
     {
-
         $id_client = $this->getAddContactIdClient();
         return self::getSocieteContactsArray($id_client, false);
     }
@@ -533,7 +541,12 @@ class BimpComm extends BimpObject
         $dir = $this->getFilesDir();
         if ($dir) {
             if (file_exists($dir . $file_name)) {
-                return DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
+                if (isset(static::$files_module_part)) {
+                    $module_part = static::$files_module_part;
+                } else {
+                    $module_part = static::$comm_type;
+                }
+                return DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
             }
         }
 
@@ -700,22 +713,29 @@ class BimpComm extends BimpObject
 
     public function displayPDFButton($display_generate = true)
     {
+        $html = '';
         $ref = dol_sanitizeFileName($this->getRef());
 
         if ($ref) {
             $file_url = $this->getFileUrl($ref . '.pdf');
             if ($file_url) {
                 $onclick = 'window.open(\'' . $file_url . '\');';
-                $button = '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
-                $button .= '<i class="fas fa5-file-pdf iconLeft"></i>';
-                $button .= $ref . '.pdf</button>';
-                $html .= $button;
+                $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= '<i class="fas fa5-file-pdf iconLeft"></i>';
+                $html .= $ref . '.pdf</button>';
+
+                $onclick = 'toggleElementDisplay($(this).parent().find(\'.' . static::$comm_type . 'PdfGenerateContainer\'), $(this));';
+                $html .= '<span class="btn btn-light-default open-close action-open bs-popover" onclick="' . $onclick . '"';
+                $html .= BimpRender::renderPopoverData('Re-générer le document', 'top', 'false');
+                $html .= '>';
+                $html .= BimpRender::renderIcon('fas_sync');
+                $html .= '</span>';
             }
 
             if ($display_generate) {
                 $models = $this->getModelsPdfArray();
                 if (count($models)) {
-                    $html .= '<div class="' . static::$comm_type . 'PdfGenerateContainer" style="margin-top: 15px">';
+                    $html .= '<div class="' . static::$comm_type . 'PdfGenerateContainer" style="' . ($file_url ? 'margin-top: 15px; display: none;' : '') . '">';
                     $html .= BimpInput::renderInput('select', static::$comm_type . '_model_pdf', $this->getModelPdf(), array(
                                 'options' => $models
                     ));
@@ -924,6 +944,7 @@ class BimpComm extends BimpObject
             BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
 
             $type_element = static::$comm_type;
+            $fk_soc = (int) $this->getData('fk_soc');
             switch ($type_element) {
                 case 'facture':
                     $type_element = 'invoice';
@@ -932,9 +953,15 @@ class BimpComm extends BimpObject
                 case 'commande':
                     $type_element = 'order';
                     break;
+
+                case 'commande_fournisseur':
+                    $type_element = 'order_supplier';
+                    $fk_soc = 0;
+                    break;
             }
 
-            $list = ActionComm::getActions($this->db->db, (int) $this->getData('fk_soc'), $this->id, $type_element);
+            $list = ActionComm::getActions($this->db->db, $fk_soc, $this->id, $type_element);
+
             if (!is_array($list)) {
                 $html .= BimpRender::renderAlerts('Echec de la récupération de la liste des événements');
             } else {
@@ -942,7 +969,7 @@ class BimpComm extends BimpObject
 
                 $urlBack = DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->getController() . '&id=' . $this->id;
                 $href = DOL_URL_ROOT . '/comm/action/card.php?action=create&datep=' . dol_print_date(dol_now(), 'dayhourlog');
-                $href .= '&origin=' . static::$comm_type . '&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
+                $href .= '&origin=' . $type_element . '&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
                 $href .= '&backtopage=' . urlencode($urlBack);
 
                 if (isset($this->dol_object->fk_project) && (int) $this->dol_object->fk_project) {
@@ -1070,13 +1097,12 @@ class BimpComm extends BimpObject
                 foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
                     switch ($item['type']) {
                         case 'propal':
-                            if (is_null($propal_instance)) {
-                                $propal_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal');
-                            }
-                            if ($propal_instance->fetch((int) $item['id_object'])) {
+                            $propal_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
+                            if ($propal_instance->isLoaded()) {
+                                $icon = $propal_instance->params['icon'];
                                 $objects[] = array(
-                                    'type'     => BimpTools::ucfirst($propal_instance->getLabel()),
-                                    'ref'      => BimpObject::getInstanceNomUrlWithIcons($propal_instance),
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($propal_instance->getLabel()),
+                                    'ref'      => $propal_instance->getNomUrl(0, true, true, 'full'),
                                     'date'     => $propal_instance->displayData('datep'),
                                     'total_ht' => $propal_instance->displayData('total_ht'),
                                     'status'   => $propal_instance->displayData('fk_statut')
@@ -1085,13 +1111,12 @@ class BimpComm extends BimpObject
                             break;
 
                         case 'facture':
-                            if (is_null($facture_instance)) {
-                                $facture_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-                            }
-                            if ($facture_instance->fetch((int) $item['id_object'])) {
+                            $facture_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
+                            if ($facture_instance->isLoaded()) {
+                                $icon = $facture_instance->params['icon'];
                                 $objects[] = array(
-                                    'type'     => BimpTools::ucfirst($facture_instance->getLabel()),
-                                    'ref'      => BimpObject::getInstanceNomUrlWithIcons($facture_instance),
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_instance->getLabel()),
+                                    'ref'      => $facture_instance->getNomUrl(0, true, true, 'full'),
                                     'date'     => $facture_instance->displayData('datef'),
                                     'total_ht' => $facture_instance->displayData('total'),
                                     'status'   => $facture_instance->displayData('fk_statut')
@@ -1100,13 +1125,12 @@ class BimpComm extends BimpObject
                             break;
 
                         case 'commande':
-                            if (is_null($commande_instance)) {
-                                $commande_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
-                            }
-                            if ($commande_instance->fetch((int) $item['id_object'])) {
+                            $commande_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
+                            if ($commande_instance->isLoaded()) {
+                                $icon = $commande_instance->params['icon'];
                                 $objects[] = array(
-                                    'type'     => BimpTools::ucfirst($commande_instance->getLabel()),
-                                    'ref'      => BimpObject::getInstanceNomUrlWithIcons($commande_instance),
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_instance->getLabel()),
+                                    'ref'      => $commande_instance->getNomUrl(0, true, true, 'full'),
                                     'date'     => $commande_instance->displayData('date_commande'),
                                     'total_ht' => $commande_instance->displayData('total_ht'),
                                     'status'   => $commande_instance->displayData('fk_statut')
@@ -1115,16 +1139,30 @@ class BimpComm extends BimpObject
                             break;
 
                         case 'order_supplier':
-                            if (is_null($commande_fourn_instance)) {
-                                $commande_fourn_instance = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
-                            }
-                            if ($commande_fourn_instance->fetch((int) $item['id_object'])) {
+                            $commande_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $item['id_object']);
+                            if ($commande_fourn_instance->isLoaded()) {
+                                $icon = $commande_fourn_instance->params['icon'];
                                 $objects[] = array(
-                                    'type'     => BimpTools::ucfirst($commande_fourn_instance->getLabel()),
-                                    'ref'      => BimpObject::getInstanceNomUrlWithIcons($commande_fourn_instance->getNomUrl),
-                                    'date'     => '', //$commande_fourn_instance->displayData('date_commande'),
-                                    'total_ht' => '', //$commande_fourn_instance->displayData('total_ht'),
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_fourn_instance->getLabel()),
+                                    'ref'      => $commande_fourn_instance->getNomUrl(0, true, true, 'full'),
+                                    'date'     => $commande_fourn_instance->displayData('date_commande'),
+                                    'total_ht' => $commande_fourn_instance->displayData('total_ht'),
                                     'status'   => $commande_fourn_instance->displayData('fk_statut')
+                                );
+                            }
+                            break;
+
+                        case 'invoice_supplier':
+                            $facture_fourn_instance = BimpCache::getDolObjectInstance((int) $item['id_object'], 'fourn', 'fournisseur.facture', 'FactureFournisseur');
+                            BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+                            if (BimpObject::objectLoaded($facture_fourn_instance)) {
+                                $date_facture = new DateTime(BimpTools::getDateFromDolDate($facture_fourn_instance->date));
+                                $objects[] = array(
+                                    'type'     => 'Facture fournisseur',
+                                    'ref'      => BimpObject::getInstanceNomUrlWithIcons($facture_fourn_instance),
+                                    'date'     => $date_facture->format('d / m / Y'),
+                                    'total_ht' => BimpTools::displayMoneyValue((float) $facture_fourn_instance->total_ht, 'EUR'),
+                                    'status'   => Bimp_Facture::$status_list[(int) $facture_fourn_instance->statut]['label']
                                 );
                             }
                             break;
@@ -1149,7 +1187,7 @@ class BimpComm extends BimpObject
             if (count($objects)) {
                 foreach ($objects as $data) {
                     $html .= '<tr>';
-                    $html .= '<td>' . $data['type'] . '</td>';
+                    $html .= '<td><strong>' . $data['type'] . '</strong></td>';
                     $html .= '<td>' . $data['ref'] . '</td>';
                     $html .= '<td>' . $data['date'] . '</td>';
                     $html .= '<td>' . $data['total_ht'] . '</td>';
@@ -1386,7 +1424,8 @@ class BimpComm extends BimpObject
             foreach ($bimp_lines as $id_dol_line => $data) {
                 if (!array_key_exists((int) $id_dol_line, $dol_lines)) {
                     if ($bimp_line->fetch((int) $data['id'], $this, true)) {
-                        $line_errors = $bimp_line->delete(true);
+                        $line_warnings = array();
+                        $line_errors = $bimp_line->delete($line_warnings, true);
                         if (count($line_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la suppression d\'une ligne supprimée depuis l\'ancienne version');
                         }
@@ -1520,6 +1559,7 @@ class BimpComm extends BimpObject
                 }
             }
 
+            $this->reset();
             $this->fetch($new_object->id);
         }
 
@@ -1534,17 +1574,16 @@ class BimpComm extends BimpObject
             return array('Element d\'origine absent ou invalide');
         }
 
-        $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
+
         $lines = $origin->getChildrenObjects('lines', array(), 'position', 'asc');
 
         $warnings = array();
         $i = 0;
-        $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
 
         // Création des lignes: 
         foreach ($lines as $line) {
             $i++;
-            $line_instance->reset();
+            $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
             $line_instance->validateArray(array(
                 'id_obj'    => (int) $this->id,
                 'type'      => $line->getData('type'),
@@ -1574,7 +1613,7 @@ class BimpComm extends BimpObject
                 $j = 0;
                 foreach ($remises as $r) {
                     $j++;
-                    $remise->reset();
+                    $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
                     $remise->validateArray(array(
                         'id_object_line' => (int) $line_instance->id,
                         'object_type'    => $line_instance::$parent_comm_type,
@@ -1732,7 +1771,7 @@ class BimpComm extends BimpObject
                         if (!$id_contact) {
                             $errors[] = 'Contact non spécifié';
                         }
-                        if (!$type_contact) {
+                        if (!$type_contact && static::$external_contact_type_required) {
                             $errors[] = 'Type de contact non spécifié';
                         }
 
@@ -1749,7 +1788,7 @@ class BimpComm extends BimpObject
                         if (!$id_user) {
                             $errors[] = 'Utilisateur non spécifié';
                         }
-                        if (!$type_contact) {
+                        if (!$type_contact && static::$internal_contact_type_required) {
                             $errors[] = 'Type de contact non spécifié';
                         }
                         if (!count($errors)) {
@@ -1909,14 +1948,13 @@ class BimpComm extends BimpObject
                 }
             }
 
-            $contact = BimpObject::getInstance('bimpcore', 'Bimp_Contact');
-
             foreach (array('mail_to', 'copy_to') as $type) {
                 if (isset($data[$type]) && is_array($data[$type])) {
                     foreach ($data[$type] as $mail_to) {
                         $email = '';
                         if (preg_match('/^[0-9]+$/', '' . $mail_to)) {
-                            if ($contact->fetch((int) $mail_to)) {
+                            $contact = BimpObject::getInstance('bimpcore', 'Bimp_Contact', (int) $mail_to);
+                            if ($contact->isLoaded()) {
                                 if (!(string) $contact->getData('email')) {
                                     $errors[] = 'Aucune adresse e-mail enregistrée pour le contact "' . $contact->getData('firstname') . ' ' . $contact->getData('lastname') . '"';
                                 } else {
@@ -1966,10 +2004,9 @@ class BimpComm extends BimpObject
             $mimefilename_list = array();
 
             if (isset($data['join_files']) && is_array($data['join_files'])) {
-                $file = BimpObject::getInstance('bimpcore', 'BimpFile');
-
                 foreach ($data['join_files'] as $id_file) {
-                    if ($file->fetch((int) $id_file)) {
+                    $file = BimpCache::getBimpObjectInstance('bimpcore', 'BimpFile', (int) $id_file);
+                    if ($file->isLoaded()) {
                         $file_path = $file->getFilePath();
                         $file_name = $file->getData('file_name') . '.' . $file->getData('file_ext');
                         if (!file_exists($file_path)) {
@@ -2093,9 +2130,6 @@ class BimpComm extends BimpObject
     {
         global $user;
 
-//        echo '<pre>';
-//        print_r($user->rights->bimpcommercial->read);
-//        exit;
         if (isset($user->rights->bimpcommercial->read) && (int) $user->rights->bimpcommercial->read) {
             return 1;
         }

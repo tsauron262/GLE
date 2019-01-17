@@ -745,8 +745,8 @@ class BS_SAV extends BimpObject
         $list = $savS->getList(array('id_equipment' => $equip->id));
         foreach ($list as $arr) {
             if ($arr['id'] != $this->id) {
-                $sav = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-                $sav->fetch($arr['id']);
+                $sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', (int) $arr['id']);
+                $sav->isLoaded();
                 $return .= $sav->getNomUrl() . "<br/>";
             }
         }
@@ -755,7 +755,6 @@ class BS_SAV extends BimpObject
         $repairS = BimpObject::getInstance('bimpapple', 'GSX_Repair');
         $list = $repairS->getList(array('id_sav' => $this->id));
         foreach ($list as $arr) {
-            $reapir = BimpObject::getInstance('bimpapple', 'GSX_Repair');
             $return .= "<a href='#gsx'>" . $arr['repair_confirm_number'] . "</a><br/>";
         }
 
@@ -764,8 +763,8 @@ class BS_SAV extends BimpObject
 
     public function defaultDisplayEquipmentsItem($id_equipment)
     {
-        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
-        if ($equipment->fetch($id_equipment)) {
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+        if ($equipment->isLoaded()) {
             $label = '';
             if ((int) $equipment->getData('id_product')) {
                 $product = $equipment->config->getObject('', 'product');
@@ -829,10 +828,13 @@ class BS_SAV extends BimpObject
                     $html .= $view->renderHtml();
                 }
 
-                $instance = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
-                $list = new BC_ListTable($instance, 'default', 1, (int) $this->getData('id_propal'), 'Lignes du devis');
+                $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine'), 'default', 1, (int) $this->getData('id_propal'), 'Lignes du devis');
                 $html .= $list->renderHtml();
+            } else {
+                $html .= BimpRender::renderAlerts('Aucun devis enregistré pour ce SAV');
             }
+        } else {
+            $html .= BimpRender::renderAlerts('ID du SAV absent');
         }
 
         return $html;
@@ -851,7 +853,6 @@ class BS_SAV extends BimpObject
 //            exit;
             if (count($list)) {
                 krsort($list);
-                $propal = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal');
                 $html .= '<table class="bimp_list_table">';
                 $html .= '<thead>';
                 $html .= '<tr>';
@@ -864,7 +865,8 @@ class BS_SAV extends BimpObject
                 $html .= '<tbody>';
 
                 foreach ($list as $id_propal) {
-                    if ($propal->fetch($id_propal)) {
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $id_propal);
+                    if ($propal->isLoaded()) {
                         $html .= '<tr>';
                         $html .= '<td>' . $propal->getRef() . '</td>';
                         $html .= '<td>' . $propal->displayData('fk_statut') . '</td>';
@@ -996,7 +998,8 @@ class BS_SAV extends BimpObject
             if (!$id_caisse) {
                 $errors[] = 'Utilisateur connecté à aucune caisse. Enregistrement de l\'acompte abandonné';
             } else {
-                if (!$caisse->fetch($id_caisse)) {
+                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                if (!$caisse->isLoaded()) {
                     $errors[] = 'La caisse à laquelle vous êtes connecté est invalide. Enregistrement de l\'acompte abandonné';
                 } else {
                     $caisse->isValid($errors);
@@ -1191,15 +1194,14 @@ class BS_SAV extends BimpObject
 
         $prop->set_ref_client($user, $this->getData('prestataire_number'));
 
-
-        $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
-        $line->no_equipment_post = true;
-
         // Acompte: 
         if ($this->getData('id_discount') > 0) {
             BimpTools::loadDolClass('core', 'discount', 'DiscountAbsolute');
             $discount = new DiscountAbsolute($this->db->db);
             $discount->fetch($this->getData('id_discount'));
+
+            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+            $line->no_equipment_post = true;
 
             $line->find(array(
                 'id_obj'             => $prop->id,
@@ -1297,6 +1299,9 @@ class BS_SAV extends BimpObject
             $prodF->tva_tx = ($prodF->tva_tx > 0) ? $prodF->tva_tx : 0;
             $prodF->find_min_price_product_fournisseur($prodF->id, 1);
 
+            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+            $line->no_equipment_post = true;
+
             $line->find(array(
                 'id_obj'             => $prop->id,
                 'linked_object_name' => 'sav_prioritaire',
@@ -1348,6 +1353,9 @@ class BS_SAV extends BimpObject
         }
 
         // Diagnostic: 
+        $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+        $line->no_equipment_post = true;
+
         $line->find(array(
             'id_obj'             => $prop->id,
             'linked_object_name' => 'sav_diagnostic',
@@ -1355,6 +1363,7 @@ class BS_SAV extends BimpObject
                 ), false, true);
 
         $line_errors = array();
+        $line_warnings = array();
 
         if ((string) $this->getData('diagnostic')) {
             $line->validateArray(array(
@@ -1369,7 +1378,6 @@ class BS_SAV extends BimpObject
 
             $line->desc = 'Diagnostic : ' . $this->getData('diagnostic');
 
-            $line_warnings = array();
             $error_label = '';
             if (!$line->isLoaded()) {
                 $error_label = 'création';
@@ -1381,7 +1389,7 @@ class BS_SAV extends BimpObject
         } else {
             if ($line->isLoaded()) {
                 $error_label = 'suppression';
-                $line_errors = $line->delete(true);
+                $line_errors = $line->delete($line_warnings, true);
             }
         }
 
@@ -1393,6 +1401,9 @@ class BS_SAV extends BimpObject
         }
 
         // Infos Suppl: 
+        $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+        $line->no_equipment_post = true;
+
         $line->find(array(
             'id_obj'             => $prop->id,
             'linked_object_name' => 'sav_extra_infos',
@@ -1425,7 +1436,7 @@ class BS_SAV extends BimpObject
         } else {
             if ($line->isLoaded()) {
                 $error_label = 'suppression';
-                $line_errors = $line->delete(true);
+                $line_errors = $line->delete($line_warnings, true);
             }
         }
 
@@ -1464,14 +1475,14 @@ class BS_SAV extends BimpObject
 
         $garantieHt = $garantieTtc = $garantiePa = 0;
 
-        $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
         foreach ($this->getChildrenObjects('propal_lines', array(
             'type'               => array("in" => array(BS_SavPropalLine::LINE_PRODUCT, BS_SavPropalLine::LINE_FREE)),
             'linked_id_object'   => 0,
             'linked_object_name' => ''
         )) as $line) {
             if ((int) $line->id_product) {
-                if ($product->fetch((int) $line->id_product)) {
+                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
+                if ($product->isLoaded()) {
                     if (!(int) $line->getData('out_of_warranty')) {
                         $remise = (float) $line->remise;
                         $coefRemise = (100 - $remise) / 100;
@@ -1795,11 +1806,11 @@ class BS_SAV extends BimpObject
 
             $mail_msg .= "\n" . $textSuivie . "\n Cordialement.\n\nL'équipe BIMP\n\n" . $signature;
 
-            if ($this->testMail($toMail)) {
-                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3))
+            if (BimpValidate::isEmail($toMail)) {
+                if (!mailSyn2($subject, $toMail, $fromMail, $mail_msg, $tabFile, $tabFile2, $tabFile3)) {
                     $errors[] = 'Echec envoi du mail';
-            }
-            else {
+                }
+            } else {
                 $errors[] = "Pas d'email correct " . $toMail;
             }
         } else {
@@ -1905,20 +1916,18 @@ class BS_SAV extends BimpObject
                     'linked_object_name' => ''
                 ));
 
-                $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-                $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
-
                 foreach ($lines as $line) {
                     if (BimpObject::objectLoaded($line)) {
                         if (!(int) $line->id_product) {
                             continue;
                         }
-                        if ($product->fetch((int) $line->id_product)) {
+                        $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
+                        if ($product->isLoaded()) {
                             if ((int) $product->getData('fk_product_type') === Product::TYPE_PRODUCT) {
                                 if ($product->isSerialisable()) {
                                     $eq_lines = $line->getEquipmentLines();
                                     foreach ($eq_lines as $eq_line) {
-                                        $reservation->reset();
+                                        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
                                         $res_errors = $reservation->validateArray(array(
                                             'id_sav'             => (int) $this->id,
                                             'id_sav_propal_line' => (int) $line->id,
@@ -1943,7 +1952,7 @@ class BS_SAV extends BimpObject
                                         }
                                     }
                                 } else {
-                                    $reservation->reset();
+                                    $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
                                     $res_errors = $reservation->validateArray(array(
                                         'id_sav'             => (int) $this->id,
                                         'id_sav_propal_line' => (int) $line->id,
@@ -2008,7 +2017,8 @@ class BS_SAV extends BimpObject
             if (!is_null($list) && count($list)) {
 
                 foreach ($list as $item) {
-                    if ($reservation->fetch((int) $item['id'])) {
+                    $reservation = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', (int) $item['id']);
+                    if ($reservation->isLoaded()) {
                         $qty = null;
                         $reservation->set('status', $status);
                         $res_errors = $reservation->setNewStatus($status, $qty, $reservation->getData('id_equipment'));
@@ -2454,23 +2464,21 @@ class BS_SAV extends BimpObject
                     $this->addNote('Devis mis en révision le "' . date('d / m / Y H:i') . '" par ' . $user->getFullName($langs));
                     $warnings = array_merge($warnings, $this->removeReservations());
 
-                    if (isset($this->config->objects['propal'])) {
-                        unset($this->config->objects['propal']);
-                    }
-
                     $this->updateField('id_propal', (int) $new_id_propal);
 
                     $asso = new BimpAssociation($this, 'propales');
                     $asso->addObjectAssociation((int) $new_id_propal);
 
                     $propalLine = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
+
                     $lines_list = $propalLine->getList(array(
                         'id_obj' => (int) $old_id_propal,
                             ), null, null, 'position', 'asc', 'array', array('id'));
                     $i = 0;
                     foreach ($lines_list as $item) {
                         $i++;
-                        if ($propalLine->fetch((int) $item['id'])) {
+                        $propalLine = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', (int) $item['id']);
+                        if ($propalLine->isLoaded()) {
                             $remises = $propalLine->getRemises();
                             $eq_lines = $propalLine->getEquipmentLines();
                             $propalLine->id = null;
@@ -2663,7 +2671,8 @@ class BS_SAV extends BimpObject
                             ), null, null, 'id', 'asc', 'array', array('id'));
                     if (!is_null($list)) {
                         foreach ($list as $item) {
-                            if ($repair->fetch((int) $item['id'])) {
+                            $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
+                            if ($repair->isLoaded()) {
                                 $rep_errors = $repair->updateStatus();
                             } else {
                                 $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
@@ -2719,7 +2728,8 @@ class BS_SAV extends BimpObject
             if (!$id_caisse) {
                 $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
             } else {
-                if (!$caisse->fetch($id_caisse)) {
+                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                if (!$caisse->isLoaded()) {
                     $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
                 } else {
                     $caisse->isValid($errors);
@@ -2768,7 +2778,6 @@ class BS_SAV extends BimpObject
                     if (!count($errors)) {
                         // Gestion des stocks et emplacements: 
                         $id_client = (int) $this->getData('id_client');
-                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                         $id_entrepot = (int) $this->getData('id_entrepot');
                         $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
                         foreach ($this->getChildrenObjects('propal_lines') as $line) {
@@ -2783,7 +2792,7 @@ class BS_SAV extends BimpObject
                                             $eq_line_errors[] = 'Equipement non attribué';
                                         } else {
                                             // Création du nouvel emplacement: 
-                                            $place->reset();
+                                            $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                                             if ($id_client) {
                                                 $place_errors = $place->validateArray(array(
                                                     'id_equipment' => (int) $eq_line->getData('id_equipment'),
@@ -2936,7 +2945,8 @@ class BS_SAV extends BimpObject
 
             if (!is_null($list)) {
                 foreach ($list as $item) {
-                    if ($repair->fetch((int) $item['id'])) {
+                    $repair = BimpCache::getBimpObjectInstance('bimpapple', 'GSX_Repair', (int) $item['id']);
+                    if ($repair->isLoaded()) {
                         $rep_errors = $repair->close();
                     } else {
                         $rep_errors = array('Réparation d\'id ' . $item['id'] . ' non trouvée');
@@ -3118,7 +3128,8 @@ class BS_SAV extends BimpObject
             if (!$id_caisse) {
                 $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du mode de paiement de l\'acompte';
             } else {
-                if (!$caisse->fetch($id_caisse)) {
+                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                if (!$caisse->isLoaded()) {
                     $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
                 } else {
                     $caisse->isValid($errors);
@@ -3207,7 +3218,8 @@ class BS_SAV extends BimpObject
                 if (!$id_caisse) {
                     $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement de l\'acompte';
                 } else {
-                    if (!$caisse->fetch($id_caisse)) {
+                    $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                    if (!$caisse->isLoaded()) {
                         $errors[] = 'La caisse à laquelle vous êtes connecté est invalide.';
                     } else {
                         $caisse->isValid($errors);

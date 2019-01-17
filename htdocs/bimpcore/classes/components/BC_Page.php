@@ -37,8 +37,6 @@ class BC_Page extends BimpComponent
         global $bimpUser;
         if (BimpObject::objectLoaded($bimpUser)) {
             $this->header_locked = (int) $bimpUser->getData('object_header_locked');
-        } else {
-            echo 'KO'; exit;
         }
     }
 

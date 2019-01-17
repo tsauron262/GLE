@@ -29,7 +29,7 @@ class userPropalsController extends BimpController
             return BimpRender::renderAlerts('ID du commercial absent');
         }
 
-        $user = BimpObject::getInstance('bimpcore', 'Bimp_User', (int) BimpTools::getValue('id', 0));
+        $user = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) BimpTools::getValue('id', 0));
 
         if (!BimpObject::objectLoaded($user)) {
             return BimpRender::renderAlerts('ID du commercial invalide');

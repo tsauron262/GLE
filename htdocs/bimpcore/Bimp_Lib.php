@@ -43,6 +43,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpStruct.php';
     require_once $dir . 'BimpAssociation.php';
     require_once $dir . 'BimpObject.php';
+    require_once $dir . 'BimpStats.php';
     require_once $dir . 'BimpCore.php';
     require_once $dir . 'FixeTabs.php';
     require_once $dir . 'BimpController.php';

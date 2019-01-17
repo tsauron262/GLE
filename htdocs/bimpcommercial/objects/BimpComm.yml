@@ -42,6 +42,13 @@ objects:
                     parent_object_name: BimpComm
             
 fields:
+    entrepot: 
+        label: Entrepôt
+        dol_extra_field: 1
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
     ref: 
         label: Référence
     fk_statut: 
@@ -60,7 +67,7 @@ fields:
             societe_type: customer
             card: default
         required: 1
-        create_form: client_light
+        create_form: light
     ref_client: 
         label: Référence client
     fk_cond_reglement: 
@@ -71,6 +78,7 @@ fields:
             array: condReglements
         input: 
             type: select_cond_reglement
+        default_value: 0
     fk_mode_reglement: 
         label: Mode de règlement
         dol_prop: mode_reglement_id
@@ -79,6 +87,7 @@ fields:
             array: modeReglements
         input: 
             type: select_payment
+        default_value: 0
     fk_availability: 
         label: Délai de livraison
         dol_prop: availability_id
@@ -129,6 +138,35 @@ fields:
             field_name: use_amount
             show_values: 0
         
+lists_cols: 
+    entrepot: 
+        field: entrepot
+        display: nom_url
+    ref: 
+        label: Réf. 
+        field: ref
+    soc: 
+        field: fk_soc
+        display: nom_url
+    ref_client: 
+        field: ref_client
+    statut: 
+        field: fk_statut
+    total_ht: 
+        field: total_ht
+    total_ttc: 
+        field: total
+    total_tva: 
+        field: tva
+    cond_reglement: 
+        field: fk_cond_reglement
+    mode_reglement: 
+        field: fk_mode_reglement
+    availability: 
+        field: fk_availability
+    input_reason: 
+        field: fk_input_reason
+    
 forms: 
     contact:
         title: Ajouter un contact
@@ -375,8 +413,7 @@ fields_tables:
 views: 
     default: 
         objects_change_reload: Bimp_File
-        delete_btn: 
-            callback: isDeletable
+        delete_btn: 1
         edit_form: default
         footer_extra_btn: 
             callback: getActionsButtons
@@ -488,3 +525,17 @@ views:
                   fields_table: 
                       name: note_private
                       panel: 0
+                      
+    full: 
+        objects_change_reload: Bimp_File
+        rows: 
+            - cols: 
+                - type: object_header
+            - cols: 
+                - type: view
+                  view: 
+                      name: default
+            - cols: 
+                - type: view
+                  view: 
+                      name: content

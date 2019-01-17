@@ -191,14 +191,14 @@ class pdf_bimpsupport_pret extends ModeleBimpSupport
 
             $asso = new BimpAssociation($sav_pret, 'equipments');
 
-            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
             $list = $asso->getAssociatesList();
             if (!count($list)) {
                 $this->errors[] = 'Erreur: aucun équipement de prêt enregistré pour le prêt SAV d\'ID ' . $sav_pret->id;
                 return 0;
             }
             foreach ($list as $id_equipment) {
-                if (!$equipment->fetch((int) $id_equipment)) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                if (!$equipment->isLoaded()) {
                     $this->errors[] = 'Equipement d\'ID ' . $id_equipment . ' non trouvé';
                     return 0;
                 } else {

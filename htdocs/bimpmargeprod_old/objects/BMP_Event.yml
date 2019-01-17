@@ -1,0 +1,341 @@
+table: bmp_event
+controller: event
+
+labels: 
+    name: événement
+
+objects:
+    groups: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventGroup
+            
+    tarifs: 
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: BMP_Tarif
+            
+    coprods: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventCoProd
+    
+    coprod_def_parts:
+        realtion: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventCoProdDefPart
+            
+    montants: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventMontant
+            
+    frais: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: BMP_EventMontant
+        list: 
+            title: Charges
+            filters: 
+                type: 1
+            
+    recettes: 
+        relation: hasMany
+        delete: 0
+        instance: 
+            bimp_object: BMP_EventMontant
+        list: 
+            title: Recettes
+            filters: 
+                type: 2
+    
+    recettes_bar: 
+        relation: none
+        delete: 0
+        instance:
+            bimp_object: BMP_EventMontant
+        list: 
+            title: Recettes du bar
+            filters: 
+                type: 2
+                id_category_montant:
+                    prop: 
+                        name: id_bar_category
+                        is_static: 1
+    
+    billets:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventBillets
+            
+    calcs_montants:
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BMP_EventCalcMontant
+    
+fields: 
+    name: 
+        label: Nom
+        search: 
+            type: value_part
+            search_on_key_up: 1
+        
+    date:
+        label: Date
+        type: datetime
+        required: 1
+            
+    type: 
+        label: Type
+        type: int
+        values: 
+            array: types
+        
+    place: 
+        label: Lieu
+        type: int
+        values: 
+            array: places
+            
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status
+            
+    tva_billets:
+        label: Taux de TVA pour la vente de billets
+        type: int
+        values: 
+            array: 
+                1: 2,1%
+                2: 5,5%
+        default_value: 1
+    
+    ca_moyen_bar:
+        label: CA moyen bar TTC
+        type: money
+        
+    analytics: 
+        label: Analytics
+        values: 
+            array: analytics
+        
+lists:
+    default: 
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les événements sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: date
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        delete_btn: 1
+        page_btn: 1
+        edit_btn: 1
+        cols:
+            date:
+                field: date
+            name: 
+                field: name
+            type: 
+                field: type
+            place: 
+                field: place
+            status: 
+                field: status
+             
+fields_tables: 
+    infos: 
+        title: Infos événement
+        icon: info-circle
+        rows:
+          - field: date
+          - field: type
+          - field: place
+          - field: analytics
+          - field: status
+            edit: 1
+          - field: tva_billets
+          
+    ca_bar:
+        title: Prévisionnel bar
+        icon: beer
+        rows: 
+            - field: ca_moyen_bar
+              edit: 1
+              
+views:
+    default:
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+                      
+                - type: object_common_fields
+                  col_lg: 6    
+                  col_md: 6
+                  
+            - cols:
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  list: 
+                      children: groups
+                      panel: 0
+                      
+                - type: list
+                  col_lg: 6
+                  col_md: 6
+                  show: 
+                      callback: showCoprods
+                  list: 
+                      children: coprods
+                      panel: 0
+        
+    billets:
+        title: Billetterie
+        rows:                
+            - cols:
+                - type: list
+                  col_lg: 12
+                  list: 
+                      title: Tarifs
+                      children: tarifs
+                      panel: 0
+                      
+                - type: list
+                  col_lg: 12
+                  list: 
+                      title: Vente de billets
+                      children: billets
+                      panel: 0
+            - cols: 
+                - type: view
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  view: 
+                      name: total_billets
+                    
+    total_billets: 
+        objects_change_reload: BMP_Tarif,BMP_EventBillets
+        panel: 0
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderTotalBillets
+                      
+    breaks:
+        title: Calculs du break
+        icon: pie-chart
+        objects_change_reload: BMP_Tarif,BMP_EventBillets
+        rows:
+            - cols:
+                - type: fields_table
+                  show: 
+                      callback: isInPrevisionnelMode
+                  col_lg: 6
+                  col_md: 6
+                  fields_table:
+                      name: ca_bar
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  custom: 
+                      callback: renderPrevisionnelBreaks
+                
+                      
+    billets_list:
+        rows: 
+            - cols:
+                - type: list
+                  col_lg: 12
+                  list:
+                      title: Détails des ventes par vendeur
+                      children: billets
+                      panel: 0
+                              
+    totaux:
+        title: Montants HT totaux
+        objects_change_reload: BMP_EventMontant,BMP_Tarif,BMP_EventBillets
+        icon: euro
+        rows:
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderMontantsTotaux
+            
+    frais_hotel:
+        title: Détail des frais d'hôtellerie
+        icon: euro
+        rows:
+            - cols:
+                - type: custom
+                  custom: 
+                      callback:
+                          method: renderFraisHotel
+                          
+    bilans: 
+        title: Bilans
+        icon: bars
+        rows: 
+            - cols:
+                - type: nav_tabs
+                  nav_tabs: 
+                      - id: general
+                        title: Bilan général
+                        struct: 
+                            type: view
+                            view: 
+                                name: bilan_general
+                      - id: comptable
+                        title: Bilan comptable
+                        struct: 
+                            type: view
+                            view: 
+                                name: bilan_comptable
+                            
+    bilan_general: 
+        rows: 
+            - cols: 
+                - type: list
+                  list: 
+                      name: bilan_general
+                      children: montants
+                      panel: 0
+            - cols: 
+                - type: view
+                  view: 
+                    panel: 1
+                    name: totaux
+                  
+    bilan_comptable:
+        rows: 
+            - cols: 
+                - type: list
+                  list: 
+                      name: bilan_comptable
+                      children: montants
+                      panel: 0
+                - type: custom
+                  custom:
+                      callback:
+                          method: renderSoldes

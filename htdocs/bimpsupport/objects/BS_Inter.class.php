@@ -200,14 +200,15 @@ class BS_Inter extends BimpObject
         }
     }
 
-    public function delete($force_delete = false)
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         $timer = $this->getTimer();
 
-        $errors = parent::delete($force_delete);
+        $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors) && BimpObject::objectLoaded($timer)) {
-            $timer->delete(true);
+            $del_warnings = array();
+            $timer->delete($del_warnings, true);
         }
 
         return $errors;

@@ -8,7 +8,11 @@ objects:
             
     clients: 
         instance: 
-            bimp_object: Bimp_Societe
+            bimp_object: Bimp_Client
+            
+    fournisseurs: 
+        instance: 
+            bimp_object: Bimp_Fournisseur
             
     products: 
         instance: 
@@ -31,7 +35,15 @@ sections:
                   list: 
                       panel: 1
                       object: clients
-                      name: clients
+                      name: default
+        fourns: 
+            label: Fournisseurs
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: fournisseurs
+                      name: default
         products: 
             label: Produits
             sections: 

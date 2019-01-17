@@ -16,21 +16,15 @@ class Bimp_Paiement extends BimpObject
 
     public function getClient()
     {
-        if (BimpTools::isSubmit('fields/id_client')) {
-            return BimpTools::getValue('fields/id_client', 0);
+        return BimpTools::getPostFieldValue('id_client', 0);
         }
-        if (BimpTools::isSubmit('param_values/fields/id_client')) {
-            return BimpTools::getValue('param_values/fields/id_client', 0);
-        }
-        return 0;
-    }
 
     public function getAmountFromFacture()
     {
         $id_facture = (int) BimpTools::getValue('fields/id_facture', 0);
 
         if ($id_facture) {
-            $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
             if (BimpObject::objectLoaded($facture)) {
                 return (float) round($facture->getRemainToPay(), 2);
             }
@@ -81,9 +75,8 @@ class Bimp_Paiement extends BimpObject
             $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
             $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
 
-
             if ($id_caisse) {
-                $caisse->fetch($id_caisse);
+                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
                 if (!BimpObject::objectLoaded($caisse)) {
                     $html .= BimpRender::renderAlerts('Erreur: la caisse à laquelle vous êtes connecté semble ne plus exister');
                     $id_caisse = 0;
@@ -176,7 +169,8 @@ class Bimp_Paiement extends BimpObject
 
         $at_least_one = false;
         foreach ($list as $item) {
-            if ($facture->fetch((int) $item['rowid'])) {
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['rowid']);
+            if ($facture->isLoaded()) {
                 $montant_ttc = (float) $facture->dol_object->total_ttc;
                 $paid = (float) $facture->dol_object->getSommePaiement();
                 $paid += (float) $facture->dol_object->getSumCreditNotesUsed();
@@ -321,7 +315,7 @@ class Bimp_Paiement extends BimpObject
             if (!$id_caisse) {
                 $errors[] = 'Caisse absente';
             } else {
-                $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
                 if (!BimpObject::objectLoaded($caisse)) {
                     $errors[] = 'La caisse d\'ID ' . $id_caisse . ' n\'existe pas';
                 } else {
@@ -388,7 +382,7 @@ class Bimp_Paiement extends BimpObject
             if ($id_facture <= 0) {
                 $errors[] = 'ID facture invalide (ligne ' . $i . ')';
             } elseif ($amount !== 0) {
-                $factures[$id_facture] = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                $factures[$id_facture] = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
 
                 if (!$factures[$id_facture]->isLoaded()) {
                     $errors[] = 'Facture d\'ID ' . $id_facture . ' inexistante';
@@ -438,8 +432,7 @@ class Bimp_Paiement extends BimpObject
                 if (isset($factures[$id_facture]) && $factures[$id_facture]->isLoaded()) {
                     foreach ($avoirs as $avoir) {
                         if ($avoir['input_name'] === 'amount_' . $i) {
-                            $factures[$id_facture]->dol_object->error = '';
-                            $factures[$id_facture]->dol_object->errors = array();
+                            BimpTools::resetDolObjectErrors($factures[$id_facture]->dol_object);
                             if ($factures[$id_facture]->dol_object->insert_discount((int) $avoir['id_discount']) <= 0) {
                                 $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($factures[$id_facture]->dol_object), 'Echec de l\'insertion de l\'avoir client d\'ID ' . $avoir['id_discount']);
                             } else {
@@ -505,7 +498,7 @@ class Bimp_Paiement extends BimpObject
         return $errors;
     }
 
-    public function updateDolObject(&$errors)
+    public function updateDolObject(&$errors = array())
     {
         // Màj du n°:
         if (!$this->isLoaded()) {

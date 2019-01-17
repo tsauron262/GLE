@@ -256,8 +256,8 @@ class BS_Ticket extends BimpObject
 
     public function defaultDisplayEquipmentsItem($id_equipment)
     {
-        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
-        if ($equipment->fetch($id_equipment)) {
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+        if ($equipment->isLoaded()) {
             $label = '';
             $product = $equipment->config->getObject('', 'product');
             if (!is_null($product) && isset($product->id) && $product->id) {
@@ -395,9 +395,9 @@ class BS_Ticket extends BimpObject
         }
 
         if (count($inters) && !count($errors)) {
-            $inter = BimpObject::getInstance('bimpsupport', 'BS_Inter');
             foreach ($inters as $id_inter) {
-                if ($inter->fetch($id_inter)) {
+                $inter = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Inter', (int) $id_inter);
+                if ($inter->isLoaded()) {
                     $inter->set('status', BS_Inter::BS_INTER_CLOSED);
                     $inter_errors = $inter->update();
                     if (count($inter_errors)) {
@@ -539,14 +539,15 @@ class BS_Ticket extends BimpObject
         }
     }
 
-    public function delete($force_delete = false)
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         $timer = $this->getTimer();
 
-        $errors = parent::delete($force_delete);
+        $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors) && BimpObject::objectLoaded($timer)) {
-            $timer->delete(true);
+            $del_warnings = array();
+            $timer->delete($del_warnings, true);
         }
 
         return $errors;

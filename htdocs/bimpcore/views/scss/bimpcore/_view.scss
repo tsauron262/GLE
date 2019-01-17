@@ -101,6 +101,34 @@
         padding: 5px 10px;
         background-color: $gray-lighter;
     }
+
+    &.center-align {
+        & > thead > tr.col_headers > th,
+        & > tbody > tr > td,
+        & > tfoot > tr > td {
+            text-align: center;
+}
+    }
+
+    & > tbody > tr.strong > td {
+        font-weight: bold;
+        background-color: #F0F0F0;
+    }
+    
+    & > tbody > tr.title > td {
+        font-weight: bold;
+        text-align: left;
+        background-color: #C8C8C8!important;
+        border-top-color: #C8C8C8!important;
+        border-bottom-color: #C8C8C8!important;
+    }
+    
+    tr.total_row {
+        & > td {
+            font-weight: bold;
+            background-color: #F0F0F0!important;
+        }
+    }
 }
 
 .object_header {

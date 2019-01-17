@@ -1,0 +1,25 @@
+extends: 
+    module: bimpcommercial
+    object_name: FournObjectLine
+    
+table: bimp_facture_fourn_line
+
+parent_module: bimpcommercial
+parent_object: Bimp_FactureFourn
+
+labels: 
+    name: ligne de facture fournisseur
+    name_plur: lignes de facture fournisseur
+    is_female: 1
+    
+objects: 
+    line: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: fourn
+                file: fournisseur.facture
+                class: SupplierInvoiceLine
+            id_object: 
+                field_value: id_line

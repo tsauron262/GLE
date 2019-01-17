@@ -32,10 +32,10 @@ fields:
         input: 
             type: search_list
             search_list:
-                table: be_equipment
-                field_return_value: id
-                field_return_label: serial
-                fields_search: serial,id
+                table: be_equipment e
+                field_return_value: e.id
+                field_return_label: e.serial
+                fields_search: e.serial,e.id
             help: Numéro de série ou ID d'un équipement<br/>Laissez vide pour attribuer un équipement ultérieurement
         create_form: light
         display: 

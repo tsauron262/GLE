@@ -71,6 +71,7 @@ class BC_Field extends BimpComponent
         $this->params_def['next_sort_way'] = array('default' => 'asc');
 //        $this->params_def['display'] = array('type' => 'definitions', 'defs_type' => 'display', 'multiple' => 1);
         $this->params_def['depends_on'] = array('data_type' => 'array', 'compile' => true);
+        $this->params_def['keep_new_value'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['values'] = array('data_type' => 'array', 'compile' => true);
         $this->params_def['display_if'] = array('data_type' => 'array', 'compile' => true);
         $this->params_def['history'] = array('data_type' => 'bool', 'default' => 0);
@@ -104,7 +105,7 @@ class BC_Field extends BimpComponent
 
     public function renderHtml()
     {
-        if (!$this->params['editable'] && !$this->params['viewable'] || !$this->params['show']) {
+        if ((!$this->params['editable'] && !$this->params['viewable']) || !$this->params['show']) {
             return '';
         }
 
@@ -120,8 +121,13 @@ class BC_Field extends BimpComponent
             return $html;
         }
 
-        if ($this->edit && $this->params['editable']) {
-            $html .= $this->renderInput();
+        if ($this->edit) {
+            if ($this->params['editable']) {
+                $html .= $this->renderInput();
+            } else {
+                $content = $this->displayValue();
+                $html .= BimpInput::renderInputContainer($this->name, $this->value, $content, $this->name_prefix);
+            }
         } else {
             $html .= $this->displayValue();
         }
@@ -133,10 +139,6 @@ class BC_Field extends BimpComponent
     {
         if (!$this->params['show']) {
             return '';
-        }
-
-        if (!$this->params['editable']) {
-            return BimpRender::renderAlerts('Vous n\'avez pas la permission d\'éditer ce champ', 'warning');
         }
 
         if (is_null($input_path)) {
@@ -152,20 +154,21 @@ class BC_Field extends BimpComponent
         }
 
         $history_html = '';
-        if ($this->params['history']) {
+        if ($this->params['history'] && BimpObject::objectLoaded($this->object)) {
             $history_html = BimpRender::renderObjectFieldHistoryPopoverButton($this->object, $this->name_prefix . $this->name);
         }
 
         if ($history_html) {
-            $html .= '<div style="padding-right: 32px;">';
+            $html .= '<div style="padding-left: 32px;">';
+            $html .= '<div style="float: left; margin-left: -28px; margin-top: 4px">';
+            $html .= $history_html;
+            $html .= '</div>';
         }
 
         $html .= $input->renderHtml();
 
         if ($history_html) {
-            $html .= '<div style="float: right; margin-right: -28px; margin-top: 4px">';
-            $html .= $history_html;
-            $html .= '</div></div>';
+            $html .= '</div>';
         }
 
         return $html;
@@ -189,13 +192,20 @@ class BC_Field extends BimpComponent
         }
 
         if ($history_html) {
-            $html .= '<div style="padding-right: 32px;">';
+            $html .= '<div style="padding-right: 45px;">';
+            $html .= '<div style="float: left; margin-left: -40px; margin-top: 4px">';
+            $html .= $history_html;
+            $html .= '</div>';
         }
 
         if ($this->display_input_value) {
             $value = $this->value;
-            if ($this->params['type'] === 'items_list' && is_array($this->value)) {
-                $value = implode($this->params['items_delimiter'], $this->value);
+            if (is_array($value)) {
+                if ($this->params['type'] === 'json') {
+                    $value = json_encode($value);
+                } else {
+                    $value = implode($this->params['items_delimiter'], $this->value);
+                }
             }
             $html .= '<input type="hidden" name="' . $this->name_prefix . $this->name . '" value="' . htmlentities($value) . '">';
         }
@@ -206,9 +216,7 @@ class BC_Field extends BimpComponent
         $html .= $display->renderHtml();
 
         if ($history_html) {
-            $html .= '<div style="float: right; margin-right: -28px; margin-top: 4px">';
-            $html .= $history_html;
-            $html .= '</div></div>';
+            $html .= '</div>';
         }
 
         return $html;
@@ -216,10 +224,10 @@ class BC_Field extends BimpComponent
 
     public function renderDependsOnScript($form_identifier)
     {
-        return self::renderDependsOnScriptStatic($this->object, $form_identifier, $this->name, $this->params['depends_on'], $this->name_prefix);
+        return self::renderDependsOnScriptStatic($this->object, $form_identifier, $this->name, $this->params['depends_on'], $this->name_prefix, $this->params['keep_new_value']);
     }
 
-    public static function renderDependsOnScriptStatic(BimpObject $object, $form_identifier, $field_name, $depends_on, $name_prefix = '')
+    public static function renderDependsOnScriptStatic(BimpObject $object, $form_identifier, $field_name, $depends_on, $name_prefix = '', $keep_new_value = 1)
     {
         $script = '';
         if (!is_null($depends_on) && $depends_on) {
@@ -248,7 +256,7 @@ class BC_Field extends BimpComponent
                         $script .= '      data[\'' . $dep . '\'] = getFieldValue($form, \'' . $name_prefix . $dep . '\');' . "\n";
                         $script .= '  }' . "\n";
                     }
-                    $script .= '  reloadObjectInput(\'' . $form_identifier . '\', \'' . $name_prefix . $field_name . '\', data);' . "\n";
+                    $script .= '  reloadObjectInput(\'' . $form_identifier . '\', \'' . $name_prefix . $field_name . '\', data, ' . $keep_new_value . ');' . "\n";
                     $script .= '});' . "\n";
                 }
                 $script .= '</script>' . "\n";

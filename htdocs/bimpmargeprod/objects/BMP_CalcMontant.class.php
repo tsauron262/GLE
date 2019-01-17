@@ -3,44 +3,36 @@
 class BMP_CalcMontant extends BimpObject
 {
 
+    // Getters : 
+
     public function getTypes_montantsArray()
     {
-        $montants = array();
-        $instance = BimpObject::getInstance($this->module, 'BMP_TypeMontant');
-        $types_montants = $instance->getList();
-        foreach ($types_montants as $tm) {
-            $montants[$tm['id']] = $tm['name'] . ' (' . BMP_TypeMontant::$types[(int) $tm['type']]['label'] . ')';
-        }
-
-        return $montants;
+        BimpObject::loadClass($this->module, 'BMP_TypeMontant');
+        return BMP_TypeMontant::getTypesMontantsArray();
     }
 
     public function getTotaux_interArray()
     {
-        $totaux = array();
-        $instance = BimpObject::getInstance($this->module, 'BMP_TotalInter');
-        foreach ($instance->getList() as $item) {
-            $totaux[$item['id']] = $item['name'];
-        }
-
-        return $totaux;
+        return self::getBimpObjectFullListArray($this->module, 'BMP_TotalInter');
     }
+
+    // Affichage: 
 
     public function displaySource()
     {
-        if (isset($this->id) && $this->id) {
+        if ($this->isLoaded()) {
             $source_type = $this->getData('type_source');
             switch ($source_type) {
                 case 1:
                     $tm = $this->getChildObject('type_montant_src');
-                    if (!is_null($tm) && isset($tm->id) && $tm->id) {
+                    if (BimpObject::objectLoaded($tm)) {
                         return $tm->getData('name') . ' (' . BMP_TypeMontant::$types[(int) $tm->getData('type')]['label'] . ')';
                     }
                     break;
 
                 case 2:
                     $ti = $this->getChildObject('total_src');
-                    if (!is_null($ti) && isset($ti->id) && $ti->id) {
+                    if (BimpObject::objectLoaded($ti)) {
                         return $ti->getData('name');
                     }
                     break;
@@ -55,9 +47,9 @@ class BMP_CalcMontant extends BimpObject
 
     public function displayTarget()
     {
-        if (isset($this->id) && $this->id) {
+        if ($this->isLoaded()) {
             $target = $this->getChildObject('type_montant_tgt');
-            if ($target->isLoaded()) {
+            if (BimpObject::objectLoaded($target)) {
                 return $target->getData('name') . ' (' . BMP_TypeMontant::$types[(int) $target->getData('type')]['label'] . ')';
             }
             return '';
@@ -65,6 +57,8 @@ class BMP_CalcMontant extends BimpObject
 
         return BimpRender::renderAlerts('Aucun');
     }
+
+    // Traitements: 
 
     public function checkConflicts()
     {
@@ -75,8 +69,7 @@ class BMP_CalcMontant extends BimpObject
             $ti = $this->getChildObject('total_src');
             $target = $this->getChildObject('type_montant_tgt');
 
-            if (!is_null($ti) && $ti->isLoaded() &&
-                    !is_null($target) && $target->isLoaded()) {
+            if (BimpObject::objectLoaded($ti) && BimpObject::objectLoaded($target)) {
                 $asso = new BimpAssociation($ti, 'types_montants');
                 $montants = $asso->getAssociatesList();
                 if (in_array($target->id, $montants)) {
@@ -112,9 +105,9 @@ class BMP_CalcMontant extends BimpObject
                 }
             } elseif ($type_src === 2) {
 
-                $totalInter = BimpObject::getInstance($this->module, 'BMP_TotalInter', (int) $this->getData('id_total_source'));
+                $totalInter = BimpCache::getBimpObjectInstance($this->module, 'BMP_TotalInter', (int) $this->getData('id_total_source'));
                 $list = $totalInter->getAllTypesMontantsList();
-                
+
                 foreach ($list as $id_type_montant) {
                     if ($this->db->insert('bmp_calc_montant_type_montant', array(
                                 'id_calc_montant' => (int) $id,
@@ -198,22 +191,18 @@ class BMP_CalcMontant extends BimpObject
             case 1:
                 $id_type_montant = (int) $this->getData('id_montant_source');
                 if ($id_type_montant) {
-                    $montant = BimpObject::getInstance($this->module, 'BMP_EventMontant');
-                    if ($montant->find(array(
-                                'id_event'   => (int) $id_event,
-                                'id_montant' => (int) $id_type_montant,
-                                'id_coprod'  => $id_coprod
-                            ))) {
-                        return $montant->getData('amount');
+                    $event = BimpCache::getBimpObjectInstance($this->module, 'BMP_Event', (int) $id_event);
+                    if ($event->isLoaded()) {
+                        return (float) $event->getMontantAmount($id_type_montant, $id_coprod);
                     }
                 }
                 break;
 
             case 2:
-                $id_total = $this->getData('id_total_source');
+                $id_total = (int) $this->getData('id_total_source');
                 if ($id_total) {
-                    $total = BimpObject::getInstance($this->module, 'BMP_TotalInter');
-                    if ($total->fetch($id_total)) {
+                    $total = BimpCache::getBimpObjectInstance($this->module, 'BMP_TotalInter', $id_total);
+                    if ($total->isLoaded()) {
                         return $total->getEventTotal($id_event, $id_coprod);
                     }
                 }
@@ -238,29 +227,35 @@ class BMP_CalcMontant extends BimpObject
         return $errors;
     }
 
-    public function create()
+    public function create(&$warnings = array(), $force_create = false)
     {
-        $errors = parent::create();
+        $errors = parent::create($warnings, $force_create);
 
         if ($this->isLoaded()) {
-            $errors = array_merge($errors, $this->rebuildTypesMontantsCache());
+            $cache_errors = $this->rebuildTypesMontantsCache();
+            if (count($cache_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($cache_errors, 'Des erreurs sont survenues lors de la reconstruction du cache');
+            }
         }
 
         return $errors;
     }
 
-    public function update()
+    public function update(&$warnings = array(), $force_delete = false)
     {
-        $errors = parent::update();
+        $errors = parent::update($warnings, $force_delete);
 
         if ($this->isLoaded()) {
-            $errors = array_merge($errors, $this->rebuildTypesMontantsCache());
+            $cache_errors = $this->rebuildTypesMontantsCache();
+            if (count($cache_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($cache_errors, 'Des erreurs sont survenues lors de la reconstruction du cache');
+            }
         }
 
         return $errors;
     }
 
-    public function delete()
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         $errors = array();
 
@@ -270,11 +265,11 @@ class BMP_CalcMontant extends BimpObject
             $id = null;
         }
 
-        $errors = parent::delete();
+        $errors = parent::delete($warnings, $force_delete);
 
         if (!is_null($id)) {
             if ($this->db->delete('bmp_calc_montant_type_montant', '`id_calc_montant` = ' . (int) $id) <= 0) {
-                $errors[] = 'Echec de la suppression du cache (Echec suppression des types de montants déjà enregistrés)';
+                $warnings[] = 'Echec de la suppression du cache (Echec suppression des types de montants déjà enregistrés)';
             }
         }
 

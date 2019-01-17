@@ -357,7 +357,7 @@ class ObjectLine extends BimpObject
                         unset($this->post_equipment);
                         $this->post_equipment = null;
                     }
-                    $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                     if ($equipment->isLoaded()) {
                         $this->post_equipment = $equipment;
                     }
@@ -454,7 +454,7 @@ class ObjectLine extends BimpObject
                     }
                     if ($id_product && (!(int) $id_fourn_price || (int) $this->id_product !== $id_product)) {
                         if ((int) $this->id_fourn_price) {
-                            $pfp = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
+                            $pfp = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
                             if (BimpObject::objectLoaded($pfp)) {
                                 if ((int) $pfp->getData('fk_product') === $id_product) {
                                     return $this->id_fourn_price;
@@ -616,7 +616,8 @@ class ObjectLine extends BimpObject
             }
             if (!$this->isRemisable() && count($this->remises)) {
                 foreach ($this->remises as $remise) {
-                    $remise->delete(true);
+                    $del_warnings = array();
+                    $remise->delete($del_warnings, true);
                 }
                 unset($this->remises);
                 $this->remises = null;
@@ -1160,8 +1161,34 @@ class ObjectLine extends BimpObject
                             $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 0, 0, 'HT', 0, $date_from, $date_to, 0, (int) $this->getData('position'), 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
                             break;
 
+                        case 'CommandeFournisseur':
+                            if (isset($this->ref_supplier)) {
+                                $ref_supplier = $this->ref_supplier;
+                            } else {
+                                $ref_supplier = '';
+                            }
+                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (int) $this->id_fourn_price, $ref_supplier, (float) $this->remise, 'HT', 0.0, 0, 0, false, $date_from, $date_to);
+                            break;
+
+                        case 'FactureFournisseur':
+                            $type = 0;
+                            if ((int) $this->id_product) {
+                                $product = $this->getProduct();
+                                if (BimpObject::objectLoaded($product)) {
+                                    $type = (int) $product->getData('fk_product_type');
+                                }
+                            }
+                            if (isset($this->ref_supplier)) {
+                                $ref_supplier = $this->ref_supplier;
+                            } else {
+                                $ref_supplier = '';
+                            }
+                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, (float) $this->tva_tx, 0, 0, $this->qty, (int) $this->id_product, (float) $this->remise, $date_from, $date_to, 0, '', 'HT', $type, (int) $this->getData('position'), false, 0, null, 0, 0, $ref_supplier);
+                            break;
+
                         default:
-                            $result = 0;
+                            $errors[] = 'Objet parent non défini';
+                            break;
                     }
 
 
@@ -1245,8 +1272,34 @@ class ObjectLine extends BimpObject
                             $result = $object->updateLine($id_line, (string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->remise, (float) $this->tva_tx, 0.0, 0.0, 'HT', 0, $date_from, $date_to, 0, 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
                             break;
 
+                        case 'CommandeFournisseur':
+                            if (isset($this->ref_supplier)) {
+                                $ref_supplier = $this->ref_supplier;
+                            } else {
+                                $ref_supplier = '';
+                            }
+                            $result = $object->updateLine($id_line, (string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->remise, (float) $this->tva_tx, 0.0, 0.0, 'HT', 0, 0, 0, $date_from, $date_to, 0, null, 0, $ref_supplier);
+                            break;
+
+                        case 'FactureFournisseur':
+                            $type = 0;
+                            if ((int) $this->id_product) {
+                                $product = $this->getProduct();
+                                if (BimpObject::objectLoaded($product)) {
+                                    $type = (int) $product->getData('fk_product_type');
+                                }
+                            }
+                            if (isset($this->ref_supplier)) {
+                                $ref_supplier = $this->ref_supplier;
+                            } else {
+                                $ref_supplier = '';
+                            }
+                            $result = $object->updateLine($id_line, (string) $this->desc, (float) $this->pu_ht, (float) $this->tva_tx, 0, 0, $this->qty, (int) $this->id_product, 'HT', 0, $type, (float) $this->remise, false, $date_from, $date_to, 0, null, 0, $ref_supplier);
+                            break;
+
                         default:
-                            $result = 0;
+                            $errors[] = 'Objet parent non défini';
+                            break;
                     }
                     break;
 
@@ -1258,6 +1311,7 @@ class ObjectLine extends BimpObject
 
                         case 'Facture':
                         case 'Commande':
+                        case 'CommandeFournisseur':
                             $result = $object->updateline($id_line, $this->desc);
                             break;
 
@@ -1271,7 +1325,7 @@ class ObjectLine extends BimpObject
                     break;
             }
             if (!is_null($result) && $result <= 0) {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Des erreurs sont survenues lors de l\'ajout de la ligne ' . BimpObject::getInstanceLabel($instance, 'to'));
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Des erreurs sont survenues lors de la mise à jour de la ligne ' . BimpObject::getInstanceLabel($instance, 'to'));
             }
         }
 
@@ -1526,7 +1580,7 @@ class ObjectLine extends BimpObject
             $line = null;
 
             if ($id_equipment_line) {
-                $line = BimpObject::getInstance('bimpcommercial', 'ObjectLineEquipment', (int) $id_equipment_line);
+                $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'ObjectLineEquipment', (int) $id_equipment_line);
                 if (!BimpObject::objectLoaded($line)) {
                     $errors[] = 'La ligne d\'équipement d\'ID ' . $id_equipment_line . ' n\'existe pas';
                     return $errors;
@@ -1534,7 +1588,7 @@ class ObjectLine extends BimpObject
             }
 
             if ($id_equipment) {
-                $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
                 if (is_null($line) || ((int) $line->getData('id_equipment') !== (int) $id_equipment)) {
                     $errors = $this->checkEquipment($equipment);
                 }
@@ -1684,7 +1738,8 @@ class ObjectLine extends BimpObject
         if (!$this->isRemisable()) {
             if (count($remises)) {
                 foreach ($remises as $remise) {
-                    $remise->delete(true);
+                    $del_warnings = array();
+                    $remise->delete($del_warnings, true);
                 }
                 unset($this->remises);
                 $this->remises = null;
@@ -1701,7 +1756,8 @@ class ObjectLine extends BimpObject
 
                 $remises = $this->getRemises();
                 foreach ($remises as $remise) {
-                    $remise->delete(true);
+                    $del_warnings = array();
+                    $remise->delete($del_warnings, true);
                 }
                 unset($this->remises);
                 $this->remises = null;
@@ -1992,7 +2048,7 @@ class ObjectLine extends BimpObject
         if (BimpTools::isSubmit('line_pa_ht')) {
             $line_pa = BimpTools::getValue('line_pa_ht');
         } elseif (BimpTools::isSubmit('line_id_fourn_price')) {
-            $fournPrice = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) BimpTools::getValue('line_id_fourn_price'));
+            $fournPrice = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) BimpTools::getValue('line_id_fourn_price'));
             if (BimpObject::objectLoaded($fournPrice)) {
                 $line_pa = (float) $fournPrice->getData('price');
             }
@@ -2341,7 +2397,7 @@ class ObjectLine extends BimpObject
 
 
                     if (!is_null($this->id_fourn_price) && (int) $this->id_fourn_price) {
-                        $fournPrice = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
+                        $fournPrice = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
                         if (BimpObject::objectLoaded($fournPrice)) {
                             $this->pa_ht = (float) $fournPrice->getData('price');
                         } else {
@@ -2407,7 +2463,7 @@ class ObjectLine extends BimpObject
         if (!$this->no_equipment_post) {
             $id_equipment = (int) BimpTools::getValue('id_equipment', 0);
             if ($id_equipment) {
-                $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', $id_equipment);
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
                 if (!BimpObject::objectLoaded($equipment)) {
                     $errors[] = 'Equipement invalide';
                     unset($equipment);
@@ -2425,7 +2481,8 @@ class ObjectLine extends BimpObject
         if (!count($errors)) {
             $errors = $this->createLine(false);
             if (count($errors)) {
-                $this->delete(true);
+                $del_warnings = array();
+                $this->delete($del_warnings, true);
             } elseif ($this->equipment_required) {
                 $warnings = array_merge($warnings, $this->createEquipmentsLines());
 
@@ -2501,7 +2558,8 @@ class ObjectLine extends BimpObject
                                     break;
                                 }
                                 if (!(int) $eq_line->getData('id_equipment')) {
-                                    $eq_line->delete(true);
+                                    $del_warnings = array();
+                                    $eq_line->delete($del_warnings, true);
                                     $diff--;
                                 }
                             }
@@ -2585,7 +2643,8 @@ class ObjectLine extends BimpObject
         if (!$this->isRemisable()) {
             $remises = $this->getRemises();
             foreach ($remises as $remise) {
-                $remise->delete(true);
+                $del_warnings = array();
+                $remise->delete($del_warnings, true);
             }
             unset($this->remises);
             $this->remises = null;
@@ -2618,13 +2677,14 @@ class ObjectLine extends BimpObject
             if ($field === 'remisable' && !(int) $value) {
                 $instance = $this;
                 if (!$this->isLoaded()) {
-                    $instance = BimpObject::getInstance($this->module, $this->object_name, $id_object);
+                    $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_object);
                 }
 
                 if ($instance->isLoaded()) {
                     $remises = $instance->getRemises();
                     foreach ($remises as $remise) {
-                        $remise->delete(true);
+                        $del_warnings = array();
+                        $remise->delete($del_warnings, true);
                     }
                     unset($instance->remises);
                     $instance->remises = null;
@@ -2652,7 +2712,7 @@ class ObjectLine extends BimpObject
         return false;
     }
 
-    public function delete($force_delete = false)
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         if (!static::$parent_comm_type) {
             $errors[] = 'Impossible de supprimer une ligne depuis une instance de la classe de base "ObjectLine"';
@@ -2670,18 +2730,20 @@ class ObjectLine extends BimpObject
         }
 
         if (!count($errors)) {
-            $errors = parent::delete($force_delete);
+            $errors = parent::delete($warnings, $force_delete);
             if (!count($errors)) {
                 $lines = $this->getEquipmentLines();
 
                 if (count($lines)) {
                     foreach ($lines as $line) {
-                        $line->delete(true);
+                        $del_warnings = array();
+                        $line->delete($del_warnings, true);
                     }
                 }
                 if (count($remises)) {
                     foreach ($remises as $remise) {
-                        $remise->delete(true);
+                        $del_warnings = array();
+                        $remise->delete($del_warnings, true);
                     }
                     unset($this->remises);
                     $this->remise = null;
@@ -2720,7 +2782,8 @@ class ObjectLine extends BimpObject
             case 'propal':
             case 'facture':
             case 'commande':
-            case 'commande_fourn':
+            case 'commande_fournisseur':
+            case 'facture_fournisseur':
             default:
                 return 'bimpcommercial';
 
@@ -2741,8 +2804,11 @@ class ObjectLine extends BimpObject
             case 'commande':
                 return 'Bimp_CommandeLine';
 
-            case 'commande_fourn':
+            case 'commande_fournisseur':
                 return 'Bimp_CommandeFournLine';
+
+            case 'facture_fournisseur':
+                return 'Bimp_FactureFournLine';
 
             case 'sav_propal':
                 return 'BS_SavPropalLine';
@@ -2756,19 +2822,22 @@ class ObjectLine extends BimpObject
     {
         switch ($type) {
             case 'propal':
-                return BimpObject::getInstance('bimpcommercial', 'Bimp_PropalLine', $id);
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_PropalLine', $id);
 
             case 'sav_propal':
-                return BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine', $id);
+                return BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', $id);
 
             case 'commande':
-                return BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine', $id);
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', $id);
 
             case 'facture':
-                return BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine', $id);
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', $id);
 
-            case 'commande_fourn':
-                return BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine', $id);
+            case 'commande_fournisseur':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', $id);
+
+            case 'facture_fournisseur':
+                return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFournLine', $id);
         }
 
         return BimpObject::getInstance('bimpcommercial', 'ObjectLine');

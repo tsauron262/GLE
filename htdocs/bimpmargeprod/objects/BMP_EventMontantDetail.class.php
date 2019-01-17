@@ -6,7 +6,21 @@ class BMP_EventMontantDetail extends BimpObject
     public function isEditable()
     {
         $montant = $this->getParentInstance();
-        return $montant->isEventEditable();
+        if (BimpObject::objectLoaded($montant)) {
+            return (int) $montant->isEventEditable();
+        }
+
+        return 1;
+    }
+
+    public function isCreatable()
+    {
+        return $this->isEditable();
+    }
+
+    public function isDeletable()
+    {
+        return $this->isEditable();
     }
 
     public function getTotal()
@@ -17,6 +31,19 @@ class BMP_EventMontantDetail extends BimpObject
         return round(($qty * $price), 2);
     }
 
+    public function getDefaultQty()
+    {
+        $id_group = (int) BimpTools::getPostFieldValue('id_group', 0);
+        if ($id_group) {
+            $group = BimpCache::getBimpObjectInstance($this->module, 'BMP_EventGroup', $id_group);
+            if ($group->isLoaded()) {
+                return (int) $group->getData('number');
+            }
+        }
+
+        return 1;
+    }
+
     public function displayTotal()
     {
         return BimpTools::displayMoneyValue($this->getTotal(), 'EUR');
@@ -25,12 +52,12 @@ class BMP_EventMontantDetail extends BimpObject
     public function getDetail_valuesArray()
     {
         $eventMontant = $this->getParentInstance();
-        if (is_null($eventMontant) || !$eventMontant->isLoaded()) {
+        if (!BimpObject::objectLoaded($eventMontant)) {
             return array();
         }
 
-        $id_type_montant = $eventMontant->getData('id_montant');
-        if (is_null($id_type_montant) || !$id_type_montant) {
+        $id_type_montant = (int) $eventMontant->getData('id_montant');
+        if (!$id_type_montant) {
             return array();
         }
 
@@ -50,34 +77,24 @@ class BMP_EventMontantDetail extends BimpObject
         return $values;
     }
 
-    public function getGroupsArray()
+    public function getGroupsArray($include_empty = 1)
     {
         $eventMontant = $this->getParentInstance();
 
-        if (is_null($eventMontant) || !$eventMontant->isLoaded()) {
-            return array();
+        if (BimpObject::objectLoaded($eventMontant)) {
+            $event = $eventMontant->getParentInstance();
+            if (BimpObject::objectLoaded($event)) {
+                return $event->getGroupsArray($include_empty);
+            }
         }
-
-        $event = $eventMontant->getParentInstance();
-
-        if (is_null($event) || !$event->isLoaded()) {
-            return array();
-        }
-
-        return $event->getGroupsArray();
+        return arrray();
     }
 
     public function useGroups()
     {
-        $fields = BimpTools::getValue('fields', array());
-        if (isset($fields['id_montant_detail_value'])) {
-            $id_detail_value = $fields['id_montant_detail_value'];
-            if (!is_null($id_detail_value) && $id_detail_value) {
-                $detailValue = BimpObject::getInstance($this->module, 'BMP_MontantDetailValue');
-                if ($detailValue->fetch($id_detail_value)) {
-                    return (int) $detailValue->getData('use_groupe_number');
-                }
-            }
+        $detailValue = BimpCache::getBimpObjectInstance($this->module, 'BMP_MontantDetailValue', (int) BimpTools::getPostFieldValue('id_montant_detail_value', 0));
+        if ($detailValue->isLoaded()) {
+            return (int) $detailValue->getData('use_groupe_number');
         }
         return 0;
     }
@@ -85,7 +102,7 @@ class BMP_EventMontantDetail extends BimpObject
     public function getAddFormName()
     {
         $eventMontant = $this->getParentInstance();
-        if (!is_null($eventMontant) && $eventMontant->isLoaded()) {
+        if (BimpObject::objectLoaded($eventMontant)) {
             $detailValue = BimpObject::getInstance($this->module, 'BMP_MontantDetailValue');
             if ($detailValue->getListCount(array(
                         'id_type_montant' => (int) $eventMontant->getData('id_montant')
@@ -113,26 +130,25 @@ class BMP_EventMontantDetail extends BimpObject
 
             $this->setIdParent($id_event_montant);
 
-            $detailValue = BimpObject::getInstance($this->module, 'BMP_MontantDetailValue');
-            if (!$detailValue->fetch($id_value)) {
+            $detailValue = BimpCache::getBimpObjectInstance($this->module, 'BMP_MontantDetailValue', (int) $id_value);
+            if (!$detailValue->isLoaded()) {
                 return array('Valeur prédéfinie sélectionnée invalide');
             }
 
             $label = $detailValue->getData('label');
 
-            $quantity = null;
+            $quantity = BimpTools::getValue('quantity', null);
             if ((int) $detailValue->getData('use_groupe_number')) {
                 $id_group = BimpTools::getValue('id_group', 0);
                 if ($id_group) {
-                    $group = BimpObject::getInstance($this->module, 'BMP_EventGroup');
-                    if ($group->fetch($id_group)) {
+                    $group = BimpCache::getBimpObjectInstance($this->module, 'BMP_EventGroup', (int) $id_group);
+                    if ($group->isLoaded()) {
                         $label .= ' (Groupe: ' . $group->getData('name') . ')';
-                        $quantity = (int) $group->getData('number');
+                        if (is_null($quantity)) {
+                            $quantity = (int) $group->getData('number');
+                        }
                     }
                 }
-            }
-            if (is_null($quantity)) {
-                $quantity = BimpTools::getValue('quantity', 0);
             }
 
             $this->set('label', $label);

@@ -160,8 +160,11 @@ class Equipment extends BimpObject
                 ));
 
                 if (isset($items[0])) {
-                    if ($place->fetch((int) $items[0]['id'])) {
+                    $place = BimpCache::getBimpObjectInstance($this->module, 'BE_Place', (int) $items[0]['id']);
+                    if ($place->isLoaded()) {
                         $this->current_place = $place;
+                    } else {
+                        $this->current_place = null;
                     }
                 }
             }
@@ -251,7 +254,7 @@ class Equipment extends BimpObject
                         'part_type' => 'middle',
                         'part'      => $value
                     ),
-                    'place_entrepot.lieu'     => array(
+                    'place_entrepot.lieu'      => array(
                         'part_type' => 'middle',
                         'part'      => $value
                     ),
@@ -418,7 +421,7 @@ class Equipment extends BimpObject
                 $new_place_element = '';
                 $new_place_id_element = null;
 
-                $new_place = BimpObject::getInstance($this->module, 'BE_Place', $items[0]['id']);
+                $new_place = BimpCache::getBimpObjectInstance($this->module, 'BE_Place', $items[0]['id']);
                 $codemove = $new_place->getData('code_mvt');
                 if (is_null($codemove) || !$codemove) {
                     $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
@@ -448,7 +451,7 @@ class Equipment extends BimpObject
                 }
 
                 if (isset($items[1])) {
-                    $prev_place = BimpObject::getInstance($this->module, 'BE_Place', $items[1]['id']);
+                    $prev_place = BimpCache::getBimpObjectInstance($this->module, 'BE_Place', $items[1]['id']);
                     switch ((int) $prev_place->getData('type')) {
                         case BE_Place::BE_PLACE_CLIENT:
                             $prev_place_element = 'societe';
@@ -652,7 +655,7 @@ class Equipment extends BimpObject
         return parent::validate();
     }
 
-    public function delete()
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         $current_place = $this->getCurrentPlace();
         $id_entrepot = 0;
@@ -677,7 +680,7 @@ class Equipment extends BimpObject
             }
         }
 
-        $errors = parent::delete();
+        $errors = parent::delete($warnings, $force_delete);
 
         if (is_null($this->id) && $id_entrepot && !is_null($product) && isset($product->id) && $product->id) {
             global $user;

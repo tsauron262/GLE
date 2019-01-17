@@ -1,6 +1,6 @@
 extends: 
     module: bimpcommercial
-    object_name: ObjectLine
+    object_name: FournObjectLine
     
 table: bimp_commande_fourn_line
 
@@ -23,4 +23,3 @@ objects:
                 class: CommandeFournisseurLigne
             id_object: 
                 field_value: id_line
-

@@ -59,13 +59,6 @@ fields:
         label: Libellé
         dol_extra_field: 1
         required: 1
-    entrepot: 
-        label: Entrepôt
-        dol_extra_field: 1
-        type: id_object
-        object: entrepot
-        input: 
-            type: search_entrepot
     ef_type: 
         label: Secteur
         dol_extra_field: 1
@@ -262,18 +255,10 @@ views:
 lists_cols: 
     libelle: 
         field: libelle
-    ref: 
-        field: ref
-        label: Réf. 
-    statut: 
-        field: fk_statut
     secteur:
         field: ef_type
     entrepot: 
         field: entrepot
-        display: nom_url
-    client: 
-        field: fk_soc
         display: nom_url
     commercial: 
         label: Commercial
@@ -292,10 +277,6 @@ lists_cols:
     livraison: 
         field: date_livraison
         label: Livraison
-    total_ht: 
-        field: total_ht
-    total: 
-        field: total
                 
 lists: 
     default: 
@@ -328,14 +309,13 @@ lists:
         cols: 
             ref: 
             libelle: 
-                field: libelle
             statut: 
+            date_create: 
+            soc:
             entrepot: 
             secteur: 
-            client:
             commercial:
-            date_create: 
-            total: 
+            total_ttc: 
         
     user: 
         extends: default

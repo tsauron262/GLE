@@ -308,6 +308,18 @@ class BimpTools
         return $list;
     }
 
+    public static function resetDolObjectErrors($object)
+    {
+        if (is_object($object)) {
+            if (isset($object->error)) {
+                $object->error = '';
+            }
+            if (isset($object->errors)) {
+                $object->errors = array();
+            }
+        }
+    }
+
     // Gestion générique des objets: 
 
     public static function getObjectTable(BimpObject $parent, $id_object_field, $object = null)
@@ -938,7 +950,9 @@ class BimpTools
                 if (is_string($value)) {
                     if ($value) {
                         $value = json_decode($value, true);
-                    } else {
+                    }
+
+                    if (!$value) {
                         $value = array();
                     }
                 }
@@ -949,15 +963,15 @@ class BimpTools
 
     public static function isNumericType($value)
     {
-        return (is_int($value) || is_float($value) || is_bool($value));
+        return (is_int($value) || is_float($value) || is_bool($value) || (is_string($value) && preg_match('/^[0-9 ]+[.,]*[0-9 ]*$/', $value)));
     }
-    
+
     public static function isString($value)
     {
         if (is_string($value) && !preg_match('/^[0-9]+$/', $value)) {
             return 1;
         }
-        
+
         return 0;
     }
 
@@ -1041,7 +1055,7 @@ class BimpTools
         return '&euro;';
     }
 
-    public static function displayMoneyValue($value, $currency)
+    public static function displayMoneyValue($value, $currency = 'EUR', $with_styles = false)
     {
         if (is_numeric($value)) {
             $value = (float) $value;
@@ -1057,30 +1071,41 @@ class BimpTools
 
         $value = round($value, 2);
 
-        return price($value, 1, '', 1, -1, -1, $currency);
+        $price = price($value, 1, '', 1, -1, -1, $currency);
+
+        $html = '';
+
+        if ($with_styles) {
+            $html .= '<span style="';
+            if ((float) $value != 0) {
+                $html .= 'font-weight: bold;';
+            }
+            if ((float) $value < 0) {
+                $html .= 'color: #A00000;';
+            }
+            $html .= '">';
+        }
+
+        $html .= $price;
+
+        if ($with_styles) {
+            $html .= '</span>';
+        }
+        return $html;
     }
 
     public static function getTaxes($id_country = 1)
     {
-        global $db;
-        $bdb = new BimpDb($db);
-
-        $taxes = array();
-        $rows = $bdb->getRows('c_tva', '`fk_pays` = ' . $id_country . ' AND `active` = 1', null, 'array', array('rowid', 'taux'));
-        if (!is_null($rows)) {
-            foreach ($rows as $r) {
-                $taxes[$r['rowid']] = $r['taux'];
-            }
-        }
-
-        return $taxes;
+        return BimpCache::getTaxes($id_country);
     }
 
     public static function getTaxeRateById($id_tax)
     {
-        global $db;
-        $bdb = new BimpDb($db);
-        return $bdb->getValue('c_tva', 'taux', '`rowid` = ' . (int) $id_tax);
+        $taxes = BimpCache::getTaxes();
+        if (isset($taxes[(int) $id_tax])) {
+            return (float) $taxes[(int) $id_tax];
+        }
+        return 0;
     }
 
     public static function calculatePriceTaxEx($amout_tax_in, $tax_rate_percent, $precision = 6)
@@ -1097,9 +1122,27 @@ class BimpTools
 
     // Divers:
 
-    public static function displayFloatValue($value, $decimals = 2, $separator = ',')
+    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false)
     {
-        return str_replace('.', $separator, '' . (round((float) $value, $decimals)));
+        $html = '';
+
+        if ($with_styles) {
+            $html .= '<span style="';
+            if ((float) $value != 0) {
+                $html .= 'font-weight: bold;';
+            }
+            if ((float) $value < 0) {
+                $html .= 'color: #A00000;';
+            }
+            $html .= '">';
+        }
+
+        $html .= str_replace('.', $separator, '' . (round((float) $value, $decimals)));
+
+        if ($with_styles) {
+            $html .= '</span>';
+        }
+        return $html;
     }
 
     public static function ucfirst($str)
@@ -1177,32 +1220,6 @@ class BimpTools
         }
     }
 
-    public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)
-    {
-        $percentage_adjuster = round($percentage_adjuster / 100, 2);
-        if (is_array($color_code)) {
-            $r = $color_code["r"] + (round($color_code["r"]) * $percentage_adjuster);
-            $g = $color_code["g"] + (round($color_code["g"]) * $percentage_adjuster);
-            $b = $color_code["b"] + (round($color_code["b"]) * $percentage_adjuster);
-
-            return array("r" => round(max(0, min(255, $r))),
-                "g" => round(max(0, min(255, $g))),
-                "b" => round(max(0, min(255, $b))));
-        } else if (preg_match("/#/", $color_code)) {
-            $hex = str_replace("#", "", $color_code);
-            $r = (strlen($hex) == 3) ? hexdec(substr($hex, 0, 1) . substr($hex, 0, 1)) : hexdec(substr($hex, 0, 2));
-            $g = (strlen($hex) == 3) ? hexdec(substr($hex, 1, 1) . substr($hex, 1, 1)) : hexdec(substr($hex, 2, 2));
-            $b = (strlen($hex) == 3) ? hexdec(substr($hex, 2, 1) . substr($hex, 2, 1)) : hexdec(substr($hex, 4, 2));
-            $r = round($r + ($r * $percentage_adjuster));
-            $g = round($g + ($g * $percentage_adjuster));
-            $b = round($b + ($b * $percentage_adjuster));
-
-            return "#" . str_pad(dechex(max(0, min(255, $r))), 2, "0", STR_PAD_LEFT)
-                    . str_pad(dechex(max(0, min(255, $g))), 2, "0", STR_PAD_LEFT)
-                    . str_pad(dechex(max(0, min(255, $b))), 2, "0", STR_PAD_LEFT);
-        }
-    }
-
     public static function makeUrlFromConfig(BimpConfig $config, $path, $default_module, $default_controller)
     {
         $url = DOL_URL_ROOT . '/';
@@ -1267,5 +1284,126 @@ class BimpTools
     public static function replaceBr($text, $replacement = "\n")
     {
         return preg_replace("/<[ \/]*br[ \/]*>/", $replacement, $text);
+    }
+
+    // Gestion des couleurs: 
+
+    public static function changeColorLuminosity($color_code, $percentage_adjuster = 0)
+    {
+        $percentage_adjuster = round($percentage_adjuster / 100, 2);
+        if (is_array($color_code)) {
+            $r = $color_code["r"] + (round($color_code["r"]) * $percentage_adjuster);
+            $g = $color_code["g"] + (round($color_code["g"]) * $percentage_adjuster);
+            $b = $color_code["b"] + (round($color_code["b"]) * $percentage_adjuster);
+
+            return array("r" => round(max(0, min(255, $r))),
+                "g" => round(max(0, min(255, $g))),
+                "b" => round(max(0, min(255, $b))));
+        } else if (preg_match("/#/", $color_code)) {
+            $hex = str_replace("#", "", $color_code);
+            $r = (strlen($hex) == 3) ? hexdec(substr($hex, 0, 1) . substr($hex, 0, 1)) : hexdec(substr($hex, 0, 2));
+            $g = (strlen($hex) == 3) ? hexdec(substr($hex, 1, 1) . substr($hex, 1, 1)) : hexdec(substr($hex, 2, 2));
+            $b = (strlen($hex) == 3) ? hexdec(substr($hex, 2, 1) . substr($hex, 2, 1)) : hexdec(substr($hex, 4, 2));
+            $r = round($r + ($r * $percentage_adjuster));
+            $g = round($g + ($g * $percentage_adjuster));
+            $b = round($b + ($b * $percentage_adjuster));
+
+            return "#" . str_pad(dechex(max(0, min(255, $r))), 2, "0", STR_PAD_LEFT)
+                    . str_pad(dechex(max(0, min(255, $g))), 2, "0", STR_PAD_LEFT)
+                    . str_pad(dechex(max(0, min(255, $b))), 2, "0", STR_PAD_LEFT);
+        }
+    }
+
+    public static function setColorSL($color_code, $saturation = null, $luminosity = null)
+    {
+        if (preg_match("/#/", $color_code)) {
+            $hex = str_replace("#", "", $color_code);
+            $hsl = self::hexToHsl($hex);
+
+            if (!is_null($saturation)) {
+                $hsl[1] = $saturation;
+            }
+            if (!is_null($luminosity)) {
+                $hsl[2] = $luminosity;
+            }
+
+            return '#' . self::hslToHex($hsl);
+        }
+        return $color_code;
+    }
+
+    public static function hexToHsl($hex)
+    {
+        $hex = array($hex[0] . $hex[1], $hex[2] . $hex[3], $hex[4] . $hex[5]);
+        $rgb = array_map(function($part) {
+            return hexdec($part) / 255;
+        }, $hex);
+
+        $max = max($rgb);
+        $min = min($rgb);
+
+        $l = ($max + $min) / 2;
+
+        if ($max == $min) {
+            $h = $s = 0;
+        } else {
+            $diff = $max - $min;
+            $s = $l > 0.5 ? $diff / (2 - $max - $min) : $diff / ($max + $min);
+
+            switch ($max) {
+                case $rgb[0]:
+                    $h = ($rgb[1] - $rgb[2]) / $diff + ($rgb[1] < $rgb[2] ? 6 : 0);
+                    break;
+                case $rgb[1]:
+                    $h = ($rgb[2] - $rgb[0]) / $diff + 2;
+                    break;
+                case $rgb[2]:
+                    $h = ($rgb[0] - $rgb[1]) / $diff + 4;
+                    break;
+            }
+
+            $h /= 6;
+        }
+
+        return array($h, $s, $l);
+    }
+
+    public static function hslToHex($hsl)
+    {
+        list($h, $s, $l) = $hsl;
+
+        if ($s == 0) {
+            $r = $g = $b = 1;
+        } else {
+            $q = $l < 0.5 ? $l * (1 + $s) : $l + $s - $l * $s;
+            $p = 2 * $l - $q;
+
+            $r = self::hue2rgb($p, $q, $h + 1 / 3);
+            $g = self::hue2rgb($p, $q, $h);
+            $b = self::hue2rgb($p, $q, $h - 1 / 3);
+        }
+
+        return self::rgb2hex($r) . self::rgb2hex($g) . self::rgb2hex($b);
+    }
+
+    public static function hue2rgb($p, $q, $t)
+    {
+        if ($t < 0)
+            $t += 1;
+        if ($t > 1)
+            $t -= 1;
+        if ($t < 1 / 6)
+            return $p + ($q - $p) * 6 * $t;
+        if ($t < 1 / 2)
+            return $q;
+        if ($t < 2 / 3)
+            return $p + ($q - $p) * (2 / 3 - $t) * 6;
+
+        return $p;
+    }
+
+    public static function rgb2hex($rgb)
+    {
+        return str_pad(dechex($rgb * 255), 2, '0', STR_PAD_LEFT);
     }
 }

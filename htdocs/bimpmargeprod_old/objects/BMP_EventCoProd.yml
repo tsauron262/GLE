@@ -1,0 +1,72 @@
+table: bmp_event_coprod
+common_fields: 0
+
+parent_object: BMP_Event
+parent_id_property: id_event
+
+labels:
+    name: partenaire
+    
+objects: 
+    societe:
+        instance: 
+            bimp_object: unset
+            dol_object: societe
+            id_object: 
+                field_value: id_soc
+                
+fields: 
+    id_event: 
+        label: Evénement
+        type: id_parent
+        
+    id_soc: 
+        label: Tiers
+        type: id_object
+        required: 1
+        object: societe
+        input: 
+            type: search_societe
+            help: Entrez le nom ou la référence pour rechercher une société enregistrée
+        display: 
+            nom: 
+                type: nom
+            nom_url: 
+                type: nom_url
+            card: 
+                type: card
+                card: societe_card
+        
+    default_part: 
+        label: Part par défaut
+        type: percent
+        default_value: 0
+        
+list:
+    title: Structures partenaires
+    checkboxes: 
+        callback: isEventEditable
+    bulk_actions:
+        - label: supprimer les partenaires sélectionnés
+          icon: fas_trash-alt
+          onclick: deleteSelectedObjects('list_id', $(this))
+    enable_search: 0
+    sort_field: id
+    sort_way: desc
+    n: 25
+    add_object_row: 
+        callback: isEventEditable
+    update_btn: 
+        callback: isEventEditable
+    delete_btn: 
+        callback: isEventEditable
+    edit_btn: 
+        callback: isEventEditable
+    cols: 
+        societe:
+            field: id_soc
+            display: nom_url
+        part: 
+            field: default_part
+            edit:
+                callback: isEventEditable

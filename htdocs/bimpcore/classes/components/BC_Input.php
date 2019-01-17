@@ -104,6 +104,10 @@ class BC_Input extends BimpComponent
         'select_remises'              => array(
             'id_client'     => array('data_type' => 'int', 'required' => 1),
             'extra_filters' => array('default' => '')
+        ),
+        'select_remises_fourn'        => array(
+            'id_fourn'      => array('data_type' => 'int', 'required' => 1),
+            'extra_filters' => array('default' => '')
         )
     );
 
@@ -347,6 +351,11 @@ class BC_Input extends BimpComponent
                 $options['id_client'] = isset($this->params['id_client']) ? $this->params['id_client'] : 0;
                 $options['extra_filters'] = isset($this->params['extra_filters']) ? $this->params['extra_filters'] : '';
                 break;
+            
+            case 'select_remises_fourn':
+                $options['id_fourn'] = isset($this->params['id_fourn']) ? $this->params['id_fourn'] : 0;
+                $options['extra_filters'] = isset($this->params['extra_filters']) ? $this->params['extra_filters'] : '';
+                break;
         }
 
         return $options;
@@ -354,6 +363,45 @@ class BC_Input extends BimpComponent
 
     public function renderHtml()
     {
+        $html = parent::renderHtml();
+
+        if (count($this->errors)) {
+            return $html;
+        }
+
+        if (is_null($this->value)) {
+            $this->value = '';
+        }
+
+        $input_value = $this->value;
+
+        if (is_array($input_value)) {
+            if ($this->data_type === 'json') {
+                $input_value = json_encode($input_value);
+            } else {
+                $input_value = implode(',', $input_value);
+            }
+        }
+
+        if (is_null($this->new_value)) {
+            $this->new_value = $input_value;
+        } elseif (is_array($this->new_value)) {
+            if ($this->data_type === 'json') {
+                $this->new_value = json_encode($this->new_value);
+            } else {
+                $this->new_value = implode(',', $this->new_value);
+            }
+        }
+
+        $required = isset($this->field_params['required']) ? (int) $this->field_params['required'] : 0;
+        $input_name = $this->name_prefix . $this->input_name;
+        $input_id = $this->input_id;
+        $content = '';
+
+        if (isset($this->field_params['editable']) && !$this->field_params['editable']) {
+            $content = '<input type="hidden" name="' . $input_name . '" value="' . $this->new_value . '"/>';
+            $content .= $this->new_value;
+        } else {
         $options = $this->getOptions();
         $option = '';
 
@@ -384,25 +432,6 @@ class BC_Input extends BimpComponent
             }
         }
 
-        $html = parent::renderHtml();
-
-        if (count($this->errors)) {
-            return $html;
-        }
-
-        if (is_null($this->value)) {
-            $this->value = '';
-        }
-
-        if (is_null($this->new_value)) {
-            $this->new_value = $this->value;
-        }
-
-        $required = isset($this->field_params['required']) ? (int) $this->field_params['required'] : 0;
-
-        $input_name = $this->name_prefix . $this->input_name;
-        $input_id = $this->input_id;
-
         if ($this->params['multiple']) {
             $this->extraData['values_field'] = $input_name;
             $this->extraClasses[] = $input_name . '_inputContainer';
@@ -410,7 +439,6 @@ class BC_Input extends BimpComponent
             $input_id .= '_add_value';
         }
 
-        $content = '';
         switch ($this->params['type']) {
             case 'search_list':
                 $content = $this->renderSearchListInput($input_name);
@@ -468,6 +496,7 @@ class BC_Input extends BimpComponent
 
             $content = BimpInput::renderMultipleValuesInput($this->object, $this->name_prefix . $this->input_name, $content, $values, $label_input_suffixe, $autosave, $required, $sortable);
         }
+        }
 
         $extra_data = $this->extraData;
         $extra_data['data_type'] = $this->data_type;
@@ -499,6 +528,6 @@ class BC_Input extends BimpComponent
             $input_name = $this->name_prefix . $this->input_name;
         }
 
-        return BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path, $input_name, $this->value, $this->option);
+        return BimpInput::renderSearchListInputFromConfig($this->object, $this->config_path, $input_name, $this->new_value, $this->option);
     }
 }

@@ -149,7 +149,7 @@ class BS_SavProduct extends BimpObject
     public function create(&$warnings, $force_create = false)
     {
         $errors = parent::create($warnings, $force_create);
-        
+
         if (count($errors)) {
             return $errors;
         }
@@ -162,9 +162,8 @@ class BS_SavProduct extends BimpObject
                 if ($product->isSerialisable()) {
                     $qty--;
 
-                    $instance = BimpObject::getInstance($this->module, $this->object_name);
                     while ($qty > 0) {
-                        $instance->reset();
+                        $instance = BimpObject::getInstance($this->module, $this->object_name);
                         $instance->validateArray(array(
                             'id_sav'          => (int) $this->getData('id_sav'),
                             'id_product'      => (int) $this->getData('id_product'),
@@ -180,7 +179,7 @@ class BS_SavProduct extends BimpObject
                 }
             }
         }
-        
+
         return $errors;
     }
 }

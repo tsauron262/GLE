@@ -1,0 +1,82 @@
+bootstrap: 1
+title: Marge de production
+
+objects:
+    event:
+        instance:
+            bimp_object: BMP_Event
+    
+    categorie_montant:
+        instance: 
+            bimp_object: BMP_CategorieMontant
+                
+    type_montant:
+        instance: 
+            bimp_object: BMP_TypeMontant
+            
+    detail_value:
+        instance: 
+            bimp_object: BMP_MontantDetailValue
+    
+    total_inter:
+        instance: 
+            bimp_object: BMP_TotalInter
+            
+    calc_montant:
+        instance: 
+            bimp_object: BMP_CalcMontant
+            
+sections:
+    - type: tabs
+      tabs: 
+        default:
+            label: Evénements
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: event
+                      
+        montants:
+            label: Montants
+            sections: 
+                - type: nav_tabs
+                  nav_tabs: 
+                      - id: categories
+                        title: Catégories
+                        struct:
+                            type: list
+                            list: 
+                                panel: 1
+                                object: categorie_montant
+                                
+                      - id: types_montants
+                        title: Types de montants
+                        struct: 
+                            type: list
+                            list: 
+                                panel: 1
+                                object: type_montant
+                      - id: details_values
+                        title: Valeurs prédéfinies
+                        struct: 
+                            type: list
+                            list: 
+                                panel: 1
+                                object: detail_value
+                                
+                      - id: totaux_inter
+                        title: Totaux intermédiaires
+                        struct: 
+                            type: list
+                            list: 
+                                panel: 1
+                                object: total_inter
+                    
+                      - id: calcs_montants
+                        title: Calculs auto
+                        struct: 
+                            type: list
+                            list: 
+                                panel: 1
+                                object: calc_montant

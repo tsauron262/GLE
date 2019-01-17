@@ -5,7 +5,7 @@ class Bimp_Societe extends BimpObject
 
     public static $types_ent_list = null;
     public static $effectifs_list = null;
-    public $forceTpye = "client";
+    public $soc_type = "";
 
     public function __construct($module, $object_name)
     {
@@ -21,28 +21,24 @@ class Bimp_Societe extends BimpObject
 
     public function getSocieteLabel()
     {
-        $client = $this->getData('client');
-        if ($this->forceTpye == "client" || (!is_null($client) && (int) $client > 0)) {
+        if ($this->soc_type == "client" || (int) $this->getData('client') > 0) {
             return 'client';
         }
 
-        $fournisseur = $this->getData('fournisseur');
-        if ($this->forceTpye == "fourn" || (!is_null($fournisseur) && (int) $fournisseur > 0)) {
+        if ($this->soc_type == "fournisseur" || (int) $this->getData('fournisseur') > 0) {
             return 'fournisseur';
         }
 
-        return 'societe';
+        return 'société';
     }
 
     public function getSocieteIsFemale()
     {
-        $client = $this->getData('client');
-        if ($this->forceTpye == "client" || (!is_null($client) && (int) $client > 0)) {
+        if ($this->soc_type == "client" || (int) $this->getData('client') > 0) {
             return 0;
         }
 
-        $fournisseur = $this->getData('fournisseur');
-        if ($this->forceTpye == "fourn" || (!is_null($fournisseur) && (int) $fournisseur > 0)) {
+        if ($this->soc_type == "fournisseur" || (int) $this->getData('fournisseur') > 0) {
             return 0;
         }
 

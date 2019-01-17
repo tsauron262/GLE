@@ -8,7 +8,7 @@ llxHeader();
 
 
 
-$sql = $db->query('SELECT email FROM `llx_societe`  WHERE rowid IN (SELECT id_client FROM `llx_bs_sav` WHERE status = 9 AND code_centre = "P")');
+$sql = $db->query('SELECT email FROM `llx_societe`  WHERE rowid IN (SELECT id_client FROM `llx_bs_sav` WHERE status != 999 AND code_centre = "P")');
 
 $tabMail = array();
 while($ln = $db->fetch_object($sql)){
@@ -20,6 +20,9 @@ while($ln = $db->fetch_object($sql)){
 
 
 print_r($tabMail);
+
+
+echo "Total ".count($tabMail)." mails";
 
 $msg = "Madamme, Monsieur,
 

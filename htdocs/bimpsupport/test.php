@@ -36,7 +36,7 @@ C'est avec plaisir que nous vous acceuilllons désormais dans ce nouveau centre 
 
 Cordialement.";
 
-$to = implode(",", $tabMail);
+$to = implode("<br/>", $tabMail);
 
 $to = "Tommy@bimp.fr";
 

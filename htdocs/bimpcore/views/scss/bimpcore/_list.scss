@@ -380,7 +380,7 @@ table.objectlistTable {
     }
 }
 
-.listSearchRow {
+tr.listSearchRow {
     display: none;
     background-color: #DCDCDC;
 
@@ -432,10 +432,14 @@ table.objectlistTable {
 
 }
 
-.addObjectRow {
-    background-color: #A0A0A0;
+tr.addObjectRow {
+    background-color: #A0A0A0!important;
 
-    td:first-child {
+    & > td {
+        background-color: #A0A0A0!important;
+    }
+
+    & > td:first-child {
         text-align: center;
 
         i.fa-plus-circle {

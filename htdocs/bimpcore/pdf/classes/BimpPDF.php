@@ -15,7 +15,6 @@ class BimpPDF extends TCPDF
     public $footerMargin = 20;
     public static $mmPerPx = 0.353; // Pour 72 dpi
     public static $pxPerMm = 2.835;
-    
     public $addCgvPages = true;
 
     public function __construct($orientation = 'P', $format = 'A4')
@@ -73,8 +72,13 @@ class BimpPDF extends TCPDF
 
             $folder = str_replace($nomPure, "", $filename);
             if (!is_dir($folder))
-                if (!mkdir($folder))
-                    die("Le dossier " . $folder . " n'existe pas et ne peut être créé");
+                if (!mkdir($folder)) {
+                    if (!BimpTools::isSubmit('ajax')) {
+                        die("Le dossier " . $folder . " n'existe pas et ne peut être créé");
+                    } else {
+                        return 0;
+                    }
+                }
         } else {
             if ($display == 'DS') {//On enregistre et on download
                 $this->Output($filename, 'F');
@@ -83,7 +87,7 @@ class BimpPDF extends TCPDF
                 //$this->Output($filename, 'F');
                 $display = 'I';
             }
-            
+
             if ($display == 'D') { //On download
                 $output = 'D';
             } elseif ($display == 'S') { // retour en châine de caractères
@@ -92,28 +96,28 @@ class BimpPDF extends TCPDF
                 $output = 'I';
             }
         }
-        
-        
-        if($output == "I"){
+
+
+        if ($output == "I") {
             $afficher = true;
             $output = "F";
         }
-        
-        $addCgvPages = ($this->addCgvPages && BimpCore::getConf("CGV_BIMP"));//sinon $this->$addCgvPages ce fait exrasé.
+
+        $addCgvPages = ($this->addCgvPages && BimpCore::getConf("CGV_BIMP")); //sinon $this->$addCgvPages ce fait exrasé.
         $this->Output($filename, $output);
-        
-        if($addCgvPages){
+
+        if ($addCgvPages) {
             $fpdfi = new BimpConcatPdf();
-            $fpdfi->addCGVPages($filename,$output);
+            $fpdfi->addCGVPages($filename, $output);
         }
-        
-        if($afficher){
+
+        if ($afficher) {
             header("Content-type: application/pdf");
-            header("Content-Disposition: inline; filename=".$nomPure);
+            header("Content-Disposition: inline; filename=" . $nomPure);
             @readfile($filename);
             die;
         }
-        
+
         return 1;
     }
 
@@ -124,29 +128,30 @@ class BimpPDF extends TCPDF
     }
 }
 
-
 use setasign\Fpdi\Fpdi;
 
-require_once DOL_DOCUMENT_ROOT.'/includes/tcpdi/tcpdi.php';
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/fpdf2.php';
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/pdf/src/autoload.php';
+require_once DOL_DOCUMENT_ROOT . '/includes/tcpdi/tcpdi.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/fpdf2.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/src/autoload.php';
 
 class BimpConcatPdf extends Fpdi
 {
-    public function addCGVPages($fileOrig, $output){
+
+    public function addCGVPages($fileOrig, $output)
+    {
         $file = $fileOrig;
-        $pagecount = $this->setSourceFile($file);  
-        for($i=0; $i<$pagecount; $i++){
+        $pagecount = $this->setSourceFile($file);
+        for ($i = 0; $i < $pagecount; $i++) {
             $this->AddPage();
-            $tplidx = $this->importPage($i+1, '/MediaBox');
-            $this->useTemplate($tplidx); 
+            $tplidx = $this->importPage($i + 1, '/MediaBox');
+            $this->useTemplate($tplidx);
         }
-        $file = DOL_DOCUMENT_ROOT."/bimpcore/pdf/cgv.pdf";
-        $pagecount = $this->setSourceFile($file);  
-        for($i=0; $i<$pagecount; $i++){
+        $file = DOL_DOCUMENT_ROOT . "/bimpcore/pdf/cgv.pdf";
+        $pagecount = $this->setSourceFile($file);
+        for ($i = 0; $i < $pagecount; $i++) {
             $this->AddPage();
-            $tplidx = $this->importPage($i+1, '/MediaBox');
-            $this->useTemplate($tplidx); 
+            $tplidx = $this->importPage($i + 1, '/MediaBox');
+            $this->useTemplate($tplidx);
         }
         $this->Output($fileOrig, $output);
     }

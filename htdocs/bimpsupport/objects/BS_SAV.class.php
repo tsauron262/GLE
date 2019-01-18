@@ -385,6 +385,126 @@ class BS_SAV extends BimpObject
         return $buttons;
     }
 
+    public function isActionAllowed($action, &$errors = array())
+    {
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID du SAV absent';
+            return 0;
+        }
+
+        $status = (int) $this->getData('status');
+        $propal = null;
+        $propal_status = null;
+
+        if ((int) $this->getData('id_propal')) {
+            $propal = $this->getChildObject('propal');
+            if (!$propal->isLoaded()) {
+                unset($propal);
+                $propal = null;
+            } else {
+                $propal_status = (int) $propal->getData('fk_statut');
+            }
+        }
+
+        $status_error = 'Le statut actuel du SAV n\'est pas valide pour cette action';
+
+        switch ($action) {
+            case 'start':
+                if (!in_array($status, array(self::BS_SAV_NEW, self::BS_SAV_ATT_CLIENT_ACTION))) {
+                    $errors[] = $status_error;
+                    return 0;
+                }
+                return 1;
+
+            case 'propalAccepted':
+            case 'propalRefused':
+                if (is_null($propal)) {
+                    $errors[] = 'Devis absent ou invalide';
+                    return 0;
+                }
+                if ($propal_status !== 1) {
+                    $errors[] = 'Le devis n\'a pas le statut "validé"';
+                    return 0;
+                }
+                if (in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_DEVIS_REFUSE, self::BS_SAV_FERME))) {
+                    $errors[] = $status_error;
+                    return 0;
+                }
+                return 1;
+                
+            case 'validate_propal':
+                if (is_null($propal)) {
+                    $errors[] = 'Devis absent';
+                    return 0;
+                }
+                if ($propal_status !== 0) {
+                    $errors[] = 'Le devis n\'est pas au statut "Brouillon"';
+                    return 0;
+                }
+                if (in_array($status, array(self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_FERME))) {
+                    $errors[] = $status_error;
+                    return 0;
+                }
+                return 1;
+                
+            case 'reviewPropal':
+                if (is_null($propal)) {
+                    $errors[] = 'Devis absent';
+                    return 0;
+                }
+                if ($propal_status === 0) {
+                    $errors[] = 'Devis déjà au statut "Brouillon"';
+                    return 0;
+                }
+                if (!in_array($status, self::$propal_reviewable_status)) {
+                    $errors[] = $status_error;
+                    return 0;
+                }
+                return 1;
+
+            case 'waitClient':
+                if (!is_null($propal) && $propal_status > 0) {
+                    $errors[] = 'Le devis est validé';
+                    return 0;
+                }
+
+                if (in_array($status, array(self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_FERME))) {
+                    $errors[] = $status_error;
+                    return 0;
+                }
+                return 1;
+
+            case 'toRestitute':
+                if (!in_array($status, array(self::BS_SAV_REP_EN_COURS, self::BS_SAV_DEVIS_REFUSE))) {
+                    $errors[] = $status_error;
+                    return 0;
+                }
+
+                if ($status === self::BS_SAV_REP_EN_COURS && (is_null($propal) || $propal_status === 0)) {
+                    $errors[] = 'Devis absent ou non validé';
+                    return 0;
+                }
+
+                if ($status === self::BS_SAV_DEVIS_REFUSE && (is_null($propal))) {
+                    $errors[] = 'Devis absent';
+                    return 0;
+                }
+                return 1;
+
+            case 'close':
+                if (is_null($propal) && $status === self::BS_SAV_FERME) {
+                    $errors[] = 'Ce SAV est déjà fermé';
+                    return 0;
+                }
+                if (!is_null($propal) && $status !== self::BS_SAV_A_RESTITUER) {
+                    $errors[] = $status_error;
+                    return 0;
+                }
+                return 1;
+        }
+        return parent::isActionAllowed($action, $errors);
+    }
+
     public function getViewExtraBtn()
     {
         $buttons = array();
@@ -405,13 +525,15 @@ class BS_SAV extends BimpObject
             }
 
             // Devis accepté / refusé: 
-            if (!is_null($propal) && $propal_status === 1 && !in_array($status, array(self::BS_SAV_DEVIS_ACCEPTE, self::BS_SAV_DEVIS_REFUSE))) {
+            if ($this->isActionAllowed('propalAccepted')) {
                 $buttons[] = array(
                     'label'   => 'Devis accepté',
                     'icon'    => 'check',
                     'onclick' => $this->getJsActionOnclick('propalAccepted')
                 );
+            }
 
+            if ($this->isActionAllowed('propalRefused')) {
                 $buttons[] = array(
                     'label'   => 'Devis refusé',
                     'icon'    => 'times',
@@ -420,7 +542,7 @@ class BS_SAV extends BimpObject
             }
 
             // Mettre en attente client: 
-            if (!in_array($status, array(self::BS_SAV_ATT_CLIENT_ACTION, self::BS_SAV_FERME)) && (is_null($propal) || $propal_status === 0)) {
+            if ($this->isActionAllowed('waitClient')) {
                 $buttons[] = array(
                     'label'   => 'Mettre en attente client',
                     'icon'    => 'hourglass-start',
@@ -431,7 +553,7 @@ class BS_SAV extends BimpObject
             }
 
             // Commencer diagnostic: 
-            if (in_array($status, array(self::BS_SAV_NEW, self::BS_SAV_ATT_CLIENT_ACTION))) {
+            if ($this->isActionAllowed('start')) {
                 $buttons[] = array(
                     'label'   => 'Commencer diagnostic',
                     'icon'    => 'arrow-circle-right',
@@ -474,40 +596,42 @@ class BS_SAV extends BimpObject
             }
 
             // Réparation terminée: 
-            if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {
-                if (!is_null($propal) && $propal_status > 0) {
-                    $buttons[] = array(
-                        'label'   => 'Réparation terminée',
-                        'icon'    => 'check',
-                        'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
-                    );
-                }
-            }
-
-            // Fermer SAV (devis refusé) : 
-            if (in_array($status, array(self::BS_SAV_DEVIS_REFUSE))) {
-                if (!is_null($propal)) {
-                    $frais = 0;
-                    foreach ($propal->dol_object->lines as $line) {
-                        if ($line->desc === 'Acompte') {
-                            $frais = -$line->total_ttc;
-                        }
+            if ($this->isActionAllowed('toRestitute')) {
+                if (in_array($status, array(self::BS_SAV_REP_EN_COURS))) {
+                    if (!is_null($propal) && $propal_status > 0) {
+                        $buttons[] = array(
+                            'label'   => 'Réparation terminée',
+                            'icon'    => 'check',
+                            'onclick' => $this->getJsActionOnclick('toRestitute', array(), array('form_name' => 'resolution'))
+                        );
                     }
+                }
 
-                    $buttons[] = array(
-                        'label'   => 'Fermer le SAV',
-                        'icon'    => 'times-circle',
-                        'onclick' => $this->getJsActionOnclick('toRestitute', array(
-                            'frais' => $frais
-                                ), array(
-                            'form_name' => 'close_refused'
-                        ))
-                    );
+                // Fermer SAV (devis refusé) : 
+                if (in_array($status, array(self::BS_SAV_DEVIS_REFUSE))) {
+                    if (!is_null($propal)) {
+                        $frais = 0;
+                        foreach ($propal->dol_object->lines as $line) {
+                            if ($line->desc === 'Acompte') {
+                                $frais = -$line->total_ttc;
+                            }
+                        }
+
+                        $buttons[] = array(
+                            'label'   => 'Fermer le SAV',
+                            'icon'    => 'times-circle',
+                            'onclick' => $this->getJsActionOnclick('toRestitute', array(
+                                'frais' => $frais
+                                    ), array(
+                                'form_name' => 'close_refused'
+                            ))
+                        );
+                    }
                 }
             }
 
             // Restituer (payer) 
-            if (in_array($status, array(self::BS_SAV_A_RESTITUER))) {
+            if ($this->isActionAllowed('close')) {
                 if (!is_null($propal)) {
                     $buttons[] = array(
                         'label'   => 'Restituer (Payer)',
@@ -516,16 +640,13 @@ class BS_SAV extends BimpObject
                             'form_name' => 'restitute'
                         ))
                     );
+                } else {
+                    $buttons[] = array(
+                        'label'   => 'Restituer',
+                        'icon'    => 'times-circle',
+                        'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1))
+                    );
                 }
-            }
-
-            // Restituer
-            if (is_null($propal) && $status !== self::BS_SAV_FERME) {
-                $buttons[] = array(
-                    'label'   => 'Restituer',
-                    'icon'    => 'times-circle',
-                    'onclick' => $this->getJsActionOnclick('close', array('restitute' => 1))
-                );
             }
 
             //Générer devis 
@@ -556,8 +677,7 @@ class BS_SAV extends BimpObject
             }
 
             // Réviser devis:  
-            if (in_array($status, self::$propal_reviewable_status)) {
-                if (!is_null($propal_status) && $propal_status > 0) {
+            if ($this->isActionAllowed('reviewPropal')) {
                     $callback = 'function() {bimp_reloadPage();}';
                     $buttons[] = array(
                         'label'   => 'Réviser Devis',
@@ -567,11 +687,10 @@ class BS_SAV extends BimpObject
                             'confirm_msg'      => 'Veuillez confirmer la révision du devis'
                         ))
                     );
-                }
             }
 
             // Envoyer devis: 
-            if (!is_null($propal) && $propal_status === 0 && !in_array($status, array(self::BS_SAV_ATT_CLIENT_ACTION))) {
+            if ($this->isActionAllowed('validate_propal')) {
                 $callback = 'function() {bimp_reloadPage();}';
                 $buttons[] = array(
                     'label'   => 'Envoyer devis',
@@ -1474,6 +1593,8 @@ class BS_SAV extends BimpObject
         }
 
         $garantieHt = $garantieTtc = $garantiePa = 0;
+
+        BimpObject::loadClass($this->module, 'BS_SavPropalLine');
 
         foreach ($this->getChildrenObjects('propal_lines', array(
             'type'               => array("in" => array(BS_SavPropalLine::LINE_PRODUCT, BS_SavPropalLine::LINE_FREE)),
@@ -2726,7 +2847,7 @@ class BS_SAV extends BimpObject
             $caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse');
             $id_caisse = (int) $caisse->getUserCaisse((int) $user->id);
             if (!$id_caisse) {
-                $errors[] = 'Veuillez-vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
+                $errors[] = 'Veuillez vous <a href="' . DOL_URL_ROOT . '/bimpcaisse/index.php" target="_blank">connecter à une caisse</a> pour l\'enregistrement du paiement de la facture';
             } else {
                 $caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
                 if (!$caisse->isLoaded()) {
@@ -2857,64 +2978,68 @@ class BS_SAV extends BimpObject
                         }
 
                         // Création de la facture:
-                        BimpTools::loadDolClass('compta/facture', 'facture');
-                        $facture = new Facture($this->db->db);
-                        $facture->modelpdf = self::$facture_model_pdf;
-                        $facture->array_options['options_type'] = "S";
-                        $facture->array_options['options_entrepot'] = $this->getData('id_entrepot');
-
-                        if ($facture->createFromOrder($propal->dol_object, $user) <= 0) {
-                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
+                        if ((int) $this->getData('id_facture')) {
+                            $warnings[] = 'Une facture a déjà été créée pour ce SAV';
                         } else {
-                            $facture->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
-                            if ($facture->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
-                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la validation de la facture');
+                            BimpTools::loadDolClass('compta/facture', 'facture');
+                            $facture = new Facture($this->db->db);
+                            $facture->modelpdf = self::$facture_model_pdf;
+                            $facture->array_options['options_type'] = "S";
+                            $facture->array_options['options_entrepot'] = $this->getData('id_entrepot');
+
+                            if ($facture->createFromOrder($propal->dol_object, $user) <= 0) {
+                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la création de la facture');
                             } else {
-                                $facture->fetch($facture->id);
+                                $facture->addline("Résolution : " . $this->getData('resolution'), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
+                                if ($facture->validate($user, '') <= 0) { //pas d'entrepot pour pas de destock
+                                    $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture), 'Echec de la validation de la facture');
+                                } else {
+                                    $facture->fetch($facture->id);
 
-                                // Ajout du paiement: 
-                                if ($payment_set) {
-                                    require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
-                                    $payement = new Paiement($this->db->db);
-                                    $payement->amounts = array($facture->id => (float) $data['paid']);
-                                    $payement->datepaye = dol_now();
-                                    $payement->paiementid = (int) $data['mode_paiement'];
-                                    if ($payement->create($user) <= 0) {
-                                        $warnings[] = 'Echec de l\'ajout du paiement de la facture';
-                                    } else {
-                                        // Ajout du paiement au compte bancaire: 
-                                        if ($this->useCaisseForPayments) {
-                                            $id_account = (int) $caisse->getData('id_account');
+                                    // Ajout du paiement: 
+                                    if ($payment_set) {
+                                        require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+                                        $payement = new Paiement($this->db->db);
+                                        $payement->amounts = array($facture->id => (float) $data['paid']);
+                                        $payement->datepaye = dol_now();
+                                        $payement->paiementid = (int) $data['mode_paiement'];
+                                        if ($payement->create($user) <= 0) {
+                                            $warnings[] = 'Echec de l\'ajout du paiement de la facture';
                                         } else {
-                                            $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
-                                        }
-                                        if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
-                                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
-                                        }
+                                            // Ajout du paiement au compte bancaire: 
+                                            if ($this->useCaisseForPayments) {
+                                                $id_account = (int) $caisse->getData('id_account');
+                                            } else {
+                                                $id_account = (int) BimpCore::getConf('bimpcaisse_id_default_account');
+                                            }
+                                            if ($payement->addPaymentToBank($user, 'payment', '(CustomerInvoicePayment)', $id_account, '', '') < 0) {
+                                                $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($payement), 'Echec de l\'ajout du paiement n°' . $payement->id . ' au compte bancaire d\'ID ' . $id_account);
+                                            }
 
-                                        if ($this->useCaisseForPayments) {
-                                            $warnings = array_merge($warnings, $caisse->addPaiement($payement, $facture->id));
+                                            if ($this->useCaisseForPayments) {
+                                                $warnings = array_merge($warnings, $caisse->addPaiement($payement, $facture->id));
+                                            }
                                         }
                                     }
-                                }
 
-                                $to_pay = (float) $facture->total_ttc - ((float) $facture->getSommePaiement() + (float) $facture->getSumCreditNotesUsed() + (float) $facture->getSumDepositsUsed());
-                                if ($to_pay >= -0.01 && $to_pay <= 0.1) {
-                                    $facture->set_paid($user);
-                                }
+                                    $to_pay = (float) $facture->total_ttc - ((float) $facture->getSommePaiement() + (float) $facture->getSumCreditNotesUsed() + (float) $facture->getSumDepositsUsed());
+                                    if ($to_pay >= -0.01 && $to_pay <= 0.1) {
+                                        $facture->set_paid($user);
+                                    }
 
-                                $propal->dol_object->cloture($user, 4, "Auto via SAV");
+                                    $propal->dol_object->cloture($user, 4, "Auto via SAV");
 
-                                //Generation
-                                $up_errors = $this->updateField('id_facture', (int) $facture->id);
-                                if (count($up_errors)) {
-                                    $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $facture->id . ')');
-                                } else {
-                                    $facture->generateDocument(self::$facture_model_pdf, $langs);
-                                }
+                                    //Generation
+                                    $up_errors = $this->updateField('id_facture', (int) $facture->id);
+                                    if (count($up_errors)) {
+                                        $warnings[] = BimpTools::getMsgFromArray($up_errors, 'Echec de l\'enregistrement de l\'ID de la facture (' . $facture->id . ')');
+                                    } else {
+                                        $facture->generateDocument(self::$facture_model_pdf, $langs);
+                                    }
 
-                                if (isset($data['send_msg']) && $data['send_msg']) {
-                                    $warnings = array_merge($warnings, $this->sendMsg('Facture'));
+                                    if (isset($data['send_msg']) && $data['send_msg']) {
+                                        $warnings = array_merge($warnings, $this->sendMsg('Facture'));
+                                    }
                                 }
                             }
                         }
@@ -3204,6 +3329,8 @@ class BS_SAV extends BimpObject
 
     public function create(&$warnings = array())
     {
+        ini_set('display_errors', 1);
+
         $errors = array();
 
         if ((float) $this->getData('acompte') > 0) {
@@ -3340,7 +3467,7 @@ class BS_SAV extends BimpObject
         return false;
     }
 
-    // Gestion des droits: 
+    // Gestion des droits et autorisations: 
 
     public function canCreate()
     {

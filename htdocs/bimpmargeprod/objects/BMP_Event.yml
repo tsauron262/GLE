@@ -305,33 +305,34 @@ views:
                           params: 
                               - 2
         
-    billets:
-        title: Billetterie
-        rows:                
-            - cols:
-                - type: list
-                  col_lg: 12
-                  list: 
-                      title: Tarifs
-                      children: tarifs
-                      panel: 0
-                      
-                - type: list
-                  col_lg: 12
-                  list: 
-                      title: Vente de billets
-                      children: billets
-                      panel: 0
-            - cols: 
-                - type: view
-                  col_lg: 7
-                  col_md: 8
-                  col_sm: 12
-                  view: 
-                      name: total_billets
+#    billets:
+#        title: Billetterie
+#        rows:                
+#            - cols:
+#                - type: list
+#                  col_lg: 12
+#                  list: 
+#                      title: Tarifs
+#                      children: tarifs
+#                      panel: 0
+#                      
+#                - type: list
+#                  col_lg: 12
+#                  list: 
+#                      title: Vente de billets
+#                      children: billets
+#                      panel: 0
+#            - cols: 
+#                - type: view
+#                  col_lg: 7
+#                  col_md: 8
+#                  col_sm: 12
+#                  view: 
+#                      name: total_billets
                     
     total_billets: 
-        title: Total Billeterie
+        title: 
+            callback: getTotalBilletsTitle
         icon: euro
         objects_change_reload: BMP_EventTarif,BMP_EventBillets
         rows: 
@@ -434,15 +435,15 @@ views:
                             custom: 
                                 callback: renderBilansComptables
                  
-    bilan_comptable:
-        rows: 
-            - cols: 
-                - type: list
-                  list: 
-                      name: bilan_comptable
-                      children: montants
-                      panel: 0
-                - type: custom
-                  custom:
-                      callback:
-                          method: renderSoldes
+#    bilan_comptable:
+#        rows: 
+#            - cols: 
+#                - type: list
+#                  list: 
+#                      name: bilan_comptable
+#                      children: montants
+#                      panel: 0
+#                - type: custom
+#                  custom:
+#                      callback:
+#                          method: renderSoldes

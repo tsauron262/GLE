@@ -39,6 +39,7 @@ list:
           icon: fas_trash-alt
           onclick: deleteSelectedObjects('list_id', $(this))
     enable_search: 0
+    pagination: 0
     sort_field: id
     sort_way: asc
     n: 0

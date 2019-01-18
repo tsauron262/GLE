@@ -348,58 +348,58 @@ lists:
         extra_btn:
             callback: getDefaultListExtraButtons
                     
-    bilan_comptable: 
-        title: Bilan comptable Le Fil
-        checkboxes: 0
-        row_style: 
-            callback: renderListRowStyle
-        list_filters:
-            - name: id_coprod
-              filter: 0
-        sort_field: id_category_montant
-        sort_way: asc
-        n: 0
-        cols:
-            status: 
-                field: status
-                display: icon
-                max_width: 32px
-                min_width: 32px
-            category: 
-                field: id_category_montant
-            montant:
-                field: id_montant
-            code_compta: 
-                label: Code Comptable
-                value: 
-                    field_value:
-                        field_name: code_compta
-                        object: type_montant
-            taxe: 
-                label: TVA
-                field: tva_tx
-           
-            frais:
-                label: Charges HT
-                value: 
-                    callback: 
-                        method: displayPaidAmountByType
-                        params: 
-                            type: 1
-                            
-            recette:
-                label: Recettes HT
-                value: 
-                    callback: 
-                        method: displayPaidAmountByType
-                        params: 
-                            type: 2
-        extra_btn:
-            callback: 
-                method: getDefaultListExtraButtons
-                params:
-                    - 0
-                    - 1
+#    bilan_comptable: 
+#        title: Bilan comptable Le Fil
+#        checkboxes: 0
+#        row_style: 
+#            callback: renderListRowStyle
+#        list_filters:
+#            - name: id_coprod
+#              filter: 0
+#        sort_field: id_category_montant
+#        sort_way: asc
+#        n: 0
+#        cols:
+#            status: 
+#                field: status
+#                display: icon
+#                max_width: 32px
+#                min_width: 32px
+#            category: 
+#                field: id_category_montant
+#            montant:
+#                field: id_montant
+#            code_compta: 
+#                label: Code Comptable
+#                value: 
+#                    field_value:
+#                        field_name: code_compta
+#                        object: type_montant
+#            taxe: 
+#                label: TVA
+#                field: tva_tx
+#           
+#            frais:
+#                label: Charges HT
+#                value: 
+#                    callback: 
+#                        method: displayPaidAmountByType
+#                        params: 
+#                            type: 1
+#                            
+#            recette:
+#                label: Recettes HT
+#                value: 
+#                    callback: 
+#                        method: displayPaidAmountByType
+#                        params: 
+#                            type: 2
+#        extra_btn:
+#            callback: 
+#                method: getDefaultListExtraButtons
+#                params:
+#                    - 0
+#                    - 1
             
 views:
     details_list:

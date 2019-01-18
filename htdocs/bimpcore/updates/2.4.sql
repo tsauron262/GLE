@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `llx_bmp_calc_montant` (
 ) ENGINE=InnoDB;
 
 CREATE TABLE IF NOT EXISTS `llx_bmp_total_inter` (
-  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY (`id`),
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `name` varchar(256) NOT NULL DEFAULT '',
   `all_frais` BOOLEAN NOT NULL DEFAULT FALSE,
   `all_recettes` BOOLEAN NOT NULL DEFAULT FALSE,
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `llx_bmp_total_inter` (
 `all_frais` BOOLEAN NOT NULL DEFAULT FALSE, `all_recettes` BOOLEAN NOT NULL DEFAULT FALSE,
 
 CREATE TABLE IF NOT EXISTS `llx_bmp_event_calc_montant` (
-  `id` INT NOT NULL AUTO_INCREMENT ADD PRIMARY KEY,
+  `id` INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `id_event` int(11) NOT NULL,
   `id_calc_montant` int(11) NOT NULL,
   `percent` float NOT NULL,

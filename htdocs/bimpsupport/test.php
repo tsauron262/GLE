@@ -8,10 +8,10 @@ llxHeader();
 
 
 
-$sql = $db->query('SELECT email FROM `llx_societe` WHERE rowid IN (SELECT id_client FROM `llx_bs_sav` WHERE status = 9 AND code_centre = "P")');
+$sql = $db->query('SELECT email FROM `llx_societe`  WHERE rowid IN (SELECT id_client FROM `llx_bs_sav` WHERE status != 999 AND code_centre = "P")');
 
 $tabMail = array();
-foreach($db->fetch_object($sql) as $ln){
+while($ln = $db->fetch_object($sql)){
     $mail = $ln->email;
     if(stripos($mail, "@")){
         $tabMail[] = $mail;
@@ -20,6 +20,9 @@ foreach($db->fetch_object($sql) as $ln){
 
 
 print_r($tabMail);
+
+
+echo "Total ".count($tabMail)." mails";
 
 $msg = "Madamme, Monsieur,
 
@@ -37,7 +40,7 @@ $to = implode(",", $tabMail);
 
 $to = "Tommy@bimp.fr";
 
-$msg .= "<br/><br/>Mails : ".implode(",", $tabMail);
+$msg .= "<br/><br/>Mails : ".implode("<br/>", $tabMail);
 
 
 mailSyn2("Déménagement SAV BIMP", $to, 'SAV66@bimp.fr', $msg);

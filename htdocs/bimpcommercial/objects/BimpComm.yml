@@ -87,6 +87,7 @@ fields:
             array: modeReglements
         input: 
             type: select_payment
+            include_empty: 1
         default_value: 0
     fk_availability: 
         label: Délai de livraison

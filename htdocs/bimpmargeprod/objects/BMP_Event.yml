@@ -87,7 +87,7 @@ objects:
         relation: hasMany
         delete: 1
         instance: 
-            bimp_object: BMP_EventCalcMontant
+            bimp_object: BMP_EventCalcMontant       
     
 fields: 
     name: 
@@ -152,6 +152,16 @@ fields:
     
     default_dl_prod: 
         label: droits de location producteur par défaut (TTC)
+        type: money
+        default_value: 0
+        
+    bar_20_save: 
+        label: bar_20_save
+        type: money
+        default_value: 0
+        
+    bar_55_save: 
+        label: bar_55_save
         type: money
         default_value: 0
         

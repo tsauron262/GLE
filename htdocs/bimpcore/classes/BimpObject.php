@@ -903,15 +903,10 @@ class BimpObject extends BimpCache
         return '';
     }
 
-//    public function getNomUrl($withpicto = true)
-//    {
-//        $html = '<a href="' . $this->getUrl() . '">';
-//        if ($this->params['icon']) {
-//            $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
-//        }
-//        $html .= $this->getRef() . '</a>';
-//        return $html;
-//    }
+    public function getName()
+    {
+        return $this->getInstanceName();
+    }
 
     public function getDolValue($field, $value)
     {

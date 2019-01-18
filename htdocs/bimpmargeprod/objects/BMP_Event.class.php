@@ -1016,97 +1016,6 @@ class BMP_Event extends BimpObject
         }
     }
 
-    public function calcPrevisionnels()
-    {
-        if (!$this->isLoaded()) {
-            return;
-        }
-
-        if ((int) $this->getData('status') !== 1) {
-            return;
-        }
-
-        $previsionnels = $this->getPrevisionnels();
-        
-//            'total_billets_ttc'        => 0,
-//            'total_billets_ht'         => 0,
-//            'total_dl_dist_ttc'        => 0,
-//            'total_dl_dist_ht'         => 0,
-//            'total_dl_prod_ttc'        => 0,
-//            'total_dl_prod_ht'         => 0,
-//            'bar_ttc'                  => 0,
-//            'bat_ht'                   => 0,
-//            'total_frais_materiel_ttc' => 0,
-//            'total_frais_materiel_ht'  => 0,
-//            'total_nb_billets'         => 0
-
-        $eventMontant = $this->getMontant((int) $this->getBilletsIdTypeMontant());
-        if (BimpObject::objectLoaded($eventMontant)) {
-            $current_amount = (float) $eventMontant->getData('amount');
-            if ($current_amount !== (float) $previsionnels['total_billets_ht']) {
-                $eventMontant->set('amount', $previsionnels['total_billets_ht']);
-                $eventMontant->update();
-            }
-        }
-
-        $id_type_montant = 0;
-        switch ((int) $this->getData('tva_billets')) {
-            case 1:
-                $id_type_montant = self::$id_billets_5_5_type_montant;
-                break;
-
-            case 2:
-                $id_type_montant = self::$id_billets_2_1_type_montant;
-                break;
-        }
-
-        if ((int) $id_type_montant) {
-            $eventMontant = $this->getMontant($id_type_montant);
-            if (BimpObject::objectLoaded($eventMontant)) {
-                if ((float) $eventMontant->getData('amount')) {
-                    $eventMontant->set('amount', 0);
-                    $eventMontant->update();
-                }
-            }
-        }
-
-        $eventMontant = $this->getMontant(self::$id_dl_prod_montant);
-        if (BimpObject::objectLoaded($eventMontant)) {
-            $current_amount = (float) $eventMontant->getData('amount');
-            if ($current_amount !== (float) $previsionnels['total_dl_prod_ht']) {
-                $eventMontant->set('amount', $previsionnels['total_dl_prod_ht']);
-                $eventMontant->update();
-            }
-        }
-
-        $eventMontant = $this->getMontant(self::$id_frais_billets_materiels);
-        if (BimpObject::objectLoaded($eventMontant)) {
-            $current_amount = (float) $eventMontant->getData('amount');
-            if ($current_amount !== (float) $previsionnels['total_frais_materiel_ht']) {
-                $eventMontant->set('amount', $previsionnels['total_frais_materiel_ht']);
-                $eventMontant->update();
-            }
-        }
-
-        $eventMontant = $this->getMontant(self::$id_bar20_type_montant);
-        if (BimpObject::objectLoaded($eventMontant)) {
-            $current_amount = (float) $eventMontant->getData('amount');
-            if ($current_amount !== (float) $previsionnels['bar_ht']) {
-                $eventMontant->set('amount', $previsionnels['bar_ht']);
-                $eventMontant->update();
-            }
-        }
-
-        $eventMontant = $this->getMontant(self::$id_bar55_type_montant);
-        if (BimpObject::objectLoaded($eventMontant)) {
-            $current_amount = (float) $eventMontant->getData('amount');
-            if ($current_amount !== 0) {
-                $eventMontant->set('amount', 0);
-                $eventMontant->update();
-            }
-        }
-    }
-
     // Checks-up:
 
     public function checkCoprodsParts()
@@ -1222,6 +1131,149 @@ class BMP_Event extends BimpObject
         return null;
     }
 
+    public function calcPrevisionnels()
+    {
+        if (!$this->isLoaded()) {
+            return;
+        }
+
+        if ((int) $this->getData('status') !== 1) {
+            return;
+        }
+
+        $previsionnels = $this->getPrevisionnels();
+
+        $coprods = $this->getCoProds();
+
+        $id_billets_montant = (int) $this->getBilletsIdTypeMontant();
+        $eventMontant = $this->getMontant($id_billets_montant);
+        if (BimpObject::objectLoaded($eventMontant)) {
+            $current_amount = (float) $eventMontant->getData('amount');
+            if ($current_amount !== (float) $previsionnels['total_billets_ht']) {
+                $eventMontant->set('amount', $previsionnels['total_billets_ht']);
+                $eventMontant->update();
+            }
+        }
+
+        foreach ($coprods as $id_cp => $cp_name) {
+            $eventMontant = $this->getMontant($id_billets_montant, (int) $id_cp);
+            if (BimpObject::objectLoaded($eventMontant)) {
+                if ((float) $eventMontant->getData('amount')) {
+                    $eventMontant->set('amount', 0);
+                    $eventMontant->update();
+                }
+            }
+        }
+
+        $id_type_montant = 0;
+        switch ($id_billets_montant) {
+            case self::$id_billets_2_1_type_montant:
+                $id_type_montant = self::$id_billets_5_5_type_montant;
+                break;
+
+            case self::$id_billets_5_5_type_montant:
+                $id_type_montant = self::$id_billets_2_1_type_montant;
+                break;
+        }
+
+        if ((int) $id_type_montant) {
+            $eventMontant = $this->getMontant($id_type_montant);
+            if (BimpObject::objectLoaded($eventMontant)) {
+                if ((float) $eventMontant->getData('amount')) {
+                    $eventMontant->set('amount', 0);
+                    $eventMontant->update();
+                }
+            }
+
+            foreach ($coprods as $id_cp => $cp_name) {
+                $eventMontant = $this->getMontant($id_type_montant, (int) $id_cp);
+                if (BimpObject::objectLoaded($eventMontant)) {
+                    if ((float) $eventMontant->getData('amount')) {
+                        $eventMontant->set('amount', 0);
+                        $eventMontant->update();
+                    }
+                }
+            }
+        }
+
+        $eventMontant = $this->getMontant(self::$id_dl_prod_montant);
+        if (BimpObject::objectLoaded($eventMontant)) {
+            $current_amount = (float) $eventMontant->getData('amount');
+            if ($current_amount !== (float) $previsionnels['total_dl_prod_ht']) {
+                $eventMontant->set('amount', $previsionnels['total_dl_prod_ht']);
+                $eventMontant->update();
+            }
+        }
+
+        foreach ($coprods as $id_cp => $cp_name) {
+            $eventMontant = $this->getMontant(self::$id_dl_prod_montant, (int) $id_cp);
+            if (BimpObject::objectLoaded($eventMontant)) {
+                if ((float) $eventMontant->getData('amount')) {
+                    $eventMontant->set('amount', 0);
+                    $eventMontant->update();
+                }
+            }
+        }
+
+
+        $eventMontant = $this->getMontant(self::$id_frais_billets_materiels);
+        if (BimpObject::objectLoaded($eventMontant)) {
+            $current_amount = (float) $eventMontant->getData('amount');
+            if ($current_amount !== (float) $previsionnels['total_frais_materiel_ht']) {
+                $eventMontant->set('amount', $previsionnels['total_frais_materiel_ht']);
+                $eventMontant->update();
+            }
+        }
+        
+        foreach ($coprods as $id_cp => $cp_name) {
+            $eventMontant = $this->getMontant(self::$id_frais_billets_materiels, (int) $id_cp);
+            if (BimpObject::objectLoaded($eventMontant)) {
+                if ((float) $eventMontant->getData('amount')) {
+                    $eventMontant->set('amount', 0);
+                    $eventMontant->update();
+                }
+            }
+        }
+
+        $eventMontant = $this->getMontant(self::$id_bar20_type_montant);
+        if (BimpObject::objectLoaded($eventMontant)) {
+            $current_amount = (float) $eventMontant->getData('amount');
+            if ($current_amount !== (float) $previsionnels['bar_ht']) {
+                $eventMontant->set('amount', $previsionnels['bar_ht']);
+                $eventMontant->update();
+            }
+        }
+        
+        foreach ($coprods as $id_cp => $cp_name) {
+            $eventMontant = $this->getMontant(self::$id_bar20_type_montant, (int) $id_cp);
+            if (BimpObject::objectLoaded($eventMontant)) {
+                if ((float) $eventMontant->getData('amount')) {
+                    $eventMontant->set('amount', 0);
+                    $eventMontant->update();
+                }
+            }
+        }
+
+        $eventMontant = $this->getMontant(self::$id_bar55_type_montant);
+        if (BimpObject::objectLoaded($eventMontant)) {
+            $current_amount = (float) $eventMontant->getData('amount');
+            if ($current_amount !== 0) {
+                $eventMontant->set('amount', 0);
+                $eventMontant->update();
+            }
+        }
+        
+        foreach ($coprods as $id_cp => $cp_name) {
+            $eventMontant = $this->getMontant(self::$id_bar55_type_montant, (int) $id_cp);
+            if (BimpObject::objectLoaded($eventMontant)) {
+                if ((float) $eventMontant->getData('amount')) {
+                    $eventMontant->set('amount', 0);
+                    $eventMontant->update();
+                }
+            }
+        }
+    }
+
     public function calcBilletsAmount()
     {
         if (!$this->isLoaded()) {
@@ -1293,13 +1345,13 @@ class BMP_Event extends BimpObject
             $this->createMontant(self::$id_frais_billets_materiels, $amounts['total_frais_materiel_ht'], 0);
         } elseif ((float) $frais_billets_montant->getData('amount') !== (float) $amounts['total_frais_materiel_ht']) {
             $frais_billets_montant->set('amount', (float) $amounts['total_frais_materiel_ht']);
-            $frais_billets_montant->udpate();
+            $frais_billets_montant->update();
         }
     }
 
     // Rendus HTML:
 
-    public function renderMontantsRecap($montant_type = 0, $coprods_parts_mode = 'ttc', $coprods_paiements_mode = 'ttc')
+    public function renderMontantsRecap($montant_type = 0, $coprods_parts_mode = 'ht', $coprods_paiements_mode = 'ttc')
     {
         $html = '';
 
@@ -1335,7 +1387,7 @@ class BMP_Event extends BimpObject
                     case 2: $html .= 'Reçu';
                         break;
                 }
-                $html .= ' ' . $cp_label . ' ' . ($coprods_parts_mode === 'ttc' ? 'TTC' : 'HT') . '</th>';
+                $html .= ' ' . $cp_label . ' ' . ($coprods_paiements_mode === 'ttc' ? 'TTC' : 'HT') . '</th>';
             }
         }
 
@@ -1485,7 +1537,7 @@ class BMP_Event extends BimpObject
     public function renderMontantsTotaux()
     {
         $coprods = $this->getCoProds();
-        
+
         $colspan = 3;
         if (count($coprods)) {
             $colspan += 1 + count($coprods);
@@ -2555,7 +2607,7 @@ class BMP_Event extends BimpObject
         }
 
         $id_type_montant = (int) $eventMontant->getData('id_montant');
-        $id_coprod = (int) $eventMontant->getData('id_coprod');
+//        $id_coprod = (int) $eventMontant->getData('id_coprod');
 
         // Traitements des calculs automatiques dont le montant intervient dans le montant source:
         $sql = BimpTools::getSqlSelect(array('a.id_target'));
@@ -2571,7 +2623,7 @@ class BMP_Event extends BimpObject
         $sql .= ' AND a.active = 1 AND b.active = 1 AND b.id_event = ' . (int) $this->id;
 
         $rows = $this->db->executeS($sql, 'array');
-
+        
         if (!is_null($rows)) {
             foreach ($rows as $r) {
                 $this->calcMontant((int) $r['id_target'], null);
@@ -2739,7 +2791,7 @@ class BMP_Event extends BimpObject
                                 'id_coprod'  => 0
                     ));
                     if (BimpObject::objectLoaded($eventMontant)) {
-                        $eventMontant->updateField('amount', (float) $this->getSavedData('bar_20_save'));
+                        $eventMontant->updateField('amount', (float) $this->getData('bar_20_save'));
                     }
 
                     $eventMontant = BimpCache::findBimpObjectInstance($this->module, 'BMP_EventMontant', array(
@@ -2748,7 +2800,7 @@ class BMP_Event extends BimpObject
                                 'id_coprod'  => 0
                     ));
                     if (BimpObject::objectLoaded($eventMontant)) {
-                        $eventMontant->updateField('amount', (float) $this->getSavedData('bar_55_save'));
+                        $eventMontant->updateField('amount', (float) $this->getData('bar_55_save'));
                     }
                 }
             }

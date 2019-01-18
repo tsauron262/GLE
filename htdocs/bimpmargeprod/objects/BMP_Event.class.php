@@ -834,6 +834,7 @@ class BMP_Event extends BimpObject
             }
 
             $ventes = $this->getChildrenObjects('billets');
+            $frais_billet = (float) $this->getData('frais_billet');
 
             foreach ($ventes as $vente) {
                 $total = (float) $vente->getTotal();
@@ -841,27 +842,34 @@ class BMP_Event extends BimpObject
                 $dl_prod = (float) $vente->getTotalDLProd();
                 $qty = (float) $vente->getData('quantity');
                 $id_cp = (int) $vente->getData('id_coprod');
+                $frais_billets_ht = $frais_billet * $qty;
 
                 $amounts['total_billets_ttc'] += $total;
                 $amounts['total_dl_dist_ttc'] += $dl_dist;
                 $amounts['total_dl_prod_ttc'] += $dl_prod;
+                $amounts['total_frais_materiel_ht'] += $frais_billets_ht;
                 $amounts['total_nb_billets'] += $qty;
 
                 $amounts['coprods'][$id_cp]['total_billets_ttc'] += $total;
                 $amounts['coprods'][$id_cp]['total_dl_dist_ttc'] += $dl_dist;
                 $amounts['coprods'][$id_cp]['total_dl_prod_ttc'] += $dl_prod;
+                $amounts['coprods'][$id_cp]['total_frais_materiel_ht'] += $frais_billets_ht;
                 $amounts['coprods'][$id_cp]['total_nb_billets'] += $qty;
             }
 
             $billets_tva_tx = (float) $this->getBilletsTvaTx();
+            $frais_billets_tva_tx = (float) $this->getMontantTvaTx(self::$id_frais_billets_materiels);
+
             $amounts['total_billets_ht'] = BimpTools::calculatePriceTaxEx($amounts['total_billets_ttc'], $billets_tva_tx);
             $amounts['total_dl_dist_ht'] = BimpTools::calculatePriceTaxEx($amounts['total_dl_dist_ttc'], $billets_tva_tx);
             $amounts['total_dl_prod_ht'] = BimpTools::calculatePriceTaxEx($amounts['total_dl_prod_ttc'], $billets_tva_tx);
+            $amounts['total_frais_materiel_ttc'] = BimpTools::calculatePriceTaxIn($amounts['total_frais_materiel_ht'], $frais_billets_tva_tx);
 
             foreach ($amounts['coprods'] as $id_cp => $cp_amounts) {
                 $amounts['coprods'][(int) $id_cp]['total_billets_ht'] = BimpTools::calculatePriceTaxEx($cp_amounts['total_billets_ttc'], $billets_tva_tx);
                 $amounts['coprods'][(int) $id_cp]['total_dl_dist_ht'] = BimpTools::calculatePriceTaxEx($cp_amounts['total_dl_dist_ttc'], $billets_tva_tx);
                 $amounts['coprods'][(int) $id_cp]['total_dl_prod_ht'] = BimpTools::calculatePriceTaxEx($cp_amounts['total_dl_prod_ttc'], $billets_tva_tx);
+                $amounts['coprods'][(int) $id_cp]['total_frais_materiel_ttc'] = BimpTools::calculatePriceTaxIn($cp_amounts['total_frais_materiel_ht'], $frais_billets_tva_tx);
             }
         }
 
@@ -1224,7 +1232,7 @@ class BMP_Event extends BimpObject
                 $eventMontant->update();
             }
         }
-        
+
         foreach ($coprods as $id_cp => $cp_name) {
             $eventMontant = $this->getMontant(self::$id_frais_billets_materiels, (int) $id_cp);
             if (BimpObject::objectLoaded($eventMontant)) {
@@ -1243,7 +1251,7 @@ class BMP_Event extends BimpObject
                 $eventMontant->update();
             }
         }
-        
+
         foreach ($coprods as $id_cp => $cp_name) {
             $eventMontant = $this->getMontant(self::$id_bar20_type_montant, (int) $id_cp);
             if (BimpObject::objectLoaded($eventMontant)) {
@@ -1262,7 +1270,7 @@ class BMP_Event extends BimpObject
                 $eventMontant->update();
             }
         }
-        
+
         foreach ($coprods as $id_cp => $cp_name) {
             $eventMontant = $this->getMontant(self::$id_bar55_type_montant, (int) $id_cp);
             if (BimpObject::objectLoaded($eventMontant)) {
@@ -1780,14 +1788,25 @@ class BMP_Event extends BimpObject
                 $html .= '</tr>';
 
                 $sacem_billets = $billets_ht_brut * ($sacem_billets_rate / 100);
+                $sacem_groupe = (float) $this->getMontantAmount((int) self::$id_sacem_groupe, null);
                 $billets_ht_net -= $sacem_billets;
+                $billets_ht_net -= $sacem_groupe;
 
                 $html .= '<tr>';
-                $html .= '<td>SACEM</td>';
+                $html .= '<td>SACEM Billetterie</td>';
                 $html .= '<td>' . BimpTools::displayMoneyValue($sacem_billets * -1, 'EUR', true) . '</td>';
                 $html .= '</tr>';
 
+                if ($sacem_groupe != 0) {
+                    $html .= '<tr>';
+                    $html .= '<td>SACEM artistique</td>';
+                    $html .= '<td>' . BimpTools::displayMoneyValue($sacem_groupe * -1, 'EUR', true) . '</td>';
+                    $html .= '</tr>';
+                }
+
                 $sacem_secu = $sacem_billets * ($sacem_secu_rate / 100);
+                $sacem_secu += $sacem_groupe * ($sacem_secu_rate / 100);
+
                 $billets_ht_net -= $sacem_secu;
 
                 $html .= '<tr>';
@@ -1861,28 +1880,27 @@ class BMP_Event extends BimpObject
                     $total_autre_brut += $cat_amounts['total_recettes_ht'];
                 }
 
-                $sacem_autre = (float) $this->getMontantAmount((int) self::$id_sacem_autre_montant, null);
-                $sacem_autre += (float) $this->getMontantAmount((int) self::$id_sacem_groupe, null);
-
-                if ($sacem_autre > 0)
-                    $sacem_autre += $sacem_autre * ($sacem_secu_rate / 100);
-
-                $total_autre_net = $total_autre_brut - $sacem_autre;
+//                $sacem_autre += (float) $this->getMontantAmount((int) self::$id_sacem_groupe, null);
+//                if ($sacem_autre > 0)
+//                    $sacem_autre += $sacem_autre * ($sacem_secu_rate / 100);
+//                $total_autre_net = $total_autre_brut - $sacem_autre;
 
                 $html .= '<tr>';
-                $html .= '<td>Autres recettes HT BRUT</td>';
+                $html .= '<td>Autres recettes HT</td>';
                 $html .= '<td>' . BimpTools::displayMoneyValue($total_autre_brut, 'EUR', true) . '</td>';
                 $html .= '</tr>';
 
-                $html .= '<tr>';
-                $html .= '<td>SACEM autres recettes</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($sacem_autre * -1, 'EUR', true) . '</td>';
-                $html .= '</tr>';
-
-                $html .= '<tr class="strong">';
-                $html .= '<td>Autre recettes NET</td>';
-                $html .= '<td>' . BimpTools::displayMoneyValue($total_autre_net, 'EUR', true) . '</td>';
-                $html .= '</tr>';
+                $total_autre_net = $total_autre_brut;
+                
+//                $html .= '<tr>';
+//                $html .= '<td>SACEM autres recettes</td>';
+//                $html .= '<td>' . BimpTools::displayMoneyValue($sacem_autre * -1, 'EUR', true) . '</td>';
+//                $html .= '</tr>';
+//
+//                $html .= '<tr class="strong">';
+//                $html .= '<td>Autre recettes NET</td>';
+//                $html .= '<td>' . BimpTools::displayMoneyValue($total_autre_net, 'EUR', true) . '</td>';
+//                $html .= '</tr>';
 
                 $tatal_recettes = $billets_ht_net + $bar_ht_net + $total_autre_net;
 
@@ -2263,6 +2281,21 @@ class BMP_Event extends BimpObject
         $html .= '<td>' . BimpTools::displayMoneyValue($ca_moyen_net, 'EUR') . '</td>';
         $html .= '</tr>';
 
+        if ($status === 1) {
+            $prev_dl_dist = $nbBillets * (float) $this->getData('default_dl_dist');
+            $prev_dl_prod = $nbBillets * (float) $this->getData('default_dl_prod');
+
+            $html .= '<tr>';
+            $html .= '<th>Total DL distributeurs prévisionnel</th>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($prev_dl_dist, 'EUR') . '</td>';
+            $html .= '</tr>';
+
+            $html .= '<tr>';
+            $html .= '<th>Total DL producteurs prévisionnel</th>';
+            $html .= '<td>' . BimpTools::displayMoneyValue($prev_dl_prod, 'EUR') . '</td>';
+            $html .= '</tr>';
+        }
+
         $html .= '<tr>';
         $html .= '<th>Ratio invitations / total billets</th>';
         $html .= '<td>' . round($this->GetFreeBilletsRatio() * 100, 2) . ' %</td>';
@@ -2608,7 +2641,6 @@ class BMP_Event extends BimpObject
 
         $id_type_montant = (int) $eventMontant->getData('id_montant');
 //        $id_coprod = (int) $eventMontant->getData('id_coprod');
-
         // Traitements des calculs automatiques dont le montant intervient dans le montant source:
         $sql = BimpTools::getSqlSelect(array('a.id_target'));
         $sql .= BimpTools::getSqlFrom('bmp_calc_montant', array(array(
@@ -2623,7 +2655,7 @@ class BMP_Event extends BimpObject
         $sql .= ' AND a.active = 1 AND b.active = 1 AND b.id_event = ' . (int) $this->id;
 
         $rows = $this->db->executeS($sql, 'array');
-        
+
         if (!is_null($rows)) {
             foreach ($rows as $r) {
                 $this->calcMontant((int) $r['id_target'], null);

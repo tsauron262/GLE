@@ -47,7 +47,7 @@ if (isset($textSave))
 
 if (is_file($filename)){
     $size = filesize($filename)/1024/1024;
-    if($size > 1)
+    if($size > 3)
         $text = "Fichier trop gros ".$size." Mo";
     else
         $text = file_get_contents($filename);

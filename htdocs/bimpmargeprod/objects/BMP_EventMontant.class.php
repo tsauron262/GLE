@@ -115,7 +115,8 @@ class BMP_EventMontant extends BimpObject
                     $errors[] = 'Cet Evénement est validé et n\'est donc plus modifiable';
                     return 0;
                 }
-                return 1;
+                $event = $this->getParentInstance();
+                return $event->showCoprods();
         }
 
         return (int) parent::isActionAllowed($action, $errors);

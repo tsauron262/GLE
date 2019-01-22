@@ -210,7 +210,7 @@ class BimpLine extends BimpObject
                     if (BimpObject::objectLoaded($product)) {
                         return (float) $product->getData('tva_tx');
                     }
-                    return 0;
+                    return (float) $this->getConf('fields/tva_tx/default_value', 0);
 
                 case 'id_fourn_price':
                     if (BimpObject::objectLoaded($product)) {

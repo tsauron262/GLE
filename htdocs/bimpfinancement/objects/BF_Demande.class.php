@@ -831,6 +831,61 @@ class BF_Demande extends BimpObject
 
         return $errors;
     }
+    
+    public function calcMontants()
+    {
+        $errors = array();
+        if ($this->isLoaded()) {
+            $montant_produits = 0;
+            $montant_services = 0;
+            $montant_logiciels = 0;
+            
+            $lines = $this->getChildrenObjects('lines');
+            foreach ($lines as $line) {
+                $total_ttc = (float) $line->getTotalTTC();
+                switch((int) $line->getData('product_type')) {
+                    case BimpLine::BL_PRODUIT:
+                        $montant_produits += $total_ttc;
+                        break;
+                    
+                    case BimpLine::BL_SERVICE:
+                        $montant_services += $total_ttc;
+                        break;
+                    
+                    case BimpLine::BL_LOGICIEL:
+                        $montant_logiciels += $total_ttc;
+                        break;
+                }
+            }
+            
+            $this->set('montant_materiels', $montant_produits);
+            $this->set('montant_services', $montant_services);
+            $this->set('montant_logiciels', $montant_logiciels);
+            $up_warnings = array();
+            $up_errors = $this->update($up_warnings);
+            
+            if (count($up_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Des erreurs sont survenues lors de la mise à jour des montants de la demande de financement');
+            }
+            
+            if (count($up_warnings)) {
+                $errors[] = BimpTools::getMsgFromArray($up_warnings, 'Des erreurs sont survenues suite à la mise à jour des montants de la demande de financement');
+            }
+        }
+        
+        return $errors;
+    }
+    
+    public function onChildSave($child)
+    {
+        if (isset($child->object_name)) {
+            if ($child->object_name === 'BF_Line') {
+                return $this->calcMontants();
+            }
+        }
+        
+        return array();
+    }
 
     // Actions:
 

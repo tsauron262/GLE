@@ -14,6 +14,7 @@ if (!defined('BIMP_LIB')) {
 
     require_once __DIR__ . '/libs/spyc/Spyc.php';
 
+    require_once $dir . 'BimpLog.php';
     require_once $dir . 'BimpDb.php';
     require_once $dir . 'BimpValidate.php';
     require_once $dir . 'BimpCache.php';

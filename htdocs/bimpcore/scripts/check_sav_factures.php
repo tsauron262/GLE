@@ -17,11 +17,13 @@ echo '</head>';
 
 echo '<body>';
 
-require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/class/html.formmargin.class.php';
 
 global $db;
 $bdb = new BimpDb($db);
-$form = new Form($db);
+$formmargin = new FormMargin($db);
+
+BimpTools::loadDolClass('compta/facture', 'facture');
 
 $where = '`facnumber` LIKE \'FAS1901-%\' AND `datec` >= \'2019-01-17 00:00:00\' AND `datec` < \'2019-01-18 00:00:00\'';
 $rows = $bdb->getRows('facture', $where, null, 'array', array(
@@ -90,7 +92,17 @@ foreach ($toDelete as $id_soc => $soc_data) {
     }
     $delete_txt .= "\n\n" . 'Client: ' . $soc_data['label'] . "\n\n";
     foreach ($soc_data['rows'] as $r) {
-        $delete_txt .= ' - ' . $r['rowid'] . ' => ' . $r['facnumber'] . ': ' . $r['total'] . "\n";
+        $facture = new Facture($db);
+        $facture->fetch((int) $r['rowid']);
+
+        $marge = 0;
+
+        if (BimpObject::objectLoaded($facture)) {
+            $margin_infos = $formmargin->getMarginInfosArray($facture);
+            $marge = $margin_infos['total_margin'];
+        }
+
+        $delete_txt .= ' - ' . $r['rowid'] . ' => ' . $r['facnumber'] . ': ' . $r['total'] . '  -  MARGE : ' . $marge . "\n";
     }
 }
 
@@ -105,7 +117,17 @@ foreach ($toProcess as $id_soc => $soc_data) {
 
     $process_txt .= "\n\n" . 'Client: ' . $soc_data['label'] . "\n\n";
     foreach ($soc_data['rows'] as $r) {
-        $process_txt .= ' - ' . $r['rowid'] . ' => ' . $r['facnumber'] . ': ' . $r['total'] . "\n";
+        $facture = new Facture($db);
+        $facture->fetch((int) $r['rowid']);
+
+        $marge = 0;
+
+        if (BimpObject::objectLoaded($facture)) {
+            $margin_infos = $formmargin->getMarginInfosArray($facture);
+            $marge = $margin_infos['total_margin'];
+        }
+
+        $process_txt .= ' - ' . $r['rowid'] . ' => ' . $r['facnumber'] . ': ' . $r['total'] . '  -  MARGE : ' . $marge . "\n";
     }
 }
 

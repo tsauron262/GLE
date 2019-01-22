@@ -5,6 +5,24 @@ require_once DOL_DOCUMENT_ROOT . '/bimpapple/controllers/gsxController.php';
 class savController extends gsxController
 {
 
+    public function display()
+    {
+        $sav = $this->config->getObject('', 'sav');
+        if (BimpObject::objectLoaded($sav)) {
+            $propal = $sav->getChildObject('propal');
+            if (BimpObject::objectLoaded($propal)) {
+                $errors = $propal->checkLines();
+                if (count($errors)) {
+                    foreach ($errors as $e) {
+                        $this->addMsg($e, 'danger');
+                    }
+                }
+            }
+        }
+
+        parent::display();
+    }
+
     public function canView()
     {
         global $user;

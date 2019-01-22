@@ -359,10 +359,10 @@ class BF_Demande extends BimpObject
             $client = new Societe($this->db->db);
             $client->fetch($id_client);
             $note = $this->db->getRow('societe_extrafields', 'fk_object = ' . $id_client, null, 'object', array('notecreditsafe'));
-            if (is_object($client)) {
+            if (BimpObject::objectLoaded($client)) {
                 $html .= '<b>Client : </b>' . $client->getNomUrl(1);
                 $html .= '<div style="margin-top: 10px">';
-                $html .= '<strong>Notre crédit safe du client: </strong>';
+                $html .= '<strong>Note crédit safe du client: </strong>';
                 if ($note->notecreditsafe) {
                     $html .= '<i>' . $note->notecreditsafe . '</i>';
                 } else {

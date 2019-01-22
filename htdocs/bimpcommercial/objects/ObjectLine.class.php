@@ -851,10 +851,10 @@ class ObjectLine extends BimpObject
                                 }
                             }
                             if ($no_html) {
-                                    $html .= "\n";
-                                } else {
-                                    $html .= '<br/>';
-                                }
+                                $html .= "\n";
+                            } else {
+                                $html .= '<br/>';
+                            }
                             if (!(string) $this->desc) {
                                 $html .= $product->displayData('label');
                             }
@@ -2385,6 +2385,16 @@ class ObjectLine extends BimpObject
                 case self::LINE_PRODUCT:
                     if (is_null($this->id_product) || !$this->id_product) {
                         $errors[] = 'Produit ou service obligatoire';
+                    } else {
+                        if (is_null($this->pu_ht)) {
+                            $this->pu_ht = (float) $this->getValueByProduct('pu_ht');
+                        }
+                        if (is_null($this->tva_tx)) {
+                            $this->tva_tx = (float) $this->getValueByProduct('tva_tx');
+                        }
+                        if (is_null($this->id_fourn_price) && is_null($this->pa_ht)) {
+                            $this->id_fourn_price = (int) $this->getValueByProduct('id_fourn_price');
+                        }
                     }
 
                 case self::LINE_FREE:
@@ -2395,14 +2405,12 @@ class ObjectLine extends BimpObject
                         }
                     }
 
-
                     if (!is_null($this->id_fourn_price) && (int) $this->id_fourn_price) {
                         $fournPrice = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $this->id_fourn_price);
                         if (BimpObject::objectLoaded($fournPrice)) {
                             $this->pa_ht = (float) $fournPrice->getData('price');
                         } else {
                             $this->id_fourn_price = 0;
-//                            $errors[] = 'Prix fournisseur d\'ID ' . $this->id_fourn_price . ' inexistant';
                         }
                     }
 

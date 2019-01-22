@@ -116,7 +116,11 @@ class BMP_EventMontant extends BimpObject
                     return 0;
                 }
                 $event = $this->getParentInstance();
-                return $event->showCoprods();
+                if(!$event->showCoprods()){
+                    $errors[] = 'Cet Evénement n\'a pas de copro.';
+                    return 0;
+                }
+                return 1;
         }
 
         return (int) parent::isActionAllowed($action, $errors);

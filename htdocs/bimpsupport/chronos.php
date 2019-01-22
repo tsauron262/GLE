@@ -28,7 +28,6 @@ function runBimpSupportChrono()
 
 function initTimers($timers)
 {
-    $ticket = BimpObject::getInstance("bimpsupport", "BS_Ticket");
     if (!count($timers)) {
         return;
     }
@@ -124,7 +123,9 @@ function initTimers($timers)
                 continue;
             }
 
-            if (!$ticket->fetch((int) $id_ticket)) {
+            
+            $ticket = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_Ticket', (int) $id_ticket);
+            if (!$ticket->isLoaded()) {
                 $errors[] = 'Echec du chargement du ticket n°' . $id_ticket;
                 $timer->delete();
                 continue;

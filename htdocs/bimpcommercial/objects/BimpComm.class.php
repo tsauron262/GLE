@@ -1398,7 +1398,7 @@ class BimpComm extends BimpObject
     public function checkLines()
     {
         $errors = array();
-
+        
         if (($this->isLoaded())) {
             $dol_lines = array();
             $bimp_lines = array();

@@ -2564,6 +2564,9 @@ class BMP_Event extends BimpObject
                     'frais'        => '',
                     'recette'      => BimpTools::displayMoneyValue($dl_dist, 'EUR')
                 );
+                
+                $solde += $dl_dist;
+                $total_recettes += $dl_dist;
             }
 
             $html .= '<div class="row">';

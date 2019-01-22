@@ -2868,7 +2868,7 @@ class BS_SAV extends BimpObject
         }
 
         $success = 'SAV Fermé avec succès';
-        $current_status = (int) $this->getSavedData('status');
+        $current_status = (int) $this->getInitData('status');
         $warnings = array();
 
         if ((int) $this->getData('id_propal')) {

@@ -25,4 +25,10 @@ class BS_SavPropal extends Bimp_Propal
 
         return $buttons;
     }
+    
+    public function actionSetRemiseGlobale($data, &$success) {
+        $result = parent::actionSetRemiseGlobale($data, $success);
+        $result['success_callback'] = 'bimp_reloadPage();';
+        return $result;
+    }
 }

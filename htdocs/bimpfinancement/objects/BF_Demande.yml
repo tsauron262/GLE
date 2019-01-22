@@ -563,11 +563,8 @@ fields_tables:
         icon: euro
         rows:
             - field: montant_materiels
-              edit: 1
             - field: montant_services
-              edit: 1
             - field: montant_logiciels
-              edit: 1
             - field: vr
               edit: 1
             - field: vr_vente
@@ -653,6 +650,7 @@ views:
                   
     montants:
         panel: 0
+        objects_change_reload: BF_Line
         rows:
             - cols:  
                   - type: fields_table

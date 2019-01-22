@@ -968,50 +968,52 @@ class BimpObject extends BimpCache
         $parent_id_property = $this->getParentIdProperty();
         $this->set($parent_id_property, $id_parent);
 
-        if (!BimpObject::objectLoaded($this->parent) || 
+        if (!BimpObject::objectLoaded($this->parent) ||
                 (BimpObject::objectLoaded($this->parent) && ((int) $this->parent->id !== (int) $id_parent))) {
             $this->parent = null;
             $this->getParentInstance();
-            }
         }
+    }
 
     public function setNewStatus($new_status, $extra_data = array(), &$warnings = array())
     {
+        BimpLog::actionStart('bimpobject_new_status', 'Nouveau statut', $this);
+
+        $errors = array();
         $new_status = (int) $new_status;
 
         if (!array_key_exists($new_status, static::$status_list)) {
-            return array('Erreur: ce statut n\'existe pas');
+            $errors[] = 'Erreur: ce statut n\'existe pas';
+        } else {
+            $status_label = is_array(static::$status_list[$new_status]) ? static::$status_list[$new_status]['label'] : static::$status_list[$new_status];
+            $object_label = $this->getLabel('the') . (isset($this->id) && $this->id ? ' ' . $this->id : '');
+
+            if (!$this->canSetStatus($new_status)) {
+                $errors[] = 'Vous n\'avez pas la permission de passer ' . $this->getLabel('this') . ' au statut "' . $status_label . '"';
+            } else {
+                $error_msg = 'Impossible de passer ' . $object_label;
+                $error_msg .= ' au statut "' . $status_label . '"';
+
+                if (!$this->isLoaded()) {
+                    $errors[] = $error_msg . ' ID ' . $this->getLabel('of_the') . ' absent';
+                } else {
+                    $current_status = (int) $this->getSavedData('status');
+
+                    if ($current_status === $new_status) {
+                        $errors[] = $object_label . ' a déjà le statut "' . $status_label . '"';
+                    } elseif (method_exists($this, 'onNewStatus')) {
+                        $errors = $this->onNewStatus($new_status, $current_status, $extra_data, $warnings);
+                    }
+
+                    if (!count($errors)) {
+                        $this->set('status', $new_status);
+                        $errors = $this->update();
+                    }
+                }
+            }
         }
 
-        $status_label = is_array(static::$status_list[$new_status]) ? static::$status_list[$new_status]['label'] : static::$status_list[$new_status];
-        $object_label = $this->getLabel('the') . (isset($this->id) && $this->id ? ' ' . $this->id : '');
-
-        if (!$this->canSetStatus($new_status)) {
-            return array('Vous n\'avez pas la permission de passer ' . $this->getLabel('this') . ' au statut "' . $status_label . '"');
-        }
-
-        $error_msg = 'Impossible de passer ' . $object_label;
-        $error_msg .= ' au statut "' . $status_label . '"';
-
-        if (!$this->isLoaded()) {
-            return array($error_msg . ' ID ' . $this->getLabel('of_the') . ' absent');
-        }
-
-        $current_status = (int) $this->getSavedData('status');
-
-        if ($current_status === $new_status) {
-            return array($object_label . ' a déjà le statut "' . $status_label . '"');
-        }
-
-        $errors = array();
-        if (method_exists($this, 'onNewStatus')) {
-            $errors = $this->onNewStatus($new_status, $current_status, $extra_data, $warnings);
-        }
-
-        if (!count($errors)) {
-            $this->set('status', $new_status);
-            $errors = $this->update();
-        }
+        BimpLog::actionEnd('bimpobject_new_status', $errors);
 
         return $errors;
     }
@@ -1023,9 +1025,10 @@ class BimpObject extends BimpCache
         if ((int) $id_object) {
             if (!$this->fetch($id_object)) {
                 $errors[] = BimpTools::ucfirst($this->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
-                return $errors;
             }
         }
+
+        BimpLog::actionStart('bimpobject_action', 'Action "' . $action . '"', $this);
 
         if (!$this->isLoaded()) {
             $parent_id_prop = $this->getParentIdProperty();
@@ -1039,20 +1042,22 @@ class BimpObject extends BimpCache
             }
         }
 
-        if (!$this->canSetAction($action)) {
-            return array('Vous n\'avez pas la permission d\'effectuer cette action');
+        if (!count($errors)) {
+            if (!$this->canSetAction($action)) {
+                $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action';
+            } elseif (!$this->isActionAllowed($action, $errors)) {
+                $errors[] = BimpTools::getMsgFromArray($errors, 'Action impossible');
+            }
+
+            $method = 'action' . ucfirst($action);
+            if (method_exists($this, $method)) {
+                $errors = $this->{$method}($extra_data, $success);
+            } else {
+                $errors[] = 'Action invalide: "' . $action . '"';
+            }
         }
 
-        if (!$this->isActionAllowed($action, $errors)) {
-            return BimpTools::getMsgFromArray($errors, 'Action impossible');
-        }
-
-        $method = 'action' . ucfirst($action);
-        if (method_exists($this, $method)) {
-            $errors = $this->{$method}($extra_data, $success);
-        } else {
-            $errors[] = 'Action invalide: "' . $action . '"';
-        }
+        BimpLog::actionEnd('bimpobject_action', (isset($errors['errors']) ? $errors['errors'] : $errors), (isset($errors['warnings']) ? $errors['warnings'] : array()));
 
         return $errors;
     }
@@ -2228,157 +2233,174 @@ class BimpObject extends BimpCache
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        if (!$force_create && !$this->canCreate()) {
-            return array('Vous n\'avez pas la permission de créer ' . $this->getLabel('a'));
-        }
+        BimpLog::actionStart('bimpobject_create', 'Création', $this);
 
-        if (!$force_create && !$this->isCreatable()) {
-            return array('Il n\'est pas possible de créer ' . $this->getLabel('a'));
-        }
+        $errors = array();
 
-        $errors = $this->validate();
+        if (!$force_create) {
+            if (!$this->canCreate()) {
+                $errors[] = 'Vous n\'avez pas la permission de créer ' . $this->getLabel('a');
+            } elseif (!$this->isCreatable()) {
+                $errors[] = 'Il n\'est pas possible de créer ' . $this->getLabel('a');
+            }
+        }
 
         if (!count($errors)) {
-            if ($this->use_commom_fields) {
-                $dc = $this->getData('date_create');
-                if (is_null($dc) || !$dc) {
-                    $this->data['date_create'] = date('Y-m-d H:i:s');
+            $errors = $this->validate();
+
+            if (!count($errors)) {
+                if ($this->use_commom_fields) {
+                    $dc = $this->getData('date_create');
+                    if (is_null($dc) || !$dc) {
+                        $this->data['date_create'] = date('Y-m-d H:i:s');
+                    }
+
+                    $uc = (int) $this->getData('user_create');
+                    if (is_null($uc) || !$uc) {
+                        global $user;
+                        if (isset($user->id)) {
+                            $uc = (int) $user->id;
+                        } else {
+                            $uc = 0;
+                        }
+                    }
+                    $this->set('user_create', $uc);
                 }
 
-                $uc = (int) $this->getData('user_create');
-                if (is_null($uc) || !$uc) {
-                    global $user;
-                    if (isset($user->id)) {
-                        $uc = (int) $user->id;
+                if (!is_null($this->dol_object)) {
+                    $result = $this->createDolObject($errors);
+                } else {
+                    $table = $this->getTable();
+
+                    if (is_null($table)) {
+                        $errors[] = 'Fichier de configuration invalide (table non renseignée)';
+                        $result = 0;
                     } else {
-                        $uc = 0;
-                    }
-                }
-                $this->set('user_create', $uc);
-            }
-
-            if (!is_null($this->dol_object)) {
-                $result = $this->createDolObject($errors);
-            } else {
-                $table = $this->getTable();
-
-                if (is_null($table)) {
-                    return array('Fichier de configuration invalide (table non renseignées)');
-                }
-
-                $result = $this->db->insert($table, $this->getDbData(), true);
-            }
-
-            if ($result > 0) {
-                $this->id = (int) $result;
-                $this->set($this->getPrimary(), (int) $result);
-                $cache_key = 'bimp_object_' . $this->module . '_' . $this->object_name . '_' . $this->id;
-                self::$cache[$cache_key] = $this;
-
-                if ($this->getConf('positions', false, false, 'bool')) {
-                    $insert_mode = $this->getConf('position_insert', 'before');
-                    switch ($insert_mode) {
-                        case 'before':
-                            $this->setPosition(1);
-                            break;
-
-                        case 'after':
-                            $this->setPosition((int) $this->getNextPosition());
-                            break;
+                        $result = $this->db->insert($table, $this->getDbData(), true);
                     }
                 }
 
-                $this->initData = $this->data;
+                if ($result > 0) {
+                    $this->id = (int) $result;
+                    $this->set($this->getPrimary(), (int) $result);
+                    $cache_key = 'bimp_object_' . $this->module . '_' . $this->object_name . '_' . $this->id;
+                    self::$cache[$cache_key] = $this;
 
-                $warnings = array_merge($warnings, $this->updateAssociations());
-                $warnings = array_merge($warnings, $this->saveHistory());
+                    if ($this->getConf('positions', false, false, 'bool')) {
+                        $insert_mode = $this->getConf('position_insert', 'before');
+                        switch ($insert_mode) {
+                            case 'before':
+                                $this->setPosition(1);
+                                break;
 
-                $parent = $this->getParentInstance();
-                if (!is_null($parent)) {
-                    if (method_exists($parent, 'onChildSave')) {
-                        $parent->onChildSave($this);
+                            case 'after':
+                                $this->setPosition((int) $this->getNextPosition());
+                                break;
+                        }
                     }
+
+                    $this->initData = $this->data;
+
+                    $warnings = array_merge($warnings, $this->updateAssociations());
+                    $warnings = array_merge($warnings, $this->saveHistory());
+
+                    $parent = $this->getParentInstance();
+                    if (!is_null($parent)) {
+                        if (method_exists($parent, 'onChildSave')) {
+                            $parent->onChildSave($this);
+                        }
+                    }
+                } else {
+                    $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
+                    $sqlError = $this->db->db->lasterror;
+                    if ($sqlError) {
+                        $msg .= ' - Erreur SQL: ' . $sqlError;
+                    }
+                    $errors[] = $msg;
                 }
-            } else {
-                $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
-                $sqlError = $this->db->db->lasterror;
-                if ($sqlError) {
-                    $msg .= ' - Erreur SQL: ' . $sqlError;
-                }
-                $errors[] = $msg;
             }
         }
 
+        BimpLog::actionData($this->getDataArray());
+        BimpLog::actionEnd('bimpobject_create', $errors, $warnings);
         return $errors;
     }
 
     public function update(&$warnings = array(), $force_update = false)
     {
-        if (!$force_update && !$this->canEdit()) {
-            return array('Vous n\'avez pas la permission de modifier ' . $this->getLabel('this'));
-        }
-
-        if (!$force_update && !$this->isEditable()) {
-            return array('Il n\'est pas possible de modifier ' . $this->getLabel('this'));
-        }
+        BimpLog::actionStart('bimpobject_update', 'Mise à jour', $this);
 
         $errors = array();
 
-        if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' Absent');
+        if (!$force_update && !$this->canEdit()) {
+            $errors[] = 'Vous n\'avez pas la permission de modifier ' . $this->getLabel('this');
         }
 
-        $errors = $this->validate();
+        if (!$force_update && !$this->isEditable()) {
+            $errors[] = 'Il n\'est pas possible de modifier ' . $this->getLabel('this');
+        }
 
         if (!count($errors)) {
-            if ($this->use_commom_fields) {
-                $this->data['date_update'] = date('Y-m-d H:i:s');
-                global $user;
-                if (isset($user->id)) {
-                    $this->data['user_update'] = (int) $user->id;
-                } else {
-                    $this->data['user_update'] = 0;
-                }
-            }
-
-            if (!is_null($this->dol_object)) {
-                $result = $this->updateDolObject($errors);
+            if (!$this->isLoaded()) {
+                $errors[] = 'ID ' . $this->getLabel('of_the') . ' Absent';
             } else {
-                $table = $this->getTable();
-                $primary = $this->getPrimary();
+                $errors = $this->validate();
 
-                if (is_null($table)) {
-                    return array('Fichier de configuration invalide (table non renseignée)');
-                }
+                if (!count($errors)) {
+                    if ($this->use_commom_fields) {
+                        $this->data['date_update'] = date('Y-m-d H:i:s');
+                        global $user;
+                        if (isset($user->id)) {
+                            $this->data['user_update'] = (int) $user->id;
+                        } else {
+                            $this->data['user_update'] = 0;
+                        }
+                    }
 
-                unset($this->data[$primary]);
+                    if (!is_null($this->dol_object)) {
+                        $result = $this->updateDolObject($errors);
+                    } else {
+                        $table = $this->getTable();
+                        $primary = $this->getPrimary();
 
-                $result = $this->db->update($table, $this->getDbData(), '`' . $primary . '` = ' . (int) $this->id);
-                $this->set($primary, $this->id);
-            }
+                        if (is_null($table)) {
+                            $errors[] = 'Fichier de configuration invalide (table non renseignée)';
+                            $result = 0;
+                        } else {
+                            unset($this->data[$primary]);
 
-            if ($result <= 0) {
-                $msg = 'Echec de la mise à jour ' . $this->getLabel('of_the');
-                $sqlError = $this->db->db->lasterror;
-                if ($sqlError) {
-                    $msg .= ' - Erreur SQL: ' . $sqlError;
-                }
-                $errors[] = $msg;
-            } else {
-                $this->initData = $this->data;
+                            $result = $this->db->update($table, $this->getDbData(), '`' . $primary . '` = ' . (int) $this->id);
+                            $this->set($primary, $this->id);
+                        }
+                    }
 
-                $warnings = array_merge($warnings, $this->updateAssociations());
-                $warnings = array_merge($warnings, $this->saveHistory());
+                    if ($result <= 0) {
+                        $msg = 'Echec de la mise à jour ' . $this->getLabel('of_the');
+                        $sqlError = $this->db->db->lasterror;
+                        if ($sqlError) {
+                            $msg .= ' - Erreur SQL: ' . $sqlError;
+                        }
+                        $errors[] = $msg;
+                    } else {
+                        $this->initData = $this->data;
 
-                $parent = $this->getParentInstance();
+                        $warnings = array_merge($warnings, $this->updateAssociations());
+                        $warnings = array_merge($warnings, $this->saveHistory());
 
-                if (!is_null($parent)) {
-                    if (method_exists($parent, 'onChildSave')) {
-                        $warnings = array_merge($warnings, $parent->onChildSave($this));
+                        $parent = $this->getParentInstance();
+
+                        if (!is_null($parent)) {
+                            if (method_exists($parent, 'onChildSave')) {
+                                $warnings = array_merge($warnings, $parent->onChildSave($this));
+                            }
+                        }
                     }
                 }
             }
         }
+
+        BimpLog::actionData($this->getDataArray());
+        BimpLog::actionEnd('bimpobject_update', $errors, $warnings);
 
         return $errors;
     }
@@ -2386,7 +2408,7 @@ class BimpObject extends BimpCache
     public function updateAssociations()
     {
         $errors = array();
-        if (!isset($this->id) || !$this->id) {
+        if (!$this->isLoaded()) {
             $errors[] = 'Mise à jour des associations impossible - ID absent';
             return $errors;
         }
@@ -2410,19 +2432,20 @@ class BimpObject extends BimpCache
 
     public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false)
     {
+        BimpLog::actionStart('bimpobject_update_field', 'Mise à jour du champ "' . $field . '"', $this);
+        BimpLog::actionData($value);
+
         if (is_null($id_object) || !$id_object) {
             if ($this->isLoaded()) {
                 $id_object = (int) $this->id;
             }
         }
+
         $errors = array();
 
         if (is_null($id_object) || !$id_object) {
             $errors[] = 'Impossible de mettre à jour le champ "' . $field . '" - ID ' . $this->getLabel('of_the') . ' absent';
-            return $errors;
-        }
-
-        if ($this->field_exists($field)) {
+        } elseif ($this->field_exists($field)) {
             if (!$force_update) {
                 if (!$this->canEditField($field)) {
                     $errors[] = 'Vous n\'avez pas la permission de modifier ce champ';
@@ -2495,6 +2518,8 @@ class BimpObject extends BimpCache
         } else {
             $errors[] = 'Le champ "' . $field . '" n\'existe pas';
         }
+
+        BimpLog::actionEnd('bimpobject_update_field', $errors);
 
         return $errors;
     }
@@ -2639,19 +2664,19 @@ class BimpObject extends BimpCache
 
     public function delete(&$warnings = array(), $force_delete = false)
     {
-        if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
-        }
-
-        if (!$force_delete && !$this->canDelete()) {
-            return array('Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this'));
-        }
-
-        if (!$force_delete && !$this->isDeletable()) {
-            return array('Il n\'est pas possible de supprimer ' . $this->getLabel('this'));
-        }
+        BimpLog::actionStart('bimpobject_delete', 'Suppression', $this);
 
         $errors = array();
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+        } else if (!$force_delete) {
+            if (!$this->canDelete()) {
+                $errors[] = 'Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this');
+            } elseif (!$this->isDeletable()) {
+                $errors[] = 'Il n\'est pas possible de supprimer ' . $this->getLabel('this');
+            }
+        }
 
         $parent = $this->getParentInstance();
 
@@ -2665,9 +2690,11 @@ class BimpObject extends BimpCache
             $primary = $this->getPrimary();
 
             if (is_null($table)) {
-                return array('Fichier de configuration invalide (table non renseignée)');
+                $errors[] = 'Fichier de configuration invalide (table non renseignée)';
+                $result = 0;
+            } else {
+                $result = $this->db->delete($table, '`' . $primary . '` = ' . (int) $this->id);
             }
-            $result = $this->db->delete($table, '`' . $primary . '` = ' . (int) $this->id);
         }
 
         if ($result <= 0) {
@@ -2758,6 +2785,7 @@ class BimpObject extends BimpCache
             $this->reset();
         }
 
+        BimpLog::actionEnd('bimpobject_delete', $errors, $warnings);
         return $errors;
     }
 

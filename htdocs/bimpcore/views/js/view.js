@@ -333,9 +333,9 @@ function onViewLoaded($view) {
         $view.find('.modal').modal();
 
         setCommonEvents($('#' + $view.attr('id') + '_container'));
+        setInputsEvents($view);
 
         $view.find('.object_fields_table').each(function () {
-            setInputsEvents($(this));
             setFieldsTableEvents($(this));
         });
 
@@ -418,6 +418,7 @@ function onViewRefreshed($view) {
     });
 
     setCommonEvents($view);
+    setInputsEvents($view);
     $('body').trigger($.Event('viewRefresh', {
         $view: $view
     }));

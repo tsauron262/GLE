@@ -204,7 +204,7 @@ class Bimp_Product extends BimpObject
                 $filters = json_decode(BimpTools::getValue('param_list_filters', array()));
                 foreach ($filters as $filter) {
                     if ($filter->name === 'id_commande_client') {
-                        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $filter->filter);
+                        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $filter->filter);
                         if (BimpObject::objectLoaded($commande)) {
                             $id_entrepot = (int) $commande->dol_object->array_options['options_entrepot'];
                             break;

@@ -42,17 +42,106 @@ class BimpCache
 
     public static function getBimpObjectInstance($module, $object_name, $id_object, $parent = null)
     {
+        if (!is_int($id_object)) {
+            if (preg_match('/^[0-9]+$/', $id_object)) {
+                $id_object = (int) $id_object;
+            } else {
+                $id_object = 0;
+            }
+        }
+
+        // retourne une nouvelle instance si $id_object non défini
         if (!(int) $id_object) {
             return BimpObject::getInstance($module, $object_name, null, $parent);
         }
 
         $cache_key = 'bimp_object_' . $module . '_' . $object_name . '_' . $id_object;
 
+        if (isset(self::$cache[$cache_key])) {
+            if (!is_a(self::$cache[$cache_key], $object_name) || !self::$cache[$cache_key]->isLoaded() ||
+                    (int) self::$cache[$cache_key]->id !== (int) $id_object) {
+                self::$cache[$cache_key] = null;
+            }
+        }
+
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = BimpObject::getInstance($module, $object_name, $id_object, $parent);
         }
 
         return self::$cache[$cache_key];
+    }
+
+    public static function findBimpObjectInstance($module, $object_name, $filters, $return_first = false, $delete_if_multiple = false)
+    {
+        $instance = BimpObject::getInstance($module, $object_name);
+
+        if (is_a($instance, 'BimpObject')) {
+            $id_object = null;
+
+            $joins = null;
+            $table = $instance->getTable();
+            $primary = $instance->getPrimary();
+
+            if ($instance->isDolObject()) {
+                $has_extrafields = false;
+                $filters = $instance->checkSqlFilters($filters, $has_extrafields);
+
+                if ($has_extrafields) {
+                    $joins = array(
+                        'alias' => 'ef',
+                        'table' => $table . '_extrafields',
+                        'on'    => 'ef.fk_object = a.' . $primary
+                    );
+                }
+            }
+
+            $sql = BimpTools::getSqlSelect('a.' . $primary);
+            $sql .= BimpTools::getSqlFrom($table, $joins);
+            $sql .= BimpTools::getSqlWhere($filters);
+
+            $rows = self::getBdb()->executeS($sql, 'array');
+
+            if (!is_null($rows) && count($rows)) {
+                if (count($rows) > 1 && !$return_first) {
+                    if ($delete_if_multiple) {
+                        $fl = true;
+                        foreach ($rows as $r) {
+                            if ($fl) {
+                                $fl = false;
+                                if ($return_first) {
+                                    continue;
+                                }
+                            }
+                            $obj = self::getBimpObjectInstance($module, $object_name, (int) $r[$primary]);
+                            if ($obj->isLoaded()) {
+                                $obj->delete();
+                            }
+                        }
+                    }
+                    if (!$return_first) {
+                        return null;
+                    }
+                }
+                $id_object = (int) $rows[0][$primary];
+            }
+
+            if (is_null($id_object) || !$id_object) {
+                return null;
+            }
+
+            return self::getBimpObjectInstance($module, $object_name, $id_object);
+        }
+
+        return null;
+    }
+
+    public static function unsetBimpObjectInstance($module, $object_name, $id_object)
+    {
+        $cache_key = 'bimp_object_' . $module . '_' . $object_name . '_' . $id_object;
+        if (isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = null;
+            unset(self::$cache[$cache_key]);
+        }
     }
 
     public static function getDolObjectInstance($id_object, $module, $file = null, $class = null)
@@ -77,8 +166,14 @@ class BimpCache
             $cache_key = 'dol_object_' . $class . '_' . $id_object;
 
             if (!isset(self::$cache[$cache_key])) {
-                
+                $instance = new $class($db);
+                if (method_exists($instance, 'fetch')) {
+                    $instance->fetch($id_object);
+                }
+                self::$cache[$cache_key] = $instance;
             }
+
+            return self::$cache[$cache_key];
         }
 
         return null;
@@ -255,6 +350,28 @@ class BimpCache
         }
 
         return self::$cache[$cache_key];
+    }
+
+    public static function getBimpObjectFullListArray($module, $object_name, $include_empty = 0)
+    {
+        $cache_key = $module . '_' . $object_name . '_full_list_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $instance = BimpObject::getInstance($module, $object_name);
+            if (is_a($instance, 'BimpObject')) {
+                $name_prop = $instance->getNameProperty();
+                $primary = $instance->getPrimary();
+                if ($name_prop) {
+                    foreach ($instance->getList(array(), null, null, 'id', 'desc', 'array', array($primary, $name_prop)) as $item) {
+                        self::$cache[$cache_key][(int) $item[$primary]] = $item[$name_prop];
+                    }
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
     }
 
     public static function getFilesParentsArray($include_empty = false)
@@ -699,6 +816,7 @@ class BimpCache
             $form->load_cache_types_paiements();
 
             self::$cache[$cache_key] = array();
+
             foreach ($form->cache_types_paiements as $id_payment => $payment_data) {
                 if (!$active_only || ($active_only && (int) $payment_data['active'])) {
                     switch ($key) {
@@ -714,7 +832,12 @@ class BimpCache
             }
         }
 
-        return self::getCacheArray($cache_key, 1);
+        $empty_value = '';
+        if ($key === 'id') {
+            $empty_value = 0;
+        }
+
+        return self::getCacheArray($cache_key, 1, $empty_value);
     }
 
     public static function getAvailabilitiesArray()
@@ -757,6 +880,25 @@ class BimpCache
         }
 
         return self::$cache['demand_reasons_array'];
+    }
+
+    public static function getCommandeMethodsArray($include_empty = true)
+    {
+        $cache_key = 'commande_methods_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            $rows = self::getBdb()->getRows('c_input_method', '`active` = 1', null, 'array', array('rowid', 'libelle'));
+
+            self::$cache[$cache_key] = array();
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['rowid']] = $r['libelle'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
     }
 
     public static function getCountriesArray($active_only = false, $key_field = 'rowid', $include_empty = false)

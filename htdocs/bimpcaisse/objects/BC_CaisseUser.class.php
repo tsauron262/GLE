@@ -22,7 +22,7 @@ class BC_CaisseUser extends BimpObject
                     if ($id_caisse === (int) $caisse->id) {
                         $errors[] = 'Vous êtes déjà connecté à la caisse "' . $caisse->getData('name') . '"';
                     } else {
-                        $caisse2 = BimpObject::getInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                        $caisse2 = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
                         $caisse_label = '';
                         if (BimpObject::objectLoaded($caisse2)) {
                             $caisse_label = "'" . $caisse2->getData('name') . '"';

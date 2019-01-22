@@ -25,7 +25,7 @@ $html = '';
 if (!$id_vente) {
     $errors[] = 'ID de la vente absent';
 } else {
-    $vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente', $id_vente);
+    $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', $id_vente);
     if ($vente->isLoaded()) {
         $html = $vente->renderTicketHtml($errors);
     } else {

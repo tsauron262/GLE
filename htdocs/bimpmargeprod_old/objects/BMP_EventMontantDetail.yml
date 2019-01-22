@@ -1,0 +1,111 @@
+table: bmp_event_montant_detail
+common_fields: 0
+
+parent_id_property: id_event_montant
+parent_object: BMP_EventMontant
+
+labels: 
+    name: détail de montant
+    name_plur: détails de montant
+
+fields: 
+    id_event_montant:
+        label: Montant
+        type: id_parent
+    
+    label: 
+        label: libellé
+        type: string
+        size: 256
+        search: 
+            type: value_part
+            part_type: middle
+            
+    quantity:
+        label: Quantité
+        type: int
+        default_value: 1
+        display_if: 
+            field_name: id_group
+            show_values: 0
+        search:
+            type: value_part
+            part_type: beginning
+        
+    unit_price:
+        label: Prix unitaire HT
+        type: money
+        search:
+            type: value_part
+            part_type: beginning
+
+forms: 
+    predef: 
+        label: Valeurs prédéfinies
+        rows:
+            - custom: 1
+              label: Valeurs prédéfinies
+              data_type: int
+              input_name: id_montant_detail_value
+              input: 
+                  type: select
+                  options: 
+                      array: detail_values
+            - custom: 1
+              hidden: 1
+              data_type: bool
+              input_name: use_groups
+              value:
+                  callback: useGroups
+              input: 
+                  type: hidden
+              depends_on: id_montant_detail_value
+            - custom: 1
+              label: Groupe
+              data_type: int
+              input_name: id_group
+              input: 
+                  type: select
+                  options: 
+                      array: groups
+              value: 0
+              display_if: 
+                  field_name: use_groups
+                  show_values: 1
+            - field: quantity
+
+list: 
+    checkboxes: 
+        callback: isEditable
+    bulk_actions:
+        - label: supprimer les lignes sélectionnées
+          icon: fas_trash-alt
+          onclick: deleteSelectedObjects('list_id', $(this))
+    sort_field: id
+    sort_way: desc
+    n: 25
+    update_btn: 1
+    delete_btn: 
+        callback: isEditable
+    add_object_row: 
+        callback: isEditable
+    add_form_name:
+        callback: getAddFormName
+    cols: 
+        label: 
+            field: label
+            edit: 1
+        qty: 
+            field: quantity
+            edit: 
+                callback: isEditable
+        price: 
+            field: unit_price
+            edit: 
+                callback: isEditable
+        total:
+            label: Total HT
+            value: 
+                callback: displayTotal
+        
+    

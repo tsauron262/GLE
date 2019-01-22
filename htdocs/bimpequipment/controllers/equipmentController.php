@@ -11,8 +11,7 @@ class equipmentController extends BimpController
             return BimpRender::renderAlerts('ID de l\'équipement absent');
         }
 
-        $instance = BimpObject::getInstance('bimpsupport', 'BS_SavPret');
-        $list = new BC_ListTable($instance, 'default', 1, null, 'Prêts de l\'équipement');
+        $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_SavPret'), 'default', 1, null, 'Prêts de l\'équipement');
         $list->addAssociateAssociationFilter('equipments', BimpTools::getValue('id', 0));
         return $list->renderHtml();
     }
@@ -23,14 +22,13 @@ class equipmentController extends BimpController
             return BimpRender::renderAlerts('ID de l\'équipement absent');
         }
 
-        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', (int) BimpTools::getValue('id', 0));
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) BimpTools::getValue('id', 0));
 
         if (!BimpObject::objectLoaded($equipment)) {
             return BimpRender::renderAlerts('ID de l\'équipement invalide');
         }
 
-        $instance = BimpObject::getInstance('bimpsupport', 'BS_SAV');
-        $list = new BC_ListTable($instance, 'default', 1, null, 'SAV enregistrés pour cet équipement', 'wrench');
+        $list = new BC_ListTable(BimpObject::getInstance('bimpsupport', 'BS_SAV'), 'default', 1, null, 'SAV enregistrés pour cet équipement', 'wrench');
         $list->addFieldFilterValue('id_equipment', BimpTools::getValue('id', 0));
 
         $place = $equipment->getCurrentPlace();
@@ -89,7 +87,7 @@ class equipmentController extends BimpController
 
         $id_equipment = (int) BimpTools::getValue('id_equipment', 0);
         if ($id_equipment) {
-            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
             if (BimpObject::objectLoaded($equipment)) {
 
                 $data = $equipment->gsxLookup($equipment->getData('serial'), $errors);

@@ -26,6 +26,10 @@ objects:
         instance: 
             bimp_object: BMP_CalcMontant
             
+    vendeur: 
+        instance: 
+            bimp_object: BMP_Vendeur
+            
 sections:
     - type: tabs
       tabs: 
@@ -80,3 +84,10 @@ sections:
                             list: 
                                 panel: 1
                                 object: calc_montant
+                                
+        vendeurs: 
+            label: Vendeurs
+            sections: 
+                - type: list
+                  list: 
+                      object: vendeur

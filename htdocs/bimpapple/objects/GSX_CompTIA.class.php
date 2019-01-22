@@ -10,6 +10,7 @@ class GSX_CompTIA extends BimpObject
 
     public static function updateCodesFromGSX()
     {
+        $errors = array();
         $gsx = new GSX();
         $error_msg = 'Echec de la récupération des codes CompTIA';
         if (!$gsx->connect) {
@@ -49,6 +50,7 @@ class GSX_CompTIA extends BimpObject
             }
             if (!$check) {
                 dol_syslog($error_msg . '<pre>' . print_r($gsx->errors, 1) . '</pre>', LOG_ERR);
+                $errors[] = $error_msg . '<pre>' . print_r($gsx->errors, 1) . '</pre>';
             } else {
                 global $db;
                 $bdb = new BimpDb($db);
@@ -74,6 +76,8 @@ class GSX_CompTIA extends BimpObject
                 }
             }
         }
+        
+        return $errors;
     }
 
     public static function fetchCodes()

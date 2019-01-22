@@ -31,6 +31,7 @@ class BC_ListTable extends BC_List
         'display'     => array('default' => ''),
         'label'       => array('default' => ''),
         'value'       => array('default' => ''),
+        'true_value'  => array('default' => null),
         'width'       => array('default' => null),
         'min_width'   => array('default' => null),
         'max_width'   => array('default' => null),
@@ -38,19 +39,24 @@ class BC_ListTable extends BC_List
         'search_list' => array('data_type' => 'array', 'compile' => true, 'default' => null),
         'field_name'  => array(),
         'search'      => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null),
-        'col_style'   => array('default' => '')
+        'col_style'   => array('default' => ''),
+        'has_total'   => array('data_type' => 'bool', 'default' => 0),
+        'total_type'  => array('default' => null)
     );
     protected $selected_rows = array();
+    protected $totals = array();
 
     public function __construct(BimpObject $object, $name = 'default', $level = 1, $id_parent = null, $title = null, $icon = null)
     {
         $this->params_def['checkboxes'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['total_row'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['add_object_row'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['add_object_row_open'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['positions'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['positions_open'] = array('data_type' => 'bool', 'default' => 0);
-        $this->params_def['bulk_actions'] = array('data_type' => array(), 'compile' => true);
+        $this->params_def['bulk_actions'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
         $this->params_def['cols'] = array('type' => 'keys');
-        $this->params_def['extra_cols'] = array('data_type' => 'array');
+        $this->params_def['extra_cols'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['enable_search'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['enable_sort'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['enable_refresh'] = array('data_type' => 'bool', 'default' => 1);
@@ -107,6 +113,8 @@ class BC_ListTable extends BC_List
             $this->colspan = 2 + count($this->cols);
 
             if ($this->params['positions_open']) {
+                $this->params['sort_field'] = 'position';
+                $this->params['sort_way'] = 'asc';
                 $this->colspan++;
             }
         }
@@ -191,19 +199,23 @@ class BC_ListTable extends BC_List
 
         $this->setConfPath();
 
+        $object_instance = $this->object;
+
         foreach ($this->items as $item) {
-            if ($this->object->fetch((int) $item[$primary], $this->parent)) {
+            $object = BimpCache::getBimpObjectInstance($this->object->module, $this->object->object_name, (int) $item[$primary], $this->parent);
+            if (BimpObject::objectLoaded($object)) {
+                $this->object = $object;
                 $item_params = $this->fetchParams($this->config_path, $this->item_params);
 
                 $row = array(
                     'params' => array(
-                        'checkbox'       => (int) $this->object->getCurrentConf('item_checkbox', true, false, 'bool'),
+                        'checkbox'       => (int) $object->getConf($this->config_path . '/item_checkbox', true, false, 'bool'),
                         'single_cell'    => false,
                         'item_params'    => $item_params,
-                        'canEdit'        => (int) ($this->object->canEdit() && $this->object->isEditable()),
-                        'canView'        => (int) $this->object->canView(),
-                        'canDelete'      => (int) ($this->object->canDelete() && $this->object->isDeletable()),
-                        'instance_name'  => $this->object->getInstanceName(),
+                        'canEdit'        => (int) ($object->canEdit() && $object->isEditable()),
+                        'canView'        => (int) $object->canView(),
+                        'canDelete'      => (int) ($object->canDelete() && $object->isDeletable()),
+                        'instance_name'  => $object->getInstanceName(),
                         'url'            => '',
                         'page_btn_label' => '',
                     ),
@@ -211,24 +223,24 @@ class BC_ListTable extends BC_List
                 );
 
                 if ((int) $item_params['page_btn']) {
-                    $controller = $this->object->getController();
+                    $controller = $object->getController();
                     if ($controller) {
-                        $row['params']['url'] = DOL_URL_ROOT . '/' . $this->object->module . '/index.php?fc=' . $controller . '&id=' . $item[$primary];
+                        $row['params']['url'] = DOL_URL_ROOT . '/' . $object->module . '/index.php?fc=' . $controller . '&id=' . $item[$primary];
                         $row['params']['page_btn_label'] = 'Affichage la page';
-                    } elseif ($this->object->isDolObject()) {
-                        $row['params']['url'] = BimpTools::getDolObjectUrl($this->object->dol_object, (int) $item[$primary]);
-                        $row['params']['page_btn_label'] = 'Affichage la fiche ' . $this->object->getLabel();
+                    } elseif ($object->isDolObject()) {
+                        $row['params']['url'] = BimpTools::getDolObjectUrl($object->dol_object, (int) $item[$primary]);
+                        $row['params']['page_btn_label'] = 'Affichage la fiche ' . $object->getLabel();
                     }
                 }
 
                 if (($this->params['single_cell']['col'])) {
-                    if ($this->object->doMatchFilters($this->params['single_cell']['filters'])) {
+                    if ($object->doMatchFilters($this->params['single_cell']['filters'])) {
                         $row['params']['single_cell'] = true;
                     }
                 }
                 $new_values = isset($this->new_values[(int) $item[$primary]]) ? $this->new_values[(int) $item[$primary]] : array();
                 if ($this->params['positions']) {
-                    $row['params']['position'] = (int) $this->object->getData('position');
+                    $row['params']['position'] = (int) $object->getData('position');
                 }
                 foreach ($this->cols as $col_name) {
                     if ($row['params']['single_cell'] && $col_name !== $this->params['single_cell']['col']) {
@@ -250,36 +262,63 @@ class BC_ListTable extends BC_List
                         continue;
                     }
 
+                    $current_value = null;
+                    $field = null;
+
                     if ($col_params['field']) {
                         if ($col_params['child']) {
-                            $object = $this->object->getChildObject($col_params['child']);
-                            if (is_null($object) || !is_a($object, 'BimpObject')) {
+                            $obj = $object->getChildObject($col_params['child']);
+                            if (is_null($obj) || !is_a($obj, 'BimpObject')) {
                                 $row['cols'][$col_name]['content'] = BimpRender::renderAlerts('Objet "' . $col_params['col_name'] . '" invalide');
                                 continue;
                             }
-                            if (!$object->isLoaded()) {
+                            if (!$obj->isLoaded()) {
                                 $row['cols'][$col_name]['content'] = '';
                                 continue;
                             }
                         } else {
-                            $object = $this->object;
+                            $obj = $object;
                         }
-                        $field = new BC_Field($object, $col_params['field'], ($this->params['enable_edit'] && (int) $col_params['edit']));
+                        $field = new BC_Field($obj, $col_params['field'], ($this->params['enable_edit'] && (int) $col_params['edit']));
                         $field->display_name = $col_params['display'];
 
                         if (isset($new_values[$col_params['field']])) {
                             $field->new_value = $new_values[$col_params['field']];
                         }
 
+                        $current_value = $field->value;
+
                         $row['cols'][$col_name]['content'] = $field->renderHtml();
                     } elseif (isset($col_params['value'])) {
                         $row['cols'][$col_name]['content'] .= $col_params['value'];
+                        if (!is_null($col_params['true_value'])) {
+                            $current_value = $col_params['true_value'];
+                        } else {
+                            $current_value = $col_params['value'];
+                        }
+                    }
+
+                    if ((int) $this->params['total_row'] && (int) $col_params['has_total'] && BimpTools::isNumericType($current_value)) {
+                        if (!isset($this->totals[$col_name])) {
+                            $this->totals[$col_name] = array(
+                                'data_type' => '',
+                                'value'     => 0
+                            );
+                            if (is_a($field, 'BC_Field')) {
+                                $this->totals[$col_name]['data_type'] = $field->params['type'];
+                            } elseif (!is_null($col_params['total_type'])) {
+                                $this->totals[$col_name]['data_type'] = $col_params['total_type'];
+                            }
+                        }
+                        $this->totals[$col_name]['value'] += (float) $current_value;
                     }
                 }
                 $rows[$item[$primary]] = $row;
-                $this->object->reset();
             }
         }
+
+        $this->object = $object_instance;
+
         if (!is_null($this->parent)) {
             $this->object->parent = $this->parent;
         }
@@ -300,6 +339,10 @@ class BC_ListTable extends BC_List
     public function getColParams($col_name)
     {
         $col_params = array();
+        if (isset($this->params['extra_cols'][$col_name])) {
+            $this->object->config->params['lists_cols'][$col_name] = $this->params['extra_cols'][$col_name];
+        }
+
         if ($this->object->config->isDefined('lists_cols/' . $col_name)) {
             $col_params = $this->fetchParams('lists_cols/' . $col_name, $this->col_params);
             $col_overriden_params = $this->object->config->getCompiledParams($this->config_path . '/cols/' . $col_name);
@@ -504,7 +547,7 @@ class BC_ListTable extends BC_List
                 $html .= '<span class="headerButton openSearchRowButton open-close action-open"></span>';
             }
             if ($this->params['add_object_row']) {
-                $html .= '<span class="headerButton openAddObjectRowButton open-close action-open"></span>';
+                $html .= '<span class="headerButton openAddObjectRowButton open-close action-' . ($this->params['add_object_row_open'] ? 'close' : 'open') . '"></span>';
             }
             if ($this->params['positions']) {
                 $html .= '<span class="headerButton activatePositionsButton bs-popover open-close action-' . ($this->params['positions_open'] ? 'close' : 'open') . '"';
@@ -613,6 +656,59 @@ class BC_ListTable extends BC_List
         return $html;
     }
 
+    public function renderTotalRow()
+    {
+        $html = '';
+
+        if ((int) $this->params['total_row'] && !empty($this->totals)) {
+            $html .= '<tr class="margin_row">';
+            $html .= '<td colspan="' . $this->colspan . '"></td>';
+            $html .= '</tr>';
+
+
+            $fl = true;
+            $html .= '<tr class="total_row">';
+
+            if ((int) $this->params['checkboxes']) {
+                $html .= '<th></th>';
+            }
+
+            foreach ($this->cols as $col_name) {
+                if (!isset($this->totals[$col_name]) && $fl) {
+                    $html .= '<th>Total: </th>';
+                } else {
+                    $html .= '<td>';
+                    if (isset($this->totals[$col_name])) {
+                        switch ($this->totals[$col_name]['data_type']) {
+                            case 'money':
+                                $html .= BimpTools::displayMoneyValue($this->totals[$col_name]['value'], 'EUR');
+                                break;
+
+                            case 'percent':
+                                $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value']) . '%';
+                                break;
+
+                            case 'float':
+                                $html .= BimpTools::displayFloatValue($this->totals[$col_name]['value']);
+                                break;
+
+                            default:
+                                $html .= $this->totals[$col_name]['value'];
+                                break;
+                        }
+                    }
+                    $html .= '</td>';
+                }
+
+                $fl = false;
+            }
+            $html .= '<td></td>';
+            $html .= '</tr>';
+        }
+
+        return $html;
+    }
+
     public function renderAddObjectRow()
     {
         if (!$this->object->canCreate()) {
@@ -629,7 +725,7 @@ class BC_ListTable extends BC_List
         }
 
         if ((int) $this->params['add_object_row'] && !is_null($this->config_path)) {
-            $html .= '<tr id="' . $this->identifier . '_addObjectRow" class="addObjectRow inputsRow">';
+            $html .= '<tr id="' . $this->identifier . '_addObjectRow" class="addObjectRow inputsRow" style="' . ($this->params['add_object_row_open'] ? '' : 'display: none;') . '">';
             $html .= '<td><i class="fa fa-plus-circle"></i></td>';
 
             if ($this->params['positions']) {
@@ -707,6 +803,7 @@ class BC_ListTable extends BC_List
                 $onclick = isset($action_params['onclick']) ? $action_params['onclick'] : '';
                 $icon = isset($action_params['icon']) ? $action_params['icon'] : '';
                 $onclick = str_replace('list_id', $this->identifier, $onclick);
+                $onclick = str_replace('id_parent', $this->id_parent, $onclick);
                 foreach ($this->params['list_filters'] as $filter) {
                     if (BimpTools::isNumericType($filter['filter']) || is_string($filter['filter'])) {
                         $onclick = str_replace('list_filter_' . $filter['name'], $filter['filter'], $onclick);
@@ -797,6 +894,7 @@ class BC_ListTable extends BC_List
                 }
                 $html .= '<div><span class="btn';
                 $onclick = str_replace('list_id', $this->identifier, $onclick);
+                $onclick = str_replace('id_parent', $this->id_parent, $onclick);
                 foreach ($this->params['list_filters'] as $filter) {
                     if (BimpTools::isNumericType($filter['filter']) || is_string($filter['filter'])) {
                         $onclick = str_replace('list_filter_' . $filter['name'], $filter['filter'], $onclick);
@@ -1116,6 +1214,8 @@ class BC_ListTable extends BC_List
                 $html .= '</td>';
                 $html .= '</tr>';
             }
+
+            $html .= $this->renderTotalRow();
         } else {
             $label = $this->object->getLabel('name');
             $isFemale = $this->object->isLabelFemale();

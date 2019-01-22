@@ -21,7 +21,7 @@ objects:
        relation: hasOne
        delete: 0
        instance: 
-           bimp_object: BMP_Tarif
+           bimp_object: BMP_EventTarif
            id_object: 
                field_value: id_tarif
                
@@ -30,6 +30,13 @@ fields:
         label: Evénement
         type: id_parent
     
+    id_coprod: 
+            label: Encaisseur
+            type: int
+            values: 
+                array: coprods
+            default_value: 0
+                
     id_soc_seller: 
         label: Vendeur
         type: id_object
@@ -58,23 +65,34 @@ fields:
         
     quantity:
         label: Quantité vendue
-        type: int
+        type: qty
+        min: 0
         default_value: 0
         history: 1
-            
+        
+    dl_dist: 
+        label: Droits de location distributeur TTC
+        type: money
+        default_value: 0
+        min: 0
+    
+    dl_prod: 
+        label: Droits de location producteur TTC
+        type: money
+        default_value: 0
+        min: 0
+        
 list:
     title: Vente de billets
     checkboxes: 
         callback: isEventEditable
     pagination: 0
-    objects_change_reload: BMP_Tarif
+    objects_change_reload: BMP_EventTarif
     bulk_actions:
-        - label: supprimer les lignes sélectionnées
-          icon: fas_trash-alt
-          onclick: deleteSelectedObjects('list_id', $(this))
+        callback: getBulkActions
     enable_search: 0
     sort_field: id
-    sort_way: desc
+    sort_way: asc
     n: 0
     update_btn: 
         callback: isEventEditable
@@ -84,7 +102,7 @@ list:
         callback: isEventEditable
     delete_btn: 
         callback: isEventEditable
-    cols: 
+    cols:     
         seller:
             label: Vendeur
             value: 
@@ -98,12 +116,25 @@ list:
             edit: 
                 callback: isEventEditable
             history: 1
-            width: 120px
-        total_ttc: 
-            label: Total TTC
-            value:
-                callback: displayTotalTTC
         total_ht: 
             label: Total HT
             value:
                 callback: displayTotalHT
+        total_ttc: 
+            label: Total TTC
+            value:
+                callback: displayTotalTTC
+        dl_dist: 
+            label: DL Dist. TTC
+            field: dl_dist
+            edit: 1
+            max_width: 120px
+        dl_prod: 
+            label: DL Prod. TTC
+            field: dl_prod
+            edit: 1
+            max_width: 120px
+        coprod: 
+            field: id_coprod
+            edit: 1
+            max_width: 200px

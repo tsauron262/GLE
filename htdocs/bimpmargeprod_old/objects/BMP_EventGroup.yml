@@ -1,0 +1,61 @@
+table: bmp_event_group
+common_fields: 0
+
+parent_object: BMP_Event
+parent_id_property: id_event
+
+labels:
+    name: Groupe
+    
+fields: 
+    id_event: 
+        label: Evénement
+        type: id_parent
+        
+    name: 
+        label: Nom
+        type: string
+        required: 1
+        
+    number: 
+        label: Nombre de personnes
+        type: int
+        required: 1
+        
+    rank: 
+        label: Ordre de passage
+        type: int
+        values:
+            array: ranks
+        
+list:
+    title: Groupes
+    icon: users
+    checkboxes: 
+        callback: isEventEditable
+    bulk_actions:
+        - label: supprimer les groupes sélectionnés
+          icon: fas_trash-alt
+          onclick: deleteSelectedObjects('list_id', $(this))
+    enable_search: 0
+    sort_field: id
+    sort_way: desc
+    n: 25
+    add_object_row: 
+        callback: isEventEditable
+    update_btn: 
+        callback: isEventEditable
+    delete_btn: 
+        callback: isEventEditable
+    cols: 
+        name: 
+            field: name
+            edit: 
+                callback: isEventEditable
+        number: 
+            field: number
+            edit: 1
+        rank: 
+            field: rank
+            edit: 
+                callback: isEventEditable

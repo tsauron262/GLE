@@ -1,0 +1,99 @@
+table: bmp_event_coprod_def_part
+common_fields: 0
+
+parent_object: BMP_Event
+parent_id_property: id_event
+
+labels:
+    name: part partenaire par défaut
+    name_plur: parts partenaires par défaut
+    is_female: 1
+    
+objects: 
+    category: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: BMP_CategorieMontant
+            id_object: 
+                field_value: id_category_montant
+                
+    event_coprod:
+        relation: hasOne
+        delete: 0
+        intance: 
+            bimp_object: BMP_EventCoProd
+            id_object:
+                field_value: id_event_coprod
+                
+fields: 
+    id_event: 
+        label: Evénement
+        type: id_parent
+    
+    id_category_montant: 
+        label: Catégorie
+        type: id_object
+        object: category
+        values: 
+            callback:
+                method: getCategories
+                object: category
+                
+        display: 
+            type: nom
+        sortable: 1
+        sort_options:
+            default:
+                label: Position
+                join_field: position
+        
+    id_event_coprod:
+        label: Partenaire
+        type: id_object
+        object: event_coprod
+        values: 
+            callback:
+                method: getCoProds
+                object: 
+                    callback: getParentInstance
+        
+    part: 
+        label: Part
+        type: percent
+
+forms:
+    default: 
+        rows: 
+            - field: id_category_montant
+
+list:
+    title: Parts partenaires par défaut
+    checkboxes: 
+        callback: isEventEditable
+    bulk_actions:
+        - label: supprimer les lignes sélectionnées
+          icon: fas_trash-alt
+          onclick: deleteSelectedObjects('list_id', $(this))
+    sort_field: id_category_montant
+    sort_way: asc
+    n: 25
+    update_btn: 
+        callback: isEventEditable
+    delete_btn: 
+        callback: isEventEditable
+    add_form_name: 
+        callback: getCreateForm
+    edit_btn: 
+        callback: isEventEditable
+    row_style: 
+            callback: getListRowStyle
+    cols: 
+        category:
+            field: id_category_montant
+        coprod: 
+            field: id_event_coprod
+        part:
+            field: part
+            edit: 
+                callback: isEventEditable

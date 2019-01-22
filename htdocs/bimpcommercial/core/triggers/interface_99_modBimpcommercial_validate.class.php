@@ -35,7 +35,7 @@ class Interfacevalidate extends DolibarrTriggers {
         }
         
         if($action == 'PROPAL_VALIDATE') {
-           $bimp_object = BimpObject::getInstance('bimpcommercial', 'Bimp_Propal', $object->id);
+           $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $object->id);
            $bimp_object->dol_object->statut = 0;
             $bimp_object->checkLines();
         }

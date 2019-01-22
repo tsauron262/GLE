@@ -116,10 +116,10 @@ fields:
         input: 
             type: search_list
             search_list:
-                table: be_equipment
-                field_return_value: a.id
-                field_return_label: a.serial
-                fields_search: a.serial,a.id,a.product_label
+                table: be_equipment e
+                field_return_value: e.id
+                field_return_label: e.serial
+                fields_search: e.serial,e.id,e.product_label
             help: Numéro de série ou ID d'un équipement
         create_form: light
     id_entrepot:
@@ -153,7 +153,7 @@ fields:
             input: 
                 type: search_societe
                 societe_type: customer    
-        create_form: client_light
+        create_form: light
     id_contact:
         label: Contact
         type: id_object

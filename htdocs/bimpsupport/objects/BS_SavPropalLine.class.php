@@ -207,7 +207,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
                     return 20;
 
                 case 'pu_ht':
-                    $part = BimpObject::getInstance('bimpsupport', 'BS_ApplePart', (int) $this->getData('linked_id_object'));
+                    $part = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_ApplePart', (int) $this->getData('linked_id_object'));
                     if ($part->isLoaded()) {
                         return $part->convertPrix((float) $this->pa_ht, $part->getData('part_number'), $part->getData('label'));
                     }
@@ -307,15 +307,15 @@ class BS_SavPropalLine extends Bimp_PropalLine
         return $errors;
     }
 
-    public function delete($force_delete = false)
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         $sav_errors = $this->updateSav();
 
         if (count($sav_errors)) {
-            $errors[] = BimpTools::getMsgFromArray($sav_errors, 'Des erreurs sont survenues lors de la mise à jour du SAV');
+            $warnings[] = BimpTools::getMsgFromArray($sav_errors, 'Des erreurs sont survenues lors de la mise à jour du SAV');
         }
 
-        $errors = array_merge($errors, parent::delete($force_delete));
+        $errors = parent::delete($warnings, $force_delete);
 
         return $errors;
     }

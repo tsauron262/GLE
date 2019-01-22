@@ -64,7 +64,7 @@ class savController extends gsxController
         if (!$id_sav) {
             $errors[] = 'ID du SAV absent';
         } else {
-            $sav = BimpObject::getInstance($this->module, 'BS_SAV', $id_sav);
+            $sav = BimpCache::getBimpObjectInstance($this->module, 'BS_SAV', $id_sav);
             if (!$sav->isLoaded()) {
                 $errors[] = 'SAV d\'ID ' . $id_sav . ' non trouvé';
             } else {
@@ -92,7 +92,7 @@ class savController extends gsxController
         }
 
         if (!count($errors)) {
-            $sav = BimpObject::getInstance($this->module, 'BS_SAV', $id_sav);
+            $sav = BimpCache::getBimpObjectInstance($this->module, 'BS_SAV', $id_sav);
             if (!$sav->isLoaded()) {
                 $errors[] = 'SAV d\'ID ' . $id_sav . ' non trouvé';
             } else {

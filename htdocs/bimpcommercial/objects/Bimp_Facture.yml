@@ -58,13 +58,6 @@ fields:
             options: 
                 array: selectTypes
         depends_on: fk_soc
-    entrepot: 
-        label: Entrepôt
-        dol_extra_field: 1
-        type: id_object
-        object: entrepot
-        input: 
-            type: search_entrepot
     model_pdf: 
         default_value: bimpfact
     libelle: 
@@ -80,13 +73,15 @@ fields:
         input: 
             display_now: 1
         required: 1
+    date_lim_reglement:
+        label: Date limite de réglement
+        type: date
     fk_account: 
         label: Compte bancaire
         type: id_object
         object: account
         input: 
             type: select_mysoc_account
-        required: 1
     ef_type: 
         label: Secteur
         dol_extra_field: 1
@@ -395,7 +390,7 @@ lists:
             total: 
                 field: total_ttc
             pdf: 
-                label: fichier PDF
+                label: Fichier PDF
                 value: 
                     callback: 
                         method: displayPDFButton

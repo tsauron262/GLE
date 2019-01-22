@@ -341,12 +341,12 @@ class BC_Vente extends BimpObject
             if ((int) $this->getData('status') !== 2) {
                 $buttons[] = array(
                     'label'   => 'Abandonner la vente',
-                    'icon'    => 'times',
+                    'icon'    => 'fas_times',
                     'onclick' => 'setVenteStatus($(this), ' . $this->id . ', 0)'
                 );
                 $buttons[] = array(
                     'label'   => 'Editer',
-                    'icon'    => 'edit',
+                    'icon'    => 'fas_edit',
                     'onclick' => 'loadVente($(this), ' . $this->id . ');'
                 );
             }
@@ -698,7 +698,7 @@ class BC_Vente extends BimpObject
             $html .= '><i class="fa fa-edit"></i></button>';
             $html .= '<button type="button" class="btn btn-default"';
             $title = 'Client "' . addslashes($client->getData('nom')) . '"';
-            $html .= ' onclick="loadModalView(\'bimpcore\', \'Bimp_Societe\', ' . $client->id . ', \'client\', $(this), \'' . htmlentities($title) . '\');"';
+            $html .= ' onclick="loadModalView(\'bimpcore\', \'Bimp_Client\', ' . $client->id . ', \'default\', $(this), \'' . htmlentities($title) . '\');"';
             $html .= '><i class="fa fa-eye"></i></button>';
 
             $html .= '</div>';
@@ -1110,7 +1110,7 @@ class BC_Vente extends BimpObject
     {
         $html = '';
 
-        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', $id_equipment);
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
         if (!$equipment->isLoaded()) {
             $errors[] = 'Erreur: aucun enregistrement trouvé pour l\'équipement d\'ID ' . $id_equipment;
         } else {
@@ -1370,9 +1370,9 @@ class BC_Vente extends BimpObject
 
     public function checkEquipment($id_equipment, &$errors)
     {
-        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', $id_equipment);
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
 
-        if (is_null($equipment) || !$equipment->isLoaded()) {
+        if (!$equipment->isLoaded()) {
             $errors[] = 'Erreur: aucun enregistrement trouvé pour l\'équipement d\'ID ' . $id_equipment;
             return null;
         } else {
@@ -1563,7 +1563,7 @@ class BC_Vente extends BimpObject
                     }
                 } elseif (count($products)) {
                     if (array_key_exists((int) $products[0], $current_products)) {
-                        $article = BimpObject::getInstance($this->module, 'BC_VenteArticle', (int) $current_products[(int) $products[0]]);
+                        $article = BimpCache::getBimpObjectInstance($this->module, 'BC_VenteArticle', (int) $current_products[(int) $products[0]]);
                         if ($article->isLoaded()) {
                             $qty = (int) $article->getData('qty');
                             $article->set('qty', ($qty + 1));
@@ -1604,7 +1604,7 @@ class BC_Vente extends BimpObject
                 $current_products = $this->getCurrentProducts();
 
                 if (array_key_exists((int) $id_object, $current_products)) {
-                    $article = BimpObject::getInstance($this->module, 'BC_VenteArticle', (int) $current_products[$id_object]);
+                    $article = BimpCache::getBimpObjectInstance($this->module, 'BC_VenteArticle', (int) $current_products[$id_object]);
                     if ($article->isLoaded()) {
                         $qty = (int) $article->getData('qty');
                         $article->set('qty', ($qty + 1));
@@ -1775,10 +1775,8 @@ class BC_Vente extends BimpObject
                 return false;
             }
 
-            $caisse = $this->getChildObject('caisse');
             $articles = $this->getChildrenObjects('articles');
             $returns = $this->getChildrenObjects('returns');
-            $paiements = $this->getChildrenObjects('paiements');
 
             $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
             $id_client = (int) $this->getData('id_client');
@@ -1805,10 +1803,10 @@ class BC_Vente extends BimpObject
                         if (count($place_errors)) {
                             $errors[] = 'Echec de la correction de l\'emplacement pour le n° de série "' . $equipment->getData('serial') . '"';
                         }
-                        $place->reset();
                     }
 
                     // Création du nouvel emplacement: 
+                    $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                     if ($id_client) {
                         $place_errors = $place->validateArray(array(
                             'id_equipment' => (int) $equipment->id,
@@ -2252,7 +2250,7 @@ class BC_Vente extends BimpObject
             switch ($avoir_rbt_mode) {
                 case 'remise':
                     $remise_errors = array();
-                    $bimpFacture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', $facture->id);
+                    $bimpFacture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $facture->id);
                     if (BimpObject::objectLoaded($bimpFacture)) {
                         $remise_errors = $bimpFacture->convertToRemise();
                     } else {

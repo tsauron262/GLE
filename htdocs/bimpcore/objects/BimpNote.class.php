@@ -37,7 +37,7 @@ class BimpNote extends BimpObject
 
             if ($object_type && $module && $object_name && $id_object) {
                 if ($object_type === 'bimp_object') {
-                    $this->parent = BimpObject::getInstance($module, $object_name, $id_object);
+                    $this->parent = BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
                     if (!BimpObject::objectLoaded($this->parent)) {
                         unset($this->parent);
                         $this->parent = null;

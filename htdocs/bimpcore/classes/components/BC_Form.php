@@ -24,7 +24,8 @@ class BC_Form extends BC_Panel
         'create_form_label'  => array('default' => 'Créer'),
         'display'            => array('default' => 'default'),
         'hidden'             => array('data_type' => 'bool', 'default' => 0),
-        'required'           => array('data_type' => 'bool', 'default' => null)
+        'required'           => array('data_type' => 'bool', 'default' => null),
+        'edit'               => array('data_type' => 'bool', 'default' => 1)
     );
     public static $association_params = array(
         'display_if' => array('data_type' => 'array'),
@@ -119,6 +120,11 @@ class BC_Form extends BC_Panel
         // $id_parent a pu être fourni via params['values']. 
         if (!is_null($object)) {
             $this->id_parent = (int) $object->getParentId();
+
+            $form_errors = array();
+            if (!$object->isFormAllowed($this->name, $form_errors)) {
+                $this->errors[] = BimpTools::getMsgFromArray($form_errors, 'Cette édition n\'est pas permise');
+            }
         }
 
         if (!is_null($this->id_parent)) {
@@ -288,7 +294,11 @@ class BC_Form extends BC_Panel
         $field->name_prefix = $this->fields_prefix;
         $field->display_card_mode = 'visible';
 
-        if (!$field->params['editable'] || !$field->params['show']) {
+        if (isset($params['edit']) && !(int) $params['edit']) {
+            $field->params['editable'] = 0;
+        }
+
+        if (!$field->params['show']) {
             return '';
         }
 
@@ -320,16 +330,18 @@ class BC_Form extends BC_Panel
         $html .= '</div>';
 
         $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
-        
+
+        if ($field->params['editable']) {
         if ($field->params['type'] === 'id_object' ||
                 ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) {
             $form_name = ($params['create_form'] ? $params['create_form'] : ($field->params['create_form'] ? $field->params['create_form'] : ''));
             $form_values = ($params['create_form_values'] ? $params['create_form_values'] : ($field->params['create_form_values'] ? $field->params['create_form_values'] : ''));
             $btn_label = ($params['create_form_label'] ? $params['create_form_label'] : ($field->params['create_form_label'] ? $field->params['create_form_label'] : 'Créer'));
-            
+
             if ($form_name) {
                 $html .= self::renderCreateObjectButton($this->object, $this->identifier, $field->params['object'], $this->fields_prefix . $field->name, $form_name, $form_values, $btn_label);
-            }            
+            }
+        }
         }
         $html .= $field->renderHtml();
 
@@ -420,7 +432,11 @@ class BC_Form extends BC_Panel
 
         $params = array_merge($params, parent::fetchParams($this->config_path . '/rows/' . $row, self::$custom_row_params));
         if (is_array($params['value'])) {
+            if ($params['data_type'] === 'json') {
+                $params['value'] = json_encode($params['value']);
+            } else {
             $params['value'] = implode(',', $params['value']);
+        }
         }
 
         if ($params['data_type'] === 'items_list') {
@@ -656,7 +672,7 @@ class BC_Form extends BC_Panel
     public static function renderCreateObjectButton(BimpObject $parent, $parent_form_id, $object_name, $result_input_name, $form_name, $form_values = null, $btn_label = 'Créer', $reload_input = true, $object = null, $successcallBack = '')
     {
         if (!$form_name) {
-            return 'LA';
+            return '';
         }
 
         if (is_null($object) && $object_name) {
@@ -664,7 +680,7 @@ class BC_Form extends BC_Panel
         }
 
         if (is_null($object) || !is_a($object, 'BimpObject')) {
-            return 'ICI';
+            return '';
         }
 
         $label = $btn_label . ' ' . $object->getLabel('a');

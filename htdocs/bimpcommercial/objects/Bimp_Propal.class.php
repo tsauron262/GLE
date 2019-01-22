@@ -37,7 +37,7 @@ class Bimp_Propal extends BimpComm
         if (is_null($this->sav)) {
             $id_sav = (int) $this->getIdSav();
             if ($id_sav) {
-                $this->sav = BimpObject::getInstance('bimpsupport', 'BS_SAV', $id_sav);
+                $this->sav = BimpCache::getBimpObjectInstance('bimpsupport', 'BS_SAV', $id_sav);
             }
         }
 
@@ -109,27 +109,27 @@ class Bimp_Propal extends BimpComm
                 // Valider:
                 if ($this->isActionAllowed('validate')) {
                     if ($this->canSetAction('validate')) {
-                        $ref = substr($this->getRef(), 1, 4);
-                        if ($ref == 'PROV') {
-                            $numref = $this->dol_object->getNextNumRef($soc->dol_object);
-                        } else {
-                            $numref = $ref;
-                        }
-
-                        $text = $langs->trans('ConfirmValidateProp', $numref);
-                        if (!empty($conf->notification->enabled)) {
-                            if (!class_exists('Notify')) {
-                                require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
-                            }
-                            $notify = new Notify($this->db->db);
-                            $text .= "\n";
-                            $text .= $notify->confirmMessage('PROPAL_VALIDATE', (int) $this->getData('fk_soc'), $this->dol_object);
-                        }
+//                        $ref = substr($this->getRef(), 1, 4);
+//                        if ($ref == 'PROV') {
+//                            $numref = $this->dol_object->getNextNumRef($soc->dol_object);
+//                        } else {
+//                            $numref = $ref;
+//                        }
+//
+//                        $text = $langs->trans('ConfirmValidateProp', $numref);
+//                        if (!empty($conf->notification->enabled)) {
+//                            if (!class_exists('Notify')) {
+//                                require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
+//                            }
+//                            $notify = new Notify($this->db->db);
+//                            $text .= "\n";
+//                            $text .= $notify->confirmMessage('PROPAL_VALIDATE', (int) $this->getData('fk_soc'), $this->dol_object);
+//                        }
                         $buttons[] = array(
                             'label'   => 'Valider',
                             'icon'    => 'check',
-                            'onclick' => $this->getJsActionOnclick('validate', array('new_ref' => $numref), array(
-                                'confirm_msg' => strip_tags($text)
+                            'onclick' => $this->getJsActionOnclick('validate', array(), array(
+                                'confirm_msg' => 'Veuillez confirmer la validation '.$this->getLabel('of_this')
                             ))
                         );
                     } else {

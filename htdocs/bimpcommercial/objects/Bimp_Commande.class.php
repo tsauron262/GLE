@@ -355,7 +355,7 @@ class Bimp_Commande extends BimpComm
                 $pu_ttc = $product->price_ttc;
                 $pa_ht = 0;
                 if ($id_fournisseur_price) {
-                    $fournPrice = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $id_fournisseur_price);
+                    $fournPrice = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', (int) $id_fournisseur_price);
                     if (BimpObject::objectLoaded($fournPrice)) {
                         $pa_ht = (float) $fournPrice->getData('price');
                     } else {
@@ -447,7 +447,8 @@ class Bimp_Commande extends BimpComm
                     if ($this->dol_object->deleteline($user, $id_line) <= 0) {
                         $errors = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la suppression de la ligne de commande');
                     } else {
-                        $del_errors = $orderLine->delete(true);
+                        $del_warnings = array();
+                        $del_errors = $orderLine->delete($del_warnings, true);
                         if (count($del_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression de la ligne de commande');
                         }
@@ -494,7 +495,7 @@ class Bimp_Commande extends BimpComm
                 $shipments_ids = array($shipments_ids);
             }
             foreach ($shipments_ids as $id_shipment) {
-                $shipment = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment', (int) $id_shipment);
+                $shipment = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_CommandeShipment', (int) $id_shipment);
                 if (!BimpObject::objectLoaded($shipment)) {
                     $errors[] = 'Expédition d\'ID ' . $id_shipment . ' non trouvée';
                 } elseif ((int) $shipment->getData('id_facture')) {
@@ -712,7 +713,7 @@ class Bimp_Commande extends BimpComm
                 $asso->addObjectAssociation($avoir->id);
             }
         } else {
-            $bimp_avoir = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture', (int) $id_avoir);
+            $bimp_avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_avoir);
             if (!$bimp_avoir->isLoaded()) {
                 $errors[] = 'Avoir d\'ID ' . $id_avoir . ' inexistant';
             } else {
@@ -727,8 +728,8 @@ class Bimp_Commande extends BimpComm
             } else {
                 $serial = '';
                 if (!is_null($id_equipment) && (int) $id_equipment) {
-                    $equipment = BimpObject::getInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                    if (!is_null($equipment) && $equipment->isLoaded()) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                    if ($equipment->isLoaded()) {
                         $serial = $equipment->getData('serial');
                     }
                 }

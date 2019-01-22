@@ -12,7 +12,54 @@ fields:
         label: Afficher dans le contrat
         type: bool
         default_value: 1     
+    qty: 
+        min: 
+            callback: getQtyOrdered
+    commandes_fourn:
+        label: Commandes fournisseurs
+        type: json
+        input: 
+            type: hidden
         
     remisable: unset
+    
+forms: 
+    default: 
+        rows: 
+            - field: type
+            - field: id_product
+            - field: product_type
+            - field: label
+            - field: qty
+            - field: pu_ht
+            - field: tva_tx
+            - field: id_fourn_price
+            - field: id_fournisseur
+            - field: pa_ht
+            - field: equipments
+            - field: extra_serials
+            - field: description
+            
+lists_cols: 
+    qty_ordered: 
+        label: Qté commandée
+        value: 
+            callback: displayQtyOrdered
+            
+lists: 
+    default: 
+        objects_change_reload: BF_Demande
+        cols: 
+            unextends: 1
+            label:
+            product_type: 
+            pu_ht: 
+            tva:
+            pa_ht: 
+            qty: 
+            qty_ordered: 
+            total_ttc:
+            equipments:
+            fourn: 
 
     

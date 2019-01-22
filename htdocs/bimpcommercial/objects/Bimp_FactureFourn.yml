@@ -1,0 +1,270 @@
+
+extends: 
+    module: bimpcommercial
+    object_name: BimpComm
+
+dol_object: 
+    instance: 
+        dol_object: 
+            module: fourn
+            file: fournisseur.facture
+            class: FactureFournisseur
+            
+table: facture_fourn
+controller: factureFourn
+icon: fas_file-invoice-dollar
+list_page_url: 
+    controller: facturesFourn
+
+labels: 
+    name: facture fournisseur
+    name_plur: factures fournisseurs
+    is_female: 1
+        
+objects: 
+    lines: 
+        instance: 
+            bimp_object: Bimp_FactureFournLine
+            
+    files:
+        list: 
+            filters:
+                parent_object_name: Bimp_FactureFourn
+        add_form: 
+            values:
+                fields: 
+                    parent_object_name: Bimp_FactureFourn
+    fournisseur: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Fournisseur
+            id_object: 
+                field_value: fk_soc
+    user:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_User
+    user_author: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_author
+            
+    user_valid: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: fk_user_valid
+    account: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: compta/bank
+                file: account
+            id_object: 
+                field_value: fk_account
+                    
+fields: 
+    fk_soc: 
+        label: Fournisseur
+        object: fournisseur
+        input: 
+            societe_type: supplier
+            create_form: fournisseur_light
+    ref_supplier: 
+        label: Référence fournisseur
+    type: 
+        label: Type
+        type: int
+        values: 
+            array: types
+        default_value: 0
+    libelle: 
+        label: Libellé
+    paye:
+        label: Payée
+        type: bool
+        default_value: 0
+    amount: 
+        label: Montant
+        type: money
+        default_value: 0
+    tva: 
+        label: TVA
+        dol_prop: tva
+        default_value: 0
+    total_tva: 
+        label: Total TVA
+        type: money
+        default_value: 0
+    total_ttc: 
+        label: Total TTC
+        type: money
+        default_value: 0
+    remise: 
+        label: Remise
+        type: money
+        default_value: 0
+    close_code: 
+        label: Code de fermeture
+    close_note: 
+        label: Note de fermeture
+    datec: 
+        label: Créée le
+        type: datetime
+    datef: 
+        label: Date
+        dol_prop: date
+        type: date
+    date_lim_reglement: 
+        label: Date limite de réglement
+        dol_prop: date_echeance
+        type: date
+    fk_user_author: 
+        label: Créée par
+        type: id_object
+        object: user_author
+    fk_user_valid: 
+        label: Validée par
+        type: id_object
+        object: user_valid
+    fk_facture_source: 
+        label: Facture d'origine
+        type: int
+        default_value: 0
+    fk_account: 
+        label: Compte financier
+        type: id_object
+        object: account
+        values: 
+            array: comptes
+        
+    fk_availability: unset
+    fk_input_reason: unset
+    ref_client: unset
+    total: unset
+    remise_globale: unset
+    
+fields_tables: 
+    infos: 
+        rows: 
+            - field: libelle
+              edit: 1
+            - field: datef
+              edit: 1
+            - field: fk_statut
+            - field: paye
+            - field: entrepot
+              display: nom_url
+            - field: fk_facture_source
+              show: 
+                  field_value: fk_facture_source
+                  
+    client: 
+        title: Fournisseur
+        icon: fas_building
+        rows: 
+            - field: fk_soc
+              display: card
+            - field: ref_supplier
+              edit: 1
+        
+    payment:
+        rows: 
+            - field: fk_cond_reglement
+              edit: 1
+            - field: fk_mode_reglement
+              edit: 1
+            - field: date_lim_reglement
+              edit: 1
+            - field: fk_account
+              display: nom_url
+                
+    pdf: 
+        rows: 
+            - label: Fichier PDF
+              value: 
+                  callback: displayPDFButton
+                  
+    totals: 
+        rows: 
+            - field: total_ht
+            - field: total_tva
+            - field: total_ttc
+        
+lists_cols: 
+    ref_supplier: 
+        field: ref_supplier
+    type: 
+        field: type
+    paye: 
+        field: paye
+    amount: 
+        field: amount
+    datec: 
+        field: datec
+    datef: 
+        field: datef
+    date_lim: 
+        field: date_lim_reglement
+    user_author: 
+        field: fk_user_author
+        display: nom_url
+    user_valid: 
+        field: fk_user_valid
+        display: nom_url
+    total_tva: 
+        field: total_tva
+    total_ttc: 
+        field: total_ttc
+    libelle: 
+        field: libelle
+    paye: 
+        field: paye
+    facture_src: 
+        field: fk_facture_source
+        display: nom_url
+    account: 
+        field: fk_account
+        display: nom_url
+        
+    ref_client: unset
+    availability: unset
+    input_reason: unset
+    
+lists: 
+    default: 
+        title: Facture fournisseurs
+        icon: fas_file-invoice-dollar
+        configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les factures fournisseurs sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        list_filters: 
+            callback: getListFilters
+        sort_field: datec
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 
+            callback: isDeletable
+        modal_view: full
+        page_btn: 1
+        cols: 
+            ref: 
+            statut: 
+            datec:
+            user_author:
+            soc: 
+            total_ttc:

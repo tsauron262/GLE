@@ -125,7 +125,7 @@ class BS_ApplePart extends BimpObject
         foreach (self::$tabRefCommenceBatterie as $val)
             if (stripos($ref, $val) === 0)
                 $type = "batt";
-            
+
         //deuxieme cas bis  les Batterie X
         foreach (self::$tabRefCommenceBatterieX as $val)
             if (stripos($ref, $val) === 0)
@@ -425,7 +425,7 @@ class BS_ApplePart extends BimpObject
         return $errors;
     }
 
-    public function delete($force_delete = false)
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         $sav = $this->getParentInstance();
 
@@ -435,7 +435,7 @@ class BS_ApplePart extends BimpObject
 
         $id = (int) $this->id;
 
-        $errors = parent::delete($force_delete);
+        $errors = parent::delete($warnings, $force_delete);
 
         if (!count($errors)) {
             if ((int) $sav->isPropalEditable()) {
@@ -445,9 +445,13 @@ class BS_ApplePart extends BimpObject
                             'linked_id_object'   => (int) $id,
                             'linked_object_name' => 'sav_apple_part'
                         ))) {
-                    $line_errors = $line->delete(true);
+                    $line_warnings = array();
+                    $line_errors = $line->delete($line_warnings, true);
                     if (count($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la suppression de la ligne du devis');
+                        $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la suppression de la ligne du devis');
+                    }
+                    if (count($line_warnings)) {
+                        $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Des erreurs sont survenues suite à la suppression de la ligne du devis');
                     }
                 }
             }

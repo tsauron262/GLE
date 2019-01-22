@@ -8,6 +8,7 @@ labels:
     name: détail de montant
     name_plur: détails de montant
 
+objects: 
 fields: 
     id_event_montant:
         label: Montant
@@ -23,11 +24,12 @@ fields:
             
     quantity:
         label: Quantité
-        type: int
-        default_value: 1
-        display_if: 
-            field_name: id_group
-            show_values: 0
+        type: qty
+        default_value: 
+            callback: getDefaultQty
+        min: 0
+        depends_on: id_group
+        keep_new_value: 0
         search:
             type: value_part
             part_type: beginning
@@ -42,6 +44,7 @@ fields:
 forms: 
     predef: 
         label: Valeurs prédéfinies
+        on_save: reload
         rows:
             - custom: 1
               label: Valeurs prédéfinies
@@ -77,6 +80,7 @@ forms:
 list: 
     checkboxes: 
         callback: isEditable
+    total_row: 1
     bulk_actions:
         - label: supprimer les lignes sélectionnées
           icon: fas_trash-alt
@@ -89,6 +93,7 @@ list:
         callback: isEditable
     add_object_row: 
         callback: isEditable
+    add_object_row_open: 1
     add_form_name:
         callback: getAddFormName
     cols: 
@@ -97,6 +102,7 @@ list:
             edit: 1
         qty: 
             field: quantity
+            has_total: 1
             edit: 
                 callback: isEditable
         price: 
@@ -105,7 +111,11 @@ list:
                 callback: isEditable
         total:
             label: Total HT
+            has_total: 1
+            total_type: money
             value: 
                 callback: displayTotal
+            true_value: 
+                callback: getTotal
         
     

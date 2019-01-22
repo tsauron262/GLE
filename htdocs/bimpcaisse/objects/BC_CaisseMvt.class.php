@@ -1,6 +1,6 @@
 <?php
 
-class Bc_CaisseMvt extends BimpObject
+class BC_CaisseMvt extends BimpObject
 {
 
     public static $types = array(

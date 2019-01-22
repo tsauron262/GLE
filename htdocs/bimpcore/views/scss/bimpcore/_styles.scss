@@ -20,7 +20,6 @@
     }
 }
 
-
 /*Styles génériques*/
 
 .clearAfter:after {
@@ -178,7 +177,7 @@ div.alert {
 .historyPopoverButton {
     margin: 0 6px;
     font-weight: normal;
-    color: $gray-dark;
+    color: $gray;
     cursor: pointer;
     font-size: 15px;
     @include transition(all 0.3s ease);
@@ -324,7 +323,18 @@ i.iconRight {
     }
 }
 
+/*Panels*/
 
+.panel {
+    .panel-body {
+        .beforePanelContainer {
+            margin-bottom: 10px;
+        }
+        .afterPanelContainer {
+            margin-top: 10px;
+        }
+    }
+}
 /*Modales*/
 
 .modal {
@@ -877,7 +887,7 @@ i.iconRight {
         font-size: 20px;
         color: #C85300;
     }
-    
+
     .debug_info_title {
         font-weight: bold;
     }

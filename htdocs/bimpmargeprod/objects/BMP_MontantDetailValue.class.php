@@ -5,16 +5,21 @@ class BMP_MontantDetailValue extends BimpObject
 
     public function getTypes_montantsArray()
     {
-        $typesMontants = array();
-        $instance = BimpObject::getInstance($this->module, 'BMP_TypeMontant');
-        $list = $instance->getList(array(
-            'has_details' => 1
-        ));
+        $cache_key = 'bmp_types_montants_with_details';
 
-        foreach ($list as $item) {
-            $typesMontants[(int) $item['id']] = $item['name'];
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $instance = BimpObject::getInstance($this->module, 'BMP_TypeMontant');
+            $list = $instance->getList(array(
+                'has_details' => 1
+            ));
+
+            foreach ($list as $item) {
+                self::$cache[$cache_key][(int) $item['id']] = $item['name'];
+            }
         }
 
-        return $typesMontants;
+        return self::$cache[$cache_key];
     }
 }

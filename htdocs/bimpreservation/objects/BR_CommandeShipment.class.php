@@ -319,8 +319,8 @@ class BR_CommandeShipment extends BimpObject
                 'id_shipment'        => (int) $this->id
             ));
 
-            $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
-            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+
+
 
             if (count($rows)) {
                 $html .= '<table class="objectlistTable">';
@@ -336,11 +336,11 @@ class BR_CommandeShipment extends BimpObject
                 $html .= '<tbody>';
 
                 foreach ($rows as $r) {
-                    $product->fetch((int) $r['id_product']);
+                    $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $r['id_product']);
                     if ((int) $r['id_equipment']) {
-                        $equipment->fetch((int) $r['id_equipment']);
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int)$r['id_equipment']);
                     } else {
-                        $equipment->reset();
+                        $equipment = null;
                     }
                     $html .= '<tr>';
                     $html .= '<td>' . $r['ref_reservation'] . '</td>';
@@ -353,7 +353,7 @@ class BR_CommandeShipment extends BimpObject
                     $html .= '</td>';
                     $html .= '<td>';
                     if ((int) $r['id_equipment']) {
-                        if ($equipment->isLoaded()) {
+                        if (BimpObject::objectLoaded($equipment)) {
                             $html .= $equipment->getData('serial');
                         } else {
                             $html .= '<span class="danger">Erreur: équipement invalide (ID ' . $r['id_equipment'] . ')</span>';
@@ -576,7 +576,8 @@ class BR_CommandeShipment extends BimpObject
                     $errors = $commande->createFacture($shipments, $cond_reglement, $id_account, $remises);
 
                     if (!count($errors)) {
-                        $facture->delete(true);
+                        $fac_warnings = array();
+                        $facture->delete($fac_warnings, true);
                     }
                 }
             }
@@ -673,7 +674,6 @@ class BR_CommandeShipment extends BimpObject
         // Traitement des réservations: 
         $reservation = BimpObject::getInstance($this->module, 'BR_Reservation');
         $reservationShipment = BimpObject::getInstance($this->module, 'BR_ReservationShipment');
-        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
         $id_client = $commande->socid;
         $id_contact = (int) $this->getData('id_contact');
         if (!$id_contact) {
@@ -699,7 +699,8 @@ class BR_CommandeShipment extends BimpObject
             $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
             foreach ($list as $item) {
                 // Mise à jour du statut de la réservation correspondante: 
-                if ($reservationShipment->fetch((int) $item['id'])) {
+                $reservationShipment = BimpCache::getBimpObjectInstance($this->module, 'BR_ReservationShipment', (int) $item['id']);
+                if ($reservationShipment->isLoaded()) {
                     $item_qty_shipped = 0;
 
                     if ($reservation->find(array(
@@ -723,7 +724,7 @@ class BR_CommandeShipment extends BimpObject
                     $id_equipment = (int) $reservationShipment->getData('id_equipment');
                     if ($id_equipment) {
                         $item_qty_shipped = 1;
-                        $place->reset();
+                        $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                         $place_errors = $place->validateArray(array(
                             'id_equipment' => $id_equipment,
                             'type'         => BE_Place::BE_PLACE_CLIENT,
@@ -743,7 +744,7 @@ class BR_CommandeShipment extends BimpObject
                         }
                     } else {
                         $product = $reservationShipment->getChildObject('product');
-                        if (is_null($product) || !$product->isLoaded()) {
+                        if (!BimpObject::objectLoaded($product)) {
                             $warnings[] = 'Aucun produit trouvé pour la ligne d\'expédition d\'ID ' . $reservationShipment->id . ' (Réf. réservation: "' . $item['ref_reservation'] . '"';
                         } else {
                             if ($product->isSerialisable()) {
@@ -808,7 +809,7 @@ class BR_CommandeShipment extends BimpObject
         $private_note = (isset($data['note_private']) ? $data['note_private'] : '');
 
         if (!count($errors)) {
-            $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = $label . ': ID de la commande client absent ou invalide';
             } else {
@@ -867,9 +868,9 @@ class BR_CommandeShipment extends BimpObject
         if (!isset($data['id_objects']) || !count($data['id_objects'])) {
             $errors[] = 'Aucun expédition sélectionnées';
         } else {
-            $shipment = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
             foreach ($data['id_objects'] as $id_shipment) {
-                if (!$shipment->fetch((int) $id_shipment)) {
+                $shipment = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_CommandeShipment', (int) $id_shipment);
+                if (!$shipment->isLoaded()) {
                     $errors[] = 'L\'expédition d\'ID ' . $id_shipment . ' n\'existe pas';
                 } else {
                     $label = 'Expédition n° ' . $shipment->getData('num_livraison');
@@ -903,7 +904,7 @@ class BR_CommandeShipment extends BimpObject
         $private_note = (isset($data['note_private']) ? $data['note_private'] : '');
 
         if (!count($errors)) {
-            $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_commande);
             if (!BimpObject::objectLoaded($commande)) {
                 $errors[] = 'La commande client d\'ID ' . $id_commande . ' n\'existe pas';
             } else {
@@ -965,9 +966,8 @@ class BR_CommandeShipment extends BimpObject
         if (!count($errors) && $this->isLoaded()) {
             // Création de la liste des services: 
             $services = $commande->getChildrenObjects('services');
-            $serviceShipment = BimpObject::getInstance($this->module, 'BR_ServiceShipment');
             foreach ($services as $service) {
-                $serviceShipment->reset();
+                $serviceShipment = BimpObject::getInstance($this->module, 'BR_ServiceShipment');
                 $service_errors = $serviceShipment->validateArray(array(
                     'id_shipment'             => (int) $this->id,
                     'id_commande_client'      => (int) $commande->id,

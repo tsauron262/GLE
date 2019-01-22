@@ -589,8 +589,8 @@ function saveCurrentVente($button, status) {
 function loadNewClientForm($button) {
     loadModalForm($button, {
         module: 'bimpcore',
-        object_name: 'Bimp_Societe',
-        form_name: 'client_light'
+        object_name: 'Bimp_Client',
+        form_name: 'light'
     }, 'Ajout d\'un nouveau client', function ($form) {
         var modal_idx = parseInt($form.data('modal_idx'));
         if (!modal_idx) {
@@ -649,7 +649,7 @@ function loadNewContactForm($button, id_client) {
 }
 
 function selectClientFromList($button) {
-    var $row = $button.findParentByClass('Bimp_Societe_row');
+    var $row = $button.findParentByClass('Bimp_Client_row');
 
     if (!$row.length) {
         bimp_msg('Erreur: ID client absent');
@@ -749,7 +749,7 @@ function editClient($button, id_client, client_name) {
     var title = 'Edition du client "' + client_name + '"';
     loadModalForm($button, {
         'module': 'bimpcore',
-        'object_name': 'Bimp_Societe',
+        'object_name': 'Bimp_Client',
         'id_object': id_client,
         'form_name': 'default'
     }, title, function ($form) {

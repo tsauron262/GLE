@@ -141,6 +141,7 @@ function loadObjectFieldValue(module, object_name, id_object, field, $resultCont
 }
 
 function setObjectNewStatus($button, object_data, new_status, extra_data, $resultContainer, successCallback, confirm_msg) {
+    // object_data.id_object peut être un array d'id
     if (typeof (confirm_msg) === 'string') {
         if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
             return;
@@ -181,7 +182,7 @@ function setObjectNewStatus($button, object_data, new_status, extra_data, $resul
     });
 }
 
-function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg) {
+function setObjectAction($button, object_data, action, extra_data, form_name, $resultContainer, successCallback, confirm_msg, on_form_submit) {
     if (typeof (confirm_msg) === 'string') {
         if (!confirm(confirm_msg.replace(/&quote;/g, '"'))) {
             return;
@@ -240,6 +241,9 @@ function setObjectAction($button, object_data, action, extra_data, form_name, $r
                                 extra_data[field_name] = getInputValue($(this));
                             }
                         });
+                        if (typeof (on_form_submit) === 'function') {
+                            extra_data = on_form_submit($form, extra_data);
+                        }
                         setObjectAction($(this), object_data, action, extra_data, null, $('#' + $form.attr('id') + '_result'), function (result) {
                             if (typeof (result.warnings) !== 'undefined' && result.warnings && result.warnings.length) {
                                 bimpModal.$footer.find('.set_action_button.modal_' + $form.data('modal_idx')).remove();
@@ -335,7 +339,7 @@ function loadObjectCard($container, module, object_name, id_object, card_name, s
         id_object: id_object,
         card_name: card_name
     };
-    
+
     BimpAjax('loadObjectCard', data, $container, {
         display_success: false,
         append_html: true,

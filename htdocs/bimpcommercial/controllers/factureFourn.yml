@@ -1,0 +1,16 @@
+extends: 
+    module: bimpcommercial
+    object_name: BimpComm
+    
+objects: 
+    bimp_comm: 
+        instance: 
+            bimp_object: Bimp_FactureFourn
+            id_object: 
+                request: id
+                
+    facture_fourn: 
+        instance: 
+            bimp_object: Bimp_FactureFourn
+            id_object: 
+                request: id

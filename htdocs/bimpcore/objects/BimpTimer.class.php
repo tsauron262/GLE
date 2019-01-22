@@ -89,8 +89,8 @@ class BimpTimer extends BimpObject
         $id_object = (int) $this->getData('id_obj');
         $field = $this->getData('field_name');
 
-        $object = BimpObject::getInstance($module, $object_name);
-        if (!$object->fetch($id_object)) {
+        $object = BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
+        if (!$object->isLoaded()) {
             $msg = BimpTools::ucfirst($object->getLabel('')) . ' d\'ID ' . $id_object . ' non trouvé';
             if ($object->isLabelFemale()) {
                 $msg .= 'e';
@@ -203,9 +203,10 @@ class BimpTimer extends BimpObject
                     )
                         ), null, null, 'id', 'asc', 'array', array('id'));
                 if (!is_null($list) && count($list)) {
-                    $instance = BimpObject::getInstance($this->module, $this->object_name);
+                    
                     foreach ($list as $item) {
-                        if ($instance->fetch((int) $item['id'])) {
+                        $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $item['id']);
+                        if ($instance->isLoaded()) {
                             $hold_errors = $instance->hold();
                             if (count($hold_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($hold_errors, 'Echec de la mise en pause du chrono ' . $instance->id);

@@ -38,6 +38,25 @@ table.objectlistTable {
             color: #fff;
             border-bottom: 1px solid #fff;
             text-align: right;
+
+            a {
+                color: #fff;
+                font-weight: bold!important;
+
+                &:hover {
+                    font-weight: bold!important;
+                    color: #fff;
+                    text-decoration: underline;
+                }
+            }
+
+            .objectIcon {
+                color: #F0D5B8;
+
+                &:hover {
+                    color: #fff;
+                }
+            }
         }
 
         & > td {
@@ -54,14 +73,14 @@ table.objectlistTable {
 
             .inputContainer {
                 display: inline-block;
-                width: 100%;
+                width: 99%;
 
                 input, textarea, select {
                     width: 100%;
                     color: $input-color;
                     font-weight: normal;
                 }
-                
+
                 .select2-container {
                     width: 100%important;
                     min-width: 100%;
@@ -74,6 +93,18 @@ table.objectlistTable {
 
             .popover {
                 color: $gray-darker;
+            }
+        }
+
+        &.deactivated {
+            background-color: #DCDCDC!important;
+            border-color: #C8C8C8!important;
+            color: #646464!important;
+
+            & > td {
+                background-color: #DCDCDC!important;
+                border-color: #C8C8C8!important;
+                color: #646464!important;
             }
         }
 
@@ -104,6 +135,14 @@ table.objectlistTable {
 
             & > td {
                 background-color: #FAFAFA!important;
+            }
+        }
+
+        &.deactivated:hover {
+            background-color: #E6E6E6!important;
+
+            & > td {
+                background-color: #E6E6E6!important;
             }
         }
 
@@ -150,21 +189,145 @@ table.objectlistTable {
             border-bottom: 1px solid $primary;
         }
 
+        & > tbody > tr {
+            &.selected {
+                background-color: #FFF5E1!important;
+
+                & > td {
+                    background-color: #FFF5E1!important;
+                }
+            }
+
+            &.deactivated {
+                background-color: #DCDCDC!important;
+                border-color: #C8C8C8!important;
+                color: #646464!important;
+
+                & > td {
+                    background-color: #DCDCDC!important;
+                    border-color: #C8C8C8!important;
+                    color: #646464!important;
+                }
+            }
+
+            &.modified  {
+                background-color: #E1F5FF!important;
+                border-color: #E1F5FF!important;
+
+                & > td {
+                    background-color: #E1F5FF!important;
+                    border-color: #E1F5FF!important;
+
+                    .inputContainer .modified {
+                        box-shadow: 0 0 3px #003550!important;
+                    }
+                }
+            }
+
+            &:hover {
+                background-color: #FAFAFA!important;
+
+                & > td {
+                    background-color: #FAFAFA!important;
+                }
+            }
+
+            &.deactivated:hover {
+                background-color: #E6E6E6!important;
+
+                & > td {
+                    background-color: #E6E6E6!important;
+                }
+            }
+
+            &.selected:hover {
+                background-color: #FFEFCD!important;
+
+                & > td {
+                    background-color: #FFEFCD!important;
+                }
+            }
+
+            &.modified:hover {
+                background-color: #CDEFFF!important;
+
+                & > td {
+                    background-color: #CDEFFF!important;
+                }
+            }
+        }
+
         td {
             padding: 4px 10px;
             border-bottom: 1px solid $gray-light;
             background-color: #fff;
             color: $gray-dark;
         }
+
+        & > tfoot > tr {
+            td,th {
+                padding: 4px 10px;
+                border: none;
+                background-color: #F0F0F0;
+                color: $gray-darker;
+                font-weight: bold;
+            }
+            th {
+                text-align: right;
+                padding-right: 20px;
+            }
+        }
+    }
+
+    tr.margin_row {
+        background-color: #fff;
+        & > td {
+            background-color: #fff;
+            height: 15px;
+        }
+    }
+
+    tr.total_row {
+        & > th {
+            text-align: right;
+            padding-right: 20px;
+        }
+
+        & > td {
+            font-weight: bold;
+            background-color: #F0F0F0!important;
+        }
+
+        & > td, & > th {
+            border-top: 1px solid #787878;
+            border-bottom: 1px solid #787878;
+        }
+
+        & > th:first-child,
+            & > td:first-child {
+            border-left: 1px solid #787878;
+        }
+
+        & > td:last-child {
+            border-right: 1px solid #787878;
+        }
     }
 
     & > tfoot > tr.paginationContainer > td {
         background-color: #fff;
     }
-    
+
     .listFooterButtons > td {
         background-color: #fff;
         padding: 10px 0 0;
+    }
+
+    &.center-align {
+        & > thead > tr.col_headers > th,
+        & > tbody > tr > td,
+        & > tfoot > tr > td {
+            text-align: center;
+        }
     }
 }
 
@@ -217,7 +380,7 @@ table.objectlistTable {
     }
 }
 
-.listSearchRow {
+tr.listSearchRow {
     display: none;
     background-color: #DCDCDC;
 
@@ -269,11 +432,14 @@ table.objectlistTable {
 
 }
 
-.addObjectRow {
-    display: none;
-    background-color: #A0A0A0;
+tr.addObjectRow {
+    background-color: #A0A0A0!important;
 
-    td:first-child {
+    & > td {
+        background-color: #A0A0A0!important;
+    }
+
+    & > td:first-child {
         text-align: center;
 
         i.fa-plus-circle {
@@ -282,6 +448,7 @@ table.objectlistTable {
             color: #DCDCDC;
         }
     }
+
     .inputHelp {
         display: none;
     }

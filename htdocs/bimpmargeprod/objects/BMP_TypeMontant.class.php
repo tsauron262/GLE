@@ -11,32 +11,37 @@ class BMP_TypeMontant extends BimpObject
         2 => array('label' => 'Recette', 'icon' => '', 'classes' => array('success'))
     );
 
+    // Getters: 
+
     public function getCategoriesArray()
     {
-        $instance = BimpObject::getInstance('bimpmargeprod', 'BMP_CategorieMontant');
-        $rows = $instance->getList();
-        $categories = array();
-
-        foreach ($rows as $r) {
-            $categories[$r['id']] = $r['name'];
-        }
-
-        return $categories;
+        return BimpCache::getBimpObjectFullListArray($this->module, 'BMP_CategorieMontant');
     }
 
     public function getAllTypes()
     {
-        $rows = $this->getList(array(), null, null, 'id', 'asc', 'array', array('id', 'name'));
-        $list = array();
+        return self::getBimpObjectFullListArray($this->module, $this->object_name);
+    }
 
-        if (!is_null($rows)) {
-            foreach ($rows as $r) {
-                $list[$r['id']] = $r['name'];
+    // Cache: 
+
+    public static function getTypesMontantsArray($include_empty = 0)
+    {
+        $cache_key = 'bmp_types_montants_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+            $instance = BimpObject::getInstance('bimpmargeprod', 'BMP_TypeMontant');
+            $types_montants = $instance->getList();
+            foreach ($types_montants as $tm) {
+                self::$cache[$cache_key][(int) $tm['id']] = $tm['name'] . ' (' . self::$types[(int) $tm['type']]['label'] . ')';
             }
         }
 
-        return $list;
+        return self::getCacheArray($cache_key, $include_empty);
     }
+
+    // Traitements: 
 
     public function rebuildAllCalcMontantsCaches()
     {
@@ -47,7 +52,8 @@ class BMP_TypeMontant extends BimpObject
         $list = $calc_montant->getList(array(), null, null, 'id', 'asc', 'array', array('id'));
 
         foreach ($list as $item) {
-            if ($calc_montant->fetch((int) $item['id'])) {
+            $calc_montant = BimpCache::getBimpObjectInstance($this->module, 'BMP_CalcMontant', (int) $item['id']);
+            if ($calc_montant->isLoaded()) {
                 $errors = array_merge($errors, $calc_montant->rebuildTypesMontantsCache());
             }
         }
@@ -55,6 +61,8 @@ class BMP_TypeMontant extends BimpObject
 
         return $errors;
     }
+
+    // Overrides: 
 
     public function validate()
     {
@@ -64,36 +72,54 @@ class BMP_TypeMontant extends BimpObject
             if ((int) $this->getData('editable')) {
                 $errors[] = 'Un type de montant ne peux pas être à la fois éditable et avoir une liste de détails. Veuillez choisir entre l\'un ou l\'autre';
             }
-            if (!(int) $this->getData('required')) {
-                $errors[] = 'Un type de montant avec une liste de détails doit être obligatoire';
-            }
+//            if (!(int) $this->getData('required')) {
+//                $errors[] = 'Un type de montant avec une liste de détails doit être obligatoire';
+//            }
         }
         return $errors;
     }
 
-    public function create()
+    public function create(&$warnings = array(), $force_create = false)
     {
-        $errors = parent::create();
+        $errors = parent::create($warnings, $force_create);
 
-        $errors = array_merge($errors, $this->rebuildAllCalcMontantsCaches());
+        if (!count($errors)) {
+            $cache_errors = $this->rebuildAllCalcMontantsCaches();
+
+            if (count($cache_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($cache_errors, 'Des erreurs sont survenues lors de la reconstruction du cache');
+            }
+        }
 
         return $errors;
     }
 
-    public function update()
+    public function update(&$warnings = array(), $force_update = false)
     {
-        $errors = parent::update();
+        $errors = parent::update($warnings, $force_update);
 
-        $errors = array_merge($errors, $this->rebuildAllCalcMontantsCaches());
+        if (!count($errors)) {
+            $cache_errors = $this->rebuildAllCalcMontantsCaches();
+
+            if (count($cache_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($cache_errors, 'Des erreurs sont survenues lors de la reconstruction du cache');
+            }
+        }
 
         return $errors;
     }
 
-    public function delete()
+    public function delete(&$warnings = array(), $force_delete = false)
     {
-        $errors = parent::delete();
+        $errors = parent::delete($warnings, $force_delete);
 
-        $errors = array_merge($errors, $this->rebuildAllCalcMontantsCaches());
+        if (!count($errors)) {
+            $cache_errors = $this->rebuildAllCalcMontantsCaches();
+
+            if (count($cache_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($cache_errors, 'Des erreurs sont survenues lors de la reconstruction du cache');
+            }
+        }
 
         return $errors;
     }

@@ -1,44 +1,11 @@
-dol_object: 
-    instance: 
-        dol_object: societe
+extends: 
+    module: bimpcore
+    object_name: Bimp_Societe
         
-table: societe
-primary: rowid
-icon: fas_user-circle
-
-labels: 
-    name: 
-        callback: getSocieteLabel
-    is_female: 
-        callback: getSocieteIsFemale
-    
 fields: 
-    nom:
-        dol_prop: name
-        label: Nom
-        required: 1
-    name_alias: 
-        label: Nom alternatif
-    status:
-        label: Etat
-        type: int
-        values: 
-            array: 
-                0: Clos
-                1: Ouvert
     client: 
-        label: Prospect / Client
-        type: int
-        values: 
-            array: 
-                1: Client
-                2: Prospect
-                3: Prospect / Client
-                0: Ni prospect ni client
-        default_value: 0
+        default_value: 1
     fournisseur:
-        label: Fournisseur
-        type: bool
         default_value: 0
     code_client:
         label: Code Client
@@ -329,104 +296,28 @@ views:
                       name: notes
                       
 forms: 
-    client_light: 
+    light: 
         title: Ajout d'un client
-        values: 
-            fields: 
-                status: 1
-                client: 1
         rows: 
-            - field: nom
-            - custom: 1
-              label: Prénom
-              input_name: prenom
-              data_type: string
+            1: 
               input: 
-                  type: text
                   help: A remplir si le client est un particulier
-            - field: name_alias
-            - field: status
-              hidden: 1
-            - field: client
-              hidden: 1
-            - field: email
-            - field: phone
-            - field: address
-            - field: zip
-            - field: town
-            - field: fk_pays
-            - field: fk_departement
-            - field: fax
-            - field: skype
-            - field: url
             
 lists:
-    clients: 
+    default: 
+        title: Liste des Clients
+        icon: user
         list_filters:
             - name: fournisseur
               filter: 0
-        title: Liste des Clients
-        icon: user
         add_btn_label: Nouveau client
-        checkboxes: 1
         bulk_actions:
-            - label: supprimer les clients sélectionnés
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-        sort_field: id
-        sort_way: desc
-        n: 50
-        add_form_name: client_light
-        delete_btn: 1
-        page_btn: 1
-        modal_view: client
-        edit_btn: 1
-        cols:
-            nom:
-                field: nom
-            name_alias:
-                field: name_alias
-            email: 
-                field: email
-            phone:
-                field: phone
-            zip:
-                field: zip
-            town: 
-                field: town
+            0: 
+                label: supprimer les clients sélectionnés
                 
     clients_caisse: 
-        list_filters:
-            - name: fournisseur
-              filter: 0
-        title: Liste des Clients
-        icon: user
-        add_btn_label: Nouveau client
-        sort_field: id
-        sort_way: desc
-        n: 25
-        add_form_name: client_light
-        modal_view: client
-        edit_btn: 1
+        extends: default
         extra_btn: 
             - label: Sélectionner ce client
               icon: arrow-circle-right
               onclick: selectClientFromList($(this))
-        cols:
-            nom:
-                field: nom
-            name_alias:
-                field: name_alias
-            email: 
-                field: email
-            phone:
-                field: phone
-            zip:
-                field: zip
-            town: 
-                field: town
-                
-cards: 
-    default: 
-        type: societe_card
-        view_btn: 1

@@ -9,8 +9,9 @@ labels:
     
 objects: 
     societe:
+        relation: hasOne
+        delete: 0
         instance: 
-            bimp_object: unset
             dol_object: societe
             id_object: 
                 field_value: id_soc
@@ -51,6 +52,7 @@ list:
           icon: fas_trash-alt
           onclick: deleteSelectedObjects('list_id', $(this))
     enable_search: 0
+    pagination: 0
     sort_field: id
     sort_way: desc
     n: 25

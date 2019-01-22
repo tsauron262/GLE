@@ -12,7 +12,7 @@ dol_object:
             
 table: commande_fournisseur
 controller: commandeFourn
-icon: fas_file-invoice
+icon: fas_cart-arrow-down
 list_page_url: 
     controller: commandesFourn
 
@@ -26,6 +26,16 @@ objects:
         instance: 
             bimp_object: Bimp_CommandeFournLine
             
+    fournisseur: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_Fournisseur
+            id_object: 
+                field_value: fk_soc
+            
     files:
         list: 
             filters:
@@ -34,6 +44,295 @@ objects:
             values:
                 fields: 
                     parent_object_name: Bimp_CommandeFourn
-                    
+               
+    user: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcore
+                name: Bimp_User
+        
+    user_author:
+        extends: user
+        instance: 
+            id_object: fk_user_author
+            
+    user_valid:
+        extends: user
+        instance: 
+            id_object: fk_user_valid
+            
+    user_approve:
+        extends: user
+        instance: 
+            id_object: fk_user_approve
+            
+    user_approve2:
+        extends: user
+        instance: 
+            id_object: fk_user_approve2
+                
 fields: 
+    entrepot: 
+        required: 1
+    fk_soc: 
+        label: Fournisseur
+        object: fournisseur
+        input: 
+            societe_type: supplier
+            create_form: fournisseur_light
+    ref_supplier: 
+        label: Référence fournisseur
+    total_ttc: 
+        label: Total TTC
+        type: money
+    remise_percent: 
+        label: Remise
+        type: percent
+        default_value: 0
+    date_creation: 
+        label: Créée le
+        dol_prop: date
+        type: datetime
+    date_valid: 
+        label: Validée le
+        type: datetime
+    date_approve: 
+        label: 1ère approbation le
+        type: datetime
+    date_approve2: 
+        label: 2ème approbation le
+        type: datetime
+    date_commande: 
+        label: Date de la commande
+        type: date
+        input: 
+            display_now: 1
+    date_livraison: 
+        label: Date prévue de livraison
+        type: datetime
+    fk_user_author: 
+        label: Créée par
+        dol_prop: user_author_id
+        type: id_object
+        object: user_author
+        input: 
+            type: hidden
+    fk_user_valid: 
+        label: Validée par
+        dol_prop: user_valid_id
+        type: id_object
+        object: user_valid
+        input: 
+            type: hidden
+    fk_user_approve: 
+        label: Approuvée par
+        dol_prop: user_approve_id
+        type: id_object
+        object: user_approve
+        input: 
+            type: hidden
+    fk_user_approve2: 
+        label: Approuvée (2) par
+        dol_prop: user_approve_id2
+        type: id_object
+        object: user_approve2
+        input: 
+            type: hidden
+    fk_input_method: 
+        label: Méthode de commande
+        dol_prop: methode_commande_id
+        type: int
+        values: 
+            array: commandeMethods
+#    fk_account: 
+#        label: Compte bancaire
+#        type: id_object
+#        object: account
+        
+    ref_client: unset
+    total: unset
+    fk_availability: unset
+    fk_input_reason: unset
     remise_globale: unset
+    
+forms: 
+    default: 
+        rows: 
+            - field: entrepot
+            - field: fk_soc
+            - field: ref_supplier
+            - field: date_livraison
+            - field: fk_cond_reglement
+            - field: fk_mode_reglement
+#            - field: fk_account
+            - field: model_pdf
+            - field: note_private
+            - field: note_public
+            
+    make_order: 
+        rows: 
+            - field: date_commande
+            - field: fk_input_method
+            
+    receive: 
+        rows: 
+            - custom: 1
+              label: Date de livraison
+              input_name: date_livraison
+              data_type: date
+              input: 
+                  type: date
+                  display_now: 1
+            - custom: 1
+              label: Livraison
+              input_name: livraison_type
+              input: 
+                  type: select
+                  options: 
+                      array: livraison_types
+            - custom: 1
+              label: Commentaires
+              data_type: string
+              input_name: comments
+              input: 
+                  type: text
+            
+fields_tables: 
+    infos: 
+        rows: 
+            - field: entrepot
+              display: nom_url
+              edit: 1
+            - field: fk_statut
+            - field: date_commande
+            - field: date_livraison
+              edit: 1
+            - field: fk_input_method
+              show: 
+                  field_value: fk_input_method
+    
+    fournisseur: 
+        title: Fournisseur
+        icon: fas_building
+        rows: 
+            - field: fk_soc
+              display: card
+            - field: ref_supplier
+              edit: 1
+                  
+    payment:
+        rows:
+            - field: fk_cond_reglement
+              edit: 
+                  callback: isEditable
+            - field: fk_mode_reglement
+              edit: 
+                  callback: isEditable
+                
+    pdf: 
+        rows: 
+            - label: Fichier PDF
+              value: 
+                  callback: displayPDFButton
+                  
+    totals: 
+        rows: 
+            - label: Remises
+              value: 
+                  callback: displayTotalRemises
+            - field: total_ht
+            - field: tva
+            - field: total_ttc
+            
+views: 
+    default: 
+        rows: 
+            0: 
+                cols: 
+                    1:
+                        rows: 
+                            0: 
+                                cols: 
+                                    0: 
+                                        fields_table: 
+                                            name: fournisseur  
+                                            
+    content: 
+        rows: 
+            0: 
+                cols: 
+                    1: unset
+            
+lists_cols: 
+    ref_supplier: 
+        field: ref_supplier
+    total_ttc:
+        field: total_ttc    
+    remise: 
+        field: remise_percent
+    date_creation: 
+        field: date_creation
+    date_valid: 
+        field: date_valid
+    date_approve: 
+        field: date_approve
+    date_approve2: 
+        field: date_approve2
+    date_commance: 
+        field: date_commance
+    date_livration: 
+        field: date_livration
+    user_author: 
+        field: fk_user_author
+        display: nom_url
+    user_valid: 
+        field: fk_user_valid
+        display: nom_url
+    user_approve: 
+        field: fk_user_approve
+        display: nom_url
+    user_approve2: 
+        field: fk_user_approve2
+        display: nom_url
+#    input_method: 
+#        field: fk_input_method
+#        display: nom_url
+#    account: 
+#        field: fk_account
+#        display: nom_url
+        
+    ref_client: unset
+    availability: unset
+    input_reason: unset
+        
+lists: 
+    default: 
+        title: Commandes fournisseurs
+        icon: fas_cart-arrow-down
+        configurable: 1
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les commandes fournisseurs sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        list_filters: 
+            callback: getListFilters
+        sort_field: date_creation
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 
+            callback: isDeletable
+        modal_view: full
+        page_btn: 1
+        cols: 
+            ref: 
+            statut: 
+            date_creation:
+            user_author:
+            soc: 
+            total_ttc:

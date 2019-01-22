@@ -21,42 +21,62 @@ sections:
                   id: 
                       request: id
               sections: 
+                  - type: object_header
+                    object_header: 
+                        object: event
                   - type: view
                     view: 
                         panel: 1
                         name: default
                         object: event
-          parts:
-              label: Parts Partenaires
-              show:
-                  callback: 
-                      method: showCoprods
-                      object: event
-                      params: 
-                          - test
-              url_params:
-                  id: 
-                      request: id
-              sections: 
-                  - type: list
-                    list: 
-                        panel: 1
-                        name: default
-                        object: event
-                        children: coprod_def_parts
+#          parts:
+#              label: Parts Partenaires
+#              show:
+#                  callback: 
+#                      method: showCoprods
+#                      object: event
+#                      params: 
+#                          - test
+#              url_params:
+#                  id: 
+#                      request: id
+#              sections: 
+#                  - type: object_header
+#                    object_header: 
+#                        object: event
+#                  - type: list
+#                    list: 
+#                        panel: 1
+#                        name: default
+#                        object: event
+#                        children: coprod_def_parts
           frais: 
               label: Charges
               url_params:
                   id: 
                       request: id
               sections:
-                  - type: list
-                    list: 
-                        panel: 1
-                        name: frais
+                  - type: object_header
+                    object_header: 
                         object: event
-                        children: frais
-                        
+                  - type: nav_tabs
+                    nav_tabs: 
+                        - id: list
+                          title: Liste
+                          struct: 
+                              type: list
+                              list: 
+                                  panel: 1
+                                  name: frais
+                                  object: event
+                                  children: frais
+                        - id: frais_recap
+                          title: Récapitulatif
+                          struct: 
+                              type: view
+                              view: 
+                                  name: frais_recap
+                                  object: event                        
 #                  - type: view
 #                    view: 
 #                        panel: 1
@@ -68,6 +88,9 @@ sections:
                   id: 
                       request: id
               sections: 
+                  - type: object_header
+                    object_header: 
+                        object: event
                   - type: view
                     view:
                         panel: 0
@@ -80,13 +103,27 @@ sections:
                   id: 
                       request: id
               sections: 
-                  - type: list
-                    list: 
-                        panel: 1
-                        name: recettes
+                  - type: object_header
+                    object_header: 
                         object: event
-                        children: recettes
-                        
+                  - type: nav_tabs
+                    nav_tabs: 
+                        - id: list
+                          title: Liste
+                          struct: 
+                            type: list
+                            list: 
+                                panel: 1
+                                name: recettes
+                                object: event
+                                children: recettes
+                        - id: recettes_recap
+                          title: Récapitulatif
+                          struct: 
+                              type: view
+                              view: 
+                                  name: recettes_recap
+                                  object: event              
 #                  - type: view
 #                    view: 
 #                        panel: 1
@@ -98,6 +135,9 @@ sections:
                   id: 
                       request: id
               sections: 
+                  - type: object_header
+                    object_header: 
+                        object: event
                   - type: list
                     list: 
                         panel: 1
@@ -110,21 +150,41 @@ sections:
                   id: 
                       request: id
               sections: 
-                  - type: view
-                    view: 
-                        panel: 1
-                        name: billets
+                  - type: object_header
+                    object_header: 
                         object: event
-                  - type: view
-                    view: 
-                        panel: 1
-                        name: breaks
-                        object: event
-#                  - type: view
-#                    view: 
-#                        panel: 1
-#                        name: totaux
-#                        object: event
+                  - type: nav_tabs
+                    nav_tabs: 
+                        - id: ventes
+                          title: Ventes de billets
+                          struct: 
+                              type: rows
+                              rows: 
+                                  - cols:  
+                                      - type: view
+                                        view: 
+                                            object: event
+                                            name: total_billets
+                                            panel: 1
+                                      - type: list
+                                        list: 
+                                            object: event
+                                            children: billets
+                        - id: tarifs
+                          title: Tarifs
+                          struct: 
+                              type: view
+                              view: 
+                                  object: event
+                                  name: tarifs
+                        - id: break
+                          title: Indicateurs
+                          struct: 
+                              type: view
+                              view: 
+                                  panel: 1
+                                  name: breaks
+                                  object: event
                         
           bilans: 
               label: Bilans
@@ -132,6 +192,9 @@ sections:
                   id: 
                       request: id
               sections: 
+                  - type: object_header
+                    object_header: 
+                        object: event
                   - type: view
                     view: 
                         panel: 0
@@ -144,6 +207,9 @@ sections:
                   id: 
                       request: id
               sections: 
+                  - type: object_header
+                    object_header: 
+                        object: event
                   - type: list
                     list: 
                         name: default

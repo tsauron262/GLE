@@ -93,7 +93,7 @@ class BR_reservationShipment extends BimpObject
     public function getCommande()
     {
         if (is_null($this->commande)) {
-            $this->commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+            $this->commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
         }
 
         return $this->commande;
@@ -208,9 +208,9 @@ class BR_reservationShipment extends BimpObject
 
         if (BimpObject::objectLoaded($commande)) {
             $asso = new BimpAssociation($commande, 'avoirs');
-            $avoir = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             foreach ($asso->getAssociatesList() as $id_avoir) {
-                if ($avoir->fetch((int) $id_avoir)) {
+                $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_avoir);
+                if ($avoir->isLoaded()) {
                     if ((int) $avoir->dol_object->statut === (int) Facture::STATUS_DRAFT) {
                         $DT = new DateTime($this->db->db->iDate($avoir->dol_object->date_creation));
                         $avoirs[(int) $id_avoir] = $avoir->dol_object->ref . ' (créé le ' . $DT->format('d / m / Y à H:i') . ')';
@@ -237,7 +237,7 @@ class BR_reservationShipment extends BimpObject
         $errors = array();
 
         $shipment = $this->getParentInstance();
-        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
 
         if (!BimpObject::objectLoaded($shipment)) {
             $errors[] = 'ID de l\'expédition absent';
@@ -353,7 +353,8 @@ class BR_reservationShipment extends BimpObject
         $new_qty = ((int) $this->getData('qty')) - $qty;
 
         if ($new_qty <= 0) {
-            $del_errors = $this->delete(true);
+            $del_warnings = array();
+            $del_errors = $this->delete($del_warnings, true);
             if (count($del_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression de la ligne d\'expédition');
             }
@@ -528,7 +529,7 @@ class BR_reservationShipment extends BimpObject
 
     // Overrides:
 
-    public function create(&$warnings = array())
+    public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
 
@@ -584,7 +585,7 @@ class BR_reservationShipment extends BimpObject
                 $this->set('id_product', $id_product);
                 $this->set('id_equipment', $id_equipment);
 
-                $errors = parent::create($warnings);
+                $errors = parent::create($warnings, $force_create);
 
                 if ($this->isLoaded()) {
                     $res_errors = $this->updateReservationsQty((int) $this->getData('qty'));
@@ -608,11 +609,11 @@ class BR_reservationShipment extends BimpObject
         return $errors;
     }
 
-    public function update(&$warnings = array())
+    public function update(&$warnings = array(), $force_update = false)
     {
         $current_qty = (int) $this->getSavedData('qty');
 
-        $errors = parent::update($warnings);
+        $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
             $new_qty = (int) $this->getData('qty');
@@ -632,25 +633,26 @@ class BR_reservationShipment extends BimpObject
             }
 
             if ((int) $this->getData('qty') === 0) {
-                $this->delete(true);
+                $del_warnings = array();
+                $this->delete($del_warnings, true);
             }
         }
 
         return $errors;
     }
 
-    public function delete()
-    {
-        $errors = array();
-
-//        if ((int) $this->getData('qty') > 0) {
-//            $errors = $this->removeFromShipment((int) $this->getData('qty'));
-//        }
-
-        if (!count($errors)) {
-            $errors = parent::delete();
+//    public function delete()
+//    {
+////        $errors = array();
+//
+////        if ((int) $this->getData('qty') > 0) {
+////            $errors = $this->removeFromShipment((int) $this->getData('qty'));
+////        }
+//
+////        if (!count($errors)) {
+//            $errors = parent::delete();
+////        }
+//
+//        return $errors;
+//    }
         }
-
-        return $errors;
-    }
-}

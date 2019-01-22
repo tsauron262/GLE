@@ -1,0 +1,49 @@
+extends: Bimp_Paiement
+
+dol_object: 
+    instance: 
+        dol_object: 
+            module: fourn
+            file: paiementfourn
+            class: PaiementFourn
+            
+table: paiementfourn
+primary: rowid
+
+labels: 
+    name: paiement
+    
+forms:
+    default:
+        rows:
+            0:
+                label: Fournisseur
+                input_name: id_fourn
+                input: 
+                    societe_type: supplier
+                value: 
+                    callback: getFourn
+            1:
+                label: Compte
+                input_name: id_account
+                content: unset
+                input: 
+                    type: select_mysoc_account
+                show: 1
+            7:
+                label: Avoirs chez ce fournisseur
+                depends_on: id_supplier
+                input_name: avoirs
+                input: 
+                    type: select_remises_fourn
+                    id_fourn: 
+                        callback: getFourn
+                display_if: 
+                    field_name: id_fourn
+            8:
+                depends_on: id_fourn
+                input_name: factures
+                display_if: 
+                    field_name: id_fourn
+                content: 
+                    callback: renderFacturesAmountsInputs

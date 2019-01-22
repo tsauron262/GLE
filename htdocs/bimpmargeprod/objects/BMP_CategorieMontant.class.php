@@ -3,15 +3,8 @@
 class BMP_CategorieMontant extends BimpObject
 {
 
-    public function getCategories()
+    public function getCategories($include_empty = 0)
     {
-        $rows = $this->getList();
-        $categories = array();
-
-        foreach ($rows as $r) {
-            $categories[$r['id']] = $r['name'];
-        }
-
-        return $categories;
+        return self::getBimpObjectFullListArray($this->module, $this->object_name, $include_empty);
     }
 }

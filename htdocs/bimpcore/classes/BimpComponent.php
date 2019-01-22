@@ -165,7 +165,7 @@ abstract class BimpComponent
         if ($request) {
             $json = isset($defs['json']) ? (bool) $defs['json'] : false;
             if (BimpTools::isSubmit('param_' . $name)) {
-                $param = BimpTools::getValue('param_' . $name, '', false);
+                $param = BimpTools::getValue('param_' . $name);
                 if ($json && !is_null($param) && is_string($param)) {
                     $param = json_decode($param, true);
                 }
@@ -244,10 +244,6 @@ abstract class BimpComponent
                         }
                     }
                     break;
-
-                case 'component':
-
-                    break;
             }
         }
 
@@ -282,6 +278,41 @@ abstract class BimpComponent
         }
 
         return true;
+    }
+
+    public static function getDefaultParams($definitions)
+    {
+        $params = array();
+
+        foreach ($definitions as $name => $def) {
+            $type = (isset($def['type']) ? $def['type'] : 'value');
+            switch ($type) {
+                case 'value':
+                    $params[$name] = (isset($def['default']) ? $def['default'] : null);
+                    break;
+
+                case 'object':
+                    $params[$name] = null;
+                    break;
+
+                case 'keys':
+                    $params[$name] = array();
+                    break;
+
+                case 'definitions':
+                    $defs_type = isset($def['defs_type']) ? $def['defs_type'] : null;
+                    $multiple = isset($def['multiple']) ? (bool) $def['multiple'] : false;
+
+                    if ($multiple || !property_exists('BimpConfigDefinitions', $defs_type)) {
+                        $params[$name] = array();
+                    } else {
+                        $params[$name] = self::getDefaultParams(BimpConfigDefinitions::${$defs_type});
+                    }
+                    break;
+            }
+        }
+
+        return $params;
     }
 
     // Rendus:

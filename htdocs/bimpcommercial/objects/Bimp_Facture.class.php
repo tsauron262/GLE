@@ -274,8 +274,9 @@ class Bimp_Facture extends BimpComm
     {
         return $this->getData('facnumber');
     }
-    
-    public function getRefProperty() {
+
+    public function getRefProperty()
+    {
         return 'facnumber';
     }
 
@@ -969,29 +970,29 @@ class Bimp_Facture extends BimpComm
                 // Avoirs utilisés: 
                 $rows = $this->db->getRows('societe_remise_except', '`fk_facture` = ' . (int) $this->id, null, 'array');
                 if (!is_null($rows) && count($rows)) {
-                    $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
                     foreach ($rows as $r) {
-                        $facture->fetch((int) $r['fk_facture_source']);
+                        $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $r['fk_facture_source']);
+                        if ($facture->isLoaded()) {
+                            $html .= '<tr>';
+                            $html .= '<td style="text-align: right;">';
+                            if ((int) $facture->getData('type') === Facture::TYPE_CREDIT_NOTE) {
+                                $html .= 'Avoir ';
+                                $total_credit_note += (float) $r['amount_ttc'];
+                            } elseif ((int) $facture->getData('type') === Facture::TYPE_DEPOSIT) {
+                                $html .= 'Acompte ';
+                                $total_deposit += (float) $r['amount_ttc'];
+                            }
+                            $html .= $facture->dol_object->getNomUrl(0);
+                            $html .= ' : </td>';
 
-                        $html .= '<tr>';
-                        $html .= '<td style="text-align: right;">';
-                        if ((int) $facture->getData('type') === Facture::TYPE_CREDIT_NOTE) {
-                            $html .= 'Avoir ';
-                            $total_credit_note += (float) $r['amount_ttc'];
-                        } elseif ((int) $facture->getData('type') === Facture::TYPE_DEPOSIT) {
-                            $html .= 'Acompte ';
-                            $total_deposit += (float) $r['amount_ttc'];
+                            $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . '</td>';
+                            $html .= '<td class="buttons">';
+                            $onclick = $this->getJsActionOnclick('removeDiscount', array('id_discount' => (int) $r['rowid']));
+                            $html .= BimpRender::renderRowButton('Retirer', 'trash', $onclick);
+                            $html .= '</td>';
+
+                            $html .= '</tr>';
                         }
-                        $html .= $facture->dol_object->getNomUrl(0);
-                        $html .= ' : </td>';
-
-                        $html .= '<td>' . BimpTools::displayMoneyValue((float) $r['amount_ttc'], 'EUR') . '</td>';
-                        $html .= '<td class="buttons">';
-                        $onclick = $this->getJsActionOnclick('removeDiscount', array('id_discount' => (int) $r['rowid']));
-                        $html .= BimpRender::renderRowButton('Retirer', 'trash', $onclick);
-                        $html .= '</td>';
-
-                        $html .= '</tr>';
                     }
                 }
 
@@ -1106,7 +1107,7 @@ class Bimp_Facture extends BimpComm
             $mult = 1;
             $title = 'Paiements effectuées';
 
-            $paiement = BimpObject::getInstance('bimpcommercial', 'Bimp_Paiement');
+
             $rows = $this->db->getRows('paiement_facture', '`fk_facture` = ' . (int) $this->id, null, 'array');
 
             $html = '<table class="bimp_list_table">';
@@ -1129,7 +1130,8 @@ class Bimp_Facture extends BimpComm
 
             if (!is_null($rows) && count($rows)) {
                 foreach ($rows as $r) {
-                    if ($paiement->fetch((int) $r['fk_paiement'])) {
+                    $paiement = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Paiement', (int) $r['fk_paiement']);
+                    if ($paiement->isLoaded()) {
                         $html .= '<tr>';
                         $html .= '<td>' . $paiement->dol_object->getNomUrl(1) . '</td>';
                         $html .= '<td>' . $paiement->displayData('datep') . '</td>';
@@ -1445,7 +1447,7 @@ class Bimp_Facture extends BimpComm
 
         return $errors;
     }
-    
+
     public function checkIsPaid()
     {
         if ($this->isLoaded() && (int) $this->getData('fk_statut') === 1) {
@@ -1982,7 +1984,7 @@ class Bimp_Facture extends BimpComm
                 if (!$id_facture_replaced) {
                     $errors[] = 'Facture à remplacer absente';
                 } else {
-                    $facture = BimpObject::getInstance($this->module, $this->object_name, $id_facture_replaced);
+                    $facture = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $id_facture_replaced);
                     if (!$facture->isLoaded()) {
                         $errors[] = 'Facture à remplacer invalide';
                     } else {
@@ -2022,7 +2024,7 @@ class Bimp_Facture extends BimpComm
                 if (!$this->dol_object->fk_facture_source && (empty($conf->global->INVOICE_CREDIT_NOTE_STANDALONE) || $avoir_same_lines || $avoir_remain_to_pay)) {
                     $errors[] = 'Facture à corriger absente';
                 } elseif ($this->dol_object->fk_facture_source) {
-                    $facture = BimpObject::getInstance($this->module, $this->object_name, $this->dol_object->fk_facture_source);
+                    $facture = BimpCache::getBimpObjectInstance($this->module, $this->object_name, $this->dol_object->fk_facture_source);
                     if (!$facture->isLoaded()) {
                         $errors[] = 'Facture à corriger invalide';
                     }

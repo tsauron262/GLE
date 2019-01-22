@@ -34,7 +34,8 @@ fields:
     id_event: 
         label: Evénement
         type: id_parent
-    
+        input: 
+            type: hidden
     id_coprod:
         show:
             callback: 
@@ -46,7 +47,6 @@ fields:
         default_value: 0
         values: 
             array: coprods
-            
     id_category_montant: 
         label: Catégorie
         type: id_object
@@ -68,13 +68,16 @@ fields:
                 join_field: position
         next_sort_field: id_montant
         depends_on: type,id_coprod
-            
     id_montant:
         label: Type montant
         type: id_object
         object: type_montant
         values: 
-            array: types_montants
+            array: allTypes
+        input: 
+            type: select
+            options: 
+                array: types_montants
         display:
             type: nom
         search: 
@@ -90,7 +93,6 @@ fields:
             default:
                 label: Nom
                 join_field: name
-        
     amount: 
         label: Montant HT
         type: money
@@ -98,12 +100,18 @@ fields:
             type: value_part
             part_type: beginning
             search_on_key_up: 1
-        
+        display_if: 
+            field_name: has_details
+            show_values: 0
+    tva_tx:
+        label: Tx TVA
+        type: percent
+        default_value: 0
     status:
         label: Statut
         type: int
         values:
-            array: status
+            array: status_list
         default_value: 1
         display: 
             default: 
@@ -111,7 +119,6 @@ fields:
             icon:
                 type: array_value
                 icon_only: 1
-            
     type: 
         label: Type
         type: int
@@ -122,37 +129,121 @@ fields:
                 is_static: 1
         input: 
             type: hidden
-            
     comment: 
         label: Commentaire
         type: text
         input: 
             auto_expand: 1
             rows: 1
-        searchable: 0
+        searchable: 0   
+    paiements: 
+        label: Paiements
+        type: json
+        input: 
+            type: hidden
      
+forms: 
+    default: 
+        rows: 
+            - field: type
+            - field: id_coprod
+            - field: id_category_montant
+            - field: id_montant
+            - custom: 1
+              hidden: 1
+              input_name: has_details
+              data_type: bool
+              input: 
+                  type: hidden
+              value: 
+                  callback: hasDetails
+              depends_on: id_montant
+            - field: amount
+            - field: status
+            - field: comment
+            - object: details
+              multiple: 1
+              display_if: 
+                  field_name: has_details
+                  show_values: 1
+                  
+    paiement: 
+        rows: 
+            - field: id_event
+            - field: type
+            - field: id_coprod
+              label: Payé/reçu intialement par
+            - custom: 1
+              label: Catégorie
+              input_name: id_category_montant
+              data_type: int
+              input: 
+                  type: select
+                  options: 
+                      array: paiementCategories
+              depends_on: id_event,type,id_coprod
+            - custom: 1
+              label: Type de montant
+              input_name: id_montant
+              data_type: int
+              input: 
+                  type: select
+                  options: 
+                      array: paiementTypesMontants
+              depends_on: id_event,type,id_coprod,id_category_montant
+              display_if: 
+                  field_name: id_category_montant
+                  hide_values: 0,
+            - custom: 1
+              label: Paiements / Reçus
+              input_name: paiements
+              content: 
+                  callback: renderPaiementInputs
+              display_if: 
+                  field_name: id_montant
+                  hide_values: 0,
+              depends_on: id_event,id_coprod,id_montant
+              
+    paiement_montant: 
+        rows: 
+            - field: id_event
+            - field: type
+            - field: id_coprod
+              edit: 0
+            - field: id_category_montant
+              edit: 0
+            - field: id_montant
+              edit: 0
+            - custom: 1
+              label: Paiements / Reçus
+              input_name: paiements
+              content: 
+                  callback: renderPaiementInputs
+              
 lists:
-    frais: 
+    default: 
         title: Montants
         checkboxes: 
             callback: isEventEditable
-        item_checkbox: 
-            callback: isDeletable
         objects_change_reload: BMP_EventMontantDetail,BMP_EventBillets
         row_style: 
-            callback: getListRowStyle
+            callback: renderListRowStyle
         bulk_actions:
             - label: supprimer les lignes sélectionnées
               icon: fas_trash-alt
               onclick: deleteSelectedObjects('list_id', $(this))
+            - label: Confirmé
+              icon: check-circle
+              onclick: setSelectedObjectsNewStatus($(this), 'list_id', 2)
+            - label: Optionnel
+              icon: question-circle
+              onclick: setSelectedObjectsNewStatus($(this), 'list_id', 3)
         sort_field: id_category_montant
         sort_way: asc
         n: 0
         update_btn: 1
         add_form_name: 
             callback: getCreateForm
-        add_form_values:
-            type: 1
         delete_btn: 
             callback: isDeletable
         cols: 
@@ -162,7 +253,8 @@ lists:
                 field: id_montant
             coprod: 
                 label: Payé par
-                field: id_coprod
+                value: 
+                    callback: displayPaidBy
                 show:
                     callback: 
                         method: showCoprods
@@ -172,13 +264,14 @@ lists:
                 field: amount
                 edit: 
                     callback: isEditable
+                max_width: 120px
             taxe:
-                label: TVA
-                value: 
-                    callback: getTva
+                field: tva_tx
+                max_width: 40px
             status: 
                 field: status
                 edit: 1
+                max_width: 120px
             comment: 
                 field: comment
                 edit: 1
@@ -187,66 +280,38 @@ lists:
         extra_btn:
             callback: getDefaultListExtraButtons
             
-    recettes: 
-        title: Montants
-        checkboxes: 
-            callback: isEventEditable
-        item_checkbox: 
-            callback: isDeletable
-        objects_change_reload: BMP_EventMontantDetail,BMP_EventBillets
-        row_style: 
-            callback: getListRowStyle
-        bulk_actions:
-            - label: supprimer les lignes sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
-        sort_field: id_category_montant
-        sort_way: asc
-        n: 0
-        update_btn: 1
-        add_form_name: 
-            callback: getCreateForm
+    frais: 
+        extends: default
+        header_buttons: 
+            callback: 
+                method: getDefaultListExtraHeaderBtn
+                params: 
+                    - 1
         add_form_values:
-            type: 2
-        delete_btn: 
-            callback: isDeletable
+            fields: 
+                type: 1
+        
+            
+    recettes: 
+        extends: default
+        header_buttons: 
+            callback: 
+                method: getDefaultListExtraHeaderBtn
+                params: 
+                    - 2
+        add_form_values:
+            fields: 
+                type: 2
         cols: 
-            category:
-                field: id_category_montant
-            type: 
-                field: id_montant
             coprod: 
                 label: Reçu par
-                field: id_coprod
-                show:
-                    callback: 
-                        method: showCoprods
-                        object: 
-                            callback: getParentInstance
-            amount: 
-                field: amount
-                edit: 
-                    callback: isEditable
-            taxe:
-                label: TVA
-                value: 
-                    callback: getTva
-            status: 
-                field: status
-                edit: 1
-            comment: 
-                field: comment
-                edit: 1
-        extra_cols: 
-            callback: getCoProdsCols
-        extra_btn:
-            callback: getDefaultListExtraButtons
+        
             
     recettes_bar: 
         title: Recette du bar
         objects_change_reload: BMP_EventMontantDetail,BMP_EventBillets
         row_style: 
-            callback: getListRowStyle
+            callback: renderListRowStyle
         sort_field: id_montant
         sort_way: asc
         n: 0
@@ -258,7 +323,8 @@ lists:
                 field: id_montant
             coprod: 
                 label: Reçu par
-                field: id_coprod
+                value: 
+                    callback: displayPaidBy
                 show:
                     callback: 
                         method: showCoprods
@@ -270,8 +336,7 @@ lists:
                     callback: isEditable
             taxe:
                 label: TVA
-                value: 
-                    callback: getTva
+                field: tva_tx
             status: 
                 field: status
                 edit: 1
@@ -282,115 +347,59 @@ lists:
             callback: getCoProdsCols
         extra_btn:
             callback: getDefaultListExtraButtons
-            
-    bilan_general: 
-        title: Bilan général
-        checkboxes: 0
-        row_style: 
-            callback: getListRowStyle
-        sort_field: id_category_montant
-        sort_way: asc
-        n: 0
-        cols:
-            category: 
-                field: id_category_montant
-            montant:
-                field: id_montant
-            coprod: 
-                field: id_coprod
-                show:
-                    callback: 
-                        method: showCoprods
-                        object: 
-                            callback: getParentInstance
-            status: 
-                field: status
-                
-            taxe: 
-                label: TVA
-                value: 
-                    callback: getTva
-           
-            frais:
-                label: Charges HT
-                value: 
-                    callback: 
-                        method: displayAmountByType
-                        params: 
-                            type: 1
-                            
-            recette:
-                label: Recettes HT
-                value: 
-                    callback: 
-                        method: displayAmountByType
-                        params: 
-                            type: 2
-            
-        extra_cols: 
-            callback: 
-                method: getCoProdsCols
-                params: 
-                    edit: 0
-        extra_btn:
-            callback: 
-                method: getDefaultListExtraButtons
-                params:
-                    - 0
-                    - 1
                     
-    bilan_comptable: 
-        title: Bilan comptable Le Fil
-        checkboxes: 0
-        row_style: 
-            callback: getListRowStyle
-        filters: 
-            id_coprod: 0
-        sort_field: id_category_montant
-        sort_way: asc
-        n: 0
-        cols:
-            status: 
-                field: status
-                display: icon
-                max_width: 32px
-                min_width: 32px
-            category: 
-                field: id_category_montant
-            montant:
-                field: id_montant
-            code_compta: 
-                label: Code Comptable
-                value: 
-                    field_value:
-                        field_name: code_compta
-                        object: type_montant
-            taxe: 
-                label: TVA
-                value: 
-                    callback: getTva
-           
-            frais:
-                label: Charges HT
-                value: 
-                    callback: 
-                        method: displayAmountByType
-                        params: 
-                            type: 1
-                            
-            recette:
-                label: Recettes HT
-                value: 
-                    callback: 
-                        method: displayAmountByType
-                        params: 
-                            type: 2
-        extra_btn:
-            callback: 
-                method: getDefaultListExtraButtons
-                params:
-                    - 0
-                    - 1
+#    bilan_comptable: 
+#        title: Bilan comptable Le Fil
+#        checkboxes: 0
+#        row_style: 
+#            callback: renderListRowStyle
+#        list_filters:
+#            - name: id_coprod
+#              filter: 0
+#        sort_field: id_category_montant
+#        sort_way: asc
+#        n: 0
+#        cols:
+#            status: 
+#                field: status
+#                display: icon
+#                max_width: 32px
+#                min_width: 32px
+#            category: 
+#                field: id_category_montant
+#            montant:
+#                field: id_montant
+#            code_compta: 
+#                label: Code Comptable
+#                value: 
+#                    field_value:
+#                        field_name: code_compta
+#                        object: type_montant
+#            taxe: 
+#                label: TVA
+#                field: tva_tx
+#           
+#            frais:
+#                label: Charges HT
+#                value: 
+#                    callback: 
+#                        method: displayPaidAmountByType
+#                        params: 
+#                            type: 1
+#                            
+#            recette:
+#                label: Recettes HT
+#                value: 
+#                    callback: 
+#                        method: displayPaidAmountByType
+#                        params: 
+#                            type: 2
+#        extra_btn:
+#            callback: 
+#                method: getDefaultListExtraButtons
+#                params:
+#                    - 0
+#                    - 1
             
 views:
     details_list:

@@ -569,7 +569,10 @@ function validateForm($form) {
     return check;
 }
 
-function reloadObjectInput(form_id, input_name, fields) {
+function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
+    if (typeof (keep_new_value) === 'undefined') {
+        keep_new_value = 1;
+    }
     var $form = $('#' + form_id);
     if (!$form.length) {
         return;
@@ -609,10 +612,13 @@ function reloadObjectInput(form_id, input_name, fields) {
         field_name: input_name,
         fields: fields,
         custom_field: custom,
-        value: value,
         field_prefix: $container.data('field_prefix'),
         is_object: is_object
     };
+
+    if (keep_new_value) {
+        data.value = value;
+    }
 
     if (custom) {
         data['form_row'] = $container.data('form_row');
@@ -637,13 +643,13 @@ function reloadObjectInput(form_id, input_name, fields) {
                 var $input = bimpAjax.$form.find('[name=' + bimpAjax.input_name + ']');
                 if ($input.length) {
                     setInputEvents($form, $input);
-                    $('body').trigger($.Event('inputReloaded', {
-                        $form: $form,
-                        input_name: bimpAjax.input_name,
-                        $input: $input
-                    }));
                     $input.change();
                 }
+                $('body').trigger($.Event('inputReloaded', {
+                    $form: $form,
+                    input_name: bimpAjax.input_name,
+                    $input: $input
+                }));
             }
         }
     });
@@ -766,6 +772,7 @@ function getFieldValue($form, field_name) {
     if ($input.length) {
         return $input.val();
     }
+
     return '';
 }
 
@@ -1826,7 +1833,7 @@ function setInputsEvents($container) {
             setSortableMultipleValuesHandlesEvents($(this));
         }
     });
-    $container.find('.search_list_input').each(function() {
+    $container.find('.search_list_input').each(function () {
         if (!parseInt($(this).data('search_list_input_events_init'))) {
             $(this).keyup(function (e) {
                 if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp' && e.key !== 'Enter') {
@@ -1886,7 +1893,7 @@ function setInputsEvents($container) {
                     }
                 }
             });
-            $(this).keydown(function(e) {
+            $(this).keydown(function (e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                 }

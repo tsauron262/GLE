@@ -19,7 +19,7 @@ class indexController extends BimpController
                 BimpObject::loadClass('bimpcaisse', 'BC_Caisse');
                 $id_caisse = (int) BC_Caisse::getUserCaisse((int) $user->id);
                 if ($id_caisse) {
-                    $this->caisse = BimpObject::getInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
+                    $this->caisse = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Caisse', $id_caisse);
                     if (!BimpObject::objectLoaded($this->caisse)) {
                         unset($this->caisse);
                         $this->caisse = null;
@@ -440,7 +440,7 @@ class indexController extends BimpController
 
     public function renderClientsTabHtml()
     {
-        $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe');
+        $client = BimpObject::getInstance('bimpcore', 'Bimp_Client');
         $list = new BC_ListTable($client, 'clients_caisse');
         return $list->renderHtml();
     }
@@ -470,7 +470,7 @@ class indexController extends BimpController
             return BimpRender::renderAlerts($errors);
         }
 
-        $session = BimpObject::getInstance('bimpcaisse', 'BC_CaisseSession', (int) $caisse->getData('id_current_session'));
+        $session = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_CaisseSession', (int) $caisse->getData('id_current_session'));
         if (!$session->isLoaded()) {
             $html .= BimpRender::renderAlerts('Aucune session valide en cours pour cette caisse');
         } else {
@@ -517,7 +517,7 @@ class indexController extends BimpController
             if ($id_user_caisse === $id_caisse) {
                 $errors[] = 'Vous êtes déjà connecté à cette caisse';
             } else {
-                $user_caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_user_caisse);
+                $user_caisse = BimpCache::getBimpObjectInstance($this->module, 'BC_Caisse', $id_user_caisse);
                 if (BimpObject::objectLoaded($user_caisse)) {
                     $caisse_label = '"' . $user_caisse->getData('name') . '"';
                 } else {
@@ -528,7 +528,7 @@ class indexController extends BimpController
         }
 
         if (!count($errors)) {
-            $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
+            $caisse = BimpCache::getBimpObjectInstance($this->module, 'BC_Caisse', $id_caisse);
             if (!$caisse->isLoaded()) {
                 $errors[] = 'Cette caisse n\'est pas enregistrée';
             } else {
@@ -623,7 +623,7 @@ class indexController extends BimpController
         }
 
         if (!count($errors)) {
-            $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
+            $caisse = BimpCache::getBimpObjectInstance($this->module, 'BC_Caisse', $id_caisse);
 
             if ($this->isCaisseValide($caisse, $errors)) {
                 $id_entrepot = (int) $caisse->getData('id_entrepot');
@@ -697,10 +697,10 @@ class indexController extends BimpController
         if (!$id_caisse) {
             $errors[] = 'ID de la caisse absent';
         } else {
-            $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
+            $caisse = BimpCache::getBimpObjectInstance($this->module, 'BC_Caisse', $id_caisse);
 
             if ($this->isCaisseValide($caisse, $errors)) {
-                $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
+                $caisse = BimpCache::getBimpObjectInstance($this->module, 'BC_Caisse', $id_caisse);
                 $vente = BimpObject::getInstance($this->module, 'BC_Vente');
                 $errors = $vente->validateArray(array(
                     'status'            => 1,
@@ -743,7 +743,7 @@ class indexController extends BimpController
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
         } else {
-            $vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente', $id_vente);
+            $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe pas';
             } else {
@@ -774,11 +774,10 @@ class indexController extends BimpController
         }
 
         if (!count($errors)) {
-            $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
+            $caisse = BimpCache::getBimpObjectInstance($this->module, 'BC_Caisse', $id_caisse);
 
             if ($this->isCaisseValide($caisse, $errors)) {
-                $caisse = BimpObject::getInstance($this->module, 'BC_Caisse', $id_caisse);
-                $vente = BimpObject::getInstance($this->module, 'BC_Vente', $id_vente);
+                $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', $id_vente);
 
                 if ($vente->getData('status') === 2) {
                     $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
@@ -826,7 +825,7 @@ class indexController extends BimpController
         if (!$id_vente) {
             $errors[] = 'ID de la vente absent';
         } else {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe pas';
             }
@@ -901,7 +900,7 @@ class indexController extends BimpController
         $vente_data = array();
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
@@ -943,7 +942,7 @@ class indexController extends BimpController
         $vente_data = array();
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
@@ -984,7 +983,7 @@ class indexController extends BimpController
         }
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
@@ -1027,7 +1026,7 @@ class indexController extends BimpController
         }
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
@@ -1073,7 +1072,7 @@ class indexController extends BimpController
         $vente_data = array();
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
@@ -1115,7 +1114,7 @@ class indexController extends BimpController
         $vente_data = array();
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
@@ -1161,14 +1160,14 @@ class indexController extends BimpController
         $stock = 0;
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
                 if ($vente->getData('status') === 2) {
                     $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
                 } else {
-                    $article = BimpObject::getInstance($this->module, 'BC_VenteArticle', (int) $id_article);
+                    $article = BimpCache::getBimpObjectInstance($this->module, 'BC_VenteArticle', (int) $id_article);
                     if (!$article->isLoaded()) {
                         $errors[] = 'Article non trouvé';
                     } else {
@@ -1210,14 +1209,14 @@ class indexController extends BimpController
         $vente_data = array();
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
                 if ($vente->getData('status') === 2) {
                     $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
                 } else {
-                    $article = BimpObject::getInstance($this->module, 'BC_VenteArticle', (int) $id_article);
+                    $article = BimpCache::getBimpObjectInstance($this->module, 'BC_VenteArticle', (int) $id_article);
                     if (!$article->isLoaded()) {
                         $errors[] = 'Article non trouvé';
                     } else {
@@ -1254,14 +1253,14 @@ class indexController extends BimpController
         $vente_data = array();
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
                 if ($vente->getData('status') === 2) {
                     $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
                 } else {
-                    $remise = BimpObject::getInstance($this->module, 'BC_VenteRemise', $id_remise);
+                    $remise = BimpCache::getBimpObjectInstance($this->module, 'BC_VenteRemise', $id_remise);
                     $errors = $remise->delete();
                     $vente_data = $vente->getAjaxData();
                 }
@@ -1299,7 +1298,7 @@ class indexController extends BimpController
         $vente_data = array();
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
@@ -1339,14 +1338,14 @@ class indexController extends BimpController
         $vente_data = array();
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
                 if ($vente->getData('status') === 2) {
                     $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
                 } else {
-                    $paiement = BimpObject::getInstance($this->module, 'BC_VentePaiement', $id_paiement);
+                    $paiement = BimpCache::getBimpObjectInstance($this->module, 'BC_VentePaiement', $id_paiement);
                     $errors = $paiement->delete();
                     $html = $vente->renderPaiementsLines();
                 }
@@ -1387,7 +1386,7 @@ class indexController extends BimpController
             $errors[] = 'ID de la vente absent';
         }
 
-        $vente = BimpObject::getInstance('bimpcaisse', 'BC_Vente', $id_vente);
+        $vente = BimpCache::getBimpObjectInstance('bimpcaisse', 'BC_Vente', $id_vente);
         if (!BimpObject::objectLoaded($vente)) {
             $errors[] = 'ID de la vente invalide';
         }
@@ -1412,18 +1411,18 @@ class indexController extends BimpController
             $list = Equipment::findEquipments($serial, $id_client);
 
             if (count($list)) {
-                $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
-                $client = BimpObject::getInstance('bimpcore', 'Bimp_Societe');
                 foreach ($list as $id_equipment) {
                     if (in_array($id_equipment, $currentReturnedEquipments)) {
                         $warnings[] = 'Un équipement correspondant à ce numéro de série a déjà été ajouté aux retours';
                         continue;
                     }
-                    if ($equipment->fetch((int) $id_equipment)) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                    if (BimpObject::objectLoaded($equipment)) {
                         $place = $equipment->getCurrentPlace();
                         if ((int) $place->getData('type') === BE_Place::BE_PLACE_CLIENT &&
                                 (int) $place->getData('id_client')) {
-                            if ($client->fetch((int) $place->getData('id_client'))) {
+                            $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) $place->getData('id_client'));
+                            if (BimpObject::objectLoaded($client)) {
                                 $equipments[] = array(
                                     'id'        => (int) $id_equipment,
                                     'label'     => $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . ' (' . $client->getData('nom') . ')',
@@ -1470,14 +1469,14 @@ class indexController extends BimpController
         $vente_data = array();
 
         if (!count($errors)) {
-            $vente = BimpObject::getInstance($this->module, 'BC_Vente', (int) $id_vente);
+            $vente = BimpCache::getBimpObjectInstance($this->module, 'BC_Vente', (int) $id_vente);
             if (!$vente->isLoaded()) {
                 $errors[] = 'Cette vente n\'existe plus';
             } else {
                 if ($vente->getData('status') === 2) {
                     $errors[] = 'Cette vente ne peut pas être modifée car elle a été validée';
                 } else {
-                    $return = BimpObject::getInstance($this->module, 'BC_VenteReturn', (int) $id_return);
+                    $return = BimpCache::getBimpObjectInstance($this->module, 'BC_VenteReturn', (int) $id_return);
                     if (!$return->isLoaded()) {
                         $errors[] = 'Article non trouvé';
                     } else {

@@ -29,6 +29,8 @@ class BC_Panel extends BimpComponent
         $this->params_def['header_buttons'] = array('data_type' => 'array', 'compile' => true);
         $this->params_def['footer_extra_btn'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
         $this->params_def['msgs'] = array('data_type' => 'array', 'default' => null, 'compile' => true);
+        $this->params_def['before_content'] = array('default' => '');
+        $this->params_def['after_content'] = array('default' => '');
 
         $this->content_only = (int) $content_only;
         $this->level = $level;
@@ -93,11 +95,17 @@ class BC_Panel extends BimpComponent
         $html .= $this->object->object_name . '_' . static::$type . '_container"';
         $html .= '>';
 
-        
+
         if (count($this->errors)) {
             $html .= BimpRender::renderAlerts($this->errors);
         } else {
             $content = '';
+
+            if ($this->params['before_content']) {
+                $content .= '<div class="beforePanelContainer">';
+                $content .= $this->params['before_content'];
+                $content .= '</div>';
+            }
 
             $content = '<div id="' . $this->identifier . '"';
             $content .= ' class="object_component object_' . static::$type;
@@ -137,8 +145,14 @@ class BC_Panel extends BimpComponent
             $content .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result" style="display: none"></div>';
             $content .= '</div>';
 
+            if ($this->params['after_content']) {
+                $content .= '<div class="afterPanelContainer">';
+                $content .= $this->params['after_content'];
+                $content .= '</div>';
+            }
+
             $html .= $this->renderBeforePanelHtml();
-            
+
             if (!$this->content_only && (int) $this->params['panel']) {
                 $title = $this->getTitle();
                 $icon = $this->getIcon();

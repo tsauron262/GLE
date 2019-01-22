@@ -2,11 +2,20 @@ $(document).ready(function () {
     $('body').on('viewLoaded', function (e) {
         if (e.$view.hasClass('BF_Demande_view_montants')) {
             onBFDemandeViewLoaded(e.$view);
+        } else if (e.$view.hasClass('BF_Demande_view_fournisseurs')) {
+            onBfCommandesFournViewLoaded(e.$view);
         }
     });
     $('body').on('viewRefresh', function (e) {
         if (e.$view.hasClass('BF_Demande_view_montants')) {
             onBFDemandeViewLoaded(e.$view);
+        } else if (e.$view.hasClass('BF_Demande_view_fournisseurs')) {
+            onBfCommandesFournViewLoaded(e.$view);
+        }
+    });
+    $('body').on('formLoaded', function (e) {
+        if (/^BF_Demande_new_commandes_fourn_form_(\d+)$/.test(e.$form.attr('id'))) {
+            onCommandesFournFormLoaded(e.$form);
         }
     });
 });
@@ -183,7 +192,6 @@ function bf_demande_calculateMontantTotal($view, champ) {
     displayMoneyValue(restPaye, $view.find('#rest_fact'));
 }
 
-
 function calculInteret(montant, duree, taux, echoir) {
     if (taux == 0)
         return 0;
@@ -215,7 +223,6 @@ function calculTotal(selecteur) {
     return totalLI;
 }
 
-
 function hideShowAvance(view_id, hide) {
     if ($("#ca_calc").length > 0) {
         var $container = $('.BF_Demande_fields_table_montants');
@@ -241,5 +248,382 @@ function hideShowAvance(view_id, hide) {
         }
 
         elem2.prepend('<button type="button" id="plusMoinsAvance"  class="btn btn-primary" ' + moreBut + '</button>');
+    }
+}
+
+// Factures frais: 
+function addSelectedElementsToFacture(list_id, id_demande, $button) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$.isOk($list)) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        return;
+    }
+
+    var $selected = $list.find('tbody').find('input.item_check:checked');
+    var object_name = $list.data('object_name');
+
+    if (!$selected.length) {
+        var msg = '';
+        if (object_labels[object_name]['is_female']) {
+            msg = 'Aucune ' + object_labels[object_name]['name'] + ' sélectionnée';
+        } else {
+            msg = 'Aucun ' + object_labels[object_name]['name'] + ' sélectionné';
+        }
+        bimp_msg(msg, 'danger');
+    } else {
+        var elements = [];
+
+        $selected.each(function () {
+            elements.push(parseInt($(this).data('id_object')));
+        });
+        addElementsToFacture(object_name, id_demande, elements, $button);
+    }
+}
+
+function addElementsToFacture(object_name, id_demande, elements, $button) {
+    // bimpcore/views/js/object.js :
+    setObjectAction($button, {
+        module: 'bimpfinancement',
+        object_name: 'BF_Demande',
+        id_object: id_demande
+    }, 'addElementsToFacture', {
+        object_name: object_name,
+        elements: elements
+    }, 'add_to_invoice');
+}
+
+// Commandes fournisseurs:
+
+function onCommandesFournFormLoaded($form) {
+    if (!parseInt($form.data('demande_form_events_init'))) {
+        $form.find('.fournisseur_container').each(function () {
+            $(this).find('input[name="fournisseurs[]"]').change(function () {
+                var $container = $(this).findParentByClass('fournisseur_container');
+                if ($.isOk($container)) {
+                    if ($(this).prop('checked')) {
+                        $container.find('.commande_fourn_lines').slideDown(250);
+                    } else {
+                        $container.find('.commande_fourn_lines').slideUp(250);
+                    }
+                }
+            });
+            $(this).find('.commande_fourn_lines > table > tbody > tr').each(function () {
+                $(this).find('.fourn_line_check').change(function () {
+                    var $row = $(this).parent('td').parent('tr');
+                    if ($(this).prop('checked')) {
+                        $row.removeClass('deactivated');
+                        var qty = $row.find('.qtyInput').data('max');
+                        if (qty) {
+                            $row.find('.qtyInput').val(qty);
+                        }
+                    } else {
+                        $row.addClass('deactivated');
+                        $row.find('.qtyInput').val(0);
+                    }
+                });
+            });
+        });
+
+        $form.data('demande_form_events_init', 1);
+    }
+}
+
+function onCommandesFournFormSubmit($form, extra_data) {
+    if ($.isOk($form)) {
+        var fourns = [];
+
+        $form.find('.fournisseur_container').each(function () {
+            if ($(this).find('input[name="fournisseurs[]"]').prop('checked')) {
+                var lines = [];
+
+                $(this).find('.commande_fourn_lines > table > tbody > tr').each(function () {
+                    var $check = $(this).find('.fourn_line_check');
+                    if ($check.prop('checked')) {
+                        var $qty = $(this).find('.qtyInput');
+                        lines.push({id_line: $check.val(), qty: $qty.val()});
+                    }
+                });
+
+                if (lines.length) {
+                    fourns.push({
+                        id_fourn: $(this).find('input[name="fournisseurs[]"]').val(),
+                        lines: lines
+                    });
+                }
+            }
+        });
+
+        if (fourns.length) {
+            extra_data['commandes_fourn'] = fourns;
+        }
+    }
+    return extra_data;
+}
+
+function onBfCommandesFournViewLoaded($view) {
+    if ($view.length) {
+
+        $view.find('input.line_qty_input').each(function () {
+            if (!parseInt($(this).data('bf_demande_commande_fourn_events_init'))) {
+                $(this).change(function () {
+                    var $row = $(this).findParentByClass('commande_fourn_element_row');
+                    checkBfLineCommandesfournQties($view.attr('id'), $row.data('id_fourn'), $row.data('id_bf_line'));
+                });
+                $(this).data('bf_demande_commande_fourn_events_init', 1);
+            }
+        });
+    }
+}
+
+function checkBfLineCommandesfournQties(view_id, id_fourn, id_line) {
+    var $view = $('#' + view_id);
+    if ($view.length) {
+        var $rows = $view.find('.commande_fourn_element_row.fourn_' + id_fourn + '_line_' + id_line);
+        if ($rows.length) {
+            var total_initial = 0;
+            var total_set = 0;
+            var remain_qty = parseFloat($('#fourn_' + id_fourn + '_line_' + id_line + '_remain_qty').val());
+            if (isNaN(remain_qty)) {
+                remain_qty = 0;
+            }
+            var qties_set = {};
+            var error = false;
+            $rows.each(function () {
+                var $input = $(this).find('input.line_qty_input');
+                if ($input.length) {
+                    var initial_qty = parseFloat($input.data('initial_qty'));
+                    if (isNaN(initial_qty)) {
+                        initial_qty = 0;
+                    }
+                    var qty_set = parseFloat($input.val());
+                    if (isNaN(qty_set)) {
+                        $input.val(initial_qty).change();
+                        error = true;
+                    }
+                    var max = parseFloat($input.data('max'));
+                    if (isNaN(max)) {
+                        max = initial_qty;
+                    }
+                    if (qty_set > max) {
+                        error = true;
+                    }
+                    total_initial += initial_qty;
+                    total_set += qty_set;
+                    var id_comm = parseInt($(this).data('id_commande'));
+                    qties_set[id_comm] = qty_set;
+                }
+            });
+            if (error) {
+                return;
+            }
+            remain_qty -= (total_set - total_initial);
+            if (remain_qty < 0) {
+//                bimp_msg('Une incohérence dans les quantités a été détecté.<br/>Les quantités ont été réinitialisées' + ': ' + remain_qty + ', ' + total_set + ', ' + total_initial);
+                resetBfLineCommandesFournQties(view_id, id_fourn, id_line);
+                return;
+            }
+            $rows.each(function () {
+                var $input = $(this).find('input.line_qty_input');
+                if ($input.length) {
+                    var id_comm = parseInt($(this).data('id_commande'));
+                    var new_max = qties_set[id_comm] + remain_qty;
+                    $input.data('max', new_max);
+                    $(this).find('span.qty_max_value').text(new_max);
+                }
+            });
+            checkCommandesFournLinesModifs(view_id);
+        }
+    }
+}
+
+function resetBfLineCommandesFournQties(view_id, id_fourn, id_line) {
+    var $view = $('#' + view_id);
+    if ($view.length) {
+        var $rows = $view.find('.commande_fourn_element_row.fourn_' + id_fourn + '_line_' + id_line);
+        var remain_qty = parseFloat($('#fourn_' + id_fourn + '_line_' + id_line + '_remain_qty'));
+        if (isNaN(remain_qty)) {
+            remain_qty = 0;
+        }
+        if ($rows.length) {
+            $rows.each(function () {
+                var $input = $(this).find('input.line_qty_input');
+                if ($input.length) {
+                    var initial_qty = parseFloat($input.data('initial_qty'));
+                    if (isNaN(initial_qty)) {
+                        initial_qty = 0;
+                    }
+                    $input.val(initial_qty);
+
+                    var max = (initial_qty + remain_qty);
+                    $input.data('max', max);
+                    $(this).find('span.qty_max_value').text(max);
+                }
+            });
+        }
+    }
+}
+
+function checkCommandesFournLinesModifs(view_id) {
+    var $view = $('#' + view_id);
+
+    if ($view.length) {
+        var has_modif = false;
+        $view.find('.fourn_row').each(function () {
+            $(this).find('.commande_fourn_element_row').each(function () {
+                var is_modif = false;
+                var $input = $(this).find('input.line_qty_input');
+                if ($input.length) {
+                    var initial_qty = parseFloat($input.data('initial_qty'));
+                    var qty_set = parseFloat($input.val());
+                    if (!isNaN(initial_qty) && !isNaN(qty_set)) {
+                        if (qty_set !== initial_qty) {
+                            is_modif = true;
+                        }
+                    }
+                }
+                if (is_modif) {
+                    has_modif = true;
+                    $(this).addClass('modified');
+                    $(this).find('.cancel_line').removeClass('hidden');
+                    $(this).find('.save_line').removeClass('hidden');
+                } else {
+                    $(this).removeClass('modified');
+                    $(this).find('.cancel_line').addClass('hidden');
+                    $(this).find('.save_line').addClass('hidden');
+                }
+            });
+        });
+        if (has_modif) {
+            $view.find('div.commandes_fourn_modif_buttons').stop().slideDown(250);
+        } else {
+            $view.find('div.commandes_fourn_modif_buttons').stop().slideUp(250);
+        }
+    }
+}
+
+function cancelCommandesFournLinesModifs($button, view_id) {
+    var $view = $('#' + view_id);
+
+    if ($view.length) {
+        if ($button.hasClass('cancel_line')) {
+            var $row = $button.findParentByClass('commande_fourn_element_row');
+            if ($row.length) {
+                var $input = $row.find('input.line_qty_input');
+                if ($input.length) {
+                    var initial_qty = parseFloat($input.data('initial_qty'));
+                    if (!isNaN(initial_qty)) {
+                        $input.val(initial_qty).change();
+                    }
+                }
+            }
+        } else {
+            $view.find('.fourn_row').each(function () {
+                $(this).find('.commande_fourn_element_row').each(function () {
+                    var $input = $(this).find('input.line_qty_input');
+                    if ($input.length) {
+                        var initial_qty = parseFloat($input.data('initial_qty'));
+                        if (!isNaN(initial_qty)) {
+                            $input.val(initial_qty).change();
+                        }
+                    }
+                });
+            });
+        }
+    }
+}
+
+function saveCommandesFournLinesModifs($button, view_id, id_demande) {
+    if ($button.hasClass('deactivated')) {
+        return;
+    }
+
+    var $view = $('#' + view_id);
+
+    if ($view.length) {
+        if ($button.hasClass('save_line')) {
+            var $row = $button.findParentByClass('commande_fourn_element_row');
+            if ($row.length) {
+
+                var $input = $row.find('input.line_qty_input');
+                if ($input.length) {
+                    var initial_qty = parseFloat($input.data('initial_qty'));
+                    var qty_set = parseFloat($input.val());
+                    if (!isNaN(initial_qty) && !isNaN(qty_set) && (qty_set !== initial_qty)) {
+                        var id_bf_line = parseInt($row.data('id_bf_line'));
+                        var id_commande = parseInt($row.data('id_commande'));
+                        var new_qties = [{
+                                id_commande: id_commande,
+                                id_bf_line: id_bf_line,
+                                qty: qty_set
+                            }];
+
+                        setObjectAction($button, {
+                            module: 'bimpfinancement',
+                            object_name: 'BF_Demande',
+                            id_object: id_demande
+                        }, 'setCommandesFournLinesQties', {
+                            new_qties: new_qties
+                        });
+                        return;
+                    }
+                }
+            }
+        } else {
+            var $rows = $view.find('.commande_fourn_element_row');
+            var new_qties = [];
+            $rows.each(function () {
+                var $input = $(this).find('input.line_qty_input');
+                if ($input.length) {
+                    var initial_qty = parseFloat($input.data('initial_qty'));
+                    var qty_set = parseFloat($input.val());
+                    if (!isNaN(initial_qty) && !isNaN(qty_set) && (qty_set !== initial_qty)) {
+                        var id_bf_line = parseInt($(this).data('id_bf_line'));
+                        var id_commande = parseInt($(this).data('id_commande'));
+                        new_qties.push({
+                            id_commande: id_commande,
+                            id_bf_line: id_bf_line,
+                            qty: qty_set
+                        });
+                    }
+                }
+            });
+            if (new_qties.length) {
+                setObjectAction($button, {
+                    module: 'bimpfinancement',
+                    object_name: 'BF_Demande',
+                    id_object: id_demande
+                }, 'setCommandesFournLinesQties', {
+                    new_qties: new_qties
+                });
+                return;
+            } else  {
+                bimp_msg('Aucune quantité à mettre à jour trouvée', 'warning');
+
+            }
+        }
+    }
+    $button.removeClass('deactivated');
+}
+
+function toggleBfCommandeFournDetailDisplay($button) {
+    if ($.isOk($button)) {
+        var $row = $button.parent('td').parent('tr');
+        if ($row.length) {
+            var $next = $row.next();
+            if ($next.length && $next.hasClass('commande_fourn_elements_rows')) {
+                if ($next.css('display') === 'none') {
+                    $next.stop().slideDown(250);
+                    $button.find('i.iconRight').attr('class', 'fas fa5-caret-up iconRight');
+                } else {
+                    $next.stop().slideUp(250);
+                    $button.find('i.iconRight').attr('class', 'fas fa5-caret-down iconRight');
+                }
+            }
+        }
     }
 }

@@ -43,9 +43,9 @@ class BS_SavPret extends BimpObject
                 if (in_array((int) $item['id'], $unreturned)) {
                     continue;
                 }
-
-                if ($instance->fetch((int) $item['id'])) {
-                    $equipments[(int) $item['id']] = $instance->getData('serial') . ' - ' . $instance->displayProduct('nom', true);
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $item['id']);
+                if ($equipment->isLoaded()) {
+                    $equipments[(int) $item['id']] = $equipment->getData('serial') . ' - ' . $equipment->displayProduct('nom', true);
                 }
             }
         }
@@ -63,9 +63,9 @@ class BS_SavPret extends BimpObject
         }
         $list = $this->getList($filters, null, null, 'id', 'desc', 'array', array('id'));
         $items = array();
-        $instance = BimpObject::getInstance($this->module, $this->object_name);
         foreach ($list as $item) {
-            if ($instance->fetch((int) $item['id'])) {
+            $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $item['id']);
+            if ($instance->isLoaded()) {
                 $asso = new BimpAssociation($instance, 'equipments');
                 foreach ($asso->getAssociatesList() as $id_equipment) {
                     $items[] = (int) $id_equipment;
@@ -96,8 +96,8 @@ class BS_SavPret extends BimpObject
 
     public function defaultDisplayEquipmentsItem($id_equipment)
     {
-        $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
-        if ($equipment->fetch($id_equipment)) {
+        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+        if ($equipment->isLoaded()) {
             $label = '';
             $product = $equipment->getChildObject('product');
             if (!is_null($product) && isset($product->id) && $product->id) {

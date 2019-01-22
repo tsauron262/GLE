@@ -38,9 +38,9 @@ class BR_OrderLine extends BimpObject
 
         if (BimpObject::objectLoaded($commande)) {
             $asso = new BimpAssociation($commande, 'avoirs');
-            $avoir = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
             foreach ($asso->getAssociatesList() as $id_avoir) {
-                if ($avoir->fetch((int) $id_avoir)) {
+                $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_avoir);
+                if ($avoir->isLoaded()) {
                     if ((int) $avoir->dol_object->statut === (int) Facture::STATUS_DRAFT) {
                         $DT = new DateTime($this->db->db->iDate($avoir->dol_object->date_creation));
                         $avoirs[(int) $id_avoir] = $avoir->dol_object->ref . ' (créé le ' . $DT->format('d / m / Y à H:i') . ')';

@@ -66,7 +66,7 @@ class BimpCommController extends BimpController
         }
 
         if ($module && $object_name) {
-            $objectLine = BimpObject::getInstance($module, $object_name, $id_object_line);
+            $objectLine = BimpCache::getBimpObjectInstance($module, $object_name, $id_object_line);
             if (!is_null($objectLine)) {
                 if (!$objectLine->getParentId() && $id_parent) {
                     $objectLine->setIdParent($id_parent);

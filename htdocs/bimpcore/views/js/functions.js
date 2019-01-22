@@ -98,6 +98,28 @@ function toggleFoldableSection($caption) {
     }
 }
 
+function toggleElementDisplay($element, $button) {
+    if (!$.isOk($element)) {
+        return;
+    }
+
+    if ($element.css('display') === 'none') {
+        $element.stop().slideDown(250);
+        if ($.isOk($button)) {
+            if ($button.hasClass('open-close')) {
+                $button.removeClass('action-open').addClass('action-close');
+            }
+        }
+    } else {
+        $element.stop().slideUp(250);
+        if ($.isOk($button)) {
+            if ($button.hasClass('open-close')) {
+                $button.removeClass('action-close').addClass('action-open');
+            }
+        }
+    }
+}
+
 function hidePopovers($container) {
     $container.find('.bs-popover').each(function () {
         $(this).popover('hide');

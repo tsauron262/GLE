@@ -5919,55 +5919,55 @@ readers do not read off random characters that represent icons */
   }
 }
 /*Styles génériques*/
-/* line 26, ../scss/bimpcore/_styles.scss */
+/* line 25, ../scss/bimpcore/_styles.scss */
 .clearAfter:after {
   clear: right;
 }
 
-/* line 30, ../scss/bimpcore/_styles.scss */
+/* line 29, ../scss/bimpcore/_styles.scss */
 #id-right {
   background-color: #F0F0F0;
 }
 
 @media (max-width: 1279px) {
-  /* line 35, ../scss/bimpcore/_styles.scss */
+  /* line 34, ../scss/bimpcore/_styles.scss */
   #id-right {
     z-index: 9950 !important;
   }
 
-  /* line 39, ../scss/bimpcore/_styles.scss */
+  /* line 38, ../scss/bimpcore/_styles.scss */
   #id-left {
     z-index: 10100 !important;
     background-color: #fff;
   }
 
-  /* line 44, ../scss/bimpcore/_styles.scss */
+  /* line 43, ../scss/bimpcore/_styles.scss */
   #tmenu_tooltip {
     z-index: 10100 !important;
   }
-  /* line 47, ../scss/bimpcore/_styles.scss */
+  /* line 46, ../scss/bimpcore/_styles.scss */
   #tmenu_tooltip .tmenudiv,
   #tmenu_tooltip .tmenudiv ul.tmenu {
     z-index: 10100 !important;
   }
 
-  /* line 52, ../scss/bimpcore/_styles.scss */
+  /* line 51, ../scss/bimpcore/_styles.scss */
   .side-nav {
     z-index: 9960 !important;
   }
 
-  /* line 56, ../scss/bimpcore/_styles.scss */
+  /* line 55, ../scss/bimpcore/_styles.scss */
   #but-menu,
   #id-top .login_block {
     z-index: 10110 !important;
   }
 
-  /* line 63, ../scss/bimpcore/_styles.scss */
+  /* line 62, ../scss/bimpcore/_styles.scss */
   body.has_fullscreen #id-right,
   body.has_fullscreen #id-left {
     z-index: 1 !important;
   }
-  /* line 68, ../scss/bimpcore/_styles.scss */
+  /* line 67, ../scss/bimpcore/_styles.scss */
   body.has_fullscreen #tmenu_tooltip,
   body.has_fullscreen .side-nav,
   body.has_fullscreen #but-menu,
@@ -5975,59 +5975,59 @@ readers do not read off random characters that represent icons */
     display: none;
   }
 }
-/* line 77, ../scss/bimpcore/_styles.scss */
+/* line 76, ../scss/bimpcore/_styles.scss */
 .page_content {
   background-color: #fff;
   padding: 15px;
 }
 
-/* line 82, ../scss/bimpcore/_styles.scss */
+/* line 81, ../scss/bimpcore/_styles.scss */
 div.tabBar {
   padding-left: 15px;
   padding-right: 15px;
 }
 
-/* line 89, ../scss/bimpcore/_styles.scss */
+/* line 88, ../scss/bimpcore/_styles.scss */
 .ajaxResultContainer {
   margin: 15px;
 }
 
-/* line 93, ../scss/bimpcore/_styles.scss */
+/* line 92, ../scss/bimpcore/_styles.scss */
 .ui-autocomplete,
 .select2-drop,
 .select2-dropdown {
   z-index: 10250 !important;
 }
 
-/* line 100, ../scss/bimpcore/_styles.scss */
+/* line 99, ../scss/bimpcore/_styles.scss */
 body.has_fullscreen .modal {
   z-index: 11100 !important;
 }
-/* line 103, ../scss/bimpcore/_styles.scss */
+/* line 102, ../scss/bimpcore/_styles.scss */
 body.has_fullscreen .ui-autocomplete,
 body.has_fullscreen .select2-drop,
 body.has_fullscreen .select2-dropdown {
   z-index: 11250 !important;
 }
 
-/* line 110, ../scss/bimpcore/_styles.scss */
+/* line 109, ../scss/bimpcore/_styles.scss */
 .content-loading {
   display: none;
   padding: 60px;
   text-align: center;
 }
-/* line 115, ../scss/bimpcore/_styles.scss */
+/* line 114, ../scss/bimpcore/_styles.scss */
 .content-loading .loading-spin {
   font-size: 32px;
   color: #3B6EA0;
   margin: 30px;
 }
-/* line 120, ../scss/bimpcore/_styles.scss */
+/* line 119, ../scss/bimpcore/_styles.scss */
 .content-loading .loading-text {
   font-size: 16px;
 }
 
-/* line 125, ../scss/bimpcore/_styles.scss */
+/* line 124, ../scss/bimpcore/_styles.scss */
 .typeLabel {
   border-radius: 24px;
   padding: 3px 8px;
@@ -6035,53 +6035,53 @@ body.has_fullscreen .select2-dropdown {
   color: #fff;
 }
 
-/* line 132, ../scss/bimpcore/_styles.scss */
+/* line 131, ../scss/bimpcore/_styles.scss */
 .success {
   font-weight: bold;
   color: #348C41;
 }
 
-/* line 136, ../scss/bimpcore/_styles.scss */
+/* line 135, ../scss/bimpcore/_styles.scss */
 .info {
   font-weight: bold;
   color: #3B6EA0;
 }
 
-/* line 140, ../scss/bimpcore/_styles.scss */
+/* line 139, ../scss/bimpcore/_styles.scss */
 .warning {
   font-weight: bold;
   color: #E69900;
 }
 
-/* line 144, ../scss/bimpcore/_styles.scss */
+/* line 143, ../scss/bimpcore/_styles.scss */
 .danger {
   font-weight: bold;
   color: #A00000;
 }
 
-/* line 148, ../scss/bimpcore/_styles.scss */
+/* line 147, ../scss/bimpcore/_styles.scss */
 .important {
   font-weight: bold;
   color: #963E96;
 }
 
-/* line 153, ../scss/bimpcore/_styles.scss */
+/* line 152, ../scss/bimpcore/_styles.scss */
 div.alert {
   margin: 10px 0;
 }
 
-/* line 157, ../scss/bimpcore/_styles.scss */
+/* line 156, ../scss/bimpcore/_styles.scss */
 .date, .time, .datetime {
   font-weight: bold;
 }
 
-/* line 161, ../scss/bimpcore/_styles.scss */
+/* line 160, ../scss/bimpcore/_styles.scss */
 .datetime .time {
   font-weight: normal;
   font-style: italic;
 }
 
-/* line 166, ../scss/bimpcore/_styles.scss */
+/* line 165, ../scss/bimpcore/_styles.scss */
 .loading {
   font-size: 18px;
   color: #3B6EA0;
@@ -6090,33 +6090,33 @@ div.alert {
   line-height: 22px;
   vertical-align: middle;
 }
-/* line 173, ../scss/bimpcore/_styles.scss */
+/* line 172, ../scss/bimpcore/_styles.scss */
 .loading.active {
   opacity: 1;
 }
 
-/* line 178, ../scss/bimpcore/_styles.scss */
+/* line 177, ../scss/bimpcore/_styles.scss */
 .historyPopoverButton {
   margin: 0 6px;
   font-weight: normal;
-  color: #636363;
+  color: #B4B4B4;
   cursor: pointer;
   font-size: 15px;
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
   transition: all 0.3s ease;
 }
-/* line 186, ../scss/bimpcore/_styles.scss */
+/* line 185, ../scss/bimpcore/_styles.scss */
 .historyPopoverButton:before {
   font-family: 'FontAwesome';
   content: '\f1da';
 }
-/* line 191, ../scss/bimpcore/_styles.scss */
+/* line 190, ../scss/bimpcore/_styles.scss */
 .historyPopoverButton:hover {
   color: #EF7D00;
 }
 
-/* line 196, ../scss/bimpcore/_styles.scss */
+/* line 195, ../scss/bimpcore/_styles.scss */
 .objectIcon {
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -6127,12 +6127,12 @@ div.alert {
   font-size: 11px;
   color: #636363;
 }
-/* line 206, ../scss/bimpcore/_styles.scss */
+/* line 205, ../scss/bimpcore/_styles.scss */
 .objectIcon:hover {
   color: #EF7D00;
 }
 
-/* line 211, ../scss/bimpcore/_styles.scss */
+/* line 210, ../scss/bimpcore/_styles.scss */
 .dropdown-title {
   display: block;
   margin: 10px 0;
@@ -6145,133 +6145,143 @@ div.alert {
 
 /*Objects Components*/
 @media (max-width: 1279px) {
-  /* line 224, ../scss/bimpcore/_styles.scss */
+  /* line 223, ../scss/bimpcore/_styles.scss */
   .object_component {
     overflow-x: auto;
   }
-  /* line 228, ../scss/bimpcore/_styles.scss */
+  /* line 227, ../scss/bimpcore/_styles.scss */
   .object_component .row {
     margin-right: 0 !important;
     margin-left: 0 !important;
   }
 }
 
-/* line 235, ../scss/bimpcore/_styles.scss */
+/* line 234, ../scss/bimpcore/_styles.scss */
 .object_component_content {
   background-color: #fff;
 }
 
 /*Boutons*/
-/* line 241, ../scss/bimpcore/_styles.scss */
+/* line 240, ../scss/bimpcore/_styles.scss */
 .btn {
   margin: 2px;
 }
-/* line 243, ../scss/bimpcore/_styles.scss */
+/* line 242, ../scss/bimpcore/_styles.scss */
 .btn i {
   font-size: 14px;
 }
-/* line 246, ../scss/bimpcore/_styles.scss */
+/* line 245, ../scss/bimpcore/_styles.scss */
 .btn i.left {
   margin-right: 8px;
 }
-/* line 249, ../scss/bimpcore/_styles.scss */
+/* line 248, ../scss/bimpcore/_styles.scss */
 .btn i.right {
   margin-left: 8px;
 }
 
-/* line 256, ../scss/bimpcore/_styles.scss */
+/* line 255, ../scss/bimpcore/_styles.scss */
 .open-close:after {
   font-family: 'FontAwesome';
   margin-left: 5px;
 }
-/* line 260, ../scss/bimpcore/_styles.scss */
+/* line 259, ../scss/bimpcore/_styles.scss */
 .open-close.action-open:after {
   content: '\f0d7';
 }
-/* line 263, ../scss/bimpcore/_styles.scss */
+/* line 262, ../scss/bimpcore/_styles.scss */
 .open-close.action-close:after {
   content: '\f0d8';
 }
 
-/* line 268, ../scss/bimpcore/_styles.scss */
+/* line 267, ../scss/bimpcore/_styles.scss */
 i.iconLeft {
   margin-right: 8px;
 }
 
-/* line 272, ../scss/bimpcore/_styles.scss */
+/* line 271, ../scss/bimpcore/_styles.scss */
 i.iconRight {
   margin-left: 8px;
 }
 
-/* line 276, ../scss/bimpcore/_styles.scss */
+/* line 275, ../scss/bimpcore/_styles.scss */
 .buttonsContainer {
   margin: 10px 0;
   padding: 5px 0;
 }
-/* line 279, ../scss/bimpcore/_styles.scss */
+/* line 278, ../scss/bimpcore/_styles.scss */
 .buttonsContainer button, .buttonsContainer .button, .buttonsContainer .btn {
   margin: 5px;
   display: inline-block;
 }
-/* line 284, ../scss/bimpcore/_styles.scss */
+/* line 283, ../scss/bimpcore/_styles.scss */
 .buttonsContainer.align-left {
   text-align: left;
 }
-/* line 287, ../scss/bimpcore/_styles.scss */
+/* line 286, ../scss/bimpcore/_styles.scss */
 .buttonsContainer.align-center {
   text-align: center;
 }
-/* line 290, ../scss/bimpcore/_styles.scss */
+/* line 289, ../scss/bimpcore/_styles.scss */
 .buttonsContainer.align-right {
   text-align: right;
 }
 
-/* line 296, ../scss/bimpcore/_styles.scss */
+/* line 295, ../scss/bimpcore/_styles.scss */
 .panel-footer .btn, .panel-footer .button, .panel-footer button {
   margin: 2px 4px;
 }
-/* line 300, ../scss/bimpcore/_styles.scss */
+/* line 299, ../scss/bimpcore/_styles.scss */
 .panel-footer .btn-group {
   margin: 2px 8px;
 }
-/* line 302, ../scss/bimpcore/_styles.scss */
+/* line 301, ../scss/bimpcore/_styles.scss */
 .panel-footer .btn-group .btn {
   margin: 0;
 }
 
 @media (min-width: 1279px) {
-  /* line 308, ../scss/bimpcore/_styles.scss */
+  /* line 307, ../scss/bimpcore/_styles.scss */
   .btn-large {
     font-size: 14px;
     padding: 12px 20px;
   }
-  /* line 313, ../scss/bimpcore/_styles.scss */
+  /* line 312, ../scss/bimpcore/_styles.scss */
   .btn-large i {
     font-size: 18px;
   }
-  /* line 316, ../scss/bimpcore/_styles.scss */
+  /* line 315, ../scss/bimpcore/_styles.scss */
   .btn-large i.iconLeft {
     margin-right: 12px;
   }
-  /* line 320, ../scss/bimpcore/_styles.scss */
+  /* line 319, ../scss/bimpcore/_styles.scss */
   .btn-large i.iconRight {
     margin-left: 12px;
   }
 }
 
+/*Panels*/
+/* line 330, ../scss/bimpcore/_styles.scss */
+.panel .panel-body .beforePanelContainer {
+  margin-bottom: 10px;
+}
+/* line 333, ../scss/bimpcore/_styles.scss */
+.panel .panel-body .afterPanelContainer {
+  margin-top: 10px;
+}
+
 /*Modales*/
-/* line 331, ../scss/bimpcore/_styles.scss */
+/* line 341, ../scss/bimpcore/_styles.scss */
 .modal .modal-dialog {
   margin-top: 5%;
 }
-/* line 335, ../scss/bimpcore/_styles.scss */
+/* line 345, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons {
   display: inline-block;
   padding-right: 20px;
   margin-right: 20px;
   border-right: 1px solid #969696;
 }
-/* line 341, ../scss/bimpcore/_styles.scss */
+/* line 351, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-prev,
 .modal .modal-nav-buttons .modal-nav-next {
   display: inline-block;
@@ -6288,91 +6298,91 @@ i.iconRight {
   width: 32px;
   height: 32px;
 }
-/* line 355, ../scss/bimpcore/_styles.scss */
+/* line 365, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-prev i,
 .modal .modal-nav-buttons .modal-nav-next i {
   display: inline-block;
   vertical-align: middle;
   line-height: 32px;
 }
-/* line 361, ../scss/bimpcore/_styles.scss */
+/* line 371, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-prev:hover,
 .modal .modal-nav-buttons .modal-nav-next:hover {
   color: #636363;
   background-color: #fff;
 }
-/* line 366, ../scss/bimpcore/_styles.scss */
+/* line 376, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-prev.disabled,
 .modal .modal-nav-buttons .modal-nav-next.disabled {
   cursor: default;
   color: #787878;
 }
-/* line 370, ../scss/bimpcore/_styles.scss */
+/* line 380, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-prev.disabled:hover,
 .modal .modal-nav-buttons .modal-nav-next.disabled:hover {
   background-color: #636363;
   color: #787878;
 }
-/* line 377, ../scss/bimpcore/_styles.scss */
+/* line 387, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-prev i {
   margin-right: 2px;
 }
-/* line 381, ../scss/bimpcore/_styles.scss */
+/* line 391, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-history {
   display: inline-block;
   margin-left: 10px;
 }
-/* line 385, ../scss/bimpcore/_styles.scss */
+/* line 395, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle {
   display: inline-block;
   color: #B4B4B4;
   font-size: 16px;
   cursor: pointer;
 }
-/* line 391, ../scss/bimpcore/_styles.scss */
+/* line 401, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle:before {
   font-family: 'FontAwesome';
   content: '\f0d7';
 }
-/* line 396, ../scss/bimpcore/_styles.scss */
+/* line 406, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle:hover {
   color: #fff;
 }
-/* line 400, ../scss/bimpcore/_styles.scss */
+/* line 410, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle.disabled {
   color: #787878;
   cursor: default;
 }
-/* line 404, ../scss/bimpcore/_styles.scss */
+/* line 414, ../scss/bimpcore/_styles.scss */
 .modal .modal-nav-buttons .modal-nav-history .dropdown-toggle.disabled:hover {
   color: #787878;
 }
-/* line 412, ../scss/bimpcore/_styles.scss */
+/* line 422, ../scss/bimpcore/_styles.scss */
 .modal .modal-titles_container {
   display: inline-block;
 }
-/* line 416, ../scss/bimpcore/_styles.scss */
+/* line 426, ../scss/bimpcore/_styles.scss */
 .modal .modal-body {
   max-height: 650px;
   padding-bottom: 60px;
   overflow-y: auto;
 }
-/* line 421, ../scss/bimpcore/_styles.scss */
+/* line 431, ../scss/bimpcore/_styles.scss */
 .modal .modal-body .page_modal_img {
   max-width: 100%;
   height: auto;
 }
-/* line 427, ../scss/bimpcore/_styles.scss */
+/* line 437, ../scss/bimpcore/_styles.scss */
 .modal .select2-container {
   z-index: 11000;
 }
 
-/* line 432, ../scss/bimpcore/_styles.scss */
+/* line 442, ../scss/bimpcore/_styles.scss */
 .modal-ui-dialog {
   margin-top: 1px;
 }
 
-/* line 436, ../scss/bimpcore/_styles.scss */
+/* line 446, ../scss/bimpcore/_styles.scss */
 #openModalBtn {
   position: fixed;
   bottom: 0;
@@ -6391,24 +6401,24 @@ i.iconRight {
   -o-transition: all 0.3s ease;
   transition: all 0.3s ease;
 }
-/* line 452, ../scss/bimpcore/_styles.scss */
+/* line 462, ../scss/bimpcore/_styles.scss */
 #openModalBtn i {
   color: #fff;
   font-size: 16px;
   vertical-align: middle;
   margin-right: 1px;
 }
-/* line 459, ../scss/bimpcore/_styles.scss */
+/* line 469, ../scss/bimpcore/_styles.scss */
 #openModalBtn:hover {
   background-color: #EF7D00;
 }
-/* line 463, ../scss/bimpcore/_styles.scss */
+/* line 473, ../scss/bimpcore/_styles.scss */
 #openModalBtn.closed {
   margin-right: -40px;
 }
 
 /*Sections dépliables*/
-/* line 472, ../scss/bimpcore/_styles.scss */
+/* line 482, ../scss/bimpcore/_styles.scss */
 .foldable_section .foldable_section_caption {
   margin-top: 15px;
   padding: 8px 15px;
@@ -6428,7 +6438,7 @@ i.iconRight {
   color: #292964;
   cursor: pointer;
 }
-/* line 488, ../scss/bimpcore/_styles.scss */
+/* line 498, ../scss/bimpcore/_styles.scss */
 .foldable_section .foldable_section_caption:hover {
   /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#ffffff+1,f2f2f2+100 */
   background: #ffffff;
@@ -6442,30 +6452,30 @@ i.iconRight {
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#f2f2f2',GradientType=0 );
   /* IE6-9 */
 }
-/* line 497, ../scss/bimpcore/_styles.scss */
+/* line 507, ../scss/bimpcore/_styles.scss */
 .foldable_section > .foldable_section_caption:after {
   font-family: 'FontAwesome';
   margin-right: 10px;
   float: right;
   font-size: 14px;
 }
-/* line 503, ../scss/bimpcore/_styles.scss */
+/* line 513, ../scss/bimpcore/_styles.scss */
 .foldable_section.closed > .foldable_section_caption:after {
   content: '\f0d7';
 }
-/* line 506, ../scss/bimpcore/_styles.scss */
+/* line 516, ../scss/bimpcore/_styles.scss */
 .foldable_section.open > .foldable_section_caption:after {
   content: '\f0d8';
 }
-/* line 509, ../scss/bimpcore/_styles.scss */
+/* line 519, ../scss/bimpcore/_styles.scss */
 .foldable_section.closed > .foldable_section_content {
   display: none;
 }
-/* line 512, ../scss/bimpcore/_styles.scss */
+/* line 522, ../scss/bimpcore/_styles.scss */
 .foldable_section.open > .foldable_section_content {
   display: block;
 }
-/* line 515, ../scss/bimpcore/_styles.scss */
+/* line 525, ../scss/bimpcore/_styles.scss */
 .foldable_section .foldable_section_content {
   margin-left: 15px;
   margin-top: 15px;
@@ -6473,11 +6483,11 @@ i.iconRight {
   border-left: 1px dotted #B4B4B4;
 }
 
-/* line 526, ../scss/bimpcore/_styles.scss */
+/* line 536, ../scss/bimpcore/_styles.scss */
 .panel.foldable > .panel-heading:first-child {
   cursor: pointer;
 }
-/* line 529, ../scss/bimpcore/_styles.scss */
+/* line 539, ../scss/bimpcore/_styles.scss */
 .panel.foldable > .panel-heading:first-child .panel-caret {
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -6488,28 +6498,28 @@ i.iconRight {
   margin-left: 12px;
   line-height: 30px;
 }
-/* line 537, ../scss/bimpcore/_styles.scss */
+/* line 547, ../scss/bimpcore/_styles.scss */
 .panel.foldable > .panel-heading:first-child .panel-caret:before {
   font-family: 'FontAwesome';
 }
-/* line 543, ../scss/bimpcore/_styles.scss */
+/* line 553, ../scss/bimpcore/_styles.scss */
 .panel.foldable > .panel-heading:first-child:hover .panel-caret {
   opacity: 1;
 }
-/* line 550, ../scss/bimpcore/_styles.scss */
+/* line 560, ../scss/bimpcore/_styles.scss */
 .panel.foldable.open .panel-heading .panel-caret:before {
   content: '\f0d8';
 }
-/* line 556, ../scss/bimpcore/_styles.scss */
+/* line 566, ../scss/bimpcore/_styles.scss */
 .panel.foldable.closed .panel-heading .panel-caret:before {
   content: '\f0d7';
 }
 
-/* line 564, ../scss/bimpcore/_styles.scss */
+/* line 574, ../scss/bimpcore/_styles.scss */
 .objectViewtable.foldable > thead tr:first-child {
   cursor: pointer;
 }
-/* line 567, ../scss/bimpcore/_styles.scss */
+/* line 577, ../scss/bimpcore/_styles.scss */
 .objectViewtable.foldable > thead tr:first-child .foldable-caret {
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -6520,25 +6530,25 @@ i.iconRight {
   margin: 0 6px;
   float: right;
 }
-/* line 575, ../scss/bimpcore/_styles.scss */
+/* line 585, ../scss/bimpcore/_styles.scss */
 .objectViewtable.foldable > thead tr:first-child .foldable-caret:before {
   font-family: 'FontAwesome';
 }
-/* line 581, ../scss/bimpcore/_styles.scss */
+/* line 591, ../scss/bimpcore/_styles.scss */
 .objectViewtable.foldable > thead tr:first-child:hover .foldable-caret {
   opacity: 1;
 }
-/* line 589, ../scss/bimpcore/_styles.scss */
+/* line 599, ../scss/bimpcore/_styles.scss */
 .objectViewtable.foldable.open > thead tr:first-child .foldable-caret:before {
   content: '\f0d8';
 }
-/* line 595, ../scss/bimpcore/_styles.scss */
+/* line 605, ../scss/bimpcore/_styles.scss */
 .objectViewtable.foldable.closed:first-child > thead tr:first-child .foldable-caret:before {
   content: '\f0d7';
 }
 
 /*Tiny Popups*/
-/* line 604, ../scss/bimpcore/_styles.scss */
+/* line 614, ../scss/bimpcore/_styles.scss */
 .tinyPopup {
   display: none;
   background-color: #fff;
@@ -6554,7 +6564,7 @@ i.iconRight {
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 619, ../scss/bimpcore/_styles.scss */
+/* line 629, ../scss/bimpcore/_styles.scss */
 .tinyPopup .title {
   font-size: 11px;
   color: #505050;
@@ -6562,107 +6572,107 @@ i.iconRight {
   margin-bottom: 5px;
   border-bottom: 1px solid #B4B4B4;
 }
-/* line 626, ../scss/bimpcore/_styles.scss */
+/* line 636, ../scss/bimpcore/_styles.scss */
 .tinyPopup .btn {
   display: inline-block;
   margin: 5px 0;
   padding: 8px 12px;
   font-size: 12px;
 }
-/* line 632, ../scss/bimpcore/_styles.scss */
+/* line 642, ../scss/bimpcore/_styles.scss */
 .tinyPopup .btn:hover {
   background-color: #EF7D00;
   color: #fff;
 }
 
 /*Bimp Timer*/
-/* line 641, ../scss/bimpcore/_styles.scss */
+/* line 651, ../scss/bimpcore/_styles.scss */
 .bimp_timer {
   background-color: #fff;
   border: 1px solid #636363;
 }
-/* line 645, ../scss/bimpcore/_styles.scss */
+/* line 655, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_header {
   padding: 5px 8px;
   background-color: #EF7D00;
   color: #fff;
 }
-/* line 650, ../scss/bimpcore/_styles.scss */
+/* line 660, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_header .title {
   padding: 0;
 }
-/* line 653, ../scss/bimpcore/_styles.scss */
+/* line 663, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_header .title:before {
   font-family: 'FontAwesome';
   margin-right: 8px;
   content: '\f017';
 }
-/* line 661, ../scss/bimpcore/_styles.scss */
+/* line 671, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_time {
   text-align: center;
   color: #282828;
   padding: 10px 16px;
   font-weight: bold;
 }
-/* line 667, ../scss/bimpcore/_styles.scss */
+/* line 677, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_time .title {
   font-size: 13px;
   color: #636363;
   text-align: left;
   margin-bottom: 8px;
 }
-/* line 674, ../scss/bimpcore/_styles.scss */
+/* line 684, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_time .bimp_timer_label {
   margin: 0 8px;
 }
-/* line 678, ../scss/bimpcore/_styles.scss */
+/* line 688, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_time.bimp_timer_current_time {
   color: #5b5b5b;
 }
-/* line 680, ../scss/bimpcore/_styles.scss */
+/* line 690, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_time.bimp_timer_current_time .bimp_timer_value {
   font-size: 22px;
 }
-/* line 683, ../scss/bimpcore/_styles.scss */
+/* line 693, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_time.bimp_timer_current_time .bimp_timer_label {
   font-size: 16px;
 }
-/* line 687, ../scss/bimpcore/_styles.scss */
+/* line 697, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_time.bimp_timer_total_time {
   color: #282828;
 }
-/* line 689, ../scss/bimpcore/_styles.scss */
+/* line 699, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_time.bimp_timer_total_time .bimp_timer_value {
   font-size: 32px;
 }
-/* line 692, ../scss/bimpcore/_styles.scss */
+/* line 702, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_time.bimp_timer_total_time .bimp_timer_label {
   font-size: 24px;
 }
-/* line 698, ../scss/bimpcore/_styles.scss */
+/* line 708, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_footer {
   background-color: #DCDCDC;
   padding: 5px 8px;
   text-align: right;
 }
-/* line 703, ../scss/bimpcore/_styles.scss */
+/* line 713, ../scss/bimpcore/_styles.scss */
 .bimp_timer .bimp_timer_footer button {
   margin: 2px 3px;
 }
 
 /*FixeTabs*/
-/* line 711, ../scss/bimpcore/_styles.scss */
+/* line 721, ../scss/bimpcore/_styles.scss */
 .fixe_tab_content {
   max-height: 500px;
   overflow-y: scroll;
 }
-/* line 715, ../scss/bimpcore/_styles.scss */
+/* line 725, ../scss/bimpcore/_styles.scss */
 .fixe_tab_content .bimp_timer {
   display: inline-block;
 }
 
 /*Page Notifications*/
-/* line 723, ../scss/bimpcore/_styles.scss */
+/* line 733, ../scss/bimpcore/_styles.scss */
 #page_notifications {
   display: none;
   position: fixed;
@@ -6673,7 +6683,7 @@ i.iconRight {
   right: 0;
   width: 430px;
 }
-/* line 733, ../scss/bimpcore/_styles.scss */
+/* line 743, ../scss/bimpcore/_styles.scss */
 #page_notifications p {
   width: 340px;
   margin: 15px;
@@ -6683,7 +6693,7 @@ i.iconRight {
 }
 
 /*Popup login*/
-/* line 746, ../scss/bimpcore/_styles.scss */
+/* line 756, ../scss/bimpcore/_styles.scss */
 #bimp_login_popup {
   position: fixed;
   top: 0;
@@ -6694,7 +6704,7 @@ i.iconRight {
   background-color: rgba(20, 20, 20, 0.75);
   text-align: center;
 }
-/* line 757, ../scss/bimpcore/_styles.scss */
+/* line 767, ../scss/bimpcore/_styles.scss */
 #bimp_login_popup iframe {
   margin: 5%;
   width: 80%;
@@ -6702,7 +6712,7 @@ i.iconRight {
 }
 
 /*Product Stocks*/
-/* line 767, ../scss/bimpcore/_styles.scss */
+/* line 777, ../scss/bimpcore/_styles.scss */
 .productStocksContainer {
   display: none;
   position: absolute;
@@ -6715,17 +6725,17 @@ i.iconRight {
   overflow-y: auto;
   z-index: 10101;
 }
-/* line 779, ../scss/bimpcore/_styles.scss */
+/* line 789, ../scss/bimpcore/_styles.scss */
 .productStocksContainer h3 {
   margin-top: 0;
   font-size: 17px;
 }
-/* line 784, ../scss/bimpcore/_styles.scss */
+/* line 794, ../scss/bimpcore/_styles.scss */
 .productStocksContainer .stockSearchContainer {
   margin: 10px 0;
   color: #636363;
 }
-/* line 789, ../scss/bimpcore/_styles.scss */
+/* line 799, ../scss/bimpcore/_styles.scss */
 .productStocksContainer .productStockTable > thead > tr > th {
   background-color: #fff;
   color: #282828;
@@ -6733,75 +6743,75 @@ i.iconRight {
   border-bottom: 2px solid #282828;
   text-align: center;
 }
-/* line 796, ../scss/bimpcore/_styles.scss */
+/* line 806, ../scss/bimpcore/_styles.scss */
 .productStocksContainer .productStockTable > thead > tr > th:first-child {
   text-align: left;
 }
-/* line 801, ../scss/bimpcore/_styles.scss */
+/* line 811, ../scss/bimpcore/_styles.scss */
 .productStocksContainer .productStockTable > tbody > tr > td {
   text-align: center;
 }
-/* line 804, ../scss/bimpcore/_styles.scss */
+/* line 814, ../scss/bimpcore/_styles.scss */
 .productStocksContainer .productStockTable > tbody > tr > td:first-child {
   text-align: left;
 }
-/* line 809, ../scss/bimpcore/_styles.scss */
+/* line 819, ../scss/bimpcore/_styles.scss */
 .productStocksContainer tr.currentEntrepot {
   font-weight: bold;
 }
-/* line 812, ../scss/bimpcore/_styles.scss */
+/* line 822, ../scss/bimpcore/_styles.scss */
 .productStocksContainer tr.currentEntrepot td {
   background-color: #E6E6E6 !important;
 }
 
 /*Controller Debug times*/
-/* line 820, ../scss/bimpcore/_styles.scss */
+/* line 830, ../scss/bimpcore/_styles.scss */
 #bimpControllerDebugTimeInfos {
   padding: 30px;
   background-color: #fff;
 }
-/* line 825, ../scss/bimpcore/_styles.scss */
+/* line 835, ../scss/bimpcore/_styles.scss */
 #bimpControllerDebugTimeInfos table tr td {
   padding: 5px 8px;
 }
-/* line 829, ../scss/bimpcore/_styles.scss */
+/* line 839, ../scss/bimpcore/_styles.scss */
 #bimpControllerDebugTimeInfos table tr td:first-child {
   font-weight: bold;
 }
 
 /*Position handles*/
-/* line 837, ../scss/bimpcore/_styles.scss */
+/* line 847, ../scss/bimpcore/_styles.scss */
 .positionHandle {
   cursor: grab;
   text-align: center;
 }
-/* line 841, ../scss/bimpcore/_styles.scss */
+/* line 851, ../scss/bimpcore/_styles.scss */
 .positionHandle span {
   display: inline-block;
   font-size: 15px;
   margin: 0 6px;
 }
-/* line 847, ../scss/bimpcore/_styles.scss */
+/* line 857, ../scss/bimpcore/_styles.scss */
 .positionHandle span:before {
   font-family: 'FontAwesome';
   content: '\f07d';
 }
 
-/* line 853, ../scss/bimpcore/_styles.scss */
+/* line 863, ../scss/bimpcore/_styles.scss */
 .select2-results ul li {
   min-height: 30px;
 }
-/* line 856, ../scss/bimpcore/_styles.scss */
+/* line 866, ../scss/bimpcore/_styles.scss */
 .select2-results ul li.select2-results__option--highlighted {
   color: #fff !important;
 }
-/* line 859, ../scss/bimpcore/_styles.scss */
+/* line 869, ../scss/bimpcore/_styles.scss */
 .select2-results ul li.select2-results__option--highlighted span {
   color: #fff !important;
 }
 
 /*Debug infos*/
-/* line 867, ../scss/bimpcore/_styles.scss */
+/* line 877, ../scss/bimpcore/_styles.scss */
 .debug_info {
   margin: 10px;
   padding: 5px 5px 5px 40px;
@@ -6809,14 +6819,14 @@ i.iconRight {
   border-left-width: 3px;
   background-color: #FFF4EB;
 }
-/* line 874, ../scss/bimpcore/_styles.scss */
+/* line 884, ../scss/bimpcore/_styles.scss */
 .debug_info i.debug_icon {
   float: left;
   margin-left: -30px;
   font-size: 20px;
   color: #C85300;
 }
-/* line 881, ../scss/bimpcore/_styles.scss */
+/* line 891, ../scss/bimpcore/_styles.scss */
 .debug_info .debug_info_title {
   font-weight: bold;
 }
@@ -7412,17 +7422,18 @@ select.switch option[value='0'] {
   overflow-y: auto;
   margin: 10px;
 }
-/* line 523, ../scss/bimpcore/_form.scss */
-.check_list_container .check_list_item {
+
+/* line 524, ../scss/bimpcore/_form.scss */
+.check_list_item {
   margin: 0;
   padding: 0;
 }
-/* line 527, ../scss/bimpcore/_form.scss */
-.check_list_container .check_list_item input[type=checkbox] {
+/* line 528, ../scss/bimpcore/_form.scss */
+.check_list_item input[type=checkbox] {
   display: none;
 }
-/* line 531, ../scss/bimpcore/_form.scss */
-.check_list_container .check_list_item label {
+/* line 532, ../scss/bimpcore/_form.scss */
+.check_list_item label {
   padding: 6px 6px 6px 30px;
   background-color: #fff;
   color: #818181;
@@ -7431,8 +7442,8 @@ select.switch option[value='0'] {
   -o-transition: all 0.3s ease;
   transition: all 0.3s ease;
 }
-/* line 538, ../scss/bimpcore/_form.scss */
-.check_list_container .check_list_item label:before {
+/* line 539, ../scss/bimpcore/_form.scss */
+.check_list_item label:before {
   font-family: 'FontAwesome';
   margin-left: -24px;
   margin-right: 16px;
@@ -7441,12 +7452,12 @@ select.switch option[value='0'] {
   font-size: 14px;
   vertical-align: middle;
 }
-/* line 549, ../scss/bimpcore/_form.scss */
-.check_list_container .check_list_item input[type=checkbox]:checked + label {
+/* line 550, ../scss/bimpcore/_form.scss */
+.check_list_item input[type=checkbox]:checked + label {
   color: #282828;
 }
-/* line 552, ../scss/bimpcore/_form.scss */
-.check_list_container .check_list_item input[type=checkbox]:checked + label:before {
+/* line 553, ../scss/bimpcore/_form.scss */
+.check_list_item input[type=checkbox]:checked + label:before {
   font-size: 16px;
   content: '\f046';
   color: #EF7D00;
@@ -7651,7 +7662,30 @@ table.objectlistTable > tbody > tr > th {
   border-bottom: 1px solid #fff;
   text-align: right;
 }
-/* line 43, ../scss/bimpcore/_list.scss */
+/* line 42, ../scss/bimpcore/_list.scss */
+table.bimp_list_table > tbody > tr > th a,
+table.objectlistTable > tbody > tr > th a {
+  color: #fff;
+  font-weight: bold !important;
+}
+/* line 46, ../scss/bimpcore/_list.scss */
+table.bimp_list_table > tbody > tr > th a:hover,
+table.objectlistTable > tbody > tr > th a:hover {
+  font-weight: bold !important;
+  color: #fff;
+  text-decoration: underline;
+}
+/* line 53, ../scss/bimpcore/_list.scss */
+table.bimp_list_table > tbody > tr > th .objectIcon,
+table.objectlistTable > tbody > tr > th .objectIcon {
+  color: #F0D5B8;
+}
+/* line 56, ../scss/bimpcore/_list.scss */
+table.bimp_list_table > tbody > tr > th .objectIcon:hover,
+table.objectlistTable > tbody > tr > th .objectIcon:hover {
+  color: #fff;
+}
+/* line 62, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr > td,
 table.objectlistTable > tbody > tr > td {
   padding: 5px 6px;
@@ -7659,7 +7693,7 @@ table.objectlistTable > tbody > tr > td {
   background-color: #fff !important;
 }
 @media (max-width: 768px) {
-  /* line 49, ../scss/bimpcore/_list.scss */
+  /* line 68, ../scss/bimpcore/_list.scss */
   table.bimp_list_table > tbody > tr > td .toggle-label-off,
   table.bimp_list_table > tbody > tr > td .toggle-label-on,
   table.objectlistTable > tbody > tr > td .toggle-label-off,
@@ -7667,13 +7701,13 @@ table.objectlistTable > tbody > tr > td {
     display: none;
   }
 }
-/* line 55, ../scss/bimpcore/_list.scss */
+/* line 74, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr > td .inputContainer,
 table.objectlistTable > tbody > tr > td .inputContainer {
   display: inline-block;
-  width: 100%;
+  width: 99%;
 }
-/* line 59, ../scss/bimpcore/_list.scss */
+/* line 78, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr > td .inputContainer input, table.bimp_list_table > tbody > tr > td .inputContainer textarea, table.bimp_list_table > tbody > tr > td .inputContainer select,
 table.objectlistTable > tbody > tr > td .inputContainer input,
 table.objectlistTable > tbody > tr > td .inputContainer textarea,
@@ -7682,80 +7716,104 @@ table.objectlistTable > tbody > tr > td .inputContainer select {
   color: #3C3C3C;
   font-weight: normal;
 }
-/* line 65, ../scss/bimpcore/_list.scss */
+/* line 84, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr > td .inputContainer .select2-container,
 table.objectlistTable > tbody > tr > td .inputContainer .select2-container {
   width: 100% important;
   min-width: 100%;
 }
-/* line 70, ../scss/bimpcore/_list.scss */
+/* line 89, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr > td .inputContainer .inputHelp,
 table.objectlistTable > tbody > tr > td .inputContainer .inputHelp {
   display: none;
 }
-/* line 75, ../scss/bimpcore/_list.scss */
+/* line 94, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr > td .popover,
 table.objectlistTable > tbody > tr > td .popover {
   color: #282828;
 }
-/* line 80, ../scss/bimpcore/_list.scss */
+/* line 99, ../scss/bimpcore/_list.scss */
+table.bimp_list_table > tbody > tr.deactivated,
+table.objectlistTable > tbody > tr.deactivated {
+  background-color: #DCDCDC !important;
+  border-color: #C8C8C8 !important;
+  color: #646464 !important;
+}
+/* line 104, ../scss/bimpcore/_list.scss */
+table.bimp_list_table > tbody > tr.deactivated > td,
+table.objectlistTable > tbody > tr.deactivated > td {
+  background-color: #DCDCDC !important;
+  border-color: #C8C8C8 !important;
+  color: #646464 !important;
+}
+/* line 111, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr.selected,
 table.objectlistTable > tbody > tr.selected {
   background-color: #FFF5E1 !important;
 }
-/* line 83, ../scss/bimpcore/_list.scss */
+/* line 114, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr.selected > td,
 table.objectlistTable > tbody > tr.selected > td {
   background-color: #FFF5E1 !important;
 }
-/* line 88, ../scss/bimpcore/_list.scss */
+/* line 119, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr.modified,
 table.objectlistTable > tbody > tr.modified {
   background-color: #E1F5FF !important;
   border-color: #E1F5FF !important;
 }
-/* line 92, ../scss/bimpcore/_list.scss */
+/* line 123, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr.modified > td,
 table.objectlistTable > tbody > tr.modified > td {
   background-color: #E1F5FF !important;
   border-color: #E1F5FF !important;
 }
-/* line 96, ../scss/bimpcore/_list.scss */
+/* line 127, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr.modified > td .inputContainer .modified,
 table.objectlistTable > tbody > tr.modified > td .inputContainer .modified {
   box-shadow: 0 0 3px #003550 !important;
 }
-/* line 102, ../scss/bimpcore/_list.scss */
+/* line 133, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr:hover,
 table.objectlistTable > tbody > tr:hover {
   background-color: #FAFAFA !important;
 }
-/* line 105, ../scss/bimpcore/_list.scss */
+/* line 136, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr:hover > td,
 table.objectlistTable > tbody > tr:hover > td {
   background-color: #FAFAFA !important;
 }
-/* line 110, ../scss/bimpcore/_list.scss */
+/* line 141, ../scss/bimpcore/_list.scss */
+table.bimp_list_table > tbody > tr.deactivated:hover,
+table.objectlistTable > tbody > tr.deactivated:hover {
+  background-color: #E6E6E6 !important;
+}
+/* line 144, ../scss/bimpcore/_list.scss */
+table.bimp_list_table > tbody > tr.deactivated:hover > td,
+table.objectlistTable > tbody > tr.deactivated:hover > td {
+  background-color: #E6E6E6 !important;
+}
+/* line 149, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr.selected:hover,
 table.objectlistTable > tbody > tr.selected:hover {
   background-color: #FFEFCD !important;
 }
-/* line 113, ../scss/bimpcore/_list.scss */
+/* line 152, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr.selected:hover > td,
 table.objectlistTable > tbody > tr.selected:hover > td {
   background-color: #FFEFCD !important;
 }
-/* line 118, ../scss/bimpcore/_list.scss */
+/* line 157, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr.modified:hover,
 table.objectlistTable > tbody > tr.modified:hover {
   background-color: #CDEFFF !important;
 }
-/* line 121, ../scss/bimpcore/_list.scss */
+/* line 160, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr.modified:hover > td,
 table.objectlistTable > tbody > tr.modified:hover > td {
   background-color: #CDEFFF !important;
 }
-/* line 127, ../scss/bimpcore/_list.scss */
+/* line 166, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tfoot > tr > th,
 table.objectlistTable > tfoot > tr > th {
   color: #fff;
@@ -7763,7 +7821,7 @@ table.objectlistTable > tfoot > tr > th {
   text-align: right;
   padding: 5px 12px 5px 6px;
 }
-/* line 134, ../scss/bimpcore/_list.scss */
+/* line 173, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tfoot > tr > td,
 table.objectlistTable > tfoot > tr > td {
   background-color: #E6E6E6;
@@ -7771,12 +7829,12 @@ table.objectlistTable > tfoot > tr > td {
   color: #282828;
   padding: 8px 6px;
 }
-/* line 141, ../scss/bimpcore/_list.scss */
+/* line 180, ../scss/bimpcore/_list.scss */
 table.bimp_list_table .objectSubList,
 table.objectlistTable .objectSubList {
   width: 100%;
 }
-/* line 143, ../scss/bimpcore/_list.scss */
+/* line 182, ../scss/bimpcore/_list.scss */
 table.bimp_list_table .objectSubList > thead > tr > th,
 table.objectlistTable .objectSubList > thead > tr > th {
   padding: 4px 10px;
@@ -7787,7 +7845,88 @@ table.objectlistTable .objectSubList > thead > tr > th {
   font-weight: bold;
   border-bottom: 1px solid #EF7D00;
 }
-/* line 153, ../scss/bimpcore/_list.scss */
+/* line 193, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.selected,
+table.objectlistTable .objectSubList > tbody > tr.selected {
+  background-color: #FFF5E1 !important;
+}
+/* line 196, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.selected > td,
+table.objectlistTable .objectSubList > tbody > tr.selected > td {
+  background-color: #FFF5E1 !important;
+}
+/* line 201, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.deactivated,
+table.objectlistTable .objectSubList > tbody > tr.deactivated {
+  background-color: #DCDCDC !important;
+  border-color: #C8C8C8 !important;
+  color: #646464 !important;
+}
+/* line 206, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.deactivated > td,
+table.objectlistTable .objectSubList > tbody > tr.deactivated > td {
+  background-color: #DCDCDC !important;
+  border-color: #C8C8C8 !important;
+  color: #646464 !important;
+}
+/* line 213, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.modified,
+table.objectlistTable .objectSubList > tbody > tr.modified {
+  background-color: #E1F5FF !important;
+  border-color: #E1F5FF !important;
+}
+/* line 217, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.modified > td,
+table.objectlistTable .objectSubList > tbody > tr.modified > td {
+  background-color: #E1F5FF !important;
+  border-color: #E1F5FF !important;
+}
+/* line 221, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.modified > td .inputContainer .modified,
+table.objectlistTable .objectSubList > tbody > tr.modified > td .inputContainer .modified {
+  box-shadow: 0 0 3px #003550 !important;
+}
+/* line 227, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr:hover,
+table.objectlistTable .objectSubList > tbody > tr:hover {
+  background-color: #FAFAFA !important;
+}
+/* line 230, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr:hover > td,
+table.objectlistTable .objectSubList > tbody > tr:hover > td {
+  background-color: #FAFAFA !important;
+}
+/* line 235, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.deactivated:hover,
+table.objectlistTable .objectSubList > tbody > tr.deactivated:hover {
+  background-color: #E6E6E6 !important;
+}
+/* line 238, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.deactivated:hover > td,
+table.objectlistTable .objectSubList > tbody > tr.deactivated:hover > td {
+  background-color: #E6E6E6 !important;
+}
+/* line 243, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.selected:hover,
+table.objectlistTable .objectSubList > tbody > tr.selected:hover {
+  background-color: #FFEFCD !important;
+}
+/* line 246, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.selected:hover > td,
+table.objectlistTable .objectSubList > tbody > tr.selected:hover > td {
+  background-color: #FFEFCD !important;
+}
+/* line 251, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.modified:hover,
+table.objectlistTable .objectSubList > tbody > tr.modified:hover {
+  background-color: #CDEFFF !important;
+}
+/* line 254, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tbody > tr.modified:hover > td,
+table.objectlistTable .objectSubList > tbody > tr.modified:hover > td {
+  background-color: #CDEFFF !important;
+}
+/* line 260, ../scss/bimpcore/_list.scss */
 table.bimp_list_table .objectSubList td,
 table.objectlistTable .objectSubList td {
   padding: 4px 10px;
@@ -7795,23 +7934,87 @@ table.objectlistTable .objectSubList td {
   background-color: #fff;
   color: #636363;
 }
-/* line 161, ../scss/bimpcore/_list.scss */
+/* line 268, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tfoot > tr td, table.bimp_list_table .objectSubList > tfoot > tr th,
+table.objectlistTable .objectSubList > tfoot > tr td,
+table.objectlistTable .objectSubList > tfoot > tr th {
+  padding: 4px 10px;
+  border: none;
+  background-color: #F0F0F0;
+  color: #282828;
+  font-weight: bold;
+}
+/* line 275, ../scss/bimpcore/_list.scss */
+table.bimp_list_table .objectSubList > tfoot > tr th,
+table.objectlistTable .objectSubList > tfoot > tr th {
+  text-align: right;
+  padding-right: 20px;
+}
+/* line 282, ../scss/bimpcore/_list.scss */
+table.bimp_list_table tr.margin_row,
+table.objectlistTable tr.margin_row {
+  background-color: #fff;
+}
+/* line 284, ../scss/bimpcore/_list.scss */
+table.bimp_list_table tr.margin_row > td,
+table.objectlistTable tr.margin_row > td {
+  background-color: #fff;
+  height: 15px;
+}
+/* line 291, ../scss/bimpcore/_list.scss */
+table.bimp_list_table tr.total_row > th,
+table.objectlistTable tr.total_row > th {
+  text-align: right;
+  padding-right: 20px;
+}
+/* line 296, ../scss/bimpcore/_list.scss */
+table.bimp_list_table tr.total_row > td,
+table.objectlistTable tr.total_row > td {
+  font-weight: bold;
+  background-color: #F0F0F0 !important;
+}
+/* line 301, ../scss/bimpcore/_list.scss */
+table.bimp_list_table tr.total_row > td, table.bimp_list_table tr.total_row > th,
+table.objectlistTable tr.total_row > td,
+table.objectlistTable tr.total_row > th {
+  border-top: 1px solid #787878;
+  border-bottom: 1px solid #787878;
+}
+/* line 306, ../scss/bimpcore/_list.scss */
+table.bimp_list_table tr.total_row > th:first-child, table.bimp_list_table tr.total_row > td:first-child,
+table.objectlistTable tr.total_row > th:first-child,
+table.objectlistTable tr.total_row > td:first-child {
+  border-left: 1px solid #787878;
+}
+/* line 311, ../scss/bimpcore/_list.scss */
+table.bimp_list_table tr.total_row > td:last-child,
+table.objectlistTable tr.total_row > td:last-child {
+  border-right: 1px solid #787878;
+}
+/* line 316, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tfoot > tr.paginationContainer > td,
 table.objectlistTable > tfoot > tr.paginationContainer > td {
   background-color: #fff;
 }
-/* line 165, ../scss/bimpcore/_list.scss */
+/* line 320, ../scss/bimpcore/_list.scss */
 table.bimp_list_table .listFooterButtons > td,
 table.objectlistTable .listFooterButtons > td {
   background-color: #fff;
   padding: 10px 0 0;
 }
+/* line 326, ../scss/bimpcore/_list.scss */
+table.bimp_list_table.center-align > thead > tr.col_headers > th, table.bimp_list_table.center-align > tbody > tr > td, table.bimp_list_table.center-align > tfoot > tr > td,
+table.objectlistTable.center-align > thead > tr.col_headers > th,
+table.objectlistTable.center-align > tbody > tr > td,
+table.objectlistTable.center-align > tfoot > tr > td {
+  text-align: center;
+}
 
-/* line 171, ../scss/bimpcore/_list.scss */
+/* line 334, ../scss/bimpcore/_list.scss */
 .sortTitle {
   cursor: pointer;
 }
-/* line 174, ../scss/bimpcore/_list.scss */
+/* line 337, ../scss/bimpcore/_list.scss */
 .sortTitle:after {
   font-family: 'FontAwesome';
   margin-left: 8px;
@@ -7820,136 +8023,139 @@ table.objectlistTable .listFooterButtons > td {
   transition: all 0.15s ease;
   -webkit-transition: all 0.15s ease;
 }
-/* line 182, ../scss/bimpcore/_list.scss */
+/* line 345, ../scss/bimpcore/_list.scss */
 .sortTitle:hover, .sortTitle.active {
   text-decoration: none !important;
 }
-/* line 185, ../scss/bimpcore/_list.scss */
+/* line 348, ../scss/bimpcore/_list.scss */
 .sortTitle:hover:after, .sortTitle.active:after {
   opacity: 1;
 }
-/* line 190, ../scss/bimpcore/_list.scss */
+/* line 353, ../scss/bimpcore/_list.scss */
 .sortTitle.sorted-asc:after {
   content: '\f0d7';
 }
-/* line 193, ../scss/bimpcore/_list.scss */
+/* line 356, ../scss/bimpcore/_list.scss */
 .sortTitle.sorted-desc:after {
   content: '\f0d8';
 }
-/* line 196, ../scss/bimpcore/_list.scss */
+/* line 359, ../scss/bimpcore/_list.scss */
 .sortTitle.active.sorted-asc:after {
   content: '\f0d8';
 }
-/* line 199, ../scss/bimpcore/_list.scss */
+/* line 362, ../scss/bimpcore/_list.scss */
 .sortTitle.active.sorted-desc:after {
   content: '\f0d7';
 }
-/* line 202, ../scss/bimpcore/_list.scss */
+/* line 365, ../scss/bimpcore/_list.scss */
 .sortTitle.active.sorted-asc:hover:after {
   content: '\f0d7';
 }
-/* line 205, ../scss/bimpcore/_list.scss */
+/* line 368, ../scss/bimpcore/_list.scss */
 .sortTitle.active.sorted-desc:hover:after {
   content: '\f0d8';
 }
-/* line 209, ../scss/bimpcore/_list.scss */
+/* line 372, ../scss/bimpcore/_list.scss */
 .sortTitle.deactivated, .sortTitle.deactivated:hover {
   cursor: not-allowed;
 }
-/* line 213, ../scss/bimpcore/_list.scss */
+/* line 376, ../scss/bimpcore/_list.scss */
 .sortTitle.deactivated:after, .sortTitle.deactivated:hover:after {
   opacity: 0 !important;
 }
 
-/* line 220, ../scss/bimpcore/_list.scss */
-.listSearchRow {
+/* line 383, ../scss/bimpcore/_list.scss */
+tr.listSearchRow {
   display: none;
   background-color: #DCDCDC;
 }
-/* line 224, ../scss/bimpcore/_list.scss */
-.listSearchRow > td {
+/* line 387, ../scss/bimpcore/_list.scss */
+tr.listSearchRow > td {
   background-color: #DCDCDC;
 }
-/* line 228, ../scss/bimpcore/_list.scss */
-.listSearchRow i.fa-search {
+/* line 391, ../scss/bimpcore/_list.scss */
+tr.listSearchRow i.fa-search {
   font-size: 16px;
   font-weight: bold;
   color: #787878;
 }
-/* line 233, ../scss/bimpcore/_list.scss */
-.listSearchRow .inputHelp {
+/* line 396, ../scss/bimpcore/_list.scss */
+tr.listSearchRow .inputHelp {
   display: none;
 }
-/* line 237, ../scss/bimpcore/_list.scss */
-.listSearchRow #search_id {
+/* line 400, ../scss/bimpcore/_list.scss */
+tr.listSearchRow #search_id {
   max-width: 45px;
 }
-/* line 240, ../scss/bimpcore/_list.scss */
-.listSearchRow td.searchTools {
+/* line 403, ../scss/bimpcore/_list.scss */
+tr.listSearchRow td.searchTools {
   text-align: right;
 }
-/* line 243, ../scss/bimpcore/_list.scss */
-.listSearchRow td.searchTools .btn {
+/* line 406, ../scss/bimpcore/_list.scss */
+tr.listSearchRow td.searchTools .btn {
   margin-right: 10px;
 }
-/* line 248, ../scss/bimpcore/_list.scss */
-.listSearchRow .searchInputContainer {
+/* line 411, ../scss/bimpcore/_list.scss */
+tr.listSearchRow .searchInputContainer {
   width: 100%;
   padding: 2px;
 }
-/* line 252, ../scss/bimpcore/_list.scss */
-.listSearchRow .searchInputContainer input, .listSearchRow .searchInputContainer select, .listSearchRow .searchInputContainer .input-group, .listSearchRow .searchInputContainer span.select2 {
+/* line 415, ../scss/bimpcore/_list.scss */
+tr.listSearchRow .searchInputContainer input, tr.listSearchRow .searchInputContainer select, tr.listSearchRow .searchInputContainer .input-group, tr.listSearchRow .searchInputContainer span.select2 {
   width: 100% !important;
   min-width: 100px !important;
 }
-/* line 257, ../scss/bimpcore/_list.scss */
-.listSearchRow .searchInputContainer .optionsContainer {
+/* line 420, ../scss/bimpcore/_list.scss */
+tr.listSearchRow .searchInputContainer .optionsContainer {
   display: none;
 }
-/* line 261, ../scss/bimpcore/_list.scss */
-.listSearchRow .searchInputContainer .loading {
+/* line 424, ../scss/bimpcore/_list.scss */
+tr.listSearchRow .searchInputContainer .loading {
   display: none;
 }
-/* line 265, ../scss/bimpcore/_list.scss */
-.listSearchRow .searchInputContainer .minwidth200 {
+/* line 428, ../scss/bimpcore/_list.scss */
+tr.listSearchRow .searchInputContainer .minwidth200 {
   min-width: 0;
 }
 
-/* line 272, ../scss/bimpcore/_list.scss */
-.addObjectRow {
-  display: none;
-  background-color: #A0A0A0;
+/* line 435, ../scss/bimpcore/_list.scss */
+tr.addObjectRow {
+  background-color: #A0A0A0 !important;
 }
-/* line 276, ../scss/bimpcore/_list.scss */
-.addObjectRow td:first-child {
+/* line 438, ../scss/bimpcore/_list.scss */
+tr.addObjectRow > td {
+  background-color: #A0A0A0 !important;
+}
+/* line 442, ../scss/bimpcore/_list.scss */
+tr.addObjectRow > td:first-child {
   text-align: center;
 }
-/* line 279, ../scss/bimpcore/_list.scss */
-.addObjectRow td:first-child i.fa-plus-circle {
+/* line 445, ../scss/bimpcore/_list.scss */
+tr.addObjectRow > td:first-child i.fa-plus-circle {
   font-size: 20px;
   font-weight: normal;
   color: #DCDCDC;
 }
-/* line 285, ../scss/bimpcore/_list.scss */
-.addObjectRow .inputHelp {
+/* line 452, ../scss/bimpcore/_list.scss */
+tr.addObjectRow .inputHelp {
   display: none;
 }
-/* line 290, ../scss/bimpcore/_list.scss */
-.addObjectRow .inputContainer input, .addObjectRow .inputContainer select, .addObjectRow .inputContainer textarea {
+/* line 457, ../scss/bimpcore/_list.scss */
+tr.addObjectRow .inputContainer input, tr.addObjectRow .inputContainer select, tr.addObjectRow .inputContainer textarea {
   width: 100%;
 }
 
-/* line 296, ../scss/bimpcore/_list.scss */
+/* line 463, ../scss/bimpcore/_list.scss */
 th.th_tools {
   margin-right: 25px;
 }
 
-/* line 300, ../scss/bimpcore/_list.scss */
+/* line 467, ../scss/bimpcore/_list.scss */
 .headerTools {
   text-align: right;
   height: 100%;
 }
-/* line 304, ../scss/bimpcore/_list.scss */
+/* line 471, ../scss/bimpcore/_list.scss */
 .headerTools .headerButton {
   display: inline-block;
   margin: 5px;
@@ -7963,40 +8169,40 @@ th.th_tools {
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 318, ../scss/bimpcore/_list.scss */
+/* line 485, ../scss/bimpcore/_list.scss */
 .headerTools .headerButton:hover {
   color: #EF7D00;
   background-color: #fff;
 }
-/* line 322, ../scss/bimpcore/_list.scss */
+/* line 489, ../scss/bimpcore/_list.scss */
 .headerTools .headerButton:before, .headerTools .headerButton:after {
   font-family: 'FontAwesome';
 }
-/* line 327, ../scss/bimpcore/_list.scss */
+/* line 494, ../scss/bimpcore/_list.scss */
 .headerTools .openSearchRowButton:before {
   content: '\f002';
 }
-/* line 330, ../scss/bimpcore/_list.scss */
+/* line 497, ../scss/bimpcore/_list.scss */
 .headerTools .openAddObjectRowButton:before {
   content: '\f055';
 }
-/* line 333, ../scss/bimpcore/_list.scss */
+/* line 500, ../scss/bimpcore/_list.scss */
 .headerTools .activatePositionsButton:before {
   content: '\f07d';
 }
-/* line 336, ../scss/bimpcore/_list.scss */
+/* line 503, ../scss/bimpcore/_list.scss */
 .headerTools .openBulkActionsPopupButton:before {
   content: '\f046';
 }
-/* line 339, ../scss/bimpcore/_list.scss */
+/* line 506, ../scss/bimpcore/_list.scss */
 .headerTools .openParametersPopupButton:before {
   content: '\f013';
 }
-/* line 342, ../scss/bimpcore/_list.scss */
+/* line 509, ../scss/bimpcore/_list.scss */
 .headerTools .refreshListButton:before {
   content: '\f01e';
 }
-/* line 345, ../scss/bimpcore/_list.scss */
+/* line 512, ../scss/bimpcore/_list.scss */
 .headerTools .loadingIcon {
   display: inline-block;
   margin: 5px;
@@ -8008,28 +8214,28 @@ th.th_tools {
   opacity: 0;
   font-size: 16px;
 }
-/* line 356, ../scss/bimpcore/_list.scss */
+/* line 523, ../scss/bimpcore/_list.scss */
 .headerTools .loadingIcon:before {
   font-family: 'FontAwesome';
   content: '\f110';
 }
-/* line 361, ../scss/bimpcore/_list.scss */
+/* line 528, ../scss/bimpcore/_list.scss */
 .headerTools .loadingIcon.visible {
   opacity: 1;
 }
 
-/* line 367, ../scss/bimpcore/_list.scss */
+/* line 534, ../scss/bimpcore/_list.scss */
 td.buttons {
   text-align: right;
   min-width: 160px;
   padding-right: 6px !important;
 }
-/* line 372, ../scss/bimpcore/_list.scss */
+/* line 539, ../scss/bimpcore/_list.scss */
 td.buttons .btn {
   margin-right: 4px;
 }
 
-/* line 377, ../scss/bimpcore/_list.scss */
+/* line 544, ../scss/bimpcore/_list.scss */
 .rowButton {
   color: #636363 !important;
   text-align: center;
@@ -8046,54 +8252,54 @@ td.buttons .btn {
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 394, ../scss/bimpcore/_list.scss */
+/* line 561, ../scss/bimpcore/_list.scss */
 .rowButton:hover {
   color: #fff !important;
   background-color: #EF7D00;
   text-decoration: none;
 }
-/* line 399, ../scss/bimpcore/_list.scss */
+/* line 566, ../scss/bimpcore/_list.scss */
 .rowButton:hover i {
   color: #fff !important;
 }
-/* line 403, ../scss/bimpcore/_list.scss */
+/* line 570, ../scss/bimpcore/_list.scss */
 .rowButton:before {
   font-family: 'FA5S';
 }
-/* line 406, ../scss/bimpcore/_list.scss */
+/* line 573, ../scss/bimpcore/_list.scss */
 .rowButton.editButton:before {
   content: '\f044';
 }
-/* line 409, ../scss/bimpcore/_list.scss */
+/* line 576, ../scss/bimpcore/_list.scss */
 .rowButton.updateButton:before {
   content: '\f0c7';
 }
-/* line 412, ../scss/bimpcore/_list.scss */
+/* line 579, ../scss/bimpcore/_list.scss */
 .rowButton.deleteButton:before {
   content: '\f2ed';
 }
-/* line 415, ../scss/bimpcore/_list.scss */
+/* line 582, ../scss/bimpcore/_list.scss */
 .rowButton.viewButton:before {
   content: '\f06e';
 }
-/* line 419, ../scss/bimpcore/_list.scss */
+/* line 586, ../scss/bimpcore/_list.scss */
 .rowButton i {
   color: #636363 !important;
 }
 
-/* line 424, ../scss/bimpcore/_list.scss */
+/* line 591, ../scss/bimpcore/_list.scss */
 .ajaxResultContainer {
   display: none;
   margin: 20px 15px;
 }
 
 /*Pagination*/
-/* line 431, ../scss/bimpcore/_list.scss */
+/* line 598, ../scss/bimpcore/_list.scss */
 .paginationContainer td {
   background-color: #fff;
 }
 
-/* line 435, ../scss/bimpcore/_list.scss */
+/* line 602, ../scss/bimpcore/_list.scss */
 .listPagination {
   text-align: center;
   background-color: #fff;
@@ -8101,11 +8307,11 @@ td.buttons .btn {
   margin: 10px 0;
   border-top: 1px solid #DCDCDC;
 }
-/* line 436, ../scss/bimpcore/_list.scss */
+/* line 603, ../scss/bimpcore/_list.scss */
 .listPagination:empty {
   display: none;
 }
-/* line 446, ../scss/bimpcore/_list.scss */
+/* line 613, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton {
   font-size: 13px;
   margin: 0 5px;
@@ -8119,48 +8325,48 @@ td.buttons .btn {
   line-height: 16px;
   vertical-align: middle;
 }
-/* line 459, ../scss/bimpcore/_list.scss */
+/* line 626, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton:hover {
   color: #EF7D00;
 }
-/* line 462, ../scss/bimpcore/_list.scss */
+/* line 629, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton:before, .listPagination span.navButton:after {
   font-family: 'FontAwesome';
   font-size: 12px;
   transition: all 0.3s ease;
   -webkit-transition: all 0.3s ease;
 }
-/* line 469, ../scss/bimpcore/_list.scss */
+/* line 636, ../scss/bimpcore/_list.scss */
 .listPagination span.navButton.disabled, .listPagination span.navButton.disabled:hover {
   color: #C8C8C8;
   cursor: default;
 }
-/* line 475, ../scss/bimpcore/_list.scss */
+/* line 642, ../scss/bimpcore/_list.scss */
 .listPagination span.prevButton:before {
   content: '\f053';
   margin-right: 8px;
 }
-/* line 479, ../scss/bimpcore/_list.scss */
+/* line 646, ../scss/bimpcore/_list.scss */
 .listPagination span.nextButton:after {
   content: '\f054';
   margin-left: 8px;
 }
-/* line 483, ../scss/bimpcore/_list.scss */
+/* line 650, ../scss/bimpcore/_list.scss */
 .listPagination .pages {
   display: inline-block;
   margin: 0 50px;
   color: #A0A0A0;
 }
-/* line 488, ../scss/bimpcore/_list.scss */
+/* line 655, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn {
   font-weight: bold;
   cursor: pointer;
 }
-/* line 491, ../scss/bimpcore/_list.scss */
+/* line 658, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn:hover {
   color: #505050;
 }
-/* line 494, ../scss/bimpcore/_list.scss */
+/* line 661, ../scss/bimpcore/_list.scss */
 .listPagination .pages .pageBtn.active, .listPagination .pages .pageBtn.active:hover {
   color: #EF7D00;
   cursor: default;
@@ -8300,35 +8506,63 @@ td.buttons .btn {
   padding: 5px 10px;
   background-color: #F5F5F5;
 }
-
 /* line 106, ../scss/bimpcore/_view.scss */
+.bimp_fields_table.center-align > thead > tr.col_headers > th, .bimp_fields_table.center-align > tbody > tr > td, .bimp_fields_table.center-align > tfoot > tr > td,
+.objectFieldsTable.center-align > thead > tr.col_headers > th,
+.objectFieldsTable.center-align > tbody > tr > td,
+.objectFieldsTable.center-align > tfoot > tr > td {
+  text-align: center;
+}
+/* line 113, ../scss/bimpcore/_view.scss */
+.bimp_fields_table > tbody > tr.strong > td,
+.objectFieldsTable > tbody > tr.strong > td {
+  font-weight: bold;
+  background-color: #F0F0F0;
+}
+/* line 118, ../scss/bimpcore/_view.scss */
+.bimp_fields_table > tbody > tr.title > td,
+.objectFieldsTable > tbody > tr.title > td {
+  font-weight: bold;
+  text-align: left;
+  background-color: #C8C8C8 !important;
+  border-top-color: #C8C8C8 !important;
+  border-bottom-color: #C8C8C8 !important;
+}
+/* line 127, ../scss/bimpcore/_view.scss */
+.bimp_fields_table tr.total_row > td,
+.objectFieldsTable tr.total_row > td {
+  font-weight: bold;
+  background-color: #F0F0F0 !important;
+}
+
+/* line 134, ../scss/bimpcore/_view.scss */
 .object_header {
   padding: 15px 15px 0 15px;
   background-color: #fff;
 }
-/* line 109, ../scss/bimpcore/_view.scss */
+/* line 137, ../scss/bimpcore/_view.scss */
 .object_header h1, .object_header h2 {
   margin-top: 0;
 }
-/* line 113, ../scss/bimpcore/_view.scss */
+/* line 141, ../scss/bimpcore/_view.scss */
 .object_header .object_header_infos {
   margin: 3px 0 0 0;
   font-style: italic;
   color: #787878;
   font-size: 11px;
 }
-/* line 120, ../scss/bimpcore/_view.scss */
+/* line 148, ../scss/bimpcore/_view.scss */
 .object_header .header_status {
   display: inline-block;
   font-size: 15px;
   margin: 5px 10px;
 }
-/* line 126, ../scss/bimpcore/_view.scss */
+/* line 154, ../scss/bimpcore/_view.scss */
 .object_header .header_tools {
   display: inline-block;
   margin-left: 15px;
 }
-/* line 131, ../scss/bimpcore/_view.scss */
+/* line 159, ../scss/bimpcore/_view.scss */
 .object_header .headerIconButton {
   -webkit-transition: all 0.3s ease;
   -o-transition: all 0.3s ease;
@@ -8337,26 +8571,26 @@ td.buttons .btn {
   cursor: pointer;
   font-size: 18px;
 }
-/* line 137, ../scss/bimpcore/_view.scss */
+/* line 165, ../scss/bimpcore/_view.scss */
 .object_header .headerIconButton:hover {
   color: #EF7D00;
 }
-/* line 142, ../scss/bimpcore/_view.scss */
+/* line 170, ../scss/bimpcore/_view.scss */
 .object_header .header_button {
   vertical-align: top;
   display: inline-block;
   margin: 2px 25px 6px 0;
 }
-/* line 148, ../scss/bimpcore/_view.scss */
+/* line 176, ../scss/bimpcore/_view.scss */
 .object_header .header_buttons {
   text-align: right;
   margin-top: 10px;
 }
-/* line 152, ../scss/bimpcore/_view.scss */
+/* line 180, ../scss/bimpcore/_view.scss */
 .object_header .header_buttons .btn {
   margin: 3px 5px;
 }
-/* line 157, ../scss/bimpcore/_view.scss */
+/* line 185, ../scss/bimpcore/_view.scss */
 .object_header .header_bottom {
   margin-top: 10px;
   padding: 5px;
@@ -8366,7 +8600,7 @@ td.buttons .btn {
 /*.object_page_header {
     @include transition(all 0.3s ease);    
 }*/
-/* line 168, ../scss/bimpcore/_view.scss */
+/* line 196, ../scss/bimpcore/_view.scss */
 .object_page_header.fixed {
   position: fixed;
   top: 48px;
@@ -8379,42 +8613,42 @@ td.buttons .btn {
           padding-bottom: 5px;
       }*/
 }
-/* line 176, ../scss/bimpcore/_view.scss */
+/* line 204, ../scss/bimpcore/_view.scss */
 .object_page_header.fixed .object_header {
   padding-top: 5px;
 }
-/* line 180, ../scss/bimpcore/_view.scss */
+/* line 208, ../scss/bimpcore/_view.scss */
 .object_page_header.fixed .object_header_infos {
   display: none;
 }
-/* line 184, ../scss/bimpcore/_view.scss */
+/* line 212, ../scss/bimpcore/_view.scss */
 .object_page_header.fixed .header_buttons {
   margin-top: 0;
 }
-/* line 187, ../scss/bimpcore/_view.scss */
+/* line 215, ../scss/bimpcore/_view.scss */
 .object_page_header.fixed h1 {
   font-size: 18px;
   display: inline-block;
   margin-bottom: 5px;
 }
-/* line 193, ../scss/bimpcore/_view.scss */
+/* line 221, ../scss/bimpcore/_view.scss */
 .object_page_header.fixed h2 {
   font-size: 15px;
   display: inline-block;
   margin-left: 15px;
   margin-bottom: 5px;
 }
-/* line 200, ../scss/bimpcore/_view.scss */
+/* line 228, ../scss/bimpcore/_view.scss */
 .object_page_header.fixed .header_bottom {
   padding: 0;
   margin-top: 0;
 }
 
-/* line 212, ../scss/bimpcore/_view.scss */
+/* line 240, ../scss/bimpcore/_view.scss */
 .object_card {
   margin-top: 0;
 }
-/* line 215, ../scss/bimpcore/_view.scss */
+/* line 243, ../scss/bimpcore/_view.scss */
 .object_card .object_card_status {
   display: inline-block;
   text-align: right;
@@ -8422,17 +8656,17 @@ td.buttons .btn {
   margin-left: 15px;
 }
 
-/* line 222, ../scss/bimpcore/_view.scss */
+/* line 250, ../scss/bimpcore/_view.scss */
 .object_card_table {
   width: 100%;
   margin-top: 5px;
 }
-/* line 227, ../scss/bimpcore/_view.scss */
+/* line 255, ../scss/bimpcore/_view.scss */
 .object_card_table tbody tr th, .object_card_table tbody tr td {
   padding: 0 5px;
   border-bottom: 1px solid #fff;
 }
-/* line 232, ../scss/bimpcore/_view.scss */
+/* line 260, ../scss/bimpcore/_view.scss */
 .object_card_table tbody tr th {
   width: 20%;
   min-width: 120px;
@@ -8442,29 +8676,29 @@ td.buttons .btn {
   background-color: #fff;
   color: #282828;
 }
-/* line 242, ../scss/bimpcore/_view.scss */
+/* line 270, ../scss/bimpcore/_view.scss */
 .object_card_table tbody tr td {
   color: #282828;
   background-color: #fff;
 }
 
-/* line 248, ../scss/bimpcore/_view.scss */
+/* line 276, ../scss/bimpcore/_view.scss */
 .object_common_fields {
   margin: 5px 0;
   background-color: #F5F5F5;
 }
-/* line 252, ../scss/bimpcore/_view.scss */
+/* line 280, ../scss/bimpcore/_view.scss */
 .object_common_fields table {
   width: 100%;
   border: none;
 }
-/* line 257, ../scss/bimpcore/_view.scss */
+/* line 285, ../scss/bimpcore/_view.scss */
 .object_common_fields table tbody tr th, .object_common_fields table tbody tr td {
   padding: 3px 5px;
   font-size: 12px;
   border-bottom: 1px solid #fff;
 }
-/* line 263, ../scss/bimpcore/_view.scss */
+/* line 291, ../scss/bimpcore/_view.scss */
 .object_common_fields table tbody tr th {
   font-weight: normal;
   color: #DCDCDC;
@@ -8475,18 +8709,18 @@ td.buttons .btn {
   vertical-align: top;
   background-color: #636363;
 }
-/* line 274, ../scss/bimpcore/_view.scss */
+/* line 302, ../scss/bimpcore/_view.scss */
 .object_common_fields table tbody tr td {
   color: #282828;
   border-bottom: 1px solid #DCDCDC;
   vertical-align: middle;
 }
 
-/* line 282, ../scss/bimpcore/_view.scss */
+/* line 310, ../scss/bimpcore/_view.scss */
 .multiple_values_items_list {
   padding: 5px;
 }
-/* line 285, ../scss/bimpcore/_view.scss */
+/* line 313, ../scss/bimpcore/_view.scss */
 .multiple_values_items_list .multiple_values_item {
   margin: 5px 0;
   border: 1px solid #B4B4B4;

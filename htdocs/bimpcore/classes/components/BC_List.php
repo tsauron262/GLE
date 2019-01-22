@@ -33,6 +33,7 @@ class BC_List extends BC_Panel
         $this->params_def['add_btn'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['add_form_name'] = array();
         $this->params_def['add_form_values'] = array('data_type' => 'array', 'default' => array());
+        $this->params_def['add_form_on_save'] = array('default' => '');
         $this->params_def['add_form_title'] = array();
         $this->params_def['add_btn_label'] = array('default' => '');
 
@@ -50,7 +51,7 @@ class BC_List extends BC_Panel
             $parent_module = $object->getParentModule();
             $parent_object_name = $object->getParentObjectName();
             if ($parent_module && $parent_object_name) {
-                $this->parent = BimpObject::getInstance($parent_module, $parent_object_name, (int) $id_parent);
+                $this->parent = BimpCache::getBimpObjectInstance($parent_module, $parent_object_name, (int) $id_parent);
             }
         }
 
@@ -299,9 +300,6 @@ class BC_List extends BC_Panel
         $joins = $this->params['joins'];
 
         // Filtres: 
-//        echo '<pre>';
-//        print_r($this->params['list_filters']);
-//        exit;
         if (count($this->params['list_filters'])) {
             foreach ($this->params['list_filters'] as $list_filter) {
                 $this->mergeFilter($list_filter['name'], $list_filter['filter']);
@@ -317,10 +315,12 @@ class BC_List extends BC_Panel
                 $return_field = '';
 
                 if (isset($asso_filter['object_module']) && isset($asso_filter['object_name'])) {
-                    $object = BimpObject::getInstance($asso_filter['object_module'], $asso_filter['object_name']);
+
                     if (isset($asso_filter['id_object'])) {
                         $id_object = (int) $asso_filter['id_object'];
-                        $object->fetch($id_object);
+                        $object = BimpCache::getBimpObjectInstance($asso_filter['object_module'], $asso_filter['object_name'], $id_object);
+                    } else {
+                        $object = BimpObject::getInstance($asso_filter['object_module'], $asso_filter['object_name']);
                     }
                     $return_field = 'dest_id_object';
                 } elseif (isset($asso_filter['id_associate'])) {
@@ -523,6 +523,8 @@ class BC_List extends BC_Panel
         if ($this->object->isCreatable()) {
             if ((int) $this->params['add_btn'] && !is_null($this->params['add_form_name']) && $this->params['add_form_name']) {
                 $label = '';
+                $on_save = ($this->params['add_form_on_save'] ? $this->params['add_form_on_save'] : $this->object->getConf('forms/' . $this->params['add_form_name'] . '/on_save', 'close'));
+
                 if ($this->object->config->isDefined('forms/' . $this->params['add_form_name'] . '/label')) {
                     $label = $this->object->getConf('forms/' . $this->params['add_form_name'] . '/label', '');
                 } elseif ($this->params['add_btn_label']) {
@@ -540,7 +542,7 @@ class BC_List extends BC_Panel
                 }
 
                 $onclick = 'loadModalFormFromList(\'' . $this->identifier . '\', \'' . $this->params['add_form_name'] . '\', ';
-                $onclick .= '$(this), 0, ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ', \'' . $title . '\')';
+                $onclick .= '$(this), 0, ' . (!is_null($this->id_parent) ? $this->id_parent : 0) . ', \'' . $title . '\', \'' . $on_save . '\')';
 
                 $buttons[] = array(
                     'classes'     => array('btn', 'btn-default'),
@@ -556,5 +558,4 @@ class BC_List extends BC_Panel
 
         return $buttons;
     }
-
 }

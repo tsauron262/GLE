@@ -44,9 +44,9 @@ class BimpController
         $this->controller = $controller;
 
         global $user, $bimpUser;
-        $bimpUser = BimpObject::getInstance('bimpcore', 'Bimp_User');
+
         if (BimpObject::objectLoaded($user)) {
-            $bimpUser->fetch((int) $user->id);
+            $bimpUser = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_User', (int) $user->id);
         }
 
         $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/controllers/';
@@ -868,6 +868,7 @@ class BimpController
     protected function ajaxProcessDeleteObjects()
     {
         $errors = array();
+        $warnings = array();
         $success = '';
 
         $objects = BimpTools::getValue('objects', array());
@@ -889,7 +890,14 @@ class BimpController
                 foreach ($objects as $id_object) {
                     $instance->reset();
                     if ($instance->fetch($id_object)) {
-                        $errors = array_merge($errors, $instance->delete());
+                        $del_warnings = array();
+                        $del_errors = $instance->delete($del_warnings);
+                        if (count($del_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($del_errors, 'Echec de la suppression ' . $instance->getLabel('of_the') . ' d\'ID ' . $id_object);
+                        }
+                        if (count($del_warnings)) {
+                            $warnings[] = BimpTools::getMsgFromArray($del_warnings, BimpTools::ucfirst($instance->getLabel()) . ' ' . $id_object);
+                        }
                     }
                 }
                 if (!count($errors)) {
@@ -911,6 +919,7 @@ class BimpController
         }
         die(json_encode(array(
             'errors'       => $errors,
+            'warnings'     => $warnings,
             'success'      => $success,
             'module'       => $module,
             'object_name'  => $object_name,
@@ -1362,33 +1371,42 @@ class BimpController
         $fields_return_label = BimpTools::getValue('field_return_label', '');
         $label_syntaxe = html_entity_decode(BimpTools::getValue('label_syntaxe', '<label_1>'));
         $fields_return_value = BimpTools::getValue('field_return_value', '');
-        $filters = BimpTools::getValue('filters', array());
+        $filters = BimpTools::getValue('filters', '');
         $join = BimpTools::getValue('join', '');
         $join_return_label = BimpTools::getValue('join_return_label', '');
         $join_on = BimpTools::getValue('join_on', '');
-        $values = explode(' ', BimpTools::getValue('value'));
+        $values = explode(' ', BimpTools::getValue('value', ''));
 
-        if (!is_array($filters)) {
+        if ($filters) {
             $filters = json_decode($filters, 1);
+        } else {
+            $filters = array();
         }
 
-        if (!is_null($table) && !is_null($fields_return_label) && !is_null($fields_return_value) && count($fields_search) && !is_null($values)) {
+        if (!is_null($table) && !is_null($fields_return_label) && !is_null($fields_return_value) && count($fields_search) && !empty($values)) {
             global $db;
             $bdb = new BimpDb($db);
+
+            if (preg_match('/^.* ([a-z]+)$/', $table, $matches)) {
+                $alias = $matches[1];
+            } else {
+                $table .= ' a';
+                $alias = 'a';
+            }
 
             $sql = 'SELECT ';
             $fields_return_label = explode(',', $fields_return_label);
             $i = 1;
             foreach ($fields_return_label as $field_label) {
                 if (!preg_match('/\./', $field_label)) {
-                    $field_label = 'a.' . $field_label;
+                    $field_label = $alias . '.' . $field_label;
                 }
                 $sql .= $field_label . ' as label_' . $i . ', ';
                 $i++;
             }
 
             if (!preg_match('/\./', $fields_return_value)) {
-                $fields_return_value = 'a.' . $fields_return_value;
+                $fields_return_value = $alias . '.' . $fields_return_value;
             }
 
             $sql .= $fields_return_value . ' as value';
@@ -1396,18 +1414,14 @@ class BimpController
             if ($join_return_label) {
                 $sql .= ', ' . $join_return_label . ' as join_label';
             }
-            
-            if (stripos($table, " ") === false) {
-                $table .= ' a';
-            }
 
             $sql .= ' FROM ' . MAIN_DB_PREFIX . $table;
-            
+
             if ($join && $join_on) {
                 $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . $join;
                 $sql .= ' ON ' . $join_on;
             }
-            
+
             $where = '';
             $fl = true;
             foreach ($fields_search as $field) {
@@ -1417,7 +1431,7 @@ class BimpController
                     $fl = false;
                 }
                 if (!preg_match('/\./', $field)) {
-                    $field = 'a.' . $field;
+                    $field = $alias . '.' . $field;
                 }
                 $val_fl = true;
                 $where .= '(';
@@ -1573,12 +1587,37 @@ class BimpController
         }
 
         if (!count($errors)) {
-            $object = BimpObject::getInstance($module, $object_name, $id_object);
-            if (is_null($object) || !$object->isLoaded()) {
-                $errors[] = 'ID de l\'objet invalide';
+            if (is_array($id_object)) {
+                foreach ($id_object as $id) {
+                    $object = BimpCache::getBimpObjectInstance($module, $object_name, (int) $id);
+                    if (!BimpObject::objectLoaded($object)) {
+                        if (is_a($object, 'BimpObject')) {
+                            $warnings[] = BimpTools::ucfirst($object->getLabel('the') . ' d\'ID ' . $id . ' n\'existe pas');
+                        } else {
+                            $warnings[] = 'L\'objet d\'ID ' . $id . ' n\'existe pas';
+                        }
+                    } else {
+                        if (!$success) {
+                            $success = 'Mise à jour des statuts des ' . $object->getLabel('name_plur') . ' effectuée avec succès';
+                        }
+                        $obj_errors = $object->setNewStatus($status, $extra_data, $warnings);
+                        if (count($obj_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($obj_errors, 'Echec de la mise à jour du statut ' . $object->getLabel('of_the') . ' d\'ID ' . $id);
+                        }
+                    }
+                }
             } else {
-                $errors = $object->setNewStatus($status, $extra_data, $warnings);
-                $success = 'Mise à jour du statut ' . $object->getLabel('of_the') . ' ' . $object->id . ' effectué avec succès';
+                if (!(int) $id_object) {
+                    $errors[] = 'ID absent';
+                } else {
+                    $object = BimpCache::getBimpObjectInstance($module, $object_name, (int) $id_object);
+                    if (!BimpObject::objectLoaded($object)) {
+                        $errors[] = 'ID de l\'objet invalide';
+                    } else {
+                        $errors = $object->setNewStatus($status, $extra_data, $warnings);
+                        $success = 'Mise à jour du statut ' . $object->getLabel('of_the') . ' ' . $object->id . ' effectué avec succès';
+                    }
+                }
             }
         }
 
@@ -1648,7 +1687,7 @@ class BimpController
         if (!$id_product) {
             $errors[] = 'ID du produit absent';
         } else {
-            $product = BimpObject::getInstance('bimpcore', 'Bimp_Product', $id_product);
+            $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
             if (!BimpObject::objectLoaded($product)) {
                 $errors[] = 'Produit d\'ID ' . $id_product . ' inexistant';
             } else {

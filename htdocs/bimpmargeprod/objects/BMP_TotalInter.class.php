@@ -16,79 +16,17 @@ class BMP_TotalInter extends BimpObject
         )
     );
 
+    // Getters: 
+
     public function getCategoriesArray()
     {
-        $instance = BimpObject::getInstance($this->module, 'BMP_CategorieMontant');
-        $categories = array();
-        $list = $instance->getList();
-        foreach ($list as $cat) {
-            $categories[$cat['id']] = $cat['name'];
-        }
-
-        return $categories;
+        return $this->getBimpObjectFullListArray($this->module, 'BMP_CategorieMontant');
     }
 
     public function getTypes_montantsArray()
     {
-        $instance = BimpObject::getInstance($this->module, 'BMP_TypeMontant');
-        $types_montants = $instance->getList();
-        $montants = array();
-
-        foreach ($types_montants as $tm) {
-            $montants[$tm['id']] = $tm['name'] . ' (' . BMP_TypeMontant::$types[(int) $tm['type']]['label'] . ')';
-        }
-
-        return $montants;
-    }
-
-    public function displayCategorie($id_categorie)
-    {
-        $instance = BimpObject::getInstance($this->module, 'BMP_CategorieMontant');
-        if ($instance->fetch($id_categorie)) {
-            return $instance->getData('name');
-        }
-
-        return BimpRender::renderAlerts('La catégorie d\'ID ' . $id_categorie . ' n\'existe pas');
-    }
-
-    public function displayTypeMontant($id_typeMontant)
-    {
-        $instance = BimpObject::getInstance($this->module, 'BMP_TypeMontant');
-        if ($instance->fetch($id_typeMontant)) {
-            return $instance->getData('name') . ' (' . BMP_TypeMontant::$types[(int) $instance->getData('type')]['label'] . ')';
-        }
-
-        return BimpRender::renderAlerts('Le type de montant d\'ID ' . $id_TypeMontant . ' n\'existe pas');
-    }
-
-    public function defaultDisplayCategories_frais_inItem($id_categorie)
-    {
-        return $this->displayCategorie($id_categorie);
-    }
-
-    public function defaultDisplayCategories_recettes_inItem($id_categorie)
-    {
-        return $this->displayCategorie($id_categorie);
-    }
-
-    public function defaultDisplayCategories_frais_exItem($id_categorie)
-    {
-        return $this->displayCategorie($id_categorie);
-    }
-
-    public function defaultDisplayCategories_recettes_exItem($id_categorie)
-    {
-        return $this->displayCategorie($id_categorie);
-    }
-
-    public function defaultDisplayMontants_inItem($id_typeMontant)
-    {
-        return $this->displayTypeMontant($id_typeMontant);
-    }
-
-    public function defaultDisplayMontants_exItem($id_typeMontant)
-    {
-        return $this->displayTypeMontant($id_typeMontant);
+        BimpObject::loadClass($this->module, 'BMP_TypeMontant');
+        return BMP_TypeMontant::getTypesMontantsArray();
     }
 
     public function getEventTotal($id_event, $id_coprod = 0)
@@ -97,8 +35,8 @@ class BMP_TotalInter extends BimpObject
             return 0;
         }
 
-        $event = BimpObject::getInstance($this->module, 'BMP_Event');
-        if (!$event->fetch((int) $id_event)) {
+        $event = BimpCache::getBimpObjectInstance($this->module, 'BMP_Event', (int) $id_event);
+        if (!$event->isLoaded()) {
             return 0;
         }
 
@@ -109,16 +47,14 @@ class BMP_TotalInter extends BimpObject
 
         $amounts = $event->getTotalAmounts();
 
-
         if ($all_frais) {
-            $total += $amounts['total_frais'];
+            $total += $amounts['total_frais_ht'];
         }
 
         if ($all_recettes) {
-            $total += $amounts['total_recettes'];
+            $total += $amounts['total_recettes_ht'];
         }
 
-        $montant = BimpObject::getInstance($this->module, 'BMP_EventMontant');
         $tm_instance = BimpObject::getInstance($this->module, 'BMP_TypeMontant');
 
         $asso = new BimpAssociation($this, 'categories_frais_in');
@@ -131,14 +67,7 @@ class BMP_TotalInter extends BimpObject
             ));
 
             foreach ($tm_list as $tm) {
-                $montant->reset();
-                if ($montant->find(array(
-                            'id_event'   => (int) $id_event,
-                            'id_montant' => (int) $tm['id'],
-                            'id_coprod'  => (int) $id_coprod
-                        ))) {
-                    $total += (float) $montant->getData('amount');
-                }
+                $total += (float) $event->getMontantAmount((int) $tm['id'], $id_coprod);
             }
         }
         unset($asso);
@@ -154,14 +83,7 @@ class BMP_TotalInter extends BimpObject
             ));
 
             foreach ($tm_list as $tm) {
-                $montant->reset();
-                if ($montant->find(array(
-                            'id_event'   => (int) $id_event,
-                            'id_montant' => (int) $tm['id'],
-                            'id_coprod'  => (int) $id_coprod
-                        ))) {
-                    $total -= (float) $montant->getData('amount');
-                }
+                $total -= (float) $event->getMontantAmount((int) $tm['id'], $id_coprod);
             }
         }
         unset($asso);
@@ -177,14 +99,7 @@ class BMP_TotalInter extends BimpObject
             ));
 
             foreach ($tm_list as $tm) {
-                $montant->reset();
-                if ($montant->find(array(
-                            'id_event'   => (int) $id_event,
-                            'id_montant' => (int) $tm['id'],
-                            'id_coprod'  => (int) $id_coprod
-                        ))) {
-                    $total += (float) $montant->getData('amount');
-                }
+                $total += (float) $event->getMontantAmount((int) $tm['id'], $id_coprod);
             }
         }
         unset($asso);
@@ -200,14 +115,7 @@ class BMP_TotalInter extends BimpObject
             ));
 
             foreach ($tm_list as $tm) {
-                $montant->reset();
-                if ($montant->find(array(
-                            'id_event'   => (int) $id_event,
-                            'id_montant' => (int) $tm['id'],
-                            'id_coprod'  => (int) $id_coprod
-                        ))) {
-                    $total -= (float) $montant->getData('amount');
-                }
+                $total -= (float) $event->getMontantAmount((int) $tm['id'], $id_coprod);
             }
         }
         unset($asso);
@@ -217,14 +125,7 @@ class BMP_TotalInter extends BimpObject
         $list = $asso->getAssociatesList();
 
         foreach ($list as $id_type_montant) {
-            $montant->reset();
-            if ($montant->find(array(
-                        'id_event'   => (int) $id_event,
-                        'id_montant' => (int) $id_type_montant,
-                        'id_coprod'  => (int) $id_coprod
-                    ))) {
-                $total += (float) $montant->getData('amount');
-            }
+            $total += (float) $event->getMontantAmount((int) $id_type_montant, $id_coprod);
         }
         unset($asso);
         unset($list);
@@ -233,14 +134,7 @@ class BMP_TotalInter extends BimpObject
         $list = $asso->getAssociatesList();
 
         foreach ($list as $id_type_montant) {
-            $montant->reset();
-            if ($montant->find(array(
-                        'id_event'   => (int) $id_event,
-                        'id_montant' => (int) $id_type_montant,
-                        'id_coprod'  => (int) $id_coprod
-                    ))) {
-                $total -= (float) $montant->getData('amount');
-            }
+            $total -= (float) $event->getMontantAmount((int) $id_type_montant, $id_coprod);
         }
         unset($asso);
         unset($list);
@@ -257,15 +151,14 @@ class BMP_TotalInter extends BimpObject
         ));
 
         $asso = new BimpAssociation($this, 'types_montants');
-        $typeMontant = BimpObject::getInstance($this->module, 'BMP_TypeMontant');
-
+        
         foreach ($list as $item) {
             $code = null;
             $montants = $asso->getAssociatesList((int) $item['id']);
             $check = true;
             foreach ($montants as $id_montant) {
-                $typeMontant->reset();
-                if ($typeMontant->fetch($id_montant)) {
+                $typeMontant = BimpCache::getBimpObjectInstance($this->module, 'BMP_TypeMontant', (int) $id_montant);
+                if ($typeMontant->isLoaded()) {
                     $m_code = $typeMontant->getData('code_compta');
                     if (is_null($code)) {
                         $code = $m_code;
@@ -426,11 +319,63 @@ class BMP_TotalInter extends BimpObject
         return $return;
     }
 
+    // Affichage: 
+
+    public function displayCategorie($id_categorie)
+    {
+        $instance = BimpCache::getBimpObjectInstance($this->module, 'BMP_CategorieMontant', (int) $id_categorie);
+        if ($instance->isLoaded()) {
+            return $instance->getData('name');
+        }
+
+        return BimpRender::renderAlerts('La catégorie d\'ID ' . $id_categorie . ' n\'existe pas');
+    }
+
+    public function displayTypeMontant($id_typeMontant)
+    {
+        $instance = BimpCache::getBimpObjectInstance($this->module, 'BMP_TypeMontant', (int) $id_typeMontant);
+        if ($instance->isLoaded()) {
+            return $instance->getData('name') . ' (' . BMP_TypeMontant::$types[(int) $instance->getData('type')]['label'] . ')';
+        }
+
+        return BimpRender::renderAlerts('Le type de montant d\'ID ' . $id_typeMontant . ' n\'existe pas');
+    }
+
+    public function defaultDisplayCategories_frais_inItem($id_categorie)
+    {
+        return $this->displayCategorie($id_categorie);
+    }
+
+    public function defaultDisplayCategories_recettes_inItem($id_categorie)
+    {
+        return $this->displayCategorie($id_categorie);
+    }
+
+    public function defaultDisplayCategories_frais_exItem($id_categorie)
+    {
+        return $this->displayCategorie($id_categorie);
+    }
+
+    public function defaultDisplayCategories_recettes_exItem($id_categorie)
+    {
+        return $this->displayCategorie($id_categorie);
+    }
+
+    public function defaultDisplayMontants_inItem($id_typeMontant)
+    {
+        return $this->displayTypeMontant($id_typeMontant);
+    }
+
+    public function defaultDisplayMontants_exItem($id_typeMontant)
+    {
+        return $this->displayTypeMontant($id_typeMontant);
+    }
+
     // Overrides: 
 
-    public function update()
+    public function update(&$warnings = array(), $force_update = false)
     {
-        $errors = parent::update();
+        $errors = parent::update($warnings, $force_update);
 
         if ($this->isLoaded()) {
             $calcMontant = BimpObject::getInstance($this->module, 'BMP_CalcMontant');
@@ -443,8 +388,12 @@ class BMP_TotalInter extends BimpObject
             ));
 
             foreach ($list as $item) {
-                if ($calcMontant->fetch((int) $item['id'])) {
-                    $errors = array_merge($errors, $calcMontant->rebuildTypesMontantsCache());
+                $calcMontant = BimpCache::getBimpObjectInstance($this->module, 'BMP_CalcMontant', (int) $item['id']);
+                if ($calcMontant->isLoaded()) {
+                    $cache_errors = $calcMontant->rebuildTypesMontantsCache();
+                    if (count($cache_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($cache_errors, 'Des erreurs sont survenues lors de la reconstruction du cache');
+                    }
                 }
             }
         }
@@ -452,7 +401,7 @@ class BMP_TotalInter extends BimpObject
         return $errors;
     }
 
-    public function delete()
+    public function delete(&$warnings = array(), $force_delete = false)
     {
         if ($this->isLoaded()) {
             $id = $this->id;
@@ -460,22 +409,23 @@ class BMP_TotalInter extends BimpObject
             $id = null;
         }
 
-        $errors = parent::delete();
+        $errors = parent::delete($warnings, $force_delete);
 
-        if (!is_null($id)) {
+        if (!count($errors) && !is_null($id)) {
             $calcMontant = BimpObject::getInstance($this->module, 'BMP_CalcMontant');
 
             $list = $calcMontant->getList(array(
                 'type_source'     => 2,
-                'id_total_source' => (int) $this->id
+                'id_total_source' => (int) $id
                     ), null, null, 'id', 'asc', 'array', array(
                 'id'
             ));
 
-            foreach ($list as $id) {
-                if ($calcMontant->fetch((int) $id)) {
+            foreach ($list as $item) {
+                $calcMontant = BimpCache::getBimpObjectInstance($this->module, '', (int) $item['id']);
+                if ($calcMontant->isLoaded()) {
                     $calcMontant->set('id_total_source', 0);
-                    $errors = array_merge($errors, $calcMontant->update());
+                    $calcMontant->update();
                 }
             }
         }

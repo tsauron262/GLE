@@ -1,47 +1,19 @@
+extends: BF_Frais
+
 table: bf_frais_divers
-parent_object: BF_Demande
-parent_id_property: id_demande
 
 labels:
     name: frais divers
     name_plur: frais divers
-    
+                    
 fields: 
-    id_demande: 
-        label: Demande
-        type: id_parent
-        input: 
-            type: hidden
-    date: 
-        label: Date
-        type: date
-        required: 1
-
     description:
         label: Libellé
         required: 1
         
-    amount:
-        label: Montant HT
-        type: money
-        required: 1
-    id_facture:
-        display: nom_url
-        type: text
-
-        
 list:
-    checkboxes: 1
     title: Frais divers
     icon: sticky-note
-    bulk_actions: 
-        - label: Supprimer les lignes sélectionnées
-          icon: fas_trash-alt
-          onclick: deleteSelectedObjects('list_id', $(this));
-          btn_class: deleteSelectedObjects
-    sort_field: date_create
-    sort_way: desc
-    n: 25
     cols:
         date: 
             field: date
@@ -52,15 +24,6 @@ list:
         amount: 
             field: amount
             edit: 1
-        id_facture:
-            label: Facture
-            edit: 0
+        facture:
+            field: id_facture
             display: nom_url
-            value: 
-                callback: displayFacture
-    extra_btn:
-        callback: displayExtraButton
-
-    add_object_row: 1
-    update_btn: 1
-    delete_btn: 1

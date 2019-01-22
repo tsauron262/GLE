@@ -258,6 +258,7 @@ class BimpInput
                             } else {
                                 $label = $option_value;
                             }
+                            
                             if (isset($option['color'])) {
                                 $color = $option['color'];
                             } elseif (isset($option['classes'])) {
@@ -380,6 +381,12 @@ class BimpInput
                 ob_start();
                 $form->select_remises((int) $value, $field_name, $filter, (int) $options['id_client']);
                 $html .= ob_get_clean();
+                break;
+
+            case 'select_remises_fourn':
+                if (!isset($options['id_fourn'])) {
+                    $options['id_fourn'] = 0;
+                }
                 break;
 
             case 'select_availability':

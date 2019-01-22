@@ -543,7 +543,7 @@ class BimpRender
 
         $html = '<span class="historyPopoverButton bs-popover"';
         $html .= ' data-toggle="popover"';
-        $html .= ' data-trigger="hover" ';
+        $html .= ' data-trigger="hover"';
         $html .= ' data-placement="bottom"';
         $html .= ' data-html="true"';
         $html .= ' data-content="' . htmlentities($bimpHistory->renderCard($object, $field, 10, false, false)) . '"';

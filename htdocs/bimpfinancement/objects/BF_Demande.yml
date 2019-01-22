@@ -2,10 +2,12 @@ table: bf_demande
 controller: demande
 
 icon: fas_hand-holding-usd
+header_btn: 
+    callback: getActionsButtons
 header_list_name: default
 list_page_url: 
     controller: index
-        
+    
 labels:
     name: demande de financement
     name_plur: demandes de financement
@@ -13,18 +15,51 @@ labels:
 
 objects:
     commande:
+        relation: hasOne
+        delete: 0
         instance:
-            id_object: unset
+            bimp_object:
+                module: bimpcommercial
+                name: Bimp_Commande
+
+    reference:
+        relation: hasOne
+        delete: 0
+        instance:
+            bimp_object:
+                module: bimpfinancement
+                name: Bimp_Demande
+
+    contrat:
+        relation: hasOne
+        delete: 0
+        instance:
+            dol_object: contrat
+            id_object:
+                field_value: id_contrat
 
     facture:
+        relation: hasOne
+        delete: 0
         instance: 
-            bimp_object: unset
-            dol_object: facture
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Facture
+        card: 
+            title: 
+                object_prop: ref
+            view_btn: 1
 
+    facture_banque: 
+        extends: facture
+        instance: 
+            id_object: 
+                field_value: id_facture
+                
     facture_client:
         extends: facture
-        instance:
-            id_object:
+        instance: 
+            id_object: 
                 field_value: id_facture_client
 
     facture_fournisseur:
@@ -32,22 +67,36 @@ objects:
         instance:
             id_object:
                 field_value: id_facture_fournisseur
-        card: 
-            title: 
-                object_prop: ref
-            view_btn: 1
+
+    client: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Client
+            id_object: 
+                field_value: id_client
                 
     client_contact: 
-        extends: contact
+        relation: hasOne
+        delete: 0
         instance: 
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Contact
             id_object:
                 field_value: id_client_contact
     
     commercial:
-        extends: user
+        relation: hasOne
+        delete: 0
         instance:
+            bimp_object:
+                module: bimpcore
+                name: Bimp_User
             id_object:
-                field_value: id_commercial
+                fiels_value: id_commercial
 
     supplier:
         relation: hasOne
@@ -55,7 +104,7 @@ objects:
         instance: 
             bimp_object: 
                 module: bimpcore
-                name: Bimp_Societe
+                name: Bimp_Fournisseur
             id_object:
                 field_value: id_supplier
                 
@@ -137,24 +186,35 @@ associations:
         input:
             type: search_list
             search_list:
-                table: commande
-                field_return_value: a.rowid
-                field_return_label: a.ref
+                table: commande c
+                field_return_value: c.rowid
+                field_return_label: c.ref
                 options:
                     default:
                         label: Recherche par référence de commande
-                        fields_search: a.ref,a.rowid
+                        fields_search: c.ref,c.rowid
                         join: societe s
-                        join_on: a.fk_soc = s.rowid
+                        join_on: c.fk_soc = s.rowid
                         join_return_label: s.nom
                         help: Entrez la référence de la commande
                     by_client:
                         label: Recherche par client
                         fields_search: s.nom,s.code_client
                         join: societe s
-                        join_on: a.fk_soc = s.rowid
+                        join_on: c.fk_soc = s.rowid
                         join_return_label: s.nom
                         help: Entrez le nom ou le code d'un client
+                        
+    factures: 
+        object: 
+            instance: 
+                bimp_object:
+                    module: bimpcommercial
+                    name: Bimp_Facture
+        label: Factures liées
+        display: 
+            default: 
+                type: nom_url
 
 fields:
     id_client:
@@ -196,7 +256,7 @@ fields:
     id_facture:
         label: Facture banque
         type: id_object
-        object: facture
+        object: facture_banque
         input:
             type: hidden
 
@@ -290,6 +350,7 @@ fields:
     accepted:
         label: Acceptation définitive de la banque
         type: bool
+        default_value: 0
                 
     insurance:
         label: Assurance
@@ -316,16 +377,10 @@ fields:
     date_livraison:
         label: Date de livraison
         type: date
-        required: 0
-        search:
-            type: date_range
             
     date_loyer:
         label: Date de mise en loyer
         type: date
-        required: 0
-        search:
-            type: date_range
         
     id_supplier:
         label: Apporteur
@@ -358,6 +413,39 @@ forms:
             - field: id_supplier_contact
             - field: duration
             - field: periodicity
+            
+    new_commandes_fourn:
+        rows: 
+            - custom: 1
+              label: Entrepôt
+              input_name: id_entrepot
+              data_type: int
+              input: 
+                  type: search_entrepot
+                  
+            - custom: 1
+              label: Sélection des fournisseurs et des éléments à inclure aux commandes
+              input_name: commandes_fourn
+              content: 
+                  callback: renderNewCommandesFournInputs
+                  
+    add_to_invoice:
+        rows: 
+            - custom: 1
+              label: Facture
+              input_name: id_facture
+              input: 
+                  type: select
+                  options: 
+                      array: demandeFactures
+            - custom: 1
+              label: Centre
+              input_name: id_entrepot
+              input: 
+                  type: search_entrepot
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0,
             
 lists:
     default:
@@ -418,14 +506,9 @@ fields_tables:
             - field: id_contrat
               edit: 0
               display: nom_url
-            - field: id_facture_client
-              edit: 0
-              display: nom_url
-            - field: id_facture_fournisseur
-              edit: 0
-              display: nom_url
+            - field: id_facture
+              display: card
     
-
     options: 
         title: Options
         footer_extra_btn:
@@ -448,9 +531,6 @@ fields_tables:
               edit: 1
             - field: pba_prevu
               edit: 1
-            - field: id_facture
-              edit: 0
-              display: nom_url
               
     client: 
         title: Client
@@ -462,6 +542,8 @@ fields_tables:
             - field: id_client_contact
               label: Contact
               display: card
+            - field: id_facture_client
+              display: card
     
     apporteur: 
         title: Apporteur
@@ -472,6 +554,8 @@ fields_tables:
               display: card
             - field: id_supplier_contact
               label: Contact
+              display: card
+            - field: id_facture_fournisseur
               display: card
               
     montants: 
@@ -544,16 +628,13 @@ views:
                             col_lg: 12
                             fields_table: 
                                 name: contrat
-                                  
                           
                 - type: fields_table
                   col_lg: 6
                   col_md: 6
                   fields_table:
                       name: options
-
-            
-                                      
+                
             - cols: 
                   - type: fields_table
                     col_lg: 6
@@ -569,14 +650,12 @@ views:
                     fields_table:
                         name: apporteur
                         
-            
-                
-            - cols: 
-                  - type: custom
-                    col_lg: 6
-                    col_md: 6
-                    custom: 
-                        callback: renderViewLoadedScript
+            - cols:
+                  - type: list
+                    col_lg: 12
+                    list: 
+                        children: refinanceurs
+                        panel: 0
                   
     montants:
         panel: 0
@@ -595,47 +674,36 @@ views:
                         - cols: 
                             - type: list
                               list: 
-                                  children: frais_divers
-                                  panel: 0
-                            - type: list
-                              list: 
                                   children: rents
                                   panel: 0
                             - type: list
                               list: 
                                   children: rents_except
                                   panel: 0
-                         
+                            - type: list
+                              list: 
+                                  children: frais_divers
+                                  panel: 0
             - cols: 
-                  - type: custom
-                    custom: 
-                        callback: renderViewLoadedScript
-
-            - cols:
-                  - type: list
-                    col_lg: 12
-                    list: 
-                        children: refinanceurs
-                        panel: 0
-            
+                - type: custom
+                  custom: 
+                      callback: renderFacturesFraisList
     
     fournisseurs:
         title: nom
+        objects_change_reload: BF_Line,Bimp_CommandeFourn,Bimp_CommandeFournLine
         edit_form: default
         delete_btn: 1
         rows:
             - cols: 
-                  - type: fields_table
-                    col_lg: 3
-                    col_md: 4
-                    col_sm: 12
-                    fields_table:
-                        name: montants_fournisseurs
+                  - type: custom
+                    custom: 
+                        callback: renderCommandesFournisseursList
                         
-                  - type: list
-                    col_lg: 9
-                    col_md: 8
-                    col_sm: 12
-                    list: 
-                        children: frais_fournisseur
-                        panel: 0
+    factures: 
+        objects_change_reload: BF_Line,Bimp_CommandeFourn,Bimp_CommandeFournLine,Bimp_Facture,BF_RentExcept,BF_FraisDivers
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderAllFacturesList

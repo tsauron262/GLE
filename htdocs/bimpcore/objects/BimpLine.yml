@@ -259,6 +259,7 @@ lists:
             callback: getListExtraBtn
         cols:
             label:
+            product_type: 
             pu_ht: 
             tva:
             pa_ht: 

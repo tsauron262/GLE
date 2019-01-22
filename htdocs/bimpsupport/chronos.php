@@ -28,6 +28,7 @@ function runBimpSupportChrono()
 
 function initTimers($timers)
 {
+    $ticket = BimpObject::getInstance("bimpsupport", "BS_Ticket");
     if (!count($timers)) {
         return;
     }

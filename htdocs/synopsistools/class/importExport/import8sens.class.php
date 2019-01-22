@@ -12,6 +12,10 @@ abstract class import8sens {
     var $utf8 = true;
     var $debug = false;
     var $moveFile = true;
+    public $sepCollone = "	";
+    public $maxLn = 0;
+    public $minLn = 0;
+    public $nbLigne = 0;//Soit nbLigne soit maxLn
     
     function __construct($db) {
         $this->db = $db;
@@ -53,7 +57,7 @@ abstract class import8sens {
                             if(rename ($this->path . $newFile, $this->path ."imported/". $file))
                                 echo "<br/>Fichier traité déplacé vers ".$this->path ."imported/". $file;
                             else
-                                $this->error("Impossible de déplacé le fichier ".$this->path . $file);
+                                $this->error("Impossible de déplacé le fichier ".$this->path . $file." vers ".$this->path ."imported/". $file);
                         }
                     }
                     rename($this->path . $newFile, $this->path . $file);
@@ -81,13 +85,13 @@ abstract class import8sens {
             $tabLigne = explode("\r", $content);
         }
         if(isset($tabLigne[1]) && $tabLigne[1] != "")
-            $tabTitre = explode("	", $tabLigne[1]);
+            $tabTitre = explode($this->sepCollone, $tabLigne[1]);
         else
-            $tabTitre = explode("	", $tabLigne[0]);
+            $tabTitre = explode($this->sepCollone, $tabLigne[0]);
         $tabFinal = $tabTitre2 = array();
         foreach ($tabLigne as $idLn => $ligne) {
             if (($idLn != 1)) {
-                $tabTmp = explode("	", $ligne);
+                $tabTmp = explode($this->sepCollone, $ligne);
                 $tabLn = array();
                 foreach ($tabTmp as $idTmp => $chTmp) {
                     $tabLn[$tabTitre[$idTmp]] = $chTmp;
@@ -104,9 +108,21 @@ abstract class import8sens {
 //        print_r($tabFinal[5363]);
 //        print_r(count($tabFinal));
 
-        foreach ($tabFinal as $ln)
-            if(count($ln) > 1)
+        $i = $j = 0;
+        $trunquer = false;
+        foreach ($tabFinal as $ln){
+            $i++;
+            if(count($ln) > 1 && ($i <= $this->maxLn || $this->maxLn < 1) && $i >= $this->minLn && ($i < $this->nbLigne+$this->minLn || $this->nbLigne < 1)){
+                $j++;
                 $this->traiteLn($ln);
+            }
+            else
+                $trunquer = true;
+        }
+        echo "<br/><br/>".$j." lignes traitées sur ".$i;
+        
+        if($trunquer)
+            echo "<br/><br/>ATTENTION Toutes les lignes 'on pas été traitées";
     }
     
 

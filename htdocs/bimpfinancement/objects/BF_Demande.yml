@@ -650,12 +650,6 @@ views:
                     fields_table:
                         name: apporteur
                         
-            - cols:
-                  - type: list
-                    col_lg: 12
-                    list: 
-                        children: refinanceurs
-                        panel: 0
                   
     montants:
         panel: 0
@@ -671,6 +665,12 @@ views:
                     col_lg: 8
                     col_md: 7
                     rows: 
+                        - cols:
+                              - type: list
+                                col_lg: 12
+                                list: 
+                                    children: refinanceurs
+                                    panel: 0
                         - cols: 
                             - type: list
                               list: 

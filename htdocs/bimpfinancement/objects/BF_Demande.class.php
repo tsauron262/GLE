@@ -919,7 +919,7 @@ class BF_Demande extends BimpObject
 
         $errors = $this->checkDemande();
         if (!count($refinanceurs)) {
-            $errors[] = 'Un refinanceur est obligatoire';
+            $errors[] = 'Un refinanceur en accord est obligatoire';
         }
 
         if (!count($errors)) {
@@ -927,9 +927,11 @@ class BF_Demande extends BimpObject
             $facture = $this->getChildObject('facture_banque');
 
             if (!BimpObject::objectLoaded($facture)) {
-                $facture->set('fk_soc', 0);  // todo
+                $facture->set('fk_soc', $this->getData("id_client"));  // todo
                 $facture->set('datef', date('Y-m-d'));
                 $facture->set('date_lim_reglement', date('Y-m-d'));
+                $facture->set('ef_type', "S");
+                $facture->set('entrepot', "1");
 
                 $fac_errors = $facture->create($warnings);
                 if (count($fac_errors)) {

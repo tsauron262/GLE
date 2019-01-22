@@ -81,13 +81,13 @@ class CronSynopsis {
         $import->debug = $debug;
         $import->go(); 
         $this->output .= $import->output;
-        
+//        
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProd.class.php");
         $import = new importProd($this->db);
         $import->debug = $debug;
         $import->go(); 
         $this->output .= $import->output;
-        
+//        
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importStock.class.php");
         $import = new importStock($this->db);
         $import->debug = $debug;
@@ -102,6 +102,13 @@ class CronSynopsis {
         
         require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importProdFourn.class.php");
         $import = new importProdFourn($this->db);
+        $import->debug = $debug;
+        $import->go(); 
+        $this->output .= $import->output;
+        
+        
+        require_once(DOL_DOCUMENT_ROOT."/synopsistools/class/importExport/importCat.class.php");
+        $import = new importCat($this->db);
         $import->debug = $debug;
         $import->go(); 
         $this->output .= $import->output;

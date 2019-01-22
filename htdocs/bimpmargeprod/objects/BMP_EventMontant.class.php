@@ -115,6 +115,11 @@ class BMP_EventMontant extends BimpObject
                     $errors[] = 'Cet Evénement est validé et n\'est donc plus modifiable';
                     return 0;
                 }
+                $event = $this->getParentInstance();
+                if(!$event->showCoprods()){
+                    $errors[] = 'Cet Evénement n\'a pas de copro.';
+                    return 0;
+                }
                 return 1;
         }
 

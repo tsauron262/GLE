@@ -1,12 +1,13 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/import8sens.class.php";
+require_once DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/importCat.class.php";
 
-class importProd extends import8sens {
+class importProd extends importCat {
 
     public function __construct($db) {
         parent::__construct($db);
-        $this->path .= "prod/";
+        $this->path .= "../prod/";
+        $this->sepCollone = "	";
     }
 
     function traiteLn($ln) {
@@ -110,11 +111,11 @@ class importProd extends import8sens {
             
             $this->getAllCat();
 
-            $this->traiteCat("Gamme", $ln["ArtGammeEnu"]);
-            $this->traiteCat("Famille", $ln["ArtFamilleEnu"]);
-            $this->traiteCat("Categorie", $ln["ArtCategEnu"]);
-            $this->traiteCat("Nature", $ln["ArtNatureEnu"]);
-            $this->traiteCat("Collection", $ln["ArtCollectEnu"]);
+            $this->traiteCat1("Gamme", $ln["ArtGammeEnu"]);
+            $this->traiteCat1("Categorie", $ln["ArtCategEnu"]);
+            $this->traiteCat1("Nature", $ln["ArtNatureEnu"]);
+            $this->traiteCat1("Collection", $ln["ArtCollectEnu"]);
+            $this->traiteCat1("Famille", $ln["ArtFamilleEnu"]);
 
 
             if ($this->updatePrice) {
@@ -127,97 +128,6 @@ class importProd extends import8sens {
             }
         } else
             $this->error("Pas d'id pour maj " . $ln['ArtCode']);
-    }
-
-    function getCatIDByNom($nom, $parent = "2", $lien = "parent") {
-        if (isset($this->cache['catIdByNom'][$parent][$lien][$nom]))
-            return $this->cache['catIdByNom'][$parent][$lien][$nom];
-        else {
-            if($lien == "parent")
-                $sql = $this->db->query("SELECT rowid FROM `llx_categorie` WHERE `type` = 0 AND `label` LIKE '" . $nom . "' AND fk_parent = ".$parent);
-            else
-                $sql = $this->db->query("SELECT rowid  FROM `" . MAIN_DB_PREFIX . "view_categorie_all` WHERE `leaf` LIKE  '" . addslashes($nom) . "' AND id_subroot = " . $parent); //TODO rajout de type
-            if ($this->db->num_rows($sql) < 1)
-                return 0;
-            else {
-                $ln = $this->db->fetch_object($sql);
-                $this->cache['catIdByNom'][$parent][$lien][$nom] = $ln->rowid;
-                return $ln->rowid;
-            }
-        }
-        
-    }
-
-    function traiteCat($grandeCat, $cat) {
-        $grCatId = $this->getCatIDByNom($grandeCat);
-        if ($grCatId < 1)
-            die("Grande Famille " . $grandeCat . " introuvable");
-        else {
-            $catId = array();
-            if ($cat == "" || $cat == "  " || $cat == " " || $cat == "  ")
-                $cat = "A catégoriser";
-            $catTmp = $this->getCatIDByNom($cat, $grCatId, "racine");
-            if ($catTmp < 1) {
-                $catId[] = $this->createCat($cat, $grCatId);
-            } else {
-                $catId[] = $catTmp;
-                while ($catMere = $this->getCatMere($catTmp) AND $catMere != $grCatId) {
-                    if ($catMere != $grCatId)
-                        $catId[] = $catMere;
-                    $catTmp = $catMere;
-                }
-            }
-            if(!$this->testCat($catId, $grCatId))
-                $this->updateProdCat($catId, $grCatId);
-        }
-    }
-    
-    function getAllCat(){
-        $this->allCatProd = array();
-        $sql = $this->db->query("SELECT fk_categorie FROM " . MAIN_DB_PREFIX . "categorie_product WHERE fk_product = ".$this->object->id);
-        while($result = $this->db->fetch_object($sql))
-                $this->allCatProd[] = $result->fk_categorie;
-    }
-    
-    function testCat($catId, $fk_parent){
-        if(!isset($this->cache['listSousCat'][$fk_parent])){
-            $sql100 = $this->db->query("SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = " . $fk_parent . "");
-            while($result = $this->db->fetch_object($sql100))
-                $this->cache['listSousCat'][$fk_parent][] = $result->rowid;
-        }
-        
-        
-        $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (".implode(",", $this->cache['listSousCat'][$fk_parent]).") AND fk_product = " . $this->object->id. " AND fk_categorie NOT IN (".implode(", ",$catId).")");
-        if($this->db->num_rows($sql) > 0)//Cat a suppr
-            return 0;
-        foreach($catId as $cat)
-            if(!in_array($cat, $this->allCatProd))
-                    return 0; //Car a ajouter
-        return 1;
-    }
-
-    function getCatMere($id) {
-        $sql = $this->db->query("SELECT `fk_parent` FROM `llx_categorie` WHERE `rowid` = " . $id);
-        if ($this->db->num_rows($sql) > 0) {
-            $ln = $this->db->fetch_object($sql);
-            return $ln->fk_parent;
-        }
-    }
-
-    function createCat($cat, $fk_parent) {
-        $sql = $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie (label, type, fk_parent) VALUES ('" . addslashes($cat) . "', 0, " . $fk_parent . ") ");
-        $id = $this->db->last_insert_id($sql);
-        if(isset($this->cache['listSousCat'][$fk_parent]))
-            $this->cache['listSousCat'][$fk_parent][] = $id;
-        return $id;
-    }
-
-    function updateProdCat($catId, $fk_parent) {
-        echo "update cat prod ".$this->object->id."<br/>";
-        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "categorie_product WHERE  fk_categorie IN (SELECT rowid FROM `" . MAIN_DB_PREFIX . "view_categorie` WHERE `id_subroot` = " . $fk_parent . ") AND fk_product = " . $this->object->id);
-        foreach ($catId as $cat) {
-            $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $cat . "," . $this->object->id . ")");
-        }
     }
 
 }

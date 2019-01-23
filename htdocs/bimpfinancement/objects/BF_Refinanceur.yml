@@ -41,7 +41,10 @@ fields:
             
     quantity: 
         label: Nombre
-        type: int
+        type: qty
+        min: 0
+        default_value: 0
+        decimals: 0
         required: 1
         
     amount_ht:
@@ -64,6 +67,7 @@ fields:
     periode2:
         label: Seconde période
         type: bool
+        default_value: 0
         
     comment:
         label: Commentaire
@@ -75,13 +79,18 @@ fields:
 list:
     checkboxes: 1
     positions: 1
-    title: Refinanceurs consultés
+    title: Refinanceurs
     icon: bank
     bulk_actions: 
         - label: Supprimer les lignes sélectionnées
           icon: fas_trash-alt
           onclick: deleteSelectedObjects('list_id', $(this));
           btn_class: deleteSelectedObjects
+    update_btn: 1
+    delete_btn: 1
+    edit_btn: 1
+    add_form_name: default
+    edit_form: default
     sort_field: position
     sort_way: asc
     n: 10
@@ -95,18 +104,21 @@ list:
         rate: 
             field: rate
             edit: 1
+            max_width: 100px
         coef: 
             field: coef
             edit: 1
+            max_width: 60px
         quantity: 
             field: quantity
             edit: 1
         amount: 
-            label: Loyé 
+            label: Loyer
             field: amount_ht
             edit: 1
+            max_width: 100px
         amount2: 
-            label: Loyé calculé
+            label: Loyer calculé
             value: 
                 callback: displayLoyerSuggest
         periodicity:
@@ -114,11 +126,7 @@ list:
             edit: 1
         periode2:
             field: periode2
-            edit: 1
-    add_object_row: 1
-    update_btn: 1
-    delete_btn: 1
-        
+            edit: 1        
             
             
         

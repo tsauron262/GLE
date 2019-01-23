@@ -65,7 +65,7 @@ class BF_Refinanceur extends BimpObject
     
     public function displayLoyerSuggest($display_name = 'nom_url', $display_input_value = true, $no_html = false){
         $totalEmprunt = $this->getTotalEmprunt();
-        $loyer = $this->caclulLoyer($this->getTotalEmpruntDemande());
+        $loyer = $this->calculLoyer($this->getTotalEmpruntDemande());
         
         $info = "Total emprunt : ".price($totalEmprunt);
         $info .= "<br />Coût banque : ".price($this->getCoutBanqueWithCoeficient() + $this->getCoutBanqueWithTaux());
@@ -73,7 +73,7 @@ class BF_Refinanceur extends BimpObject
         $verif = ($this->getCoutBanqueWithCoeficient() + $this->getCoutBanqueWithTaux()) > 0 
                 && ($this->getCoutBanqueWithCoeficient() + $this->getCoutBanqueWithTaux()) < ($totalEmprunt / 2);
         $html = "";
-        $html .= '<a type="button" class="'.($verif? '': 'red').' btn btn-default bs-popover"';
+        $html .= '<a type="button" class="btn btn-'.($verif ? 'default' : 'danger').' bs-popover"';
         $html .= ' onclick="majLoyerAuto($(this), '.$loyer.')"';
         $html .= ' data-toggle="popover"';
         $html .= ' data-trigger="hover"';
@@ -81,7 +81,7 @@ class BF_Refinanceur extends BimpObject
         $html .= ' data-content="'.$info.'"';
         $html .= ' data-container="body"';
         $html .= ' data-placement="top">';
-        $html .= '<i class="fas fa-question-circle iconLeft"></i>';
+        $html .= '<i class="fas fa-question-circle"></i>';
         $html .= price($loyer);
         $html .= '</a>';
         return $html;
@@ -149,8 +149,7 @@ class BF_Refinanceur extends BimpObject
         return 0;
     }
 
-    
-    public function caclulLoyer($capital){
+    public function calculLoyer($capital){
         $nbPeriode = $this->getData("quantity");
         $dureePeriode = $this->getData("periodicity");
         $nbMois = $this->getNbMois();

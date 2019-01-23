@@ -354,9 +354,17 @@ class Bimp_FactureFourn extends BimpComm
         return array();
     }
 
+    public function getTotalPaid()
+    {
+        $alreadypaid += $this->dol_object->getSommePaiement();
+        $alreadypaid += $this->dol_object->getSumDepositsUsed();
+        $alreadypaid += $this->dol_object->getSumCreditNotesUsed();
+        return $alreadypaid;
+    }
+
     public function getRemainToPay()
     {
-        
+        return (float) $this->getData('total_ttc') - (float) $this->getTotalPaid();
     }
 
     // Rendus HTML - overrides BimpObject:

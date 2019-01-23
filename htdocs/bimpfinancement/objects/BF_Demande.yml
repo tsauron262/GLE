@@ -433,6 +433,7 @@ forms:
                   type: select
                   options: 
                       array: demandeFactures
+                  select_first: 1
             - custom: 1
               label: Entrepôt
               input_name: id_entrepot
@@ -642,28 +643,33 @@ views:
                     fields_table:
                         name: apporteur
                         
-                  
     montants:
         panel: 0
         objects_change_reload: BF_Line
         rows:
+            - cols: 
+                - type: view
+                  col_lg: 4
+                  col_md: 4
+                  view: 
+                      panel: 0
+                      name: infos_fin
+            - cols:
+                - type: list
+                  list: 
+                      children: refinanceurs
+                      panel: 0
             - cols:  
                   - type: fields_table
-                    col_lg: 4
-                    col_md: 5
+                    col_lg: 3
+                    col_md: 3
                     fields_table:
                         name: montants
-                  
+                        
                   - type: rows
-                    col_lg: 8
-                    col_md: 7
+                    col_lg: 9
+                    col_md: 9
                     rows: 
-                        - cols:
-                              - type: list
-                                col_lg: 12
-                                list: 
-                                    children: refinanceurs
-                                    panel: 0
                         - cols: 
                             - type: list
                               list: 
@@ -685,6 +691,12 @@ views:
         delete_btn: 1
         rows:
             - cols: 
+                - type: custom
+                  col_lg: 3
+                  col_md: 4
+                  custom: 
+                      callback: renderCommandesInfos
+            - cols: 
                   - type: custom
                     custom: 
                         callback: renderCommandesFournisseursList
@@ -696,3 +708,12 @@ views:
                 - type: custom
                   custom: 
                       callback: renderAllFacturesList
+                      
+    infos_fin: 
+        objects_change_reload: BF_Line,BF_RentExcept,BF_FraisDivers,BF_FraisFournisseur,BF_Refinanceur
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderInfoFin
+        

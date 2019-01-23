@@ -711,7 +711,7 @@ class BimpComm extends BimpObject
         return $html;
     }
 
-    public function displayPDFButton($display_generate = true)
+    public function displayPDFButton($display_generate = true, $with_ref = true)
     {
         $html = '';
         $ref = dol_sanitizeFileName($this->getRef());
@@ -721,15 +721,20 @@ class BimpComm extends BimpObject
             if ($file_url) {
                 $onclick = 'window.open(\'' . $file_url . '\');';
                 $html .= '<button type="button" class="btn btn-default" onclick="' . $onclick . '">';
-                $html .= '<i class="fas fa5-file-pdf iconLeft"></i>';
-                $html .= $ref . '.pdf</button>';
+                $html .= '<i class="fas fa5-file-pdf ' . ($with_ref ? 'iconLeft' : '') . '"></i>';
+                if ($with_ref) {
+                    $html .= $ref . '.pdf';
+                }
+                $html .= '</button>';
 
-                $onclick = 'toggleElementDisplay($(this).parent().find(\'.' . static::$comm_type . 'PdfGenerateContainer\'), $(this));';
-                $html .= '<span class="btn btn-light-default open-close action-open bs-popover" onclick="' . $onclick . '"';
-                $html .= BimpRender::renderPopoverData('Re-générer le document', 'top', 'false');
-                $html .= '>';
-                $html .= BimpRender::renderIcon('fas_sync');
-                $html .= '</span>';
+                if ($display_generate) {
+                    $onclick = 'toggleElementDisplay($(this).parent().find(\'.' . static::$comm_type . 'PdfGenerateContainer\'), $(this));';
+                    $html .= '<span class="btn btn-light-default open-close action-open bs-popover" onclick="' . $onclick . '"';
+                    $html .= BimpRender::renderPopoverData('Re-générer le document', 'top', 'false');
+                    $html .= '>';
+                    $html .= BimpRender::renderIcon('fas_sync');
+                    $html .= '</span>';
+                }
             }
 
             if ($display_generate) {
@@ -1398,7 +1403,7 @@ class BimpComm extends BimpObject
     public function checkLines()
     {
         $errors = array();
-        
+
         if (($this->isLoaded())) {
             $dol_lines = array();
             $bimp_lines = array();

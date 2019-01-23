@@ -13,10 +13,9 @@ class BF_Demande extends BimpObject
     const BF_DEMANDE_REMPLACE = 7;
     const BF_DEMANDE_SIGNE_ANOM = 888;
     const BF_DEMANDE_TERMINE = 999;
-    
+
     var $warningsMsg = array();
     var $infoMsg = array();
-
     public static $status_list = array(
         self::BF_DEMANDE_BROUILLON         => array('label' => 'Brouillon', 'classes' => array('warning')),
         self::BF_DEMANDE_ATT_RETOUR        => array('label' => 'Signé - en attente de retour', 'classes' => array('important')),
@@ -315,9 +314,7 @@ class BF_Demande extends BimpObject
 
     public function getDemandeFacturesArray()
     {
-        $factures = array(
-            0 => 'Nouvelle facture'
-        );
+        $factures = array();
 
         if ($this->isLoaded()) {
             $asso = new BimpAssociation($this, 'factures');
@@ -334,123 +331,85 @@ class BF_Demande extends BimpObject
             }
         }
 
+        $factures[0] = 'Nouvelle facture';
+
         return $factures;
     }
-    
-    public function getTotalDemande($withComm = true){
+
+    public function getTotalDemande($withComm = true)
+    {
         $tot = $this->getData('montant_materiels') + (float) $this->getData('montant_services') + (float) $this->getData('montant_logiciels') - $this->getData('vr_vente');
-        if($withComm)
-            $tot += $this->getCommissionCommerciale()  + $this->getCommissionFinanciere();
-        return (float)$tot;
+        if ($withComm)
+            $tot += $this->getCommissionCommerciale() + $this->getCommissionFinanciere();
+        return (float) $tot;
     }
-    
-    
-    
-    public function renderInfoFin(){
-        
-        
-        $factBanque = $this->getChildObject('facture_banque');
-        if (BimpObject::objectLoaded($factBanque)){
-            $diference = $this->getTotalEmprunt() - $factBanque->getData('total_ttc');
-            if($diference > 0.1 || $diference < -0.1)
-                $this->warningsMsg[] = "Attention diférence entre facture banque est emprunt de : ".price($diference);
-        }
-        
-        $contrat = $this->getChildObject('contrat');
-        if (BimpObject::objectLoaded($contrat)){
-            $diference = $this->getTotalLoyer() - $contrat->total_ttc;
-            if($diference > 0.1 || $diference < -0.1)
-                $this->warningsMsg[] = "Attention diférence entre CONTRAT est emprunt de : ".price($diference);
-        }
-        
-        $marge1 = $this->getMarge(1);
-        $marge2 = $this->getMarge(2);
-        $marge = $marge1 + $marge2;
-        if($marge < -1)
-            $this->warningsMsg['marge-'] = "Attention la marge est négative : ".$marge;
-        
-        
-        
-        
-        $html = "";
-        
-        foreach($this->warningsMsg as $msg){
-            $html .= "<div class='error'>".$msg."</div>";
-        }
-        foreach($this->infoMsg as $msg){
-            $html .= "<div class='success'>".$msg."</div>";
-        }
-        
-        
-        
-        
-        $html .= "<br/>Total emprunt : ".$this->getTotalEmprunt();
-        $html .= "<br/>Marge sur le financement : ". $marge1;
-        $html .= "<br/>Marge loyer inter + frais divers : ". $marge2;
-        $html .= "<br/>Marge total : ". $marge;
-        
-        return $html;
-    }
-    
-    public function getTotalEmprunt(){
+
+    public function getTotalEmprunt()
+    {
         $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
-                'status' => 2, 'periode2' => 0
-            ));
-        if(count($refinanceurs) > 1)
+            'status'   => 2, 'periode2' => 0
+        ));
+        if (count($refinanceurs) > 1)
             $this->warningsMsg['plusrefi'] = "ATTENTION Plusieurs refinanceur en Accord";
         $totalEmp = 0;
-        foreach($refinanceurs as $refinanceur){
+        foreach ($refinanceurs as $refinanceur) {
             $totalEmp += $refinanceur->getTotalEmprunt();
         }
         return $totalEmp;
     }
-    
-    public function getTotalLoyer(){
+
+    public function getTotalLoyer()
+    {
         $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
-                'status' => 2, 'periode2' => 0
-            ));
-        if(count($refinanceurs) > 1)
+            'status'   => 2, 'periode2' => 0
+        ));
+        if (count($refinanceurs) > 1)
             $this->warningsMsg['plusrefi'] = "ATTENTION Plusieurs refinanceur en Accord";
         $totalEmp = 0;
-        foreach($refinanceurs as $refinanceur){
+        foreach ($refinanceurs as $refinanceur) {
             $totalEmp += $refinanceur->getTotalLoyer();
         }
         return $totalEmp;
     }
-    
-    
-    public function getMarge($type = 0){//type = 0 tous    1 = Financement  2 = Frais divers + Loyer inter
+
+    public function getMarge($type = 0)
+    {//type = 0 tous    1 = Financement  2 = Frais divers + Loyer inter
         $total = 0;
-        if($type == 0 || $type == 1){
+        if ($type == 0 || $type == 1) {
             $total += $this->getTotalEmprunt() - $this->getTotalDemande(0) - $this->getCommissionCommerciale();
         }
-        if($type == 0 || $type == 2)
+        if ($type == 0 || $type == 2)
             $total += $this->getTotalLoyerInter() + $this->getTotalFraisDiv();
         return $total;
     }
-    
-    public function getTotalLoyerInter(){
+
+    public function getTotalLoyerInter()
+    {
         $loyerInters = $this->getChildrenObjects('rents_except');
         $total = 0;
-        foreach($loyerInters as $loyerInter)
+        foreach ($loyerInters as $loyerInter)
             $total += $loyerInter->getData("amount");
         return $total;
     }
-    public function getTotalFraisDiv(){
+
+    public function getTotalFraisDiv()
+    {
         $fraisDivs = $this->getChildrenObjects('frais_divers');
         $total = 0;
-        foreach($fraisDivs as $fraisDiv)
+        foreach ($fraisDivs as $fraisDiv)
             $total += $fraisDiv->getData("amount");
         return $total;
     }
-    
-    public function getCommissionCommerciale(){   
+
+    public function getCommissionCommerciale()
+    {
         return $this->getTotalDemande(0) * $this->getData("commission_commerciale") / 100;
     }
-    public function getCommissionFinanciere(){   
-        return ($this->getTotalDemande(0)+$this->getCommissionCommerciale()) * $this->getData("commission_financiere") / 100;
+
+    public function getCommissionFinanciere()
+    {
+        return ($this->getTotalDemande(0) + $this->getCommissionCommerciale()) * $this->getData("commission_financiere") / 100;
     }
-    
 
     // Rendus HTML: 
 
@@ -475,7 +434,76 @@ class BF_Demande extends BimpObject
                 $html .= '</div>';
             }
         }
-        return $html . $this->renderInfoFin();
+
+        $html .= $this->renderInfoFin();
+
+        return $html;
+    }
+
+    public function renderCommandesInfos()
+    {
+        $html = '';
+
+        $total = 0;
+        $total_ordered = 0;
+        $total_paid = 0;
+
+        $lines = $this->getChildrenObjects('lines');
+
+        foreach ($lines as $line) {
+            $pu_ttc = (float) BimpTools::calculatePriceTaxIn((float) $line->getData('pu_ht'), (float) $line->getData('tva_tx'));
+            $total += $pu_ttc * (float) $line->getData('qty');
+            $total_ordered += $pu_ttc * (float) $line->getQtyOrdered();
+        }
+
+        $commandes = $this->getCommandesFournisseurData();
+
+        foreach ($commandes as $id_fourn => $commandes) {
+            foreach ($commandes as $comm_data) {
+                foreach (BimpTools::getDolObjectLinkedObjectsList($comm_data['comm']->dol_object, $this->db) as $item) {
+                    if ($item['type'] !== 'invoice_supplier') {
+                        continue;
+                    }
+
+                    $facture_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $item['id_object']);
+                    if (BimpObject::objectLoaded($facture_fourn_instance)) {
+                        $total_paid += $facture_fourn_instance->getTotalPaid();
+                    }
+                }
+            }
+        }
+
+        $to_order = $total - $total_ordered;
+        $to_pay = $total - $total_paid;
+
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<tr>';
+        $html .= '<th>Total Eléments financés</th>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($total, 'EUR', true) . '</td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<tr>';
+        $html .= '<th>Total Commandé</th>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($total_ordered, 'EUR', true) . '</td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<th>Total Commandes payées</th>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($total_paid, 'EUR', true) . '</td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<th>Reste à commander</th>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($to_order, 'EUR', true) . '</td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<th>Reste à payer</th>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($to_pay, 'EUR', true) . '</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        return BimpRender::renderPanel('Infos', $html, '', array(
+                    'type' => 'secondary',
+                    'icon' => 'fas_info',
+        ));
     }
 
     public function renderCommandesFournisseursList()
@@ -521,7 +549,7 @@ class BF_Demande extends BimpObject
                         }
                     }
                     $fourn_lines = $this->getChildrenObjects('lines', array('id_fournisseur' => (int) $id_fourn), 'position', 'asc');
-                    $html .= '<th style="width: 25%">';
+                    $html .= '<th style="max-width: 2000px;">';
                     $html .= $fourn->getNomUrl(true, false, true, 'default');
                     $html .= '</th>';
                     $html .= '<td>';
@@ -533,23 +561,58 @@ class BF_Demande extends BimpObject
                         $html .= '<thead>';
                         $html .= '<tr>';
                         $html .= '<th>Commande</th>';
+                        $html .= '<th>Total TTC</th>';
                         $html .= '<th>Statut</th>';
                         $html .= '<th>PDF Commande</th>';
-                        $html .= '<th>Facture</th>';
-                        $html .= '<th>PDF Facture</th>';
+                        $html .= '<th>Facture(s)</th>';
                         $html .= '<th></th>';
                         $html .= '</tr>';
                         $html .= '</thead>';
                         foreach ($commandes as $commande_data) {
                             $commande = $commande_data['comm'];
+
+                            $factures = array();
+
+                            foreach (BimpTools::getDolObjectLinkedObjectsList($commande->dol_object, $this->db) as $item) {
+                                if ($item['type'] !== 'invoice_supplier') {
+                                    continue;
+                                }
+
+                                $facture_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $item['id_object']);
+                                if (BimpObject::objectLoaded($facture_fourn_instance)) {
+                                    $factures[] = $facture_fourn_instance;
+                                }
+                            }
+
                             $html .= '<tr>';
                             $html .= '<td>' . $commande->getNomUrl(true, true, true, 'full') . '</td>';
+                            $html .= '<td>' . BimpTools::displayMoneyValue($commande->getData('total_ttc'), 'EUR', true) . '</td>';
                             $html .= '<td>' . $commande->displayData('fk_statut') . '</td>';
                             $html .= '<td>';
-                            $html .= $commande->displayPDFButton(false);
+                            $html .= $commande->displayPDFButton(true, false);
                             $html .= '</td>';
-                            $html .= '<td></td>';
-                            $html .= '<td></td>';
+                            $html .= '<td>';
+                            if (count($factures)) {
+                                $html .= '<table>';
+                                $html .= '<tbody>';
+                                foreach ($factures as $fac_data) {
+                                    $html .= '<tr>';
+                                    $html .= '<td>' . $fac_data->getNomUrl(1, 1, 1, 'full') . '</td>';
+                                    $html .= '<td>' . $fac_data->displayData('fk_statut') . '</td>';
+                                    $html .= '<td>';
+                                    if ((int) $fac_data->getData('paye')) {
+                                        $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Payée</span>';
+                                    } else {
+                                        $html .= '<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Non payée</span>';
+                                    }
+                                    $html .= '</td>';
+                                    $html .= '<td>' . $fac_data->displayPDFButton(true, false) . '</td>';
+                                    $html .= '</tr>';
+                                }
+                            }
+                            $html .= '</tbody>';
+                            $html .= '</table>';
+                            $html .= '</td>';
                             $html .= '<td class="buttons">';
                             $html .= '<span class="displayDetailButton btn btn-light-default" onclick="toggleBfCommandeFournDetailDisplay($(this));">';
                             $html .= '<i class="' . BimpRender::renderIconClass('fas_list') . ' iconLeft"></i>Détail';
@@ -835,6 +898,47 @@ class BF_Demande extends BimpObject
         return $html;
     }
 
+    public function renderInfoFin()
+    {
+        $factBanque = $this->getChildObject('facture_banque');
+        if (BimpObject::objectLoaded($factBanque)) {
+            $diference = $this->getTotalEmprunt() - $factBanque->getData('total_ttc');
+            if ($diference > 0.1 || $diference < -0.1)
+                $this->warningsMsg[] = "Attention diférence entre facture banque est emprunt de : " . price($diference);
+        }
+
+        $contrat = $this->getChildObject('contrat');
+        if (BimpObject::objectLoaded($contrat)) {
+            $diference = $this->getTotalLoyer() - $contrat->total_ttc;
+            if ($diference > 0.1 || $diference < -0.1)
+                $this->warningsMsg[] = "Attention diférence entre CONTRAT est emprunt de : " . price($diference);
+        }
+
+        $marge1 = $this->getMarge(1);
+        $marge2 = $this->getMarge(2);
+        $marge = $marge1 + $marge2;
+        if ($marge < -1)
+            $this->warningsMsg['marge-'] = "Attention la marge est négative : " . $marge;
+
+        $html = "";
+
+        $html .= '<div class="object_header_extra">';
+        if (count($this->warningsMsg)) {
+            $html .= BimpRender::renderAlerts($this->warningsMsg, 'warning');
+        }
+        if (count($this->infoMsg)) {
+            $html .= BimpRender::renderAlerts($this->infoMsg, 'info');
+        }
+
+        $html .= "<strong>Total emprunt :</strong> " . BimpTools::displayMoneyValue($this->getTotalEmprunt(), 'EUR') . '<br/>';
+        $html .= "<strong>Marge sur le financement :</strong> " . BimpTools::displayMoneyValue($marge1, 'EUR') . '<br/>';
+        $html .= "<strong>Marge loyer inter + frais divers :</strong> " . BimpTools::displayMoneyValue($marge2, 'EUR') . '<br/>';
+        $html .= "<strong>Marge total :</strong> " . BimpTools::displayMoneyValue($marge, 'EUR') . '<br/>';
+
+        $html .= '</div>';
+        return $html;
+    }
+
     // Traitements: 
 
     public function verif_exist_document($document_type)
@@ -935,51 +1039,65 @@ class BF_Demande extends BimpObject
 
         return $errors;
     }
-    
+
     public function calcMontants()
     {
         $errors = array();
+
         if ($this->isLoaded()) {
             $montant_produits = 0;
             $montant_services = 0;
             $montant_logiciels = 0;
-            
+
             $lines = $this->getChildrenObjects('lines');
             foreach ($lines as $line) {
                 $total_ttc = (float) $line->getTotalTTC();
-                switch((int) $line->getData('product_type')) {
+                switch ((int) $line->getData('product_type')) {
                     case BimpLine::BL_PRODUIT:
                         $montant_produits += $total_ttc;
                         break;
-                    
+
                     case BimpLine::BL_SERVICE:
                         $montant_services += $total_ttc;
                         break;
-                    
+
                     case BimpLine::BL_LOGICIEL:
                         $montant_logiciels += $total_ttc;
                         break;
                 }
             }
-            
-            $this->set('montant_materiels', $montant_produits);
-            $this->set('montant_services', $montant_services);
-            $this->set('montant_logiciels', $montant_logiciels);
-            $up_warnings = array();
-            $up_errors = $this->update($up_warnings);
-            
-            if (count($up_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Des erreurs sont survenues lors de la mise à jour des montants de la demande de financement');
+
+            $up = false;
+            if ((float) $montant_produits !== $this->getInitData('montant_materiels')) {
+                $this->set('montant_materiels', $montant_produits);
+                $up = true;
             }
-            
-            if (count($up_warnings)) {
-                $errors[] = BimpTools::getMsgFromArray($up_warnings, 'Des erreurs sont survenues suite à la mise à jour des montants de la demande de financement');
+            if ((float) $montant_services !== $this->getInitData('montant_services')) {
+                $this->set('montant_services', $montant_services);
+                $up = true;
+            }
+            if ((float) $montant_logiciels !== $this->getInitData('montant_logiciels')) {
+                $this->set('montant_logiciels', $montant_logiciels);
+                $up = true;
+            }
+
+            if ($up) {
+                $up_warnings = array();
+                $up_errors = $this->update($up_warnings);
+
+                if (count($up_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_errors, 'Des erreurs sont survenues lors de la mise à jour des montants de la demande de financement');
+                }
+
+                if (count($up_warnings)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_warnings, 'Des erreurs sont survenues suite à la mise à jour des montants de la demande de financement');
+                }
             }
         }
-        
+
         return $errors;
     }
-    
+
     public function onChildSave($child)
     {
         if (isset($child->object_name)) {
@@ -987,7 +1105,18 @@ class BF_Demande extends BimpObject
                 return $this->calcMontants();
             }
         }
-        
+
+        return array();
+    }
+
+    public function onChildDelete($child)
+    {
+        if (isset($child->object_name)) {
+            if ($child->object_name === 'BF_Line') {
+                return $this->calcMontants();
+            }
+        }
+
         return array();
     }
 
@@ -995,15 +1124,15 @@ class BF_Demande extends BimpObject
 
     public function actionGenerateContrat($data, &$success)
     {
-            global $user;
+        global $user;
         $errors = array();
         $warnings = array();
         $success = '';
 
         $contrat = $this->getChildObject('contrat');
         $loyers = $this->getChildrenObjects('refinanceurs', array(
-                'status' => 2, 'periode2' => 0
-            ), 'position', 'asc');
+            'status'   => 2, 'periode2' => 0
+                ), 'position', 'asc');
 
         if (!BimpObject::objectLoaded($contrat)) {
             $success = 'Contrat généré avec succès';
@@ -1116,7 +1245,7 @@ class BF_Demande extends BimpObject
 
                 $taux_tva = 0; // A MOFIFIER EN FONCTION DE SI ON A UN TAUX POUR LES EMPRUNS
 
-                $emprunt_label = ''.$total_emprunt;
+                $emprunt_label = '' . $total_emprunt;
 
                 $line = $facture->getLineInstance();
 
@@ -1162,7 +1291,7 @@ class BF_Demande extends BimpObject
             'errors'   => $errors
         );
     }
-    
+
     public function actionGenerateFactureClient($data, &$success)
     {
         $errors = array();

@@ -369,6 +369,19 @@ class BF_Demande extends BimpObject
         if($marge < -1)
             $this->warningsMsg['marge-'] = "Attention la marge est négative : ".$marge;
         
+        $asso = new BimpAssociation($this, 'factures');
+        $tot = 0;
+        if(count($asso->getAssociatesList()) > 0){
+            foreach ($asso->getAssociatesList() as $id_facture) {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+                if (BimpObject::objectLoaded($facture)) {
+                    $tot += $facture->getData('total');
+                }
+            }
+            $diference =  ($this->getTotalFraisDiv()+$this->getTotalLoyerInter()) - $tot;
+            if($diference > 0.1 || $diference < -0.1)
+                $this->warningsMsg['fraisdivdif'] = "Attention les factures de frais divers + loyer intercalaires ne correspond pas diférence de : ".price($diference);
+        }
         
         
         

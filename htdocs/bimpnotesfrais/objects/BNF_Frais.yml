@@ -1,5 +1,6 @@
 table: bnf_frais
 icon: fas_sticky-note
+controller: index
 
 labels: 
     name: note de frais
@@ -12,13 +13,41 @@ objects:
         delete: 1
         instance: 
             bimp_object: BNF_FraisMontant
+
+    invite:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object: BNF_FraisInvite
+
+    comment: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: BNF_Comment
             
     kilometers:
         relation: hasMany
         delete: 1
         instance: 
             bimp_object: BNF_FraisKilometers
-                
+
+    files:
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpnotesfrais
+                parent_object_name: BNF_Frais
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpnotesfrais
+                    parent_object_name: BNF_Frais
+           
 fields: 
     id_user: 
         label: Utilisateur
@@ -31,7 +60,7 @@ fields:
                 name: id
                 object: 
                     global: user
-        
+
     type: 
         label: Type
         type: int
@@ -59,9 +88,10 @@ fields:
         default_value: 1
         
     ticket_validated: 
-        label: Ticket de caisse validé
+        label: Tickets de caisse validé
         type: bool
-        default_value: 0
+        value:
+            callback: checkValidateTickets
         
     period: 
         label: Période
@@ -78,18 +108,23 @@ forms:
             - field: id_user
             - field: date
             - field: type
+              input:
+                    type: hidden
             - field: description
-            - field: period
-            - object: montants
-              multiple: 1
-              display_if: 
-                  field_name: type
-                  hide_values: 5
-            - object: kilometers
-              multiple: 1
-              display_if: 
-                  field_name: type
-                  show_values: 5
+            # - field: period
+            #   display_if: 
+            #       field_name: type
+            #       show_values: 1
+            # - object: montants
+            #   multiple: 1
+            #   display_if: 
+            #       field_name: type
+            #       hide_values: 5
+            # - object: kilometers
+            #   multiple: 1
+            #   display_if: 
+            #       field_name: type
+            #       show_values: 5
             
 fields_tables: 
     default: 
@@ -102,13 +137,14 @@ fields_tables:
                   callback: displayTotalAmount
             - field: id_user
               display: card
-            - field: period
-              show: 
-                  callback: hasPeriod
+            #- field: period
+            #  show: 
+            #      callback: hasPeriod
             - field: type
             - field: description
             - field: ticket_validated
-            
+
+
 views: 
     default:
         objects_change_reload: BNF_FraisMontant,BNF_FraisKilometers
@@ -128,9 +164,19 @@ views:
             - cols: 
                 - type: list
                   show: 
+                      callback: hasRestauration
+                  list: 
+                      children: invite
+            - cols: 
+                - type: list
+                  show: 
                       callback: hasKilometers
                   list: 
                       children: kilometers
+            - cols: 
+                - type: list
+                  list: 
+                      children: files
 lists: 
     default: 
         title: Notes de frais
@@ -146,6 +192,7 @@ lists:
         add_form_name: default
         edit_btn: 1
         edit_form: default
+        page_btn: 1
         update_btn: 1
         delete_btn: 1
         modal_view: default
@@ -165,7 +212,8 @@ lists:
                     callback: displayTotalAmount
             ticket: 
                 field: ticket_validated
-                edit: 1
+                value:
+                    callback: checkValidateTickets
             status: 
                 field: status
     
@@ -199,6 +247,7 @@ lists:
                     callback: displayTotalAmount
             ticket: 
                 field: ticket_validated
-                edit: 1
+                value:
+                    callback: checkValidateTickets
             status: 
                 field: status

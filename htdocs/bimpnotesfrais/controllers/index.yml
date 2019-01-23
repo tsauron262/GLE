@@ -8,7 +8,11 @@ objects:
             bimp_object: BNF_Frais
             id_object: 
                 request: id
-            
+    note:
+        instance:
+            bimp_object: BNF_Frais
+            id_object: 
+                request: id
 sections:
     - type: tabs
       tabs: 
@@ -16,6 +20,11 @@ sections:
             label: Liste complète
             sections:
                 - type: list
+                  panel: 1
                   list: 
                       title: Toutes les notes de frais
                       object: frais
+    - type: view
+      view: 
+          object: note
+          name: default

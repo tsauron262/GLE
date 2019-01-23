@@ -76,6 +76,7 @@ class BNF_FraisKilometers extends BimpObject
 
         return $montant;
     }
+   
 
     public function displayMontant()
     {

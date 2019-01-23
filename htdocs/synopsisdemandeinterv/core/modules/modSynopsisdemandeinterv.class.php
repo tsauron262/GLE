@@ -213,7 +213,7 @@ class modsynopsisdemandeinterv  extends DolibarrModules
   `total_ttc` double default NULL,
   `dateStat` int(11) NOT NULL,
   PRIMARY KEY  (`rowid`),
-  UNIQUE KEY `ref` (`ref`),
+  UNIQUE KY `ref` (`ref`),
   KEY `idx_synopsisdemandeinterv_fk_soc` (`fk_soc`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2280 ;";
         

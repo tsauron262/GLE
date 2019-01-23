@@ -1269,6 +1269,15 @@ class BS_SAV extends BimpObject
 
                 if ($this->getData("id_facture_acompte"))
                     addElementElement("propal", "facture", $prop->id, $this->getData("id_facture_acompte"));
+                
+                
+                // Création des lignes propal:
+                if ((int) $this->getData('id_propal')) {
+                    $prop_errors = $this->generatePropalLines();
+                    if (count($prop_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création des lignes du devis');
+                    }
+                }
             }
         }
 

@@ -38,6 +38,32 @@ fields:
         label: Coéficient
         type: float
         decimals: 5
+            
+    quantity: 
+        label: Nombre
+        type: int
+        required: 1
+        
+    amount_ht:
+        label: Montant HT
+        type: money
+        required: 1
+        
+    payment:
+        label: Règlement
+        type: int
+        values: 
+            array: payments
+        
+    periodicity:
+        label: Périodicité
+        type: int
+        values: 
+            array: periodicities
+            
+    periode2:
+        label: Seconde période
+        type: bool
         
     comment:
         label: Commentaire
@@ -72,10 +98,23 @@ list:
         coef: 
             field: coef
             edit: 1
-        comment:
-            field: comment
+        quantity: 
+            field: quantity
             edit: 1
-            min_width: 40%
+        amount: 
+            label: Loyé 
+            field: amount_ht
+            edit: 1
+        amount2: 
+            label: Loyé calculé
+            value: 
+                callback: displayLoyerSuggest
+        periodicity:
+            field: periodicity
+            edit: 1
+        periode2:
+            field: periode2
+            edit: 1
     add_object_row: 1
     update_btn: 1
     delete_btn: 1

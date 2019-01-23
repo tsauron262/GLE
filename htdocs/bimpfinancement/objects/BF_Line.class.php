@@ -4,6 +4,11 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpLine.class.php';
 
 class BF_Line extends BimpLine
 {
+    
+    public function getQtyDecimals()
+    {
+        return 3;
+    }
 
     // Getters: 
     public function getQtyOrdered($id_commande_excluded = 0)

@@ -265,15 +265,17 @@ class BimpRender
         return $html;
     }
 
-    public static function renderFreeForm($rows, $buttons, $title, $icon = '', $infos = array())
+    public static function renderFreeForm($rows, $buttons = array(), $title = '', $icon = '', $infos = array())
     {
         $html = '<div class="freeForm">';
-        $html .= '<div class="freeFormTitle">';
-        if ($icon) {
-            $html .= '<i class="fa fa-' . $icon . ' iconLeft"></i>';
+        if ($title) {
+            $html .= '<div class="freeFormTitle">';
+            if ($icon) {
+                $html .= '<i class="fa fa-' . $icon . ' iconLeft"></i>';
+            }
+            $html .= $title;
+            $html .= '</div>';
         }
-        $html .= $title;
-        $html .= '</div>';
         $html .= '<div class="freeFormContent">';
 
         if (count($infos)) {
@@ -300,11 +302,13 @@ class BimpRender
         $html .= '<div class="freeFormAjaxResult">';
         $html .= '</div>';
 
-        $html .= '<div class="freeFormSubmit rightAlign">';
-        foreach ($buttons as $button) {
-            $html .= $button;
+        if (!empty($buttons)) {
+            $html .= '<div class="freeFormSubmit rightAlign">';
+            foreach ($buttons as $button) {
+                $html .= $button;
+            }
+            $html .= '</div>';
         }
-        $html .= '</div>';
 
         $html .= '</div>';
         $html .= '</div>';

@@ -403,6 +403,70 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, '', '');
     }
 
+    public static function getBimpObjectsArray($with_icons = true, $by_modules = true, $include_empty = false)
+    {
+        $cache_key = 'bimp_objects_array';
+        if ($by_modules) {
+            $cache_key .= 'by_modules';
+        }
+        if ($with_icons) {
+            $cache_key .= 'with_icons';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $files = scandir(DOL_DOCUMENT_ROOT);
+
+            foreach ($files as $f) {
+                if (in_array($f, array('.', '..')) || !is_dir(DOL_DOCUMENT_ROOT . '/' . $f) ||
+                        !preg_match('/^bimp(.+)$/', $f)) {
+                    continue;
+                }
+
+
+                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $f . '/objects') && is_dir(DOL_DOCUMENT_ROOT . '/' . $f . '/objects')) {
+                    if ($by_modules) {
+                        self::$cache[$cache_key][$f] = array(
+                            'group' => array(
+                                'label'   => $f,
+                                'options' => array()
+                            )
+                        );
+                    }
+
+                    $objects = scandir(DOL_DOCUMENT_ROOT . '/' . $f . '/objects');
+
+                    foreach ($objects as $objFile) {
+                        if (in_array($objFile, array('.', '..'))) {
+                            continue;
+                        }
+
+                        if (preg_match('/^(.+)\.yml$/', $objFile, $matches)) {
+                            $object_name = $matches[1];
+                            $instance = BimpObject::getInstance($f, $object_name);
+                            if (is_a($instance, 'BimpObject') && is_a($instance, $object_name)) {
+                                $option = array();
+                                if ($with_icons && (string) $instance->params['icon']) {
+                                    $option['icon'] = $instance->params['icon'];
+                                }
+                                $option['label'] = BimpTools::ucfirst($instance->getLabel()) . ' (' . $object_name . ')';
+
+                                if ($by_modules) {
+                                    self::$cache[$cache_key][$f]['group']['options'][$f . '-' . $object_name] = $option;
+                                } else {
+                                    self::$cache[$cache_key][$f . '-' . $object_name] = $option;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
     // Sociétés: 
 
     public static function getSocieteContactsArray($id_societe, $include_empty = false)

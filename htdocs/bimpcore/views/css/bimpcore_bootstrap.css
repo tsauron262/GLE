@@ -17218,12 +17218,27 @@ input[type=text].large_input:focus {
   margin-left: 15px;
 }
 
-/* line 695, ../scss/bimpcore/_form.scss */
+/* line 696, ../scss/bimpcore/_form.scss */
+.bimp_form .bimp_form_row {
+  width: 100%;
+  margin-bottom: 10px;
+}
+/* line 702, ../scss/bimpcore/_form.scss */
+.bimp_form.labels_up label {
+  display: block;
+}
+/* line 707, ../scss/bimpcore/_form.scss */
+.bimp_form .select2 {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* line 713, ../scss/bimpcore/_form.scss */
 .ui-menu .ui-menu-item a {
   padding: 0.12em 0.4em !important;
 }
 
-/* line 699, ../scss/bimpcore/_form.scss */
+/* line 717, ../scss/bimpcore/_form.scss */
 .ui-menu .ui-menu-item:last-child a {
   padding-bottom: 1em !important;
 }

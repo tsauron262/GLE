@@ -248,39 +248,7 @@ class BimpInput
                     }
                     $html .= '<select id="' . $input_id . '" name="' . $field_name . '" class="' . $extra_class . '">';
                     foreach ($options['options'] as $option_value => $option) {
-                        $color = null;
-                        $icon = null;
-                        if (is_array($option)) {
-                            if (isset($option['label'])) {
-                                $label = $option['label'];
-                            } elseif (isset($option['value'])) {
-                                $label = $option['value'];
-                            } else {
-                                $label = $option_value;
-                            }
-                            
-                            if (isset($option['color'])) {
-                                $color = $option['color'];
-                            } elseif (isset($option['classes'])) {
-                                $color = BimpTools::getAlertColor($option['classes'][0]);
-                            }
-                            if (isset($option['icon'])) {
-                                $icon = BimpRender::renderIconClass($option['icon']);
-                            }
-                        } else {
-                            $label = $option;
-                        }
-                        $html .= '<option value="' . $option_value . '"';
-                        if ($value == $option_value) {
-                            $html .= ' selected="1"';
-                        }
-                        if (!is_null($color)) {
-                            $html .= ' data-color="' . $color . '" style="color: #' . $color . '"';
-                        }
-                        if (!is_null($icon)) {
-                            $html .= ' data-icon_class="' . $icon . '"';
-                        }
-                        $html .= '>' . $label . '</option>';
+                        $html .= self::renderSelectOption($option_value, $option, $value);
                     }
                     $html .= '</select>';
 
@@ -1221,6 +1189,64 @@ class BimpInput
 
         $html .= '</div>';
 
+        return $html;
+    }
+
+    public static function renderSelectOption($option_value, $option, $value)
+    {
+        $html = '';
+        $color = null;
+        $icon = null;
+        if (is_array($option)) {
+            if (isset($option['label'])) {
+                $label = $option['label'];
+            } elseif (isset($option['value'])) {
+                $label = $option['value'];
+            } else {
+                $label = $option_value;
+            }
+
+            if (isset($option['color'])) {
+                $color = $option['color'];
+            } elseif (isset($option['classes'])) {
+                $color = BimpTools::getAlertColor($option['classes'][0]);
+            }
+            if (isset($option['icon'])) {
+                $icon = BimpRender::renderIconClass($option['icon']);
+            }
+            if (isset($option['group'])) {
+                $html .= '<optgroup label="' . (isset($option['group']['label']) ? $option['group']['label'] : '') . '"';
+                if (!is_null($color)) {
+                    $html .= ' data-color="' . $color . '" style="color: #' . $color . '"';
+                }
+                if (!is_null($icon)) {
+                    $html .= ' data-icon_class="' . $icon . '"';
+                }
+                $html .= '>';
+                if (isset($option['group']['options']) && is_array($option['group']['options'])) {
+                    foreach ($option['group']['options'] as $opt_value => $opt) {
+                        $html .= self::renderSelectOption($opt_value, $opt, $value);
+                    }
+                }
+                $html .= '</optgroup>';
+                return $html;
+            }
+        } else {
+            $label = $option;
+        }
+        
+        $html .= '<option value="' . $option_value . '"';
+        if ($value == $option_value) {
+            $html .= ' selected="1"';
+        }
+        if (!is_null($color)) {
+            $html .= ' data-color="' . $color . '" style="color: #' . $color . '"';
+        }
+        if (!is_null($icon)) {
+            $html .= ' data-icon_class="' . $icon . '"';
+        }
+        $html .= '>' . $label . '</option>';
+        
         return $html;
     }
 }

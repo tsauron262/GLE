@@ -692,6 +692,24 @@ input[type=text].large_input {
     }
 }
 
+.bimp_form {
+    .bimp_form_row {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    &.labels_up {
+        label {
+            display: block;
+        }
+    }
+
+    .select2 {
+        width: 100%!important;
+        max-width: 100%!important;
+    }
+}
+
 .ui-menu .ui-menu-item a {
     padding: .12em .4em!important;
 }

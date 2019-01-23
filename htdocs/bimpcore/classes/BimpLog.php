@@ -140,7 +140,15 @@ class BimpLog
 
     public static function loadFile($file)
     {
+        $actions = array();
         
+        if (file_exists($file)) {
+            $rows = file($file);
+            
+            
+        }
+        
+        return $actions;
     }
 
     public static function end()

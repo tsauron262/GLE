@@ -27,6 +27,7 @@ forms:
     default: 
         rows: 
             - field: type
+            - field: in_contrat
             - field: id_product
             - field: product_type
             - field: label
@@ -39,6 +40,7 @@ forms:
             - field: equipments
             - field: extra_serials
             - field: description
+
             
 lists_cols: 
     qty_ordered: 
@@ -60,6 +62,7 @@ lists:
             qty_ordered: 
             total_ttc:
             equipments:
-            fourn: 
+            fourn:
+            in_contrat: 
 
     

@@ -130,11 +130,6 @@ objects:
         instance: 
             bimp_object: BF_Refinanceur
             
-    rents:
-        relation: hasMany
-        delete: 1
-        instance:
-            bimp_object: BF_Rent
             
     rents_except: 
         relation: hasMany
@@ -439,7 +434,7 @@ forms:
                   options: 
                       array: demandeFactures
             - custom: 1
-              label: Centre
+              label: Entrepôt
               input_name: id_entrepot
               input: 
                   type: search_entrepot
@@ -670,10 +665,6 @@ views:
                                     children: refinanceurs
                                     panel: 0
                         - cols: 
-                            - type: list
-                              list: 
-                                  children: rents
-                                  panel: 0
                             - type: list
                               list: 
                                   children: rents_except

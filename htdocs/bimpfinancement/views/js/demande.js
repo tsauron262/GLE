@@ -118,11 +118,51 @@ function bf_demande_calculateMontantTotal($view, champ) {
     //Total loyer calculé
     var totalLoyer = 0;
     var duree = 0;
-    $view.find(".BF_Rent_row").each(function () {
-        totalLoyer += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
-        if ($(this).find('input[name="periode2"]').val() == 0)
-            duree += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('select[name="periodicity"]').val());
+//    $view.find(".BF_Rent_row").each(function () {
+//    });
+
+    //Cout banque
+    var taux = 0;
+    var coef = 0;
+    var coupBanque = 0;
+    var posTmp = 10000000;
+    var periodicity = 1;
+    $view.find(".BF_Refinanceur_row").each(function () {
+        if ($(this).find('input[name="periode2"]').val() == 0
+                && $(this).find('[name="status"]').val() == 2){
+                totalLoyer += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
+            }
+        });
+    $view.find(".BF_Refinanceur_row").each(function () {
+        if ($(this).find('input[name="periode2"]').val() == 0
+                && $(this).find('[name="status"]').val() == 2){
+//            if ($(this).data("position") < posTmp) {
+                posTmp = $(this).data("position");
+                taux = $(this).find("input[name=rate]").val();
+                coef = $(this).find("input[name=coef]").val();
+                totalLoyerT = parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
+                if(totalLoyerT > 0){
+                    dureeT = parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('select[name="periodicity"]').val());
+                    duree += dureeT;
+
+                    periodicity = $(this).find('select[name="periodicity"]').val();
+
+                    coupBanqueT = 0;
+                    if (coef > 0)
+                        coupBanqueT += (dureeT / periodicity) * total2 * coef / 100 - total2;
+
+                    if (taux > 0) {
+                        var echoir = ($view.find('input[name="mode_calcul"]').val() == 2);
+                        coupBanqueT += calculInteret(total2, dureeT, taux, echoir);
+                    }
+                    coupBanque += coupBanqueT * totalLoyerT / totalLoyer;
+                    console.log(dureeT);
+                }
+//            }
+        }
     });
+    
+    
     displayMoneyValue(totalLoyer, $view.find('#total_loyer'));
 
 
@@ -132,29 +172,8 @@ function bf_demande_calculateMontantTotal($view, champ) {
     if (duree == 0)
         duree = $view.find('input[name="duration"]').val();
 
-    //Cout banque
-    var taux = 0;
-    var coef = 0;
-    var posTmp = 10000000;
-    $view.find(".BF_Refinanceur_row").each(function () {
-        if ($(this).data("position") < posTmp) {
-            posTmp = $(this).data("position");
-            taux = $(this).find("input[name=rate]").val();
-            coef = $(this).find("input[name=coef]").val();
-        }
-    });
 
-
-    var periodicity = $view.find('input[name="periodicity"]').val();
-
-    var coupBanque = 0;
-    if (coef > 0)
-        coupBanque += (duree * periodicity) * total2 * coef / 100 - total2;
-
-    if (taux > 0) {
-        var echoir = ($view.find('input[name="mode_calcul"]').val() == 2);
-        coupBanque += calculInteret(total2, duree, taux, echoir);
-    }
+    
 
     displayMoneyValue(coupBanque, $view.find('#cout_banque'));
 
@@ -626,4 +645,10 @@ function toggleBfCommandeFournDetailDisplay($button) {
             }
         }
     }
+}
+
+function majLoyerAuto(elem, montant){
+    elem2 = elem.parent().parent().find("input[name='amount_ht']");
+    elem2.val(montant);
+    elem2.trigger("keyup");
 }

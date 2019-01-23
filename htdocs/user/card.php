@@ -503,11 +503,13 @@ if (empty($reshook)) {
 
 				$object->oldcopy = clone $object;
 
-				$ret = $object->setPassword($user, GETPOST("password"));
-				if ($ret < 0)
-				{
-					setEventMessages($object->error, $object->errors, 'errors');
-				}
+                                if(GETPOST("password") != ""){
+                                    $ret = $object->setPassword($user, GETPOST("password"));
+                                    if ($ret < 0)
+                                    {
+                                            setEventMessages($object->error, $object->errors, 'errors');
+                                    }
+                                }
 			}
 		}
 	}

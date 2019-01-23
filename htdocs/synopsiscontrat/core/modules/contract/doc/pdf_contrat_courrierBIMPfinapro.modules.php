@@ -17,11 +17,6 @@
     	var $contrat;
     	var $pdf;
     	var $margin_bottom = 25;
-        var $current_exemplaire = 1;
-
-        const EXEMPLAIRE_LOCATAIRE = 1;
-        const EXEMPLAIRE_LOUEUR = 2;
-        const EXEMPLAIRE_REFINANCEUR = 3;
 
     function __construct($db) {
         global $conf, $langs, $mysoc;
@@ -135,7 +130,6 @@
          \______| \______/  |__| \__|     |__|     | _| `._____/__/     \__\  |__|   
 
  */         
-            $nb_exemplaires = 3;
             if ($contrat->specimen) {
                 $dir = $conf->contrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
@@ -143,7 +137,6 @@
                 $propref = sanitize_string($contrat->ref);
                 $dir = $conf->contrat->dir_output . "/" . $propref;
                 $file = $dir . "/Liasse_finapro_" . date("d_m_Y") . "_" . $propref . ".pdf";
-
             }
             $this->contrat = $contrat;
             if (!file_exists($dir)) {
@@ -171,6 +164,7 @@
                 }
 
                 $pdf->Open();
+
                 $pdf->AddPage();
                 $pdf->SetDrawColor(128, 128, 128);
                 $pdf->SetTitle($contrat->ref);
@@ -248,14 +242,18 @@
                 $pdf->SetFont(''/* 'Arial' */, '', 9);
                 /* FIN ENTE_TETE DU TABLEAU (QUANTITE, DESIGNATION DU MATERIEL, NUMERO DE SERIE) */  
                                  
-                $where = "`id_parent` = " . $id_demande . " AND `in_contrat` = 1";
-                $liste_materiel = $BimpDb->getRows("bf_demande_line", $where, null, 'object', array('*'));
-                $count = $BimpDb->getRows('bf_demande_line', $where, null, 'object', array('COUNT(*) as res'));
-                $count = $this->db->query("SELECT COUNT(*) as res FROM " . MAIN_DB_PREFIX . "bf_demande_line WHERE " . $where);
-                $count = $this->db->fetch_object($count);
+                // $where = "`id_parent` = " . $id_demande . " AND `in_contrat` = 1";
+                // $count = count($BimpDb->getRows("bf_demande_line", $where, null, 'object', array('*')));
+                // $count = $BimpDb->getRows('bf_demande_line', $where, null, 'object', array('id'));
+                // foreach ($count as $nb) {
+                //     $count_++;
+                // 
+
+                // $count = $this->db->query("SELECT COUNT(*) as res FROM " . MAIN_DB_PREFIX . "bf_demande_line WHERE " . $where);
+                // $count = $this->db->fetch_object($count);
 
                  /* DEBUT CORP DU TABLEAU (QUANTITE, DESIGNATION DU MATERIEL, NUMERO DE SERIE) */
-                if($count->res <= 5) {
+                if($count <= 5) {
                     $new_page = false;
                     foreach ($liste_materiel as $liste) {
                         if($liste->id_product > 0) {
@@ -588,7 +586,7 @@
                 /* DEBUT CORP DU TABLEAU (QUANTITE, DESIGNATION DU MATERIEL, NUMERO DE SERIE) */
                 $liste_materiel = $BimpDb->getRows("bf_demande_line", $where, null, 'object', array('*'));
                 $count = $BimpDb->getRows('bf_demande_line', $where, null, 'object', array('COUNT(*) as res'));
-                $count = $this->db->query("SELECT COUNT(*) as res FROM " . MAIN_DB_PREFIX . "bf_demande_line WHERE " . $where);
+                //$count = $this->db->query("SELECT COUNT(*) as res FROM " . MAIN_DB_PREFIX . "bf_demande_line WHERE " . $where);
                 $count = $this->db->fetch_object($count);
                 if($count->res <= 5){
                     $new_page = false;

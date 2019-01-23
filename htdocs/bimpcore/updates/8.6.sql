@@ -1,1 +1,1 @@
-ALTER TABLE `llx_bf_demande` ADD `reference` VARCHAR(20) NOT NULL; 
+ALTER TABLE `llx_bf_demande` ADD `reference` VARCHAR(20) NOT NULL;

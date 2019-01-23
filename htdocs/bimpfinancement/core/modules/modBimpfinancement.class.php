@@ -285,7 +285,7 @@ class modBimpfinancement extends DolibarrModules
 
                 
                 //Facture
-                //$sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpfact', 1, 'invoice', 'Facture', NULL);";
+               $sql[] = "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity, libelle) VALUES('contrat_LDLC_lease','contract'," . $conf->entity . ", 'Liasse LDLC Lease')";
                 
 		//$this->_load_tables('/bimpcommercial/sql/');
 
@@ -304,7 +304,7 @@ class modBimpfinancement extends DolibarrModules
 	{
 		$sql = array();
                 
-                //$sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevis';";
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom = 'contrat_LDLC_lease' ;";
 
 		return $this->_remove($sql, $options);
 	}

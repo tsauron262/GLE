@@ -8,6 +8,16 @@ class BNF_Frais extends BimpObject
     const NOTE_FRAIS_REMBOURSEE = 3;
     const NOTE_FRAIS_REFUSEE = 4;
 
+    const NOTE_FRAIS_RESTAURATION = 1; // Sous-Type : OK
+    const NOTE_FRAIS_HEBERGEMENT = 2;
+    const NOTE_FRAIS_PARKING = 3;
+    const NOTE_FRAIS_ENTRETIEN = 4;
+    const NOTE_FRAIS_KILOMETERS = 5;
+    const NOTE_FRAIS_TRANSPORT = 6; // Sous-Type : OK
+    const NOTE_FRAIS_POSTAL = 7; // Sous-Type : OK
+    const NOTE_FRAIS_ABONNEMENT = 8;
+    const NOTE_FRAIS_SALON = 9;
+
     public static $status_list = array(
         self::NOTE_FRAIS_ATT_VALIDATION    => array('label' => 'En attente de validation', 'classes' => array('warning'), 'icon' => 'hourglass-start'),
         self::NOTE_FRAIS_ATT_REMBOURSEMENT => array('label' => 'En attente de remboursement', 'classes' => array('important'), 'icon' => 'hourglass-start'),
@@ -15,18 +25,33 @@ class BNF_Frais extends BimpObject
         self::NOTE_FRAIS_REFUSEE           => array('label' => 'Refusée', 'classes' => array('danger'), 'icon' => 'times'),
     );
     public static $types = array(
-        1 => 'Restauration',
-        2 => 'Hébergement / transport',
-        3 => 'Parking',
-        4 => 'Entretien véhicule',
-        5 => 'Indémnités kilométriques'
+        self::NOTE_FRAIS_RESTAURATION   => array('label' => 'Restauration', 'classes' => array(''), 'icon' => 'apple'),
+        self::NOTE_FRAIS_HEBERGEMENT    => array('label' => 'Hébergement', 'classes' => array(''), 'icon' => 'hotel'),
+        self::NOTE_FRAIS_PARKING        => array('label' => 'Parking', 'classes' => array(''), 'icon' => 'map'),
+        self::NOTE_FRAIS_ENTRETIEN      => array('label' => 'Entretien véhicule', 'classes' => array(''), 'icon' => 'cogs'),
+        self::NOTE_FRAIS_KILOMETERS     => array('label' => 'Indémnités kilométriques', 'classes' => array(''), 'icon' => 'car'),
+        self::NOTE_FRAIS_TRANSPORT      => array('label' => 'Transport', 'classes' => array(''), 'icon' => 'bus'),
+        self::NOTE_FRAIS_POSTAL         => array('label' => 'Frais postaux', 'classes' => array(''), 'icon' => 'paper-plane'),
+        self::NOTE_FRAIS_ABONNEMENT     => array('label' => 'Abonnement', 'classes' => array(''), 'icon' => 'link'),
+        self::NOTE_FRAIS_SALON          => array('label' => 'Salon', 'classes' => array(''), 'icon' => 'users'),
     );
-    public static $periods = array(
-        1 => 'Midi',
-        2 => 'Soir'
+    public static $periods = array(1 => 'Midi',2 => 'Soir');
+    public static $amounts_types = array(
+        self::NOTE_FRAIS_RESTAURATION,
+        self::NOTE_FRAIS_HEBERGEMENT,
+        self::NOTE_FRAIS_PARKING,
+        self::NOTE_FRAIS_ENTRETIEN,
+        self::NOTE_FRAIS_TRANSPORT,
+        self::NOTE_FRAIS_POSTAL,
+        self::NOTE_FRAIS_ABONNEMENT,
+        self::NOTE_FRAIS_SALON
     );
-    public static $amounts_types = array(1, 2, 3, 4);
-    public static $kilometers_types = array(5);
+    public static $kilometers_types = array(self::NOTE_FRAIS_KILOMETERS);
+    
+
+    public function hasRestauration() {
+        return ((int) $this->getData('type') == 1 ? 1 : 0);
+    } 
 
     public function hasAmounts()
     {
@@ -92,7 +117,7 @@ class BNF_Frais extends BimpObject
                 'onclick' => $this->getJsNewStatusOnclick(self::NOTE_FRAIS_REMBOURSEE)
             );
         }
-        if ($status !== self::NOTE_FRAIS_ATT_VALIDATION) {
+        if ($status !== self::NOTE_FRAIS_ATT_VALIDATION && $status !== self::NOTE_FRAIS_REMBOURSEE) {
             $buttons[] = array(
                 'label'   => 'Remettre en attente de validation',
                 'icon'    => 'undo',
@@ -106,6 +131,7 @@ class BNF_Frais extends BimpObject
     public function getListBulkActions()
     {
         $actions = array();
+
 
         $actions[] = array(
             'label'   => 'Supprimer les Notes de frais sélectionnées',
@@ -148,6 +174,12 @@ class BNF_Frais extends BimpObject
             'onclick' => 'setSelectedObjectsNewStatus($(this), \'list_id\', ' . self::NOTE_FRAIS_ATT_VALIDATION . ', {}, \'' . $confirm . '\');'
         );
 
+        $confirm = 'Veuillez confirmer la remise en attente de validation des notes de frais sélectionnées';
+        $actions[] = array(
+            'label'   => 'Remettre en attente de validation',
+            'icon'    => 'undo',
+            'onclick' => 'test();'
+        );
         return $actions;
     }
 
@@ -192,7 +224,38 @@ class BNF_Frais extends BimpObject
             }
             $result = parent::checkSubObjectsPost();
         }
-
         return $result;
+    }
+    
+    public function checkValidateTickets() {
+        if(count($this->getChildrenObjects('montants')) > 0){
+            $false = 0;
+            foreach ($this->getChildrenObjects('montants') as $line) {
+                if($line->getData('validate') == 0)
+                    $false++;
+           }
+           if($false == 0) $this->actionValidateTicket('');
+           else {
+            $this->set('ticket_validated', 0); $this->update();
+           }
+       }
+    }
+    //  public function canEdit() {
+    //     $status = $this->getData('status');
+    //     if($status == '2' OR $status == '3') {
+    //         return 0;
+    //     }
+    //     return 1;
+    // }
+    // public function canDelete(){
+    //     return $this->canEdit();
+    // }
+    public function canEdit() {
+        if($this->getData('status') > 1) return 0;
+        return 1;
+    }
+
+    public function canDelete() {
+        return $this->canEdit();
     }
 }

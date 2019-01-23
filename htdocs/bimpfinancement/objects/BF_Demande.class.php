@@ -343,9 +343,70 @@ class BF_Demande extends BimpObject
             $tot += $this->getCommissionCommerciale() + $this->getCommissionFinanciere();
         return (float) $tot;
     }
-
-    public function getTotalEmprunt()
-    {
+    
+    
+    
+    public function renderInfoFin(){
+        
+        
+        $factBanque = $this->getChildObject('facture_banque');
+        if (BimpObject::objectLoaded($factBanque)){
+            $diference = $this->getTotalEmprunt() - $factBanque->getData('total_ttc');
+            if($diference > 0.1 || $diference < -0.1)
+                $this->warningsMsg[] = "Attention diférence entre facture banque est emprunt de : ".price($diference);
+        }
+        
+        $contrat = $this->getChildObject('contrat');
+        if (BimpObject::objectLoaded($contrat)){
+            $diference = $this->getTotalLoyer() - $contrat->total_ttc;
+            if($diference > 0.1 || $diference < -0.1)
+                $this->warningsMsg[] = "Attention diférence entre CONTRAT est emprunt de : ".price($diference);
+        }
+        
+        $marge1 = $this->getMarge(1);
+        $marge2 = $this->getMarge(2);
+        $marge = $marge1 + $marge2;
+        if($marge < -1)
+            $this->warningsMsg['marge-'] = "Attention la marge est négative : ".$marge;
+        
+        $asso = new BimpAssociation($this, 'factures');
+        $tot = $nbF = 0;
+        foreach ($asso->getAssociatesList() as $id_facture) {
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+            if (BimpObject::objectLoaded($facture)) {
+                $tot += $facture->getData('total');
+                $nbF ++;
+            }
+        }
+        if($nbF){
+            $diference =  ($this->getTotalFraisDiv()+$this->getTotalLoyerInter()) - $tot;
+            if($diference > 0.1 || $diference < -0.1)
+                $this->warningsMsg['fraisdivdif'] = "Attention les factures de frais divers + loyer intercalaires ne correspond pas diférence de : ".price($diference);
+        }
+        
+        
+        
+        $html = "";
+        
+        foreach($this->warningsMsg as $msg){
+            $html .= "<div class='error'>".$msg."</div>";
+        }
+        foreach($this->infoMsg as $msg){
+            $html .= "<div class='success'>".$msg."</div>";
+        }
+        
+        
+        
+        
+        $html .= "<br/>Total emprunt : ".$this->getTotalEmprunt();
+        $html .= "<br/>Marge sur le financement : ". $marge1;
+        $html .= "<br/>Marge loyer inter + frais divers : ". $marge2;
+        $html .= "<br/>Marge total : ". $marge;
+        
+        return $html;
+    }
+    
+    public function getTotalEmprunt(){
         $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
             'status'   => 2, 'periode2' => 0
         ));

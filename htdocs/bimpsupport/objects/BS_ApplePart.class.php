@@ -10,7 +10,7 @@ class BS_ApplePart extends BimpObject
     private static $tabDescContientIosDouble = array("Ipad Pro", "Ipad mini", "Apple Watc"); //design contient
     private static $tabRefCommenceBatterie = array("661-04577", "661-04576", "661-08917", "661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755", "661-08935", "661-8216"); //Prix a 59
     private static $tabRefCommenceBatterieX = array("661-08932", "661-10565", "661-10850", "661-11035"); //Prix a 84
-    private static $tabRefCommencePrixEcran = array("661-11232" => "184,25", "661-07285" => "142,58", "661-07286" => "142,58", "661-07287" => "142,58", "661-07288" => "142,58", "661-07289" => "159,25", "661-07290" => "159,25", "661-07291" => "159,25", "661-07292" => "159,25", "661-07293" => "142,58", "661-07294" => "142,58", "661-07295" => "142,58", "661-07296" => "142,58", "661-07297" => "159,25", "661-07298" => "159,25", "661-07299" => "159,25", "661-07300" => "159,25", "661-08933" => "142,58", "661-08934" => "142,58", "661-09081" => "142,58", "661-10102" => "142,58", "661-09032" => "159,25", "661-09033" => "159,25", "661-09034" => "159,25", "661-10103" => "159,25", "661-09294" => "259,25", "661-10608" => "259,25", "661-11037" => "300,91");
+    private static $tabRefCommencePrixEcran = array("661-11232" => array("184,25"), "661-07285" => array("142,58"), "661-07286" => array("142,58"), "661-07287" => array("142,58"), "661-07288" => array("142,58"), "661-07289" => array("159,25"), "661-07290" => array("159,25"), "661-07291" => array("159,25"), "661-07292" => array("159,25"), "661-07293" => array("142,58"), "661-07294" => array("142,58"), "661-07295" => array("142,58"), "661-07296" => array("142,58"), "661-07297" => array("159,25"), "661-07298" => array("159,25"), "661-07299" => array("159,25"), "661-07300" => array("159,25"), "661-08933" => array("142,58"), "661-08934" => array("142,58"), "661-09081" => array("142,58"), "661-10102" => array("142,58"), "661-09032" => array("159,25"), "661-09033" => array("159,25"), "661-09034" => array("159,25"), "661-10103" => array("159,25"), "661-09294" => array("259,25"), "661-10608" => array("259,25"), "661-11037" => array("300,91"));
     public static $componentsTypes = array(
         0   => 'Général',
         1   => 'Visuel',
@@ -220,13 +220,11 @@ class BS_ApplePart extends BimpObject
 
     // Traitements: 
 
-    public function convertPrix($prix, $ref, $desc)
+    public function convertPrix($type, $prix, $ref, $desc)
     {
         $coefPrix = 1;
         $constPrix = 0;
         $newPrix = 0;
-
-        $type = self::getCategProdApple($ref, $desc);
 
 
         //Application des coef et constantes
@@ -237,9 +235,9 @@ class BS_ApplePart extends BimpObject
         } elseif ($type == "battX" && $this->getData('price_type') == "EXCHANGE") {
             $newPrix = 70;
         } elseif ($type == "ecran" && $this->getData('price_type') == "EXCHANGE") {
-            foreach (self::$tabRefCommencePrixEcran as $refT => $prixT)
+            foreach (self::$tabRefCommencePrixEcran as $refT => $tabInfo)
                 if ($ref == $refT)
-                    $newPrix = str_replace(",", ".", $prixT);
+                    $newPrix = str_replace(",", ".", $tabInfo[0]);
         }
         else {
             if ($prix > 300)
@@ -314,7 +312,22 @@ class BS_ApplePart extends BimpObject
                     $line->desc = $label;
                     $line->qty = (int) $this->getData('qty');
                     $line->tva_tx = 20;
-                    $line->pu_ht = $this->convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
+                    
+                    $type = self::getCategProdApple($this->getData('part_number'), $this->getData('label'));
+                    $line->pu_ht = $this->convertPrix($type, $line->pa_ht, $this->getData('part_number'), $this->getData('label'));
+                    
+                    if($type == "ecran" && isset(self::$tabRefCommencePrixEcran[$this->getData('part_number')][1])){
+                        $lineT = BimpObject::getInstance("bimpsupport", "BS_SavPropalLine");
+                        $lineT->id_product = self::$tabRefCommencePrixEcran[$this->getData('part_number')][1];
+                        $values = array("type"=>1, "id_obj"=>$sav->getData('id_propal'));
+                        $errorsT = $lineT->validateArray($values);
+                        if(count($errorsT) == 0)
+                            $errorsT = $lineT->create();
+                        
+                        if (count($errorsT)) {
+                            $errors = array_merge($errors, $errorsT);
+                        }
+                    }
 
                     $line_warnings = array();
                     $line_errors = $line->create($line_warnings, true);
@@ -393,7 +406,8 @@ class BS_ApplePart extends BimpObject
                     $line->pa_ht = $this->getPrice();
                     $line->qty = (int) $this->getData('qty');
                     $line->tva_tx = 20;
-                    $line->pu_ht = $this->convertPrix($line->pa_ht, $this->getData('part_number'), $this->getData('label'));
+                    $type = self::getCategProdApple($this->getData('part_number'), $this->getData('label'));
+                    $line->pu_ht = $this->convertPrix($type, $line->pa_ht, $this->getData('part_number'), $this->getData('label'));
 
                     $line_warnings = array();
 

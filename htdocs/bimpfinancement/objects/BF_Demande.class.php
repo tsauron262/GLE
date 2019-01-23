@@ -959,46 +959,46 @@ class BF_Demande extends BimpObject
         return $html;
     }
 
-    public function renderInfoFin()
-    {
-        $factBanque = $this->getChildObject('facture_banque');
-        if (BimpObject::objectLoaded($factBanque)) {
-            $diference = $this->getTotalEmprunt() - $factBanque->getData('total_ttc');
-            if ($diference > 0.1 || $diference < -0.1)
-                $this->warningsMsg[] = "Attention diférence entre facture banque est emprunt de : " . price($diference);
-        }
-
-        $contrat = $this->getChildObject('contrat');
-        if (BimpObject::objectLoaded($contrat)) {
-            $diference = $this->getTotalLoyer() - $contrat->total_ttc;
-            if ($diference > 0.1 || $diference < -0.1)
-                $this->warningsMsg[] = "Attention diférence entre CONTRAT est emprunt de : " . price($diference);
-        }
-
-        $marge1 = $this->getMarge(1);
-        $marge2 = $this->getMarge(2);
-        $marge = $marge1 + $marge2;
-        if ($marge < -1)
-            $this->warningsMsg['marge-'] = "Attention la marge est négative : " . $marge;
-
-        $html = "";
-
-        $html .= '<div class="object_header_extra">';
-        if (count($this->warningsMsg)) {
-            $html .= BimpRender::renderAlerts($this->warningsMsg, 'warning');
-        }
-        if (count($this->infoMsg)) {
-            $html .= BimpRender::renderAlerts($this->infoMsg, 'info');
-        }
-
-        $html .= "<strong>Total emprunt :</strong> " . BimpTools::displayMoneyValue($this->getTotalEmprunt(), 'EUR') . '<br/>';
-        $html .= "<strong>Marge sur le financement :</strong> " . BimpTools::displayMoneyValue($marge1, 'EUR') . '<br/>';
-        $html .= "<strong>Marge loyer inter + frais divers :</strong> " . BimpTools::displayMoneyValue($marge2, 'EUR') . '<br/>';
-        $html .= "<strong>Marge total :</strong> " . BimpTools::displayMoneyValue($marge, 'EUR') . '<br/>';
-
-        $html .= '</div>';
-        return $html;
-    }
+//    public function renderInfoFin()
+//    {
+//        $factBanque = $this->getChildObject('facture_banque');
+//        if (BimpObject::objectLoaded($factBanque)) {
+//            $diference = $this->getTotalEmprunt() - $factBanque->getData('total_ttc');
+//            if ($diference > 0.1 || $diference < -0.1)
+//                $this->warningsMsg[] = "Attention diférence entre facture banque est emprunt de : " . price($diference);
+//        }
+//
+//        $contrat = $this->getChildObject('contrat');
+//        if (BimpObject::objectLoaded($contrat)) {
+//            $diference = $this->getTotalLoyer() - $contrat->total_ttc;
+//            if ($diference > 0.1 || $diference < -0.1)
+//                $this->warningsMsg[] = "Attention diférence entre CONTRAT est emprunt de : " . price($diference);
+//        }
+//
+//        $marge1 = $this->getMarge(1);
+//        $marge2 = $this->getMarge(2);
+//        $marge = $marge1 + $marge2;
+//        if ($marge < -1)
+//            $this->warningsMsg['marge-'] = "Attention la marge est négative : " . $marge;
+//
+//        $html = "";
+//
+//        $html .= '<div class="object_header_extra">';
+//        if (count($this->warningsMsg)) {
+//            $html .= BimpRender::renderAlerts($this->warningsMsg, 'warning');
+//        }
+//        if (count($this->infoMsg)) {
+//            $html .= BimpRender::renderAlerts($this->infoMsg, 'info');
+//        }
+//
+//        $html .= "<strong>Total emprunt :</strong> " . BimpTools::displayMoneyValue($this->getTotalEmprunt(), 'EUR') . '<br/>';
+//        $html .= "<strong>Marge sur le financement :</strong> " . BimpTools::displayMoneyValue($marge1, 'EUR') . '<br/>';
+//        $html .= "<strong>Marge loyer inter + frais divers :</strong> " . BimpTools::displayMoneyValue($marge2, 'EUR') . '<br/>';
+//        $html .= "<strong>Marge total :</strong> " . BimpTools::displayMoneyValue($marge, 'EUR') . '<br/>';
+//
+//        $html .= '</div>';
+//        return $html;
+//    }
 
     // Traitements: 
 

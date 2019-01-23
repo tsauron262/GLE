@@ -248,6 +248,11 @@ fields:
         input: 
             type: hidden
 
+    agreement_number:
+        label: N° d'accord
+        type: int
+
+
     id_facture:
         label: Facture banque
         type: id_object
@@ -487,6 +492,8 @@ fields_tables:
         icon: fas_file-signature
         rows: 
             - field: status
+              edit: 1
+            - field: agreement_number
               edit: 1
             - field: accepted
               edit: 1

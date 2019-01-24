@@ -1,133 +1,36 @@
 table: bf_refinanceur
-parent_object: BF_Demande
-parent_id_property: id_demande
-
-positions: 1
-position_insert: before
+common_fields: 0
 
 labels:
-    name: Refinanceur
+    name: refinanceur
     
 fields: 
-    id_demande: 
-        label: Demande
-        type: id_parent
+    id_societe: 
+        label: Société
+        type: id_object
+        object: societe
         input: 
-            type: hidden
-            
-    name: 
-        label: Nom
-        type: int
-        values: 
-            array: names
+            type: search_societe
         required: 1
         
-    status:
-        label: Statut
-        type: int
-        values:
-            array: status_list
-        default_value: 1
-        required: 1
-        
-    rate:
-        label: Taux
-        type: percent
-        
-    coef:
-        label: Coéficient
-        type: float
-        decimals: 5
-            
-    quantity: 
-        label: Nombre
-        type: qty
-        min: 0
-        default_value: 0
-        decimals: 0
-        required: 1
-        
-    amount_ht:
-        label: Montant HT
-        type: money
-        required: 1
-        
-    payment:
-        label: Règlement
-        type: int
-        values: 
-            array: payments
-        
-    periodicity:
-        label: Périodicité
-        type: int
-        values: 
-            array: periodicities
-            
-    periode2:
-        label: Seconde période
-        type: bool
-        default_value: 0
-        
-    comment:
-        label: Commentaire
-        type: text
-        input:
-            rows: 1
-            auto_expand: 1
-        
-list:
-    checkboxes: 1
-    positions: 1
-    title: Refinanceurs
-    icon: bank
-    bulk_actions: 
-        - label: Supprimer les lignes sélectionnées
-          icon: fas_trash-alt
-          onclick: deleteSelectedObjects('list_id', $(this));
-          btn_class: deleteSelectedObjects
-    update_btn: 1
-    delete_btn: 1
-    edit_btn: 1
-    add_form_name: default
-    edit_form: default
-    sort_field: position
-    sort_way: asc
-    n: 10
-    cols:
-        name: 
-            field: name
-            edit: 1
-        status: 
-            field: status
-            edit: 1
-        rate: 
-            field: rate
-            edit: 1
-            max_width: 100px
-        coef: 
-            field: coef
-            edit: 1
-            max_width: 60px
-        quantity: 
-            field: quantity
-            edit: 1
-        amount: 
-            label: Loyer
-            field: amount_ht
-            edit: 1
-            max_width: 100px
-        amount2: 
-            label: Loyer calculé
-            value: 
-                callback: displayLoyerSuggest
-        periodicity:
-            field: periodicity
-            edit: 1
-        periode2:
-            field: periode2
-            edit: 1        
-            
-            
-        
-            
+lists: 
+    default:
+        title: Refinanceurs
+        icon: fas_university
+        checkboxes: 1
+        add_btn: 1
+        add_form_name: default
+        edit_btn: 1
+        delete_btn: 1
+        bulk_actions:
+            - label: supprimer les refinanceurs sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: asc
+        n: 10
+        cols: 
+            societe:
+                field: id_societe
+                display: nom_url
+    

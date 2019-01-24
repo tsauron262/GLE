@@ -5881,6 +5881,9 @@ readers do not read off random characters that represent icons */
  * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
+/*$state-info-text:                #31708f !default;*/
+/*$state-warning-text:             #8a6d3b !default;*/
+/*$state-danger-text:              #a94442 !default;*/
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
 /* line 9, ../scss/bootstrap/_normalize.scss */
 html {
@@ -7892,46 +7895,46 @@ a.text-primary:focus {
 
 /* line 5, ../scss/bootstrap/mixins/_text-emphasis.scss */
 .text-success {
-  color: #3c763d;
+  color: #1C823E;
 }
 
 /* line 8, ../scss/bootstrap/mixins/_text-emphasis.scss */
 a.text-success:hover,
 a.text-success:focus {
-  color: #2b542c;
+  color: #13582a;
 }
 
 /* line 5, ../scss/bootstrap/mixins/_text-emphasis.scss */
 .text-info {
-  color: #31708f;
+  color: #00678C;
 }
 
 /* line 8, ../scss/bootstrap/mixins/_text-emphasis.scss */
 a.text-info:hover,
 a.text-info:focus {
-  color: #245269;
+  color: #004159;
 }
 
 /* line 5, ../scss/bootstrap/mixins/_text-emphasis.scss */
 .text-warning {
-  color: #8a6d3b;
+  color: #AA6300;
 }
 
 /* line 8, ../scss/bootstrap/mixins/_text-emphasis.scss */
 a.text-warning:hover,
 a.text-warning:focus {
-  color: #66512c;
+  color: #774500;
 }
 
 /* line 5, ../scss/bootstrap/mixins/_text-emphasis.scss */
 .text-danger {
-  color: #a94442;
+  color: #AA0000;
 }
 
 /* line 8, ../scss/bootstrap/mixins/_text-emphasis.scss */
 a.text-danger:hover,
 a.text-danger:focus {
-  color: #843534;
+  color: #770000;
 }
 
 /* line 119, ../scss/bootstrap/_type.scss */
@@ -10067,29 +10070,29 @@ select[multiple].input-lg,
 .has-success .checkbox,
 .has-success .radio-inline,
 .has-success .checkbox-inline, .has-success.radio label, .has-success.checkbox label, .has-success.radio-inline label, .has-success.checkbox-inline label {
-  color: #3c763d;
+  color: #1C823E;
 }
 /* line 21, ../scss/bootstrap/mixins/_forms.scss */
 .has-success .form-control {
-  border-color: #3c763d;
+  border-color: #1C823E;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 /* line 24, ../scss/bootstrap/mixins/_forms.scss */
 .has-success .form-control:focus {
-  border-color: #2b542c;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #67b168;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #67b168;
+  border-color: #13582a;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #31d367;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #31d367;
 }
 /* line 31, ../scss/bootstrap/mixins/_forms.scss */
 .has-success .input-group-addon {
-  color: #3c763d;
-  border-color: #3c763d;
+  color: #1C823E;
+  border-color: #1C823E;
   background-color: #dff0d8;
 }
 /* line 37, ../scss/bootstrap/mixins/_forms.scss */
 .has-success .form-control-feedback {
-  color: #3c763d;
+  color: #1C823E;
 }
 
 /* line 8, ../scss/bootstrap/mixins/_forms.scss */
@@ -10099,29 +10102,29 @@ select[multiple].input-lg,
 .has-warning .checkbox,
 .has-warning .radio-inline,
 .has-warning .checkbox-inline, .has-warning.radio label, .has-warning.checkbox label, .has-warning.radio-inline label, .has-warning.checkbox-inline label {
-  color: #8a6d3b;
+  color: #AA6300;
 }
 /* line 21, ../scss/bootstrap/mixins/_forms.scss */
 .has-warning .form-control {
-  border-color: #8a6d3b;
+  border-color: #AA6300;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 /* line 24, ../scss/bootstrap/mixins/_forms.scss */
 .has-warning .form-control:focus {
-  border-color: #66512c;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #c0a16b;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #c0a16b;
+  border-color: #774500;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #ff9c11;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #ff9c11;
 }
 /* line 31, ../scss/bootstrap/mixins/_forms.scss */
 .has-warning .input-group-addon {
-  color: #8a6d3b;
-  border-color: #8a6d3b;
+  color: #AA6300;
+  border-color: #AA6300;
   background-color: #fcf8e3;
 }
 /* line 37, ../scss/bootstrap/mixins/_forms.scss */
 .has-warning .form-control-feedback {
-  color: #8a6d3b;
+  color: #AA6300;
 }
 
 /* line 8, ../scss/bootstrap/mixins/_forms.scss */
@@ -10131,29 +10134,29 @@ select[multiple].input-lg,
 .has-error .checkbox,
 .has-error .radio-inline,
 .has-error .checkbox-inline, .has-error.radio label, .has-error.checkbox label, .has-error.radio-inline label, .has-error.checkbox-inline label {
-  color: #a94442;
+  color: #AA0000;
 }
 /* line 21, ../scss/bootstrap/mixins/_forms.scss */
 .has-error .form-control {
-  border-color: #a94442;
+  border-color: #AA0000;
   -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
   box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
 /* line 24, ../scss/bootstrap/mixins/_forms.scss */
 .has-error .form-control:focus {
-  border-color: #843534;
-  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #ce8483;
-  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #ce8483;
+  border-color: #770000;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #ff1111;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 6px #ff1111;
 }
 /* line 31, ../scss/bootstrap/mixins/_forms.scss */
 .has-error .input-group-addon {
-  color: #a94442;
-  border-color: #a94442;
+  color: #AA0000;
+  border-color: #AA0000;
   background-color: #f2dede;
 }
 /* line 37, ../scss/bootstrap/mixins/_forms.scss */
 .has-error .form-control-feedback {
-  color: #a94442;
+  color: #AA0000;
 }
 
 /* line 439, ../scss/bootstrap/_forms.scss */
@@ -12961,7 +12964,7 @@ a.thumbnail.active {
 .alert {
   padding: 8px 12px;
   margin-bottom: 0;
-  border: 1px solid transparent;
+  border-left: 5px solid transparent;
   border-radius: 0;
 }
 /* line 16, ../scss/bootstrap/_alerts.scss */
@@ -13000,61 +13003,61 @@ a.thumbnail.active {
 /* line 59, ../scss/bootstrap/_alerts.scss */
 .alert-success {
   background-color: #dff0d8;
-  border-color: #d6e9c6;
-  color: #3c763d;
+  border-color: #1C823E;
+  color: #1C823E;
 }
 /* line 8, ../scss/bootstrap/mixins/_alerts.scss */
 .alert-success hr {
-  border-top-color: #c9e2b3;
+  border-top-color: #176d34;
 }
 /* line 11, ../scss/bootstrap/mixins/_alerts.scss */
 .alert-success .alert-link {
-  color: #2b542c;
+  color: #13582a;
 }
 
 /* line 63, ../scss/bootstrap/_alerts.scss */
 .alert-info {
   background-color: #d9edf7;
-  border-color: #bce8f1;
-  color: #31708f;
+  border-color: #00678C;
+  color: #00678C;
 }
 /* line 8, ../scss/bootstrap/mixins/_alerts.scss */
 .alert-info hr {
-  border-top-color: #a6e1ec;
+  border-top-color: #005473;
 }
 /* line 11, ../scss/bootstrap/mixins/_alerts.scss */
 .alert-info .alert-link {
-  color: #245269;
+  color: #004159;
 }
 
 /* line 67, ../scss/bootstrap/_alerts.scss */
 .alert-warning {
   background-color: #fcf8e3;
-  border-color: #faebcc;
-  color: #8a6d3b;
+  border-color: #AA6300;
+  color: #AA6300;
 }
 /* line 8, ../scss/bootstrap/mixins/_alerts.scss */
 .alert-warning hr {
-  border-top-color: #f7e1b5;
+  border-top-color: #915400;
 }
 /* line 11, ../scss/bootstrap/mixins/_alerts.scss */
 .alert-warning .alert-link {
-  color: #66512c;
+  color: #774500;
 }
 
 /* line 71, ../scss/bootstrap/_alerts.scss */
 .alert-danger {
   background-color: #f2dede;
-  border-color: #ebccd1;
-  color: #a94442;
+  border-color: #AA0000;
+  color: #AA0000;
 }
 /* line 8, ../scss/bootstrap/mixins/_alerts.scss */
 .alert-danger hr {
-  border-top-color: #e4b9c0;
+  border-top-color: #910000;
 }
 /* line 11, ../scss/bootstrap/mixins/_alerts.scss */
 .alert-danger .alert-link {
-  color: #843534;
+  color: #770000;
 }
 
 @-webkit-keyframes progress-bar-stripes {
@@ -13324,14 +13327,14 @@ button.list-group-item {
 
 /* line 4, ../scss/bootstrap/mixins/_list-group.scss */
 .list-group-item-success {
-  color: #3c763d;
+  color: #1C823E;
   background-color: #dff0d8;
 }
 
 /* line 11, ../scss/bootstrap/mixins/_list-group.scss */
 a.list-group-item-success,
 button.list-group-item-success {
-  color: #3c763d;
+  color: #1C823E;
 }
 /* line 15, ../scss/bootstrap/mixins/_list-group.scss */
 a.list-group-item-success .list-group-item-heading,
@@ -13342,7 +13345,7 @@ button.list-group-item-success .list-group-item-heading {
 a.list-group-item-success:hover, a.list-group-item-success:focus,
 button.list-group-item-success:hover,
 button.list-group-item-success:focus {
-  color: #3c763d;
+  color: #1C823E;
   background-color: #d0e9c6;
 }
 /* line 24, ../scss/bootstrap/mixins/_list-group.scss */
@@ -13351,20 +13354,20 @@ button.list-group-item-success.active,
 button.list-group-item-success.active:hover,
 button.list-group-item-success.active:focus {
   color: #fff;
-  background-color: #3c763d;
-  border-color: #3c763d;
+  background-color: #1C823E;
+  border-color: #1C823E;
 }
 
 /* line 4, ../scss/bootstrap/mixins/_list-group.scss */
 .list-group-item-info {
-  color: #31708f;
+  color: #00678C;
   background-color: #d9edf7;
 }
 
 /* line 11, ../scss/bootstrap/mixins/_list-group.scss */
 a.list-group-item-info,
 button.list-group-item-info {
-  color: #31708f;
+  color: #00678C;
 }
 /* line 15, ../scss/bootstrap/mixins/_list-group.scss */
 a.list-group-item-info .list-group-item-heading,
@@ -13375,7 +13378,7 @@ button.list-group-item-info .list-group-item-heading {
 a.list-group-item-info:hover, a.list-group-item-info:focus,
 button.list-group-item-info:hover,
 button.list-group-item-info:focus {
-  color: #31708f;
+  color: #00678C;
   background-color: #c4e3f3;
 }
 /* line 24, ../scss/bootstrap/mixins/_list-group.scss */
@@ -13384,20 +13387,20 @@ button.list-group-item-info.active,
 button.list-group-item-info.active:hover,
 button.list-group-item-info.active:focus {
   color: #fff;
-  background-color: #31708f;
-  border-color: #31708f;
+  background-color: #00678C;
+  border-color: #00678C;
 }
 
 /* line 4, ../scss/bootstrap/mixins/_list-group.scss */
 .list-group-item-warning {
-  color: #8a6d3b;
+  color: #AA6300;
   background-color: #fcf8e3;
 }
 
 /* line 11, ../scss/bootstrap/mixins/_list-group.scss */
 a.list-group-item-warning,
 button.list-group-item-warning {
-  color: #8a6d3b;
+  color: #AA6300;
 }
 /* line 15, ../scss/bootstrap/mixins/_list-group.scss */
 a.list-group-item-warning .list-group-item-heading,
@@ -13408,7 +13411,7 @@ button.list-group-item-warning .list-group-item-heading {
 a.list-group-item-warning:hover, a.list-group-item-warning:focus,
 button.list-group-item-warning:hover,
 button.list-group-item-warning:focus {
-  color: #8a6d3b;
+  color: #AA6300;
   background-color: #faf2cc;
 }
 /* line 24, ../scss/bootstrap/mixins/_list-group.scss */
@@ -13417,20 +13420,20 @@ button.list-group-item-warning.active,
 button.list-group-item-warning.active:hover,
 button.list-group-item-warning.active:focus {
   color: #fff;
-  background-color: #8a6d3b;
-  border-color: #8a6d3b;
+  background-color: #AA6300;
+  border-color: #AA6300;
 }
 
 /* line 4, ../scss/bootstrap/mixins/_list-group.scss */
 .list-group-item-danger {
-  color: #a94442;
+  color: #AA0000;
   background-color: #f2dede;
 }
 
 /* line 11, ../scss/bootstrap/mixins/_list-group.scss */
 a.list-group-item-danger,
 button.list-group-item-danger {
-  color: #a94442;
+  color: #AA0000;
 }
 /* line 15, ../scss/bootstrap/mixins/_list-group.scss */
 a.list-group-item-danger .list-group-item-heading,
@@ -13441,7 +13444,7 @@ button.list-group-item-danger .list-group-item-heading {
 a.list-group-item-danger:hover, a.list-group-item-danger:focus,
 button.list-group-item-danger:hover,
 button.list-group-item-danger:focus {
-  color: #a94442;
+  color: #AA0000;
   background-color: #ebcccc;
 }
 /* line 24, ../scss/bootstrap/mixins/_list-group.scss */
@@ -13450,8 +13453,8 @@ button.list-group-item-danger.active,
 button.list-group-item-danger.active:hover,
 button.list-group-item-danger.active:focus {
   color: #fff;
-  background-color: #a94442;
-  border-color: #a94442;
+  background-color: #AA0000;
+  border-color: #AA0000;
 }
 
 /* line 123, ../scss/bootstrap/_list-group.scss */
@@ -13847,7 +13850,7 @@ button.list-group-item-danger.active:focus {
 }
 /* line 6, ../scss/bootstrap/mixins/_panels.scss */
 .panel-success > .panel-heading {
-  color: #3c763d;
+  color: #1C823E;
   background-color: #dff0d8;
   border-color: #d6e9c6;
 }
@@ -13858,7 +13861,7 @@ button.list-group-item-danger.active:focus {
 /* line 14, ../scss/bootstrap/mixins/_panels.scss */
 .panel-success > .panel-heading .badge {
   color: #dff0d8;
-  background-color: #3c763d;
+  background-color: #1C823E;
 }
 /* line 20, ../scss/bootstrap/mixins/_panels.scss */
 .panel-success > .panel-footer + .panel-collapse > .panel-body {
@@ -13871,7 +13874,7 @@ button.list-group-item-danger.active:focus {
 }
 /* line 6, ../scss/bootstrap/mixins/_panels.scss */
 .panel-info > .panel-heading {
-  color: #31708f;
+  color: #00678C;
   background-color: #d9edf7;
   border-color: #bce8f1;
 }
@@ -13882,7 +13885,7 @@ button.list-group-item-danger.active:focus {
 /* line 14, ../scss/bootstrap/mixins/_panels.scss */
 .panel-info > .panel-heading .badge {
   color: #d9edf7;
-  background-color: #31708f;
+  background-color: #00678C;
 }
 /* line 20, ../scss/bootstrap/mixins/_panels.scss */
 .panel-info > .panel-footer + .panel-collapse > .panel-body {
@@ -13895,7 +13898,7 @@ button.list-group-item-danger.active:focus {
 }
 /* line 6, ../scss/bootstrap/mixins/_panels.scss */
 .panel-warning > .panel-heading {
-  color: #8a6d3b;
+  color: #AA6300;
   background-color: #fcf8e3;
   border-color: #faebcc;
 }
@@ -13906,7 +13909,7 @@ button.list-group-item-danger.active:focus {
 /* line 14, ../scss/bootstrap/mixins/_panels.scss */
 .panel-warning > .panel-heading .badge {
   color: #fcf8e3;
-  background-color: #8a6d3b;
+  background-color: #AA6300;
 }
 /* line 20, ../scss/bootstrap/mixins/_panels.scss */
 .panel-warning > .panel-footer + .panel-collapse > .panel-body {
@@ -13919,7 +13922,7 @@ button.list-group-item-danger.active:focus {
 }
 /* line 6, ../scss/bootstrap/mixins/_panels.scss */
 .panel-danger > .panel-heading {
-  color: #a94442;
+  color: #AA0000;
   background-color: #f2dede;
   border-color: #ebccd1;
 }
@@ -13930,7 +13933,7 @@ button.list-group-item-danger.active:focus {
 /* line 14, ../scss/bootstrap/mixins/_panels.scss */
 .panel-danger > .panel-heading .badge {
   color: #f2dede;
-  background-color: #a94442;
+  background-color: #AA0000;
 }
 /* line 20, ../scss/bootstrap/mixins/_panels.scss */
 .panel-danger > .panel-footer + .panel-collapse > .panel-body {

@@ -16,6 +16,11 @@ class BF_Demande extends BimpObject
 
     var $warningsMsg = array();
     var $infoMsg = array();
+    public $marges = array(
+        'marge1'      => 0,
+        'marge2'      => 0,
+        'total_marge' => 0
+    );
     public static $status_list = array(
         self::BF_DEMANDE_BROUILLON         => array('label' => 'Brouillon', 'classes' => array('warning')),
         self::BF_DEMANDE_ATT_RETOUR        => array('label' => 'Signé - en attente de retour', 'classes' => array('important')),
@@ -52,7 +57,7 @@ class BF_Demande extends BimpObject
         2 => 'A terme à échoir'
     );
 
-    // Autorisations et droits :
+    // Autorisations et droits:
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -343,77 +348,9 @@ class BF_Demande extends BimpObject
             $tot += $this->getCommissionCommerciale() + $this->getCommissionFinanciere();
         return (float) $tot;
     }
-    
-    
-    
-    public function renderInfoFin(){
-        
-        
-        $factBanque = $this->getChildObject('facture_banque');
-        if (BimpObject::objectLoaded($factBanque)){
-            $diference = $this->getTotalEmprunt() - $factBanque->getData('total_ttc');
-            if($diference > 0.1 || $diference < -0.1)
-                $this->warningsMsg['montant-fact-banque'] = "Attention diférence entre facture banque est emprunt de : ".price($diference);
-        }
-        
-        $contrat = $this->getChildObject('contrat');
-        if (BimpObject::objectLoaded($contrat)){
-            $diference = $this->getTotalLoyer() - $contrat->total_ttc;
-            if($diference > 0.1 || $diference < -0.1)
-                $this->warningsMsg['montant-contrat'] = "Attention diférence entre CONTRAT est emprunt de : ".price($diference);
-        }
-        
-        $marge1 = $this->getMarge(1);
-        $marge2 = $this->getMarge(2);
-        $marge = $marge1 + $marge2;
-        if($marge < -1)
-            $this->warningsMsg['marge-'] = "Attention la marge est négative : ".$marge;
-        
-        $asso = new BimpAssociation($this, 'factures');
-        $tot = $nbF = 0;
-        foreach ($asso->getAssociatesList() as $id_facture) {
-            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
-            if (BimpObject::objectLoaded($facture)) {
-                $tot += $facture->getData('total');
-                $nbF ++;
-            }
-        }
-        if($nbF){
-            $diference =  ($this->getTotalFraisDiv()+$this->getTotalLoyerInter()) - $tot;
-            if($diference > 0.1 || $diference < -0.1)
-                $this->warningsMsg['fraisdivdif'] = "Attention les factures de frais divers + loyer intercalaires ne correspond pas diférence de : ".price($diference);
-        }
-        
-        
-        
-        $html = "";
-        
-        foreach($this->warningsMsg as $msg){
-            $html .= "<div class='error'>".$msg."</div>";
-        }
-        foreach($this->infoMsg as $msg){
-            $html .= "<div class='success'>".$msg."</div>";
-        }
-        
-        
-        $html .= "<table class='objectFieldsTable foldable open center-align'>";
-        
-        $html .= "<tr><th>Total emprunt</th><td>".price($this->getTotalEmprunt())." €</td></tr>";
-        $html .= "<tr><th>Marge sur le financement</th><td>". price($marge1)." €</td></tr>";
-        $html .= "<tr><th>Marge loyer inter + frais divers</th><td>". price($marge2)." €</td></tr>";
-        $html .= "<tr><th>Marge total</th><td>". price($marge)." €</td></tr>";
-        
-        $html .= "</table>";
-        
-        return $html;
-    }
-    
-    public function getTotalEmprunt(){
-        $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
-            'status'   => 2, 'periode2' => 0
-        ));
-        if (count($refinanceurs) > 1)
-            $this->warningsMsg['plusrefi'] = "ATTENTION Plusieurs refinanceur en Accord";
+
+    public function getTotalEmprunt()
+    {
         $totalEmp = 0;
         foreach ($refinanceurs as $refinanceur) {
             $totalEmp += $refinanceur->getTotalEmprunt();
@@ -423,11 +360,6 @@ class BF_Demande extends BimpObject
 
     public function getTotalLoyer()
     {
-        $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
-            'status'   => 2, 'periode2' => 0
-        ));
-        if (count($refinanceurs) > 1)
-            $this->warningsMsg['plusrefi'] = "ATTENTION Plusieurs refinanceur en Accord";
         $totalEmp = 0;
         foreach ($refinanceurs as $refinanceur) {
             $totalEmp += $refinanceur->getTotalLoyer();
@@ -474,6 +406,23 @@ class BF_Demande extends BimpObject
         return ($this->getTotalDemande(0) + $this->getCommissionCommerciale()) * $this->getData("commission_financiere") / 100;
     }
 
+    public function getSitesArray($include_empty = false)
+    {
+        if ($this->isLoaded()) {
+            $cache_key = 'bf_demande_' . $this->id . '_sites_array';
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+                foreach ($this->getData('sites') as $site) {
+                    self::$cache[$cache_key][$site] = $site;
+                }
+            }
+            
+            return self::getCacheArray($cache_key, $include_empty, '');
+        }
+        
+        return array();
+    }
+
     // Rendus HTML: 
 
     public function renderHeaderExtraLeft()
@@ -497,7 +446,6 @@ class BF_Demande extends BimpObject
                 $html .= '</div>';
             }
         }
-
 
         return $html;
     }
@@ -671,9 +619,9 @@ class BF_Demande extends BimpObject
                                     $html .= '<td>' . $fac_data->displayPDFButton(true, false) . '</td>';
                                     $html .= '</tr>';
                                 }
+                                $html .= '</tbody>';
+                                $html .= '</table>';
                             }
-                            $html .= '</tbody>';
-                            $html .= '</table>';
                             $html .= '</td>';
                             $html .= '<td class="buttons">';
                             $html .= '<span class="displayDetailButton btn btn-light-default" onclick="toggleBfCommandeFournDetailDisplay($(this));">';
@@ -684,8 +632,7 @@ class BF_Demande extends BimpObject
                             $html .= '</tr>';
 
                             $html .= '<tr class="commande_fourn_elements_rows">';
-                            $html .= '<td colspan="4" style="padding: 10px 30px; border-top-color: #fff">';
-
+                            $html .= '<td colspan="5" style="padding: 10px 30px; border-top-color: #fff">';
                             $html .= '<table class="objectSubList">';
                             $html .= '<tbody>';
                             foreach ($fourn_lines as $fourn_line) {
@@ -697,6 +644,9 @@ class BF_Demande extends BimpObject
                                 }
 
                                 if (BimpObject::objectLoaded($line)) {
+                                    if ((int) $commande->getData('fk_statut') !== 0 && !(float) $qty) {
+                                        continue;
+                                    }
                                     $html .= '<tr class="commande_fourn_element_row fourn_' . $fourn->id . '_line_' . $line->id . (!$qty ? ' deactivated' : '') . '"';
                                     $html .= ' data-id_fourn="' . $fourn->id . '"';
                                     $html .= ' data-id_commande="' . $commande->id . '"';
@@ -725,19 +675,13 @@ class BF_Demande extends BimpObject
                                         $html .= $qty;
                                     }
                                     $html .= '</td>';
-                                    $html .= '<td class="buttons">';
-//                                    if ($commande->isEditable()) {
-//                                        $html .= BimpRender::renderRowButton('Annuler les modifications', 'fas_undo', 'cancelCommandesFournLinesModifs($(this), \'' . $view_id . '\')', 'cancel_line hidden');
-//                                        $html .= BimpRender::renderRowButton('Enregistrer', 'fas_save', 'saveCommandesFournLinesModifs($(this), \'' . $view_id . '\', ' . $this->id . ')', 'save_line hidden');
-//                                    }
-                                    $html .= '</td>';
                                     $html .= '</tr>';
                                 }
                             }
                             $html .= '</tbody>';
                             $html .= '</table>';
-
                             $html .= '</td>';
+                            $html .= '<td></td>';
                             $html .= '</tr>';
                         }
                         $html .= '</table>';
@@ -947,7 +891,7 @@ class BF_Demande extends BimpObject
                 }
             } else {
                 $html .= '<tr>';
-                $html .= '<td colspan="6" style="text-align: center">';
+                $html .= '<td colspan="7" style="text-align: center">';
                 $html .= BimpRender::renderAlerts('Il n\'y a aucune facture enregistrée pour cette demande de financement pour le moment', 'info');
                 $html .= '</td>';
                 $html .= '</tr>';
@@ -960,6 +904,32 @@ class BF_Demande extends BimpObject
         return $html;
     }
 
+    public function renderInfoFin()
+    {
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<tr>';
+        $html .= '<th>Total emprunt</th>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($this->getTotalEmprunt()) . '</td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<th>Marge sur le financement</th>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($this->marges['marge1']) . '</td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<th>Marge loyers inter + frais divers</th>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($this->marges['marge2']) . '</td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<th>Marge totale</th>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($this->marges['total_marge']) . '</td>';
+        $html .= '</tr>';
+        $html .= '</table>';
+
+        return BimpRender::renderPanel('Totaux', $html, '', array(
+                    'type' => 'secondary',
+                    'icon' => 'fas_euro-sign'
+        ));
+    }
 
     // Traitements: 
 
@@ -1733,5 +1703,66 @@ class BF_Demande extends BimpObject
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    // Overrides: 
+
+    public function reset()
+    {
+        parent::reset();
+
+        $this->marges['marge1'] = 0;
+        $this->marges['marge2'] = 0;
+        $this->marges['total_marge'] = 0;
+    }
+
+    public function checkObject()
+    {
+        $this->resetMsgs();
+
+        $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
+            'status'   => 2, 'periode2' => 0
+        ));
+        if (count($refinanceurs) > 1)
+            $this->msgs['errors']['plusrefi'] = "ATTENTION Plusieurs refinanceur en Accord";
+        
+        $factBanque = $this->getChildObject('facture_banque');
+        if (BimpObject::objectLoaded($factBanque)) {
+            $diference = $this->getTotalEmprunt() - $factBanque->getData('total_ttc');
+            if ($diference > 0.1 || $diference < -0.1)
+                $this->msgs['errors'][] = "Attention différence entre facture banque et emprunt de : " . BimpTools::displayMoneyValue($diference);
+        }
+
+        $contrat = $this->getChildObject('contrat');
+        if (BimpObject::objectLoaded($contrat)) {
+            $diference = $this->getTotalLoyer() - $contrat->total_ttc;
+            if ($diference > 0.1 || $diference < -0.1)
+                $this->msgs['errors'][] = "Attention différence entre CONTRAT et emprunt de : " . BimpTools::displayMoneyValue($diference);
+        }
+
+        $marge1 = $this->getMarge(1);
+        $marge2 = $this->getMarge(2);
+        $marge = $marge1 + $marge2;
+        if ($marge < -1)
+            $this->msgs['errors']['marge-'] = "Attention la marge est négative : " . $marge;
+
+        $asso = new BimpAssociation($this, 'factures');
+        $tot = $nbF = 0;
+        foreach ($asso->getAssociatesList() as $id_facture) {
+            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_facture);
+            if (BimpObject::objectLoaded($facture)) {
+                $tot += $facture->getData('total');
+                $nbF ++;
+            }
+        }
+        if ($nbF) {
+            $diference = ($this->getTotalFraisDiv() + $this->getTotalLoyerInter()) - $tot;
+            if ($diference > 0.1 || $diference < -0.1)
+                $this->msgs['errors']['fraisdivdif'] = "Les factures de frais divers et de loyers intercalaires ne correspondent pas. Différence de : " . BimpTools::displayMoneyValue($diference);
+        }
+
+        $this->marges['marge1'] = $marge1;
+        $this->marges['marge2'] = $marge2;
+        $this->marges['total_marge'] = $marge;
     }
 }

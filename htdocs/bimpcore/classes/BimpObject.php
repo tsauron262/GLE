@@ -50,6 +50,11 @@ class BimpObject extends BimpCache
         'searches'                 => array('type' => 'keys')
     );
     public $params = array();
+    public $msgs = array(
+        'errors'   => array(),
+        'warnings' => array(),
+        'infos'    => array()
+    );
     protected $data = array();
     protected $initData = array();
     protected $associations = array();
@@ -933,6 +938,15 @@ class BimpObject extends BimpCache
         echo '</pre>';
     }
 
+    public function resetMsgs()
+    {
+        $this->msgs = array(
+            'errors'   => array(),
+            'warnings' => array(),
+            'infos'    => array()
+        );
+    }
+
     public function reset()
     {
         if ($this->isLoaded()) {
@@ -953,6 +967,8 @@ class BimpObject extends BimpCache
             unset($this->dol_object);
             $this->dol_object = $this->config->getObject('dol_object');
         }
+
+        $this->resetMsgs();
     }
 
     public function set($field, $value)
@@ -1386,6 +1402,11 @@ class BimpObject extends BimpCache
 
         $this->history = array();
         return $errors;
+    }
+
+    public function checkObject()
+    {
+        
     }
 
     public function checkFieldValueType($field, &$value)
@@ -2310,6 +2331,8 @@ class BimpObject extends BimpCache
                             $parent->onChildSave($this);
                         }
                     }
+
+                    $this->checkObject();
                 } else {
                     $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
                     $sqlError = $this->db->db->lasterror;
@@ -2394,6 +2417,8 @@ class BimpObject extends BimpCache
                                 $warnings = array_merge($warnings, $parent->onChildSave($this));
                             }
                         }
+
+                        $this->checkObject();
                     }
                 }
             }
@@ -2513,6 +2538,8 @@ class BimpObject extends BimpCache
                             $warnings = array_merge($warnings, $parent->onChildSave($this));
                         }
                     }
+
+                    $this->checkObject();
                 }
             }
         } else {
@@ -2622,6 +2649,9 @@ class BimpObject extends BimpCache
             }
             $this->initData = $this->data;
             $this->ref = $this->getRef();
+
+            $this->checkObject();
+
             return true;
         }
         return false;
@@ -3595,11 +3625,15 @@ class BimpObject extends BimpCache
                 }
             }
 
+            $html .= '<div class="header_extra">';
+            $html .= $this->renderMsgs();
+
             if (method_exists($this, 'renderHeaderExtraLeft')) {
                 $html .= '<div style="margin: 10px 0;">';
                 $html .= $this->renderHeaderExtraLeft();
                 $html .= '</div>';
             }
+            $html .= '</div>';
             $html .= '</div>';
             $html .= '</div>';
 
@@ -3706,14 +3740,15 @@ class BimpObject extends BimpCache
                 $html .= '</div>';
             }
 
+            $html .= '<div class="header_extra">';
             if (method_exists($this, 'renderHeaderExtraRight')) {
                 $html .= '<div style="margin: 10px 0;">';
                 $html .= $this->renderHeaderExtraRight();
                 $html .= '</div>';
             }
-
             $html .= '</div>';
 
+            $html .= '</div>';
             $html .= '</div>';
 
             $html .= '<div class="row header_bottom"></div>';
@@ -3721,6 +3756,25 @@ class BimpObject extends BimpCache
             if (!$content_only) {
                 $html .= '</div>';
             }
+        }
+
+        return $html;
+    }
+
+    public function renderMsgs()
+    {
+        $html = '';
+
+        if (count($this->msgs['errors'])) {
+            $html .= BimpRender::renderAlerts($this->msgs['errors']);
+        }
+
+        if (count($this->msgs['warnings'])) {
+            $html .= BimpRender::renderAlerts($this->msgs['warnings'], 'warning');
+        }
+
+        if (count($this->msgs['infos'])) {
+            $html .= BimpRender::renderAlerts($this->msgs['infos'], 'info');
         }
 
         return $html;

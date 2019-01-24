@@ -5876,6 +5876,9 @@ readers do not read off random characters that represent icons */
   font-weight: 900;
 }
 
+/*$state-info-text:                #31708f !default;*/
+/*$state-warning-text:             #8a6d3b !default;*/
+/*$state-danger-text:              #a94442 !default;*/
 /*Text-align*/
 /* line 3, ../scss/bimpcore/_helpers.scss */
 .align-center {

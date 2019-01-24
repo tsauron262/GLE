@@ -9,6 +9,18 @@ class BF_Line extends BimpLine
     {
         return 3;
     }
+    
+    
+    public function getTotalLine($ttc = true){
+        $tot = $this->getData("pu_ht") * $this->getData("qty");
+        if($ttc)
+            $tot += $tot * $this->getData("tva_tx") / 100;
+        return $tot;
+    }
+    
+    public function getDesc(){
+        return $this->getData("label");
+    }
 
     // Getters: 
     public function getQtyOrdered($id_commande_excluded = 0)

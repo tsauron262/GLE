@@ -578,29 +578,29 @@ fields_tables:
               edit: 1
             - field: commission_financiere
               edit: 1
-            - label: Montant total
-              value: <span id="montant_total2"></span>
-            - label: Durée Calculée
-              value: <span id="duree_total"></span>
-            - field: duration
-              label: Durée demandée
-            - field: mode_calcul
-            - field: periodicity
-              label: Périodicité demandé
-            - label: Coût banque
-              value: <span id="cout_banque"></span>
-            - label: Loyer Théorique
-              value: <span id="loyer_the"></span>
-            - label: Total loyer Calculé
-              value: <span id="total_loyer"></span>
-            - label: Dif financement/demande
-              value: <span id="dif_banque_demande"></span>
-            - label: Loyer intermediaire
-              value: <span id="loy_inter"></span>
-            - label: Frais Divers
-              value: <span id="frais_div"></span>
-            - label: Marge Calculé
-              value: <span id="ca_calc"></span>
+#            - label: Montant total
+#              value: <span id="montant_total2"></span>
+#            - label: Durée Calculée
+#              value: <span id="duree_total"></span>
+#            - field: duration
+#              label: Durée demandée
+#            - field: mode_calcul
+#            - field: periodicity
+#              label: Périodicité demandé
+#            - label: Coût banque
+#              value: <span id="cout_banque"></span>
+#            - label: Loyer Théorique
+#              value: <span id="loyer_the"></span>
+#            - label: Total loyer Calculé
+#              value: <span id="total_loyer"></span>
+#            - label: Dif financement/demande
+#              value: <span id="dif_banque_demande"></span>
+#            - label: Loyer intermediaire
+#              value: <span id="loy_inter"></span>
+#            - label: Frais Divers
+#              value: <span id="frais_div"></span>
+#            - label: Marge Calculé
+#              value: <span id="ca_calc"></span>
               
     montants_fournisseurs: 
         title: Montants

@@ -58,7 +58,7 @@ class BF_Demande extends BimpObject
     {
         $status = $this->getData('status');
 
-        if (in_array($action, array('generateFactureBanque', 'generateFactureClient', 'generateFactureFourn', 'generateContrat'))) {
+        if (in_array($action, array('generateFactureBanque', 'generateFactureVRClient', 'generateFactureVRFourn', 'generateContrat'))) {
             if (!$this->isLoaded()) {
                 $errors[] = 'ID de la demande de fincancement absent';
                 return 0;
@@ -82,7 +82,7 @@ class BF_Demande extends BimpObject
                 }
                 return 1;
 
-            case 'generateFactureClient':
+            case 'generateFactureVRClient':
                 $facture = $this->getChildObject('facture_client');
                 if (BimpObject::objectLoaded($facture)) {
                     if ((int) $facture->getData('fk_statut') !== 0) {
@@ -100,7 +100,7 @@ class BF_Demande extends BimpObject
                 }
                 return 1;
 
-            case 'generateFactureFourn':
+            case 'generateFactureVRFourn':
                 $facture = $this->getChildObject('facture_fournisseur');
                 if (BimpObject::objectLoaded($facture)) {
                     if ((int) $facture->getData('fk_statut') !== 0) {
@@ -147,21 +147,21 @@ class BF_Demande extends BimpObject
             );
         }
 
-        if ($this->isActionAllowed('generateFactureClient')) {
+        if ($this->isActionAllowed('generateFactureVRClient')) {
             $buttons[] = array(
                 'label'   => 'Générer facture client',
                 'icon'    => 'fas_file-invoice-dollar',
-                'onclick' => $this->getJsActionOnclick('generateFactureClient', array(), array(
+                'onclick' => $this->getJsActionOnclick('generateFactureVRClient', array(), array(
                     'success_callback' => $callback
                 ))
             );
         }
 
-        if ($this->isActionAllowed('generateFactureFourn')) {
+        if ($this->isActionAllowed('generateFactureVRFourn')) {
             $buttons[] = array(
                 'label'   => 'Générer facture fournisseur',
                 'icon'    => 'fas_file-invoice-dollar',
-                'onclick' => $this->getJsActionOnclick('generateFactureFourn', array(), array(
+                'onclick' => $this->getJsActionOnclick('generateFactureVRFourn', array(), array(
                     'success_callback' => $callback
                 ))
             );
@@ -353,14 +353,14 @@ class BF_Demande extends BimpObject
         if (BimpObject::objectLoaded($factBanque)){
             $diference = $this->getTotalEmprunt() - $factBanque->getData('total_ttc');
             if($diference > 0.1 || $diference < -0.1)
-                $this->warningsMsg[] = "Attention diférence entre facture banque est emprunt de : ".price($diference);
+                $this->warningsMsg['montant-fact-banque'] = "Attention diférence entre facture banque est emprunt de : ".price($diference);
         }
         
         $contrat = $this->getChildObject('contrat');
         if (BimpObject::objectLoaded($contrat)){
             $diference = $this->getTotalLoyer() - $contrat->total_ttc;
             if($diference > 0.1 || $diference < -0.1)
-                $this->warningsMsg[] = "Attention diférence entre CONTRAT est emprunt de : ".price($diference);
+                $this->warningsMsg['montant-contrat'] = "Attention diférence entre CONTRAT est emprunt de : ".price($diference);
         }
         
         $marge1 = $this->getMarge(1);
@@ -396,12 +396,14 @@ class BF_Demande extends BimpObject
         }
         
         
+        $html .= "<table class='objectFieldsTable foldable open center-align'>";
         
+        $html .= "<tr><th>Total emprunt</th><td>".price($this->getTotalEmprunt())." €</td></tr>";
+        $html .= "<tr><th>Marge sur le financement</th><td>". price($marge1)." €</td></tr>";
+        $html .= "<tr><th>Marge loyer inter + frais divers</th><td>". price($marge2)." €</td></tr>";
+        $html .= "<tr><th>Marge total</th><td>". price($marge)." €</td></tr>";
         
-        $html .= "<br/>Total emprunt : ".$this->getTotalEmprunt();
-        $html .= "<br/>Marge sur le financement : ". $marge1;
-        $html .= "<br/>Marge loyer inter + frais divers : ". $marge2;
-        $html .= "<br/>Marge total : ". $marge;
+        $html .= "</table>";
         
         return $html;
     }
@@ -496,7 +498,6 @@ class BF_Demande extends BimpObject
             }
         }
 
-        $html .= $this->renderInfoFin();
 
         return $html;
     }
@@ -959,46 +960,6 @@ class BF_Demande extends BimpObject
         return $html;
     }
 
-//    public function renderInfoFin()
-//    {
-//        $factBanque = $this->getChildObject('facture_banque');
-//        if (BimpObject::objectLoaded($factBanque)) {
-//            $diference = $this->getTotalEmprunt() - $factBanque->getData('total_ttc');
-//            if ($diference > 0.1 || $diference < -0.1)
-//                $this->warningsMsg[] = "Attention diférence entre facture banque est emprunt de : " . price($diference);
-//        }
-//
-//        $contrat = $this->getChildObject('contrat');
-//        if (BimpObject::objectLoaded($contrat)) {
-//            $diference = $this->getTotalLoyer() - $contrat->total_ttc;
-//            if ($diference > 0.1 || $diference < -0.1)
-//                $this->warningsMsg[] = "Attention diférence entre CONTRAT est emprunt de : " . price($diference);
-//        }
-//
-//        $marge1 = $this->getMarge(1);
-//        $marge2 = $this->getMarge(2);
-//        $marge = $marge1 + $marge2;
-//        if ($marge < -1)
-//            $this->warningsMsg['marge-'] = "Attention la marge est négative : " . $marge;
-//
-//        $html = "";
-//
-//        $html .= '<div class="object_header_extra">';
-//        if (count($this->warningsMsg)) {
-//            $html .= BimpRender::renderAlerts($this->warningsMsg, 'warning');
-//        }
-//        if (count($this->infoMsg)) {
-//            $html .= BimpRender::renderAlerts($this->infoMsg, 'info');
-//        }
-//
-//        $html .= "<strong>Total emprunt :</strong> " . BimpTools::displayMoneyValue($this->getTotalEmprunt(), 'EUR') . '<br/>';
-//        $html .= "<strong>Marge sur le financement :</strong> " . BimpTools::displayMoneyValue($marge1, 'EUR') . '<br/>';
-//        $html .= "<strong>Marge loyer inter + frais divers :</strong> " . BimpTools::displayMoneyValue($marge2, 'EUR') . '<br/>';
-//        $html .= "<strong>Marge total :</strong> " . BimpTools::displayMoneyValue($marge, 'EUR') . '<br/>';
-//
-//        $html .= '</div>';
-//        return $html;
-//    }
 
     // Traitements: 
 
@@ -1285,6 +1246,7 @@ class BF_Demande extends BimpObject
                 $facture->set('date_lim_reglement', date('Y-m-d'));
                 $facture->set('ef_type', "S");
                 $facture->set('entrepot', "1");
+                $facture->set('libelle', 'Demande de financement n° ' . $this->getData("agreement_number"));
 
                 $fac_errors = $facture->create($warnings);
                 if (count($fac_errors)) {
@@ -1301,49 +1263,110 @@ class BF_Demande extends BimpObject
             }
 
             if (!count($errors) && BimpObject::objectLoaded($facture)) {
-                $loyers = $this->getChildrenObjects('rents', array(), 'position', 'asc');
                 $total_emprunt = $this->getTotalEmprunt();
+                
+                $lines = $this->getChildrenObjects('lines', array(), 'position', 'asc');
+                $totNonCache = $totCache = 0;
 
-                $taux_tva = 0; // A MOFIFIER EN FONCTION DE SI ON A UN TAUX POUR LES EMPRUNS
-
-                $emprunt_label = '' . $total_emprunt;
-
-                $line = $facture->getLineInstance();
-
-                if (!$line->find(array(
-                            'id_obj'             => (int) $facture->id,
-                            'linked_id_object'   => $this->id,
-                            'linked_object_name' => 'df_total_emprunt'
-                                ), true, true)) {
-                    $line->validateArray(array(
-                        'id_obj'             => (int) $facture->id,
-                        'type'               => (int) ObjectLine::LINE_FREE,
-                        'deletable'          => 0,
-                        'editable'           => 1,
-                        'remisable'          => 1,
-                        'linked_id_object'   => (int) $this->id,
-                        'linked_object_name' => 'df_total_emprunt'
-                    ));
-                }
-
-                $line->desc = 'Demande de financement n° ' . $this->id;
-                $line->qty = 1;
-                $line->pu_ht = $total_emprunt;
-                $line->tva_tx = $taux_tva;
-
-                if (!$line->isLoaded()) {
-                    $line_errors = $line->create();
-                    if (count($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne à la facture');
+                foreach ($lines as $line) {
+                    if($line->getData("in_contrat")){
+                        $totNonCache += $line->getTotalLine();
                     }
-                } else {
-                    $line_errors = $line->update();
-                    if (count($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne de facture');
+                    else
+                        $totCache += $line->getTotalLine();
+                }
+//                if(($totNonCache + $totCache) != $total_emprunt)
+//                    $errors[] = "Problémes dans les totaux !!! " . ($totNonCache + $totCache)." ".$total_emprunt;
+                
+                $coef = $total_emprunt / $totNonCache;
+                
+                $lines = $this->getChildrenObjects('lines', array(), 'position', 'asc');
+                foreach ($lines as $lineT) {
+                    $line = $facture->getLineInstance();
+                    $line->reset();
+                    if($lineT->getData("in_contrat")){
+                        if (!$line->find(array(
+                                    'id_obj'             => (int) $facture->id,
+                                    'linked_id_object'   => $lineT->id,
+                                    'linked_object_name' => 'df_line'
+                                        ), true, true)) {
+                            $line->validateArray(array(
+                                'id_obj'             => (int) $facture->id,
+                                'type'               => (int) ObjectLine::LINE_FREE,
+                                'deletable'          => 1,
+                                'editable'           => 1,
+                                'remisable'          => 1,
+                                'linked_id_object'   => (int) $lineT->id,
+                                'linked_object_name' => 'df_line'
+                            ));
+                        }
+
+                        $line->desc = $lineT->getDesc();
+                        $line->qty = $lineT->getData("qty");
+                        $line->pu_ht = $lineT->getData("pu_ht") * $coef;
+                        $line->tva_tx = $lineT->getData("tva_tx");
+
+                        if (!$line->isLoaded()) {
+                            $line_errors = $line->create();
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne à la facture');
+                            }
+                        } else {
+                            $line_errors = $line->update();
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne de facture');
+                            }
+                        }
+                    }
+                    else{
+                        if($line->find(array(
+                                    'id_obj'             => (int) $facture->id,
+                                    'linked_id_object'   => $lineT->id,
+                                    'linked_object_name' => 'df_line'
+                                        ), true, true))
+                            $line->delete();
                     }
                 }
+                
+                
+                
 
-                $success .= ($success ? '<br/>' : '') . 'Montant facture : ' . $emprunt_label;
+//                $line = $facture->getLineInstance();
+//
+//                if (!$line->find(array(
+//                            'id_obj'             => (int) $facture->id,
+//                            'linked_id_object'   => $this->id,
+//                            'linked_object_name' => 'df_total_emprunt'
+//                                ), true, true)) {
+//                    $line->validateArray(array(
+//                        'id_obj'             => (int) $facture->id,
+//                        'type'               => (int) ObjectLine::LINE_FREE,
+//                        'deletable'          => 0,
+//                        'editable'           => 1,
+//                        'remisable'          => 1,
+//                        'linked_id_object'   => (int) $this->id,
+//                        'linked_object_name' => 'df_total_emprunt'
+//                    ));
+//                }
+//
+//                $line->desc = 'Demande de financement n° ' . $this->id;
+//                $line->qty = 1;
+//                $line->pu_ht = $total_emprunt;
+//                $line->tva_tx = $taux_tva;
+//
+//                if (!$line->isLoaded()) {
+//                    $line_errors = $line->create();
+//                    if (count($line_errors)) {
+//                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne à la facture');
+//                    }
+//                } else {
+//                    $line_errors = $line->update();
+//                    if (count($line_errors)) {
+//                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne de facture');
+//                    }
+//                }
+
+                $success .= ($success ? '<br/>' : '') . 'Montant facture : ' . $total_emprunt;
             }
         }
 
@@ -1353,7 +1376,7 @@ class BF_Demande extends BimpObject
         );
     }
 
-    public function actionGenerateFactureClient($data, &$success)
+    public function actionGenerateFactureVRClient($data, &$success)
     {
         $errors = array();
         $warnings = array();
@@ -1429,7 +1452,7 @@ class BF_Demande extends BimpObject
         );
     }
 
-    public function actionGenerateFactureFourn($data, &$success)
+    public function actionGenerateFactureVRFourn($data, &$success)
     {
 
         $errors = array();

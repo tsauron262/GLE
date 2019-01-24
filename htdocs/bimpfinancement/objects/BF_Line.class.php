@@ -4,25 +4,9 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpLine.class.php';
 
 class BF_Line extends BimpLine
 {
-    
-    public function getQtyDecimals()
-    {
-        return 3;
-    }
-    
-    
-    public function getTotalLine($ttc = true){
-        $tot = $this->getData("pu_ht") * $this->getData("qty");
-        if($ttc)
-            $tot += $tot * $this->getData("tva_tx") / 100;
-        return $tot;
-    }
-    
-    public function getDesc(){
-        return $this->getData("label");
-    }
 
     // Getters: 
+    
     public function getQtyOrdered($id_commande_excluded = 0)
     {
         $qty_ordered = 0;
@@ -43,6 +27,19 @@ class BF_Line extends BimpLine
     public function getQtyDecimals()
     {
         return 3;
+    }
+
+    public function getDesc()
+    {
+        return $this->getData("label");
+    }
+
+    public function getTotalLine($ttc = true)
+    {
+        $tot = $this->getData("pu_ht") * $this->getData("qty");
+        if ($ttc)
+            $tot += $tot * $this->getData("tva_tx") / 100;
+        return $tot;
     }
 
     // Getters - Overrides

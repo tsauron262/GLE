@@ -1699,7 +1699,7 @@ class BS_SAV extends BimpObject
         } else {
             if ($line->isLoaded()) {
                 $error_label = 'suppression';
-                $line_errors = $line->delete(true);
+                $line_errors = $line->delete();
             }
         }
 

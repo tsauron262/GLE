@@ -1891,7 +1891,7 @@ class BMP_Event extends BimpObject
                 $html .= '</tr>';
 
                 $total_autre_net = $total_autre_brut;
-                
+
 //                $html .= '<tr>';
 //                $html .= '<td>SACEM autres recettes</td>';
 //                $html .= '<td>' . BimpTools::displayMoneyValue($sacem_autre * -1, 'EUR', true) . '</td>';
@@ -2042,6 +2042,9 @@ class BMP_Event extends BimpObject
             $html .= '<h3>Détails calculs: </h3>';
         }
 
+        $nb_billets_payants = 0;
+        $nb_billets_gratuits = 0;
+
         if ($nTarifs > 0) {
             $id_billets_type_montant = (int) $this->getBilletsIdTypeMontant();
             $billets_tva_tx = (float) $this->getMontantTvaTx($id_billets_type_montant);
@@ -2061,6 +2064,9 @@ class BMP_Event extends BimpObject
                 if ($qty) {
                     if ($prix_ttc) {
                         $total_billets_ttc += $prix_ttc * $qty;
+                        $nb_billets_payants += $qty;
+                    } else {
+                        $nb_billets_gratuits += $qty;
                     }
                     $nbBillets += $qty;
                 }
@@ -2069,8 +2075,8 @@ class BMP_Event extends BimpObject
             $total_billets_ht = BimpTools::calculatePriceTaxEx($total_billets_ttc, $billets_tva_tx);
 
             if ($nbBillets) {
-                $prix_moyen_ttc = $total_billets_ttc / $nbBillets;
-                $prix_moyen_ht = $total_billets_ht / $nbBillets;
+                $prix_moyen_ttc = $total_billets_ttc / $nb_billets_payants;
+                $prix_moyen_ht = $total_billets_ht / $nb_billets_payants;
             }
 
             if ($debug) {
@@ -2282,8 +2288,8 @@ class BMP_Event extends BimpObject
         $html .= '</tr>';
 
         if ($status === 1) {
-            $prev_dl_dist = $nbBillets * (float) $this->getData('default_dl_dist');
-            $prev_dl_prod = $nbBillets * (float) $this->getData('default_dl_prod');
+            $prev_dl_dist = $nb_billets_payants * (float) $this->getData('default_dl_dist');
+            $prev_dl_prod = $nb_billets_payants * (float) $this->getData('default_dl_prod');
 
             $html .= '<tr>';
             $html .= '<th>Total DL distributeurs prévisionnel</th>';
@@ -2296,6 +2302,15 @@ class BMP_Event extends BimpObject
             $html .= '</tr>';
         }
 
+        $html .= '<tr>';
+        $html .= '<th>Nombre de billets payants</th>';
+        $html .= '<td>' . $nb_billets_payants . '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<th>Nombre d\'invitations</th>';
+        $html .= '<td>' . $nb_billets_gratuits . '</td>';
+        $html .= '</tr>';
         $html .= '<tr>';
         $html .= '<th>Ratio invitations / total billets</th>';
         $html .= '<td>' . round($this->GetFreeBilletsRatio() * 100, 2) . ' %</td>';
@@ -2564,7 +2579,7 @@ class BMP_Event extends BimpObject
                     'frais'        => '',
                     'recette'      => BimpTools::displayMoneyValue($dl_dist, 'EUR')
                 );
-                
+
                 $solde += $dl_dist;
                 $total_recettes += $dl_dist;
             }

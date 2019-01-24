@@ -20,12 +20,20 @@ fields:
         type: json
         input: 
             type: hidden
-        
+    site: 
+        label: Site
+        values: 
+            callback: 
+                object: 
+                    callback: getParentInstance
+                method: getSitesArray
+                
     remisable: unset
     
 forms: 
     default: 
         rows: 
+            - field: site
             - field: type
             - field: in_contrat
             - field: id_product
@@ -47,6 +55,9 @@ lists_cols:
         label: Qté commandée
         value: 
             callback: displayQtyOrdered
+    site: 
+        field: site
+        edit: 1
             
 lists: 
     default: 
@@ -64,5 +75,6 @@ lists:
             equipments:
             fourn:
             in_contrat: 
+            site:
 
     

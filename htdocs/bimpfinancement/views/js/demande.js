@@ -127,13 +127,13 @@ function bf_demande_calculateMontantTotal($view, champ) {
     var coupBanque = 0;
     var posTmp = 10000000;
     var periodicity = 1;
-    $view.find(".BF_Refinanceur_row").each(function () {
+    $view.find(".BF_DemandeRefinanceur_row").each(function () {
         if ($(this).find('input[name="periode2"]').val() == 0
                 && $(this).find('[name="status"]').val() == 2){
                 totalLoyer += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
             }
         });
-    $view.find(".BF_Refinanceur_row").each(function () {
+    $view.find(".BF_DemandeRefinanceur_row").each(function () {
         if ($(this).find('input[name="periode2"]').val() == 0
                 && $(this).find('[name="status"]').val() == 2){
 //            if ($(this).data("position") < posTmp) {

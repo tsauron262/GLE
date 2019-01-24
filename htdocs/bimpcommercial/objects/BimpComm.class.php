@@ -38,19 +38,6 @@ class BimpComm extends BimpObject
         return $this->getChildObject('lines');
     }
 
-    public function isEditable()
-    {
-//        if ($this->isLoaded()) {
-//            if ((int) $this->getData('fk_statut') === 0) {
-//                return 1;
-//            }
-//
-//            return 0;
-//        }
-
-        return 1;
-    }
-
     public function isDeletable()
     {
         return 1;

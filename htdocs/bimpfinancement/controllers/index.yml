@@ -6,8 +6,27 @@ objects:
         instance:
             bimp_object: BF_Demande
     
+    refinanceurs: 
+        instance: 
+            bimp_object: BF_Refinanceur
+            
 sections:
-     - type: list
-       list: 
-           panel: 1
-           object: demandes
+    - type: tabs
+      tabs: 
+          default: 
+              label: Demandes
+              icon: fas_hand-holding-usd
+              sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: demandes
+                        
+          refinanceurs:
+              label: Refinanceurs
+              icon: fas_university
+              sections: 
+                  - type: list
+                    list: 
+                        panel: 1
+                        object: refinanceurs

@@ -585,7 +585,7 @@ class BimpRender
         $return .= ' data-container="' . $container . '"';
         $return .= ' data-placement="' . $placement . '"';
         $return .= ' data-content="' . htmlentities($content) . '"';
-        $return .= ' data-html="' . $html . '"';
+        $return .= ' data-html="' . (is_string($html) ? $html : ($html ? 'true' : 'false')) . '"';
 
         return $return;
     }

@@ -59,6 +59,18 @@ class BF_Demande extends BimpObject
 
     // Autorisations et droits:
 
+    public function isFieldEditable($field)
+    {
+        if (in_array($field, array('duration', 'periodicity', 'vr', 'vr_vente', 'mode_calcul'))) {
+            if ((int) $this->getData('accepted')) {
+                return 0;
+            }
+            return 1;
+        }
+
+        return parent::isFieldEditable($field);
+    }
+
     public function isActionAllowed($action, &$errors = array())
     {
         $status = $this->getData('status');
@@ -344,14 +356,18 @@ class BF_Demande extends BimpObject
     public function getTotalDemande($withComm = true)
     {
         $tot = $this->getData('montant_materiels') + (float) $this->getData('montant_services') + (float) $this->getData('montant_logiciels') - $this->getData('vr_vente');
-        if ($withComm)
+        if ($withComm) {
             $tot += $this->getCommissionCommerciale() + $this->getCommissionFinanciere();
+        }
         return (float) $tot;
     }
 
     public function getTotalEmprunt()
     {
         $totalEmp = 0;
+        $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
+            'status'   => 2, 'periode2' => 0
+        ));
         foreach ($refinanceurs as $refinanceur) {
             $totalEmp += $refinanceur->getTotalEmprunt();
         }
@@ -361,6 +377,9 @@ class BF_Demande extends BimpObject
     public function getTotalLoyer()
     {
         $totalEmp = 0;
+        $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
+            'status'   => 2, 'periode2' => 0
+        ));
         foreach ($refinanceurs as $refinanceur) {
             $totalEmp += $refinanceur->getTotalLoyer();
         }
@@ -416,14 +435,14 @@ class BF_Demande extends BimpObject
                     self::$cache[$cache_key][$site] = $site;
                 }
             }
-            
+
             return self::getCacheArray($cache_key, $include_empty, '');
         }
-        
+
         return array();
     }
 
-    // Rendus HTML: 
+    // Rendus HTML:
 
     public function renderHeaderExtraLeft()
     {
@@ -448,6 +467,15 @@ class BF_Demande extends BimpObject
         }
 
         return $html;
+    }
+
+    public function renderHeaderStatusExtra()
+    {
+        if ((int) $this->getData('accepted')) {
+            return '&nbsp;&nbsp;<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Acceptée par la banque</span>';
+        }
+
+        return '';
     }
 
     public function renderCommandesInfos()
@@ -931,7 +959,33 @@ class BF_Demande extends BimpObject
         ));
     }
 
-    // Traitements: 
+    public function renderCommissionInputs($field_name)
+    {
+        if ($this->field_exists($field_name) && $this->isFieldEditable($field_name)) {
+            $html = '';
+
+            $bc_field = new BC_Field($this, $field_name, 1);
+            $html .= $bc_field->renderHtml();
+
+            $html .= '<div style="margin-top: 5px;padding-left: 4px">';
+            $html .= BimpInput::renderInput('text', $field_name . '_amount', 0, array(
+                        'data'        => array(
+                            'data_type' => 'number',
+                            'decimals'  => 2,
+                            'min'       => 'none',
+                            'max'       => 'none'
+                        ),
+                        'addon_right' => BimpRender::renderIcon('fas_euro-sign')
+            ));
+            $html .= '</div>';
+
+            return $html;
+        }
+
+        return $this->displayData($field_name);
+    }
+
+    // Traitements:
 
     public function verif_exist_document($document_type)
     {
@@ -1234,27 +1288,26 @@ class BF_Demande extends BimpObject
 
             if (!count($errors) && BimpObject::objectLoaded($facture)) {
                 $total_emprunt = $this->getTotalEmprunt();
-                
+
                 $lines = $this->getChildrenObjects('lines', array(), 'position', 'asc');
                 $totNonCache = $totCache = 0;
 
                 foreach ($lines as $line) {
-                    if($line->getData("in_contrat")){
+                    if ($line->getData("in_contrat")) {
                         $totNonCache += $line->getTotalLine();
-                    }
-                    else
+                    } else
                         $totCache += $line->getTotalLine();
                 }
 //                if(($totNonCache + $totCache) != $total_emprunt)
 //                    $errors[] = "Problémes dans les totaux !!! " . ($totNonCache + $totCache)." ".$total_emprunt;
-                
+
                 $coef = $total_emprunt / $totNonCache;
-                
+
                 $lines = $this->getChildrenObjects('lines', array(), 'position', 'asc');
                 foreach ($lines as $lineT) {
                     $line = $facture->getLineInstance();
                     $line->reset();
-                    if($lineT->getData("in_contrat")){
+                    if ($lineT->getData("in_contrat")) {
                         if (!$line->find(array(
                                     'id_obj'             => (int) $facture->id,
                                     'linked_id_object'   => $lineT->id,
@@ -1287,9 +1340,8 @@ class BF_Demande extends BimpObject
                                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne de facture');
                             }
                         }
-                    }
-                    else{
-                        if($line->find(array(
+                    } else {
+                        if ($line->find(array(
                                     'id_obj'             => (int) $facture->id,
                                     'linked_id_object'   => $lineT->id,
                                     'linked_object_name' => 'df_line'
@@ -1297,9 +1349,9 @@ class BF_Demande extends BimpObject
                             $line->delete();
                     }
                 }
-                
-                
-                
+
+
+
 
 //                $line = $facture->getLineInstance();
 //
@@ -1705,7 +1757,7 @@ class BF_Demande extends BimpObject
         );
     }
 
-    // Overrides: 
+    // Overrides:
 
     public function reset()
     {
@@ -1723,9 +1775,10 @@ class BF_Demande extends BimpObject
         $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
             'status'   => 2, 'periode2' => 0
         ));
+
         if (count($refinanceurs) > 1)
             $this->msgs['errors']['plusrefi'] = "ATTENTION Plusieurs refinanceur en Accord";
-        
+
         $factBanque = $this->getChildObject('facture_banque');
         if (BimpObject::objectLoaded($factBanque)) {
             $diference = $this->getTotalEmprunt() - $factBanque->getData('total_ttc');

@@ -1,0 +1,19 @@
+bootstrap: 1
+objects:
+    refinanceur: 
+        instance: 
+            bimp_object: BF_Refinanceur
+            id_object: 
+                request: id
+sections:
+    - type: object_header
+      object_header: 
+          object: refinanceur
+    - type: view
+      view: 
+          object: refinanceur
+          panel: 1
+    - type: view
+      view: 
+          object: refinanceur
+          name: coefs

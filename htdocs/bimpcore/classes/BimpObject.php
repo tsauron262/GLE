@@ -970,7 +970,7 @@ class BimpObject extends BimpCache
 
         $this->resetMsgs();
     }
-
+    
     public function set($field, $value)
     {
         if (!$this->field_exists($field)) {
@@ -1518,6 +1518,11 @@ class BimpObject extends BimpCache
         }
 
         return $return;
+    }
+    
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
+        
     }
 
     // Gestion des objets enfants:
@@ -2332,6 +2337,7 @@ class BimpObject extends BimpCache
                         }
                     }
 
+                    $this->onSave($errors, $warnings);
                     $this->checkObject();
                 } else {
                     $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
@@ -2418,6 +2424,7 @@ class BimpObject extends BimpCache
                             }
                         }
 
+                        $this->onSave($errors, $warnings);
                         $this->checkObject();
                     }
                 }
@@ -2539,6 +2546,7 @@ class BimpObject extends BimpCache
                         }
                     }
 
+                    $this->onSave($errors, $warnings);
                     $this->checkObject();
                 }
             }
@@ -3626,13 +3634,12 @@ class BimpObject extends BimpCache
             }
 
             $html .= '<div class="header_extra">';
-            $html .= $this->renderMsgs();
-
             if (method_exists($this, 'renderHeaderExtraLeft')) {
                 $html .= '<div style="margin: 10px 0;">';
                 $html .= $this->renderHeaderExtraLeft();
                 $html .= '</div>';
             }
+            $html .= $this->renderMsgs();
             $html .= '</div>';
             $html .= '</div>';
             $html .= '</div>';

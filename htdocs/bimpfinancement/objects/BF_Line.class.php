@@ -6,7 +6,7 @@ class BF_Line extends BimpLine
 {
 
     // Getters: 
-    
+
     public function getQtyOrdered($id_commande_excluded = 0)
     {
         $qty_ordered = 0;
@@ -53,9 +53,27 @@ class BF_Line extends BimpLine
         return (int) parent::isFieldEditable($field);
     }
 
+    public function isCreatable()
+    {
+        $demande = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($demande)) {
+            if (!(int) $demande->getData('accepted')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+    
+    public function isEditable()
+    {
+        return $this->isCreatable();
+    }
+
     public function isDeletable()
     {
-        return (int) $this->areAllCommandesFournEditable();
+        return (int) ($this->areAllCommandesFournEditable() && $this->isCreatable());
     }
 
     public function areAllCommandesFournEditable()

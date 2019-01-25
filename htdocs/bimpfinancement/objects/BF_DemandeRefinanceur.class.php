@@ -58,37 +58,174 @@ class BF_DemandeRefinanceur extends BimpObject
         5      => 'LIXXBAIL',
         230634 => 'LOCAM'
     );
+    protected $calcValues = array(
+        'cout_with_coef' => 0,
+        'cout_with_tx'   => 0,
+        'nb_mois'        => 0,
+        'total_loyer'    => 0,
+    );
+
+    public function isCreatable()
+    {
+        $demande = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($demande)) {
+            if (!(int) $demande->getData('accepted')) {
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
+    public function isEditable()
+    {
+        return $this->isCreatable();
+    }
+
+    public function isDeletable()
+    {
+        return $this->isCreatable();
+    }
+
+    public function isEchouar()
+    {
+        //todo
+        $demande = $this->getParentInstance();
+        return ($demande->getData("mode_calcul") == 2);
+    }
+
+    public function getCalcValues()
+    {
+        if (is_null($this->calcValues)) {
+            if ($this->isLoaded() && BimpTools::isSubmit('new_values/' . $this->id)) {
+                $amount_ht = BimpTools::getValue('new_values/' . $this->id . '/amount_ht', $this->getData('amount_ht'));
+                $coef = BimpTools::getValue('new_values/' . $this->id . '/coef', $this->getData('coef'));
+                $taux = BimpTools::getValue('new_values/' . $this->id . '/rate', $this->getData('rate'));
+                $nbPeriodes = BimpTools::getValue('new_values/' . $this->id . '/quantity', $this->getData('quantity'));
+                $dureePeriode = BimpTools::getValue('new_values/' . $this->id . '/periodicity', $this->getData('periodicity'));
+            } else {
+                $amount_ht = $this->getData("amount_ht");
+                $coef = $this->getData('coef');
+                $taux = $this->getData("rate");
+                $nbPeriodes = $this->getData('quantity');
+                $dureePeriode = $this->getData('periodicity');
+            }
+
+            $nbMois = $nbPeriodes * $dureePeriode;
+            $total_loyer = $nbPeriodes * $amount_ht;
+            $coutWithTx = 0;
+            $coutWithCoef = 0;
+            $loyer = 0;
+            $totalDemande = $this->getTotalDemande();
+
+            $isEchoir = $this->isEchouar();
+
+            // Cout banque avec taux: 
+            if ($taux > 0) {
+                $tauxPM = $taux / 100 / 12;
+                $echoirCalc = 1;
+                if ($isEchoir) {
+                    $echoirCalc = 1 + $taux / 100 * self::$coefALaCon;
+                }
+                $capital = $amount_ht / ($tauxPM / (1 - pow((1 + $tauxPM), -($nbMois))) / $echoirCalc) / $dureePeriode;
+                $coutWithTx = $total_loyer - $capital;
+            }
+
+            // Cout banque avec coef:
+            if ($coef > 0) {
+                $loyerTest = $amount_ht;
+                $total = $loyerTest * $nbMois;
+
+                //cherchons total
+                for ($i = 1; $i <= 100; $i++) {
+                    $loyerT = $total * $coef / 100;
+                    $coefCorrec = $nbPeriodes * (1 - $i / 100);
+                    if ($loyerT == $loyerTest) {
+                        break;
+                    } elseif ($loyerT < $loyerTest) {
+                        $total += ($loyerTest - $loyerT) * $coefCorrec;
+                    } elseif ($loyerT > $loyerTest) {
+                        $total += ($loyerTest - $loyerT) * $coefCorrec;
+                    }
+                }
+
+                $coutWithCoef = ($total * $nbPeriodes * $coef / 100) - $total;
+            }
+
+            // Calcul Loyer: 
+            if ($taux > 0) {
+                $tauxPM = $taux / 100 / 12;
+                $echoirCalc = 1;
+                if ($isEchoir) {
+                    $echoirCalc = 1 + $taux / 100 * self::$coefALaCon;
+                }
+                $loyer = $totalDemande * ($dureePeriode * (($tauxPM / (1 - pow((1 + $tauxPM), -($nbMois))) / $echoirCalc)));
+//             $loyer = $totalDemande * ($tauxPM / (1 - pow((1 + $tauxPM), -($nbMois)))  / $echoirCalc) * $dureePeriode;
+//             $loyer = (($totalDemande * $tauxPM) / (1 - pow((1 + $tauxPM), -($nbMois)))  / $echoirCalc) * $dureePeriode;
+            } else {
+                $loyer = $totalDemande / $nbPeriodes;
+            }
+
+            if ($coef != 0) {
+                $interet = $totalDemande - ($totalDemande * ($nbMois / $dureePeriode * $coef / 100));
+                $loyer = ($totalDemande - $interet) / $nbPeriodes;
+            }
+
+            // Emprunt total: 
+            $totalEmprunt = $total_loyer - ($coutWithCoef + $coutWithTx);
+
+            $this->calcValues = array(
+                'cout_with_coef' => $coutWithCoef,
+                'cout_with_tx'   => $coutWithTx,
+                'cout_total'     => $coutWithCoef + $coutWithTx,
+                'nb_mois'        => $nbMois,
+                'loyer'          => $loyer,
+                'total_loyer'    => $total_loyer,
+                'total_emprunt'  => $totalEmprunt
+            );
+        }
+
+        return $this->calcValues;
+    }
 
     public function getTotalLoyer()
     {
         return $this->getData("quantity") * $this->getData("amount_ht");
     }
 
-    public function displayLoyerSuggest($display_name = 'nom_url', $display_input_value = true, $no_html = false)
+    public function displayLoyerSuggest()
     {
-        $totalEmprunt = $this->getTotalEmprunt();
-        $loyer = $this->calculLoyer($this->getTotalEmpruntDemande());
+        $calc_values = $this->getCalcValues(true);
 
-        $info = "Total emprunt : " . price($totalEmprunt);
-        $info .= "<br />Coût banque : " . price($this->getCoutBanqueWithCoeficient() + $this->getCoutBanqueWithTaux());
-        $info .= '<br/>Total remboursement : ' . price($this->getTotalLoyer());
-        $verif = ($this->getCoutBanqueWithCoeficient() + $this->getCoutBanqueWithTaux()) > 0 && ($this->getCoutBanqueWithCoeficient() + $this->getCoutBanqueWithTaux()) < ($totalEmprunt / 2);
+        $info = "Total emprunt : " . price($calc_values['total_emprunt']);
+        $info .= "<br />Coût banque : " . price($calc_values['cout_total']);
+        $info .= '<br/>Total remboursement : ' . price($calc_values['total_loyer']);
+
+        $verif = ($calc_values['cout_total'] > 0) && ($calc_values['cout_total'] < ($calc_values['total_emprunt'] / 2));
+
         $html = "";
-        $html .= '<span type="button" class="btn btn-' . ($verif ? 'default' : 'danger') . ' bs-popover"';
-        $html .= ' onclick="majLoyerAuto($(this), ' . $loyer . ')"';
+
+        $html .= '<span type="button" class="loyer_calc_btn btn btn-' . ($verif ? 'success' : 'danger') . ' bs-popover"';
+        $html .= ' onclick="majLoyerAuto($(this), ' . $calc_values['loyer'] . ');"';
         $html .= BimpRender::renderPopoverData($info, 'top', 'true');
         $html .= '>';
-        if ($loyer) {
-            $html .= BimpTools::displayMoneyValue($loyer);
-        }
-        $html .= '<i class="fas fa-question-circle' . ($loyer ? ' iconRight' : '') . '"></i>';
+
+        $html .= BimpTools::displayMoneyValue($calc_values['loyer']);
+
+        $html .= '<i class="fas fa-question-circle iconRight"></i>';
         $html .= '</span>';
+
         return $html;
     }
 
     public function getTotalEmprunt()
     {
-        return $this->getTotalLoyer() - ($this->getCoutBanqueWithCoeficient() + $this->getCoutBanqueWithTaux());
+        $calcValues = $this->getCalcValues();
+        if (isset($calcValues['total_emprunt'])) {
+            return $calcValues['total_emprunt'];
+        }
+        return 0;
     }
 
     public function getNbMois()
@@ -96,101 +233,56 @@ class BF_DemandeRefinanceur extends BimpObject
         return $this->getData("quantity") * $this->getData("periodicity");
     }
 
-    public function isEchouar()
-    {//todo
-        $demande = $this->getParentInstance();
-        return ($demande->getData("mode_calcul") == 2);
-    }
-
-    public function getTotalEmpruntDemande()
+    public function getTotalDemande()
     {
         $demande = $this->getParentInstance();
-        return $demande->getTotalDemande();
+
+        if (BimpObject::objectLoaded($demande)) {
+            return $demande->getTotalDemande();
+        }
+
+        return 0;
     }
 
     public function getCoutBanqueWithTaux()
     {
-        $taux = $this->getData("rate");
-        if ($taux > 0) {
-            $tauxPM = $taux / 100 / 12;
-            $echoirCalc = 1;
-            if ($this->isEchouar()) {
-                $echoirCalc = 1 + $taux / 100 * self::$coefALaCon;
-            }
-            $capital = $this->getData("amount_ht") / ($tauxPM / (1 - pow((1 + $tauxPM), -($this->getNbMois()))) / $echoirCalc) / $this->getData('periodicity');
-            return $this->getTotalLoyer() - $capital;
+        $calcValues = $this->getCalcValues();
+        if (isset($calcValues['cout_with_tx'])) {
+            return $calcValues['cout_with_tx'];
         }
         return 0;
     }
 
     public function getCoutBanqueWithCoeficient()
     {
-        $coef = $this->getData("coef");
-        if ($coef > 0) {
-            $loyerTest = $this->getData("amount_ht");
-            $nbPeriode = $this->getData("quantity");
-            $nbMois = $this->getNbMois();
-
-            $total = $loyerTest * $nbMois;
-
-            //cherchon total
-            for ($i = 1; $i <= 100; $i++) {
-                $loyerT = $total * $coef / 100;
-                $coefCorrec = $nbPeriode * (1 - $i / 100);
-                if ($loyerT == $loyerTest) {
-                    break;
-                } elseif ($loyerT < $loyerTest) {
-                    $total += ($loyerTest - $loyerT) * $coefCorrec;
-                } elseif ($loyerT > $loyerTest) {
-                    $total += ($loyerTest - $loyerT) * $coefCorrec;
-                }
-//echo "<br/>oooo".$total;
-            }
-
-            return ($total * $nbPeriode * $coef / 100) - $total;
+        $calcValues = $this->getCalcValues();
+        if (isset($calcValues['cout_with_coef'])) {
+            return $calcValues['cout_with_coef'];
         }
         return 0;
     }
 
-    public function calculLoyer($capital)
+    public function getLoyer()
     {
-        $nbPeriode = $this->getData("quantity");
-        $dureePeriode = $this->getData("periodicity");
-        $nbMois = $this->getNbMois();
-        $coef = $this->getData("coef");
-        if ($this->getData("rate") > 0) {
-            $tauxPM = $this->getData("rate") / 100 / 12;
-            $echoirCalc = 1;
-            if ($this->isEchouar()) {
-                $echoirCalc = 1 + $this->getData("rate") / 100 * self::$coefALaCon;
-            }
-            $loyer = $capital * ($dureePeriode * (($tauxPM / (1 - pow((1 + $tauxPM), -($nbMois))) / $echoirCalc)));
-//             $loyer = $capital * ($tauxPM / (1 - pow((1 + $tauxPM), -($nbMois)))  / $echoirCalc) * $dureePeriode;
-//             $loyer = (($capital * $tauxPM) / (1 - pow((1 + $tauxPM), -($nbMois)))  / $echoirCalc) * $dureePeriode;
-        } else {
-            $loyer = $capital / $nbPeriode;
+        $calcValues = $this->getCalcValues();
+        if (isset($calcValues['loyer'])) {
+            return $calcValues['loyer'];
         }
-
-        if ($coef != 0) {
-            $interet = $capital - $capital * ($nbMois / $dureePeriode * $coef / 100);
-            $loyer = ($capital - $interet) / $nbPeriode;
-        }
-
-        return $loyer;
+        return 0;
     }
 
     public function displayRefinanceur()
     {
         if ($this->isLoaded()) {
             $refinanceur = BimpCache::getBimpObjectInstance($this->module, 'BF_Refinanceur', (int) $this->getData('id_refinanceur'));
-            
+
             if (!$refinanceur->isLoaded()) {
                 return $this->renderChildUnfoundMsg('id_refinanceur', $refinanceur);
             } else {
                 return $refinanceur->getName();
             }
         }
-        
+
         return '';
     }
 
@@ -212,5 +304,19 @@ class BF_DemandeRefinanceur extends BimpObject
         }
 
         return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    // Overrides: 
+
+    public function reset()
+    {
+        $this->calcValues = null;
+
+        parent::reset();
+    }
+
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
+        $this->calcValues = null;
     }
 }

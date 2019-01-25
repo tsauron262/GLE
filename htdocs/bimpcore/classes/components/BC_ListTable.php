@@ -206,7 +206,7 @@ class BC_ListTable extends BC_List
             if (BimpObject::objectLoaded($object)) {
                 $this->object = $object;
                 $item_params = $this->fetchParams($this->config_path, $this->item_params);
-
+                
                 $row = array(
                     'params' => array(
                         'checkbox'       => (int) $object->getConf($this->config_path . '/item_checkbox', true, false, 'bool'),
@@ -316,7 +316,7 @@ class BC_ListTable extends BC_List
                 $rows[$item[$primary]] = $row;
             }
         }
-
+        
         $this->object = $object_instance;
 
         if (!is_null($this->parent)) {

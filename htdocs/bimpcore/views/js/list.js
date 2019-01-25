@@ -1144,6 +1144,10 @@ function onListLoaded($list) {
 
             $list.data('object_change_event_init', 1);
         }
+
+        $('body').trigger($.Event('listLoaded', {
+            $list: $list
+        }));
     }
 }
 

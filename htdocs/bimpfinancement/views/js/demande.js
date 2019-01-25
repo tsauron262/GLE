@@ -18,6 +18,11 @@ $(document).ready(function () {
             onCommandesFournFormLoaded(e.$form);
         }
     });
+    $('body').on('listLoaded', function (e) {
+        if (e.$list.hasClass('BF_DemandeRefinanceur_list_table')) {
+            setRefinanceursListRowsEvents(e.$list);
+        }
+    });
 });
 
 function onBFDemandeViewLoaded($view) {
@@ -40,20 +45,37 @@ function bf_demande_initEvents($view) {
             '[name="periode2"],' +
             '[name="vr"],[name="vr_vente"]';
 
-    $view.find(selecteur).change(function () {
+    var $fields_table = $view.find('.BF_Demande_fields_table_montants');
+
+    if (!parseInt($fields_table.data('bf_demande_montants_events_init'))) {
+        $view.find(selecteur).keyup(function () {
+            bf_demande_calculateMontantTotal($view, $(this), false);
+        });
+        
+        $view.find(selecteur).change(function () {
+            bf_demande_calculateMontantTotal($view, $(this), false);
+        });
+
+        $view.find('[name="commission_commerciale_amount"],[name="commission_financiere_amount"]').keyup(function () {
+            bf_demande_calculateMontantTotal($view, $(this), true);
+        });
+        $view.find('[name="commission_commerciale_amount"],[name="commission_financiere_amount"]').change(function () {
+            bf_demande_calculateMontantTotal($view, $(this), true);
+        });
+
         bf_demande_calculateMontantTotal($view);
-    });
 
-    $view.find(selecteur).keyup(function () {
-        bf_demande_calculateMontantTotal($view, this);
-    });
-
-    bf_demande_calculateMontantTotal($view);
+        $fields_table.data('bf_demande_montants_events_init', 1);
+    }
 }
 
-function bf_demande_calculateMontantTotal($view, champ) {
-    if (champ != undefined)
-        $(champ).val($(champ).val().replace(",", ".").replace(" ", "").replace("€", ""));
+function bf_demande_calculateMontantTotal($view, $champ, use_comm_amount) {
+    if (typeof (use_comm_amount) === 'undefined') {
+        use_comm_amount = false;
+    }
+
+    if ($.isOk($champ))
+        $champ.val($champ.val().replace(",", ".").replace(" ", "").replace("€", ""));
 
     if (!$view.length) {
         return;
@@ -63,15 +85,9 @@ function bf_demande_calculateMontantTotal($view, champ) {
     var $montant_services = $view.find('[name="montant_services"]');
     var $montant_logiciels = $view.find('[name="montant_logiciels"]');
 
-    var $commission_commerciale = $view.find('[name="commission_commerciale"]');
-    var $commission_financiere = $view.find('[name="commission_financiere"]');
-
     var montant_materiels = parseFloat($montant_materiels.val());
     var montant_services = parseFloat($montant_services.val());
     var montant_logiciels = parseFloat($montant_logiciels.val());
-
-    var commission_commerciale = parseFloat($commission_commerciale.val());
-    var commission_financiere = parseFloat($commission_financiere.val());
 
     var total = 0;
     if (montant_materiels) {
@@ -90,13 +106,55 @@ function bf_demande_calculateMontantTotal($view, champ) {
 
     //On a le premier total
 
-    var commC = 0;
-    if (commission_commerciale > 0)
-        commC = commission_commerciale * total / 100;
+    var $commission_commerciale = $view.find('[name="commission_commerciale"]');
+    var $commission_financiere = $view.find('[name="commission_financiere"]');
+    var $commC = $view.find('[name="commission_commerciale_amount"]');
+    var $commF = $view.find('[name="commission_financiere_amount"]');
 
+    var commission_commerciale = 0;
+    var commission_financiere = 0;
+    var commC = 0;
     var commF = 0;
-    if (commission_financiere > 0)
-        commF = commission_financiere * (total + commC) / 100;
+
+    if (use_comm_amount) {
+        commC = parseFloat($commC.val());
+        commF = parseFloat($commF.val());
+
+        if (commC) {
+            commission_commerciale = Math.round10((commC / total) * 100, -6);
+        }
+
+        if (commF) {
+            commission_financiere = Math.round10((commF / (total + commC)) * 100, -6);
+        }
+
+        if (parseFloat($commission_commerciale.val()) !== commission_commerciale) {
+            $commission_commerciale.val(commission_commerciale);
+            checkTextualInput($commission_commerciale);
+        }
+
+        if (parseFloat($commission_financiere.val()) !== commission_financiere) {
+            $commission_financiere.val(commission_financiere);
+            checkTextualInput($commission_financiere);
+        }
+    } else {
+        commission_commerciale = parseFloat($commission_commerciale.val());
+        commission_financiere = parseFloat($commission_financiere.val());
+
+        if (commission_commerciale > 0)
+            commC = Math.round10(commission_commerciale * total / 100, -2);
+
+        if (commission_financiere > 0)
+            commF = Math.round10(commission_financiere * (total + commC) / 100, -2);
+
+        if (parseFloat($commC.val()) !== commC) {
+            $commC.val(commC);
+        }
+
+        if (parseFloat($commF.val()) !== commF) {
+            $commF.val(commF);
+        }
+    }
 
     total2 = total + commC + commF;
 
@@ -104,15 +162,6 @@ function bf_demande_calculateMontantTotal($view, champ) {
 
     displayMoneyValue(total, $view.find('#montant_total'));
     displayMoneyValue(total2, $view.find('#montant_total2'));
-
-    if ($view.find('input[name="commC"]').length < 1)
-        $commission_commerciale.parent().parent().parent().append("<span id='commC'></span>");
-    displayMoneyValue(commC, $view.find('#commC'));
-
-    if ($view.find('input[name="commF"]').length < 1)
-        $commission_financiere.parent().parent().parent().append("<span id='commF'></span>");
-    displayMoneyValue(commF, $view.find('#commF'));
-
 
 
     //Total loyer calculé
@@ -129,40 +178,40 @@ function bf_demande_calculateMontantTotal($view, champ) {
     var periodicity = 1;
     $view.find(".BF_DemandeRefinanceur_row").each(function () {
         if ($(this).find('input[name="periode2"]').val() == 0
-                && $(this).find('[name="status"]').val() == 2){
-                totalLoyer += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
-            }
-        });
+                && $(this).find('[name="status"]').val() == 2) {
+            totalLoyer += parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
+        }
+    });
     $view.find(".BF_DemandeRefinanceur_row").each(function () {
         if ($(this).find('input[name="periode2"]').val() == 0
-                && $(this).find('[name="status"]').val() == 2){
+                && $(this).find('[name="status"]').val() == 2) {
 //            if ($(this).data("position") < posTmp) {
-                posTmp = $(this).data("position");
-                taux = $(this).find("input[name=rate]").val();
-                coef = $(this).find("input[name=coef]").val();
-                totalLoyerT = parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
-                if(totalLoyerT > 0){
-                    dureeT = parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('select[name="periodicity"]').val());
-                    duree += dureeT;
+            posTmp = $(this).data("position");
+            taux = $(this).find("input[name=rate]").val();
+            coef = $(this).find("input[name=coef]").val();
+            totalLoyerT = parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('input[name="amount_ht"]').val());
+            if (totalLoyerT > 0) {
+                dureeT = parseFloat($(this).find('input[name="quantity"]').val()) * parseFloat($(this).find('select[name="periodicity"]').val());
+                duree += dureeT;
 
-                    periodicity = $(this).find('select[name="periodicity"]').val();
+                periodicity = $(this).find('select[name="periodicity"]').val();
 
-                    coupBanqueT = 0;
-                    if (coef > 0)
-                        coupBanqueT += (dureeT / periodicity) * total2 * coef / 100 - total2;
+                coupBanqueT = 0;
+                if (coef > 0)
+                    coupBanqueT += (dureeT / periodicity) * total2 * coef / 100 - total2;
 
-                    if (taux > 0) {
-                        var echoir = ($view.find('input[name="mode_calcul"]').val() == 2);
-                        coupBanqueT += calculInteret(total2, dureeT, taux, echoir);
-                    }
-                    coupBanque += coupBanqueT * totalLoyerT / totalLoyer;
-                    console.log(dureeT);
+                if (taux > 0) {
+                    var echoir = ($view.find('input[name="mode_calcul"]').val() == 2);
+                    coupBanqueT += calculInteret(total2, dureeT, taux, echoir);
                 }
+                coupBanque += coupBanqueT * totalLoyerT / totalLoyer;
+                console.log(dureeT);
+            }
 //            }
         }
     });
-    
-    
+
+
     displayMoneyValue(totalLoyer, $view.find('#total_loyer'));
 
 
@@ -171,9 +220,6 @@ function bf_demande_calculateMontantTotal($view, champ) {
 
     if (duree == 0)
         duree = $view.find('input[name="duration"]').val();
-
-
-    
 
     displayMoneyValue(coupBanque, $view.find('#cout_banque'));
 
@@ -253,7 +299,7 @@ function hideShowAvance(view_id, hide) {
 
         var elems = $container.find(selecteur).parent().parent();
         var elemsACacher = $container.find(selecteur2).parent().parent();
-        var elem2 = elems.parent().parent().parent().parent().parent().parent().find(".panel-footer");
+        var elem2 = elems.findParentByClass('panel').find(".panel-footer");
         var moreBut = "erreur";
 
         $("#plusMoinsAvance").remove();
@@ -271,6 +317,7 @@ function hideShowAvance(view_id, hide) {
 }
 
 // Factures frais: 
+
 function addSelectedElementsToFacture(list_id, id_demande, $button) {
     if ($button.hasClass('disabled')) {
         return;
@@ -314,6 +361,88 @@ function addElementsToFacture(object_name, id_demande, elements, $button) {
         object_name: object_name,
         elements: elements
     }, 'add_to_invoice');
+}
+
+// Refinanceurs: 
+
+function setRefinanceursListRowsEvents($list) {
+    if (!$.isOk($list)) {
+        return;
+    }
+
+    var $rows = $list.find('tbody.listRows').find('tr.objectListItemRow');
+
+    if ($rows.length) {
+        $rows.each(function () {
+            if (!parseInt($(this).data('calc_loyer_events_init'))) {
+                var $button = $(this).find('span.loyer_calc_btn');
+                var $row = $(this);
+                if ($button.length) {
+                    $row.find('.inputContainer').each(function () {
+                        var field_name = $(this).data('field_name');
+                        if (field_name) {
+                            var $input = $(this).find('[name="' + field_name + '"]');
+                            if ($input.length) {
+                                $input.change(function () {
+                                    reloadRefinanceurLoyerCalc($(this).findParentByClass('objectListItemRow').data('id_object'));
+                                });
+                            }
+                        }
+                    });
+                }
+
+                $(this).data('calc_loyer_events_init', 1);
+            }
+        });
+    }
+}
+
+function reloadRefinanceurLoyerCalc(id_refinanceur) {
+    var $row = $('#BF_DemandeRefinanceur_row_' + id_refinanceur);
+    if ($.isOk($row)) {
+        var new_values = {};
+        new_values[id_refinanceur] = {};
+
+        $row.find('.inputContainer').each(function () {
+            var field_name = $(this).data('field_name');
+            if (field_name) {
+                new_values[id_refinanceur][field_name] = getInputValue($(this));
+            }
+        });
+
+        var $span = $row.find('span.loyer_calc_btn');
+        $span.hide().popover('hide');
+        var $td = $span.parent('td');
+        if (!$td.find('.loading-spin').length) {
+            $td.append('<div class="loading-spin"><i class="fa fa-spinner fa-spin"></i></div>');
+        }
+
+        BimpAjax('getRefinanceurLoyerCalc', {
+            id_refinanceur: id_refinanceur,
+            new_values: new_values
+        }, null, {
+            $td: $td,
+            display_success: false,
+            display_errors: false,
+            display_warnings: false,
+            success: function (result, bimpAjax) {
+                if (result.span_html) {
+                    var $span = bimpAjax.$td.find('span.loyer_calc_btn').popover('destroy');
+                    bimpAjax.$td.html(result.span_html);
+                    bimpAjax.$td.find('span.loyer_calc_btn').popover();
+                }
+            },
+            error: function (result, bimpAjax) {
+                bimpAjax.$td.find('.loading-spin').remove();
+            }
+        });
+    }
+}
+
+function majLoyerAuto(elem, montant) {
+    elem2 = elem.parent().parent().find("input[name='amount_ht']");
+    elem2.val(montant);
+    elem2.trigger("keyup");
 }
 
 // Commandes fournisseurs:
@@ -645,10 +774,4 @@ function toggleBfCommandeFournDetailDisplay($button) {
             }
         }
     }
-}
-
-function majLoyerAuto(elem, montant){
-    elem2 = elem.parent().parent().find("input[name='amount_ht']");
-    elem2.val(montant);
-    elem2.trigger("keyup");
 }

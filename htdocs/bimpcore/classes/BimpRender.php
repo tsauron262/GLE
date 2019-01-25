@@ -271,7 +271,7 @@ class BimpRender
         if ($title) {
             $html .= '<div class="freeFormTitle">';
             if ($icon) {
-                $html .= '<i class="fa fa-' . $icon . ' iconLeft"></i>';
+                $html .= BimpRender::renderIcon($icon, 'iconLeft');
             }
             $html .= $title;
             $html .= '</div>';

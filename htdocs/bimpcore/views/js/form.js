@@ -1104,7 +1104,7 @@ function checkTextualInput($input) {
             if (msg) {
                 displayInputMsg($input, msg, 'info');
             } else {
-                $input.popover('destroy');
+                $input.popover('destroy').removeClass('bs-popover');
             }
         }
     }
@@ -1116,7 +1116,9 @@ function displayInputMsg($input, msg, className) {
     }
     var html = '<p class="alert alert-' + className + '">' + msg + '</p>';
     bimp_display_element_popover($input, html, 'bottom');
+    $input.addClass('bs-popover');
     $input.unbind('blur').blur(function () {
+        $input.removeClass('bs-popover');
         $input.popover('destroy');
     });
 }

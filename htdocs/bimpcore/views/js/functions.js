@@ -743,6 +743,7 @@ function findParentByTag($element, tag) {
 $(document).ready(function () {
     $('body').click(function (e) {
         $(this).find('.hideOnClickOut').hide();
+        $(this).find('.bs-popover').popover('hide');
     });
     $('body').append('<div id="page_notifications"></div>');
     var $notifications = $('#page_notifications');

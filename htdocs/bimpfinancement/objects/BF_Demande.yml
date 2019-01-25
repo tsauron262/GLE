@@ -277,11 +277,13 @@ fields:
         label: Commission commerciale
         type: percent
         default_value: 0
+        decimals: 6
                 
     commission_financiere:
         label: Commission financière
         type: percent
         default_value: 0
+        decimals: 6
                 
     vr: 
         label: VR achat
@@ -478,7 +480,6 @@ fields_tables:
               edit: 1
             - field: sites
             - field: id_contrat
-              edit: 0
               display: nom_url
             - field: id_facture
               display: card
@@ -545,10 +546,18 @@ fields_tables:
               edit: 1
             - label: Montant total
               value: <span id="montant_total"></span>
-            - field: commission_commerciale
-              edit: 1
-            - field: commission_financiere
-              edit: 1
+            - label: Commission commerciale
+              value: 
+                  callback: 
+                      method: renderCommissionInputs
+                      params: 
+                          - commission_commerciale
+            - label: Commission financière
+              value: 
+                  callback: 
+                      method: renderCommissionInputs
+                      params: 
+                          - commission_financiere
 #            - label: Montant total
 #              value: <span id="montant_total2"></span>
 #            - label: Durée Calculée

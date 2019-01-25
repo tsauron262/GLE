@@ -281,14 +281,12 @@ class modBimpfinancement extends DolibarrModules
 	 */
 	public function init($options='')
 	{
+		global $conf;
 		$sql = array();
 
-                
-                //Facture
-               $sql[] = "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity, libelle) VALUES('contrat_LDLC_lease','contract'," . $conf->entity . ", 'Liasse LDLC Lease')";
-                
-		//$this->_load_tables('/bimpcommercial/sql/');
-
+        $extrafields = new ExtraFields($this->db);
+        $extrafields->addExtraField('periodicity', 'Périodicité', 'sellist' /* 'sellist' */, 40, 15, 'contratdet');
+        $sql[] = "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity, libelle) VALUES('contrat_LDLC_lease','contract'," . $conf->entity . ", 'Liasse LDLC Lease')";
 		return $this->_init($sql, $options);
 	}
 

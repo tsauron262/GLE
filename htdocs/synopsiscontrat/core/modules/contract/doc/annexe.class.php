@@ -11,6 +11,7 @@
  * @author minijean
  */
 class annexe {
+    var $nbAnnexe = 0;
 
     function annexe($pdf, $model, $outputlangs) {
         $this->pdf = $pdf;
@@ -52,13 +53,15 @@ class annexe {
             $this->getOneAnnexe($res, $filtre);
         }
 
-//        $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
+        $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
     }
 
     function getOneAnnexe($res) {
+        $this->nbAnnexe ++;
 //        if (!$this->i == 0)
         if($res->afficheTitre == 1){
-            $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
+            if($this->nbAnnexe > 1)
+                $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
             $this->pdf->AddPage();
         }
         $this->model->_pagehead($this->pdf, $this->element, 0, $this->outputlangs);
@@ -129,31 +132,31 @@ class annexe {
         if (stripos(get_class($contrat), "contrat") !== false) {
             //Tritement des contact
             $contacts = array();
-            foreach ($contrat->list_all_valid_contacts() as $key => $val) {
-                foreach (array('fullname', 'civility', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
-                    $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
-                    $annexe = preg_replace('/' . $code . "/", $val[$val0], $annexe);
-                }
-                $tempStr = utf8_encodeRien('Contact-external-CUSTOMER-fullname
-Mail : Contact-external-CUSTOMER-email
-Tél. : Contact-external-CUSTOMER-tel
-');
-                foreach (array('fullname', 'civility', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
-                    $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
-                    $result = $val[$val0];
-                    $tempStr = preg_replace('/' . $code . "/", $result, $tempStr);
-                }
-                $contacts[$val['code']][] = $tempStr;
-            }
-            foreach ($contacts as $typeContact => $val) {
-                $annexe = preg_replace('/Contacts-' . $typeContact . '/', implode("
+//             foreach ($contrat->list_all_valid_contacts() as $key => $val) {
+//                 foreach (array('fullname', 'civility', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
+//                     $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
+//                     $annexe = preg_replace('/' . $code . "/", $val[$val0], $annexe);
+//                 }
+//                 $tempStr = utf8_encodeRien('Contact-external-CUSTOMER-fullname
+// Mail : Contact-external-CUSTOMER-email
+// Tél. : Contact-external-CUSTOMER-tel
+// ');
+//                 foreach (array('fullname', 'civility', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
+//                     $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
+//                     $result = $val[$val0];
+//                     $tempStr = preg_replace('/' . $code . "/", $result, $tempStr);
+//                 }
+//                 $contacts[$val['code']][] = $tempStr;
+//             }
+//             foreach ($contacts as $typeContact => $val) {
+//                 $annexe = preg_replace('/Contacts-' . $typeContact . '/', implode("
 
-", $val), $annexe);
-            }
+// ", $val), $annexe);
+//             }
 
             $sql2 = "SELECT lnCon.rowid FROM `" . MAIN_DB_PREFIX . "product_extrafields` prod, `" . MAIN_DB_PREFIX . "contratdet` lnCon
-				WHERE lnCon.`fk_product` = prod.fk_object 
-				    AND lnCon.`fk_contrat` = '" . $contrat->id . "' AND
+                WHERE lnCon.`fk_product` = prod.fk_object 
+                    AND lnCon.`fk_contrat` = '" . $contrat->id . "' AND
                                     prod.`2annexe` = '" . $idAnnexe . "'";
             $res = $this->db->query($sql2);
             //$result = $this->db->fetch_object($res);

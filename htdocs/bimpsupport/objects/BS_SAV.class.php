@@ -1583,6 +1583,8 @@ class BS_SAV extends BimpObject
         if (!$this->isLoaded()) {
             return 'ID du SAV absent';
         }
+        
+        $line_warnings = array();
 
         if (!$this->isPropalEditable()) {
             return '';
@@ -1686,7 +1688,6 @@ class BS_SAV extends BimpObject
             }
             $line->remise = 0;
 
-            $line_warnings = array();
             $error_label = '';
             if (!$line->isLoaded()) {
                 $error_label = 'création';
@@ -1699,7 +1700,7 @@ class BS_SAV extends BimpObject
         } else {
             if ($line->isLoaded()) {
                 $error_label = 'suppression';
-                $line_errors = $line->delete(true);
+                $line_errors = $line->delete($line_warnings, true);
             }
         }
 

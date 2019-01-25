@@ -34,6 +34,10 @@ class BF_Line extends BimpLine
         return $this->getData("label");
     }
 
+    public function getSerial() {
+        
+    }
+
     public function getTotalLine($ttc = true)
     {
         $tot = $this->getData("pu_ht") * $this->getData("qty");

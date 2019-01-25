@@ -41,6 +41,8 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
     var $contrat;
     var $pdf;
     var $margin_bottom = 2;
+    public $db;
+    private $textDroite = 'Contrat location sans service V3 du 01/05/2018';
 
     public static $periodicities = array(
         1  => 'Mensuelle',
@@ -137,11 +139,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
 
     public function linesProduct($pdf, $lines, $produit) {
         foreach ($lines as $line) {
-            $nomProduit = $line->label;
-            if(is_numeric($line->id_product)){
-                $produit->fetch($line->id_product);
-                $nomProduit = $produit->label;
-            }
+            $data = $object->getSerial();
             $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
             $pdf->SetX($this->marge_gauche);
             $pdf->SetFont(''/* 'Arial' */, '', 9);
@@ -153,47 +151,50 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
             $pdf->setX($X);
             $pdf->setColor('fill', 248, 248, 248);
             $pdf->SetTextColor(0,0,0);
-            $pdf->Cell($W * 7, 8, $nomProduit, 1, null, 'L', true);
+            $pdf->Cell($W * 7, 8, $data->label, 1, null, 'L', true);
             $pdf->SetTextColor(0,0,0);
             $X = $this->marge_gauche + $W * 8;
             $pdf->setX($X);
             $pdf->setColor('fill', 248, 248, 248);
             $pdf->SetTextColor(0,0,0);
-            $pdf->MultiCell($W * 2, 8, "", 1, null, 'L', true);
+            $pdf->MultiCell($W * 2, 8, $data->serials, 1, null, 'L', true);
             $pdf->SetTextColor(0,0,0);
         }
     } 
 
-    public function linesRents($pdf, $rents) {
+    public function linesRents($pdf, $lines) {
         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
-        foreach($rents as $rent) {
+        foreach($lines as $rent) {
+            $period = $rent->array_options['options_periodicity'];
             $pdf->SetFont(''/* 'Arial' */, '', 9);
             $pdf->setColor('fill', 248, 248, 248);
             $pdf->SetTextColor(0,0,0);
-            $pdf->Cell($W * 2.1, 8, $rent->position, 1, null, 'L', true);
+            $pdf->Cell($W * 2.1, 8, "", 1, null, 'L', true);
             $X = $this->marge_gauche + $W;
             $pdf->setX($X *1.5);
             $pdf->setColor('fill', 248, 248, 248);
             $pdf->SetTextColor(0,0,0);
-            $pdf->Cell($W * 2.1, 8, $rent->quantity, 1, null, 'L', true);
+            $pdf->Cell($W * 2.1, 8, $rent->qty, 1, null, 'L', true);
             $pdf->setX($X * 2.5);
             $pdf->setColor('fill', 248, 248, 248);
             $pdf->SetTextColor(0,0,0);
-            $pdf->Cell($W * 2.1, 8, $rent->amount_ht . "€", 1, null, 'L', true);
+            $pdf->Cell($W * 2.1, 8, $rent->price_ht . "€", 1, null, 'L', true);
             $pdf->setX($X * 3.5);
             $pdf->setColor('fill', 248, 248, 248);
             $pdf->SetTextColor(0,0,0);
-            $pdf->Cell($W * 2.1, 8, self::$periodicities[$rent->periodicity], 1, null, 'L', true);
+            $pdf->Cell($W * 2.1, 8, self::$periodicities[$period], 1, null, 'L', true);
             $pdf->setX($X * 4.5);
             $pdf->setColor('fill', 248, 248, 248);
             $pdf->SetTextColor(0,0,0);
-            $pdf->Cell($W * 2.6, 8, $rent->amount_ht + $rent->amount_ht * (20/100) . "€", 1, null, 'L', true);
+            $pdf->Cell($W * 2.6, 8, $rent->price_ht * (20/100) . "€", 1, null, 'L', true);
             $this->jump($pdf,3);
             $this->jump($pdf,3);
         }
     }
 
-    public function greyFooter($pdf, $textGauche, $textDroite) {
+
+
+    public function greyFooter($pdf, $textGauche) {
         $pdf->SetDrawColor(255,255,255);
         $pdf->setColor('fill', 255, 255, 255);
         $pdf->SetTextColor(200, 200, 200);
@@ -205,7 +206,8 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5.5, "", 0, 'L');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5.5, "", 0, 'L');
         $pdf->Cell($W, 8, $textGauche, 1, null, 'L', true);
-        $pdf->Cell($W, 8, $textDroite, 1, null, 'R', ture);
+        $pdf->Cell($W, 8, $this->textDroite, 1, null, 'R', ture);
+        $pdf->MultiCell(19, 3, '' . $pdf->PageNo() . '/{:ptp:}', 0, 'R', 0);
         $pdf->SetTextColor(0, 0, 0);
     }
 
@@ -258,7 +260,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
     function write_file($contrat,$outputlangs='')
     {
         global $user,$langs,$conf;
-
+        
         if (! is_object($outputlangs)) $outputlangs=$langs;
         $outputlangs->load("main");
         $outputlangs->load("dict");
@@ -320,7 +322,10 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                     $pdf->setPrintFooter(true);
                 }
 
+
                 $pdf->Open();
+                $exemplaire_contrat = 3;
+                for ($i=1; $i <= $exemplaire_contrat ; $i++) { 
                 $pdf->AddPage();
                 $pdf->SetDrawColor(128, 128, 128);
                 $pdf->SetTitle($contrat->ref);
@@ -362,9 +367,15 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                 $pdf->SetFont('', '', 9);
                 
 
-                $id_demande = $BimpDb->getValue('bf_demande', 'id', '`id_contrat` = ' . (int) $contrat->id);
-                $lines = $BimpDb->getRows('bf_demande_line', 'id_parent = ' . $id_demande . " AND in_contrat = 1");
-                $new_page = (count($lines) > 5 ) ? true : false;
+                $demande = BimpObject::getInstance('bimpfinancement', 'BF_Demande');
+                $demande->find(array('id_contrat' => (int) $contrat->id), true, true);
+
+
+                // PROBLEME AVEC Le load du children
+
+
+              
+                // $new_page = (count($lines) > 5 ) ? true : false;
                 
                 $this->enTete3Cases($pdf);
                 if($new_page){
@@ -377,7 +388,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                     $pdf->SetTextColor(0,0,0);
                     $pdf->setXY($this->marge_gauche, 120);
                 } else {
-                    $this->linesProduct($pdf, $lines, $produit);
+                    //$this->linesProduct($pdf, $lines, $produit);
                 }
                 $pdf->SetFont('', 'B', 9);
                 $this->jump($pdf, 1);
@@ -388,8 +399,8 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                 $this->enTete5Case($pdf);
                 $this->jump($pdf,3);
                 $this->jump($pdf,3);
-                $rents = $BimpDb->getRows('bf_rent', 'id_demande = ' . $id_demande, null, 'object', null, 'position');
-                $this->linesRents($pdf, $rents);
+                
+                $this->linesRents($pdf, $contrat->lines);
                 
                 $pdf->SetFont('', 'B', 9);
                 $this->jump($pdf,3);
@@ -435,7 +446,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                 $this->jump($pdf, 5.5);
                 $this->jump($pdf, 5.5);
                 $this->jump($pdf, 5.5);
-                $this->greyFooter($pdf, "Conditions Particulières de Location F-LOC V1 du 15/06/2018", 'Contrat location sans service V3 du 01/05/2018');
+                $this->greyFooter($pdf, 'djhieohduishuhsuchdsuchdisuhcuisdhcuidhsucis');
                 $pdf->SetTextColor(0, 0, 0);
                 /* FIN ENTE_TETE DU TABLEAU (QUANTITE, DESIGNATION DU MATERIEL, NUMERO DE SERIE) */
                 if($new_page){
@@ -485,9 +496,13 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                         $pdf->MultiCell($W * 2, 8, "", 1, null, 'L', true);
                         $pdf->SetTextColor(0,0,0);
                     }
-                    $this->greyFooter($pdf, "Conditions Particulières de Location F-LOC V1 du 15/06/2018", "Contrat location sans service V3 du 01/05/2018");
+                    $this->greyFooter($pdf, "Conditions Particulières de Location F-LOC V1 du 15/06/2018");
                 }
-
+                require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
+                $classAnnexe = new annexe($pdf, $this, $outputlangs);
+                $classAnnexe->getAnnexeContrat($contrat);
+            }
+            for ($i=1; $i <= 2; $i++) { 
                 $pdf->AddPage();
                 $pdf->SetTitle($contrat->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("Contract"));
@@ -621,7 +636,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                     $pdf->SetTextColor(0, 0, 0);
 
 
-                
+                }
                 $pdf->SetDrawColor(128, 128, 128);
                 $this->marge_haute = 10;
                 $this->marge_basse = 10;
@@ -762,8 +777,9 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->MultiCell($W, 6, "Joindre un RIB", 0, 'L',false,0);
                 $pdf->setFont('','',8);
 
-                $this->greyFooter($pdf, "Mandat SEPA F-LOC V1 du 15/06/2018", "Contrat location sans service V3 du 01/05/2018");
+                $this->greyFooter($pdf, "Mandat SEPA F-LOC V1 du 15/06/2018");
 
+                //die("mmm");
 
                 if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
                 $pdf->Close();
@@ -796,7 +812,7 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
 
     function _pagefoot(&$pdf,$outputlangs)
     {
-
+        $this->greyFooter($pdf, "blabla annexe");
     }
 
 

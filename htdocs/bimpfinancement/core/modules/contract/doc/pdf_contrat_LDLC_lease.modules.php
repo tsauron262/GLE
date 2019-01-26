@@ -137,15 +137,15 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
         $pdf->SetTextColor(0,0,0);
     }
 
-    public function linesProduct($pdf, $lines, $produit) {
+    public function linesProduct($pdf, $lines) {
         foreach ($lines as $line) {
-            $data = $object->getSerial();
+            $data = $line->getSerial();
             $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
             $pdf->SetX($this->marge_gauche);
             $pdf->SetFont(''/* 'Arial' */, '', 9);
             $pdf->setColor('fill', 248, 248, 248);
             $pdf->SetTextColor(0,0,0);
-            $pdf->Cell($W, 8, (int) $line->qty, 1, null, 'L', true);
+            $pdf->Cell($W, 8, (int) $line->getData('qty'), 1, null, 'L', true);
             $pdf->SetTextColor(0,0,0);
             $X = $this->marge_gauche + $W;
             $pdf->setX($X);
@@ -371,14 +371,9 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
 
                 $demande = BimpObject::getInstance('bimpfinancement', 'BF_Demande');
                 $demande->find(array('id_contrat' => (int) $contrat->id), true, true);
+                $lines = $demande->getChildrenObjects('lines', array('in_contrat' => (int) 1));
 
-
-                // PROBLEME AVEC Le load du children
-
-
-              
-                // $new_page = (count($lines) > 5 ) ? true : false;
-                
+                $new_page = (count($lines) > 5) ? true : false;
                 $this->enTete3Cases($pdf);
                 if($new_page){
                     $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
@@ -390,7 +385,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                     $pdf->SetTextColor(0,0,0);
                     $pdf->setXY($this->marge_gauche, 120);
                 } else {
-                    //$this->linesProduct($pdf, $lines, $produit);
+                    $this->linesProduct($pdf, $lines);
                 }
                 $pdf->SetFont('', 'B', 9);
                 $this->jump($pdf, 1);
@@ -467,37 +462,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                     $this->enTete3Cases($pdf);
                     $pdf->SetTextColor(0,0,0);
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
-                    foreach ($lines as $line) {
-                        $nomProduit = $line->label;
-                        $serial = $line->extra_serials;
-                        if(!is_null($line->id_product)){
-                            $produit->fetch($line->id_product);
-                            $nomProduit = $produit->label;
-                            $search_serial = $BimpDb->getValue('be_equipment', 'serial');
-                        }
-                        if(!is_null($line->equipments)) {
-                        }
-                        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
-                        $pdf->SetX($this->marge_gauche);
-                        $pdf->SetFont(''/* 'Arial' */, '', 9);
-                        $pdf->setColor('fill', 248, 248, 248);
-                        $pdf->SetTextColor(0,0,0);
-                        $pdf->Cell($W, 8, (int) $line->qty, 1, null, 'L', true);
-                        $pdf->SetTextColor(0,0,0);
-                        $X = $this->marge_gauche + $W;
-                        $pdf->setX($X);
-                        $pdf->setColor('fill', 248, 248, 248);
-                        $pdf->SetTextColor(0,0,0);
-                        $pdf->Cell($W * 7, 8, $nomProduit, 1, null, 'L', true);
-                        $pdf->SetTextColor(0,0,0);
-                        $M_N = false;
-                        $X = $this->marge_gauche + $W * 8;
-                        $pdf->setX($X);
-                        $pdf->setColor('fill', 248, 248, 248);
-                        $pdf->SetTextColor(0,0,0);
-                        $pdf->MultiCell($W * 2, 8, "", 1, null, 'L', true);
-                        $pdf->SetTextColor(0,0,0);
-                    }
+                    $this->linesProduct($pdf, $lines);
                     $this->greyFooter($pdf, "Conditions Particulières de Location F-LOC V1 du 15/06/2018");
                 }
                 require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';

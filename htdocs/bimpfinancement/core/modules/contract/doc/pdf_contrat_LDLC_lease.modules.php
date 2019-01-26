@@ -163,13 +163,14 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
     } 
 
     public function linesRents($pdf, $lines) {
+        $nbLine = 1;
         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
         foreach($lines as $rent) {
             $period = $rent->array_options['options_periodicity'];
             $pdf->SetFont(''/* 'Arial' */, '', 9);
             $pdf->setColor('fill', 248, 248, 248);
             $pdf->SetTextColor(0,0,0);
-            $pdf->Cell($W * 2.1, 8, "", 1, null, 'L', true);
+            $pdf->Cell($W * 2.1, 8, $nbLine, 1, null, 'L', true);
             $X = $this->marge_gauche + $W;
             $pdf->setX($X *1.5);
             $pdf->setColor('fill', 248, 248, 248);
@@ -186,9 +187,10 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
             $pdf->setX($X * 4.5);
             $pdf->setColor('fill', 248, 248, 248);
             $pdf->SetTextColor(0,0,0);
-            $pdf->Cell($W * 2.6, 8, $rent->price_ht * (20/100) . "€", 1, null, 'L', true);
+            $pdf->Cell($W * 2.6, 8,$rent->price_ht + $rent->price_ht * (20/100) . "€", 1, null, 'L', true);
             $this->jump($pdf,3);
             $this->jump($pdf,3);
+            $nbLine++;
         }
     }
 

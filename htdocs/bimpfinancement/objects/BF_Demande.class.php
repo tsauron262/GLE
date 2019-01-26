@@ -1220,7 +1220,7 @@ class BF_Demande extends BimpObject
                 $qty = (int) $loyer->getData('quantity');
                 $periodicity = (int) $loyer->getData('periodicity');
                 $amount_ht = (float) $loyer->getData('amount_ht');
-
+                
                 $desc = 'Paiement ' . $loyer::$periodicities_masc[$periodicity] . ' de ';
                 $desc .= BimpTools::displayMoneyValue($amount_ht, 'EUR') . ' HT sur ' . $qty;
                 if ($qty > 1) {
@@ -1233,7 +1233,7 @@ class BF_Demande extends BimpObject
                 $dt->add(new DateInterval("P" . $qty * $periodicity . "M"));
                 $dt->sub(new DateInterval('P1D'));
 
-                $contrat->addline($desc, (float) $amount_ht, (int) $qty, 0, 0, 0, 0, 0, $start_date, $dt->format('Y-m-d'));
+                $contrat->addline($desc, (float) $amount_ht, (int) $qty, 0, 0, 0, 0, 0, $start_date, $dt->format('Y-m-d'), 'HT', 0.0, 0, null, 0, array('periodicity' => $periodicity));
                 $contrat->activateAll($user, $start_date);
                 $dt->add(new DateInterval('P1D'));
             }

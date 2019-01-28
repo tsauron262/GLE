@@ -532,38 +532,14 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                 $pdf->MultiCell($W * 2, 8, "Numéro de série", 1, null, 'L', true);
                 $pdf->SetTextColor(0,0,0);
                 $pdf->SetFont(''/* 'Arial' */, '', 9);
-                /* FIN ENTE_TETE DU TABLEAU (QUANTITE, DESIGNATION DU MATERIEL, NUMERO DE SERIE) */
-                foreach ($lines as $line) {
-                        $nomProduit = $line->label;
-                        $serial = $line->extra_serials;
-                        if(!is_null($line->id_product)){
-                            $produit->fetch($line->id_product);
-                            $nomProduit = $produit->label;
-                            $search_serial = $BimpDb->getValue('be_equipment', 'serial');
-                        }
-                        if(!is_null($line->equipments)) {
-                        }
-                        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
-                        $pdf->SetX($this->marge_gauche);
-                        $pdf->SetFont(''/* 'Arial' */, '', 9);
-                        $pdf->setColor('fill', 248, 248, 248);
-                        $pdf->SetTextColor(0,0,0);
-                        $pdf->Cell($W, 8, (int) $line->qty, 1, null, 'L', true);
-                        $pdf->SetTextColor(0,0,0);
-                        $X = $this->marge_gauche + $W;
-                        $pdf->setX($X);
-                        $pdf->setColor('fill', 248, 248, 248);
-                        $pdf->SetTextColor(0,0,0);
-                        $pdf->Cell($W * 7, 8, $nomProduit, 1, null, 'L', true);
-                        $pdf->SetTextColor(0,0,0);
-                        $M_N = false;
-                        $X = $this->marge_gauche + $W * 8;
-                        $pdf->setX($X);
-                        $pdf->setColor('fill', 248, 248, 248);
-                        $pdf->SetTextColor(0,0,0);
-                        $pdf->MultiCell($W * 2, 8, "", 1, null, 'L', true);
-                        $pdf->SetTextColor(0,0,0);
-                    }
+
+                
+                    $this->linesProduct($pdf, $lines);
+
+                
+                
+
+
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "Le locataire a choisi librement et sous sa responsabilité les équipements, objets du présent contrat, en s’assurant auprès de ses fournisseurs de leur compatibilité y compris dans le cas où ils sont incorporés dans un système préexistant.", 0, 'L');
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');

@@ -674,7 +674,10 @@ class PDO extends AbstractBackend {
                 if (preg_match("/^.*PARTSTAT=(.+);.+$/U", $ligne, $retour))
                     $stat = $retour[1];
                 $tabT = explode("mailto:", $ligne);
-                if (isset($tabT[1])) {
+                if (isset($tabT[2])) {
+                    $mailT = str_replace(" ", "", $tabT[2]);
+                    $tabMail[$mailT] = array($mailT, $stat);
+                } elseif (isset($tabT[1])) {
                     $mailT = str_replace(" ", "", $tabT[1]);
                     $tabMail[$mailT] = array($mailT, $stat);
                 } else {
@@ -694,7 +697,11 @@ class PDO extends AbstractBackend {
             }
             if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
                 $tabT = explode("mailto:", $ligne);
-                if (isset($tabT[1])) {
+                if (isset($tabT[2])) {
+                    $mailT = str_replace(" ", "", $tabT[2]);
+                    $organisateur = $mailT;
+                    $tabMail[$mailT] = array($mailT, "ACCEPTED"); //Pour forcer l'organiser a etre invité
+                } elseif (isset($tabT[1])) {
                     $mailT = str_replace(" ", "", $tabT[1]);
                     $organisateur = $mailT;
                     $tabMail[$mailT] = array($mailT, "ACCEPTED"); //Pour forcer l'organiser a etre invité

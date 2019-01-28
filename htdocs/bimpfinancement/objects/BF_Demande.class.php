@@ -355,7 +355,7 @@ class BF_Demande extends BimpObject
 
     public function getTotalDemande($withComm = true)
     {
-        $tot = $this->getData('montant_materiels') + (float) $this->getData('montant_services') + (float) $this->getData('montant_logiciels') - $this->getData('vr_vente');
+        $tot = $this->getData('montant_materiels') + (float) $this->getData('montant_services') + (float) $this->getData('montant_logiciels');// - $this->getData('vr_vente');
         if ($withComm) {
             $tot += $this->getCommissionCommerciale() + $this->getCommissionFinanciere();
         }

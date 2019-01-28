@@ -3643,13 +3643,6 @@ class Product extends CommonObject
 		$reshook=$hookmanager->executeHooks('getNomUrl',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
 		if ($reshook > 0) $result = $hookmanager->resPrint;
 		else $result .= $hookmanager->resPrint;
-                
-                /*moddrsi*/
-                if(class_exists("BimpObject")){
-                    BimpObject::loadClass('bimpcore', 'Bimp_Product');
-                    $result .= Bimp_Product::getStockIconStatic($this->id); // $id_entrepôt facultatif, peut être null.
-                }
-                /*fmoddrsi*/
 
 		return $result;
 	}

@@ -693,7 +693,6 @@ class PDO extends AbstractBackend {
                         }
                     }
                 }
-                dol_syslog("email ".print_r($tabMail,1),3);
             }
             if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
                 $tabT = explode("mailto:", $ligne);
@@ -829,7 +828,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
         $calendarData = str_replace("\r\n ", "", $calendarData);
         
         
-//        if (stripos($objectUri, $this->uriTest) > 0)
+        if (stripos($objectUri, $this->uriTest) > 0)
             dol_syslog("update : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 
         $extraData = $this->getDenormalizedData($calendarData);

@@ -529,6 +529,7 @@ class PDO extends AbstractBackend {
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
+        $calendarData = str_replace("\x0A\x20", '', $calendarData);
         $calendarData = str_replace("\r\n ", "", $calendarData);
 
 
@@ -816,6 +817,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
     }
 
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
+        $calendarData = str_replace("\x0A\x20", '', $calendarData);
         $calendarData = str_replace("\r\n ", "", $calendarData);
 
         $extraData = $this->getDenormalizedData($calendarData);

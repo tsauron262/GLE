@@ -822,7 +822,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
         
         
 //        if (stripos($objectUri, $this->uriTest) > 0)
-            dol_syslog("Create : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
+            dol_syslog("update : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 
         $extraData = $this->getDenormalizedData($calendarData);
 

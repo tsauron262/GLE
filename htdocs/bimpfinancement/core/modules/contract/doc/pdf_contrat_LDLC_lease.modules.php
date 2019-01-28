@@ -139,7 +139,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
 
     public function linesProduct($pdf, $lines) {
         foreach ($lines as $line) {
-            $data = $line->getSerial();
+            $data = $line->getSerialDesc();
             $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
             $pdf->SetX($this->marge_gauche);
             $pdf->SetFont(''/* 'Arial' */, '', 9);

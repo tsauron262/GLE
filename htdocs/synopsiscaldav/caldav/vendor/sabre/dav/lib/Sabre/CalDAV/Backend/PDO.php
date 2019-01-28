@@ -690,6 +690,7 @@ class PDO extends AbstractBackend {
                         }
                     }
                 }
+                dol_syslog("email ".print_r($tabMail,1),3);
             }
             if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
                 $tabT = explode("mailto:", $ligne);

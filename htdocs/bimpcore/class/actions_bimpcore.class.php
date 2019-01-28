@@ -16,7 +16,7 @@ class ActionsBimpcore {
             BimpObject::loadClass('bimpcore', 'Bimp_Product');
             $hookmanager->resPrint = Bimp_Product::getStockIconStatic($object->id); // $id_entrepôt facultatif, peut être null.
         }
-        $hookmanager->resPrint .= 'rr';
+        
         return 0;
     }
 

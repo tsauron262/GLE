@@ -64,7 +64,7 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-order' => 'calendarorder',
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
-    public $uriTest = "m9ghvds3gb6ioell2d8723ido"; //35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
+    public $uriTest = "2f332e25-97d0-bc4b-b143-a4af33e58bd8"; //35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend
@@ -819,6 +819,10 @@ WHERE  `email` LIKE  '" . $mail . "'");
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
         $calendarData = str_replace("\x0A\x20", '', $calendarData);
         $calendarData = str_replace("\r\n ", "", $calendarData);
+        
+        
+        if (stripos($objectUri, $this->uriTest) > 0)
+            dol_syslog("Create : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 
         $extraData = $this->getDenormalizedData($calendarData);
 

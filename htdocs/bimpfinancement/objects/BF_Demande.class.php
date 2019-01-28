@@ -1205,6 +1205,8 @@ class BF_Demande extends BimpObject
                 $this->updateField('id_contrat', (int) $contrat->id);
                 $contrat->validate($user);
             }
+            
+            
         } else {
             $success = 'Contrat mis à jour avec succès';
 
@@ -1212,6 +1214,11 @@ class BF_Demande extends BimpObject
                 $contrat->deleteline($line->id, $user);
             }
         }
+        
+            require_once(DOL_DOCUMENT_ROOT."/synopsiscontrat/class/annexeManip.class.php");
+            $annexeManip = new annexeManip($this->db->db);
+            $annexeManip->fetchContrat($contrat->id);
+            $annexeManip->addAnnexe("CGV_FIN");
 
         if (!count($errors) && BimpObject::objectLoaded($contrat)) {
             $dt = new DateTime($this->getData('date_loyer'));

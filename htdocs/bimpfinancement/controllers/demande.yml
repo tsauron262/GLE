@@ -20,15 +20,6 @@ sections:
                     panel: 1
                     name: demande
                     object: demande
-          
-          - id: montants
-            title: Montants
-            struct:
-                type: view
-                view: 
-                    panel: 1
-                    name: montants
-                    object: demande
                     
           - id: elements
             title: Elements financés
@@ -38,6 +29,15 @@ sections:
                     name: default
                     object: demande
                     children: lines
+          
+          - id: montants
+            title: Montants
+            struct:
+                type: view
+                view: 
+                    panel: 1
+                    name: montants
+                    object: demande
           
           - id: fournisseurs
             title: Commandes fournisseurs

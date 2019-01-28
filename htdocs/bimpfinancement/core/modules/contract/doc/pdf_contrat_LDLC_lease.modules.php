@@ -196,14 +196,16 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
 
 
 
-    public function greyFooter($pdf, $textGauche) {
+    public function greyFooter($pdf, $textGauche = null) {
+        if(is_null($textGauche))
+            $textGauche = "Conditions Particulières de Location F-LOC V1 du 15/06/2018";
         $pdf->SetDrawColor(255,255,255);
         $pdf->setColor('fill', 255, 255, 255);
         $pdf->SetTextColor(200, 200, 200);
         $pdf->setY(265);
+        $pdf->setX(30);
         $pdf->SetFont(''/* 'Arial' */, '', 9);
-        $pdf->setY(265);
-        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
+        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2 - 10;
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5.5, "", 0, 'L');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5.5, "", 0, 'L');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5.5, "", 0, 'L');
@@ -463,10 +465,10 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                     $pdf->SetTextColor(0,0,0);
                     $pdf->SetFont(''/* 'Arial' */, '', 9);
                     $this->linesProduct($pdf, $lines);
-                    $this->greyFooter($pdf, "Conditions Particulières de Location F-LOC V1 du 15/06/2018");
+                    $this->greyFooter($pdf);
                 }
                 require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
-                $classAnnexe = new annexe($pdf, $this, $outputlangs);
+                $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page? 1 : 0));
                 $classAnnexe->getAnnexeContrat($contrat);
             }
             for ($i=1; $i <= 2; $i++) { 
@@ -565,37 +567,43 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                     $pdf->setColor('fill', 255, 255, 255);
                     $pdf->SetTextColor(0,0,0);
                     $pdf->Cell($W, 8, "Pour le loueur", 1, null, 'L', true);
-                    $pdf->SetTextColor(0,0,0);
-                    $pdf->setColor('fill', 255, 255, 255);
-                    $pdf->SetTextColor(200, 200, 200);
-                    $pdf->setY(265);
-                    $pdf->SetFont(''/* 'Arial' */, '', 9);
-                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5.5, "", 0, 'L');
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5.5, "", 0, 'L');
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5.5, "", 0, 'L');
-                    $pdf->Cell($W, 8, "Procès-verbal de livraison F-LOC V1 du 15/06/2018", 1, null, 'L', true);
-                    $pdf->Cell($W, 8, 'Contrat location sans service V3 du 01/05/2018', 1, null, 'R', ture);
-                    $pdf->SetTextColor(0, 0, 0);
+//                    $pdf->SetTextColor(0,0,0);
+//                    $pdf->setColor('fill', 255, 255, 255);
+//                    $pdf->SetTextColor(200, 200, 200);
+//                    $pdf->setY(265);
+//                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+//                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
+//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5.5, "", 0, 'L');
+//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5.5, "", 0, 'L');
+//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 5.5, "", 0, 'L');
+                    
+                    $this->greyFooter($pdf, "Procès-verbal de livraison F-LOC V1 du 15/06/2018");
+                    
+//                    $pdf->Cell($W, 8, "Procès-verbal de livraison F-LOC V1 du 15/06/2018", 1, null, 'L', true);
+//                    $pdf->Cell($W, 8, 'Contrat location sans service V3 du 01/05/2018', 1, null, 'R', ture);
+//                    $pdf->SetTextColor(0, 0, 0);
 
 
                 }
                 $pdf->SetDrawColor(128, 128, 128);
-                $this->marge_haute = 10;
+                $this->marge_haute = 33;
                 $this->marge_basse = 10;
-                $this->marge_gauche = 10;
-                $this->marge_droite = 10;
+//                $this->marge_gauche = 10;
+//                $this->marge_droite = 10;
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
                $pdf->AddPage();
-                $this->marge_gauche = 20;
-                $this->marge_droite = 25;
+               $this->addLogo($pdf, 20);
+//                $this->marge_gauche = 20;
+                $this->marge_droite = 20;
                 $x = $this->marge_gauche;
                 $y = $this->marge_haute;
+                $separateur = 10;
                 //titre
                 $pdf->SetXY($x, $y);
                 $pdf->setEqualColumns(2, 98);
                 $pdf->setFont('','B',10);
                 $pdf->MultiCell($W, 6, "Mandat de Prélèvement SEPA", 0, 'C',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Mandat de Prélèvement SEPA", 0, 'C',false,0);
                 $y = $this->marge_haute + 8;
                 $pdf->SetY($y);
@@ -604,6 +612,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
 le présent mandat sont expliqués dans un document que vous pouvez obtenir auprès de votre banque.
 Le présent mandat est donné pour le débiteur en référence, il sera utilisable pour les contrats conclus avec celui-ci et aux termes desquels le débiteur donne autorisation de paiement en utilisant le présent mandat.  Les informations contenues dans le présent mandat, qui doit être complété, sont destinées à n'être utilisées par le créancier que pour la gestion de sa relation avec son client. Elles pourront donner lieu à l'exercice, par ce dernier, de ses droits d'opposition, d’accès et de rectification tels que prévus aux articles 38 et suivants de la Loi n° 78-17 du 6 janvier 1978 relative à l'informatique, aux fichiers et aux libertés. En signant ce mandat le débiteur, par dérogation à la règle de pré-notification de 14 jours, déclare que le délai de pré-notification des prélèvements par le créancier est fixé à 2 jours avant la date d’échéance du prélèvement
 " , 0, 'J', false, 0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "En signant ce formulaire de mandat, vous autorisez le créancier à envoyer des instructions à votre banque pour débiter votre compte, et votre banque à débiter votre compte conformément aux instructions du créancier. Vous bénéficiez du droit d’être remboursé par votre banque selon les conditions décrites dans la convention que vous avez passée avec elle. Une demande de remboursement doit être présentée dans les 8 semaines suivant la date de débit de votre compte pour un prélèvement autorisé. Vos droits concernant
 le présent mandat sont expliqués dans un document que vous pouvez obtenir auprès de votre banque.
 Le présent mandat est donné pour le débiteur en référence, il sera utilisable pour les contrats conclus avec celui-ci et aux termes desquels le débiteur donne autorisation de paiement en utilisant le présent mandat.  Les informations contenues dans le présent mandat, qui doit être complété, sont destinées à n'être utilisées par le créancier que pour la gestion de sa relation avec son client. Elles pourront donner lieu à l'exercice, par ce dernier, de ses droits d'opposition, d’accès et de rectification tels que prévus aux articles 38 et suivants de la Loi n° 78-17 du 6 janvier 1978 relative à l'informatique, aux fichiers et aux libertés. En signant ce mandat le débiteur, par dérogation à la règle de pré-notification de 14 jours, déclare que le délai de pré-notification des prélèvements par le créancier est fixé à 2 jours avant la date d’échéance du prélèvement
@@ -611,90 +620,111 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->setY($y +62);
                 $pdf->setFont('','b',8);
                 $pdf->MultiCell($W, 6, "Informations Débiteur", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Informations Débiteur", 0, 'L',false,0);
                 $pdf->Line($x - 10, $y+66, $x+60, $y+66);
-                $pdf->Line($x+80, $y+66, $x+163, $y+66);
+                $pdf->Line($x+80+$separateur, $y+66, $x+163, $y+66);
                 $pdf->setY($y +68);
                 $pdf->setFont('','',8);
                 $pdf->MultiCell($W, 6, "Raison social : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Raison social : ", 0, 'L',false,0);
                 $pdf->setY($y +72);
                 $pdf->MultiCell($W, 6, "Adresse : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Adresse : ", 0, 'L',false,0);
                 $pdf->setY($y +80);
                 $pdf->MultiCell($W, 6, "Code postal et ville : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Code postal et ville : ", 0, 'L',false,0);
                 $pdf->setY($y +88);
                 $pdf->MultiCell($W, 6, "SIREN : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "SIREN : ", 0, 'L',false,0);
                 $pdf->setY($y +92);
                 $pdf->MultiCell($W, 6, "Pays : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Pays : ", 0, 'L',false,0);
                 $pdf->setY($y +96);
                 $pdf->MultiCell($W, 6, "Email : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Email : ", 0, 'L',false,0);
                 $pdf->setY($y +101);
                 $pdf->setFont('','b',8);
                 $pdf->MultiCell($W, 6, "Coordonnées Bancaire débiteur : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Coordonnées Bancaire débiteur : ", 0, 'L',false,0);
                 $pdf->Line($x - 10, $y+105, $x+60, $y+105);
-                $pdf->Line($x+80, $y+105, $x+163, $y+105);
+                $pdf->Line($x+80+$separateur, $y+105, $x+163, $y+105);
                 $pdf->setY($y +107);
                 $pdf->setFont('','',8);
                 $pdf->MultiCell($W, 6, "IBAN : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "IBAN : ", 0, 'L',false,0);
                 $pdf->setY($y +111);
                 $pdf->MultiCell($W, 6, "BIC : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "BIC : ", 0, 'L',false,0);
                 $pdf->setY($y +116);
                 $pdf->setFont('','b',8);
                 $pdf->MultiCell($W, 6, "Coordonnées Bancaire Créancier : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Coordonnées Bancaire Créancier : ", 0, 'L',false,0);
                 $pdf->Line($x-10, $y+120, $x+60, $y+120);
-                $pdf->Line($x+80, $y+120, $x+163, $y+120);
+                $pdf->Line($x+80+$separateur, $y+120, $x+163, $y+120);
                 $pdf->setY($y +122);
                 $pdf->setFont('','',8);
                 $pdf->MultiCell($W, 6, "Raison social : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Raison social : ", 0, 'L',false,0);
                 $pdf->setY($y +126);
                 $pdf->MultiCell($W, 6, "Adresse : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Adresse : ", 0, 'L',false,0);
                 $pdf->setY($y +134);
                 $pdf->MultiCell($W, 6, "Code postal et ville : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Code postal et ville : ", 0, 'L',false,0);
                 $pdf->setY($y +138);
                 $pdf->MultiCell($W, 6, "Pays : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Pays : ", 0, 'L',false,0);
                 $pdf->setY($y +142);
                 $pdf->MultiCell($W, 6, "ICS : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "ICS : ", 0, 'L',false,0);
                 $pdf->setY($y +147);
                 $pdf->setFont('','b',8);
                 $pdf->MultiCell($W, 6, "Référence Unique du Mandat (RUM) : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Référence Unique du Mandat (RUM) : ", 0, 'L',false,0);
                 $pdf->Line($x-10, $y+151, $x+60, $y+151);
-                $pdf->Line($x+80, $y+151, $x+163, $y+151);
+                $pdf->Line($x+80+$separateur, $y+151, $x+163, $y+151);
 
                 $pdf->setY($y +160);
                 $pdf->setFont('','b',8);
                 $pdf->MultiCell($W, 6, "Informations Type de Paiement : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Informations type de Paiement : ", 0, 'L',false,0);
                 $pdf->Line($x-10, $y+164, $x+60, $y+164);
-                $pdf->Line($x+80, $y+164, $x+163, $y+164);
+                $pdf->Line($x+80+$separateur, $y+164, $x+163, $y+164);
                 $pdf->setFont('','',8);
                 $pdf->setY($y +168);
                 $pdf->MultiCell($W, 6, "Paiement: Récurent / Unique", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Paiement: Récurent / Unique", 0, 'L',false,0);
 
                 $pdf->setY($y +176);
                 $pdf->setFont('','b',8);
                 $pdf->MultiCell($W, 6, "Signature : ", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Signature : ", 0, 'L',false,0);
                 $pdf->Line($x-10, $y+180, $x+60, $y+180);
-                $pdf->Line($x+80, $y+180, $x+163, $y+180);
+                $pdf->Line($x+80+$separateur, $y+180, $x+163, $y+180);
                 $pdf->setFont('','',8);
                 $pdf->setY($y +184);
                 $pdf->MultiCell($W, 6, "Date :           /          /", 0, 'L',false,0);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Date :           /          /", 0, 'L',false,0);
 
                 $pdf->SetAutoPageBreak(1, 0);
@@ -702,7 +732,7 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->SetDrawColor(0,0,0);
                 $pdf->setColor('fill', 255, 255, 255);
                 $pdf->Cell($W - 5, 40, '', 1, null, 'C', true);
-                $pdf->setX($x+84);
+                $pdf->setX($x+84+$separateur);
                 $pdf->SetDrawColor(0,0,0);
                 $pdf->setColor('fill', 255, 255, 255);
                 $pdf->Cell($W - 5, 40, '', 1, null, 'C', true);
@@ -710,6 +740,7 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->setFont('','I',7);
                 $pdf->MultiCell($W, 6, "Signature", 0, 'L',false,0);
                 $pdf->setX($x+84);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Signature", 0, 'L',false,0);
                 $pdf->setFont('','',8);
 
@@ -717,6 +748,7 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->setFont('','I',7);
                 $pdf->MultiCell($W, 6, "Joindre un RIB", 0, 'L',false,0);
                 $pdf->setX($x+84);
+                $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Joindre un RIB", 0, 'L',false,0);
                 $pdf->setFont('','',8);
 
@@ -751,11 +783,12 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
         {
             $showadress=0;
         }
+        $this->addLogo($pdf, 20);
     }
 
     function _pagefoot(&$pdf,$outputlangs)
     {
-        $this->greyFooter($pdf, "blabla annexe");
+        $this->greyFooter($pdf);
     }
 
 
@@ -795,7 +828,7 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
         'textes' => array(
             'texte_1' => 'La société F-LOC, SAS au capital de 100 000 € dont le siège social est situé à Dardilly (69570), 62, chemin du Moulin enregistrée sous le SIREN 838 651 594 au RCS de Lyon, représentée par Monsieur Olivier VILLEMONTE DE LA CLERGERIE , intervenant en qualité de Président .',
             'texte_2' => "Le loueur donne en location, l’équipement désigné ci-dessous (ci-après « équipement »), au locataire qui l’accepte, aux Conditions Particulières et aux Conditions Générales composées de deux pages recto",
-            'texte_3' => "Liste et détails du matériel en ANNEXE 1",
+            'texte_3' => "Liste et détails du matériel en ANNEXE",
             'texte_4' => "Le loyer ferme et non révisable en cours de contrat, payable par terme à échoir, par prélèvements automatiques.",
             'texte_5' => "Le locataire déclare avoir été parfaitement informé de l’opération lors de la phase précontractuelle, avoir pris connaissance,
 reçu et accepter toutes les conditions particulières et générales. Il atteste que le contrat est en rapport direct avec son activité

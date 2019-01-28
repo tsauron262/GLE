@@ -13,12 +13,12 @@
 class annexe {
     var $nbAnnexe = 0;
 
-    function annexe($pdf, $model, $outputlangs) {
+    function annexe($pdf, $model, $outputlangs, $rang = 0) {
         $this->pdf = $pdf;
         $this->model = $model;
         $this->outputlangs = $outputlangs;
         $this->db = $model->db;
-        $this->rang = 0;
+        $this->rang = $rang;
         $this->i = 0;
     }
 
@@ -59,11 +59,11 @@ class annexe {
     function getOneAnnexe($res) {
         $this->nbAnnexe ++;
 //        if (!$this->i == 0)
-        if($res->afficheTitre == 1){
+//        if($res->afficheTitre == 1){
             if($this->nbAnnexe > 1)
                 $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
             $this->pdf->AddPage();
-        }
+//        }
         $this->model->_pagehead($this->pdf, $this->element, 0, $this->outputlangs);
         $this->i++;
         if ($arrAnnexe[$res->ref]['lnk'] > 0) {

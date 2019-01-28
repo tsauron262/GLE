@@ -1275,7 +1275,7 @@ class BF_Demande extends BimpObject
                 $facture->set('fk_soc', $this->getData("id_client"));  // todo
                 $facture->set('datef', date('Y-m-d'));
                 $facture->set('date_lim_reglement', date('Y-m-d'));
-                $facture->set('ef_type', "S");
+                $facture->set('ef_type', "F");
                 $facture->set('entrepot', "1");
                 $facture->set('libelle', 'Demande de financement n° ' . $this->getData("agreement_number"));
 
@@ -1296,66 +1296,7 @@ class BF_Demande extends BimpObject
             if (!count($errors) && BimpObject::objectLoaded($facture)) {
                 $total_emprunt = $this->getTotalEmprunt();
 
-                $lines = $this->getChildrenObjects('lines', array(), 'position', 'asc');
-                $totNonCache = $totCache = 0;
-
-                foreach ($lines as $line) {
-                    if ($line->getData("in_contrat")) {
-                        $totNonCache += $line->getTotalLine();
-                    } else
-                        $totCache += $line->getTotalLine();
-                }
-//                if(($totNonCache + $totCache) != $total_emprunt)
-//                    $errors[] = "Problémes dans les totaux !!! " . ($totNonCache + $totCache)." ".$total_emprunt;
-
-                $coef = $total_emprunt / $totNonCache;
-
-                $lines = $this->getChildrenObjects('lines', array(), 'position', 'asc');
-                foreach ($lines as $lineT) {
-                    $line = $facture->getLineInstance();
-                    $line->reset();
-                    if ($lineT->getData("in_contrat")) {
-                        if (!$line->find(array(
-                                    'id_obj'             => (int) $facture->id,
-                                    'linked_id_object'   => $lineT->id,
-                                    'linked_object_name' => 'df_line'
-                                        ), true, true)) {
-                            $line->validateArray(array(
-                                'id_obj'             => (int) $facture->id,
-                                'type'               => (int) ObjectLine::LINE_FREE,
-                                'deletable'          => 1,
-                                'editable'           => 1,
-                                'remisable'          => 1,
-                                'linked_id_object'   => (int) $lineT->id,
-                                'linked_object_name' => 'df_line'
-                            ));
-                        }
-
-                        $line->desc = $lineT->getDesc();
-                        $line->qty = $lineT->getData("qty");
-                        $line->pu_ht = $lineT->getData("pu_ht") * $coef;
-                        $line->tva_tx = $lineT->getData("tva_tx");
-
-                        if (!$line->isLoaded()) {
-                            $line_errors = $line->create();
-                            if (count($line_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne à la facture');
-                            }
-                        } else {
-                            $line_errors = $line->update();
-                            if (count($line_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne de facture');
-                            }
-                        }
-                    } else {
-                        if ($line->find(array(
-                                    'id_obj'             => (int) $facture->id,
-                                    'linked_id_object'   => $lineT->id,
-                                    'linked_object_name' => 'df_line'
-                                        ), true, true))
-                            $line->delete();
-                    }
-                }
+                $this->traiteLinesFacture($facture, $total_emprunt);
 
 
 
@@ -1405,6 +1346,71 @@ class BF_Demande extends BimpObject
         );
     }
 
+    public function traiteLinesFacture($facture, $totalFact){
+        $lines = $this->getChildrenObjects('lines', array(), 'position', 'asc');
+                $totNonCache = $totCache = 0;
+
+                foreach ($lines as $line) {
+                    if ($line->getData("in_contrat")) {
+                        $totNonCache += $line->getTotalLine();
+                    } else
+                        $totCache += $line->getTotalLine();
+                }
+//                if(($totNonCache + $totCache) != $total_emprunt)
+//                    $errors[] = "Problémes dans les totaux !!! " . ($totNonCache + $totCache)." ".$total_emprunt;
+
+                $coef = $totalFact / $totNonCache;
+
+                $lines = $this->getChildrenObjects('lines', array(), 'position', 'asc');
+                foreach ($lines as $lineT) {
+                    $line = $facture->getLineInstance();
+                    $line->reset();
+                    if ($lineT->getData("in_contrat")) {
+                        if (!$line->find(array(
+                                    'id_obj'             => (int) $facture->id,
+                                    'linked_id_object'   => $lineT->id,
+                                    'linked_object_name' => 'df_line'
+                                        ), true, true)) {
+                            $line->validateArray(array(
+                                'id_obj'             => (int) $facture->id,
+                                'type'               => (int) ObjectLine::LINE_FREE,
+                                'deletable'          => 1,
+                                'editable'           => 1,
+                                'remisable'          => 1,
+                                'linked_id_object'   => (int) $lineT->id,
+                                'linked_object_name' => 'df_line'
+                            ));
+                        }
+
+                        $getDescSerials = $lineT->getSerialDesc();
+                        // Verif
+                        $line->desc = $getDescSerials->label . " " . $getDescSerials->serials ;
+                        $line->qty = $lineT->getData("qty");
+                        $line->pu_ht = $lineT->getData("pu_ht") * $coef;
+                        $line->tva_tx = $lineT->getData("tva_tx");
+
+                        if (!$line->isLoaded()) {
+                            $line_errors = $line->create();
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne à la facture');
+                            }
+                        } else {
+                            $line_errors = $line->update();
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne de facture');
+                            }
+                        }
+                    } else {
+                        if ($line->find(array(
+                                    'id_obj'             => (int) $facture->id,
+                                    'linked_id_object'   => $lineT->id,
+                                    'linked_object_name' => 'df_line'
+                                        ), true, true))
+                            $line->delete();
+                    }
+                }
+    }
+
     public function actionGenerateFactureVRClient($data, &$success)
     {
         $errors = array();
@@ -1421,6 +1427,9 @@ class BF_Demande extends BimpObject
                 $facture->set('fk_soc', (int) $this->getData('id_client'));
                 $facture->set('datef', date('Y-m-d'));
                 $facture->set('date_lim_reglement', date('Y-m-d'));
+                 $facture->set('ef_type', "F");
+                $facture->set('entrepot', "1");
+                $facture->set('libelle', 'Valeur résiduelle de la demande de financement n° ' . $this->getData("agreement_number"));
 
                 $fac_errors = $facture->create($warnings);
                 if (count($fac_errors)) {
@@ -1437,41 +1446,8 @@ class BF_Demande extends BimpObject
             }
 
             if (!count($errors) && BimpObject::objectLoaded($facture)) {
-                $line = $facture->getLineInstance();
-
-                if (!$line->find(array(
-                            'id_obj'             => (int) $facture->id,
-                            'linked_id_object'   => $this->id,
-                            'linked_object_name' => 'bf_demande_vr_achat'
-                                ), true, true)) {
-                    $line->validateArray(array(
-                        'id_obj'             => (int) $facture->id,
-                        'type'               => (int) ObjectLine::LINE_FREE,
-                        'deletable'          => 0,
-                        'editable'           => 0,
-                        'remisable'          => 1,
-                        'linked_id_object'   => (int) $this->id,
-                        'linked_object_name' => 'bf_demande_vr_achat'
-                    ));
-                }
-
-                $line->desc = 'Total de la valeur résiduelle d\'achat pour la demande de financement' . ' DF' . $this->id;
-                $line->qty = 1;
-                $line->pu_ht = (float) $this->getData('vr');
-                $line->tva_tx = 0;
-
-                if (!$line->isLoaded()) {
-                    $line_errors = $line->create();
-                    if (count($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la vr à la facture');
-                    }
-                } else {
-                    $line_errors = $line->update();
-                    if (count($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la vr pour la facture');
-                    }
-                }
-            }
+                $this->traiteLinesFacture($facture, $this->getData('vr_vente'));
+             }
         }
 
         return array(
@@ -1514,40 +1490,9 @@ class BF_Demande extends BimpObject
             }
 
             if (!count($errors) && BimpObject::objectLoaded($facture)) {
-                $line = $facture->getLineInstance();
+            
+                $this->traiteLinesFacture($facture, $this->getData('vr_vente'));
 
-                if (!$line->find(array(
-                            'id_obj'             => (int) $facture->id,
-                            'linked_id_object'   => $this->id,
-                            'linked_object_name' => 'bf_demande_vr_vente'
-                                ), true, true)) {
-                    $line->validateArray(array(
-                        'id_obj'             => (int) $facture->id,
-                        'type'               => (int) ObjectLine::LINE_FREE,
-                        'deletable'          => 0,
-                        'editable'           => 0,
-                        'remisable'          => 1,
-                        'linked_id_object'   => (int) $this->id,
-                        'linked_object_name' => 'bf_demande_vr_vente'
-                    ));
-                }
-
-                $line->desc = 'Total de la valeur résiduelle de vente pour la demande de financement' . ' DF' . $this->id;
-                $line->qty = 1;
-                $line->pu_ht = (float) $this->getData('vr_vente');
-                $line->tva_tx = 0;
-
-                if (!$line->isLoaded()) {
-                    $line_errors = $line->create();
-                    if (count($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la vr à la facture');
-                    }
-                } else {
-                    $line_errors = $line->update();
-                    if (count($line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la vr pour la facture');
-                    }
-                }
             }
         }
 

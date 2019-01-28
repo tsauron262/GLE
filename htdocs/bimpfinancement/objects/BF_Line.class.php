@@ -29,12 +29,7 @@ class BF_Line extends BimpLine
         return 3;
     }
 
-    public function getDesc()
-    {
-        return $this->getData("label");
-    }
-
-    public function getSerial() {
+    public function getSerialDesc() {
         $id_product = $this->getdata('id_product');
         $equipments = $this->getData('equipments');
         $label = $this->getData('label');

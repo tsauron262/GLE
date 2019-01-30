@@ -639,6 +639,10 @@ class BimpRender
             $html .= '<i class="far fa5-eye"></i>';
             $html .= '</span>';
         }
+        
+        if (method_exists($object, 'getExtraObjectIcons')) {
+            $html .= $object->getExtraObjectIcons();
+        }
 
         return $html;
     }

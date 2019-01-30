@@ -96,7 +96,10 @@
         background-color: #fff;
         border-bottom: 1px solid $gray_light;
 
-        .inputContainer {            
+        .inputContainer {      
+            select {
+                max-width: 350px!important;
+            }
             input {
                 width: 350px;
 

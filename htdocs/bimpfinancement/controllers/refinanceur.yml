@@ -13,7 +13,4 @@ sections:
       view: 
           object: refinanceur
           panel: 1
-    - type: view
-      view: 
-          object: refinanceur
-          name: coefs
+          name: edit

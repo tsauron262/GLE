@@ -60,8 +60,25 @@ class BF_Line extends BimpLine
             $tot += $tot * $this->getData("tva_tx") / 100;
         return $tot;
     }
+    
+    public function getInputValue($field_name)
+    {
+        if ($field_name === 'use_pu_for_pa') {
+            if (!$this->isLoaded()) {
+                return 1;
+            }
+            
+            if (!(int) $this->getData('id_fourn_price')) {
+                if ((float) $this->getData('pu_ht') === (float) $this->getData('pa_ht'))  {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+        parent::getInputValue($field_name);
+    }
 
-    // Getters - Overrides
+    // Getters - booléens
 
     public function isFieldEditable($field)
     {
@@ -84,7 +101,7 @@ class BF_Line extends BimpLine
 
         return 0;
     }
-    
+
     public function isEditable()
     {
         return $this->isCreatable();
@@ -383,6 +400,18 @@ class BF_Line extends BimpLine
     }
 
     // Overrides: 
+
+    public function validate()
+    {
+        $use_pu_for_pa = (int) BimpTools::getValue('use_pu_for_pa', 0);
+
+        if ($use_pu_for_pa) {
+            $this->set('id_fourn_price', 0);
+            $this->set('pa_ht', (float) $this->getData('pu_ht'));
+        }
+
+        return parent::validate();
+    }
 
     public function update(&$warnings = array(), $force_update = false)
     {

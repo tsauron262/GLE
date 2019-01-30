@@ -35,8 +35,22 @@ fields_tables:
         rows: 
             - field: id_societe
               display: card
+              
 views: 
     default: 
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  fields_table: 
+                      name: infos
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: displayCoefs
+                      
+    edit: 
         panel: 1
         edit_form: default
         delete_btn: 1
@@ -47,13 +61,19 @@ views:
                   col_md: 6
                   fields_table: 
                       name: infos
-                    
-    coefs: 
-        rows: 
             - cols: 
                 - type: custom
                   custom: 
                       callback: renderCoefsForm
+                      
+    coefs: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: displayCoefs
+                      
 lists: 
     default:
         title: Refinanceurs

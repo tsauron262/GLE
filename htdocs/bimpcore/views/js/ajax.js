@@ -90,7 +90,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         } else {
             bimp_msg(this.processing_msg, 'info');
         }
-    } else if ((bimpAjax.display_success || bimpAjax.display_errors) && bimpAjax.remove_current_content) {
+    } else if (bimpAjax.remove_current_content &&
+            ((bimpAjax.display_success && !bimpAjax.display_success_in_popup_only) ||
+                    (bimpAjax.display_errors && !bimpAjax.display_errors_in_popup_only))) {
         if (this.$resultContainer) {
             this.$resultContainer.html('').slideUp(250);
         }
@@ -183,10 +185,6 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             bimpAjax.nologged(bimpAjax);
             return;
         }
-
-        $('body').find('.bs-popover').each(function () {
-            $(this).popover('hide');
-        });
 
         $.ajax({
             url: bimpAjax.url,

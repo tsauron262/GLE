@@ -367,6 +367,18 @@ class Bimp_FactureFourn extends BimpComm
         return (float) $this->getData('total_ttc') - (float) $this->getTotalPaid();
     }
 
+    // Affichages: 
+
+    public function displayPaid()
+    {
+        if ($this->isLoaded()) {
+            $paid = $this->getTotalPaid();
+            return BimpTools::displayMoneyValue($paid, 'EUR');
+        }
+
+        return '';
+    }
+    
     // Rendus HTML - overrides BimpObject:
 
     public function renderHeaderExtraLeft()

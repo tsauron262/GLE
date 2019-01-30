@@ -1726,11 +1726,11 @@ class BF_Demande extends BimpObject
         $this->resetMsgs();
 
         $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
-            'status'   => 2, 'periode2' => 0
+            'status'   => array('not_in' => 3), 'periode2' => 0
         ));
 
         if (count($refinanceurs) > 1)
-            $this->msgs['errors']['plusrefi'] = "ATTENTION Plusieurs refinanceur en Accord";
+            $this->msgs['errors']['plusrefi'] = "ATTENTION Plusieurs refinanceur";
 
         $factBanque = $this->getChildObject('facture_banque');
         if (BimpObject::objectLoaded($factBanque)) {

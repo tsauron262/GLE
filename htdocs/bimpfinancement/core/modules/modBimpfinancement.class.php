@@ -285,7 +285,14 @@ class modBimpfinancement extends DolibarrModules
 		$sql = array();
 
         $extrafields = new ExtraFields($this->db);
-        $extrafields->addExtraField('periodicity', 'Périodicité', 'sellist' /* 'sellist' */, 40, 15, 'contratdet');
+        $extrafields->addExtraField('periodicity', 'Périodicité', 'select', 40, 30, 'contratdet', 0, 0, "", 
+        	array("options" => array(
+        		1 => "Mensuelle",
+        		3 => "Trimestrielle",
+        		6 => "Semestrielle",
+        		12 => "Annuelle"
+        	)
+        ), 1, "", 1, 1, "", "", "", 1);
         $sql[] = "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity, libelle) VALUES('contrat_LDLC_lease','contract'," . $conf->entity . ", 'Liasse LDLC Lease')";
 		return $this->_init($sql, $options);
 	}
@@ -301,8 +308,9 @@ class modBimpfinancement extends DolibarrModules
 	public function remove($options = '')
 	{
 		$sql = array();
-                
-                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom = 'contrat_LDLC_lease' ;";
+        // $extrafields = new ExtraFields($this->db);
+        // $extrafields->delete('periodicity', 'contratdet');
+        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom = 'contrat_LDLC_lease' ;";
 
 		return $this->_remove($sql, $options);
 	}

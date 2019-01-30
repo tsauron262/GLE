@@ -64,7 +64,7 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-order' => 'calendarorder',
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
-    public $uriTest = "m9ghvds3gb6ioell2d8723ido"; //35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
+    public $uriTest = "2f332e25-97d0-bc4b-b143-a4af33e58bd8"; //35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend
@@ -529,6 +529,7 @@ class PDO extends AbstractBackend {
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
+        $calendarData = str_replace("\x0A\x20", '', $calendarData);
         $calendarData = str_replace("\r\n ", "", $calendarData);
 
 
@@ -673,7 +674,10 @@ class PDO extends AbstractBackend {
                 if (preg_match("/^.*PARTSTAT=(.+);.+$/U", $ligne, $retour))
                     $stat = $retour[1];
                 $tabT = explode("mailto:", $ligne);
-                if (isset($tabT[1])) {
+                if (isset($tabT[2])) {
+                    $mailT = str_replace(" ", "", $tabT[2]);
+                    $tabMail[$mailT] = array($mailT, $stat);
+                } elseif (isset($tabT[1])) {
                     $mailT = str_replace(" ", "", $tabT[1]);
                     $tabMail[$mailT] = array($mailT, $stat);
                 } else {
@@ -692,7 +696,11 @@ class PDO extends AbstractBackend {
             }
             if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
                 $tabT = explode("mailto:", $ligne);
-                if (isset($tabT[1])) {
+                if (isset($tabT[2])) {
+                    $mailT = str_replace(" ", "", $tabT[2]);
+                    $organisateur = $mailT;
+                    $tabMail[$mailT] = array($mailT, "ACCEPTED"); //Pour forcer l'organiser a etre invité
+                } elseif (isset($tabT[1])) {
                     $mailT = str_replace(" ", "", $tabT[1]);
                     $organisateur = $mailT;
                     $tabMail[$mailT] = array($mailT, "ACCEPTED"); //Pour forcer l'organiser a etre invité
@@ -816,7 +824,12 @@ WHERE  `email` LIKE  '" . $mail . "'");
     }
 
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
+        $calendarData = str_replace("\x0A\x20", '', $calendarData);
         $calendarData = str_replace("\r\n ", "", $calendarData);
+        
+        
+        if (stripos($objectUri, $this->uriTest) > 0)
+            dol_syslog("update : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 
         $extraData = $this->getDenormalizedData($calendarData);
 

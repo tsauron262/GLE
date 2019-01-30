@@ -65,7 +65,7 @@ fields:
     amount_ht:
         label: Montant HT
         type: money
-        required: 1
+        required: 0
         
     payment:
         label: Règlement

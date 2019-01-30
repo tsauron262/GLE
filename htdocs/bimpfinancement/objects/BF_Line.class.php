@@ -29,13 +29,27 @@ class BF_Line extends BimpLine
         return 3;
     }
 
-    public function getDesc()
-    {
-        return $this->getData("label");
-    }
+    public function getSerialDesc() {
+        $id_product = $this->getdata('id_product');
+        $equipments = $this->getData('equipments');
+        $label = $this->getData('label');
+        $serials = $this->getData('extra_serials');
 
-    public function getSerial()
-    {
+        if($id_product > 0) {
+            $p = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+            $p->find(array('rowid' => (int) $id_product), true, true);
+            $label = $p->getData('label');
+        }
+
+        if($equipments) {
+            foreach($equipments as $equipment) {
+                $e = BimpObject::getInstance('bimpequipment', 'Equipment');
+                $e->find(array('id' => (int) $equipment), true, true);
+                $serials .= (!empty($serials)) ? ", " : "";
+                $serials .= $e->getData('serial');
+            }
+        }
+        return (object) Array('label' => $label, 'serials' => $serials);
         
     }
 

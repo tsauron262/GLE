@@ -102,7 +102,7 @@ function bf_demande_calculateMontantTotal($view, $champ, use_comm_amount) {
 
     //Calcul du VR
     var VR_vente = parseFloat($view.find('[name="vr_vente"]').val());
-    total = total - VR_vente;
+    total = total;// - VR_vente;
 
     //On a le premier total
 

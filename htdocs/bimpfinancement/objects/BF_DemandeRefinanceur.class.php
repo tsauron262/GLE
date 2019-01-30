@@ -203,10 +203,11 @@ class BF_DemandeRefinanceur extends BimpObject
         $info .= '<br/>Total remboursement : ' . price($calc_values['total_loyer']);
 
         $verif = ($calc_values['cout_total'] > 0) && ($calc_values['cout_total'] < ($calc_values['total_emprunt'] / 2));
+        $verif2 = ((float) round($calc_values['loyer'], 2) === (float) round($this->getData('amount_ht'), 2));
 
         $html = "";
 
-        $html .= '<span type="button" class="loyer_calc_btn btn btn-' . ($verif ? 'default' : 'danger') . ' bs-popover"';
+        $html .= '<span type="button" class="loyer_calc_btn btn btn-' . ($verif ? ($verif2 ? 'success' : 'default') : 'danger') . ' bs-popover"';
         $html .= ' onclick="majLoyerAuto($(this), ' . $calc_values['loyer'] . ');"';
         $html .= BimpRender::renderPopoverData($info, 'top', 'true');
         $html .= '>';

@@ -293,7 +293,7 @@ function setCommonEvents($container) {
     });
 
     $container.find('.classfortooltip').each(function () {
-        $(this).removeClass('classfortooltip');
+        $(this).removeClass('classfortooltip').addClass('bs-popover');
         $(this).popover({
             container: 'body',
             placement: 'bottom',

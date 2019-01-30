@@ -366,7 +366,7 @@ class BF_Demande extends BimpObject
     {
         $totalEmp = 0;
         $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
-            'status'   => 2, 'periode2' => 0
+            'status'   => array('not_in' => 3), 'periode2' => 0
         ));
         foreach ($refinanceurs as $refinanceur) {
             $totalEmp += $refinanceur->getTotalEmprunt();
@@ -378,7 +378,7 @@ class BF_Demande extends BimpObject
     {
         $totalEmp = 0;
         $refinanceurs = $this->getChildrenObjects('refinanceurs', array(
-            'status'   => 2, 'periode2' => 0
+            'status' => 2, 'periode2' => 0
         ));
         foreach ($refinanceurs as $refinanceur) {
             $totalEmp += $refinanceur->getTotalLoyer();
@@ -1268,11 +1268,12 @@ class BF_Demande extends BimpObject
         }
 
         if (!count($errors)) {
+
             $success = 'Facture créée avec succès';
             $facture = $this->getChildObject('facture_banque');
 
             if (!BimpObject::objectLoaded($facture)) {
-                $facture->set('fk_soc', $this->getData("id_client"));  // todo
+                $facture->set('fk_soc', $this->getData('id_client'));
                 $facture->set('datef', date('Y-m-d'));
                 $facture->set('date_lim_reglement', date('Y-m-d'));
                 $facture->set('ef_type', "F");

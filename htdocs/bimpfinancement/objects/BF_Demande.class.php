@@ -489,9 +489,9 @@ class BF_Demande extends BimpObject
         $lines = $this->getChildrenObjects('lines');
 
         foreach ($lines as $line) {
-            $pu_ttc = (float) BimpTools::calculatePriceTaxIn((float) $line->getData('pu_ht'), (float) $line->getData('tva_tx'));
-            $total += $pu_ttc * (float) $line->getData('qty');
-            $total_ordered += $pu_ttc * (float) $line->getQtyOrdered();
+            $pa_ttc = (float) BimpTools::calculatePriceTaxIn((float) $line->getData('pa_ht'), (float) $line->getData('tva_tx'));
+            $total += $pa_ttc * (float) $line->getData('qty');
+            $total_ordered += $pa_ttc * (float) $line->getQtyOrdered();
         }
 
         $commandes = $this->getCommandesFournisseurData();
@@ -890,43 +890,121 @@ class BF_Demande extends BimpObject
                 }
             }
 
-            $html .= '<table class="bimp_list_table">';
-            $html .= '<thead>';
-            $html .= '<tr>';
-            $html .= '<th>Type</th>';
-            $html .= '<th>Facture</th>';
-            $html .= '<th>Date</th>';
-            $html .= '<th>Statut</th>';
-            $html .= '<th>Montant HT</th>';
-            $html .= '<th>Payé</th>';
-            $html .= '<th>Fichier PDF</th>';
-            $html .= '</tr>';
-            $html .= '</thead>';
+            $content .= '<table class="bimp_list_table">';
+            $content .= '<thead>';
+            $content .= '<tr>';
+            $content .= '<th>Type</th>';
+            $content .= '<th>Facture</th>';
+            $content .= '<th>Date</th>';
+            $content .= '<th>Statut</th>';
+            $content .= '<th>Montant HT</th>';
+            $content .= '<th>Payé</th>';
+            $content .= '<th>Fichier PDF</th>';
+            $content .= '</tr>';
+            $content .= '</thead>';
 
-            $html .= '<tbody>';
+            $content .= '<tbody>';
 
             if (count($factures)) {
                 foreach ($factures as $fac) {
-                    $html .= '<tr>';
-                    $html .= '<td><strong>' . $fac['type'] . '</strong></td>';
-                    $html .= '<td>' . $fac['nom_url'] . '</td>';
-                    $html .= '<td>' . $fac['date'] . '</td>';
-                    $html .= '<td>' . $fac['status'] . '</td>';
-                    $html .= '<td>' . $fac['amount_ht'] . '</td>';
-                    $html .= '<td>' . $fac['paid'] . '</td>';
-                    $html .= '<td>' . $fac['file'] . '</td>';
-                    $html .= '</tr>';
+                    $content .= '<tr>';
+                    $content .= '<td><strong>' . $fac['type'] . '</strong></td>';
+                    $content .= '<td>' . $fac['nom_url'] . '</td>';
+                    $content .= '<td>' . $fac['date'] . '</td>';
+                    $content .= '<td>' . $fac['status'] . '</td>';
+                    $content .= '<td>' . $fac['amount_ht'] . '</td>';
+                    $content .= '<td>' . $fac['paid'] . '</td>';
+                    $content .= '<td>' . $fac['file'] . '</td>';
+                    $content .= '</tr>';
                 }
             } else {
-                $html .= '<tr>';
-                $html .= '<td colspan="7" style="text-align: center">';
-                $html .= BimpRender::renderAlerts('Il n\'y a aucune facture enregistrée pour cette demande de financement pour le moment', 'info');
-                $html .= '</td>';
-                $html .= '</tr>';
+                $content .= '<tr>';
+                $content .= '<td colspan="7" style="text-align: center">';
+                $content .= BimpRender::renderAlerts('Il n\'y a aucune facture client enregistrée pour cette demande de financement pour le moment', 'info');
+                $content .= '</td>';
+                $content .= '</tr>';
             }
 
-            $html .= '</tbody>';
-            $html .= '</table>';
+            $content .= '</tbody>';
+            $content .= '</table>';
+
+            $html .= BimpRender::renderPanel('Factures clients', $content, '', array(
+                        'type' => 'secondary',
+                        'icon' => 'fas_file-invoice-dollar'
+            ));
+
+            // Factures fournisseurs: 
+            $factures = array();
+            $facture = null;
+            $content = '';
+
+            $commandes_fourn = $this->getCommandesFournisseurData();
+
+            foreach ($commandes_fourn as $id_fourn => $commandes) {
+                if (is_array($commandes) && count($commandes)) {
+                    foreach ($commandes as $commande_data) {
+                        $commande = $commande_data['comm'];
+                        foreach (BimpTools::getDolObjectLinkedObjectsList($commande->dol_object, $this->db) as $item) {
+                            if ($item['type'] !== 'invoice_supplier') {
+                                continue;
+                            }
+
+                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $item['id_object']);
+                            if (BimpObject::objectLoaded($facture)) {
+                                $factures[] = array(
+                                    'nom_url'   => $facture->getNomUrl(0, true, true, 'full'),
+                                    'date'      => $facture->displayData('datef'),
+                                    'status'    => $facture->displayData('fk_statut'),
+                                    'amount_ht' => $facture->displayData('total_ttc'),
+                                    'paid'      => $facture->displayPaid(),
+                                    'file'      => $facture->displayPDFButton(true, true)
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            $content .= '<table class="bimp_list_table">';
+            $content .= '<thead>';
+            $content .= '<tr>';
+            $content .= '<th>Type</th>';
+            $content .= '<th>Facture</th>';
+            $content .= '<th>Date</th>';
+            $content .= '<th>Statut</th>';
+            $content .= '<th>Montant HT</th>';
+            $content .= '<th>Payé</th>';
+            $content .= '<th>Fichier PDF</th>';
+            $content .= '</tr>';
+            $content .= '</thead>';
+
+            if (count($factures)) {
+                foreach ($factures as $fac) {
+                    $content .= '<tr>';
+                    $content .= '<td><strong>Facture fournisseur</strong></td>';
+                    $content .= '<td>' . $fac['nom_url'] . '</td>';
+                    $content .= '<td>' . $fac['date'] . '</td>';
+                    $content .= '<td>' . $fac['status'] . '</td>';
+                    $content .= '<td>' . $fac['amount_ht'] . '</td>';
+                    $content .= '<td>' . $fac['paid'] . '</td>';
+                    $content .= '<td>' . $fac['file'] . '</td>';
+                    $content .= '</tr>';
+                }
+            } else {
+                $content .= '<tr>';
+                $content .= '<td colspan="7" style="text-align: center">';
+                $content .= BimpRender::renderAlerts('Il n\'y a aucune facture fournisseur enregistrée pour cette demande de financement pour le moment', 'info');
+                $content .= '</td>';
+                $content .= '</tr>';
+            }
+
+            $content .= '</tbody>';
+            $content .= '</table>';
+
+            $html .= BimpRender::renderPanel('Factures fournisseurs', $content, '', array(
+                'type' => 'secondary',
+                'icon' => 'fas_file-invoice-dollar'
+            ));
         }
 
         return $html;

@@ -95,9 +95,6 @@ $(document).ready(function () {
     $('.bs-popover').each(function () {
         if (!parseInt($(this).data('event_init'))) {
             $(this).popover();
-            $(this).click(function () {
-                $(this).popover('hide');
-            });
             $(this).data('event_init', 1);
         }
     });

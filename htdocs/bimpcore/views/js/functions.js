@@ -52,14 +52,29 @@ function bimp_display_element_popover($element, content, side) {
         if (typeof (side) === 'undefined') {
             side = 'right';
         }
-//        $element.popover('destroy');
-        $element.popover({
-            html: true,
-            content: content,
-            placement: side,
-            trigger: 'manual',
-            container: 'body'
-        }).popover('show');
+
+        if (typeof ($element.data('bs.popover')) !== 'undefined') {
+            $element.data('bs.popover').options.content = content;
+            $element.data('bs.popover').options.side = side;
+            $element.popover('show');
+        } else {
+            $element.popover({
+                html: true,
+                content: content,
+                placement: side,
+                trigger: 'manual',
+                container: 'body'
+            });
+            $element.popover('show');
+            $element.addClass('bs-popover');
+        }
+    }
+}
+
+function bimp_destroy_element_popover($element) {
+    if (typeof ($element.data('bs.popover')) !== 'undefined') {
+        $element.popover('destroy');
+        $element.removeClass('bs-popover');
     }
 }
 

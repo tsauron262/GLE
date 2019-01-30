@@ -33,9 +33,9 @@ fields:
             array: refinanceurs
         required: 1
         display: 
-            default: 
-                callback: 
-                    method: displayRefinanceur
+            nom_url: 
+                type: nom_url
+                modal_view: default
         
     status:
         label: Statut
@@ -113,6 +113,7 @@ list:
     cols:
         refinanceur: 
             field: id_refinanceur
+            display: nom_url
         status: 
             field: status
             edit: 1

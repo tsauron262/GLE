@@ -200,7 +200,10 @@ class BC_Input extends BimpComponent
 
         if (is_a($this->object, 'BimpObject') &&
                 method_exists($this->object, 'getInputValue')) {
-            $this->value = $this->object->getInputValue($this->input_name);
+            $input_value = $this->object->getInputValue($this->input_name);
+            if (!is_null($input_value)) {
+                $this->value = $input_value;
+            }
         }
     }
 

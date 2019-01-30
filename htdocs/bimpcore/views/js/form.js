@@ -1023,8 +1023,12 @@ function checkMultipleValues() {
     });
 }
 
-function checkTextualInput($input) {
+function checkTextualInput($input, skip_min) {
+    if (typeof (skip_min) === 'undefined') {
+        skip_min = false;
+    }
     if ($input.length) {
+        var do_not_change_value = false;
         var data_type = $input.data('data_type');
         if (data_type) {
             var value = $input.val();
@@ -1046,14 +1050,16 @@ function checkTextualInput($input) {
                     var decimals = parseInt($input.data('decimals'));
                     var unsigned = parseInt($input.data('unsigned'));
 
-                    value = value.replace(/[^0-9\.,\-]/g, '');
+                    var is_neg = /^\-.*$/.test(value);
+                    value = value.replace(/[^0-9\.,]/g, '');
                     value = value.replace(',', '.');
-                    if (value === '-') {
+                    if (is_neg) {
                         if (unsigned || (parseFloat(min) >= 0)) {
-                            value = '';
                             msg = 'Nombres négatifs interdits';
+                            break;
+                        } else {
+                            value = '-' + value;
                         }
-                        break;
                     }
                     var parsed_value = 0;
                     if (decimals > 0) {
@@ -1083,6 +1089,9 @@ function checkTextualInput($input) {
                     if (min !== 'none' && parsed_value < min) {
                         value = min;
                         msg = 'Min: ' + min;
+                        if (skip_min) {
+                            do_not_change_value = true;
+                        }
                     } else if (max !== 'none' && parsed_value > max) {
                         value = max;
                         msg = 'Max: ' + max;
@@ -1098,13 +1107,14 @@ function checkTextualInput($input) {
                     var lowercase = $input.data('lowercase');
                     break;
             }
-            if (('' + value) !== ('' + initial_value)) {
+
+            if (('' + value) !== ('' + initial_value) && !do_not_change_value) {
                 $input.val(value).change();
             }
             if (msg) {
                 displayInputMsg($input, msg, 'info');
             } else {
-                $input.popover('destroy').removeClass('bs-popover');
+                bimp_destroy_element_popover($input);
             }
         }
     }
@@ -1116,11 +1126,13 @@ function displayInputMsg($input, msg, className) {
     }
     var html = '<p class="alert alert-' + className + '">' + msg + '</p>';
     bimp_display_element_popover($input, html, 'bottom');
-    $input.addClass('bs-popover');
-    $input.unbind('blur').blur(function () {
-        $input.removeClass('bs-popover');
-        $input.popover('destroy');
-    });
+//    $input.unbind('blur').blur(function () {
+//        if ($input.hasClass('bs-popover')) {
+//            $input.removeClass('bs-popover');
+//            $input.popover('destroy');
+//            bimp_msg('here');
+//        }
+//    });
 }
 
 function addSubObjectForm($button, object_name) {
@@ -1731,7 +1743,9 @@ function setInputsEvents($container) {
     $container.find('input[type="text"]').each(function () {
         if (!$(this).data('check_event_init')) {
             $(this).keyup(function () {
-                checkTextualInput($(this));
+                checkTextualInput($(this), true);
+            }).focusout(function () {
+                checkTextualInput($(this), false);
             });
             $(this).data('check_event_init', 1);
         }
@@ -1786,14 +1800,16 @@ function setInputsEvents($container) {
     });
     $container.find('.qtyInputContainer').each(function () {
         if (!parseInt($(this).data('qty_event_init'))) {
-            $(this).find('.qtyDown').click(function () {
+            $(this).find('.qtyDown').click(function (e) {
+                e.stopPropagation();
                 var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
                 if ($.isOk($qtyInputcontainer)) {
                     $qtyInputcontainer.find('input.qtyInput').focus();
                     inputQtyDown($qtyInputcontainer);
                 }
             });
-            $(this).find('.qtyUp').click(function () {
+            $(this).find('.qtyUp').click(function (e) {
+                e.stopPropagation();
                 var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
                 if ($.isOk($qtyInputcontainer)) {
                     $qtyInputcontainer.find('input.qtyInput').focus();
@@ -1801,6 +1817,7 @@ function setInputsEvents($container) {
                 }
             });
             $(this).find('input.qtyInput').keyup(function (e) {
+                e.stopPropagation();
                 var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
                 if ($.isOk($qtyInputcontainer)) {
                     if (e.key === 'Up') {

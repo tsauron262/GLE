@@ -206,7 +206,7 @@ class BF_DemandeRefinanceur extends BimpObject
 
         $html = "";
 
-        $html .= '<span type="button" class="loyer_calc_btn btn btn-' . ($verif ? 'success' : 'danger') . ' bs-popover"';
+        $html .= '<span type="button" class="loyer_calc_btn btn btn-' . ($verif ? 'default' : 'danger') . ' bs-popover"';
         $html .= ' onclick="majLoyerAuto($(this), ' . $calc_values['loyer'] . ');"';
         $html .= BimpRender::renderPopoverData($info, 'top', 'true');
         $html .= '>';

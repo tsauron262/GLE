@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bnf_frais` ADD `s_type` INT DEFAULT NULL;

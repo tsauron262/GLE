@@ -243,8 +243,21 @@ $tabModel = array(
             $sql[] = "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity, libelle) VALUES('" . $result . "','contract'," . $conf->entity . ", '".$nom."')";
         }
         
+
+        $extrafields = new ExtraFields($this->db);
+        $extrafields->addExtraField('periodicity', 'Périodicité', 'select', 40, 30, 'contrat', 0, 1, "", 
+          array("options" => array(
+            1 => "Mensuelle",
+            3 => "Trimestrielle",
+            6 => "Semestrielle",
+            12 => "Annuelle"
+          )
+        ), 1, "", 1, 1, "", "", "", 1);
         
-            
+        $extrafields->addExtraField('syntec', 'Indice SYNTEC', 'int', 1, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('date_start', 'Date de début', 'date', 38, 30, 'contrat', 0, 1, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('duree_mois', 'Durée en mois', 'int', 37, 30, 'contrat', 0, 1, "", NULL, 1, "", 1, 1, "", "", "", 1);
+
         return $this->_init($sql);
     }
 
@@ -254,6 +267,11 @@ $tabModel = array(
      */
     function remove() {
         global $conf;
+        $extrafields = new ExtraFields($this->db);
+        // $extrafields->delete('syntec', 'contrat');
+        // $extrafields->delete('date_start', 'contrat');
+        // $extrafields->delete('duree_mois', 'contrat');
+        // $extrafields->delete('periodicity', 'contrat');
         $sql = array("DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE nom = '" . $this->const[0][2] . "' AND entity = " . $conf->entity);
         return $this->_remove($sql);
     }

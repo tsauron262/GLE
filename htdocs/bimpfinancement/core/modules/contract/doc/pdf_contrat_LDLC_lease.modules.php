@@ -445,7 +445,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                 $this->jump($pdf, 5.5);
                 $this->jump($pdf, 5.5);
                 $this->jump($pdf, 5.5);
-                $this->greyFooter($pdf, 'djhieohduishuhsuchdsuchdisuhcuisdhcuidhsucis');
+                $this->greyFooter($pdf, 'Conditions Particulières de Location F-LOC V1 du 15/06/2018');
                 $pdf->SetTextColor(0, 0, 0);
                 /* FIN ENTE_TETE DU TABLEAU (QUANTITE, DESIGNATION DU MATERIEL, NUMERO DE SERIE) */
                 if($new_page){
@@ -857,7 +857,13 @@ y compris les clauses attribution de compétence et CNIL.",
     );
 
      public function getTextClient($client) {
-        return "La société " . $client->nom . ", au capital de " . number_format($client->capital, 2, ',', ""). "€, immatriculée sous le numéro SIREN " . $client->idprof1 . " auprès du RCS de " . $client->town . " Dont le siège est situé : " . $client->address . ", " . $client->zip . " " . $client->town;
+        $text = "La société " . $client->nom . " ";
+        $text .= ($client->capital > 0) ? "au capital de " . number_format($client->capital, 2, ',', "") . "€, " : "";
+        $text .= (!is_null($client->idprof1) || !empty($client->idprof1)) ? "immatriculée sous le numéro SIREN " . $client->idprof1 . ", " : "";
+        $text .= " dont le siège est situé à : " . $client->address . ", " . $client->zip . " " . $client->town;
+
+
+        return $text;
      }
 
      public function getTextAnnexe($ajoutAnnexe) {

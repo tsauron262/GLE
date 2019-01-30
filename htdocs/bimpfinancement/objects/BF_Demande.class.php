@@ -1267,13 +1267,24 @@ class BF_Demande extends BimpObject
             $errors[] = 'Un refinanceur en accord est obligatoire';
         }
 
-        if (!count($errors)) {
+        if(count($refinanceurs) > 1) {
+            $errors[] = "Il ne peut y avoir plusieurs refinanceurs en accord";
+        }
 
+        if(!$this->getData('agreement_number'))
+            $errors[] = "Il doit y avoir un numéro d'accord";
+
+        foreach ($refinanceurs as $refinanceur) {
+            $le_refinanceur = $refinanceur->getChildObject('refinanceur');
+        }
+
+        if (!count($errors)) {
+            
             $success = 'Facture créée avec succès';
             $facture = $this->getChildObject('facture_banque');
 
             if (!BimpObject::objectLoaded($facture)) {
-                $facture->set('fk_soc', $this->getData('id_client'));
+                $facture->set('fk_soc', $le_refinanceur->getData('id_societe'));
                 $facture->set('datef', date('Y-m-d'));
                 $facture->set('date_lim_reglement', date('Y-m-d'));
                 $facture->set('ef_type', "F");
@@ -1298,44 +1309,6 @@ class BF_Demande extends BimpObject
                 $total_emprunt = $this->getTotalEmprunt();
 
                 $this->traiteLinesFacture($facture, $total_emprunt);
-
-
-
-
-//                $line = $facture->getLineInstance();
-//
-//                if (!$line->find(array(
-//                            'id_obj'             => (int) $facture->id,
-//                            'linked_id_object'   => $this->id,
-//                            'linked_object_name' => 'df_total_emprunt'
-//                                ), true, true)) {
-//                    $line->validateArray(array(
-//                        'id_obj'             => (int) $facture->id,
-//                        'type'               => (int) ObjectLine::LINE_FREE,
-//                        'deletable'          => 0,
-//                        'editable'           => 1,
-//                        'remisable'          => 1,
-//                        'linked_id_object'   => (int) $this->id,
-//                        'linked_object_name' => 'df_total_emprunt'
-//                    ));
-//                }
-//
-//                $line->desc = 'Demande de financement n° ' . $this->id;
-//                $line->qty = 1;
-//                $line->pu_ht = $total_emprunt;
-//                $line->tva_tx = $taux_tva;
-//
-//                if (!$line->isLoaded()) {
-//                    $line_errors = $line->create();
-//                    if (count($line_errors)) {
-//                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'ajout de la ligne à la facture');
-//                    }
-//                } else {
-//                    $line_errors = $line->update();
-//                    if (count($line_errors)) {
-//                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour de la ligne de facture');
-//                    }
-//                }
 
                 $success .= ($success ? '<br/>' : '') . 'Montant facture : ' . $total_emprunt;
             }

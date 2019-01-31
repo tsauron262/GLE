@@ -337,6 +337,11 @@ class BS_SAV extends BimpObject
 
         return 0;
     }
+    
+    public function displayFactureAmountToPay()
+    {
+        return $this->getFactureAmountToPay()." €";
+    }
 
     public function getListFilters()
     {

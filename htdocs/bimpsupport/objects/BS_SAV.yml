@@ -456,6 +456,10 @@ forms:
               label: Notifier le client
               value: 1
               input_name: send_msg
+            - custom: 1
+              label: Montant devis
+              content: 
+                  callback: displayFactureAmountToPay
             
     resolution: 
         rows: 
@@ -476,6 +480,10 @@ forms:
               label: Notifier le client
               value: 1
               input_name: send_msg
+            - custom: 1
+              label: Montant facture
+              content: 
+                  callback: displayFactureAmountToPay
               
     equipment: 
         rows: 

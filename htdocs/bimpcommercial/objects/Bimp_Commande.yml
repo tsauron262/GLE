@@ -422,7 +422,7 @@ lists:
         edit_form: default
         delete_btn: 
             callback: isDeletable
-        modal_view: default
+        modal_view: full
         page_btn: 1
         cols: 
             ref: 

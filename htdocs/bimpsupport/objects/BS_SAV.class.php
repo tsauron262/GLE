@@ -74,6 +74,9 @@ class BS_SAV extends BimpObject
     public static $list_wait_infos = array(
         'Attente désactivation de la localisation'
     );
+    public static $check_on_create = 0;
+    public static $check_on_update = 0;
+    public static $check_on_update_field = 0;
     public static $systems_cache = null;
     public $check_version = true;
 
@@ -436,7 +439,7 @@ class BS_SAV extends BimpObject
                     return 0;
                 }
                 return 1;
-                
+
             case 'validate_propal':
                 if (is_null($propal)) {
                     $errors[] = 'Devis absent';
@@ -451,7 +454,7 @@ class BS_SAV extends BimpObject
                     return 0;
                 }
                 return 1;
-                
+
             case 'reviewPropal':
                 if (is_null($propal)) {
                     $errors[] = 'Devis absent';
@@ -683,15 +686,15 @@ class BS_SAV extends BimpObject
 
             // Réviser devis:  
             if ($this->isActionAllowed('reviewPropal')) {
-                    $callback = 'function() {bimp_reloadPage();}';
-                    $buttons[] = array(
-                        'label'   => 'Réviser Devis',
-                        'icon'    => 'edit',
-                        'onclick' => $this->getJsActionOnclick('reviewPropal', array(), array(
-                            'success_callback' => $callback,
-                            'confirm_msg'      => 'Veuillez confirmer la révision du devis'
-                        ))
-                    );
+                $callback = 'function() {bimp_reloadPage();}';
+                $buttons[] = array(
+                    'label'   => 'Réviser Devis',
+                    'icon'    => 'edit',
+                    'onclick' => $this->getJsActionOnclick('reviewPropal', array(), array(
+                        'success_callback' => $callback,
+                        'confirm_msg'      => 'Veuillez confirmer la révision du devis'
+                    ))
+                );
             }
 
             // Envoyer devis: 
@@ -725,6 +728,17 @@ class BS_SAV extends BimpObject
                     );
                 }
             }
+        }
+
+        global $user;
+        if ($user->admin && BimpObject::objectLoaded($propal)) {
+            $propal->module = 'bimpcommercial';
+            $buttons[] = array(
+                'label'   => 'Fiche Propale ' . $propal->id,
+                'icon'    => 'fas_file',
+                'onclick' => 'window.open(\'' . $propal->getUrl() . '\')'
+            );
+            $propal->module = 'bimpsupport';
         }
 
         return $buttons;
@@ -1016,6 +1030,65 @@ class BS_SAV extends BimpObject
 
     // Traitements:
 
+    public function checkObject()
+    {
+        if ($this->isLoaded()) {
+            $this->resetMsgs();
+
+            // Vérif de l'existance de la propale: 
+            if ($this->getData("sav_pro") < 1) {
+                $propal = $this->getChildObject('propal');
+                if (!BimpObject::objectLoaded($propal)) {
+                    if ($this->getData("id_propal") < 1) {
+                        $prop_errors = $this->createPropal();
+                        if (count($prop_errors)) {
+                            $msg = BimpTools::getMsgFromArray($prop_errors, 'Devis absent du SAV "' . $this->getRef() . '". Echec de la tentative de création');
+                            $this->msgs['errors'][] = $msg;
+                            dol_syslog($msg, LOG_ERR);
+                        } else {
+                            dol_syslog('Devis absent du SAV "' . $this->getRef() . '". Réparation effectuée avec succès', LOG_NOTICE);
+                            $propal = $this->getChildObject('propal');
+                        }
+                    }
+                }
+
+                // Vérif de la propale: 
+                if (BimpObject::objectLoaded($propal)) {
+                    $update = false;
+
+                    if (!(int) $propal->getData('entrepot')) {
+                        if (!(int) $this->getData('id_entrepot')) {
+                            $this->msgs['errors'][] = 'Aucun entrepôt défini pour ce SAV';
+                            dol_syslog('Aucun entrepôt défini pour le SAV "' . $this->getRef() . '"', LOG_ERR);
+                        } else {
+                            $propal->set('entrepot', (int) $this->getData('id_entrepot'));
+                            $update = true;
+                        }
+                    }
+
+                    if ((string) $propal->getData('libelle') !== $this->getRef()) {
+                        $propal->set('libelle', $this->getRef());
+                        $update = true;
+                    }
+
+                    if ((string) $propal->getData('ef_type') !== 'S') {
+                        $propal->set('ef_type', 'S');
+                        $update = true;
+                    }
+
+                    if ($update) {
+                        $prop_errors = $propal->update();
+                        if (count($prop_errors)) {
+                            dol_syslog(BimpTools::getMsgFromArray($prop_errors, 'Echec de la réparation automatique de la propale pour le SAV "' . $this->getRef() . '"'), LOG_ERR);
+                        } else {
+                            dol_syslog('Correction automatique de la propale pour le SAV "' . $this->getRef() . '" effectuée avec succès', LOG_NOTICE);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     protected function onNewStatus(&$new_status, $current_status, $extra_data, &$warnings = array())
     {
         $errors = array();
@@ -1274,8 +1347,8 @@ class BS_SAV extends BimpObject
 
                 if ($this->getData("id_facture_acompte"))
                     addElementElement("propal", "facture", $prop->id, $this->getData("id_facture_acompte"));
-                
-                
+
+
                 // Création des lignes propal:
                 if ((int) $this->getData('id_propal')) {
                     $prop_errors = $this->generatePropalLines();
@@ -1588,7 +1661,7 @@ class BS_SAV extends BimpObject
         if (!$this->isLoaded()) {
             return 'ID du SAV absent';
         }
-        
+
         $line_warnings = array();
 
         if (!$this->isPropalEditable()) {
@@ -1920,9 +1993,9 @@ class BS_SAV extends BimpObject
         $contact = $this->getChildObject('contact');
 
         $contact_pref = (int) $this->getData('contact_pref');
-        
+
         //Perpignan demenagement
-        if($nomCentre == "Perpignan"){
+        if ($nomCentre == "Perpignan") {
             $mail_msg .= "<br/><br/>Attention vottre SAV a déménagé il ce trouve désormais au 12 Avenue du Maréchal Leclerc.<br/>Nous sommes désormais ouvert le Lundi après-midi de 14h à 18h et du Mardi au Vendredi, le matin de 10h à 12h30 et l'après-midi de 14h à 18h.<br/>";
         }
 
@@ -3349,8 +3422,6 @@ class BS_SAV extends BimpObject
 
     public function create(&$warnings = array())
     {
-        ini_set('display_errors', 1);
-
         $errors = array();
 
         if ((float) $this->getData('acompte') > 0) {
@@ -3392,6 +3463,8 @@ class BS_SAV extends BimpObject
         $errors = parent::create($warnings);
 
         if (!count($errors) && !defined('DONT_CHECK_SERIAL')) {
+
+            // Création de la facture d'acompte: 
             if ($this->getData("id_facture_acompte") < 1 && (float) $this->getData('acompte') > 0) {
                 $fac_errors = $this->createAccompte((float) $this->getData('acompte'), false);
                 if (count($fac_errors)) {
@@ -3399,6 +3472,7 @@ class BS_SAV extends BimpObject
                 }
             }
 
+            // Création de la popale: 
             if ($this->getData("id_propal") < 1 && $this->getData("sav_pro") < 1) {
                 $prop_errors = $this->createPropal();
                 if (count($prop_errors)) {
@@ -3406,6 +3480,7 @@ class BS_SAV extends BimpObject
                 }
             }
 
+            // Emplacement de l'équipement: 
             if ((int) $this->getData('id_equipment')) {
                 $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
                 $place_errors = $place->validateArray(array(
@@ -3424,8 +3499,10 @@ class BS_SAV extends BimpObject
                 }
             }
 
+            // Génération du bon de prise en charge: 
             $this->generatePDF('pc', $warnings);
 
+            // Envoi du mail / sms:
             if (BimpTools::getValue('send_msg', 0)) {
                 $warnings = array_merge($warnings, $this->sendMsg('debut'));
             }
@@ -3437,6 +3514,10 @@ class BS_SAV extends BimpObject
             if (count($prop_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la création des lignes du devis');
             }
+        }
+
+        if (!count($errors)) {
+            $this->checkObject();
         }
 
         return $errors;
@@ -3467,6 +3548,10 @@ class BS_SAV extends BimpObject
                     }
                 }
             }
+        }
+
+        if (!count($errors)) {
+            $this->checkObject();
         }
 
         return $errors;

@@ -467,6 +467,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                     $this->linesProduct($pdf, $lines);
                     $this->greyFooter($pdf);
                 }
+
                 require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
                 $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page? 1 : 0));
                 $classAnnexe->getAnnexeContrat($contrat);
@@ -787,7 +788,8 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
     }
 
     function _pagefoot(&$pdf,$outputlangs)
-    {
+    {   
+        
         $this->greyFooter($pdf);
     }
 

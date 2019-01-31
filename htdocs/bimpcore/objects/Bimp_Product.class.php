@@ -214,7 +214,9 @@ class Bimp_Product extends BimpObject
             }
         }
 
-        $html = '<span class="objectIcon displayProductStocksBtn" title="Stocks" data-id_product="' . $id_product . '" data-id_entrepot="' . (int) $id_entrepot . '"><i class="fas fa5-box-open"></i></span>';
+        $html = '<span class="objectIcon displayProductStocksBtn" title="Stocks" data-id_product="' . $id_product . '" data-id_entrepot="' . (int) $id_entrepot . '">';
+        $html .= BimpRender::renderIcon('fas_box-open');
+        $html .= '</span>';
         $html .= '<div class="productStocksContainer hideOnClickOut" id="product_' . $id_product . '_stocks_popover_container"></div>';
 
         return $html;

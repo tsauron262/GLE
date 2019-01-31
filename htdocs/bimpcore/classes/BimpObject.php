@@ -49,6 +49,10 @@ class BimpObject extends BimpCache
         'cards'                    => array('type' => 'keys'),
         'searches'                 => array('type' => 'keys')
     );
+    public static $check_on_create = 1;
+    public static $check_on_update = 1;
+    public static $check_on_update_field = 1;
+    
     public $params = array();
     public $msgs = array(
         'errors'   => array(),
@@ -970,7 +974,7 @@ class BimpObject extends BimpCache
 
         $this->resetMsgs();
     }
-    
+
     public function set($field, $value)
     {
         if (!$this->field_exists($field)) {
@@ -1519,7 +1523,7 @@ class BimpObject extends BimpCache
 
         return $return;
     }
-    
+
     public function onSave(&$errors = array(), &$warnings = array())
     {
         
@@ -2338,7 +2342,10 @@ class BimpObject extends BimpCache
                     }
 
                     $this->onSave($errors, $warnings);
-                    $this->checkObject();
+
+                    if (static::$check_on_create) {
+                        $this->checkObject();
+                    }
                 } else {
                     $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
                     $sqlError = $this->db->db->lasterror;
@@ -2425,7 +2432,9 @@ class BimpObject extends BimpCache
                         }
 
                         $this->onSave($errors, $warnings);
-                        $this->checkObject();
+                        if (static::$check_on_update) {
+                            $this->checkObject();
+                        }
                     }
                 }
             }
@@ -2547,7 +2556,10 @@ class BimpObject extends BimpCache
                     }
 
                     $this->onSave($errors, $warnings);
-                    $this->checkObject();
+
+                    if (static::$check_on_update_field) {
+                        $this->checkObject();
+                    }
                 }
             }
         } else {
@@ -2657,8 +2669,6 @@ class BimpObject extends BimpCache
             }
             $this->initData = $this->data;
             $this->ref = $this->getRef();
-
-            $this->checkObject();
 
             return true;
         }

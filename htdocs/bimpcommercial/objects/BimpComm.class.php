@@ -9,7 +9,41 @@ class BimpComm extends BimpObject
     public static $internal_contact_type_required = true;
     public $remise_globale_line_rate = null;
 
-    // Getters: 
+    // Getters booléens: 
+
+    public function isDeletable()
+    {
+        return 1;
+    }
+
+    public function isFieldEditable($field)
+    {
+        return 1;
+    }
+
+    // Getters array: 
+
+    public function getModelsPdfArray()
+    {
+        return array();
+    }
+
+    public function getClientContactsArray()
+    {
+        $id_client = $this->getAddContactIdClient();
+        return self::getSocieteContactsArray($id_client, false);
+    }
+
+    public function getEmailModelsArray()
+    {
+        if (!static::$email_type) {
+            return array();
+        }
+
+        return self::getEmailTemplatesArray(static::$email_type, true);
+    }
+
+    // Getters paramètres: 
 
     public static function getInstanceByType($type, $id_object = null)
     {
@@ -38,14 +72,126 @@ class BimpComm extends BimpObject
         return $this->getChildObject('lines');
     }
 
-    public function isDeletable()
+    public function getActionsButtons()
     {
-        return 1;
+        return array();
     }
 
-    public function isFieldEditable($field)
+    public function getDirOutput()
     {
-        return 1;
+        return '';
+    }
+
+    public function getDefaultListExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            $buttons[] = array(
+                'label'   => 'Vue rapide du contenu',
+                'icon'    => 'fas_list',
+                'onclick' => $this->getJsLoadModalView('content', 'Contenu ' . $this->getLabel('of_the') . ' ' . $this->getRef())
+            );
+        }
+        
+        return $buttons;
+    }
+
+    public function getRequestSelectRemisesFilters()
+    {
+        $filter = '';
+
+        $discounts = (int) BimpTools::getValue('discounts', BimpTools::getValue('param_values/fields/discounts', 1));
+        if ($discounts) {
+            $filter = "(fk_facture_source IS NULL OR (fk_facture_source IS NOT NULL AND ((description LIKE '(DEPOSIT)%' OR description LIKE 'Acompte%') AND description NOT LIKE '(EXCESS RECEIVED)%')))";
+        }
+        $creditNotes = (int) BimpTools::getValue('credit_notes', BimpTools::getValue('param_values/fields/credit_notes', 1));
+        if ($creditNotes) {
+            if ($discounts) {
+                $filter .= ' OR ';
+            }
+            $filter .= "(fk_facture_source IS NOT NULL AND ((description NOT LIKE '(DEPOSIT)%' AND description NOT LIKE 'Acompte%') OR description LIKE '(EXCESS RECEIVED)%'))";
+        }
+
+        if ($discounts && $creditNotes) {
+            return '(' . $filter . ')';
+        }
+
+        return $filter;
+    }
+
+    // Getters données: 
+
+    public function getTotalHt()
+    {
+        if ($this->isDolObject()) {
+            if (property_exists($this->dol_object, 'total_ht')) {
+                return (float) $this->dol_object->total_ht;
+            }
+        }
+
+        return 0;
+    }
+
+    public function getTotalTtc()
+    {
+        if ($this->isDolObject()) {
+            if (property_exists($this->dol_object, 'total_ttc')) {
+                return (float) $this->dol_object->total_ttc;
+            }
+        }
+
+        return 0;
+    }
+
+    public function getTotalTtcWithoutRemises()
+    {
+        $total = 0;
+
+        if ($this->isLoaded()) {
+            $lines = $this->getChildrenObjects('lines');
+            foreach ($lines as $line) {
+                $total += $line->getTotalTtcWithoutRemises();
+            }
+        }
+        return $total;
+    }
+
+    public function getRemiseGlobaleAmount()
+    {
+        if ($this->isLoaded() && $this->field_exists('remise_globale')) {
+            $total_ttc = (float) $this->getTotalTtcWithoutRemises();
+            return round($total_ttc * ((float) $this->getData('remise_globale') / 100), 2);
+        }
+
+        return 0;
+    }
+
+    public function getRemiseGlobaleLineRate()
+    {
+        if (is_null($this->remise_globale_line_rate)) {
+            $this->remise_globale_line_rate = 0;
+
+            $remise_globale = (float) $this->getData('remise_globale');
+            if ($remise_globale) {
+                $ttc = $this->getTotalTtcWithoutRemises();
+                $remise_amount = $ttc * ($remise_globale / 100);
+                $total_lines = 0;
+
+                $lines = $this->getChildrenObjects('lines');
+                foreach ($lines as $line) {
+                    if ($line->isRemisable()) {
+                        $total_lines += (float) $line->getTotalTtcWithoutRemises();
+                    }
+                }
+
+                if ($total_lines) {
+                    $this->remise_globale_line_rate = ($remise_amount / $total_lines) * 100;
+                }
+            }
+        }
+
+        return $this->remise_globale_line_rate;
     }
 
     public function getModelPdf()
@@ -57,11 +203,6 @@ class BimpComm extends BimpObject
         return '';
     }
 
-    public function getModelsPdfArray()
-    {
-        return array();
-    }
-
     public function getAddContactIdClient()
     {
         $id_client = (int) BimpTools::getPostFieldValue('id_client');
@@ -70,21 +211,6 @@ class BimpComm extends BimpObject
         }
 
         return $id_client;
-    }
-
-    public function getClientContactsArray()
-    {
-        $id_client = $this->getAddContactIdClient();
-        return self::getSocieteContactsArray($id_client, false);
-    }
-
-    public function getEmailModelsArray()
-    {
-        if (!static::$email_type) {
-            return array();
-        }
-
-        return self::getEmailTemplatesArray(static::$email_type, true);
     }
 
     public function getEmailUsersFromArray()
@@ -120,84 +246,6 @@ class BimpComm extends BimpObject
             }
         }
         return $emails;
-    }
-
-    public function getActionsButtons()
-    {
-        return array();
-    }
-
-    public function getDirOutput()
-    {
-        return '';
-    }
-
-    public function getTotalTtc()
-    {
-        if ($this->isDolObject()) {
-            if (property_exists($this->dol_object, 'total_ttc')) {
-                return (float) $this->dol_object->total_ttc;
-            }
-        }
-
-        return 0;
-    }
-
-    public function getTotalTtcWithoutRemises()
-    {
-        $total = 0;
-
-        if ($this->isLoaded()) {
-            $lines = $this->getChildrenObjects('lines');
-            foreach ($lines as $line) {
-                $total += $line->getTotalTtcWithoutRemises();
-            }
-        }
-        return $total;
-    }
-
-    public function getTotalHt()
-    {
-        if ($this->isDolObject()) {
-            if (property_exists($this->dol_object, 'total_ht')) {
-                return (float) $this->dol_object->total_ht;
-            }
-        }
-
-        return 0;
-    }
-
-    public function getRequestSelectRemisesFilters()
-    {
-        $filter = '';
-
-        $discounts = (int) BimpTools::getValue('discounts', BimpTools::getValue('param_values/fields/discounts', 1));
-        if ($discounts) {
-            $filter = "(fk_facture_source IS NULL OR (fk_facture_source IS NOT NULL AND ((description LIKE '(DEPOSIT)%' OR description LIKE 'Acompte%') AND description NOT LIKE '(EXCESS RECEIVED)%')))";
-        }
-        $creditNotes = (int) BimpTools::getValue('credit_notes', BimpTools::getValue('param_values/fields/credit_notes', 1));
-        if ($creditNotes) {
-            if ($discounts) {
-                $filter .= ' OR ';
-            }
-            $filter .= "(fk_facture_source IS NOT NULL AND ((description NOT LIKE '(DEPOSIT)%' AND description NOT LIKE 'Acompte%') OR description LIKE '(EXCESS RECEIVED)%'))";
-        }
-
-        if ($discounts && $creditNotes) {
-            return '(' . $filter . ')';
-        }
-
-        return $filter;
-    }
-
-    public function getRemiseGlobaleAmount()
-    {
-        if ($this->isLoaded() && $this->field_exists('remise_globale')) {
-            $total_ttc = (float) $this->getTotalTtcWithoutRemises();
-            return round($total_ttc * ((float) $this->getData('remise_globale') / 100), 2);
-        }
-
-        return 0;
     }
 
     public function getDocumentFileId()
@@ -348,33 +396,6 @@ class BimpComm extends BimpObject
         return $infos;
     }
 
-    public function getRemiseGlobaleLineRate()
-    {
-        if (is_null($this->remise_globale_line_rate)) {
-            $this->remise_globale_line_rate = 0;
-
-            $remise_globale = (float) $this->getData('remise_globale');
-            if ($remise_globale) {
-                $ttc = $this->getTotalTtcWithoutRemises();
-                $remise_amount = $ttc * ($remise_globale / 100);
-                $total_lines = 0;
-
-                $lines = $this->getChildrenObjects('lines');
-                foreach ($lines as $line) {
-                    if ($line->isRemisable()) {
-                        $total_lines += (float) $line->getTotalTtcWithoutRemises();
-                    }
-                }
-
-                if ($total_lines) {
-                    $this->remise_globale_line_rate = ($remise_amount / $total_lines) * 100;
-                }
-            }
-        }
-
-        return $this->remise_globale_line_rate;
-    }
-
     public function getCreateFromOriginCheckMsg()
     {
         if (!$this->isLoaded()) {
@@ -410,11 +431,10 @@ class BimpComm extends BimpObject
         return null;
     }
 
-    function getMarginInfosArray($force_price = false)
+    public function getMarginInfosArray($force_price = false)
     {
         global $conf, $db;
 
-        // Default returned array
         $marginInfos = array(
             'pa_products'          => 0,
             'pv_products'          => 0,

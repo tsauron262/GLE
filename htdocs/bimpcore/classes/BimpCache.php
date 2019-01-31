@@ -66,6 +66,9 @@ class BimpCache
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = BimpObject::getInstance($module, $object_name, $id_object, $parent);
+            if (BimpObject::objectLoaded(self::$cache[$cache_key])) {
+                self::$cache[$cache_key]->checkObject();
+            }
         }
 
         return self::$cache[$cache_key];

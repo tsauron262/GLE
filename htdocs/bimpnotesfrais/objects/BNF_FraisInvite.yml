@@ -1,0 +1,104 @@
+table: bnf_frais_personne
+common_fields: 0
+controller: note
+icon: far_user-plus
+
+parent_id_property: id_frais
+parent_object: BNF_Frais
+
+labels: 
+    name: Personne supplémentaire
+    name_plur: Personnes supplémentaires
+
+fields:
+    id_frais:
+        label: Note de frais
+        type: id_parent
+        input:
+            type: hidden
+        required: 1
+
+    id_montant:
+        label: Note de frais associée
+        type: int
+        values:
+            callback: getListeMontant
+        required: 1
+
+    type:
+      label: Type
+      type: int
+      default-value: 1
+      values:
+          array: typePersonne
+
+    lieu:
+        label: Lieu du repas
+        type: text
+        required: 1
+        input:
+            rows: 1
+
+    name:
+        label: Invité
+        type: text
+        input:
+            rows: 1
+            auto_expand: 0
+        sortable: 0
+        display_if: 
+            field_name: type
+            show_values: 1
+
+    id_user: 
+        label: Invité
+        type: id_object
+        object: user
+        input: 
+            type: search_user
+        default_value: 0         
+        display_if: 
+            field_name: type
+            show_values: 2
+
+lists:
+    default: 
+        title: Personnes supplémentaires
+        icon: user-plus
+        checkboxes: 1
+        bulk_actions:
+            - label: Supprimer les montants sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        extra_btn: 
+            callback: getListExtraBtn
+        sort_field: id
+        sort_way: desc
+        n: 0
+        enable_search: 0
+        delete_btn: 1
+        update_btn: 1
+        add_object_row: 0
+        add_form_name: default
+        cols:
+            type:
+                field: type
+            montantValue:
+                label: Frais associé
+                value: 
+                    callback: showMontant
+            nameValue:
+                label: Invité
+                value:
+                    callback: showInvite
+            lieu:
+                field: lieu
+
+forms:
+    default:
+        rows:
+            - field: type
+            - field: name
+            - field: id_user
+            - field: lieu
+            - field: id_montant

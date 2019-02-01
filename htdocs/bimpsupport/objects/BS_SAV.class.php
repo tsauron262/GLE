@@ -340,10 +340,10 @@ class BS_SAV extends BimpObject
 
         return 0;
     }
-    
+
     public function displayFactureAmountToPay()
     {
-        return $this->getFactureAmountToPay()." €";
+        return $this->getFactureAmountToPay() . " €";
     }
 
     public function getListFilters()
@@ -736,7 +736,7 @@ class BS_SAV extends BimpObject
             $buttons[] = array(
                 'label'   => 'Fiche Propale ' . $propal->id,
                 'icon'    => 'fas_file',
-                'onclick' => 'window.open(\'' . $propal->getUrl() . '\')'
+                'onclick' => 'window.open(\'' . BimpObject::getInstanceUrl($propal->dol_object) . '\')'
             );
             $propal->module = 'bimpsupport';
         }
@@ -1694,6 +1694,9 @@ class BS_SAV extends BimpObject
                 $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
                 if ($product->isLoaded()) {
                     if (!(int) $line->getData('out_of_warranty')) {
+//                        $line->fetch($line->id);
+//                        echo $line->qty;
+//                        exit;
                         $remise = (float) $line->remise;
                         $coefRemise = (100 - $remise) / 100;
                         $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);

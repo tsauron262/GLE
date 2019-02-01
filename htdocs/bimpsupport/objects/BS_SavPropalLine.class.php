@@ -247,6 +247,9 @@ class BS_SavPropalLine extends Bimp_PropalLine
         $errors = parent::validate();
 
         if ((int) $this->getData('type') !== self::LINE_TEXT) {
+            if (!(int) $this->getData('out_of_warranty')) {
+                $this->set('remisable', 0);
+            }
 //            if ((int) $this->getData('out_of_warranty')) {
 //                if (!(float) $this->pu_ht) {
 //                    $this->pu_ht = $this->getValueByProduct('pu_ht');
@@ -254,24 +257,26 @@ class BS_SavPropalLine extends Bimp_PropalLine
 //            } else {
 //                $this->pu_ht = 0;
 //            }
-
-            if (is_null($this->remise)) {
-                $remise = 0;
-
-                if ((int) $this->id_product) {
-                    $product = $this->getProduct();
-                    if (BimpObject::objectLoaded($product)) {
-                        $remise .= (float) $product->getData('remise');
-                    }
-                }
-                $client = $sav->getChildObject('client');
-                // todo: remanier la remise client
-                if (BimpObject::objectLoaded($client) && isset($client->dol_object->remise_percent)) {
-                    $remise += (float) $client->dol_object->remise_percent;
-                }
-
-                $this->remise = $remise;
-            }
+//            if (is_null($this->remise)) {
+//                $remise = 0;
+//
+//                if ((int) $this->id_product) {
+//                    $product = $this->getProduct();
+//                    if (BimpObject::objectLoaded($product)) {
+//                        $remise .= (float) $product->getData('remise');
+//                    }
+//                }
+//                $client = $sav->getChildObject('client');
+//                // todo: remanier la remise client
+//                if (BimpObject::objectLoaded($client) && isset($client->dol_object->remise_percent)) {
+//                    $remise += (float) $client->dol_object->remise_percent;
+//                }
+//
+//                $this->remise = $remise;
+//            }
+        } else {
+            $this->set('remisable', 0);
+            $this->set('out_of_warranty', 1);
         }
 
         return $errors;

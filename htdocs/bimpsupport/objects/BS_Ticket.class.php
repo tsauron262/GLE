@@ -126,14 +126,10 @@ class BS_Ticket extends BimpObject
                 );
         }
     }
-
-    public function getInstanceName()
+    
+    public function getRef()
     {
-        if ($this->isLoaded()) {
-            return 'Ticket ' . $this->id . ' - ' . $this->getData('ticket_number');
-        }
-
-        return 'Ticket';
+        return (string) $this->getData('ticket_number');
     }
 
     public function getTimer()

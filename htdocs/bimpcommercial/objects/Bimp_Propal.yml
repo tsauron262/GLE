@@ -172,7 +172,10 @@ forms:
                   
     duplicate_propal:
         rows: 
+            - field: entrepot
             - field: fk_soc
+            - field: libelle
+            - field: ef_type
             - field: date_livraison
             
 fields_tables: 

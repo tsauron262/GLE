@@ -6,6 +6,7 @@ class Bimp_Commande extends BimpComm
 {
 
     public static $comm_type = 'commande';
+    public static $email_type = 'order_send';
     public static $status_list = array(
         -3 => array('label' => 'Stock insuffisant', 'icon' => 'exclamation-triangle', 'classes' => array('warning')),
         -1 => array('label' => 'Abandonnée', 'icon' => 'times-circle', 'classes' => array('danger')),
@@ -15,204 +16,109 @@ class Bimp_Commande extends BimpComm
         3  => array('label' => 'Fermée', 'icon' => 'times', 'classes' => array('danger')),
     );
 
-    // Getters - overrides BimpComm
+    // Gestion des droits et autorisations: 
 
-    public function getModelsPdfArray()
-    {
-        if (!class_exists('ModelePDFPropales')) {
-            require_once DOL_DOCUMENT_ROOT . '/core/modules/commande/modules_commande.php';
+    public function canCreate()
+    {        
+        if (defined('NOLOGIN')) {
+            return 1;
         }
 
-        return ModelePDFCommandes::liste_modeles($this->db->db);
+        global $user;
+        if (isset($user->rights->commande->creer)) {
+            return (int) $user->rights->commande->creer;
+        }
+
+        return 0;
     }
 
-    public function getDirOutput()
+    public function canEdit()
     {
+        return $this->canCreate();
+    }
+
+    public function canSetAction($action)
+    {
+        global $conf, $user;
+
+        switch ($action) {
+            case 'validate':
+                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->creer)) ||
+                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->order_advance->validate))) {
+                    return 1;
+                }
+                return 0;
+
+            case 'cancel':
+                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->cloturer)) ||
+                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->order_advance->annuler))) {
+                    return 1;
+                }
+                return 0;
+
+            case 'sendMail':
+                if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->commande->order_advance->send) {
+                    return 1;
+                }
+                return 0;
+
+            case 'reopen':
+            case 'duplicate':
+                return (int) $this->canCreate();
+        }
+        return 1;
+    }
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la commande absent';
+            return 0;
+        }
+
         global $conf;
+        $status = (int) $this->getData('fk_statut');
+        $invalide_error = 'Le statut actuel de la commande ne permet pas cette opération';
 
-        return $conf->commande->dir_output;
-    }
+        switch ($action) {
+            case 'sendMail':
+                if ($status <= Commande::STATUS_DRAFT) {
+                    $errors[] = $invalide_error;
+                    return 0;
+                }
+                return 1;
 
-    public function getListFilters()
-    {
-        return array();
-    }
-
-    public function getActionsButtons()
-    {
-        global $conf, $langs, $user;
-
-        $buttons = array();
-
-        if ($this->isLoaded()) {
-            $status = (int) $this->getData('fk_statut');
-            $ref = $this->getRef();
-            $lines = $this->getChildrenObjects('lines');
-            $client = $this->getChildObject('client');
-
-            // Envoyer par e-mail
-            if ($status > Commande::STATUS_DRAFT) {
-                if ($this->canSetAction('sendMail')) {
-                    $onclick = 'bimpModal.loadAjaxContent($(this), \'loadMailForm\', {id: ' . $this->id . '}, \'Envoyer par email\')';
-                    $buttons[] = array(
-                        'label'   => 'Envoyer par e-mail',
-                        'icon'    => 'envelope',
-                        'onclick' => $onclick
-                    );
+            case 'validate':
+                if ($status !== Commande::STATUS_DRAFT) {
+                    $errors[] = $invalide_error;
+                    return 0;
                 } else {
-                    $buttons[] = array(
-                        'label'    => 'Envoyer par e-mail',
-                        'icon'     => 'envelope',
-                        'onclick'  => '',
-                        'disabled' => 1,
-                        'popover'  => 'Vous n\'avez pas la permission'
-                    );
-                }
-            }
-
-//            // Valider
-            if ($status === Commande::STATUS_DRAFT && $this->dol_object->total_ttc >= 0 && count($lines) > 0) {
-                if ($this->canSetAction('validate')) {
-                    if (substr($ref, 1, 4) == 'PROV') {
-                        $numref = $this->dol_object->getNextNumRef($client->dol_object);
-                    } else {
-                        $numref = $ref;
-                    }
-
-                    $text = $langs->trans('ConfirmValidateOrder', $numref);
-                    if (!empty($conf->notification->enabled)) {
-                        if (!class_exists('Notify')) {
-                            require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
-                        }
-                        $notify = new Notify($this->db->db);
-                        $text .= "\n";
-                        $text .= $notify->confirmMessage('ORDER_VALIDATE', (int) $this->getData('fk_soc'), $this->dol_object);
-                    }
-
-                    $buttons[] = array(
-                        'label'   => 'Valider',
-                        'icon'    => 'check',
-                        'onclick' => $this->getJsActionOnclick('validate', array('new_ref' => $numref), array(
-                            'confirm_msg' => strip_tags($text)
-                        ))
-                    );
-                } else {
-                    $buttons[] = array(
-                        'label'    => 'Valider',
-                        'icon'     => 'check',
-                        'onclick'  => '',
-                        'disabled' => 1,
-                        'popover'  => 'Vous n\'avez pas la permission'
-                    );
-                }
-            }
-
-            // Edit (désactivé)
-//            if ($status == Commande::STATUS_VALIDATED && $this->canCreate()) {
-//                $buttons[] = array(
-//                    'label'   => 'Modifier',
-//                    'icon'    => 'undo',
-//                    'onclick' => $this->getJsActionOnclick('modify', array(), array(
-//                        'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateOrder', $ref))
-//                    ))
-//                );
-//            }
-            // Créer intervention
-            if ($conf->ficheinter->enabled) {
-                $langs->load("interventions");
-
-                if ($status > Commande::STATUS_DRAFT && $status < Commande::STATUS_CLOSED && $this->dol_object->getNbOfServicesLines() > 0) {
-                    if ($user->rights->ficheinter->creer) {
-                        $url = DOL_URL_ROOT . '/fichinter/card.php?action=create&amp;origin=' . $this->dol_object->element . '&amp;originid=' . $this->id . '&amp;socid=' . $client->id;
-                        $buttons[] = array(
-                            'label'   => $langs->trans('AddIntervention'),
-                            'icon'    => 'plus-circle',
-                            'onclick' => 'window.location = \'' . $url . '\''
-                        );
-                    } else {
-                        $buttons[] = array(
-                            'label'    => $langs->trans('AddIntervention'),
-                            'icon'     => 'plus-circle',
-                            'onclick'  => '',
-                            'disabled' => 1,
-                            'popover'  => 'Vous n\'avez pas la permission'
-                        );
+                    $lines = $this->getChildrenObjects('lines');
+                    if (!count($lines)) {
+                        $errors[] = 'Aucune ligne enregistrée pour cette commande';
+                        return 0;
                     }
                 }
-            }
-//
-//            // Créer contrat
-//            if ($conf->contrat->enabled && ($status == Commande::STATUS_VALIDATED || $status == Commande::STATUS_ACCEPTED || $status == Commande::STATUS_CLOSED)) {
-//                $langs->load("contracts");
-//
-//                if ($user->rights->contrat->creer) {
-//                    print '<div class="inline-block divButAction"><a class="butAction" href="' . DOL_URL_ROOT . '/contrat/card.php?action=create&amp;origin=' . $this->dol_object->element . '&amp;originid=' . $this->dol_object->id . '&amp;socid=' . $this->dol_object->socid . '">' . $langs->trans('AddContract') . '</a></div>';
-//                }
-//            }
-//
-//            // Expédier
-//            $numshipping = 0;
-//            if (!empty($conf->expedition->enabled)) {
-//                $numshipping = $this->dol_object->nb_expedition();
-//
-//                if ($status > Commande::STATUS_DRAFT && $status < Commande::STATUS_CLOSED && ($this->dol_object->getNbOfProductsLines() > 0 || !empty($conf->global->STOCK_SUPPORTS_SERVICES))) {
-//                    if (($conf->expedition_bon->enabled && $user->rights->expedition->creer) || ($conf->livraison_bon->enabled && $user->rights->expedition->livraison->creer)) {
-//                        if ($user->rights->expedition->creer) {
-//                            print '<div class="inline-block divButAction"><a class="butAction" href="' . DOL_URL_ROOT . '/expedition/shipment.php?id=' . $this->dol_object->id . '">' . $langs->trans('CreateShipment') . '</a></div>';
-//                        } else {
-//                            print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="' . dol_escape_htmltag($langs->trans("NotAllowed")) . '">' . $langs->trans('CreateShipment') . '</a></div>';
-//                        }
-//                    } else {
-//                        $langs->load("errors");
-//                        print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="' . dol_escape_htmltag($langs->trans("ErrorModuleSetupNotComplete")) . '">' . $langs->trans('CreateShipment') . '</a></div>';
-//                    }
-//                }
-//            }
-//
-            // Réouvrir
-            if (($status == Commande::STATUS_CLOSED || $status == Commande::STATUS_CANCELED) && $this->canCreate()) {
-                $buttons[] = array(
-                    'label'   => 'Réouvrir',
-                    'icon'    => 'undo',
-                    'onclick' => $this->getJsActionOnclick('reopen', array(), array(
-                        'confirm_msg' => 'Veuillez confirmer la réouverture de ' . $this->getLabel('this')
-                    ))
-                );
-            }
-//
-//            // Marquer comme expédier
-//            if (($status == Commande::STATUS_VALIDATED || $status == Commande::STATUS_ACCEPTED) && $user->rights->commande->cloturer) {
-//                print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $this->dol_object->id . '&amp;action=shipped">' . $langs->trans('ClassifyShipped') . '</a></div>';
-//            }
-//
-            // Cloner
-            if ($this->canCreate()) {
-                $buttons[] = array(
-                    'label'   => 'Cloner',
-                    'icon'    => 'copy',
-                    'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
-                        'form_name'   => 'duplicate',
-                        'confirm_msg' => 'Etes-vous sûr de vouloir cloner ' . addslashes($this->getLabel('the')) . ' ' . $this->getRef()
-                    ))
-                );
-            }
+                return 1;
 
-            // Annuler
-            if ($status == Commande::STATUS_VALIDATED && $this->canSetAction('cancel')) {
-                $buttons[] = array(
-                    'label'   => 'Annuler',
-                    'icon'    => 'times',
-                    'onclick' => $this->getJsActionOnclick('cancel', array(), array(
-                        'confirm_msg' => $langs->trans('ConfirmCancelOrder', $ref)
-                    ))
-                );
-            }
+            case 'reopen':
+                if (!in_array($status, array(Commande::STATUS_CLOSED, Commande::STATUS_CANCELED))) {
+                    $errors[] = $invalide_error;
+                    return 0;
+                }
+                return 1;
+
+            case 'cancel':
+                if ($status !== Commande::STATUS_VALIDATED) {
+                    $errors[] = $invalide_error;
+                    return 0;
+                }
+                return 1;
         }
-
-        return $buttons;
+        return parent::isActionAllowed($action, $errors);
     }
 
-    // Getters: 
+    // Getters booléens:
 
     public function isFullyShipped()
     {
@@ -302,6 +208,195 @@ class Bimp_Commande extends BimpComm
         return 0;
     }
 
+    // Getters: 
+
+    public function getModelsPdfArray()
+    {
+        if (!class_exists('ModelePDFPropales')) {
+            require_once DOL_DOCUMENT_ROOT . '/core/modules/commande/modules_commande.php';
+        }
+
+        return ModelePDFCommandes::liste_modeles($this->db->db);
+    }
+
+    public function getDirOutput()
+    {
+        global $conf;
+
+        return $conf->commande->dir_output;
+    }
+
+    public function getListFilters()
+    {
+        return array();
+    }
+
+    public function getActionsButtons()
+    {
+        global $conf, $langs, $user;
+
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            $status = (int) $this->getData('fk_statut');
+            $ref = $this->getRef();
+            $client = $this->getChildObject('client');
+
+            // Envoyer par e-mail
+            if ($this->isActionAllowed('sendMail')) {
+                if ($this->canSetAction('sendMail')) {
+                    $buttons[] = array(
+                        'label'   => 'Envoyer par e-mail',
+                        'icon'    => 'envelope',
+                        'onclick' => $this->getJsActionOnclick('sendEmail', array(), array(
+                            'form_name' => 'email'
+                        ))
+                    );
+                } else {
+                    $buttons[] = array(
+                        'label'    => 'Envoyer par e-mail',
+                        'icon'     => 'envelope',
+                        'onclick'  => '',
+                        'disabled' => 1,
+                        'popover'  => 'Vous n\'avez pas la permission'
+                    );
+                }
+            }
+
+//            // Valider
+            if ($this->isActionAllowed('validate')) {
+                if ($this->canSetAction('validate')) {
+                    $buttons[] = array(
+                        'label'   => 'Valider',
+                        'icon'    => 'fas_check',
+                        'onclick' => $this->getJsActionOnclick('validate', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer la validation de cette commande'
+                        ))
+                    );
+                } else {
+                    $buttons[] = array(
+                        'label'    => 'Valider',
+                        'icon'     => 'fas_check',
+                        'onclick'  => '',
+                        'disabled' => 1,
+                        'popover'  => 'Vous n\'avez pas la permission'
+                    );
+                }
+            }
+
+            // Edit (désactivé)
+//            if ($status == Commande::STATUS_VALIDATED && $this->canCreate()) {
+//                $buttons[] = array(
+//                    'label'   => 'Modifier',
+//                    'icon'    => 'undo',
+//                    'onclick' => $this->getJsActionOnclick('modify', array(), array(
+//                        'confirm_msg' => strip_tags($langs->trans('ConfirmUnvalidateOrder', $ref))
+//                    ))
+//                );
+//            }
+//            
+            // Créer intervention
+            if ($conf->ficheinter->enabled) {
+                $langs->load("interventions");
+
+                if ($status > Commande::STATUS_DRAFT && $status < Commande::STATUS_CLOSED && $this->dol_object->getNbOfServicesLines() > 0) {
+                    if ($user->rights->ficheinter->creer) {
+                        $url = DOL_URL_ROOT . '/fichinter/card.php?action=create&amp;origin=' . $this->dol_object->element . '&amp;originid=' . $this->id . '&amp;socid=' . $client->id;
+                        $buttons[] = array(
+                            'label'   => $langs->trans('AddIntervention'),
+                            'icon'    => 'plus-circle',
+                            'onclick' => 'window.location = \'' . $url . '\''
+                        );
+                    } else {
+                        $buttons[] = array(
+                            'label'    => $langs->trans('AddIntervention'),
+                            'icon'     => 'plus-circle',
+                            'onclick'  => '',
+                            'disabled' => 1,
+                            'popover'  => 'Vous n\'avez pas la permission'
+                        );
+                    }
+                }
+            }
+//
+//            // Créer contrat
+//            if ($conf->contrat->enabled && ($status == Commande::STATUS_VALIDATED || $status == Commande::STATUS_ACCEPTED || $status == Commande::STATUS_CLOSED)) {
+//                $langs->load("contracts");
+//
+//                if ($user->rights->contrat->creer) {
+//                    print '<div class="inline-block divButAction"><a class="butAction" href="' . DOL_URL_ROOT . '/contrat/card.php?action=create&amp;origin=' . $this->dol_object->element . '&amp;originid=' . $this->dol_object->id . '&amp;socid=' . $this->dol_object->socid . '">' . $langs->trans('AddContract') . '</a></div>';
+//                }
+//            }
+//
+//            // Expédier
+//            $numshipping = 0;
+//            if (!empty($conf->expedition->enabled)) {
+//                $numshipping = $this->dol_object->nb_expedition();
+//
+//                if ($status > Commande::STATUS_DRAFT && $status < Commande::STATUS_CLOSED && ($this->dol_object->getNbOfProductsLines() > 0 || !empty($conf->global->STOCK_SUPPORTS_SERVICES))) {
+//                    if (($conf->expedition_bon->enabled && $user->rights->expedition->creer) || ($conf->livraison_bon->enabled && $user->rights->expedition->livraison->creer)) {
+//                        if ($user->rights->expedition->creer) {
+//                            print '<div class="inline-block divButAction"><a class="butAction" href="' . DOL_URL_ROOT . '/expedition/shipment.php?id=' . $this->dol_object->id . '">' . $langs->trans('CreateShipment') . '</a></div>';
+//                        } else {
+//                            print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="' . dol_escape_htmltag($langs->trans("NotAllowed")) . '">' . $langs->trans('CreateShipment') . '</a></div>';
+//                        }
+//                    } else {
+//                        $langs->load("errors");
+//                        print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="' . dol_escape_htmltag($langs->trans("ErrorModuleSetupNotComplete")) . '">' . $langs->trans('CreateShipment') . '</a></div>';
+//                    }
+//                }
+//            }
+//
+            // Réouvrir
+            if ($this->isActionAllowed('reopen') && $this->canSetAction('reopen')) {
+                $buttons[] = array(
+                    'label'   => 'Réouvrir',
+                    'icon'    => 'undo',
+                    'onclick' => $this->getJsActionOnclick('reopen', array(), array(
+                        'confirm_msg' => 'Veuillez confirmer la réouverture de ' . $this->getLabel('this')
+                    ))
+                );
+            }
+//
+//            // Marquer comme expédier
+//            if (($status == Commande::STATUS_VALIDATED || $status == Commande::STATUS_ACCEPTED) && $user->rights->commande->cloturer) {
+//                print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $this->dol_object->id . '&amp;action=shipped">' . $langs->trans('ClassifyShipped') . '</a></div>';
+//            }
+//
+            // Cloner
+            if ($this->canSetAction('duplicate')) {
+                $buttons[] = array(
+                    'label'   => 'Cloner',
+                    'icon'    => 'copy',
+                    'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+                        'form_name' => 'duplicate'
+                    ))
+                );
+            }
+
+            // Annuler
+            if ($this->isActionAllowed('cancel') && $this->canSetAction('cancel')) {
+                $buttons[] = array(
+                    'label'   => 'Annuler',
+                    'icon'    => 'times',
+                    'onclick' => $this->getJsActionOnclick('cancel', array(), array(
+                        'confirm_msg' => $langs->trans('ConfirmCancelOrder', $ref)
+                    ))
+                );
+            }
+
+            if ($user->admin) {
+                $buttons[] = array(
+                    'label'   => 'Ancienne version',
+                    'icon'    => 'fas_file',
+                    'onclick' => 'window.open(\'' . BimpObject::getInstanceUrl($this->dol_object) . '\')'
+                );
+            }
+        }
+
+        return $buttons;
+    }
+
     public function getProductFournisseursPricesArray()
     {
         if (BimpTools::isSubmit('id_product')) {
@@ -322,7 +417,52 @@ class Bimp_Commande extends BimpComm
         );
     }
 
-    // Traitements: 
+    // Rendus HTML: 
+
+    public function renderHeaderExtraLeft()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $user = new User($this->db->db);
+
+            $html .= '<div class="object_header_infos">';
+            $html .= 'Créée le ' . $this->displayData('date_creation');
+
+            $user->fetch((int) $this->dol_object->user_author_id);
+            $html .= ' par ' . $user->getNomUrl(1);
+            $html .= '</div>';
+
+            $status = (int) $this->getData('fk_statut');
+            if ($status >= 1 && (int) $this->getData('fk_user_valid')) {
+                $html .= '<div class="object_header_infos">';
+                $html .= 'Validée le ' . $this->displayData('date_valid');
+                $user->fetch((int) $this->getData('fk_user_valid'));
+                $html .= ' par ' . $user->getNomUrl(1);
+                $html .= '</div>';
+            }
+
+            if ($status >= 3 && (int) $this->getData('fk_user_cloture')) {
+                $html .= '<div class="object_header_infos">';
+                $html .= 'Fermée le ' . $this->displayData('date_cloture');
+                $user->fetch((int) $this->getData('fk_user_cloture'));
+                $html .= ' par ' . $user->getNomUrl(1);
+                $html .= '</div>';
+            }
+
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                $html .= '<div style="margin-top: 10px">';
+                $html .= '<strong>Client: </strong>';
+                $html .= BimpObject::getInstanceNomUrlWithIcons($client);
+                $html .= '</div>';
+            }
+        }
+
+        return $html;
+    }
+
+    // Traitements:
 
     public function addOrderLine($id_product, $qty = 1, $desc = '', $id_fournisseur_price = 0, $remise_percent = 0, $date_start = '', $date_end = '')
     {
@@ -857,7 +997,7 @@ class Bimp_Commande extends BimpComm
             }
 
             if ((int) $nCommandeProducts !== (int) $nBrOrderProducts) {
-                $errors[] = 'Le nombre de produits enregistrés pour la commande ('.$nCommandeProducts.') ne correspond pas au nombre de produits enregistrés pour la logistique ('.$nBrOrderProducts.')';
+                $errors[] = 'Le nombre de produits enregistrés pour la commande (' . $nCommandeProducts . ') ne correspond pas au nombre de produits enregistrés pour la logistique (' . $nBrOrderProducts . ')';
             }
 
             if ((int) $nCommandeServices !== (int) $nBrOrderServices) {
@@ -923,7 +1063,7 @@ class Bimp_Commande extends BimpComm
         }
 
         if ((is_null($id_shipment) || !$id_shipment) && !(int) $this->getData('id_facture')) {
-            $success_callback = 'location.reload();';
+            $success_callback = 'bimp_reloadPage();';
         }
 
         $errors = $this->createFacture($id_shipment, $cond_reglement, $id_account, $remises, $public_note, $private_note);
@@ -940,7 +1080,7 @@ class Bimp_Commande extends BimpComm
         $errors = array();
         $warnings = array();
         $success = '';
-        $success_callback = 'location.reload();';
+        $success_callback = 'bimp_reloadPage();';
         $success = 'Produit / service ajouté à la commande avec succès - ' . $data['qty'];
 
         if (!isset($data['id_product']) || !$data['id_product']) {
@@ -992,7 +1132,7 @@ class Bimp_Commande extends BimpComm
         $errors = array();
         $warnings = array();
         $success = 'Facture validée avec succès';
-        $success_callback = 'location.reload();';
+        $success_callback = 'bimp_reloadPage();';
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la commande absent';
@@ -1021,6 +1161,37 @@ class Bimp_Commande extends BimpComm
         );
     }
 
+    public function actionValidate($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
+        if ($this->isLabelFemale()) {
+            $success .= 'e';
+        }
+        $success .= ' avec succès';
+        $success_callback = 'bimp_reloadPage();';
+
+        global $conf, $langs, $user;
+
+        $result = $this->dol_object->valid($user, (int) $this->getData('entrepot'));
+
+        if ($result > 0) {
+            if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
+                $this->fetch($this->id);
+                $this->dol_object->generateDocument($this->getModelPdf(), $langs);
+            }
+        } else {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
     public function actionCancel($data, &$success)
     {
         $errors = array();
@@ -1028,13 +1199,10 @@ class Bimp_Commande extends BimpComm
         $success = 'Commande annulée avec succès';
         $success_callback = 'bimp_reloadPage();';
 
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID de la commande absent';
-        } else {
-            if ($this->dol_object->cancel() < 0) {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Echec de l\'annulation de la commande');
-            }
+        if ($this->dol_object->cancel() < 0) {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Echec de l\'annulation de la commande');
         }
+
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
@@ -1048,16 +1216,10 @@ class Bimp_Commande extends BimpComm
         $warnings = array();
         $success = 'Réouverture ' . $this->getLabel('of_the') . ' effectuée avec succès';
 
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-        } elseif (!in_array((int) $this->getData('fk_statut'), array(Commande::STATUS_CLOSED, Commande::STATUS_CANCELED))) {
-            $errors[] = 'Impossible de réouvrir ' . $this->getLabel('this') . ' - statut actuel invalide';
-        } else {
-            global $user;
+        global $user;
 
-            if ($this->dol_object->set_reopen($user) < 0) {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la réouverture ' . $this->getLabel('of_the'));
-            }
+        if ($this->dol_object->set_reopen($user) < 0) {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la réouverture ' . $this->getLabel('of_the'));
         }
 
         return array(
@@ -1067,56 +1229,27 @@ class Bimp_Commande extends BimpComm
         );
     }
 
-    // Gestion des droits - overrides BimpObject: 
+    // Overrides BimpComm:
 
-    public function canCreate()
+    public function duplicate($new_data = array(), &$warnings = array(), $force_create = false)
     {
-        global $user;
-        if (defined('NOLOGIN')) {
-            return 1;
-        }
+        $new_data['id_facture'] = 0;
+        $new_data['validFin'] = 0;
+        $new_data['validComm'] = 0;
+        $new_data['date_creation'] = date('Y-m-d H:i:s');
+        $new_data['date_valid'] = null;
+        $new_data['date_cloture'] = null;
+        $new_data['fk_user_modif'] = 0;
+        $new_data['fk_user_valid'] = 0;
+        $new_data['fk_user_cloture'] = 0;
 
-        if (isset($user->rights->commande->creer)) {
-            return (int) $user->rights->commande->creer;
-        }
-
-        return 0;
+        return parent::duplicate($new_data, $warnings, $force_create);
     }
 
-    public function canEdit()
+    public function create(&$warnings = array(), $force_create = false)
     {
-        if (defined('NOLOGIN')) {
-            return 1;
-        }
-        
-        return $this->canCreate();
-    }
+        $this->set('date_creation', date('Y-m-d H:i:s'));
 
-    public function canSetAction($action)
-    {
-        global $conf, $user;
-
-        switch ($action) {
-            case 'validate':
-                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->creer)) ||
-                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->order_advance->validate))) {
-                    return 1;
-                }
-                return 0;
-
-            case 'cancel':
-                if ((empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->cloturer)) ||
-                        (!empty($conf->global->MAIN_USE_ADVANCED_PERMS) && !empty($user->rights->commande->order_advance->annuler))) {
-                    return 1;
-                }
-                return 0;
-
-            case 'sendMail':
-                if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->commande->order_advance->send) {
-                    return 1;
-                }
-                return 0;
-        }
-        return 1;
+        return parent::create($warnings, $force_create);
     }
 }

@@ -93,7 +93,7 @@ class BimpComm extends BimpObject
                 'onclick' => $this->getJsLoadModalView('content', 'Contenu ' . $this->getLabel('of_the') . ' ' . $this->getRef())
             );
         }
-        
+
         return $buttons;
     }
 
@@ -530,6 +530,12 @@ class BimpComm extends BimpObject
     }
 
     // Getters - Overrides BimpObject
+
+    public function getName()
+    {
+        $name = parent::getName();
+        return BimpTools::ucfirst($this->getLabel()) . ' ' . ($name ? '"' . $name . '"' : '');
+    }
 
     public function getFilesDir()
     {
@@ -1539,14 +1545,12 @@ class BimpComm extends BimpObject
         if (count($copy_errors)) {
             $errors[] = BimpTools::getMsgFromArray($copy_errors, 'Echec de la copie ' . $this->getLabel('of_the'));
         } else {
-            $new_object->dol_object->error = '';
-            $new_object->dol_object->errors = array();
+            BimpTools::resetDolObjectErrors($this->dol_object);
             if ($new_object->dol_object->copy_linked_contact($this->dol_object, 'internal') < 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_object->dol_object), 'Echec de la copie des contacts internes');
             }
             if (!$new_soc) {
-                $new_object->dol_object->error = '';
-                $new_object->dol_object->errors = array();
+                BimpTools::resetDolObjectErrors($this->dol_object);
                 if ($new_object->dol_object->copy_linked_contact($this->dol_object, 'external') < 0) {
                     $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($new_object->dol_object), 'Echec de la copie des contacts externes');
                 }

@@ -19,7 +19,7 @@ class BimpObject extends BimpCache
         'position'
     );
     public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent', 'bool', 'qty');
-    public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description', 'ref', 'reference');
+    public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
     public static $ref_properties = array('ref', 'reference', 'code');
     public $use_commom_fields = false;
     public $use_positions = false;
@@ -52,7 +52,6 @@ class BimpObject extends BimpCache
     public static $check_on_create = 1;
     public static $check_on_update = 1;
     public static $check_on_update_field = 1;
-    
     public $params = array();
     public $msgs = array(
         'errors'   => array(),
@@ -897,24 +896,32 @@ class BimpObject extends BimpCache
 
     public function getRef($withGeneric = true)
     {
-        if ($this->field_exists('ref')) {
-            return $this->getData('ref');
-        }
-
-        if ($this->field_exists('reference')) {
-            return $this->getData('reference');
+        foreach (self::$ref_properties as $prop) {
+            if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
+                return $this->data[$prop];
+            }
         }
 
         if ($withGeneric) {
-            return get_class($this) . "_" . $this->id;
+            return $this->object_name . "_" . $this->id;
         }
 
         return '';
     }
 
-    public function getName()
+    public function getName($withGeneric = true)
     {
-        return $this->getInstanceName();
+        foreach (self::$name_properties as $prop) {
+            if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
+                return $this->data[$prop];
+            }
+        }
+
+        if ($withGeneric) {
+            return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+        }
+
+        return '';
     }
 
     public function getDolValue($field, $value)
@@ -4563,17 +4570,7 @@ class BimpObject extends BimpCache
 
     public function getInstanceName()
     {
-        if (!$this->isLoaded()) {
-            return ' ';
-        }
-
-        foreach (self::$name_properties as $prop) {
-            if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
-                return $this->data[$prop];
-            }
-        }
-
-        return BimpTools::ucfirst($this->getLabel()) . ' ' . $this->id;
+        return $this->getName();
     }
 
     public static function getInstanceLabel($instance, $type = '')
@@ -4648,7 +4645,7 @@ class BimpObject extends BimpCache
     public static function getInstanceNom($instance)
     {
         if (is_a($instance, 'BimpObject')) {
-            return $instance->getInstanceName();
+            return $instance->getName();
         } elseif (is_a($instance, 'user')) {
             return $instance->lastname . ' ' . $instance->firstname;
         } elseif (property_exists($instance, 'nom')) {
@@ -4688,7 +4685,7 @@ class BimpObject extends BimpCache
 
         $label = '';
         if ($withpicto && $this->params['icon']) {
-            $label .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
+            $label .= BimpRender::renderIcon($this->params['icon'], 'iconLeft');
         }
         $ref = $this->getRef();
 
@@ -4736,15 +4733,7 @@ class BimpObject extends BimpCache
             if ($instance->isDolObject()) {
                 $html = $instance->dol_object->getNomUrl(1);
             } else {
-                if ($instance->params['icon']) {
-                    $html .= BimpRender::renderIcon($instance->params['icon']) . '&nbsp;';
-                }
-                $url = $instance->getUrl();
-                if ($url) {
-                    $html .= '<a href="' . $url . '" target="_blank">' . $instance->getInstanceName() . '</a>';
-                } else {
-                    $html .= $instance->getInstanceName();
-                }
+                $html .= $instance->getNomUrl();
             }
         } elseif (method_exists($instance, 'getNomUrl')) {
             $html .= $instance->getNomUrl(1);

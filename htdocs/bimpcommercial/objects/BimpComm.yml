@@ -249,6 +249,7 @@ forms:
                   
     duplicate:
         rows: 
+            - field: entrepot
             - field: fk_soc
             
     use_remise:
@@ -417,6 +418,7 @@ lists:
     default: 
         extra_btn: 
             callback: getDefaultListExtraButtons
+            
 views: 
     default: 
         objects_change_reload: Bimp_File

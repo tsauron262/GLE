@@ -514,6 +514,8 @@ cards:
     default:
         title: nom
         fields: 
+            - label: N°
+              field: ticket_number
             - label: Contrat
               field: id_contrat
               display: nom_url

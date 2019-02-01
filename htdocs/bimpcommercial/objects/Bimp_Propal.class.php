@@ -109,22 +109,6 @@ class Bimp_Propal extends BimpComm
                 // Valider:
                 if ($this->isActionAllowed('validate')) {
                     if ($this->canSetAction('validate')) {
-//                        $ref = substr($this->getRef(), 1, 4);
-//                        if ($ref == 'PROV') {
-//                            $numref = $this->dol_object->getNextNumRef($soc->dol_object);
-//                        } else {
-//                            $numref = $ref;
-//                        }
-//
-//                        $text = $langs->trans('ConfirmValidateProp', $numref);
-//                        if (!empty($conf->notification->enabled)) {
-//                            if (!class_exists('Notify')) {
-//                                require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
-//                            }
-//                            $notify = new Notify($this->db->db);
-//                            $text .= "\n";
-//                            $text .= $notify->confirmMessage('PROPAL_VALIDATE', (int) $this->getData('fk_soc'), $this->dol_object);
-//                        }
                         $buttons[] = array(
                             'label'   => 'Valider',
                             'icon'    => 'check',

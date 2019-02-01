@@ -54,7 +54,7 @@ class BMP_Event extends BimpObject
         3 => array('label' => 'Validé', 'classes' => array('success'))
     );
     public static $tarifs = array(
-        'TARIF NORMAL', 'TARIF REDUIT', 'FILGOOD', 'TARIF SPECIAL', 'TARIF SPECIAL LE FIL', 'TARIF CE', 'INVITATIONS', 'GUICHET NORMAL', 'GUICHET REDUIT'
+        'TARIF NORMAL', 'TARIF REDUIT', 'FILGOOD', 'TARIF SPECIAL', 'TARIF SPECIAL LE FIL', 'TARIF CE', 'INVITATIONS', 'GUICHET NORMAL', 'GUICHET REDUIT', 'GUICHET FILGOOD'
     );
     public static $vendeurs = array();
     public static $analytics = array(

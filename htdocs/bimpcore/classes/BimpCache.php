@@ -2,7 +2,7 @@
 
 class BimpCache
 {
-
+    
     public static $bdb = null;
     protected static $cache = array();
 
@@ -141,6 +141,24 @@ class BimpCache
     public static function unsetBimpObjectInstance($module, $object_name, $id_object)
     {
         $cache_key = 'bimp_object_' . $module . '_' . $object_name . '_' . $id_object;
+        if (isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = null;
+            unset(self::$cache[$cache_key]);
+        }
+    }
+    
+    public static function unsetDolObjectInstance($id_object, $module, $file = null, $class = null)
+    {
+        if (is_null($file)) {
+            $file = $module;
+        }
+
+        if (is_null($class)) {
+            $class = ucfirst($file);
+        }
+        
+        $cache_key = 'dol_object_' . $class . '_' . $id_object;
+        
         if (isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = null;
             unset(self::$cache[$cache_key]);

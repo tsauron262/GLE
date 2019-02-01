@@ -1237,6 +1237,8 @@ class ObjectLine extends BimpObject
                     return $errors;
                 }
             }
+            
+            BimpCache::unsetDolObjectInstance((int) $id_line, 'comm/propal', 'propal', 'PropaleLigne');
 
             $object = $instance->dol_object;
             $object->error = '';
@@ -1324,6 +1326,7 @@ class ObjectLine extends BimpObject
                     $errors[] = 'Type de ligne invalide';
                     break;
             }
+            
             if (!is_null($result) && $result <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Des erreurs sont survenues lors de la mise à jour de la ligne ' . BimpObject::getInstanceLabel($instance, 'to'));
             }
@@ -1339,7 +1342,9 @@ class ObjectLine extends BimpObject
         if (!$id_line) {
             return false;
         }
-
+        
+        BimpCache::unsetDolObjectInstance((int) $id_line, 'comm/propal', 'propal', 'PropaleLigne');
+        
         $line = $this->getChildObject('line');
 
         if (!BimpObject::objectLoaded($line)) {
@@ -1398,6 +1403,8 @@ class ObjectLine extends BimpObject
             }
             if ($result <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($instance->dol_object), 'Des erreurs sont survenues lors de la suppression de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the'));
+            } else {
+                BimpCache::unsetDolObjectInstance((int) $id_line, 'comm/propal', 'propal', 'PropaleLigne');
             }
         }
 
@@ -2289,6 +2296,8 @@ class ObjectLine extends BimpObject
 
     public function reset()
     {
+        BimpCache::unsetDolObjectInstance((int) $this->getData('id_line'), 'comm/propal', 'propal', 'PropaleLigne');
+        
         $this->id_product = null;
         $this->id_fourn_price = null;
         $this->desc = null;

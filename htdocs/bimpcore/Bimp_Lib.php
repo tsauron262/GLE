@@ -9,6 +9,8 @@ if (!defined('BIMP_LIB')) {
     if (defined('MOD_DEV')) {
         ini_set('display_errors', 1);
     }
+    
+    set_time_limit(5);
 
     $dir = __DIR__ . '/classes/';
 

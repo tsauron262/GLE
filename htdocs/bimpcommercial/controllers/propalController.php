@@ -9,15 +9,15 @@ class propalController extends BimpCommController
     {
         $propal = $this->config->getObject('', 'propal');
         if (BimpObject::objectLoaded($propal)) {
-            global $user;
+//            global $user;
 
-            if (!$user->admin) {
+//            if (!$user->admin) {
                 $id_sav = (int) $propal->getIdSav();
                 if ($id_sav) {
                     header("Location: " . DOL_URL_ROOT . '/bimpsupport/index.php?fc=sav&id=' . $id_sav);
                     exit();
                 }
-            }
+//            }
         }
     }
 }

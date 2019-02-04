@@ -47,8 +47,9 @@ class ObjectLine extends BimpObject
     public $no_equipment_post = false;
     public $remises = null;
     protected $bimp_line_only = false;
+    protected $remises_total_infos = null;
 
-    // Getters: 
+    // Getters booléens: 
 
     public function isEditable($force_edit = false)
     {
@@ -170,6 +171,20 @@ class ObjectLine extends BimpObject
         return 1;
     }
 
+    public function isChild($instance)
+    {
+        if (is_a($instance, 'ObjectLineRemise')) {
+            $obj_type = $instance->getParentObjectType();
+            if (!$obj_type) {
+                if (isset($_POST['remises_sub_object_idx_object_type'])) {
+                    $instance->set('object_type', $_POST['remises_sub_object_idx_object_type']);
+                }
+            }
+        }
+
+        return parent::isChild($instance);
+    }
+
     public function hasEquipmentToAttribute()
     {
         if ($this->isLoaded()) {
@@ -191,6 +206,50 @@ class ObjectLine extends BimpObject
         return 0;
     }
 
+    // Getters array: 
+
+    public function getProductFournisseursPricesArray()
+    {
+        $id_product = (int) $this->getIdProductFromPost();
+        if ($id_product) {
+            BimpObject::loadClass('bimpcore', 'Bimp_Product');
+            return Bimp_Product::getFournisseursPriceArray($id_product);
+        }
+
+        return array();
+    }
+
+    public function getProductPricesValuesArray()
+    {
+        $this->getIdProductFromPost();
+
+        if (!(int) $this->id_product) {
+            return array();
+        }
+
+        $product = $this->getProduct();
+
+        if (!BimpObject::objectLoaded($product)) {
+            return array();
+        }
+
+        $values = array(
+            0 => ''
+        );
+
+        if (BimpObject::objectLoaded($this->post_equipment)) {
+            if ((float) $this->post_equipment->getData('prix_vente_except') > 0) {
+                $pu_ht = BimpTools::calculatePriceTaxEx((float) $this->post_equipment->getData('prix_vente_except'), (float) $product->getData('tva_tx'));
+                $values['' . $pu_ht] = 'Prix de vente exceptionnel équipement: ' . BimpTools::displayMoneyValue($pu_ht, 'EUR');
+            }
+        }
+
+        $values['' . $product->getData('price')] = 'Prix de vente produit: ' . BimpTools::displayMoneyValue((float) $product->getData('price'), 'EUR');
+        return $values;
+    }
+
+    // Getters params: 
+
     public function getParentCommType()
     {
         return static::$parent_comm_type;
@@ -209,6 +268,76 @@ class ObjectLine extends BimpObject
 
         return array();
     }
+
+    public function getFournisseurPriceCreateForm()
+    {
+        if ($this->canEditPrixAchat()) {
+            return 'default';
+        }
+
+        return '';
+    }
+
+    public function getLineEquipmentInstance()
+    {
+        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $this->module . '/objects/' . $this->object_name . 'Equipment.yml')) {
+            $module = $this->module;
+            $object_name = $this->object_name . 'Equipment';
+        } else {
+            $module = 'bimpcommercial';
+            $object_name = 'ObjectLineEquipment';
+        }
+
+        return BimpObject::getInstance($module, $object_name);
+    }
+
+    public function getListExtraBtn()
+    {
+        $buttons = array();
+        if ($this->isLoaded()) {
+            if ((int) $this->id_product && $this->isEquipmentEditable()) {
+                $product = $this->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    if ($product->isSerialisable() && $this->equipment_required) {
+                        if ($this->hasEquipmentToAttribute()) {
+                            $data = array();
+                            if (BimpObject::objectLoaded($this->post_equipment)) {
+                                $data['id_equipment'] = (int) $this->post_equipment->id;
+                            }
+                            $onclick = $this->getJsActionOnclick('attributeEquipment', $data, array(
+                                'form_name' => 'equipment'
+                            ));
+                            $buttons[] = array(
+                                'label'   => 'Attribuer un équipement',
+                                'icon'    => 'arrow-circle-down',
+                                'onclick' => $onclick
+                            );
+                        }
+
+                        $instance = $this->getLineEquipmentInstance();
+
+                        $buttons[] = array(
+                            'label'   => 'Détails équipements',
+                            'icon'    => 'bars',
+                            'onclick' => 'loadModalList(\'' . $instance->module . '\', \'' . $instance->object_name . '\', \'default\', ' . $this->id . ', $(this), \'Equipements\')'
+                        );
+                    }
+                }
+            }
+            if ($this->isRemisable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
+                $onclick = 'loadModalList(\'bimpcommercial\', \'ObjectLineRemise\', \'default\', ' . $this->id . ', $(this), \'Remises\', {parent_object_type: \'' . static::$parent_comm_type . '\'})';
+                $buttons[] = array(
+                    'label'   => 'Remises ligne',
+                    'icon'    => 'percent',
+                    'onclick' => $onclick
+                );
+            }
+        }
+
+        return $buttons;
+    }
+
+    // Getters valeurs:     
 
     public function getUnitPriceTTC()
     {
@@ -263,7 +392,6 @@ class ObjectLine extends BimpObject
 
     public function getTotalTtcWithoutRemises()
     {
-//        echo round(BimpTools::calculatePriceTaxIn((float) $this->pu_ht, (float) $this->tva_tx) * (float) $this->qty, 8) . "\n";
         return round(BimpTools::calculatePriceTaxIn((float) $this->pu_ht, (float) $this->tva_tx) * (float) $this->qty, 8);
     }
 
@@ -395,26 +523,6 @@ class ObjectLine extends BimpObject
         return (int) $this->post_id_product;
     }
 
-    public function getProductFournisseursPricesArray()
-    {
-        $id_product = (int) $this->getIdProductFromPost();
-        if ($id_product) {
-            BimpObject::loadClass('bimpcore', 'Bimp_Product');
-            return Bimp_Product::getFournisseursPriceArray($id_product);
-        }
-
-        return array();
-    }
-
-    public function getFournisseurPriceCreateForm()
-    {
-        if ($this->canEditPrixAchat()) {
-            return 'default';
-        }
-
-        return '';
-    }
-
     public function getValueByProduct($field)
     {
         $id_product = (int) $this->getIdProductFromPost();
@@ -489,81 +597,6 @@ class ObjectLine extends BimpObject
         return 0;
     }
 
-    public function getProductPricesValuesArray()
-    {
-        $this->getIdProductFromPost();
-
-        if (!(int) $this->id_product) {
-            return array();
-        }
-
-        $product = $this->getProduct();
-
-        if (!BimpObject::objectLoaded($product)) {
-            return array();
-        }
-
-        $values = array(
-            0 => ''
-        );
-
-        if (BimpObject::objectLoaded($this->post_equipment)) {
-            if ((float) $this->post_equipment->getData('prix_vente_except') > 0) {
-                $pu_ht = BimpTools::calculatePriceTaxEx((float) $this->post_equipment->getData('prix_vente_except'), (float) $product->getData('tva_tx'));
-                $values['' . $pu_ht] = 'Prix de vente exceptionnel équipement: ' . BimpTools::displayMoneyValue($pu_ht, 'EUR');
-            }
-        }
-
-        $values['' . $product->getData('price')] = 'Prix de vente produit: ' . BimpTools::displayMoneyValue((float) $product->getData('price'), 'EUR');
-        return $values;
-    }
-
-    public function getListExtraBtn()
-    {
-        $buttons = array();
-        if ($this->isLoaded()) {
-            if ((int) $this->id_product && $this->isEquipmentEditable()) {
-                $product = $this->getProduct();
-                if (BimpObject::objectLoaded($product)) {
-                    if ($product->isSerialisable() && $this->equipment_required) {
-                        if ($this->hasEquipmentToAttribute()) {
-                            $data = array();
-                            if (BimpObject::objectLoaded($this->post_equipment)) {
-                                $data['id_equipment'] = (int) $this->post_equipment->id;
-                            }
-                            $onclick = $this->getJsActionOnclick('attributeEquipment', $data, array(
-                                'form_name' => 'equipment'
-                            ));
-                            $buttons[] = array(
-                                'label'   => 'Attribuer un équipement',
-                                'icon'    => 'arrow-circle-down',
-                                'onclick' => $onclick
-                            );
-                        }
-
-                        $instance = $this->getLineEquipmentInstance();
-
-                        $buttons[] = array(
-                            'label'   => 'Détails équipements',
-                            'icon'    => 'bars',
-                            'onclick' => 'loadModalList(\'' . $instance->module . '\', \'' . $instance->object_name . '\', \'default\', ' . $this->id . ', $(this), \'Equipements\')'
-                        );
-                    }
-                }
-            }
-            if ($this->isRemisable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
-                $onclick = 'loadModalList(\'bimpcommercial\', \'ObjectLineRemise\', \'default\', ' . $this->id . ', $(this), \'Remises\', {parent_object_type: \'' . static::$parent_comm_type . '\'})';
-                $buttons[] = array(
-                    'label'   => 'Remises ligne',
-                    'icon'    => 'percent',
-                    'onclick' => $onclick
-                );
-            }
-        }
-
-        return $buttons;
-    }
-
     public function getProduct()
     {
         if ((int) $this->id_product) {
@@ -577,19 +610,6 @@ class ObjectLine extends BimpObject
         }
 
         return $this->product;
-    }
-
-    public function getLineEquipmentInstance()
-    {
-        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $this->module . '/objects/' . $this->object_name . 'Equipment.yml')) {
-            $module = $this->module;
-            $object_name = $this->object_name . 'Equipment';
-        } else {
-            $module = 'bimpcommercial';
-            $object_name = 'ObjectLineEquipment';
-        }
-
-        return BimpObject::getInstance($module, $object_name);
     }
 
     public function getEquipmentLines()
@@ -629,84 +649,90 @@ class ObjectLine extends BimpObject
         return array();
     }
 
-    public function getRemiseTotalInfos()
+    public function getRemiseTotalInfos($recalculate = false, $remise_globale_rate = null)
     {
-        $infos = array(
-            'line_percent'              => 0,
-            'line_amount_ht'            => 0,
-            'line_amount_ttc'           => 0,
-            'remise_globale_percent'    => 0,
-            'remise_globale_amount_ht'  => 0,
-            'remise_globale_amount_ttc' => 0,
-            'total_percent'             => 0,
-            'total_amount_ht'           => 0,
-            'total_amount_ttc'          => 0,
-            'total_ht_without_remises'  => 0,
-            'total_ttc_without_remises' => 0
-        );
+        if ($recalculate || is_null($this->remises_total_infos)) {
+            $this->remises_total_infos = array(
+                'line_percent'              => 0,
+                'line_amount_ht'            => 0,
+                'line_amount_ttc'           => 0,
+                'remise_globale_percent'    => 0,
+                'remise_globale_amount_ht'  => 0,
+                'remise_globale_amount_ttc' => 0,
+                'total_percent'             => 0,
+                'total_amount_ht'           => 0,
+                'total_amount_ttc'          => 0,
+                'total_ht_without_remises'  => 0,
+                'total_ttc_without_remises' => 0
+            );
 
-        if (!$this->isLoaded()) {
-            return $infos;
-        }
-
-        $total_ht = $this->getTotalHT();
-        $total_ttc = $this->getTotalTtcWithoutRemises();
-        $infos['total_ht_without_remises'] = $total_ht;
-        $infos['total_ttc_without_remises'] = $total_ttc;
-
-        if (!$this->isRemisable()) {
-            return $infos;
-        }
-
-        $remises = $this->getRemises();
-
-        $total_line_amounts = 0;
-
-        foreach ($remises as $remise) {
-            switch ((int) $remise->getData('type')) {
-                case ObjectLineRemise::OL_REMISE_PERCENT:
-                    $infos['line_percent'] += (float) $remise->getData('percent');
-                    break;
-
-                case ObjectLineRemise::OL_REMISE_AMOUNT:
-                    if ((int) $remise->getData('per_unit')) {
-                        $total_line_amounts += ((float) $remise->getData('montant') * (float) $this->qty);
-                    } else {
-                        $total_line_amounts += (float) $remise->getData('montant');
-                    }
-                    break;
+            if (!$this->isLoaded()) {
+                return $this->remises_total_infos;
             }
-        }
 
-        if ($total_line_amounts) {
-            $infos['line_percent'] += (float) (($total_line_amounts / $total_ttc) * 100);
-        }
+            $total_ht = $this->getTotalHT();
+            $total_ttc = $this->getTotalTtcWithoutRemises();
+            $this->remises_total_infos['total_ht_without_remises'] = $total_ht;
+            $this->remises_total_infos['total_ttc_without_remises'] = $total_ttc;
 
-        if ($infos['line_percent']) {
-            $infos['line_amount_ht'] = (float) ($total_ht * ($infos['line_percent'] / 100));
-            $infos['line_amount_ttc'] = (float) ($total_ttc * ($infos['line_percent'] / 100));
-        }
+            if (!$this->isRemisable()) {
+                return $this->remises_total_infos;
+            }
 
-        $parent = $this->getParentInstance();
+            $remises = $this->getRemises();
 
-        if ($this->isRemisable()) {
-            if ($parent->isLoaded()) {
-                if ($parent->field_exists('remise_globale')) {
-                    $remise_globale = (float) $parent->getRemiseGlobaleLineRate();
-                    if ($remise_globale > 0) {
-                        $infos['remise_globale_percent'] = $remise_globale;
-                        $infos['remise_globale_amount_ht'] = $total_ht * ($remise_globale / 100);
-                        $infos['remise_globale_amount_ttc'] = $total_ttc * ($remise_globale / 100);
+            $total_line_amounts = 0;
+
+            foreach ($remises as $remise) {
+                switch ((int) $remise->getData('type')) {
+                    case ObjectLineRemise::OL_REMISE_PERCENT:
+                        $this->remises_total_infos['line_percent'] += (float) $remise->getData('percent');
+                        break;
+
+                    case ObjectLineRemise::OL_REMISE_AMOUNT:
+                        if ((int) $remise->getData('per_unit')) {
+                            $total_line_amounts += ((float) $remise->getData('montant') * (float) $this->qty);
+                        } else {
+                            $total_line_amounts += (float) $remise->getData('montant');
+                        }
+                        break;
+                }
+            }
+
+            if ($total_line_amounts) {
+                $this->remises_total_infos['line_percent'] += (float) (($total_line_amounts / $total_ttc) * 100);
+            }
+
+            if ($this->remises_total_infos['line_percent']) {
+                $this->remises_total_infos['line_amount_ht'] = (float) ($total_ht * ($this->remises_total_infos['line_percent'] / 100));
+                $this->remises_total_infos['line_amount_ttc'] = (float) ($total_ttc * ($this->remises_total_infos['line_percent'] / 100));
+            }
+
+            $parent = $this->getParentInstance();
+
+            if ($this->isRemisable()) {
+                if ($parent->isLoaded()) {
+                    if ($parent->field_exists('remise_globale')) {
+                        if (is_null($remise_globale_rate)) {
+                            $remise_globale_rate = (float) $parent->getRemiseGlobaleLineRate($recalculate);
+                        } else {
+                            $remise_globale_rate = (float) $remise_globale_rate;
+                        }
+                        if ($remise_globale_rate > 0) {
+                            $this->remises_total_infos['remise_globale_percent'] = $remise_globale_rate;
+                            $this->remises_total_infos['remise_globale_amount_ht'] = $total_ht * ($remise_globale_rate / 100);
+                            $this->remises_total_infos['remise_globale_amount_ttc'] = $total_ttc * ($remise_globale_rate / 100);
+                        }
                     }
                 }
             }
+
+            $this->remises_total_infos['total_percent'] = round($this->remises_total_infos['line_percent'] + $this->remises_total_infos['remise_globale_percent'], 8);
+            $this->remises_total_infos['total_amount_ht'] = $this->remises_total_infos['line_amount_ht'] + $this->remises_total_infos['remise_globale_amount_ht'];
+            $this->remises_total_infos['total_amount_ttc'] = $this->remises_total_infos['line_amount_ttc'] + $this->remises_total_infos['remise_globale_amount_ttc'];
         }
 
-        $infos['total_percent'] = round($infos['line_percent'] + $infos['remise_globale_percent'], 8);
-        $infos['total_amount_ht'] = $infos['line_amount_ht'] + $infos['remise_globale_amount_ht'];
-        $infos['total_amount_ttc'] = $infos['line_amount_ttc'] + $infos['remise_globale_amount_ttc'];
-
-        return $infos;
+        return $this->remises_total_infos;
     }
 
     public function getClientDefaultRemiseFormValues()
@@ -731,22 +757,6 @@ class ObjectLine extends BimpObject
         }
 
         return array();
-    }
-
-    // Gettters - Overrides BimpObject:
-
-    public function isChild($instance)
-    {
-        if (is_a($instance, 'ObjectLineRemise')) {
-            $obj_type = $instance->getParentObjectType();
-            if (!$obj_type) {
-                if (isset($_POST['remises_sub_object_idx_object_type'])) {
-                    $instance->set('object_type', $_POST['remises_sub_object_idx_object_type']);
-                }
-            }
-        }
-
-        return parent::isChild($instance);
     }
 
     // Affichages: 
@@ -1017,8 +1027,7 @@ class ObjectLine extends BimpObject
     {
         $html = '';
         if ($this->isLoaded()) {
-            $this->calcRemise();
-            if ($this->isRemisable()) {                
+            if ($this->isRemisable()) {
                 $remises = $this->getRemiseTotalInfos();
                 if ((float) $remises['total_amount_ttc']) {
                     $html .= BimpTools::displayMoneyValue($remises['total_amount_ht'], 'EUR');
@@ -1238,7 +1247,7 @@ class ObjectLine extends BimpObject
                     return $errors;
                 }
             }
-            
+
             BimpCache::unsetDolObjectInstance((int) $id_line, 'comm/propal', 'propal', 'PropaleLigne');
 
             $object = $instance->dol_object;
@@ -1327,7 +1336,7 @@ class ObjectLine extends BimpObject
                     $errors[] = 'Type de ligne invalide';
                     break;
             }
-            
+
             if (!is_null($result) && $result <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Des erreurs sont survenues lors de la mise à jour de la ligne ' . BimpObject::getInstanceLabel($instance, 'to'));
             }
@@ -1343,9 +1352,9 @@ class ObjectLine extends BimpObject
         if (!$id_line) {
             return false;
         }
-        
+
         BimpCache::unsetDolObjectInstance((int) $id_line, 'comm/propal', 'propal', 'PropaleLigne');
-        
+
         $line = $this->getChildObject('line');
 
         if (!BimpObject::objectLoaded($line)) {
@@ -1709,12 +1718,12 @@ class ObjectLine extends BimpObject
         }
     }
 
-    public function calcRemise()
+    public function calcRemise($remise_globale_rate = null)
     {
         if ($this->isLoaded()) {
-            $remises_infos = $this->getRemiseTotalInfos();
-            if ((float) $this->remise !== $remises_infos['total_percent'] ||
-                    $remises_infos['total_percent'] !== (float) $this->getData('remise') || 
+            $remises_infos = $this->getRemiseTotalInfos(true, $remise_globale_rate);
+            if ((float) $this->remise !== (float) $remises_infos['total_percent'] ||
+                    $remises_infos['total_percent'] !== (float) $this->getData('remise') ||
                     $remises_infos['total_percent'] !== (float) $this->getInitData('remise')) {
                 $this->update($warnings, true);
             }
@@ -2299,7 +2308,7 @@ class ObjectLine extends BimpObject
     public function reset()
     {
         BimpCache::unsetDolObjectInstance((int) $this->getData('id_line'), 'comm/propal', 'propal', 'PropaleLigne');
-        
+
         $this->id_product = null;
         $this->id_fourn_price = null;
         $this->desc = null;
@@ -2533,10 +2542,11 @@ class ObjectLine extends BimpObject
             return array(BimpTools::ucfirst($parent->getLabel('the')) . ' n\'a pas le statut "brouillon". Mise à jour de la ligne impossible');
         }
 
+        $line = $this->getChildObject('line');
+
         if ((int) $this->id_product) {
             $product = $this->getProduct();
             if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
-                $line = $this->getChildObject('line');
 
                 if (!BimpObject::objectLoaded($line)) {
                     return array('ID de la ligne correspondante absent');
@@ -2669,19 +2679,24 @@ class ObjectLine extends BimpObject
             $this->remises = null;
         }
 
-        $remises = $this->getRemiseTotalInfos();
-        $this->remise = (float) $remises['total_percent'];
-        $this->set('remise', (float) $remises['total_percent']);
+        $initial_remise = (float) $this->getData('remise');
+        $this->remise = $initial_remise;
 
         $errors = parent::update($warnings, $force_update);
         $errors = array_merge($errors, $this->updateLine(false));
 
         if (!count($errors)) {
-            $parent = $this->getParentInstance();
+            $remises = $this->getRemiseTotalInfos(true);
+            if ($initial_remise !== (float) $remises['total_percent']) {
+                $this->remise = (float) $remises['total_percent'];
+                $this->set('remise', (float) $remises['total_percent']);
+                $new_warnings = array();
+                $errors = $this->update($new_warnings, $force_update);
+            }
             if (BimpObject::objectLoaded($parent)) {
                 if ($parent->field_exists('remise_globale') &&
                         (float) $parent->getData('remise_globale')) {
-                    $warnings[] = 'Attention: le montant de la remise globale a pu être modifié';
+                    $warnings[] = 'Attention: le montant de la remise globale a pu être modifié. Veuillez vérifier.';
                 }
             }
         }

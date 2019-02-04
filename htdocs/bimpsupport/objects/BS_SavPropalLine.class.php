@@ -302,6 +302,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
         $errors = parent::update($warnings, $force_update);
 
         if (!count($errors)) {
+
             $sav_errors = $this->updateSav();
 
             if (count($sav_errors)) {

@@ -1017,12 +1017,13 @@ class ObjectLine extends BimpObject
     {
         $html = '';
         if ($this->isLoaded()) {
-            if ($this->isRemisable()) {
+            $this->calcRemise();
+            if ($this->isRemisable()) {                
                 $remises = $this->getRemiseTotalInfos();
                 if ((float) $remises['total_amount_ttc']) {
                     $html .= BimpTools::displayMoneyValue($remises['total_amount_ht'], 'EUR');
                     $html .= ' / ' . BimpTools::displayMoneyValue($remises['total_amount_ttc'], 'EUR');
-                    $html .= ' (' . round($remises['total_percent'], 4) . '%)';
+                    $html .= ' (' . round($remises['total_percent'], 4) . '%, ' . round($this->remise, 4) . '%)';
                 }
             } else {
                 $html = '<span class="warning">Non remisable</span>';
@@ -1713,7 +1714,8 @@ class ObjectLine extends BimpObject
         if ($this->isLoaded()) {
             $remises_infos = $this->getRemiseTotalInfos();
             if ((float) $this->remise !== $remises_infos['total_percent'] ||
-                    $remises_infos['total_percent'] !== (float) $this->getData('remise')) {
+                    $remises_infos['total_percent'] !== (float) $this->getData('remise') || 
+                    $remises_infos['total_percent'] !== (float) $this->getInitData('remise')) {
                 $this->update($warnings, true);
             }
         }

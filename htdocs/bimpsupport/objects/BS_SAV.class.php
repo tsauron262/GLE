@@ -1694,9 +1694,7 @@ class BS_SAV extends BimpObject
                 $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
                 if ($product->isLoaded()) {
                     if (!(int) $line->getData('out_of_warranty')) {
-//                        $line->fetch($line->id);
-//                        echo $line->qty;
-//                        exit;
+                        $line->fetch($line->id);
                         $remise = (float) $line->remise;
                         $coefRemise = (100 - $remise) / 100;
                         $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
@@ -1713,34 +1711,25 @@ class BS_SAV extends BimpObject
             'linked_object_name' => 'sav_apple_part'
         )) as $line) {
             if (!(int) $line->getData('out_of_warranty')) {
-                $garantieHt += ((float) $line->pu_ht * (float) $line->qty);
-                $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100));
+                $line->fetch($line->id);
+                $remise = (float) $line->remise;
+                $coefRemise = (100 - $remise) / 100;
+                $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
+                $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
                 $garantiePa += (float) $line->pa_ht * (float) $line->qty;
             } else {
                 $this->allGarantie = false;
             }
         }
 
-        $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
-
-        $rows = $line->getList(array(
+        $line = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
             'id_obj'             => (int) $propal->id,
             'linked_id_object'   => (int) $this->id,
             'linked_object_name' => 'sav_garantie'
-                ), null, null, 'position', 'asc', 'array', array('id'));
-
-        if ($rows > 1) {
-            foreach ($rows as $idx => $r) {
-                if ($idx === 0) {
-                    continue;
-                }
-                $line->fetch((int) $r['id']);
-                $line->delete();
-            }
-        }
-
-        if (isset($rows[0]['id']) && (int) $rows[0]['id']) {
-            $line->fetch((int) $rows[0]['id']);
+                ), true, true);
+        
+        if (!BimpObject::objectLoaded($line)) {
+            $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
         }
 
         $line_errors = array();
@@ -1771,13 +1760,14 @@ class BS_SAV extends BimpObject
 
             $error_label = '';
             if (!$line->isLoaded()) {
+//                echo 'New Garantie: '.$garantieHt.'<br/>';
                 $error_label = 'création';
                 $line_errors = $line->create($line_warnings, true);
             } else {
+//                echo 'Maj Garantie: '.$garantieHt.'<br/>';
                 $error_label = 'mise à jour';
                 $line_errors = $line->update($line_warnings, true);
             }
-            $line_errors = array_merge($line_errors, $line_warnings);
         } else {
             if ($line->isLoaded()) {
                 $error_label = 'suppression';
@@ -2305,7 +2295,8 @@ class BS_SAV extends BimpObject
                             'linked_object_name' => '',
                             'id_reservation'     => 0,
                             'out_of_warranty'    => 1,
-                            'position'           => (int) $line['rang']
+                            'position'           => (int) $line['rang'],
+                            'remisable'          => 0
                         );
                         $insert = false;
                         if ((string) $line['description']) {
@@ -2356,6 +2347,7 @@ class BS_SAV extends BimpObject
                                                 $data['def_pu_ht'] = (float) $line['subprice'];
                                                 $data['def_tva_tx'] = (float) $line['tva_tx'];
                                                 $data['def_id_fourn_price'] = (int) $line['fk_product_fournisseur_price'];
+                                                $data['remisable'] = 1;
                                                 $insert = true;
                                                 unset($sav_products[$idx]);
                                                 $insert = true;
@@ -2376,6 +2368,7 @@ class BS_SAV extends BimpObject
                                         $data['linked_object_name'] = 'sav_apple_part';
                                         $data['linked_id_object'] = (int) $part['id'];
                                         $data['out_of_warranty'] = (int) $part['out_of_warranty'];
+                                        $data['remisable'] = 1;
                                         unset($apple_parts[$idx]);
                                         $insert = true;
                                         break;
@@ -2428,7 +2421,8 @@ class BS_SAV extends BimpObject
                             'linked_object_name' => '',
                             'id_reservation'     => 0,
                             'out_of_warranty'    => 1,
-                            'position'           => (int) $line['rang']
+                            'position'           => (int) $line['rang'],
+                            'remisable'          => 1
                         );
                         $id_new_line = (int) $this->db->insert('bs_sav_propal_line', $data, true);
                         if ($id_new_line <= 0) {
@@ -2709,6 +2703,7 @@ class BS_SAV extends BimpObject
                                 if (!BimpObject::objectLoaded($apple_part)) {
                                     $propalLine->set('deletable', 1);
                                     $propalLine->set('editable', 1);
+                                    $propalLine->set('remisable', 1);
                                     $propalLine->set('linked_id_object', 0);
                                     $propalLine->set('linked_object_name', '');
                                 }

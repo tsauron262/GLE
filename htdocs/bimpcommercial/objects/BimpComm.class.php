@@ -167,9 +167,9 @@ class BimpComm extends BimpObject
         return 0;
     }
 
-    public function getRemiseGlobaleLineRate()
+    public function getRemiseGlobaleLineRate($recalculate = false)
     {
-        if (is_null($this->remise_globale_line_rate)) {
+        if ($recalculate || is_null($this->remise_globale_line_rate)) {
             $this->remise_globale_line_rate = 0;
 
             $remise_globale = (float) $this->getData('remise_globale');
@@ -1563,8 +1563,9 @@ class BimpComm extends BimpObject
                 if ($remise_globale) {
                     $new_object->updateField('remise_globale', $remise_globale);
                     $lines = $new_object->getChildrenObjects('lines');
+                    $remise_globale_lines_rate = (float) $this->getRemiseGlobaleLineRate(true);
                     foreach ($lines as $line) {
-                        $line->calcRemise();
+                        $line->calcRemise($remise_globale_lines_rate);
                     }
                 }
 
@@ -1656,12 +1657,11 @@ class BimpComm extends BimpObject
             if (is_a($child, 'objectLine')) {
                 // Vérification du changement de taux de remise globale: 
                 $current_rate = (float) $this->remise_globale_line_rate;
-                $this->remise_globale_line_rate = null;
-                $new_rate = (float) $this->getRemiseGlobaleLineRate();
+                $new_rate = (float) $this->getRemiseGlobaleLineRate(true);
 
                 if ($new_rate !== $current_rate) {
                     foreach ($this->getChildrenObjects('lines') as $line) {
-                        $line->calcRemise();
+                        $line->calcRemise($new_rate);
                     }
                 }
             }
@@ -2088,8 +2088,9 @@ class BimpComm extends BimpObject
 
                     if (!count($errors)) {
                         $lines = $this->getChildrenObjects('lines');
+                        $remise_globale_lines_rate = (float) $this->getRemiseGlobaleLineRate(true);
                         foreach ($lines as $line) {
-                            $line->calcRemise();
+                            $line->calcRemise($remise_globale_lines_rate);
                         }
                     }
                 }

@@ -302,6 +302,7 @@ class BS_ApplePart extends BimpObject
                     'linked_id_object'   => (int) $this->id,
                     'linked_object_name' => 'sav_apple_part',
                     'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
+                    'remisable'          => 1
                 ));
                 if (!count($line_errors)) {
                     $label = $this->getData('part_number') . ' - ' . $this->getData('label');
@@ -312,18 +313,18 @@ class BS_ApplePart extends BimpObject
                     $line->desc = $label;
                     $line->qty = (int) $this->getData('qty');
                     $line->tva_tx = 20;
-                    
+
                     $type = self::getCategProdApple($this->getData('part_number'), $this->getData('label'));
                     $line->pu_ht = $this->convertPrix($type, $line->pa_ht, $this->getData('part_number'), $this->getData('label'));
-                    
-                    if($type == "ecran" && isset(self::$tabRefCommencePrixEcran[$this->getData('part_number')][1])){
+
+                    if ($type == "ecran" && isset(self::$tabRefCommencePrixEcran[$this->getData('part_number')][1])) {
                         $lineT = BimpObject::getInstance("bimpsupport", "BS_SavPropalLine");
                         $lineT->id_product = self::$tabRefCommencePrixEcran[$this->getData('part_number')][1];
-                        $values = array("type"=>1, "id_obj"=>$sav->getData('id_propal'));
+                        $values = array("type" => 1, "id_obj" => $sav->getData('id_propal'));
                         $errorsT = $lineT->validateArray($values);
-                        if(count($errorsT) == 0)
+                        if (count($errorsT) == 0)
                             $errorsT = $lineT->create();
-                        
+
                         if (count($errorsT)) {
                             $errors = array_merge($errors, $errorsT);
                         }
@@ -393,6 +394,7 @@ class BS_ApplePart extends BimpObject
                     'linked_id_object'   => (int) $this->id,
                     'linked_object_name' => 'sav_apple_part',
                     'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
+                    'remisable'          => 1
                 ));
 
                 if (!count($line_errors)) {

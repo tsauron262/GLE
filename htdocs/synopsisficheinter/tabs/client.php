@@ -1,6 +1,7 @@
 <?php
 require_once("../../main.inc.php");
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/synopsisfichinter/class/synopsisfichinter.class.php';
 
 llxHeader($js, "Intervnetion en rapport avec le client");
 

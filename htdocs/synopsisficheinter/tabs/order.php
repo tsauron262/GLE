@@ -1,11 +1,12 @@
 <?php
 require_once("../../main.inc.php");
+require_once(DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php');
+require_once(DOL_DOCUMENT_ROOT . "/core/lib/order.lib.php");
+require_once DOL_DOCUMENT_ROOT.'/synopsisfichinter/class/synopsisfichinter.class.php';
 
 llxHeader($js, "Intervnetion en rapport avec la commande");
 
 $id = GETPOST("id");
-require_once(DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php');
-require_once(DOL_DOCUMENT_ROOT . "/core/lib/order.lib.php");
 $commande = new Commande($db);
 $commande->fetch($id);
 $head = commande_prepare_head($commande);

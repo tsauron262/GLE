@@ -31,13 +31,17 @@ if ($_SESSION['login'] != LOGIN or $_SESSION['pw'] != PASSWORD) {
     <title>Authentification sauvegarde</title>
 </head>
 <body>
-    <form action="index.php"  method="post">
-        <label for="login"><b>Login</b></label>
-        <input type="text" placeholder="Entrez le nom de l\'utilisateur" name="login" required><br/>
-        <label for="pw"><b>Mot de passe</b></label>
-        <input type="password" placeholder="Entrez le mot de passe" name="pw" required><br/>
-        <button type="submit">Se connecter</button>
-    </form>
+    <div class="container" style="text-align: center">
+        <div class="greyBorder">
+            <form action="index.php"  method="post">
+                <label for="login"><b>Login</b></label>
+                <input type="text" placeholder="Entrez le nom de l\'utilisateur" name="login" required><br/>
+                <label for="pw"><b>Mot de passe</b></label>
+                <input type="password" placeholder="Entrez le mot de passe" name="pw" required><br/>
+                <button type="submit">Se connecter</button>
+            </form>
+        </div>
+    </div>
 </body>';
     die();
 }

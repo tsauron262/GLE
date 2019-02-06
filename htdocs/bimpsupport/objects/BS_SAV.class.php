@@ -1942,6 +1942,7 @@ class BS_SAV extends BimpObject
             case 'repOk':
                 $subject = $this->getData('ref') . " Reparation  terminee";
                 $mail_msg = "Nous avons le plaisir de vous annoncer que la réparation de votre \"$nomMachine\" est finie.\n";
+                $mail_msg .= "Voici ce que nous avons fait : ".$this->getData("resolution")."\n";
                 $mail_msg .= "Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel;
                 $sms = "Bonjour, la réparation de votre produit est finie. Vous pouvez le récupérer à " . $nomCentre . " " . $delai . ".\nL'Equipe BIMP.";
                 break;

@@ -5,12 +5,14 @@ $return = 0;
 
 $forceRightEdit = false;
 
-if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
+if (isset($_POST['url']) && isset($_POST['type']) && ($_POST['type'] == 'note' || $_POST['type'] == 'note2')) {
     $url = $_POST['url'];
 
     $nomId = "id";
     $nomChampId = 'rowid';
     $nomChampNote = "note_public";
+    if($_POST['type'] == 'note2')
+        $nomChampNote = "note_private";
 
 
     if (stripos($url, '/societe/') !== false

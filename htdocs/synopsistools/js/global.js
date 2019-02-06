@@ -677,16 +677,24 @@ function ajNoteAjax() {
     for (tab of tabs)
         if ($("a#" + tab).length > 0) {
             i++;
-            ajNote(tab, i);
+            ajNote(tab, i, 'note');
+
+        }
+    
+    
+    for (tab of tabs)
+        if ($("a#" + tab).length > 0) {
+            i++;
+            ajNote(tab, i, 'note2');
 
         }
 }
 
-function  ajNote(tab, i) {
+function  ajNote(tab, i, type) {
     var idNote = 'noteAjax' + i;
     fermable = true;
     var datas = 'url=' + window.location;
-    datas = datas + '&type=note&tab=' + tab;
+    datas = datas + '&type='+type+'&tab=' + tab;
     jQuery.ajax({
         url: DOL_URL_ROOT + '/synopsistools/ajax/note_ajax.php',
         data: datas,
@@ -704,7 +712,18 @@ function  ajNote(tab, i) {
                     classEdit = "editable";
                     msg = msg.replace("[1]", "");
                 }
-                var htmlDiv = '<div class="noteAjax" id="' + idNote + '"><div class="note">Note (publique) :<br><div class="' + classEdit + ' notePublicEdit" id="notePublicEdit' + i + '" title="Editer">' + msg + '</div></div></div>';
+                style = "margin-top: 20px;";
+                if(type == "note")
+                    titre = 'Note (publique)';
+                else if(type == "note2"){
+                    titre = 'Note (privee)';
+                    style += "margin-left: 400px;";
+                }
+                else
+                    titre = 'Note';
+                    
+                
+                var htmlDiv = '<div class="noteAjax" style="'+style+'" id="' + idNote + '"><div class="note">'+titre+' :<br><div class="' + classEdit + ' notePublicEdit" id="notePublicEdit' + i + '" title="Editer">' + msg + '</div></div></div>';
                 $('.fiche').append(htmlDiv);
                 //                var htmlDiv  = '<div class="control"><input class="controlBut" type="button" value="<"/></div>';
                 //                $('a#note').append(htmlDiv);

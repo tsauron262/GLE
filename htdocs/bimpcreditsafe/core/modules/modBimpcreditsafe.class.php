@@ -57,7 +57,8 @@ class modBimpcreditsafe extends DolibarrModules {
         
         
         $this->module_parts = array(
-            'hooks' => array('thirdpartycard')
+            'hooks' => array('thirdpartycard'),
+            'triggers' => 1
         );
     }
 

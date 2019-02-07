@@ -373,6 +373,21 @@ if (empty($reshook))
             $error++;
 
         }
+        if (! GETPOST('address'))
+        {
+            setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Adresse")), null, 'errors');
+            $error++;
+        }
+        if (! GETPOST('zipcode'))
+        {
+            setEventMessages($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Code postal")), null, 'errors');
+            $error++;
+        }
+        if (GETPOST('zipcode') && sizeof(GETPOST('zipcode')) < 5)
+        {            
+            setEventMessages($langs->trans("ErrorFieldFormat", $langs->transnoentitiesnoconv("Code postal")), null, 'errors');
+            $error++;
+        }
 
         if (! $error)
         {
@@ -1205,13 +1220,13 @@ else
         }
 
         // Address
-        print '<tr><td class="tdtop">'.fieldLabel('Address','address').'</td>';
+        print '<tr><td class="tdtop">'.fieldLabel('Address','address',1).'</td>';
 	    print '<td colspan="3"><textarea name="address" id="address" class="quatrevingtpercent" rows="'.ROWS_2.'" wrap="soft">';
         print $object->address;
         print '</textarea></td></tr>';
 
         // Zip / Town
-        print '<tr><td>'.fieldLabel('Zip','zipcode').'</td><td>';
+        print '<tr><td>'.fieldLabel('Zip','zipcode',1).'</td><td>';
         print $formcompany->select_ziptown($object->zip,'zipcode',array('town','selectcountry_id','state_id'), 0, 0, '', 'maxwidth100 quatrevingtpercent');
         print '</td><td>'.fieldLabel('Town','town').'</td><td>';
         print $formcompany->select_ziptown($object->town,'town',array('zipcode','selectcountry_id','state_id'), 0, 0, '', 'maxwidth100 quatrevingtpercent');

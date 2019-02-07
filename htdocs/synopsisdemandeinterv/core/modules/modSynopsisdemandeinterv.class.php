@@ -213,8 +213,7 @@ class modsynopsisdemandeinterv  extends DolibarrModules
   `total_ttc` double default NULL,
   `dateStat` int(11) NOT NULL,
   PRIMARY KEY  (`rowid`),
-  UNIQUE KY `ref` (`ref`),
-  KEY `idx_synopsisdemandeinterv_fk_soc` (`fk_soc`)
+  UNIQUE KY `ref` (`ref`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2280 ;";
         
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisdemandeintervdet` (

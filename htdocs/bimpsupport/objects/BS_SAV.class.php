@@ -1935,7 +1935,9 @@ class BS_SAV extends BimpObject
 
             case 'commOk':
                 $subject = 'Commande piece(s) ' . $this->getData('ref');
-                $mail_msg = "Nous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. Nous restons à votre disposition pour toutes questions au " . $tel;
+                $mail_msg = "Nous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. ";
+                $mail_msg .= "\n Voici nottre diagnostique : " . $this->getData("diagnostic");
+                $mail_msg .= "\n Nous restons à votre disposition pour toutes questions au " . $tel;
                 $sms = "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci.\nL'équipe BIMP";
                 break;
 

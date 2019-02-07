@@ -212,8 +212,7 @@ class modsynopsisdemandeinterv  extends DolibarrModules
   `total_tva` double default NULL,
   `total_ttc` double default NULL,
   `dateStat` int(11) NOT NULL,
-  PRIMARY KEY  (`rowid`),
-  UNIQUE KY `ref` (`ref`)
+  PRIMARY KEY  (`rowid`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2280 ;";
         
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisdemandeintervdet` (

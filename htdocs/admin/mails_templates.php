@@ -33,6 +33,11 @@
  */
 
 require '../main.inc.php';
+
+if($user->rights->SynopsisTools->mail->write)
+    $user->admin = true;
+
+
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formadmin.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';

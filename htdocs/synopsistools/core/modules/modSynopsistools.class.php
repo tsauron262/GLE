@@ -131,6 +131,13 @@ class modSynopsistools extends DolibarrModules
         $this->rights[$r][4] = 'Commande'; // Famille
         $this->rights[$r][5] = 'defaultViewMy'; // Droit
         $r ++;
+        
+        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][1] = 'Modifié les modéles de mails';
+        $this->rights[$r][3] = 0; // Default
+        $this->rights[$r][4] = 'mail'; // Famille
+        $this->rights[$r][5] = 'write'; // Droit
+        $r ++;
 
 
 
@@ -232,6 +239,20 @@ class modSynopsistools extends DolibarrModules
                             'langs'=>'',
                             'position'=>1304,
                             'perms'=>'$user->rights->SynopsisTools->Global->fileInfo',
+                            'target'=>'',
+                            'user'=>0);
+        $s = $r;
+        $r++;
+        
+        
+        $this->menu[$r]=array('fk_menu' => 'fk_mainmenu=SynopsisTools,fk_leftmenu=tools',
+                            'type'=>'left',
+                            'titre'=>'Modéle de mails',
+                            'mainmenu'=>'SynopsisTools',
+                            'url'=>'/admin/mails_templates.php',
+                            'langs'=>'',
+                            'position'=>1304,
+                            'perms'=>'$user->rights->SynopsisTools->mail->write',
                             'target'=>'',
                             'user'=>0);
         $s = $r;

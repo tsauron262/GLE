@@ -136,6 +136,20 @@ class BimpValidateOrder {
         $contacts = $order->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
         foreach($contacts as $contact)
                 mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, vottre commande ".$order->getNomUrl(1). " est validée.");
+        
+        
+        
+        foreach($order->lines as $line){
+            if(stripos($line->ref, "REMISECRT") !== false){
+                $order->array_options['options_crt'] = 2;
+                $order->updateExtraField('crt');
+            }
+            if(stripos($line->desc, "Applecare") !== false){
+                $order->array_options['options_apple_care'] = 2;
+                $order->updateExtraField('apple_care');
+            }
+        }
+        
 
         return 1;
     }

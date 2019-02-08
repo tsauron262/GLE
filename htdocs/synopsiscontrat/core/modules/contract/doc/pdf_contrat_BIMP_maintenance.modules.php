@@ -152,21 +152,68 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
     }
     
     public function display_lines($pdf, $lines) {
-        $count = count($lines);
         $pdf->SetFont(''/* 'Arial' */, '', 7);
         $pdf->setColor('fill',242, 242, 242);
         $pdf->SetTextColor(0,0,0);
         $pdf->setDrawColor(255,255,255);
         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 13;
         foreach($lines as $line) {
-            $pdf->Cell($W * 5, 8, $line->description, 1, null, 'L', true);
+            $pdf->Cell($W * 5, 8, (strlen($line->description) > 40) ? substr($line->description, 0, 40) . " ..." :$line->description, 1, null, 'L', true);
             $pdf->Cell($W, 8, number_format($line->tva_tx, 0, '', '')  . "%", 1, null, 'C', true);
             $pdf->Cell($W * 2, 8, number_format($line->price_ht, 2, '.', '') . "€", 1, null, 'C', true);
             $pdf->Cell($W, 8, $line->qty, 1, null, 'C', true);
             $pdf->Cell($W * 2, 8, number_format($line->total_ht, 2, '.', '') . "€", 1, null, 'C', true);
             $pdf->Cell($W * 2, 8, number_format($line->total_ttc, 2, '.', '') . '€', 1, null, 'C', true);
+            $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, "", 0, 'C');
         }
         $pdf->SetTextColor(0,0,0);
+    }
+    
+    public function display_total($pdf, $lines) {
+        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 13;
+        $total = $this->get_totaux($lines);
+        $taux_tva_text = "TOTAL TVA ";
+        //print_r($total);
+        foreach($total as $designation => $valeur){
+            //echo $designation;
+            if($designation == 'TVA') {
+                foreach($total->TVA as $taux => $montant) {
+                    $pdf->setColor('fill', 255, 255, 255);
+                    $pdf->Cell($W * 5, 8, "", 1, null, 'L', true);
+                    $pdf->Cell($W, 8, "", 1, null, 'C', true);
+                    $pdf->Cell($W * 2, 8, "", 1, null, 'C', true);
+                    $pdf->Cell($W, 8, "", 1, null, 'C', true);
+                    $pdf->setColor('fill', 230, 230, 230);
+                    $pdf->Cell($W * 2, 8, (!is_float($taux)) ? $taux_tva_text . number_format($taux, 0, '', '') . "%" : $taux_tva_text . number_format($taux, 2,'.', '') . "%", 1, null, 'L', true);
+                    $pdf->Cell($W * 2, 8, number_format($montant, 2, '.', "") . "€", 1, null, 'C', true);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, "", 0, 'C');
+                }
+            } else {
+                $pdf->setColor('fill', 255, 255, 255);
+                $pdf->Cell($W * 5, 8, "", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "", 1, null, 'C', true);
+                $pdf->Cell($W * 2, 8, "", 1, null, 'C', true);
+                $pdf->Cell($W, 8, "", 1, null, 'C', true);
+                $pdf->setColor('fill', 230, 230, 230);
+                $pdf->setFont('', 'B', 8);
+                $pdf->Cell($W * 2, 8, "TOTAL $designation" , 1, null, 'L', true);
+                $pdf->Cell($W * 2, 8, "", 1, null, 'L', true);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, "", 0, 'C');
+            }
+        } 
+    }
+    
+    public function get_totaux($lines) {
+        $total_ttc = 0;
+        $total_ht = 0;
+        $tva = Array();
+        
+        foreach($lines as $line) {
+            $total_ht += $line->total_ht;
+            $total_ttc += $line->total_ttc;
+            $tva[$line->tva_tx] += $line->total_tva;
+        }
+        return (object) Array('HT' => $total_ht,'TVA' => $tva, 'TTC' => $total_ttc);
     }
     
     function write_file($contrat,$outputlangs='')
@@ -339,7 +386,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
                 $pdf->SetFont('', 'B', 9);
                 $pdf->Cell($W * 2.5, 8, "Reconduction : ", 1, null, 'L', true);
                 $pdf->SetFont('', '', 9);
-                $pdf->Cell($W * 1.5, 8, (is_null($extra->options_tacite)) ? "NON" : $extra->options_tacite, 1, null, 'L', true);
+                $pdf->Cell($W * 1.5, 8, (is_null($extra->options_tacite)) ? "NON" : $extra->options_tacite . " fois", 1, null, 'L', true);
                 
                 
                 $pdf->SetFont('', 'BU', 13);
@@ -352,9 +399,10 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
                 $pdf->setColor('fill', 255, 255, 255);
                 $this->headOfArray($pdf);
                 
+                $count = count($contrat->lines);
                 
                 $this->display_lines($pdf, $contrat->lines);
-                
+                $this->display_total($pdf, $contrat->lines);
                 
 //                $colTVA = (float) 20;
 //                $colPU = (float) 0;
@@ -466,7 +514,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
 
     function _pagefoot(&$pdf,$outputlangs)
     {
-
+        
     }
 
 

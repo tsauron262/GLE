@@ -362,7 +362,7 @@ class Synopsis_Contrat extends Contrat {
                      LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont ON " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont.element_id = " . MAIN_DB_PREFIX . "contratdet.rowid AND " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont.element_type LIKE 'contrat%'
                          WHERE fk_contrat =" . $id;
         $sql = $this->db->query($requete);
-        echo $requete;
+        
         while ($res = $this->db->fetch_object($sql)) {
             $this->lineTkt[$res->rowid] = array(
                 'serial_number' => $res->serial_number,

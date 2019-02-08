@@ -264,7 +264,6 @@ $tabModel = array(
         $extrafields->addExtraField('syntec', 'Indice SYNTEC', 'float', 1, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('date_start', 'Date de début', 'date', 38, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('duree_mois', 'Durée en mois', 'int', 37, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
-        $extrafields->addExtraField('duree_mois', 'Durée en mois', 'int', 37, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('denounce', 'Contrat dénoncé', 'select', 100, 30, 'contrat', 0, 0, "", 
             array( 'options' => array(
                     0 => 'Non',

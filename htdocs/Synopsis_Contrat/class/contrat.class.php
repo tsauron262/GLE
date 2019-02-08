@@ -362,6 +362,7 @@ class Synopsis_Contrat extends Contrat {
                          WHERE " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.contratdet_refid = " . MAIN_DB_PREFIX . "contratdet.rowid
                            AND fk_contrat =" . $id;
         $sql = $this->db->query($requete);
+        echo $requete;
         while ($res = $this->db->fetch_object($sql)) {
             $this->lineTkt[$res->rowid] = array(
                 'serial_number' => $res->serial_number,

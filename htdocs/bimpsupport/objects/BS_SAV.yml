@@ -719,6 +719,12 @@ lists_cols:
         field: total
         child: propal
         label: Total TTC Devis
+    symptomes:
+        field: symptomes
+    diagnostic:
+        field: diagnostic
+    resolution:
+        field: resolution
                         
 filters_panels: 
     default: 

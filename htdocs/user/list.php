@@ -125,7 +125,7 @@ $search_previousconn=GETPOST('search_previousconn','alpha');
 $optioncss = GETPOST('optioncss','alpha');
 
 // Default search
-if ($search_statut == '') $search_statut='1';
+//if ($search_statut == '') $search_statut='1';
 if ($mode == 'employee') $search_employee=1;
 
 

@@ -3,9 +3,9 @@
 include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 
 //die(md5("admin:BaikalDAV:"."admin@synopsis"));
-class object {
-    
-}
+//class object {
+//    
+//}
 
 class synopsisHook {//FA1506-0369
 
@@ -46,7 +46,7 @@ class synopsisHook {//FA1506-0369
 
         if (($modDev == 1 && !$builddoc && !$viewDoc) || ($modDev == 1))
             error_reporting(E_ALL);
-        elseif (modDev == 2)
+        elseif ($modDev == 2)
             error_reporting(E_ALL ^ (E_NOTICE));
         else
             error_reporting(E_ALL ^ (E_NOTICE | E_STRICT | E_WARNING | E_DEPRECATED));

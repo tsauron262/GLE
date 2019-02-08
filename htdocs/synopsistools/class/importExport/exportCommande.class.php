@@ -175,6 +175,8 @@ class exportCommande extends export8sens {
                 $PcvPAdpZip = ($contact->zip != "") ?$contact->zip : $societe->zip;
                 $PcvPAdpCity = ($contact->town != "") ?$contact->town : $societe->town;
             }
+            $PcvLAdpRue1 = str_replace("\n", "", $PcvLAdpRue1);
+            $PcvPAdpRue1 = str_replace("\n", "", $PcvPAdpRue1);
             
 //            echo "<pre>";
 //            print_r($contact);

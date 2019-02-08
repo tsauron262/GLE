@@ -1012,6 +1012,7 @@ class BF_Demande extends BimpObject
 
     public function renderInfoFin()
     {
+        $this->checkObject();
         $html .= '<table class="bimp_list_table">';
         $html .= '<tr>';
         $html .= '<th>Total emprunt</th>';

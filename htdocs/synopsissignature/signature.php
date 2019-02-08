@@ -33,7 +33,7 @@ $socid = isset($_GET["socid"]) ? $_GET["socid"] : '';
 if ($user->societe_id)
     $socid = $user->societe_id;
 if (!$invite)
-    $result = restrictedArea($user, 'synopsischrono', $socid, '', '', 'Afficher');
+    $result = restrictedArea($user, 'propal', $socid, '', '', 'Afficher');
 else {
     if ($code != "nc" && $code != "" && $code != 0) {
 //        $tabRes = getElementElement("demSign", null, $code);

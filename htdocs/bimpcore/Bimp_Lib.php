@@ -34,6 +34,8 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'components/BC_Search.php';
     require_once $dir . 'components/BC_Card.php';
     require_once $dir . 'components/BC_Panel.php';
+    require_once $dir . 'components/BC_Filter.php';
+    require_once $dir . 'components/BC_FiltersPanel.php';
     require_once $dir . 'components/BC_List.php';
     require_once $dir . 'components/BC_ListTable.php';
     require_once $dir . 'components/BC_ListViews.php';

@@ -132,12 +132,20 @@ function reloadObjectList(list_id, callback) {
         data['param_joins'] = joins;
     }
 
-    // Filtres: 
+    // Filtres prédéfinis: 
     if ($list.find('input[name=param_list_filters]').length) {
         data['param_list_filters'] = $list.find('input[name=param_list_filters]').val();
     }
     if ($list.find('input[name=param_association_filters]').length) {
         data['param_association_filters'] = $list.find('input[name=param_association_filters]').val();
+    }
+
+    // Panneau Filtres utilisateur: 
+    var $listFilters = $list.find('.object_filters_panel');
+    if ($listFilters.length) {
+        if ($listFilters.data('list_identifier') === $list.attr('id')) {
+            data['filters_panel_values'] = getAllListFieldsFilters($listFilters);
+        }
     }
 
     // Envoi requête:
@@ -169,6 +177,18 @@ function reloadObjectList(list_id, callback) {
                     bimpAjax.$list.find('.listPagination').each(function () {
                         $(this).html('').parent('td').parent('tr.paginationContainer').hide();
                     });
+                }
+
+                if (result.filters_panel_html) {
+                    bimpAjax.$list.find('.listFiltersPanelContainer').each(function () {
+                        $(this).html(result.filters_panel_html);
+                    });
+                    bimpAjax.$list.find('.headerTools').find('.openFiltersPanelButton').show();
+                } else {
+                    bimpAjax.$list.find('.listFiltersPanelContainer').each(function () {
+                        $(this).hide();
+                    });
+                    bimpAjax.$list.find('.headerTools').find('.openFiltersPanelButton').removeClass('action-close').addClass('action-open').hide();
                 }
 
                 onListRefeshed(bimpAjax.$list);
@@ -988,11 +1008,10 @@ function onListLoaded($list) {
         return;
     }
 
-//    bimp_msg($list.attr('id'));
-
     if (!parseInt($list.data('loaded_event_processed'))) {
         $list.data('loaded_event_processed', 1);
 
+        var $table = $list.find('table.objectlistTable');
         var $tbody = $list.find('tbody.listRows');
 
         if ($tbody.find('tr.objectListItemRow').length > 10) {
@@ -1021,6 +1040,21 @@ function onListLoaded($list) {
 
         var $tools = $list.find('.headerTools');
         if ($tools.length) {
+            $tools.find('.openFiltersPanelButton').click(function () {
+                var $filtersPanel = $list.find('.listFiltersPanelContainer');
+                if ($filtersPanel.length) {
+                    if ($(this).hasClass('action-open')) {
+                        $table.parent().removeClass('col-md-12').removeClass('col-lg-12').addClass('col-md-8').addClass('col-lg-10');
+                        $filtersPanel.stop().fadeIn(150);
+                        $(this).removeClass('action-open').addClass('action-close');
+                    } else {
+                        $filtersPanel.stop().fadeOut(150, function () {
+                            $table.parent().removeClass('col-md-8').removeClass('col-lg-10').addClass('col-md-12').addClass('col-lg-12');
+                        });
+                        $(this).removeClass('action-close').addClass('action-open');
+                    }
+                }
+            });
             $tools.find('.openSearchRowButton').click(function () {
                 var $searchRow = $list.find('.listSearchRow');
                 if ($searchRow.length) {
@@ -1104,6 +1138,13 @@ function onListLoaded($list) {
         setPositionsHandlesEvents($list);
         setPaginationEvents($list);
 
+        var $filters = $list.find('.object_filters_panel');
+        if ($filters.length) {
+            $filters.each(function () {
+                onListFiltersPanelLoaded($(this));
+            });
+        }
+
         if (!$list.data('object_change_event_init')) {
             var module = $list.data('module');
             var object_name = $list.data('object_name');
@@ -1137,6 +1178,11 @@ function onListLoaded($list) {
                                 reloadObjectList($list.attr('id'));
                             }
                         }
+                    }
+                });
+                $('body').on('listFiltersChange', function (e) {
+                    if (e.$filters.data('list_identifier') === $list.attr('id')) {
+                        reloadObjectList($list.attr('id'));
                     }
                 });
                 $('body').data($list.attr('id') + '_object_events_init', 1);
@@ -1186,6 +1232,13 @@ function onListRefeshed($list) {
     setInputsEvents($tbody);
     setListEditInputsEvents($list);
     setPositionsHandlesEvents($list);
+
+    var $filters = $list.find('.object_filters_panel');
+    if ($filters.length) {
+        $filters.each(function () {
+            onListFiltersPanelLoaded($(this));
+        });
+    }
 
     $list.trigger('listRefresh');
 }

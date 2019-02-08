@@ -169,7 +169,7 @@ class BimpRender
         $html .= '<button type="button" class="btn btn-' . $params['type'] . ' dropdown-toggle"';
         $html .= ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
         if (isset($params['icon'])) {
-            $html .= self::renderIcon($params['icon'], 'iconLeft');
+            $html .= self::renderIcon($params['icon'], $label ? 'iconLeft' : '');
         }
         $html .= $label;
         if (!isset($params['caret']) || (isset($params['caret']) && $params['caret'])) {
@@ -237,7 +237,12 @@ class BimpRender
             if (isset($params['header_buttons']) && is_array($params['header_buttons']) && count($params['header_buttons'])) {
                 foreach ($params['header_buttons'] as $button) {
                     $button['classes'][] = 'headerBtn';
-                    $html .= self::renderButton($button);
+
+//                    if (isset($button['dropdown']) && (int) $button['dropdown']) {
+//                        $html .= self::renderDropDownButton($button['label'], $button['items'], $button['params']);
+//                    } else {
+                        $html .= self::renderButton($button);
+//                    }
                 }
             }
 
@@ -639,7 +644,7 @@ class BimpRender
             $html .= '<i class="far fa5-eye"></i>';
             $html .= '</span>';
         }
-        
+
         if (method_exists($object, 'getExtraObjectIcons')) {
             $html .= $object->getExtraObjectIcons();
         }

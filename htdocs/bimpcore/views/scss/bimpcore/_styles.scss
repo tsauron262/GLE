@@ -83,6 +83,17 @@ div.tabBar {
     padding-right: 15px;
 }
 
+.tabBar #controllerTabContentContainer {
+    margin-left: -15px;
+    margin-right: -15px;
+    
+    margin-top: -16px;
+}
+
+.tabBarWithBottom #controllerTabContentContainer {
+    margin-bottom: -29px;
+}
+
 .section {
 }
 .ajaxResultContainer {
@@ -323,6 +334,23 @@ i.iconRight {
     }
 }
 
+.btn-small {
+    font-size: 11px;
+    padding: 3px 5px;
+
+    i {
+        font-size: 12px;
+
+        &.iconLeft {
+            margin-right: 5px;
+        }
+
+        &.iconRight {
+            margin-left: 5px;
+        }
+    }
+}
+
 /*Panels*/
 
 .panel {
@@ -529,6 +557,43 @@ i.iconRight {
         padding-left: 15px;
 
         border-left: 1px dotted #B4B4B4;
+    }
+}
+
+.foldable_container {
+    & > .foldable_caption {
+        cursor: pointer;
+
+        & > .foldable-caret {
+            @include transition(all 0.3s ease);
+            font-size: 14px;
+            display: inline-block;
+            opacity: 0;
+            margin: 0 6px;
+            float: right;
+
+            &:before {
+                font-family: 'FontAwesome';
+            }
+        }
+
+        &:hover {
+            .foldable-caret {
+                opacity: 1;
+            }
+        }
+    }
+
+    &.open {
+        & > .foldable_caption .foldable-caret:before {
+            content: '\f0d8';
+        }
+    }
+
+    &.closed {
+        & > .foldable_caption .foldable-caret:before {
+            content: '\f0d7';
+        }
     }
 }
 

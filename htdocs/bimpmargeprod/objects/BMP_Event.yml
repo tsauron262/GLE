@@ -94,7 +94,7 @@ fields:
         label: Nom
         search: 
             type: value_part
-            search_on_key_up: 1
+            search_on_key_up: 1range
         required: 1
         
     date:
@@ -187,8 +187,18 @@ forms:
               value: 
                   callback: getDefaultTarifsValue
                   
+filters_panels: 
+    default: 
+        filters: 
+            - field: date
+            - field: name
+            - field: status
+            - field: type
+            - field: place
+            
 lists:
     default: 
+        filters_panel: default
         checkboxes: 1
         bulk_actions:
             - label: supprimer les événements sélectionnés
@@ -201,6 +211,24 @@ lists:
         delete_btn: 1
         page_btn: 1
         edit_btn: 1
+        cols:
+            date:
+                field: date
+            name: 
+                field: name
+            type: 
+                field: type
+            place: 
+                field: place
+            status: 
+                field: status
+                
+    marge_prod: 
+        filters_panel: default
+        sort_field: date
+        sort_way: desc
+        n: 10
+        page_btn: 1
         cols:
             date:
                 field: date

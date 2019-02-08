@@ -40,7 +40,14 @@ sections:
                   list: 
                       panel: 1
                       object: event
-                      
+        marge_prod: 
+            label: Marge de production
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: event
+                      name: marge_prod
         montants:
             label: Montants
             sections: 

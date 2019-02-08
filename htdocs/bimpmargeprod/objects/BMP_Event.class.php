@@ -1359,7 +1359,7 @@ class BMP_Event extends BimpObject
 
     // Rendus HTML:
 
-    public function renderMontantsRecap($montant_type = 0, $coprods_parts_mode = 'ht', $coprods_paiements_mode = 'ttc')
+    public function renderMontantsRecap($montant_type = 0, $coprods_parts_mode = 'ht', $coprods_paiements_mode = 'ht')
     {
         $html = '';
 
@@ -1373,13 +1373,13 @@ class BMP_Event extends BimpObject
             $colspan += (2 * count($coprods));
         }
 
-        $html .= '<table class="bimp_list_table">';
+        $html .= '<table class="bimp_list_table" style="width: auto!important;">';
         $html .= '<thead>';
         $html .= '<tr>';
         $html .= '<th>Montant</th>';
         $html .= '<th style="text-align: center;">Montant HT</th>';
-        $html .= '<th style="text-align: center;">Montant TVA</th>';
-        $html .= '<th style="text-align: center;">Montant TTC</th>';
+//        $html .= '<th style="text-align: center;">Montant TVA</th>';
+//        $html .= '<th style="text-align: center;">Montant TTC</th>';
 
         if ($show_coprods) {
             foreach ($coprods as $id_coprod => $cp_label) {
@@ -1437,8 +1437,8 @@ class BMP_Event extends BimpObject
                         $html .= '<td style="font-weight: bold; color: #' . $categ->getData('color') . ';text-align:right;">' . $tm->getData('name') . '</td>';
 
                         $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($tot_montants['total_ht'], '', true) . '</td>';
-                        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($tot_montants['total_tva'], '', true) . '</td>';
-                        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($tot_montants['total_ttc'], '', true) . '</td>';
+//                        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($tot_montants['total_tva'], '', true) . '</td>';
+//                        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($tot_montants['total_ttc'], '', true) . '</td>';
 
                         if ($show_coprods) {
                             $fl = 1;
@@ -1471,8 +1471,8 @@ class BMP_Event extends BimpObject
                 // Total catégorie
                 $html .= '<td style="font-weight: bold;background-color: ' . $td_bk_col . '!important; color: #' . $categ->getData('color') . ';text-align:right;">Total</td>';
                 $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;">' . BimpTools::displayMoneyValue($tot_cat['total_ht'], '', true) . (isset($tot_cat['total_ht_percent']) ? ' (' . BimpTools::displayFloatValue($tot_cat['total_ht_percent']) . '%)' : '') . '</td>';
-                $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;">' . BimpTools::displayMoneyValue($tot_cat['total_tva'], '', true) . '</td>';
-                $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;">' . BimpTools::displayMoneyValue($tot_cat['total_ttc'], '', true) . '</td>';
+//                $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;">' . BimpTools::displayMoneyValue($tot_cat['total_tva'], '', true) . '</td>';
+//                $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;">' . BimpTools::displayMoneyValue($tot_cat['total_ttc'], '', true) . '</td>';
 
                 if ($show_coprods) {
                     $fl = 1;
@@ -1512,8 +1512,8 @@ class BMP_Event extends BimpObject
         $html .= '<tr style="border: 2px solid #505050; font-size: 14px">';
         $html .= '<td style="text-align: right">Total</td>';
         $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($totaux['total_ht'], '', true) . '</td>';
-        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($totaux['total_tva'], '', true) . '</td>';
-        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($totaux['total_ttc'], '', true) . '</td>';
+//        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($totaux['total_tva'], '', true) . '</td>';
+//        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($totaux['total_ttc'], '', true) . '</td>';
 
         if ($show_coprods) {
             $fl = 1;
@@ -1981,8 +1981,8 @@ class BMP_Event extends BimpObject
         $tabs = array();
         $montants = array(
             array('id_type_montant' => 8, 'title' => 'Frais d\'hôtel', 'label' => 'Hôtel', 'id' => 'frais_hotel'),
-            array('id_type_montant' => 9, 'title' => 'Frais de repas (TVA à 5,5%)', 'label' => 'Repas (5,5%)', 'id' => 'repas_5_5'),
-            array('id_type_montant' => 10, 'title' => 'Frais de repas (TVA à 20%)', 'label' => 'Repas (20%)', 'id' => 'repas_19_6'),
+            array('id_type_montant' => 9, 'title' => 'Catering Le Fil', 'label' => 'Catering Le Fil', 'id' => 'catering'),
+            array('id_type_montant' => 10, 'title' => 'Repas extérieurs', 'label' => 'Repas extérieurs', 'id' => 'repas_ext'),
         );
 
         foreach ($montants as $m) {

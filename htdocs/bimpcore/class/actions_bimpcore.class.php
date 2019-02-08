@@ -19,4 +19,12 @@ class ActionsBimpcore
 
         return 0;
     }
+    function replaceThirdparty($parameters, &$object, &$action, $hookmanager)
+    {
+        global $db;
+        
+        $db->query("UPDATE ".MAIN_DB_PREFIX."bs_sav SET id_client = ".$parameters['soc_dest']." WHERE id_client = ".$parameters['soc_origin']);
+
+        return 0;
+    }
 }

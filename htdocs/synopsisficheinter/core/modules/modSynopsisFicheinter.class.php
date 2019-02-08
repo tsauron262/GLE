@@ -86,6 +86,10 @@ class modSynopsisFicheinter extends DolibarrModules {
         $this->module_parts = array(
             'models' => '1' 
         );
+        
+        
+        $this->tabs = array('order:+inter:Inter:bimpcore@bimpcore:1:/synopsisficheinter/tabs/order.php?id=__ID__',
+            'thirdparty:+inter:Inter:bimpcore@bimpcore:1:/synopsisficheinter/tabs/client.php?id=__ID__');
 
         // Constantes
         $this->const = array();

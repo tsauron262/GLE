@@ -107,7 +107,7 @@ class annexe {
 
             $nbCarac = strlen($ligne);
             $nbLn = 0;
-            $maxCarac = 105;
+            $maxCarac = 310;
             while ($nbCarac > $maxCarac) {
                 $nbCarac = $nbCarac - $maxCarac;
                 $nbLn++;
@@ -120,9 +120,9 @@ class annexe {
                 $this->pdf->SetY($this->model->marge_haute + $this->model->hauteurHeader);
             }
 
-            $this->pdf->SetFont('', $style, 8);
-            if(strlen($ligne) > 1)
-                $this->pdf->multicell(155, 5, utf8_encodeRien(utf8_encodeRien($ligne)), 0, 'L');
+            $this->pdf->SetFont('', $style, 6); // 8
+            if(strlen($ligne) > 1) 
+                $this->pdf->multicell($this->model->page_largeur - $this->model->marge_droite - ($this->model->marge_gauche), 5, utf8_encodeRien(utf8_encodeRien($ligne."\n")), 0, (empty($style) ? 'J' : 'L'));
         }
     }
 

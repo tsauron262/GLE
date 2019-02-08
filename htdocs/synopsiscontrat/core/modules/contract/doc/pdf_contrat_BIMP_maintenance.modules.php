@@ -173,32 +173,30 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 13;
         $total = $this->get_totaux($lines);
         $taux_tva_text = "TOTAL TVA ";
-        //print_r($total);
         foreach($total as $designation => $valeur){
-            //echo $designation;
             if($designation == 'TVA') {
                 foreach($total->TVA as $taux => $montant) {
                     $pdf->setColor('fill', 255, 255, 255);
-                    $pdf->Cell($W * 5, 8, "", 1, null, 'L', true);
-                    $pdf->Cell($W, 8, "", 1, null, 'C', true);
-                    $pdf->Cell($W * 2, 8, "", 1, null, 'C', true);
-                    $pdf->Cell($W, 8, "", 1, null, 'C', true);
+                    $pdf->Cell($W * 5, 7, "", 1, null, 'L', true);
+                    $pdf->Cell($W, 7, "", 1, null, 'C', true);
+                    $pdf->Cell($W * 2, 7, "", 1, null, 'C', true);
+                    $pdf->Cell($W, 7, "", 1, null, 'C', true);
                     $pdf->setColor('fill', 230, 230, 230);
-                    $pdf->Cell($W * 2, 8, (!is_float($taux)) ? $taux_tva_text . number_format($taux, 0, '', '') . "%" : $taux_tva_text . number_format($taux, 2,'.', '') . "%", 1, null, 'L', true);
-                    $pdf->Cell($W * 2, 8, number_format($montant, 2, '.', "") . "€", 1, null, 'C', true);
-                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, "", 0, 'C');
+                    $pdf->Cell($W * 2, 7, (!is_float($taux)) ? $taux_tva_text . number_format($taux, 0, '', '') . "%" : $taux_tva_text . number_format($taux, 2,'.', '') . "%", 1, null, 'L', true);
+                    $pdf->Cell($W * 2, 7, number_format($montant, 2, '.', "") . "€", 1, null, 'C', true);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'C');
                 }
             } else {
                 $pdf->setColor('fill', 255, 255, 255);
-                $pdf->Cell($W * 5, 8, "", 1, null, 'L', true);
-                $pdf->Cell($W, 8, "", 1, null, 'C', true);
-                $pdf->Cell($W * 2, 8, "", 1, null, 'C', true);
-                $pdf->Cell($W, 8, "", 1, null, 'C', true);
-                $pdf->setColor('fill', 230, 230, 230);
+                $pdf->Cell($W * 5, 7, "", 1, null, 'L', true);
+                $pdf->Cell($W, 7, "", 1, null, 'C', true);
+                $pdf->Cell($W * 2, 7, "", 1, null, 'C', true);
+                $pdf->Cell($W, 7, "", 1, null, 'C', true);
+                $pdf->setColor('fill', 235, 235, 235);
                 $pdf->setFont('', 'B', 8);
-                $pdf->Cell($W * 2, 8, "TOTAL $designation" , 1, null, 'L', true);
-                $pdf->Cell($W * 2, 8, "", 1, null, 'L', true);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, "", 0, 'C');
+                $pdf->Cell($W * 2, 7, "TOTAL $designation" , 1, null, 'L', true);
+                $pdf->Cell($W * 2, 7, $total->$designation . "€", 1, null, 'C', true);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'C');
             }
         } 
     }
@@ -401,8 +399,21 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
                 
                 $count = count($contrat->lines);
                 
-                $this->display_lines($pdf, $contrat->lines);
-                $this->display_total($pdf, $contrat->lines);
+                if($count > 7) {
+                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
+                        $pdf->SetX($this->marge_gauche);
+                        $pdf->SetFont(''/* 'Arial' */, '', 9);
+                        $pdf->setDrawColor(255,255,255);
+                        $pdf->setColor('fill', 242, 242, 242);
+                        $pdf->SetTextColor(0,0,0);
+                        $pdf->Cell($W, 8, "Liste des descriptions financière en ANNEXE 1", 1, null, 'C', true);
+                        $pdf->SetTextColor(0,0,0);
+                } else {
+                    $this->display_lines($pdf, $contrat->lines);
+                    $this->display_total($pdf, $contrat->lines);
+                }
+                
+                
                 
 //                $colTVA = (float) 20;
 //                $colPU = (float) 0;

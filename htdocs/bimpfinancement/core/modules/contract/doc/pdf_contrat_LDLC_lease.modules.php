@@ -64,8 +64,8 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
         $this->page_largeur = 210;
         $this->page_hauteur = 297;
         $this->format = array($this->page_largeur, $this->page_hauteur);
-        $this->marge_gauche = 15;
-        $this->marge_droite = 15;
+        $this->marge_gauche = 12;
+        $this->marge_droite = 12;
         $this->marge_haute = 40;
         $this->marge_basse = 0;
         $this->option_logo = 1; 
@@ -115,7 +115,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
         $pdf->Cell($W * 2.1, 8, "Ordre", 1, null, 'L', true);
         $pdf->SetTextColor(0,0,0);
         $X = $this->marge_gauche + $W;
-        $pdf->setX($X *1.5);
+        $pdf->setX($X * 1.5);
         $pdf->setColor('fill', 192, 199, 228);
         $pdf->SetTextColor(255,255,255);
         $pdf->Cell($W * 2.1, 8, "Nombre de loyers", 1, null, 'L', true);
@@ -133,7 +133,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
         $pdf->setX($X * 4.5);
         $pdf->setColor('fill', 192, 199, 228);
         $pdf->SetTextColor(255,255,255);
-        $pdf->Cell($W * 2.6, 8, "Montant TTC", 1, null, 'L', true);
+        $pdf->Cell($W * 3.2, 8, "Montant TTC", 1, null, 'L', true);
         $pdf->SetTextColor(0,0,0);
     }
 
@@ -187,7 +187,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
             $pdf->setX($X * 4.5);
             $pdf->setColor('fill', 248, 248, 248);
             $pdf->SetTextColor(0,0,0);
-            $pdf->Cell($W * 2.6, 8,$rent->price_ht + $rent->price_ht * (20/100) . "€", 1, null, 'L', true);
+            $pdf->Cell($W * 3.2, 8,$rent->price_ht + $rent->price_ht * (20/100) . "€", 1, null, 'L', true);
             $this->jump($pdf,3);
             $this->jump($pdf,3);
             $nbLine++;
@@ -408,6 +408,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                         $this->greyFooter($pdf);
                     }
                     $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite - 20);
+                    
                     require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
                     $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page? 1 : 0));
                     $classAnnexe->getAnnexeContrat($contrat);
@@ -483,6 +484,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                 $demande->find(array('id_contrat' => (int) $contrat->id), true, true);
                 $lines = $demande->getChildrenObjects('lines', array('in_contrat' => (int) 1));
                 $this->linesProduct($pdf, $lines);
+                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "Le locataire a choisi librement et sous sa responsabilité les équipements, objets du présent contrat, en s’assurant auprès de ses fournisseurs de leur compatibilité y compris dans le cas où ils sont incorporés dans un système préexistant.", 0, 'L');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
@@ -522,7 +524,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                 $this->marge_droite = 20;
                 $x = $this->marge_gauche;
                 $y = $this->marge_haute;
-                $separateur = 10;
+                $separateur = 7;
                 //titre
                 $pdf->SetXY($x, $y);
                 $pdf->setEqualColumns(2, 98);
@@ -547,8 +549,8 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->MultiCell($W, 6, "Informations Débiteur", 0, 'L',false,0);
                 $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Informations Débiteur", 0, 'L',false,0);
-                $pdf->Line($x - 10, $y+66, $x+60, $y+66);
-                $pdf->Line($x+80+$separateur, $y+66, $x+163, $y+66);
+                $pdf->Line($x - 5, $y+66, $x+60, $y+66);
+                $pdf->Line($x+90+$separateur, $y+66, $x+163, $y+66);
                 $pdf->setY($y +68);
                 $pdf->setFont('','',8);
                 $pdf->MultiCell($W, 6, "Raison social : ", 0, 'L',false,0);
@@ -579,8 +581,8 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->MultiCell($W, 6, "Coordonnées Bancaire débiteur : ", 0, 'L',false,0);
                 $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Coordonnées Bancaire débiteur : ", 0, 'L',false,0);
-                $pdf->Line($x - 10, $y+105, $x+60, $y+105);
-                $pdf->Line($x+80+$separateur, $y+105, $x+163, $y+105);
+                $pdf->Line($x - 5, $y+105, $x+60, $y+105);
+                $pdf->Line($x+90+$separateur, $y+105, $x+163, $y+105);
                 $pdf->setY($y +107);
                 $pdf->setFont('','',8);
                 $pdf->MultiCell($W, 6, "IBAN : ", 0, 'L',false,0);
@@ -595,8 +597,8 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->MultiCell($W, 6, "Coordonnées Bancaire Créancier : ", 0, 'L',false,0);
                 $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Coordonnées Bancaire Créancier : ", 0, 'L',false,0);
-                $pdf->Line($x-10, $y+120, $x+60, $y+120);
-                $pdf->Line($x+80+$separateur, $y+120, $x+163, $y+120);
+                $pdf->Line($x-5, $y+120, $x+60, $y+120);
+                $pdf->Line($x+90+$separateur, $y+120, $x+163, $y+120);
                 $pdf->setY($y +122);
                 $pdf->setFont('','',8);
                 $pdf->MultiCell($W, 6, "Raison social : ", 0, 'L',false,0);
@@ -623,16 +625,16 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->MultiCell($W, 6, "Référence Unique du Mandat (RUM) : ", 0, 'L',false,0);
                 $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Référence Unique du Mandat (RUM) : ", 0, 'L',false,0);
-                $pdf->Line($x-10, $y+151, $x+60, $y+151);
-                $pdf->Line($x+80+$separateur, $y+151, $x+163, $y+151);
+                $pdf->Line($x-5, $y+151, $x+60, $y+151);
+                $pdf->Line($x+90+$separateur, $y+151, $x+163, $y+151);
 
                 $pdf->setY($y +160);
                 $pdf->setFont('','b',8);
                 $pdf->MultiCell($W, 6, "Informations Type de Paiement : ", 0, 'L',false,0);
                 $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Informations type de Paiement : ", 0, 'L',false,0);
-                $pdf->Line($x-10, $y+164, $x+60, $y+164);
-                $pdf->Line($x+80+$separateur, $y+164, $x+163, $y+164);
+                $pdf->Line($x-5, $y+164, $x+60, $y+164);
+                $pdf->Line($x+90+$separateur, $y+164, $x+163, $y+164);
                 $pdf->setFont('','',8);
                 $pdf->setY($y +168);
                 $pdf->MultiCell($W, 6, "Paiement: Récurent / Unique", 0, 'L',false,0);
@@ -644,8 +646,8 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->MultiCell($W, 6, "Signature : ", 0, 'L',false,0);
                 $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Signature : ", 0, 'L',false,0);
-                $pdf->Line($x-10, $y+180, $x+60, $y+180);
-                $pdf->Line($x+80+$separateur, $y+180, $x+163, $y+180);
+                $pdf->Line($x-5, $y+180, $x+60, $y+180);
+                $pdf->Line($x+90+$separateur, $y+180, $x+163, $y+180);
                 $pdf->setFont('','',8);
                 $pdf->setY($y +184);
                 $pdf->MultiCell($W, 6, "Date :           /          /", 0, 'L',false,0);
@@ -657,14 +659,14 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->SetDrawColor(0,0,0);
                 $pdf->setColor('fill', 255, 255, 255);
                 $pdf->Cell($W - 5, 40, '', 1, null, 'C', true);
-                $pdf->setX($x+84+$separateur);
+                $pdf->setX($x+90+$separateur);
                 $pdf->SetDrawColor(0,0,0);
                 $pdf->setColor('fill', 255, 255, 255);
                 $pdf->Cell($W - 5, 40, '', 1, null, 'C', true);
                 $pdf->setY($y +195);
                 $pdf->setFont('','I',7);
                 $pdf->MultiCell($W, 6, "Signature", 0, 'L',false,0);
-                $pdf->setX($x+84);
+                $pdf->setX($x+90);
                 $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Signature", 0, 'L',false,0);
                 $pdf->setFont('','',8);
@@ -672,7 +674,7 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->setY($y +234);
                 $pdf->setFont('','I',7);
                 $pdf->MultiCell($W, 6, "Joindre un RIB", 0, 'L',false,0);
-                $pdf->setX($x+84);
+                $pdf->setX($x+90);
                 $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Joindre un RIB", 0, 'L',false,0);
                 $pdf->setFont('','',8);
@@ -752,6 +754,7 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $file1 = $dir ."/Contrat_LDLC_lease_".date("d_m_Y")."_" . $propref . "_X1.pdf";
                 $this->print_contrat($pdf1, $contrat, $outputlangs);
                 $this->print_preces($pdf1, $contrat, $outputlangs);
+                $this->print_mandat($pdf1, $contrat);
                 $pdf->Close(); $pdf1->Close();
                 $this->file = $file;$pdf->Output($file, 'f');
                 $this->file1 = $file1;$pdf1->Output($file1, 'f');

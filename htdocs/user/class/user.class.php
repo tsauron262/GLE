@@ -1930,8 +1930,8 @@ class User extends CommonObject
 		}
                 
                 /*moddrsi*/
-                if(isset($this->array_options['options_mail_sec']) && $this->array_options['options_mail_sec'] != "")
-                    $this->email .= ",".$this->array_options['options_mail_sec'];
+//                if(isset($this->array_options['options_mail_sec']) && $this->array_options['options_mail_sec'] != "")
+//                    $this->email .= ",".$this->array_options['options_mail_sec'];
                 /*fmod drsi*/
 
 		$mailfile = new CMailFile(

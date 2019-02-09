@@ -20,6 +20,7 @@ class BimpCore
             '/bimpcore/views/js/list.js',
             '/bimpcore/views/js/view.js',
             '/bimpcore/views/js/viewsList.js',
+            '/bimpcore/views/js/listCustom.js',
             '/bimpcore/views/js/page.js'
         ),
         'css' => array(

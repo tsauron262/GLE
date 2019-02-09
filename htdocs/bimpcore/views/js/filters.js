@@ -135,7 +135,7 @@ function saveListFilters($button, filters_id) {
             list_name: $filters.data('list_name'),
             panel_name: $filters.data('name')
         }, 'save_list_filters', null, function (result) {
-
+//            $('body').trigger('');
         }, null, function ($form, extra_data) {
             extra_data['filters'] = filters;
             return extra_data;

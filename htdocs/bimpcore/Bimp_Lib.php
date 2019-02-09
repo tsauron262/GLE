@@ -39,6 +39,7 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'components/BC_List.php';
     require_once $dir . 'components/BC_ListTable.php';
     require_once $dir . 'components/BC_ListViews.php';
+    require_once $dir . 'components/BC_ListCustom.php';
     require_once $dir . 'components/BC_FieldsTable.php';
     require_once $dir . 'components/BC_Form.php';
     require_once $dir . 'components/BC_View.php';
@@ -52,8 +53,6 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpCore.php';
     require_once $dir . 'FixeTabs.php';
     require_once $dir . 'BimpController.php';
-
-    checkBimpCoreVersion();
 }
 
 function checkBimpCoreVersion()

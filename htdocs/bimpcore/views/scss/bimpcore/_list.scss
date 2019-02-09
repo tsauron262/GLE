@@ -677,14 +677,14 @@ td.buttons {
 /*Panel Filtres*/
 
 .bimp_filter_container {
-    margin-bottom: 15px;
+    margin-bottom: 5px;
 
     .bimp_filter_caption {
         font-weight: bold;
         color: $gray-darker;
-        padding: 5px 0;
+        padding: 6px 8px;
         margin-bottom: 5px;
-        border-bottom: 1px solid $gray-darker;
+        background-color: #DCDCDC;
     }
 
     .bimp_filter_values_container {

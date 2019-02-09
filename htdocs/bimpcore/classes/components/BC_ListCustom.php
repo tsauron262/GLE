@@ -44,10 +44,25 @@ class BC_ListCustom extends BC_List
             $html .= '<div class="listFiltersPanelContainer col-xs-12 col-sm-12 col-md-4 col-lg-2"' . (!(int) $this->params['filters_panel_open'] ? ' style="display: none"' : '') . '>';
             $html .= $this->renderFiltersPanel();
             $html .= '</div>';
-            $html .= '<div class="objectlistTableContainer col-xs-12 col-sm-12 col-md-8 col-lg-10">';
+            $html .= '<div class="objectlistCustomContainer col-xs-12 col-sm-12 col-md-8 col-lg-10">';
         }
 
-        $html .= '<div class="list_custom_content">';
+        $html .= '<div id="' . $this->identifier . '_ajax_content" class="list_custom_ajax_content">';
+        $html .= $this->renderListContent();
+        $html .= '</div>';
+
+        if (!is_null($this->params['filters_panel'])) {
+            $html .= '</div></div>';
+        }
+
+        $html .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result"></div>';
+
+        return $html;
+    }
+
+    public function renderListContent()
+    {
+        $html = '';
 
         if (is_null($this->items)) {
             $this->fetchItems();
@@ -58,14 +73,6 @@ class BC_ListCustom extends BC_List
         } else {
             $html .= BimpRender::renderAlerts('Erreur de configuration: aucun contenu défini pour cette section');
         }
-
-        $html .= '</div>';
-
-        if (!is_null($this->params['filters_panel'])) {
-            $html .= '</div></div>';
-        }
-
-        $html .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result"></div>';
 
         return $html;
     }

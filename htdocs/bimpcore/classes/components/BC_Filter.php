@@ -98,12 +98,6 @@ class BC_Filter extends BimpComponent
 
             $this->identifier .= '_' . $this->field->name . '_' . ($this->name ? $this->name . '_' : '') . 'filter';
         }
-
-//        if ($params['field'] === 'code_centre') {
-//            echo '<pre>';
-//            print_r($this->params);
-//            exit;
-//        }
     }
 
     public function getFilterValueLabel($value)

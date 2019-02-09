@@ -223,23 +223,15 @@ lists:
             status: 
                 field: status
                 
+list_customs: 
     marge_prod: 
+        title: Marge de production
+        icon: fas_chart-line
+        content_callback: renderMargeProd
         filters_panel: default
         sort_field: date
-        sort_way: desc
-        n: 10
-        page_btn: 1
-        cols:
-            date:
-                field: date
-            name: 
-                field: name
-            type: 
-                field: type
-            place: 
-                field: place
-            status: 
-                field: status
+        sort_way: asc
+        
              
 fields_tables: 
     infos: 

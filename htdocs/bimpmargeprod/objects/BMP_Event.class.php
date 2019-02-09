@@ -2649,6 +2649,16 @@ class BMP_Event extends BimpObject
         return BimpRender::renderNavTabs($tabs, 'bilans');
     }
 
+    public function renderMargeProd($items)
+    {
+        $html = '';
+        $html .= '<pre>';
+        $html .= print_r($items, 1);
+        $html .= '</pre>';
+
+        return $html;
+    }
+
     // Events:
 
     public function onMontantChange(BMP_EventMontant $eventMontant)

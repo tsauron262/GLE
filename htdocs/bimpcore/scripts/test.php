@@ -20,10 +20,10 @@ global $db;
 $bdb = new BimpDb($db);
 
 
-//BimpTools::changeBimpObjectId(213182, 213202, 'bimpcore', 'Bimp_Societe');
-//BimpTools::changeBimpObjectId(213182, 213202, 'bimpcore', 'Bimp_Client');
-//BimpTools::changeBimpObjectId(213182, 213202, 'bimpcore', 'Bimp_Fournisseur');
-//BimpTools::changeDolObjectId(213182, 213202, 'societe');
+BimpTools::changeBimpObjectId(213202, 213203, 'bimpcore', 'Bimp_Societe');
+BimpTools::changeBimpObjectId(213202, 213203, 'bimpcore', 'Bimp_Client');
+BimpTools::changeBimpObjectId(213202, 213203, 'bimpcore', 'Bimp_Fournisseur');
+BimpTools::changeDolObjectId(213202, 213203, 'societe');
 
 echo '</body></html>';
 

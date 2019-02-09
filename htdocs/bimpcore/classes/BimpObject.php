@@ -528,7 +528,7 @@ class BimpObject extends BimpCache
                 return 1;
             }
         }
-        
+
         return 0;
     }
 
@@ -3838,6 +3838,12 @@ class BimpObject extends BimpCache
             }
         }
 
+        return $list->renderHtml();
+    }
+
+    public function renderListCustom($list_name = 'default', $title = null, $icon = null)
+    {
+        $list = new BC_ListCustom($this, $list_name, null, $title, $icon);
         return $list->renderHtml();
     }
 

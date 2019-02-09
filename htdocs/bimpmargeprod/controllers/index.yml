@@ -43,9 +43,8 @@ sections:
         marge_prod: 
             label: Marge de production
             sections: 
-                - type: list
-                  list: 
-                      panel: 1
+                - type: list_custom
+                  list_custom: 
                       object: event
                       name: marge_prod
         montants:

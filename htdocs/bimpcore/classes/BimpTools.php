@@ -402,7 +402,7 @@ class BimpTools
 
                     foreach ($instance->params['objects'] as $obj_conf_name => $obj_params) {
                         if (!$obj_params['relation'] === 'hasOne') {
-                            return;
+                            continue;
                         }
 
                         $obj_module = '';
@@ -440,7 +440,7 @@ class BimpTools
                                         }
                                     }
                                     
-                                    echo $instance->object_name . ': ' . $field . '<br/>';
+//                                    echo $instance->object_name . ': ' . $field . '<br/>';
                                     $result = $bdb->update($table, array(
                                         $field => $new_id
                                             ), '`' . $field . '` = ' . (int) $old_id);
@@ -464,14 +464,13 @@ class BimpTools
             $msg .= 'Ancien ID: ' . $old_id . "\n";
             $msg .= 'Nouvel ID: ' . $new_id . "\n\n";
 
-            $msg .= 'Echecs des mises à jour SQL: ' . "\n\n";
+            $msg .= 'Echec des mises à jour SQL: ' . "\n\n";
 
             foreach ($fails as $fail) {
                 $msg .= ' - ' . $fail . "\n";
             }
 
             mailSyn2($subject, 'debugerp@bimp.fr', 'BIMP<admin@bimp.fr>', $msg);
-
             dol_syslog($subject . "\n" . $msg, LOG_ERR);
         }
     }
@@ -561,7 +560,7 @@ class BimpTools
             $msg .= 'Ancien ID: ' . $old_id . "\n";
             $msg .= 'Nouvel ID: ' . $new_id . "\n\n";
 
-            $msg .= 'Echecs des mises à jour SQL: ' . "\n\n";
+            $msg .= 'Echec des mises à jour SQL: ' . "\n\n";
 
             foreach ($fails as $fail) {
                 $msg .= ' - ' . $fail . "\n";

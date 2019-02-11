@@ -879,7 +879,7 @@ y compris les clauses attribution de compétence et CNIL.",
      }
 
      public function getTextAnnexe($ajoutAnnexe) {
-        return "ANNEXE : Conditions Générales composées de deux pages recto " . $ajoutAnnexe;
+        return "ANNEXE : Conditions Générales composées de quatre pages recto " . $ajoutAnnexe;
      }
 
      public function jump($pdf, $interval) {

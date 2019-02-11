@@ -839,7 +839,7 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
         ),
         'textes' => array(
             'texte_1' => 'La société F-LOC, SAS au capital de 100 000 € dont le siège social est situé à Dardilly (69570), 62, chemin du Moulin enregistrée sous le SIREN 838 651 594 au RCS de Lyon, représentée par Monsieur Olivier VILLEMONTE DE LA CLERGERIE , intervenant en qualité de Président .',
-            'texte_2' => "Le loueur donne en location, l’équipement désigné ci-dessous (ci-après « équipement »), au locataire qui l’accepte, aux Conditions Particulières et aux Conditions Générales composées de deux pages recto",
+            'texte_2' => "Le loueur donne en location, l’équipement désigné ci-dessous (ci-après « équipement »), au locataire qui l’accepte, aux Conditions Particulières et aux Conditions Générales composées de quatre pages recto",
             'texte_3' => "Liste et détails du matériel en ANNEXE",
             'texte_4' => "Le loyer ferme et non révisable en cours de contrat, payable par terme à échoir, par prélèvements automatiques.",
             'texte_5' => "Le locataire déclare avoir été parfaitement informé de l’opération lors de la phase précontractuelle, avoir pris connaissance,
@@ -879,7 +879,7 @@ y compris les clauses attribution de compétence et CNIL.",
      }
 
      public function getTextAnnexe($ajoutAnnexe) {
-        return "ANNEXE : Conditions Générales composées de deux pages recto " . $ajoutAnnexe;
+        return "ANNEXE : Conditions Générales composées de quatre pages recto " . $ajoutAnnexe;
      }
 
      public function jump($pdf, $interval) {

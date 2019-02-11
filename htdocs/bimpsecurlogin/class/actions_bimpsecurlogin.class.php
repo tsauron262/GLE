@@ -42,7 +42,7 @@ class securLogSms {
 
     public function secur() {
         if (!$this->isSecur()) {
-            $code = GETPOST("code_sms");
+            $code = GETPOST("sms_code_1") . GETPOST("sms_code_2") . GETPOST("sms_code_3") . GETPOST("sms_code_4");
             if ($this->user->array_options['options_echec_auth'] < $this->max_tentative) {
                 if (!empty($code))
                     $this->testCode($code);
@@ -51,8 +51,12 @@ class securLogSms {
             }
 
             if (!$this->isSecur()) {
-                if ($this->user->array_options['options_echec_auth'] < $this->max_tentative)
-                    die("SAISIR LE CODE RECU PAR SMS<form><input type='text' name='code_sms'/><input type='submit' value='Envoyé'/></form><form><input type='submit' value='Renvoyé CODE'/></form>");
+                if ($this->user->array_options['options_echec_auth'] < $this->max_tentative){
+                    $message = $this->message;
+                    include(DOL_DOCUMENT_ROOT . '/bimpsecurlogin/views/formCode.php');
+                    die;
+                }
+                   
                 else
                     die("Compte bloqué");
             }
@@ -100,7 +104,7 @@ class securLogSms {
         }
 
 
-        if(1){//provisoir a viré
+        if(1){//provisoir a viré - Mettre à 0 pour modification
             $to = $this->traitePhone();
             if (!$this->isPhoneMobile($to))
                 mailSyn2("ATTENTION Ip Inconnue phone KO ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to);
@@ -124,6 +128,7 @@ class securLogSms {
         }
         $this->user->array_options['options_echec_auth'] ++;
         $this->user->update($user);
+        $this->message = "Code incorrecte";
         return false;
     }
 
@@ -138,9 +143,10 @@ class securLogSms {
                 $this->user->array_options['options_code_sms'] = $code;
                 $this->user->update($user);
             }
-            echo 'code envoye a ' . substr($to, 0, 8) . "****<br/><br/>";
+            
+            $this->message = 'Code envoyé à 0' . substr($to, 3, 5) . "****<br/><br/>";
         } else
-            echo "Pas de numéro pour l'envoie du code... ";
+            $this->message = "Pas de numéro pour l'envoie du code... ";
     }
 
     public function traitePhone() {

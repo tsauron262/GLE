@@ -209,7 +209,7 @@ input::-o-outer-spin-button {
 	<center>
             <?php global $mysoc; ?>
 		<img src="<?= DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=' . $mysoc->logo ?>">
-              
+               
 	</center>
 </body>
 </html>

@@ -806,6 +806,10 @@ if (!defined('NOLOGIN')) {
     }
 }
 
+/*moddrsi*/
+$synopsisHook->afterUserOk();
+/*fmoddrsi*/
+
 // Case forcing style from url
 if (GETPOST('theme', 'alpha')) {
     $conf->theme = GETPOST('theme', 'alpha', 1);

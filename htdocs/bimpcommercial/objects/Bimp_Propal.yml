@@ -280,9 +280,33 @@ lists_cols:
     livraison: 
         field: date_livraison
         label: Livraison
-                
+           
+filters_panels: 
+    propal: 
+        extends: default
+        filters: 
+            - field: ref
+            - field: ref_client
+            - field: fk_soc
+            - field: entrepot
+            - field: fk_availability
+            - field: fk_cond_reglement
+            - field: fk_mode_reglement
+            - field: fk_statut
+            - field: note_private
+            - field: note_public
+            - field: remise_global
+            - field: total_ht
+            - field: total
+#            Puis ceux de la propal
+            - field: datec
+            - field: datep
+            - field: date_livraison
+            - field: libelle
+            - field: ef_type
 lists: 
     default: 
+        filters_panel: propal
         title: Propositions commerciales
         icon: fas_file-invoice
         configurable: 1

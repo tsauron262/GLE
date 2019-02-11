@@ -141,6 +141,14 @@ fields:
         label: E-Mail de secours
         dol_extra_field: 1
         type: password
+    code_sms: 
+        label: Code SMS
+        dol_extra_field: 1
+        type: text
+    echec_auth: 
+        label: Nombre d'echec d'authentification consecutif
+        dol_extra_field: 1
+        type: int
     comp:
         label: Compétence
         dol_extra_field: 1
@@ -176,6 +184,7 @@ forms:
             - field: signature
             - field: defaultentrepot
             - field: apple_centre
+            - field: echec_auth
             
 lists_cols: 
     id: 
@@ -270,6 +279,12 @@ fields_tables:
             - field: lastname
             - field: login
             - field: gender
+    security:
+        title: Securité
+        icon: lock
+        rows: 
+            - field: code_sms
+            - field: echec_auth
             
     address:
         title: Adresse
@@ -340,6 +355,12 @@ views:
                   col_md: 6
                   col_sm: 12
                   fields_table: 
+                      name: contact
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
                       name: identity
                       
                 - type: fields_table
@@ -347,7 +368,8 @@ views:
                   col_md: 6
                   col_sm: 12
                   fields_table: 
-                      name: contact
+                      name: security
+                      
                       
             - cols: 
                 - type: fields_table

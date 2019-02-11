@@ -3537,12 +3537,45 @@ class BS_SAV extends BimpObject
 
         return $errors;
     }
+    
+    public function updateClient(&$warnings = array(), $id){
+        $errors = array();
+        if($this->getData("id_facture_acompte") > 0){
+            $fact = $this->getChildObject("facture_acompte");
+            $fact->set("fk_soc", $id);
+            $errors = $fact->update($warnings, true);
+        }
+        
+        
+        if($this->getData("id_discount") > 0 && !count($errors)) {
+            $this->db->db->query("UPDATE ".MAIN_DB_PREFIX."societe_remise_except SET `fk_soc` = ".$id." WHERE rowid = ".$this->getData("id_discount"));
+        }
+        
+        if($this->getData("id_propal") > 0 && !count($errors)){
+//            $prop = $this->getChildObject("propal");
+//            $prop->set("fk_soc", $id);
+//            $errors = $prop->updateDolObject($warnings, true);
+            $this->db->db->query("UPDATE ".MAIN_DB_PREFIX."propal SET `fk_soc` = ".$id." WHERE rowid = ".$this->getData("id_propal"));
+        }
+        
+        if($this->getData("id_facture") > 0){
+            $fact = $this->getChildObject("facture");
+            $fact->set("fk_soc", $id);
+            $errors = $fact->update($warnings, true);
+        }
+        
+        return $errors;
+    }
 
     public function update(&$warnings = array(), $force_update = false)
     {
         $errors = array();
 
         $centre = $this->getCentreData();
+        
+        
+        if($this->getData("id_client") != $this->initData["id_client"])
+            $errors = $this->updateClient ($warnings, $this->getData("id_client"));
 
         if (!is_null($centre)) {
             $this->set('id_entrepot', (int) $centre['id_entrepot']);

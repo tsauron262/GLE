@@ -229,6 +229,7 @@ list_customs:
         icon: fas_chart-line
         content_callback: renderEventsBilanComptable
         filters_panel: default
+        filters_panel_open: 1
         sort_field: date
         sort_way: asc       
              

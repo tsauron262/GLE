@@ -40,6 +40,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
     public $emetteur;
     var $contrat;
     var $pdf;
+    public $db;
     var $margin_bottom = 2;
 
     public static $periodicities = array(
@@ -398,8 +399,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
                 $this->headOfArray($pdf);
                 
                 $count = count($contrat->lines);
-                
-                if($count > 7) {
+                $new_page = false;
+                if($count > 5) {
+                    $new_page = true;
                     $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
                         $pdf->SetX($this->marge_gauche);
                         $pdf->SetFont(''/* 'Arial' */, '', 9);
@@ -408,92 +410,58 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
                         $pdf->SetTextColor(0,0,0);
                         $pdf->Cell($W, 8, "Liste des descriptions financière en ANNEXE 1", 1, null, 'C', true);
                         $pdf->SetTextColor(0,0,0);
+                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 50, '', 0, 'C');
                 } else {
                     $this->display_lines($pdf, $contrat->lines);
                     $this->display_total($pdf, $contrat->lines);
                 }
                 
-                
-                
-//                $colTVA = (float) 20;
-//                $colPU = (float) 0;
-//                $colQTE = (int) 0;
-//                $colHT = (float) 0;
-//                $colTTC = (float) 0;
-//                $pdf->SetFont('', '', 7);
-//                $pdf->Cell($W * 5, 8, "Assistance globale", "LR", null, 'L', true);
-//                $pdf->Cell($W, 8, $colTVA . "%", "LR", null, 'C', true);
-//                foreach ($contrat->lines as $line) {
-//                    $totalHT += $line->total_ht;
-//                    $totalTTC += $line->total_ttc;
-//                }
-//                $pdf->Cell($W * 2, 8, $totalHT . "€", "LR", null, 'C', true);
-//                $pdf->Cell($W, 8, "1", "LR", null, 'C', true);
-//                $pdf->Cell($W * 2, 8, $totalHT . "€", "LR", null, 'C', true);
-//                $pdf->Cell($W * 2, 8, $totalTTC . "€", "LR", null, 'C', true);
-//                $pdf->SetFont('', 'B', 7);
-//                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, '', 0, 'C');
-//                $pdf->Cell($W * 5, 4, "Forfait pour", "LR", null, 'L', true);
-//                $pdf->Cell($W, 4, "", "LR", null, 'C', true);
-//                $pdf->Cell($W * 2, 4, "", "LR", null, 'C', true);
-//                $pdf->Cell($W, 4, "", "LR", null, 'C', true);
-//                $pdf->Cell($W * 2, 4, "", "LR", null, 'C', true);
-//                $pdf->Cell($W * 2, 4, "", "LR", null, 'C', true);
-//                $pdf->SetFont('', '', 7);
-//                foreach ($contrat->lines as $line) {
-//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, '', 0, 'C');
-//                    $pdf->Cell($W * 5, 4, $line->qty . " " . $line->description, "LR", null, 'L', true);
-//                    $pdf->Cell($W, 4, "", "LR", null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "", "LR", null, 'C', true);
-//                    $pdf->Cell($W, 4, "", "LR", null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "", "LR", null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "", "LR", null, 'C', true);
-//                }
-//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, '', 0, 'C');
-//                    $pdf->Cell($W * 5, 4, "", "LRB", null, 'L', true);
-//                    $pdf->Cell($W, 4, "", "LRB", null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "", "LRB", null, 'C', true);
-//                    $pdf->Cell($W, 4, "", "LRB", null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "", "LRB", null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "", "LRB", null, 'C', true);
-//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, '', 0, 'C');
-//                    $pdf->Cell($W * 5, 4, "", 0, null, 'L', true);
-//                    $pdf->Cell($W, 4, "", 0, null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "", 0, null, 'C', true);
-//                    $pdf->Cell($W, 4, "", 0, null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "Total HT", 1, null, 'L', true);
-//                    $pdf->Cell($W * 2, 4, $totalHT . "€", 1, null, 'R', true);
-//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-//                    $pdf->Cell($W * 5, 4, "", 0, null, 'L', true);
-//                    $pdf->Cell($W, 4, "", 0, null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "", 0, null, 'C', true);
-//                    $pdf->Cell($W, 4, "", 0, null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "Total TVA 20%", 1, null, 'L', true);
-//                    $pdf->Cell($W * 2, 4, $totalTTC - $totalHT . "€", 1, null, 'R', true);
-//                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
-//                    $pdf->Cell($W * 5, 4, "", 0, null, 'L', true);
-//                    $pdf->Cell($W, 4, "", 0, null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "", 0, null, 'C', true);
-//                    $pdf->Cell($W, 4, "", 0, null, 'C', true);
-//                    $pdf->Cell($W * 2, 4, "Total TTC", 1, null, 'L', true);
-//                    $pdf->Cell($W * 2, 4, $totalTTC . "€", 1, null, 'R', true);
-                
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
-                $pdf->SetFont('','bu',9);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Pour BIMP', 0, 'L');
+                $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, '', 0, 'L');
+                $pdf->SetFont('','BU',9);
+                $pdf->setColor('fill', 255,255,255);
+                $pdf->Cell($W, 8, "POUR BIMP", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "POUR LE CLIENT", 1, null, 'L', true);
+                $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->SetFont('','',9);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'NOM et fonction du signataire : ', 0, 'L');
-            //  $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), , '', 0, 'C');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Date :', 0, 'L');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 10, '', 0, 'C');
-                $pdf->SetFont('','bu',9);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, 'Pour le client', 0, 'L');
-                $pdf->SetFont('','',9);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'NOM, fonction et cahcet du signataire : ', 0, 'L');
-            //  $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), , '', 0, 'C');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'précédé de la mention "Lu et approuvé"', 0, 'L');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '+ paraphe de toutes les pages', 0, 'L');
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, 'Date : ', 0, 'L');
+                $pdf->Cell($W, 8, "Nom et fonction du signataire :", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Nom, fonction et cachet du signataire :", 1, null, 'L', true);
+                $pdf->MultiCell($W, 6, '', 0, 'L');
+                $pdf->Cell($W, 8, "Date :          /          /", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Précédé de la mention 'Lu et approuvé' + Paraphe des pages", 1, null, 'L', true);
+                $pdf->MultiCell($W, 6, '', 0, 'L');
+                $pdf->Cell($W, 8, "Signature", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Date :          /          /", 1, null, 'L', true);
+                $pdf->MultiCell($W, 6, '', 0, 'L');
+                $pdf->Cell($W, 8, "", 1, null, 'L', true);
+                $pdf->Cell($W, 8, "Signature", 1, null, 'L', true);
+                
+                $this->_pagefoot($pdf, $outputlangs);
+                if($new_page) {
+                    $maxLinePerPage = 25;
+                    $pdf->AddPage();
+                    $this->addLogo($pdf, 20);
+                    $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
+                    $pdf->SetFont('', 'B', 14);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "ANNEXE 1 : Description financière", 0, 'C');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "Contrat N° " . $propref, 0, 'C');
+                    $pdf->SetFont('', 'B', 11);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
+                    $this->headOfArray($pdf);
+                    $this->display_lines($pdf, $contrat->lines);
+                    $this->display_lines($pdf, $contrat->lines);
+                    $this->display_lines($pdf, $contrat->lines);
+                    $this->display_lines($pdf, $contrat->lines);
+                    $this->display_lines($pdf, $contrat->lines);
+                    $this->display_total($pdf, $contrat->lines);
+                    
+                }
+                
+                
+//                require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
+//                $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page? 1 : 0));
+//                $classAnnexe->getAnnexeContrat($contrat);
+                
                 if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
                 $pdf->Close();
                 $this->file = $file;$pdf->Output($file, 'f');
@@ -525,7 +493,18 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat
 
     function _pagefoot(&$pdf,$outputlangs)
     {
+        $pdf->SetDrawColor(255,255,255);
+        $pdf->setColor('fill', 255, 255, 255);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->setY(280);
+        //$pdf->setX();
+        $pdf->SetFont(''/* 'Arial' */, '', 9);
+        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
+        $pdf->Cell($W, 3, 'Page ' . $pdf->PageNo() . '/{:ptp:}', 1, null, 'L', true);
+        $pdf->Cell($W, 3, 'Paraphes', 1, null, 'R', true);
+        $pdf->SetTextColor(200, 200, 200);
         
+        $pdf->SetTextColor(0, 0, 0);
     }
 
 

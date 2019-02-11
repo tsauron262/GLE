@@ -86,7 +86,7 @@ class BimpStatsFacture {
         $out = $this->sortHash($hash, $sortBy, $placeType);
         if ($this->mode == 'c') {
             $this->putCsv($out, $nomFichier);
-            $out['urlCsv'] = "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&attachment=1&file=/export/exportGle/" . $nomFichier . ".csv' class='butAction'>Fichier</a>";
+            $out['urlCsv'] = "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=bimpstatsfacture&attachment=1&file=/export_fact/" . $nomFichier . ".csv' class='butAction'>Fichier</a>";
         }
         return $out;
     }
@@ -492,8 +492,14 @@ class BimpStatsFacture {
             $sortie .= $sautLn;
             $sortie .= $sautLn;
         }
-
-        file_put_contents(DOL_DATA_ROOT . "/synopsischrono/export/exportGle/" . $nomFichier . ".csv", $sortie);
+        
+        $folder = DOL_DATA_ROOT . "/bimpstatsfacture/";
+        if(!is_dir($folder))
+            mkdir ($folder);
+        $folder .= "/export_fact/";
+        if(!is_dir($folder))
+            mkdir ($folder);
+        file_put_contents($folder . $nomFichier . ".csv", $sortie);
     }
 
     private function sortHash($hash, $sortBy, $placeType) {

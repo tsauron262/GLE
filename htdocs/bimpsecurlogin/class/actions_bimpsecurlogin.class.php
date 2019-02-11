@@ -21,7 +21,7 @@ class securLogSms {
 
     var $max_tentative = 4;
     
-    var $debug = true;
+    var $debug = false;
 
     var $message = array();
     public function __construct($db) {

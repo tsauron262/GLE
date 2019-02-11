@@ -102,7 +102,7 @@ class securLogSms {
 
         //provisoir a viré
         $to = $this->traitePhone();
-        if (stripos($to, "+336") === false && stripos($to, "+337") === false)
+        if (!$this->isPhoneMobile($to))
             mailSyn2("ATTENTION Ip Inconnue phone KO ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to);
 //                else
 //                    mailSyn2("Ip Inconnue phone OK", "tommy@bimp.fr", "admin@bimp.fr", "Ip inconnue : ".$_SERVER['REMOTE_ADDR']." user ".$this->user->login. " phone : ".$to);
@@ -131,7 +131,7 @@ class securLogSms {
         $code = rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
         require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
         $to = $this->traitePhone();
-        if (stripos($to, "+336") === 0 || stripos($to, "+337") === 0) {
+        if ($this->isPhoneMobile($to)) {
             $smsfile = new CSMSFile($to, "BIMP ERP", "Votre code est : " . $code);
             if ($smsfile->sendfile()) {
                 $this->user->array_options['options_code_sms'] = $code;
@@ -148,9 +148,22 @@ class securLogSms {
             if (stripos($phone, "0") === 0)
                 $phone = "+33" . substr($phone, 1);
         }
-        if (stripos($phone, "+336") === false && stripos($phone, "+337") === false)
-            setEventMessages("<a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php'>Votre numéro de mobile et invalide : " . $phone . " dans quelques jours vous ne pourez plus acceder a l'application</a>", null, 'warnings');
+        if (!$this->isPhoneMobile($phone)){//Si pas trouver 
+            $phone = $this->user->array_options['options_phone_perso'];
+            if (stripos($phone, "+") === false) {
+                if (stripos($phone, "0") === 0)
+                    $phone = "+33" . substr($phone, 1);
+            }
+        }
+                
+                
+        if (!$this->isPhoneMobile($phone))
+            setEventMessages("<a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php'>Vos numéros de mobile (pro et perso) sont invalide : " . $phone . " dans quelques jours vous ne pourez plus acceder a l'application</a>", null, 'warnings');
         return $phone;
+    }
+    
+    public function isPhoneMobile($phone){
+        return (stripos($phone, "+336") === 0 || stripos($phone, "+337") === 0);
     }
 
 }

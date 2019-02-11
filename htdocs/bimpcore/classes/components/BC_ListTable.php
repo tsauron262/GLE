@@ -408,10 +408,10 @@ class BC_ListTable extends BC_List
 
         if (!is_null($this->params['filters_panel'])) {
             $html .= '<div class="row">';
-            $html .= '<div class="listFiltersPanelContainer col-xs-12 col-sm-12 col-md-2 col-lg-2"' . (!(int) $this->params['filters_panel_open'] ? ' style="display: none"' : '') . '>';
+            $html .= '<div class="listFiltersPanelContainer col-xs-12 col-sm-12 col-md-3 col-lg-2"' . (!(int) $this->params['filters_panel_open'] ? ' style="display: none"' : '') . '>';
             $html .= $this->renderFiltersPanel();
             $html .= '</div>';
-            $html .= '<div class="objectlistTableContainer col-xs-12 col-sm-12 col-md-10 col-lg-10">';
+            $html .= '<div class="objectlistTableContainer ' . ((int) $this->params['filters_panel_open'] ? 'col-xs-12 col-sm-12 col-md-9 col-lg-10' : 'col-xs-12') . '">';
         }
 
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';

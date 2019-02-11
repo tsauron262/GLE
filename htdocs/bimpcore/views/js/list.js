@@ -1044,12 +1044,12 @@ function onListLoaded($list) {
                 var $filtersPanel = $list.find('.listFiltersPanelContainer');
                 if ($filtersPanel.length) {
                     if ($(this).hasClass('action-open')) {
-                        $table.parent().removeClass('col-md-12').removeClass('col-lg-12').addClass('col-md-8').addClass('col-lg-10');
+                        $table.parent().removeClass('col-md-12').removeClass('col-lg-12').addClass('col-md-9').addClass('col-lg-10');
                         $filtersPanel.stop().fadeIn(150);
                         $(this).removeClass('action-open').addClass('action-close');
                     } else {
                         $filtersPanel.stop().fadeOut(150, function () {
-                            $table.parent().removeClass('col-md-8').removeClass('col-lg-10').addClass('col-md-12').addClass('col-lg-12');
+                            $table.parent().removeClass('col-md-9').removeClass('col-lg-10').addClass('col-md-12').addClass('col-lg-12');
                         });
                         $(this).removeClass('action-close').addClass('action-open');
                     }

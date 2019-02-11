@@ -86,6 +86,16 @@ class BimpInput
 
                 break;
 
+            case 'password':
+                $data = '';
+                if (isset($options['data'])) {
+                    foreach ($options['data'] as $data_name => $data_value) {
+                        $data .= ' data-' . $data_name . '="' . $data_value . '"';
+                    }
+                }
+                $html .= '<input type="password" id="' . $input_id . '" name="' . $field_name . '" value="' . $value . '"' . $data . '/>';
+                break;
+
             case 'qty':
                 $data = '';
                 if (isset($options['data'])) {

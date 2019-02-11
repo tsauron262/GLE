@@ -417,6 +417,9 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
     
     public function print_preces($pdf, $contrat, $outputlangs, $nombre = 1) {
         global $user;
+        $titreContrat = (object) self::$textContrat['titres'];
+                $texteContrat = (object) self::$textContrat['textes'];
+                $autre = (object) self::$autre;
             for ($i=1; $i <= $nombre; $i++) { 
                 $pdf->AddPage();
                 $pdf->SetTitle($contrat->ref);
@@ -483,7 +486,19 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                 $demande = BimpObject::getInstance('bimpfinancement', 'BF_Demande');
                 $demande->find(array('id_contrat' => (int) $contrat->id), true, true);
                 $lines = $demande->getChildrenObjects('lines', array('in_contrat' => (int) 1));
-                $this->linesProduct($pdf, $lines);
+                $new_page = (count($lines) > 5) ? true : false;
+                if($new_page) {
+                    $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
+                    $pdf->SetX($this->marge_gauche);
+                    $pdf->SetFont(''/* 'Arial' */, '', 9);
+                    $pdf->setColor('fill', 248, 248, 248);
+                    $pdf->SetTextColor(0,0,0);
+                    $pdf->Cell($W, 8, $texteContrat->texte_3, 1, null, 'C', true);
+                    $pdf->SetTextColor(0,0,0);
+                    $pdf->setXY($this->marge_gauche, 120);
+                } else {
+                    $this->linesProduct($pdf, $lines);
+                }
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "Le locataire a choisi librement et sous sa responsabilité les équipements, objets du présent contrat, en s’assurant auprès de ses fournisseurs de leur compatibilité y compris dans le cas où ils sont incorporés dans un système préexistant.", 0, 'L');
@@ -510,6 +525,25 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat
                 $pdf->SetTextColor(0,0,0);
                 $pdf->Cell($W, 8, "Pour le loueur", 1, null, 'L', true);
                 $this->greyFooter($pdf, "Procès-verbal de livraison F-LOC V1 du 15/06/2018");
+                if($new_page) {
+                   $pdf->AddPage();
+                        $this->addLogo($pdf, 20);
+                        $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
+                        $pdf->SetFont('', 'B', 15);
+                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "CONTRAT DE LOCATION N° " . $this->contrat->ref, 0, 'C');
+                        $pdf->SetFont('', 'B', 9);
+                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
+                        $pdf->SetFont('', '', 10);
+                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "ANNEXE 1 : Liste et détails des produits", 0, 'C');
+                        $pdf->SetFont('', '', 9);
+                        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
+                        $pdf->SetDrawColor(255, 255, 255);
+                        $this->enTete3Cases($pdf);
+                        $pdf->SetTextColor(0,0,0);
+                        $pdf->SetFont(''/* 'Arial' */, '', 9);
+                        $this->linesProduct($pdf, $lines);
+                        $this->greyFooter($pdf);
+                }
             }
     }
     
@@ -678,7 +712,7 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $pdf->MultiCell($separateur, 6, "", 0, 'C',false,0);
                 $pdf->MultiCell($W, 6, "Joindre un RIB", 0, 'L',false,0);
                 $pdf->setFont('','',8);
-
+                
                 $this->greyFooter($pdf, "Mandat SEPA F-LOC V1 du 15/06/2018");
     }
     
@@ -739,11 +773,14 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $nblignes = sizeof($contrat->lignes);
                 $pdf = pdf_getInstance($this->format);
                 $pdf1 = pdf_getInstance($this->format);
+                $pdf2 = pdf_getInstance($this->format);
                 if (class_exists('TCPDF')) {
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(true);
                     $pdf1->setPrintHeader(false);
                     $pdf1->setPrintFooter(true);
+                    $pdf2->setPrintHeader(false);
+                    $pdf2->setPrintFooter(true);
                 }
                 
                 //$this->print_contrat($pdf, $contrat, $file, 3);
@@ -753,11 +790,14 @@ Le présent mandat est donné pour le débiteur en référence, il sera utilisab
                 $this->print_mandat($pdf, $contrat);
                 $file1 = $dir ."/Contrat_LDLC_lease_".date("d_m_Y")."_" . $propref . "_X1.pdf";
                 $this->print_contrat($pdf1, $contrat, $outputlangs);
-                $this->print_preces($pdf1, $contrat, $outputlangs);
                 $this->print_mandat($pdf1, $contrat);
-                $pdf->Close(); $pdf1->Close();
+                $file2 = $dir ."/Contrat_LDLC_lease_".date("d_m_Y")."_" . $propref . "_PROCES.pdf";
+                $pdf2->setDrawColor(255,255,255);
+                $this->print_preces($pdf2, $contrat, $outputlangs);
+                $pdf->Close(); $pdf1->Close(); $pdf2->Close();
                 $this->file = $file;$pdf->Output($file, 'f');
                 $this->file1 = $file1;$pdf1->Output($file1, 'f');
+                $this->file2 = $file2;$pdf2->Output($file2, 'f');
                 return 1;   // Pas d'erreur
                 
 

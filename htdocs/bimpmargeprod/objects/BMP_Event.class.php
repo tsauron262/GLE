@@ -444,12 +444,14 @@ class BMP_Event extends BimpObject
                         if ($type_montant === 0 && $type === 1) {
                             $paid_ttc *= -1;
                         }
+
+                        $paid_ht = (float) BimpTools::calculatePriceTaxEx($paid_ttc, $montant->getTvaTx());
                         $coprods_montants[(int) $id_coprod] = array(
                             'total_part_ht'  => $montant_ht * $part_tx,
                             'total_part_tva' => $montant_tva * $part_tx,
                             'total_part_ttc' => $montant_ttc * $part_tx,
-                            'total_paid_ht'  => 0, //$montant_ht * $paiement_tx,
-                            'total_paid_tva' => 0, //$montant_tva * $paiement_tx,
+                            'total_paid_ht'  => $paid_ht,
+//                            'total_paid_tva' => $montant_tva * $paiement_tx,
                             'total_paid_ttc' => $paid_ttc,
                         );
                     }
@@ -1047,6 +1049,11 @@ class BMP_Event extends BimpObject
             }
 
             $cp_soldes = $event->getCoprodsSoldes();
+            
+//            echo '<pre>';
+//            print_r($cp_soldes);
+//            echo '</pre>';
+            
             $billets_amounts = $event->getBilletsAmounts();
             $montants = $event->getChildrenObjects('montants');
 
@@ -1124,14 +1131,10 @@ class BMP_Event extends BimpObject
                         }
 
                         if ($cp_solde > 0) {
-                            $total_coprods[$id_soc_cp]['total_frais'] += $cp_solde;
-                            $amounts['total_frais'] += $cp_solde;
-                            $amounts['solde'] -= $cp_solde;
+                            $total_coprods[$id_soc_cp]['total_recettes'] += $cp_solde;
                         } else {
                             $cp_solde *= -1;
-                            $total_coprods[$id_soc_cp]['total_recettes'] += $cp_solde;
-                            $amounts['total_recettes'] += $cp_solde;
-                            $amounts['solde'] += $cp_solde;
+                            $total_coprods[$id_soc_cp]['total_frais'] += $cp_solde;
                         }
                     }
                 }
@@ -1146,14 +1149,10 @@ class BMP_Event extends BimpObject
                 }
 
                 if ($cp_solde > 0) {
-                    $total_coprods[0]['total_frais'] += $cp_solde;
-                    $amounts['total_recettes'] += $cp_solde;
-                    $amounts['solde'] += $cp_solde;
+                    $total_coprods[0]['total_recettes'] += $cp_solde;
                 } else {
                     $cp_solde *= -1;
-                    $total_coprods[0]['total_recettes'] += $cp_solde;
-                    $amounts['total_frais'] += $cp_solde;
-                    $amounts['solde'] -= $cp_solde;
+                    $total_coprods[0]['total_frais'] += $cp_solde;
                 }
             }
 
@@ -1187,6 +1186,10 @@ class BMP_Event extends BimpObject
             $amounts['total_recettes'] += $total_dl_dist;
         }
 
+//        echo '<pre>';
+//        print_r($total_coprods);
+//        echo '</pre>';
+        
         // Ajout totaux coprods: 
         if (!empty($total_coprods)) {
             if (!isset($amounts['categories'][self::$id_coprods_category])) {
@@ -1228,9 +1231,13 @@ class BMP_Event extends BimpObject
 
                 if ($solde > 0) {
                     $row['recette'] = BimpTools::displayMoneyValue($solde, 'EUR');
+                    $amounts['total_recettes'] += $solde;
+                    $amounts['solde'] += $solde;
                 } else {
                     $solde *= -1;
                     $row['frais'] = BimpTools::displayMoneyValue($solde, 'EUR');
+                    $amounts['total_frais'] += $solde;
+                    $amounts['solde'] -= $solde;
                 }
 
                 $amounts['categories'][self::$id_coprods_category]['rows'][] = $row;
@@ -1580,6 +1587,12 @@ class BMP_Event extends BimpObject
         $html = '';
 
         $totaux = $this->getMontantsRecap($montant_type);
+
+//        $html .= '<pre>';
+//        $html .= print_r($totaux, 1);
+//        $html .= '</pre>';
+//        return $html;
+
         $show_coprods = (int) $this->showCoprods();
         $colspan = 4;
         if ($show_coprods) {

@@ -41,10 +41,10 @@ class BC_ListCustom extends BC_List
 
         if (!is_null($this->params['filters_panel'])) {
             $html .= '<div class="row">';
-            $html .= '<div class="listFiltersPanelContainer col-xs-12 col-sm-12 col-md-4 col-lg-2"' . (!(int) $this->params['filters_panel_open'] ? ' style="display: none"' : '') . '>';
+            $html .= '<div class="listFiltersPanelContainer col-xs-12 col-sm-12 col-md-2 col-lg-2"' . (!(int) $this->params['filters_panel_open'] ? ' style="display: none"' : '') . '>';
             $html .= $this->renderFiltersPanel();
             $html .= '</div>';
-            $html .= '<div class="objectlistCustomContainer col-xs-12 col-sm-12 col-md-8 col-lg-10">';
+            $html .= '<div class="objectlistCustomContainer col-xs-12 col-sm-12 col-md-10 col-lg-10">';
         }
 
         $html .= '<div id="' . $this->identifier . '_ajax_content" class="list_custom_ajax_content">';

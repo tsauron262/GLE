@@ -86,6 +86,9 @@ fields:
         label: Tél. pro
     user_mobile: 
         label: Tél. portable
+    phone_perso: 
+        label: Téléphone portable perso
+        dol_extra_field: 1
     skype: 
         label: Identifiant Skype
     fk_user: 
@@ -158,6 +161,7 @@ forms:
             - field: firstname
             - field: office_phone
             - field: user_mobile
+            - field: phone_perso
             - field: mail_sec
             - field: apple_id
             - field: apple_service
@@ -186,8 +190,6 @@ lists_cols:
         field: job
     email: 
         field: email
-    mail_sec: 
-        field: mail_sec
     office_phone: 
         field: office_phone
     user_mobile: 
@@ -283,8 +285,9 @@ fields_tables:
             - field: email
             - field: office_phone
             - field: user_mobile
-            - field: skype
+            - field: phone_perso
             - field: mail_sec
+            - field: skype
             - field: synchaction
             - field: displayedinglobaladdressbook
             - field: mailquota

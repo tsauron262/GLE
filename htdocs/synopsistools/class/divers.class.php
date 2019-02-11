@@ -818,20 +818,23 @@ class dashboard {
                 $this->nomCookie = "secure_bimp_erp".$this->user->id;
                 
                 
-                
 //                $this->setSecure();
             }
             
+            
             function isSecur(){
-                if(isset($_SESSION['sucur']) && $_SESSION['sucur'])
-                    return 1;
                 $filename = DOL_DATA_ROOT."/white-ip.txt";
                 if(is_file($filename)){//ip white liste
-                    $témp = file_get_contents($filename);
+                    $tmp = file_get_contents($filename);
                     $tab = explode("\n", $tmp);
                     if(in_array($_SERVER['REMOTE_ADDR'], $tab))
                         return 1;
                 }
+                
+                $this->traitePhone();
+                
+                if(isset($_SESSION['sucur']) && $_SESSION['sucur'])//session deja securise
+                    return 1;
                     
                 if(isset($_COOKIE[$this->nomCookie])){//cokkie secur en place
                     $crypt = $_COOKIE[$this->nomCookie];
@@ -845,7 +848,7 @@ class dashboard {
 
 
                 //provisoir a viré
-                $to = self::traitePhone($this->user->user_mobile);
+                $to = $this->traitePhone();
                 if(stripos($to, "+336") === false && stripos($to, "+337") === false)
                     mailSyn2("ATTENTION Ip Inconnue phone KO ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr", "admin@bimp.fr", "Ip inconnue : ".$_SERVER['REMOTE_ADDR']." user ".$this->user->login. " phone : ".$to);
 //                else
@@ -874,7 +877,7 @@ class dashboard {
                 global $user;
                 $code = rand(0,9).rand(0,9).rand(0,9).rand(0,9);
                 require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
-                $to = self::traitePhone($this->user->user_mobile);
+                $to = $this->traitePhone();
                 if(stripos($to, "+336") === 0 || stripos($to, "+337") === 0){
                     $smsfile = new CSMSFile($to, "BIMP ERP", "Votre code est : ".$code);
                     if($smsfile->sendfile()){
@@ -888,12 +891,14 @@ class dashboard {
             }
             
             
-        static function traitePhone($phone){
-            $phone = str_replace(array(" ", "-", ":"), "", $phone);
+        public function traitePhone(){
+            $phone = str_replace(array(" ", "-", ":"), "", $this->user->user_mobile);
             if(stripos($phone, "+") === false){
                 if(stripos($phone, "0") === 0)
                         $phone = "+33".substr($phone,1);
             }
+            if(stripos($phone, "+336") === false && stripos($phone, "+337") === false)
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Votre numéro de mobile et invalide : ".$phone." dans quelques jours vous ne pourez plus accedé a l'application</a>", null, 'warnings');   
             return $phone;
         }
     }

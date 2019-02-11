@@ -227,11 +227,10 @@ list_customs:
     marge_prod: 
         title: Marge de production
         icon: fas_chart-line
-        content_callback: renderMargeProd
+        content_callback: renderEventsBilanComptable
         filters_panel: default
         sort_field: date
-        sort_way: asc
-        
+        sort_way: asc       
              
 fields_tables: 
     infos: 
@@ -463,7 +462,7 @@ views:
                         struct: 
                             type: custom
                             custom: 
-                                callback: renderBilansComptables
+                                callback: renderEventBilansComptables
                  
 #    bilan_comptable:
 #        rows: 

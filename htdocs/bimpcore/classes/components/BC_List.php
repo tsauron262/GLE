@@ -40,7 +40,7 @@ class BC_List extends BC_Panel
 
         $this->params_def['filters_panel'] = array();
         $this->params_def['filters_panel_values'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
-        $this->params_def['filters_panel_open'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['filters_panel_open'] = array('data_type' => 'bool', 'default' => 0);
 
         if (is_null($id_parent)) {
             $parent_id_property = $object->getParentIdProperty();

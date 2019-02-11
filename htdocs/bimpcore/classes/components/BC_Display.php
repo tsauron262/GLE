@@ -45,6 +45,9 @@ class BC_Display extends BimpComponent
         ),
         'callback'    => array(
             'method' => array('required' => true, 'default' => '')
+        ),
+        'password'    => array(
+            'hide' => array('data_type' => 'bool', 'default' => 1)
         )
     );
 
@@ -72,6 +75,7 @@ class BC_Display extends BimpComponent
                 case 'money':
                 case 'percent':
                 case 'qty':
+                case 'password':
                     $this->params_def['type']['default'] = $field_params['type'];
                     break;
 
@@ -390,6 +394,14 @@ class BC_Display extends BimpComponent
                         $html = BimpRender::renderAlerts('Erreur technique: champ de type JSON non affichable');
                         break;
 
+                    case 'password':
+                        if ($this->params['hide']) {
+                            $html .= preg_replace('/./', '*', $this->value);
+                        } else {
+                            $html .= htmlentities($this->value);
+                        }
+                        break;
+
                     case 'string':
                     case 'html':
                     default:
@@ -397,7 +409,7 @@ class BC_Display extends BimpComponent
                             $value = BimpTools::replaceBr($this->value);
                             $html .= (string) strip_tags($value);
                         } else {
-                            $html .= (string) $this->value;
+                            $html .= (string) htmlentities($this->value);
                         }
 
                         break;

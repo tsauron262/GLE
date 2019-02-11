@@ -36,6 +36,15 @@ fields:
     unit_price: 
         label: Prix unitaire HT
         type: money
+        
+    qty: 
+        label: Quantités par défaut
+        type: qty
+        min: 0
+        default_value: 0
+        display_if: 
+            field_name: use_groupe_number
+            show_values: 0
             
 list: 
     checkboxes: 1
@@ -61,5 +70,10 @@ list:
         price: 
             field: unit_price
             edit: 1
+        qty: 
+            field: qty
+            edit: 1
+            show: 
+                callback: showQtyInput
         
     

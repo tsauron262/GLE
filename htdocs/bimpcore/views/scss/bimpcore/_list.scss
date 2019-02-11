@@ -3,7 +3,7 @@ table.objectlistTable {
     td,th {
         padding: 5px;
     }
-    
+
     border: none;
     box-shadow: none;
     width: 100%;
@@ -64,7 +64,7 @@ table.objectlistTable {
         }
 
         & > td {
-            padding: 5px 6px;
+            padding: 4px 6px;
             border-bottom: 1px solid #ddd;
             background-color: #fff!important;
 
@@ -178,7 +178,7 @@ table.objectlistTable {
         background-color: #E6E6E6;
         font-weight: bold;
         color: $gray-darker;
-        padding: 8px 6px;
+        padding: 5px 6px;
     }
 
     .objectSubList {
@@ -495,6 +495,9 @@ th.th_tools {
             font-family: 'FontAwesome';
         }
     }
+    .openFiltersPanelButton:before {
+        content: '\f0b0';
+    }
     .openSearchRowButton:before {
         content: '\f002';
     }
@@ -548,15 +551,15 @@ td.buttons {
 .rowButton {
     color: #636363!important;
     text-align: center;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     vertical-align: middle;
-    line-height: 32px;
+    line-height: 28px;
     border-radius: 50%;
     cursor: pointer;
     display: inline-block;
     margin: 0 1px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: normal;
 
     transition: all 0.3s ease;
@@ -669,4 +672,57 @@ td.buttons {
             }
         }
     }
+}
+
+/*Panel Filtres*/
+
+.bimp_filter_container {
+    margin-bottom: 5px;
+
+    .bimp_filter_caption {
+        font-weight: bold;
+        color: $gray-darker;
+        padding: 6px 8px;
+        margin-bottom: 5px;
+        background-color: #DCDCDC;
+    }
+
+    .bimp_filter_values_container {
+        margin-top: 5px;
+    }
+
+    .bimp_filter_value {       
+        font-size: 11px;
+        display: inline-block;
+        margin: 1px;
+        padding: 5px 8px;
+        background-color: #F5F5F5;
+        border: 1px solid #8C8C8C;
+
+        .bimp_filter_value_remove_btn {
+            @include transition(all 0.3s ease);
+            margin-left: 8px;
+            color: #A0A0A0;
+            cursor: pointer;
+            float: right;
+
+            &:hover {
+                color: $danger;
+            }
+        }
+    }
+
+    input[type=text] {
+        width: 100%;
+    }
+
+    i.loading {
+        display: none;
+    }
+}
+
+.load_saved_filters_container {
+    padding: 5px 0;
+    margin: 5px 0;
+    border-top: 1px solid $gray-darker;
 }

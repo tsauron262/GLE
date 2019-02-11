@@ -1,0 +1,47 @@
+table: bimp_list_filters
+common_fields: 0
+
+labels: 
+    name: enregistrement de filtres
+    name_plur: enregistrements de filtres
+    
+fields: 
+    name: 
+        label: Nom
+        required: 1
+        
+    owner_type: 
+        label: Type objet propriétaire
+        values: 
+            1: Groupe
+            2: Utilisateur
+        default_value: 2
+        
+    id_owner: 
+        label: Propriétaire
+        type: int
+        required: 1
+        
+    obj_module: 
+        label: Module
+        required: 1
+        
+    obj_name: 
+        label: Objet
+        required: 1
+        
+    list_type: 
+        label: Type de liste
+        required: 1
+        
+    list_name: 
+        label: Code liste
+        default_value: default
+        
+    panel_name: 
+        label: Nom du panel
+        default_value: default
+        
+    filters: 
+        label: filtres
+        type: json

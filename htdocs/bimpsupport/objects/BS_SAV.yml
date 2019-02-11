@@ -719,9 +719,31 @@ lists_cols:
         field: total
         child: propal
         label: Total TTC Devis
+    symptomes:
+        field: symptomes
+    diagnostic:
+        field: diagnostic
+    resolution:
+        field: resolution
                         
+filters_panels: 
+    default: 
+        filters: 
+            - field: ref
+            - field: status
+            - field: date_create
+            - field: id_equipment
+            - field: code_centre
+            - field: id_user_tech
+            - field: id_client
+            - field: id_facture_acompte
+            - field: id_facture
+            - field: prestataire_number
+            - field: sav_pro
+            
 lists: 
     default: 
+        filters_panel: default
         title: Liste des SAV
         configurable: 1
         checkboxes: 1

@@ -365,6 +365,14 @@ class BimpInput
                 $options['options'] = BimpCache::getDemandReasonsArray();
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
+            case 'search_object':
+                if (isset($options['object']) && is_a($options['object'], 'BimpObject')) {
+                    $html = $options['object']->renderSearchInput($field_name);
+                } else {
+                    $html .= BimpRender::renderAlerts('Type d\'objet à rechercher invalide');
+                }
+                break;
+
             case 'search_ziptown':
                 $html = '<div class="searchZiptownInputContainer">';
                 $html .= '<input autocomplete="off" typetype="text" class="search_ziptown" name="' . $field_name . '" value="' . $value . '"';
@@ -1234,7 +1242,7 @@ class BimpInput
         } else {
             $label = $option;
         }
-        
+
         $html .= '<option value="' . $option_value . '"';
         if ($value == $option_value) {
             $html .= ' selected="1"';
@@ -1246,7 +1254,7 @@ class BimpInput
             $html .= ' data-icon_class="' . $icon . '"';
         }
         $html .= '>' . $label . '</option>';
-        
+
         return $html;
     }
 }

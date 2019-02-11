@@ -1935,13 +1935,16 @@ class BS_SAV extends BimpObject
 
             case 'commOk':
                 $subject = 'Commande piece(s) ' . $this->getData('ref');
-                $mail_msg = "Nous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. Nous restons à votre disposition pour toutes questions au " . $tel;
+                $mail_msg = "Nous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. ";
+                $mail_msg .= "\n Voici nottre diagnostique : " . $this->getData("diagnostic");
+                $mail_msg .= "\n Nous restons à votre disposition pour toutes questions au " . $tel;
                 $sms = "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci.\nL'équipe BIMP";
                 break;
 
             case 'repOk':
                 $subject = $this->getData('ref') . " Reparation  terminee";
                 $mail_msg = "Nous avons le plaisir de vous annoncer que la réparation de votre \"$nomMachine\" est finie.\n";
+                $mail_msg .= "Voici ce que nous avons fait : ".$this->getData("resolution")."\n";
                 $mail_msg .= "Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel;
                 $sms = "Bonjour, la réparation de votre produit est finie. Vous pouvez le récupérer à " . $nomCentre . " " . $delai . ".\nL'Equipe BIMP.";
                 break;

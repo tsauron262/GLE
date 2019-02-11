@@ -144,6 +144,26 @@ function hidePopovers($container) {
 // Evenements: 
 
 function setCommonEvents($container) {
+    //Foldable custom: 
+    $container.find('.foldable_container').each(function () {
+        if (!parseInt($(this).data('foldable_container_event_init'))) {
+            var $caption = $(this).children('.foldable_caption');
+
+            $caption.click(function () {
+                var $foldableContainer = $(this).findParentByClass('foldable_container');
+                if ($.isOk($foldableContainer)) {
+                    if ($foldableContainer.hasClass('open')) {
+                        $foldableContainer.removeClass('open').addClass('closed');
+                        $foldableContainer.children('.foldable_content').slideUp(250);
+                    } else {
+                        $foldableContainer.removeClass('closed').addClass('open');
+                        $foldableContainer.children('.foldable_content').slideDown(250);
+                    }
+                }
+            });
+            $(this).data('foldable_container_event_init', 1);
+        }
+    });
     // foldable sections: 
     $container.find('.foldable_section_caption').each(function () {
         if (!parseInt($(this).data('foldable_event_init'))) {
@@ -196,19 +216,19 @@ function setCommonEvents($container) {
     });
     // Popup
     $container.find('.displayPopupButton').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
+        if (!parseInt($(this).data('popup_btn_event_init'))) {
             setDisplayPopupButtonEvents($(this));
-            $(this).data('event_init', 1);
+            $(this).data('popup_btn_event_init', 1);
         }
     });
     // bootstrap popover:
     $container.find('.bs-popover').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
+        if (!parseInt($(this).data('bs_popover_event_init'))) {
             $(this).popover();
             $(this).click(function () {
                 $(this).popover('hide');
             });
-            $(this).data('event_init', 1);
+            $(this).data('bs_popover_event_init', 1);
         }
     });
     // Auto-expand: 
@@ -243,27 +263,34 @@ function setCommonEvents($container) {
         }
     });
     $container.find('.nav-tabs').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
+        if (!parseInt($(this).data('nav_tabs_event_init'))) {
             $(this).find('li > a').click(function (e) {
                 e.preventDefault();
                 $(this).tab('show');
             });
-            $(this).data('event_init', 1);
+            $(this).data('nav_tabs_event_init', 1);
         }
     });
     $container.find('.hideOnClickOut').each(function () {
-        $(this).click(function (e) {
-            e.stopPropagation();
-        });
+        if (!parseInt($(this).data('hide_on_click_event_init'))) {
+            $(this).click(function (e) {
+                e.stopPropagation();
+            });
+            $(this).data('hide_on_click_event_init', 1);
+        }
     });
     $container.find('.displayProductStocksBtn').each(function () {
-        $(this).click(function (e) {
-            e.stopPropagation();
-            displayProductStocks($(this), $(this).data('id_product'), $(this).data('id_entrepot'));
-        });
+        if (!parseInt($(this).data('on_click_event_init'))) {
+            $(this).click(function (e) {
+                e.stopPropagation();
+                displayProductStocks($(this), $(this).data('id_product'), $(this).data('id_entrepot'));
+            });
+
+            $(this).data('on_click_event_init', 1);
+        }
     });
     $container.find('a[data-toggle="tab"]').each(function () {
-        if (!parseInt($(this).data('event_init'))) {
+        if (!parseInt($(this).data('toggle_tab_event_init'))) {
             $(this).on('shown.bs.tab', function (e) {
                 var target = '' + e.target;
                 var tab_id = target.replace(/^.*#(.*)$/, '$1');
@@ -288,7 +315,7 @@ function setCommonEvents($container) {
                     setCommonEvents($content);
                 }
             });
-            $(this).data('event_init', 1);
+            $(this).data('toggle_tab_event_init', 1);
         }
     });
 

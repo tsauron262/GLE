@@ -15,15 +15,17 @@ class BimpCore
 //            '/bimpcore/views/js/component.js',
             '/bimpcore/views/js/modal.js',
             '/bimpcore/views/js/object.js',
+            '/bimpcore/views/js/filters.js',
             '/bimpcore/views/js/form.js',
             '/bimpcore/views/js/list.js',
             '/bimpcore/views/js/view.js',
             '/bimpcore/views/js/viewsList.js',
+            '/bimpcore/views/js/listCustom.js',
             '/bimpcore/views/js/page.js'
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
-            '/bimpcore/views/css/bimpcore_bootstrap.css'
+            '/bimpcore/views/css/bimpcore.css'
         )
     );
     public static $filesInit = false;

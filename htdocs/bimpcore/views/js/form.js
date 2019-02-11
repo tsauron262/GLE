@@ -1625,88 +1625,45 @@ function setInputContainerEvents($inputContainer) {
 function setInputsEvents($container) {
     var in_modal = $.isOk($container.findParentByClass('modal'));
     $container.find('select').each(function () {
-        if (!$.isOk($(this).findParentByClass('subObjectFormTemplate')) &&
-                !$(this).hasClass('no_select2')) {
-            if ($(this).hasClass('select2-hidden-accessible')) {
-                $(this).select2('destroy');
-            }
-
-            var dropdownCssClass = 'ui-dialog';
-            if (in_modal) {
-                dropdownCssClass += ' modal-ui-dialog';
-            }
-            var options = {
-                dir: 'ltr',
-                width: 'resolve',
-                minimumResultsForSearch: 15,
-                minimumInputLength: 0,
-                language: select2arrayoflanguage,
-                containerCssClass: ':all:',
-                dropdownCssClass: dropdownCssClass,
-                templateResult: function (data, container) {
-                    if (data.element) {
-                        $(container).addClass($(data.element).attr("class"));
-                    }
-
-                    if (data.loading) {
-                        return data.text;
-                    }
-
-                    var $option = $(data.element);
-
-                    if ($option.css('display') === 'none') {
-                        $(container).remove();
-                        return;
-                    }
-
-                    if ($option.data('html')) {
-                        return htmlEntityDecodeJs($(data.element).attr("data-html"));
-                    }
-
-                    var html = '<span style="';
-                    if ($option.data('color')) {
-                        html += 'color: #' + $option.data('color') + '; font-weight: bold;';
-                    }
-                    html += '">';
-                    if ($option.data('icon_class')) {
-                        html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
-                    }
-
-                    html += data.text + '</span>';
-                    return html;
-                },
-                templateSelection: function (selection) {
-                    var $option = $(selection.element);
-
-                    var html = '<span style="';
-                    if ($option.data('color')) {
-                        html += 'color: #' + $option.data('color') + '; font-weight: bold;';
-                    }
-                    html += '">';
-                    if ($option.data('icon_class')) {
-                        html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
-                    }
-
-                    html += selection.text + '</span>';
-                    return html;
-                },
-                escapeMarkup: function (markup) {
-                    return markup;
+        if (!$(this).data('select_2_converted')) {
+            if (!$.isOk($(this).findParentByClass('subObjectFormTemplate')) &&
+                    !$(this).hasClass('no_select2')) {
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2('destroy');
                 }
-            };
-            if (in_modal) {
-                options.dropdownParent = $('#page_modal');
-            }
-            $(this).select2(options);
 
-            // Hack pour correction bug d'affichage:
-            $(this).on('select2:close', function (e) {
-                var $options = $(this).find('option');
-//
-                if ($options.length === 1) {
-                    var val = $(this).val();
-                    var $option = $(this).find('option[value="' + val + '"]');
-                    if ($option.length) {
+                var dropdownCssClass = 'ui-dialog';
+                if (in_modal) {
+                    dropdownCssClass += ' modal-ui-dialog';
+                }
+                var options = {
+                    dir: 'ltr',
+                    width: 'resolve',
+                    minimumResultsForSearch: 15,
+                    minimumInputLength: 0,
+                    language: select2arrayoflanguage,
+                    containerCssClass: ':all:',
+                    dropdownCssClass: dropdownCssClass,
+                    templateResult: function (data, container) {
+                        if (data.element) {
+                            $(container).addClass($(data.element).attr("class"));
+                        }
+
+                        if (data.loading) {
+                            return data.text;
+                        }
+
+                        var $option = $(data.element);
+
+                        if ($option.css('display') === 'none') {
+                            $(container).remove();
+                            return;
+                        }
+
+                        if ($option.data('html')) {
+                            return htmlEntityDecodeJs($(data.element).attr("data-html"));
+                        }
+
                         var html = '<span style="';
                         if ($option.data('color')) {
                             html += 'color: #' + $option.data('color') + '; font-weight: bold;';
@@ -1715,11 +1672,58 @@ function setInputsEvents($container) {
                         if ($option.data('icon_class')) {
                             html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
                         }
-                        html += $option.text() + '</span>';
-                        $(this).parent().find('span.select2-selection__rendered').html(html);
+
+                        html += data.text + '</span>';
+                        return html;
+                    },
+                    templateSelection: function (selection) {
+                        var $option = $(selection.element);
+
+                        var html = '<span style="';
+                        if ($option.data('color')) {
+                            html += 'color: #' + $option.data('color') + '; font-weight: bold;';
+                        }
+                        html += '">';
+                        if ($option.data('icon_class')) {
+                            html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
+                        }
+
+                        html += selection.text + '</span>';
+                        return html;
+                    },
+                    escapeMarkup: function (markup) {
+                        return markup;
                     }
+                };
+                if (in_modal) {
+                    options.dropdownParent = $('#page_modal');
                 }
-            });
+                $(this).select2(options);
+
+                // Hack pour correction bug d'affichage:
+                $(this).on('select2:close', function (e) {
+                    var $options = $(this).find('option');
+//
+                    if ($options.length === 1) {
+                        var val = $(this).val();
+                        var $option = $(this).find('option[value="' + val + '"]');
+                        if ($option.length) {
+                            var html = '<span style="';
+                            if ($option.data('color')) {
+                                html += 'color: #' + $option.data('color') + '; font-weight: bold;';
+                            }
+                            html += '">';
+                            if ($option.data('icon_class')) {
+                                html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
+                            }
+                            html += $option.text() + '</span>';
+                            $(this).parent().find('span.select2-selection__rendered').html(html);
+                        }
+                    }
+                });
+            }
+
+            $(this).data('select_2_converted', 1);
         }
     });
     $container.find('.switch').each(function () {

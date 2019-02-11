@@ -272,7 +272,7 @@ class pdf_bimpsupport_europe extends ModeleBimpSupport {
 
 
                 if ($sav->getChildObject('user_tech')->id > 0) {
-                    $tech = $sav->getChildObject('user_create');
+                    $tech = $sav->getChildObject('user_tech')->dol_object;
                     $tech->fetch_optionals();
 //                    print_r($tech);die;
                     $pdf->SetXY('33', '182');

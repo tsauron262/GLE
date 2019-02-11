@@ -66,16 +66,18 @@ class BC_ListTable extends BC_List
 
         $path = null;
 
-        if (!$name || $name === 'default') {
-            if ($object->config->isDefined('list')) {
-                $path = 'list';
-                $name = '';
-            } elseif ($object->config->isDefined('lists/default')) {
+        if (!is_null($object)) {
+            if (!$name || $name === 'default') {
+                if ($object->config->isDefined('list')) {
+                    $path = 'list';
+                    $name = '';
+                } elseif ($object->config->isDefined('lists/default')) {
+                    $path = 'lists';
+                    $name = 'default';
+                }
+            } else {
                 $path = 'lists';
-                $name = 'default';
             }
-        } else {
-            $path = 'lists';
         }
 
         parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon);
@@ -206,7 +208,7 @@ class BC_ListTable extends BC_List
             if (BimpObject::objectLoaded($object)) {
                 $this->object = $object;
                 $item_params = $this->fetchParams($this->config_path, $this->item_params);
-                
+
                 $row = array(
                     'params' => array(
                         'checkbox'       => (int) $object->getConf($this->config_path . '/item_checkbox', true, false, 'bool'),
@@ -316,7 +318,7 @@ class BC_ListTable extends BC_List
                 $rows[$item[$primary]] = $row;
             }
         }
-        
+
         $this->object = $object_instance;
 
         if (!is_null($this->parent)) {
@@ -404,6 +406,14 @@ class BC_ListTable extends BC_List
 
         $html .= $this->renderListParamsInputs();
 
+        if (!is_null($this->params['filters_panel'])) {
+            $html .= '<div class="row">';
+            $html .= '<div class="listFiltersPanelContainer col-xs-12 col-sm-12 col-md-4 col-lg-2"' . (!(int) $this->params['filters_panel_open'] ? ' style="display: none"' : '') . '>';
+            $html .= $this->renderFiltersPanel();
+            $html .= '</div>';
+            $html .= '<div class="objectlistTableContainer col-xs-12 col-sm-12 col-md-8 col-lg-10">';
+        }
+
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
         $html .= '<thead>';
 
@@ -437,6 +447,11 @@ class BC_ListTable extends BC_List
         $html .= '</tfoot>';
 
         $html .= '</table>';
+
+        if (!is_null($this->params['filters_panel'])) {
+            $html .= '</div></div>';
+        }
+
         $html .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result"></div>';
 
         return $html;
@@ -543,6 +558,9 @@ class BC_ListTable extends BC_List
 
             $html .= '<span class="fa-spin loadingIcon"></span>';
 
+            if (!is_null($this->params['filters_panel'])) {
+                $html .= '<span class="headerButton openFiltersPanelButton open-close action-' . ($this->params['filters_panel_open'] ? 'close' : 'open') . '"></span>';
+            }
             if ($this->search && $this->params['enable_search']) {
                 $html .= '<span class="headerButton openSearchRowButton open-close action-open"></span>';
             }
@@ -647,7 +665,7 @@ class BC_ListTable extends BC_List
 
         $html .= '<td class="searchTools">';
         $html .= '<button type="button" class="btn btn-default" onclick="resetListSearchInputs(\'' . $this->identifier . '\')">';
-        $html .= '<i class="fa fa-eraser iconLeft"></i>Réinitialiser</span>';
+        $html .= BimpRender::renderIcon('fas_eraser', 'iconLeft') . 'Réinitialiser</button>';
         $html .= '</td>';
         $html .= '</tr>';
 

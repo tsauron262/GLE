@@ -518,6 +518,20 @@ class BimpObject extends BimpCache
         return true;
     }
 
+    public function isDolExtraField(&$field_name)
+    {
+        if ($this->isDolObject()) {
+            if ((int) $this->getConf('fields/' . $field_name . '/dol_extra_field', 0, false, 'bool')) {
+                if (preg_match('/^ef_(.*)$/', $field_name, $matches)) {
+                    $field_name = $matches[1];
+                }
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     public function object_exists($object_name)
     {
         return array_key_exists($object_name, $this->params['objects']);
@@ -624,7 +638,7 @@ class BimpObject extends BimpCache
         return 1;
     }
 
-    public function hasFieldChange($field)
+    public function hasDataChanged($field)
     {
         return (int) ($this->getData($field) !== $this->getInitData($field));
     }
@@ -3827,6 +3841,12 @@ class BimpObject extends BimpCache
         return $list->renderHtml();
     }
 
+    public function renderListCustom($list_name = 'default', $title = null, $icon = null)
+    {
+        $list = new BC_ListCustom($this, $list_name, null, $title, $icon);
+        return $list->renderHtml();
+    }
+
     public function renderForm($form_name = 'default', $panel = false, $level = 1)
     {
         $form = new BC_Form($this, null, $form_name, $level, !$panel);
@@ -5067,6 +5087,79 @@ class BimpObject extends BimpCache
                         }
                     }
                 }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSaveListFilters($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Filtres enregistrés avec succès';
+
+        if (!isset($data['list_type']) || !(string) $data['list_type']) {
+            $errors[] = 'Type de liste absent';
+        }
+        if (!isset($data['name']) || !(string) $data['name']) {
+            $errors[] = 'Veuillez spécifié un nom pour cet enregistrement';
+        }
+
+        if (!count($errors)) {
+            $owner_type = (isset($data['owner_type']) ? (int) $data['owner_type'] : 2);
+
+            $id_owner = 0;
+            if (!isset($data['id_owner']) || !(int) $data['id_owner']) {
+                if ($owner_type === 2) {
+                    global $user;
+
+                    if (!BimpObject::objectLoaded($user)) {
+                        $errors[] = 'Aucun utilisateur connecté';
+                    } else {
+                        $id_owner = $user->id;
+                    }
+                } else {
+                    $errors[] = 'ID du groupe propriétaire absent';
+                }
+            } else {
+                $id_owner = (int) $data['id_owner'];
+            }
+
+            $filters = (isset($data['filters']) && is_array($data['filters']) ? $data['filters'] : array());
+
+            $values = array();
+            if (!empty($filters)) {
+                foreach ($filters as $field_name => $filter) {
+                    if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
+                        $values[$field_name] = $filter['values'];
+                    }
+                }
+            }
+
+            if (count($values)) {
+                $listFilters = BimpObject::getInstance('bimpcore', 'ListFilters');
+
+                $errors = $listFilters->validateArray(array(
+                    'owner_type' => $owner_type,
+                    'name'       => (string) $data['name'],
+                    'id_owner'   => $id_owner,
+                    'obj_module' => $this->module,
+                    'obj_name'   => $this->object_name,
+                    'list_type'  => $data['list_type'],
+                    'list_name'  => (isset($data['list_name']) ? (string) $data['list_name'] : 'default'),
+                    'panel_name' => (isset($data['panel_name']) ? (string) $data['panel_name'] : 'default'),
+                    'filters'    => $values
+                ));
+
+                if (!count($errors)) {
+                    $errors = $listFilters->create($warnings);
+                }
+            } else {
+                $errors[] = 'Aucun filtre sélectionné';
             }
         }
 

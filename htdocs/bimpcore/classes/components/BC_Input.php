@@ -168,6 +168,10 @@ class BC_Input extends BimpComponent
                     case 'datetime':
                         $this->params['type'] = $this->data_type;
                         break;
+
+                    case 'id_object':
+                        $this->params['type'] = 'search_object';
+                        break;
                 }
             }
             if (!is_null($this->params['type'])) {
@@ -300,6 +304,16 @@ class BC_Input extends BimpComponent
             case 'items_list':
                 $options['sortable'] = isset($this->params['sortable']) ? $this->params['sortable'] : 0;
                 $options['add_input'] = isset($this->params['add_input']) ? $this->params['add_input'] : null;
+                break;
+
+            case 'search_object':
+                $options['object'] = null;
+                if (isset($this->field_params['object'])) {
+                    $object = $this->object->config->getObject('', $this->field_params['object']);
+                    if (!is_null($object) && is_a($object, 'BimpObject')) {
+                        $options['object'] = $object;
+                    }
+                }
                 break;
 
             case 'search_user':

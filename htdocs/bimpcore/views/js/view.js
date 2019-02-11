@@ -354,6 +354,10 @@ function onViewLoaded($view) {
         $view.find('.object_list_views').each(function () {
             onViewsListLoaded($(this));
         });
+        
+        $view.find('.object_list_custom').each(function () {
+            onListCustomLoaded($(this));
+        });
 
         if (!$view.data('object_change_event_init')) {
             var objects = $view.data('objects_change_reload');

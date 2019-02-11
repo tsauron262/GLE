@@ -44,6 +44,15 @@ class BimpStruct
                 }
                 break;
 
+            case 'list_custom': 
+                if ($config->isDefined($path . '/list_custom')) {
+                    $html = self::renderListCustom($config, $path . '/list_custom', $parent_component);
+                } else {
+                    // logError
+                }
+                break;
+            
+            
             case 'form':
                 if ($config->isDefined($path . '/form')) {
                     $html = self::renderForm($config, $path . '/form', $parent_component);
@@ -227,6 +236,32 @@ class BimpStruct
                 $filters = $config->getFromCurrentPath('filters', array(), false, 'array');
                 $html = $object->renderList($name, $panel, $title, $icon, $filters);
             }
+        }
+
+        $config->setCurrentPath($prev_path);
+        return $html;
+    }
+    
+    public static function renderListCustom(BimpConfig $config, $path, &$parent_component = null)
+    {
+        $html = '';
+        $prev_path = $config->current_path;
+        $config->setCurrentPath($path);
+
+        $object = $config->getObject($path . '/object');
+
+        if (is_null($object)) {
+            if (is_a($config->instance, 'BimpObject')) {
+                $object = $config->instance;
+            }
+        }
+
+        if (!is_null($object)) {
+            $name = $config->getFromCurrentPath('name', 'default');
+            $title = $config->getFromCurrentPath('title', null);
+            $icon = $config->getFromCurrentPath('icon', null);
+            
+            $html = $object->renderListCustom($name, $title, $icon);
         }
 
         $config->setCurrentPath($prev_path);

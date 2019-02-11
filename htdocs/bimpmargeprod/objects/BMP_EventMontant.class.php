@@ -48,7 +48,7 @@ class BMP_EventMontant extends BimpObject
             }
 
             $editable = 1;
-            
+
             if ($field === 'amount') {
                 $typeMontant = $this->getChildObject('type_montant');
                 if (is_null($typeMontant)) {
@@ -1365,7 +1365,7 @@ class BMP_EventMontant extends BimpObject
                             $detail_errors = $detail->validateArray(array(
                                 'id_event_montant' => (int) $this->id,
                                 'label'            => $r['label'],
-                                'quantity'         => 0,
+                                'quantity'         => (int) $r['qty'],
                                 'unit_price'       => (float) $r['unit_price']
                             ));
 

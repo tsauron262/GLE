@@ -353,7 +353,7 @@ abstract class BimpComponent
 
     public function addTechnicalError($msg)
     {
-        $label = 'Composant "' . $this->component_name . '" - Type: "' . $this->name . '" - Objet: "' . $this->object->getLabel() . '"';
+        $label = 'Composant "' . $this->component_name . ' (' . static::$type . ')" - Type: "' . $this->name . '" - Objet: "' . $this->object->getLabel() . '"';
         $this->addError('[ERREUR TECHNIQUE] ' . $label . ' - ' . $msg);
     }
 

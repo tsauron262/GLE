@@ -9,6 +9,7 @@ class BC_List extends BC_Panel
     public $id_parent;
     public $parent = null;
     protected $filters = array();
+    protected $bc_filtersPanel = null;
     protected $new_values = array();
     protected $items = null;
     public $nbTotalPages = 1;
@@ -36,6 +37,10 @@ class BC_List extends BC_Panel
         $this->params_def['add_form_on_save'] = array('default' => '');
         $this->params_def['add_form_title'] = array();
         $this->params_def['add_btn_label'] = array('default' => '');
+
+        $this->params_def['filters_panel'] = array();
+        $this->params_def['filters_panel_values'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
+        $this->params_def['filters_panel_open'] = array('data_type' => 'bool', 'default' => 1);
 
         if (is_null($id_parent)) {
             $parent_id_property = $object->getParentIdProperty();
@@ -286,8 +291,41 @@ class BC_List extends BC_Panel
         }
     }
 
+    public function fetchFiltersPanelValues()
+    {
+        if (is_null($this->bc_filtersPanel)) {
+            if (is_null($this->params['filters_panel'])) {
+                return;
+            }
+            $this->bc_filtersPanel = new BC_FiltersPanel($this->object, static::$type, $this->name, $this->identifier, $this->params['filters_panel']);
+
+            if (BimpTools::isSubmit('filters_panel_values')) {
+                $values = array();
+
+                foreach (BimpTools::getValue('filters_panel_values', array()) as $field_name => $filter) {
+                    foreach ($this->bc_filtersPanel->params['filters'] as $key => $params) {
+                        if (isset($params['field']) && $params['field'] === $field_name) {
+                            if (isset($filter['open'])) {
+                                $this->bc_filtersPanel->params['filters'][$key]['open'] = (int) $filter['open'];
+                            }
+                            if (isset($filter['values'])) {
+                                $values[$field_name] = $filter['values'];
+                            }
+                            continue 2;
+                        }
+                    }
+                }
+                $this->bc_filtersPanel->setFiltersValues($values);
+            } elseif (!empty($this->params['filters_panel_values'])) {
+                $this->bc_filtersPanel->setFiltersValues($this->params['filters_panel_values']);
+            }
+        }
+    }
+
     protected function fetchItems()
     {
+        $this->fetchFiltersPanelValues();
+
         if (!$this->isOk()) {
             $this->setConfPath();
             $this->items = array();
@@ -303,6 +341,14 @@ class BC_List extends BC_Panel
         if (count($this->params['list_filters'])) {
             foreach ($this->params['list_filters'] as $list_filter) {
                 $this->mergeFilter($list_filter['name'], $list_filter['filter']);
+            }
+        }
+
+        if (!is_null($this->bc_filtersPanel)) {
+            $panelFilters = array();
+            $this->bc_filtersPanel->getSqlFilters($panelFilters, $joins);
+            foreach ($panelFilters as $name => $filter) {
+                $this->mergeFilter($name, $filter);
             }
         }
 
@@ -339,7 +385,7 @@ class BC_List extends BC_Panel
                         $this->mergeFilter($this->object->getPrimary(), array($asso_filter['type'] => $sql));
                     } else {
                         $this->errors[] = array_merge($this->errors, $bimp_asso->errors);
-                        $filters[$this->object->getPrimary()] = 0;
+                        $this->filters[$this->object->getPrimary()] = 0;
                     }
                 }
             }
@@ -435,7 +481,7 @@ class BC_List extends BC_Panel
         }
     }
 
-    // rendus HTML:
+// rendus HTML:
 
     public function renderListParamsInputs()
     {
@@ -508,6 +554,19 @@ class BC_List extends BC_Panel
 
         $this->setConfPath();
         return $html;
+    }
+
+    public function renderFiltersPanel()
+    {
+        if (is_null($this->params['filters_panel'])) {
+            return '';
+        }
+
+        if (is_null($this->bc_filtersPanel)) {
+            $this->fetchFiltersPanelValues();
+        }
+
+        return $this->bc_filtersPanel->renderHtml();
     }
 
     public function getHeaderButtons()

@@ -1186,6 +1186,7 @@ class BimpController
         $errors = array();
         $rows_html = '';
         $pagination_html = '';
+        $filters_panel_html = '';
 
         $id_parent = BimpTools::getValue('id_parent', null);
         if (!$id_parent) {
@@ -1214,14 +1215,16 @@ class BimpController
             }
             $rows_html = $list->renderRows();
             $pagination_html = $list->renderPagination();
+            $filters_panel_html = $list->renderFiltersPanel();
         }
 
         die(json_encode(array(
-            'errors'          => $errors,
-            'rows_html'       => $rows_html,
-            'pagination_html' => $pagination_html,
-            'list_id'         => $list_id,
-            'request_id'      => BimpTools::getValue('request_id', 0)
+            'errors'             => $errors,
+            'rows_html'          => $rows_html,
+            'pagination_html'    => $pagination_html,
+            'filters_panel_html' => $filters_panel_html,
+            'list_id'            => $list_id,
+            'request_id'         => BimpTools::getValue('request_id', 0)
         )));
     }
 
@@ -1322,6 +1325,45 @@ class BimpController
             'pagination'    => $pagination,
             'views_list_id' => $views_list_id,
             'request_id'    => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessLoadObjectListCustom()
+    {
+        $errors = array();
+        $html = '';
+        $filters_panel_html = '';
+
+        $id_parent = BimpTools::getValue('id_parent', null);
+        if (!$id_parent) {
+            $id_parent = null;
+        }
+        
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $list_name = BimpTools::getValue('list_name', 'default');
+        $list_id = BimpTools::getValue('list_id', null);
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module, $object_name);
+            $list = new BC_ListCustom($object, $list_name, $id_parent);
+            if (!is_null($list_id)) {
+                $list->identifier = $list_id;
+            }
+            $html = $list->renderListContent();
+            $filters_panel_html = $list->renderFiltersPanel();
+        }
+
+        die(json_encode(array(
+            'errors'             => $errors,
+            'html'               => $html,
+            'filters_panel_html' => $filters_panel_html,
+            'list_id'            => $list_id,
+            'request_id'         => BimpTools::getValue('request_id', 0)
         )));
     }
 
@@ -1787,6 +1829,38 @@ class BimpController
             usleep(930000); //un tous petit peu moins d'une seconde + temps d'execution = 1s
             return $this->ajaxProcessLoadFixeTabs($i);
         }
+    }
+
+    protected function ajaxProcessLoadSavedListFilters()
+    {
+        $errors = array();
+        $html = '';
+
+        $module = BimpTools::getValue('module', '');
+        $object_name = BimpTools::getValue('object_name');
+        $list_type = BimpTools::getValue('list_type', '');
+        $list_name = BimpTools::getValue('list_name', 'default');
+        $list_identifier = BimpTools::getValue('list_identifier', '');
+        $panel_name = BimpTools::getValue('panel_name', 'default');
+        $id_list_filters = (int) BimpTools::getValue('id_list_filters', 0);
+
+        if ($module && $object_name && $list_type && $list_identifier && $id_list_filters) {
+            $object = BimpObject::getInstance($module, $object_name);
+            $bc_filters = new BC_FiltersPanel($object, $list_type, $list_name, $list_identifier, $panel_name);
+            $errors = $bc_filters->loadSavedValues($id_list_filters);
+
+            if (!count($errors)) {
+                $html = $bc_filters->renderHtml();
+            }
+        } else {
+            $errors[] = 'Echec du chargement des filtres enregistrés. Certains paramètres obligatoires sont absents';
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
     }
 
     // Callbacks:

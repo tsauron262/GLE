@@ -100,14 +100,15 @@ class securLogSms {
         }
 
 
-        //provisoir a viré
-        $to = $this->traitePhone();
-        if (!$this->isPhoneMobile($to))
-            mailSyn2("ATTENTION Ip Inconnue phone KO ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to);
-//                else
-//                    mailSyn2("Ip Inconnue phone OK", "tommy@bimp.fr", "admin@bimp.fr", "Ip inconnue : ".$_SERVER['REMOTE_ADDR']." user ".$this->user->login. " phone : ".$to);
-        $this->setSecure(2);
-        return 1;
+        if(1){//provisoir a viré
+            $to = $this->traitePhone();
+            if (!$this->isPhoneMobile($to))
+                mailSyn2("ATTENTION Ip Inconnue phone KO ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to);
+    //                else
+    //                    mailSyn2("Ip Inconnue phone OK", "tommy@bimp.fr", "admin@bimp.fr", "Ip inconnue : ".$_SERVER['REMOTE_ADDR']." user ".$this->user->login. " phone : ".$to);
+            $this->setSecure(2);
+            return 1;
+        }
 
 
         return 0;

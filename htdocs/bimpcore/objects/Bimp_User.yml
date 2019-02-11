@@ -89,6 +89,7 @@ fields:
     phone_perso: 
         label: Téléphone portable perso
         dol_extra_field: 1
+        type: password
     skype: 
         label: Identifiant Skype
     fk_user: 
@@ -139,6 +140,7 @@ fields:
     mail_sec: 
         label: E-Mail de secours
         dol_extra_field: 1
+        type: password
     comp:
         label: Compétence
         dol_extra_field: 1

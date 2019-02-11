@@ -1231,13 +1231,13 @@ class BMP_Event extends BimpObject
 
                 if ($solde > 0) {
                     $row['recette'] = BimpTools::displayMoneyValue($solde, 'EUR');
-                    $amounts['total_recettes'] += $cp_solde;
-                    $amounts['solde'] += $cp_solde;
+                    $amounts['total_recettes'] += $solde;
+                    $amounts['solde'] += $solde;
                 } else {
                     $solde *= -1;
                     $row['frais'] = BimpTools::displayMoneyValue($solde, 'EUR');
-                    $amounts['total_frais'] += $cp_solde;
-                    $amounts['solde'] -= $cp_solde;
+                    $amounts['total_frais'] += $solde;
+                    $amounts['solde'] -= $solde;
                 }
 
                 $amounts['categories'][self::$id_coprods_category]['rows'][] = $row;

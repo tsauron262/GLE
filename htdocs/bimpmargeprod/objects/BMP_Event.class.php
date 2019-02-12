@@ -1156,11 +1156,11 @@ class BMP_Event extends BimpObject
                 }
             }
 
-            if (!(int) $id_coprod) {
-                $total_dl_dist += (float) $billets_amounts['total_dl_dist_ht'];
-            }elseif (isset($billets_amounts['coprods'][(int) $id_coprod])) {
+            if (isset($billets_amounts['coprods'][(int) $id_coprod])) {
                 $total_dl_dist += (float) $billets_amounts['coprods'][(int) $id_coprod]['total_dl_dist_ht'];
-            } 
+            } elseif (!(int) $id_coprod) {
+                $total_dl_dist += (float) $billets_amounts['total_dl_dist_ht'];
+            }
         }
 
         // Ajout DL Distributeur

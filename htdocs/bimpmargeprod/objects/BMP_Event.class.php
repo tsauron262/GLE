@@ -1088,13 +1088,14 @@ class BMP_Event extends BimpObject
                     );
                 }
 
+                $filtre = $tm->id."-".$montant->getTvaTx();
                 $row = array(
                     'status'       => $montant->displayData('status', 'default', false),
                     'type_montant' => $tm->getData('name'),
                     'code'         => $tm->getData('code_compta'),
                     'tva'          => BimpTools::displayFloatValue($montant->getTvaTx()) . '%',
-                    'frais'        => (isset($amounts['categories'][$id_category]['rows'][$tm->getData('name')])? $amounts['categories'][$id_category]['rows'][$tm->getData('name')]['frais'] : 0),
-                    'recette'      => (isset($amounts['categories'][$id_category]['rows'][$tm->getData('name')])? $amounts['categories'][$id_category]['rows'][$tm->getData('name')]['recette'] : 0)
+                    'frais'        => (isset($amounts['categories'][$id_category]['rows'][$filtre])? $amounts['categories'][$id_category]['rows'][$filtre]['frais'] : 0),
+                    'recette'      => (isset($amounts['categories'][$id_category]['rows'][$filtre])? $amounts['categories'][$id_category]['rows'][$filtre]['recette'] : 0)
                 );
 
                 switch ((int) $tm->getData('type')) {
@@ -1111,7 +1112,7 @@ class BMP_Event extends BimpObject
                         break;
                 }
 
-                $amounts['categories'][$id_category]['rows'][$tm->getData('name')] = $row;
+                $amounts['categories'][$id_category]['rows'][$filtre] = $row;
             }
             
 
@@ -2743,7 +2744,7 @@ class BMP_Event extends BimpObject
 
         $html = '';
 //        $html .= '<h1>Bilan comptable</h1>';
-        $html .= '<h2>' . count($items) . ' événements pris en comtpe</h2>';
+        $html .= '<h2>' . count($items) . ' événements pris en compte</h2>';
 
         foreach ($items as $item) {
             $events[] = (int) $item['id'];

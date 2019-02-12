@@ -2728,7 +2728,7 @@ class BMP_Event extends BimpObject
         $html = '';
 //        $html .= '<h1>Bilan comptable</h1>';
         $html .= '<h2>' . count($items) . ' événements pris en comtpe</h2>';
-
+$html .= print_r($items,1);
         foreach ($items as $item) {
             $events[] = (int) $item['id'];
         }

@@ -1996,6 +1996,11 @@ class ObjectLine extends BimpObject
                 $html = BimpInput::renderInput('date', 'date_to', (string) $value);
                 break;
 
+            case 'force_qty_1':
+                $value = $this->getData("force_qty_1");
+                $html .= BimpInput::renderInput('toggle', 'force_qty_1', (int) $value);
+                break;
+                
             case 'remisable':
                 $product = $this->getProduct();
                 if (BimpObject::objectLoaded($product)) {

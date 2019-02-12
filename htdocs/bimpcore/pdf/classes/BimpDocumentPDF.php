@@ -412,9 +412,9 @@ class BimpDocumentPDF extends BimpModelPDF
             if ($this->bimpCommObject->field_exists('remise_globale')) {
                 $remise_globale = (float) $this->bimpCommObject->getData('remise_globale');
                 $remise_globale_line_rate = (float) $this->bimpCommObject->getRemiseGlobaleLineRate();
-                foreach ($this->bimpCommObject->getChildrenObjects('lines') as $bimpLine) {
-                    $bimpLines[(int) $bimpLine->getData('id_line')] = $bimpLine;
-                }
+            }
+            foreach ($this->bimpCommObject->getChildrenObjects('lines') as $bimpLine) {
+                $bimpLines[(int) $bimpLine->getData('id_line')] = $bimpLine;
             }
         }
 
@@ -520,13 +520,14 @@ class BimpDocumentPDF extends BimpModelPDF
             }
             
             
-                
-            $bimpLine = $bimpLines[$line->id];
-            if($bimpLine->getData("force_qty_1") && $row['qte'] > 1){
-                $row['pu_ht'] = $row['pu_ht'] * $row['qte'];
-                $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
-                $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
-                $row['qte'] = 1;
+            if(isset($bimpLines[$line->id])){
+                $bimpLine = $bimpLines[$line->id];
+                if($bimpLine->getData("force_qty_1") && $row['qte'] > 1){
+                    $row['pu_ht'] = $row['pu_ht'] * $row['qte'];
+                    $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
+                    $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
+                    $row['qte'] = 1;
+                }
             }
             
             

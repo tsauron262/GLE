@@ -24,6 +24,12 @@ class PropalSavPDF extends PropalPDF
 
         parent::init($object);
     }
+    
+    protected function initData(){
+        parent::initData();
+        if (isset($this->object) && is_a($this->object, 'Propal'))
+            $this->bimpCommObject = BimpObject::getInstance('bimpsupport', 'BS_SavPropal', (int) $this->object->id);
+    }
 
     protected function initHeader()
     {

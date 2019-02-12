@@ -430,8 +430,7 @@ filters_panels:
             - field: remise_global
             - field: total_ht
             - field: total
-    
-    
+        
 lists: 
     default: 
         extra_btn: 

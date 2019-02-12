@@ -58,7 +58,7 @@ class securLogSms {
                 }
                    
                 else
-                    die("Compte bloqué");
+                    $this->message = "Compte bloqué";
             }
         }
     }
@@ -104,7 +104,7 @@ class securLogSms {
         }
 
 
-        if(1){//provisoir a viré - Mettre à 0 pour modification
+        if(1){//provisoir a viré
             $to = $this->traitePhone();
             if (!$this->isPhoneMobile($to))
                 mailSyn2("ATTENTION Ip Inconnue phone KO ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to);

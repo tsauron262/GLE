@@ -280,11 +280,12 @@ lists_cols:
     livraison: 
         field: date_livraison
         label: Livraison
-                
+            
 lists: 
     default: 
         title: Propositions commerciales
         icon: fas_file-invoice
+        filters_panel: propal
         configurable: 1
         checkboxes: 1
         bulk_actions:

@@ -413,7 +413,7 @@ fields_tables:
     note_private:
         rows: 
             - field: note_private
-    
+            
 lists: 
     default: 
         extra_btn: 

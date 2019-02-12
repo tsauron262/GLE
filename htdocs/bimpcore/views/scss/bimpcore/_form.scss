@@ -721,3 +721,22 @@ input[type=text].large_input {
 .ui-menu .ui-menu-item:last-child a {
     padding-bottom: 1em!important;
 }
+
+/*Single Line Forms:*/
+
+.singleLineForm {
+    display: inline-block;
+    padding: 5px; 
+    background-color: #F0F0F0;
+    border: 1px solid #787878;
+    
+    .inputContainer {
+        display: inline-block;
+        padding: 4px 0;
+        margin-right: 20px;
+        
+        .inputHelp {
+            display: none;
+        }
+    }
+}

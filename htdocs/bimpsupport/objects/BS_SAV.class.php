@@ -3552,10 +3552,26 @@ class BS_SAV extends BimpObject
         }
         
         if($this->getData("id_propal") > 0 && !count($errors)){
-//            $prop = $this->getChildObject("propal");
+            // Mise à jour du client de la propale: 
+            $prop = $this->getChildObject("propal");
+            $prop->set('fk_soc', (int) $id);
+            $prop_errors = $prop->update();
+            if (count($prop_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors du changement de client du devis');
+            }
 //            $prop->set("fk_soc", $id);
 //            $errors = $prop->updateDolObject($warnings, true);
-            $this->db->db->query("UPDATE ".MAIN_DB_PREFIX."propal SET `fk_soc` = ".$id." WHERE rowid = ".$this->getData("id_propal"));
+//            $this->db->db->query("UPDATE ".MAIN_DB_PREFIX."propal SET `fk_soc` = ".$id." WHERE rowid = ".$this->getData("id_propal"));
+        }
+        
+        // Changement du client pour les prêts:
+        $prets = $this->getChildrenObjects('prets');
+        foreach ($prets as $pret) {
+            $pret->set('id_client', (int) $id);
+            $pret_errors = $pret->update();
+            if (count($pret_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($pret_errors, 'Des erreurs sont survenues lors de la mise à jour du prêt "' . $pret->getData('ref') . '"');
+            }
         }
         
         if($this->getData("id_facture") > 0){
@@ -3581,7 +3597,6 @@ class BS_SAV extends BimpObject
             $this->set('id_entrepot', (int) $centre['id_entrepot']);
         }
 
-        $new_id_client = ((int) $this->getData('id_client') !== (int) $this->getInitData('id_client'));
 
         if (!count($errors)) {
             $errors = parent::update($warnings, $force_update);
@@ -3591,14 +3606,6 @@ class BS_SAV extends BimpObject
             $propal = $this->getChildObject('propal');
             if (BimpObject::objectLoaded($propal)) {
                 if ((int) $propal->getData('fk_statut') === 0) {
-                    // Mise à jour du client de la propale: 
-                    if ($new_id_client && (int) $propal->getData('fk_soc') !== (int) $this->getData('id_client')) {
-                        $propal->set('fk_soc', (int) $this->getData('id_client'));
-                        $prop_errors = $propal->update();
-                        if (count($prop_errors)) {
-                            $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors du changement de client du devis');
-                        }
-                    }
                     // Mise à jour des lignes propale:
                     $prop_errors = $this->generatePropalLines();
                     if (count($prop_errors)) {
@@ -3608,17 +3615,6 @@ class BS_SAV extends BimpObject
             }
         }
 
-        if ($new_id_client) {
-            // Changement du client pour les prêts:
-            $prets = $this->getChildrenObjects('prets');
-            foreach ($prets as $pret) {
-                $pret->set('id_client', (int) $this->getData('id_client'));
-                $pret_errors = $pret->update();
-                if (count($pret_errors)) {
-                    $warnings[] = BimpTools::getMsgFromArray($pret_errors, 'Des erreurs sont survenues lors de la mise à jour du prêt "' . $pret->getData('ref') . '"');
-                }
-            }
-        }
 
         if (!count($errors)) {
             $this->checkObject();

@@ -2728,10 +2728,10 @@ class BMP_Event extends BimpObject
         $html = '';
 //        $html .= '<h1>Bilan comptable</h1>';
         $html .= '<h2>' . count($items) . ' événements pris en comtpe</h2>';
-$html .= print_r($items,1);
         foreach ($items as $item) {
             $events[] = (int) $item['id'];
         }
+$html .= print_r($events,1);
 
         $amounts = $this->getTotalComptable($events);
         $html .= $this->renderBilanComptable($amounts, false);

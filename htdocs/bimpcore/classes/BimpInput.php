@@ -270,6 +270,7 @@ class BimpInput
                         }
                     }
                 } else {
+                    $html .= '<input type="hidden" name="' . $field_name . '" value=""/>';
                     $html .= '<p class="alert alert-warning">Aucune option disponible</p>';
                 }
                 break;
@@ -283,6 +284,7 @@ class BimpInput
                     $vertical = isset($options['vertical']) ? (int) $options['vertical'] : 0;
                     $html = self::renderSwitchOptionsInput($field_name, $options['options'], $value, $input_id, $vertical);
                 } else {
+                    $html .= '<input type="hidden" name="' . $field_name . '" value=""/>';
                     $html .= '<p class="alert alert-warning">Aucune option disponible</p>';
                 }
                 break;

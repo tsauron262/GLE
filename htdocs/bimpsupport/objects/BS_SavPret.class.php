@@ -161,6 +161,8 @@ class BS_SavPret extends BimpObject
         } else {
             return array('SAV non spécifié');
         }
+        
+        $errors = arry();
 
         if (!count($this->associations['equipments'])) {
             $errors[] = 'Aucun équipement sélectionné';
@@ -168,8 +170,7 @@ class BS_SavPret extends BimpObject
             $errors = parent::create();
 
             if ($this->isLoaded()) {
-                $this->set('ref', 'PRET' . $this->id);
-                $this->update();
+                $this->updateField('ref', 'PRET' . $this->id);
             }
         }
 

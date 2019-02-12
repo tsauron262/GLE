@@ -3641,6 +3641,7 @@ class BimpObject extends BimpCache
                 $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
             }
             $html .= $name . '</h1>';
+//            $html .= '<span style="color: #787878; font-size: 14px;">' . BimpTools::ucfirst($this->getLabel()) . '</span>';
 
             $ref = $this->getRef(false);
             if ($ref) {

@@ -294,13 +294,14 @@ filters_panels:
                 field: libelle
             24: 
                 field: ef_type
+                
 lists: 
     default: 
-        filters_panel: default
         title: Propositions commerciales
         icon: fas_file-invoice
         configurable: 1
         checkboxes: 1
+        filters_panel: default
         bulk_actions:
             - label: supprimer les propositions commerciales sélectionnées
               icon: fas_trash-alt

@@ -3,7 +3,7 @@
 class BC_Filter extends BimpComponent
 {
 
-    public $component_name = 'Filtres de liste';
+    public $component_name = 'Filtre';
     public static $type = 'filter';
     public static $config_required = false;
     public $field = null;
@@ -124,8 +124,8 @@ class BC_Filter extends BimpComponent
             case 'date_range':
                 if (is_array($value) && (isset($value['min']) || isset($value['max']))) {
                     $label .= 'Min: <strong>';
-                    if (!isset($value['min'])) {
-                        $label .= '&infin;';
+                    if (!isset($value['min']) || !(string) $value['min']) {
+                        $label .= '-&infin;';
                     } else {
                         $this->field->value = $value['min'];
                         $label .= $this->field->displayValue();
@@ -133,7 +133,7 @@ class BC_Filter extends BimpComponent
 
                     $label .= '</strong><br/>Max: <strong>';
 
-                    if (!isset($value['max'])) {
+                    if (!isset($value['max']) || !(string) $value['max']) {
                         $label .= '&infin;';
                     } else {
                         $this->field->value = $value['max'];

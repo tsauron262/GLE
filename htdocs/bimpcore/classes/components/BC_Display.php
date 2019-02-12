@@ -409,7 +409,7 @@ class BC_Display extends BimpComponent
                             $value = BimpTools::replaceBr($this->value);
                             $html .= (string) strip_tags($value);
                         } else {
-                            $html .= (string) htmlentities($this->value);
+                            $html .= (string) $this->value;
                         }
 
                         break;

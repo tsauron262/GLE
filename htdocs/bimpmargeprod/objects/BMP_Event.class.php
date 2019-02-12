@@ -1093,25 +1093,25 @@ class BMP_Event extends BimpObject
                     'type_montant' => $tm->getData('name'),
                     'code'         => $tm->getData('code_compta'),
                     'tva'          => BimpTools::displayFloatValue($montant->getTvaTx()) . '%',
-                    'frais'        => '',
-                    'recette'      => ''
+                    'frais'        => (isset($amounts['categories'][$id_category]['rows'][$tm->getData('name')])? $amounts['categories'][$id_category]['rows'][$tm->getData('name')]['frais'] : 0),
+                    'recette'      => (isset($amounts['categories'][$id_category]['rows'][$tm->getData('name')])? $amounts['categories'][$id_category]['rows'][$tm->getData('name')]['recette'] : 0)
                 );
 
                 switch ((int) $tm->getData('type')) {
                     case BMP_TypeMontant::BMP_TYPE_FRAIS:
-                        $row['frais'] = BimpTools::displayMoneyValue($amount_ht, 'EUR');
+                        $row['frais'] += BimpTools::displayMoneyValue($amount_ht, 'EUR');
                         $amounts['total_frais'] += $amount_ht;
                         $amounts['solde'] -= $amount_ht;
                         break;
 
                     case BMP_TypeMontant::BMP_TYPE_RECETTE:
-                        $row['recette'] = BimpTools::displayMoneyValue($amount_ht, 'EUR');
+                        $row['recette'] += BimpTools::displayMoneyValue($amount_ht, 'EUR');
                         $amounts['total_recettes'] += $amount_ht;
                         $amounts['solde'] += $amount_ht;
                         break;
                 }
 
-                $amounts['categories'][$id_category]['rows'][] = $row;
+                $amounts['categories'][$id_category]['rows'][$tm->getData('name')] = $row;
             }
 
             if (!(int) $id_coprod) {

@@ -518,6 +518,18 @@ class BimpDocumentPDF extends BimpModelPDF
                 $total_ht_without_remises += $line->subprice * (float) $line->qty;
                 $total_ttc_without_remises += BimpTools::calculatePriceTaxIn($line->subprice * (float) $line->qty, (float) $line->tva_tx);
             }
+            
+            
+                
+            $bimpLine = $bimpLines[$line->id];
+            if($bimpLine->getData("force_qty_1") && $row['qte'] > 1){
+                $row['pu_ht'] = $row['pu_ht'] * $row['qte'];
+                $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
+                $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
+                $row['qte'] = 1;
+            }
+            
+            
            /*Pour les ecotaxe et copie privé*/
             $row['object'] = $product;
             if(is_object($product)){
@@ -526,7 +538,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 if(isset($product->array_options['options_rpcp']) && $product->array_options['options_rpcp'] > 0)
                     $this->totals['RPCP'] += $product->array_options['options_rpcp'] * $row['qte'];
             }
-
+            
             $table->rows[] = $row;
         }
 

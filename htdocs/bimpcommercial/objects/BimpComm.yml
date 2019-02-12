@@ -413,7 +413,25 @@ fields_tables:
     note_private:
         rows: 
             - field: note_private
-            
+    
+filters_panels: 
+    default: 
+        filters: 
+            - field: fk_soc
+            - field: entrepot
+            - field: fk_availability
+            - field: fk_cond_reglement
+            - field: fk_mode_reglement
+            - field: fk_statut
+            - field: note_private
+            - field: note_public
+            - field: ref
+            - field: ref_client
+            - field: remise_global
+            - field: total_ht
+            - field: total
+    
+    
 lists: 
     default: 
         extra_btn: 

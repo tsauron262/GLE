@@ -280,9 +280,23 @@ lists_cols:
     livraison: 
         field: date_livraison
         label: Livraison
-            
+           
+filters_panels: 
+    default: 
+        filters: 
+            20: 
+                field: datec
+            21: 
+                field: datep
+            22: 
+                field: date_livraison
+            23: 
+                field: libelle
+            24: 
+                field: ef_type
 lists: 
     default: 
+        filters_panel: default
         title: Propositions commerciales
         icon: fas_file-invoice
         filters_panel: propal

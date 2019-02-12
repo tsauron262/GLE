@@ -1113,6 +1113,19 @@ class BMP_Event extends BimpObject
 
                 $amounts['categories'][$id_category]['rows'][$tm->getData('name')] = $row;
             }
+            
+            foreach($amounts['categories'] as $id_categ => $rows){
+                foreach($rows as $nom => $row){
+                    if($amounts['categories'][$id_categ]['rows'][$nom]['frais'] == 0)
+                        $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = "";
+                    else
+                        $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['frais'], 'EUR');
+                    if($amounts['categories'][$id_categ]['rows'][$nom]['recette'] == 0)
+                        $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = "";
+                    else
+                        $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['recette'], 'EUR');
+                }
+            }
 
             if (!(int) $id_coprod) {
                 if (!empty($cp_soldes)) {
@@ -2728,10 +2741,10 @@ class BMP_Event extends BimpObject
         $html = '';
 //        $html .= '<h1>Bilan comptable</h1>';
         $html .= '<h2>' . count($items) . ' événements pris en comtpe</h2>';
+
         foreach ($items as $item) {
-            $events[$item['id']] = (int) $item['id'];
+            $events[] = (int) $item['id'];
         }
-$html .= print_r($events,1);
 
         $amounts = $this->getTotalComptable($events);
         $html .= $this->renderBilanComptable($amounts, false);

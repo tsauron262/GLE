@@ -354,7 +354,7 @@ function onViewLoaded($view) {
         $view.find('.object_list_views').each(function () {
             onViewsListLoaded($(this));
         });
-        
+
         $view.find('.object_list_custom').each(function () {
             onListCustomLoaded($(this));
         });
@@ -455,7 +455,6 @@ $(document).ready(function () {
             onViewLoaded($(this));
         });
     });
-
 
     $('body').on('controllerTabLoaded', function (e) {
         if (e.$container.length) {

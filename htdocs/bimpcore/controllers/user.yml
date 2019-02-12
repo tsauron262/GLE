@@ -1,0 +1,8 @@
+bootstrap: 1
+
+objects: 
+    user: 
+        instance: 
+            bimp_object: Bimp_User
+            id_object: 
+                request: id

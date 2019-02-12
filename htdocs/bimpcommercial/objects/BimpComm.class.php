@@ -531,11 +531,11 @@ class BimpComm extends BimpObject
 
     // Getters - Overrides BimpObject
 
-    public function getName()
-    {
-        $name = parent::getName();
-        return BimpTools::ucfirst($this->getLabel()) . ' ' . ($name ? '"' . $name . '"' : '');
-    }
+//    public function getName()
+//    {
+//        $name = parent::getName();
+//        return BimpTools::ucfirst($this->getLabel()) . ' ' . ($name ? '"' . $name . '"' : '');
+//    }
 
     public function getFilesDir()
     {

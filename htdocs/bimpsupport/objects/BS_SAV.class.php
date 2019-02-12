@@ -1734,11 +1734,11 @@ class BS_SAV extends BimpObject
         }
 
         $line = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
-            'id_obj'             => (int) $propal->id,
-            'linked_id_object'   => (int) $this->id,
-            'linked_object_name' => 'sav_garantie'
-                ), true, true);
-        
+                    'id_obj'             => (int) $propal->id,
+                    'linked_id_object'   => (int) $this->id,
+                    'linked_object_name' => 'sav_garantie'
+                        ), true, true);
+
         if (!BimpObject::objectLoaded($line)) {
             $line = BimpObject::getInstance('bimpsupport', 'BS_SavPropalLine');
         }
@@ -1944,7 +1944,7 @@ class BS_SAV extends BimpObject
             case 'repOk':
                 $subject = $this->getData('ref') . " Reparation  terminee";
                 $mail_msg = "Nous avons le plaisir de vous annoncer que la réparation de votre \"$nomMachine\" est finie.\n";
-                $mail_msg .= "Voici ce que nous avons fait : ".$this->getData("resolution")."\n";
+                $mail_msg .= "Voici ce que nous avons fait : " . $this->getData("resolution") . "\n";
                 $mail_msg .= "Vous pouvez récupérer votre matériel à " . $nomCentre . " " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel;
                 $sms = "Bonjour, la réparation de votre produit est finie. Vous pouvez le récupérer à " . $nomCentre . " " . $delai . ".\nL'Equipe BIMP.";
                 break;
@@ -3548,19 +3548,41 @@ class BS_SAV extends BimpObject
             $this->set('id_entrepot', (int) $centre['id_entrepot']);
         }
 
+        $new_id_client = ((int) $this->getData('id_client') !== (int) $this->getInitData('id_client'));
+
         if (!count($errors)) {
             $errors = parent::update($warnings, $force_update);
         }
 
-        // Mise à jour des lignes propales:
         if ((int) $this->getData('id_propal')) {
             $propal = $this->getChildObject('propal');
             if (BimpObject::objectLoaded($propal)) {
                 if ((int) $propal->getData('fk_statut') === 0) {
+                    // Mise à jour du client de la propale: 
+                    if ($new_id_client && (int) $propal->getData('fk_soc') !== (int) $this->getData('id_client')) {
+                        $propal->set('fk_soc', (int) $this->getData('id_client'));
+                        $prop_errors = $propal->update();
+                        if (count($prop_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors du changement de client du devis');
+                        }
+                    }
+                    // Mise à jour des lignes propale:
                     $prop_errors = $this->generatePropalLines();
                     if (count($prop_errors)) {
                         $warnings[] = BimpTools::getMsgFromArray($prop_errors, 'Des erreurs sont survenues lors de la mise à jour des lignes du devis');
                     }
+                }
+            }
+        }
+
+        if ($new_id_client) {
+            // Changement du client pour les prêts:
+            $prets = $this->getChildrenObjects('prets');
+            foreach ($prets as $pret) {
+                $pret->set('id_client', (int) $this->getData('id_client'));
+                $pret_errors = $pret->update();
+                if (count($pret_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($pret_errors, 'Des erreurs sont survenues lors de la mise à jour du prêt "' . $pret->getData('ref') . '"');
                 }
             }
         }
@@ -3575,8 +3597,6 @@ class BS_SAV extends BimpObject
     public function fetch($id, $parent = null)
     {
         if (parent::fetch($id, $parent)) {
-//            echo (float) $this->getData('version');
-//            exit;
             if ($this->check_version && (float) $this->getData('version') < 1.0) {
                 $this->convertSav();
             }

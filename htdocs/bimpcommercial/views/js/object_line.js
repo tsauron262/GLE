@@ -142,9 +142,13 @@ function quickAddObjectLine($button) {
         bimp_msg('Une erreur est survenue. Opération abandonnée');
         return;
     }
-
-    var data = getInputsValues($container);
-
+    
+    var data = {};
+    $container.find('.inputContainer').each(function () {
+        var field = $(this).data('field_name').replace(/^quick_add_(.*)$/, '$1');
+        data[field] = getInputValue($(this));
+    });
+    
     data.module = $container.data('module');
     data.object_name = $container.data('object_name');
     data.id_obj = $container.data('id_obj');

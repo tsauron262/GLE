@@ -1099,13 +1099,13 @@ class BMP_Event extends BimpObject
 
                 switch ((int) $tm->getData('type')) {
                     case BMP_TypeMontant::BMP_TYPE_FRAIS:
-                        $row['frais'] += BimpTools::displayMoneyValue($amount_ht, 'EUR');
+                        $row['frais'] += $amount_ht;
                         $amounts['total_frais'] += $amount_ht;
                         $amounts['solde'] -= $amount_ht;
                         break;
 
                     case BMP_TypeMontant::BMP_TYPE_RECETTE:
-                        $row['recette'] += BimpTools::displayMoneyValue($amount_ht, 'EUR');
+                        $row['recette'] += $amount_ht;
                         $amounts['total_recettes'] += $amount_ht;
                         $amounts['solde'] += $amount_ht;
                         break;

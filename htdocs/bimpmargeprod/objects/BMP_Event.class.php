@@ -1114,18 +1114,6 @@ class BMP_Event extends BimpObject
                 $amounts['categories'][$id_category]['rows'][$tm->getData('name')] = $row;
             }
             
-            foreach($amounts['categories'] as $id_categ => $rows){
-                foreach($rows as $nom => $row){
-                    if($amounts['categories'][$id_categ]['rows'][$nom]['frais'] == 0)
-                        $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = "";
-                    else
-                        $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['frais'], 'EUR');
-                    if($amounts['categories'][$id_categ]['rows'][$nom]['recette'] == 0)
-                        $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = "";
-                    else
-                        $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['recette'], 'EUR');
-                }
-            }
 
             if (!(int) $id_coprod) {
                 if (!empty($cp_soldes)) {
@@ -1174,6 +1162,21 @@ class BMP_Event extends BimpObject
             }elseif (isset($billets_amounts['coprods'][(int) $id_coprod])) {
                 $total_dl_dist += (float) $billets_amounts['coprods'][(int) $id_coprod]['total_dl_dist_ht'];
             } 
+        }
+        
+        
+        
+        foreach($amounts['categories'] as $id_categ => $rows){
+            foreach($rows as $nom => $row){
+                if($amounts['categories'][$id_categ]['rows'][$nom]['frais'] == 0)
+                    $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = "";
+                else
+                    $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['frais'], 'EUR');
+                if($amounts['categories'][$id_categ]['rows'][$nom]['recette'] == 0)
+                    $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = "";
+                else
+                    $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['recette'], 'EUR');
+            }
         }
 
         // Ajout DL Distributeur

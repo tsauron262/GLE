@@ -280,6 +280,20 @@ lists_cols:
     livraison: 
         field: date_livraison
         label: Livraison
+           
+filters_panels: 
+    default: 
+        filters: 
+            20: 
+                field: datec
+            21: 
+                field: datep
+            22: 
+                field: date_livraison
+            23: 
+                field: libelle
+            24: 
+                field: ef_type
                 
 lists: 
     default: 
@@ -287,6 +301,7 @@ lists:
         icon: fas_file-invoice
         configurable: 1
         checkboxes: 1
+        filters_panel: default
         bulk_actions:
             - label: supprimer les propositions commerciales sélectionnées
               icon: fas_trash-alt

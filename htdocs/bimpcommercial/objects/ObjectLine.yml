@@ -35,7 +35,7 @@ objects:
                 
 fields: 
     id_obj: 
-        label: Objet
+        label: Objet parent
         type: id_parent
         required: 1
         
@@ -427,6 +427,8 @@ lists:
         positions: 1
         positions_open: 1
         objects_change_reload: ObjectLineRemise
+        after_list_content: 
+            callback: renderQuickAddForm
         enable_search: 0
         enable_sort: 0
         pagination: 0

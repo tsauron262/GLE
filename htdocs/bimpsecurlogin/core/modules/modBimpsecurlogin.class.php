@@ -129,7 +129,8 @@ class modBimpsecurlogin extends DolibarrModules {
         
         $extrafields->addExtraField('echec_auth', 'Echec d\'authentification consecutif', 'int', 900, 10, 'user');
         $extrafields->addExtraField('code_sms', 'Code SMS', 'varchar', 901, 10, 'user');
-        $extrafields->addExtraField('phone_perso', 'Téléphone portable perso', 'password', 902, 10, 'user');
+        $extrafields->addExtraField('phone_perso', 'Téléphone portable perso', 'password', 902, 20, 'user');
+        $extrafields->addExtraField('mail_sec', 'Mail de secours', 'password', 903, 40, 'user');
 
         
         

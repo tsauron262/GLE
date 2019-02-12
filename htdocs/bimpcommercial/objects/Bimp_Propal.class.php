@@ -578,6 +578,34 @@ class Bimp_Propal extends BimpComm
 
         global $user;
 
+        $bimpObjectFields = array();
+        $this->hydrateDolObject($bimpObjectFields);
+
+        if (method_exists($this, 'beforeUpdateDolObject')) {
+            $this->beforeUpdateDolObject();
+        }
+        
+        $result = $this->dol_object->update($user);
+        if ($result <= 0) {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour de la propale');
+            return $errors;
+        }
+
+        // Mise à jour des champs Bimp_Propal:
+        foreach ($bimpObjectFields as $field => $value) {
+            $field_errors = $this->updateField($field, $value);
+            if (count($field_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($field_errors, 'Echec de la mise à jour du champ "' . $field . '"');
+            }
+        }
+
+        // Mise à jour des extra_fields: 
+        if ($this->dol_object->insertExtraFields('', $user) <= 0) {
+            $errors[] = 'Echec de la mise à jour des champs supplémentaires';
+        }
+        
+        $this->dol_object->fetch($this->id);
+        
         // Ref. client
         if ((string) $this->getData('ref_client') !== (string) $this->dol_object->ref_client) {
             $this->dol_object->error = '';
@@ -693,25 +721,7 @@ class Bimp_Propal extends BimpComm
             }
         }
 
-        $bimpObjectFields = array();
-        $this->hydrateDolObject($bimpObjectFields);
-
-        if (method_exists($this, 'beforeUpdateDolObject')) {
-            $this->beforeUpdateDolObject();
-        }
-
-        // Mise à jour des champs Bimp_Propal:
-        foreach ($bimpObjectFields as $field => $value) {
-            $field_errors = $this->updateField($field, $value);
-            if (count($field_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($field_errors, 'Echec de la mise à jour du champ "' . $field . '"');
-            }
-        }
-
-        // Mise à jour des extra_fields: 
-        if ($this->dol_object->insertExtraFields('', $user) <= 0) {
-            $errors[] = 'Echec de la mise à jour des champs supplémentaires';
-        }
+        
         if (!count($errors)) {
             return 1;
         }

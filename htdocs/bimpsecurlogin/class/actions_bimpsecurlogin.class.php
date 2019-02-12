@@ -20,7 +20,10 @@ class Actionsbimpsecurlogin {
 class securLogSms {
 
     var $max_tentative = 4;
+    
+    var $debug = false;
 
+    var $message = array();
     public function __construct($db) {
         $this->db = $db;
     }
@@ -52,11 +55,10 @@ class securLogSms {
 
             if (!$this->isSecur()) {
                 if ($this->user->array_options['options_echec_auth'] < $this->max_tentative){
-                    $message = $this->message;
+                    $message = implode("<br/>", $this->message);
                     include(DOL_DOCUMENT_ROOT . '/bimpsecurlogin/views/formCode.php');
                     die;
                 }
-                   
                 else
                     $this->message = "Compte bloqué";
             }
@@ -104,7 +106,7 @@ class securLogSms {
         }
 
 
-        if(1){//provisoir a viré
+        if(!$this->debug){//provisoir a viré
             $to = $this->traitePhone();
             if (!$this->isPhoneMobile($to))
                 mailSyn2("ATTENTION Ip Inconnue phone KO ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to);
@@ -128,25 +130,33 @@ class securLogSms {
         }
         $this->user->array_options['options_echec_auth'] ++;
         $this->user->update($user);
-        $this->message = "Code incorrecte";
+        $this->message[] = "Code incorrecte";
         return false;
     }
 
     function createSendCode() {
         global $user;
+        $ok = true;
         $code = rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
         require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
         $to = $this->traitePhone();
         if ($this->isPhoneMobile($to)) {
-            $smsfile = new CSMSFile($to, "BIMP ERP", "Votre code est : " . $code);
-            if ($smsfile->sendfile()) {
+            if(!$this->debug){
+                $smsfile = new CSMSFile($to, "BIMP ERP", "Votre code est : " . $code);
+                if ($smsfile->sendfile())
+                    $this->message[] = 'Code envoyé à 0' . substr($to, 3, 5) . "****<br/><br/>";
+                else
+                    $ok = false;
+            }
+            else
+                $this->message[] = "Vottre code est ".$code." il ne sera pas envoyé au ".$to;
+            
+            if($ok){
                 $this->user->array_options['options_code_sms'] = $code;
                 $this->user->update($user);
             }
-            
-            $this->message = 'Code envoyé à 0' . substr($to, 3, 5) . "****<br/><br/>";
         } else
-            $this->message = "Pas de numéro pour l'envoie du code... ";
+            $this->message[] = "Pas de numéro pour l'envoie du code... ";
     }
 
     public function traitePhone() {

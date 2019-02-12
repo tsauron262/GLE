@@ -106,6 +106,10 @@ div.tabBar {
     margin: 15px;
 }
 
+ul.ui-autocomplete {
+    overflow-x: hidden;
+}
+
 .ui-autocomplete,
 .select2-drop,
 .select2-dropdown {

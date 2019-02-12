@@ -23,25 +23,25 @@ class BC_ListTable extends BC_List
         'td_style'        => array('default' => '')
     );
     public $col_params = array(
-        'show'        => array('data_type' => 'bool', 'default' => 1),
-        'field'       => array('default' => ''),
-        'child'       => array('default' => ''),
-        'edit'        => array('data_type' => 'bool', 'default' => 0),
-        'history'     => array('data_type' => 'bool', 'default' => 0),
-        'display'     => array('default' => ''),
-        'label'       => array('default' => ''),
-        'value'       => array('default' => ''),
-        'true_value'  => array('default' => null),
-        'width'       => array('default' => null),
-        'min_width'   => array('default' => null),
-        'max_width'   => array('default' => null),
-        'hidden'      => array('data_type' => 'bool', 'default' => 0),
-        'search_list' => array('data_type' => 'array', 'compile' => true, 'default' => null),
-        'field_name'  => array(),
-        'search'      => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null),
-        'col_style'   => array('default' => ''),
-        'has_total'   => array('data_type' => 'bool', 'default' => 0),
-        'total_type'  => array('default' => null)
+        'show'               => array('data_type' => 'bool', 'default' => 1),
+        'field'              => array('default' => ''),
+        'child'              => array('default' => ''),
+        'edit'               => array('data_type' => 'bool', 'default' => 0),
+        'history'            => array('data_type' => 'bool', 'default' => 0),
+        'display'            => array('default' => ''),
+        'label'              => array('default' => ''),
+        'value'              => array('default' => ''),
+        'true_value'         => array('default' => null),
+        'width'              => array('default' => null),
+        'min_width'          => array('default' => null),
+        'max_width'          => array('default' => null),
+        'hidden'             => array('data_type' => 'bool', 'default' => 0),
+        'search_list'        => array('data_type' => 'array', 'compile' => true, 'default' => null),
+        'field_name'         => array(),
+        'search'             => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null),
+        'col_style'          => array('default' => ''),
+        'has_total'          => array('data_type' => 'bool', 'default' => 0),
+        'total_type'         => array('default' => null),
     );
     protected $selected_rows = array();
     protected $totals = array();
@@ -63,6 +63,7 @@ class BC_ListTable extends BC_List
         $this->params_def['enable_edit'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['single_cell'] = array('type' => 'definitions', 'defs_type' => 'single_cell', 'default' => null);
         $this->params_def['inline_view_item'] = array('data_type' => 'int', 'default' => 0);
+        $this->params_def['after_list_content'] =  array('default' => '');
 
         $path = null;
 
@@ -447,6 +448,12 @@ class BC_ListTable extends BC_List
         $html .= '</tfoot>';
 
         $html .= '</table>';
+
+        if ($this->params['after_list_content']) {
+            $html .= '<div class="after_list_content">';
+            $html .= $this->params['after_list_content'];
+            $html .= '</div>';
+        }
 
         if (!is_null($this->params['filters_panel'])) {
             $html .= '</div></div>';

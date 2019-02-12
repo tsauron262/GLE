@@ -16,10 +16,12 @@ class BimpController
     private $nbBouclePush = 2;
     private $maxBouclePush = 40;
 
-    public static function getInstance($module)
+    public static function getInstance($module, $controller = null)
     {
         $dir = DOL_DOCUMENT_ROOT . '/' . $module . '/';
-        $controller = BimpTools::getValue('fc', 'index');
+        if (is_null($controller)) {
+            $controller = BimpTools::getValue('fc', 'index');
+        }
         $controllerClass = $controller . 'Controller';
 
         if (file_exists($dir . '/controllers/' . $controllerClass . '.php')) {
@@ -1338,7 +1340,7 @@ class BimpController
         if (!$id_parent) {
             $id_parent = null;
         }
-        
+
         $module = BimpTools::getValue('module', $this->module);
         $object_name = BimpTools::getValue('object_name');
         $list_name = BimpTools::getValue('list_name', 'default');

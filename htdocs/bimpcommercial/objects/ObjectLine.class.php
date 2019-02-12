@@ -24,12 +24,12 @@ class ObjectLine extends BimpObject
     public $id_remise_except = null;
     public static $product_line_data = array(
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1),
-        'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'required' => 1),
+        'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int'),
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
         'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1),
-        'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => 0),
-        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => 0),
-        'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0, 'default' => 0),
+        'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0),
+        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0),
+        'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0),
         'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0),
         'date_from'      => array('label' => 'Date début', 'type' => 'date', 'required' => 0, 'default' => null),
         'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null)
@@ -1798,7 +1798,7 @@ class ObjectLine extends BimpObject
 
     // Rendus HTML: 
 
-    public function renderLineInput($field, $attribute_equipment = false)
+    public function renderLineInput($field, $attribute_equipment = false, $prefixe = '')
     {
         $html = '';
 
@@ -1826,7 +1826,7 @@ class ObjectLine extends BimpObject
 
         switch ($field) {
             case 'id_product':
-                $html = BimpInput::renderInput('search_product', 'id_product', (int) $value, array(
+                $html = BimpInput::renderInput('search_product', $prefixe . 'id_product', (int) $value, array(
                             'filter_type' => 'both'
                 ));
                 $html .= '<p class="inputHelp">Entrez la référence ou le code-barre d\'un produit.<br/>Laissez vide si vous sélectionnez un équipement.</p>';
@@ -1835,8 +1835,8 @@ class ObjectLine extends BimpObject
             case 'id_fourn_price':
                 if (BimpObject::objectLoaded($this->post_equipment)) {
                     if ((float) $this->post_equipment->getData('prix_achat') > 0) {
-                        $html .= '<input type="hidden" name="id_fourn_price" value="0"/>';
-                        $html .= '<input type="hidden" name="pa_ht" value="' . (float) $this->post_equipment->getData('prix_achat') . '"/>';
+                        $html .= '<input type="hidden" name="' . $prefixe . 'id_fourn_price" value="0"/>';
+                        $html .= '<input type="hidden" name="' . $prefixe . 'pa_ht" value="' . (float) $this->post_equipment->getData('prix_achat') . '"/>';
                         $html .= 'Prix d\'achat équipement: <strong>';
                         $html .= BimpTools::displayMoneyValue((float) $this->post_equipment->getData('prix_achat'), 'EUR') . '</strong>';
                         break;
@@ -1845,7 +1845,7 @@ class ObjectLine extends BimpObject
 
                 $values = $this->getProductFournisseursPricesArray();
                 if (!$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable()) {
-                    $html = BimpInput::renderInput('select', 'id_fourn_price', (int) $value, array(
+                    $html = BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
                                 'options' => $values
                     ));
                 } else {
@@ -1854,7 +1854,7 @@ class ObjectLine extends BimpObject
                             $value = (int) $this->getData('def_id_fourn_price');
                         }
                     }
-                    $html .= '<input type="hidden" name="id_fourn_price" value="' . $value . '"/>';
+                    $html .= '<input type="hidden" name="' . $prefixe . 'id_fourn_price" value="' . $value . '"/>';
                     if ((int) $value) {
                         if (isset($values[$value])) {
                             $html .= $values[$value];
@@ -1880,7 +1880,7 @@ class ObjectLine extends BimpObject
                 }
 
                 if (BimpObject::objectLoaded($this->post_equipment)) {
-                    $html .= '<input type="hidden" value="1" name="qty"/>';
+                    $html .= '<input type="hidden" value="1" name="' . $prefixe . 'qty"/>';
                     $html .= '1';
                 } else {
                     $min = 1;
@@ -1901,7 +1901,7 @@ class ObjectLine extends BimpObject
                     }
 
                     if ($product_type === 1) {
-                        $html = BimpInput::renderInput('qty', 'qty', (float) $value, array(
+                        $html = BimpInput::renderInput('qty', $prefixe . 'qty', (float) $value, array(
                                     'step' => 0.100,
                                     'data' => array(
                                         'data_type' => 'number',
@@ -1911,7 +1911,7 @@ class ObjectLine extends BimpObject
                                     )
                         ));
                     } else {
-                        $html = BimpInput::renderInput('qty', 'qty', (int) $value, array(
+                        $html = BimpInput::renderInput('qty', $prefixe . 'qty', (int) $value, array(
                                     'data' => array(
                                         'data_type' => 'number',
                                         'min'       => $min,
@@ -1934,13 +1934,13 @@ class ObjectLine extends BimpObject
                     }
                 }
                 if (!$this->isEditable() || $attribute_equipment || !$this->canEditPrixVente()) {
-                    $html = '<input type="hidden" value="' . $value . '" name="pu_ht"/>';
+                    $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'pu_ht"/>';
                     $html .= BimpTools::displayMoneyValue($value, 'EUR');
                     if (!$this->isEditable()) {
                         $html .= ' <span class="warning">(non modifiable)</span>';
                     }
                 } else {
-                    $html = BimpInput::renderInput('text', 'pu_ht', (float) $value, array(
+                    $html = BimpInput::renderInput('text', $prefixe . 'pu_ht', (float) $value, array(
                                 'values'      => $this->getProductPricesValuesArray(),
                                 'data'        => array(
                                     'data_type' => 'number',
@@ -1953,13 +1953,13 @@ class ObjectLine extends BimpObject
 
             case 'tva_tx':
                 if (!$this->isEditable() || $attribute_equipment || !$this->canEditPrixVente()) {
-                    $html = '<input type="hidden" value="' . $value . '" name="tva_tx"/>';
+                    $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= $value . ' %';
                     if (!$this->isEditable()) {
                         $html .= ' <span class="warning">(non modifiable)</span>';
                     }
                 } else {
-                    $html = BimpInput::renderInput('text', 'tva_tx', (float) $value, array(
+                    $html = BimpInput::renderInput('text', $prefixe . 'tva_tx', (float) $value, array(
                                 'data'        => array(
                                     'data_type' => 'number',
                                     'decimals'  => 2,
@@ -1973,7 +1973,7 @@ class ObjectLine extends BimpObject
 
             case 'remise':
                 if ($this->isEditable()) {
-                    $html = BimpInput::renderInput('text', 'remise', (float) $value, array(
+                    $html = BimpInput::renderInput('text', $prefixe . 'remise', (float) $value, array(
                                 'data'        => array(
                                     'data_type' => 'number',
                                     'decimals'  => 2,
@@ -1989,23 +1989,23 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'date_from':
-                $html = BimpInput::renderInput('date', 'date_from', (string) $value);
+                $html = BimpInput::renderInput('date', $prefixe . 'date_from', (string) $value);
                 break;
 
             case 'date_to':
-                $html = BimpInput::renderInput('date', 'date_to', (string) $value);
+                $html = BimpInput::renderInput('date', $prefixe . 'date_to', (string) $value);
                 break;
 
             case 'remisable':
                 $product = $this->getProduct();
                 if (BimpObject::objectLoaded($product)) {
                     if (!(int) $product->getData('remisable')) {
-                        $html .= '<input type="hidden" value="0" name="remisable"/>';
+                        $html .= '<input type="hidden" value="0" name="' . $prefixe . 'remisable"/>';
                         $html .= '<span class="danger">NON</span>';
                         break;
                     }
                 }
-                $html .= BimpInput::renderInput('toggle', 'remisable', (int) $value);
+                $html .= BimpInput::renderInput('toggle', $prefixe . 'remisable', (int) $value);
                 break;
         }
 
@@ -2224,6 +2224,40 @@ class ObjectLine extends BimpObject
         return $html;
     }
 
+    public function renderQuickAddForm()
+    {
+        if (!$this->isParentEditable()) {
+            return '';
+        }
+
+        $parent = $this->getParentInstance();
+
+        $html = '';
+
+        $html .= '<div class="objectLineQuickAddForm singleLineForm"';
+        $html .= ' data-module="' . $this->module . '"';
+        $html .= ' data-object_name="' . $this->object_name . '"';
+        $html .= ' data-id_obj="' . $parent->id . '"';
+        $html .= '>';
+        $html .= '<h4>Ajout rapide</h4>';
+
+        $content = '<label>Produit: </label>';
+        $content .= $this->renderLineInput('id_product', false, 'quick_add_');
+        $html .= BimpInput::renderInputContainer('quick_add_id_product', 0, $content, '', 1);
+
+        $content = '<label>Qté: </label>';
+        $content .= $this->renderLineInput('qty', false, 'quick_add_');
+        $html .= BimpInput::renderInputContainer('quick_add_qty', 1, $content, '', 1);
+
+        $html .= '<button type="button" class="btn btn-primary" onclick="quickAddObjectLine($(this));">';
+        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
+        $html .= '</button>';
+        $html .= '<div class="quickAddForm_ajax_result"></div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
     // Actions: 
 
     public function actionAttributeEquipment($data, &$success)
@@ -2339,6 +2373,10 @@ class ObjectLine extends BimpObject
     {
         $errors = parent::validatePost();
 
+        if (!(int) $this->getData('type') && BimpTools::isSubmit('id_product')) {
+            $this->set('type', 1);
+        }
+
         if (!count($errors)) {
             $data = null;
 
@@ -2380,6 +2418,10 @@ class ObjectLine extends BimpObject
 
     public function validate()
     {
+        if (!(int) $this->getData('type') && (int) $this->id_product) {
+            $this->set('type', 1);
+        }
+
         $errors = parent::validate();
 
         if (!count($errors)) {
@@ -2415,9 +2457,29 @@ class ObjectLine extends BimpObject
                         if (is_null($this->id_fourn_price) && is_null($this->pa_ht)) {
                             $this->id_fourn_price = (int) $this->getValueByProduct('id_fourn_price');
                         }
+
+                        if ((int) $this->getData('remisable')) {
+                            $product = $this->getProduct();
+                            if (!(int) $product->getData('remisable')) {
+                                $this->set('remisable', 0);
+                            }
+                        }
                     }
 
                 case self::LINE_FREE:
+                    if (is_null($this->pu_ht)) {
+                        $this->pu_ht = 0;
+                    }
+                    if (is_null($this->tva_tx)) {
+                        $this->tva_tx = 0;
+                    }
+                    if (is_null($this->id_fourn_price)) {
+                        $this->id_fourn_price = 0;
+                    }
+                    if (is_null($this->pa_ht)) {
+                        $this->pa_ht = 0;
+                    }
+
                     if (BimpObject::objectLoaded($this->post_equipment)) {
                         $errors = $this->checkEquipment($this->post_equipment);
                         if (count($errors)) {

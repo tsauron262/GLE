@@ -1165,7 +1165,7 @@ class BMP_Event extends BimpObject
         }
         
         
-        
+        //presentation en euro et "" quand 0
         foreach($amounts['categories'] as $id_categ => $rows){
             foreach($rows as $nom => $row){
                 if($amounts['categories'][$id_categ]['rows'][$nom]['frais'] == 0)

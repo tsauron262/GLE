@@ -310,6 +310,17 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat {
         $pdf->SetTextColor(200, 200, 200);
     }
 
+    public function print_signature_matos($pdf) {
+        $pdf->setY($this->page_hauteur - 70);
+        $pdf->SetTextColor(0, 0, 0);
+        $pdf->setColor('fill', 255, 255, 255);
+        $pdf->SetFont('', 'B', 9);
+        $W = ($this->page_largeur - ($this->marge_droite - $this->marge_gauche)) / 2;
+        $pdf->Cell($W, 8, "Pour le Locataire", 1, null, 'L', true);
+        $pdf->Cell($W, 8, "Pour le loueur", 1, null, 'L', true);
+        $pdf->SetFont('', '', 9);
+    }
+
     public function print_contrat($pdf, $contrat, $outputlangs, $nombre = 1) {
         global $user;
         $titreContrat = (object) self::$textContrat['titres'];
@@ -517,7 +528,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat {
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "Fait en autant d’exemplaires que de parties, un pour chacune des parties", 0, 'L');
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
-            $this->print_signature($pdf);
+            $this->print_signature_matos($pdf);
             $this->greyFooter($pdf, 'proces');
             if ($new_page || $this->forceAnnexe) {
                 $pdf->AddPage();
@@ -536,6 +547,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat {
                 $pdf->SetTextColor(0, 0, 0);
                 $pdf->SetFont(''/* 'Arial' */, '', 9);
                 $this->linesProduct($pdf, $lines);
+                $this->print_signature_matos($pdf);
                 $this->greyFooter($pdf, 'proces');
             }
         }

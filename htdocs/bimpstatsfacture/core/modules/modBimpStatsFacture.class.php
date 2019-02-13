@@ -50,7 +50,7 @@ class modBimpStatsFacture extends DolibarrModules {
         // Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
         $this->numero = 754381;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
         // Key text used to identify module (for permissions, menus, etc...)
-        $this->rights_class = 'BimpStatsFacture';
+        $this->rights_class = 'bimpstatsfacture';
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
         // It is used to group modules by family in module setup page
@@ -135,7 +135,7 @@ class modBimpStatsFacture extends DolibarrModules {
 
         if (!isset($conf->modBimpStatsFacture) || !isset($conf->modBimpStatsFacture->enabled)) {
             $conf->modBimpStatsFacture = new stdClass();
-            $conf->modBimpStatsFacture->enabled = 0;
+            $conf->modBimpStatsFacture->enabled = 1;
         }
 
         // Dictionaries

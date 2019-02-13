@@ -132,7 +132,7 @@ class BimpStatsFacture {
         }
         $sql .= ")";
 
-        if ($user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read) {
+        if ($user->rights->bimpstatsfacture->factureCentre->read and ! $user->rights->bimpstatsfacture->facture->read) {
             $tab_center = explode(' ', $user->array_options['options_apple_centre']);
             $sql .= ' AND (fs.code_centre IN ("' . implode('","', $tab_center) . '")';
             $sql .= ' OR fs2.code_centre IN ("' . implode('","', $tab_center) . '")';

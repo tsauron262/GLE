@@ -66,9 +66,12 @@ fields:
         default_value: 1
         
     force_qty_1: 
-        label: Forcer qty a 1
+        label: Forcer qté à 1
         type: bool
         default_value: 0
+        display_if: 
+            field_name: type
+            show_values: 1
         
     linked_id_object: 
         label: Objet lié
@@ -259,9 +262,6 @@ forms:
                           - desc
             
             - field: force_qty_1
-              display_if: 
-                  field_name: type
-                  show_values: 1
                      
             - custom: 1
               label: Remises autorisées

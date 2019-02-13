@@ -2469,6 +2469,10 @@ class ObjectLine extends BimpObject
                                 $this->set('remisable', 0);
                             }
                         }
+                        
+//                        if (!(int) $this->id_fourn_price && !(float) $this->pa_ht) {
+//                            $errors[] = 'Un prix d\'achat est obligatoire';
+//                        }
                     }
 
                 case self::LINE_FREE:

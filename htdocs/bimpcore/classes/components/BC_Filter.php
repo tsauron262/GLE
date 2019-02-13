@@ -25,7 +25,7 @@ class BC_Filter extends BimpComponent
     {
         $this->params_def['type'] = array();
         $this->params_def['label'] = array();
-        $this->params_def['open'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['open'] = array('data_type' => 'bool', 'default' => 0);
 
         if (isset($params['field']) && (string) $params['field']) {
             $field = new BC_Field($object, $params['field']);
@@ -106,7 +106,11 @@ class BC_Filter extends BimpComponent
 
         switch ($this->params['type']) {
             case 'value':
+                if ($this->field->params['type'] === 'id_object') {
+                    $this->field->display_name = 'ref_nom';
+                }
                 $this->field->value = $value;
+                $this->field->no_html = true;
                 $label = $this->field->displayValue();
                 break;
 
@@ -279,9 +283,9 @@ class BC_Filter extends BimpComponent
             $value = json_encode($value);
         }
 
-        $html .= '<div class="bimp_filter_value" data-value="' . htmlentities($value) . '">';
-        $html .= '<span class="bimp_filter_value_remove_btn" onclick="removeBimpFilterValue($(this));">';
-        $html .= BimpRender::renderIcon('fas_trash-alt');
+        $html .= '<div class="bimp_filter_value" data-value="' . htmlentities($value) . '" onclick="editBimpFilterValue($(this))">';
+        $html .= '<span class="bimp_filter_value_remove_btn" onclick="removeBimpFilterValue(event, $(this));">';
+        $html .= BimpRender::renderIcon('fas_times');
         $html .= '</span>';
         $html .= $label;
         $html .= '</div>';
@@ -315,19 +319,17 @@ class BC_Filter extends BimpComponent
                 break;
 
             case 'value_part':
-//                $html .= '<div style="padding-right: 42px">';
                 $html .= BimpInput::renderInput('text', $input_name, '');
-//                $html .= '<span style="float: right; margin-right: -40px;">';
                 $html .= $add_btn_html;
-//                $html .= '</span>';
-//                $html .= '</div>';
                 break;
 
             case 'date_range':
-                $html .= BimpInput::renderInput($this->field->params['type'] . '_range', $input_name);
-//                $html .= '<span style="float: right">';
+                $type = $this->field->params['type'];
+                if ($type === 'datetime') {
+                    $type = 'date';
+                }
+                $html .= BimpInput::renderInput($type . '_range', $input_name);
                 $html .= $add_btn_html;
-//                $html .= '</span>';
                 break;
 
             case 'range':
@@ -337,9 +339,7 @@ class BC_Filter extends BimpComponent
 
                 $html .= '<span class="range_input_label">Min: </span>' . BimpInput::renderInput($input_type, $input_name . '_min', '', $input_options);
                 $html .= '<span class="range_input_label">Max: </span>' . BimpInput::renderInput($input_type, $input_name . '_max', '', $input_options);
-//                $html .= '<span style="float: right">';
                 $html .= $add_btn_html;
-//                $html .= '</span>';
                 break;
 
             case 'check_list':

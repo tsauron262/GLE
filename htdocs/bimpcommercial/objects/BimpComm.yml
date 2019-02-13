@@ -427,7 +427,7 @@ filters_panels:
             - field: note_public
             - field: ref
             - field: ref_client
-            - field: remise_global
+            - field: remise_globale
             - field: total_ht
             - field: total
         

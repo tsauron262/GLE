@@ -743,7 +743,6 @@ filters_panels:
             
 lists: 
     default: 
-        filters_panel: default
         title: Liste des SAV
         configurable: 1
         checkboxes: 1
@@ -753,6 +752,7 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this))
         list_filters: 
             callback: getListFilters
+        filters_panel: default
         sort_field: date_create
         sort_way: desc
         n: 10

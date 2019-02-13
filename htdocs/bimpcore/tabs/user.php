@@ -2,9 +2,14 @@
 
 require("../../main.inc.php");
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-ini_set('display_errors', 1);
+if (!BimpTools::isSubmit('id')) {
+    global $user;
+    if (BimpObject::objectLoaded($user)) {
+        $_GET['id'] = $user->id;
+    }
+}
 
 $controller = BimpController::getInstance('bimpcore', 'user');
 $controller->display();

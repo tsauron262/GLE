@@ -1049,11 +1049,11 @@ class BMP_Event extends BimpObject
             }
 
             $cp_soldes = $event->getCoprodsSoldes();
-            
+
 //            echo '<pre>';
 //            print_r($cp_soldes);
 //            echo '</pre>';
-            
+
             $billets_amounts = $event->getBilletsAmounts();
             $montants = $event->getChildrenObjects('montants');
 
@@ -1093,8 +1093,8 @@ class BMP_Event extends BimpObject
                     'type_montant' => $tm->getData('name'),
                     'code'         => $tm->getData('code_compta'),
                     'tva'          => BimpTools::displayFloatValue($montant->getTvaTx()) . '%',
-                    'frais'        => (isset($amounts['categories'][$id_category]['rows'][$tm->getData('name')])? $amounts['categories'][$id_category]['rows'][$tm->getData('name')]['frais'] : 0),
-                    'recette'      => (isset($amounts['categories'][$id_category]['rows'][$tm->getData('name')])? $amounts['categories'][$id_category]['rows'][$tm->getData('name')]['recette'] : 0)
+                    'frais'        => (isset($amounts['categories'][$id_category]['rows'][$tm->getData('name')]) ? $amounts['categories'][$id_category]['rows'][$tm->getData('name')]['frais'] : 0),
+                    'recette'      => (isset($amounts['categories'][$id_category]['rows'][$tm->getData('name')]) ? $amounts['categories'][$id_category]['rows'][$tm->getData('name')]['recette'] : 0)
                 );
 
                 switch ((int) $tm->getData('type')) {
@@ -1113,7 +1113,7 @@ class BMP_Event extends BimpObject
 
                 $amounts['categories'][$id_category]['rows'][$tm->getData('name')] = $row;
             }
-            
+
 
             if (!(int) $id_coprod) {
                 if (!empty($cp_soldes)) {
@@ -1159,20 +1159,20 @@ class BMP_Event extends BimpObject
 
             if (!(int) $id_coprod) {
                 $total_dl_dist += (float) $billets_amounts['total_dl_dist_ht'];
-            }elseif (isset($billets_amounts['coprods'][(int) $id_coprod])) {
+            } elseif (isset($billets_amounts['coprods'][(int) $id_coprod])) {
                 $total_dl_dist += (float) $billets_amounts['coprods'][(int) $id_coprod]['total_dl_dist_ht'];
-            } 
+            }
         }
-        
-        
+
+
         //presentation en euro et "" quand 0
-        foreach($amounts['categories'] as $id_categ => $rows){
-            foreach($rows['rows'] as $nom => $row){
-                if($amounts['categories'][$id_categ]['rows'][$nom]['frais'] == 0)
+        foreach ($amounts['categories'] as $id_categ => $rows) {
+            foreach ($rows['rows'] as $nom => $row) {
+                if ($amounts['categories'][$id_categ]['rows'][$nom]['frais'] == 0)
                     $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = "";
                 else
                     $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['frais'], 'EUR');
-                if($amounts['categories'][$id_categ]['rows'][$nom]['recette'] == 0)
+                if ($amounts['categories'][$id_categ]['rows'][$nom]['recette'] == 0)
                     $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = "";
                 else
                     $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['recette'], 'EUR');
@@ -1202,10 +1202,6 @@ class BMP_Event extends BimpObject
             $amounts['total_recettes'] += $total_dl_dist;
         }
 
-//        echo '<pre>';
-//        print_r($total_coprods);
-//        echo '</pre>';
-        
         // Ajout totaux coprods: 
         if (!empty($total_coprods)) {
             if (!isset($amounts['categories'][self::$id_coprods_category])) {

@@ -10,6 +10,14 @@ function addFieldFilterValue($button) {
         $container.data('new_value_set', 0);
         var field_name = $container.data('field_name');
         if (field_name) {
+            if ($container.data('type') === 'value_part') {
+                var $input = $container.find('input[name="add_' + field_name + '_filter"]');
+                if ($input.val() === '') {
+                    bimp_msg('Veuillez saisir une valeur', 'danger');
+                    return;
+                }
+            }
+
             $container.data('new_value_set', 1);
             $('body').trigger($.Event('listFiltersChange', {
                 $filters: $container.findParentByClass('object_filters_panel')
@@ -22,7 +30,75 @@ function addFieldFilterValue($button) {
     }
 }
 
-function removeBimpFilterValue($button) {
+function editBimpFilterValue($value) {
+    var $container = $value.findParentByClass('bimp_filter_container');
+
+    if ($.isOk($container)) {
+        var type = $container.data('type');
+        var value = $value.data('value');
+        var field_name = $container.data('field_name');
+        var check = false;
+        var $input = null;
+        switch (type) {
+            case 'value':
+            case 'value_part':
+                $input = $container.find('input[name="add_' + field_name + '_filter"]');
+                if ($input.length) {
+                    $input.val(value);
+                    check = true;
+                }
+                break;
+
+            case 'range':
+                if (typeof (value.min) !== 'undefined') {
+                    $input = $container.find('input[name="add_' + field_name + '_filter_min"]');
+                    if ($input.length) {
+                        $input.val(value.min);
+                        check = true;
+                    }
+                }
+                if (typeof (value.max) !== 'undefined') {
+                    $input = $container.find('input[name="add_' + field_name + '_filter_max"]');
+                    if ($input.length) {
+                        $input.val(value.max);
+                        check = true;
+                    }
+                }
+                break;
+
+            case 'date_range':
+                if (typeof (value.min) !== 'undefined') {
+//                    .find('input.bs_datetimepicker').data('DateTimePicker').date(moment(initial_value)
+                    $input = $container.find('input[name="add_' + field_name + '_filter_from_picker"]');
+                    if ($input.length) {
+                        $input.data('DateTimePicker').date(moment(value.min));
+                        check = true;
+                    }
+                }
+                if (typeof (value.max) !== 'undefined') {
+                    $input = $container.find('input[name="add_' + field_name + '_filter_to_picker"]');
+                    if ($input.length) {
+                        $input.data('DateTimePicker').date(moment(value.max));
+                        check = true;
+                    }
+                }
+                break;
+
+            case 'check_list':
+                return;
+        }
+
+        if (check) {
+            $container.addClass('open').removeClass('closed').find('.bimp_filter_content').stop().slideDown(250);
+            $value.remove();
+        }
+    }
+}
+
+function removeBimpFilterValue(e, $button) {
+    if (e) {
+        e.stopPropagation();
+    }
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -94,6 +170,13 @@ function getAllListFieldsFilters($filters, width_open_value) {
                         var values = {};
                         values.min = $container.find('[name="add_' + field_name + '_filter_from"]').val();
                         values.max = $container.find('[name="add_' + field_name + '_filter_to"]').val();
+                        filters[field_name].values.push(values);
+                        break;
+
+                    case 'range':
+                        var values = {};
+                        values.min = $container.find('[name="add_' + field_name + '_filter_min"]').val();
+                        values.max = $container.find('[name="add_' + field_name + '_filter_max"]').val();
                         filters[field_name].values.push(values);
                         break;
                 }
@@ -258,7 +341,7 @@ function deleteSavedFilters($button, filters_id) {
                     }));
                 }
             });
-            
+
             return;
         }
     }

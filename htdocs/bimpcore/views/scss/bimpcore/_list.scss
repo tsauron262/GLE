@@ -692,22 +692,28 @@ td.buttons {
     }
 
     .bimp_filter_value {       
-        font-size: 11px;
+        @include transition(all 0.3s ease);
+        font-size: 12px;
         display: inline-block;
         margin: 1px;
-        padding: 5px 8px;
-        background-color: #F5F5F5;
-        border: 1px solid #8C8C8C;
+        padding: 6px 10px;
+        background-color: #3E88D2;
+        color: #fff;
+        cursor: pointer;
 
+        &:hover {
+            background-color: #489FF5;
+        }
+        
         .bimp_filter_value_remove_btn {
-            @include transition(all 0.3s ease);
-            margin-left: 8px;
-            color: #A0A0A0;
+
+            margin-left: 10px;
+            color: #9EC5E6;;
             cursor: pointer;
             float: right;
 
             &:hover {
-                color: $danger;
+                color: #fff;
             }
         }
     }

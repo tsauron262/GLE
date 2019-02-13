@@ -547,7 +547,7 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat {
                 $pdf->SetTextColor(0, 0, 0);
                 $pdf->SetFont(''/* 'Arial' */, '', 9);
                 $this->linesProduct($pdf, $lines);
-                $this->print_signature_matos($pdf);
+                $this->print_signature($pdf);
                 $this->greyFooter($pdf, 'proces');
             }
         }

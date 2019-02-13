@@ -66,7 +66,8 @@ class BMP_Event extends BimpObject
         'JEU'  => 'JEU',
         'AUTR' => 'AUTR',
         'INT'  => 'INT',
-        'NUM'  => 'NUM'
+        'NUM'  => 'NUM',
+        'MER'  => 'MER'
     );
     protected $montants = array();
     protected $calc_montants = array();

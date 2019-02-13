@@ -87,7 +87,7 @@ fields:
     user_mobile: 
         label: Tél. portable
     phone_perso: 
-        label: Téléphone portable perso
+        label: Tél. portable perso
         dol_extra_field: 1
         type: password
     skype: 

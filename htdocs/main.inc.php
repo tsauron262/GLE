@@ -1388,6 +1388,7 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
                     echo '</script>';
                     BimpCore::displayHeaderFiles();
                 } else {
+                    checkBimpCoreVersion();
                     global $main_controller;
                     if (is_a($main_controller, 'BimpController')) {
                         $main_controller->displayHeaderFiles();

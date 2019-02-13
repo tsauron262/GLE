@@ -17,10 +17,10 @@ $staticSF = new BimpStatsFacture($db);
 $entrepots = $staticSF->getAllEntrepots();
 $centres = $staticSF->getExtrafieldArray('facture', 'centre');
 
-if (!$user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read)
+if (!$user->rights->bimpstatsfacture->factureCentre->read and ! $user->rights->bimpstatsfacture->facture->read)
     accessforbidden();
 
-if ($user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read) {
+if ($user->rights->bimpstatsfacture->factureCentre->read and ! $user->rights->bimpstatsfacture->facture->read) {
     $centres = $staticSF->parseCenter($user, $centres);
     $centres_string = '';
     foreach ($centres as $centre)
@@ -54,7 +54,7 @@ print '<tr class="liste_titre">';
 print '</tr>' . "\n";
 print '</table>';
 
-if ($user->rights->BimpStatsFacture->factureCentre->read and ! $user->rights->BimpStatsFacture->facture->read and $is_customer)
+if ($user->rights->bimpstatsfacture->factureCentre->read and ! $user->rights->bimpstatsfacture->facture->read and $is_customer)
     print '<p>Vos droits vous permettent de voir les factures des centres suivants : ' . $centres_string . '</p>';
 
 print '<table class="tableforField">';

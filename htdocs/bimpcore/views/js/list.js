@@ -944,6 +944,42 @@ function activateSorting($list) {
     $row.find('.sortTitle').removeClass('deactivated');
 }
 
+function checkListWidth($list) {
+    var $panelBody = $list.findParentByClass('panel-body');
+
+    if (!$.isOk($panelBody)) {
+        return;
+    }
+
+    var offset = 5;
+
+    if ($(window).width() > 1270) {
+        var $filtersPanel = $list.find('.listFiltersPanelContainer');
+        var $table = $list.find('.objectlistTableContainer').children('.objectlistTable');
+
+        var width = 0;
+
+        if ($filtersPanel.length && $filtersPanel.css('display') !== 'none') {
+            width += $filtersPanel.width();
+        }
+
+        if ($table.length) {
+            width += $table.width();
+        }
+
+        var panel_width = $panelBody.width();
+        
+        if (width > panel_width) {
+            offset = Math.round(panel_width - width);
+        }
+    }
+
+    $list.find('tr.headerRow').find('.listPopup').each(function () {
+        $(this).css('margin-right', offset + 'px');
+    });
+
+}
+
 // Gestion des inputs:
 
 function resetListAddObjectRow(list_id) {
@@ -1044,15 +1080,16 @@ function onListLoaded($list) {
                 var $filtersPanel = $list.find('.listFiltersPanelContainer');
                 if ($filtersPanel.length) {
                     if ($(this).hasClass('action-open')) {
-                        $table.parent().removeClass('col-md-12').removeClass('col-lg-12').addClass('col-md-9').addClass('col-lg-10');
+                        $table.findParentByClass('objectlistTableContainer').removeClass('col-md-12').removeClass('col-lg-12').addClass('col-md-9').addClass('col-lg-10');
                         $filtersPanel.stop().fadeIn(150);
                         $(this).removeClass('action-open').addClass('action-close');
                     } else {
                         $filtersPanel.stop().fadeOut(150, function () {
-                            $table.parent().removeClass('col-md-9').removeClass('col-lg-10').addClass('col-md-12').addClass('col-lg-12');
+                            $table.findParentByClass('objectlistTableContainer').removeClass('col-md-9').removeClass('col-lg-10').addClass('col-md-12').addClass('col-lg-12');
                         });
                         $(this).removeClass('action-close').addClass('action-open');
                     }
+                    checkListWidth($list);
                 }
             });
             $tools.find('.openSearchRowButton').click(function () {
@@ -1195,6 +1232,8 @@ function onListLoaded($list) {
             $list: $list
         }));
     }
+
+    checkListWidth($list);
 }
 
 function onListRefeshed($list) {
@@ -1241,6 +1280,8 @@ function onListRefeshed($list) {
     }
 
     $list.trigger('listRefresh');
+
+    checkListWidth($list);
 }
 
 function setSearchInputsEvents($list) {
@@ -1447,5 +1488,11 @@ $(document).ready(function () {
                 onListLoaded($(this));
             });
         }
+    });
+
+    $(window).resize(function () {
+        $('.object_list_table').each(function () {
+            checkListWidth($(this));
+        });
     });
 });

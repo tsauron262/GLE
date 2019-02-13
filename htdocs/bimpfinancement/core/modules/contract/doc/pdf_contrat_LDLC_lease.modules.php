@@ -311,7 +311,9 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat {
     }
 
     public function print_signature_matos($pdf) {
+        $autre = (object) self::$autre;
         $pdf->setY($this->page_hauteur - 70);
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, $autre->fait, 0, 'L');
         $pdf->SetTextColor(0, 0, 0);
         $pdf->setColor('fill', 255, 255, 255);
         $pdf->SetFont('', 'B', 9);

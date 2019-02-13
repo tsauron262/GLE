@@ -1885,16 +1885,17 @@ class BS_SAV extends BimpObject
                         $facture = null;
                         $errors[] = $error_msg . ' - Facture invalide ou absente';
                     }
-                } elseif (!is_null($propal)) {
-                    $tabT = getElementElement("propal", "facture", $propal->id);
-                    if (count($tabT) > 0) {
-                        include_once DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php";
-                        $facture = new Facture($this->db->db);
-                        $facture->fetch($tabT[count($tabT) - 1]['d']);
-                        $this->set('id_facture', $facture->id);
-                        $this->update();
-                    }
                 }
+//                elseif (!is_null($propal)) {
+//                    $tabT = getElementElement("propal", "facture", $propal->id);
+//                    if (count($tabT) > 0) {
+//                        include_once DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php";
+//                        $facture = new Facture($this->db->db);
+//                        $facture->fetch($tabT[count($tabT) - 1]['d']);
+//                        $this->set('id_facture', $facture->id);
+//                        $this->update();
+//                    }
+//                }
                 if (!is_null($facture)) {
                     $fileProp = DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf";
                     if (is_file($fileProp)) {

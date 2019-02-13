@@ -62,7 +62,7 @@ class BimpConfigDefinitions
     public static $list_filter = array(
         'field' => array('required' => true),
         'name'  => array('default' => 'default'),
-        'open'  => array('data_type' => 'bool', 'default' => 1)
+        'open'  => array('data_type' => 'bool', 'default' => 0)
     );
 
 }

@@ -910,14 +910,14 @@ class BimpObject extends BimpCache
 
     public function getRef($withGeneric = true)
     {
-        foreach (self::$ref_properties as $prop) {
-            if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
-                return $this->data[$prop];
-            }
+        $prop = $this->getRefProperty();
+
+        if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
+            return $this->data[$prop];
         }
 
         if ($withGeneric) {
-            return $this->object_name . "_" . $this->id;
+            return $this->id;
         }
 
         return '';
@@ -925,10 +925,10 @@ class BimpObject extends BimpCache
 
     public function getName($withGeneric = true)
     {
-        foreach (self::$name_properties as $prop) {
-            if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
-                return $this->data[$prop];
-            }
+        $prop = $this->getNameProperty();
+
+        if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
+            return $this->data[$prop];
         }
 
         if ($withGeneric) {
@@ -4678,6 +4678,22 @@ class BimpObject extends BimpCache
         } elseif (isset($instance->id) && $instance->id) {
             return $instance->id;
         }
+        return '';
+    }
+
+    public static function getInstanceRef($instance)
+    {
+        if (is_a($instance, 'BimpObject')) {
+            return $instance->getRef();
+        }
+
+        if (isset($instance->ref)) {
+            return $instance->ref;
+        }
+        if (isset($instance->id)) {
+            return $instance->id;
+        }
+
         return '';
     }
 

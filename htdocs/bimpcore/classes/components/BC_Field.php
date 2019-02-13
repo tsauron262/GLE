@@ -384,6 +384,7 @@ class BC_Field extends BimpComponent
                         break;
 
                     case 'date':
+                    case 'datetime':
                         $search_type = $input_type = 'date_range';
                         break;
 
@@ -391,9 +392,9 @@ class BC_Field extends BimpComponent
                         $search_type = $input_type = 'time_range';
                         break;
 
-                    case 'datetime':
-                        $search_type = $input_type = 'datetime_range';
-                        break;
+//                    case 'datetime':
+//                        $search_type = $input_type = 'datetime_range';
+//                        break;
 
                     case 'bool':
                         $input_type = 'select';

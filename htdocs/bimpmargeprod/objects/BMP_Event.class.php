@@ -1049,11 +1049,11 @@ class BMP_Event extends BimpObject
             }
 
             $cp_soldes = $event->getCoprodsSoldes();
-            
+
 //            echo '<pre>';
 //            print_r($cp_soldes);
 //            echo '</pre>';
-            
+
             $billets_amounts = $event->getBilletsAmounts();
             $montants = $event->getChildrenObjects('montants');
 
@@ -1088,31 +1088,33 @@ class BMP_Event extends BimpObject
                     );
                 }
 
+                $filtre = $tm->id."-".$montant->getTvaTx();
                 $row = array(
                     'status'       => $montant->displayData('status', 'default', false),
                     'type_montant' => $tm->getData('name'),
                     'code'         => $tm->getData('code_compta'),
                     'tva'          => BimpTools::displayFloatValue($montant->getTvaTx()) . '%',
-                    'frais'        => '',
-                    'recette'      => ''
+                    'frais'        => (isset($amounts['categories'][$id_category]['rows'][$filtre])? $amounts['categories'][$id_category]['rows'][$filtre]['frais'] : 0),
+                    'recette'      => (isset($amounts['categories'][$id_category]['rows'][$filtre])? $amounts['categories'][$id_category]['rows'][$filtre]['recette'] : 0)
                 );
 
                 switch ((int) $tm->getData('type')) {
                     case BMP_TypeMontant::BMP_TYPE_FRAIS:
-                        $row['frais'] = BimpTools::displayMoneyValue($amount_ht, 'EUR');
+                        $row['frais'] += $amount_ht;
                         $amounts['total_frais'] += $amount_ht;
                         $amounts['solde'] -= $amount_ht;
                         break;
 
                     case BMP_TypeMontant::BMP_TYPE_RECETTE:
-                        $row['recette'] = BimpTools::displayMoneyValue($amount_ht, 'EUR');
+                        $row['recette'] += $amount_ht;
                         $amounts['total_recettes'] += $amount_ht;
                         $amounts['solde'] += $amount_ht;
                         break;
                 }
 
-                $amounts['categories'][$id_category]['rows'][] = $row;
+                $amounts['categories'][$id_category]['rows'][$filtre] = $row;
             }
+
 
             if (!(int) $id_coprod) {
                 if (!empty($cp_soldes)) {
@@ -1163,6 +1165,21 @@ class BMP_Event extends BimpObject
             }
         }
 
+
+        //presentation en euro et "" quand 0
+        foreach ($amounts['categories'] as $id_categ => $rows) {
+            foreach ($rows['rows'] as $nom => $row) {
+                if ($amounts['categories'][$id_categ]['rows'][$nom]['frais'] == 0)
+                    $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = "";
+                else
+                    $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['frais'], 'EUR');
+                if ($amounts['categories'][$id_categ]['rows'][$nom]['recette'] == 0)
+                    $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = "";
+                else
+                    $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['recette'], 'EUR');
+            }
+        }
+
         // Ajout DL Distributeur
         if ($total_dl_dist > 0) {
             if (!isset($amounts['categories'][self::$id_billets_category])) {
@@ -1186,10 +1203,6 @@ class BMP_Event extends BimpObject
             $amounts['total_recettes'] += $total_dl_dist;
         }
 
-//        echo '<pre>';
-//        print_r($total_coprods);
-//        echo '</pre>';
-        
         // Ajout totaux coprods: 
         if (!empty($total_coprods)) {
             if (!isset($amounts['categories'][self::$id_coprods_category])) {
@@ -2727,7 +2740,7 @@ class BMP_Event extends BimpObject
 
         $html = '';
 //        $html .= '<h1>Bilan comptable</h1>';
-        $html .= '<h2>' . count($items) . ' événements pris en comtpe</h2>';
+        $html .= '<h2>' . count($items) . ' événements pris en compte</h2>';
 
         foreach ($items as $item) {
             $events[] = (int) $item['id'];

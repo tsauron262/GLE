@@ -19,7 +19,17 @@ class BC_Display extends BimpComponent
             'card'   => array('default' => 'default'),
             'object' => array('type' => 'object')
         ),
+        'ref'         => array(
+            'object'     => array('type' => 'object'),
+            'card'       => array(),
+            'modal_view' => array()
+        ),
         'nom'         => array(
+            'object'     => array('type' => 'object'),
+            'card'       => array(),
+            'modal_view' => array()
+        ),
+        'ref_nom'     => array(
             'object'     => array('type' => 'object'),
             'card'       => array(),
             'modal_view' => array()
@@ -65,7 +75,7 @@ class BC_Display extends BimpComponent
         } elseif (isset($field_params['type']) && !is_null($field_params['type'])) {
             switch ($field_params['type']) {
                 case 'id_object':
-                    $this->params_def['type']['default'] = 'nom';
+                    $this->params_def['type']['default'] = 'ref_nom';
                     break;
 
                 case 'html':
@@ -157,6 +167,7 @@ class BC_Display extends BimpComponent
                         break;
 
                     case 'nom':
+                    case 'ref_nom':
                     case 'nom_url':
                     case 'ref':
                         $cache_key = ($this->no_html ? 'no_html' : 'html');
@@ -180,11 +191,18 @@ class BC_Display extends BimpComponent
                         if (BimpObject::objectLoaded($instance)) {
                             switch ($this->params['type']) {
                                 case 'ref':
-                                    $html .= $instance->ref;
-                                    break;
-
                                 case 'nom':
-                                    $html .= BimpObject::getInstanceNom($instance);
+                                case 'ref_nom':
+                                    $ref = BimpObject::getInstanceRef($instance);
+                                    $nom = BimpObject::getInstanceNom($instance);
+
+                                    if (in_array($this->params['type'], array('ref', 'ref_nom'))) {
+                                        $html .= $ref;
+                                    }
+                                    if (in_array($this->params['type'], array('nom', 'ref_nom'))) {
+                                        $html .= ($html ? ' - ' : '') . $nom;
+                                    }
+
                                     if (!$this->no_html && $this->params['card']) {
                                         $card = new BC_Card($this->object, $this->field_params['object'], $this->params['card']);
                                         if ($card->isOk()) {

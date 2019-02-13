@@ -487,7 +487,7 @@ class BimpCache
 
         return self::getCacheArray($cache_key, $include_empty);
     }
-    
+
     public static function getBimpObjectsList()
     {
         $cache_key = 'bimp_objects_list';
@@ -721,7 +721,7 @@ class BimpCache
         return array();
     }
 
-    public static function getUserListFiltersArray(BimpObject $object, $id_user, $list_type, $list_name, $panel_name)
+    public static function getUserListFiltersArray(BimpObject $object, $id_user, $list_type, $list_name, $panel_name, $include_empty = false)
     {
         $cache_key = $object->module . '_' . $object->object_name . '_' . $list_name . '_' . $list_type . '_' . $panel_name . '_filters_panel_user_' . $id_user;
 
@@ -747,7 +747,7 @@ class BimpCache
             }
         }
 
-        return self::$cache[$cache_key];
+        return self::getCacheArray($cache_key, $include_empty);
     }
 
     // MySoc: 

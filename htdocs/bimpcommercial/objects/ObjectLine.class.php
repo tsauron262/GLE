@@ -1996,6 +1996,11 @@ class ObjectLine extends BimpObject
                 $html = BimpInput::renderInput('date', $prefixe . 'date_to', (string) $value);
                 break;
 
+            case 'force_qty_1':
+                $value = $this->getData("force_qty_1");
+                $html .= BimpInput::renderInput('toggle', 'force_qty_1', (int) $value);
+                break;
+                
             case 'remisable':
                 $product = $this->getProduct();
                 if (BimpObject::objectLoaded($product)) {
@@ -2464,6 +2469,10 @@ class ObjectLine extends BimpObject
                                 $this->set('remisable', 0);
                             }
                         }
+                        
+//                        if (!(int) $this->id_fourn_price && !(float) $this->pa_ht) {
+//                            $errors[] = 'Un prix d\'achat est obligatoire';
+//                        }
                     }
 
                 case self::LINE_FREE:

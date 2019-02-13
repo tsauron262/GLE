@@ -174,7 +174,7 @@ class securLogSms {
         }
                 
                 
-        if (!$this->isPhoneMobile($phone))
+        if (!$this->isPhoneMobile($phone) && strtolower($phone) != "no")
             setEventMessages("<a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php'>Vos numéros de mobile (pro et perso) sont invalide : " . $phone . " dans quelques jours vous ne pourez plus acceder a l'application</a>", null, 'warnings');
         return $phone;
     }

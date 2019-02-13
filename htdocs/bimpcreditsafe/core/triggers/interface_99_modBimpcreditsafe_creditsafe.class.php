@@ -45,8 +45,7 @@ class Interfacecreditsafe extends DolibarrTriggers {
         $soc->fetch($object->socid);
         
         $code = ($soc->idprof1 != "" ? $soc->idprof1 : $soc->idprof2);
-        
-        if($code != "")
+        if(strlen($code) > 5)
             return 1;
         
 //        $soc->fetch_optionals();

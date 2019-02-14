@@ -19,9 +19,9 @@ class Actionsbimpsecurlogin {
 
 class securLogSms {
 
-    var $max_tentative = 4;
+    var $max_tentative = 6;
     
-    var $debug = false;
+    var $debug = 2;//0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
 
     var $message = array();
     public function __construct($db) {
@@ -32,15 +32,23 @@ class securLogSms {
         global $conf;
         $_SESSION['sucur'] = $statut;
         if ($statut == 1) {
-            $int = 60 * 60 * 24 * 7;
             if (is_null($codeR)) {
                 $codeR = rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
                 $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "bimp_secure_log (id_user, crypt, ip) VALUES (" . $this->user->id . ",'" . $codeR . "', '" . $_SERVER['REMOTE_ADDR'] . "')");
             }
 
-            unset($_COOKIE[$this->nomCookie]);
-            setcookie($this->nomCookie, $codeR, time() + $int, $conf->file->dol_url_root['main']);
+            $this->setCookie($codeR);
         }
+        else
+            $this->setCookie ();
+    }
+    
+    public function setCookie($codeR = ""){
+        global $conf;
+        $int = 60 * 60 * 24 * 7;
+        $_COOKIE[$this->nomCookie] = $codeR;
+        setcookie($this->nomCookie, $codeR, time() + $int, $conf->file->dol_url_root['main']);
+        
     }
 
     public function secur() {
@@ -54,13 +62,11 @@ class securLogSms {
             }
 
             if (!$this->isSecur()) {
-                if ($this->user->array_options['options_echec_auth'] < $this->max_tentative){
+                if ($this->user->array_options['options_echec_auth'] >= $this->max_tentative)
+                    $this->message[] = "<span class='red'>Compte bloqué</span>";
                     $message = implode("<br/>", $this->message);
-                    include(DOL_DOCUMENT_ROOT . '/bimpsecurlogin/views/formCode.php');
-                    die;
-                }
-                else
-                    $this->message = "Compte bloqué";
+                include(DOL_DOCUMENT_ROOT . '/bimpsecurlogin/views/formCode.php');
+                die;
             }
         }
     }
@@ -97,7 +103,6 @@ class securLogSms {
 
         if (isset($_COOKIE[$this->nomCookie])) {//cokkie secur en place
             $crypt = $_COOKIE[$this->nomCookie];
-//                        die($crypt);
             $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "bimp_secure_log WHERE id_user = " . $this->user->id . " AND crypt = '" . $crypt . "'");
             if ($this->db->num_rows($sql) > 0) {
                 $this->setSecure(1, $crypt);
@@ -130,7 +135,7 @@ class securLogSms {
         }
         $this->user->array_options['options_echec_auth'] ++;
         $this->user->update($user);
-        $this->message[] = "Code incorrecte";
+        $this->message[] = "Code incorrecte ".$this->user->array_options['options_echec_auth'] ." / ". $this->max_tentative;
         return false;
     }
 
@@ -141,7 +146,7 @@ class securLogSms {
         require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
         $to = $this->traitePhone();
         if ($this->isPhoneMobile($to)) {
-            if(!$this->debug){
+            if($this->debug != 1){
                 $smsfile = new CSMSFile($to, "BIMP ERP", "Votre code est : " . $code);
                 if ($smsfile->sendfile())
                     $this->message[] = 'Code envoyé à 0' . substr($to, 3, 5) . "****<br/><br/>";

@@ -84,7 +84,7 @@ class securLogSms {
         $this->nomCookie = "secure_bimp_erp" . $this->user->id;
 
 
-//                $this->setSecure();
+                $this->setSecure();
     }
 
     function isSecur() {
@@ -92,8 +92,12 @@ class securLogSms {
         if (is_file($filename)) {//ip white liste
             $tmp = file_get_contents($filename);
             $tab = explode("\n", $tmp);
-            if (in_array($_SERVER['REMOTE_ADDR'], $tab))
-                return 1;
+            foreach($tab as $ip){
+                $tabT = explode("//", $ip);
+                $ip = $tabT[0];
+                if(stripos($_SERVER['REMOTE_ADDR'],$ip) !== false)
+                    return 1;
+            }
         }
 
         $this->traitePhone();

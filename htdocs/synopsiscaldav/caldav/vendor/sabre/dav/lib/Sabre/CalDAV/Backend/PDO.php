@@ -827,7 +827,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
         $dataOrig = $calendarData;
 //        $calendarData = str_replace("
 // ", "", $calendarData);
-        $calendarData = str_replace(CHR("0A").CHR("20"), '', $calendarData);
+        $calendarData = str_replace("\n"." ", '', $calendarData);
         $dataOrig2 = $calendarData;
         $calendarData = str_replace("\x0A\x20", '', $calendarData);
         $dataOrig3 = $calendarData;

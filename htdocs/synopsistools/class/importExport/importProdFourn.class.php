@@ -67,7 +67,7 @@ class importProdFourn extends import8sens {
                 }
                 if(!$ok){
                     if($existeDeja != "non"){
-                        mailSyn2("Ref fourn en double", "deburerp@bimp.fr", "gle@bimp.fr", "Bonjour la ref : ".$ln['ProCode']." existe deja dans prodId ".$existeDeja." ne peut donc pas être ajouter a ".$prodId);
+                        mailSyn2("Ref fourn en double", "debugerp@bimp.fr", "gle@bimp.fr", "Bonjour la ref : ".$ln['ProCode']." existe deja dans prodId ".$existeDeja." ne peut donc pas être ajouter a ".$prodId);
                     }
                     else{
                         $this->addPrice($prodId, $fournId, $ln);

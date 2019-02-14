@@ -529,9 +529,10 @@ class PDO extends AbstractBackend {
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
-        global $dataOrig;
+        global $dataOrig, $dataOrig2;
         $dataOrig = $calendarData;
         $calendarData = $this->traiteCalendarData($calendarData);
+        $dataOrig2 = $calendarData;
 
 
 

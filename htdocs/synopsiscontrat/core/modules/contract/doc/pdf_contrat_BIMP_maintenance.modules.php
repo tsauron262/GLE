@@ -484,9 +484,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $this->display_cp($pdf, $contrat, $user, $outputlangs);
  
                 $this->_pagefoot($pdf, $outputlangs);
-//                require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
-//                $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page? 1 : 0));
-//                $classAnnexe->getAnnexeContrat($contrat);
+                require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
+                $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page? 1 : 0));
+                $classAnnexe->getAnnexeContrat($contrat);
 
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();

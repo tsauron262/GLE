@@ -144,7 +144,7 @@ class Reader {
                 if(!is_file("/data/synchro/test.txt"))
                     file_put_contents("/data/synchro/test.txt", $dataOrig);
                 if(!is_file("/data/synchro/test2.txt"))
-                    file_put_contents("/data/synchro/test.txt", $dataOrig2);
+                    file_put_contents("/data/synchro/test2.txt", $dataOrig2);
                 dol_syslog("Probléme de parsage caldav ".print_r($lines,1)." ligne original ". $dataOrig." apres modifs ". $dataOrig2." apres modifs ". $dataOrig3, 3);
                 throw new ParseException('Invalid VObject, line ' . ($lineNr+1) . ' did not follow the icalendar/vcard format');
             }

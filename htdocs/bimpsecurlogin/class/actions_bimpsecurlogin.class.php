@@ -30,7 +30,7 @@ class securLogSms {
 
     public function setSecure($statut = false, $codeR = null) {//statut = 0 pas secure = 1 secure add cokkie secure = 2 session secure mais pas de cookie
         global $conf;
-        $_SESSION['sucur'] = $statut;
+        $_SESSION['sucur'] = ($statut? "secur" : "no");
         if ($statut == 1) {
             if (is_null($codeR)) {
                 $codeR = rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
@@ -81,7 +81,7 @@ class securLogSms {
         } elseif (is_object($id_user))
             $this->user = $id_user;
 
-        $this->nomCookie = "secure_bimp_erp" . $this->user->id;
+        $this->nomCookie = "secure_bimp_erp234" . $this->user->id;
 
 
 //                $this->setSecure();
@@ -102,7 +102,7 @@ class securLogSms {
 
         $this->traitePhone();
 
-        if (isset($_SESSION['sucur']) && $_SESSION['sucur'])//session deja securise
+        if (isset($_SESSION['sucur']) && $_SESSION['sucur'] == "secur")//session deja securise
             return 1;
 
         if (isset($_COOKIE[$this->nomCookie])) {//cokkie secur en place

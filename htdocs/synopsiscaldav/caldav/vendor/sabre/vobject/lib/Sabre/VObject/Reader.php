@@ -140,8 +140,8 @@ class Reader {
             if ($options & self::OPTION_IGNORE_INVALID_LINES) {
                 return null;
             } else {
-                global $dataOrig;
-                dol_syslog("Probléme de parsage caldav ".print_r($lines,1)." ligne original ". $dataOrig, 3);
+                global $dataOrig, $dataOrig2;
+                dol_syslog("Probléme de parsage caldav ".print_r($lines,1)." ligne original ". $dataOrig." apres modifs ". $dataOrig2, 3);
                 throw new ParseException('Invalid VObject, line ' . ($lineNr+1) . ' did not follow the icalendar/vcard format');
             }
         }

@@ -21,7 +21,7 @@ class securLogSms {
 
     var $max_tentative = 6;
     
-    var $debug = 2;//0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
+    var $debug = 0;//0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
 
     var $message = array();
     public function __construct($db) {
@@ -180,7 +180,7 @@ class securLogSms {
                 
                 
         if (!$this->isPhoneMobile($phone) && strtolower($phone) != "no")
-            setEventMessages("<a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php'>Vos numéros de mobile (pro et perso) sont invalide : " . $phone . " dans quelques jours vous ne pourez plus acceder a l'application</a>", null, 'warnings');
+            setEventMessages("<a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php'>Vos numéros de mobile (pro et perso) sont invalide : " . $phone . " dans quelques jours vous ne pourez plus acceder a l'application inscrire NO si vous n'avez pas de téléphone pro et que vous refusé d'inscrire vottre tel perso (qui ne serai utilisé que pour l'envoie de code par SMS</a>", null, 'warnings');
         return $phone;
     }
     

@@ -21,7 +21,7 @@ class securLogSms {
 
     var $max_tentative = 3;
     
-    var $debug = 0;//0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
+    var $debug = 2;//0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
 
     var $message = array();
     public function __construct($db) {
@@ -84,7 +84,7 @@ class securLogSms {
         $this->nomCookie = "secure_bimp_erp" . $this->user->id;
 
 
-                $this->setSecure();
+//                $this->setSecure();
     }
 
     function isSecur() {

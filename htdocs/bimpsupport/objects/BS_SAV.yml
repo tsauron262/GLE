@@ -460,6 +460,7 @@ forms:
               label: Montant devis
               content: 
                   callback: displayFactureAmountToPay
+              input_name: inut
             
     resolution: 
         rows: 

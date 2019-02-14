@@ -47,7 +47,7 @@ class importProdFourn extends import8sens {
         if($prodId > 0){
             $fournId = $this->getFourn($ln['ProGFouCode']);
             if($fournId > 0){
-                $sql3 = $this->db->query("SELECT rowid, ref_fourn, price, quantity, tva_tx, fk_product FROM `llx_product_fournisseur_price` WHERE  `fk_soc` = ".$fournId." AND ref_fourn LIKE '".$ln['ProCode']."'");
+                $sql3 = $this->db->query("SELECT rowid, ref_fourn, price, unitprice, quantity, tva_tx, fk_product FROM `llx_product_fournisseur_price` WHERE  `fk_soc` = ".$fournId." AND ref_fourn LIKE '".$ln['ProCode']."'");
                 $ok = false;
                 $existeDeja = "non";
                 while ($ln3 = $this->db->fetch_object($sql3)){

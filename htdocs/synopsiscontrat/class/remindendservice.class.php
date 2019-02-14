@@ -28,13 +28,17 @@ class RemindEndService {
         $services = array();
 
         // contrat
-        $sql = 'SELECT c.rowid as c_rowid, c.fk_commercial_suivi as fk_commercial_suivi, ';
+        $sql = 'SELECT c.rowid as c_rowid, ';
         // contradet 
-        $sql .= ' cd.rowid as cd_rowid, cd.statut as statut_line';
+        $sql .= ' cd.rowid as cd_rowid, cd.statut as statut_line,';
+        // societe_commerciaux
+        $sql .= ' sc.fk_user as fk_user';
+
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'contrat as c';
-        $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'contratdet as cd ON c.rowid=cd.fk_contrat';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'contratdet as cd ON c.rowid=cd.fk_contrat';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe_commerciaux as sc ON c.fk_soc=sc.fk_soc';
         $sql .= ' WHERE cd.statut=4 '; // contrat line open
-        $sql .= ' AND NOW() - INTERVAL 1 DAY <= cd.date_fin_validite AND cd.date_fin_validite <= NOW() + INTERVAL ' . $days . ' DAY'; 
+        $sql .= ' AND cd.date_fin_validite <= NOW() + INTERVAL ' . $days . ' DAY';
         $sql .= ' AND c.statut>0'; // contrat isn't draft
         $sql .= ' ORDER BY c.rowid';
 
@@ -44,7 +48,7 @@ class RemindEndService {
                 $contrat = new Contrat($this->db);
                 $contrat->fetch($obj->c_rowid);
                 $services[] = array(
-                    'id_user' => $obj->fk_commercial_suivi,
+                    'id_user' => $obj->fk_user,
                     'statut_line' => $obj->statut_line,
                     'id_contrat' => $obj->c_rowid,
                     'id_line' => $obj->cd_rowid,
@@ -60,9 +64,10 @@ class RemindEndService {
      * @param  type $days  number day to reach urgence
      * @return type return number of task sent or -($number_of_errors) if there are some
      */
-    public function setTaksForService($days) {
+    public function setTaskForService($days) {
         $services = $this->getUrgentService($days);
         global $conf;
+        $newTasksSends = 0;
 
         foreach ($services as $service) {
             if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
@@ -73,14 +78,17 @@ class RemindEndService {
                     $tasks = $task->getList(array('test_ferme' => $test));
                     if (count($tasks) == 0) {
                         $param = array(
-                            "src" => "gle@bimp.fr",
+                            "src" => "",
                             "dst" => "suivicontrat@bimp.fr",
                             "subj" => "Service à relancer",
                             "id_user_owner" => $service['id_user'],
                             "txt" => $service['nom_url'],
                             "test_ferme" => $test);
+                        $errors_befor = sizeof($this->errors);
                         $this->errors = array_merge($this->errors, $task->validateArray($param)); // check params
                         $this->errors = array_merge($this->errors, $task->create()); // create task
+                        if ($errors_befor == sizeof($this->errors))
+                            $newTasksSends++;
                     }
                 }
                 $previous_service = $service;
@@ -94,10 +102,12 @@ class RemindEndService {
         }
         $errors = sizeof($this->errors);
 
+        $this->output = "Nombre de tâche envoyé: " . $newTasksSends . '' . implode(',', $this->errors);
+
         if ($errors != 0)
             return -$errors;
         else
-            return sizeof($services);
+            return 0;
     }
 
 }

@@ -529,10 +529,7 @@ class PDO extends AbstractBackend {
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
-        global $dataOrig, $dataOrig2;
-        $dataOrig = $calendarData;
         $calendarData = $this->traiteCalendarData($calendarData);
-        $dataOrig2 = $calendarData;
 
 
 
@@ -826,10 +823,14 @@ WHERE  `email` LIKE  '" . $mail . "'");
     }
     
     public function traiteCalendarData($calendarData){
+        global $dataOrig, $dataOrig2, $dataOrig3;
+        $dataOrig = $calendarData;
 //        $calendarData = str_replace("
 // ", "", $calendarData);
         $calendarData = str_replace(CHR("0A".CHR("20")), '', $calendarData);
+        $dataOrig2 = $calendarData;
         $calendarData = str_replace("\x0A\x20", '', $calendarData);
+        $dataOrig3 = $calendarData;
 //        $calendarData = str_replace("\r\n ", "", $calendarData);
         return $calendarData;
     }

@@ -53,12 +53,21 @@ class importProdFourn extends import8sens {
                 while ($ln3 = $this->db->fetch_object($sql3)){
                     if($ln3->fk_product == $prodId){
                         $ok = true;
-                        if($ln3->ref_fourn != $ln['ProCode'] 
-                                    || $this->traiteNumber($ln3->unitprice) != $this->traiteNumber($ln['ProPrixBase']) 
-                                    || $this->traiteNumber($ln3->price) != $this->traiteNumber($ln['ProPrixBase']) 
-                                    || $ln3->quantity != 1 
-                                    || $this->traiteNumber($ln3->tva_tx) != $this->traiteNumber($ln['Pro1TaxTaux'])){
-                                $this->updatePrice($ln3->rowid, $ln);
+                        $achanger = "";
+                        if($ln3->ref_fourn != $ln['ProCode'])
+                            $achanger .= " ref";
+                        if($this->traiteNumber($ln3->unitprice) != $this->traiteNumber($ln['ProPrixBase'])) 
+                            $achanger .= " prix";
+                        if($this->traiteNumber($ln3->price) != $this->traiteNumber($ln['ProPrixBase']) ) 
+                            $achanger .= " prix2";
+                        if($ln3->quantity != 1 ) 
+                            $achanger .= " qty";
+                        if($this->traiteNumber($ln3->tva_tx) != $this->traiteNumber($ln['Pro1TaxTaux'])) 
+                            $achanger .= " tva";
+                            
+                        if($achanger != ""){
+                            echo "updatePrice ".$achanger."<br/>";
+                            $this->updatePrice($ln3->rowid, $ln);
                         }
                     }
                     else{
@@ -94,7 +103,6 @@ class importProdFourn extends import8sens {
     }
 
     function updatePrice($idGle, $ln) {
-        echo "updatePrice<br/>";
         global $user;
         $this->db->query("UPDATE `llx_product_fournisseur_price` SET "
                 . "ref_fourn = '".$ln['ProCode']."', price = '".$ln['ProPrixBase']."', quantity = 1, tva_tx = '".$ln['Pro1TaxTaux']."', unitprice = '".$ln['ProPrixBase']."' "

@@ -66,7 +66,8 @@ class BMP_Event extends BimpObject
         'JEU'  => 'JEU',
         'AUTR' => 'AUTR',
         'INT'  => 'INT',
-        'NUM'  => 'NUM'
+        'NUM'  => 'NUM',
+        'MER'  => 'MER'
     );
     protected $montants = array();
     protected $calc_montants = array();
@@ -1088,14 +1089,14 @@ class BMP_Event extends BimpObject
                     );
                 }
 
-                $filtre = $tm->id."-".$montant->getTvaTx();
+                $filtre = $tm->id . "-" . $montant->getTvaTx();
                 $row = array(
                     'status'       => $montant->displayData('status', 'default', false),
                     'type_montant' => $tm->getData('name'),
                     'code'         => $tm->getData('code_compta'),
                     'tva'          => BimpTools::displayFloatValue($montant->getTvaTx()) . '%',
-                    'frais'        => (isset($amounts['categories'][$id_category]['rows'][$filtre])? $amounts['categories'][$id_category]['rows'][$filtre]['frais'] : 0),
-                    'recette'      => (isset($amounts['categories'][$id_category]['rows'][$filtre])? $amounts['categories'][$id_category]['rows'][$filtre]['recette'] : 0)
+                    'frais'        => (isset($amounts['categories'][$id_category]['rows'][$filtre]) ? $amounts['categories'][$id_category]['rows'][$filtre]['frais'] : 0),
+                    'recette'      => (isset($amounts['categories'][$id_category]['rows'][$filtre]) ? $amounts['categories'][$id_category]['rows'][$filtre]['recette'] : 0)
                 );
 
                 switch ((int) $tm->getData('type')) {

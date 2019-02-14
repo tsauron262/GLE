@@ -182,7 +182,7 @@ class BC_FiltersPanel extends BC_Panel
                     'label'       => 'Enregistrer les filtres actuels',
                     'icon_before' => 'fas_save',
                     'attr'        => array(
-                        'onclick' => 'saveListFilters(\'' . $this->identifier . '\')'
+                        'onclick' => 'saveListFilters($(this), \'' . $this->identifier . '\')'
                     )
         ));
 

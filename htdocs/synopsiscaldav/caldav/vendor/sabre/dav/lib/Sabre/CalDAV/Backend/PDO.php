@@ -529,8 +529,7 @@ class PDO extends AbstractBackend {
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
-        $calendarData = str_replace("\x0A\x20", '', $calendarData);
-        $calendarData = str_replace("\r\n ", "", $calendarData);
+        $calendarData = $this->traiteCalendarData($calendarData);
 
 
 
@@ -822,11 +821,17 @@ WHERE  `email` LIKE  '" . $mail . "'");
             $infoEvent["rappel"] = 15;
         return 0;
     }
-
-    public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
+    
+    public function traiteCalendarData($calendarData){
+        $calendarData = str_replace("
+ ", "", $calendarData);
         $calendarData = str_replace("\x0A\x20", '', $calendarData);
         $calendarData = str_replace("\r\n ", "", $calendarData);
-        
+        return $calendarData;
+    }
+
+    public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
+        $calendarData = $this->traiteCalendarData($calendarData);
         
         if (stripos($objectUri, $this->uriTest) > 0)
             dol_syslog("update : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");

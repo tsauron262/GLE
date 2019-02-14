@@ -482,6 +482,7 @@ forms:
               input_name: send_msg
             - custom: 1
               label: Montant facture
+              input_name: inut
               content: 
                   callback: displayFactureAmountToPay
               

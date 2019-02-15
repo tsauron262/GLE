@@ -64,7 +64,7 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-order' => 'calendarorder',
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
-    public $uriTest = "2f332e25-97d0-bc4b-b143-a4af33e58bd8"; //35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
+    public $uriTest = "BIMP-ERP-fgfjfhjfytcrt-2045804"; //35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend
@@ -514,10 +514,16 @@ class PDO extends AbstractBackend {
             'size' => (int) $row['size'],
             'calendardata' => $calData,
         );
-//        if(stripos($objectUri, $this->uriTest) > 0)
+        if(stripos($objectUri, $this->uriTest) > 0)
+                $this->logIcs("get", $this->uriTest, $return);
 //dol_syslog("GET OBJECT : ".$calendarId." ".$row["etag"]."   |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
 
         return $return;
+    }
+    
+    
+    function logIcs($action, $uri, $data){
+        file_put_contents("/data/synchro/tempics/".$uri."-".date("Y-m-d H:i:s").$uri."-".$action, print_r($data,1));
     }
 
     /**
@@ -542,7 +548,8 @@ class PDO extends AbstractBackend {
 
 
         if (stripos($objectUri, $this->uriTest) > 0)
-            dol_syslog("Create : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
+                $this->logIcs("update", $this->uriTest, $calendarData);
+//            dol_syslog("Create : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
 //
@@ -845,7 +852,8 @@ WHERE  `email` LIKE  '" . $mail . "'");
         $calendarData = $this->traiteCalendarData($calendarData);
         
         if (stripos($objectUri, $this->uriTest) > 0)
-            dol_syslog("update : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
+                $this->logIcs("update", $this->uriTest, $calendarData);
+//            dol_syslog("update : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 
         $extraData = $this->getDenormalizedData($calendarData);
 

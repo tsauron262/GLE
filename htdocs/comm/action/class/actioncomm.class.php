@@ -308,6 +308,7 @@ class ActionComm extends CommonObject
             
             if(!$ok){
                 $this->userassigned[USER_EXTERNE_ID] = array("id"=>USER_EXTERNE_ID);
+                $this->userownerid = USER_EXTERNE_ID;
                 $userownerid = USER_EXTERNE_ID;
             }
         }

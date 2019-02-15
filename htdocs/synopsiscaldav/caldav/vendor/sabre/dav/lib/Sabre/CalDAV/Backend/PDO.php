@@ -453,7 +453,14 @@ class PDO extends AbstractBackend {
                 }
             //iciattendee 
 //            $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
-            $calendarData2[] = 'ORGANIZER;CN="test CN";SENT-BY="MAILTO:'.$row['organisateur'].'":mailto:'.$row['organisateur'];
+            $cnOrga = "INC";
+            $sql = $db->query("SELECT lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE email = '".$row['organisateur']."'");
+            if($db->num_rows($sql)>0){
+                $ln = $db->fetch_object($sql);
+                $cnOrga = $ln->lastname." ".$ln->firstname;
+            }
+                
+            $calendarData2[] = 'ORGANIZER;CN="'.$cnOrga.'":mailto:'.$row['organisateur'];
         }
 
         $action->fetch_optionals();

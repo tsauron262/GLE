@@ -686,6 +686,9 @@ class PDO extends AbstractBackend {
             if (stripos($nom, "DTSTAMP") !== false) {
                 $DTSTAMP = str_replace("DTSTAMP:", "", $ligne);
             }
+            if (stripos($nom, "LAST-MODIFIED") !== false) {
+                $last_modified = str_replace("LAST-MODIFIED:", "", $ligne);
+            }
             if (stripos($ligne, "ATTENDEE") !== false || stripos($ligne, "CUTYPE") != false) {
                 $stat = "NEEDS-ACTION";
                 if (preg_match("/^.*PARTSTAT=(.+);.+$/U", $ligne, $retour))
@@ -797,12 +800,15 @@ WHERE  `email` LIKE  '" . $mail . "'");
             //dol_syslog("action ".$action->id." invit ext : ".print_r($tabMailInc,1),3);
             /* $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "'  ".($sequence > 0 ?", sequence = '" . $sequence . "'" : "")." WHERE fk_object = '" . $action->id . "'";
               $sql = $db->query($req); */
+            
+            if(!isset($last_modified) && isset($calendarData2['LAST-MODIFIED']))
+                $last_modified = $calendarData2['LAST-MODIFIED'];
 
-            if (!isset($calendarData2['LAST-MODIFIED']))// || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
-                $calendarData2['LAST-MODIFIED'] = $DTSTAMP;
+            if (!isset($last_modified))// || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
+                $last_modified = $DTSTAMP;
 
             //date_default_timezone_set("GMT");
-            $sql = "UPDATE `" . MAIN_DB_PREFIX . "actioncomm` SET " . (isset($calendarData2['CREATED']) ? "`datec` = '" . $db->idate(strtotime($calendarData2['CREATED'])) . "'," : "") . " `tms` = '" . $db->idate(strtotime($calendarData2['LAST-MODIFIED'])) . "' WHERE `id` = " . $action->id . ";";
+            $sql = "UPDATE `" . MAIN_DB_PREFIX . "actioncomm` SET " . (isset($calendarData2['CREATED']) ? "`datec` = '" . $db->idate(strtotime($calendarData2['CREATED'])) . "'," : "") . " `tms` = '" . $db->idate(strtotime($last_modified)) . "' WHERE `id` = " . $action->id . ";";
 
             $db->query($sql);
             //date_default_timezone_set("Europe/Paris");

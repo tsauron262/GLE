@@ -452,7 +452,8 @@ class PDO extends AbstractBackend {
                     $calendarData2[] = "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=" . $tmpEtat . $extra . ":mailto:" . $tmpMail;
                 }
             //iciattendee 
-            $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
+//            $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
+            $calendarData2[] = 'ORGANIZER;CN="test CN";SENT-BY="MAILTO:'.$row['organisateur'].'":mailto:'.$row['organisateur'];
         }
 
         $action->fetch_optionals();

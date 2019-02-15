@@ -17,6 +17,11 @@ table#customer th, table#customer td {
     border-right: solid black 1px;
 }
 
-table#customer tr.last > td{
+table#customer tr.last > td, table#customer > tbody > tr > th{
     border-bottom: solid black 1px;
+}
+
+table#customer th{
+    text-align: center;
+    font-weight: bold;
 }

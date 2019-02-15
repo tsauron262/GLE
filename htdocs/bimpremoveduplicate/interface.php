@@ -24,9 +24,9 @@ switch ($action) {
             break;
         }
 
-    case 'delete_customers': {
+    case 'merge_duplicates': {
             echo json_encode(array(
-                'nb_delete' => $staticRD->deleteCustomer(GETPOST('ids_to_delete')),
+                'success' => $staticRD->mergeDuplicate(GETPOST('src_to_dest')),
                 'errors' => $staticRD->errors
             ));
             break;

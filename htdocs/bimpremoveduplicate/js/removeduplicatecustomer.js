@@ -33,12 +33,12 @@ function displayMessage(message, code = 'mesgs') {
 
 
 function getAllFactures(limit, details) {
-    
+
     if (limit > 100) {
         alert("La requête est trop longue (100 doublons ou plus) pour être exécuter");
         return -1;
     }
-    
+
     if (limit > 30) {
         if (!confirm("Vous êtes sur le point d'exécuter une longue requête (plus de 30 doublons), continuer ?"))
             return -2;
@@ -73,30 +73,30 @@ function getAllFactures(limit, details) {
                     var last = Object.keys(duplicate).length - 1;
                     for (var counter in duplicate) {
                         var instance = duplicate[counter];
-                        var key_checkbox = index;
+                        var key_group = index;
                         if (counter == last)
-                            add_line(instance, key_checkbox, 2, true);
+                            add_line(instance, key_group, true);
                         else
-                            add_line(instance, key_checkbox, 2, false);
+                            add_line(instance, key_group, false);
 
                     }
                 });
             }
             // Add button and his event
-            $('div#id-right').append('<br/><input type="submit" class="butAction" id="remove_duplicates" value="Supprimer les doublons">');
+            $('div#id-right').append('<br/><input type="submit" class="butAction" id="merge_duplicates" value="Fusionner les doublons">');
             iniEventAfterDisplayDuplicate();
         }
     });
 }
 
-function deleteCustomers(ids_to_delete) {
+function mergeDuplicates(src_to_dest) {
 
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpremoveduplicate/interface.php",
         data: {
-            action: 'delete_customers',
-            ids_to_delete: ids_to_delete
+            action: 'merge_duplicates',
+            src_to_dest: src_to_dest
         },
         beforeSend: function () {
             $('i#spinner').css('display', 'block');
@@ -110,9 +110,8 @@ function deleteCustomers(ids_to_delete) {
         success: function (rowOut) {
             $('i#spinner').css('display', 'none');
             $('input#display_duplicates').css('display', 'block');
-
             var out = JSON.parse(rowOut);
-            displayOutputDelete(out.nb_delete);
+            displayOutputMerge(out);
         }
     });
 }
@@ -125,7 +124,6 @@ $(document).ready(function () {
     initEvents();
 
     var limit = parseInt(getUrlParameter('limit'));
-    console.log(limit);
     if (limit > 0)
         getAllFactures(limit, 'true');
 });
@@ -144,19 +142,41 @@ function initEvents() {
 }
 
 function iniEventAfterDisplayDuplicate() {
-    $('input#remove_duplicates').click(function () {
-        var ids_to_delete = [];
-        $('input[type=checkbox][cb_delete=true]:checked').each(function () {
-            ids_to_delete.push(parseInt($(this).val()));
+    // Merge duplicate
+    $('input#merge_duplicates').click(function () {
+        var radio_checked = {};
+        $('input[type="radio"][r_keep="true"]:checked').each(function () {
+            var group_name = $(this).attr('name');
+            var radio_value = $(this).val();
+            radio_checked[group_name] = radio_value;
         });
-        deleteCustomers(ids_to_delete);
+
+        var src_to_dest = {};
+        $('table#customer > tbody > tr[key_group]').each(function () {
+            var key_group = $(this).attr('key_group');
+            var src = parseInt($(this).find('input[type="checkbox"][cb_merge="true"]:checked').val());
+            if (src > 0) {
+                var dest = radio_checked[key_group];
+                src_to_dest[src] = dest;
+            }
+        });
+        mergeDuplicates(src_to_dest);
     });
 
-    // Search if every checkbox are checked to prevent deleting a customer
-    $('input[cb_delete=true]').change(function () {
-        if ($('input[cb_delete=true][name=' + $(this).attr('name') + ']:not(:checked)').length == 0)
-            alert("Attention vous avez selectionné toutes les instances de ce client,\n\
-vous risquez de le supprimer totalement.");
+
+    // Prevent merge it self, part 1
+    $('input[r_keep=true]').change(function () {
+        if ($(this).prop('checked'))
+            $(this).parent().parent().find('input[type="checkbox"][cb_merge="true"]').prop('checked', false);
+    });
+    // Prevent merge it self, part 2
+    $('input[cb_merge=true]').change(function () {
+        if ($(this).prop('checked')) {
+            if ($(this).parent().parent().find('input[type="radio"][r_keep="true"]').prop('checked')) {
+                alert("Action impossible, il est impossible de fusionner un tier avec lui-même.");
+                $(this).prop('checked', false);
+            }
+        }
     });
 }
 
@@ -167,15 +187,16 @@ vous risquez de le supprimer totalement.");
  * @param {type} is_last used to split group with black tr
  * @return {undefined}
  */
-function add_line(c, key_checkbox, key_radio, is_last) {
+function add_line(c, key_group, is_last) {
 
     if (is_last)
-        var html = '<tr id="' + c.rowid + '" class="last">';
+        var html = '<tr id="' + c.rowid + '" key_group=' + key_group + ' class="last">';
     else
-        var html = '<tr id="' + c.rowid + '">';
+        var html = '<tr id="' + c.rowid + '" key_group=' + key_group + '>';
 
-    html += '<td><input r_keep="true" type="radio" name="' + key_radio + '" value=' + c.rowid + ' checked></td>'; // TODO remove "checked"
-    html += '<td><input cb_delete="true" type="checkbox" name="' + key_checkbox + '" value=' + c.rowid + ' checked></td>'; // TODO remove "checked"
+    html += '<td>' + c.rowid + '</td>';
+    html += '<td><input r_keep="true" type="radio" name="' + key_group + '" value=' + c.rowid + ' checked></td>'; // TODO remove "checked"
+    html += '<td><input cb_merge="true" type="checkbox" name="' + key_group + '" value=' + c.rowid + '></td>'; // TODO remove "checked"
     html += '<td>' + c.nom + '</td>';
     html += '<td>' + c.email + '</td>';
     html += '<td>' + c.address + '</td>';
@@ -189,39 +210,40 @@ function add_line(c, key_checkbox, key_radio, is_last) {
     $('table#customer').append(html);
 }
 
-function displayOutputDelete(tab) {
+function displayOutputMerge(tab) {
 
-    // Errors
-    for (var i in tab[-1]) {
-        var out = tab[-1][i];
-        var all_errors = '';
-        out.errors.forEach(function (message, index) {
-            all_errors += index + ':' + message;
-        });
-        all_errors += (out.error != null) ? out.error : '';
-        $('table#customer > tbody > tr#' + out.id).css('background-color', 'red');
-        $('table#customer > tbody > tr#' + out.id + ' > td[name=errors]').text(all_errors);
-    }
-
-    // Nothing done
-    for (var i in tab[0]) {
-        var out = tab[0][i];
-        var all_errors = '';
-        out.errors.forEach(function (message, index) {
-            all_errors += index + ':' + message;
-        });
-        all_errors += (out.error != null) ? out.error : '';
-        $('table#customer > tbody > tr#' + out.id).css('background-color', 'yellow');
-        $('table#customer > tbody > tr#' + out.id + ' > td[name=errors]').text(all_errors);
-    }
+    var success = tab.success;
+    var errors = tab.errors;
 
     // Success
-    for (var i in tab[1]) {
-        var out = tab[1][i];
-        $('table#customer > tbody > tr#' + out.id).css('background-color', 'green');
-        $('table#customer > tbody > tr#' + out.id + ' > td[name=errors]').text("OK");
+    for (var i in success) {
+        var id_success = i;
+        var id_merge = success[i];
+        // Add color
+        $('table#customer > tbody > tr#' + id_success).css('background-color', 'rgba(0, 153, 0, 0.5)');
+        // Remove input
+        $('table#customer > tbody > tr#' + id_success).find('input').remove();
+        $('table#customer > tbody > tr#' + id_success + ' > td[name=errors]').html('Fusionné avec <a style="color: blue;">' + id_merge+"</a>");
+
+        $('table#customer > tbody > tr#' + id_success + ' > td[name=errors]').hover(function () {
+            $(this).css('cursor', 'pointer');
+            $('table#customer > tbody > tr#' + id_merge).css('background-color', 'rgb(255, 255, 153)');
+        }, function () {
+            $('table#customer > tbody > tr#' + id_merge).css('background-color', '');
+        });
+    }
+
+    // Errors
+    for (var i in errors) {
+        var id_error = i;
+        var error = errors[id_error];
+        // Add color
+        $('table#customer > tbody > tr#' + id_error).css('background-color', 'rgba(255, 0, 0, 0.5)');
+        // Remove input
+        $('table#customer > tbody > tr#' + id_error + ' > td[name=errors]').text(error);
     }
 }
+
 
 /**
  * Functions Annexes

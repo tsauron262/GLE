@@ -51,7 +51,7 @@ print '</tr></tbody</table>';
 print '<table id="customer" class="liste_titre_filter">';
 print '<tr id="tr_header" class="liste_titre last">';
 $arrayofheader = array(
-    'Garder', 'Fusionner', 'Nom', 'Email', 'Adresse', 'Code Postal', 'Ville', 'Téléphone', 'Lien', 'Erreur'
+    'Id', 'Garder', 'Fusionner', 'Nom', 'Email', 'Adresse', 'Code Postal', 'Ville', 'Téléphone', 'Lien', 'Retour fusion'
 );
 displayHeader($arrayofheader);
 print '</tr>';

@@ -905,7 +905,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
 
             if ($action->update($user) < 1)
-                $this->forbiden("update.");
+                $this->forbiden("update. ".$action->error);
 
 
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);

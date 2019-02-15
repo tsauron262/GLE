@@ -514,8 +514,8 @@ class PDO extends AbstractBackend {
             'size' => (int) $row['size'],
             'calendardata' => $calData,
         );
-        if(stripos($objectUri, $this->uriTest) > 0)
-                $this->logIcs("get", $this->uriTest, $return);
+//        if(stripos($objectUri, $this->uriTest) > 0)
+                $this->logIcs("get", $objectUri, $return);
 //dol_syslog("GET OBJECT : ".$calendarId." ".$row["etag"]."   |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
 
         return $return;
@@ -547,8 +547,8 @@ class PDO extends AbstractBackend {
 
 
 
-        if (stripos($objectUri, $this->uriTest) > 0)
-                $this->logIcs("update", $this->uriTest, $calendarData);
+//        if (stripos($objectUri, $this->uriTest) > 0)
+                $this->logIcs("update", $objectUri, $calendarData);
 //            dol_syslog("Create : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
@@ -851,8 +851,8 @@ WHERE  `email` LIKE  '" . $mail . "'");
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
         $calendarData = $this->traiteCalendarData($calendarData);
         
-        if (stripos($objectUri, $this->uriTest) > 0)
-                $this->logIcs("update", $this->uriTest, $calendarData);
+//        if (stripos($objectUri, $this->uriTest) > 0)
+                $this->logIcs("update", $objectUri, $calendarData);
 //            dol_syslog("update : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 
         $extraData = $this->getDenormalizedData($calendarData);

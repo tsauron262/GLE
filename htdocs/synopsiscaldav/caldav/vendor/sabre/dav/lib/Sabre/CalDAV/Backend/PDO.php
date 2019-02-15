@@ -526,7 +526,8 @@ class PDO extends AbstractBackend {
         $dir = "/data/synchro/tempics/".$uri."/";
         if(!is_dir($dir))
             mkdir($dir);
-        file_put_contents($dir.$uri."-".date("Y-m-d H:i:s:u")."-".$action.".txt", print_r($data,1));
+        $objDateTime = new DateTime('NOW');
+        file_put_contents($dir.$uri."-".$objDateTime->format("Y-m-d H:i:s:u")."-".$action.".txt", print_r($data,1));
     }
 
     /**

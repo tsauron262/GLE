@@ -523,7 +523,10 @@ class PDO extends AbstractBackend {
     
     
     function logIcs($action, $uri, $data){
-        file_put_contents("/data/synchro/tempics/".$uri."-".date("Y-m-d H:i:s")."-".$action.".txt", print_r($data,1));
+        $dir = "/data/synchro/tempics/".$uri."/";
+        if(!is_dir($dir))
+            mkdir($dir);
+        file_put_contents($dir.$uri."-".date("Y-m-d H:i:s")."-".$action.".txt", print_r($data,1));
     }
 
     /**

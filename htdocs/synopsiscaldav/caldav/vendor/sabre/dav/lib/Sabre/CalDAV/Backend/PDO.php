@@ -743,7 +743,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
 
 
                 if ($organisateur == $mail) {
-                    $action->userdoneid = $ligne->rowid;
+//                    $action->userdoneid = $ligne->rowid;
                     $action->userownerid = $ligne->rowid;
                     $statut = "ACCEPTED";
                     $okOrga = true;

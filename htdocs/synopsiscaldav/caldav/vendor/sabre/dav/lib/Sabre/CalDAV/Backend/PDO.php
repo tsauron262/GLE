@@ -525,7 +525,7 @@ class PDO extends AbstractBackend {
     
     function logIcs($action, $uri, $data){
         $dir = "/data2/tempics/";
-        if(is_dir($dir)){
+        if(is_dir($dir) && strlen($uri) < 40){
             $dir .= $uri."/";
             if(!is_dir($dir))
                 mkdir($dir);

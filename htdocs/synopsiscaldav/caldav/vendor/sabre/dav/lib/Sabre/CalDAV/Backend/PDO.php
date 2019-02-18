@@ -1131,6 +1131,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
      * @return void
      */
     public function deleteCalendarObject($calendarId, $objectUri) {
+                $this->logIcs("delete", $objectUri, array());
 
 //        $stmt = $this->pdo->prepare('DELETE FROM '.$this->calendarObjectTableName.' WHERE calendarid = ? AND uri = ?');
 //        $stmt->execute(array($calendarId,$objectUri));

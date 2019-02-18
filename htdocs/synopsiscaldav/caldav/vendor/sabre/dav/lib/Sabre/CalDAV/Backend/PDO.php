@@ -1163,9 +1163,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 $action->userassigned[$user->id]['answer_status'] = -2;
                 $action->update($user);
             }
-                dol_syslog("delete -2".$objectUri,3);
         }
-                $this->logIcs("delete2", $objectUri, $action->userassigned, $calendarId);
             
 //        $this->userIdCaldavPlus($calendarId);
     }

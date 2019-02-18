@@ -525,12 +525,12 @@ class PDO extends AbstractBackend {
     
     function logIcs($action, $uri, $data, $idUser){
         $dir = "/data2/tempics/";
-        if(is_dir($dir) && strlen($uri) < 40){
+        if(is_dir($dir)){
             $dir .= $uri."/";
             if(!is_dir($dir))
                 mkdir($dir);
             $objDateTime = new \DateTime('NOW');
-            file_put_contents($dir.$uri."-".$objDateTime->format("Y-m-d H:i:s:u")."-".microtime()."-".$idUser."-".$action."-".substr(urlencode($_SERVER['HTTP_USER_AGENT']), 0, 20).".txt", print_r($data,1));
+            file_put_contents($dir.substr($uri,30)."-".$objDateTime->format("Y-m-d H:i:s:u")."-".microtime()."-".$idUser."-".$action."-".substr(urlencode($_SERVER['HTTP_USER_AGENT']), 0, 20).".txt", print_r($data,1));
         }
     }
 

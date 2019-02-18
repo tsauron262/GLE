@@ -784,7 +784,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             }
         }
         if (!$okOrga) {
-            if (count($tabMail) > 1 || $organisateur != "") {
+            if (count($action->userassigned) > 1 || $organisateur != "") {
                 $action->userownerid = USER_EXTERNE_ID;
                 $action->userassigned[USER_EXTERNE_ID] = array('id' => USER_EXTERNE_ID);
                 if($organisateur == "")

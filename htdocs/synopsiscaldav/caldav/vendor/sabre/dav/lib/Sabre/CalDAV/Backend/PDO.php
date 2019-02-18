@@ -523,14 +523,14 @@ class PDO extends AbstractBackend {
     }
     
     
-    function logIcs($action, $uri, $data){
+    function logIcs($action, $uri, $data, $idUser){
         $dir = "/data2/tempics/";
         if(is_dir($dir) && strlen($uri) < 40){
             $dir .= $uri."/";
             if(!is_dir($dir))
                 mkdir($dir);
             $objDateTime = new \DateTime('NOW');
-            file_put_contents($dir.$uri."-".$objDateTime->format("Y-m-d H:i:s:u")."-".microtime()."-".$action."-".urlencode($_SERVER['HTTP_USER_AGENT']).".txt", print_r($data,1));
+            file_put_contents($dir.$uri."-".$objDateTime->format("Y-m-d H:i:s:u")."-".microtime()."-".$idUser."-".$action."-".substr(urlencode($_SERVER['HTTP_USER_AGENT']), 0, 20).".txt", print_r($data,1));
         }
     }
 
@@ -556,7 +556,7 @@ class PDO extends AbstractBackend {
 
 
 //        if (stripos($objectUri, $this->uriTest) > 0)
-                $this->logIcs("update", $objectUri, $calendarData);
+                $this->logIcs("update", $objectUri, $calendarData, $calendarId);
 //            dol_syslog("Create : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
@@ -866,7 +866,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
         $calendarData = $this->traiteCalendarData($calendarData);
         
 //        if (stripos($objectUri, $this->uriTest) > 0)
-                $this->logIcs("update", $objectUri, $calendarData);
+                $this->logIcs("update", $objectUri, $calendarData, $calendarId);
 //            dol_syslog("update : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 
         $extraData = $this->getDenormalizedData($calendarData);
@@ -1131,7 +1131,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
      * @return void
      */
     public function deleteCalendarObject($calendarId, $objectUri) {
-                $this->logIcs("delete", $objectUri, array());
+                $this->logIcs("delete", $objectUri, array(), $calendarId);
 
 //        $stmt = $this->pdo->prepare('DELETE FROM '.$this->calendarObjectTableName.' WHERE calendarid = ? AND uri = ?');
 //        $stmt->execute(array($calendarId,$objectUri));

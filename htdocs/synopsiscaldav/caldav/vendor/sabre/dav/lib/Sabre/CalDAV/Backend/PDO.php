@@ -428,7 +428,7 @@ class PDO extends AbstractBackend {
                 $userT = new \User($db);
                 $userT->fetch($val['id']);
                 if ($userT->email != "")
-                    $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status'] == 1 ? 'ACCEPTED' : ($val['answer_status'] == -1 ? 'DECLINED' : 'NEEDS-ACTION'));
+                    $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status'] == 1 ? 'ACCEPTED' : ($val['answer_status'] < 0 ? 'DECLINED' : 'NEEDS-ACTION'));
             }
         }
         if (count($tabPartExtInt) > 1) {
@@ -524,11 +524,14 @@ class PDO extends AbstractBackend {
     
     
     function logIcs($action, $uri, $data){
-        $dir = "/data/synchro/tempics/".$uri."/";
-        if(!is_dir($dir))
-            mkdir($dir);
-        $objDateTime = new \DateTime('NOW');
-        file_put_contents($dir.$uri."-".$objDateTime->format("Y-m-d H:i:s:u")."-".microtime()."-".$action.".txt", print_r($data,1));
+        $dir = "/data/synchro/tempics/";
+        if(is_dir($dir)){
+            $dir .= $uri."/";
+            if(!is_dir($dir))
+                mkdir($dir);
+            $objDateTime = new \DateTime('NOW');
+            file_put_contents($dir.$uri."-".$objDateTime->format("Y-m-d H:i:s:u")."-".microtime()."-".$action.".txt", print_r($data,1));
+        }
     }
 
     /**
@@ -1150,8 +1153,20 @@ WHERE  `email` LIKE  '" . $mail . "'");
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
         $action = new \ActionComm($db);
         $action->fetch($row['id']);
-        if ($action->delete() < 1)
-            $this->forbiden("delete.");
+        if($action->userownerid == $user->id || count($action->userassigned) == 1){
+            if ($action->delete() < 1)
+                $this->forbiden("delete.");
+        }
+        else{
+            if(isset($action->userassigned[$user->id])){
+                $action->userassigned[$user->id]['answer_status'] = -2;
+                $action->update($user);
+            }
+            
+            
+//            $action->userassigned
+        }
+            
 //        $this->userIdCaldavPlus($calendarId);
     }
 

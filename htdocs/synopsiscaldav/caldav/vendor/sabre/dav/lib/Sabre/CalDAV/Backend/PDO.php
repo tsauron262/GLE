@@ -516,7 +516,7 @@ class PDO extends AbstractBackend {
             'calendardata' => $calData,
         );
 //        if(stripos($objectUri, $this->uriTest) > 0)
-                $this->logIcs("get", $objectUri, $return);
+                $this->logIcs("get", $objectUri, $return, $calendarId);
 //dol_syslog("GET OBJECT : ".$calendarId." ".$row["etag"]."   |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
 
         return $return;
@@ -556,7 +556,7 @@ class PDO extends AbstractBackend {
 
 
 //        if (stripos($objectUri, $this->uriTest) > 0)
-                $this->logIcs("update", $objectUri, $calendarData, $calendarId);
+                $this->logIcs("create", $objectUri, $calendarData, $calendarId);
 //            dol_syslog("Create : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);

@@ -783,13 +783,12 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 $tabMailInc[] = $mail . "|" . $statut;
             }
         }
-        dol_syslog(print_r($action->userassigned,1),3);
         if (!$okOrga) {
             if (count($tabMail) > 1 || $organisateur != "") {
                 $action->userownerid = USER_EXTERNE_ID;
-                $action->userassigned = array(USER_EXTERNE_ID => array('id' => USER_EXTERNE_ID));
+                $action->userassigned[USER_EXTERNE_ID] = array('id' => USER_EXTERNE_ID);
                 if($organisateur == "")
-                    $organisateur = "gle_suivi@bimp.fr";
+                    $organisateur = "externe@bimp.fr";
             } elseif (isset($tabMail[0]))
                     $organisateur = $tabMail[0][0];
         }

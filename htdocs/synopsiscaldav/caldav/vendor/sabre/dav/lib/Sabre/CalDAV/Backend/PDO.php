@@ -530,7 +530,7 @@ class PDO extends AbstractBackend {
             if(!is_dir($dir))
                 mkdir($dir);
             $objDateTime = new \DateTime('NOW');
-            file_put_contents($dir.$uri."-".$objDateTime->format("Y-m-d H:i:s:u")."-".microtime()."-".$action.".txt", print_r($data,1));
+            file_put_contents($dir.$uri."-".$objDateTime->format("Y-m-d H:i:s:u")."-".microtime()."-".$action."-".$_SERVER['HTTP_USER_AGENT'].".txt", print_r($data,1));
         }
     }
 

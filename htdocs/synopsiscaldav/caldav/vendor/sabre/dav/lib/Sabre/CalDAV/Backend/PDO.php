@@ -694,7 +694,7 @@ class PDO extends AbstractBackend {
             if (stripos($nom, "LAST-MODIFIED") !== false) {
                 $last_modified = str_replace("LAST-MODIFIED:", "", $ligne);
             }
-            if (stripos($ligne, "ATTENDEE") !== false || stripos($ligne, "CUTYPE") != false || stripos($ligne, "ROLE=") != false) {
+            if (stripos($ligne, "ATTENDEE") !== false || stripos($ligne, "CUTYPE") != false || stripos($nom, "ATTENDEE") != false) {
                 $stat = "NEEDS-ACTION";
                 if (preg_match("/^.*PARTSTAT=(.+);.+$/U", $ligne, $retour))
                     $stat = $retour[1];

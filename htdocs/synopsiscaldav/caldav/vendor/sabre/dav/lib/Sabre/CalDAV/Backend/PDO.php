@@ -657,9 +657,9 @@ class PDO extends AbstractBackend {
         }
     }
 
-    public function getUser($calendarId) {
-        global $USER_CONNECT;
-        if (isset($USER_CONNECT) && is_object($USER_CONNECT)) {
+    public function getUser($calendarId, $forceUserCalendar = false) {
+        global $USER_CONNECT, $db;
+        if (isset($USER_CONNECT) && is_object($USER_CONNECT) && !$forceUserCalendar) {
             $user = $USER_CONNECT;
         } else {
             $user = new \User($db);
@@ -1150,7 +1150,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             return null;
 
         global $db, $user;
-        $user = $this->getUser($calendarId);
+        $user = $this->getUser($calendarId, true);
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
         $action = new \ActionComm($db);
         $action->fetch($row['id']);

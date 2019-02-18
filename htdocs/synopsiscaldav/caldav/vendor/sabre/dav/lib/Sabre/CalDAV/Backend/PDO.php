@@ -746,6 +746,9 @@ class PDO extends AbstractBackend {
                 }
             }
         }
+        dol_syslog(print_r($tabMail,1),3);
+        
+        
 //        if($organisateur == "" && isset($tabMail[0][0]))
 //            $organisateur = $tabMail[0][0];
         $organisateur = str_replace(array("\n",

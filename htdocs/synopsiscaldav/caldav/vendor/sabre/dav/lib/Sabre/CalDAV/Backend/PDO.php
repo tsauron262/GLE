@@ -746,9 +746,6 @@ class PDO extends AbstractBackend {
                 }
             }
         }
-        dol_syslog(print_r($tabMail,1),3);
-        
-        
 //        if($organisateur == "" && isset($tabMail[0][0]))
 //            $organisateur = $tabMail[0][0];
         $organisateur = str_replace(array("\n",
@@ -786,6 +783,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
                 $tabMailInc[] = $mail . "|" . $statut;
             }
         }
+        dol_syslog(print_r($action->userassigned,1),3);
         if (!$okOrga) {
             if (count($tabMail) > 1 || $organisateur != "") {
                 $action->userownerid = USER_EXTERNE_ID;

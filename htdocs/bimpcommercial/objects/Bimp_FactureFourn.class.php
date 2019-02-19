@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
 class Bimp_FactureFourn extends BimpComm
 {
 
-    public static $comm_type = 'facture_fourn';
+    public static $dol_module = 'facture_fourn';
     public static $files_module_part = 'facture_fournisseur';
     public static $email_type = 'invoice_supplier_send'; // A checker
     public static $status_list = array(
@@ -416,7 +416,7 @@ class Bimp_FactureFourn extends BimpComm
 //        $ref = dol_sanitizeFileName($this->getRef());
 //        $pdf_file = $pdf_dir . '/' . $ref . '/' . $ref . '.pdf';
 //        if (file_exists($pdf_file)) {
-//            $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
+//            $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
 //            $onclick = 'window.open(\'' . $url . '\');';
 //
 //            $html .= BimpRender::renderButton(array(

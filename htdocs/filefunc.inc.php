@@ -68,7 +68,12 @@ $conffiletoshow = "htdocs/conf/conf.php";
 
 // Include configuration
 // --- End of part replaced by Dolibarr packager makepack-dolibarr
-
+/*mod drsi*/
+$conffileT = str_replace(".php", "-".$_SERVER['HTTP_HOST'].".php", $conffile);
+$conffileT = str_replace(basename(__FILE__), $conffileT, __FILE__);
+if(is_file($conffileT))
+    $conffile = $conffileT;
+/*fmod drsi*/ 
 
 // Include configuration
 $result=@include_once $conffile;	// Keep @ because with some error reporting this break the redirect done when file not found

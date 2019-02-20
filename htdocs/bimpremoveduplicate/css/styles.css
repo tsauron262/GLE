@@ -1,0 +1,27 @@
+table#customer {
+    border-collapse:separate; 
+    border-spacing:0;
+    border-top: solid black 1px;
+    border-bottom: solid black 1px;
+    border-left: solid black 1px;
+    z-index:900 !important;
+    margin-top: 30px;
+}
+
+/*table#customer tr:nth-child(even){
+    background: #ccc;
+}*/
+
+table#customer th, table#customer td {
+    padding: 3px 10px 3px 10px;
+    border-right: solid black 1px;
+}
+
+table#customer tr.last > td, table#customer > tbody > tr > th{
+    border-bottom: solid black 1px;
+}
+
+table#customer th{
+    text-align: center;
+    font-weight: bold;
+}

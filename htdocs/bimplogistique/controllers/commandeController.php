@@ -2,7 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpreservation/controllers/reservationController.php';
 
-class commandeController extends reservationController
+class commandeController extends BimpController
 {
 
 //    public function displayHead()
@@ -25,11 +25,11 @@ class commandeController extends reservationController
             return BimpRender::renderAlerts('Aucune commande trouvée pour l\'ID ' . BimpTools::getValue('id', ''));
         }
 
-        if ($commande->dol_object->statut < 1) {
+        if ($commande->getData('fk_statut') < 1) {
             return BimpRender::renderAlerts('Cette commande doit etre validée pour accéder à cet onglet');
         }
 
-        $_GET['id_entrepot'] = (int) $commande->dol_object->array_options['options_entrepot'];
+        $_GET['id_entrepot'] = (int) $commande->getData('entrepot');
 
         $html = '';
 
@@ -53,8 +53,8 @@ class commandeController extends reservationController
         $html .= BimpRender::renderNavTabs(array(
                     array(
                         'id'      => 'reservations',
-                        'title'   => 'logistique produits',
-                        'content' => $this->renderReservationsTab($commande)
+                        'title'   => 'Logistique produits / services',
+                        'content' => $this->renderCommandesLinesLogisticTab($commande)
                     ),
                     array(
                         'id'      => 'shipments',
@@ -67,13 +67,8 @@ class commandeController extends reservationController
                         'content' => $this->renderSupplierOrdersTab($commande)
                     ),
                     array(
-                        'id'      => 'products',
-                        'title'   => 'Récapitulatif Produits / Services',
-                        'content' => $this->renderProductsTab($commande)
-                    ),
-                    array(
-                        'id'      => 'avoirs',
-                        'title'   => 'Avoirs',
+                        'id'      => 'invoices',
+                        'title'   => 'Factures',
                         'content' => $this->renderAvoirsTab($commande)
                     ),
         ));
@@ -114,7 +109,7 @@ class commandeController extends reservationController
 
         $html .= '</div>';
 
-        $orderLine = BimpObject::getInstance($this->module, 'BR_OrderLine');
+        $orderLine = BimpObject::getInstance('bimplogistique', 'BR_OrderLine');
         $list = new BC_ListTable($orderLine, 'default', 1, $commande->id, 'Produits et services');
         $list->addFieldFilterValue('id_commande', (int) $commande->id);
         $html .= $list->renderHtml();
@@ -125,6 +120,19 @@ class commandeController extends reservationController
         return $html;
     }
 
+    protected function renderCommandesLinesLogisticTab(Bimp_Commande $commande)
+    {
+        $html = '';
+        
+        if (BimpObject::objectLoaded($commande)) {
+            $html .= $commande->renderChildrenList('lines', 'logistique', 1);
+        } else {
+            $html .= BimpRender::renderAlerts('ID de la commande absent');
+        }
+        
+        return $html;
+    }
+    
     protected function renderReservationsTab($commande)
     {
         $html = '';
@@ -165,7 +173,7 @@ class commandeController extends reservationController
 
         $html .= $this->renderEquipmentForm((int) $commande->id);
 
-        $reservation = BimpObject::getInstance($this->module, 'BR_Reservation');
+        $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
         $list = new BC_ListTable($reservation, 'commandes', 1, null, 'Réservations et statuts des produits');
         $list->addFieldFilterValue('id_commande_client', (int) $commande->id);
         $html .= $list->renderHtml();
@@ -188,7 +196,7 @@ class commandeController extends reservationController
             $html .= '</div>';
         }
 
-        $shipment = BimpObject::getInstance($this->module, 'BR_CommandeShipment');
+        $shipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
         $list = new BC_ListTable($shipment, 'commandes', 1, (int) $commande->id, 'Liste des expéditions', 'sign-out');
 //        $list->addFieldFilterValue('id_commande_client', (int) $commande->id);
         $html .= $list->renderHtml();
@@ -206,7 +214,7 @@ class commandeController extends reservationController
         $html .= '<div class="row">';
         $html .= '<div class="col-lg-12">';
 
-        $rcf = BimpObject::getInstance($this->module, 'BR_ReservationCmdFourn');
+        $rcf = BimpObject::getInstance('bimpreservation', 'BR_ReservationCmdFourn');
         $list = new BC_ListTable($rcf, 'default', 1, null, 'Liste des réservations en commande / à commander');
         $list->addFieldFilterValue('id_commande_client', (int) $commande->id);
         $html .= $list->renderHtml();
@@ -229,7 +237,7 @@ class commandeController extends reservationController
         $list->addObjectAssociationFilter($commande, $commande->id, 'avoirs');
         $list->addObjectChangeReload('BR_ReservationShipment');
         $list->addObjectChangeReload('BR_ServiceShipment');
-        $list->addObjectChangeReload('BR_CommandeShipment');
+        $list->addObjectChangeReload('BL_CommandeShipment');
         $list->addObjectChangeReload('BR_Reservation');
         $list->addObjectChangeReload('BR_OrderLine');
 
@@ -248,7 +256,7 @@ class commandeController extends reservationController
         if (BimpObject::objectLoaded($facture)) {
             $ref = $facture->getData('facnumber');
             $label = '';
-            $shipment = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
+            $shipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
             if (count($shipment->getList(array(
                                 'id_commande_client' => (int) $commande->id,
                                 'id_facture'         => array(
@@ -292,7 +300,7 @@ class commandeController extends reservationController
     {
         $success = 'Création de l\'expédition effectuée avec succès';
 
-        BimpObject::loadClass($this->module, 'BR_Reservation');
+        BimpObject::loadClass('bimpreservation', 'BR_Reservation');
         $errors = BR_Reservation::createShipment((int) BimpTools::getValue('id_commande_client', 0));
 
         die(json_encode(array(

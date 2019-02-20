@@ -19,7 +19,7 @@ class Bimp_Commande extends BimpComm
     // Gestion des droits et autorisations: 
 
     public function canCreate()
-    {        
+    {
         if (defined('NOLOGIN')) {
             return 1;
         }
@@ -131,7 +131,7 @@ class Bimp_Commande extends BimpComm
                 $total_qty += (int) $line->getData('qty');
             }
 
-            $shipment_instance = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
+            $shipment_instance = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
             $rs = BimpObject::getInstance('bimpreservation', 'BR_ReservationShipment');
             $ss = BimpObject::getInstance('bimpreservation', 'BR_ServiceShipment');
             foreach ($shipment_instance->getList(array(
@@ -175,7 +175,7 @@ class Bimp_Commande extends BimpComm
                 $total_qty += (int) $line->getData('qty');
             }
 
-            $shipment_instance = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
+            $shipment_instance = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
             $rs = BimpObject::getInstance('bimpreservation', 'BR_ReservationShipment');
             $ss = BimpObject::getInstance('bimpreservation', 'BR_ServiceShipment');
 
@@ -417,6 +417,23 @@ class Bimp_Commande extends BimpComm
         );
     }
 
+    public function getShipmentsArray()
+    {
+        $shipments = array();
+
+        if ($this->isLoaded()) {
+            $cs = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
+            foreach ($cs->getList(array(
+                'id_commande_client' => (int) $this->id,
+                'status'             => 1
+            )) as $row) {
+                $shipments[(int) $row['id']] = 'Expédition n°' . $row['num_livraison'];
+            }
+        }
+
+        return $shipments;
+    }
+
     // Rendus HTML: 
 
     public function renderHeaderExtraLeft()
@@ -462,7 +479,130 @@ class Bimp_Commande extends BimpComm
         return $html;
     }
 
+    public function renderShipmentsInput()
+    {
+        $shipments = $this->getShipmentsArray();
+
+        $id_shipment = (int) BimpTools::getPostFieldValue('id_shipment', 0);
+
+        return BimpInput::renderInput('select', 'id_shipment', $id_shipment, array(
+                    'options' => $shipments
+        ));
+    }
+
+    public function renderShipmentLinesListInput()
+    {
+        $lines = BimpTools::getPostFieldValue('shipment_lines_list', array());
+
+        if (empty($lines)) {
+            $lines = array();
+            foreach ($this->getChildrenObjects('lines') as $line) {
+                if ((int) $line->getData('type') !== ObjectLine::LINE_TEXT) {
+                    $lines[] = $line->id;
+                }
+            }
+        }
+
+        if (is_array($lines)) {
+            $lines = implode(',', $lines);
+        }
+
+        return '<input type="hidden" value="' . $lines . '" name="shipment_lines_list"/>';
+    }
+
+    public function renderShipmentLinesInputs()
+    {
+        $html = '';
+        $id_shipment = (int) BimpTools::getPostFieldValue('id_shipment', 0);
+
+        $lines = explode(',', BimpTools::getPostFieldValue('shipment_lines_list', ''));
+
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>N° ligne</th>';
+        $html .= '<th>Libellé</th>';
+        $html .= '<th>Qté expédition</th>';
+        $html .= '<th>Grouper les articles</th>';
+        $html .= '</tr>';
+
+        foreach ($lines as $id_line) {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
+
+            $product = null;
+
+            if ((int) $line->getData('type') === ObjectLine::LINE_PRODUCT) {
+                $product = $line->getProduct();
+            }
+
+            if ($line->isLoaded()) {
+                $html .= '<tr>';
+                $html .= '<td>';
+                $html .= $line->getData('position');
+                $html .= '</td>';
+                $html .= '<td>';
+                $html .= $line->displayLineData('desc');
+                $html .= '</td>';
+                $html .= '<td>';
+                $html .= $line->renderShipmentQtyInput($id_shipment);
+                $html .= '</td>';
+                $html .= '<td>';
+
+                if (BimpObject::objectLoaded($product)) {
+                    if ((int) $product->getData('fk_product_type') === 0 && !$product->isSerialisable()) {
+                        $line_shipments = $line->getData('shipments');
+                        if (isset($line_shipments[$id_shipment]['group_articles'])) {
+                            $value = (int) $line_shipments[$id_shipment]['group_articles'];
+                        } else {
+                            $value = 0;
+                        }
+                        $html .= BimpInput::renderInput('toggle', 'group_articles', $value);
+                    }
+                }
+
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+
+
+            if (BimpObject::objectLoaded($product)) {
+                if ($product->isSerialisable()) {
+                    $html .= '<tr>';
+                    $html .= '<td colspan="3">';
+                    $html .= '<div style="display: inline-block; font-weight: bold">Equipement: </div>';
+                    $html .= '<div style="display: inline-block">';
+                    $html .= $line->renderShipmentEquipmentsInput($id_shipment);
+                    $html .= '</div>';
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+            }
+        }
+
+        $html .= '</thead>';
+        $html .= '</table>';
+
+        return $html;
+    }
+
     // Traitements:
+
+    public function createReservations()
+    {
+        $errors = array();
+
+        if ($this->isLoaded()) {
+            $lines = $this->getChildrenObjects('lines');
+
+            foreach ($lines as $line) {
+                $errors = array_merge($errors, $line->createReservation());
+            }
+        } else {
+            $errors[] = 'ID de la commande absent';
+        }
+
+        return $errors;
+    }
 
     public function addOrderLine($id_product, $qty = 1, $desc = '', $id_fournisseur_price = 0, $remise_percent = 0, $date_start = '', $date_end = '')
     {
@@ -635,7 +775,7 @@ class Bimp_Commande extends BimpComm
                 $shipments_ids = array($shipments_ids);
             }
             foreach ($shipments_ids as $id_shipment) {
-                $shipment = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_CommandeShipment', (int) $id_shipment);
+                $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_shipment);
                 if (!BimpObject::objectLoaded($shipment)) {
                     $errors[] = 'Expédition d\'ID ' . $id_shipment . ' non trouvée';
                 } elseif ((int) $shipment->getData('id_facture')) {
@@ -942,6 +1082,8 @@ class Bimp_Commande extends BimpComm
 
     public function checkIntegrity()
     {
+        return array();
+
         $errors = array();
         if ($this->isLoaded() && $this->dol_object->statut > 0) {
             $nCommandeProducts = 0;
@@ -1182,7 +1324,7 @@ class Bimp_Commande extends BimpComm
                 $this->dol_object->generateDocument($this->getModelPdf(), $langs);
             }
         } else {
-            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings));
         }
 
         return array(
@@ -1226,6 +1368,104 @@ class Bimp_Commande extends BimpComm
             'errors'           => $errors,
             'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
+        );
+    }
+
+    public function actionLinesShipmentQties($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $id_shipment = (isset($data['id_shipment']) ? (int) $data['id_shipment'] : 0);
+        $lines = (isset($data['lines']) ? $data['lines'] : array());
+
+        if (!$id_shipment) {
+            $errors[] = 'ID de l\'expédition absent';
+        }
+
+        if (!is_array($lines) || empty($lines)) {
+            $errors[] = 'Aucune ligne de commande spécifiée';
+        }
+
+        if (!count($errors)) {
+            $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', $id_shipment);
+            if (!BimpObject::objectLoaded($shipment)) {
+                $errors[] = 'L\'expédition d\'ID ' . $id_shipment . ' n\'existe pas';
+            } else {
+                if ((int) $shipment->getData('status') !== BL_CommandeShipment::BLCS_BROUILLON) {
+                    $errors[] = 'L\'expédition sélectionnée ne peut pas être modifiée car elle n\'a plus le statut "brouillon"';
+                } elseif ((int) $shipment->getData('id_commande_client') !== (int) $this->id) {
+                    $errors[] = 'L\'expédition sélectionnée n\'appartient pas à cette commande';
+                } else {
+                    $success = 'Ajouts à l\'expédition n°' . $shipment->getData('num_livraison') . ' effectués avec succès';
+                    foreach ($lines as $line_data) {
+                        $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $line_data['id_line']);
+                        if (!BimpObject::objectLoaded($line)) {
+                            $errors[] = 'La ligne de commande d\'ID ' . $line_data['id_line'] . ' n\'existe pas';
+                        } else {
+                            $line_warnings = array();
+                            $equipments = array();
+                            $line_errors = $line->setShipmentData($shipment, $line_data, $line_warnings);
+
+                            if (count($line_warnings)) {
+                                $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n° ' . $line->getData('position') . ' (ID ' . $line->id . ')');
+                            }
+
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n° ' . $line->getData('position') . ' (ID ' . $line->id . ')');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSetLinesReservationsStatus($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Tous les nouveaux statuts ont été enregistrés avec succès';
+
+        $reservations = isset($data['reservations']) ? $data['reservations'] : array();
+        $status = isset($data['status']) ? (int) $data['status'] : null;
+
+        if (!is_array($reservations) || empty($reservations)) {
+            $errors[] = 'Aucun élément sélectionné';
+        } elseif (is_null($status)) {
+            $errors[] = 'Nouveau statut non spécifié';
+        } else {
+            foreach ($reservations as $id_reservation) {
+                $reservation = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', (int) $id_reservation);
+                if (!BimpObject::objectLoaded($reservation)) {
+                    $warnings[] = 'La réservation d\'ID ' . $id_reservation . ' n\'existe pas';
+                } else {
+                    $line = $reservation->getChildObject('commande_client_line');
+
+                    if (!BimpObject::objectLoaded($line)) {
+                        $warnings[] = 'La réservation d\'ID ' . $id_reservation . ' n\'est pas associée à une ligne de commande valide';
+                    } else {
+                        $res_errors = $reservation->setNewStatus($status);
+
+                        if (count($res_errors)) {
+                            $title = 'Ligne n° ' . $line->getData('position') . ': ';
+                            $title .= 'statut "' . BR_Reservation::$status_list[(int) $reservation->getData('status')]['label'] . '"';
+                            $warnings[] = BimpTools::getMsgFromArray($res_errors, $title);
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
         );
     }
 

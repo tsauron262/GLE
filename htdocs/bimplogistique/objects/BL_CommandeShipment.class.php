@@ -1,18 +1,18 @@
 <?php
 
-class BR_CommandeShipment extends BimpObject
+class Bl_CommandeShipment extends BimpObject
 {
 
-    const BRCS_BROUILLON = 1;
-    const BRCS_EXPEDIEE = 2;
-    const BRCS_ANNULEE = 3;
-    const BRCS_VEROUILLEE = 4;
+    const BLCS_BROUILLON = 1;
+    const BLCS_EXPEDIEE = 2;
+    const BLCS_ANNULEE = 3;
+    const BLCS_VEROUILLEE = 4;
 
     public static $status_list = array(
-        self::BRCS_BROUILLON  => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
-        self::BRCS_EXPEDIEE   => array('label' => 'Expédiée', 'icon' => 'check', 'classes' => array('success')),
-        self::BRCS_ANNULEE    => array('label' => 'Annulée', 'icon' => 'times', 'classes' => array('danger')),
-        self::BRCS_VEROUILLEE => array('label' => 'Vérouillée', 'icon' => 'lock', 'classes' => array('important'))
+        self::BLCS_BROUILLON  => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
+        self::BLCS_EXPEDIEE   => array('label' => 'Expédiée', 'icon' => 'check', 'classes' => array('success')),
+        self::BLCS_ANNULEE    => array('label' => 'Annulée', 'icon' => 'times', 'classes' => array('danger')),
+        self::BLCS_VEROUILLEE => array('label' => 'Vérouillée', 'icon' => 'lock', 'classes' => array('important'))
     );
     public static $signed_values = array(
         0 => array('label' => 'NON', 'classes' => array('danger')),
@@ -888,7 +888,7 @@ class BR_CommandeShipment extends BimpObject
             $errors[] = 'Aucun expédition sélectionnées';
         } else {
             foreach ($data['id_objects'] as $id_shipment) {
-                $shipment = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_CommandeShipment', (int) $id_shipment);
+                $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_shipment);
                 if (!$shipment->isLoaded()) {
                     $errors[] = 'L\'expédition d\'ID ' . $id_shipment . ' n\'existe pas';
                 } else {

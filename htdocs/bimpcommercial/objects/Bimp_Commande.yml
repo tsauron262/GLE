@@ -51,16 +51,23 @@ objects:
         list: 
             title: Services
             filters: 
-                type: 2
+                type: 2  
                 
+    shipment: 
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimplogistique
+                name: BL_CommandeShipment
                 
     shipments: 
         relation: hasMany
         delete: 0
         instance: 
             bimp_object: 
-                module: bimpreservation
-                name: BR_CommandeShipment
+                module: bimplogistique
+                name: BL_CommandeShipment
                 
     fournisseur_price: 
         relation: none
@@ -147,6 +154,11 @@ fields:
     date_cloture: 
         label: Fermée le
         type: datetime
+    
+    fk_user_author:
+        label: Créée par
+        type: int
+        default_value: 0
         
     fk_user_modif: 
         label: Dernière modification par
@@ -227,7 +239,15 @@ fields_tables:
             - field: total_ht
             - field: tva
             - field: total_ttc
-                  
+          
+views: 
+    default: 
+        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile
+    content: 
+        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile
+    full: 
+        objects_change_reload: Bimp_CommandeLine,ObjectLineRemise,BimpFile
+        
 forms: 
     default: 
         msgs:
@@ -439,6 +459,36 @@ forms:
                 field: date_livraison
             6: 
                 field: fk_availability
+                
+    shipment: 
+        title: Expédition
+        icon: fas_shipping-fast
+        rows: 
+            - custom: 1
+              label: Expédition
+              input_name: id_shipment
+              data_type: id_object
+              object: shipment
+              create_form: default
+              create_form_values: 
+                  fields: 
+                      id_commande_client: 
+                          field_value: id_obj
+              card: default
+              content: 
+                  callback: renderShipmentsInput
+            - custom: 1
+              label: Lignes
+              hidden: 1
+              input_name: shipment_lines_list
+              content: 
+                  callback: renderShipmentLinesListInput
+            - custom: 1
+              label: Quantités et équipements
+              input_name: shipment_lines
+              content: 
+                  callback: renderShipmentLinesInputs
+              depends_on: id_shipment,shipment_lines_list
                   
 lists_cols: 
     ef_type:

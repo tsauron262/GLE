@@ -1055,8 +1055,15 @@ function checkTextualInput($input, skip_min) {
                     value = value.replace(',', '.');
                     if (is_neg) {
                         if (unsigned || (parseFloat(min) >= 0)) {
-                            msg = 'Nombres négatifs interdits';
-                            break;
+                            if (min == 0) {
+                                msg = 'Min: 0';
+                                if (value !== '') {
+                                    value = '-' + value;
+                                }
+                            } else {
+                                msg = 'Nombres négatifs interdits';
+                                break;
+                            }
                         } else {
                             value = '-' + value;
                         }
@@ -1924,6 +1931,54 @@ function setInputsEvents($container) {
 
             $(this).data('input_choices_events_init', 1);
         }
+    });
+    $container.find('input.total_max').each(function () {
+        $(this).change(function () {
+            var $input = $(this);
+            var total_max_value = $input.data('total_max_value');
+            var inputs_class = $input.data('total_max_inputs_class');
+
+            if (typeof (total_max_value) !== 'undefined' && typeof (inputs_class) !== 'undefined') {
+                total_max_value = parseFloat(total_max_value);
+                if (!isNaN(total_max_value) && inputs_class !== '') {
+                    var $inputsContainer = $input.findParentByClass(inputs_class + '_container');
+                    if ($.isOk($inputsContainer)) {
+                        var total_set = 0;
+                        var $inputs = $inputsContainer.find('input.' + inputs_class);
+                        $inputs.each(function () {
+                            var val = parseFloat($(this).val());
+                            if (!isNaN(val)) {
+                                total_set += val;
+                            }
+                        });
+
+                        if (total_set > total_max_value) {
+                            var diff = total_set - total_max_value;
+                            var cur_val = parseFloat($input.val());
+                            if (isNaN(cur_val)) {
+                                cur_val = 0;
+                            }
+                            cur_val -= diff;
+                            $input.val(cur_val).change();
+                        } else {
+                            var remain = total_max_value - total_set;
+                            $inputs.each(function () {
+                                var val = parseFloat($(this).val());
+                                if (isNaN(val)) {
+                                    val = 0;
+                                }
+                                var max = remain + val;
+                                $(this).data('max', max);
+                                var $label = $(this).parent().find('.max_label');
+                                if ($label.length) {
+                                    $label.text('Max: ' + max);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+        });
     });
 }
 

@@ -21,25 +21,25 @@
 include_once DOL_DOCUMENT_ROOT . '/core/triggers/dolibarrtriggers.class.php';
 include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.class.php';
 
-
 /**
  *  Class of triggers for validateorder module
  */
-class Interfacevalidate extends DolibarrTriggers {
+class Interfacevalidate extends DolibarrTriggers
+{
 
-    public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
+    public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
+    {
         global $conf, $user;
-        
-        if($action == 'ORDER_VALIDATE') {
-           
+
+        if ($action == 'ORDER_VALIDATE') {
+            
         }
-        
-        if($action == 'PROPAL_VALIDATE') {
-           $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $object->id);
-           $bimp_object->dol_object->statut = 0;
+
+        if ($action == 'PROPAL_VALIDATE') {
+            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $object->id);
+            $bimp_object->dol_object->statut = 0;
             $bimp_object->checkLines();
         }
         return 0;
     }
-
 }

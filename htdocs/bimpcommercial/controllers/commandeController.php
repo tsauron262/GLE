@@ -200,7 +200,7 @@ class commandeController extends BimpCommController
 //            $html .= '</div>';
 //        }
 //
-//        $shipment = BimpObject::getInstance($this->module, 'BR_CommandeShipment');
+//        $shipment = BimpObject::getInstance($this->module, 'BL_CommandeShipment');
 //        $list = new BC_ListTable($shipment, 'commandes', 1, (int) $commande->id, 'Liste des expéditions', 'sign-out');
 ////        $list->addFieldFilterValue('id_commande_client', (int) $commande->id);
 //        $html .= $list->renderHtml();
@@ -241,7 +241,7 @@ class commandeController extends BimpCommController
 //        $list->addObjectAssociationFilter($commande, $commande->id, 'avoirs');
 //        $list->addObjectChangeReload('BR_ReservationShipment');
 //        $list->addObjectChangeReload('BR_ServiceShipment');
-//        $list->addObjectChangeReload('BR_CommandeShipment');
+//        $list->addObjectChangeReload('BL_CommandeShipment');
 //        $list->addObjectChangeReload('BR_Reservation');
 //        $list->addObjectChangeReload('BR_OrderLine');
 //
@@ -260,7 +260,7 @@ class commandeController extends BimpCommController
 //        if (BimpObject::objectLoaded($facture)) {
 //            $ref = $facture->getData('facnumber');
 //            $label = '';
-//            $shipment = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
+//            $shipment = BimpObject::getInstance('bimpreservation', 'BL_CommandeShipment');
 //            if (count($shipment->getList(array(
 //                                'id_commande_client' => (int) $commande->id,
 //                                'id_facture'         => array(

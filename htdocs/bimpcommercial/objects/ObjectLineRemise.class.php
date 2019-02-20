@@ -12,7 +12,7 @@ class ObjectLineRemise extends BimpObject
     {
         $parent = $this->getParentInstance();
         if (BimpObject::objectLoaded($parent)) {
-            return (int) $parent->isEditable();
+            return (int) $parent->isRemiseEditable();
         }
 
         return 0;

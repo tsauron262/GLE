@@ -86,15 +86,15 @@ div.tabBar {
 .tabBar #controllerTabContentContainer {
     margin-left: -15px;
     margin-right: -15px;
-    
+
     margin-top: -16px;
-    
+
     padding: 5px;
 }
 
 .tabBarWithBottom #controllerTabContentContainer {
-    margin-bottom: -29px;
-    
+    margin-bottom: -23px;
+
     & + * {
         margin-top: 39px;
     }
@@ -172,6 +172,10 @@ body.has_fullscreen {
 
 div.alert {
     margin: 10px 0;
+
+    ul {
+        padding-left: 15px;
+    }
 }
 
 .date, .time, .datetime {
@@ -361,6 +365,47 @@ i.iconRight {
     }
 }
 
+.smallActionsContainer {
+    margin: 5px 0;
+    &,
+    &.align-left {
+        text-align: left;
+        .small-action {
+            margin-right: 12px;
+        }        
+    }
+    &.align-right {
+        .small-action {
+            margin-left: 12px;
+        }        
+    }
+    &.align-center {
+        .small-action {
+            margin: 0 12px;
+        }        
+    }
+}
+
+.small-action {
+    @include transition(all 0.3s ease);
+    display: inline-block;
+    font-weight: normal;
+    color: #787878;
+    font-size: 11px;
+    cursor: pointer;
+
+    &:hover {
+        color: $primary;
+    }
+
+    i.iconLeft {
+        margin-right: 6px;
+    }
+
+    i.iconRight {
+        margin-left: 6px;
+    }
+}
 /*Panels*/
 
 .panel {

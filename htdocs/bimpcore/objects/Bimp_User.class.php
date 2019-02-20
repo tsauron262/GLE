@@ -8,6 +8,10 @@ class Bimp_User extends BimpObject
         'man'   => 'Homme',
         'woman' => 'Femme'
     );
+    
+    public function getName($withGeneric = true) {
+        return $this->getInstanceName();
+    }
 
     // Getters: 
 

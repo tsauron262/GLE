@@ -460,6 +460,7 @@ forms:
               label: Montant devis
               content: 
                   callback: displayFactureAmountToPay
+              input_name: inut
             
     resolution: 
         rows: 
@@ -482,6 +483,7 @@ forms:
               input_name: send_msg
             - custom: 1
               label: Montant facture
+              input_name: inut
               content: 
                   callback: displayFactureAmountToPay
               
@@ -725,6 +727,9 @@ lists_cols:
         field: diagnostic
     resolution:
         field: resolution
+    propal:
+        field: id_propal
+        display: nom_url
                         
 filters_panels: 
     default: 

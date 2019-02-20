@@ -44,6 +44,9 @@ class Interfacecreditsafe extends DolibarrTriggers {
         $soc = new Societe($this->db);
         $soc->fetch($object->socid);
         
+        if(isset($object->array_options) && isset($object->array_options['options_type']) && $object->array_options['options_type'] == "S")
+            return true;
+        
         $code = ($soc->idprof1 != "" ? $soc->idprof1 : $soc->idprof2);
         if(strlen($code) > 5)
             return 1;

@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Commande extends BimpComm
 {
 
-    public static $comm_type = 'commande';
+    public static $dol_module = 'commande';
     public static $email_type = 'order_send';
     public static $status_list = array(
         -3 => array('label' => 'Stock insuffisant', 'icon' => 'exclamation-triangle', 'classes' => array('warning')),

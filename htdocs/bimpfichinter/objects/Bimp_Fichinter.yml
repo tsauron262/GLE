@@ -1,0 +1,416 @@
+dol_object: 
+    instance: 
+#        dol_object: user
+        dol_object: synopsisfichinter
+        
+table: synopsis_fichinter
+primary: rowid
+#controller: fichinter
+list_page_url:
+    controller: index
+header_list_name: default
+icon: fas_ambulance
+
+labels: 
+    name: Fiche d'intervention
+    is_female: 1
+    
+   
+     
+objects:  
+    lines: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpfichinter
+                name: Bimp_Fichinterdet         
+    commande: 
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_Commande
+                
+    propal: 
+        instance: 
+            bimp_object: 
+                module: bimpsupport
+                name: BS_SavPropal
+    contrat:
+        card: 
+            title: 
+                object_prop: ref
+            view_btn: 1 
+            
+    
+                
+fields: 
+    description:
+        label: Description
+        type: text
+    fk_soc:
+        label: Client
+        type: id_object
+        object: client
+        create_form: client_light
+        input: 
+            type: search_societe
+            societe_type: customer
+            help: Entrez le nom ou la référence d'un client pour effectuer une recherche
+        search:
+            input: 
+                type: search_societe
+                societe_type: customer 
+    fk_commande: 
+        label: Commande
+        object: commande
+        type: id_object
+    ref:
+        label: Ref
+        type: string
+    model_pdf:
+        label: Model PDF
+        type: string
+    fk_contrat:
+        label: Contrat
+        type: id_object
+        object: contrat
+        input: 
+            type: search_list
+            search_list:
+                table: contrat
+                field_return_value: a.rowid
+                field_return_label: a.ref
+                join: societe s
+                join_on: a.fk_soc s.rowid
+                join_return_label: s.nom
+                filters: 
+                    callback: getContratInputFilters
+                options:    
+                    default:
+                        label: Recherche par client
+                        fields_search: s.nom,s.code_client
+                        join: societe s
+                        join_on: a.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez le nom ou le code d'un client
+                    by_ref:
+                        label: Recherche par référence contrat
+                        fields_search: a.ref,a.rowid
+                        join: societe s
+                        join_on: a.fk_soc = s.rowid
+                        join_return_label: s.nom
+                        help: Entrez la référence ou l'ID d'un contrat
+    fk_statut:
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        
+    datei:
+        label: Date d'intervention
+        type: date
+    date_valid:
+        label: Date de validation
+        type: date
+    fk_user_author:
+        label: Intervenant
+        type: id_object
+        object: user
+        input: 
+            type: search_user
+#    fk_user_modif:
+#        label: User modif
+#        type: id_object
+#        object: user
+#        search:
+#            input: 
+#                type: search_user
+    fk_user_valid:
+        label: Valideur
+        type: id_object
+        object: user
+        search:
+            input: 
+                type: search_user
+                
+    duree:
+        label: Durée
+        type: time
+        
+    note_public:
+        label: Note Public
+    note_private:
+        label: Note Privée
+    total_ht:
+        label: Total Ht
+        type: money
+    total_tva:
+        label: Total Tva
+        type: money
+    total_ttc:
+        label: Total Ttc
+        type: money
+    natureInter:
+        label: Nature de l'inter
+        type: int
+        values: 
+            array: nature_list
+    extra35:
+        label: Type d'inter
+        type: int
+        values: 
+            array: type_list
+    extra17:
+        label: Terminée
+        type: bool
+    extra18:
+        label: Date du prochain RDV
+        type: date
+    extra24:
+        label: Heure d'arrivé AM
+        type: int
+    extra26:
+        label: Heure de départ AM
+        type: int
+    extra25:
+        label: Heure d'arrivé PM
+        type: int
+    extra27:
+        label: Heure de départ PM
+        type: int
+# fields manquant :
+#    fk_projet
+#    entity
+#    tms
+#    datec
+#    dateo
+#    datee
+#    datet
+#    extraparams
+#    ref_ext
+#    last_main_doc
+#    Import_key
+        
+
+        
+forms:
+    default: 
+        rows:
+            - field: fk_soc
+            - field: description
+            - field: fk_contrat
+            - field: fk_commande
+            - field: fk_statut
+            - field: note_public
+            - field: note_private
+            - field: extra35
+            - field: natureInter
+    
+        
+filters_panels: 
+    default: 
+        filters: 
+            10:
+                field: fk_statut
+            20: 
+                field: ref
+            21: 
+                field: fk_commande
+            210: 
+                field: fk_contrat
+            30: 
+                field: datei
+            31: 
+                field: date_valid
+            23: 
+                field: total_ht
+            24: 
+                field: total_tva
+            25: 
+                field: total_ttc
+            26: 
+                field: fk_user_author
+            
+lists_cols: 
+    id: 
+        field: id
+    fk_commande:
+        field: fk_commande
+        display: nom_url
+    ref:
+        field: ref
+    fk_contrat:
+        field: fk_contrat
+        display: nom_url
+    fk_soc:
+        field: fk_soc
+        display: nom_url
+    datei:
+        field: datei
+    date_valid:
+        field: date_valid
+    fk_user_author:
+        field: fk_user_author
+        display: nom_url
+    fk_user_modif:
+        field: fk_user_modif
+        display: nom_url
+    fk_user_valid:
+        field: fk_user_valid
+        display: nom_url
+    fk_statut:
+        field: fk_statut
+    duree:
+        field: duree
+    description:
+        field: description
+    note_public:
+        field: note_public
+    note_private:
+        field: note_private
+    total_ht:
+        field: total_ht
+    total_tva:
+        field: total_tva
+    total_ttc:
+        field: total_ttc
+    natureInter:
+        field: natureInter
+    typeInter:
+        field: extra35
+    commercial: 
+        label: Commercial
+        value: 
+            callback: displayCommercial
+        search: 
+            input: 
+                type: search_user
+                
+lists:
+    default: 
+        checkboxes: 1
+        configurable: 1
+        sort_field: id
+        sort_way: desc
+        n: 25
+        delete_btn: 0
+        modal_view: default
+        filters_panel: default
+        page_btn: 1
+        edit_btn: 1
+        cols:
+            ref:
+            fk_soc:
+            fk_commande:
+            fk_contrat:
+            datei:
+            date_valid:
+            fk_user_author:
+            fk_statut:
+            duree:
+            total_ht:
+            natureInter:
+            typeInter:
+            commercial:
+                
+fields_tables: 
+    infos:
+        footer_extra_btn: 
+              callback: getActionsButtons
+        title: Infos FI
+        icon: id-card
+        rows: 
+            - field: ref 
+            - field: di
+            - field: fk_statut 
+            - field: description 
+            - field: natureInter
+              edit: 1
+            - field: extra35
+              edit: 1
+            - field: note_public
+            - field: note_private
+            - field: extra17
+            - field: extra18
+    horraire:
+        title: Horraire
+        icon: fas_calendar-check
+        rows: 
+            - field: datei 
+              edit: 1
+            - field: date_valid 
+            - field: duree 
+            - field: extra24
+              edit: 1
+            - field: extra26
+            - field: extra25
+            - field: extra27
+    lien:
+        title: Objets liées
+        icon: link
+        rows:
+            - field: fk_soc 
+              display: nom_url
+            - field: fk_commande
+              display: nom_url
+            - field: fk_contrat 
+              display: nom_url
+            - field: fk_user_author
+              display: nom_url 
+    price:
+        title: Prix
+        icon: money
+        rows:
+            - field: total_ht 
+            - field: total_tva 
+            - field: total_ttc 
+            
+            
+        
+views: 
+    default: 
+        objects_change_reload: Bimp_Fichinterdet
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: infos
+            
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: horraire
+            
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: lien
+            
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: price
+            - cols: 
+                - type: list
+                  list: 
+                      name: default
+                      children: lines
+                      title: Lignes
+                      
+                     
+        
+cards:
+    default: 
+        type: user_card
+        
+

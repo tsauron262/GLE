@@ -3,6 +3,7 @@
     <head>
         <meta charset="UTF-8">		
         <title>Vérification du code</title>
+        <link rel="shortcut icon" type="image/x-icon" href="/bimp8/theme/eldy/img/favicon.ico"/>
         <link rel="stylesheet" href="<?= DOL_URL_ROOT . '/bimpsecurlogin/views/css/codeForm.css' ?>">
         <script type="text/javascript" src=" <?= DOL_URL_ROOT . '/includes/jquery/js/jquery.min.js?layout=classic&version=8.0.3' ?>"></script>
         <script type="text/javascript" src="<?= DOL_URL_ROOT . '/bimpsecurlogin/views/js/codeForm.js'?>" ></script>
@@ -19,7 +20,7 @@
                     <input type="number" name="sms_code_4" maxLength="1" size="1" min="0" max="9" pattern="[0-9]{1}" />
                     <br />
 		    <button class='btn'>
-			<span>Envoyé</span>
+			<span>Valider</span>
                     </button>
 		</form>
                 <form>

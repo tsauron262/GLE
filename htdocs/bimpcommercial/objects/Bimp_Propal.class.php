@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Propal extends BimpComm
 {
 
-    public static $comm_type = 'propal';
+    public static $dol_module = 'propal';
     public static $email_type = 'propal_send';
     public $id_sav = null;
     public $sav = null;
@@ -399,7 +399,7 @@ class Bimp_Propal extends BimpComm
         $ref = dol_sanitizeFileName($this->getRef());
         $pdf_file = $pdf_dir . '/' . $ref . '/' . $ref . '.pdf';
         if (file_exists($pdf_file)) {
-            $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
+            $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
             $onclick = 'window.open(\'' . $url . '\');';
 
             $html .= BimpRender::renderButton(array(

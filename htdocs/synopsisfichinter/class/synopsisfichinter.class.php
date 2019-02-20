@@ -208,7 +208,7 @@ class Synopsisfichinter extends Fichinter {
 
 
         $sql2 = "UPDATE " . MAIN_DB_PREFIX . "synopsisfichinter SET ";
-        $sql2 .= ", natureInter = '" . $this->natureInter . "'";
+        $sql2 .= " natureInter = '" . $this->natureInter . "'";
         $sql2 .= " WHERE rowid = " . $this->id;
 
         dol_syslog("Fichinter::update sql=" . $sql);
@@ -1045,7 +1045,12 @@ class SynopsisfichinterLigne extends FichinterLigne{
             return -1;
         }
     }
-
+    
+    
+    
+    function create($user, $noTrigger = 0){
+        return $this->insert($user, $noTrigger);
+    }
     /**
      *      \brief         Insere l'objet ligne d'intervention en base
      *        \return        int        <0 si ko, >0 si ok
@@ -1090,7 +1095,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
         $sql.= ')';
         $sql.= " VALUES (" . $this->fk_fichinter . ",";
         $sql.= " '" . addslashes($this->desc) . "',";
-        $sql.= " '" . $this->datei . "',";
+        $sql.= " '" . $this->db->idate($this->datei) . "',";
         $sql.= " " . $this->duration . ",";
         $sql.= ' ' . $rangToUse;
         $sql.= ')';
@@ -1347,6 +1352,11 @@ class SynopsisfichinterLigne extends FichinterLigne{
      *      \brief      Supprime une ligne d'intervention
      *      \return     int         >0 si ok, <0 si ko
      */
+    function delete(){
+        return $this->delete_line();
+    }
+    
+    
     function delete_line() {
         global $user, $langs, $conf;
         if ($this->statut == 0) {

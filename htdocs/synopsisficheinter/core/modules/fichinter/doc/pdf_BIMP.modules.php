@@ -3,6 +3,8 @@
 require_once(DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php');
 require_once(DOL_DOCUMENT_ROOT . '/synopsisfichinter/class/synopsisfichinter.class.php');
 
+require_once(DOL_DOCUMENT_ROOT . '/core/modules/fichinter/modules_fichinter.php');
+
 class pdf_bimp extends ModelePDFFicheinter {
 
     /**
@@ -767,6 +769,8 @@ class pdf_bimp extends ModelePDFFicheinter {
                 $pdf->Close();
 
                 $pdf->Output($file, 'f');
+                
+                $this->result["fullpath"] = $file;
 
 //                $langs->setPhpLang();    // On restaure langue session
                 return 1;

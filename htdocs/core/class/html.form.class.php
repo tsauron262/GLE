@@ -1731,6 +1731,7 @@ class Form
 			{
 				$out.=' <input type="image" style="border: 0px;" src="'.img_picto($langs->trans("Remove"), 'delete', '', 0, 1).'" value="'.$userstatic->id.'" class="removedassigned" id="removedassigned_'.$userstatic->id.'" name="removedassigned_'.$userstatic->id.'">';
 			}
+			$out.=' '.($value['answer_status'] == -1?img_picto($langs->trans("Refused"), 'switch_off'):($value['answer_status'] == 1 ?img_picto($langs->trans("Accepted"), 'switch_on') : ($value['answer_status'] == -2 ?img_picto($langs->trans("deleted"), 'delete') : "")));
 			// Show my availability
 			if ($showproperties)
 			{

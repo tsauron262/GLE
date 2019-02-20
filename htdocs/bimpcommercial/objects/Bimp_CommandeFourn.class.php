@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
 class Bimp_CommandeFourn extends BimpComm
 {
 
-    public static $comm_type = 'commande_fournisseur';
+    public static $dol_module = 'commande_fournisseur';
     public static $email_type = 'order_supplier_send';
     public static $external_contact_type_required = false;
     public static $internal_contact_type_required = false;
@@ -603,7 +603,7 @@ class Bimp_CommandeFourn extends BimpComm
 //        $ref = dol_sanitizeFileName($this->getRef());
 //        $pdf_file = $pdf_dir . '/' . $ref . '/' . $ref . '.pdf';
 //        if (file_exists($pdf_file)) {
-//            $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
+//            $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
 //            $onclick = 'window.open(\'' . $url . '\');';
 //
 //            $html .= BimpRender::renderButton(array(

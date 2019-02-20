@@ -1,9 +1,10 @@
 <?php
 
-class BimpComm extends BimpObject
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/objects/BimpDolObject.class.php';
+
+class BimpComm extends BimpDolObject
 {
 
-    public static $comm_type = '';
     public static $email_type = '';
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
@@ -192,15 +193,6 @@ class BimpComm extends BimpObject
         }
 
         return $this->remise_globale_line_rate;
-    }
-
-    public function getModelPdf()
-    {
-        if ($this->field_exists('model_pdf')) {
-            return $this->getData('model_pdf');
-        }
-
-        return '';
     }
 
     public function getAddContactIdClient()
@@ -557,7 +549,7 @@ class BimpComm extends BimpObject
                 if (isset(static::$files_module_part)) {
                     $module_part = static::$files_module_part;
                 } else {
-                    $module_part = static::$comm_type;
+                    $module_part = static::$dol_module;
                 }
                 return DOL_URL_ROOT . '/document.php?modulepart=' . $module_part . '&file=' . htmlentities(dol_sanitizeFileName($this->getRef()) . '/' . $file_name);
             }
@@ -741,7 +733,7 @@ class BimpComm extends BimpObject
                 $html .= '</button>';
 
                 if ($display_generate) {
-                    $onclick = 'toggleElementDisplay($(this).parent().find(\'.' . static::$comm_type . 'PdfGenerateContainer\'), $(this));';
+                    $onclick = 'toggleElementDisplay($(this).parent().find(\'.' . static::$dol_module . 'PdfGenerateContainer\'), $(this));';
                     $html .= '<span class="btn btn-light-default open-close action-open bs-popover" onclick="' . $onclick . '"';
                     $html .= BimpRender::renderPopoverData('Re-générer le document', 'top', 'false');
                     $html .= '>';
@@ -753,11 +745,11 @@ class BimpComm extends BimpObject
             if ($display_generate) {
                 $models = $this->getModelsPdfArray();
                 if (count($models)) {
-                    $html .= '<div class="' . static::$comm_type . 'PdfGenerateContainer" style="' . ($file_url ? 'margin-top: 15px; display: none;' : '') . '">';
-                    $html .= BimpInput::renderInput('select', static::$comm_type . '_model_pdf', $this->getModelPdf(), array(
+                    $html .= '<div class="' . static::$dol_module . 'PdfGenerateContainer" style="' . ($file_url ? 'margin-top: 15px; display: none;' : '') . '">';
+                    $html .= BimpInput::renderInput('select', static::$dol_module . '_model_pdf', $this->getModelPdf(), array(
                                 'options' => $models
                     ));
-                    $onclick = 'var model = $(this).parent(\'.' . static::$comm_type . 'PdfGenerateContainer\').find(\'[name=' . static::$comm_type . '_model_pdf]\').val();setObjectAction($(this), ' . $this->getJsObjectData() . ', \'generatePdf\', {model: model}, null, null, null, null);';
+                    $onclick = 'var model = $(this).parent(\'.' . static::$dol_module . 'PdfGenerateContainer\').find(\'[name=' . static::$dol_module . '_model_pdf]\').val();setObjectAction($(this), ' . $this->getJsObjectData() . ', \'generatePdf\', {model: model}, null, null, null, null);';
                     $html .= '<button type="button" onclick="' . $onclick . '" class="btn btn-default">';
                     $html .= '<i class="fas fa5-sync iconLeft"></i>Générer';
                     $html .= '</button>';
@@ -889,7 +881,7 @@ class BimpComm extends BimpObject
 
 
             if (count($files_list)) {
-                $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . dol_sanitizeFileName($this->getRef()) . urlencode('/');
+                $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . dol_sanitizeFileName($this->getRef()) . urlencode('/');
                 foreach ($files_list as $file) {
                     $html .= '<tr>';
 
@@ -961,7 +953,7 @@ class BimpComm extends BimpObject
 
             BimpTools::loadDolClass('comm/action', 'actioncomm', 'ActionComm');
 
-            $type_element = static::$comm_type;
+            $type_element = static::$dol_module;
             $fk_soc = (int) $this->getData('fk_soc');
             switch ($type_element) {
                 case 'facture':
@@ -1670,38 +1662,6 @@ class BimpComm extends BimpObject
 
     // Actions:
 
-    public function actionGeneratePdf($data, &$success, $errors = array(), $warnings = array())
-    {
-        $success = 'PDF généré avec succès';
-
-        if ($this->isLoaded()) {
-            if (!$this->isDolObject() || !method_exists($this->dol_object, 'generateDocument')) {
-                $errors[] = 'Cette fonction n\'est pas disponible pour ' . $this->getLabel('the_plur');
-            } else {
-                if (!isset($data['model']) || !$data['model']) {
-                    $data['model'] = $this->getModelPdf();
-                }
-                global $langs;
-                $this->dol_object->error = '';
-                $this->dol_object->errors = array();
-                if ($this->dol_object->generateDocument($data['model'], $langs) <= 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du PDF');
-                } else {
-                    $ref = dol_sanitizeFileName($this->getRef());
-                    $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . $ref . '/' . $ref . '.pdf';
-                    $success_callback = 'window.open(\'' . $url . '\');';
-                }
-            }
-        } else {
-            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-        }
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
 
     public function actionValidate($data, &$success)
     {

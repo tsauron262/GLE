@@ -1,0 +1,194 @@
+dol_object: 
+    instance: 
+        dol_object: 
+            module: synopsisfichinter
+            file: synopsisfichinter
+            class: SynopsisfichinterLigne
+        
+parent_module: bimpfichinter
+parent_object: Bimp_Fichinter
+parent_id_property: fk_fichinter
+        
+table: synopsis_fichinterdet
+primary: rowid
+
+labels: 
+    name: Ligne de fiche d'intervention
+    is_female: 1
+    
+   
+     
+objects:    
+    product: 
+        instance: 
+            id_object: 
+                field_value: unset
+                prop: fk_depProduct
+    
+            
+    
+                
+fields: 
+    fk_fichinter: 
+        label: Objet parent
+        type: id_parent
+        required: 1
+    rowid:
+        label: Id
+        type: int
+    fk_typeinterv:
+        label: Nature de l'inter
+        type: int
+    datei:
+        label: Date
+        type: date
+    desc:
+        label: Description
+        type: text
+    duration:
+        label: Durée
+        type: int
+    fk_typeinterv:
+        label: typoe interv
+        type: int
+        values: 
+            array: typeinter_list
+    fk_depProduct:
+        label: Prod
+        type: id_object
+        object: product
+    tx_tva:
+        label: TVA
+        type: float
+    pu_ht:
+        label: Prix Ht
+        type: money
+    qte:
+        label: Quantité
+        type: int
+    total_ht:
+        label: Total Ht
+        type: money
+    total_tva:
+        label: Total Tva
+        type: money
+    total_ttc:
+        label: Total Ttc
+        type: money
+    isForfait:
+        label: Forfait
+        type: bool
+#        Fields manquant:
+#    rang
+#    fk_commandedet
+#    fk_contratdet
+    
+        
+
+        
+forms:
+    default: 
+        rows:
+            - field: datei
+            - field: desc
+            - field: qte
+            - field: fk_typeinterv
+            - field: duration
+            - field: tx_tva
+            - field: pu_ht
+            - field: isForfait
+    
+            
+lists_cols: 
+    fk_typeinterv: 
+        field: fk_typeinterv
+    datei:
+        field: datei
+    desc:
+        field: desc
+    fk_depProduct:
+        field: fk_depProduct
+        display: nom_url
+    duration:
+        field: duration
+    tx_tva:
+        field: tx_tva
+    pu_ht:
+        field: pu_ht
+        edit: 1
+    qte:
+        field: qte
+        edit: 1
+    total_ht:
+        field: total_ht
+    total_tva:
+        field: total_tva
+    total_ttc:
+        field: total_ttc
+    isForfait:
+        field: isForfait
+        edit: 1
+    rowid:
+        field: rowid
+                
+lists:
+    default: 
+        add_btn: 1
+        add_form_name: default
+        add_btn_label: Ajouter une ligne
+        update_btn: 1
+        checkboxes: 1
+        configurable: 1
+        sort_field: rowid
+        sort_way: desc
+        n: 25
+        delete_btn: 1
+        modal_view: default
+        page_btn: 1
+        edit_btn: 1
+        cols:
+            rowid:
+            fk_typeinterv:
+            datei:
+            desc:
+            fk_depProduct:
+            duration:
+            tx_tva:
+            pu_ht:
+            qte:
+            total_ht:
+            total_tva:
+            total_ttc:
+            isForfait:
+                
+fields_tables: 
+    infos:
+        title: Infos ligne FI
+        icon: id-card
+        rows: 
+            - field: duration 
+            - field: desc 
+            - field: total_ht 
+            - field: total_tva 
+            - field: total_ttc 
+            - field: natureInter
+            
+        
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 12
+                  col_md: 12
+                  col_sm: 12
+                  fields_table: 
+                      name: infos
+                      
+                     
+        
+cards:
+    default: 
+        type: default
+        
+

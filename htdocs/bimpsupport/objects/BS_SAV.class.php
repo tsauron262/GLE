@@ -2004,7 +2004,7 @@ class BS_SAV extends BimpObject
 
         //Perpignan demenagement
         if ($nomCentre == "Perpignan") {
-            $mail_msg .= "<br/><br/>Attention vottre SAV a déménagé il ce trouve désormais au 12 Avenue du Maréchal Leclerc.<br/>Nous sommes désormais ouvert le Lundi après-midi de 14h à 18h et du Mardi au Vendredi, le matin de 10h à 12h30 et l'après-midi de 14h à 18h.<br/>";
+            $mail_msg .= "<br/><br/>Attention votre SAV a déménagé il se trouve désormais au 12 Avenue du Maréchal Leclerc.<br/>Nous sommes ouvert le Lundi de 14h à 18h et du Mardi au Vendredi, de 10h à 12h30 et de 14h à 18h.<br/>";
         }
 
         if ($mail_msg) {

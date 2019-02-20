@@ -168,7 +168,6 @@ forms:
                       method: renderLineInput
                       params: 
                           - id_fourn_price
-              required: 1
               display_if: 
                   field_name: type
                   show_values: 1

@@ -9,6 +9,10 @@ $(function() {
         t = $(e.target),
         sib = t.next("input");
 
+        if(key == 13)
+            $('.btn').click();
+
+
         if (key != 9 && (key < 48 || key > 57)) {
             e.preventDefault();
             return false;
@@ -21,7 +25,11 @@ $(function() {
         if (!sib || !sib.length) {
             sib = body.find("input").eq(0);
         }
-        sib.select().focus();
+        
+        
+        var re = new RegExp("^[0-9]");
+        if(re.test(e.key)) 
+            sib.select().focus();
     }
 
     function onKeyDown(e) { 
@@ -42,4 +50,5 @@ $(function() {
         body.on("keyup", "input", goToNextInput);
         body.on("keydown", "input", onKeyDown);
         body.on("click", "input", onFocus);
+        $("input[name='sms_code_1'").trigger("click");
     });

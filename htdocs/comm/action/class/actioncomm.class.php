@@ -295,7 +295,7 @@ class ActionComm extends CommonObject
         
         /*Moddrsi*/
         if(!defined('USER_EXTERNE_ID'))
-            define('USER_EXTERNE_ID',  215);
+            define('USER_EXTERNE_ID',  326);
         if(count($this->userassigned)>1 && $this->userownerid != $user->id){//PLusieurs user et ce n'est pas l'orga qu'il la fait
             $ok = false;
             
@@ -307,10 +307,15 @@ class ActionComm extends CommonObject
             }
             
             if(!$ok){
-                $this->userassigned[USER_EXTERNE_ID] = array("id"=>USER_EXTERNE_ID);
+                $this->userassigned[USER_EXTERNE_ID] = array("id"=>USER_EXTERNE_ID, "answer_status" => 1);
+                $this->userownerid = USER_EXTERNE_ID;
                 $userownerid = USER_EXTERNE_ID;
             }
         }
+        if(isset($this->userassigned[$userownerid]))
+            $this->userassigned[$userownerid]['answer_status'] = 1;
+        
+        
         /*fmdodrsi*/
         
         

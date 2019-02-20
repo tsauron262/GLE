@@ -5,6 +5,7 @@ function runBimpTask()
     global $bimp_fixe_tabs, $user;
     $content = "";
     $alert = false;
+    $maxTaskView = 25;
 
     $task = BimpObject::getInstance('bimptask', 'BIMP_Task');
 
@@ -12,15 +13,18 @@ function runBimpTask()
             'operator' => '<',
             'value'    => 4
     )));
-    $i = 0;
+    $i = $j = 0;
     BIMP_Task::$nbNonLu = 0;
     BIMP_Task::$nbAlert = 0;
     foreach ($tasks as $taskData) {
         $task->fetch($taskData["id"]);
         if ($task->canView()) {
-            $content .= $task->renderLight();
-            $content .= "<br/>";
-            $i++;
+            if($j < $maxTaskView){
+                $content .= $task->renderLight();
+                $content .= "<br/>";
+                $i++;
+            }
+            $j++;
         }
     }
     $class = array();
@@ -44,15 +48,18 @@ function runBimpTask()
             'value'    => 4
     )));
 
-    $i2 = 0;
+    $i2 = $j2 = 0;
     BIMP_Task::$nbNonLu = 0;
     BIMP_Task::$nbAlert = 0;
     foreach ($tasks as $taskData) {
         $task->fetch($taskData["id"]);
         if ($task->canView()) {
-            $content2 .= $task->renderLight();
-            $content2 .= "<br/>";
-            $i2++;
+            if($j2 < $maxTaskView){
+                $content2 .= $task->renderLight();
+                $content2 .= "<br/>";
+                $i2++;
+            }
+            $j2++;
         }
     }
 
@@ -76,8 +83,8 @@ function runBimpTask()
 
 
     if ($i > 0)
-        $bimp_fixe_tabs->addTab("mYtask", "<span class='" . implode(" ", $class) . "' >" . $i . " tâche(s) en attente" . ($nonLu1 > 0 ? " <span class='red'>" . $nonLu1 . " message" . ($nonLu1 > 1 ? 's' : '') . " non lu" . ($nonLu1 > 1 ? 's' : '') . ".</span>" : "") . "</span>", $content);
+        $bimp_fixe_tabs->addTab("mYtask", "<span class='" . implode(" ", $class) . "' >" . $i . (($j != $i)? " / ".$j : "")." tâche(s) en attente" . ($nonLu1 > 0 ? " <span class='red'>" . $nonLu1 . " message" . ($nonLu1 > 1 ? 's' : '') . " non lu" . ($nonLu1 > 1 ? 's' : '') . ".</span>" : "") . "</span>", $content);
 
     if ($i2 > 0)
-        $bimp_fixe_tabs->addTab("taskAPersonne", "<span class='" . implode(" ", $class2) . "' >" . $i2 . " tâche" . ($i2 > 1 ? 's' : '') . " non attribuée" . ($i2 > 1 ? 's' : '') . ($nonLu2 > 0 ? " <span class='red'>" . $nonLu2 . " message" . ($nonLu2 > 1 ? 's' : '') . " non lu" . ($nonLu2 > 1 ? 's' : '') . ".</span>" : "") . "</span>", $content2);
+        $bimp_fixe_tabs->addTab("taskAPersonne", "<span class='" . implode(" ", $class2) . "' >" . $i2 .(($j2 != $i2)? " / ".$j2 : ""). " tâche" . ($i2 > 1 ? 's' : '') . " non attribuée" . ($i2 > 1 ? 's' : '') . ($nonLu2 > 0 ? " <span class='red'>" . $nonLu2 . " message" . ($nonLu2 > 1 ? 's' : '') . " non lu" . ($nonLu2 > 1 ? 's' : '') . ".</span>" : "") . "</span>", $content2);
 }

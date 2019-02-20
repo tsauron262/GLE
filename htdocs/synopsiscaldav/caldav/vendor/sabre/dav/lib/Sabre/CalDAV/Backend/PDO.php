@@ -64,7 +64,7 @@ class PDO extends AbstractBackend {
         '{http://apple.com/ns/ical/}calendar-order' => 'calendarorder',
         '{http://apple.com/ns/ical/}calendar-color' => 'calendarcolor',
     );
-    public $uriTest = "2f332e25-97d0-bc4b-b143-a4af33e58bd8"; //35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
+    public $uriTest = "BIMP-ERP-fgfjfhjfytcrt-2045804"; //35aef3ab-dd26-41b8-b361-f30dd6ff1bc4
 
     /**
      * Creates the backend
@@ -428,7 +428,7 @@ class PDO extends AbstractBackend {
                 $userT = new \User($db);
                 $userT->fetch($val['id']);
                 if ($userT->email != "")
-                    $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status'] == 1 ? 'ACCEPTED' : ($val['answer_status'] == -1 ? 'DECLINED' : 'NEEDS-ACTION'));
+                    $tabPartExtInt[] = $userT->email . "|" . ($val['answer_status'] == 1 ? 'ACCEPTED' : ($val['answer_status'] < 0 ? 'DECLINED' : 'NEEDS-ACTION'));
             }
         }
         if (count($tabPartExtInt) > 1) {
@@ -443,7 +443,8 @@ class PDO extends AbstractBackend {
                         $row['organisateur'] = $tmpMail;
 
                     if ($tmpMail == $row['organisateur']) {
-                        $extra = ";ROLE=CHAIR";
+//                        $extra = ";ROLE=CHAIR";
+                        $extra = ";ROLE=REQ-PARTICIPANT";
                         $tmpEtat = "ACCEPTED";
                     } else
                         $extra = ";ROLE=REQ-PARTICIPANT";
@@ -452,7 +453,15 @@ class PDO extends AbstractBackend {
                     $calendarData2[] = "ATTENDEE;CUTYPE=INDIVIDUAL;PARTSTAT=" . $tmpEtat . $extra . ":mailto:" . $tmpMail;
                 }
             //iciattendee 
-            $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
+//            $calendarData2[] = "ORGANIZER:mailto:" . $row['organisateur'];
+            $cnOrga = "INC";
+            $sql = $db->query("SELECT lastname, firstname FROM ".MAIN_DB_PREFIX."user WHERE email = '".$row['organisateur']."'");
+            if($db->num_rows($sql)>0){
+                $ln = $db->fetch_object($sql);
+                $cnOrga = $ln->lastname." ".$ln->firstname;
+            }
+                
+            $calendarData2[] = 'ORGANIZER;CN="'.$cnOrga.'":mailto:'.$row['organisateur'];
         }
 
         $action->fetch_optionals();
@@ -507,9 +516,22 @@ class PDO extends AbstractBackend {
             'calendardata' => $calData,
         );
 //        if(stripos($objectUri, $this->uriTest) > 0)
+                $this->logIcs("get", $objectUri, $return, $calendarId);
 //dol_syslog("GET OBJECT : ".$calendarId." ".$row["etag"]."   |   ".$objectUri."   |".print_r($return,1),3, 0, "_caldavLog");
 
         return $return;
+    }
+    
+    
+    function logIcs($action, $uri, $data, $idUser){
+        $dir = "/data2/tempics/";
+        if(is_dir($dir)){
+            $dir .= $uri."/";
+            if(!is_dir($dir))
+                mkdir($dir);
+            $objDateTime = new \DateTime('NOW');
+            file_put_contents($dir.substr($uri,30)."-".$objDateTime->format("Y-m-d H:i:s:u")."-".microtime()."-".$idUser."-".$action."-".substr(urlencode($_SERVER['HTTP_USER_AGENT']), 0, 20).".txt", print_r($data,1));
+        }
     }
 
     /**
@@ -529,13 +551,13 @@ class PDO extends AbstractBackend {
      * @return string|null
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData) {
-        $calendarData = str_replace("\x0A\x20", '', $calendarData);
-        $calendarData = str_replace("\r\n ", "", $calendarData);
+        $calendarData = $this->traiteCalendarData($calendarData);
 
 
 
-        if (stripos($objectUri, $this->uriTest) > 0)
-            dol_syslog("Create : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
+//        if (stripos($objectUri, $this->uriTest) > 0)
+                $this->logIcs("create", $objectUri, $calendarData, $calendarId);
+//            dol_syslog("Create : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 //        dol_syslog("deb".print_r($calendarData,1),3);
 //        $extraData = $this->getDenormalizedData($calendarData);
 //
@@ -635,9 +657,9 @@ class PDO extends AbstractBackend {
         }
     }
 
-    public function getUser($calendarId) {
-        global $USER_CONNECT;
-        if (isset($USER_CONNECT) && is_object($USER_CONNECT)) {
+    public function getUser($calendarId, $forceUserCalendar = false) {
+        global $USER_CONNECT, $db;
+        if (isset($USER_CONNECT) && is_object($USER_CONNECT) && !$forceUserCalendar) {
             $user = $USER_CONNECT;
         } else {
             $user = new \User($db);
@@ -669,7 +691,10 @@ class PDO extends AbstractBackend {
             if (stripos($nom, "DTSTAMP") !== false) {
                 $DTSTAMP = str_replace("DTSTAMP:", "", $ligne);
             }
-            if (stripos($ligne, "ATTENDEE") !== false || stripos($ligne, "CUTYPE") != false) {
+            if (stripos($nom, "LAST-MODIFIED") !== false) {
+                $last_modified = str_replace("LAST-MODIFIED:", "", $ligne);
+            }
+            if (stripos($ligne, "ATTENDEE") !== false || stripos($ligne, "CUTYPE") != false || stripos($nom, "ATTENDEE") != false) {
                 $stat = "NEEDS-ACTION";
                 if (preg_match("/^.*PARTSTAT=(.+);.+$/U", $ligne, $retour))
                     $stat = $retour[1];
@@ -744,7 +769,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
 
 
                 if ($organisateur == $mail) {
-                    $action->userdoneid = $ligne->rowid;
+//                    $action->userdoneid = $ligne->rowid;
                     $action->userownerid = $ligne->rowid;
                     $statut = "ACCEPTED";
                     $okOrga = true;
@@ -759,11 +784,11 @@ WHERE  `email` LIKE  '" . $mail . "'");
             }
         }
         if (!$okOrga) {
-            if (count($tabMail) > 1 || $organisateur != "") {
+            if (count($action->userassigned) > 1/* || $organisateur != ""*/) {
                 $action->userownerid = USER_EXTERNE_ID;
-                $action->userassigned = array(USER_EXTERNE_ID => array('id' => USER_EXTERNE_ID));
+                $action->userassigned[USER_EXTERNE_ID] = array('id' => USER_EXTERNE_ID);
                 if($organisateur == "")
-                    $organisateur = "gle_suivi@bimp.fr";
+                    $organisateur = "externe@bimp.fr";
             } elseif (isset($tabMail[0]))
                     $organisateur = $tabMail[0][0];
         }
@@ -780,12 +805,15 @@ WHERE  `email` LIKE  '" . $mail . "'");
             //dol_syslog("action ".$action->id." invit ext : ".print_r($tabMailInc,1),3);
             /* $req = "UPDATE " . MAIN_DB_PREFIX . "synopsiscaldav_event SET organisateur = '" . $organisateur . "', participentExt = '" . implode(",", $tabMailInc) . "'  ".($sequence > 0 ?", sequence = '" . $sequence . "'" : "")." WHERE fk_object = '" . $action->id . "'";
               $sql = $db->query($req); */
+            
+            if(!isset($last_modified) && isset($calendarData2['LAST-MODIFIED']))
+                $last_modified = $calendarData2['LAST-MODIFIED'];
 
-            if (!isset($calendarData2['LAST-MODIFIED']))// || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
-                $calendarData2['LAST-MODIFIED'] = $DTSTAMP;
+            if (!isset($last_modified))// || strtotime($calendarData2['LAST-MODIFIED']) < strtotime($DTSTAMP))
+                $last_modified = $DTSTAMP;
 
             //date_default_timezone_set("GMT");
-            $sql = "UPDATE `" . MAIN_DB_PREFIX . "actioncomm` SET " . (isset($calendarData2['CREATED']) ? "`datec` = '" . $db->idate(strtotime($calendarData2['CREATED'])) . "'," : "") . " `tms` = '" . $db->idate(strtotime($calendarData2['LAST-MODIFIED'])) . "' WHERE `id` = " . $action->id . ";";
+            $sql = "UPDATE `" . MAIN_DB_PREFIX . "actioncomm` SET " . (isset($calendarData2['CREATED']) ? "`datec` = '" . $db->idate(strtotime($calendarData2['CREATED'])) . "'," : "") . " `tms` = '" . $db->idate(strtotime($last_modified)) . "' WHERE `id` = " . $action->id . ";";
 
             $db->query($sql);
             //date_default_timezone_set("Europe/Paris");
@@ -822,14 +850,24 @@ WHERE  `email` LIKE  '" . $mail . "'");
             $infoEvent["rappel"] = 15;
         return 0;
     }
+    
+    public function traiteCalendarData($calendarData){
+        global $dataOrig, $dataOrig2, $dataOrig3;
+        $dataOrig = $calendarData;
+        $calendarData = str_replace("\x0D\x0A\x20", '', $calendarData);
+        
+        $calendarData = str_replace("\x0A\x20", '', $calendarData);
+        $dataOrig3 = $calendarData;
+        $calendarData = str_replace("\r\n ", "", $calendarData);
+        return $calendarData;
+    }
 
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
-        $calendarData = str_replace("\x0A\x20", '', $calendarData);
-        $calendarData = str_replace("\r\n ", "", $calendarData);
+        $calendarData = $this->traiteCalendarData($calendarData);
         
-        
-        if (stripos($objectUri, $this->uriTest) > 0)
-            dol_syslog("update : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
+//        if (stripos($objectUri, $this->uriTest) > 0)
+                $this->logIcs("update", $objectUri, $calendarData, $calendarId);
+//            dol_syslog("update : " . $calendarId . "    |   " . $objectUri . "   |" . print_r($calendarData, 1), 3, 0, "_caldavLog");
 
         $extraData = $this->getDenormalizedData($calendarData);
 
@@ -897,7 +935,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
 
             if ($action->update($user) < 1)
-                $this->forbiden("update.");
+                $this->forbiden("update. ".$action->error);
 
 
             $this->traiteParticipantAndTime($action, $calendarData2, $calendarId);
@@ -1093,6 +1131,7 @@ WHERE  `email` LIKE  '" . $mail . "'");
      * @return void
      */
     public function deleteCalendarObject($calendarId, $objectUri) {
+                $this->logIcs("delete", $objectUri, array(), $calendarId);
 
 //        $stmt = $this->pdo->prepare('DELETE FROM '.$this->calendarObjectTableName.' WHERE calendarid = ? AND uri = ?');
 //        $stmt->execute(array($calendarId,$objectUri));
@@ -1111,12 +1150,21 @@ WHERE  `email` LIKE  '" . $mail . "'");
             return null;
 
         global $db, $user;
-        $user = $this->getUser($calendarId);
+        $user = $this->getUser($calendarId, true);
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
         $action = new \ActionComm($db);
         $action->fetch($row['id']);
-        if ($action->delete() < 1)
-            $this->forbiden("delete.");
+        if($action->userownerid == $user->id || count($action->userassigned) == 1){
+            if ($action->delete() < 1)
+                $this->forbiden("delete.");
+        }
+        else{
+            if(isset($action->userassigned[$user->id])){
+                $action->userassigned[$user->id]['answer_status'] = -2;
+                $action->update($user);
+            }
+        }
+            
 //        $this->userIdCaldavPlus($calendarId);
     }
 

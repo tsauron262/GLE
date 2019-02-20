@@ -5,6 +5,11 @@ dol_object:
         
 table: synopsis_fichinter
 primary: rowid
+#controller: fichinter
+list_page_url:
+    controller: index
+header_list_name: default
+icon: fas_ambulance
 
 labels: 
     name: Fiche d'intervention
@@ -112,9 +117,8 @@ fields:
         label: Intervenant
         type: id_object
         object: user
-        search:
-            input: 
-                type: search_user
+        input: 
+            type: search_user
 #    fk_user_modif:
 #        label: User modif
 #        type: id_object
@@ -152,6 +156,29 @@ fields:
         type: int
         values: 
             array: nature_list
+    extra35:
+        label: Type d'inter
+        type: int
+        values: 
+            array: type_list
+    extra17:
+        label: Terminée
+        type: bool
+    extra18:
+        label: Date du prochain RDV
+        type: date
+    extra24:
+        label: Heure d'arrivé AM
+        type: int
+    extra26:
+        label: Heure de départ AM
+        type: int
+    extra25:
+        label: Heure d'arrivé PM
+        type: int
+    extra27:
+        label: Heure de départ PM
+        type: int
 # fields manquant :
 #    fk_projet
 #    entity
@@ -177,6 +204,7 @@ forms:
             - field: fk_statut
             - field: note_public
             - field: note_private
+            - field: extra35
             - field: natureInter
     
         
@@ -236,7 +264,7 @@ lists_cols:
     duree:
         field: duree
     description:
-        filed: description
+        field: description
     note_public:
         field: note_public
     note_private:
@@ -249,6 +277,15 @@ lists_cols:
         field: total_ttc
     natureInter:
         field: natureInter
+    typeInter:
+        field: extra35
+    commercial: 
+        label: Commercial
+        value: 
+            callback: displayCommercial
+        search: 
+            input: 
+                type: search_user
                 
 lists:
     default: 
@@ -274,6 +311,8 @@ lists:
             duree:
             total_ht:
             natureInter:
+            typeInter:
+            commercial:
                 
 fields_tables: 
     infos:
@@ -283,25 +322,50 @@ fields_tables:
         icon: id-card
         rows: 
             - field: ref 
-            - field: fk_commande
-              display: nom_url
-            - field: ref 
-            - field: fk_contrat 
-              display: nom_url
-            - field: fk_soc 
-              display: nom_url
+            - field: di
+            - field: fk_statut 
+            - field: description 
+            - field: natureInter
+              edit: 1
+            - field: extra35
+              edit: 1
+            - field: note_public
+            - field: note_private
+            - field: extra17
+            - field: extra18
+    horraire:
+        title: Horraire
+        icon: fas_calendar-check
+        rows: 
             - field: datei 
               edit: 1
             - field: date_valid 
+            - field: duree 
+            - field: extra24
+              edit: 1
+            - field: extra26
+            - field: extra25
+            - field: extra27
+    lien:
+        title: Objets liées
+        icon: link
+        rows:
+            - field: fk_soc 
+              display: nom_url
+            - field: fk_commande
+              display: nom_url
+            - field: fk_contrat 
+              display: nom_url
             - field: fk_user_author
               display: nom_url 
-            - field: fk_statut 
-            - field: duree 
-            - field: description 
+    price:
+        title: Prix
+        icon: money
+        rows:
             - field: total_ht 
             - field: total_tva 
             - field: total_ttc 
-            - field: natureInter
+            
             
         
 views: 
@@ -310,11 +374,32 @@ views:
         rows: 
             - cols: 
                 - type: fields_table
-                  col_lg: 12
-                  col_md: 12
+                  col_lg: 6
+                  col_md: 6
                   col_sm: 12
                   fields_table: 
                       name: infos
+            
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: horraire
+            
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: lien
+            
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: price
             - cols: 
                 - type: list
                   list: 

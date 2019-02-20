@@ -241,7 +241,7 @@ class BimpRemoveDuplicateCustomer {
                         $reshook = $hookmanager->executeHooks('replaceThirdparty', array(
                             'soc_origin' => $soc_origin->id,
                             'soc_dest' => $soc_dest->id
-                                ), $soc_dest, $action);
+                                ), $soc_destblabla, $action);
 
                         if ($reshook < 0) {
                             $this->addErrorMerge($src, $hookmanager->error . ', ' . implode(",", $hookmanager->errors));

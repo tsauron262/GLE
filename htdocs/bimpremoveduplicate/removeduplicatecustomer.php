@@ -40,7 +40,7 @@ print '<table class="noborder" width="100%"><tr/></table>';
 print '<table><tbody>';
 print '<tr class="liste_titre_filter">';
 print '<td style="padding:10px;"><label>Nombre de groupe de doublons à afficher</label><br/>';
-print '<input id="limit" type="number" min=1 max=100 class="flat" value=3></td>';
+print '<input id="limit" type="number" min=1 max=100 class="flat" value=30></td>';
 print '<td style="padding:10px;"><input id="display_duplicates" type="submit" class="butAction" value="Afficher doublons">';
 print '<i id="spinner" style="display: none; font-size: 30px;" class="fa fa-spinner fa-spin"></i></td>';
 print '<td style="padding:10px;"></td>';

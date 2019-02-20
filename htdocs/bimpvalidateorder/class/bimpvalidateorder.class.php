@@ -32,6 +32,9 @@ class BimpValidateOrder {
      */
     public function checkValidateRights($user, $order) {
         
+        if (defined('MOD_DEV') && (int) MOD_DEV) {
+            return 1;
+        }
         
         $updateValFin = $updateValComm = false;
         $ok = true;
@@ -129,6 +132,25 @@ class BimpValidateOrder {
         
         if(!$ok)
             return   -1;
+        
+        $contacts = $order->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
+        foreach($contacts as $contact)
+                mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, vottre commande ".$order->getNomUrl(1). " est validée.");
+        
+        
+        
+        foreach($order->lines as $line){
+            if(stripos($line->ref, "REMISECRT") !== false){
+                $order->array_options['options_crt'] = 2;
+                $order->updateExtraField('crt');
+            }
+            if(stripos($line->desc, "Applecare") !== false){
+                $order->array_options['options_apple_care'] = 2;
+                $order->updateExtraField('apple_care');
+            }
+        }
+        
+
         return 1;
     }
 

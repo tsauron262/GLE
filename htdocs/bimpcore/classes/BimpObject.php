@@ -19,7 +19,7 @@ class BimpObject extends BimpCache
         'position'
     );
     public static $numeric_types = array('id', 'id_parent', 'id_object', 'int', 'float', 'money', 'percent', 'bool', 'qty');
-    public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description', 'ref', 'reference');
+    public static $name_properties = array('public_name', 'name', 'nom', 'label', 'libelle', 'title', 'titre', 'description');
     public static $ref_properties = array('ref', 'reference', 'code');
     public $use_commom_fields = false;
     public $use_positions = false;
@@ -49,7 +49,15 @@ class BimpObject extends BimpCache
         'cards'                    => array('type' => 'keys'),
         'searches'                 => array('type' => 'keys')
     );
+    public static $check_on_create = 1;
+    public static $check_on_update = 1;
+    public static $check_on_update_field = 1;
     public $params = array();
+    public $msgs = array(
+        'errors'   => array(),
+        'warnings' => array(),
+        'infos'    => array()
+    );
     protected $data = array();
     protected $initData = array();
     protected $associations = array();
@@ -510,6 +518,20 @@ class BimpObject extends BimpCache
         return true;
     }
 
+    public function isDolExtraField(&$field_name)
+    {
+        if ($this->isDolObject()) {
+            if ((int) $this->getConf('fields/' . $field_name . '/dol_extra_field', 0, false, 'bool')) {
+                if (preg_match('/^ef_(.*)$/', $field_name, $matches)) {
+                    $field_name = $matches[1];
+                }
+                return 1;
+            }
+        }
+
+        return 0;
+    }
+
     public function object_exists($object_name)
     {
         return array_key_exists($object_name, $this->params['objects']);
@@ -616,7 +638,7 @@ class BimpObject extends BimpCache
         return 1;
     }
 
-    public function hasFieldChange($field)
+    public function hasDataChanged($field)
     {
         return (int) ($this->getData($field) !== $this->getInitData($field));
     }
@@ -888,24 +910,32 @@ class BimpObject extends BimpCache
 
     public function getRef($withGeneric = true)
     {
-        if ($this->field_exists('ref')) {
-            return $this->getData('ref');
-        }
+        $prop = $this->getRefProperty();
 
-        if ($this->field_exists('reference')) {
-            return $this->getData('reference');
+        if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
+            return $this->data[$prop];
         }
 
         if ($withGeneric) {
-            return get_class($this) . "_" . $this->id;
+            return $this->id;
         }
 
         return '';
     }
 
-    public function getName()
+    public function getName($withGeneric = true)
     {
-        return $this->getInstanceName();
+        $prop = $this->getNameProperty();
+
+        if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
+            return $this->data[$prop];
+        }
+
+        if ($withGeneric) {
+            return BimpTools::ucfirst($this->getLabel()) . ' #' . $this->id;
+        }
+
+        return '';
     }
 
     public function getDolValue($field, $value)
@@ -933,6 +963,15 @@ class BimpObject extends BimpCache
         echo '</pre>';
     }
 
+    public function resetMsgs()
+    {
+        $this->msgs = array(
+            'errors'   => array(),
+            'warnings' => array(),
+            'infos'    => array()
+        );
+    }
+
     public function reset()
     {
         if ($this->isLoaded()) {
@@ -953,6 +992,8 @@ class BimpObject extends BimpCache
             unset($this->dol_object);
             $this->dol_object = $this->config->getObject('dol_object');
         }
+
+        $this->resetMsgs();
     }
 
     public function set($field, $value)
@@ -1388,6 +1429,11 @@ class BimpObject extends BimpCache
         return $errors;
     }
 
+    public function checkObject()
+    {
+        
+    }
+
     public function checkFieldValueType($field, &$value)
     {
         $type = '';
@@ -1497,6 +1543,11 @@ class BimpObject extends BimpCache
         }
 
         return $return;
+    }
+
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
+        
     }
 
     // Gestion des objets enfants:
@@ -2310,6 +2361,12 @@ class BimpObject extends BimpCache
                             $parent->onChildSave($this);
                         }
                     }
+
+                    $this->onSave($errors, $warnings);
+
+                    if (static::$check_on_create) {
+                        $this->checkObject();
+                    }
                 } else {
                     $msg = 'Echec de l\'enregistrement ' . $this->getLabel('of_the');
                     $sqlError = $this->db->db->lasterror;
@@ -2393,6 +2450,11 @@ class BimpObject extends BimpCache
                             if (method_exists($parent, 'onChildSave')) {
                                 $warnings = array_merge($warnings, $parent->onChildSave($this));
                             }
+                        }
+
+                        $this->onSave($errors, $warnings);
+                        if (static::$check_on_update) {
+                            $this->checkObject();
                         }
                     }
                 }
@@ -2513,6 +2575,12 @@ class BimpObject extends BimpCache
                             $warnings = array_merge($warnings, $parent->onChildSave($this));
                         }
                     }
+
+                    $this->onSave($errors, $warnings);
+
+                    if (static::$check_on_update_field) {
+                        $this->checkObject();
+                    }
                 }
             }
         } else {
@@ -2622,6 +2690,7 @@ class BimpObject extends BimpCache
             }
             $this->initData = $this->data;
             $this->ref = $this->getRef();
+
             return true;
         }
         return false;
@@ -3572,6 +3641,7 @@ class BimpObject extends BimpCache
                 $html .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
             }
             $html .= $name . '</h1>';
+//            $html .= '<span style="color: #787878; font-size: 14px;">' . BimpTools::ucfirst($this->getLabel()) . '</span>';
 
             $ref = $this->getRef(false);
             if ($ref) {
@@ -3595,11 +3665,14 @@ class BimpObject extends BimpCache
                 }
             }
 
+            $html .= '<div class="header_extra">';
             if (method_exists($this, 'renderHeaderExtraLeft')) {
                 $html .= '<div style="margin: 10px 0;">';
                 $html .= $this->renderHeaderExtraLeft();
                 $html .= '</div>';
             }
+            $html .= $this->renderMsgs();
+            $html .= '</div>';
             $html .= '</div>';
             $html .= '</div>';
 
@@ -3706,14 +3779,15 @@ class BimpObject extends BimpCache
                 $html .= '</div>';
             }
 
+            $html .= '<div class="header_extra">';
             if (method_exists($this, 'renderHeaderExtraRight')) {
                 $html .= '<div style="margin: 10px 0;">';
                 $html .= $this->renderHeaderExtraRight();
                 $html .= '</div>';
             }
-
             $html .= '</div>';
 
+            $html .= '</div>';
             $html .= '</div>';
 
             $html .= '<div class="row header_bottom"></div>';
@@ -3721,6 +3795,25 @@ class BimpObject extends BimpCache
             if (!$content_only) {
                 $html .= '</div>';
             }
+        }
+
+        return $html;
+    }
+
+    public function renderMsgs()
+    {
+        $html = '';
+
+        if (count($this->msgs['errors'])) {
+            $html .= BimpRender::renderAlerts($this->msgs['errors']);
+        }
+
+        if (count($this->msgs['warnings'])) {
+            $html .= BimpRender::renderAlerts($this->msgs['warnings'], 'warning');
+        }
+
+        if (count($this->msgs['infos'])) {
+            $html .= BimpRender::renderAlerts($this->msgs['infos'], 'info');
         }
 
         return $html;
@@ -3746,6 +3839,12 @@ class BimpObject extends BimpCache
             }
         }
 
+        return $list->renderHtml();
+    }
+
+    public function renderListCustom($list_name = 'default', $title = null, $icon = null)
+    {
+        $list = new BC_ListCustom($this, $list_name, null, $title, $icon);
         return $list->renderHtml();
     }
 
@@ -4492,17 +4591,7 @@ class BimpObject extends BimpCache
 
     public function getInstanceName()
     {
-        if (!$this->isLoaded()) {
-            return ' ';
-        }
-
-        foreach (self::$name_properties as $prop) {
-            if ($this->field_exists($prop) && isset($this->data[$prop]) && $this->data[$prop]) {
-                return $this->data[$prop];
-            }
-        }
-
-        return BimpTools::ucfirst($this->getLabel()) . ' ' . $this->id;
+        return $this->getName();
     }
 
     public static function getInstanceLabel($instance, $type = '')
@@ -4577,7 +4666,7 @@ class BimpObject extends BimpCache
     public static function getInstanceNom($instance)
     {
         if (is_a($instance, 'BimpObject')) {
-            return $instance->getInstanceName();
+            return $instance->getName();
         } elseif (is_a($instance, 'user')) {
             return $instance->lastname . ' ' . $instance->firstname;
         } elseif (property_exists($instance, 'nom')) {
@@ -4589,6 +4678,22 @@ class BimpObject extends BimpCache
         } elseif (isset($instance->id) && $instance->id) {
             return $instance->id;
         }
+        return '';
+    }
+
+    public static function getInstanceRef($instance)
+    {
+        if (is_a($instance, 'BimpObject')) {
+            return $instance->getRef();
+        }
+
+        if (isset($instance->ref)) {
+            return $instance->ref;
+        }
+        if (isset($instance->id)) {
+            return $instance->id;
+        }
+
         return '';
     }
 
@@ -4617,7 +4722,7 @@ class BimpObject extends BimpCache
 
         $label = '';
         if ($withpicto && $this->params['icon']) {
-            $label .= '<i class="' . BimpRender::renderIconClass($this->params['icon']) . ' iconLeft"></i>';
+            $label .= BimpRender::renderIcon($this->params['icon'], 'iconLeft');
         }
         $ref = $this->getRef();
 
@@ -4665,15 +4770,7 @@ class BimpObject extends BimpCache
             if ($instance->isDolObject()) {
                 $html = $instance->dol_object->getNomUrl(1);
             } else {
-                if ($instance->params['icon']) {
-                    $html .= BimpRender::renderIcon($instance->params['icon']) . '&nbsp;';
-                }
-                $url = $instance->getUrl();
-                if ($url) {
-                    $html .= '<a href="' . $url . '" target="_blank">' . $instance->getInstanceName() . '</a>';
-                } else {
-                    $html .= $instance->getInstanceName();
-                }
+                $html .= $instance->getNomUrl();
             }
         } elseif (method_exists($instance, 'getNomUrl')) {
             $html .= $instance->getNomUrl(1);
@@ -5007,6 +5104,79 @@ class BimpObject extends BimpCache
                         }
                     }
                 }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionSaveListFilters($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Filtres enregistrés avec succès';
+
+        if (!isset($data['list_type']) || !(string) $data['list_type']) {
+            $errors[] = 'Type de liste absent';
+        }
+        if (!isset($data['name']) || !(string) $data['name']) {
+            $errors[] = 'Veuillez spécifié un nom pour cet enregistrement';
+        }
+
+        if (!count($errors)) {
+            $owner_type = (isset($data['owner_type']) ? (int) $data['owner_type'] : 2);
+
+            $id_owner = 0;
+            if (!isset($data['id_owner']) || !(int) $data['id_owner']) {
+                if ($owner_type === 2) {
+                    global $user;
+
+                    if (!BimpObject::objectLoaded($user)) {
+                        $errors[] = 'Aucun utilisateur connecté';
+                    } else {
+                        $id_owner = $user->id;
+                    }
+                } else {
+                    $errors[] = 'ID du groupe propriétaire absent';
+                }
+            } else {
+                $id_owner = (int) $data['id_owner'];
+            }
+
+            $filters = (isset($data['filters']) && is_array($data['filters']) ? $data['filters'] : array());
+
+            $values = array();
+            if (!empty($filters)) {
+                foreach ($filters as $field_name => $filter) {
+                    if (isset($filter['values']) && is_array($filter['values']) && !empty($filter['values'])) {
+                        $values[$field_name] = $filter['values'];
+                    }
+                }
+            }
+
+            if (count($values)) {
+                $listFilters = BimpObject::getInstance('bimpcore', 'ListFilters');
+
+                $errors = $listFilters->validateArray(array(
+                    'owner_type' => $owner_type,
+                    'name'       => (string) $data['name'],
+                    'id_owner'   => $id_owner,
+                    'obj_module' => $this->module,
+                    'obj_name'   => $this->object_name,
+                    'list_type'  => $data['list_type'],
+                    'list_name'  => (isset($data['list_name']) ? (string) $data['list_name'] : 'default'),
+                    'panel_name' => (isset($data['panel_name']) ? (string) $data['panel_name'] : 'default'),
+                    'filters'    => $values
+                ));
+
+                if (!count($errors)) {
+                    $errors = $listFilters->create($warnings);
+                }
+            } else {
+                $errors[] = 'Aucun filtre sélectionné';
             }
         }
 

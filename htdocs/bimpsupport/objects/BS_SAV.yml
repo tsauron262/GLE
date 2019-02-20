@@ -456,6 +456,11 @@ forms:
               label: Notifier le client
               value: 1
               input_name: send_msg
+            - custom: 1
+              label: Montant devis
+              content: 
+                  callback: displayFactureAmountToPay
+              input_name: inut
             
     resolution: 
         rows: 
@@ -476,6 +481,11 @@ forms:
               label: Notifier le client
               value: 1
               input_name: send_msg
+            - custom: 1
+              label: Montant facture
+              input_name: inut
+              content: 
+                  callback: displayFactureAmountToPay
               
     equipment: 
         rows: 
@@ -711,7 +721,31 @@ lists_cols:
         field: total
         child: propal
         label: Total TTC Devis
+    symptomes:
+        field: symptomes
+    diagnostic:
+        field: diagnostic
+    resolution:
+        field: resolution
+    propal:
+        field: id_propal
+        display: nom_url
                         
+filters_panels: 
+    default: 
+        filters: 
+            - field: ref
+            - field: status
+            - field: date_create
+            - field: id_equipment
+            - field: code_centre
+            - field: id_user_tech
+            - field: id_client
+            - field: id_facture_acompte
+            - field: id_facture
+            - field: prestataire_number
+            - field: sav_pro
+            
 lists: 
     default: 
         title: Liste des SAV
@@ -723,6 +757,7 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this))
         list_filters: 
             callback: getListFilters
+        filters_panel: default
         sort_field: date_create
         sort_way: desc
         n: 10

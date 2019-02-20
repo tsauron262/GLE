@@ -7,7 +7,7 @@ class BS_ApplePart extends BimpObject
     private static $tabDescCommenceIos = array("SVC,IPOD", "Ipod nano");
     private static $tabRefCommenceIosDouble = array("661", "Z661");
     private static $tabDescCommenceIosDouble = array("iphone", "BAT,IPHONE", "SVC,IPHONE"); //design commence par
-    private static $tabDescContientIosDouble = array("Ipad Pro", "Ipad mini", "Apple Watc"); //design contient
+    private static $tabDescContientIosDouble = array("Ipad", "Ipad Pro", "Ipad mini", "Apple Watc", "Ipad Air"); //design contient
     private static $tabRefCommenceBatterie = array("661-04577", "661-04576", "661-08917", "661-02909", "661-04479", "661-04579", "661-04580", "661-04581", "661-04582", "661-05421", "661-05755", "661-08935", "661-8216"); //Prix a 59
     private static $tabRefCommenceBatterieX = array("661-08932", "661-10565", "661-10850", "661-11035"); //Prix a 84
     private static $tabRefCommencePrixEcran = array("661-11232" => array("184,25"), "661-07285" => array("142,58"), "661-07286" => array("142,58"), "661-07287" => array("142,58"), "661-07288" => array("142,58"), "661-07289" => array("159,25"), "661-07290" => array("159,25"), "661-07291" => array("159,25"), "661-07292" => array("159,25"), "661-07293" => array("142,58"), "661-07294" => array("142,58"), "661-07295" => array("142,58"), "661-07296" => array("142,58"), "661-07297" => array("159,25"), "661-07298" => array("159,25"), "661-07299" => array("159,25"), "661-07300" => array("159,25"), "661-08933" => array("142,58"), "661-08934" => array("142,58"), "661-09081" => array("142,58"), "661-10102" => array("142,58"), "661-09032" => array("159,25"), "661-09033" => array("159,25"), "661-09034" => array("159,25"), "661-10103" => array("159,25"), "661-09294" => array("259,25"), "661-10608" => array("259,25"), "661-11037" => array("300,91"));
@@ -302,6 +302,7 @@ class BS_ApplePart extends BimpObject
                     'linked_id_object'   => (int) $this->id,
                     'linked_object_name' => 'sav_apple_part',
                     'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
+                    'remisable'          => 1
                 ));
                 if (!count($line_errors)) {
                     $label = $this->getData('part_number') . ' - ' . $this->getData('label');
@@ -312,18 +313,18 @@ class BS_ApplePart extends BimpObject
                     $line->desc = $label;
                     $line->qty = (int) $this->getData('qty');
                     $line->tva_tx = 20;
-                    
+
                     $type = self::getCategProdApple($this->getData('part_number'), $this->getData('label'));
                     $line->pu_ht = $this->convertPrix($type, $line->pa_ht, $this->getData('part_number'), $this->getData('label'));
-                    
-                    if($type == "ecran" && isset(self::$tabRefCommencePrixEcran[$this->getData('part_number')][1])){
+
+                    if ($type == "ecran" && isset(self::$tabRefCommencePrixEcran[$this->getData('part_number')][1])) {
                         $lineT = BimpObject::getInstance("bimpsupport", "BS_SavPropalLine");
                         $lineT->id_product = self::$tabRefCommencePrixEcran[$this->getData('part_number')][1];
-                        $values = array("type"=>1, "id_obj"=>$sav->getData('id_propal'));
+                        $values = array("type" => 1, "id_obj" => $sav->getData('id_propal'));
                         $errorsT = $lineT->validateArray($values);
-                        if(count($errorsT) == 0)
+                        if (count($errorsT) == 0)
                             $errorsT = $lineT->create();
-                        
+
                         if (count($errorsT)) {
                             $errors = array_merge($errors, $errorsT);
                         }
@@ -393,6 +394,7 @@ class BS_ApplePart extends BimpObject
                     'linked_id_object'   => (int) $this->id,
                     'linked_object_name' => 'sav_apple_part',
                     'out_of_warranty'    => (int) $this->getData('out_of_warranty'),
+                    'remisable'          => 1
                 ));
 
                 if (!count($line_errors)) {

@@ -70,6 +70,10 @@ class exportCommande extends export8sens {
 
     public function getId8sensByCommande($id, $userCr) {
         $this->id8sens = 0;
+        if ($userCr < 1)
+            $userCr = 1;
+        $userM = new User($this->db);
+        $userM->fetch($userCr);
         $sql = $this->db->query("SELECT * FROM `llx_element_contact` WHERE `element_id` = " . $id . " AND `fk_c_type_contact` = 91 ORDER BY `rowid` DESC");
         if ($this->db->num_rows($sql) > 0) {
             $ligne = $this->db->fetch_object($sql);
@@ -81,14 +85,10 @@ class exportCommande extends export8sens {
                 if ($this->debug)
                     echo "<br/>Comm pas de comm<br/>";
                 if(!defined("MODE_TEST"))
-                    mailSyn2("Exportation commande", $userC->email, null, "Bonjour vos commandes ne peuvent être exporté car vous n'avez pas d'identifiant 8Sens dans vottre profil <a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php?id=" . $userC->id . "'>Voir</a>");
+                    mailSyn2("Exportation commande", $userCr->email, null, "Bonjour vos commandes ne peuvent être exporté car le commerciale na pas d'identifiant 8Sens dans son profil <a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php?id=" . $userC->id . "'>Voir</a>");
             }
         }
         else {
-            if ($userCr < 1)
-                $userCr = 1;
-            $userM = new User($this->db);
-            $userM->fetch($userCr);
             if ($this->debug)
                 echo "<br/>Pas de comm<br/>";
             if(!defined("MODE_TEST"))
@@ -175,6 +175,8 @@ class exportCommande extends export8sens {
                 $PcvPAdpZip = ($contact->zip != "") ?$contact->zip : $societe->zip;
                 $PcvPAdpCity = ($contact->town != "") ?$contact->town : $societe->town;
             }
+            $PcvLAdpRue1 = str_replace("\n", "", $PcvLAdpRue1);
+            $PcvPAdpRue1 = str_replace("\n", "", $PcvPAdpRue1);
             
 //            echo "<pre>";
 //            print_r($contact);

@@ -26,7 +26,7 @@ include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.cla
  */
 class Interfacesynopsistools extends DolibarrTriggers {
     public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
-        global $conf, $user;
+//        global $conf, $user;
         
         $file = DOL_DOCUMENT_ROOT."/synopsistools/core/triggers/interface_".$conf->global->MAIN_INFO_SOCIETE_NOM . ".class.php";
         if(is_file($file)){

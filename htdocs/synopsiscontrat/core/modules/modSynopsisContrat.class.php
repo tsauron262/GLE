@@ -232,7 +232,7 @@ $tabModel = array(
   "contrat_courrierBIMPAutoPrelevement" => "BIMP Courrier - Prelevement automatique",
   "contrat_courrierBIMPfinapro" => "BIMP contrat - Financement + Proces Verbal + Mandat Prélèvement",
   //"contrat_LDLC_lease" => "Liasse LDLC Lease",
-  //"contrat_LDLC_BIMP_maintenance" => 'Contrat maintenance informatique'
+  "contrat_BIMP_maintenance" => 'Contrat maintenance informatique'
 );
 
         foreach($tabModel as $result => $nom){
@@ -243,8 +243,36 @@ $tabModel = array(
             $sql[] = "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity, libelle) VALUES('" . $result . "','contract'," . $conf->entity . ", '".$nom."')";
         }
         
+
+        $extrafields = new ExtraFields($this->db);
+        $extrafields->addExtraField('periodicity', 'Périodicité', 'select', 40, 30, 'contrat', 0, 0, "", 
+          array("options" => array(
+            1 => "Mensuelle",
+            3 => "Trimestrielle",
+            6 => "Semestrielle",
+            12 => "Annuelle"
+          )
+        ), 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('tacite', 'Renouvellement tacite', 'select', 40, 30, 'contrat', 0, 0, "", 
+          array("options" => array(
+            1 => "1 fois",
+            3 => "2 fois",
+            6 => "3 fois",
+          )
+        ), 1, "", 1, 1, "", "", "", 1);
         
-            
+        $extrafields->addExtraField('syntec', 'Indice SYNTEC', 'float', 1, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('date_start', 'Date de début', 'date', 38, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('duree_mois', 'Durée en mois', 'int', 37, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('denounce', 'Contrat dénoncé', 'select', 100, 30, 'contrat', 0, 0, "", 
+            array( 'options' => array(
+                    0 => 'Non',
+                    1 => 'Oui dans les temps',
+                    2 => 'Oui hors délais'
+                )
+            ), 1, "", 1, 1, "", "", "", 1);
+        
+        
         return $this->_init($sql);
     }
 
@@ -254,6 +282,13 @@ $tabModel = array(
      */
     function remove() {
         global $conf;
+//         $extrafields = new ExtraFields($this->db);
+//         $extrafields->delete('syntec', 'contrat');
+//         $extrafields->delete('tacite', 'contrat');
+//         $extrafields->delete('denounce', 'contrat');
+//         $extrafields->delete('date_start', 'contrat');
+//         $extrafields->delete('duree_mois', 'contrat');
+//         $extrafields->delete('periodicity', 'contrat');
         $sql = array("DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE nom = '" . $this->const[0][2] . "' AND entity = " . $conf->entity);
         return $this->_remove($sql);
     }

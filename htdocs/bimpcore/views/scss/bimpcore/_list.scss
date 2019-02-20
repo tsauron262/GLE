@@ -1,5 +1,9 @@
 table.bimp_list_table,
 table.objectlistTable {
+    td,th {
+        padding: 5px;
+    }
+
     border: none;
     box-shadow: none;
     width: 100%;
@@ -60,7 +64,7 @@ table.objectlistTable {
         }
 
         & > td {
-            padding: 5px 6px;
+            padding: 4px 6px;
             border-bottom: 1px solid #ddd;
             background-color: #fff!important;
 
@@ -174,7 +178,7 @@ table.objectlistTable {
         background-color: #E6E6E6;
         font-weight: bold;
         color: $gray-darker;
-        padding: 8px 6px;
+        padding: 5px 6px;
     }
 
     .objectSubList {
@@ -257,7 +261,7 @@ table.objectlistTable {
             }
         }
 
-        td {
+        & > tbody > tr > td {
             padding: 4px 10px;
             border-bottom: 1px solid $gray-light;
             background-color: #fff;
@@ -265,14 +269,14 @@ table.objectlistTable {
         }
 
         & > tfoot > tr {
-            td,th {
+            & > td, & > th {
                 padding: 4px 10px;
                 border: none;
                 background-color: #F0F0F0;
                 color: $gray-darker;
                 font-weight: bold;
             }
-            th {
+            & > th {
                 text-align: right;
                 padding-right: 20px;
             }
@@ -491,6 +495,9 @@ th.th_tools {
             font-family: 'FontAwesome';
         }
     }
+    .openFiltersPanelButton:before {
+        content: '\f0b0';
+    }
     .openSearchRowButton:before {
         content: '\f002';
     }
@@ -544,15 +551,15 @@ td.buttons {
 .rowButton {
     color: #636363!important;
     text-align: center;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     vertical-align: middle;
-    line-height: 32px;
+    line-height: 28px;
     border-radius: 50%;
     cursor: pointer;
     display: inline-block;
     margin: 0 1px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: normal;
 
     transition: all 0.3s ease;
@@ -665,4 +672,63 @@ td.buttons {
             }
         }
     }
+}
+
+/*Panel Filtres*/
+
+.bimp_filter_container {
+    margin-bottom: 5px;
+
+    .bimp_filter_caption {
+        font-weight: bold;
+        color: $gray-darker;
+        padding: 6px 8px;
+        margin-bottom: 5px;
+        background-color: #DCDCDC;
+    }
+
+    .bimp_filter_values_container {
+        margin-top: 5px;
+    }
+
+    .bimp_filter_value {       
+        @include transition(all 0.3s ease);
+        font-size: 12px;
+        display: inline-block;
+        margin: 1px;
+        padding: 6px 10px;
+        background-color: #3E88D2;
+        color: #fff;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #489FF5;
+        }
+        
+        .bimp_filter_value_remove_btn {
+
+            margin-left: 10px;
+            color: #9EC5E6;;
+            cursor: pointer;
+            float: right;
+
+            &:hover {
+                color: #fff;
+            }
+        }
+    }
+
+    input[type=text] {
+        width: 100%;
+    }
+
+    i.loading {
+        display: none;
+    }
+}
+
+.load_saved_filters_container {
+    padding: 5px 0;
+    margin: 5px 0;
+    border-top: 1px solid $gray-darker;
 }

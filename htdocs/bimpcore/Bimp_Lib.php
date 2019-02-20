@@ -10,6 +10,8 @@ if (!defined('BIMP_LIB')) {
         ini_set('display_errors', 1);
     }
 
+//    set_time_limit(3);
+
     $dir = __DIR__ . '/classes/';
 
     require_once __DIR__ . '/libs/spyc/Spyc.php';
@@ -32,9 +34,12 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'components/BC_Search.php';
     require_once $dir . 'components/BC_Card.php';
     require_once $dir . 'components/BC_Panel.php';
+    require_once $dir . 'components/BC_Filter.php';
+    require_once $dir . 'components/BC_FiltersPanel.php';
     require_once $dir . 'components/BC_List.php';
     require_once $dir . 'components/BC_ListTable.php';
     require_once $dir . 'components/BC_ListViews.php';
+    require_once $dir . 'components/BC_ListCustom.php';
     require_once $dir . 'components/BC_FieldsTable.php';
     require_once $dir . 'components/BC_Form.php';
     require_once $dir . 'components/BC_View.php';
@@ -48,35 +53,42 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpCore.php';
     require_once $dir . 'FixeTabs.php';
     require_once $dir . 'BimpController.php';
-
-    checkBimpCoreVersion();
 }
 
 function checkBimpCoreVersion()
 {
     global $db;
     $bdb = new BimpDb($db);
-    $current_version = (float) $bdb->getValue('bimpcore_conf', 'value', '`name` = \'bimpcore_version\'');
 
-    if (is_null($current_version) || !$current_version) {
-        $current_version = 0.0;
-    }
-
-    $files = scandir(DOL_DOCUMENT_ROOT . '/bimpcore/updates');
+    $dir = DOL_DOCUMENT_ROOT . '/bimpcore/updates';
     $updates = array();
-    foreach ($files as $f) {
-        if (in_array($f, array('.', '..'))) {
+    foreach (scandir($dir) as $subDir) {
+        if (in_array($subDir, array('.', '..'))) {
             continue;
         }
 
-        if (preg_match('/^(\d+\.\d{1})\.sql$/', $f, $matches)) {
-            if ((float) $matches[1] > (float) $current_version) {
-                $updates[] = (float) $matches[1];
+        if (preg_match('/^[a-z]+$/', $subDir) && is_dir($dir . '/' . $subDir)) {
+            $current_version = (float) BimpCore::getVersion($subDir);
+            foreach (scandir($dir . '/' . $subDir) as $f) {
+                if (in_array($f, array('.', '..'))) {
+                    continue;
+                }
+                if (preg_match('/^(\d+(\.\d{1})*)\.sql$/', $f, $matches)) {
+                    if ((float) $matches[1] > (float) $current_version) {
+                        if (!isset($updates[$subDir])) {
+                            $updates[$subDir] = array();
+                        }
+                        $updates[$subDir][] = (float) $matches[1];
+                    }
+                }
+            }
+            if (isset($updates[$subDir])) {
+                sort($updates[$subDir]);
             }
         }
     }
 
-    if (count($updates)) {
+    if (!empty($updates)) {
         if (!BimpTools::isSubmit('bimpcore_update_confirm')) {
             $url = $_SERVER['REQUEST_URI'];
             if (empty($_SERVER['QUERY_STRING'])) {
@@ -86,20 +98,42 @@ function checkBimpCoreVersion()
             }
             $url .= 'bimpcore_update_confirm=1';
             echo 'Le module BimpCore doit etre mis a jour<br/><br/>';
+            echo 'Liste des mise à jour: ';
+            echo '<pre>';
+            print_r($updates);
+            echo '</pre>';
             echo '<button type="button" onclick="window.location = \'' . $url . '\'">OK</button>';
             exit;
         } else {
-            sort($updates);
-            foreach ($updates as $version) {
-                echo 'Mise a jour du module bimpcore a la version ' . $version;
-                if ($bdb->executeFile(DOL_DOCUMENT_ROOT . '/bimpcore/updates/' . $version . '.sql')) {
-                    echo ' [OK]<br/>';
-                    $bdb->update('bimpcore_conf', array(
-                        'value' => $version
-                            ), '`name` = \'bimpcore_version\'');
-                } else {
-                    echo ' [ECHEC] - ' . $db->error() . '<br/>';
+            foreach ($updates as $dev => $dev_updates) {
+                sort($dev_updates);
+                $new_version = 0;
+                $dev_dir = DOL_DOCUMENT_ROOT . '/bimpcore/updates/' . $dev . '/';
+                foreach ($dev_updates as $version) {
+                    $new_version = $version;
+                    $version = (string) $version;
+                    if (!file_exists($dev_dir . $version . '.sql') && preg_match('/^[0-9]+$/', $version)) {
+                        if (file_exists($dev_dir . $version . '.0.sql')) {
+                            $version .= '.0';
+                        }
+                    }
+                    if (!file_exists($dev_dir . $version . '.sql')) {
+                        echo 'FICHIER ABSENT: ' . $dev_dir . $version . '.sql <br/>';
+                        continue;
+                    }
+                    echo 'Mise a jour du module bimpcore a la version: ' . $dev . '/' . $version;
+                    if ($bdb->executeFile($dev_dir . $version . '.sql')) {
+                        echo ' [OK]<br/>';
+                        $bdb->update('bimpcore_conf', array(
+                            'value' => $version
+                                ), '`name` = \'bimpcore_version\'');
+                    } else {
+                        echo ' [ECHEC] - ' . $db->error() . '<br/>';
+                    }
                 }
+                echo '<br/>';
+
+                BimpCore::setVersion($dev, $new_version);
             }
             $url = str_replace('bimpcore_update_confirm=1', '', $_SERVER['REQUEST_URI']);
             echo '<br/><button type="button" onclick="window.location = \'' . $url . '\'">OK</button>';

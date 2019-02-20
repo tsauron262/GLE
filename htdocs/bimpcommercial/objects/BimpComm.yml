@@ -97,6 +97,7 @@ fields:
             array: availabilities
         input: 
             type: select_availability
+        default_value: 0
     fk_input_reason: 
         label: Origine
         dol_prop: demand_reason_id
@@ -105,6 +106,7 @@ fields:
             array: demandReasons
         input: 
             type: select_input_reasons
+        default_value: 0
     total: 
         label: Total TTC
         dol_prop: total_ttc
@@ -247,6 +249,7 @@ forms:
                   
     duplicate:
         rows: 
+            - field: entrepot
             - field: fk_soc
             
     use_remise:
@@ -410,6 +413,28 @@ fields_tables:
     note_private:
         rows: 
             - field: note_private
+    
+filters_panels: 
+    default: 
+        filters: 
+            - field: fk_soc
+            - field: entrepot
+            - field: fk_availability
+            - field: fk_cond_reglement
+            - field: fk_mode_reglement
+            - field: fk_statut
+            - field: note_private
+            - field: note_public
+            - field: ref
+            - field: ref_client
+            - field: remise_globale
+            - field: total_ht
+            - field: total
+        
+lists: 
+    default: 
+        extra_btn: 
+            callback: getDefaultListExtraButtons
             
 views: 
     default: 
@@ -486,6 +511,7 @@ views:
                   col_sm: 12
                   custom: 
                       callback: renderMarginsTable
+                      
             - cols: 
                 - type: custom
                   col_lg: 5

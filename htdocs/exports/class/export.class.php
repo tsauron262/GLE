@@ -262,6 +262,9 @@ class Export
 		        if (preg_match('/GROUP_CONCAT/i', $key) and $value != '') $sql.=" HAVING ".$this->build_filterQuery($this->array_export_TypeFields[$indice][$key], $key, $array_filterValue[$key]);
 		    }
 		}
+                
+                $sql = str_replace("= 'PRO'", "NOT IN ('Particulier', 'Administration')", $sql);
+                
 
 		return $sql;
 	}

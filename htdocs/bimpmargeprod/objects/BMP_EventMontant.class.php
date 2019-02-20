@@ -42,28 +42,32 @@ class BMP_EventMontant extends BimpObject
 
     public function isFieldEditable($field)
     {
-        if (in_array($field, array('amount'))) {
+        if (in_array($field, array('amount', 'tva_tx'))) {
             if (!$this->isEventEditable()) {
                 return 0;
             }
 
-            $typeMontant = $this->getChildObject('type_montant');
-            if (is_null($typeMontant)) {
-                return 0;
-            }
-            $editable = (int) $typeMontant->getData('editable');
-            if (is_null($editable)) {
-                return 0;
-            }
+            $editable = 1;
 
-            if ($editable) {
-                $event = $this->getParentInstance();
-                if (BimpObject::objectLoaded($event)) {
-                    if ((int) $event->getData('status') === 1) {
-                        $id_type_montant = (int) $this->getData('id_montant');
-                        if (($id_type_montant === BMP_Event::$id_bar20_type_montant) ||
-                                ($id_type_montant === BMP_Event::$id_bar55_type_montant)) {
-                            return 0;
+            if ($field === 'amount') {
+                $typeMontant = $this->getChildObject('type_montant');
+                if (is_null($typeMontant)) {
+                    return 0;
+                }
+                $editable = (int) $typeMontant->getData('editable');
+                if (is_null($editable)) {
+                    return 0;
+                }
+
+                if ($editable) {
+                    $event = $this->getParentInstance();
+                    if (BimpObject::objectLoaded($event)) {
+                        if ((int) $event->getData('status') === 1) {
+                            $id_type_montant = (int) $this->getData('id_montant');
+                            if (($id_type_montant === BMP_Event::$id_bar20_type_montant) ||
+                                    ($id_type_montant === BMP_Event::$id_bar55_type_montant)) {
+                                return 0;
+                            }
                         }
                     }
                 }
@@ -116,7 +120,7 @@ class BMP_EventMontant extends BimpObject
                     return 0;
                 }
                 $event = $this->getParentInstance();
-                if(!$event->showCoprods()){
+                if (!$event->showCoprods()) {
                     $errors[] = 'Cet Evénement n\'a pas de copro.';
                     return 0;
                 }
@@ -468,7 +472,7 @@ class BMP_EventMontant extends BimpObject
                     $method = 'displayCoProdPartAmount';
                 }
                 $cols['coprod_' . $cp->id] = array(
-                    'label'     => 'Part ' . $soc->nom,
+                    'label'     => 'Part ' . $soc->getData('nom'),
                     'value'     => array(
                         'callback' => array(
                             'method' => $method,
@@ -1361,7 +1365,7 @@ class BMP_EventMontant extends BimpObject
                             $detail_errors = $detail->validateArray(array(
                                 'id_event_montant' => (int) $this->id,
                                 'label'            => $r['label'],
-                                'quantity'         => 0,
+                                'quantity'         => (int) $r['qty'],
                                 'unit_price'       => (float) $r['unit_price']
                             ));
 
@@ -1428,7 +1432,7 @@ class BMP_EventMontant extends BimpObject
                         } else {
                             $coprod = $event->getChildObject('coprods', (int) $cp['id']);
                             $societe = $coprod->getChildObject('societe');
-                            $errors[] = 'Montant de la part du coproducteur "' . $societe->nom . '" invalide (Doit être un nombre décimal)';
+                            $errors[] = 'Montant de la part du coproducteur "' . $societe->getData('nom') . '" invalide (Doit être un nombre décimal)';
                         }
                     }
 
@@ -1458,7 +1462,7 @@ class BMP_EventMontant extends BimpObject
                                         )) <= 0) {
                                     $coprod = $event->getChildObject('coprods', (int) $id_coprod);
                                     $societe = $coprod->getChildObject('societe');
-                                    $errors[] = 'Echec de l\'enregistrement de la part du co-producteur "' . $societe->nom . '"';
+                                    $errors[] = 'Echec de l\'enregistrement de la part du co-producteur "' . $societe->getData('nom') . '"';
                                 }
                             }
                         }

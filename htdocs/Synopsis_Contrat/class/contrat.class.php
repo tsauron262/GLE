@@ -356,12 +356,13 @@ class Synopsis_Contrat extends Contrat {
                                " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.fk_contrat_prod,
                                " . MAIN_DB_PREFIX . "product_extrafields.2dureeSav,
                                " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont.serial_number
-                          FROM " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO, " . MAIN_DB_PREFIX . "contratdet
+                          FROM " . MAIN_DB_PREFIX . "contratdet
+                     LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO ON " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.contratdet_refid = " . MAIN_DB_PREFIX . "contratdet.rowid
                      LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields ON fk_object = " . MAIN_DB_PREFIX . "contratdet.fk_product
                      LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont ON " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont.element_id = " . MAIN_DB_PREFIX . "contratdet.rowid AND " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont.element_type LIKE 'contrat%'
-                         WHERE " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.contratdet_refid = " . MAIN_DB_PREFIX . "contratdet.rowid
-                           AND fk_contrat =" . $id;
+                         WHERE fk_contrat =" . $id;
         $sql = $this->db->query($requete);
+        
         while ($res = $this->db->fetch_object($sql)) {
             $this->lineTkt[$res->rowid] = array(
                 'serial_number' => $res->serial_number,

@@ -22,4 +22,13 @@ class BMP_MontantDetailValue extends BimpObject
 
         return self::$cache[$cache_key];
     }
+
+    public function showQtyInput()
+    {
+        if ((int) $this->getData('use_groupe_number')) {
+            return 0;
+        }
+        
+        return 1;
+    }
 }

@@ -1,5 +1,11 @@
 <?php
 
+
+$file = file_get_contents("/Users/tommy/Downloads/2f332e25-97d0-bc4b-b143-a4af33e58bd8.ics");
+$file = str_replace("\x0A\x20", '', $file);
+die ($file);
+
+
 require("../main.inc.php");
 
 require_once(DOL_DOCUMENT_ROOT."/bimpfinancement/class/BIMP_TOOLS_FINANC.class.php");

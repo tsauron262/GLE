@@ -41,7 +41,7 @@ class BC_ListTable extends BC_List
         'search'      => array('type' => 'definitions', 'defs_type' => 'search', 'default' => null),
         'col_style'   => array('default' => ''),
         'has_total'   => array('data_type' => 'bool', 'default' => 0),
-        'total_type'  => array('default' => null)
+        'total_type'  => array('default' => null),
     );
     protected $selected_rows = array();
     protected $totals = array();
@@ -63,19 +63,22 @@ class BC_ListTable extends BC_List
         $this->params_def['enable_edit'] = array('data_type' => 'bool', 'default' => 1);
         $this->params_def['single_cell'] = array('type' => 'definitions', 'defs_type' => 'single_cell', 'default' => null);
         $this->params_def['inline_view_item'] = array('data_type' => 'int', 'default' => 0);
+        $this->params_def['after_list_content'] = array('default' => '');
 
         $path = null;
 
-        if (!$name || $name === 'default') {
-            if ($object->config->isDefined('list')) {
-                $path = 'list';
-                $name = '';
-            } elseif ($object->config->isDefined('lists/default')) {
+        if (!is_null($object)) {
+            if (!$name || $name === 'default') {
+                if ($object->config->isDefined('list')) {
+                    $path = 'list';
+                    $name = '';
+                } elseif ($object->config->isDefined('lists/default')) {
+                    $path = 'lists';
+                    $name = 'default';
+                }
+            } else {
                 $path = 'lists';
-                $name = 'default';
             }
-        } else {
-            $path = 'lists';
         }
 
         parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon);
@@ -404,6 +407,14 @@ class BC_ListTable extends BC_List
 
         $html .= $this->renderListParamsInputs();
 
+        if (!is_null($this->params['filters_panel'])) {
+            $html .= '<div class="row">';
+            $html .= '<div class="listFiltersPanelContainer col-xs-12 col-sm-12 col-md-3 col-lg-2"' . (!(int) $this->params['filters_panel_open'] ? ' style="display: none"' : '') . '>';
+            $html .= $this->renderFiltersPanel();
+            $html .= '</div>';
+            $html .= '<div class="objectlistTableContainer ' . ((int) $this->params['filters_panel_open'] ? 'col-xs-12 col-sm-12 col-md-9 col-lg-10' : 'col-xs-12') . '">';
+        }
+
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: ' . ($this->colspan * 80) . 'px" width="100%">';
         $html .= '<thead>';
 
@@ -437,6 +448,19 @@ class BC_ListTable extends BC_List
         $html .= '</tfoot>';
 
         $html .= '</table>';
+
+        if ($this->params['after_list_content']) {
+            $html .= '<div class="after_list_content">';
+            $html .= $this->params['after_list_content'];
+            $html .= '</div>';
+        }
+
+        if (!is_null($this->params['filters_panel'])) {
+            $html .= '</div>';
+//            $html .= '<div style="clear: left"></div>';
+            $html .= '</div>';
+        }
+
         $html .= '<div class="ajaxResultContainer" id="' . $this->identifier . '_result"></div>';
 
         return $html;
@@ -543,6 +567,9 @@ class BC_ListTable extends BC_List
 
             $html .= '<span class="fa-spin loadingIcon"></span>';
 
+            if (!is_null($this->params['filters_panel'])) {
+                $html .= '<span class="headerButton openFiltersPanelButton open-close action-' . ($this->params['filters_panel_open'] ? 'close' : 'open') . '"></span>';
+            }
             if ($this->search && $this->params['enable_search']) {
                 $html .= '<span class="headerButton openSearchRowButton open-close action-open"></span>';
             }
@@ -567,9 +594,11 @@ class BC_ListTable extends BC_List
 
             $parametersPopUpHtml = $this->renderParametersPopup();
             if ($parametersPopUpHtml) {
+                $html .= '<div style="display: inline-block">';
                 $html .= '<span class="headerButton displayPopupButton openParametersPopupButton"';
                 $html .= ' data-popup_id="' . $this->identifier . '_parametersPopup"></span>';
                 $html .= $parametersPopUpHtml;
+                $html .= '</div>';
             }
 
             if ($this->params['enable_refresh']) {
@@ -647,7 +676,7 @@ class BC_ListTable extends BC_List
 
         $html .= '<td class="searchTools">';
         $html .= '<button type="button" class="btn btn-default" onclick="resetListSearchInputs(\'' . $this->identifier . '\')">';
-        $html .= '<i class="fa fa-eraser iconLeft"></i>Réinitialiser</span>';
+        $html .= BimpRender::renderIcon('fas_eraser', 'iconLeft') . 'Réinitialiser</button>';
         $html .= '</td>';
         $html .= '</tr>';
 

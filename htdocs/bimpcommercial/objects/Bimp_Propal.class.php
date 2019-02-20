@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Propal extends BimpComm
 {
 
-    public static $comm_type = 'propal';
+    public static $dol_module = 'propal';
     public static $email_type = 'propal_send';
     public $id_sav = null;
     public $sav = null;
@@ -109,22 +109,6 @@ class Bimp_Propal extends BimpComm
                 // Valider:
                 if ($this->isActionAllowed('validate')) {
                     if ($this->canSetAction('validate')) {
-//                        $ref = substr($this->getRef(), 1, 4);
-//                        if ($ref == 'PROV') {
-//                            $numref = $this->dol_object->getNextNumRef($soc->dol_object);
-//                        } else {
-//                            $numref = $ref;
-//                        }
-//
-//                        $text = $langs->trans('ConfirmValidateProp', $numref);
-//                        if (!empty($conf->notification->enabled)) {
-//                            if (!class_exists('Notify')) {
-//                                require_once DOL_DOCUMENT_ROOT . '/core/class/notify.class.php';
-//                            }
-//                            $notify = new Notify($this->db->db);
-//                            $text .= "\n";
-//                            $text .= $notify->confirmMessage('PROPAL_VALIDATE', (int) $this->getData('fk_soc'), $this->dol_object);
-//                        }
                         $buttons[] = array(
                             'label'   => 'Valider',
                             'icon'    => 'check',
@@ -415,7 +399,7 @@ class Bimp_Propal extends BimpComm
         $ref = dol_sanitizeFileName($this->getRef());
         $pdf_file = $pdf_dir . '/' . $ref . '/' . $ref . '.pdf';
         if (file_exists($pdf_file)) {
-            $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$comm_type . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
+            $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
             $onclick = 'window.open(\'' . $url . '\');';
 
             $html .= BimpRender::renderButton(array(
@@ -594,6 +578,34 @@ class Bimp_Propal extends BimpComm
 
         global $user;
 
+        $bimpObjectFields = array();
+        $this->hydrateDolObject($bimpObjectFields);
+
+        if (method_exists($this, 'beforeUpdateDolObject')) {
+            $this->beforeUpdateDolObject();
+        }
+        
+        $result = $this->dol_object->update($user);
+        if ($result <= 0) {
+            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour de la propale');
+            return $errors;
+        }
+
+        // Mise à jour des champs Bimp_Propal:
+        foreach ($bimpObjectFields as $field => $value) {
+            $field_errors = $this->updateField($field, $value);
+            if (count($field_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($field_errors, 'Echec de la mise à jour du champ "' . $field . '"');
+            }
+        }
+
+        // Mise à jour des extra_fields: 
+        if ($this->dol_object->insertExtraFields('', $user) <= 0) {
+            $errors[] = 'Echec de la mise à jour des champs supplémentaires';
+        }
+        
+        $this->dol_object->fetch($this->id);
+        
         // Ref. client
         if ((string) $this->getData('ref_client') !== (string) $this->dol_object->ref_client) {
             $this->dol_object->error = '';
@@ -709,25 +721,7 @@ class Bimp_Propal extends BimpComm
             }
         }
 
-        $bimpObjectFields = array();
-        $this->hydrateDolObject($bimpObjectFields);
-
-        if (method_exists($this, 'beforeUpdateDolObject')) {
-            $this->beforeUpdateDolObject();
-        }
-
-        // Mise à jour des champs Bimp_Propal:
-        foreach ($bimpObjectFields as $field => $value) {
-            $field_errors = $this->updateField($field, $value);
-            if (count($field_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($field_errors, 'Echec de la mise à jour du champ "' . $field . '"');
-            }
-        }
-
-        // Mise à jour des extra_fields: 
-        if ($this->dol_object->insertExtraFields('', $user) <= 0) {
-            $errors[] = 'Echec de la mise à jour des champs supplémentaires';
-        }
+        
         if (!count($errors)) {
             return 1;
         }

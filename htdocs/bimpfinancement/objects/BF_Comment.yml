@@ -1,7 +1,7 @@
 table: bf_comment
 
 parent_id_property: id_demande
-parent_object: BF_demande
+parent_object: BF_Demande
 
 labels: 
     name: commentaire

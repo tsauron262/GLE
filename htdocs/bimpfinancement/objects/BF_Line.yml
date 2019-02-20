@@ -15,17 +15,39 @@ fields:
     qty: 
         min: 
             callback: getQtyOrdered
+    id_fourn_price: 
+        display_if: 
+            field_name: unset
+            show_values: unset
+            fields_names: type,use_pu_for_pa
+            type: 
+                show_values: 1
+            use_pu_for_pa: 
+                hide_values: 1
+    pa_ht: 
+        display_if: 
+            fields_names: type,id_fourn_price,use_pu_for_pa
+            use_pu_for_pa: 
+                hide_values: 1
     commandes_fourn:
         label: Commandes fournisseurs
         type: json
         input: 
             type: hidden
-        
+    site: 
+        label: Site
+        values: 
+            callback: 
+                object: 
+                    callback: getParentInstance
+                method: getSitesArray
+                
     remisable: unset
     
 forms: 
     default: 
         rows: 
+            - field: site
             - field: type
             - field: in_contrat
             - field: id_product
@@ -34,6 +56,15 @@ forms:
             - field: qty
             - field: pu_ht
             - field: tva_tx
+            - custom: 1
+              input_name: use_pu_for_pa
+              label: Prix d'achat identique au prix de vente
+              data_type: bool
+              input: 
+                  type: toggle
+              display_if: 
+                  field_name: type
+                  hide_values: 3  
             - field: id_fourn_price
             - field: id_fournisseur
             - field: pa_ht
@@ -47,6 +78,9 @@ lists_cols:
         label: Qté commandée
         value: 
             callback: displayQtyOrdered
+    site: 
+        field: site
+        edit: 1
             
 lists: 
     default: 
@@ -64,5 +98,6 @@ lists:
             equipments:
             fourn:
             in_contrat: 
+            site:
 
     

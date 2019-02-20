@@ -14,13 +14,9 @@ labels:
     is_female: 1
 
 objects:
-    commande:
-        relation: hasOne
-        delete: 0
-        instance:
-            bimp_object:
-                module: bimpcommercial
-                name: Bimp_Commande
+#    commande:
+#        instance: 
+#            id_object: unset
 
     reference:
         relation: hasOne
@@ -30,25 +26,9 @@ objects:
                 module: bimpfinancement
                 name: Bimp_Demande
 
-    contrat:
-        relation: hasOne
-        delete: 0
-        instance:
-            dol_object: contrat
-            id_object:
-                field_value: id_contrat
-
     facture:
-        relation: hasOne
-        delete: 0
         instance: 
-            bimp_object: 
-                module: bimpcommercial
-                name: Bimp_Facture
-        card: 
-            title: 
-                object_prop: ref
-            view_btn: 1
+            id_object: unset
 
     facture_banque: 
         extends: facture
@@ -67,54 +47,28 @@ objects:
         instance:
             id_object:
                 field_value: id_facture_fournisseur
-
-    client: 
-        relation: hasOne
-        delete: 0
-        instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Client
-            id_object: 
-                field_value: id_client
                 
     client_contact: 
-        relation: hasOne
-        delete: 0
+        extends: contact
         instance: 
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Contact
             id_object:
                 field_value: id_client_contact
     
     commercial:
-        relation: hasOne
-        delete: 0
+        extends: user
         instance:
-            bimp_object:
-                module: bimpcore
-                name: Bimp_User
             id_object:
                 fiels_value: id_commercial
 
     supplier:
-        relation: hasOne
-        delete: 0
+        extends: societe
         instance: 
-            bimp_object: 
-                module: bimpcore
-                name: Bimp_Fournisseur
             id_object:
                 field_value: id_supplier
                 
     supplier_contact:
-        relation: hasOne
-        delete: 0
+        extends: contact
         instance:
-            bimp_object:
-                module: bimpcore
-                name: Bimp_Contact
             id_object:
                 field_value: id_supplier_contact
                 
@@ -128,7 +82,7 @@ objects:
         relation: hasMany
         delete: 1
         instance: 
-            bimp_object: BF_Refinanceur
+            bimp_object: BF_DemandeRefinanceur
             
             
     rents_except: 
@@ -172,33 +126,33 @@ objects:
             bimp_object: BF_Line
             
 associations:
-    commandes:
-        object: commande
-        label: Ajouter une commande liée
-        display: 
-            default:
-                type: nom_url
-        input:
-            type: search_list
-            search_list:
-                table: commande c
-                field_return_value: c.rowid
-                field_return_label: c.ref
-                options:
-                    default:
-                        label: Recherche par référence de commande
-                        fields_search: c.ref,c.rowid
-                        join: societe s
-                        join_on: c.fk_soc = s.rowid
-                        join_return_label: s.nom
-                        help: Entrez la référence de la commande
-                    by_client:
-                        label: Recherche par client
-                        fields_search: s.nom,s.code_client
-                        join: societe s
-                        join_on: c.fk_soc = s.rowid
-                        join_return_label: s.nom
-                        help: Entrez le nom ou le code d'un client
+#    commandes:
+#        object: commande
+#        label: Ajouter une commande liée
+#        display: 
+#            default:
+#                type: nom_url
+#        input:
+#            type: search_list
+#            search_list:
+#                table: commande c
+#                field_return_value: c.rowid
+#                field_return_label: c.ref
+#                options:
+#                    default:
+#                        label: Recherche par référence de commande
+#                        fields_search: c.ref,c.rowid
+#                        join: societe s
+#                        join_on: c.fk_soc = s.rowid
+#                        join_return_label: s.nom
+#                        help: Entrez la référence de la commande
+#                    by_client:
+#                        label: Recherche par client
+#                        fields_search: s.nom,s.code_client
+#                        join: societe s
+#                        join_on: c.fk_soc = s.rowid
+#                        join_return_label: s.nom
+#                        help: Entrez le nom ou le code d'un client
                         
     factures: 
         object: 
@@ -216,6 +170,7 @@ fields:
         label: Client
         type: id_object
         object: client
+        create_form: light
         input:
             type: search_societe
             societe_type: customer
@@ -252,7 +207,6 @@ fields:
         label: N° d'accord
         type: int
 
-
     id_facture:
         label: Facture banque
         type: id_object
@@ -278,6 +232,11 @@ fields:
         label: Contact client
         type: id_object
         object: client_contact
+        create_form: default
+        create_form_values:
+            fields: 
+                fk_soc: 
+                    field_value: id_client
         depends_on: id_client
         input: 
             type: select
@@ -318,11 +277,13 @@ fields:
         label: Commission commerciale
         type: percent
         default_value: 0
+        decimals: 6
                 
     commission_financiere:
         label: Commission financière
         type: percent
         default_value: 0
+        decimals: 6
                 
     vr: 
         label: VR achat
@@ -389,6 +350,7 @@ fields:
         input: 
             type: search_societe
             help: Entrez le nom ou la référence pour rechercher un tiers
+        create_form: light
         
     id_supplier_contact:
         label: Contact apporteur
@@ -402,6 +364,15 @@ fields:
             field_name: id_supplier
             hide_values: 0,''
         depends_on: id_supplier
+        create_form: default
+        create_form_values:
+            fields: 
+                fk_soc: 
+                    field_value: id_supplier
+        
+    sites: 
+        label: Sites
+        type: items_list
         
 forms:
     default: 
@@ -413,6 +384,7 @@ forms:
             - field: id_supplier_contact
             - field: duration
             - field: periodicity
+            - field: sites
             
     new_commandes_fourn:
         rows: 
@@ -438,6 +410,7 @@ forms:
                   type: select
                   options: 
                       array: demandeFactures
+                  select_first: 1
             - custom: 1
               label: Entrepôt
               input_name: id_entrepot
@@ -505,8 +478,8 @@ fields_tables:
               edit: 1
             - field: id_commercial
               edit: 1
+            - field: sites
             - field: id_contrat
-              edit: 0
               display: nom_url
             - field: id_facture
               display: card
@@ -573,33 +546,41 @@ fields_tables:
               edit: 1
             - label: Montant total
               value: <span id="montant_total"></span>
-            - field: commission_commerciale
-              edit: 1
-            - field: commission_financiere
-              edit: 1
-            - label: Montant total
-              value: <span id="montant_total2"></span>
-            - label: Durée Calculée
-              value: <span id="duree_total"></span>
-            - field: duration
-              label: Durée demandée
-            - field: mode_calcul
-            - field: periodicity
-              label: Périodicité demandé
-            - label: Coût banque
-              value: <span id="cout_banque"></span>
-            - label: Loyer Théorique
-              value: <span id="loyer_the"></span>
-            - label: Total loyer Calculé
-              value: <span id="total_loyer"></span>
-            - label: Dif financement/demande
-              value: <span id="dif_banque_demande"></span>
-            - label: Loyer intermediaire
-              value: <span id="loy_inter"></span>
-            - label: Frais Divers
-              value: <span id="frais_div"></span>
-            - label: Marge Calculé
-              value: <span id="ca_calc"></span>
+            - label: Commission commerciale
+              value: 
+                  callback: 
+                      method: renderCommissionInputs
+                      params: 
+                          - commission_commerciale
+            - label: Commission financière
+              value: 
+                  callback: 
+                      method: renderCommissionInputs
+                      params: 
+                          - commission_financiere
+#            - label: Montant total
+#              value: <span id="montant_total2"></span>
+#            - label: Durée Calculée
+#              value: <span id="duree_total"></span>
+#            - field: duration
+#              label: Durée demandée
+#            - field: mode_calcul
+#            - field: periodicity
+#              label: Périodicité demandé
+#            - label: Coût banque
+#              value: <span id="cout_banque"></span>
+#            - label: Loyer Théorique
+#              value: <span id="loyer_the"></span>
+#            - label: Total loyer Calculé
+#              value: <span id="total_loyer"></span>
+#            - label: Dif financement/demande
+#              value: <span id="dif_banque_demande"></span>
+#            - label: Loyer intermediaire
+#              value: <span id="loy_inter"></span>
+#            - label: Frais Divers
+#              value: <span id="frais_div"></span>
+#            - label: Marge Calculé
+#              value: <span id="ca_calc"></span>
               
     montants_fournisseurs: 
         title: Montants
@@ -649,28 +630,33 @@ views:
                     fields_table:
                         name: apporteur
                         
-                  
     montants:
         panel: 0
         objects_change_reload: BF_Line
         rows:
+            - cols: 
+                - type: view
+                  col_lg: 4
+                  col_md: 4
+                  view: 
+                      panel: 0
+                      name: infos_fin
+            - cols:
+                - type: list
+                  list: 
+                      children: refinanceurs
+                      panel: 0
             - cols:  
                   - type: fields_table
-                    col_lg: 4
-                    col_md: 5
+                    col_lg: 3
+                    col_md: 3
                     fields_table:
                         name: montants
-                  
+                        
                   - type: rows
-                    col_lg: 8
-                    col_md: 7
+                    col_lg: 9
+                    col_md: 9
                     rows: 
-                        - cols:
-                              - type: list
-                                col_lg: 12
-                                list: 
-                                    children: refinanceurs
-                                    panel: 0
                         - cols: 
                             - type: list
                               list: 
@@ -692,6 +678,12 @@ views:
         delete_btn: 1
         rows:
             - cols: 
+                - type: custom
+                  col_lg: 3
+                  col_md: 4
+                  custom: 
+                      callback: renderCommandesInfos
+            - cols: 
                   - type: custom
                     custom: 
                         callback: renderCommandesFournisseursList
@@ -703,3 +695,12 @@ views:
                 - type: custom
                   custom: 
                       callback: renderAllFacturesList
+                      
+    infos_fin: 
+        objects_change_reload: BF_Line,BF_RentExcept,BF_FraisDivers,BF_FraisFournisseur,BF_DemandeRefinanceur
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderInfoFin
+        

@@ -1023,8 +1023,12 @@ function checkMultipleValues() {
     });
 }
 
-function checkTextualInput($input) {
+function checkTextualInput($input, skip_min) {
+    if (typeof (skip_min) === 'undefined') {
+        skip_min = false;
+    }
     if ($input.length) {
+        var do_not_change_value = false;
         var data_type = $input.data('data_type');
         if (data_type) {
             var value = $input.val();
@@ -1046,14 +1050,16 @@ function checkTextualInput($input) {
                     var decimals = parseInt($input.data('decimals'));
                     var unsigned = parseInt($input.data('unsigned'));
 
-                    value = value.replace(/[^0-9\.,\-]/g, '');
+                    var is_neg = /^\-.*$/.test(value);
+                    value = value.replace(/[^0-9\.,]/g, '');
                     value = value.replace(',', '.');
-                    if (value === '-') {
+                    if (is_neg) {
                         if (unsigned || (parseFloat(min) >= 0)) {
-                            value = '';
                             msg = 'Nombres négatifs interdits';
+                            break;
+                        } else {
+                            value = '-' + value;
                         }
-                        break;
                     }
                     var parsed_value = 0;
                     if (decimals > 0) {
@@ -1083,6 +1089,9 @@ function checkTextualInput($input) {
                     if (min !== 'none' && parsed_value < min) {
                         value = min;
                         msg = 'Min: ' + min;
+                        if (skip_min) {
+                            do_not_change_value = true;
+                        }
                     } else if (max !== 'none' && parsed_value > max) {
                         value = max;
                         msg = 'Max: ' + max;
@@ -1098,13 +1107,14 @@ function checkTextualInput($input) {
                     var lowercase = $input.data('lowercase');
                     break;
             }
-            if (('' + value) !== ('' + initial_value)) {
+
+            if (('' + value) !== ('' + initial_value) && !do_not_change_value) {
                 $input.val(value).change();
             }
             if (msg) {
                 displayInputMsg($input, msg, 'info');
             } else {
-                $input.popover('destroy');
+                bimp_destroy_element_popover($input);
             }
         }
     }
@@ -1116,9 +1126,13 @@ function displayInputMsg($input, msg, className) {
     }
     var html = '<p class="alert alert-' + className + '">' + msg + '</p>';
     bimp_display_element_popover($input, html, 'bottom');
-    $input.unbind('blur').blur(function () {
-        $input.popover('destroy');
-    });
+//    $input.unbind('blur').blur(function () {
+//        if ($input.hasClass('bs-popover')) {
+//            $input.removeClass('bs-popover');
+//            $input.popover('destroy');
+//            bimp_msg('here');
+//        }
+//    });
 }
 
 function addSubObjectForm($button, object_name) {
@@ -1611,88 +1625,45 @@ function setInputContainerEvents($inputContainer) {
 function setInputsEvents($container) {
     var in_modal = $.isOk($container.findParentByClass('modal'));
     $container.find('select').each(function () {
-        if (!$.isOk($(this).findParentByClass('subObjectFormTemplate')) &&
-                !$(this).hasClass('no_select2')) {
-            if ($(this).hasClass('select2-hidden-accessible')) {
-                $(this).select2('destroy');
-            }
-
-            var dropdownCssClass = 'ui-dialog';
-            if (in_modal) {
-                dropdownCssClass += ' modal-ui-dialog';
-            }
-            var options = {
-                dir: 'ltr',
-                width: 'resolve',
-                minimumResultsForSearch: 15,
-                minimumInputLength: 0,
-                language: select2arrayoflanguage,
-                containerCssClass: ':all:',
-                dropdownCssClass: dropdownCssClass,
-                templateResult: function (data, container) {
-                    if (data.element) {
-                        $(container).addClass($(data.element).attr("class"));
-                    }
-
-                    if (data.loading) {
-                        return data.text;
-                    }
-
-                    var $option = $(data.element);
-
-                    if ($option.css('display') === 'none') {
-                        $(container).remove();
-                        return;
-                    }
-
-                    if ($option.data('html')) {
-                        return htmlEntityDecodeJs($(data.element).attr("data-html"));
-                    }
-
-                    var html = '<span style="';
-                    if ($option.data('color')) {
-                        html += 'color: #' + $option.data('color') + '; font-weight: bold;';
-                    }
-                    html += '">';
-                    if ($option.data('icon_class')) {
-                        html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
-                    }
-
-                    html += data.text + '</span>';
-                    return html;
-                },
-                templateSelection: function (selection) {
-                    var $option = $(selection.element);
-
-                    var html = '<span style="';
-                    if ($option.data('color')) {
-                        html += 'color: #' + $option.data('color') + '; font-weight: bold;';
-                    }
-                    html += '">';
-                    if ($option.data('icon_class')) {
-                        html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
-                    }
-
-                    html += selection.text + '</span>';
-                    return html;
-                },
-                escapeMarkup: function (markup) {
-                    return markup;
+        if (!$(this).data('select_2_converted')) {
+            if (!$.isOk($(this).findParentByClass('subObjectFormTemplate')) &&
+                    !$(this).hasClass('no_select2')) {
+                if ($(this).hasClass('select2-hidden-accessible')) {
+                    $(this).select2('destroy');
                 }
-            };
-            if (in_modal) {
-                options.dropdownParent = $('#page_modal');
-            }
-            $(this).select2(options);
 
-            // Hack pour correction bug d'affichage:
-            $(this).on('select2:close', function (e) {
-                var $options = $(this).find('option');
-//
-                if ($options.length === 1) {
-                    var val = $(this).val();
-                    var $option = $(this).find('option[value="' + val + '"]');
-                    if ($option.length) {
+                var dropdownCssClass = 'ui-dialog';
+                if (in_modal) {
+                    dropdownCssClass += ' modal-ui-dialog';
+                }
+                var options = {
+                    dir: 'ltr',
+                    width: 'resolve',
+                    minimumResultsForSearch: 15,
+                    minimumInputLength: 0,
+                    language: select2arrayoflanguage,
+                    containerCssClass: ':all:',
+                    dropdownCssClass: dropdownCssClass,
+                    templateResult: function (data, container) {
+                        if (data.element) {
+                            $(container).addClass($(data.element).attr("class"));
+                        }
+
+                        if (data.loading) {
+                            return data.text;
+                        }
+
+                        var $option = $(data.element);
+
+                        if ($option.css('display') === 'none') {
+                            $(container).remove();
+                            return;
+                        }
+
+                        if ($option.data('html')) {
+                            return htmlEntityDecodeJs($(data.element).attr("data-html"));
+                        }
+
                         var html = '<span style="';
                         if ($option.data('color')) {
                             html += 'color: #' + $option.data('color') + '; font-weight: bold;';
@@ -1701,11 +1672,58 @@ function setInputsEvents($container) {
                         if ($option.data('icon_class')) {
                             html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
                         }
-                        html += $option.text() + '</span>';
-                        $(this).parent().find('span.select2-selection__rendered').html(html);
+
+                        html += data.text + '</span>';
+                        return html;
+                    },
+                    templateSelection: function (selection) {
+                        var $option = $(selection.element);
+
+                        var html = '<span style="';
+                        if ($option.data('color')) {
+                            html += 'color: #' + $option.data('color') + '; font-weight: bold;';
+                        }
+                        html += '">';
+                        if ($option.data('icon_class')) {
+                            html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
+                        }
+
+                        html += selection.text + '</span>';
+                        return html;
+                    },
+                    escapeMarkup: function (markup) {
+                        return markup;
                     }
+                };
+                if (in_modal) {
+                    options.dropdownParent = $('#page_modal');
                 }
-            });
+                $(this).select2(options);
+
+                // Hack pour correction bug d'affichage:
+                $(this).on('select2:close', function (e) {
+                    var $options = $(this).find('option');
+//
+                    if ($options.length === 1) {
+                        var val = $(this).val();
+                        var $option = $(this).find('option[value="' + val + '"]');
+                        if ($option.length) {
+                            var html = '<span style="';
+                            if ($option.data('color')) {
+                                html += 'color: #' + $option.data('color') + '; font-weight: bold;';
+                            }
+                            html += '">';
+                            if ($option.data('icon_class')) {
+                                html += '<i class="' + $option.data('icon_class') + ' iconLeft"></i>';
+                            }
+                            html += $option.text() + '</span>';
+                            $(this).parent().find('span.select2-selection__rendered').html(html);
+                        }
+                    }
+                });
+            }
+
+            $(this).data('select_2_converted', 1);
         }
     });
     $container.find('.switch').each(function () {
@@ -1729,7 +1747,9 @@ function setInputsEvents($container) {
     $container.find('input[type="text"]').each(function () {
         if (!$(this).data('check_event_init')) {
             $(this).keyup(function () {
-                checkTextualInput($(this));
+                checkTextualInput($(this), true);
+            }).focusout(function () {
+                checkTextualInput($(this), false);
             });
             $(this).data('check_event_init', 1);
         }
@@ -1784,14 +1804,16 @@ function setInputsEvents($container) {
     });
     $container.find('.qtyInputContainer').each(function () {
         if (!parseInt($(this).data('qty_event_init'))) {
-            $(this).find('.qtyDown').click(function () {
+            $(this).find('.qtyDown').click(function (e) {
+                e.stopPropagation();
                 var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
                 if ($.isOk($qtyInputcontainer)) {
                     $qtyInputcontainer.find('input.qtyInput').focus();
                     inputQtyDown($qtyInputcontainer);
                 }
             });
-            $(this).find('.qtyUp').click(function () {
+            $(this).find('.qtyUp').click(function (e) {
+                e.stopPropagation();
                 var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
                 if ($.isOk($qtyInputcontainer)) {
                     $qtyInputcontainer.find('input.qtyInput').focus();
@@ -1799,6 +1821,7 @@ function setInputsEvents($container) {
                 }
             });
             $(this).find('input.qtyInput').keyup(function (e) {
+                e.stopPropagation();
                 var $qtyInputcontainer = $(this).findParentByClass('qtyInputContainer');
                 if ($.isOk($qtyInputcontainer)) {
                     if (e.key === 'Up') {

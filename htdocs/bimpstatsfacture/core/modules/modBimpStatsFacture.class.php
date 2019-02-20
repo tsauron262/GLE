@@ -50,7 +50,7 @@ class modBimpStatsFacture extends DolibarrModules {
         // Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
         $this->numero = 754381;  // TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
         // Key text used to identify module (for permissions, menus, etc...)
-        $this->rights_class = 'BimpStatsFacture';
+        $this->rights_class = 'bimpstatsfacture';
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
         // It is used to group modules by family in module setup page
@@ -135,7 +135,7 @@ class modBimpStatsFacture extends DolibarrModules {
 
         if (!isset($conf->modBimpStatsFacture) || !isset($conf->modBimpStatsFacture->enabled)) {
             $conf->modBimpStatsFacture = new stdClass();
-            $conf->modBimpStatsFacture->enabled = 0;
+            $conf->modBimpStatsFacture->enabled = 1;
         }
 
         // Dictionaries
@@ -167,6 +167,14 @@ class modBimpStatsFacture extends DolibarrModules {
         // Permissions
         $this->rights = array();  // Permission array used by this module
         $r = 0;
+        $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
+        $this->rights[$r][1] = 'Acces au module'; // Permission label
+        $this->rights[$r][3] = 1;      // Permission by default for new user (0/1)
+        $this->rights[$r][4] = 'read';    // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $this->rights[$r][5] = '';        // In php code, permission will be checked by test if ($user->rights->mymodule->level1->level2)
+        $r++;
+        
+        
         $this->rights[$r][0] = $this->numero + $r; // Permission id (must not be already used)
         $this->rights[$r][1] = 'Voir toutes les factures'; // Permission label
         $this->rights[$r][3] = 0;      // Permission by default for new user (0/1)

@@ -355,6 +355,10 @@ function onViewLoaded($view) {
             onViewsListLoaded($(this));
         });
 
+        $view.find('.object_list_custom').each(function () {
+            onListCustomLoaded($(this));
+        });
+
         if (!$view.data('object_change_event_init')) {
             var objects = $view.data('objects_change_reload');
             if (objects) {
@@ -451,7 +455,6 @@ $(document).ready(function () {
             onViewLoaded($(this));
         });
     });
-
 
     $('body').on('controllerTabLoaded', function (e) {
         if (e.$container.length) {

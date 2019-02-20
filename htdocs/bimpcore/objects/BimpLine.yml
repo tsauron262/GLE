@@ -123,7 +123,7 @@ fields:
         label: Prix d'achat HT
         type: money
         display_if: 
-            fields_names: type,id_fourn_price
+            fields_names: type,id_fourn_price,use_pu_for_pa
             type: 
                 hide_values: 3
             id_fourn_price: 

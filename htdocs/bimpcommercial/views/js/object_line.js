@@ -135,6 +135,43 @@ function reloadObjectLineFormMargins($form) {
     }
 }
 
+function quickAddObjectLine($button) {
+    var $container = $button.findParentByClass('objectLineQuickAddForm');
+
+    if (!$.isOk($container)) {
+        bimp_msg('Une erreur est survenue. Opération abandonnée');
+        return;
+    }
+    
+    var data = {};
+    $container.find('.inputContainer').each(function () {
+        var field = $(this).data('field_name').replace(/^quick_add_(.*)$/, '$1');
+        data[field] = getInputValue($(this));
+    });
+    
+    data.module = $container.data('module');
+    data.object_name = $container.data('object_name');
+    data.id_obj = $container.data('id_obj');
+
+    BimpAjax('saveObject', data, $container.find('.quickAddForm_ajax_result'), {
+        $button: $button,
+        $container: $container,
+        display_success_in_popup_only: true,
+        display_processing: true,
+        processing_padding: 10,
+        success: function (result, bimpAjax) {
+            bimpAjax.$container.find('.inputContainer').each(function () {
+                resetInputValue($(this));
+            });
+            $('body').trigger($.Event('objectChange', {
+                module: result.module,
+                object_name: result.object_name,
+                id_object: result.id_object
+            }));
+        }
+    });
+}
+
 // Events: 
 
 function onObjectLineFormLoaded($form) {

@@ -35,7 +35,7 @@ objects:
                 
 fields: 
     id_obj: 
-        label: Objet
+        label: Objet parent
         type: id_parent
         required: 1
         
@@ -64,6 +64,14 @@ fields:
         label: Remisable
         type: bool
         default_value: 1
+        
+    force_qty_1: 
+        label: Forcer qté à 1
+        type: bool
+        default_value: 0
+        display_if: 
+            field_name: type
+            show_values: 1
         
     linked_id_object: 
         label: Objet lié
@@ -174,7 +182,6 @@ forms:
                       method: renderLineInput
                       params: 
                           - id_fourn_price
-              required: 1
               display_if: 
                   field_name: type
                   show_values: 1
@@ -253,7 +260,9 @@ forms:
                       method: renderLineInput
                       params: 
                           - desc
-                          
+            
+            - field: force_qty_1
+                     
             - custom: 1
               label: Remises autorisées
               input_name: remisable
@@ -390,6 +399,9 @@ lists_cols:
                 method: displayRemise
         min_width: 130px
         max_width: 130px
+    force_qty_1:
+        field: force_qty_1
+        edit: 1
     total_ht: 
         label: Total HT (Hors remises)
         value: 
@@ -427,6 +439,8 @@ lists:
         positions: 1
         positions_open: 1
         objects_change_reload: ObjectLineRemise
+        after_list_content: 
+            callback: renderQuickAddForm
         enable_search: 0
         enable_sort: 0
         pagination: 0

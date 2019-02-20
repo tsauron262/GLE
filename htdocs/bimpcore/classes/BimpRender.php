@@ -169,7 +169,7 @@ class BimpRender
         $html .= '<button type="button" class="btn btn-' . $params['type'] . ' dropdown-toggle"';
         $html .= ' data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">';
         if (isset($params['icon'])) {
-            $html .= self::renderIcon($params['icon'], 'iconLeft');
+            $html .= self::renderIcon($params['icon'], $label ? 'iconLeft' : '');
         }
         $html .= $label;
         if (!isset($params['caret']) || (isset($params['caret']) && $params['caret'])) {
@@ -237,7 +237,12 @@ class BimpRender
             if (isset($params['header_buttons']) && is_array($params['header_buttons']) && count($params['header_buttons'])) {
                 foreach ($params['header_buttons'] as $button) {
                     $button['classes'][] = 'headerBtn';
-                    $html .= self::renderButton($button);
+
+//                    if (isset($button['dropdown']) && (int) $button['dropdown']) {
+//                        $html .= self::renderDropDownButton($button['label'], $button['items'], $button['params']);
+//                    } else {
+                        $html .= self::renderButton($button);
+//                    }
                 }
             }
 
@@ -265,15 +270,17 @@ class BimpRender
         return $html;
     }
 
-    public static function renderFreeForm($rows, $buttons, $title, $icon = '', $infos = array())
+    public static function renderFreeForm($rows, $buttons = array(), $title = '', $icon = '', $infos = array())
     {
         $html = '<div class="freeForm">';
-        $html .= '<div class="freeFormTitle">';
-        if ($icon) {
-            $html .= '<i class="fa fa-' . $icon . ' iconLeft"></i>';
+        if ($title) {
+            $html .= '<div class="freeFormTitle">';
+            if ($icon) {
+                $html .= BimpRender::renderIcon($icon, 'iconLeft');
+            }
+            $html .= $title;
+            $html .= '</div>';
         }
-        $html .= $title;
-        $html .= '</div>';
         $html .= '<div class="freeFormContent">';
 
         if (count($infos)) {
@@ -300,11 +307,13 @@ class BimpRender
         $html .= '<div class="freeFormAjaxResult">';
         $html .= '</div>';
 
-        $html .= '<div class="freeFormSubmit rightAlign">';
-        foreach ($buttons as $button) {
-            $html .= $button;
+        if (!empty($buttons)) {
+            $html .= '<div class="freeFormSubmit rightAlign">';
+            foreach ($buttons as $button) {
+                $html .= $button;
+            }
+            $html .= '</div>';
         }
-        $html .= '</div>';
 
         $html .= '</div>';
         $html .= '</div>';
@@ -581,7 +590,7 @@ class BimpRender
         $return .= ' data-container="' . $container . '"';
         $return .= ' data-placement="' . $placement . '"';
         $return .= ' data-content="' . htmlentities($content) . '"';
-        $return .= ' data-html="' . $html . '"';
+        $return .= ' data-html="' . (is_string($html) ? $html : ($html ? 'true' : 'false')) . '"';
 
         return $return;
     }
@@ -634,6 +643,10 @@ class BimpRender
             $html .= '<span class="objectIcon" onclick="' . $onclick . '">';
             $html .= '<i class="far fa5-eye"></i>';
             $html .= '</span>';
+        }
+
+        if (method_exists($object, 'getExtraObjectIcons')) {
+            $html .= $object->getExtraObjectIcons();
         }
 
         return $html;

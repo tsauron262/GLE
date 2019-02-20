@@ -6,6 +6,7 @@ class BF_Line extends BimpLine
 {
 
     // Getters: 
+
     public function getQtyOrdered($id_commande_excluded = 0)
     {
         $qty_ordered = 0;
@@ -23,47 +24,92 @@ class BF_Line extends BimpLine
         return $qty_ordered;
     }
 
-    // Getters - Overrides
+    public function getQtyDecimals()
+    {
+        return 3;
+    }
+
+    public function getSerialDesc() {
+        $id_product = $this->getdata('id_product');
+        $equipments = $this->getData('equipments');
+        $label = $this->getData('label');
+        $serials = $this->getData('extra_serials');
+
+        if($id_product > 0) {
+            $p = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+            $p->find(array('rowid' => (int) $id_product), true, true);
+            $label = $p->getData('label');
+        }
+
+        if($equipments) {
+            foreach($equipments as $equipment) {
+                $e = BimpObject::getInstance('bimpequipment', 'Equipment');
+                $e->find(array('id' => (int) $equipment), true, true);
+                $serials .= (!empty($serials)) ? ", " : "";
+                $serials .= $e->getData('serial');
+            }
+        }
+        return (object) Array('label' => $label, 'serials' => $serials);
+        
+    }
+
+    public function getTotalLine($ttc = true)
+    {
+        $tot = $this->getData("pu_ht") * $this->getData("qty");
+        if ($ttc)
+            $tot += $tot * $this->getData("tva_tx") / 100;
+        return $tot;
+    }
+    
+    public function getInputValue($field_name)
+    {
+        if ($field_name === 'use_pu_for_pa') {
+            if (!$this->isLoaded()) {
+                return 1;
+            }
+            
+            if (!(int) $this->getData('id_fourn_price')) {
+                if ((float) $this->getData('pu_ht') === (float) $this->getData('pa_ht'))  {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+        parent::getInputValue($field_name);
+    }
+
+    // Getters - booléens
 
     public function isFieldEditable($field)
     {
         if (in_array($field, array('type', 'id_product', 'label', 'pu_ht', 'pa_ht', 'tva_tx', 'id_fourn_price', 'id_fournisseur', 'description', 'remisable'))) {
-            if ($this->isLoaded()) {
-                $commandes_fourn = $this->getData('commandes_fourn');
-                if (is_array($commandes_fourn)) {
-                    foreach ($commandes_fourn as $id_commande => $qty) {
-                        if ((float) $qty > 0) {
-                            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $id_commande);
-                            if (BimpObject::objectLoaded($commande)) {
-                                if (!$commande->isEditable()) {
-                                    return 0;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            return (int) $this->areAllCommandesFournEditable();
         }
 
         return (int) parent::isFieldEditable($field);
     }
 
-    public function isDeletable()
+    public function isCreatable()
     {
-        $commandes_fourn = $this->getData('commandes_fourn');
-        if (is_array($commandes_fourn)) {
-            foreach ($commandes_fourn as $id_commande => $qty) {
-                if ((float) $qty > 0) {
-                    $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $id_commande);
-                    if (BimpObject::objectLoaded($commande)) {
-                        if (!$commande->isEditable()) {
-                            return 0;
-                        }
-                    }
-                }
+        $demande = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($demande)) {
+            if (!(int) $demande->getData('accepted')) {
+                return 1;
             }
         }
-        return parent::isDeletable();
+
+        return 0;
+    }
+
+    public function isEditable()
+    {
+        return $this->isCreatable();
+    }
+
+    public function isDeletable()
+    {
+        return (int) ($this->areAllCommandesFournEditable() && $this->isCreatable());
     }
 
     public function areAllCommandesFournEditable()
@@ -75,7 +121,7 @@ class BF_Line extends BimpLine
                 if ((float) $qty > 0) {
                     $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $id_commande);
                     if (BimpObject::objectLoaded($commande)) {
-                        if (!$commande->isEditable()) {
+                        if ($commande->getData('fk_statut') > 0) {
                             return 0;
                         }
                     }
@@ -107,54 +153,63 @@ class BF_Line extends BimpLine
 
     public function createCommandeFournLine($id_commande, $qty, $update_commandes_fourn_field = true)
     {
-        if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
-        }
-
-        if (!(int) $id_commande) {
-            return array('ID de la commande fournisseur absent');
-        }
-
         $errors = array();
-        $comm_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
 
-        if ($comm_line->find(array(
-                    'id_obj'             => (int) $id_commande,
-                    'linked_id_object'   => (int) $this->id,
-                    'linked_object_name' => 'bf_line',
-                        ), true, true)) {
-            return $this->updateCommandeFournLine($id_commande, $qty, $update_commandes_fourn_field);
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+        } elseif (!(int) $id_commande) {
+            $errors[] = 'ID de la commande fournisseur absent';
         } else {
-            if (!(float) $qty) {
-                return array();
-            }
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $id_commande);
 
-            if ((float) $qty + (float) $this->getQtyOrdered() > (float) $this->getData('qty')) {
-                $errors[] = 'Erreurs: quantités totales à commander supérieures à la quantité de la ligne à financer';
+            if (!BimpObject::objectLoaded($commande)) {
+                $errors[] = 'La commande fournisseur d\'ID ' . $id_commande . ' n\'existe pas';
             } else {
-                $errors = $comm_line->validateArray(array(
-                    'id_obj'             => (int) $id_commande,
-                    'type'               => $this->getTypeForObjectLine(),
-                    'linked_id_object'   => (int) $this->id,
-                    'linked_object_name' => 'bf_line'
-                ));
-            }
-
-            if (!count($errors)) {
-                $this->hydrateObjectLine($comm_line, (float) $qty);
-                $errors = $comm_line->create();
-            }
-
-            if (!count($errors)) {
-                $commandesFourn = $this->getData('commandes_fourn');
-                if (!is_array($commandesFourn)) {
-                    $commandesFourn = array();
+                if ((int) $commande->getData('fk_statut') !== 0) {
+                    $errors[] = 'La commande fournisseur ' . $commande->getRef() . ' n\'a plus le statut "Brouillon"';
                 }
-                $commandesFourn[(int) $id_commande] = (float) $qty;
-                if ($update_commandes_fourn_field) {
-                    $this->updateField('commandes_fourn', $commandesFourn);
+            }
+        }
+
+        if (!count($errors)) {
+            $comm_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+
+            if ($comm_line->find(array(
+                        'id_obj'             => (int) $id_commande,
+                        'linked_id_object'   => (int) $this->id,
+                        'linked_object_name' => 'bf_line',
+                            ), true, true)) {
+                $errors = $this->updateCommandeFournLine($id_commande, $qty, $update_commandes_fourn_field);
+            } elseif ((float) $qty) {
+                if ((float) $qty + (float) $this->getQtyOrdered() > (float) $this->getData('qty')) {
+                    $errors[] = 'Erreurs: quantités totales à commander supérieures à la quantité de la ligne à financer';
                 } else {
-                    $this->set('commandes_fourn', $commandesFourn);
+                    $errors = $comm_line->validateArray(array(
+                        'id_obj'             => (int) $id_commande,
+                        'type'               => $this->getTypeForObjectLine(),
+                        'editable'           => 0,
+                        'deletable'          => 0,
+                        'linked_id_object'   => (int) $this->id,
+                        'linked_object_name' => 'bf_line'
+                    ));
+                }
+
+                if (!count($errors)) {
+                    $this->hydrateObjectLine($comm_line, (float) $qty);
+                    $errors = $comm_line->create();
+                }
+
+                if (!count($errors)) {
+                    $commandesFourn = $this->getData('commandes_fourn');
+                    if (!is_array($commandesFourn)) {
+                        $commandesFourn = array();
+                    }
+                    $commandesFourn[(int) $id_commande] = (float) $qty;
+                    if ($update_commandes_fourn_field) {
+                        $this->updateField('commandes_fourn', $commandesFourn);
+                    } else {
+                        $this->set('commandes_fourn', $commandesFourn);
+                    }
                 }
             }
         }
@@ -163,45 +218,58 @@ class BF_Line extends BimpLine
 
     public function updateCommandeFournLine($id_commande, $qty, $update_commandes_fourn_field = true)
     {
+        $errors = array();
+
         if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_the') . ' absent');
-        }
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+        } elseif (!(int) $id_commande) {
+            $errors[] = 'ID de la commande fournisseur absent';
+        } else {
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $id_commande);
 
-        if (!(int) $id_commande) {
-            return array('ID de la commande fournisseur absent');
-        }
-
-        if (!(float) $qty) {
-            return $this->deleteCommandeFournLine($id_commande);
-        }
-
-        $cf_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
-        if ($cf_line->find(array(
-                    'id_obj'             => (int) $id_commande,
-                    'linked_id_object'   => (int) $this->id,
-                    'linked_object_name' => 'bf_line',
-                        ), true, true)) {
-            if ((float) $qty + (float) $this->getQtyOrdered($id_commande) > (float) $this->getData('qty')) {
-                $errors[] = 'Erreurs: quantités totales à commander supérieures à la quantité de la ligne à financer';
+            if (!BimpObject::objectLoaded($commande)) {
+                $errors[] = 'La commande fournisseur d\'ID ' . $id_commande . ' n\'existe pas';
             } else {
-                $cf_line->set('type', $this->getTypeForObjectLine());
-                $this->hydrateObjectLine($cf_line, $qty);
-                $errors = $cf_line->update();
-                if (!count($errors)) {
-                    $commandesFourn = $this->getData('commandes_fourn');
-                    if (!is_array($commandesFourn)) {
-                        $commandesFourn = array();
-                    }
-                    $commandesFourn[$id_commande] = (float) $qty;
-                    if ($update_commandes_fourn_field) {
-                        $this->updateField('commandes_fourn', $commandesFourn);
-                    } else {
-                        $this->set('commandes_fourn', $commandesFourn);
-                    }
+                if ((int) $commande->getData('fk_statut') !== 0) {
+                    $errors[] = 'La commande fournisseur ' . $commande->getRef() . ' n\'a plus le statut "Brouillon"';
                 }
             }
-        } else {
-            $errors = $this->createCommandeFournLine($id_commande, $qty, $update_commandes_fourn_field);
+        }
+
+        if (!count($errors)) {
+            if (!(float) $qty) {
+                $errors = $this->deleteCommandeFournLine($id_commande);
+            } else {
+                $cf_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+                if ($cf_line->find(array(
+                            'id_obj'             => (int) $id_commande,
+                            'linked_id_object'   => (int) $this->id,
+                            'linked_object_name' => 'bf_line',
+                                ), true, true)) {
+                    if ((float) $qty + (float) $this->getQtyOrdered($id_commande) > (float) $this->getData('qty')) {
+                        $errors[] = 'Erreurs: quantités totales à commander supérieures à la quantité de la ligne à financer';
+                    } else {
+                        $cf_line->set('type', $this->getTypeForObjectLine());
+                        $this->hydrateObjectLine($cf_line, $qty);
+                        $warnings = array();
+                        $errors = $cf_line->update($warnings, true);
+                        if (!count($errors)) {
+                            $commandesFourn = $this->getData('commandes_fourn');
+                            if (!is_array($commandesFourn)) {
+                                $commandesFourn = array();
+                            }
+                            $commandesFourn[$id_commande] = (float) $qty;
+                            if ($update_commandes_fourn_field) {
+                                $this->updateField('commandes_fourn', $commandesFourn);
+                            } else {
+                                $this->set('commandes_fourn', $commandesFourn);
+                            }
+                        }
+                    }
+                } else {
+                    $errors = $this->createCommandeFournLine($id_commande, $qty, $update_commandes_fourn_field);
+                }
+            }
         }
 
         return $errors;
@@ -243,30 +311,40 @@ class BF_Line extends BimpLine
 
     public function deleteCommandeFournLine($id_commande, $update_commandes_fourn_field = true)
     {
+        $errors = array();
+
         if (!$this->isLoaded()) {
-            return array('ID ' . $this->getLabel('of_this') . ' absent');
+            $errors[] = 'ID ' . $this->getLabel('of_this') . ' absent';
+        } elseif (!(int) $id_commande) {
+            $errors[] = 'ID de la commande fournisseur absent';
+        } else {
+            $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $id_commande);
+
+            if (!BimpObject::objectLoaded($commande)) {
+                $errors[] = 'La commande fournisseur d\'ID ' . $id_commande . ' n\'existe pas';
+            } elseif ((int) $commande->getData('fk_statut') !== 0) {
+                $errors[] = 'La commande fournisseur ' . $commande->getRef() . ' n\'a plus le statut "Brouillon"';
+            }
         }
 
-        if (!(int) $id_commande) {
-            return array('ID de la commande fournisseur absent');
-        }
-
-        $cf_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
-        if ($cf_line->find(array(
-                    'id_obj'             => (int) $id_commande,
-                    'linked_id_object'   => (int) $this->id,
-                    'linked_object_name' => 'bf_line',
-                        ), true, true)) {
-            $del_warnings = array();
-            $errors = $cf_line->delete($del_warnings, true);
-            if (!count($errors)) {
-                $commandesFourn = $this->getData('commandes_fourn');
-                if (isset($commandesFourn[$id_commande])) {
-                    unset($commandesFourn[$id_commande]);
-                    if ($update_commandes_fourn_field) {
-                        $this->updateField('commandes_fourn', $commandesFourn);
-                    } else {
-                        $this->set('commandes_fourn', $commandesFourn);
+        if (!count($errors)) {
+            $cf_line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+            if ($cf_line->find(array(
+                        'id_obj'             => (int) $id_commande,
+                        'linked_id_object'   => (int) $this->id,
+                        'linked_object_name' => 'bf_line',
+                            ), true, true)) {
+                $del_warnings = array();
+                $errors = $cf_line->delete($del_warnings, true);
+                if (!count($errors)) {
+                    $commandesFourn = $this->getData('commandes_fourn');
+                    if (isset($commandesFourn[$id_commande])) {
+                        unset($commandesFourn[$id_commande]);
+                        if ($update_commandes_fourn_field) {
+                            $this->updateField('commandes_fourn', $commandesFourn);
+                        } else {
+                            $this->set('commandes_fourn', $commandesFourn);
+                        }
                     }
                 }
             }
@@ -322,6 +400,18 @@ class BF_Line extends BimpLine
     }
 
     // Overrides: 
+
+    public function validate()
+    {
+        $use_pu_for_pa = (int) BimpTools::getValue('use_pu_for_pa', 0);
+
+        if ($use_pu_for_pa) {
+            $this->set('id_fourn_price', 0);
+            $this->set('pa_ht', (float) $this->getData('pu_ht'));
+        }
+
+        return parent::validate();
+    }
 
     public function update(&$warnings = array(), $force_update = false)
     {

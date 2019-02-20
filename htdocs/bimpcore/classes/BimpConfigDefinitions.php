@@ -9,9 +9,9 @@ class BimpConfigDefinitions
         'is_female' => array('data_type' => 'bool', 'default' => 0)
     );
     public static $object_child = array(
-        'relation' => array('default' => 'none'),
-        'delete'   => array('data_type' => 'bool', 'default' => 0),
-        'instance' => array('data_type' => 'array'),
+        'relation'  => array('default' => 'none'),
+        'delete'    => array('data_type' => 'bool', 'default' => 0),
+        'instance'  => array('data_type' => 'array'),
         'has_files' => array('data_type' => 'bool', 'default' => 0)
     );
     public static $button = array(
@@ -58,6 +58,11 @@ class BimpConfigDefinitions
     public static $msgs = array(
         'content' => array('default' => ''),
         'type'    => array('default' => 'info')
+    );
+    public static $list_filter = array(
+        'field' => array('required' => true),
+        'name'  => array('default' => 'default'),
+        'open'  => array('data_type' => 'bool', 'default' => 0)
     );
 
 }

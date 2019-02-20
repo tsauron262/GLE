@@ -1380,6 +1380,7 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
             if (stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1) {
                 if (!defined('BIMP_CONTROLLER_INIT')) {
                     require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+                    checkBimpCoreVersion();
                     echo '<script type="text/javascript">';
                     echo 'if (!dol_url_root) {';
                     echo 'var dol_url_root = \'' . DOL_URL_ROOT . '\';}';
@@ -1387,6 +1388,7 @@ function top_htmlhead($head, $title = '', $disablejs = 0, $disablehead = 0, $arr
                     echo '</script>';
                     BimpCore::displayHeaderFiles();
                 } else {
+                    checkBimpCoreVersion();
                     global $main_controller;
                     if (is_a($main_controller, 'BimpController')) {
                         $main_controller->displayHeaderFiles();

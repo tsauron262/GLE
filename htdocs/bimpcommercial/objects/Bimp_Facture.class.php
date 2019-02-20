@@ -10,7 +10,7 @@ $langs->load('errors');
 class Bimp_Facture extends BimpComm
 {
 
-    public static $comm_type = 'facture';
+    public static $dol_module = 'facture';
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),

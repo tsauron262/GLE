@@ -120,6 +120,10 @@ if (isset($_GET['typeInter']) && $_GET['typeInter'] > 0)
 
 if (isset($_GET['assocContrat']))
     $sql .= " AND fk_contrat > 0";
+if (isset($_GET['assocComm']))
+    $sql .= " AND fk_commande > 0";
+if (isset($_GET['assocNone']))
+    $sql .= " AND (fk_commande < 1 || fk_commande IS NULL) AND (fk_contrat < 1 || fk_contrat IS NULL) ";
 
 if (isset($_GET['statutInter'])) {
     if ($_GET['statutInter'] == 1)
@@ -299,6 +303,8 @@ if ($resql) {
 
 
     print '<td align="center">Associ&eacute; a un contrat<input type="checkbox" name="assocContrat" ' . (isset($_GET['assocContrat']) ? 'checked="checked"' : '') . '/>';
+    print '<td align="center">Associ&eacute; a une commande<input type="checkbox" name="assocComm" ' . (isset($_GET['assocComm']) ? 'checked="checked"' : '') . '/>';
+    print '<td align="center">Associ&eacute; a rien<input type="checkbox" name="assocNone" ' . (isset($_GET['assocNone']) ? 'checked="checked"' : '') . '/>';
 
     echo "<tr><td colspan=6 align=center><input class='button ui-state-default' style='padding: 3px;' type='submit' name='g' value='Afficher le rapport'></td>";
     echo "</table><form>";

@@ -15,15 +15,17 @@ class BimpCore
 //            '/bimpcore/views/js/component.js',
             '/bimpcore/views/js/modal.js',
             '/bimpcore/views/js/object.js',
+            '/bimpcore/views/js/filters.js',
             '/bimpcore/views/js/form.js',
             '/bimpcore/views/js/list.js',
             '/bimpcore/views/js/view.js',
             '/bimpcore/views/js/viewsList.js',
+            '/bimpcore/views/js/listCustom.js',
             '/bimpcore/views/js/page.js'
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
-            '/bimpcore/views/css/bimpcore_bootstrap.css'
+            '/bimpcore/views/css/bimpcore.css'
         )
     );
     public static $filesInit = false;
@@ -52,6 +54,10 @@ class BimpCore
 
     public static function getConf($name)
     {
+//        if ($name === 'bimpcore_version') {
+//            return self::getVersion();
+//        }
+
         if (!isset(self::$conf_cache[$name])) {
             global $db;
             $bdb = new BimpDb($db);
@@ -59,5 +65,65 @@ class BimpCore
         }
 
         return self::$conf_cache[$name];
+    }
+
+    public static function getVersion($dev = '')
+    {
+        if (!isset(self::$conf_cache['bimpcore_version']) || ($dev && !isset(self::$conf_cache['bimpcore_version'][$dev]))) {
+            global $db;
+            $bdb = new BimpDb($db);
+
+            $value = $bdb->getValue('bimpcore_conf', 'value', '`name` = \'bimpcore_version\'');
+
+            $update = false;
+
+            if (preg_match('/^[0-9]+(\.[0-9])*$/', $value)) {
+                $versions = array(
+                    'florian' => (float) $value
+                );
+                $update = true;
+            } else {
+                $versions = json_decode($value, 1);
+            }
+
+            if ($dev && !isset($versions[$dev])) {
+                $versions[$dev] = 0;
+                $update = true;
+            }
+
+            if ($update) {
+                $bdb->update('bimpcore_conf', array(
+                    'value' => json_encode($versions)
+                        ), '`name` = \'bimpcore_version\'');
+            }
+
+            self::$conf_cache['bimpcore_version'] = $versions;
+        }
+
+        if ($dev) {
+            return self::$conf_cache['bimpcore_version'][$dev];
+        }
+
+        return self::$conf_cache['bimpcore_version'];
+    }
+
+    public static function setVersion($dev, $version)
+    {
+        $versions = self::getVersion();
+
+        if (!isset($versions[$dev])) {
+            $versions[$dev] = array();
+        }
+
+        $versions[$dev] = $version;
+
+        self::$conf_cache['bimpcore_version'] = $versions;
+
+        global $db;
+        $bdb = new BimpDb($db);
+
+        $bdb->update('bimpcore_conf', array(
+            'value' => json_encode($versions)
+                ), '`name` = \'bimpcore_version\'');
     }
 }

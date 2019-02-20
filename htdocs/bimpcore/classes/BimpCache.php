@@ -66,6 +66,9 @@ class BimpCache
 
         if (!isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = BimpObject::getInstance($module, $object_name, $id_object, $parent);
+            if (BimpObject::objectLoaded(self::$cache[$cache_key])) {
+                self::$cache[$cache_key]->checkObject();
+            }
         }
 
         return self::$cache[$cache_key];
@@ -138,6 +141,24 @@ class BimpCache
     public static function unsetBimpObjectInstance($module, $object_name, $id_object)
     {
         $cache_key = 'bimp_object_' . $module . '_' . $object_name . '_' . $id_object;
+        if (isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = null;
+            unset(self::$cache[$cache_key]);
+        }
+    }
+
+    public static function unsetDolObjectInstance($id_object, $module, $file = null, $class = null)
+    {
+        if (is_null($file)) {
+            $file = $module;
+        }
+
+        if (is_null($class)) {
+            $class = ucfirst($file);
+        }
+
+        $cache_key = 'dol_object_' . $class . '_' . $id_object;
+
         if (isset(self::$cache[$cache_key])) {
             self::$cache[$cache_key] = null;
             unset(self::$cache[$cache_key]);
@@ -403,6 +424,108 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, '', '');
     }
 
+    public static function getBimpObjectsArray($with_icons = true, $by_modules = true, $include_empty = false)
+    {
+        $cache_key = 'bimp_objects_array';
+        if ($by_modules) {
+            $cache_key .= 'by_modules';
+        }
+        if ($with_icons) {
+            $cache_key .= 'with_icons';
+        }
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $files = scandir(DOL_DOCUMENT_ROOT);
+
+            foreach ($files as $f) {
+                if (in_array($f, array('.', '..')) || !is_dir(DOL_DOCUMENT_ROOT . '/' . $f) ||
+                        !preg_match('/^bimp(.+)$/', $f)) {
+                    continue;
+                }
+
+
+                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $f . '/objects') && is_dir(DOL_DOCUMENT_ROOT . '/' . $f . '/objects')) {
+                    if ($by_modules) {
+                        self::$cache[$cache_key][$f] = array(
+                            'group' => array(
+                                'label'   => $f,
+                                'options' => array()
+                            )
+                        );
+                    }
+
+                    $objects = scandir(DOL_DOCUMENT_ROOT . '/' . $f . '/objects');
+
+                    foreach ($objects as $objFile) {
+                        if (in_array($objFile, array('.', '..'))) {
+                            continue;
+                        }
+
+                        if (preg_match('/^(.+)\.yml$/', $objFile, $matches)) {
+                            $object_name = $matches[1];
+                            $instance = BimpObject::getInstance($f, $object_name);
+                            if (is_a($instance, 'BimpObject') && is_a($instance, $object_name)) {
+                                $option = array();
+                                if ($with_icons && (string) $instance->params['icon']) {
+                                    $option['icon'] = $instance->params['icon'];
+                                }
+                                $option['label'] = BimpTools::ucfirst($instance->getLabel()) . ' (' . $object_name . ')';
+
+                                if ($by_modules) {
+                                    self::$cache[$cache_key][$f]['group']['options'][$f . '-' . $object_name] = $option;
+                                } else {
+                                    self::$cache[$cache_key][$f . '-' . $object_name] = $option;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    public static function getBimpObjectsList()
+    {
+        $cache_key = 'bimp_objects_list';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $files = scandir(DOL_DOCUMENT_ROOT);
+
+            foreach ($files as $module) {
+                if (in_array($module, array('.', '..')) || !is_dir(DOL_DOCUMENT_ROOT . '/' . $module) ||
+                        !preg_match('/^bimp(.+)$/', $module)) {
+                    continue;
+                }
+
+
+                if (file_exists(DOL_DOCUMENT_ROOT . '/' . $module . '/objects') && is_dir(DOL_DOCUMENT_ROOT . '/' . $module . '/objects')) {
+                    self::$cache[$cache_key][$module] = array();
+
+                    $objects = scandir(DOL_DOCUMENT_ROOT . '/' . $module . '/objects');
+
+                    foreach ($objects as $objFile) {
+                        if (in_array($objFile, array('.', '..'))) {
+                            continue;
+                        }
+
+                        if (preg_match('/^(.+)\.yml$/', $objFile, $matches)) {
+                            $object_name = $matches[1];
+                            self::$cache[$cache_key][$module][] = $object_name;
+                        }
+                    }
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
+    }
+
     // Sociétés: 
 
     public static function getSocieteContactsArray($id_societe, $include_empty = false)
@@ -596,6 +719,35 @@ class BimpCache
         }
 
         return array();
+    }
+
+    public static function getUserListFiltersArray(BimpObject $object, $id_user, $list_type, $list_name, $panel_name, $include_empty = false)
+    {
+        $cache_key = $object->module . '_' . $object->object_name . '_' . $list_name . '_' . $list_type . '_' . $panel_name . '_filters_panel_user_' . $id_user;
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $instance = BimpObject::getInstance('bimpcore', 'ListFilters');
+
+            $rows = $instance->getList(array(
+                'owner_type' => 2,
+                'id_owner'   => (int) $id_user,
+                'obj_module' => $object->module,
+                'obj_name'   => $object->object_name,
+                'list_type'  => $list_type,
+                'list_name'  => $list_name,
+                'panel_name' => $panel_name
+                    ), null, null, 'id', 'asc', 'array', array('id', 'name'));
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['id']] = $r['name'];
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
     }
 
     // MySoc: 

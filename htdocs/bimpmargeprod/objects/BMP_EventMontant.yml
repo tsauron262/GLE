@@ -166,7 +166,13 @@ forms:
               display_if: 
                   field_name: has_details
                   show_values: 1
-                  
+    edit: 
+        rows: 
+            - field: amount
+            - field: tva_tx
+            - field: status
+            - field: comment
+            
     paiement: 
         rows: 
             - field: id_event
@@ -242,6 +248,8 @@ lists:
         sort_way: asc
         n: 0
         update_btn: 1
+        edit_btn: 1
+        edit_form: edit
         add_form_name: 
             callback: getCreateForm
         delete_btn: 
@@ -290,7 +298,6 @@ lists:
         add_form_values:
             fields: 
                 type: 1
-        
             
     recettes: 
         extends: default
@@ -305,7 +312,6 @@ lists:
         cols: 
             coprod: 
                 label: Reçu par
-        
             
     recettes_bar: 
         title: Recette du bar

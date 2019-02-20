@@ -1,4 +1,4 @@
-.object_view {
+.panel-secondary {
     .panel-secondary {
         /*border-color: #c8c8c8;*/
         .panel-heading {
@@ -75,8 +75,9 @@
                     textarea, input[type=text] {
                         width: 100%;
                     }
-                    .select2 {
+                    select,.select2 {
                         min-width: 160px;
+                        max-width: 350px!important;
                     }
                 }
                 .form-control {
@@ -107,14 +108,14 @@
         & > tbody > tr > td,
         & > tfoot > tr > td {
             text-align: center;
-}
+        }
     }
 
     & > tbody > tr.strong > td {
         font-weight: bold;
         background-color: #F0F0F0;
     }
-    
+
     & > tbody > tr.title > td {
         font-weight: bold;
         text-align: left;
@@ -122,7 +123,7 @@
         border-top-color: #C8C8C8!important;
         border-bottom-color: #C8C8C8!important;
     }
-    
+
     tr.total_row {
         & > td {
             font-weight: bold;
@@ -204,11 +205,11 @@
     .object_header {
         padding-top: 5px;
     }
-    
+
     & .object_header_infos {
         display: none;
     }
-    
+
     .header_buttons {
         margin-top: 0;
     }
@@ -217,23 +218,23 @@
         display: inline-block;
         margin-bottom: 5px
     }
-    
+
     h2 {
         font-size: 15px;
         display: inline-block;
         margin-left: 15px;
         margin-bottom: 5px
     }
-    
+
     .header_bottom {
         padding: 0;
         margin-top: 0;
     }
-    
-/*    .nav-tabs li a {
-        padding-top: 5px;
-        padding-bottom: 5px;
-    }*/
+
+    /*    .nav-tabs li a {
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }*/
 
 }
 

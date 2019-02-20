@@ -1,0 +1,19 @@
+bootstrap: 1
+
+
+objects: 
+    fichinter: 
+        instance: 
+            bimp_object: Bimp_Fichinter
+            id_object: 
+                request: id
+                
+                
+sections:
+    - type: object_header
+      object_header: 
+          object: fichinter
+      
+    - type: view
+      view: 
+          object: fichinter

@@ -24,6 +24,9 @@ class synopsisHook {//FA1506-0369
 
         if (defined('MAX_TIME_LOG'))
             self::$MAX_TIME_LOG = MAX_TIME_LOG;
+        
+        
+        
 
 
 
@@ -120,6 +123,7 @@ class synopsisHook {//FA1506-0369
         if (defined('PORT_INTERNE') && $_SERVER["SERVER_PORT"] != PORT_INTERNE)
             $conf->global->MAIN_SECURITY_ENABLECAPTCHA = 1;
     }
+    
 
     public static function reloadPage() {
         ob_start();
@@ -745,5 +749,10 @@ class dashboard {
     }
 
 }
+
+
+
+
+
 
 ?>

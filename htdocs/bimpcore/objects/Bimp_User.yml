@@ -86,6 +86,10 @@ fields:
         label: Tél. pro
     user_mobile: 
         label: Tél. portable
+    phone_perso: 
+        label: Tél. portable perso
+        dol_extra_field: 1
+        type: password
     skype: 
         label: Identifiant Skype
     fk_user: 
@@ -136,6 +140,15 @@ fields:
     mail_sec: 
         label: E-Mail de secours
         dol_extra_field: 1
+        type: password
+    code_sms: 
+        label: Code SMS
+        dol_extra_field: 1
+        type: text
+    echec_auth: 
+        label: Nombre d'echec d'authentification consecutif
+        dol_extra_field: 1
+        type: int
     comp:
         label: Compétence
         dol_extra_field: 1
@@ -158,6 +171,7 @@ forms:
             - field: firstname
             - field: office_phone
             - field: user_mobile
+            - field: phone_perso
             - field: mail_sec
             - field: apple_id
             - field: apple_service
@@ -170,6 +184,7 @@ forms:
             - field: signature
             - field: defaultentrepot
             - field: apple_centre
+            - field: echec_auth
             
 lists_cols: 
     id: 
@@ -186,8 +201,6 @@ lists_cols:
         field: job
     email: 
         field: email
-    mail_sec: 
-        field: mail_sec
     office_phone: 
         field: office_phone
     user_mobile: 
@@ -266,6 +279,12 @@ fields_tables:
             - field: lastname
             - field: login
             - field: gender
+    security:
+        title: Securité
+        icon: lock
+        rows: 
+            - field: code_sms
+            - field: echec_auth
             
     address:
         title: Adresse
@@ -283,8 +302,9 @@ fields_tables:
             - field: email
             - field: office_phone
             - field: user_mobile
-            - field: skype
+            - field: phone_perso
             - field: mail_sec
+            - field: skype
             - field: synchaction
             - field: displayedinglobaladdressbook
             - field: mailquota
@@ -335,6 +355,12 @@ views:
                   col_md: 6
                   col_sm: 12
                   fields_table: 
+                      name: contact
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
                       name: identity
                       
                 - type: fields_table
@@ -342,7 +368,8 @@ views:
                   col_md: 6
                   col_sm: 12
                   fields_table: 
-                      name: contact
+                      name: security
+                      
                       
             - cols: 
                 - type: fields_table

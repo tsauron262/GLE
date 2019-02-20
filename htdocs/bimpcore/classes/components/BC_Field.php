@@ -51,7 +51,7 @@ class BC_Field extends BimpComponent
         )
     );
     public static $missing_if_empty_types = array(
-        'string', 'text', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
+        'string', 'text', 'password', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
     );
 
     public function __construct(BimpObject $object, $name, $edit = false, $path = 'fields')
@@ -357,6 +357,7 @@ class BC_Field extends BimpComponent
             case 'time':
             case 'date':
             case 'datetime':
+            case 'password':
                 return $data_type;
         }
 
@@ -377,11 +378,13 @@ class BC_Field extends BimpComponent
                 switch ($this->params['type']) {
                     case 'html':
                     case 'text':
+                    case 'password':
                         $search_type = 'value_part';
                         $input_type = 'text';
                         break;
 
                     case 'date':
+                    case 'datetime':
                         $search_type = $input_type = 'date_range';
                         break;
 
@@ -389,9 +392,9 @@ class BC_Field extends BimpComponent
                         $search_type = $input_type = 'time_range';
                         break;
 
-                    case 'datetime':
-                        $search_type = $input_type = 'datetime_range';
-                        break;
+//                    case 'datetime':
+//                        $search_type = $input_type = 'datetime_range';
+//                        break;
 
                     case 'bool':
                         $input_type = 'select';

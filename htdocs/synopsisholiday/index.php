@@ -81,6 +81,9 @@ if ($isDrh || $droitAll) {
     $showGroups = GETPOST('show_groups_cp');
 }
 
+
+$morefiltre = 'search_ref='.$search_ref.'&month_create='.$month_create.'&year_create='.$year_create.'&type_conges='.$type_conges.'&search_employe='.$search_employe.'&search_valideur='.$search_valideur.'&month_start='.$month_start.'&year_start='.$year_start.'&month_end='.$month_end.'&year_end='.$year_end.'&select_statut='.$search_statut.'';
+
 /*
  * Actions
  */
@@ -318,18 +321,18 @@ if ($isDrh || $droitAll) {
 }
 print '<table class="noborder" width="100%;">';
 print "<tr class=\"liste_titre\">";
-print_liste_field_titre($langs->trans("Ref"), $_SERVER["PHP_SELF"], "cp.rowid", "", '', '', $sortfield, $sortorder);
-print_liste_field_titre($langs->trans("DateCreateCP"), $_SERVER["PHP_SELF"], "cp.date_create", "", '', 'align="center"', $sortfield, $sortorder);
-print_liste_field_titre($langs->trans("Type"), $_SERVER["PHP_SELF"], "cp.type_conges", "", '', 'align="center"', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("Ref"), $_SERVER["PHP_SELF"], "cp.rowid", "", $morefiltre, '', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("DateCreateCP"), $_SERVER["PHP_SELF"], "cp.date_create", "", $morefiltre, 'align="center"', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("Type"), $_SERVER["PHP_SELF"], "cp.type_conges", "", $morefiltre, 'align="center"', $sortfield, $sortorder);
 if (!$showGroups)
-    print_liste_field_titre($langs->trans("Employe"), $_SERVER["PHP_SELF"], "cp.fk_user", "", '', '', $sortfield, $sortorder);
+    print_liste_field_titre($langs->trans("Employe"), $_SERVER["PHP_SELF"], "cp.fk_user", "", $morefiltre, '', $sortfield, $sortorder);
 else
-    print_liste_field_titre("Groupe", $_SERVER["PHP_SELF"], "cp.fk_group", "", '', '', $sortfield, $sortorder);
-print_liste_field_titre($langs->trans("ValidatorCP"), $_SERVER["PHP_SELF"], "cp.fk_validator", "", '', '', $sortfield, $sortorder);
-print_liste_field_titre($langs->trans("DateDebCP"), $_SERVER["PHP_SELF"], "cp.date_debut", "", '', 'align="center"', $sortfield, $sortorder);
-print_liste_field_titre($langs->trans("DateFinCP"), $_SERVER["PHP_SELF"], "cp.date_fin", "", '', 'align="center"', $sortfield, $sortorder);
+    print_liste_field_titre("Groupe", $_SERVER["PHP_SELF"], "cp.fk_group", "", $morefiltre, '', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("ValidatorCP"), $_SERVER["PHP_SELF"], "cp.fk_validator", "", $morefiltre, '', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("DateDebCP"), $_SERVER["PHP_SELF"], "cp.date_debut", "", $morefiltre, 'align="center"', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("DateFinCP"), $_SERVER["PHP_SELF"], "cp.date_fin", "", $morefiltre, 'align="center"', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("Duration"));
-print_liste_field_titre($langs->trans("Status"), $_SERVER["PHP_SELF"], "cp.statut", "", '', 'align="center"', $sortfield, $sortorder);
+print_liste_field_titre($langs->trans("Status"), $_SERVER["PHP_SELF"], "cp.statut", "", $morefiltre, 'align="center"', $sortfield, $sortorder);
 print '<td></td>';
 print "</tr>\n";
 

@@ -123,18 +123,45 @@ fields:
         dol_extra_field: 1
         
     id_facture: 
-        label: Facture
+        label: Facture globale
         type: id_object
         object: facture
         default_value: 0
     
     date_commande:
         label: Date
+        dol_prop: date
         type: date
+        input: 
+            display_now: 1
+        required: 1
         
     date_creation: 
         label: Créée le
         type: datetime
+        
+    date_valid: 
+        label: Validée le
+        type: datetime
+        
+    date_cloture: 
+        label: Fermée le
+        type: datetime
+        
+    fk_user_modif: 
+        label: Dernière modification par
+        type: int
+        default_value: 0
+        
+    fk_user_valid: 
+        label: Validée par
+        type: int
+        default_value: 0
+        
+    fk_user_cloture: 
+        label: Fermée par
+        type: int
+        default_value: 0
         
     date_livraison: 
         label: Date prévue de livraison
@@ -153,6 +180,7 @@ fields_tables:
             - field: entrepot
               display: nom_url
               edit: 1
+            - field: ef_type
             - field: fk_input_reason
               edit: 
                   callback: isEditable
@@ -399,10 +427,50 @@ forms:
                   field_name: limited
                   show_values: 1 
                   
+    duplicate:
+        rows: 
+            2: 
+                field: libelle
+            3: 
+                field: ef_type
+            4:
+                field: date_commande
+            5: 
+                field: date_livraison
+            6: 
+                field: fk_availability
+                  
+lists_cols: 
+    ef_type:
+        field: ef_type
+    date_create: 
+        field: date_creation
+        date_commande:
+    date_commande: 
+        field: date_commande
+    date_livraison: 
+        field: date_livraison
+    total_ttc: 
+        field: total_ttc
+    libelle: 
+        field: libelle
+    facture: 
+        field: id_facture
+        display: nom_url
+    validComm: 
+        label: Valid. comm.
+        field: validComm
+        max_width: 45px
+    validFin:
+        label: Valid. fin.
+        field: validFin
+        max_width: 45px
+    
 lists: 
     default: 
         title: Liste des commandes
         icon: fas_dolly
+        configurable: 1
         checkboxes: 1
         bulk_actions:
             - label: supprimer les commandes sélectionnées
@@ -422,20 +490,13 @@ lists:
         edit_form: default
         delete_btn: 
             callback: isDeletable
-        modal_view: default
+        modal_view: full
         page_btn: 1
         cols: 
             ref: 
-                field: ref
             statut: 
-                field: fk_statut
+            libelle:
             entrepot: 
-                field: entrepot
-                display: nom_url
-            client: 
-                field: fk_soc
-                display: nom_url
+            soc:
             date_create: 
-                field: date_creation
-            total: 
-                field: total_ttc
+            total_ttc:

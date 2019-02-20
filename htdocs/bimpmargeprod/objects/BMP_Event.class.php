@@ -54,7 +54,7 @@ class BMP_Event extends BimpObject
         3 => array('label' => 'Validé', 'classes' => array('success'))
     );
     public static $tarifs = array(
-        'TARIF NORMAL', 'TARIF REDUIT', 'FILGOOD', 'TARIF SPECIAL', 'TARIF SPECIAL LE FIL', 'TARIF CE', 'INVITATIONS', 'GUICHET NORMAL', 'GUICHET REDUIT'
+        'TARIF NORMAL', 'TARIF REDUIT', 'FILGOOD', 'TARIF SPECIAL', 'TARIF SPECIAL LE FIL', 'TARIF CE', 'INVITATIONS', 'GUICHET NORMAL', 'GUICHET REDUIT', 'GUICHET FILGOOD'
     );
     public static $vendeurs = array();
     public static $analytics = array(
@@ -66,7 +66,8 @@ class BMP_Event extends BimpObject
         'JEU'  => 'JEU',
         'AUTR' => 'AUTR',
         'INT'  => 'INT',
-        'NUM'  => 'NUM'
+        'NUM'  => 'NUM',
+        'MER'  => 'MER'
     );
     protected $montants = array();
     protected $calc_montants = array();
@@ -444,12 +445,14 @@ class BMP_Event extends BimpObject
                         if ($type_montant === 0 && $type === 1) {
                             $paid_ttc *= -1;
                         }
+
+                        $paid_ht = (float) BimpTools::calculatePriceTaxEx($paid_ttc, $montant->getTvaTx());
                         $coprods_montants[(int) $id_coprod] = array(
                             'total_part_ht'  => $montant_ht * $part_tx,
                             'total_part_tva' => $montant_tva * $part_tx,
                             'total_part_ttc' => $montant_ttc * $part_tx,
-                            'total_paid_ht'  => 0, //$montant_ht * $paiement_tx,
-                            'total_paid_tva' => 0, //$montant_tva * $paiement_tx,
+                            'total_paid_ht'  => $paid_ht,
+//                            'total_paid_tva' => $montant_tva * $paiement_tx,
                             'total_paid_ttc' => $paid_ttc,
                         );
                     }
@@ -1024,6 +1027,240 @@ class BMP_Event extends BimpObject
         }
     }
 
+    public static function getTotalComptable($events, $id_coprod = 0, $cp_label = 'Le Fil')
+    {
+        $amounts = array(
+            'categories'     => array(),
+            'total_frais'    => 0,
+            'total_recettes' => 0,
+            'solde'          => 0
+        );
+
+        $total_coprods = array();
+        $total_dl_dist = 0;
+
+        $cp_instance = BimpObject::getInstance('bimpmargeprod', 'BMP_EventCoProd');
+        $soc_instance = BimpObject::getInstance('bimpcore', 'Bimp_Societe');
+
+        foreach ($events as $id_event) {
+            $event = BimpCache::getBimpObjectInstance('bimpmargeprod', 'BMP_Event', (int) $id_event);
+
+            if (!BimpObject::objectLoaded($event)) {
+                continue;
+            }
+
+            $cp_soldes = $event->getCoprodsSoldes();
+
+//            echo '<pre>';
+//            print_r($cp_soldes);
+//            echo '</pre>';
+
+            $billets_amounts = $event->getBilletsAmounts();
+            $montants = $event->getChildrenObjects('montants');
+
+            foreach ($montants as $montant) {
+                $paiements = $montant->getPaiements();
+                if (!isset($paiements[(int) $id_coprod]) || !(float) $paiements[(int) $id_coprod]) {
+                    continue;
+                }
+
+                $amount_ttc = (float) $paiements[(int) $id_coprod];
+                $amount_ht = (float) BimpTools::calculatePriceTaxEx($amount_ttc, (float) $montant->getTvaTx());
+
+                if (!round($amount_ht, 2)) {
+                    continue;
+                }
+
+                $tm = BimpCache::getBimpObjectInstance($event->module, 'BMP_TypeMontant', (int) $montant->getData('id_montant'));
+
+                if (!BimpObject::objectLoaded($tm)) {
+                    continue;
+                }
+
+                $id_category = (int) $tm->getData('id_category');
+
+                if (!isset($amounts['categories'][$id_category])) {
+                    $category = BimpCache::getBimpObjectInstance($event->module, 'BMP_CategorieMontant', $id_category);
+
+                    $amounts['categories'][$id_category] = array(
+                        'name'  => $category->getData('name'),
+                        'color' => $category->getData('color'),
+                        'rows'  => array()
+                    );
+                }
+
+                $filtre = $tm->id . "-" . $montant->getTvaTx();
+                $row = array(
+                    'status'       => $montant->displayData('status', 'default', false),
+                    'type_montant' => $tm->getData('name'),
+                    'code'         => $tm->getData('code_compta'),
+                    'tva'          => BimpTools::displayFloatValue($montant->getTvaTx()) . '%',
+                    'frais'        => (isset($amounts['categories'][$id_category]['rows'][$filtre]) ? $amounts['categories'][$id_category]['rows'][$filtre]['frais'] : 0),
+                    'recette'      => (isset($amounts['categories'][$id_category]['rows'][$filtre]) ? $amounts['categories'][$id_category]['rows'][$filtre]['recette'] : 0)
+                );
+
+                switch ((int) $tm->getData('type')) {
+                    case BMP_TypeMontant::BMP_TYPE_FRAIS:
+                        $row['frais'] += $amount_ht;
+                        $amounts['total_frais'] += $amount_ht;
+                        $amounts['solde'] -= $amount_ht;
+                        break;
+
+                    case BMP_TypeMontant::BMP_TYPE_RECETTE:
+                        $row['recette'] += $amount_ht;
+                        $amounts['total_recettes'] += $amount_ht;
+                        $amounts['solde'] += $amount_ht;
+                        break;
+                }
+
+                $amounts['categories'][$id_category]['rows'][$filtre] = $row;
+            }
+
+
+            if (!(int) $id_coprod) {
+                if (!empty($cp_soldes)) {
+                    foreach ($cp_soldes as $id_cp => $cp_solde) {
+                        if (!(float) $cp_solde) {
+                            continue;
+                        }
+
+                        $id_soc_cp = (int) $cp_instance->getSavedData('id_soc', (int) $id_cp);
+
+                        if (!isset($total_coprods[$id_soc_cp])) {
+                            $total_coprods[$id_soc_cp] = array(
+                                'total_frais'    => 0,
+                                'total_recettes' => 0
+                            );
+                        }
+
+                        if ($cp_solde > 0) {
+                            $total_coprods[$id_soc_cp]['total_recettes'] += $cp_solde;
+                        } else {
+                            $cp_solde *= -1;
+                            $total_coprods[$id_soc_cp]['total_frais'] += $cp_solde;
+                        }
+                    }
+                }
+            } elseif (isset($cp_soldes[(int) $id_coprod]) && (float) $cp_soldes[(int) $id_coprod]) {
+                $cp_solde = (float) $cp_soldes[(int) $id_coprod];
+
+                if (!isset($total_coprods[0])) {
+                    $total_coprods[0] = array(
+                        'total_frais'    => 0,
+                        'total_recettes' => 0
+                    );
+                }
+
+                if ($cp_solde > 0) {
+                    $total_coprods[0]['total_recettes'] += $cp_solde;
+                } else {
+                    $cp_solde *= -1;
+                    $total_coprods[0]['total_frais'] += $cp_solde;
+                }
+            }
+
+            if (isset($billets_amounts['coprods'][(int) $id_coprod])) {
+                $total_dl_dist += (float) $billets_amounts['coprods'][(int) $id_coprod]['total_dl_dist_ht'];
+            } elseif (!(int) $id_coprod) {
+                $total_dl_dist += (float) $billets_amounts['total_dl_dist_ht'];
+            }
+        }
+
+
+        //presentation en euro et "" quand 0
+        foreach ($amounts['categories'] as $id_categ => $rows) {
+            foreach ($rows['rows'] as $nom => $row) {
+                if ($amounts['categories'][$id_categ]['rows'][$nom]['frais'] == 0)
+                    $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = "";
+                else
+                    $amounts['categories'][$id_categ]['rows'][$nom]['frais'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['frais'], 'EUR');
+                if ($amounts['categories'][$id_categ]['rows'][$nom]['recette'] == 0)
+                    $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = "";
+                else
+                    $amounts['categories'][$id_categ]['rows'][$nom]['recette'] = BimpTools::displayMoneyValue($amounts['categories'][$id_categ]['rows'][$nom]['recette'], 'EUR');
+            }
+        }
+
+        // Ajout DL Distributeur
+        if ($total_dl_dist > 0) {
+            if (!isset($amounts['categories'][self::$id_billets_category])) {
+                $category = BimpCache::getBimpObjectInstance($event->module, 'BMP_CategorieMontant', self::$id_billets_category);
+                $amounts['categories'][self::$id_billets_category] = array(
+                    'name'  => $category->getData('name'),
+                    'color' => $category->getData('color'),
+                    'rows'  => array()
+                );
+            }
+            $amounts['categories'][self::$id_billets_category]['rows'][] = array(
+                'status'       => '',
+                'type_montant' => 'Droits de location distributeur',
+                'code'         => '',
+                'tva'          => '',
+                'frais'        => '',
+                'recette'      => BimpTools::displayMoneyValue($total_dl_dist, 'EUR')
+            );
+
+            $amounts['solde'] += $total_dl_dist;
+            $amounts['total_recettes'] += $total_dl_dist;
+        }
+
+        // Ajout totaux coprods: 
+        if (!empty($total_coprods)) {
+            if (!isset($amounts['categories'][self::$id_coprods_category])) {
+                $category = BimpCache::getBimpObjectInstance($event->module, 'BMP_CategorieMontant', self::$id_coprods_category);
+                $amounts['categories'][self::$id_coprods_category] = array(
+                    'name'  => $category->getData('name'),
+                    'color' => $category->getData('color'),
+                    'rows'  => array()
+                );
+            }
+
+            foreach ($total_coprods as $id_soc_cp => $total_cp) {
+                if (!(int) $id_coprod) {
+                    $solde = (float) $total_cp['total_frais'] - (float) $total_cp['total_recettes'];
+                } else {
+                    $solde = (float) $total_cp['total_recettes'] - (float) $total_cp['total_frais'];
+                }
+
+                $soc_label = '';
+
+                if (!$id_soc_cp) {
+                    if ((int) $id_coprod) {
+                        $soc_label = 'Le Fil';
+                    } else {
+                        $soc_label = 'Inconnu';
+                    }
+                } else {
+                    $soc_label = $soc_instance->getSavedData('nom', (int) $id_soc_cp);
+                }
+
+                $row = array(
+                    'status'       => '',
+                    'type_montant' => $soc_label,
+                    'code'         => '',
+                    'tva'          => '',
+                    'frais'        => '',
+                    'recette'      => ''
+                );
+
+                if ($solde > 0) {
+                    $row['recette'] = BimpTools::displayMoneyValue($solde, 'EUR');
+                    $amounts['total_recettes'] += $solde;
+                    $amounts['solde'] += $solde;
+                } else {
+                    $solde *= -1;
+                    $row['frais'] = BimpTools::displayMoneyValue($solde, 'EUR');
+                    $amounts['total_frais'] += $solde;
+                    $amounts['solde'] -= $solde;
+                }
+
+                $amounts['categories'][self::$id_coprods_category]['rows'][] = $row;
+            }
+        }
+
+        return $amounts;
+    }
+
     // Checks-up:
 
     public function checkCoprodsParts()
@@ -1359,11 +1596,17 @@ class BMP_Event extends BimpObject
 
     // Rendus HTML:
 
-    public function renderMontantsRecap($montant_type = 0, $coprods_parts_mode = 'ht', $coprods_paiements_mode = 'ttc')
+    public function renderMontantsRecap($montant_type = 0, $coprods_parts_mode = 'ht', $coprods_paiements_mode = 'ht')
     {
         $html = '';
 
         $totaux = $this->getMontantsRecap($montant_type);
+
+//        $html .= '<pre>';
+//        $html .= print_r($totaux, 1);
+//        $html .= '</pre>';
+//        return $html;
+
         $show_coprods = (int) $this->showCoprods();
         $colspan = 4;
         if ($show_coprods) {
@@ -1373,13 +1616,13 @@ class BMP_Event extends BimpObject
             $colspan += (2 * count($coprods));
         }
 
-        $html .= '<table class="bimp_list_table">';
+        $html .= '<table class="bimp_list_table" style="width: auto!important;">';
         $html .= '<thead>';
         $html .= '<tr>';
         $html .= '<th>Montant</th>';
         $html .= '<th style="text-align: center;">Montant HT</th>';
-        $html .= '<th style="text-align: center;">Montant TVA</th>';
-        $html .= '<th style="text-align: center;">Montant TTC</th>';
+//        $html .= '<th style="text-align: center;">Montant TVA</th>';
+//        $html .= '<th style="text-align: center;">Montant TTC</th>';
 
         if ($show_coprods) {
             foreach ($coprods as $id_coprod => $cp_label) {
@@ -1437,8 +1680,8 @@ class BMP_Event extends BimpObject
                         $html .= '<td style="font-weight: bold; color: #' . $categ->getData('color') . ';text-align:right;">' . $tm->getData('name') . '</td>';
 
                         $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($tot_montants['total_ht'], '', true) . '</td>';
-                        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($tot_montants['total_tva'], '', true) . '</td>';
-                        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($tot_montants['total_ttc'], '', true) . '</td>';
+//                        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($tot_montants['total_tva'], '', true) . '</td>';
+//                        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($tot_montants['total_ttc'], '', true) . '</td>';
 
                         if ($show_coprods) {
                             $fl = 1;
@@ -1471,8 +1714,8 @@ class BMP_Event extends BimpObject
                 // Total catégorie
                 $html .= '<td style="font-weight: bold;background-color: ' . $td_bk_col . '!important; color: #' . $categ->getData('color') . ';text-align:right;">Total</td>';
                 $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;">' . BimpTools::displayMoneyValue($tot_cat['total_ht'], '', true) . (isset($tot_cat['total_ht_percent']) ? ' (' . BimpTools::displayFloatValue($tot_cat['total_ht_percent']) . '%)' : '') . '</td>';
-                $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;">' . BimpTools::displayMoneyValue($tot_cat['total_tva'], '', true) . '</td>';
-                $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;">' . BimpTools::displayMoneyValue($tot_cat['total_ttc'], '', true) . '</td>';
+//                $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;">' . BimpTools::displayMoneyValue($tot_cat['total_tva'], '', true) . '</td>';
+//                $html .= '<td style="text-align: center;background-color: ' . $td_bk_col . '!important;">' . BimpTools::displayMoneyValue($tot_cat['total_ttc'], '', true) . '</td>';
 
                 if ($show_coprods) {
                     $fl = 1;
@@ -1512,8 +1755,8 @@ class BMP_Event extends BimpObject
         $html .= '<tr style="border: 2px solid #505050; font-size: 14px">';
         $html .= '<td style="text-align: right">Total</td>';
         $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($totaux['total_ht'], '', true) . '</td>';
-        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($totaux['total_tva'], '', true) . '</td>';
-        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($totaux['total_ttc'], '', true) . '</td>';
+//        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($totaux['total_tva'], '', true) . '</td>';
+//        $html .= '<td style="text-align: center;">' . BimpTools::displayMoneyValue($totaux['total_ttc'], '', true) . '</td>';
 
         if ($show_coprods) {
             $fl = 1;
@@ -1891,7 +2134,7 @@ class BMP_Event extends BimpObject
                 $html .= '</tr>';
 
                 $total_autre_net = $total_autre_brut;
-                
+
 //                $html .= '<tr>';
 //                $html .= '<td>SACEM autres recettes</td>';
 //                $html .= '<td>' . BimpTools::displayMoneyValue($sacem_autre * -1, 'EUR', true) . '</td>';
@@ -1981,8 +2224,8 @@ class BMP_Event extends BimpObject
         $tabs = array();
         $montants = array(
             array('id_type_montant' => 8, 'title' => 'Frais d\'hôtel', 'label' => 'Hôtel', 'id' => 'frais_hotel'),
-            array('id_type_montant' => 9, 'title' => 'Frais de repas (TVA à 5,5%)', 'label' => 'Repas (5,5%)', 'id' => 'repas_5_5'),
-            array('id_type_montant' => 10, 'title' => 'Frais de repas (TVA à 20%)', 'label' => 'Repas (20%)', 'id' => 'repas_19_6'),
+            array('id_type_montant' => 9, 'title' => 'Catering Le Fil', 'label' => 'Catering Le Fil', 'id' => 'catering'),
+            array('id_type_montant' => 10, 'title' => 'Repas extérieurs', 'label' => 'Repas extérieurs', 'id' => 'repas_ext'),
         );
 
         foreach ($montants as $m) {
@@ -2042,6 +2285,9 @@ class BMP_Event extends BimpObject
             $html .= '<h3>Détails calculs: </h3>';
         }
 
+        $nb_billets_payants = 0;
+        $nb_billets_gratuits = 0;
+
         if ($nTarifs > 0) {
             $id_billets_type_montant = (int) $this->getBilletsIdTypeMontant();
             $billets_tva_tx = (float) $this->getMontantTvaTx($id_billets_type_montant);
@@ -2061,6 +2307,9 @@ class BMP_Event extends BimpObject
                 if ($qty) {
                     if ($prix_ttc) {
                         $total_billets_ttc += $prix_ttc * $qty;
+                        $nb_billets_payants += $qty;
+                    } else {
+                        $nb_billets_gratuits += $qty;
                     }
                     $nbBillets += $qty;
                 }
@@ -2069,8 +2318,8 @@ class BMP_Event extends BimpObject
             $total_billets_ht = BimpTools::calculatePriceTaxEx($total_billets_ttc, $billets_tva_tx);
 
             if ($nbBillets) {
-                $prix_moyen_ttc = $total_billets_ttc / $nbBillets;
-                $prix_moyen_ht = $total_billets_ht / $nbBillets;
+                $prix_moyen_ttc = $total_billets_ttc / $nb_billets_payants;
+                $prix_moyen_ht = $total_billets_ht / $nb_billets_payants;
             }
 
             if ($debug) {
@@ -2282,8 +2531,8 @@ class BMP_Event extends BimpObject
         $html .= '</tr>';
 
         if ($status === 1) {
-            $prev_dl_dist = $nbBillets * (float) $this->getData('default_dl_dist');
-            $prev_dl_prod = $nbBillets * (float) $this->getData('default_dl_prod');
+            $prev_dl_dist = $nb_billets_payants * (float) $this->getData('default_dl_dist');
+            $prev_dl_prod = $nb_billets_payants * (float) $this->getData('default_dl_prod');
 
             $html .= '<tr>';
             $html .= '<th>Total DL distributeurs prévisionnel</th>';
@@ -2296,6 +2545,15 @@ class BMP_Event extends BimpObject
             $html .= '</tr>';
         }
 
+        $html .= '<tr>';
+        $html .= '<th>Nombre de billets payants</th>';
+        $html .= '<td>' . $nb_billets_payants . '</td>';
+        $html .= '</tr>';
+
+        $html .= '<tr>';
+        $html .= '<th>Nombre d\'invitations</th>';
+        $html .= '<td>' . $nb_billets_gratuits . '</td>';
+        $html .= '</tr>';
         $html .= '<tr>';
         $html .= '<th>Ratio invitations / total billets</th>';
         $html .= '<td>' . round($this->GetFreeBilletsRatio() * 100, 2) . ' %</td>';
@@ -2385,253 +2643,114 @@ class BMP_Event extends BimpObject
         return $html;
     }
 
-    public function renderBilansComptables()
+    public function renderBilanComptable($amounts, $with_status = true)
+    {
+        $html = '';
+
+        $html .= '<div class="row">';
+        $html .= '<div class="col-sm-12 col-md-10 col-lg-8">';
+        $html .= '<table class="bimp_list_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        if ($with_status) {
+            $html .= '<th>Statut</th>';
+        }
+        $html .= '<th>Type montant</th>';
+        $html .= '<th>Code comptable</th>';
+        $html .= '<th>Tx TVA</th>';
+        $html .= '<th>Charges HT</th>';
+        $html .= '<th>Recettes HT</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $html .= '<tbody>';
+
+        foreach ($amounts['categories'] as $id_cat => $cat) {
+            $html .= '<tr>';
+            $html .= '<td colspan="6" style="padding-top: 15px; border-bottom: 2px solid #' . $cat['color'] . '!important; color: #' . $cat['color'] . '; font-weight: bold">' . $cat['name'] . '</td>';
+            $html .= '</tr>';
+
+            foreach ($cat['rows'] as $r) {
+                $style = 'font-weight: bold; color: #' . $cat['color'] . ';';
+                $html .= '<tr>';
+                if ($with_status) {
+                    $html .= '<td>' . $r['status'] . '</td>';
+                }
+                $html .= '<td style="' . $style . '">' . $r['type_montant'] . '</td>';
+                $html .= '<td style="' . $style . '">' . $r['code'] . '</td>';
+                $html .= '<td style="' . $style . '">' . $r['tva'] . '</td>';
+                $html .= '<td style="' . $style . '">' . $r['frais'] . '</td>';
+                $html .= '<td style="' . $style . '">' . $r['recette'] . '</td>';
+                $html .= '</tr>';
+            }
+        }
+
+        $html .= '<tr>';
+        $html .= '<td colspan=' . ($with_status ? '6' : '5') . '" style="height: 15px"></td>';
+        $html .= '</tr>';
+        $html .= '</tbody>';
+
+        $html .= '<tfoot>';
+        $html .= '<tr style="border: 2px solid #505050;border-bottom-width: 1px;font-weight: bold; font-size: 14px;">';
+        $html .= '<td colspan="' . ($with_status ? '4' : '3') . '" style="text-align: right;padding-right: 20px;">Total : </td>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($amounts['total_frais'], 'EUR') . '</td>';
+        $html .= '<td>' . BimpTools::displayMoneyValue($amounts['total_recettes'], 'EUR') . '</td>';
+        $html .= '</tr>';
+        $html .= '<tr style="border: 2px solid #505050;border-top-width: 1px;font-weight: bold; font-size: 14px">';
+        $html .= '<td colspan="' . ($with_status ? '4' : '3') . '" style="text-align: right;padding-right: 20px;">Solde : </td>';
+        $html .= '<td colspan="2">' . BimpTools::displayMoneyValue($amounts['solde'], 'EUR') . '</td>';
+        $html .= '</tr>';
+        $html .= '</tfoot>';
+
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    public function renderEventBilansComptables()
     {
         if (!$this->isLoaded()) {
             return '';
         }
 
         $coprods = $this->getCoProds(true);
-        $montants = $this->getChildrenObjects('montants');
 
         $tabs = array();
 
         $coprods[0] = 'Le Fil';
 
-        $cp_soldes = $this->getCoprodsSoldes();
-        $billets_amounts = $this->getBilletsAmounts();
-
-        foreach ($coprods as $id_coprod => $cp_name) {
-            $html = '';
-
-            $rows = array();
-            $solde = 0;
-            $total_frais = 0;
-            $total_recettes = 0;
-
-            foreach ($montants as $montant) {
-                $paiements = $montant->getPaiements();
-                if (!isset($paiements[(int) $id_coprod]) || !(float) $paiements[(int) $id_coprod]) {
-                    continue;
-                }
-
-                $amount_ttc = (float) $paiements[(int) $id_coprod];
-                $amount_ht = (float) BimpTools::calculatePriceTaxEx($amount_ttc, (float) $montant->getTvaTx());
-
-                if (!round($amount_ht, 2)) {
-                    continue;
-                }
-
-                $tm = BimpCache::getBimpObjectInstance($this->module, 'BMP_TypeMontant', (int) $montant->getData('id_montant'));
-
-                if (!BimpObject::objectLoaded($tm)) {
-                    continue;
-                }
-
-                $id_category = (int) $tm->getData('id_category');
-
-                if (!isset($rows[$id_category])) {
-                    $category = BimpCache::getBimpObjectInstance($this->module, 'BMP_CategorieMontant', $id_category);
-
-                    $rows[$id_category] = array(
-                        'name'  => $category->getData('name'),
-                        'color' => $category->getData('color'),
-                        'rows'  => array()
-                    );
-                }
-
-                $row = array(
-                    'status'       => $montant->displayData('status', 'default', false),
-                    'type_montant' => $tm->getData('name'),
-                    'code'         => $tm->getData('code_compta'),
-                    'tva'          => BimpTools::displayFloatValue($montant->getTvaTx()) . '%',
-                    'frais'        => '',
-                    'recette'      => ''
-                );
-
-                switch ((int) $tm->getData('type')) {
-                    case BMP_TypeMontant::BMP_TYPE_FRAIS:
-                        $row['frais'] = BimpTools::displayMoneyValue($amount_ht, 'EUR');
-                        $total_frais += $amount_ht;
-                        $solde -= $amount_ht;
-                        break;
-
-                    case BMP_TypeMontant::BMP_TYPE_RECETTE:
-                        $row['recette'] = BimpTools::displayMoneyValue($amount_ht, 'EUR');
-                        $total_recettes += $amount_ht;
-                        $solde += $amount_ht;
-                        break;
-                }
-
-                $rows[$id_category]['rows'][] = $row;
-            }
-
-            if (!(int) $id_coprod) {
-                if (!empty($cp_soldes)) {
-                    if (!isset($rows[self::$id_coprods_category])) {
-                        $category = BimpCache::getBimpObjectInstance($this->module, 'BMP_CategorieMontant', self::$id_coprods_category);
-                        $rows[self::$id_coprods_category] = array(
-                            'name'  => $category->getData('name'),
-                            'color' => $category->getData('color'),
-                            'rows'  => array()
-                        );
-                    }
-
-                    foreach ($cp_soldes as $id_cp => $cp_solde) {
-                        if (!(float) $cp_solde) {
-                            continue;
-                        }
-                        $row = array(
-                            'status'       => '',
-                            'type_montant' => 'Facture ' . $coprods[$id_cp],
-                            'code'         => '',
-                            'tva'          => '',
-                            'frais'        => '',
-                            'recette'      => ''
-                        );
-
-                        if ($cp_solde > 0) {
-                            $row['frais'] = BimpTools::displayMoneyValue($cp_solde, 'EUR');
-                            $total_frais += $cp_solde;
-                            $solde -= $cp_solde;
-                        } else {
-                            $cp_solde *= -1;
-                            $row['recette'] = BimpTools::displayMoneyValue($cp_solde, 'EUR');
-                            $total_recettes += $cp_solde;
-                            $solde += $cp_solde;
-                        }
-
-                        $rows[self::$id_coprods_category]['rows'][] = $row;
-                    }
-                }
-            } elseif (isset($cp_soldes[(int) $id_coprod]) && (float) $cp_soldes[(int) $id_coprod]) {
-                if (!isset($rows[self::$id_coprods_category])) {
-                    $category = BimpCache::getBimpObjectInstance($this->module, 'BMP_CategorieMontant', self::$id_coprods_category);
-                    $rows[self::$id_coprods_category] = array(
-                        'name'  => $category->getData('name'),
-                        'color' => $category->getData('color'),
-                        'rows'  => array()
-                    );
-                }
-
-                $cp_solde = (float) $cp_soldes[(int) $id_coprod];
-
-                $row = array(
-                    'status'       => '',
-                    'type_montant' => 'Paiement Le Fil',
-                    'code'         => '',
-                    'tva'          => '',
-                    'frais'        => '',
-                    'recette'      => ''
-                );
-
-                if ($cp_solde > 0) {
-                    $row['recette'] = BimpTools::displayMoneyValue($cp_solde, 'EUR');
-                    $total_recettes += $cp_solde;
-                    $solde += $cp_solde;
-                } else {
-                    $cp_solde *= -1;
-                    $row['frais'] = BimpTools::displayMoneyValue($cp_solde, 'EUR');
-                    $total_frais += $cp_solde;
-                    $solde -= $cp_solde;
-                }
-
-                $rows[self::$id_coprods_category]['rows'][] = $row;
-            }
-
-            // Ajout DL Distributeur
-            $dl_dist = 0;
-            if (isset($billets_amounts['coprods'][(int) $id_coprod])) {
-                $dl_dist = (float) $billets_amounts['coprods'][(int) $id_coprod]['total_dl_dist_ht'];
-            } elseif (!(int) $id_cp) {
-                $dl_dist = (float) $billets_amounts['total_dl_dist_ht'];
-            }
-
-            if ($dl_dist) {
-                if (!isset($rows[self::$id_billets_category])) {
-                    $category = BimpCache::getBimpObjectInstance($this->module, 'BMP_CategorieMontant', self::$id_billets_category);
-                    $rows[self::$id_billets_category] = array(
-                        'name'  => $category->getData('name'),
-                        'color' => $category->getData('color'),
-                        'rows'  => array()
-                    );
-                }
-                $rows[self::$id_billets_category]['rows'][] = array(
-                    'status'       => '',
-                    'type_montant' => 'Droits de location distributeur',
-                    'code'         => '',
-                    'tva'          => '',
-                    'frais'        => '',
-                    'recette'      => BimpTools::displayMoneyValue($dl_dist, 'EUR')
-                );
-                
-                $solde += $dl_dist;
-                $total_recettes += $dl_dist;
-            }
-
-            $html .= '<div class="row">';
-            $html .= '<div class="col-sm-12 col-md-10 col-lg-8">';
-            $html .= '<table class="bimp_list_table">';
-            $html .= '<thead>';
-            $html .= '<tr>';
-            $html .= '<th>Statut</th>';
-            $html .= '<th>Type montant</th>';
-            $html .= '<th>Code comptable</th>';
-            $html .= '<th>Tx TVA</th>';
-            $html .= '<th>Charges HT</th>';
-            $html .= '<th>Recettes HT</th>';
-            $html .= '</tr>';
-            $html .= '</thead>';
-
-            $html .= '<tbody>';
-
-            foreach ($rows as $id_cat => $cat) {
-                $html .= '<tr>';
-                $html .= '<td colspan="6" style="padding-top: 15px; border-bottom: 2px solid #' . $cat['color'] . '!important; color: #' . $cat['color'] . '; font-weight: bold">' . $cat['name'] . '</td>';
-                $html .= '</tr>';
-
-                foreach ($cat['rows'] as $r) {
-                    $style = 'font-weight: bold; color: #' . $cat['color'] . ';';
-                    $html .= '<tr>';
-                    $html .= '<td>' . $r['status'] . '</td>';
-                    $html .= '<td style="' . $style . '">' . $r['type_montant'] . '</td>';
-                    $html .= '<td style="' . $style . '">' . $r['code'] . '</td>';
-                    $html .= '<td style="' . $style . '">' . $r['tva'] . '</td>';
-                    $html .= '<td style="' . $style . '">' . $r['frais'] . '</td>';
-                    $html .= '<td style="' . $style . '">' . $r['recette'] . '</td>';
-                    $html .= '</tr>';
-                }
-            }
-
-            $html .= '<tr>';
-            $html .= '<td colspan=6" style="height: 15px"></td>';
-            $html .= '</tr>';
-            $html .= '</tbody>';
-
-            $html .= '<tfoot>';
-            $html .= '<tr style="border: 2px solid #505050;border-bottom-width: 1px;font-weight: bold; font-size: 14px;">';
-            $html .= '<td colspan="4" style="text-align: right;padding-right: 20px;">Total : </td>';
-            $html .= '<td>' . BimpTools::displayMoneyValue($total_frais, 'EUR') . '</td>';
-            $html .= '<td>' . BimpTools::displayMoneyValue($total_recettes, 'EUR') . '</td>';
-            $html .= '</tr>';
-            $html .= '<tr style="border: 2px solid #505050;border-top-width: 1px;font-weight: bold; font-size: 14px">';
-            $html .= '<td colspan="4" style="text-align: right;padding-right: 20px;">Solde : </td>';
-            $html .= '<td colspan="2">' . BimpTools::displayMoneyValue($solde, 'EUR') . '</td>';
-            $html .= '</tr>';
-            $html .= '</tfoot>';
-
-            $html .= '</table>';
-            $html .= '</div>';
-            $html .= '</div>';
+        foreach ($coprods as $id_coprod => $cp_label) {
+            $amounts = $this->getTotalComptable(array($this->id), $id_coprod, $cp_label);
+            $html = $this->renderBilanComptable($amounts);
 
             $tabs[] = array(
                 'id'      => 'coprod_' . $id_coprod,
-                'title'   => 'Bilan Comptable ' . $cp_name,
+                'title'   => 'Bilan Comptable ' . $cp_label,
                 'content' => $html
             );
         }
 
         return BimpRender::renderNavTabs($tabs, 'bilans');
+    }
+
+    public function renderEventsBilanComptable($items)
+    {
+        $events = array();
+
+        $html = '';
+//        $html .= '<h1>Bilan comptable</h1>';
+        $html .= '<h2>' . count($items) . ' événements pris en compte</h2>';
+
+        foreach ($items as $item) {
+            $events[] = (int) $item['id'];
+        }
+
+        $amounts = $this->getTotalComptable($events);
+        $html .= $this->renderBilanComptable($amounts, false);
+
+        return $html;
     }
 
     // Events:

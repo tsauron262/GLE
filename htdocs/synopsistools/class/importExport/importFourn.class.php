@@ -21,7 +21,7 @@ class importFourn extends import8sens {
             $this->updateFourn($lnS->rowid, $ln);
         }
         else{
-            if(($ln['FouIsSupp'] != "X" && $ln['FouIsSleep'] != "X") ? "1" : "0")
+            if($ln['FouIsSupp'] != "X" && $ln['FouIsSleep'] != "X" && $ln['FouLib'] != "")
                 $this->updateFourn($this->addFourn($ln), $ln);
         }
     }

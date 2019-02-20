@@ -8,9 +8,9 @@ table#customer {
     margin-top: 30px;
 }
 
-table#customer tr:nth-child(even){
+/*table#customer tr:nth-child(even){
     background: #ccc;
-}
+}*/
 
 table#customer th, table#customer td {
     padding: 3px 10px 3px 10px;

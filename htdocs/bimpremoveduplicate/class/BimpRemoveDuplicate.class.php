@@ -114,10 +114,15 @@ class BimpRemoveDuplicateCustomer {
 
         $action = 'confirm_merge';
         $hookmanager->initHooks(array('thirdpartycard', 'globalcard'));
-        
-        
+
+
         foreach ($src_to_dest as $src => $dest) {
-            $soc_dest->fetch((int) $dest);
+            $result = $soc_dest->fetch((int) $dest);
+
+            if ($result != 1) {
+                $this->addErrorMerge($src, "Tier destination inconnue, id=" . $dest);
+                continue;
+            }
 
             $error = 0;
             $soc_origin_id = (int) $src;

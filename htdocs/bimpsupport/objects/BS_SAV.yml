@@ -727,6 +727,9 @@ lists_cols:
         field: diagnostic
     resolution:
         field: resolution
+    propal:
+        field: id_propal
+        display: nom_url
                         
 filters_panels: 
     default: 

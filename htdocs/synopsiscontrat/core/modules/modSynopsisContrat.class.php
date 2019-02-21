@@ -272,6 +272,8 @@ $tabModel = array(
                 )
             ), 1, "", 1, 1, "", "", "", 1);
         
+        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."cronjob` (`jobtype`, `label`, `command`, `classesname`, `objectname`, `methodename`, `params`, `md5params`, `module_name`, `priority`, `datelastrun`, `datenextrun`, `datestart`, `dateend`, `datelastresult`, `lastresult`, `lastoutput`, `unitfrequency`, `frequency`, `nbrun`, `status`, `fk_user_author`, `fk_user_mod`, `note`, `libname`, `entity`, `maxrun`, `autodelete`, `fk_mailing`, `test`, `processing`) VALUES
+('method', 'Rappel tâche commerciaux', 'curl http://127.0.0.1/bimp-8/bimp-erp/htdocs/synopsiscontrat/testreminder.php?days=2', 'synopsiscontrat/class/remindendservice.class.php', 'RemindEndService', 'setTaskForService', '3', '', 'synopsiscontrat', 0, '2010-01-20 17:31:27', '2010-02-27 11:30:00', '2010-02-08 00:00:00', NULL, NULL, '', '', '3600', 1, 0, 1, 330, 330, 'Envoie une tâche aux commerciaux pour leurs rappeler qu\'un service arrive à terme.\r\nParamètre : nombre de jours qui séparent aujourd\'hui et la date de fin de validité des services.', NULL, 1, 0, 0, NULL, NULL, 0);";
         
         return $this->_init($sql);
     }
@@ -290,6 +292,7 @@ $tabModel = array(
 //         $extrafields->delete('duree_mois', 'contrat');
 //         $extrafields->delete('periodicity', 'contrat');
         $sql = array("DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE nom = '" . $this->const[0][2] . "' AND entity = " . $conf->entity);
+        $sql[] = "DELETE FROM `".MAIN_DB_PREFIX."cronjob` WHERE `methodename` LIKE 'setTaskForService'";
         return $this->_remove($sql);
     }
 

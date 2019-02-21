@@ -47,7 +47,12 @@ fields:
         type: text
     duration:
         label: Durée
-        type: int
+        type: time_last
+        input: 
+            type: timer
+        display:
+            default: 
+                type: timer
     fk_typeinterv:
         label: typoe interv
         type: int
@@ -140,7 +145,7 @@ lists:
         checkboxes: 1
         configurable: 1
         sort_field: rowid
-        sort_way: desc
+        sort_way: asc
         n: 25
         delete_btn: 1
         modal_view: default

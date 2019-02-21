@@ -1,6 +1,18 @@
 <?php
 
 
+$chaine = file_get_contents("/data/synchro/test.txt");
+
+        $chaine = str_replace("\x0D\x0A\x20", '', $chaine);
+
+//$chaine = str_replace(array("\x0A\x20", "\x0D\x0A\x20"), "", $chaine);
+
+echo "<textarea>".$chaine."</textarea>";
+
+
+die('ll');
+
+
 $file = file_get_contents("/Users/tommy/Downloads/2f332e25-97d0-bc4b-b143-a4af33e58bd8.ics");
 $file = str_replace("\x0A\x20", '', $file);
 die ($file);

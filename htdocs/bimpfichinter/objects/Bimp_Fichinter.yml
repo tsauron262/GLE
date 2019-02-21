@@ -136,7 +136,12 @@ fields:
                 
     duree:
         label: Durée
-        type: time
+        type: time_last
+        input: 
+            type: timer
+        display:
+            default: 
+                type: timer
         
     note_public:
         label: Note Public
@@ -291,7 +296,7 @@ lists:
     default: 
         checkboxes: 1
         configurable: 1
-        sort_field: id
+        sort_field: datei
         sort_way: desc
         n: 25
         delete_btn: 0
@@ -341,6 +346,13 @@ fields_tables:
               edit: 1
             - field: date_valid 
             - field: duree 
+#            - label: Horraire arrivé AM
+#              value:
+#                  callback:
+#                      method: displayExtra
+#                      params:
+#                          - extra24
+#                          - time
             - field: extra24
               edit: 1
             - field: extra26

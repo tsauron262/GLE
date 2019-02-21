@@ -113,7 +113,7 @@ class Bimp_Propal extends BimpComm
                             'label'   => 'Valider',
                             'icon'    => 'check',
                             'onclick' => $this->getJsActionOnclick('validate', array(), array(
-                                'confirm_msg' => 'Veuillez confirmer la validation '.$this->getLabel('of_this')
+                                'confirm_msg' => 'Veuillez confirmer la validation ' . $this->getLabel('of_this')
                             ))
                         );
                     } else {
@@ -295,23 +295,23 @@ class Bimp_Propal extends BimpComm
         return $conf->propal->dir_output;
     }
 
-    public function getCommercialSearchFilters(&$filters, $value, &$joins = array())
+    public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         if ((int) $value) {
-            $filters['tc.element'] = 'propal';
-            $filters['tc.source'] = 'internal';
-            $filters['tc.code'] = 'SALESREPFOLL';
-            $filters['ec.fk_socpeople'] = (int) $value;
+            $filters['typecont.element'] = 'propal';
+            $filters['typecont.source'] = 'internal';
+            $filters['typecont.code'] = 'SALESREPFOLL';
+            $filters['elemcont.fk_socpeople'] = (int) $value;
 
-            $joins['ec'] = array(
+            $joins['elemcont'] = array(
                 'table' => 'element_contact',
-                'on'    => 'ec.element_id = a.rowid',
-                'alias' => 'ec'
+                'on'    => 'elemcont.element_id = ' . $main_alias . '.rowid',
+                'alias' => 'elemcont'
             );
-            $joins['tc'] = array(
+            $joins['typecont'] = array(
                 'table' => 'c_type_contact',
-                'on'    => 'ec.fk_c_type_contact = tc.rowid',
-                'alias' => 'tc'
+                'on'    => 'elemcont.fk_c_type_contact = typecont.rowid',
+                'alias' => 'typecont'
             );
         }
     }
@@ -584,7 +584,7 @@ class Bimp_Propal extends BimpComm
         if (method_exists($this, 'beforeUpdateDolObject')) {
             $this->beforeUpdateDolObject();
         }
-        
+
         $result = $this->dol_object->update($user);
         if ($result <= 0) {
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la mise à jour de la propale');
@@ -603,9 +603,9 @@ class Bimp_Propal extends BimpComm
         if ($this->dol_object->insertExtraFields('', $user) <= 0) {
             $errors[] = 'Echec de la mise à jour des champs supplémentaires';
         }
-        
+
         $this->dol_object->fetch($this->id);
-        
+
         // Ref. client
         if ((string) $this->getData('ref_client') !== (string) $this->dol_object->ref_client) {
             $this->dol_object->error = '';
@@ -721,7 +721,7 @@ class Bimp_Propal extends BimpComm
             }
         }
 
-        
+
         if (!count($errors)) {
             return 1;
         }

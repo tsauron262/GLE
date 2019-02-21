@@ -755,25 +755,25 @@ class BS_SAV extends BimpObject
         return $buttons;
     }
 
-    public function getEquipmentSearchFilters(&$filters, $value, &$joins = array())
+    public function getEquipmentSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         if ((string) $value) {
-            $joins['e'] = array(
+            $joins['equip'] = array(
                 'table' => 'be_equipment',
-                'alias' => 'e',
-                'on'    => 'a.id_equipment = e.id'
+                'alias' => 'equip',
+                'on'    => $main_alias . '.id_equipment = equip.id'
             );
             $filters['or_equipment'] = array(
                 'or' => array(
-                    'e.serial'        => array(
+                    'equip.serial'        => array(
                         'part_type' => 'middle', // ou middle ou end
                         'part'      => $value
                     ),
-                    'e.product_label' => array(
+                    'equip.product_label' => array(
                         'part_type' => 'middle',
                         'part'      => $value
                     ),
-                    'e.warranty_type' => array(
+                    'equip.warranty_type' => array(
                         'part_type' => 'middle',
                         'part'      => $value
                     )
@@ -782,7 +782,7 @@ class BS_SAV extends BimpObject
         }
     }
 
-    public function getEquipementSearchFilters(&$filters, $value, &$joins = array())
+    public function getEquipementSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         $filters['or_equipment'] = array(
             'or' => array(
@@ -3538,21 +3538,22 @@ class BS_SAV extends BimpObject
 
         return $errors;
     }
-    
-    public function updateClient(&$warnings = array(), $id){
+
+    public function updateClient(&$warnings = array(), $id)
+    {
         $errors = array();
-        if($this->getData("id_facture_acompte") > 0){
+        if ($this->getData("id_facture_acompte") > 0) {
             $fact = $this->getChildObject("facture_acompte");
             $fact->set("fk_soc", $id);
             $errors = $fact->update($warnings, true);
         }
-        
-        
-        if($this->getData("id_discount") > 0 && !count($errors)) {
-            $this->db->db->query("UPDATE ".MAIN_DB_PREFIX."societe_remise_except SET `fk_soc` = ".$id." WHERE rowid = ".$this->getData("id_discount"));
+
+
+        if ($this->getData("id_discount") > 0 && !count($errors)) {
+            $this->db->db->query("UPDATE " . MAIN_DB_PREFIX . "societe_remise_except SET `fk_soc` = " . $id . " WHERE rowid = " . $this->getData("id_discount"));
         }
-        
-        if($this->getData("id_propal") > 0 && !count($errors)){
+
+        if ($this->getData("id_propal") > 0 && !count($errors)) {
             // Mise à jour du client de la propale: 
             $prop = $this->getChildObject("propal");
             $prop->set('fk_soc', (int) $id);
@@ -3564,7 +3565,7 @@ class BS_SAV extends BimpObject
 //            $errors = $prop->updateDolObject($warnings, true);
 //            $this->db->db->query("UPDATE ".MAIN_DB_PREFIX."propal SET `fk_soc` = ".$id." WHERE rowid = ".$this->getData("id_propal"));
         }
-        
+
         // Changement du client pour les prêts:
         $prets = $this->getChildrenObjects('prets');
         foreach ($prets as $pret) {
@@ -3574,13 +3575,13 @@ class BS_SAV extends BimpObject
                 $warnings[] = BimpTools::getMsgFromArray($pret_errors, 'Des erreurs sont survenues lors de la mise à jour du prêt "' . $pret->getData('ref') . '"');
             }
         }
-        
-        if($this->getData("id_facture") > 0){
+
+        if ($this->getData("id_facture") > 0) {
             $fact = $this->getChildObject("facture");
             $fact->set("fk_soc", $id);
             $errors = $fact->update($warnings, true);
         }
-        
+
         return $errors;
     }
 
@@ -3589,10 +3590,10 @@ class BS_SAV extends BimpObject
         $errors = array();
 
         $centre = $this->getCentreData();
-        
-        
-        if($this->getData("id_client") != $this->initData["id_client"])
-            $errors = $this->updateClient ($warnings, $this->getData("id_client"));
+
+
+        if ($this->getData("id_client") != $this->initData["id_client"])
+            $errors = $this->updateClient($warnings, $this->getData("id_client"));
 
         if (!is_null($centre)) {
             $this->set('id_entrepot', (int) $centre['id_entrepot']);

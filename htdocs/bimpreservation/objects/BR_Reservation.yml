@@ -6,7 +6,7 @@ labels:
     name: réservation
     is_female: 1
 
-objects:                 
+objects:
     commercial: 
         extends: user
         instance: 
@@ -14,15 +14,23 @@ objects:
                 field_value: id_commercial
                 
     commande_client: 
+        extends: commande
         relation: hasOne
-        delete: 0
         instance: 
-            dol_object: commande
             id_object: 
                 field_value: id_commande_client
         cards: 
             default: 
                 type: commande_client_card
+                
+    commande_client_line: 
+        relation: hasOne
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_CommandeLine
+            id_object: 
+                field_value: id_commande_client_line
 
     commande_fournisseur:
         relation: hasOne
@@ -60,7 +68,9 @@ objects:
                 
     shipment: 
         instance: 
-            bimp_object: BR_CommandeShipment
+            bimp_object: 
+                module: bimplogistique
+                name: BL_CommandeShipment
         
 fields: 
     ref: 
@@ -170,7 +180,8 @@ fields:
         
     id_commande_client_line: 
         label: Ligne commande client
-        type: id
+        type: id_object
+        object: commande_client_line
         values: 
             array: commandeClientLines
         display_if: 
@@ -470,7 +481,7 @@ lists:
         pagination: 0
         bulk_actions: 
             callback: getCommandesListBulkActions
-        objects_change_reload: BR_ReservationCmdFourn,BR_ReservationShipment,BR_CommandeShipment
+        objects_change_reload: BR_ReservationCmdFourn,BR_ReservationShipment,BL_CommandeShipment
         modal_view: default
         sort_field: id_product
         sort_way: asc

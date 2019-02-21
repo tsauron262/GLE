@@ -332,16 +332,16 @@ class BC_Form extends BC_Panel
         $html .= '<div class="formRowInput field col-xs-12 col-sm-6 col-md-' . (12 - (int) $label_cols) . '">';
 
         if ($field->params['editable']) {
-        if ($field->params['type'] === 'id_object' ||
-                ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) {
-            $form_name = ($params['create_form'] ? $params['create_form'] : ($field->params['create_form'] ? $field->params['create_form'] : ''));
-            $form_values = ($params['create_form_values'] ? $params['create_form_values'] : ($field->params['create_form_values'] ? $field->params['create_form_values'] : ''));
-            $btn_label = ($params['create_form_label'] ? $params['create_form_label'] : ($field->params['create_form_label'] ? $field->params['create_form_label'] : 'Créer'));
+            if ($field->params['type'] === 'id_object' ||
+                    ($field->params['type'] === 'items_list' && $field->params['items_data_type'] === 'id_object')) {
+                $form_name = ($params['create_form'] ? $params['create_form'] : ($field->params['create_form'] ? $field->params['create_form'] : ''));
+                $form_values = ($params['create_form_values'] ? $params['create_form_values'] : ($field->params['create_form_values'] ? $field->params['create_form_values'] : ''));
+                $btn_label = ($params['create_form_label'] ? $params['create_form_label'] : ($field->params['create_form_label'] ? $field->params['create_form_label'] : 'Créer'));
 
-            if ($form_name) {
-                $html .= self::renderCreateObjectButton($this->object, $this->identifier, $field->params['object'], $this->fields_prefix . $field->name, $form_name, $form_values, $btn_label);
+                if ($form_name) {
+                    $html .= self::renderCreateObjectButton($this->object, $this->identifier, $field->params['object'], $this->fields_prefix . $field->name, $form_name, $form_values, $btn_label);
+                }
             }
-        }
         }
         $html .= $field->renderHtml();
 
@@ -435,8 +435,8 @@ class BC_Form extends BC_Panel
             if ($params['data_type'] === 'json') {
                 $params['value'] = json_encode($params['value']);
             } else {
-            $params['value'] = implode(',', $params['value']);
-        }
+                $params['value'] = implode(',', $params['value']);
+            }
         }
 
         if ($params['data_type'] === 'items_list') {
@@ -658,7 +658,23 @@ class BC_Form extends BC_Panel
         } elseif ($this->object->config->isDefined($this->config_path . '/rows/' . $row . '/content')) {
             $content = str_replace('name="' . $params['input_name'] . '"', 'name="' . $this->fields_prefix . $params['input_name'] . '"', $this->object->getConf($row_path . '/content', '', true));
             if (!(int) $params['no_container']) {
-                $html .= BimpInput::renderInputContainer($params['input_name'], $params['value'], $content, $this->fields_prefix, $params['required'], 0, 'customField', array('form_row' => $row));
+                $extra_data = array(
+                    'form_row'  => $row,
+                    'data_type' => $params['data_type']
+                );
+                if ($params['data_type'] === 'id_object') {
+                    $card = $this->object->getConf($row_path . '/card', '');
+                    if ($card) {
+                        $object = $this->object->config->getObject($row_path . '/object');
+                        if (is_a($object, 'BimpObject')) {
+                            $extra_data['card'] = $card;
+                            $extra_data['object_module'] = $object->module;
+                            $extra_data['object_name'] = $object->object_name;
+                            $extra_data['display_card_mode'] = $this->object->getConf($row_path . '/display_card_mode', 'visible');
+                        }
+                    }
+                }
+                $html .= BimpInput::renderInputContainer($params['input_name'], $params['value'], $content, $this->fields_prefix, $params['required'], 0, 'customField', $extra_data);
             } else {
                 $html .= $content;
             }

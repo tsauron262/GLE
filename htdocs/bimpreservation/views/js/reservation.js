@@ -165,6 +165,8 @@ function createSelectedShipmentsInvoice() {
     bimp_msg('ici');
 }
 
+
+
 $(document).ready(function () {
     $('#findEquipmentSerial').keyup(function (e) {
         if (e.key === 'Enter') {

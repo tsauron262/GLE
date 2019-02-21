@@ -468,7 +468,15 @@ class BC_ListTable extends BC_List
 
     public function renderHtmlFooter()
     {
-        return $this->renderBulkActions();
+        $html = $this->renderBulkActions();
+
+        $html .= $this->renderFooterExtraBtn();
+
+        if ($this->params['footer_extra_content']) {
+            $html .= $this->params['footer_extra_content'];
+        }
+
+        return $html;
     }
 
     public function renderHeaderRow()

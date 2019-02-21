@@ -119,6 +119,11 @@ class ObjectLine extends BimpObject
         return 0;
     }
 
+    public function isRemiseEditable()
+    {
+        return (int) $this->isEditable();
+    }
+
     public function isLineProduct()
     {
         if ((int) $this->getData('type') === self::LINE_PRODUCT) {
@@ -1883,19 +1888,22 @@ class ObjectLine extends BimpObject
                     $html .= '<input type="hidden" value="1" name="' . $prefixe . 'qty"/>';
                     $html .= '1';
                 } else {
-                    $min = 1;
-
                     if ($this->isLoaded()) {
-                        $equipment_lines = $this->getEquipmentLines();
-                        if (count($equipment_lines)) {
-                            $min = 0;
-                            foreach ($equipment_lines as $line) {
-                                if ((int) $line->getData('id_equipment')) {
-                                    $min++;
+                        if (method_exists($this, 'getMinQty')) {
+                            $min = $this->getMinQty();
+                        } else {
+                            $min = 1;
+                            $equipment_lines = $this->getEquipmentLines();
+                            if (count($equipment_lines)) {
+                                $min = 0;
+                                foreach ($equipment_lines as $line) {
+                                    if ((int) $line->getData('id_equipment')) {
+                                        $min++;
+                                    }
                                 }
-                            }
-                            if (!$min) {
-                                $min = 1;
+                                if (!$min) {
+                                    $min = 1;
+                                }
                             }
                         }
                     }
@@ -2000,7 +2008,7 @@ class ObjectLine extends BimpObject
                 $value = $this->getData("force_qty_1");
                 $html .= BimpInput::renderInput('toggle', 'force_qty_1', (int) $value);
                 break;
-                
+
             case 'remisable':
                 $product = $this->getProduct();
                 if (BimpObject::objectLoaded($product)) {
@@ -2469,7 +2477,7 @@ class ObjectLine extends BimpObject
                                 $this->set('remisable', 0);
                             }
                         }
-                        
+
 //                        if (!(int) $this->id_fourn_price && !(float) $this->pa_ht) {
 //                            $errors[] = 'Un prix d\'achat est obligatoire';
 //                        }

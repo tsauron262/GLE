@@ -64,5 +64,4 @@ class BimpConfigDefinitions
         'name'  => array('default' => 'default'),
         'open'  => array('data_type' => 'bool', 'default' => 0)
     );
-
 }

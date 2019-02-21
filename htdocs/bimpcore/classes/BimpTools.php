@@ -433,13 +433,13 @@ class BimpTools
                             if (isset($params['id_object']['field_value'])) {
                                 $field = $params['id_object']['field_value'];
                                 if ($instance->field_exists($field)) {
-                                    
+
                                     if ($instance->isDolObject()) {
                                         if ($instance->isDolExtraField($field)) {
                                             $table .= '_extrafields';
                                         }
                                     }
-                                    
+
 //                                    echo $instance->object_name . ': ' . $field . '<br/>';
                                     $result = $bdb->update($table, array(
                                         $field => $new_id
@@ -1504,21 +1504,26 @@ class BimpTools
     {
         $msg = '';
         if ($title) {
-            $msg .= $title . '<br/>';
+            $msg .= $title . ' : <br/>';
         }
 
         if (is_array($msgs)) {
-            $fl = true;
+//            $msg .= '<div style="padding-left: 15px">';
+            $msg .= '<ul>';
+//            $fl = true;
             foreach ($msgs as $m) {
-                if (!$fl) {
-                    $msg .= '<br/>';
-                } else {
-                    $fl = false;
-                }
-                $msg .= '&nbsp;&nbsp;&nbsp;&nbsp;- ' . $m;
+//                if (!$fl) {
+//                    $msg .= '<br/>';
+//                } else {
+//                    $fl = false;
+//                }
+//                $msg .= ' - ' . $m;
+                $msg .= '<li>' . $m . '</li>';
             }
+            $msg .= '</ul>';
+//            $msg .= '</div>';
         } else {
-            $msg .= $msgs;
+            $msg .= '&nbsp;&nbsp;&nbsp;&nbsp;- ' . $msgs;
         }
 
         return $msg;

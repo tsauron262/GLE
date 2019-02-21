@@ -6,9 +6,6 @@ require_once($path . '../../main.inc.php');
 include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 include_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 
-//require_once(DOL_DOCUMENT_ROOT . '/core/class/commonobject.class.php');
-//class RemindEndService extends CommonObject {
-
 class RemindEndService {
 
     private $db;
@@ -24,18 +21,39 @@ class RemindEndService {
      * @return array of service
      */
     public function getUrgentService($days) {
-
+        $this->output = '';
         $services = array();
 
-        // contrat
-        $sql = 'SELECT c.rowid as c_rowid, c.fk_commercial_suivi as fk_commercial_suivi, ';
-        // contradet 
-        $sql .= ' cd.rowid as cd_rowid, cd.statut as statut_line';
+        // Select contrat
+        $sql = 'SELECT c.rowid as c_rowid, ';
+        // Select contradet 
+        $sql .= ' cd.rowid as cd_rowid, cd.statut as statut_line,';
+        // Select societe_commerciaux
+        $sql .= ' sc.fk_user as fk_user';
+
+        // From contrat
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'contrat as c';
-        $sql .= ' INNER JOIN ' . MAIN_DB_PREFIX . 'contratdet as cd ON c.rowid=cd.fk_contrat';
+
+
+        // Join societe_commerciaux
+        $sql .= ' LEFT JOIN (';
+        $sql .= ' SELECT * FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux';
+        $sql .= ' ) as sc';
+        $sql .= ' ON c.fk_soc=sc.fk_soc';
+
+
+        // Join contradet
+        $sql .= ' JOIN (';
+        $sql .= ' SELECT * FROM ' . MAIN_DB_PREFIX . 'contratdet';
+        $sql .= '   WHERE rowid IN (';
+        $sql .= '       SELECT MAX(rowid) FROM ' . MAIN_DB_PREFIX . 'contratdet GROUP BY fk_contrat';
+        $sql .= '   )';
+        $sql .= ' ) as cd';
+        $sql .= ' ON c.rowid=cd.fk_contrat';
+
         $sql .= ' WHERE cd.statut=4 '; // contrat line open
-        $sql .= ' AND NOW() - INTERVAL 1 DAY <= cd.date_fin_validite AND cd.date_fin_validite <= NOW() + INTERVAL ' . $days . ' DAY'; 
-        $sql .= ' AND c.statut>0'; // contrat isn't draft
+        $sql .= ' AND cd.date_fin_validite <= NOW() + INTERVAL ' . $days . ' DAY';
+        $sql .= ' AND c.statut > 0'; // contrat isn't draft
         $sql .= ' ORDER BY c.rowid';
 
         $result = $this->db->query($sql);
@@ -44,7 +62,7 @@ class RemindEndService {
                 $contrat = new Contrat($this->db);
                 $contrat->fetch($obj->c_rowid);
                 $services[] = array(
-                    'id_user' => $obj->fk_commercial_suivi,
+                    'id_user' => $obj->fk_user,
                     'statut_line' => $obj->statut_line,
                     'id_contrat' => $obj->c_rowid,
                     'id_line' => $obj->cd_rowid,
@@ -60,44 +78,49 @@ class RemindEndService {
      * @param  type $days  number day to reach urgence
      * @return type return number of task sent or -($number_of_errors) if there are some
      */
-    public function setTaksForService($days) {
+    public function setTaskForService($days) {
         $services = $this->getUrgentService($days);
         global $conf;
+        $newTasksSends = 0;
 
         foreach ($services as $service) {
             if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
                 // prevent multiple task for 1 contrat
-                if ($service['id_contrat'] != $previous_service['id_contrat']) {
-                    $task = BimpObject::getInstance("bimptask", "BIMP_Task");
-                    $test = "contratdet:rowid=" . $service['id_line'] . ' AND statut=5';
-                    $tasks = $task->getList(array('test_ferme' => $test));
-                    if (count($tasks) == 0) {
-                        $param = array(
-                            "src" => "gle@bimp.fr",
-                            "dst" => "suivicontrat@bimp.fr",
-                            "subj" => "Service à relancer",
-                            "id_user_owner" => $service['id_user'],
-                            "txt" => $service['nom_url'],
-                            "test_ferme" => $test);
-                        $this->errors = array_merge($this->errors, $task->validateArray($param)); // check params
-                        $this->errors = array_merge($this->errors, $task->create()); // create task
-                    }
+                if ($service['id_user'] < 1)
+                    $service['id_user'] = 62;
+                $task = BimpObject::getInstance("bimptask", "BIMP_Task");
+                $test = "contratdet:rowid=" . $service['id_line'] . ' AND statut=5';
+                $tasks = $task->getList(array('test_ferme' => $test, "id_user_owner" => $service['id_user']));
+                if (count($tasks) == 0) {
+                    $param = array(
+                        "src" => "",
+                        "dst" => "suivicontrat@bimp.fr",
+                        "subj" => "Service à relancer",
+                        "id_user_owner" => $service['id_user'],
+                        "txt" => $service['nom_url'],
+                        "test_ferme" => $test);
+                    $errors_befor = sizeof($this->errors);
+                    $this->errors = array_merge($this->errors, $task->validateArray($param)); // check params
+                    $this->errors = array_merge($this->errors, $task->create()); // create task
+                    if ($errors_befor == sizeof($this->errors))
+                        $newTasksSends++;
+                    else
+                        $this->errors[] = "Erreur sur le contrat " . $service['id_contrat'];
                 }
-                $previous_service = $service;
             } else {
                 $this->errors[] = "Le module bimptask n'est pas activé,"
                         . " le rappel des tâche urgente pour les commerciaux n'est pas pû être effectué";
-                dol_print_error("Le module bimptask n'est pas activé,"
-                        . " le rappel des tâche urgente pour les commerciaux n'est pas pû être effectué");
-                return -1;
             }
         }
+
         $errors = sizeof($this->errors);
+        $errorString = (sizeof($this->errors) == 0) ? ' Aucune' : implode(',', $this->errors);
+        $this->output = "Nombre de tâche envoyé: " . $newTasksSends . '. Erreurs:' . $errorString;
 
         if ($errors != 0)
             return -$errors;
         else
-            return sizeof($services);
+            return 0;
     }
 
 }

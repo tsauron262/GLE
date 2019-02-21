@@ -433,7 +433,7 @@ class PDO extends AbstractBackend {
         }
         if (count($tabPartExtInt) > 1) {
             foreach ($tabPartExtInt as $part)
-                if ($part != "" /* && $part != $row['organisateur'] */) {
+                if ($part != "" /* afficher lorga dans les attendee && $part != $row['organisateur'] */) {
                     $tabT3 = explode("|", $part);
                     $tmpMail = $tabT3[0];
                     $tmpEtat = (isset($tabT3[1]) ? $tabT3[1] : "ACCEPTED");

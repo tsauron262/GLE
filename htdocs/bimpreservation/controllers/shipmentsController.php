@@ -7,7 +7,7 @@ class shipmentsController extends BimpController
     {
         $html = '';
 
-        $expedition = BimpObject::getInstance('BL_CommandeShipment', 'BL_CommandeShipment');
+        $expedition = BimpObject::getInstance('bimpreservation', 'BR_CommandeShipment');
         $list = new BC_ListTable($expedition, 'default', 1, null, 'Expéditions', 'sign-out');
 
         $id_entrepot = (int) BimpTools::getValue('id_entrepot');

@@ -23,87 +23,11 @@ objects:
             id_object: 
                 field_value: id_line
                 
-    shipment: 
-        instance: 
-            bimp_object: 
-                module: bimpreservation
-                name: BL_CommandeShipment
-            id_object: 
-                field_value: id_shipment
-                
 fields: 
-    ref_reservations: 
-        label: Référence réservations
-        
-    shipments: 
-        label: Expéditions
-        type: json
-        
-    factures: 
-        label: Factures
-        type: json
-        
-views: 
-    shipments: 
-        panel: 0
-        rows: 
-            - cols: 
-                - type: custom
-                  custom: 
-                      callback: renderShipmentsView
-lists_cols:         
-    qties: 
-        label: Quantités
-        value: 
-            callback: displayQties
     qty_shipped: 
         label: Qté livrée
-        value: 
-            callback: displayQtyShipped
-        max_width: 45px
-    qty_billed: 
-        label: Qté facturée
-        value: 
-            callback: displayQtyBilled
-        max_width: 45px
-    reservations: 
-        label: Statuts
-        value: 
-            callback: displayReservationsStatus
-    
-lists: 
-    default: 
-        add_btn: 
-            callback: isCreatable
-        edit_btn: 
-            callback: isParentEditable
-    logistique:
-        extends: default
-        title: Logistique produits / services
-        icon: fas_truck-loading
-        configurable: 0
-        item_checkbox: 1
-        after_list_content: unset
-        objects_change_reload: Bimp_Commande,ObjectLineRemise,BR_Reservation
-        bulk_actions: 
-            callback: getLogistiqueBulkActions
-        extra_btn: 
-            callback: getLogistiqueExtraButtons
-        footer_extra_content:
-            callback: renderLogistiqueListFooterExtraContent
-        cols: 
-            desc:
-            pu_ht: unset
-            tva: unset
-            pa_ht: unset
-            qty: unset
-            qties: 
-            remise: unset
-            total_ttc: unset
-            margin: unset
-#            qty_shipped:
-#            qty_billed:
-            reservations:
-        
-    
-    
+        type: int
+        default_value: 0
+        min: 0
+        max: 
+            field_value: qty

@@ -21,7 +21,7 @@ class securLogSms {
 
     var $max_tentative = 3;
     
-    var $debug = 0;//0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
+    var $debug = 2;//0 pas de auth mail sur ip //1 pas de sms code ecran //2 normal
 
     var $message = array();
     public function __construct($db) {
@@ -117,8 +117,9 @@ class securLogSms {
 
         if(!$this->debug){//provisoir a viré
             $to = $this->traitePhone();
-            if (!$this->isPhoneMobile($to))
-                mailSyn2("ATTENTION Ip Inconnue phone KO ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to);
+            $toM = $this->traiteMail();
+            if (!$this->isPhoneMobile($to) && !$this->isMAil($toM))
+                mailSyn2("ATTENTION Ip Inconnue phone KO MAIL ko ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to." mail :".$toM);
     //                else
     //                    mailSyn2("Ip Inconnue phone OK", "tommy@bimp.fr", "admin@bimp.fr", "Ip inconnue : ".$_SERVER['REMOTE_ADDR']." user ".$this->user->login. " phone : ".$to);
             $this->setSecure(2);
@@ -145,22 +146,28 @@ class securLogSms {
 
     function createSendCode() {
         global $user;
-        $ok = true;
+        $okSms = $okMail = false;
         $code = rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
         require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
         $to = $this->traitePhone();
         if ($this->isPhoneMobile($to)) {
             if($this->debug != 1){
-                $smsfile = new CSMSFile($to, "BIMP ERP", "Votre code est : " . $code);
-                if ($smsfile->sendfile())
-                    $this->message[] = 'Code envoyé à 0' . substr($to, 3, 5) . "****<br/><br/>";
-                else
-                    $ok = false;
+                $text = "Votre code est : " . $code;
+                $smsfile = new CSMSFile($to, "BIMP ERP", $text);
+                if ($smsfile->sendfile()){
+                    $this->message[] = 'Code envoyé au 0' . substr($to, 3, 5) . "****<br/><br/>";
+                    $okSms = true;
+                }
+                $toM = $this->traiteMail();
+                if($this->isMAil($toM) && mailSyn2("Code BIMP", $toM, "no-replay@bimp.fr", $text)){
+                    $this->message[] = 'Code envoyé à ' . substr($toM, 0, 4) . "*******" . substr($toM, -7) . "<br/><br/>";
+                    $okMail = true;
+                }
             }
             else
                 $this->message[] = "Vottre code est ".$code." il ne sera pas envoyé au ".$to;
             
-            if($ok){
+            if($okSms || $okMail){
                 $this->user->array_options['options_code_sms'] = $code;
                 $this->user->update($user);
             }
@@ -190,8 +197,21 @@ class securLogSms {
         return $phone;
     }
     
+    public function traiteMail(){
+        $mail = "";
+        if(isset($this->user->array_options['options_mail_sec']))
+            $mail = $this->user->array_options['options_mail_sec'];
+        return $mail;
+    }
+    
     public function isPhoneMobile($phone){
         return (stripos($phone, "+336") === 0 || stripos($phone, "+337") === 0);
+    }
+    
+    public function isMAil($mail){
+        if(stripos($mail, "@") > 0)
+                return 1;
+        return 0;
     }
 
 }

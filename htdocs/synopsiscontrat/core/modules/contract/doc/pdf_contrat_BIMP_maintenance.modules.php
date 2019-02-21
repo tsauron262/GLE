@@ -23,6 +23,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php" );
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/core.class.php';
 
 //TODO  addresse livraison lié au contrat
 //TODO filtre sur statuts ???
@@ -216,9 +217,43 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         return (object) Array('HT' => $total_ht, 'TVA' => $tva, 'TTC' => $total_ttc);
     }
 
+    public function display_cp($pdf, $contrat, $user, $outputlangs) {
+        $titre = "Applicables aux conditions générales du Contrat de prestation de services et de maintenance informatique";
+        $parag1 = "Les présentes Conditions Particulières sont signées en application et exécution des Conditions Générales du Contrat de Prestation de Services et Maintenance informatique, avec lesquelles elles forment un tout indivisible. Le Client reconnaît avoir pris connaissance des dites Conditions Générales et s'engage à les respecter.";
+        $parag2 = "Il est expressément convenu entre les Parties qu'en cas de contradiction entre une ou plusieurs dispositions des Conditions Générales du Contrat de Prestation de Services et Maintenance informatique et une ou plusieurs dispositions des présentes Conditions Particulières, ces dernières prévalent.";
+        $pdf->AddPage();
+        $pdf->SetTitle($contrat->ref);
+        $pdf->SetSubject($outputlangs->transnoentities("Contract"));
+        $pdf->SetCreator("BIMP-ERP " . DOL_VERSION);
+        $pdf->SetAuthor($user->getFullName($langs));
+        $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
+        $pdf->SetAutoPageBreak(1, $this->margin_bottom);
+        $pdf->SetFont('', 'B', 9);
+
+        // Titre
+        $this->addLogo($pdf, 20);
+        $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
+        $pdf->SetFont('', 'B', 14);
+        $pdf->setTextColor(0, 0, 0);
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Conditions particulières du Contrat N°" . $contrat->ref, 0, 'C');
+        $pdf->SetFont('', 'B', 9);
+        $pdf->setDrawColor(236, 147, 0);
+        $pdf->Line(15, 32, 195, 32);
+        $pdf->Line(15, 42, 195, 42);
+        $pdf->setDrawColor(255, 255, 255);
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, $titre, 0, 'C');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, "", 0, 'C');
+        $pdf->SetFont('', '', 9);
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, $parag1, 0, 'L');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, "", 0, 'C');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, $parag2, 0, 'L');
+        $pdf->SetFont('', '', 9);
+    }
+
     function write_file($contrat, $outputlangs = '') {
         global $user, $langs, $conf;
-
+        $core = new core($this, $pdf);
         if (!is_object($outputlangs))
             $outputlangs = $langs;
         $outputlangs->load("main");
@@ -395,11 +430,6 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $count = count($contrat->lines);
                 $new_page = false;
                 if ($count > 5) {
-                    $nbAnnexe1 = 1;
-                    $maxLinePerPage = 5;
-                    if ($count > $maxLinePerPage) {
-                        $nbAnnexe1 = ceil($count / $maxLinePerPage);
-                    }
                     $new_page = true;
                     $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
                     $pdf->SetX($this->marge_gauche);
@@ -407,7 +437,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                     $pdf->setDrawColor(255, 255, 255);
                     $pdf->setColor('fill', 242, 242, 242);
                     $pdf->SetTextColor(0, 0, 0);
-                    $pdf->Cell($W, 8, "Liste des descriptions financière en ANNEXE 1 (" . $nbAnnexe1 . " Pages)", 1, null, 'C', true);
+                    $pdf->Cell($W, 8, "Liste des descriptions financière en ANNEXE 1", 1, null, 'C', true);
                     $pdf->SetTextColor(0, 0, 0);
                     $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 50, '', 0, 'C');
                 } else {
@@ -434,61 +464,49 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->MultiCell($W, 6, '', 0, 'L');
                 $pdf->Cell($W, 8, "", 1, null, 'L', true);
                 $pdf->Cell($W, 8, "Signature", 1, null, 'L', true);
-                
+
                 $this->_pagefoot($pdf, $outputlangs);
                 if ($new_page) {
-                    $currentAnnexe = 1;
-                    $this->calc_dernier_id($contrat->lines, $maxLinePerPage);
-                    for ($i = 1; $i <= $nbAnnexe1; $i++) {
-                        $pdf->AddPage();
-                        $this->addLogo($pdf, 20);
-                        $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
-                        $pdf->SetFont('', 'B', 14);
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "ANNEXE 1 : Description financière (" . $currentAnnexe . "/" . $nbAnnexe1 . ") ", 0, 'C');
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "Contrat N° " . $propref, 0, 'C');
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
-                        $pdf->SetFont('', 'B', 11);
-                        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
-                        $this->headOfArray($pdf);
-                        $dernier_id = $this->display_lines($pdf, $contrat->lines);
-                        //$pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
-                        $currentAnnexe++;
-                    }
+                    $pdf->AddPage();
+                    $this->addLogo($pdf, 20);
+                    $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
+                    $pdf->SetFont('', 'B', 14);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "ANNEXE 1 : Description financière", 0, 'C');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "Contrat N° " . $propref, 0, 'C');
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
+                    $pdf->SetFont('', 'B', 11);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
+                    $this->headOfArray($pdf);
+                    $this->display_lines($pdf, $contrat->lines);
                     $this->display_total($pdf, $contrat->lines);
                 }
 
-
-//                require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
-//                $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page? 1 : 0));
-//                $classAnnexe->getAnnexeContrat($contrat);
+                $this->display_cp($pdf, $contrat, $user, $outputlangs);
+ 
+                  $this->_pagefoot($pdf, $outputlangs);
+                require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
+                $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page? 1 : 0));
+                $classAnnexe->getAnnexeContrat($contrat);
 
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
                 $pdf->Close();
                 $this->file = $file;
                 $pdf->Output($file, 'f');
-                return 1;   // Pas d'erreur
+                return 1;
             } else {
                 $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
-                //$langs->setPhpLang();    // On restaure langue session
                 return 0;
             }
         } else {
             $this->error = $langs->trans("ErrorConstantNotDefined", "CONTRACT_OUTPUTDIR");
-            //$langs->setPhpLang();    // On restaure langue session
             return 0;
         }
 
         $this->error = $langs->trans("ErrorUnknown");
-        //$langs->setPhpLang();    // On restaure langue session
-        return 0;   // Erreur par defaut
+        return 0;
     }
-    
-    function calc_dernier_id($lines, $max) {
-        
-    }
-    
-    
+
     function _pagehead(& $pdf, $object, $showadress = 1, $outputlangs, $currentPage = 0) {
         global $conf, $langs;
         if ($currentPage > 1) {
@@ -501,13 +519,14 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->setColor('fill', 255, 255, 255);
         $pdf->SetTextColor(0, 0, 0);
         $pdf->setY(280);
-        //$pdf->setX();
-        $pdf->SetFont(''/* 'Arial' */, '', 9);
-        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
-        $pdf->Cell($W, 3, 'Page ' . $pdf->PageNo() . '/{:ptp:}', 1, null, 'L', true);
-        $pdf->Cell($W, 3, 'Paraphes', 1, null, 'R', true);
+        $pdf->SetFont('', '', 9);
+        $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 20;
+        $pdf->Cell($W * 4, 3, 'Page ' . $pdf->PageNo() . '/{:ptp:}', 1, null, 'L', true);
+        $pdf->Cell($W * 15, 3, 'Paraphes :', 1, null, 'R', true);
+        $pdf->setDrawColor(236, 147, 0);
+        $pdf->Cell($W, 3, '', 1, null, 'R', true);
+        $pdf->setDrawColor(255, 255, 255);
         $pdf->SetTextColor(200, 200, 200);
-
         $pdf->SetTextColor(0, 0, 0);
     }
 

@@ -308,8 +308,6 @@ lists:
               onclick: deleteSelectedObjects('list_id', $(this))
         list_filters: 
             callback: getListFilters
-        sort_field: datec
-        sort_way: desc
         n: 10
         add_form_name: default
         add_form_values: 

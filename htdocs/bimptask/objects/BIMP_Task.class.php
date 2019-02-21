@@ -105,7 +105,7 @@ class BIMP_Task extends BimpObject
     }
     
 
-    public function getTypeTacheSearchFilters(&$filters, $value, &$joins = array())
+    public function getTypeTacheSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         global $user;
         if($value != 'other')

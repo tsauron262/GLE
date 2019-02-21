@@ -43,8 +43,8 @@ class Bimp_Fichinter extends BimpDolObject
         return ' ';
     }
     
-    public function getCommercialSearchFilters(&$filters, $value, &$joins = array()){
-        $joins["commerciale"] = array("table" => "societe_commerciaux", "alias"=>"sc", "on"=> "sc.fk_soc = a.fk_soc");
+    public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a'){
+        $joins["commerciale"] = array("table" => "societe_commerciaux", "alias"=>"sc", "on"=> "sc.fk_soc = " . $main_alias . ".fk_soc");
         $filters["sc.fk_user"]  = $value;
     }
     

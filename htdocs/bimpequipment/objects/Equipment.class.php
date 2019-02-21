@@ -216,7 +216,7 @@ class Equipment extends BimpObject
                     'part_type' => 'middle',
                     'part'      => $value
                 ),
-                $main_alias . '.id_product'      => array(
+                $main_alias . '.id_product'    => array(
                     'in' => 'SELECT prod.rowid FROM ' . MAIN_DB_PREFIX . 'product prod WHERE ' . $where
                 )
             )
@@ -229,7 +229,7 @@ class Equipment extends BimpObject
             $joins['place'] = array(
                 'table' => 'be_equipment_place',
                 'alias' => 'place',
-                'on'    => 'place.id_equipment = a.id'
+                'on'    => 'place.id_equipment = ' . $main_alias . '.id'
             );
             $joins['place_entrepot'] = array(
                 'table' => 'entrepot',
@@ -279,9 +279,9 @@ class Equipment extends BimpObject
         }
     }
 
-    public function getReservedSearchFilters(&$filters, $value, &$joins = array())
+    public function getReservedSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
-        $sql = '(SELECT COUNT(reservation.id) FROM ' . MAIN_DB_PREFIX . 'br_reservation reservation WHERE reservation.id_equipment = a.id';
+        $sql = '(SELECT COUNT(reservation.id) FROM ' . MAIN_DB_PREFIX . 'br_reservation reservation WHERE reservation.id_equipment = ' . $main_alias . '.id';
         $sql .= ' AND reservation.status < 300 AND reservation.status >= 200)';
 
         if ((int) $value > 0) {

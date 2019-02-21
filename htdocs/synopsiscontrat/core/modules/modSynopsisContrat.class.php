@@ -107,7 +107,9 @@ class modSynopsisContrat extends DolibarrModules {
 
 
         $r = 0;
-        $this->tabs = array('contract:+annexe:Annexe PDF:@monmodule:$user->rights->synopsiscontrat->annexe:/Synopsis_Contrat/annexes.php?id=__ID__',
+        $this->tabs = array(
+            //'contract:+hotline:Hotline:@monmodule:1:/Synopsis_Contrat/contrat.php?id=__ID__',
+            'contract:+annexe:Annexe PDF:@monmodule:$user->rights->synopsiscontrat->annexe:/Synopsis_Contrat/annexes.php?id=__ID__',
             'contract:+interv:Interventions:@monmodule:$user->rights->synopsiscontrat->generate:/Synopsis_Contrat/intervByContrat.php?id=__ID__',
                 /* 'contract:+tickets:Tickets:@monmodule:/Synopsis_Contrat/annexes.php?id=__ID__',
                   'contract:+sav:SAV:@monmodule:/Babel_GMAO/savByContrat.php?id=__ID__' */                );
@@ -230,7 +232,7 @@ $tabModel = array(
   "contrat_courrierBIMPsignature" => "BIMP Courrier - Signature", 
   "contrat_courrierBIMPresiliationAvoir" => "BIMP Courrier - Resiliation & avoir", 
   "contrat_courrierBIMPAutoPrelevement" => "BIMP Courrier - Prelevement automatique",
-  "contrat_courrierBIMPfinapro" => "BIMP contrat - Financement + Proces Verbal + Mandat Prélèvement",
+  //"contrat_courrierBIMPfinapro" => "BIMP contrat - Financement + Proces Verbal + Mandat Prélèvement",
   //"contrat_LDLC_lease" => "Liasse LDLC Lease",
   "contrat_BIMP_maintenance" => 'Contrat maintenance informatique'
 );
@@ -255,15 +257,25 @@ $tabModel = array(
         ), 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('tacite', 'Renouvellement tacite', 'select', 40, 30, 'contrat', 0, 0, "", 
           array("options" => array(
-            1 => "1 fois",
-            3 => "2 fois",
-            6 => "3 fois",
+            1 => "Tacite 1 fois",
+            3 => "Tacite 2 fois",
+            6 => "Tacite 3 fois",
+            12 => "Sur proposition"
           )
         ), 1, "", 1, 1, "", "", "", 1);
         
-        $extrafields->addExtraField('syntec', 'Indice SYNTEC', 'float', 1, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
-        $extrafields->addExtraField('date_start', 'Date de début', 'date', 38, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
-        $extrafields->addExtraField('duree_mois', 'Durée en mois', 'int', 37, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('syntec', 'Indice SYNTEC', 'varchar', 1, 10, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('syntec_pdf', 'Utiliser l\'indice Syntec', 'boolean', 1, 10, 'contrat', 0, 0, "", 1, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('date_start', 'Date de début', 'date', 37, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('duree_mois', 'Durée en mois', 'int', 38, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('gti', 'Délais d\'intervention', 'select', 39, 30, 'contrat', 0, 0, "", 
+            array( 'options' => array(
+                    2 => '2h ouvrées',
+                    4 => '4h ouvrées',
+                    8 => '8h ouvrées',
+                    16 => '16h ouvrées'
+                )
+            ), 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('denounce', 'Contrat dénoncé', 'select', 100, 30, 'contrat', 0, 0, "", 
             array( 'options' => array(
                     0 => 'Non',

@@ -3319,6 +3319,14 @@ class BimpObject extends BimpCache
         }
 
         $errors = $this->hydrateFromDolObject();
+        
+        
+        $extra_fields = $this->fetchExtraFields();
+
+        foreach ($extra_fields as $field_name => $value) {
+            $this->checkFieldValueType($field_name, $value);
+            $this->data[$field_name] = $value;
+        }
 
         $this->initData = $this->data;
 

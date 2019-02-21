@@ -29,7 +29,7 @@ class RemindEndService {
         // Select contradet 
         $sql .= ' cd.rowid as cd_rowid, cd.statut as statut_line,';
         // Select societe_commerciaux
-        $sql .= ' sc.fk_user as fk_user';
+        $sql .= ' sc.fk_user as fk_user, sc.fk_soc as sc_fk_soc';
 
         // From contrat
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'contrat as c';
@@ -41,7 +41,7 @@ class RemindEndService {
         $sql .= ' ) as sc';
         $sql .= ' ON c.fk_soc=sc.fk_soc';
 
-
+        
         // Join contradet
         $sql .= ' JOIN (';
         $sql .= ' SELECT * FROM ' . MAIN_DB_PREFIX . 'contratdet';
@@ -55,17 +55,20 @@ class RemindEndService {
         $sql .= ' AND cd.date_fin_validite <= NOW() + INTERVAL ' . $days . ' DAY';
         $sql .= ' AND c.statut > 0'; // contrat isn't draft
         $sql .= ' ORDER BY c.rowid';
-
+//die($sql);
         $result = $this->db->query($sql);
         if ($result) {
             while ($obj = $this->db->fetch_object($result)) {
                 $contrat = new Contrat($this->db);
                 $contrat->fetch($obj->c_rowid);
+                $societe = new Societe($this->db);
+                $societe->fetch($obj->sc_fk_soc);
                 $services[] = array(
                     'id_user' => $obj->fk_user,
                     'statut_line' => $obj->statut_line,
                     'id_contrat' => $obj->c_rowid,
                     'id_line' => $obj->cd_rowid,
+                    'nom' => $societe->name,
                     'nom_url' => $contrat->getNomUrl(1));
             }
         }
@@ -97,7 +100,7 @@ class RemindEndService {
                         "dst" => "suivicontrat@bimp.fr",
                         "subj" => "Service à relancer",
                         "id_user_owner" => $service['id_user'],
-                        "txt" => $service['nom_url'],
+                        "txt" => $service['nom'] . $service['nom_url'],
                         "test_ferme" => $test);
                     $errors_befor = sizeof($this->errors);
                     $this->errors = array_merge($this->errors, $task->validateArray($param)); // check params

@@ -264,7 +264,7 @@ $tabModel = array(
           )
         ), 1, "", 1, 1, "", "", "", 1);
         
-        $extrafields->addExtraField('syntec', 'Indice SYNTEC', 'varchar', 1, 10, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('syntec', 'Indice SYNTEC', 'float', 1, 10, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('syntec_pdf', 'Utiliser l\'indice Syntec', 'boolean', 1, 10, 'contrat', 0, 0, "", 1, 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('date_start', 'Date de début', 'date', 37, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('duree_mois', 'Durée en mois', 'int', 38, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);

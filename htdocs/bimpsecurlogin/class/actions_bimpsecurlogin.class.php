@@ -122,7 +122,7 @@ class securLogSms {
             $to = $this->traitePhone();
             $toM = $this->traiteMail();
             if (!$this->isPhoneMobile($to) && !$this->isMAil($toM))
-                mailSyn2("ATTENTION Ip Inconnue phone KO MAIL ko ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to." mail :".$toM);
+                mailSyn2("ATTENTION Ip Inconnue phone KO MAIL ko ATTENTION", "tommy@bimp.fr, j.belhocine@bimp.fr, peter@bimp.fr, g.faure@bimp-pro.fr", "admin@bimp.fr", "Ip inconnue : " . $_SERVER['REMOTE_ADDR'] . " user " . $this->user->login . " phone : " . $to." mail :".$toM);
     //                else
     //                    mailSyn2("Ip Inconnue phone OK", "tommy@bimp.fr", "admin@bimp.fr", "Ip inconnue : ".$_SERVER['REMOTE_ADDR']." user ".$this->user->login. " phone : ".$to);
             $this->setSecure(2);

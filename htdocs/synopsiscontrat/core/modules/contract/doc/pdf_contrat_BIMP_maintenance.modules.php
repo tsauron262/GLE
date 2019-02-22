@@ -70,7 +70,8 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
        public static $tacite = Array(1 => 'Tacite 1 fois', 3 => 'Tacite 2 fois', 6 => 'Tacite 3 fois', 12 => 'Sur proposition');
        public static $denounce = Array(0 => 'Non', 1 => 'Oui, dans les temps', 2 => 'Oui, hors délais');
        public static $periode = Array(1 => 'Mensuelle', 3 => 'Trimestrielle', 6 => 'Semestrielle', 12 => 'Annuelle');
-    
+       public static $text_head_table = Array(1 => 'Désignation', 2 => 'TVA', 3 => 'P.U HT', 4 => 'Qté', 5 => 'Total HT', 6 => 'Total TTC');
+       
     public function addLogo(&$pdf, $size) {
         global $conf;
         $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
@@ -123,12 +124,12 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->SetTextColor(255, 255, 255);
         $pdf->setDrawColor(255, 255, 255);
         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 13;
-        $pdf->Cell($W * 5, 8, "Désignation", 1, null, 'L', true);
-        $pdf->Cell($W, 8, "TVA", 1, null, 'C', true);
-        $pdf->Cell($W * 2, 8, "P.U HT", 1, null, 'C', true);
-        $pdf->Cell($W, 8, "Qté", 1, null, 'C', true);
-        $pdf->Cell($W * 2, 8, "Total HT", 1, null, 'C', true);
-        $pdf->Cell($W * 2, 8, "Total TTC", 1, null, 'C', true);
+        $pdf->Cell($W * 5, 8, self::$text_head_table[1], 1, null, 'L', true);
+        $pdf->Cell($W, 8, self::$text_head_table[2], 1, null, 'C', true);
+        $pdf->Cell($W * 2, 8, self::$text_head_table[3], 1, null, 'C', true);
+        $pdf->Cell($W, 8, self::$text_head_table[4], 1, null, 'C', true);
+        $pdf->Cell($W * 2, 8, self::$text_head_table[5], 1, null, 'C', true);
+        $pdf->Cell($W * 2, 8, self::$text_head_table[6], 1, null, 'C', true);
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 8, '', 0, 'C');
         $pdf->setColor('fill', 255, 255, 255);
         $pdf->SetFont(''/* 'Arial' */, '', 9);
@@ -249,6 +250,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, $parag1, 0, 'L');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, "", 0, 'C');
         $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, $parag2, 0, 'L');
+        $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 2, "", 0, 'C');
+        $pdf->SetFont('', 'B', 9);
+        $this->titre_partie($pdf, 'Ce contrat comprend');
         $pdf->SetFont('', '', 9);
     }
 
@@ -409,6 +413,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $date = new DateTime();
                 $date->setTimestamp((int) $extra->options_date_start);
                 $date->add(new DateInterval("P" . $extra->options_duree_mois . "M"));
+                $date->sub(new DateInterval("P1D"));
                 $pdf->Cell($W, 8, $date->format('d/m/Y'), 1, null, 'L', true);
                 $pdf->SetFont('', 'B', 7);
                 $pdf->Cell($W * 2.5, 8, "Reconduction : ", 1, null, 'L', true);
@@ -546,7 +551,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         }
         return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
     }
-
+   
 }
 
 ?>

@@ -248,8 +248,8 @@ $tabModel = array(
         $extrafields = new ExtraFields($this->db);
         $extrafields->addExtraField('periodicity', 'Périodicité', 'select', 40, 30, 'contrat', 0, 0, "", array("options" => array(1 => "Mensuelle",3 => "Trimestrielle",6 => "Semestrielle",12 => "Annuelle")), 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('tacite', 'Renouvellement tacite', 'select', 40, 30, 'contrat', 0, 0, "", array("options" => array(1 => "1 fois",3 => "2 fois",6 => "3 fois",12 => "Sur proposition")), 1, "", 1, 1, "", "", "", 1);
-        //$extrafields->addExtraField('syntec', 'Indice SYNTEC', 'float', 1, 10, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
-        $extrafields->addExtraField('syntec_pdf', 'Utiliser l\'indice Syntec', 'boolean', 1, 10, 'contrat', 0, 0, "", 1, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('syntec', 'Indice SYNTEC', 'float', 1, 10, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        //$extrafields->addExtraField('syntec_pdf', 'Utiliser l\'indice Syntec', 'boolean', 1, 10, 'contrat', 0, 0, "", 1, 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('date_start', 'Date de début', 'date', 37, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('duree_mois', 'Durée en mois', 'int', 38, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('gti', 'Délais d\'intervention', 'select', 39, 30, 'contrat', 0, 0, "", array( 'options' => array(2 => '2h ouvrées',4 => '4h ouvrées',8 => '8h ouvrées',16 => '16h ouvrées')), 1, "", 1, 1, "", "", "", 1);

@@ -45,7 +45,7 @@ class modBimpContract extends DolibarrModules {
         // Example: this->dirs = array("/mymodule/temp","/mymodule/subdir");
         $this->dirs = array();
         $this->tabs = array(
-            'thirdparty:+contratauto:Contrat:@bimpcontratauto:$user->rights->contrat->lire:/bimpcontratauto/contrat.php?socid=__ID__'
+           
         );
 //            'categories_0:+restreindre:Restreindre:@bimpproductbrowser:$user->rights->bimpproductbrowser->read:/bimpproductbrowser/browse.php?id=__ID__',
 

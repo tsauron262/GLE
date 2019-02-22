@@ -425,11 +425,6 @@ class pdf_contrat_LDLC_lease extends ModeleSynopsiscontrat {
                 $this->paraphe_page = array(3, 4, 5);
             $this->greyFooter($pdf);
             $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);
-            require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
-            $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page ? 1 : 0));
-            $classAnnexe->getAnnexeContrat($contrat);
-            $this->print_signature($pdf);
-            $this->greyFooter($pdf, 'cgv');
         }
     }
 

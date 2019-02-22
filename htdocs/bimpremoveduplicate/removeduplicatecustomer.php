@@ -43,13 +43,14 @@ print '<td style="padding:10px;"><label>Nombre de groupe de doublons à afficher
 print '<input id="limit" type="number" min=1 max=100 class="flat" value=3></td>';
 print '<td style="padding:10px;"><input id="display_duplicates" type="submit" class="butAction" value="Afficher doublons">';
 print '<i id="spinner" style="display: none; font-size: 30px;" class="fa fa-spinner fa-spin"></i></td>';
-print '<td style="padding:10px;"></td>';
+print '<td style="padding:10px;"><label>Nombre de groupe de doublons total</label><br/>';
+print '<div id="db_duplicate"></td>';
 print '</tr></tbody</table>';
 
 print '<table id="customer" class="liste_titre_filter">';
 print '<tr id="tr_header" class="liste_titre last">';
 $arrayofheader = array(
-    '', 'Garder', 'Fusionner', 'Nom', 'Email', 'Adresse', 'Code Postal', 'Ville', 'Téléphone', 'Lien', 'Retour fusion'
+    '', 'Garder', 'Fusionner', 'Nom', 'Email', 'Adresse', 'Code Postal', 'Ville', 'Téléphone', 'Commerciaux', 'Lien', 'Retour fusion'
 );
 displayHeader($arrayofheader);
 print '</tr>';

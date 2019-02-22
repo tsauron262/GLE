@@ -64,30 +64,33 @@ function getAllFactures(limit, details) {
             $('input#display_duplicates').css('display', 'block');
             $('table#customer > tbody > tr[key_group]').remove();
 
-            var array_of_duplicate = JSON.parse(out);
+            var parsed_out = JSON.parse(out);
+            var array_of_duplicate = parsed_out.duplicates;
             for (var i in array_of_duplicate) {
                 var duplicates = array_of_duplicate[i];
+                var last = Object.keys(duplicates).length - 1;
                 duplicates.forEach(function (useless, index) {
                     var duplicate = duplicates[index];
-                    var last = Object.keys(duplicate).length - 1;
-                    for (var counter in duplicate) {
-                        var instance = duplicate[counter];
-                        var key_group = index;
-                        if (counter == last)
-                            var is_last = true;
-                        else
-                            var is_last = false;
-                        if (counter == 0)
-                            var is_first = true;
-                        else
-                            var is_first = false;
-                        add_line(instance, key_group, is_last, is_first, last + 1);
-                    }
+                    var key_group = i ;
+                    if (index == last)
+                        var is_last = true;
+                    else
+                        var is_last = false;
+                    if (index == 0)
+                        var is_first = true;
+                    else
+                        var is_first = false;
+                    add_line(duplicate, key_group, is_last, is_first, last + 1);
                 });
             }
+
             // Add button and his event
             if ($('input#merge_duplicates').length == 0)
                 $('div#id-right').append('<br/><input type="submit" class="butAction" id="merge_duplicates" value="Fusionner tous les doublons">');
+
+            // Display number group doublon
+            var nb_row = parsed_out.nb_row;
+            $('div#db_duplicate').text(nb_row);
             iniEventAfterDisplayDuplicate();
         }
     });
@@ -226,7 +229,20 @@ function add_line(c, key_group, is_last, is_first, nb_in_group) {
 //    html += '<td>' + ((c.statut == '1') ? 'Oui' : 'Non') + '</td>';
     html += '<td>' + c.town + '</td>';
     html += '<td>' + c.phone + '</td>';
-    html += '<td>' + c.link + '</td>';
+
+    // Commerciaux
+    html += '<td>';
+    for (var i in c.commerciaux) {
+        if (i == 0)
+            html += c.commerciaux[i];
+        else
+            html += ' - ' + c.commerciaux[i];
+    }
+    html += '</td>';
+
+    // Link to societe
+    html += '<td><a target=blank href="' + DOL_URL_ROOT + '/societe/card.php?socid=' + c.rowid + '" title="<div class=&quot;centpercent&quot;><u>ShowCompany</u></div>" class="classfortooltip refurl">';
+    html += '<img src="/bimp-8/bimp-erp/htdocs/theme/eldy/img/object_company.png" alt="" class="paddingright classfortooltip valigntextbottom"> </a></td>';
     html += '<td name="errors"></td>';
     $('table#customer').append(html);
 }

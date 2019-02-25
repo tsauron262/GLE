@@ -77,6 +77,10 @@ class BC_FieldsTable extends BC_Panel
                 $field = new BC_Field($this->object, $row_params['field'], (int) $row_params['edit']);
                 $field->display_name = $row_params['display'];
 
+                if (!$field->params['show']) {
+                    continue;
+                }
+                
                 if (isset($this->new_values[$row_params['field']])) {
                     $field->new_value = $this->new_values[$row_params['field']];
                 }

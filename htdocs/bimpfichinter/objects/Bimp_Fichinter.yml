@@ -296,7 +296,7 @@ lists:
     default: 
         checkboxes: 1
         configurable: 1
-        sort_field: datei
+        sort_field: id
         sort_way: desc
         n: 25
         delete_btn: 0

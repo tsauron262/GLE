@@ -114,16 +114,10 @@ forms:
                   type: hidden
               value: 1
             - custom: 1
-              label: Produits inclus
-              input_name: products
+              label: Produits / Services inclus
+              input_name: lines
               content: 
-                  callback: renderProductsQties
-              value: 1
-            - label: Services à inclure
-              custom: 1
-              input_name: services
-              content: 
-                  callback: renderServicesQties
+                  callback: renderLinesQties
                   
     facture: 
         rows: 
@@ -244,6 +238,7 @@ lists_cols:
                 method: displayPdfButtons
                 params: 
                     - 1
+                    
 lists: 
     default: 
         sort_field: id

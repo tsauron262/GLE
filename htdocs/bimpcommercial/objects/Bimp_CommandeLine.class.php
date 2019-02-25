@@ -48,6 +48,46 @@ class Bimp_CommandeLine extends ObjectLine
         return (int) $this->isParentEditable();
     }
 
+    public function isProductSerialisable()
+    {
+        if ((int) $this->getData('type') === self::LINE_PRODUCT) {
+            $product = $this->getProduct();
+            if (BimpObject::objectLoaded($product)) {
+                return (int) $product->isSerialisable();
+            }
+        }
+
+        return 0;
+    }
+
+    public function isReadyToShip($id_shipment, &$errors)
+    {
+        $shipments = $this->getData('shipments');
+
+        if (!isset($shipments[(int) $id_shipment]['qty']) || (float) $shipments[(int) $id_shipment]['qty'] <= 0) {
+            $errors[] = 'Il n\'y a aucune unité ajouté à cette expédition';
+            return 0;
+        }
+
+        if ($this->isProductSerialisable()) {
+            // todo: vérifier que tous les équipements ont été assignées à l'expédition
+        }
+
+        $ready_qty = (float) $this->getReadyToShipQty($id_shipment);
+        if ($ready_qty < (float) $shipments[(int) $id_shipment]['qty']) {
+            $diff = (float) $shipments[(int) $id_shipment]['qty'] - $ready_qty;
+            $msg = 'Il manque ';
+            if ($diff > 1) {
+                $msg .= $diff . 'unités prêtes à être expédiées ';
+            } else {
+                $msg .= '1 unité prête à être expédiée ';
+            }
+            $errors[] = $msg;
+            return 0;
+        }
+        return 1;
+    }
+
     public function getMinQty()
     {
         if ($this->isParentEditable()) {
@@ -57,7 +97,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $this->qty;
     }
 
-    public function getReservations($order_by = 'status', $order_way = 'asc')
+    public function getReservations($order_by = 'status', $order_way = 'asc', $status = null)
     {
         $reservations = array();
 
@@ -65,11 +105,15 @@ class Bimp_CommandeLine extends ObjectLine
             $commande = $this->getParentInstance();
             if (BimpObject::objectLoaded($commande)) {
                 $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-                $rows = $reservation->getList(array(
+                $filters = array(
                     'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
                     'id_commande_client'      => (int) $commande->id,
                     'id_commande_client_line' => $this->id
-                        ), null, null, $order_by, $order_way, 'array', array('id'));
+                );
+                if (!is_null($status)) {
+                    $filters['status'] = (int) $status;
+                }
+                $rows = $reservation->getList($filters, null, null, $order_by, $order_way, 'array', array('id'));
 
                 if (!is_null($rows)) {
                     foreach ($rows as $r) {
@@ -159,21 +203,23 @@ class Bimp_CommandeLine extends ObjectLine
         $buttons = array();
 
         if ($this->isLoaded()) {
-            $commande = $this->getParentInstance();
-            if (BimpObject::objectLoaded($commande)) {
-                $buttons[] = array(
-                    'label'   => 'Gérer les expéditions',
-                    'icon'    => 'fas_shipping-fast',
-                    'onclick' => $this->getJsLoadModalView('shipments', 'Gestion des expéditions')
-                );
-            }
+            if ((int) $this->getData('type') !== self::LINE_TEXT) {
+                $commande = $this->getParentInstance();
+                if (BimpObject::objectLoaded($commande)) {
+                    $buttons[] = array(
+                        'label'   => 'Gérer les expéditions',
+                        'icon'    => 'fas_shipping-fast',
+                        'onclick' => $this->getJsLoadModalView('shipments', 'Gestion des expéditions')
+                    );
+                }
 
-            if ((float) $this->getBilledQty() < (float) $this->qty) {
-                $buttons[] = array(
-                    'label'   => 'Ajouter à une facture',
-                    'icon'    => 'fas_file-invoice-dollar',
-                    'onclick' => ''
-                );
+                if ((float) $this->getBilledQty() < (float) $this->qty) {
+                    $buttons[] = array(
+                        'label'   => 'Ajouter à une facture',
+                        'icon'    => 'fas_file-invoice-dollar',
+                        'onclick' => ''
+                    );
+                }
             }
         }
 
@@ -212,6 +258,57 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return $qty;
+    }
+
+    public function getShipmentData($id_shipment)
+    {
+        $shipments = $this->getData('shipments');
+
+        if (isset($shipments[(int) $id_shipment])) {
+            return array(
+                'qty'     => (isset($shipments[(int) $id_shipment]['qty']) ? $shipments[(int) $id_shipment]['qty'] : 0),
+                'group'   => (isset($shipments[(int) $id_shipment]['group']) ? $shipments[(int) $id_shipment]['group'] : 0),
+                'shipped' => (isset($shipments[(int) $id_shipment]['shipped']) ? $shipments[(int) $id_shipment]['shipped'] : 0)
+            );
+        }
+
+        return array(
+            'qty'     => 0,
+            'group'   => 0,
+            'shipped' => 0
+        );
+    }
+
+    public function getReadyToShipQty($id_shipment)
+    {
+        if ((int) $this->getData('type') === self::LINE_PRODUCT) {
+            if ($this->isProductSerialisable()) {
+                // todo
+                return 0;
+            }
+
+            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+            $commande = $this->getParentInstance();
+            if (BimpObject::objectLoaded($commande)) {
+                $rows = $reservation->getList(array(
+                    'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                    'id_commande_client'      => (int) $commande->id,
+                    'id_commande_client_line' => $this->id,
+                    'status'                  => 200
+                        ), null, null, 'id', 'asc', 'array', array('qty'));
+                if (!is_null($rows)) {
+                    $qty = 0;
+                    foreach ($rows as $r) {
+                        $qty += (int) $r['qty'];
+                    }
+                    return $qty;
+                }
+            }
+        } else {
+            return (float) $this->getShippedQty($id_shipment);
+        }
+
+        return 0;
     }
 
     // Getters Array:
@@ -459,72 +556,88 @@ class Bimp_CommandeLine extends ObjectLine
             $shipments = $commande->getChildrenObjects('shipments');
             $line_shipments = $this->getData('shipments');
 
-            $html .= '<div id="commande_line_' . $this->id . '_shipments_form' . '" class="commande_shipments_form line_shipment_qty_container">';
-            $html .= '<table class="bimp_list_table">';
-            $html .= '<thead>';
-            $html .= '<tr>';
-            $html .= '<th style="width: 400px;">Expédition</th>';
-            $html .= '<th>Qté</th>';
+            if (count($shipments)) {
+                $html .= '<div id="commande_line_' . $this->id . '_shipments_form' . '" class="commande_shipments_form line_shipment_qty_container">';
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th style="width: 400px;">Expédition</th>';
+                $html .= '<th>Qté</th>';
 
-            if ($use_group) {
-                $html .= '<th>Grouper les articles</th>';
-            }
-
-            $html .= '</tr>';
-            $html .= '</thead>';
-            $html .= '<tbody>';
-
-            foreach ($shipments as $shipment) {
-                $html .= '<tr id="commande_line_shipment_' . $shipment->id . '_row" class="shipment_row" data-id_shipment="' . $shipment->id . '">';
-                $html .= '<td style="width: 400px;">';
-                $card = new BC_Card($shipment, null, 'default');
-                $html .= $card->renderHtml();
-                $html .= '</td>';
-
-                $qty = isset($line_shipments[(int) $shipment->id]['qty']) ? (float) $line_shipments[(int) $shipment->id]['qty'] : 0;
-                $group = isset($line_shipments[(int) $shipment->id]['group']) ? (float) $line_shipments[(int) $shipment->id]['group'] : 0;
-
-                if ((int) $shipment->getData('status') === BL_CommandeShipment::BLCS_BROUILLON) {
-                    $html .= '<td>';
-                    $html .= $this->renderShipmentQtyInput((int) $shipment->id, true);
-                    $html .= '</td>';
-                    if ($use_group) {
-                        $html .= '<td>';
-                        $html .= BimpInput::renderInput('toggle', 'shipment_' . $shipment->id . '_group', $group, array(
-                                    'extra_class' => 'line_shipment_group'
-                        ));
-                        $html .= '</td>';
-                    }
-                } else {
-                    $html .= '<td>';
-                    $html .= '<input type="hidden" name="line_' . $this->id . '_shipment_' . $shipment->id . '_qty" value="' . $qty . '" class="line_shipment_qty total_max"/>';
-                    $html .= $qty;
-                    $html .= '</td>';
-                    if ($use_group) {
-                        $html .= '<td>';
-                        if ($group) {
-                            $html .= '<span class="success">OUI</span>';
-                        } else {
-                            $html .= '<span class="danger">NON</span>';
-                        }
-                        $html .= '</td>';
-                    }
+                if ($use_group) {
+                    $html .= '<th>Grouper les articles</th>';
                 }
+
                 $html .= '</tr>';
+                $html .= '</thead>';
+                $html .= '<tbody>';
+
+                foreach ($shipments as $shipment) {
+                    $html .= '<tr id="commande_line_shipment_' . $shipment->id . '_row" class="shipment_row" data-id_shipment="' . $shipment->id . '">';
+                    $html .= '<td style="width: 400px;">';
+                    $card = new BC_Card($shipment, null, 'default');
+                    $html .= $card->renderHtml();
+                    $html .= '</td>';
+
+                    $qty = isset($line_shipments[(int) $shipment->id]['qty']) ? (float) $line_shipments[(int) $shipment->id]['qty'] : 0;
+                    $group = isset($line_shipments[(int) $shipment->id]['group']) ? (float) $line_shipments[(int) $shipment->id]['group'] : 0;
+
+                    if ((int) $shipment->getData('status') === BL_CommandeShipment::BLCS_BROUILLON) {
+                        $html .= '<td>';
+                        $html .= $this->renderShipmentQtyInput((int) $shipment->id, true);
+                        $html .= '</td>';
+                        if ($use_group) {
+                            $html .= '<td>';
+                            $html .= BimpInput::renderInput('toggle', 'shipment_' . $shipment->id . '_group', $group, array(
+                                        'extra_class' => 'line_shipment_group'
+                            ));
+                            $html .= '</td>';
+                        }
+                    } else {
+                        $html .= '<td>';
+                        $html .= '<input type="hidden" name="line_' . $this->id . '_shipment_' . $shipment->id . '_qty" value="' . $qty . '" class="line_shipment_qty total_max"/>';
+                        $html .= $qty;
+                        $html .= '</td>';
+                        if ($use_group) {
+                            $html .= '<td>';
+                            if ($group) {
+                                $html .= '<span class="success">OUI</span>';
+                            } else {
+                                $html .= '<span class="danger">NON</span>';
+                            }
+                            $html .= '</td>';
+                        }
+                    }
+                    $html .= '</tr>';
+                }
+
+                $html .= '</tbody>';
+                $html .= '</table>';
+
+                $html .= '<div class="ajaxResultContainer" style="display: none"></div>';
+
+                $html .= '<div style="display: none" class="buttonsContainer align-right">';
+                $html .= '<button class="btn btn-primary" onclick="saveCommandeLineShipments($(this), ' . $this->id . ')">';
+                $html .= BimpRender::renderIcon('fas_save', 'iconLeft') . 'Enregistrer';
+                $html .= '</button>';
+                $html .= '</div>';
+
+                $html .= '</div>';
+            } else {
+                $html .= BimpRender::renderAlerts('Aucune expédition créée');
+                $html .= '<div class="buttonsContainer align-center">';
+
+                $shipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
+                $onclick = 'bimpModal.clearAllContents(); ' . $shipment->getJsLoadModalForm('default', 'Nouvelle expédition', array(
+                            'fields' => array(
+                                'id_commande_client' => (int) $commande->id
+                            )
+                                ), addslashes('function() {' . $this->getJsLoadModalView('shipments', 'Gestion des expéditions') . '}'));
+                $html .= '<button class="btn btn-default btn-large" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer une expédition';
+                $html .= '</button>';
+                $html .= '</div>';
             }
-
-            $html .= '</tbody>';
-            $html .= '</table>';
-
-            $html .= '<div class="ajaxResultContainer" style="display: none"></div>';
-
-            $html .= '<div style="display: none" class="buttonsContainer align-right">';
-            $html .= '<button class="btn btn-primary" onclick="saveCommandeLineShipments($(this), ' . $this->id . ')">';
-            $html .= BimpRender::renderIcon('fas_save', 'iconLeft') . 'Enregistrer';
-            $html .= '</button>';
-            $html .= '</div>';
-
-            $html .= '</div>';
         }
 
         return $html;
@@ -550,7 +663,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
-    // Traitements: 
+    // Traitements:
 
     public function createReservation()
     {
@@ -749,6 +862,116 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return $errors;
+    }
+
+    public function setShipmentShipped(BL_CommandeShipment $shipment)
+    {
+        $errors = array();
+
+        if (!$this->isReadyToShip($shipment->id, $errors)) {
+            return $errors;
+        }
+
+        global $user;
+        $shipment_data = $this->getShipmentData($shipment->id);
+        $commande = $this->getParentInstance();
+        $id_entrepot = (int) $shipment->getData('id_entrepot');
+
+
+        if (!BimpObject::objectLoaded($commande)) {
+            return array('ID de la commande client absent ou invalide');
+        }
+
+        if (!$id_entrepot) {
+            return array('ID de l\'entrepôt absent pour cette expédition');
+        }
+
+        if ((int) $this->getData('type') === self::LINE_PRODUCT) {
+            $product = $this->getProduct();
+
+            if (!BimpObject::objectLoaded($product)) {
+                if ((int) $this->id_product) {
+                    $errors[] = 'Le produit d\'ID ' . $this->id_product . ' n\'existe plus';
+                } else {
+                    $errors[] = 'ID du produit absent';
+                }
+                return $errors;
+            }
+
+            // traitement des réservations: 
+
+            $stock_label = 'Expédition n°' . $this->getData('num_livraison') . ' pour la commande client "' . $commande->ref . '"';
+            $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+
+            if ($this->isProductSerialisable()) {
+                // todo: Assigner le statut 300 à toutes les réservations des équipements associés à l'expédition. 
+                // Mettre à jour les emplacements pour chaque équipement. 
+//                $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+//                $place_errors = $place->validateArray(array(
+//                    'id_equipment' => $id_equipment,
+//                    'type'         => BE_Place::BE_PLACE_CLIENT,
+//                    'id_client'    => (int) $id_client,
+//                    'id_contact'   => (int) $id_contact,
+//                    'infos'        => $stock_label,
+//                    'date'         => date('Y-m-d H:i:s'),
+//                    'code_mvt'     => $codemove
+//                ));
+//
+//                if (!count($place_errors)) {
+//                    $place_errors = $place->create();
+//                }
+//
+//                if (count($place_errors)) {
+//                    $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement d\'ID ' . $id_equipment . ' (Réf. réservation: "' . $item['ref_reservation'] . '")');
+//                }
+            } else {
+                $reservations = $this->getReservations('status', 'asc', '200');
+
+                $remain_qty = $shipment_data['qty'];
+
+                foreach ($reservations as $reservation) {
+                    if ($remain_qty <= 0) {
+                        break;
+                    }
+                    $qty = $remain_qty;
+                    if ($qty > (int) $reservation->getData('qty')) {
+                        $qty = (int) $reservation->getData(('qty'));
+                        $remain_qty -= $qty;
+                    }
+                    $res_errors = $reservation->setNewStatus(300, $qty);
+                    if (count($res_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour di statut de la réservation d\'ID ' . $reservation->id);
+                    } else {
+                        // traitement des stocks
+                        // todo: Voir pour utiliser un code_mov spécifique (utile en cas d'annulation pour vérifier que le mvt de stock a été correctement effectué.
+                        if ($product->dol_object->correct_stock($user, $id_entrepot, $shipment_data['qty'], 1, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
+                            $msg = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités à retirer: ' . $shipment_data['qty'] . ')';
+                            $warnings[] = $msg;
+                            dol_syslog($msg, LOG_ERR);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Mise à jour des données de l'expédition: 
+
+        if (!count($errors)) {
+            $shipments = $this->getData('shipments');
+            $shipments[(int) $shipment->id]['shipped'] = 1;
+            $this->set('shipments', $shipments);
+            $up_errors = $this->update($warnings, true);
+            if (count($up_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne de commande');
+            }
+        }
+
+        return $errors;
+    }
+
+    public function cancelShipmentShipped(BL_CommandeShipment $shipment)
+    {
+        // todo
     }
 
     // Actions: 

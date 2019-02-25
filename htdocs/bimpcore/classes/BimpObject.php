@@ -1844,9 +1844,7 @@ class BimpObject extends BimpCache
         if ($this->field_exists($order_by)) {
             if ($is_dol_object && $this->isDolExtraField($order_by)) {
                 $has_extrafields = true;
-                if (preg_match('/^ef_(.*)$/', $order_by, $matches)) {
-                    $order_by = 'ef.' . $matches[1];
-                }
+                $order_by = 'ef.' . $order_by;
             } elseif ($this->isExtraField($order_by)) {
                 $order_by = $this->getExtraFieldFilterKey($order_by, $joins);
             }
@@ -2899,7 +2897,7 @@ class BimpObject extends BimpCache
             if (count($extra_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($extra_errors, 'Des erreurs sont survenues lors de la suppression des champs supplémentaires');
             }
-            
+
             // Réintialisation de la position des autres objets du même parent: 
             if ((int) $this->params['positions']) {
                 $this->resetPositions();

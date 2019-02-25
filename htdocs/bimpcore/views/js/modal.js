@@ -69,6 +69,18 @@ function BimpModal($modal) {
         }
         modal.hide();
     };
+    
+    this.clearAllContents = function() {
+        modal.$contents.find('.modal_content').each(function() {
+            var idx = parseInt($(this).data('idx'));
+            if (idx) {
+                modal.removeContent(idx, false);
+            }
+        });
+        
+        modal.checkContents();
+//        modal.hide();
+    };
 
     this.removeContent = function (idx, check_contents) {
         if (typeof (check_contents) === 'undefined') {

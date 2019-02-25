@@ -1,6 +1,5 @@
 table: br_commande_shipment
 common_fields: 1
-icon: fas_shipping-fast
 
 parent_module: bimpcommercial
 parent_object: Bimp_Commande
@@ -212,38 +211,6 @@ views:
                       name: default
                       children: service_shipments
                       
-lists_cols: 
-    commande: 
-        field: id_commande_client
-        display: nom_url
-    num_livraison:
-        label: N°
-        field: num_livraison
-        max_width: 30px
-    status: 
-        field: status
-    contact: 
-        label: Destinataire
-        value: 
-            callback: displayContact
-    commercial: 
-        label: Commercial
-        value: 
-            callback: displayCommercial
-    date: 
-        label: Expédiée le
-        field: date_shipped
-    signed: 
-        field: signed
-        edit: 1
-        max_width: 45px
-    pdf:
-        label: Fichiers
-        value: 
-            callback: 
-                method: displayPdfButtons
-                params: 
-                    - 1
 lists: 
     default: 
         sort_field: id
@@ -258,13 +225,36 @@ lists:
             callback: getExtraBtn
         cols:
             commande: 
+                field: id_commande_client
+                display: nom_url
             num_livraison:
+                label: N°
+                field: num_livraison
+                max_width: 30px
             status: 
+                field: status
             contact: 
+                label: Destinataire
+                value: 
+                    callback: displayContact
             commercial: 
+                label: Commercial
+                value: 
+                    callback: displayCommercial
             date: 
+                label: Expédiée le
+                field: date_shipped
             signed: 
+                field: signed
+                edit: 1
+                max_width: 45px
             pdf:
+                label: Fichiers
+                value: 
+                    callback: 
+                        method: displayPdfButtons
+                        params: 
+                            - 1
                     
     commandes: 
         checkboxes: 1
@@ -286,20 +276,39 @@ lists:
             callback: getExtraBtn
         cols:
             num_livraison:
+                label: N°
+                field: num_livraison
+                max_width: 40px
+                min_width: 40px
             status: 
+                field: status
             contact: 
+                label: Destinataire
+                value: 
+                    callback: displayContact
+            qty_articles: 
+                label: Articles
+                value: 
+                    callback: getNbArticles
+                min_width: 60px
+                max_width: 60px
+            qty_services: 
+                label: Services
+                value: 
+                    callback: getNbServices
+                min_width: 60px
+                max_width: 60px
             date: 
+                label: Expédiée le
+                field: date_shipped
             signed: 
+                field: signed
+                edit: 1
+                max_width: 45px
             facture: 
+                field: id_facture
+                display: nom_url
             pdf:
-                    
-cards: 
-    default: 
-        title: nom
-        status: status
-        fields: 
-            - label: Destinataire
-              field: id_contact
-              display: default
-            - label: Infos
-              field: info
+                label: Fichiers
+                value: 
+                    callback: displayPdfButtons

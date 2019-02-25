@@ -107,7 +107,9 @@ class modSynopsisContrat extends DolibarrModules {
 
 
         $r = 0;
-        $this->tabs = array('contract:+annexe:Annexe PDF:@monmodule:$user->rights->synopsiscontrat->annexe:/Synopsis_Contrat/annexes.php?id=__ID__',
+        $this->tabs = array(
+            //'contract:+details:Détails des services:@monmodule:1:/Synopsis_Contrat/contratdet.php?id=__ID__',
+            'contract:+annexe:Annexe PDF:@monmodule:$user->rights->synopsiscontrat->annexe:/Synopsis_Contrat/annexes.php?id=__ID__',
             'contract:+interv:Interventions:@monmodule:$user->rights->synopsiscontrat->generate:/Synopsis_Contrat/intervByContrat.php?id=__ID__',
                 /* 'contract:+tickets:Tickets:@monmodule:/Synopsis_Contrat/annexes.php?id=__ID__',
                   'contract:+sav:SAV:@monmodule:/Babel_GMAO/savByContrat.php?id=__ID__' */                );
@@ -230,7 +232,7 @@ $tabModel = array(
   "contrat_courrierBIMPsignature" => "BIMP Courrier - Signature", 
   "contrat_courrierBIMPresiliationAvoir" => "BIMP Courrier - Resiliation & avoir", 
   "contrat_courrierBIMPAutoPrelevement" => "BIMP Courrier - Prelevement automatique",
-  "contrat_courrierBIMPfinapro" => "BIMP contrat - Financement + Proces Verbal + Mandat Prélèvement",
+  //"contrat_courrierBIMPfinapro" => "BIMP contrat - Financement + Proces Verbal + Mandat Prélèvement",
   //"contrat_LDLC_lease" => "Liasse LDLC Lease",
   "contrat_BIMP_maintenance" => 'Contrat maintenance informatique'
 );
@@ -243,35 +245,17 @@ $tabModel = array(
             $sql[] = "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity, libelle) VALUES('" . $result . "','contract'," . $conf->entity . ", '".$nom."')";
         }
         
-
         $extrafields = new ExtraFields($this->db);
-        $extrafields->addExtraField('periodicity', 'Périodicité', 'select', 40, 30, 'contrat', 0, 0, "", 
-          array("options" => array(
-            1 => "Mensuelle",
-            3 => "Trimestrielle",
-            6 => "Semestrielle",
-            12 => "Annuelle"
-          )
-        ), 1, "", 1, 1, "", "", "", 1);
-        $extrafields->addExtraField('tacite', 'Renouvellement tacite', 'select', 40, 30, 'contrat', 0, 0, "", 
-          array("options" => array(
-            1 => "1 fois",
-            3 => "2 fois",
-            6 => "3 fois",
-          )
-        ), 1, "", 1, 1, "", "", "", 1);
-        
-        $extrafields->addExtraField('syntec', 'Indice SYNTEC', 'float', 1, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
-        $extrafields->addExtraField('date_start', 'Date de début', 'date', 38, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
-        $extrafields->addExtraField('duree_mois', 'Durée en mois', 'int', 37, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
-        $extrafields->addExtraField('denounce', 'Contrat dénoncé', 'select', 100, 30, 'contrat', 0, 0, "", 
-            array( 'options' => array(
-                    0 => 'Non',
-                    1 => 'Oui dans les temps',
-                    2 => 'Oui hors délais'
-                )
-            ), 1, "", 1, 1, "", "", "", 1);
-        
+        $extrafields->addExtraField('periodicity', 'Périodicité', 'select', 40, 30, 'contrat', 0, 0, "", array("options" => array(1 => "Mensuelle",3 => "Trimestrielle",6 => "Semestrielle",12 => "Annuelle")), 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('tacite', 'Renouvellement tacite', 'select', 40, 30, 'contrat', 0, 0, "", array("options" => array(1 => "1 fois",3 => "2 fois",6 => "3 fois",12 => "Sur proposition")), 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('syntec', 'Indice SYNTEC', 'float', 1, 10, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        //$extrafields->addExtraField('syntec_pdf', 'Utiliser l\'indice Syntec', 'boolean', 1, 10, 'contrat', 0, 0, "", 1, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('date_start', 'Date de début', 'date', 37, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('duree_mois', 'Durée en mois', 'int', 38, 30, 'contrat', 0, 0, "", NULL, 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('gti', 'Délais d\'intervention', 'select', 39, 30, 'contrat', 0, 0, "", array( 'options' => array(2 => '2h ouvrées',4 => '4h ouvrées',8 => '8h ouvrées',16 => '16h ouvrées')), 1, "", 1, 1, "", "", "", 1);
+        $extrafields->addExtraField('denounce', 'Contrat dénoncé', 'select', 100, 30, 'contrat', 0, 0, "", array( 'options' => array(0 => 'Non',1 => 'Oui dans les temps',2 => 'Oui hors délais')), 1, "", 1, 1, "", "", "", 1);
+        //$extrafields->update('tacite', 'Renouvellement tacite', 'select', 30, 'contrat', 0, 0, 40, array("options" => array(1 => "bLA BLA1 fois",3 => "Tacite 2 fois",6 => "Tacite 3 fois",12 => "Sur proposition")), 1, '', 1);
+        $extrafields = null;
         $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."cronjob` (`jobtype`, `label`, `command`, `classesname`, `objectname`, `methodename`, `params`, `md5params`, `module_name`, `priority`, `datelastrun`, `datenextrun`, `datestart`, `dateend`, `datelastresult`, `lastresult`, `lastoutput`, `unitfrequency`, `frequency`, `nbrun`, `status`, `fk_user_author`, `fk_user_mod`, `note`, `libname`, `entity`, `maxrun`, `autodelete`, `fk_mailing`, `test`, `processing`) VALUES
 ('method', 'Rappel tâche commerciaux', 'curl http://127.0.0.1/bimp-8/bimp-erp/htdocs/synopsiscontrat/testreminder.php?days=2', 'synopsiscontrat/class/remindendservice.class.php', 'RemindEndService', 'setTaskForService', '3', '', 'synopsiscontrat', 0, '2010-01-20 17:31:27', '2010-02-27 11:30:00', '2010-02-08 00:00:00', NULL, NULL, '', '', '3600', 1, 0, 1, 330, 330, 'Envoie une tâche aux commerciaux pour leurs rappeler qu\'un service arrive à terme.\r\nParamètre : nombre de jours qui séparent aujourd\'hui et la date de fin de validité des services.', NULL, 1, 0, 0, NULL, NULL, 0);";
         
@@ -284,7 +268,10 @@ $tabModel = array(
      */
     function remove() {
         global $conf;
-//         $extrafields = new ExtraFields($this->db);
+//        $extrafields = new ExtraFields($this->db);
+//        $extrafields->update('tacite', 'Renouvellement tacite', 'select', 30, 'contrat', 0, 0, 40, array("options" => array(1 => "Tacite 1 fois",3 => "Tacite 2 fois",6 => "Tacite 3 fois",12 => "Sur proposition")), 1, '', 1);
+//        $extrafields->update('date_start', 'Date de début', 'date', 30, 'contrat', 0, 0, 37, NULL, 1, '', 1);
+//        $extrafields->update('duree_mois', 'Durée en mois', 'int', 11, 'contrat', 0, 0, 38, NULL, 1, '', 1);
 //         $extrafields->delete('syntec', 'contrat');
 //         $extrafields->delete('tacite', 'contrat');
 //         $extrafields->delete('denounce', 'contrat');

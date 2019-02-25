@@ -204,6 +204,7 @@ class Synopsisfichinter extends Fichinter {
         $sql .= ", description  = '" . addslashes($this->description) . "'";
         $sql .= ", duree = " . $this->duree;
         $sql .= ", fk_projet = " . $this->projet_id;
+        $sql .= ", fk_statut = " . $this->statut;
         $sql .= " WHERE rowid = " . $this->id;
 
 
@@ -240,7 +241,7 @@ class Synopsisfichinter extends Fichinter {
         if($this->db->num_rows($result) == 0)
             $this->db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsisfichinter (rowid) VALUES (".$rowid.")");
         
-        $sql = "SELECT ref, description, fk_soc, fk_user_author, fk_statut, fk_contrat, fk_commande, total_ht, total_tva, total_ttc,";
+        $sql = "SELECT ref, fk_user_valid, description, fk_soc, fk_user_author, fk_statut, fk_contrat, fk_commande, total_ht, total_tva, total_ttc,";
         $sql.= " datei as di, duree, fk_projet, note_public, note_private, model_pdf, natureInter";
         $sql.= " FROM " . MAIN_DB_PREFIX . "synopsis_fichinter";
         $sql.= " WHERE rowid=" . $rowid;
@@ -251,6 +252,7 @@ class Synopsisfichinter extends Fichinter {
             if ($this->db->num_rows($resql)) {
                 $obj = $this->db->fetch_object($resql);
 
+                $this->fk_user_valid = $obj->fk_user_valid;
                 $this->id = $rowid;
                 $this->ref = $obj->ref;
                 $this->description = $obj->description;
@@ -664,6 +666,10 @@ class Synopsisfichinter extends Fichinter {
     }
     
     public function setExtra($idExtraKey, $val){
+        
+                $requete = "DELETE FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value WHERE
+                                  interv_refid = " .$this->id . " AND extra_key_refid = '" . $idExtraKey . "' AND typeI = 'FI'";
+                $sql = $this->db->query($requete);
         
                 $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
                                          (interv_refid,extra_key_refid,extra_value,typeI)

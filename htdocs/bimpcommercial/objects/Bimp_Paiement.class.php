@@ -117,7 +117,8 @@ class Bimp_Paiement extends BimpObject
             $list = $facture->getList(array(
                 'fk_soc'    => $id_client,
                 'paye'      => 0,
-                'type'      => Facture::TYPE_STANDARD,
+                'type'      => array('IN' => array(Facture::TYPE_STANDARD, Facture::TYPE_DEPOSIT)),
+//                'type'      => Facture::TYPE_STANDARD,
                 'fk_statut' => 1
                     ), null, null, 'id', 'asc', 'array', array('rowid'));
         }

@@ -3,7 +3,9 @@
 class BR_reservationShipment extends BimpObject
 {
 
-    // Getters booléens: 
+    public $commande = null;
+
+    // Getters: 
 
     public function isQtyEditable()
     {
@@ -22,7 +24,7 @@ class BR_reservationShipment extends BimpObject
         if (!$this->isLoaded()) {
             return 1;
         }
-
+        
         $shipment = $this->getParentInstance();
         if (BimpObject::objectLoaded($shipment)) {
             if (in_array((int) $shipment->getData('status'), array(1, 4))) {
@@ -69,11 +71,11 @@ class BR_reservationShipment extends BimpObject
                 if ((int) $remove_from_order) {
                     return 1;
                 }
-
+                
                 return 0;
             }
         }
-
+        
         $shipment = $this->getParentInstance();
         if (BimpObject::objectLoaded($shipment)) {
             if ((int) $shipment->getData('id_facture')) {
@@ -88,43 +90,14 @@ class BR_reservationShipment extends BimpObject
         return 0;
     }
 
-    // Getters params: 
-
-    public function getListExtraBtn()
-    {
-        $buttons = array();
-
-        if ((int) $this->getData('qty') > 0) {
-            $shipment = $this->getParentInstance();
-            if (BimpObject::objectLoaded($shipment)) {
-                if (in_array($shipment->getData('status'), array(2, 4))) {
-                    $buttons[] = array(
-                        'label'   => 'Retirer',
-                        'icon'    => 'times',
-                        'onclick' => $this->getJsActionOnclick('removeFromShipment', array(), array(
-                            'form_name' => 'remove'
-                        ))
-                    );
-                }
-            }
-        }
-
-        return $buttons;
-    }
-
-    // Getters objets: 
-
     public function getCommande()
     {
-        return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
-    }
+        if (is_null($this->commande)) {
+            $this->commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $this->getData('id_commande_client'));
+        }
 
-    public function getBrOrderLine()
-    {
-        return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('id_commande_client_line'));
+        return $this->commande;
     }
-
-    // Getters array:
 
     public function getShipmentsArray()
     {
@@ -157,33 +130,26 @@ class BR_reservationShipment extends BimpObject
         return $shipments;
     }
 
-    public function getAvoirsArray()
+    public function getBrOrderLine()
     {
-        $avoirs = array(
-            0 => 'Créer un nouvel avoir'
-        );
-
-        $commande = $this->getCommande();
-
-        if (BimpObject::objectLoaded($commande)) {
-            $asso = new BimpAssociation($commande, 'avoirs');
-            foreach ($asso->getAssociatesList() as $id_avoir) {
-                $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_avoir);
-                if ($avoir->isLoaded()) {
-                    if ((int) $avoir->dol_object->statut === (int) Facture::STATUS_DRAFT) {
-                        $DT = new DateTime($this->db->db->iDate($avoir->dol_object->date_creation));
-                        $avoirs[(int) $id_avoir] = $avoir->dol_object->ref . ' (créé le ' . $DT->format('d / m / Y à H:i') . ')';
-                    }
+        $id_commande = (int) $this->getData('id_commande_client');
+        $id_commande_line = (int) $this->getData('id_commande_client_line');
+//        echo $id_commande.', '.$id_commande_line; exit;
+        if ($id_commande && $id_commande_line) {
+            $orderLine = BimpObject::getInstance($this->module, 'BR_OrderLine');
+            if ($orderLine->find(array(
+                        'id_commande'   => $id_commande,
+                        'id_order_line' => $id_commande_line,
+                        'type'          => BR_OrderLine::PRODUIT
+                    ))) {
+                if ($orderLine->isLoaded()) {
+                    return $orderLine;
                 }
             }
         }
 
-        krsort($avoirs);
-
-        return $avoirs;
+        return null;
     }
-
-    // Getters valeurs: 
 
     public function getAvailableQty()
     {
@@ -208,6 +174,54 @@ class BR_reservationShipment extends BimpObject
         }
 
         return $qty;
+    }
+
+    public function getListExtraBtn()
+    {
+        $buttons = array();
+
+        if ((int) $this->getData('qty') > 0) {
+            $shipment = $this->getParentInstance();
+            if (BimpObject::objectLoaded($shipment)) {
+                if (in_array($shipment->getData('status'), array(2, 4))) {
+                    $buttons[] = array(
+                        'label'   => 'Retirer',
+                        'icon'    => 'times',
+                        'onclick' => $this->getJsActionOnclick('removeFromShipment', array(), array(
+                            'form_name' => 'remove'
+                        ))
+                    );
+                }
+            }
+        }
+
+        return $buttons;
+    }
+
+    public function getAvoirsArray()
+    {
+        $avoirs = array(
+            0 => 'Créer un nouvel avoir'
+        );
+
+        $commande = $this->getCommande();
+
+        if (BimpObject::objectLoaded($commande)) {
+            $asso = new BimpAssociation($commande, 'avoirs');
+            foreach ($asso->getAssociatesList() as $id_avoir) {
+                $avoir = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $id_avoir);
+                if ($avoir->isLoaded()) {
+                    if ((int) $avoir->dol_object->statut === (int) Facture::STATUS_DRAFT) {
+                        $DT = new DateTime($this->db->db->iDate($avoir->dol_object->date_creation));
+                        $avoirs[(int) $id_avoir] = $avoir->dol_object->ref . ' (créé le ' . $DT->format('d / m / Y à H:i') . ')';
+                    }
+                }
+            }
+        }
+
+        krsort($avoirs);
+
+        return $avoirs;
     }
 
     // Traitements:
@@ -239,7 +253,7 @@ class BR_reservationShipment extends BimpObject
 
         // Ajout à l'avoir: 
         $rebuild_facture = false;
-
+        
         if (!$this->isOrderInvoiced() && $this->isShipmentInvoiced()) {
             $facture_status = (int) $this->db->getValue('facture', 'fk_statut', '`rowid` = ' . (int) $shipment->getData('id_facture'));
             if ($facture_status > 0) {
@@ -350,7 +364,7 @@ class BR_reservationShipment extends BimpObject
                 $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour des quantités de la ligne d\'expédition');
             }
         }
-
+        
         if ($rebuild_facture) {
             $fac_errors = $shipment->rebuildFacture();
             if (count($fac_errors)) {
@@ -626,6 +640,7 @@ class BR_reservationShipment extends BimpObject
 
         return $errors;
     }
+
 //    public function delete()
 //    {
 ////        $errors = array();
@@ -640,4 +655,4 @@ class BR_reservationShipment extends BimpObject
 //
 //        return $errors;
 //    }
-}
+        }

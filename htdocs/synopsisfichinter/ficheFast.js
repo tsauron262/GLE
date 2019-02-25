@@ -53,11 +53,11 @@ function initHeure(elem) {
     jQuery(elem).removeClass("heures");
     jQuery(elem).hide();
     select1 = "";
-    for (i = 0; i < 12; i++)
+    for (i = 0; i < 13; i++)
         select1 = select1 + '<option value="' + i + '">' + i + '</option>';
     select2 = "";
-    for (i = 0; i < 11; i++)
-        select2 = select2 + '<option value="' + i + '">' + i * 5 + '</option>';
+    for (i = 0; i < 60; i++)
+        select2 = select2 + '<option value="' + i + '">' + i + '</option>';
     jQuery(elem).before('<select class="heureHeure">' + select1 + '</select>H <select class="minHeure">' + select2 + '</select>M ');
 
 
@@ -70,7 +70,7 @@ function initHeure(elem) {
     minAv = 0;
     for (; secondesAv >= 3600; secondesAv = secondesAv - 3600)
         heuresAv++;
-    for (; secondesAv >= 300; secondesAv = secondesAv - 300)
+    for (; secondesAv >= 60; secondesAv = secondesAv - 60)
         minAv++;
     $(elem).parent().find(".heureHeure option[value=" + heuresAv + "]").attr("selected", "selected");
     $(elem).parent().find(".minHeure option[value=" + minAv + "]").attr("selected", "selected");

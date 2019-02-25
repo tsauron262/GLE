@@ -106,10 +106,12 @@ fields:
         type: int
         values: 
             array: status_list
+        dol_prop: statut
         
     datei:
         label: Date d'intervention
         type: date
+        dol_prop: date
     date_valid:
         label: Date de validation
         type: date
@@ -145,8 +147,10 @@ fields:
         
     note_public:
         label: Note Public
+        type: text
     note_private:
         label: Note Privée
+        type: text
     total_ht:
         label: Total Ht
         type: money
@@ -164,26 +168,33 @@ fields:
     extra35:
         label: Type d'inter
         type: int
+        extra: 1
         values: 
             array: type_list
     extra17:
         label: Terminée
         type: bool
+        extra: 1
     extra18:
         label: Date du prochain RDV
         type: date
+        extra: 1
     extra24:
         label: Heure d'arrivé AM
-        type: int
+        type: string
+        extra: 1
     extra26:
         label: Heure de départ AM
-        type: int
+        type: string
+        extra: 1
     extra25:
         label: Heure d'arrivé PM
-        type: int
+        type: string
+        extra: 1
     extra27:
         label: Heure de départ PM
-        type: int
+        type: string
+        extra: 1
 # fields manquant :
 #    fk_projet
 #    entity
@@ -328,15 +339,20 @@ fields_tables:
         rows: 
             - field: ref 
             - field: di
-            - field: fk_statut 
+            - field: statut 
+              edit: 1
             - field: description 
+              edit: 1
             - field: natureInter
               edit: 1
             - field: extra35
               edit: 1
             - field: note_public
+              edit: 1
             - field: note_private
+              edit: 1
             - field: extra17
+              edit: 1
             - field: extra18
     horraire:
         title: Horraire
@@ -356,8 +372,11 @@ fields_tables:
             - field: extra24
               edit: 1
             - field: extra26
+              edit: 1
             - field: extra25
+              edit: 1
             - field: extra27
+              edit: 1
     lien:
         title: Objets liées
         icon: link

@@ -1811,7 +1811,7 @@ class BimpObject extends BimpCache
         }
 
         if ($order_by === 'id') {
-            $order_by = $this->getPrimary();
+            $order_by = $primary;
         }
 
         $is_dol_object = $this->isDolObject();
@@ -1848,8 +1848,6 @@ class BimpObject extends BimpCache
             } elseif ($this->isExtraField($order_by)) {
                 $order_by = $this->getExtraFieldFilterKey($order_by, $joins);
             }
-        } else {
-            $order_by = '';
         }
 
         if ($has_extrafields && !isset($joins['ef'])) {
@@ -3317,6 +3315,14 @@ class BimpObject extends BimpCache
         }
 
         $errors = $this->hydrateFromDolObject();
+        
+        
+        $extra_fields = $this->fetchExtraFields();
+
+        foreach ($extra_fields as $field_name => $value) {
+            $this->checkFieldValueType($field_name, $value);
+            $this->data[$field_name] = $value;
+        }
 
         $this->initData = $this->data;
 

@@ -32,6 +32,18 @@ abstract class extraFI extends BimpDolObject{
         return (isset($user->rights->synopsisficheinter->$nom))? 1 : 0;
     }
     
+    
+    public function getListExtra($key){
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice WHERE key_refid = " . $key;
+        $sql1 = $this->db->db->query($requete);
+        $return = array();
+        while ($res1 = $this->db->db->fetch_object($sql1)) {
+            $return[$res1->value] = array('label' => $res1->label, 'icon' => 'fas_file-alt', 'classes' => array('warning'));
+        }
+        return $return;
+    }
+    
+    
     public function getExtra($field){
         if($field == "di"){
             if($this->isLoaded() && is_a($this->dol_object, 'Synopsisfichinter')){
@@ -94,8 +106,13 @@ abstract class extraFI extends BimpDolObject{
     {
         $return = array();
         $list = $this->getExtraFields();
-        foreach($list as $extra)
+        foreach($list as $extra){
             $return[$extra] = $this->getExtra ($extra);
+            if(in_array($extra, array("extra37"))){
+                $listName = $extra."_list";
+                $this->$listName = $this->getListExtra (str_replace("extra", "", $extra));
+            }
+        }
 
         return $return;
     }

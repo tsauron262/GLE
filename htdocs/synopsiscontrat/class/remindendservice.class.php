@@ -1,8 +1,9 @@
 <?php
 
-$path = dirname(__FILE__) . '/';
+//$path = dirname(__FILE__) . '/';
 
-require_once($path . '../../main.inc.php');
+if(isset($conf))
+require_once('../../main.inc.php');
 include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 include_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 

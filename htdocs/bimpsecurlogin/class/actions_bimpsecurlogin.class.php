@@ -185,6 +185,20 @@ class securLogSms {
                 $message = "<a href='" . DOL_URL_ROOT . "/bimpcore/tabs/user.php'>Vos numéros de mobile (pro et perso) sont invalide ainsi que l'adresse mail de secours : dans quelques jours vous ne pourrez plus accéder à l'application, inscrire 'NO' si vous n'avez pas de téléphone pro et que vous refusez d'inscrire votre tel perso (qui ne serait utilisé que pour l'envoi de code par SMS et non communiqué aux équipes) et merci d'indiquer un mail de secours en cliquant sur ce message</a>";
                 setEventMessages($message, null, 'warnings');
                 setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
+                setEventMessages($message, null, 'warnings');
             }
     }
 

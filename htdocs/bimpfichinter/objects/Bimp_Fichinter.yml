@@ -1,11 +1,10 @@
 dol_object: 
     instance: 
-#        dol_object: user
         dol_object: synopsisfichinter
         
 table: synopsis_fichinter
 primary: rowid
-#controller: fichinter
+controller: fichinter
 list_page_url:
     controller: index
 header_list_name: default
@@ -154,12 +153,21 @@ fields:
     total_ht:
         label: Total Ht
         type: money
+        show: 
+            callback:
+                method: canViewPrice
     total_tva:
         label: Total Tva
         type: money
+        show: 
+            callback:
+                method: canViewPrice
     total_ttc:
         label: Total Ttc
         type: money
+        show: 
+            callback:
+                method: canViewPrice
     natureInter:
         label: Nature de l'inter
         type: int
@@ -175,10 +183,18 @@ fields:
         label: Terminée
         type: bool
         extra: 1
+    di:
+        label: Demande
+        type: string
+        extra: 1
     extra18:
         label: Date du prochain RDV
         type: date
         extra: 1
+        display_if: 
+            field_name: extra17
+            show_values: 0
+        show: 1
     extra24:
         label: Heure d'arrivé AM
         type: string
@@ -214,6 +230,7 @@ forms:
     default: 
         rows:
             - field: fk_soc
+            - field: datei
             - field: description
             - field: fk_contrat
             - field: fk_commande
@@ -222,6 +239,8 @@ forms:
             - field: note_private
             - field: extra35
             - field: natureInter
+            - field: extra17
+            - field: extra18
     
         
 filters_panels: 
@@ -312,6 +331,7 @@ lists:
         n: 25
         delete_btn: 0
         modal_view: default
+#        add_form_name: default
         filters_panel: default
         page_btn: 1
         edit_btn: 1
@@ -339,7 +359,7 @@ fields_tables:
         rows: 
             - field: ref 
             - field: di
-            - field: statut 
+            - field: fk_statut 
               edit: 1
             - field: description 
               edit: 1
@@ -351,9 +371,6 @@ fields_tables:
               edit: 1
             - field: note_private
               edit: 1
-            - field: extra17
-              edit: 1
-            - field: extra18
     horraire:
         title: Horraire
         icon: fas_calendar-check
@@ -377,6 +394,10 @@ fields_tables:
               edit: 1
             - field: extra27
               edit: 1
+            - field: extra17
+              edit: 1
+            - field: extra18
+              edit: 1
     lien:
         title: Objets liées
         icon: link
@@ -396,7 +417,9 @@ fields_tables:
             - field: total_ht 
             - field: total_tva 
             - field: total_ttc 
-            
+        show: 
+            callback:
+                method: canViewPrice    
             
         
 views: 
@@ -418,6 +441,7 @@ views:
                   fields_table: 
                       name: horraire
             
+            - cols: 
                 - type: fields_table
                   col_lg: 6
                   col_md: 6

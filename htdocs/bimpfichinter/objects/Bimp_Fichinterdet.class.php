@@ -1,6 +1,8 @@
 <?php
 
-class Bimp_Fichinterdet extends BimpObject
+require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/extraFI.class.php';
+
+class Bimp_Fichinterdet extends extraFI
 {
     
 
@@ -26,6 +28,13 @@ class Bimp_Fichinterdet extends BimpObject
         }
 
         return ' ';
+    }
+    
+    public function canEdit() {
+        $parent = $this->getParentInstance();
+        if($parent->isLoaded())
+            return $parent->canEdit();
+        return 0;
     }
     
     

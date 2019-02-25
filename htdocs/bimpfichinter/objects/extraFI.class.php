@@ -7,7 +7,47 @@ abstract class extraFI extends BimpDolObject{
     
     // gestion des extra
     
+    
+    public function canView() {
+        return $this->getDolRights("lire");
+    }
+    public function canEdit() {
+        return $this->getDolRights("creer");
+    }
+    public function canEditAll() {
+        return $this->getDolRights("modifAfterValid");
+    }
+    public function canDelete() {
+        return $this->getDolRights("supprimer");
+    }
+    public function canCreate() {
+        return ($this->canEdit() &&$this->getDolRights("creer"));
+    }
+    public function canViewPrice() {
+        return $this->getDolRights("voirPrix");
+    }
+    
+    public function getDolRights($nom){
+        global $user;
+        return (isset($user->rights->synopsisficheinter->$nom))? 1 : 0;
+    }
+    
     public function getExtra($field){
+        if($field == "di"){
+            if($this->isLoaded() && is_a($this->dol_object, 'Synopsisfichinter')){
+                $return = array();
+                $dis = $this->dol_object->getDI();
+                require_once DOL_DOCUMENT_ROOT.'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php';
+                $di = new Synopsisdemandeinterv($this->db->db);
+                foreach($dis as $diI){
+                    $di->fetch($diI);
+                    $return[] = $di->getNomUrl(1);
+                }
+                return implode(" - ", $return);
+            }
+        }
+        
+        
         $field = str_replace("extra", "", $field);
         if ($this->isLoaded()){
             if(!$this->extraFetch){

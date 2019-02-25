@@ -10,7 +10,7 @@ sections:
     - type: tabs
       tabs: 
         default:
-            label: Utilisateurs
+            label: Fiche d'interventions
             sections:
                 - type: list
                   list: 

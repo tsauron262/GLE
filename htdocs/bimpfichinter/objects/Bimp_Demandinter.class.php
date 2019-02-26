@@ -116,13 +116,28 @@ class Bimp_Demandinter extends extraFI
         $buttons = array();
 
         if ($this->isLoaded()) {
-            $buttons[] = array(
-                'label'   => 'Générer le PDF',
-                'icon'    => 'fas_sync',
-                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
-            );
+            if($this->getData("fk_user_prisencharge") != $user->id)
+                $buttons[] = array(
+                    'label'   => 'Prendre en charge',
+                    'icon'    => 'fas_user',
+                    'onclick' => $this->getJsActionOnclick('priseEnCharge', array($user->id), array())
+                );
+            if($this->getData("fk_user_prisencharge")> 0)
+                $buttons[] = array(
+                    'label'   => 'Créer une FI',
+                    'icon'    => 'fas_ambulance',
+                    'onclick' => $this->getJsActionOnclick('createFi', array($user->id), array())
+                );
         }
         return $buttons;
+    }
+    
+    public function actionCreateFi(){
+        $this->dol_object->createFi(false);
+    }
+    
+    public function actionPriseEnCharge($params){
+        $this->updateField("fk_user_prisencharge", $params[0]);
     }
     
 //public function updateDolObject(&$errors) {

@@ -109,6 +109,8 @@ abstract class extraFI extends BimpDolObject{
         }
         return $this->list_commande;
     }
+        
+        
     
     public function getList_contratArray(){
         if($this->isLoaded() && $this->getData("fk_soc") > 0){
@@ -136,6 +138,11 @@ abstract class extraFI extends BimpDolObject{
     }
     
     
+    public function getExtra37_listArray(){
+        return $this->getListExtra(37);
+    }
+    
+    
     public function getExtra($field){
         if($field == "di"){
             if($this->isLoaded() && is_a($this->dol_object, 'Synopsisfichinter')){
@@ -160,6 +167,16 @@ abstract class extraFI extends BimpDolObject{
                     $di->fetch($diI);
                     $return[] = $di->getNomUrl(1);
                 }
+                return implode("<br/>", $return);
+            }
+        }
+        if($field == "action"){
+            if($this->isLoaded() && is_a($this->dol_object, 'Synopsisdemandeinterv')){
+                $return = array();
+                require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
+                $tabAct = ActionComm::getActions($this->db->db, 0, $this->id, 'synopsisdemandeinterv');
+                foreach($tabAct as $action)
+                    $return[] = $action->getNomUrl(1);
                 return implode("<br/>", $return);
             }
         }
@@ -200,8 +217,14 @@ abstract class extraFI extends BimpDolObject{
     public function updateExtraField($field_name, $value, $id_object)
     {
         if($id_object == $this->dol_object->id || $id_object == 0){
-            $field = str_replace("extra", "", $field_name);
-            $this->dol_object->setExtra($field, $value);
+            if(stripos($field_name, "extra") !== false){
+                $field = str_replace("extra", "", $field_name);
+                if(in_array($field, array(24,25,26,27))){
+                        $value = traiteHeure($value);
+                        $this->set($field_name,$value); 
+                }
+                $this->dol_object->setExtra($field, $value);
+            }
         }
 
         return array();
@@ -281,8 +304,7 @@ abstract class extraFI extends BimpDolObject{
                 $sql = $this->db->db->query("SELECT subprice FROM `llx_commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
 //                die("SELECT subprice FROM `llx_commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
                 while($ln = $this->db->db->fetch_object($sql)){
-                    $this->set("pu_ht", $ln->subprice);
-                    $this->data["pu_ht"] = $ln->subprice;
+                    $this->set("pu_ht", $ln->subprice); 
                     $warnings[] = "Prix de la ligne maj avec prix commande";
                 }
             }

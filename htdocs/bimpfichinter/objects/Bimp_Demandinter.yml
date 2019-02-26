@@ -397,7 +397,7 @@ fields_tables:
         
 views: 
     default: 
-        objects_change_reload: Bimp_Fichinterdet
+        objects_change_reload: Bimp_Demandinterdet
         rows: 
             - cols: 
                 - type: fields_table

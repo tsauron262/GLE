@@ -56,12 +56,12 @@ fields:
         display:
             default: 
                 type: timer
+        default_value: 3600
     fk_commandedet:
         label: Prod Commande
         type: int
         values: 
                 array: products_commande_list
-        dol_prop: comLigneId
         show: 
             callback:
                 method: asCommande

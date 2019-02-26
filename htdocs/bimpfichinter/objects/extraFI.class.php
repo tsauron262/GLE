@@ -275,14 +275,14 @@ abstract class extraFI extends BimpDolObject{
         return 0;
     }
     
-    public function traitePriceProd(){
+    public function traitePriceProd(&$warnings){
         if($this->getData("fk_commandedet") > 0){//on est en mode commande
-//            die('cic'.$this->getData("fk_commandedet"));
             if($this->getData("fk_commandedet") != $this->getInitData("fk_commandedet")){//on a changé de ligne commande
                 $sql = $this->db->db->query("SELECT subprice FROM `llx_commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
 //                die("SELECT subprice FROM `llx_commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
                 while($ln = $this->db->db->fetch_object($sql)){
-                    $this->updateField("pu_ht", $ln->subprice);
+                    $this->set("pu_ht", $ln->subprice);
+                    $this->data["pu_ht"] = $ln->subprice;
                     $warnings[] = "Prix de la ligne maj avec prix commande";
                 }
             }
@@ -292,7 +292,7 @@ abstract class extraFI extends BimpDolObject{
                 $sql = $this->db->db->query("SELECT subprice FROM `llx_contratdet` WHERE `rowid` = ".$this->getData("fk_contratdet"));
 //                die("SELECT subprice FROM `llx_commandedet` WHERE `rowid` = ".$this->getData("fk_commandedet"));
                 while($ln = $this->db->db->fetch_object($sql)){
-                    $this->updateField("pu_ht", $ln->subprice);
+                    $this->set("pu_ht", $ln->subprice);
                     $warnings[] = "Prix de la ligne maj avec prix contrat";
                 }
             }
@@ -300,13 +300,13 @@ abstract class extraFI extends BimpDolObject{
     }
     
     public function update(&$warnings = array(), $force_update = false) {
-        $this->traitePriceProd();
+        $this->traitePriceProd($warnings);
         
         return parent::update($warnings, $force_update);
     }
     
     public function create(&$warnings = array(), $force_create = false) {
-        $this->traitePriceProd();
+        $this->traitePriceProd($warnings);
         return parent::create($warnings, $force_create);
     }
 }

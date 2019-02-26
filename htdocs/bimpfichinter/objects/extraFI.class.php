@@ -7,7 +7,59 @@ abstract class extraFI extends BimpDolObject{
     
     // gestion des extra
     
+    
+    public function canView() {
+        return $this->getDolRights("lire");
+    }
+    public function canEdit() {
+        return $this->getDolRights("creer");
+    }
+    public function canEditAll() {
+        return $this->getDolRights("modifAfterValid");
+    }
+    public function canDelete() {
+        return $this->getDolRights("supprimer");
+    }
+    public function canCreate() {
+        return ($this->canEdit() &&$this->getDolRights("creer"));
+    }
+    public function canViewPrice() {
+        return $this->getDolRights("voirPrix");
+    }
+    
+    public function getDolRights($nom){
+        global $user;
+        return (isset($user->rights->synopsisficheinter->$nom))? 1 : 0;
+    }
+    
+    
+    public function getListExtra($key){
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice WHERE key_refid = " . $key;
+        $sql1 = $this->db->db->query($requete);
+        $return = array();
+        while ($res1 = $this->db->db->fetch_object($sql1)) {
+            $return[$res1->value] = array('label' => $res1->label, 'icon' => 'fas_file-alt', 'classes' => array('warning'));
+        }
+        return $return;
+    }
+    
+    
     public function getExtra($field){
+        if($field == "di"){
+            if($this->isLoaded() && is_a($this->dol_object, 'Synopsisfichinter')){
+                $return = array();
+                $dis = $this->dol_object->getDI();
+                require_once DOL_DOCUMENT_ROOT.'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php';
+                $di = new Synopsisdemandeinterv($this->db->db);
+                foreach($dis as $diI){
+                    $di->fetch($diI);
+                    $return[] = $di->getNomUrl(1);
+                }
+                return implode(" - ", $return);
+            }
+        }
+        
+        
         $field = str_replace("extra", "", $field);
         if ($this->isLoaded()){
             if(!$this->extraFetch){
@@ -54,8 +106,13 @@ abstract class extraFI extends BimpDolObject{
     {
         $return = array();
         $list = $this->getExtraFields();
-        foreach($list as $extra)
+        foreach($list as $extra){
             $return[$extra] = $this->getExtra ($extra);
+            if(in_array($extra, array("extra37"))){
+                $listName = $extra."_list";
+                $this->$listName = $this->getListExtra (str_replace("extra", "", $extra));
+            }
+        }
 
         return $return;
     }

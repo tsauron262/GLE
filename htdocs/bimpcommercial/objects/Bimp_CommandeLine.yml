@@ -22,12 +22,3 @@ objects:
                 class: OrderLine
             id_object: 
                 field_value: id_line
-                
-fields: 
-    qty_shipped: 
-        label: Qté livrée
-        type: int
-        default_value: 0
-        min: 0
-        max: 
-            field_value: qty

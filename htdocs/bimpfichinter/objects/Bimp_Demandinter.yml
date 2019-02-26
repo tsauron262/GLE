@@ -1,17 +1,17 @@
 dol_object: 
     instance: 
-        dol_object: synopsisfichinter
+        dol_object: synopsisdemandeinterv
         
-table: synopsis_fichinter
+table: synopsisdemandeinterv
 primary: rowid
-controller: fichinter
+controller: demandinter
 list_page_url:
     controller: index
 header_list_name: default
 icon: fas_ambulance
 
 labels: 
-    name: Fiche d'intervention
+    name: Demande d'intervention
     is_female: 1
     
    
@@ -23,7 +23,7 @@ objects:
         instance: 
             bimp_object: 
                 module: bimpfichinter
-                name: Bimp_Fichinterdet         
+                name: Bimp_Demandinterdet         
     commande: 
         instance: 
             bimp_object: 
@@ -115,6 +115,12 @@ fields:
         label: Date de validation
         type: date
     fk_user_author:
+        label: Créateur
+        type: id_object
+        object: user
+        input: 
+            type: search_user
+    fk_user_prisencharge:
         label: Intervenant
         type: id_object
         object: user
@@ -168,33 +174,16 @@ fields:
         show: 
             callback:
                 method: canViewPrice
-    natureInter:
-        label: Nature de l'inter
-        type: int
-        values: 
-            array: nature_list
-    extra35:
+    extra37:
         label: Type d'inter
         type: int
         extra: 1
         values: 
-            array: type_list
-    extra17:
-        label: Terminée
-        type: bool
-        extra: 1
+            array: extra37_list
     di:
         label: Demande
         type: string
         extra: 1
-    extra18:
-        label: Date du prochain RDV
-        type: date
-        extra: 1
-        display_if: 
-            field_name: extra17
-            show_values: 0
-        show: 1
     extra24:
         label: Heure d'arrivé AM
         type: string
@@ -237,10 +226,7 @@ forms:
             - field: fk_statut
             - field: note_public
             - field: note_private
-            - field: extra35
-            - field: natureInter
-            - field: extra17
-            - field: extra18
+            - field: extra37
     
         
 filters_panels: 
@@ -266,6 +252,8 @@ filters_panels:
                 field: total_ttc
             26: 
                 field: fk_user_author
+            27:
+                field: fk_user_prisencharge
             
 lists_cols: 
     id: 
@@ -287,6 +275,9 @@ lists_cols:
         field: date_valid
     fk_user_author:
         field: fk_user_author
+        display: nom_url
+    fk_user_author:
+        field: fk_user_prisencharge
         display: nom_url
     fk_user_modif:
         field: fk_user_modif
@@ -310,10 +301,8 @@ lists_cols:
         field: total_tva
     total_ttc:
         field: total_ttc
-    natureInter:
-        field: natureInter
     typeInter:
-        field: extra35
+        field: extra37
     commercial: 
         label: Commercial
         value: 
@@ -336,6 +325,7 @@ lists:
         page_btn: 1
         edit_btn: 1
         cols:
+            id:
             ref:
             fk_soc:
             fk_commande:
@@ -346,7 +336,6 @@ lists:
             fk_statut:
             duree:
             total_ht:
-            natureInter:
             typeInter:
             commercial:
                 
@@ -363,9 +352,7 @@ fields_tables:
               edit: 1
             - field: description 
               edit: 1
-            - field: natureInter
-              edit: 1
-            - field: extra35
+            - field: extra37
               edit: 1
             - field: note_public
               edit: 1
@@ -394,10 +381,6 @@ fields_tables:
               edit: 1
             - field: extra27
               edit: 1
-            - field: extra17
-              edit: 1
-            - field: extra18
-              edit: 1
     lien:
         title: Objets liées
         icon: link
@@ -409,6 +392,8 @@ fields_tables:
             - field: fk_contrat 
               display: nom_url
             - field: fk_user_author
+              display: nom_url 
+            - field: fk_user_prisencharge
               display: nom_url 
     price:
         title: Prix
@@ -460,7 +445,7 @@ views:
                   list: 
                       name: default
                       children: lines
-                      title: Lignes
+                      title: Lignes DI
                       
                      
         

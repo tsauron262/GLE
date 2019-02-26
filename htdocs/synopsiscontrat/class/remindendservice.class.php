@@ -1,8 +1,9 @@
 <?php
 
-$path = dirname(__FILE__) . '/';
+//$path = dirname(__FILE__) . '/';
 
-require_once($path . '../../main.inc.php');
+if(!isset($conf))
+    require_once('../../main.inc.php');
 include_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 include_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 
@@ -78,7 +79,8 @@ class RemindEndService {
      * @param  type $days  number day to reach urgence
      * @return type return number of task sent or -($number_of_errors) if there are some
      */
-    public function setTaskForService($days) {
+    public function setTaskForService($days = 3) {
+        dol_syslog("debut de setTaskForService",3);
         $services = $this->getUrgentService($days);
         global $conf;
         $newTasksSends = 0;
@@ -112,6 +114,7 @@ class RemindEndService {
                         . " le rappel des tâche urgente pour les commerciaux n'est pas pû être effectué";
             }
         }
+        dol_syslog("fin de setTaskForService",3);
 
         $errors = sizeof($this->errors);
         $errorString = (sizeof($this->errors) == 0) ? ' Aucune' : implode(',', $this->errors);

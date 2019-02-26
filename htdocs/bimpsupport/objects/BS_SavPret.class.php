@@ -162,7 +162,7 @@ class BS_SavPret extends BimpObject
             return array('SAV non spécifié');
         }
         
-        $errors = arry();
+        $errors = array();
 
         if (!count($this->associations['equipments'])) {
             $errors[] = 'Aucun équipement sélectionné';

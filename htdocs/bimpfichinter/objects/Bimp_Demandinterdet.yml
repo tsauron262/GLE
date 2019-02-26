@@ -1,19 +1,19 @@
 dol_object: 
     instance: 
         dol_object: 
-            module: synopsisfichinter
-            file: synopsisfichinter
-            class: SynopsisfichinterLigne
+            module: synopsisdemandeinterv
+            file: synopsisdemandeinterv
+            class: SynopsisdemandeintervLigne
         
 parent_module: bimpfichinter
-parent_object: Bimp_Fichinter
-parent_id_property: fk_fichinter
+parent_object: Bimp_Demandinter
+parent_id_property: fk_synopsisdemandeinterv
         
-table: synopsis_fichinterdet
+table: synopsisdemandeintervdet
 primary: rowid
 
 labels: 
-    name: Ligne de fiche d'intervention
+    name: Ligne de demande d'intervention
     is_female: 1
     
    
@@ -29,7 +29,7 @@ objects:
     
                 
 fields: 
-    fk_fichinter: 
+    fk_synopsisdemandeinterv: 
         label: Objet parent
         type: id_parent
         required: 1
@@ -54,12 +54,7 @@ fields:
         display:
             default: 
                 type: timer
-    fk_typeinterv:
-        label: typoe interv
-        type: int
-        values: 
-            array: typeinter_list
-    fk_depProduct:
+    fk_prod:
         label: Prod
         type: id_object
         object: product

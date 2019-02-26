@@ -2,7 +2,7 @@
 
 require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/extraFI.class.php';
 
-class Bimp_Fichinter extends extraFI
+class Bimp_Demandinter extends extraFI
 {
     public $force_update_date_ln = true;
     public static $dol_module = 'fichinter';
@@ -19,7 +19,16 @@ class Bimp_Fichinter extends extraFI
     );
     
     
+    
     public static $type_list = array(
+        -1 => array('label' => 'Choix', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
+        1 => array('label' => 'Forfait', 'icon' => 'check', 'classes' => array('info')),
+        2 => array('label' => 'Sous garantie', 'icon' => 'check', 'classes' => array('info')),
+        3 => array('label' => 'Contrat', 'icon' => 'check', 'classes' => array('info')),
+        4 => array('label' => 'Temps pass&eacute;', 'icon' => 'check', 'classes' => array('warning')),
+    );
+    
+    public static $type2_list = array(
         -1 => array('label' => 'Choix', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Forfait', 'icon' => 'check', 'classes' => array('info')),
         2 => array('label' => 'Sous garantie', 'icon' => 'check', 'classes' => array('info')),
@@ -30,7 +39,9 @@ class Bimp_Fichinter extends extraFI
     
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
-        1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info'))
+        1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
+        2 => array('label' => 'En cours', 'icon' => 'check', 'classes' => array('warning')),
+        3 => array('label' => 'Cloturé', 'icon' => 'check', 'classes' => array('success'))
     );
     
     public function canEdit() {
@@ -81,6 +92,7 @@ class Bimp_Fichinter extends extraFI
         if($this->getData("datei") != $this->getInitData("datei") && $this->force_update_date_ln){
             $lines = $this->getChildrenObjects("lines");
             foreach($lines as $line){
+                echo "mmm";die;
                 $line->set ("datei", $this->getData("datei"));
                 $line->update();
             }

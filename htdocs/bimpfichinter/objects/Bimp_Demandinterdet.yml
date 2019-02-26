@@ -18,12 +18,12 @@ labels:
     
    
      
-objects:    
-    product: 
-        instance: 
-            id_object: 
-                field_value: unset
-                prop: fk_depProduct
+#objects:    
+#    product: 
+#        instance: 
+#            id_object: 
+#                field_value: unset
+#                prop: fk_commandedet
     
             
     
@@ -39,6 +39,8 @@ fields:
     fk_typeinterv:
         label: Nature de l'inter
         type: int
+        values: 
+            array: typeinter_list
     datei:
         label: Date
         type: date
@@ -54,10 +56,23 @@ fields:
         display:
             default: 
                 type: timer
-    fk_prod:
-        label: Prod
-        type: id_object
-        object: product
+    fk_commandedet:
+        label: Prod Commande
+        type: int
+        values: 
+                array: products_commande_list
+        dol_prop: comLigneId
+        show: 
+            callback:
+                method: asCommande
+    fk_contratdet:
+        label: Prod Contrat
+        type: int
+        values: 
+                array: products_contrat_list
+        show: 
+            callback:
+                method: asContrat
     tx_tva:
         label: TVA
         type: float
@@ -115,7 +130,8 @@ forms:
             - field: tx_tva
             - field: pu_ht
             - field: isForfait
-    
+            - field: fk_commandedet
+            - field: fk_contratdet
             
 lists_cols: 
     fk_typeinterv: 
@@ -124,9 +140,14 @@ lists_cols:
         field: datei
     desc:
         field: desc
-    fk_depProduct:
-        field: fk_depProduct
-        display: nom_url
+    fk_commandedet:
+        field: fk_commandedet
+        show:
+            callback: asCommande
+    fk_contratdet:
+        field: fk_contratdet
+        show:
+            callback: asContrat
     duration:
         field: duration
     tx_tva:
@@ -184,7 +205,8 @@ lists:
             fk_typeinterv:
             datei:
             desc:
-            fk_depProduct:
+            fk_commandedet:
+            fk_contratdet:
             duration:
             tx_tva:
             pu_ht:
@@ -205,6 +227,8 @@ fields_tables:
             - field: total_tva 
             - field: total_ttc 
             - field: natureInter
+            - field: fk_commandedet
+            - field: fk_contratdet
             
         
 views: 

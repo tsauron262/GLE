@@ -33,14 +33,7 @@ class Bimp_Fichinter extends extraFI
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info'))
     );
     
-    public function canEdit() {
-        if($this->canEditAll())
-            return 1;
-        if($this->getInitData("fk_statut") > 0)
-            return 0;
-        
-        return parent::canEdit();
-    }
+
     
 
 

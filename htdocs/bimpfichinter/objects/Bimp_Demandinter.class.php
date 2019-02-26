@@ -4,6 +4,7 @@ require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/extraFI.class.php';
 
 class Bimp_Demandinter extends extraFI
 {
+    public $moduleRightsName = "synopsisdemandeinterv";
     public $force_update_date_ln = true;
     public static $dol_module = 'fichinter';
     public $extraFetch = false;
@@ -43,15 +44,7 @@ class Bimp_Demandinter extends extraFI
         2 => array('label' => 'En cours', 'icon' => 'check', 'classes' => array('warning')),
         3 => array('label' => 'Cloturé', 'icon' => 'check', 'classes' => array('success'))
     );
-    
-    public function canEdit() {
-        if($this->canEditAll())
-            return 1;
-        if($this->getInitData("fk_statut") > 0)
-            return 0;
-        
-        return parent::canEdit();
-    }
+
     
 
 
@@ -92,7 +85,6 @@ class Bimp_Demandinter extends extraFI
         if($this->getData("datei") != $this->getInitData("datei") && $this->force_update_date_ln){
             $lines = $this->getChildrenObjects("lines");
             foreach($lines as $line){
-                echo "mmm";die;
                 $line->set ("datei", $this->getData("datei"));
                 $line->update();
             }
@@ -105,7 +97,10 @@ class Bimp_Demandinter extends extraFI
     public function update(&$warnings = array(), $force_update = false) {
         $this->traiteDate();
         
+        
         parent::update($warnings, $force_update);
+        
+        $this->dol_object->synchroAction();
     }
 
    

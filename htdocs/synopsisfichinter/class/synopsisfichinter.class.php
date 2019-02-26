@@ -205,6 +205,8 @@ class Synopsisfichinter extends Fichinter {
         $sql .= ", duree = " . $this->duree;
         $sql .= ", fk_projet = " . $this->projet_id;
         $sql .= ", fk_statut = " . $this->statut;
+        $sql .= ", note_public = '" . $this->note_public."'";
+        $sql .= ", note_private = '" . $this->note_private."'";
         $sql .= " WHERE rowid = " . $this->id;
 
 

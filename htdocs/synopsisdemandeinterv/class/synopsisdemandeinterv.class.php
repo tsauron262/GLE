@@ -1246,6 +1246,12 @@ class synopsisdemandeintervLigne {
     public $typeInterv;
     public $fk_typeinterv;
     public $dateiunformated;
+    public $qte;
+    public $fk_commandedet;
+    public $fk_contratdet;
+    public $pu_ht;
+    public $total_ttc;
+    public $total_tva;
 
     /**
      *      \brief     Constructeur d'objets ligne d'intervention
@@ -1367,8 +1373,8 @@ class synopsisdemandeintervLigne {
 //                $ligne->total_ht = floatval($ligne->duration) * floatval($pu_ht)/3600;
 //            }
 //Compute total tva / total_TTC
-        $total_ttc = 1.2 * $this->total_ht;
-        $total_tva = 0.2 * $this->total_ht;
+        
+        $this->traitePrice();
 
         // Insertion dans base de la ligne
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'synopsisdemandeintervdet';
@@ -1392,7 +1398,7 @@ class synopsisdemandeintervLigne {
         if ($this->qte > 0)
             $sql .= ' ,' . preg_replace('/,/', '.', $this->qte);
         if ($this->pu_ht != 0 && $this->pu_ht != '')
-            $sql .= "," . preg_replace('/,/', '.', $this->pu_ht) . "," . preg_replace('/,/', '.', $this->total_ht) . "," . preg_replace('/,/', '.', $total_tva) . "," . preg_replace('/,/', '.', $total_ttc);
+            $sql .= "," . preg_replace('/,/', '.', $this->pu_ht) . "," . preg_replace('/,/', '.', $this->total_ht) . "," . preg_replace('/,/', '.', $this->total_tva) . "," . preg_replace('/,/', '.', $this->total_ttc);
         if ($this->fk_commandedet > 0)
             $sql .= ', ' . $this->fk_commandedet;
         if ($this->fk_contratdet > 0)
@@ -1402,9 +1408,6 @@ class synopsisdemandeintervLigne {
         dol_syslog("synopsisdemandeintervLigne::insert sql=" . $sql);
         
         
-        echo 'oo'.$this->fk_contratdet."mm".$this->comLigneId;
-        
-        die($sql);
         $resql = $this->db->query($sql);
         if ($resql) {
             $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX . "synopsisdemandeintervdet");
@@ -1433,6 +1436,19 @@ class synopsisdemandeintervLigne {
             return -1;
         }
     }
+    
+    function traitePrice(){
+        
+
+        if ($this->isForfait == 1 && ($this->pu_ht . "x" != "x")) {
+            $this->total_ht = floatval($this->qte) * floatval($this->pu_ht);
+        } else if ($this->pu_ht . "x" != "x") {
+            $this->total_ht = floatval(($this->qte . "x" == "x" ? 1 : $this->qte)) * floatval($this->duration) * floatval($this->pu_ht) / 3600;
+        }
+
+        $this->total_ttc = 1.2 * $this->total_ht;
+        $this->total_tva = 0.2 * $this->total_ht;
+    }
 
     /**
      *      \brief         Mise a jour de l'objet ligne d'intervention en base
@@ -1441,16 +1457,8 @@ class synopsisdemandeintervLigne {
     function update() {
         $this->db->begin();
         global $user, $langs, $conf;
-
-        if ($this->isForfait == 1 && ($this->pu_ht . "x" != "x")) {
-            $this->total_ht = floatval($this->qte) * floatval($this->pu_ht);
-        } else if ($this->pu_ht . "x" != "x") {
-            $this->total_ht = floatval(($this->qte . "x" == "x" ? 1 : $this->qte)) * floatval($this->duration) * floatval($this->pu_ht) / 3600;
-        }
-
-//print "toto".$this->total_ht;
-        $total_ttc = 1.2 * $this->total_ht;
-        $total_tva = 0.2 * $this->total_ht;
+        
+        $this->traitePrice();
 
 
         // Mise a jour ligne en base
@@ -1466,13 +1474,15 @@ class synopsisdemandeintervLigne {
         if ($this->pu_ht . "x" != "x")
             $sql .= ",total_ht = " . preg_replace('/,/', '.', $this->total_ht);
         if ($this->pu_ht . "x" != "x")
-            $sql .= ",total_tva = " . preg_replace('/,/', '.', $total_tva);
+            $sql .= ",total_tva = " . preg_replace('/,/', '.', $this->total_tva);
         if ($this->pu_ht . "x" != "x")
-            $sql .= ",total_ttc = " . preg_replace('/,/', '.', $total_ttc);
+            $sql .= ",total_ttc = " . preg_replace('/,/', '.', $this->total_ttc);
         if ($this->isForfait . "x" != "x")
             $sql .= ",isForfait = " . $this->isForfait;
         if ($this->comLigneId > 0)
             $sql .= ",fk_commandedet =  " . $this->comLigneId;
+        elseif ($this->fk_commandedet > 0)
+            $sql .= ",fk_commandedet =  " . $this->fk_commandedet;
         else
             $sql .= ",fk_commandedet =  NULL";
 

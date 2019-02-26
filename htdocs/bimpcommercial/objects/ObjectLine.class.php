@@ -2470,8 +2470,6 @@ class ObjectLine extends BimpObject
                     } else {
                         if (is_null($this->pu_ht)) {
                             $this->pu_ht = (float) $this->getValueByProduct('pu_ht');
-                        } else {
-                            echo $this->pu_ht; exit;
                         }
                         if (is_null($this->tva_tx)) {
                             $this->tva_tx = (float) $this->getValueByProduct('tva_tx');

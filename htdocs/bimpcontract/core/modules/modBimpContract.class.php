@@ -86,8 +86,8 @@ class modBimpContract extends DolibarrModules {
    
     public function remove($options = '') {
         $sql = array();
-        $extrafields = new ExtraFields($this->db);
-        $extrafields->delete('service_content', 'product');
+        //$extrafields = new ExtraFields($this->db);
+        //$extrafields->delete('service_content', 'product');
         return $this->_remove($sql, $options);
     }
 

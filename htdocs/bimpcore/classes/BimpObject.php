@@ -3150,6 +3150,9 @@ class BimpObject extends BimpCache
         }
 
         $errors = array();
+        
+        if(!isset($this->dol_object->id) && isset($this->dol_object->rowid))
+            $this->dol_object->id = $this->dol_object->rowid;
 
         $this->id = $this->dol_object->id;
 

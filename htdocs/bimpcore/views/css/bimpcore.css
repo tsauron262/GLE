@@ -17497,24 +17497,24 @@ table.objectlistTable > tbody > tr > td .inputContainer {
   width: 99%;
 }
 /* line 82, ../scss/bimpcore/_list.scss */
-table.bimp_list_table > tbody > tr > td .inputContainer input, table.bimp_list_table > tbody > tr > td .inputContainer textarea, table.bimp_list_table > tbody > tr > td .inputContainer select,
-table.objectlistTable > tbody > tr > td .inputContainer input,
-table.objectlistTable > tbody > tr > td .inputContainer textarea,
-table.objectlistTable > tbody > tr > td .inputContainer select {
+table.bimp_list_table > tbody > tr > td .inputContainer .inputHelp,
+table.objectlistTable > tbody > tr > td .inputContainer .inputHelp {
+  display: none;
+}
+/* line 87, ../scss/bimpcore/_list.scss */
+table.bimp_list_table > tbody > tr > td input, table.bimp_list_table > tbody > tr > td textarea, table.bimp_list_table > tbody > tr > td select,
+table.objectlistTable > tbody > tr > td input,
+table.objectlistTable > tbody > tr > td textarea,
+table.objectlistTable > tbody > tr > td select {
   width: 100%;
   color: #3C3C3C;
   font-weight: normal;
 }
-/* line 88, ../scss/bimpcore/_list.scss */
-table.bimp_list_table > tbody > tr > td .inputContainer .select2-container,
-table.objectlistTable > tbody > tr > td .inputContainer .select2-container {
+/* line 93, ../scss/bimpcore/_list.scss */
+table.bimp_list_table > tbody > tr > td .select2-container,
+table.objectlistTable > tbody > tr > td .select2-container {
   width: 100% important;
   min-width: 100%;
-}
-/* line 93, ../scss/bimpcore/_list.scss */
-table.bimp_list_table > tbody > tr > td .inputContainer .inputHelp,
-table.objectlistTable > tbody > tr > td .inputContainer .inputHelp {
-  display: none;
 }
 /* line 98, ../scss/bimpcore/_list.scss */
 table.bimp_list_table > tbody > tr > td .popover,

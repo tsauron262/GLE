@@ -176,6 +176,18 @@ class Bimp_CommandeLine extends ObjectLine
         return $qties;
     }
 
+    public function getReservationsQties($status = null)
+    {
+        $reservations = $this->getReservations('status', 'asc', $status);
+        $qty = 0;
+
+        foreach ($reservations as $reservation) {
+            $qty += (int) $reservation->getData('qty');
+        }
+
+        return $qty;
+    }
+
     public function getLogistiqueBulkActions()
     {
         $commande = $this->getParentInstance();
@@ -203,22 +215,40 @@ class Bimp_CommandeLine extends ObjectLine
         $buttons = array();
 
         if ($this->isLoaded()) {
-            if ((int) $this->getData('type') !== self::LINE_TEXT) {
-                $commande = $this->getParentInstance();
-                if (BimpObject::objectLoaded($commande)) {
+            $commande = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($commande)) {
+                $type = (int) $this->getData('type');
+                $reserved_qties = $this->getReservedQties();
+
+                if ($type === self::LINE_PRODUCT) {
+                    $product = $this->getProduct();
+                    if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === 0) {
+                        if (isset($reserved_qties['status'][0]) && $reserved_qties['status'][0] > 0)
+                            $buttons[] = array(
+                                'label'   => 'Commander',
+                                'icon'    => 'fas_cart-arrow-down',
+                                'onclick' => $this->getJsActionOnclick('addToCommandeFourn', array(), array(
+                                    'form_name' => 'commande_fourn'
+                                ))
+                            );
+                    }
+                }
+
+                if ($type !== self::LINE_TEXT) {
                     $buttons[] = array(
                         'label'   => 'Gérer les expéditions',
                         'icon'    => 'fas_shipping-fast',
                         'onclick' => $this->getJsLoadModalView('shipments', 'Gestion des expéditions')
                     );
-                }
 
-                if ((float) $this->getBilledQty() < (float) $this->qty) {
-                    $buttons[] = array(
-                        'label'   => 'Ajouter à une facture',
-                        'icon'    => 'fas_file-invoice-dollar',
-                        'onclick' => ''
-                    );
+                    if ((float) $this->getBilledQty() < (float) $this->qty) {
+                        $buttons[] = array(
+                            'label'   => 'Ajouter à une facture',
+                            'icon'    => 'fas_file-invoice-dollar',
+                            'onclick' => ''
+                        );
+                    }
                 }
             }
         }
@@ -332,6 +362,59 @@ class Bimp_CommandeLine extends ObjectLine
         return $shipments;
     }
 
+    public function getCommandesFournisseursArray()
+    {
+        $commandes = array(
+            'new' => 'Nouvelle commande'
+        );
+
+        if ($this->isLoaded()) {
+            $commande = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($commande)) {
+                $id_entrepot = (int) BimpTools::getPostFieldValue('id_entrepot', (int) $commande->getData('entrepot'));
+
+                if ($id_entrepot) {
+                    $type_price = BimpTools::getPostFieldValue('type_price', 1);
+                    $id_fourn = 0;
+                    switch ($type_price) {
+                        case 1:
+                            $id_price = (int) BimpTools::getPostFieldValue('id_fourn_price', 0);
+                            if ($id_price) {
+                                $fournPrice = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_price);
+                                if ($fournPrice->isLoaded()) {
+                                    $id_fourn = (int) $fournPrice->getData('fk_soc');
+                                }
+                            }
+                            break;
+
+                        case 2:
+                            $id_fourn = (int) BimpTools::getPostFieldValue('id_fourn', 0);
+                            break;
+                    }
+
+                    if ($id_fourn) {
+                        $sql = 'SELECT cf.rowid as id, cf.ref, cf.date_creation as date, s.nom FROM ' . MAIN_DB_PREFIX . 'commande_fournisseur cf';
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'commande_fournisseur_extrafields cfe ON cf.rowid = cfe.fk_object';
+                        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'societe s ON s.rowid = cf.fk_soc';
+                        $sql .= ' WHERE cf.fk_soc = ' . (int) $id_fourn . ' AND cf.fk_statut = 0 AND cfe.entrepot = ' . (int) $id_entrepot;
+                        $sql .= ' ORDER BY cf.rowid DESC';
+
+                        $rows = $this->db->executeS($sql);
+                        if (!is_null($rows) && count($rows)) {
+                            foreach ($rows as $obj) {
+                                $DT = new DateTime($obj->date);
+                                $commandes[(int) $obj->id] = $obj->nom . ' ' . $obj->ref . ' - Créée le ' . $DT->format('d / m / Y à H:i');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $commandes;
+    }
+
     // Affichages: 
 
     public function displayQties()
@@ -440,15 +523,15 @@ class Bimp_CommandeLine extends ObjectLine
             foreach ($reservations as $reservation) {
                 $buttons = $reservation->getListExtraBtn();
                 $html .= '<tr class="Bimp_CommandeLine_reservation_row">';
-                $html .= '<td style="text-align: center">';
+                $html .= '<td style="text-align: center; width: 45px">';
                 $html .= '<input type="checkbox" name="reservation_check[]" value="' . $reservation->id . '" class="reservation_check"';
                 $html .= ' data-id_commande_line="' . $this->id . '"';
                 $html .= ' data-id_reservation="' . $reservation->id . '"';
                 $html .= '/>';
                 $html .= '</td>';
-                $html .= '<td>' . $reservation->getData('ref') . '</td>';
-                $html .= '<td>' . $reservation->displayData('status') . '</td>';
-                $html .= '<td>Qté: ' . $reservation->getData('qty') . '</td>';
+//                $html .= '<td>' . $reservation->getData('ref') . '</td>';
+                $html .= '<td style="width: 180px;">' . $reservation->displayData('status') . '</td>';
+                $html .= '<td style="width: 80px;">Qté: ' . $reservation->getData('qty') . '</td>';
                 $html .= '<td>';
                 foreach ($buttons as $button) {
                     $html .= BimpRender::renderRowButton($button['label'], $button['icon'], $button['onclick'], isset($button['class']) ? $button['class'] : '', isset($button['attrs']) ? $button['attrs'] : array());
@@ -628,11 +711,11 @@ class Bimp_CommandeLine extends ObjectLine
                 $html .= '<div class="buttonsContainer align-center">';
 
                 $shipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
-                $onclick = 'bimpModal.clearAllContents(); ' . $shipment->getJsLoadModalForm('default', 'Nouvelle expédition', array(
-                            'fields' => array(
-                                'id_commande_client' => (int) $commande->id
-                            )
-                                ), addslashes('function() {' . $this->getJsLoadModalView('shipments', 'Gestion des expéditions') . '}'));
+                $onclick = $shipment->getJsLoadModalForm('default', 'Nouvelle expédition', array(
+                    'fields' => array(
+                        'id_commande_client' => (int) $commande->id
+                    )
+                        ), addslashes('function() {' . $this->getJsLoadModalView('shipments', 'Gestion des expéditions') . '}'));
                 $html .= '<button class="btn btn-default btn-large" onclick="' . $onclick . '">';
                 $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer une expédition';
                 $html .= '</button>';
@@ -659,6 +742,30 @@ class Bimp_CommandeLine extends ObjectLine
         $html .= BimpRender::renderDropDownButton('Status sélectionnés', $items, array(
                     'icon' => 'far_check-square'
         ));
+
+        return $html;
+    }
+
+    public function renderCommandeFournQtyInput()
+    {
+        $html = '';
+
+        $max = $this->getReservationsQties(0);
+
+        if ($max > 0) {
+            $html .= BimpInput::renderInput('qty', 'qty', $max, array(
+                        'data'      => array(
+                            'data_type' => 'number',
+                            'min'       => 1,
+                            'max'       => $max,
+                            'decimals'  => 0
+                        ),
+                        'max_label' => 1
+            ));
+        } else {
+            $html .= '<input type="hidden" name="qty" value="0"/>';
+            $html .= BimpRender::renderAlerts('Il n\'y a aucun produit au statut "A traiter"');
+        }
 
         return $html;
     }
@@ -974,6 +1081,73 @@ class Bimp_CommandeLine extends ObjectLine
         // todo
     }
 
+    public function addEquipments($equipments)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la ligne de commande fournisseur absent';
+        }
+
+        $reservations = $this->getReservations('status', 'asc', 100);
+
+        foreach ($reservations as $reservation) {
+            if (!count($equipments)) {
+                break;
+            }
+
+            $id_equipment = 0;
+            while (1) {
+                $id_equipment = array_shift($equipments);
+                if (is_null($id_equipment) || (int) $id_equipment) {
+                    break;
+                }
+            }
+
+            if ($id_equipment) {
+                $res_errors = $reservation->setNewStatus(200, null, (int) $id_equipment);
+                if (count($res_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de l\'attribution de l\'équipement ' . $id_equipment . ' à la réservation ' . $reservation->id);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function addReceivedQty($qty)
+    {
+        $errors = array();
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la ligne de commande fournisseur absent';
+        }
+
+        $reservations = $this->getReservations('status', 'asc', 100);
+
+        $remain_qty = (int) $qty;
+
+        foreach ($reservations as $reservation) {
+            if (!$remain_qty) {
+                break;
+            }
+
+            if ($remain_qty > (int) $reservation->getData('qty')) {
+                $res_qty = (int) $reservation->getData('qty');
+            } else {
+                $res_qty = $remain_qty;
+            }
+            $remain_qty -= $res_qty;
+
+            $res_errors = $reservation->setNewStatus(200, $res_qty);
+            if (count($res_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour du statut de la réservation d\'ID ' . $reservation->id);
+            }
+        }
+
+        return $errors;
+    }
+
     // Actions: 
 
     public function actionSaveShipments($data, &$success)
@@ -987,6 +1161,185 @@ class Bimp_CommandeLine extends ObjectLine
         } else {
             $errors = $this->setShipmentsData($data['shipments'], $warnings);
         }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionAddToCommandeFourn($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Ajouts à la commande fournisseur effectué avec succès';
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la ligne de commande absent';
+        } else {
+            if ((int) $this->getData('type') !== self::LINE_PRODUCT) {
+                $errors[] = 'Cette opération n\'est possible que pour les lignes de type "Produit"';
+            } else {
+                $product = $this->getProduct();
+                if (!BimpObject::objectLoaded($product)) {
+                    $errors[] = 'ID du produit absent';
+                } elseif ((int) $product->getData('fk_product_type') !== 0) {
+                    $errors[] = 'Cette opération n\'est pas possible pour les services';
+                }
+            }
+
+            $max = $this->getReservationsQties(0);
+            $qty = isset($data['qty']) ? (int) $data['qty'] : 0;
+            $id_commande_fourn = isset($data['id_commande_fourn']) ? $data['id_commande_fourn'] : 0;
+            $commande = $this->getParentInstance();
+
+            if ($id_commande_fourn !== 'new') {
+                $id_commande_fourn = (int) $id_commande_fourn;
+            }
+
+            if (!$qty) {
+                $errors[] = 'Veuillez saisir une quantité supérieure à 0';
+            } elseif ($qty > $max) {
+                $errors[] = 'Il n\'y a que ' . $max . ' unité(s) au statut "A traiter". Veuillez corriger les quantités';
+            } elseif (!$id_commande_fourn) {
+                $errors[] = 'Veuillez sélectionner une commande fournisseur (' . $id_commande_fourn . ')';
+            } elseif (!BimpObject::objectLoaded($commande)) {
+                $errors[] = 'ID de la commande client absent';
+            } else {
+                $id_entrepot = isset($data['id_entrepot']) ? (int) $data['id_entrepot'] : (int) $commande->getData('entrepot');
+
+                $type_price = isset($data['type_price']) ? (int) $data['type_price'] : 1;
+                $id_fourn = 0;
+                $pa_ht = 0;
+                $tva_tx = 0;
+
+                $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+//                $line = new Bimp_CommandeFournLine($module, $object_name);
+                $line->validateArray(array(
+                    'type'               => ObjectLine::LINE_PRODUCT,
+                    'deletable'          => 0,
+                    'editable'           => 0,
+                    'remisable'          => 1,
+                    'linked_id_object'   => (int) $this->id,
+                    'linked_object_name' => 'commande_line'
+                ));
+                $line->id_product = (int) $product->id;
+                $line->qty = (int) $qty;
+
+
+                switch ($type_price) {
+                    case 1:
+                        $id_fourn_price = isset($data['id_fourn_price']) ? (int) $data['id_fourn_price'] : 0;
+                        if (!$id_fourn_price) {
+                            $errors[] = 'Aucun prix fournisseur sélectionné';
+                        } else {
+                            $fourn_price = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_fourn_price);
+                            if (!$fourn_price->isLoaded()) {
+                                $errors[] = 'Le prix fournisseur d\'ID ' . $id_fourn_price . ' n\'existe pas';
+                            } else {
+                                $id_fourn = (int) $fourn_price->getData('fk_soc');
+                                if (!$id_fourn) {
+                                    $errors[] = 'Aucun fournisseur associé au prix d\'achat sélectionné';
+                                } else {
+                                    $line->id_fourn_price = $id_fourn_price;
+                                }
+                            }
+                        }
+                        break;
+
+                    case 2:
+                        $id_fourn = isset($data['id_fourn']) ? (int) $data['id_fourn'] : 0;
+                        if (!$id_fourn) {
+                            $errors[] = 'Veuillez sélectionner un fournisseur';
+                        } else {
+                            $pa_ht = isset($data['pa_ht']) ? (float) $data['pa_ht'] : 0;
+                            $tva_tx = isset($data['tva_tx']) ? (float) $data['tva_tx'] : 0;
+
+                            if (!$pa_ht) {
+                                $errors[] = 'Veuillez saisir un prix d\'achat supérieur à 0';
+                            }
+                            if (!$tva_tx) {
+                                $errors[] = 'Veuillez saisir un taux de TVA supérieur à 0';
+                            }
+
+                            $line->id_fourn_price = 0;
+                            $line->tva_tx = $tva_tx;
+                            $line->pa_ht = $pa_ht;
+                        }
+                        break;
+                }
+
+                if (!count($errors)) {
+                    if ($id_commande_fourn === 'new') {
+                        $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
+                        $commande_fourn->validateArray(array(
+                            'entrepot' => $id_entrepot,
+                            'fk_soc'   => $id_fourn
+                        ));
+
+                        $comm_warnings = array();
+                        $comm_errors = $commande_fourn->create($warnings, true);
+
+                        $comm_errors = array_merge($comm_errors, $comm_warnings);
+                        if (count($comm_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($comm_errors, 'Des erreurs sont survenues lors de la création de la commande fournisseur');
+                        }
+                    } else {
+                        $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn', $id_commande_fourn);
+                        if (!$commande_fourn->isLoaded()) {
+                            $errors[] = 'La commande fournisseur sélectionnée n\'existe plus (ID ' . $id_commande_fourn . ')';
+                        }
+                    }
+
+                    if (!count($errors)) {
+                        $line->set('id_obj', (int) $commande_fourn->id);
+                        $line_errors = $line->create($line_warnings, true);
+
+                        if (count($line_warnings)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_warnings, 'Des erreurs sont survenues suite à la création de la ligne de commande fournisseur');
+                        }
+
+                        if (count($line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues durant la création de la ligne de commande fournisseur');
+                        } else {
+                            $remain_qty = $qty;
+
+                            $reservations = $this->getReservations('status', 'asc', 0);
+                            foreach ($reservations as $reservation) {
+                                $res_qty = (int) $reservation->getData('qty');
+                                if ($res_qty > $remain_qty) {
+                                    $remain_qty -= $res_qty;
+                                    $res_qty = $remain_qty;
+                                } else {
+                                    $res_qty = $remain_qty;
+                                    $remain_qty = 0;
+                                }
+
+                                $res_errors = $reservation->setNewStatus(100, $res_qty);
+
+                                if (count($res_errors)) {
+                                    $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut des produits pour ' . $res_qty . ' unité(s)');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCancelCommandeFourn($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+
+        $errors[] = 'Non fonctionnel pour le moment';
 
         return array(
             'errors'   => $errors,

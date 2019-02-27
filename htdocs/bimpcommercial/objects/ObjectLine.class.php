@@ -210,6 +210,15 @@ class ObjectLine extends BimpObject
     {
         return 0;
     }
+    
+    public function isNotTypeText()
+    {
+        if ((int) $this->getData('type') === self::LINE_TEXT) {
+            return 0;
+        }
+        
+        return 1;
+    }
 
     // Getters array: 
 
@@ -219,6 +228,16 @@ class ObjectLine extends BimpObject
         if ($id_product) {
             BimpObject::loadClass('bimpcore', 'Bimp_Product');
             return Bimp_Product::getFournisseursPriceArray($id_product);
+        }
+
+        return array();
+    }
+
+    public function getProdFournisseursArray()
+    {
+        $id_product = (int) $this->getIdProductFromPost();
+        if ($id_product) {
+            return BimpCache::getProductFournisseursArray($id_product, true);
         }
 
         return array();

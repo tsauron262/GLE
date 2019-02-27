@@ -269,6 +269,29 @@ class Bimp_Product extends BimpObject
 
         return $prices;
     }
+    
+    public static function getFournisseursArray($id_product, $include_empty = true)
+    {
+        $fournisseurs = array();
+
+        $product = $this->getChildObject('product');
+
+        if (!is_null($product) && $product->isLoaded()) {
+            $list = $product->dol_object->list_suppliers();
+            foreach ($list as $id_fourn) {
+                if (!array_key_exists($id_fourn, $fournisseurs)) {
+                    $result = $this->db->getRow('societe', '`rowid` = ' . (int) $id_fourn, array('nom', 'code_fournisseur'));
+                    if (!is_null($result)) {
+                        $fournisseurs[(int) $id_fourn] = $result->code_fournisseur . ' - ' . $result->nom;
+                    } else {
+                        echo $this->db->db->error();
+                    }
+                }
+            }
+        }
+
+        return $fournisseurs;
+    }
 
     public function getProductFournisseursPricesArray()
     {

@@ -1790,7 +1790,7 @@ class BimpObject extends BimpCache
                         }
                     }
                 }
-            }
+            } 
         }
         return $children;
     }

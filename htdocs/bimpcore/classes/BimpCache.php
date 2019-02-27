@@ -810,6 +810,31 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
     }
 
+    public static function getProductFournisseursArray($id_product, $include_empty = false, $empty_label = '')
+    {
+        $cache_key = 'product_' . $id_product . '_fournisseurs_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $product = self::getBimpObjectInstance('bimpcore', 'Bimp_Product', $id_product);
+
+            if (BimpObject::objectLoaded($product)) {
+                $list = $product->dol_object->list_suppliers();
+                $rows = self::getBdb()->getRows('societe', '`rowid` IN (' . implode(',', $list) . ')', null, 'array', array('rowid', 'nom', 'code_fournisseur'));
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        if (!isset(self::$cache[$cache_key][(int) $r['rowid']])) {
+                            self::$cache[$cache_key][(int) $r['rowid']] = $r['code_fournisseur'] . ' - ' . $r['nom'];
+                        }
+                    }
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
+    }
+
     // Emails: 
 
     public static function getEmailTemplatesArray($email_type, $include_empty = false)

@@ -29,7 +29,7 @@ class Bimp_CommandeFourn extends BimpComm
         'nev' => array('label' => 'Jamais reçue', 'classes' => array('danger')),
         'can' => array('label' => 'Annulée', 'classes' => array('danger')),
     );
-    
+
     // Gestion des autorisations objet: 
 
     public function isFieldEditable($field)
@@ -549,6 +549,41 @@ class Bimp_CommandeFourn extends BimpComm
         }
 
         return $buttons;
+    }
+
+    // Getters Array: 
+
+    public function getReceptionsArray($include_empty = false)
+    {
+        if (!$this->isLoaded()) {
+            if ($include_empty) {
+                return array(
+                    0 => ''
+                );
+            } else {
+                return array();
+            }
+        }
+
+        $cache_key = 'commande_fourn_' . $this->id . '_receptions_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $receptions = $this->getChildrenObjects('receptions', array(), 'id', 'desc');
+            foreach ($receptions as $reception) {
+                $label = $reception->getData('num_reception') . ' - ' . $reception->getData('ref');
+                $entrepot = $reception->getChildObject('entrepot');
+                if (BimpObject::objectLoaded($entrepot)) {
+                    $label .= ' (' . $entrepot->libelle . ')';
+                } else {
+                    $label .= ' (Entrepôt invalide)';
+                }
+                self::$cache[$cache_key][(int) $reception->id] = $label;
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
     }
 
     // Rendus HTML - overrides BimpObject:

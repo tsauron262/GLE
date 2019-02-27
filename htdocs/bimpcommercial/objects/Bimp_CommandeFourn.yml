@@ -36,6 +36,14 @@ objects:
             id_object: 
                 field_value: fk_soc
             
+    receptions: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimplogistique
+                name: BL_CommandeFournReception
+                
     files:
         list: 
             filters:
@@ -336,3 +344,16 @@ lists:
             user_author:
             soc: 
             total_ttc:
+                
+cards:
+    default: 
+        title: nom
+        status: fk_statut
+        fields: 
+            - label: Fournisseur
+              field: fk_soc
+              display: nom_url
+            - label: Entrepôt
+              field: entrepot
+              display: nom_url
+        view_btn: 1

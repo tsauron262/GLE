@@ -157,13 +157,13 @@ objects:
             id_object: 
                 field_value: id_facture_fourn
                 
-#    commande_fourn:
-#        relation: hasOne
-#        delete: 0
-#        instance: 
-#            bimp_object: 
-#                module: bimpcommercial
-#                name: Bimp_CommandeFourn
+    commande_fourn:
+        relation: hasOne
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpcommercial
+                name: Bimp_CommandeFourn
     
 #    bimpsupport objects:
     

@@ -114,14 +114,14 @@ class Interfacevalidateorder extends DolibarrTriggers
             if ($bvo->checkValidateRights($user, $object) < 1)
                 return -2;
 
-            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-            $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
+//            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+//            $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
 
-//            $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', $object->id);
-//            $res_errors = $commande->createReservations();
-//            if (count($res_errors)) {
-//                $this->errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
-//            }
+            $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', $object->id);
+            $res_errors = $commande->createReservations();
+            if (count($res_errors)) {
+                $this->errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
+            }
             if (count($this->errors) > 0)
                 return -2;
         }

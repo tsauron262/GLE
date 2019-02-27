@@ -6,11 +6,11 @@ js:
     - /bimpcommercial/views/js/bimpcomm.js
 
 objects: 
-    commande: 
+    commande_fourn: 
         instance: 
             bimp_object:
                 module: bimpcommercial
-                name: Bimp_Commande
+                name: Bimp_CommandeFourn
             id_object: 
                 request: id
                 
@@ -20,7 +20,7 @@ sections:
           card: 
               label: Fiche
               module: bimpcommercial
-              controller: commande
+              controller: commandeFourn
               url_params: 
                   id: 
                       request: id
@@ -29,7 +29,7 @@ sections:
               sections: 
                   - type: object_header
                     object_header: 
-                        object: commande
+                        object: commande_fourn
                   - type: custom
                     custom: 
                         callback: renderContentHtml

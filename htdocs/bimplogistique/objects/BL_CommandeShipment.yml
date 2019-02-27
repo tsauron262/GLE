@@ -16,18 +16,6 @@ objects:
         instance: 
             id_object: 
                 field_value: id_commande_client
-                
-    reservation_shipments: 
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: BR_ReservationShipment
-            
-    service_shipments:
-        relation: hasMany
-        delete: 1
-        instance: 
-            bimp_object: BR_ServiceShipment
     
 fields: 
     id_commande_client: 
@@ -39,11 +27,11 @@ fields:
             type: hidden
         
     id_entrepot: 
-        label: Centre
+        label: Entrepôt de départ
         type: id_object
         object: entrepot
         input: 
-            type: hidden
+            type: search_entrepot
         
     num_livraison:
         label: Numéro de livraison
@@ -96,6 +84,7 @@ forms:
         rows: 
             - field: id_commande_client
               hidden: 1
+            - field: id_entrepot
             - field: id_contact
             - field: info
             
@@ -210,6 +199,9 @@ lists_cols:
     commande: 
         field: id_commande_client
         display: nom_url
+    entrepot: 
+        field: id_entrepot
+        display: nom_url
     num_livraison:
         label: N°
         field: num_livraison
@@ -254,6 +246,7 @@ lists:
         cols:
             commande: 
             num_livraison:
+            entrepot:
             status: 
             contact: 
             commercial: 
@@ -281,6 +274,7 @@ lists:
             callback: getExtraBtn
         cols:
             num_livraison:
+            entrepot:
             status: 
             contact: 
             date: 
@@ -296,5 +290,8 @@ cards:
             - label: Destinataire
               field: id_contact
               display: default
+            - label: Entrepôt de départ
+              field: id_entrepot
+              display: nom_url
             - label: Infos
               field: info

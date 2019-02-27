@@ -513,7 +513,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (!$this->hideTtc) {
                     $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
                 } elseif (!$this->hideReduc) {
-                    $row['pu_remise'] = price($pu_ht_with_remise, 0, $this->langs);
+                    $row['pu_remise'] = BimpTools::displayMoneyValue($pu_ht_with_remise, '');
                 }
 
                 $total_ht_without_remises += $line->subprice * (float) $line->qty;
@@ -546,7 +546,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
         if (!$this->hideReduc && $remise_globale) {
             $remise_infos = $this->bimpCommObject->getRemisesInfos();
-            $ln = array(
+            $row = array(
                 'desc'     => 'Remise exceptionnelle sur l\'intégralité ' . $this->bimpCommObject->getLabel('of_the'),
                 'qte'      => 1,
                 'tva'      => '',
@@ -554,11 +554,11 @@ class BimpDocumentPDF extends BimpModelPDF
                 'total_ht' => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], '')
             );
             if (!$this->hideTtc)
-                $ln['total_ttc'] = BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ttc'], '');
+                $row['total_ttc'] = BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ttc'], '');
             else
-                $ln['pu_remise'] = BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], '');
+                $row['pu_remise'] = BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], '');
 
-            $table->rows[] = $ln;
+            $table->rows[] = $row;
         }
 
         $this->writeContent('<div style="text-align: right; font-size: 6px;">Montants exprimés en Euros</div>');

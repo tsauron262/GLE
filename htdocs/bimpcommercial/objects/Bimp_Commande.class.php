@@ -1023,7 +1023,7 @@ class Bimp_Commande extends BimpComm
             }
             $result = $this->db->executeS($sql . ' AND `status` < 250');
             if ((int) $result[0]->qty !== (int) ($nCommandeProducts - $nToShipProducts - $nShippedProducts)) {
-                $errors[] = 'Le nombre de réservations non expédiées ou en attente d\'expédition est incorrect';
+                $errors[] = 'Le nombre de réservations non expédiées ou en attente d\'expédition est incorrect: '.$result[0]->qty.' => '.$nCommandeProducts.  ', ' . $nToShipProducts .  ', ' . $nShippedProducts;
             }
         }
 

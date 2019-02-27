@@ -85,7 +85,7 @@ function getAllFactures(limit, details) {
             }
 
             // Add button and his event
-            if ($('input#merge_duplicates').length == 0)
+            if ($('input#merge_duplicates').length == 0){
                 $('div#id-right').append('<br/><input type="submit" class="butAction" id="merge_duplicates" value="Fusionner tous les doublons">');
 
             // Display number group doublon
@@ -149,7 +149,7 @@ function initEvents() {
     });
 }
 
-function iniEventAfterDisplayDuplicate() {
+function iniEventOne() {
     // Merge duplicate
     $('input#merge_duplicates').click(function () {
         var radio_checked = {};
@@ -169,6 +169,10 @@ function iniEventAfterDisplayDuplicate() {
         });
         mergeDuplicates(src_to_dest);
     });
+}
+
+
+function iniEventAfterDisplayDuplicate() {
     // Merge only group
     $('input[merge_this_group="true"]').click(function () {
         var key_group = $(this).attr('key_group');

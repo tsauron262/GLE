@@ -198,7 +198,7 @@ class pdf_bimpsupport_pc extends ModeleBimpSupport
 
             $pdf->SetXY('20', '71');
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 12);
-            $pdf->MultiCell(300, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
+            $pdf->MultiCell(300, 6, $address . "\n" /*. $tel . "\n" . $mail*/, 0, 'L');
 
             $pdf->SetXY('16', '53.8');
             $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);

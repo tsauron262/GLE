@@ -241,7 +241,7 @@ class BimpRender
 //                    if (isset($button['dropdown']) && (int) $button['dropdown']) {
 //                        $html .= self::renderDropDownButton($button['label'], $button['items'], $button['params']);
 //                    } else {
-                        $html .= self::renderButton($button);
+                    $html .= self::renderButton($button);
 //                    }
                 }
             }

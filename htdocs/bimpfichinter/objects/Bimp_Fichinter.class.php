@@ -1,8 +1,8 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/objects/BimpDolObject.class.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/extraFI.class.php';
 
-class Bimp_Fichinter extends BimpDolObject
+class Bimp_Fichinter extends extraFI
 {
     public $force_update_date_ln = true;
     public static $dol_module = 'fichinter';
@@ -32,6 +32,9 @@ class Bimp_Fichinter extends BimpDolObject
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info'))
     );
+    
+
+    
 
 
     public function getInstanceName()
@@ -43,8 +46,8 @@ class Bimp_Fichinter extends BimpDolObject
         return ' ';
     }
     
-    public function getCommercialSearchFilters(&$filters, $value, &$joins = array()){
-        $joins["commerciale"] = array("table" => "societe_commerciaux", "alias"=>"sc", "on"=> "sc.fk_soc = a.fk_soc");
+    public function getCommercialSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a'){
+        $joins["commerciale"] = array("table" => "societe_commerciaux", "alias"=>"sc", "on"=> "sc.fk_soc = " . $main_alias . ".fk_soc");
         $filters["sc.fk_user"]  = $value;
     }
     
@@ -79,55 +82,9 @@ class Bimp_Fichinter extends BimpDolObject
     }
     
     
-    
-    
-    
-    public function getData($field) {
-        if(stripos($field, "extra") !== 0)
-            return parent::getData($field);
-        else{
-            return $this->getExtra($field);
-        }
-    }
-    
-    public function set($field, $value) {
-        if(stripos($field, "extra") !== 0)
-            parent::set($field, $value);
-        else{
-            return $this->setExtra($field, $value);
-        }
-    }
-    
-    public function updateField($field, $value, $id_object = null, $force_update = true, $do_not_validate = false) {
-        if(stripos($field, "extra") !== 0)
-            parent::updateField($field, $value, $id_object, $force_update, $do_not_validate);
-    }
-    
-    public function getExtra($field){
-        $field = str_replace("extra", "", $field);
-        if ($this->isLoaded()){
-            if(!$this->extraFetch){
-                $this->dol_object->fetch_extra();
-                $this->extraFetch = true;
-            }
-            return $this->dol_object->extraArr[$field];
-        }
-    }
-    
-    public function setExtra($field, $value){
-        $field = str_replace("extra", "", $field);
-        $this->dol_object->setExtra($field, $value);
-    }
        
     public function update(&$warnings = array(), $force_update = false) {
         $this->traiteDate();
-        
-        foreach($this->data as $nom => $val){
-            if(stripos($nom, "extra") === 0){
-                $this->setExtra($nom, $val);
-                unset($this->data[$nom]);
-            }
-        }
         
         parent::update($warnings, $force_update);
     }
@@ -157,6 +114,16 @@ class Bimp_Fichinter extends BimpDolObject
 //public function updateDolObject(&$errors) {
 //    parent::updateDolObject($errors);
 //}
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 
 }
 

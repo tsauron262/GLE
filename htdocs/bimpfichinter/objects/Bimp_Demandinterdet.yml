@@ -1,0 +1,251 @@
+dol_object: 
+    instance: 
+        dol_object: 
+            module: synopsisdemandeinterv
+            file: synopsisdemandeinterv
+            class: SynopsisdemandeintervLigne
+        
+parent_module: bimpfichinter
+parent_object: Bimp_Demandinter
+parent_id_property: fk_synopsisdemandeinterv
+        
+table: synopsisdemandeintervdet
+primary: rowid
+
+labels: 
+    name: Ligne de demande d'intervention
+    is_female: 1
+    
+   
+     
+#objects:    
+#    product: 
+#        instance: 
+#            id_object: 
+#                field_value: unset
+#                prop: fk_commandedet
+    
+            
+    
+                
+fields: 
+    fk_synopsisdemandeinterv: 
+        label: Objet parent
+        type: id_parent
+        required: 1
+    rowid:
+        label: Id
+        type: int
+    fk_typeinterv:
+        label: Nature de l'inter
+        type: int
+        values: 
+            array: typeinter_list
+    datei:
+        label: Date
+        type: date
+        default_value: now
+    desc:
+        label: Description
+        type: text
+    duration:
+        label: Durée
+        type: time_last
+        input: 
+            type: timer
+        display:
+            default: 
+                type: timer
+        default_value: 3600
+    fk_commandedet:
+        label: Prod Commande
+        type: int
+        values: 
+                array: products_commande_list
+        show: 
+            callback:
+                method: asCommande
+    fk_contratdet:
+        label: Prod Contrat
+        type: int
+        values: 
+                array: products_contrat_list
+        show: 
+            callback:
+                method: asContrat
+    tx_tva:
+        label: TVA
+        type: float
+        show: 
+            callback:
+                method: canViewPrice
+        default_value: 20
+    pu_ht:
+        label: Prix Ht
+        type: money
+        show: 
+            callback:
+                method: canViewPrice
+    qte:
+        label: Quantité
+        type: int
+        default_value: 1
+    total_ht:
+        label: Total Ht
+        type: money
+        show: 
+            callback:
+                method: canViewPrice
+    total_tva:
+        label: Total Tva
+        type: money
+        show: 
+            callback:
+                method: canViewPrice
+    total_ttc:
+        label: Total Ttc
+        type: money
+        show: 
+            callback:
+                method: canViewPrice
+    isForfait:
+        label: Forfait
+        type: bool
+#        Fields manquant:
+#    rang
+#    fk_commandedet
+#    fk_contratdet
+    
+        
+
+        
+forms:
+    default: 
+        rows:
+            - field: datei
+            - field: desc
+            - field: qte
+            - field: fk_typeinterv
+            - field: duration
+            - field: tx_tva
+            - field: pu_ht
+            - field: isForfait
+            - field: fk_commandedet
+            - field: fk_contratdet
+            
+lists_cols: 
+    fk_typeinterv: 
+        field: fk_typeinterv
+    datei:
+        field: datei
+    desc:
+        field: desc
+    fk_commandedet:
+        field: fk_commandedet
+        show:
+            callback: asCommande
+    fk_contratdet:
+        field: fk_contratdet
+        show:
+            callback: asContrat
+    duration:
+        field: duration
+    tx_tva:
+        field: tx_tva
+        show: 
+            callback:
+                method: canViewPrice
+    pu_ht:
+        field: pu_ht
+        edit: 1
+        show: 
+            callback:
+                method: canViewPrice
+    qte:
+        field: qte
+        edit: 1
+    total_ht:
+        field: total_ht
+        show: 
+            callback:
+                method: canViewPrice
+    total_tva:
+        field: total_tva
+        show: 
+            callback:
+                method: canViewPrice
+    total_ttc:
+        field: total_ttc
+        show: 
+            callback:
+                method: canViewPrice    
+    isForfait:
+        field: isForfait
+        edit: 1
+    rowid:
+        field: rowid
+                
+lists:
+    default: 
+        add_btn: 1
+        add_form_name: default
+        add_btn_label: Ajouter une ligne
+        update_btn: 1
+        checkboxes: 1
+        configurable: 1
+        sort_field: rowid
+        sort_way: asc
+        n: 25
+        delete_btn: 1
+        modal_view: default
+        page_btn: 1
+        edit_btn: 1
+        cols:
+            rowid:
+            fk_typeinterv:
+            datei:
+            desc:
+            fk_commandedet:
+            fk_contratdet:
+            duration:
+            tx_tva:
+            pu_ht:
+            qte:
+            total_ht:
+            total_tva:
+            total_ttc:
+            isForfait:
+                
+fields_tables: 
+    infos:
+        title: Infos ligne FI
+        icon: id-card
+        rows: 
+            - field: duration 
+            - field: desc 
+            - field: total_ht 
+            - field: total_tva 
+            - field: total_ttc 
+            - field: natureInter
+            - field: fk_commandedet
+            - field: fk_contratdet
+            
+        
+views: 
+    default: 
+        rows: 
+            - cols: 
+                - type: fields_table
+                  col_lg: 12
+                  col_md: 12
+                  col_sm: 12
+                  fields_table: 
+                      name: infos
+                      
+                     
+        
+cards:
+    default: 
+        type: default
+        
+

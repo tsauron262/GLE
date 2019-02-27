@@ -202,34 +202,34 @@ class Equipment extends BimpObject
         return '';
     }
 
-    public function getProductSearchFilters(&$filters, $value, &$joins = array())
+    public function getProductSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
-        $where = 'p.ref LIKE \'%' . (string) $value . '%\' OR p.label LIKE \'%' . (string) $value . '%\' OR p.barcode = \'' . (string) $value . '\'';
+        $where = 'prod.ref LIKE \'%' . (string) $value . '%\' OR prod.label LIKE \'%' . (string) $value . '%\' OR prod.barcode = \'' . (string) $value . '\'';
 
         if (preg_match('/^\d+$/', (string) $value)) {
-            $where .= ' OR p.rowid = ' . $value;
+            $where .= ' OR prod.rowid = ' . $value;
         }
 
         $filters['or_product'] = array(
             'or' => array(
-                'product_label' => array(
+                $main_alias . '.product_label' => array(
                     'part_type' => 'middle',
                     'part'      => $value
                 ),
-                'id_product'    => array(
-                    'in' => 'SELECT p.rowid FROM ' . MAIN_DB_PREFIX . 'product p WHERE ' . $where
+                $main_alias . '.id_product'    => array(
+                    'in' => 'SELECT prod.rowid FROM ' . MAIN_DB_PREFIX . 'product prod WHERE ' . $where
                 )
             )
         );
     }
 
-    public function getPlaceSearchFilters(&$filters, $value, &$joins = array())
+    public function getPlaceSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         if ((string) $value) {
             $joins['place'] = array(
                 'table' => 'be_equipment_place',
                 'alias' => 'place',
-                'on'    => 'place.id_equipment = a.id'
+                'on'    => 'place.id_equipment = ' . $main_alias . '.id'
             );
             $joins['place_entrepot'] = array(
                 'table' => 'entrepot',
@@ -279,9 +279,9 @@ class Equipment extends BimpObject
         }
     }
 
-    public function getReservedSearchFilters(&$filters, $value, &$joins = array())
+    public function getReservedSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
-        $sql = '(SELECT COUNT(reservation.id) FROM ' . MAIN_DB_PREFIX . 'br_reservation reservation WHERE reservation.id_equipment = a.id';
+        $sql = '(SELECT COUNT(reservation.id) FROM ' . MAIN_DB_PREFIX . 'br_reservation reservation WHERE reservation.id_equipment = ' . $main_alias . '.id';
         $sql .= ' AND reservation.status < 300 AND reservation.status >= 200)';
 
         if ((int) $value > 0) {

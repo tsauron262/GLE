@@ -105,7 +105,7 @@ class BIMP_Task extends BimpObject
     }
     
 
-    public function getTypeTacheSearchFilters(&$filters, $value, &$joins = array())
+    public function getTypeTacheSearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
     {
         global $user;
         if($value != 'other')
@@ -168,8 +168,8 @@ class BIMP_Task extends BimpObject
     {
         global $user;
         if ($this->isNotLoaded())
-            foreach (self::$valSrc as $src => $nom)
-                if ($user->rights->bimptask->$src->read)
+//            foreach (self::$valSrc as $src => $nom)
+//                if ($user->rights->bimptask->$src->read)
                     return 1;
 
         return $this->getRight("read");

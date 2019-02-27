@@ -75,6 +75,7 @@ class BC_Field extends BimpComponent
         $this->params_def['values'] = array('data_type' => 'array', 'compile' => true);
         $this->params_def['display_if'] = array('data_type' => 'array', 'compile' => true);
         $this->params_def['history'] = array('data_type' => 'bool', 'default' => 0);
+        $this->params_def['extra'] = array('data_type' => 'bool', 'default' => 0);
 
         $this->edit = $edit;
 

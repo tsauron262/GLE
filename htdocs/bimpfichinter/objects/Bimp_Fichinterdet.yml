@@ -42,12 +42,18 @@ fields:
     datei:
         label: Date
         type: date
+        default_value: now
     desc:
         label: Description
         type: text
     duration:
         label: Durée
-        type: int
+        type: time_last
+        input: 
+            type: timer
+        display:
+            default: 
+                type: timer
     fk_typeinterv:
         label: typoe interv
         type: int
@@ -60,21 +66,38 @@ fields:
     tx_tva:
         label: TVA
         type: float
+        show: 
+            callback:
+                method: canViewPrice
+        default_value: 20
     pu_ht:
         label: Prix Ht
         type: money
+        show: 
+            callback:
+                method: canViewPrice
     qte:
         label: Quantité
         type: int
+        default_value: 1
     total_ht:
         label: Total Ht
         type: money
+        show: 
+            callback:
+                method: canViewPrice
     total_tva:
         label: Total Tva
         type: money
+        show: 
+            callback:
+                method: canViewPrice
     total_ttc:
         label: Total Ttc
         type: money
+        show: 
+            callback:
+                method: canViewPrice
     isForfait:
         label: Forfait
         type: bool
@@ -113,18 +136,33 @@ lists_cols:
         field: duration
     tx_tva:
         field: tx_tva
+        show: 
+            callback:
+                method: canViewPrice
     pu_ht:
         field: pu_ht
         edit: 1
+        show: 
+            callback:
+                method: canViewPrice
     qte:
         field: qte
         edit: 1
     total_ht:
         field: total_ht
+        show: 
+            callback:
+                method: canViewPrice
     total_tva:
         field: total_tva
+        show: 
+            callback:
+                method: canViewPrice
     total_ttc:
         field: total_ttc
+        show: 
+            callback:
+                method: canViewPrice    
     isForfait:
         field: isForfait
         edit: 1
@@ -140,7 +178,7 @@ lists:
         checkboxes: 1
         configurable: 1
         sort_field: rowid
-        sort_way: desc
+        sort_way: asc
         n: 25
         delete_btn: 1
         modal_view: default

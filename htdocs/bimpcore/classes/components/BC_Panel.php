@@ -28,6 +28,7 @@ class BC_Panel extends BimpComponent
         $this->params_def['no_reload'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['header_buttons'] = array('data_type' => 'array', 'compile' => true);
         $this->params_def['footer_extra_btn'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
+        $this->params_def['footer_extra_content'] = array('default' => '');
         $this->params_def['msgs'] = array('data_type' => 'array', 'default' => null, 'compile' => true);
         $this->params_def['before_content'] = array('default' => '');
         $this->params_def['after_content'] = array('default' => '');
@@ -200,6 +201,9 @@ class BC_Panel extends BimpComponent
     {
         $html = '<div class="panelFooterButtons" style="text-align: right">';
         $html .= $this->renderFooterExtraBtn();
+        if ($this->params['footer_extra_content']) {
+            $html .= $this->params['footer_extra_content'];
+        }
         $html .= '</div>';
 
         return $html;

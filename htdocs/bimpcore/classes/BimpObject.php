@@ -47,7 +47,7 @@ class BimpObject extends BimpCache
         'views'                    => array('type' => 'keys'),
         'lists'                    => array('type' => 'keys'),
         'cards'                    => array('type' => 'keys'),
-        'searches'                 => array('type' => 'keys')
+        'searches'                 => array('type' => 'keys'),
     );
     public static $check_on_create = 1;
     public static $check_on_update = 1;
@@ -66,7 +66,7 @@ class BimpObject extends BimpCache
     public $dol_object = null;
     public $extends = array();
 
-    // Gestion instance: 
+    // Gestion instance:
 
     public static function getInstance($module, $object_name, $id_object = null, $parent = null)
     {
@@ -304,10 +304,20 @@ class BimpObject extends BimpCache
 
     public function getPrimary()
     {
-        return $this->params['primary'];
+        $primary = $this->params['primary'];
+
+        if (!$primary) {
+            if ($this->isDolObject()) {
+                $primary = 'rowid';
+            } else {
+                $primary = 'id';
+            }
+        }
+
+        return $primary;
     }
 
-    public function getTable()
+    public function getTable($table = '')
     {
         return $this->params['table'];
     }
@@ -496,6 +506,11 @@ class BimpObject extends BimpCache
                 in_array($field_name, $this->params['fields']);
     }
 
+    public function isExtraField($field_name)
+    {
+        return (int) $this->getConf('fields/' . $field_name . '/extra', 0);
+    }
+
     public function dol_field_exists($field_name)
     {
         if (!$this->field_exists($field_name)) {
@@ -516,6 +531,23 @@ class BimpObject extends BimpCache
         }
 
         return true;
+    }
+
+    public function isDolField($field_name)
+    {
+        if ($this->isDolObject()) {
+            if ((int) $this->getConf('fields/' . $field_name . '/dol_extra_field', 0)) {
+                return 1;
+            }
+
+            $prop = $this->getConf('fields/' . $field_name . '/dol_prop', $field_name);
+
+            if (property_exists($this->dol_object, $prop)) {
+                return 1;
+            }
+        }
+
+        return 0;
     }
 
     public function isDolExtraField(&$field_name)
@@ -595,6 +627,7 @@ class BimpObject extends BimpCache
             if ($this->field_exists($field)) {
                 if (is_array($filter)) {
                     // todo ... 
+                    return 0;
                 } else {
                     $type = $this->getConf('fields/' . $field . '/type', 'string', false);
                     $value = $this->getData($field);
@@ -722,8 +755,20 @@ class BimpObject extends BimpCache
         }
 
         $value = null;
-        if ($this->isDolObject() && $this->dol_field_exists($field) &&
+
+        if ($this->isExtraField($field)) {
+            // Cas d'un extrafield BimpObject: 
+            if (is_array($id_object)) {
+                $value = array();
+                foreach ($id_object as $id) {
+                    $value[$id] = $this->getExtraFieldSavedValue($field, $id);
+                }
+            } else {
+                $value = $this->getExtraFieldSavedValue($field, $id_object);
+            }
+        } elseif ($this->isDolObject() && $this->dol_field_exists($field) &&
                 (int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+            // Cas d'un extrafield Dolibarr:
             if (preg_match('/^ef_(.*)$/', $field, $matches)) {
                 $field = $matches[1];
             }
@@ -739,20 +784,26 @@ class BimpObject extends BimpCache
                 $value = $this->db->getValue($this->getTable() . '_extrafields', $field, '`fk_object` = ' . (int) $id_object);
             }
         } else {
+            // Cas ordinaire: 
             $primary = $this->getPrimary();
-            if (is_array($id_object)) {
-                $rows = $this->db->getRows($this->getTable(), '`' . $primary . '` IN (' . implode(',', $id_object) . ')', null, 'array', array($primary, $field));
-                if (is_array($rows)) {
-                    $value = array();
-                    foreach ($rows as $r) {
-                        $value[(int) $r[$primary]] = $r[$field];
+            $table = $this->getTable();
+
+            if ($table && $primary) {
+                if (is_array($id_object)) {
+                    $rows = $this->db->getRows($table, '`' . $primary . '` IN (' . implode(',', $id_object) . ')', null, 'array', array($primary, $field));
+                    if (is_array($rows)) {
+                        $value = array();
+                        foreach ($rows as $r) {
+                            $value[(int) $r[$primary]] = $r[$field];
+                        }
                     }
+                } else {
+                    $value = $this->db->getValue($table, $field, '`' . $primary . '` = ' . (int) $id_object);
                 }
-            } else {
-                $value = $this->db->getValue($this->getTable(), $field, '`' . $primary . '` = ' . (int) $id_object);
             }
         }
 
+        // récup valeur par défaut: 
         if (is_null($value)) {
             if (is_array($id_object)) {
                 $value = array();
@@ -762,6 +813,16 @@ class BimpObject extends BimpCache
                 }
             } else {
                 $value = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
+            }
+        } elseif (is_array($id_object)) {
+            if (!is_array($value)) {
+                $value = array();
+                $def_val = $this->getConf('fields/' . $field . '/default_value', null, false, 'any');
+                foreach ($id_object as $id) {
+                    if (!isset($value[$id]) || is_null($value[$id])) {
+                        $value[$id] = $def_val;
+                    }
+                }
             }
         }
 
@@ -776,6 +837,10 @@ class BimpObject extends BimpCache
 
         foreach ($this->data as $field => $value) {
             if ($field === $primary) {
+                continue;
+            }
+
+            if ($this->isExtraField($field)) {
                 continue;
             }
 
@@ -952,6 +1017,19 @@ class BimpObject extends BimpCache
         }
 
         return $value;
+    }
+
+    public function getExtraFields()
+    {
+        $fields = array();
+
+        foreach ($this->params['fields'] as $field_name) {
+            if ($this->isExtraField($field_name)) {
+                $fields[] = $field_name;
+            }
+        }
+
+        return $fields;
     }
 
     // Gestion des données:
@@ -1267,7 +1345,7 @@ class BimpObject extends BimpCache
                         $on_field = $this->config->params['objects'][$child_name]['instance']['id_object']['field_value'];
                         $instance = $this->getChildObject($child_name);
                         if ($on_field && !is_null($instance) && is_a($instance, 'BimpObject')) {
-                            $joins[] = array(
+                            $joins[$child_name] = array(
                                 'table' => $instance->getTable(),
                                 'alias' => $child_name,
                                 'on'    => ($alias ? $alias : 'a') . '.' . $on_field . ' = ' . $child_name . '.' . $instance->getPrimary()
@@ -1278,21 +1356,23 @@ class BimpObject extends BimpCache
                 }
             }
         }
+
         if (!is_null($fields)) {
             $prev_path = $this->config->current_path;
             foreach ($fields as $field_name => $value) {
                 if ($value === '') {
                     continue;
                 }
-                $filter_key = '';
-                if ($alias) {
-                    $filter_key .= $alias . '.';
+
+                if (!$alias) {
+                    $alias = 'a';
                 }
-                $filter_key .= $field_name;
+
+                $filter_key = $alias . '.' . $field_name;
 
                 $method = 'get' . ucfirst($field_name) . 'SearchFilters';
                 if (method_exists($this, $method)) {
-                    $this->{$method}($filters, $value, $joins);
+                    $this->{$method}($filters, $value, $joins, $alias);
                     continue;
                 }
                 if (in_array($field_name, self::$common_fields)) {
@@ -1330,28 +1410,6 @@ class BimpObject extends BimpCache
                             continue;
                         }
                     }
-
-//                    if ($search_type === 'field_input') {
-//                        $input_type = BC_Field::getInputType($this, $field_name);
-//
-//                        switch ($input_type) {
-//                            case 'text':
-//                                $search_type = 'value_part';
-//                                break;
-//
-//                            case 'time':
-//                                $search_type = 'time_range';
-//                                break;
-//
-//                            case 'date':
-//                                $search_type = 'date_range';
-//                                break;
-//
-//                            case 'datetime':
-//                                $search_type = 'datetime_range';
-//                                break;
-//                        }
-//                    }
 
                     $bc_field = new BC_Field($this, $field_name);
                     $seach_data = $bc_field->getSearchData();
@@ -1521,24 +1579,50 @@ class BimpObject extends BimpCache
         return false;
     }
 
-    protected function checkSqlFilters($filters, &$has_extrafields)
+    protected function checkSqlFilters($filters, &$has_extrafields = false, &$joins = array(), $main_alias = '')
     {
         $return = array();
         foreach ($filters as $field => $filter) {
             if (is_array($filter) && isset($filter['or'])) {
-                $return[$field] = array('or' => $this->checkSqlFilters($filter['or'], $has_extrafields));
+                $return[$field] = array('or' => $this->checkSqlFilters($filter['or'], $has_extrafields, $joins, $main_alias));
             } elseif (is_array($filter) && isset($filter['and'])) {
-                $return[$field] = array('and' => $this->checkSqlFilters($filter['and'], $has_extrafields));
+                $return[$field] = array('and' => $this->checkSqlFilters($filter['and'], $has_extrafields, $joins, $main_alias));
             } else {
-                if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
-                    if (preg_match('/^ef_(.*)$/', $field, $matches)) {
-                        $field = $matches[1];
-                    }
-                    $return['ef.' . $field] = $filter;
-                    $has_extrafields = true;
+                if (preg_match('/^(' . ($main_alias ? $main_alias : 'a') . '\.)(.+)$/', $field, $matches)) {
+                    $field_name = $matches[2];
                 } else {
-                    $return[$field] = $filter;
+                    $field_name = $field;
                 }
+                if ($this->field_exists($field_name)) {
+                    if ($this->isExtraField($field_name)) {
+                        $key = $this->getExtraFieldFilterKey($field_name, $joins, $main_alias);
+                        if ($key) {
+                            $return[$key] = $filter;
+                        }
+                        continue;
+                    } elseif ($this->isDolExtraField($field_name)) {
+                        $filter_key = ($main_alias ? $main_alias . '_' : '') . 'ef.' . $field_name;
+                        $return[$filter_key] = $filter;
+                        $has_extrafields = true;
+
+                        $join_alias = ($main_alias ? $main_alias . '_' : '') . 'ef';
+                        if (!isset($joins[$join_alias])) {
+                            $on = $join_alias . '.fk_object = ' . ($main_alias ? $main_alias : 'a') . '.' . $this->getPrimary();
+                            $joins[$join_alias] = array(
+                                'alias' => $join_alias,
+                                'table' => $this->getTable() . '_extrafields',
+                                'on'    => $on
+                            );
+                        }
+                        continue;
+                    }
+
+                    $filter_key = ($main_alias ? $main_alias . '_' : '') . 'a.' . $field_name;
+                    $return[$filter_key] = $filter;
+                    continue;
+                }
+
+                $return[$field] = $filter;
             }
         }
 
@@ -1586,6 +1670,7 @@ class BimpObject extends BimpCache
                     }
                 }
         }
+
         return false;
     }
 
@@ -1712,64 +1797,72 @@ class BimpObject extends BimpCache
 
     // Getters Listes
 
-    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null, $extra_order_by = null, $extra_order_way = 'ASC')
+    public function getList($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = array(), $extra_order_by = null, $extra_order_way = 'ASC')
     {
         $table = $this->getTable();
+        $primary = $this->getPrimary();
 
         if (is_null($table)) {
             return array();
         }
 
-        if ($order_by === 'id') {
-            $order_by = $this->getPrimary();
+        if (preg_match('/^a\.(.+)$/', $order_by, $matches)) {
+            $order_by = $matches[1];
         }
-        $order_by_alias = 'a';
 
-        if ($this->isDolObject()) {
-            $has_extrafields = false;
-            foreach ($return_fields as $key => $field) {
-                if ($this->field_exists($field)) {
-                    if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
-                        if (preg_match('/^ef_(.*)$/', $field, $matches)) {
-                            $field = $matches[1];
-                        }
-                        $return_fields[$key] = 'ef.' . $field;
-                        $has_extrafields = true;
+        if ($order_by === 'id') {
+            $order_by = $primary;
+        }
+
+        $is_dol_object = $this->isDolObject();
+        $has_extrafields = false;
+
+        // Vérification des champs à retourner: 
+        foreach ($return_fields as $key => $field) {
+            if ($this->field_exists($field)) {
+                if ($is_dol_object && $this->isDolExtraField($field)) {
+                    if (preg_match('/^ef_(.*)$/', $field, $matches)) {
+                        $field = $matches[1];
                     }
-                }
-            }
-
-            $filters = $this->checkSqlFilters($filters, $has_extrafields);
-
-            if ($this->field_exists($order_by)) {
-                if ((int) $this->getConf('fields/' . $order_by . '/dol_extra_field', 0, false, 'bool')) {
+                    $return_fields[$key] = 'ef.' . $field;
                     $has_extrafields = true;
-                    $order_by_alias = 'ef';
-                    if (preg_match('/^ef_(.*)$/', $order_by, $matches)) {
-                        $order_by = $matches[1];
+                } elseif ($this->isExtraField($field)) {
+                    $field_key = $this->getExtraFieldFilterKey($field, $joins);
+                    if ($field_key) {
+                        $return_fields[$key] = $field_key;
+                    } else {
+                        unset($return_fields[$key]);
                     }
                 }
-            } else {
-                $order_by = '';
             }
+        }
 
-            if ($has_extrafields) {
-                if (is_null($joins)) {
-                    $joins = array();
-                }
-                $joins[] = array(
-                    'alias' => 'ef',
-                    'table' => $table . '_extrafields',
-                    'on'    => 'a.rowid = ef.fk_object'
-                );
+        // Vérification des filtres: 
+        $filters = $this->checkSqlFilters($filters, $has_extrafields, $joins);
+
+        // Vérification du champ "order_by": 
+        if ($this->field_exists($order_by)) {
+            if ($is_dol_object && $this->isDolExtraField($order_by)) {
+                $has_extrafields = true;
+                $order_by = 'ef.' . $order_by;
+            } elseif ($this->isExtraField($order_by)) {
+                $order_by = $this->getExtraFieldFilterKey($order_by, $joins);
             }
+        }
+
+        if ($has_extrafields && !isset($joins['ef'])) {
+            $joins['ef'] = array(
+                'alias' => 'ef',
+                'table' => $table . '_extrafields',
+                'on'    => 'a.' . $primary . ' = ef.fk_object'
+            );
         }
 
         $sql = '';
         $sql .= BimpTools::getSqlSelect($return_fields);
         $sql .= BimpTools::getSqlFrom($table, $joins);
         $sql .= BimpTools::getSqlWhere($filters);
-        $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, $order_by_alias, $extra_order_by, $extra_order_way);
+        $sql .= BimpTools::getSqlOrderBy($order_by, $order_way, 'a', $extra_order_by, $extra_order_way);
         $sql .= BimpTools::getSqlLimit($n, $p);
 
         if (BimpDebug::isActive('bimpcore/objects/print_list_sql') || BimpTools::isSubmit('list_sql')) {
@@ -1787,6 +1880,10 @@ class BimpObject extends BimpCache
 
     public function getListByParent($id_parent, $n = null, $p = null, $order_by = 'id', $order_way = 'DESC', $return = 'array', $return_fields = null, $joins = null)
     {
+        if (preg_match('/^a\.(.+)$/', $order_by, $matches)) {
+            $order_by = $matches[1];
+        }
+
         if ($order_by === 'id') {
             $order_by = $this->getPrimary();
         }
@@ -1794,7 +1891,7 @@ class BimpObject extends BimpCache
         $table = $this->getTable();
         $parent_id_property = $this->getParentIdProperty();
 
-        if (is_null($table) || is_null($parent_id_property)) {
+        if (!(string) $table || !(string) $parent_id_property) {
             return array();
         }
 
@@ -1803,7 +1900,7 @@ class BimpObject extends BimpCache
                         ), $n, $p, $order_by, $order_way, $return, $return_fields, $joins);
     }
 
-    public function getListCount($filters = array(), $joins = null)
+    public function getListCount($filters = array(), $joins = array())
     {
         $table = $this->getTable();
         if (is_null($table)) {
@@ -1813,15 +1910,12 @@ class BimpObject extends BimpCache
 
         if ($this->isDolObject()) {
             $has_extrafields = false;
-            $filters = $this->checkSqlFilters($filters, $has_extrafields);
-            if ($has_extrafields) {
-                if (is_null($joins)) {
-                    $joins = array();
-                }
-                $joins[] = array(
+            $filters = $this->checkSqlFilters($filters, $has_extrafields, $joins);
+            if ($has_extrafields && !isset($joins['ef'])) {
+                $joins['ef'] = array(
                     'alias' => 'ef',
                     'table' => $table . '_extrafields',
-                    'on'    => 'a.rowid = ef.fk_object'
+                    'on'    => 'a.' . $primary . ' = ef.fk_object'
                 );
             }
         }
@@ -2321,7 +2415,7 @@ class BimpObject extends BimpCache
                 if (!is_null($this->dol_object)) {
                     $result = $this->createDolObject($errors);
                 } else {
-                    $table = $this->getTable();
+                    $table = $this->getTable('');
 
                     if (is_null($table)) {
                         $errors[] = 'Fichier de configuration invalide (table non renseignée)';
@@ -2333,7 +2427,13 @@ class BimpObject extends BimpCache
 
                 if ($result > 0) {
                     $this->id = (int) $result;
-                    $this->set($this->getPrimary(), (int) $result);
+                    $this->set($this->getPrimary(''), (int) $result);
+
+                    $extra_errors = $this->insertExtraFields();
+                    if (count($extra_errors)) {
+                        $warnings[] = BimpTools::getMsgFromArray($extra_errors, 'Des erreurs sont survenues lors de l\'enregistrement des champs supplémentaires');
+                    }
+
                     $cache_key = 'bimp_object_' . $this->module . '_' . $this->object_name . '_' . $this->id;
                     self::$cache[$cache_key] = $this;
 
@@ -2414,7 +2514,7 @@ class BimpObject extends BimpCache
                         }
                     }
 
-                    if (!is_null($this->dol_object)) {
+                    if ($this->isDolObject()) {
                         $result = $this->updateDolObject($errors);
                     } else {
                         $table = $this->getTable();
@@ -2424,10 +2524,7 @@ class BimpObject extends BimpCache
                             $errors[] = 'Fichier de configuration invalide (table non renseignée)';
                             $result = 0;
                         } else {
-                            unset($this->data[$primary]);
-
-                            $result = $this->db->update($table, $this->getDbData(), '`' . $primary . '` = ' . (int) $this->id);
-                            $this->set($primary, $this->id);
+                            $result = $this->db->update($table, $this->getDbData(''), '`' . $primary . '` = ' . (int) $this->id);
                         }
                     }
 
@@ -2439,6 +2536,11 @@ class BimpObject extends BimpCache
                         }
                         $errors[] = $msg;
                     } else {
+                        $extra_errors = $this->updateExtraFields();
+                        if (count($extra_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($extra_errors, 'Des erreurs sont survenues lors de l\'enregistrement des champs supplémentaires');
+                        }
+
                         $this->initData = $this->data;
 
                         $warnings = array_merge($warnings, $this->updateAssociations());
@@ -2534,26 +2636,38 @@ class BimpObject extends BimpCache
                     }
                 }
 
-                $extra_field = (int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool');
-                if ($extra_field && $this->isDolObject()) {
+                if ($this->isDolExtraField($field)) {
+                    // Cas d'un dol extrafield: 
                     if ($this->db->update($this->getTable() . '_extrafields', array(
                                 $field => $db_value
                                     ), '`fk_object` = ' . (int) $id_object) <= 0) {
                         $sqlError = $this->db->db->lasterror();
                         $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');
                     }
+                } elseif ($this->isExtraField($field)) {
+                    // Cas d'un BimpObject extra field: 
+                    $errors = array_merge($errors, $this->updateExtraField($field, $db_value, $id_object));
                 } else {
-                    if ($this->db->update($this->getTable(), array(
-                                $field => $db_value
-                                    ), '`' . $this->getPrimary() . '` = ' . (int) $id_object) <= 0) {
-                        $sqlError = $this->db->db->lasterror();
-                        $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');
+                    // Cas d'un field ordinaire: 
+                    $table = $this->getTable();
+                    $primary = $this->getPrimary();
+
+                    if ($table && $primary) {
+                        if ($this->db->update($table, array(
+                                    $field => $db_value
+                                        ), '`' . $primary . '` = ' . (int) $id_object) <= 0) {
+                            $sqlError = $this->db->db->lasterror();
+                            $errors[] = 'Echec de la mise à jour du champ "' . $field . '"' . ($sqlError ? ' - ' . $sqlError : '');
+                        }
+                    } else {
+                        $errors[] = 'Erreur de configuration: paramètres de la table invalides';
                     }
                 }
 
                 if (!count($errors)) {
                     $this->initData[$field] = $this->data[$field];
                     if ($this->getConf('fields/' . $field . '/history', false, false, 'bool')) {
+                        // Mise à jour de l'historique du champ: 
                         global $user;
                         $history = BimpObject::getInstance('bimpcore', 'BimpHistory');
                         $history->validateArray(array(
@@ -2565,12 +2679,14 @@ class BimpObject extends BimpCache
                             'date'      => date('Y-m-d H:i:s'),
                             'id_user'   => (int) $user->id,
                         ));
+                        $warnings = array();
                         $history->create($warnings, true);
                     }
 
                     $parent = $this->getParentInstance();
 
                     if (!is_null($parent)) {
+                        // Trigger sur le parent: 
                         if (method_exists($parent, 'onChildSave')) {
                             $warnings = array_merge($warnings, $parent->onChildSave($this));
                         }
@@ -2598,22 +2714,12 @@ class BimpObject extends BimpCache
 
         $id_object = null;
 
-        $joins = null;
+        $joins = array();
         $table = $this->getTable();
         $primary = $this->getPrimary();
 
-        if ($this->isDolObject()) {
-            $has_extrafields = false;
-            $filters = $this->checkSqlFilters($filters, $has_extrafields);
-
-            if ($has_extrafields) {
-                $joins = array(
-                    'alias' => 'ef',
-                    'table' => $table . '_extrafields',
-                    'on'    => 'ef.fk_object = a.' . $primary
-                );
-            }
-        }
+        $hasExtraFields = false;
+        $filters = $this->checkSqlFilters($filters, $hasExtraFields, $joins);
 
         $sql = BimpTools::getSqlSelect('a.' . $primary);
         $sql .= BimpTools::getSqlFrom($table, $joins);
@@ -2688,6 +2794,14 @@ class BimpObject extends BimpCache
                     $this->data[$field] = $value;
                 }
             }
+
+            $extra_fields = $this->fetchExtraFields();
+
+            foreach ($extra_fields as $field_name => $value) {
+                $this->checkFieldValueType($field_name, $value);
+                $this->data[$field_name] = $value;
+            }
+
             $this->initData = $this->data;
             $this->ref = $this->getRef();
 
@@ -2758,8 +2872,8 @@ class BimpObject extends BimpCache
             $table = $this->getTable();
             $primary = $this->getPrimary();
 
-            if (is_null($table)) {
-                $errors[] = 'Fichier de configuration invalide (table non renseignée)';
+            if (!$table || !$primary) {
+                $errors[] = 'Erreur de configuration: paramètre de la table invalides';
                 $result = 0;
             } else {
                 $result = $this->db->delete($table, '`' . $primary . '` = ' . (int) $this->id);
@@ -2775,6 +2889,13 @@ class BimpObject extends BimpCache
             $errors[] = $msg;
         } elseif (!count($errors)) {
             $id = $this->id;
+
+            // Suppr des extras fields: 
+            $extra_errors = $this->deleteExtraFields();
+            if (count($extra_errors)) {
+                $warnings[] = BimpTools::getMsgFromArray($extra_errors, 'Des erreurs sont survenues lors de la suppression des champs supplémentaires');
+            }
+            
             // Réintialisation de la position des autres objets du même parent: 
             if ((int) $this->params['positions']) {
                 $this->resetPositions();
@@ -2917,254 +3038,6 @@ class BimpObject extends BimpCache
         return $check;
     }
 
-    public function hydrateDolObject(&$bimpObjectFields = array())
-    {
-        $errors = array();
-
-        foreach ($this->data as $field => $value) {
-            if ($this->field_exists($field)) {
-                if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
-                    if (preg_match('/^ef_(.*)$/', $field, $matches)) {
-                        $extrafield = $matches[1];
-                    } else {
-                        $extrafield = $field;
-                    }
-                    $this->dol_object->array_options['options_' . $extrafield] = $this->getDolValue($field, $value);
-                } else {
-                    $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
-                    if (is_null($prop)) {
-                        $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-                    } if (property_exists($this->dol_object, $prop)) {
-                        $this->dol_object->{$prop} = $this->getDolValue($field, $value);
-                    } else {
-                        $bimpObjectFields[$field] = $value;
-                    }
-                }
-            }
-        }
-
-        return $errors;
-    }
-
-    public function hydrateFromDolObject()
-    {
-        if (!self::objectLoaded($this->dol_object)) {
-            return array('Echec de la récupération des données depuis l\'objet Dolibarr - objet non chargé');
-        }
-
-        $errors = array();
-
-        $this->id = $this->dol_object->id;
-
-        foreach ($this->params['fields'] as $field) {
-            $value = null;
-            if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
-                if (preg_match('/^ef_(.*)$/', $field, $matches)) {
-                    $extrafield = $matches[1];
-                } else {
-                    $extrafield = $field;
-                }
-                if (isset($this->dol_object->array_options['options_' . $extrafield])) {
-                    $value = $this->dol_object->array_options['options_' . $extrafield];
-                }
-            } else {
-                $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
-                if (is_null($prop)) {
-                    $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
-                } elseif (property_exists($this->dol_object, $prop)) {
-                    $value = $this->dol_object->{$prop};
-                } else {
-                    $value = $this->getSavedData($field);
-                }
-            }
-            if (!is_null($value)) {
-                $this->checkFieldValueType($field, $value);
-                $this->data[$field] = $value;
-            }
-        }
-
-        return $errors;
-    }
-
-    protected function createDolObject(&$errors)
-    {
-        if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
-            unset($this->dol_object);
-            $this->dol_object = $this->config->getObject('dol_object');
-        }
-
-        if (is_null($this->dol_object)) {
-            $errors[] = 'Objet Dolibarr invalide';
-            return 0;
-        }
-
-        $bimpObjectFields = array();
-        $errors = $this->hydrateDolObject($bimpObjectFields);
-
-        if (!count($errors)) {
-            if (method_exists($this, 'beforeCreateDolObject')) {
-                $this->beforeCreateDolObject();
-            }
-
-            if (method_exists($this, 'getDolObjectCreateParams')) {
-                $params = $this->getDolObjectCreateParams();
-            } else {
-                global $user;
-                $params = array($user);
-            }
-
-            $result = call_user_func_array(array($this->dol_object, 'create'), $params);
-            if ($result < 0) {
-                if (isset($this->dol_object->error) && $this->dol_object->error) {
-                    $errors[] = $this->dol_object->error;
-                } elseif (count($this->dol_object->errors)) {
-                    global $langs;
-                    $langs->load("errors");
-                    foreach ($this->dol_object->errors as $error) {
-                        $errors[] = 'Erreur: ' . $langs->trans($error);
-                    }
-                }
-            } else {
-                if (count($bimpObjectFields)) {
-                    $this->id = $this->dol_object->id;
-                    foreach ($bimpObjectFields as $field_name => $value) {
-                        $this->updateField($field_name, $value);
-                    }
-                }
-            }
-
-            return $result;
-        }
-
-        return 0;
-    }
-
-    protected function updateDolObject(&$errors)
-    {
-        if (!$this->isLoaded()) {
-            return 0;
-        }
-        if (is_null($this->dol_object)) {
-            $errors[] = 'Objet Dolibarr invalide';
-            return 0;
-        }
-
-        if (!isset($this->dol_object->id) || !$this->dol_object->id) {
-            $errors[] = 'Objet Dolibarr invalide';
-            return 0;
-        }
-
-        $bimpObjectFields = array();
-        $errors = $this->hydrateDolObject($bimpObjectFields);
-
-        if (!count($errors)) {
-            if (method_exists($this, 'beforeUpdateDolObject')) {
-                $this->beforeUpdateDolObject();
-            }
-
-            if (method_exists($this, 'getDolObjectUpdateParams')) {
-                $params = $this->getDolObjectUpdateParams();
-            } else {
-                global $user;
-                $params = array($user);
-            }
-
-            $result = call_user_func_array(array($this->dol_object, 'update'), $params);
-
-            foreach ($bimpObjectFields as $field => $value) {
-                $this->updateField($field, $value);
-            }
-
-            if ((int) $this->params['force_extrafields_update']) {
-                foreach ($this->dol_object->array_options as $key => $value) {
-                    if ($this->dol_object->updateExtraField(str_replace('options_', '', $key)) <= 0) {
-                        $errors[] = 'Echec de l\'enregistrement de l\'attribut supplémentaire "' . str_replace('options_', '', $key) . '"';
-                    }
-                }
-            }
-
-            if ($result < 0) {
-                if (isset($this->dol_object->error) && $this->dol_object->error) {
-                    $errors[] = $this->dol_object->error;
-                } elseif (count($this->dol_object->errors)) {
-                    global $langs;
-                    $langs->load("errors");
-                    foreach ($this->dol_object->errors as $error) {
-                        $errors[] = 'Erreur: ' . $langs->trans($error);
-                    }
-                }
-                return 0;
-            }
-            return 1;
-        }
-
-        return 0;
-    }
-
-    protected function fetchDolObject($id, &$errors = array())
-    {
-        if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
-            unset($this->dol_object);
-            $this->dol_object = $this->config->getObject('dol_object');
-        }
-
-        if (is_null($this->dol_object)) {
-            $errors[] = 'Objet Dolibarr invalide';
-            return false;
-        }
-
-        if (method_exists($this, 'getDolObjectFetchParams')) {
-            $params = $this->getDolObjectFetchParams($id);
-        } else {
-            $params = array($id);
-        }
-
-        $result = call_user_func_array(array($this->dol_object, 'fetch'), $params);
-
-        if ($result <= 0) {
-            if (isset($this->dol_object->error) && $this->dol_object->error) {
-                $errors[] = $this->dol_object->error;
-            }
-
-            return false;
-        }
-
-        $errors = $this->hydrateFromDolObject();
-
-        $this->initData = $this->data;
-
-        if (!count($errors)) {
-            return true;
-        }
-        return false;
-    }
-
-    protected function deleteDolObject(&$errors)
-    {
-        if (is_null($this->dol_object) || !isset($this->dol_object->id) || !$this->dol_object->id) {
-            $errors[] = 'Objet Dolibarr invalide';
-            return 0;
-        }
-
-        if (method_exists($this, 'getDolObjectDeleteParams')) {
-            $params = $this->getDolObjectDeleteParams();
-        } else {
-            $params = array($this->id);
-        }
-
-        $result = call_user_func_array(array($this->dol_object, 'delete'), $params);
-
-        if ($result <= 0) {
-            if (isset($this->dol_object->error) && $this->dol_object->error) {
-                $errors[] = $this->dol_object->error;
-            }
-
-            return 0;
-        }
-
-        return 1;
-    }
-
     public function checkSubObjectsPost()
     {
         $errors = array();
@@ -3237,6 +3110,342 @@ class BimpObject extends BimpCache
             'errors'           => $errors,
             'success_callback' => $success_callback
         );
+    }
+
+    // Gestion DolObjects: 
+
+    public function hydrateDolObject(&$bimpObjectFields = array())
+    {
+        $errors = array();
+
+        foreach ($this->data as $field => $value) {
+            if ($this->field_exists($field)) {
+                if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+                    if (preg_match('/^ef_(.*)$/', $field, $matches)) {
+                        $extrafield = $matches[1];
+                    } else {
+                        $extrafield = $field;
+                    }
+                    $this->dol_object->array_options['options_' . $extrafield] = $this->getDolValue($field, $value);
+                } else {
+                    $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+                    if (is_null($prop)) {
+                        $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
+                    } if (property_exists($this->dol_object, $prop)) {
+                        $this->dol_object->{$prop} = $this->getDolValue($field, $value);
+                    } else {
+                        $bimpObjectFields[$field] = $value;
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function hydrateFromDolObject(&$bimpObjectFields = array())
+    {
+        if (!self::objectLoaded($this->dol_object)) {
+            return array('Echec de la récupération des données depuis l\'objet Dolibarr - objet non chargé');
+        }
+
+        $errors = array();
+        
+        if(!isset($this->dol_object->id) && isset($this->dol_object->rowid))
+            $this->dol_object->id = $this->dol_object->rowid;
+
+        $this->id = $this->dol_object->id;
+
+        foreach ($this->params['fields'] as $field) {
+            $value = null;
+            if ((int) $this->getConf('fields/' . $field . '/dol_extra_field', 0, false, 'bool')) {
+                if (preg_match('/^ef_(.*)$/', $field, $matches)) {
+                    $extrafield = $matches[1];
+                } else {
+                    $extrafield = $field;
+                }
+                if (isset($this->dol_object->array_options['options_' . $extrafield])) {
+                    $value = $this->dol_object->array_options['options_' . $extrafield];
+                }
+            } else {
+                $prop = $this->getConf('fields/' . $field . '/dol_prop', $field);
+                if (is_null($prop)) {
+                    $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
+                } elseif (property_exists($this->dol_object, $prop)) {
+                    $value = $this->dol_object->{$prop};
+                } else {
+                    $bimpObjectFields[] = $field;
+                }
+            }
+            if (!is_null($value)) {
+                $this->checkFieldValueType($field, $value);
+                $this->data[$field] = $value;
+            }
+        }
+
+        return $errors;
+    }
+
+    protected function createDolObject(&$errors)
+    {
+        if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
+            unset($this->dol_object);
+            $this->dol_object = $this->config->getObject('dol_object');
+        }
+
+        if (is_null($this->dol_object)) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return 0;
+        }
+
+        $errors = $this->hydrateDolObject();
+
+        if (!count($errors)) {
+            if (method_exists($this, 'beforeCreateDolObject')) {
+                $this->beforeCreateDolObject();
+            }
+
+            if (method_exists($this, 'getDolObjectCreateParams')) {
+                $params = $this->getDolObjectCreateParams();
+            } else {
+                global $user;
+                $params = array($user);
+            }
+
+            $result = call_user_func_array(array($this->dol_object, 'create'), $params);
+            if ($result < 0) {
+                if (isset($this->dol_object->error) && $this->dol_object->error) {
+                    $errors[] = $this->dol_object->error;
+                } elseif (count($this->dol_object->errors)) {
+                    global $langs;
+                    $langs->load("errors");
+                    foreach ($this->dol_object->errors as $error) {
+                        $errors[] = 'Erreur: ' . $langs->trans($error);
+                    }
+                }
+            }
+
+            return $result;
+        }
+
+        return 0;
+    }
+
+    protected function updateDolObject(&$errors)
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+        if (is_null($this->dol_object)) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return 0;
+        }
+
+        if (!isset($this->dol_object->id) || !$this->dol_object->id) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return 0;
+        }
+
+        $bimpObjectFields = array();
+        $errors = $this->hydrateDolObject($bimpObjectFields);
+
+        if (!count($errors)) {
+            if (method_exists($this, 'beforeUpdateDolObject')) {
+                $this->beforeUpdateDolObject();
+            }
+
+            if (method_exists($this, 'getDolObjectUpdateParams')) {
+                $params = $this->getDolObjectUpdateParams();
+            } else {
+                global $user;
+                $params = array($user);
+            }
+
+            $result = call_user_func_array(array($this->dol_object, 'update'), $params);
+
+            if ((int) $this->params['force_extrafields_update']) {
+                foreach ($this->dol_object->array_options as $key => $value) {
+                    if ($this->dol_object->updateExtraField(str_replace('options_', '', $key)) <= 0) {
+                        $errors[] = 'Echec de l\'enregistrement de l\'attribut supplémentaire "' . str_replace('options_', '', $key) . '"';
+                    }
+                }
+            }
+
+            if ($result < 0) {
+                if (isset($this->dol_object->error) && $this->dol_object->error) {
+                    $errors[] = $this->dol_object->error;
+                } elseif (count($this->dol_object->errors)) {
+                    global $langs;
+                    $langs->load("errors");
+                    foreach ($this->dol_object->errors as $error) {
+                        $errors[] = 'Erreur: ' . $langs->trans($error);
+                    }
+                }
+                return 0;
+            }
+            return 1;
+        }
+
+        return 0;
+    }
+
+    protected function fetchDolObject($id, &$errors = array())
+    {
+        if (!is_null($this->dol_object) && isset($this->dol_object->id) && $this->dol_object->id) {
+            unset($this->dol_object);
+            $this->dol_object = $this->config->getObject('dol_object');
+        }
+
+        if (is_null($this->dol_object)) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return false;
+        }
+
+        if (method_exists($this, 'getDolObjectFetchParams')) {
+            $params = $this->getDolObjectFetchParams($id);
+        } else {
+            $params = array($id);
+        }
+
+        $result = call_user_func_array(array($this->dol_object, 'fetch'), $params);
+
+        
+        if ($result <= 0) {
+            if (isset($this->dol_object->error) && $this->dol_object->error) {
+                $errors[] = $this->dol_object->error;
+            }
+
+            return false;
+        }
+
+        $errors = $this->hydrateFromDolObject();        
+        
+        $extra_fields = $this->fetchExtraFields();
+
+        foreach ($extra_fields as $field_name => $value) {
+            $this->checkFieldValueType($field_name, $value);
+            $this->data[$field_name] = $value;
+        }
+
+        $this->initData = $this->data;
+
+        if (!count($errors)) {
+            return true;
+        }
+        return false;
+    }
+
+    protected function deleteDolObject(&$errors)
+    {
+        if (is_null($this->dol_object) || !isset($this->dol_object->id) || !$this->dol_object->id) {
+            $errors[] = 'Objet Dolibarr invalide';
+            return 0;
+        }
+
+        if (method_exists($this, 'getDolObjectDeleteParams')) {
+            $params = $this->getDolObjectDeleteParams();
+        } else {
+            $params = array($this->id);
+        }
+
+        $result = call_user_func_array(array($this->dol_object, 'delete'), $params);
+
+        if ($result <= 0) {
+            if (isset($this->dol_object->error) && $this->dol_object->error) {
+                $errors[] = $this->dol_object->error;
+            }
+
+            return 0;
+        }
+
+        return 1;
+    }
+
+    // Gestion Fields Extra: 
+
+    public function insertExtraFields()
+    {
+        // Enregistrer tous les extrafields (create) 
+        // A ce stade l'ID est déjà assigné à l'objet
+        // retourner un tableau d'erreurs. 
+
+        if (count($this->getExtraFields())) {
+            return array('Fonction d\'enregistrement des champs supplémentaires non implémentée');
+        }
+
+        return array();
+    }
+
+    public function updateExtraFields()
+    {
+        // Mettre à jour tous les extrafields
+        // retourner un tableau d'erreurs. 
+
+        if (count($this->getExtraFields())) {
+            return array('Fonction d\'enregistrement des champs supplémentaires non implémentée');
+        }
+
+        return array();
+    }
+
+    public function updateExtraField($field_name, $value, $id_object)
+    {
+        // enregistrer la valeur $value pour le champ extra: $field_name et l'ID $id_object (Ne pas tenir compte de $this->id). 
+        // Retourner un tableau d'erreurs.
+
+        if ($this->isExtraField($field_name)) {
+            return array('Fonction d\'enregistrement des champs supplémentaires non implémentée');
+        }
+
+        return array();
+    }
+
+    public function fetchExtraFields()
+    {
+        // Fetcher tous les extrafields
+        // retourner les valeurs dans un tableau ($field_name => $value) 
+        // Ne pas assigner les valeurs directement dans $this->data. D'autres vérifs sont faites ultérieurement de manière générique.
+
+        return array();
+    }
+
+    public function deleteExtraFields()
+    {
+        // Supprimer les extrafields
+        // Retourner un tableau d'erreurs
+
+        if (count($this->getExtraFields())) {
+            return array('Fonction de suppression des champs supplémentaires non implémentée');
+        }
+
+        return array();
+    }
+
+    public function getExtraFieldSavedValue($field, $id_object)
+    {
+        // retourner la valeur actuelle en base pour le champ $field et l'ID objet $id_object (Ici, ne pas tenir compte de $this->id). 
+        // Retourner null si pas d'entrée en base. 
+
+        return null;
+    }
+
+    public function getExtraFieldFilterKey($field, &$joins, $main_alias = '')
+    {
+        // Retourner la clé de filtre SQl sous la forme alias_table.nom_champ_db 
+        // Implémenter la jointure dans $joins en utilisant l'alias comme clé du tableau (pour éviter que la même jointure soit ajouté plusieurs fois à $joins). 
+        // Si $main_alias est défini, l'utiliser comme préfixe de alias_table. Ex: $main_alias .'_'.$alias_table (Bien utiliser l'underscore).  
+        // ET: utiliser $main_alias à la place de "a" dans la clause ON. 
+//        Ex: 
+//        $join_alias = ($main_alias ? $main_alias . '_' : '') . 'xxx';
+//        $joins[$join_alias] = array(
+//            'alias' => $join_alias,
+//            'table' => 'nom_table',
+//            'on'    => $join_alias . '.xxx = ' . ($main_alias ? $main_alias : 'a') . '.xxx'
+//        );
+//        
+//        return $join_alias.'.nom_champ_db';
+
+        return '';
     }
 
     // Gestion des autorisations: 

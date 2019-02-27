@@ -24,7 +24,7 @@ sections:
                     field_value: 
                         field_name: fk_statut
                         object: commande
-                module: bimpreservation
+                module: bimplogistique
                 controller: commande
                 url_params: 
                     id: 

@@ -24,53 +24,55 @@ include_once DOL_DOCUMENT_ROOT . '/bimpvalidateorder/class/bimpvalidateorder.cla
 /**
  *  Class of triggers for validateorder module
  */
-class Interfacevalidateorder extends DolibarrTriggers {
+class Interfacevalidateorder extends DolibarrTriggers
+{
+
     private $defaultCommEgalUser = true;
     public $errors = array();
 
-    public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf) {
+    public function runTrigger($action, $object, User $user, Translate $langs, Conf $conf)
+    {
         global $conf, $user;
-        
-        if($action == "ORDER_CREATE"){
+
+        if ($action == "ORDER_CREATE") {
             $object->fetchObjectLinked();
             if (isset($object->linkedObjects['propal'])) {
                 foreach ($object->linkedObjects['propal'] as $prop)
-                    $object->addLine("Selon notre devis ".$prop->ref,0,0,0);
+                    $object->addLine("Selon notre devis " . $prop->ref, 0, 0, 0);
             }
         }
-        if($action == "BILL_CREATE" && $object->type == TYPE_STANDARD){
+        if ($action == "BILL_CREATE" && $object->type == TYPE_STANDARD) {
             $object->fetchObjectLinked();
             if (isset($object->linkedObjects['commande']) && count($object->linkedObjects['commande'])) {
                 foreach ($object->linkedObjects['commande'] as $comm) {
-                    $object->addLine("Selon notre commande ".$comm->ref,0,0,0);
+                    $object->addLine("Selon notre commande " . $comm->ref, 0, 0, 0);
                 }
-            }
-            else{
+            } else {
                 $ok = false;
                 if (isset($object->linkedObjects['propal']) && count($object->linkedObjects['propal'])) {
                     $ok = true;
                     foreach ($object->linkedObjects['propal'] as $prop) {
-                        $object->addLine("Selon notre devis ".$prop->ref,0,0,0);
-                        if($prop->array_options['options_type'] != "S"){
-                            foreach($prop->lines as $ln){
-                                if($ln->fk_product > 0){
+                        $object->addLine("Selon notre devis " . $prop->ref, 0, 0, 0);
+                        if ($prop->array_options['options_type'] != "S") {
+                            foreach ($prop->lines as $ln) {
+                                if ($ln->fk_product > 0) {
                                     $prodTmp = new Product($this->db);
                                     $prodTmp->fetch($ln->fk_product);
-                                    if(isset($prodTmp->array_options['options_serialisable']) && $prodTmp->array_options['options_serialisable'])
+                                    if (isset($prodTmp->array_options['options_serialisable']) && $prodTmp->array_options['options_serialisable'])
                                         $ok = false;
                                 }
                             }
                         }
                     }
                 }
-                if(!$ok){
+                if (!$ok) {
 //                    setEventMessages("Impossible de facturé sans commande, cette piéce contient des produit(s) sérialisable(s)", null, 'errors');
 //                    return -1;
                 }
             }
         }
-        
-        if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE')  && !BimpDebug::isActive('bimpcommercial/no_validate')) {
+
+        if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') && !BimpDebug::isActive('bimpcommercial/no_validate')) {
             $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
             if (count($tabConatact) < 1) {
                 if (!is_object($object->thirdparty)) {
@@ -80,44 +82,47 @@ class Interfacevalidateorder extends DolibarrTriggers {
                 $tabComm = $object->thirdparty->getSalesRepresentatives($user);
                 if (count($tabComm) > 0) {
                     $object->add_contact($tabComm[0]['id'], 'SALESREPFOLL', 'internal');
-                }
-                elseif($this->defaultCommEgalUser)
+                } elseif ($this->defaultCommEgalUser)
                     $object->add_contact($user->id, 'SALESREPFOLL', 'internal');
                 else {
                     setEventMessages("Impossible de valider, pas de Commercial Suivi", null, 'errors');
                     return -2;
                 }
             }
-            
-            
-            $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN');//signataire
+
+
+            $tabConatact = $object->getIdContact('internal', 'SALESREPSIGN'); //signataire
             if (count($tabConatact) < 1) {
                 $object->add_contact($user->id, 'SALESREPSIGN', 'internal');
             }
-            
+
 
             if ($object->cond_reglement_code == "VIDE") {
                 setEventMessages("Merci de séléctionner les Conditions de règlement", null, 'errors');
                 return -2;
             }
-             
+
             $idEn = $object->array_options['options_entrepot'];
             if ($idEn < 1) {
                 setEventMessages("Pas d'entrepôt associé", null, 'errors');
                 return -2;
             }
-            
-
         }
 
         if (!defined("NOT_VERIF") && $action == 'ORDER_VALIDATE') {
             $bvo = new BimpValidateOrder($user->db);
-            if($bvo->checkValidateRights($user, $object) < 1)    
+            if ($bvo->checkValidateRights($user, $object) < 1)
                 return -2;
-            
+
             $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
             $this->errors = array_merge($this->errors, $reservation->createReservationsFromCommandeClient($idEn, $object->id));
-            if(count($this->errors) > 0)
+
+//            $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande', $object->id);
+//            $res_errors = $commande->createReservations();
+//            if (count($res_errors)) {
+//                $this->errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la création des réservations');
+//            }
+            if (count($this->errors) > 0)
                 return -2;
         }
         if ($action == 'ORDER_UNVALIDATE' || ($action == 'ORDER_DELETE' && $object->statut == 1)) {
@@ -149,14 +154,14 @@ class Interfacevalidateorder extends DolibarrTriggers {
                         $comm->classifybilled($user);
                     }
                     if (isset($comm->linkedObjects['propal']) && $facturee) {
-                        foreach ($comm->linkedObjects['propal'] as $prop){
+                        foreach ($comm->linkedObjects['propal'] as $prop) {
                             $prop->classifybilled($user);
                         }
                     }
                 }
             }
             if (isset($object->linkedObjects['propal']) && $facturee) {
-                foreach ($object->linkedObjects['propal'] as $prop){
+                foreach ($object->linkedObjects['propal'] as $prop) {
                     $prop->classifybilled($user);
                 }
             }
@@ -164,5 +169,4 @@ class Interfacevalidateorder extends DolibarrTriggers {
 
         return 0;
     }
-
 }

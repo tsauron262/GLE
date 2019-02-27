@@ -10,9 +10,9 @@ function bimp_msg(msg, className, $container) {
     if (typeof (className) === 'undefined') {
         className = 'info';
     }
-    var html = '<p class="alert alert-' + className + '">';
+    var html = '<div class="bimp_msg alert alert-' + className + '">';
     html += msg;
-    html += '</p>';
+    html += '</div>';
 
     if ($container && (typeof ($container) === 'object') && $container.length) {
         $container.html(html).stop().slideDown(250, function () {
@@ -27,16 +27,16 @@ function bimp_msg(msg, className, $container) {
 
         $container.append(html).show().css('height', 'auto');
 
-        var $p = $container.find('p:last-child').css('margin-left', '370px').animate({
+        var $div = $container.find('div.bimp_msg:last-child').css('margin-left', '370px').animate({
             'margin-left': 0
         }, {
             'duration': 250,
             complete: function () {
                 setTimeout(function () {
-                    if (!$p.data('hold')) {
-                        $p.fadeOut(500, function () {
-                            $p.remove();
-                            if (!$container.find('p').length) {
+                    if (!$div.data('hold')) {
+                        $div.fadeOut(500, function () {
+                            $div.remove();
+                            if (!$container.find('div.bimp_msg').length) {
                                 $container.hide();
                             }
                         });
@@ -440,8 +440,9 @@ function inputQtyUp($qtyInputContainer) {
             if (decimals > 0) {
                 val = Math.round10(val, -decimals);
             }
-            $input.val(val).change();
+            $input.val(val);
             checkInputQty($qtyInputContainer);
+            $input.change();
         }
     }
 }
@@ -471,8 +472,9 @@ function inputQtyDown($qtyInputContainer) {
             if (decimals > 0) {
                 val = Math.round10(val, -decimals);
             }
-            $input.val(val).change();
+            $input.val(val);
             checkInputQty($qtyInputContainer);
+            $input.change();
         }
     }
 }
@@ -489,6 +491,28 @@ function checkInputQty($qtyInputContainer) {
     var $input = $qtyInputContainer.find('input.qtyInput');
     if ($input.length) {
         checkTextualInput($input);
+    }
+}
+
+function checkAll($container, filter) {
+    if (typeof (filter) === 'undefined') {
+        filter = '';
+    }
+    if ($.isOk($container)) {
+        $container.find('input[type="checkbox"]' + filter).each(function () {
+            $(this).prop('checked', true);
+        });
+    }
+}
+
+function uncheckAll($container, filter) {
+    if (typeof (filter) === 'undefined') {
+        filter = '';
+    }
+    if ($.isOk($container)) {
+        $container.find('input[type="checkbox"]' + filter).each(function () {
+            $(this).prop('checked', false);
+        });
     }
 }
 
@@ -796,7 +820,7 @@ $(document).ready(function () {
         }, {
             'duration': 250,
             complete: function () {
-                $notifications.find('p').each(function () {
+                $notifications.find('div.bimp_msg').each(function () {
                     $(this).data('hold', 1);
                     $(this).stop(false, true);
                 });
@@ -807,14 +831,14 @@ $(document).ready(function () {
                     }, {
                         'duration': 250,
                         'complete': function () {
-                            $notifications.find('p').each(function () {
-                                var $p = $(this);
-                                $p.data('hold', 0);
+                            $notifications.find('div.bimp_msg').each(function () {
+                                var $div = $(this);
+                                $div.data('hold', 0);
                                 setTimeout(function () {
-                                    if (!$p.data('hold')) {
-                                        $p.fadeOut(500, function () {
-                                            $p.remove();
-                                            if (!$notifications.find('p').length) {
+                                    if (!$div.data('hold')) {
+                                        $div.fadeOut(500, function () {
+                                            $div.remove();
+                                            if (!$notifications.find('div.bimp_msg').length) {
                                                 $notifications.hide();
                                             }
                                         });

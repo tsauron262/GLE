@@ -57,14 +57,13 @@ class BimpRemoveDuplicateCustomerV2 {
     }
 
     public function getAllDuplicate($limit = 100, $detail = true) {
-        ini_set('memory_limit', '2048M'); // or you could use 1G
+        ini_set('memory_limit', '2048M');
         set_time_limit(7200);
         $customers = array();
 
         $sql = 'SELECT rowid, nom, email, address, zip, town, phone, datec';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe';
         $sql .= ' WHERE duplicate=0';
-//        $sql .= ' ORDER BY nom';
 
         $result = $this->db->query($sql);
         $this->nb_row = $result->num_rows;
@@ -165,9 +164,16 @@ class BimpRemoveDuplicateCustomerV2 {
             $ids_processed[] = $a->rowid;
             foreach ($customers as $j => $b) {
                 if ($a->rowid != $b->rowid and $i != $j and $this->compare($a, $b) == 1) {
-                    $customers[$i]->grp = $cnt_group;
-                    $customers[$j]->grp = $cnt_group;
-                    $cnt_group++;
+
+                    if (isset($customers[$i]->grp)) {
+                        $customers[$j]->grp = $customers[$i]->grp;
+                    } elseif (isset($customers[$j]->grp)) {
+                        $customers[$i]->grp = $customers[$j]->grp;
+                    } else {
+                        $customers[$i]->grp = $cnt_group;
+                        $customers[$j]->grp = $cnt_group;
+                        $cnt_group++;
+                    }
                 }
             }
             if ($limit <= $i)
@@ -229,21 +235,6 @@ class BimpRemoveDuplicateCustomerV2 {
      */
     private function compare($a, $b) {
         $score = 0;
-
-//        $tolerence_nom = strlen($b->nom) / 5;
-//        $tolerence_email = strlen($b->email) / 5;
-//        $tolerence_address = strlen($b->address) / 5;
-//        $tolerence_zipcode = 1;
-//        $tolerence_town = strlen($b->town) / 5;
-//        $tolerence_phone = 1;
-//
-//        $score += self::SCORE_NOM * (levenshtein($a->nom, $b->nom) <= $tolerence_nom);
-//        $score += self::SCORE_EMAIL * (levenshtein($a->email, $b->email) <= $tolerence_email);
-//        $score += self::SCORE_ADDRESS * (levenshtein($a->address, $b->address) <= $tolerence_address);
-//        $score += self::SCORE_ZIPCODE * (levenshtein($a->zip, $b->zip) <= $tolerence_zipcode);
-//        $score += self::SCORE_TOWN * (levenshtein($a->town, $b->town) <= $tolerence_town);
-//        $score += self::SCORE_PHONE * (levenshtein($a->phone, $b->phone) <= $tolerence_phone);
-
         $score += $this->s_name * $this->compareUnit($a->nom, $b->nom);
         $score += $this->s_email * $this->compareUnit($a->email, $b->email);
         $score += $this->s_address * $this->compareUnit($a->address, $b->address);

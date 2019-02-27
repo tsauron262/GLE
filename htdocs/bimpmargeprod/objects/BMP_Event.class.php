@@ -1030,10 +1030,11 @@ class BMP_Event extends BimpObject
     public static function getTotalComptable($events, $id_coprod = 0, $cp_label = 'Le Fil')
     {
         $amounts = array(
-            'categories'     => array(),
-            'total_frais'    => 0,
-            'total_recettes' => 0,
-            'solde'          => 0
+            'categories'       => array(),
+            'total_frais'      => 0,
+            'total_recettes'   => 0,
+            'solde'            => 0,
+            'solde_without_dl' => 0
         );
 
         $total_coprods = array();
@@ -1083,9 +1084,11 @@ class BMP_Event extends BimpObject
                     $category = BimpCache::getBimpObjectInstance($event->module, 'BMP_CategorieMontant', $id_category);
 
                     $amounts['categories'][$id_category] = array(
-                        'name'  => $category->getData('name'),
-                        'color' => $category->getData('color'),
-                        'rows'  => array()
+                        'name'           => $category->getData('name'),
+                        'color'          => $category->getData('color'),
+                        'total_frais'    => 0,
+                        'total_recettes' => 0,
+                        'rows'           => array()
                     );
                 }
 
@@ -1101,12 +1104,14 @@ class BMP_Event extends BimpObject
 
                 switch ((int) $tm->getData('type')) {
                     case BMP_TypeMontant::BMP_TYPE_FRAIS:
+                        $amounts['categories'][$id_category]['total_frais'] += $amount_ht;
                         $row['frais'] += $amount_ht;
                         $amounts['total_frais'] += $amount_ht;
                         $amounts['solde'] -= $amount_ht;
                         break;
 
                     case BMP_TypeMontant::BMP_TYPE_RECETTE:
+                        $amounts['categories'][$id_category]['total_recettes'] += $amount_ht;
                         $row['recette'] += $amount_ht;
                         $amounts['total_recettes'] += $amount_ht;
                         $amounts['solde'] += $amount_ht;
@@ -1186,9 +1191,11 @@ class BMP_Event extends BimpObject
             if (!isset($amounts['categories'][self::$id_billets_category])) {
                 $category = BimpCache::getBimpObjectInstance($event->module, 'BMP_CategorieMontant', self::$id_billets_category);
                 $amounts['categories'][self::$id_billets_category] = array(
-                    'name'  => $category->getData('name'),
-                    'color' => $category->getData('color'),
-                    'rows'  => array()
+                    'name'           => $category->getData('name'),
+                    'color'          => $category->getData('color'),
+                    'total_frais'    => 0,
+                    'total_recettes' => 0,
+                    'rows'           => array()
                 );
             }
             $amounts['categories'][self::$id_billets_category]['rows'][] = array(
@@ -1200,6 +1207,7 @@ class BMP_Event extends BimpObject
                 'recette'      => BimpTools::displayMoneyValue($total_dl_dist, 'EUR')
             );
 
+            $amounts['categories'][self::$id_billets_category]['total_recettes'] += $total_dl_dist;
             $amounts['solde'] += $total_dl_dist;
             $amounts['total_recettes'] += $total_dl_dist;
         }
@@ -1209,9 +1217,11 @@ class BMP_Event extends BimpObject
             if (!isset($amounts['categories'][self::$id_coprods_category])) {
                 $category = BimpCache::getBimpObjectInstance($event->module, 'BMP_CategorieMontant', self::$id_coprods_category);
                 $amounts['categories'][self::$id_coprods_category] = array(
-                    'name'  => $category->getData('name'),
-                    'color' => $category->getData('color'),
-                    'rows'  => array()
+                    'name'           => $category->getData('name'),
+                    'color'          => $category->getData('color'),
+                    'total_frais'    => 0,
+                    'total_recettes' => 0,
+                    'rows'           => array()
                 );
             }
 
@@ -1244,11 +1254,13 @@ class BMP_Event extends BimpObject
                 );
 
                 if ($solde > 0) {
+                    $amounts['categories'][self::$id_coprods_category]['total_recettes'] += $solde;
                     $row['recette'] = BimpTools::displayMoneyValue($solde, 'EUR');
                     $amounts['total_recettes'] += $solde;
                     $amounts['solde'] += $solde;
                 } else {
                     $solde *= -1;
+                    $amounts['categories'][self::$id_coprods_category]['total_frais'] += $solde;
                     $row['frais'] = BimpTools::displayMoneyValue($solde, 'EUR');
                     $amounts['total_frais'] += $solde;
                     $amounts['solde'] -= $solde;
@@ -1257,6 +1269,8 @@ class BMP_Event extends BimpObject
                 $amounts['categories'][self::$id_coprods_category]['rows'][] = $row;
             }
         }
+
+        $amounts['solde_without_dl'] = $amounts['solde'] - $total_dl_dist;
 
         return $amounts;
     }
@@ -2683,6 +2697,16 @@ class BMP_Event extends BimpObject
                 $html .= '<td style="' . $style . '">' . $r['recette'] . '</td>';
                 $html .= '</tr>';
             }
+
+            $td_bk_col = BimpTools::setColorSL('#' . $cat['color'], null, 0.9);
+
+            $html .= '<tr>';
+            $html .= '<td colspan="' . ($with_status ? '4' : '3') . '" ';
+            $html .= 'style="font-weight: bold;background-color: ' . $td_bk_col . '!important; color: #' . $cat['color'] . ';text-align: right;padding-right: 20px;">';
+            $html .= 'Total : </td>';
+            $html .= '<td style="background-color: ' . $td_bk_col . '!important; color:  #' . $cat['color'] . ';font-weight: bold;">' . BimpTools::displayMoneyValue($cat['total_frais'], 'EUR') . '</td>';
+            $html .= '<td style="background-color: ' . $td_bk_col . '!important; color:  #' . $cat['color'] . ';font-weight: bold;">' . BimpTools::displayMoneyValue($cat['total_recettes'], 'EUR') . '</td>';
+            $html .= '</tr>';
         }
 
         $html .= '<tr>';
@@ -2696,8 +2720,15 @@ class BMP_Event extends BimpObject
         $html .= '<td>' . BimpTools::displayMoneyValue($amounts['total_frais'], 'EUR') . '</td>';
         $html .= '<td>' . BimpTools::displayMoneyValue($amounts['total_recettes'], 'EUR') . '</td>';
         $html .= '</tr>';
+
+        if ($amounts['solde'] !== $amounts['solde_without_dl']) {
+            $html .= '<tr style="border: 2px solid #505050;border-top-width: 1px;border-bottom-width: 1px;font-weight: bold; font-size: 14px">';
+            $html .= '<td colspan="' . ($with_status ? '4' : '3') . '" style="text-align: right;padding-right: 20px;">Solde (hors DL): </td>';
+            $html .= '<td colspan="2">' . BimpTools::displayMoneyValue($amounts['solde_without_dl'], 'EUR') . '</td>';
+            $html .= '</tr>';
+        }
         $html .= '<tr style="border: 2px solid #505050;border-top-width: 1px;font-weight: bold; font-size: 14px">';
-        $html .= '<td colspan="' . ($with_status ? '4' : '3') . '" style="text-align: right;padding-right: 20px;">Solde : </td>';
+        $html .= '<td colspan="' . ($with_status ? '4' : '3') . '" style="text-align: right;padding-right: 20px;">Solde final: </td>';
         $html .= '<td colspan="2">' . BimpTools::displayMoneyValue($amounts['solde'], 'EUR') . '</td>';
         $html .= '</tr>';
         $html .= '</tfoot>';

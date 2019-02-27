@@ -81,16 +81,16 @@ class BimpCache
         if (is_a($instance, 'BimpObject')) {
             $id_object = null;
 
-            $joins = null;
+            $joins = array();
             $table = $instance->getTable();
             $primary = $instance->getPrimary();
 
             if ($instance->isDolObject()) {
                 $has_extrafields = false;
-                $filters = $instance->checkSqlFilters($filters, $has_extrafields);
+                $filters = $instance->checkSqlFilters($filters, $has_extrafields, $joins);
 
-                if ($has_extrafields) {
-                    $joins = array(
+                if ($has_extrafields && !isset($joins['ef'])) {
+                    $joins['ef'] = array(
                         'alias' => 'ef',
                         'table' => $table . '_extrafields',
                         'on'    => 'ef.fk_object = a.' . $primary

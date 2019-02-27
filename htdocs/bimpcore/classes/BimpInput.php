@@ -133,6 +133,9 @@ class BimpInput
                     $html .= '<span class="qtyUp">';
                     $html .= '<i class="fa fa-plus"></i>';
                     $html .= '</span>';
+                    if (isset($options['max_label']) && $options['max_label']) {
+                        $html .= '<span class="inputHelp max_label">Max: ' . (isset($options['data']['max']) ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                    }
                     $html .= '</div>';
 
                     if (isset($options['addon_right']) && $options['addon_right']) {
@@ -161,6 +164,9 @@ class BimpInput
                     $html .= '<span class="qtyUp">';
                     $html .= '<i class="fa fa-plus"></i>';
                     $html .= '</span>';
+                    if (isset($options['max_label']) && $options['max_label']) {
+                        $html .= '<span class="inputHelp max_label">' . (isset($options['data']['max']) ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                    }
                     $html .= '</div>';
                 }
                 break;

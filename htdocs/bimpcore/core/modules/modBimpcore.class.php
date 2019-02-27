@@ -117,7 +117,7 @@ class modBimpcore extends DolibarrModules
 		// );
 		$this->const = array();
        
-                $this->tabs = array('user:+formSimple:Essentielles:bimpcore@bimpcore:1:/bimpcore/tabs/user.php?id=__ID__');
+                $this->tabs = array('user:+formSimple:Mes infos:bimpcore@bimpcore:1:/bimpcore/tabs/user.php?id=__ID__');
                 
 		// Array to add new pages in new tabs
 		// Example: $this->tabs = array('objecttype:+tabname1:Title1:mylangfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__',  					// To add a new tab identified by code tabname1

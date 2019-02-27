@@ -3309,6 +3309,7 @@ class BimpObject extends BimpCache
 
         $result = call_user_func_array(array($this->dol_object, 'fetch'), $params);
 
+        
         if ($result <= 0) {
             if (isset($this->dol_object->error) && $this->dol_object->error) {
                 $errors[] = $this->dol_object->error;
@@ -3317,8 +3318,7 @@ class BimpObject extends BimpCache
             return false;
         }
 
-        $errors = $this->hydrateFromDolObject();
-        
+        $errors = $this->hydrateFromDolObject();        
         
         $extra_fields = $this->fetchExtraFields();
 

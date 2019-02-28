@@ -5,48 +5,48 @@
  *      \ingroup    bimpcontratauto
  *      \brief      Make interface between the class and the client
  */
+if ($_POST['action'] == 'get_progress')
+    die(file_get_contents('/var/www/html/bimp-8/bimp-erp/documents/progress.txt'));
+
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpremovev2duplicate/class/BimpRemoveDuplicateV2.class.php';
-$staticRD = new BimpRemoveDuplicateCustomerV2($db);
+$rd = new BimpRemoveDuplicateCustomerV2($db);
+session_start();
 
 $action = GETPOST('action');
 switch ($action) {
 
-    case 'set_message': {
-            $_SESSION['dol_events'][GETPOST('code')][] = GETPOST('message');
-            break;
-        }
-
     case 'get_all_duplicate': {
             $start = microtime(true);
-            $staticRD->s_min = GETPOST('s_min');
-            $staticRD->s_name = GETPOST('s_name');
-            $staticRD->s_email = GETPOST('s_email');
-            $staticRD->s_address = GETPOST('s_address');
-            $staticRD->s_zip = GETPOST('s_zip');
-            $staticRD->s_town = GETPOST('s_town');
-            $staticRD->s_phone = GETPOST('s_phone');
+            $rd->s_min = GETPOST('s_min');
+            $rd->s_name = GETPOST('s_name');
+            $rd->s_email = GETPOST('s_email');
+            $rd->s_address = GETPOST('s_address');
+            $rd->s_zip = GETPOST('s_zip');
+            $rd->s_town = GETPOST('s_town');
+            $rd->s_phone = GETPOST('s_phone');
+            $rd->s_siret = GETPOST('s_siret');
             echo json_encode(array(
-                'duplicates' => $staticRD->getAllDuplicate(GETPOST('limit'), GETPOST('details')),
-                'nb_row' => $staticRD->nb_row,
+                'duplicates' => $rd->getAllDuplicate(GETPOST('limit'), GETPOST('commercial'), GETPOST('details')),
+                'nb_row' => $rd->nb_row,
                 'time_exec' => microtime(true) - $start,
-                'errors' => $staticRD->errors
+                'errors' => $rd->errors
             ));
             break;
         }
 
     case 'merge_duplicates': {
             echo json_encode(array(
-                'success' => $staticRD->mergeDuplicate(GETPOST('src_to_dest')),
-                'errors' => $staticRD->errors
+                'success' => $rd->mergeDuplicate(GETPOST('src_to_dest')),
+                'errors' => $rd->errors
             ));
             break;
         }
 
     case 'init_duplicate': {
             echo json_encode(array(
-                'code' => $staticRD->setAsUnprocessed(),
-                'errors' => $staticRD->errors
+                'code' => $rd->setAsUnprocessed(),
+                'errors' => $rd->errors
             ));
             break;
         }

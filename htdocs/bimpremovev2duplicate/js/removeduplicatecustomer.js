@@ -14,29 +14,15 @@ function displayMessage(message, code = 'mesgs') {
     if (message == '')
         alert("Message d'erreur vide");
 
-    $.ajax({
-        type: "POST",
-        url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
-        data: {
-            message: message,
-            code: code,
-            action: 'set_message'
-        },
-        error: function () {
-            console.log("Erreur PHP 1861");
-        },
-        success: function () {
-            location.reload();
-        }
-    });
+    alert(message);
 }
 
 
-function getAllFactures(limit, s_min, s_name, s_email, s_address, s_zip, s_town, s_phone, details) {
+function getAllDuplicate(limit, s_min, s_name, s_email, s_address, s_zip, s_town, s_phone, s_siret, commercial, details) {
 
     if (limit <= 0) {
         displayMessage("Le nombre de doublon doit être supérieur à zéro.", 'errors');
-        return -2
+        return -2;
     }
 
     $.ajax({
@@ -51,21 +37,26 @@ function getAllFactures(limit, s_min, s_name, s_email, s_address, s_zip, s_town,
             s_zip: s_zip,
             s_town: s_town,
             s_phone: s_phone,
+            s_siret: s_siret,
+            commercial: commercial,
             details: details,
             action: 'get_all_duplicate'
         },
         beforeSend: function () {
             $('i#spinner').css('display', 'block');
             $('input#display_duplicates').css('display', 'none');
+            $('input#init_duplicate').css('display', 'none');
         },
         error: function () {
             $('i#spinner').css('display', 'none');
             $('input#display_duplicates').css('display', 'block');
+            $('input#init_duplicate').css('display', 'block');
             alert("Erreur PHP 2654");
         },
         success: function (out) {
             $('i#spinner').css('display', 'none');
             $('input#display_duplicates').css('display', 'block');
+            $('input#init_duplicate').css('display', 'block');
             $('table#customer > tbody > tr[key_group]').remove();
 
             if (out) {
@@ -74,20 +65,33 @@ function getAllFactures(limit, s_min, s_name, s_email, s_address, s_zip, s_town,
                     var array_of_duplicate = parsed_out.duplicates;
                     for (var i in array_of_duplicate) {
                         var duplicates = array_of_duplicate[i];
-                        var last = Object.keys(duplicates).length - 1;
-                        duplicates.forEach(function (useless, index) {
+
+                        // Get first key
+                        var first_index;
+                        for (var index in duplicates) {
+                            first_index = index;
+                            break;
+                        }
+                        // Get last key
+                        var last_index;
+                        for (var index in duplicates) {
+                            last_index = index;
+                        }
+
+                        var nb_line = Object.keys(duplicates).length;
+                        for (var index in duplicates) {
                             var duplicate = duplicates[index];
                             var key_group = i;
-                            if (index == last)
+                            if (index == last_index)
                                 var is_last = true;
                             else
                                 var is_last = false;
-                            if (index == 0)
+                            if (index == first_index)
                                 var is_first = true;
                             else
                                 var is_first = false;
-                            add_line(duplicate, key_group, is_last, is_first, last + 1);
-                        });
+                            addLine(duplicate, key_group, is_last, is_first, nb_line);
+                        }
                     }
 
 
@@ -99,11 +103,13 @@ function getAllFactures(limit, s_min, s_name, s_email, s_address, s_zip, s_town,
                     // Display number group doublon
                     var nb_row = parsed_out.nb_row;
                     $('div#db_duplicate').text(nb_row);
-                    iniEventAfterDisplayDuplicate();
 
                     // Display time exec
                     var time_exec = parseInt(parsed_out.time_exec);
-                    $('div#time_exec').text(time_exec);
+                    var date = new Date(null);
+                    date.setSeconds(time_exec);
+                    var time_string = date.toISOString().substr(11, 8);
+                    $('div#time_exec').text(time_string);
 
                 } catch (e) {
                     displayMessage("Erreur:" + e, 'errors');
@@ -113,6 +119,34 @@ function getAllFactures(limit, s_min, s_name, s_email, s_address, s_zip, s_town,
             }
         }
     });
+
+    displayProgress(0, limit);
+
+}
+
+var progress = 0;
+
+function displayProgress(i, limit) {
+    setTimeout(function () {
+        $.ajax({
+            type: "POST",
+            url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
+            data: {
+                action: 'get_progress'
+            },
+            error: function () {
+                alert("Erreur PHP 6464");
+            },
+            success: function (rowOut) {
+                progress = rowOut;
+                $('div#progress').text(progress + '/' + limit);
+                i++;
+                if (progress < limit && i < 200) {
+                    displayProgress(i, limit);
+                }
+            }
+        });
+    }, 5000);
 }
 
 function mergeDuplicates(src_to_dest) {
@@ -190,7 +224,16 @@ function initDuplicate() {
 
 $(document).ready(function () {
     initEvents();
+    $('.select2').select2();
+
+    // Prevent leave without
+    window.addEventListener('beforeunload', function (e) {
+        e.preventDefault();
+        e.returnValue = '';
+    });
 });
+
+
 /**
  * Functions
  */
@@ -198,29 +241,13 @@ function initEvents() {
     // DISPLAY DUPLICATE
     // By Clicking
     $('input#display_duplicates').click(function () {
-        var limit = parseInt($('input#limit').val());
-        var s_min = parseInt($('input#s_min').val());
-        var s_name = parseInt($('input#s_name').val());
-        var s_email = parseInt($('input#s_email').val());
-        var s_address = parseInt($('input#s_address').val());
-        var s_zip = parseInt($('input#s_zip').val());
-        var s_town = parseInt($('input#s_town').val());
-        var s_phone = parseInt($('input#s_phone').val());
-        getAllFactures(limit, s_min, s_name, s_email, s_address, s_zip, s_town, s_phone, 'true');
+        preGetAllDuplicate();
     });
 
     // By pressing enter
     $('input#limit').keypress(function (e) {
         if (e.which == 13) {
-            var limit = parseInt($('input#limit').val());
-            var s_min = parseInt($('input#s_min').val());
-            var s_name = parseInt($('input#s_name').val());
-            var s_email = parseInt($('input#s_email').val());
-            var s_address = parseInt($('input#s_address').val());
-            var s_zip = parseInt($('input#s_zip').val());
-            var s_town = parseInt($('input#s_town').val());
-            var s_phone = parseInt($('input#s_phone').val());
-            getAllFactures(limit, s_min, s_name, s_email, s_address, s_zip, s_town, s_phone, 'true');
+            preGetAllDuplicate();
         }
     });
 
@@ -231,6 +258,28 @@ Cette action marquera TOUS les tiers comme étant non vérifiés\n\
 par ce programme de détection des doublons."))
             initDuplicate();
     });
+}
+
+function preGetAllDuplicate() {
+    var limit = parseInt($('input#limit').val());
+    var s_min = parseInt($('input#s_min').val());
+    var s_name = parseInt($('input#s_name').val());
+    var s_email = parseInt($('input#s_email').val());
+    var s_address = parseInt($('input#s_address').val());
+    var s_zip = parseInt($('input#s_zip').val());
+    var s_town = parseInt($('input#s_town').val());
+    var s_phone = parseInt($('input#s_phone').val());
+    var s_siret = parseInt($('input#s_siret').val());
+    var commercial = getCommercial();
+    getAllDuplicate(limit, s_min, s_name, s_email, s_address, s_zip, s_town, s_phone, s_siret, commercial, 'true');
+}
+
+function getCommercial() {
+    var commercial = [];
+    $.each($("select#commercial > option:selected"), function () {
+        commercial.push($(this).val());
+    });
+    return commercial;
 }
 
 function iniEventAfterDisplayDuplicate() {
@@ -253,6 +302,7 @@ function iniEventAfterDisplayDuplicate() {
         });
         mergeDuplicates(src_to_dest);
     });
+
     // Merge only group
     $('input[merge_this_group="true"]').click(function () {
         var key_group = $(this).attr('key_group');
@@ -271,6 +321,7 @@ function iniEventAfterDisplayDuplicate() {
         });
         mergeDuplicates(src_to_dest);
     });
+
     // Prevent merge it self, part 1
     $('input[r_keep=true]').change(function () {
         if ($(this).prop('checked'))
@@ -294,7 +345,7 @@ function iniEventAfterDisplayDuplicate() {
  * @param {type} is_last used to split group with black tr
  * @return {undefined}
  */
-function add_line(c, key_group, is_last, is_first, nb_in_group) {
+function addLine(c, key_group, is_last, is_first, nb_in_group) {
 
     if (is_last) {
         var html = '<tr id="' + c.rowid + '" key_group=' + key_group + ' class="last">';
@@ -304,7 +355,7 @@ function add_line(c, key_group, is_last, is_first, nb_in_group) {
 
     if (is_first)
         html += '<td rowspan=' + nb_in_group + ' style="border-bottom: solid black 1px;"><input type="submit" class="butAction" key_group="' + key_group + '" merge_this_group="true" value="Fusionner"></td>';
-    html += '<td><input r_keep="true" type="radio" name="' + key_group + '" value=' + c.rowid + ' checked></td>'; // TODO remove "checked"
+    html += '<td><input r_keep="true" type="radio" name="' + key_group + '" value=' + c.rowid + ' checked></td>';
     html += '<td><input cb_merge="true" type="checkbox" name="' + key_group + '" value=' + c.rowid + '></td>';
     html += '<td>' + c.nom + '</td>';
     html += '<td>' + c.email + '</td>';
@@ -312,6 +363,7 @@ function add_line(c, key_group, is_last, is_first, nb_in_group) {
     html += '<td>' + c.zip + '</td>';
     html += '<td>' + c.town + '</td>';
     html += '<td>' + c.phone + '</td>';
+    html += '<td>' + c.siret + '</td>';
     html += '<td>' + convertDate(c.datec) + '</td>';
 
     // Commerciaux

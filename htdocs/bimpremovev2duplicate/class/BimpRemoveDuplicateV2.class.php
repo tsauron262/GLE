@@ -45,6 +45,8 @@ class BimpRemoveDuplicateCustomerV2 {
     public $s_zip;
     public $s_town;
     public $s_phone;
+    public $s_siret;
+    public static $filename = DOL_DATA_ROOT . '/progress.txt';
 
     /**
      * 	Constructor
@@ -56,27 +58,51 @@ class BimpRemoveDuplicateCustomerV2 {
         $this->errors = array();
     }
 
-    public function getAllDuplicate($limit = 100, $detail = true) {
+    public function getAllDuplicate($limit, $commercial, $detail = true) {
+        file_put_contents(self::$filename, 0);
         ini_set('memory_limit', '2048M');
         set_time_limit(7200);
-        $customers = array();
+        $customers2 = array();
 
-        $sql = 'SELECT rowid, nom, email, address, zip, town, phone, datec';
-        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe';
-        $sql .= ' WHERE duplicate=0';
-
-        $result = $this->db->query($sql);
-        $this->nb_row = $result->num_rows;
-        if ($result) {
-            while ($obj = $this->db->fetch_object($result)) {
-                $customers[] = $obj;
+        $sql2 = 'SELECT rowid, nom, email, address, zip, town, phone, datec, siret';
+        $sql2 .= ' FROM ' . MAIN_DB_PREFIX . 'societe';
+        $sql2 .= ' WHERE duplicate=0';
+        $result2 = $this->db->query($sql2);
+        if ($result2) {
+            while ($obj2 = $this->db->fetch_object($result2)) {
+                $customers2[] = $obj2;
             }
         } else {
             $this->errors[] = "Tous les tiers ont été traité";
             return 0;
         }
+
+        $customers = array();
+        if (empty($commercial))
+            $customers = $customers2;
+        else {
+            $sql = 'SELECT s.rowid, nom, email, address, zip, town, phone, s.datec, siret';
+            $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe s, ' . MAIN_DB_PREFIX . 'societe_commerciaux sc';
+            $sql .= ' WHERE duplicate=0';
+            $sql .= ' AND sc.fk_soc=s.rowid';
+            $sql .= ' AND sc.fk_user IN (' . implode(',', $commercial) . ')';
+
+
+            $result = $this->db->query($sql);
+            $this->nb_row = $result->num_rows;
+            if ($result) {
+                while ($obj = $this->db->fetch_object($result)) {
+                    $customers[] = $obj;
+                }
+            } else {
+                $this->errors[] = "Tous les tiers de ce(s) commercial(ux) ont été traité";
+                return 0;
+            }
+        }
+
         $clean_customers = $this->cleanLines($customers);
-        $duplicates = $this->groupDuplicate($clean_customers, $limit);
+        $clean_customers2 = $this->cleanLines($customers2);
+        $duplicates = $this->groupDuplicate($clean_customers, $clean_customers2, $limit);
         return $duplicates;
     }
 
@@ -118,6 +144,8 @@ class BimpRemoveDuplicateCustomerV2 {
             $tmp->address = strtolower($tmp->address);
             $tmp->address = str_replace('avenue', 'av', $tmp->address);
             $tmp->address = str_replace('boulevard', 'bd', $tmp->address);
+            $tmp->address = str_replace('chemin', 'ch', $tmp->address);
+            $tmp->address = str_replace('route', 'rte', $tmp->address);
             $tmp->address = str_replace(',', '', $tmp->address);
 
             // Zipcode
@@ -135,17 +163,23 @@ class BimpRemoveDuplicateCustomerV2 {
             $tmp->phone = str_replace('+33', '0', $tmp->phone);
             $tmp->phone = str_replace(' ', '', $tmp->phone);
             $tmp->phone = str_replace('.', '', $tmp->phone);
+            $tmp->phone = str_replace('-', '', $tmp->phone);
+            $tmp->phone = str_replace('/', '', $tmp->phone);
+
+            // Siret
+            if ($tmp->siret == 'NULL')
+                $tmp->siret = '';
 
             // Date create
             if ($tmp->datec == '0000-00-00 00:00:00')
                 $tmp->datec = null;
 
-            // CLEAN FOR DISPLAY
-            $tmp->address = mb_strimwidth($tmp->address, 0, self::MAX_STRING_LENGTH, "...");
-            $tmp->nom = mb_strimwidth($tmp->nom, 0, self::MAX_STRING_LENGTH, "...");
-            $tmp->email = mb_strimwidth($tmp->email, 0, self::MAX_STRING_LENGTH, "...");
+            // CLEAN FOR DISPLAY 
+            $tmp->address = mb_strimwidth($tmp->address, 0, self::MAX_STRING_LENGTH, "..."); //TODO faire après traitement
+            $tmp->nom = mb_strimwidth($tmp->nom, 0, self::MAX_STRING_LENGTH, "..."); //TODO faire après traitement
+            $tmp->email = mb_strimwidth($tmp->email, 0, self::MAX_STRING_LENGTH, "..."); //TODO faire après traitement
 
-            $out[] = $tmp; // good
+            $out[] = $tmp;
         }
         return $out;
     }
@@ -154,26 +188,37 @@ class BimpRemoveDuplicateCustomerV2 {
      * 
      * @param array $customers all customers pre-selected
      */
-    private function groupDuplicate($customers, $limit) {
-        // Set group for each customer
+    private function groupDuplicate($customers, $customers2, $limit) {
+        session_start();
 
         $cnt_group = 0;
         $ids_processed = array();
 
-        foreach ($customers as $i => $a) {
-            $ids_processed[] = $a->rowid;
-            foreach ($customers as $j => $b) {
-                if ($a->rowid != $b->rowid and $i != $j and $this->compare($a, $b) == 1) {
+        $out = array();
 
-                    if (isset($customers[$i]->grp)) {
-                        $customers[$j]->grp = $customers[$i]->grp;
-                    } elseif (isset($customers[$j]->grp)) {
-                        $customers[$i]->grp = $customers[$j]->grp;
+        foreach ($customers as $i => $a) {
+
+            file_put_contents(self::$filename, $i);
+
+            $ids_processed[] = $a->rowid;
+            foreach ($customers2 as $j => $b) {
+                if ($a->rowid != $b->rowid and $this->compare($a, $b) == 1) {
+                    $a->commerciaux = $this->getCommerciaux($a->rowid);
+                    $b->commerciaux = $this->getCommerciaux($b->rowid);
+                    if (isset($a->grp)) {
+                        $grp = $a->grp;
+                        $customers2[$j]->grp = $a->grp;
+                    } elseif (isset($b->grp)) {
+                        $grp = $b->grp;
+                        $customers[$i]->grp = $b->grp;
                     } else {
                         $customers[$i]->grp = $cnt_group;
-                        $customers[$j]->grp = $cnt_group;
+                        $customers2[$j]->grp = $cnt_group;
+                        $grp = $cnt_group;
                         $cnt_group++;
                     }
+                    $out[$grp][$a->rowid] = $a;
+                    $out[$grp][$b->rowid] = $b;
                 }
             }
             if ($limit <= $i)
@@ -183,18 +228,18 @@ class BimpRemoveDuplicateCustomerV2 {
         $this->setAsProcessed($ids_processed);
 
         // Create group and push customer in each group
-        $duplicate = array();
-        foreach ($customers as $key => $c) {
-            if (isset($c->grp)) {
-                $customers[$key]->commerciaux = $this->getCommerciaux($c->rowid);
-                if (isset($duplicate[$c->grp]))
-                    $duplicate[$c->grp][] = $c;
-                else
-                    $duplicate[$c->grp] = array($c);
-            }
-        }
+//        $duplicate = array();
+//        foreach ($customers2 as $key => $c) {
+//            if (isset($c->grp)) {
+//                $customers2[$key]->commerciaux = $this->getCommerciaux($c->rowid);
+//                if (isset($duplicate[$c->grp]))
+//                    $duplicate[$c->grp][] = $c;
+//                else
+//                    $duplicate[$c->grp] = array($c);
+//            }
+//        }
 
-        return $duplicate;
+        return $out;
     }
 
     public function setAsProcessed($ids_processed) {
@@ -241,6 +286,7 @@ class BimpRemoveDuplicateCustomerV2 {
         $score += $this->s_zip * $this->compareUnit($a->zip, $b->zip);
         $score += $this->s_town * $this->compareUnit($a->town, $b->town);
         $score += $this->s_phone * $this->compareUnit($a->phone, $b->phone);
+        $score += $this->s_siret * $this->compareUnit($a->s_siret, $b->s_siret);
 
         if ($this->s_min < $score)
             return 1;
@@ -249,11 +295,9 @@ class BimpRemoveDuplicateCustomerV2 {
     }
 
     private function compareUnit($a, $b) {
-        if ($a != NULL and $a != ''
-                and ( $a == $b
-                or ( strpos($a, $b) != false and strlen($b) > 3)
-                or ( strpos($b, $a) != false) and strlen($a) > 3)) {
-//            echo $a . ' ressemble à ' . $b . '<br/>';
+        if ($a != NULL and $a != '' and $b != NULL and $b != '' and strlen($b) > 3 and strlen($a) > 3
+                and ( $a == $b or strpos($a, $b) != false or strpos($b, $a) != false)
+        ) {
             return 1;
         }
         return 0;
@@ -294,8 +338,9 @@ class BimpRemoveDuplicateCustomerV2 {
                 $langs->load('companies');
                 $this->addErrorMerge($src, $langs->trans('ErrorThirdPartyIdIsMandatory', $langs->trans('MergeOriginThirdparty')));
             } else {
-                if (!$error && $soc_origin->fetch($soc_origin_id) < 1) {
-                    $this->addErrorMerge($src, $langs->trans('ErrorRecordNotFound') . '; Tier destination inconnue, id=' . $soc_origin_id);
+                $res_fetch = $soc_origin->fetch($soc_origin_id);
+                if (!$error and $res_fetch < 1) {
+                    $this->addErrorMerge($src, $langs->trans('ErrorRecordNotFound') . ' Tier source inconnue, id=' . $soc_origin_id);
                     $error++;
                 }
                 if (!$error) {

@@ -71,7 +71,7 @@ function getAllFactures(limit, details) {
                 var last = Object.keys(duplicates).length - 1;
                 duplicates.forEach(function (useless, index) {
                     var duplicate = duplicates[index];
-                    var key_group = i ;
+                    var key_group = i;
                     if (index == last)
                         var is_last = true;
                     else
@@ -85,7 +85,7 @@ function getAllFactures(limit, details) {
             }
 
             // Add button and his event
-            if ($('input#merge_duplicates').length == 0){
+            if ($('input#merge_duplicates').length == 0)
                 $('div#id-right').append('<br/><input type="submit" class="butAction" id="merge_duplicates" value="Fusionner tous les doublons">');
 
             // Display number group doublon

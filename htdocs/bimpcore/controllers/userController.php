@@ -9,7 +9,7 @@ class userController extends BimpController
     {        
         $b_user = $this->config->getObject('', 'user');
         $head = user_prepare_head($b_user->dol_object);
-        dol_fiche_head($head, 'formSimple', 'Essentiel', -1, 'user');
+        dol_fiche_head($head, 'formSimple', 'Mes infos', -1, 'user');
     }
 
     public function renderHtml()

@@ -78,14 +78,16 @@ class modBimpContract extends DolibarrModules {
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB;';
-
+        $extrafields = new ExtraFields($this->db);
+        $extrafields->addExtraField('service_content', 'Services Compris', 'chkbxlst', 103, null, 'product', 0, 0, "", 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::active=1";N;}}', 1, "", 1, 1, "", "", "", 1);
         return $this->_init($sql, $options);
     }
 
    
     public function remove($options = '') {
         $sql = array();
-
+        //$extrafields = new ExtraFields($this->db);
+        //$extrafields->delete('service_content', 'product');
         return $this->_remove($sql, $options);
     }
 

@@ -193,6 +193,9 @@ class Synopsisdemandeinterv extends CommonObject {
 
     function update($id = null) {
         global $user, $langs, $conf;
+        if(is_object($id) && is_a($id, "User"))
+                $id = null;
+        
         if($id == null)
             $id = $this->id;
         if (!is_numeric($this->duree)) {
@@ -206,10 +209,16 @@ class Synopsisdemandeinterv extends CommonObject {
          *  Insertion dans la base
          */
         $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv SET ";
-        $sql .= " datei = " . $this->db->idate($this->date);
+        $sql .= " datei = '" . $this->db->idate($this->date)."'";
         $sql .= ", description  = '" . addslashes($this->description) . "'";
+        $sql .= ", note_public  = '" . addslashes($this->note_public) . "'";
+        $sql .= ", note_private  = '" . addslashes($this->note_private) . "'";
         $sql .= ", duree = " . $this->duree;
         $sql .= ", fk_projet = " . $this->projet_id;
+        $sql .= ", fk_user_prisencharge = " . $this->fk_user_prisencharge;
+        $sql .= ", fk_statut = " . $this->statut;
+        $sql .= ", fk_commande = '" . $this->fk_commande."'";
+        $sql .= ", fk_contrat = '" . $this->fk_contrat."'";
         $sql .= " WHERE rowid = " . $id;
 
         dol_syslog("synopsisdemandeinterv::update sql=" . $sql);
@@ -237,7 +246,7 @@ class Synopsisdemandeinterv extends CommonObject {
      *        \return        int            <0 si ko, >0 si ok
      */
     function fetch($rowid) {
-        $sql = "SELECT rowid, ref, description, fk_soc, fk_statut,fk_user_prisencharge, fk_user_author, fk_contrat, fk_commande, total_ht, total_tva, total_ttc, ";
+        $sql = "SELECT rowid, date_valid, ref, description, fk_soc, fk_statut,fk_user_prisencharge, fk_user_author, fk_contrat, fk_commande, total_ht, total_tva, total_ttc, ";
         $sql.= " datei as di, duree, fk_projet, note_public, note_private, model_pdf";
         $sql.= " FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $sql.= " WHERE rowid=" . $rowid;
@@ -261,6 +270,7 @@ class Synopsisdemandeinterv extends CommonObject {
                     $this->societe = $tmpSoc;
                 }
                 $this->statut = $obj->fk_statut;
+                $this->date_valid = $obj->date_valid;
                 $this->date = $this->db->jdate($obj->di);
                 $this->duree = $obj->duree;
                 $this->projetidp = $obj->fk_projet;
@@ -276,6 +286,7 @@ class Synopsisdemandeinterv extends CommonObject {
                 if ($this->fk_user_prisencharge)
                     $this->user_prisencharge->fetch($this->fk_user_prisencharge);
                 $this->user_author_id = $obj->fk_user_author;
+                $this->fk_user_author = $obj->fk_user_author;
 
                 if ($this->statut == 0)
                     $this->brouillon = 1;
@@ -528,6 +539,11 @@ class Synopsisdemandeinterv extends CommonObject {
             dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
             return -1;
         }
+    }
+    
+    function fetch_extra(){
+        $this->getExtra();
+        $this->extraArr = $this->tabExtraV;
     }
 
     function getExtra() {
@@ -1230,6 +1246,12 @@ class synopsisdemandeintervLigne {
     public $typeInterv;
     public $fk_typeinterv;
     public $dateiunformated;
+    public $qte;
+    public $fk_commandedet;
+    public $fk_contratdet;
+    public $pu_ht;
+    public $total_ttc;
+    public $total_tva;
 
     /**
      *      \brief     Constructeur d'objets ligne d'intervention
@@ -1307,6 +1329,11 @@ class synopsisdemandeintervLigne {
             return -1;
         }
     }
+    
+    
+    function create($user, $noTrigger = 0){
+        return $this->insert();
+    }
 
     /**
      *      \brief         Insere l'objet ligne d'intervention en base
@@ -1346,8 +1373,8 @@ class synopsisdemandeintervLigne {
 //                $ligne->total_ht = floatval($ligne->duration) * floatval($pu_ht)/3600;
 //            }
 //Compute total tva / total_TTC
-        $total_ttc = 1.2 * $this->total_ht;
-        $total_tva = 0.2 * $this->total_ht;
+        
+        $this->traitePrice();
 
         // Insertion dans base de la ligne
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'synopsisdemandeintervdet';
@@ -1364,14 +1391,14 @@ class synopsisdemandeintervLigne {
         $sql.= " VALUES (" . $this->fk_synopsisdemandeinterv . ",";
         $sql.= " '" . addslashes($this->desc) . "',";
         $sql.= " '" . $this->db->idate($this->datei) . "',";
-        $sql.= " " . $this->duration . ",";
+        $sql.= " '" . $this->duration . "',";
         $sql.= ' ' . $rangToUse . ",";
         $sql.= ' ' . ($this->fk_typeinterv > 0 ? $this->fk_typeinterv : 'NULL') . ",";
         $sql.= ' ' . ($this->isForfait > 0 ? 1 : 0);
         if ($this->qte > 0)
             $sql .= ' ,' . preg_replace('/,/', '.', $this->qte);
         if ($this->pu_ht != 0 && $this->pu_ht != '')
-            $sql .= "," . preg_replace('/,/', '.', $this->pu_ht) . "," . preg_replace('/,/', '.', $this->total_ht) . "," . preg_replace('/,/', '.', $total_tva) . "," . preg_replace('/,/', '.', $total_ttc);
+            $sql .= "," . preg_replace('/,/', '.', $this->pu_ht) . "," . preg_replace('/,/', '.', $this->total_ht) . "," . preg_replace('/,/', '.', $this->total_tva) . "," . preg_replace('/,/', '.', $this->total_ttc);
         if ($this->fk_commandedet > 0)
             $sql .= ', ' . $this->fk_commandedet;
         if ($this->fk_contratdet > 0)
@@ -1379,8 +1406,11 @@ class synopsisdemandeintervLigne {
 
         $sql.= ')';
         dol_syslog("synopsisdemandeintervLigne::insert sql=" . $sql);
+        
+        
         $resql = $this->db->query($sql);
         if ($resql) {
+            $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX . "synopsisdemandeintervdet");
             $result = $this->update_total();
             if ($result > 0) {
                 $this->rang = $rangToUse;
@@ -1406,6 +1436,19 @@ class synopsisdemandeintervLigne {
             return -1;
         }
     }
+    
+    function traitePrice(){
+        
+
+        if ($this->isForfait == 1 && ($this->pu_ht . "x" != "x")) {
+            $this->total_ht = floatval($this->qte) * floatval($this->pu_ht);
+        } else if ($this->pu_ht . "x" != "x") {
+            $this->total_ht = floatval(($this->qte . "x" == "x" ? 1 : $this->qte)) * floatval($this->duration) * floatval($this->pu_ht) / 3600;
+        }
+
+        $this->total_ttc = 1.2 * $this->total_ht;
+        $this->total_tva = 0.2 * $this->total_ht;
+    }
 
     /**
      *      \brief         Mise a jour de l'objet ligne d'intervention en base
@@ -1414,23 +1457,15 @@ class synopsisdemandeintervLigne {
     function update() {
         $this->db->begin();
         global $user, $langs, $conf;
-
-        if ($this->isForfait == 1 && ($this->pu_ht . "x" != "x")) {
-            $this->total_ht = floatval($this->qte) * floatval($this->pu_ht);
-        } else if ($this->pu_ht . "x" != "x") {
-            $this->total_ht = floatval(($this->qte . "x" == "x" ? 1 : $this->qte)) * floatval($this->duration) * floatval($this->pu_ht) / 3600;
-        }
-
-//print "toto".$this->total_ht;
-        $total_ttc = 1.2 * $this->total_ht;
-        $total_tva = 0.2 * $this->total_ht;
+        
+        $this->traitePrice();
 
 
         // Mise a jour ligne en base
         $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeintervdet SET";
         $sql.= " description='" . addslashes($this->desc) . "'";
         $sql.= ",date='" . $this->db->idate($this->datei) . "'";
-        $sql.= ",duree=" . $this->duration;
+        $sql.= ",duree='" . $this->duration."'";
         $sql.= ",fk_typeinterv=" . ($this->fk_typeinterv > 0 ? $this->fk_typeinterv : 'NULL');
         if ($this->qte . "x" != "x")
             $sql .= ",qte = " . $this->qte;
@@ -1439,13 +1474,15 @@ class synopsisdemandeintervLigne {
         if ($this->pu_ht . "x" != "x")
             $sql .= ",total_ht = " . preg_replace('/,/', '.', $this->total_ht);
         if ($this->pu_ht . "x" != "x")
-            $sql .= ",total_tva = " . preg_replace('/,/', '.', $total_tva);
+            $sql .= ",total_tva = " . preg_replace('/,/', '.', $this->total_tva);
         if ($this->pu_ht . "x" != "x")
-            $sql .= ",total_ttc = " . preg_replace('/,/', '.', $total_ttc);
+            $sql .= ",total_ttc = " . preg_replace('/,/', '.', $this->total_ttc);
         if ($this->isForfait . "x" != "x")
             $sql .= ",isForfait = " . $this->isForfait;
         if ($this->comLigneId > 0)
             $sql .= ",fk_commandedet =  " . $this->comLigneId;
+        elseif ($this->fk_commandedet > 0)
+            $sql .= ",fk_commandedet =  " . $this->fk_commandedet;
         else
             $sql .= ",fk_commandedet =  NULL";
 
@@ -1562,6 +1599,9 @@ class synopsisdemandeintervLigne {
      *      \brief      Supprime une ligne d'intervention
      *      \return     int         >0 si ok, <0 si ko
      */
+    function delete() {
+        return $this->delete_line();
+    }
     function delete_line() {
         global $user, $langs, $conf;
         if ($this->statut == 0) {

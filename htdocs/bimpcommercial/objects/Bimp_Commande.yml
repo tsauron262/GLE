@@ -53,21 +53,14 @@ objects:
             filters: 
                 type: 2
                 
-    shipment: 
-        relation: none
-        delete: 0
-        instance: 
-            bimp_object: 
-                module: bimplogistique
-                name: BL_CommandeShipment
                 
     shipments: 
         relation: hasMany
         delete: 0
         instance: 
             bimp_object: 
-                module: bimplogistique
-                name: BL_CommandeShipment
+                module: bimpreservation
+                name: BR_CommandeShipment
                 
     fournisseur_price: 
         relation: none

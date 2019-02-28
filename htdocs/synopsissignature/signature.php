@@ -307,7 +307,7 @@ if ($selectedFile) {
               $tabFilePc2[] = ".pdf";
               $tabFilePc3[] = "PC-" . $chrono->ref . ".pdf"; */
             
-            $email = "j.mazet@bimp.fr, v.gilbert@bimp.fr";
+            $email = "f.pineri@bimp.fr, v.gilbert@bimp.fr";
             if(is_object($soc) && $soc->id > 0){
                 foreach($soc->getSalesRepresentatives($user) as $userT){
                     $emails[] = $userT['email'];

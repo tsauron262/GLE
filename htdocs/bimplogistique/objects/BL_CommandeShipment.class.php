@@ -1,6 +1,6 @@
 <?php
 
-class Bl_CommandeShipment extends BimpObject
+class BL_CommandeShipment extends BimpObject
 {
 
     const BLCS_BROUILLON = 1;

@@ -23,13 +23,13 @@ class ObjectLine extends BimpObject
     public $date_to = null;
     public $id_remise_except = null;
     public static $product_line_data = array(
-        'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1, 'default' => 0),
-        'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'default' => null),
+        'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1),
+        'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int'),
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
         'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1),
-        'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => null),
-        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => 20),
-        'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0, 'default' => null),
+        'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0),
+        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0),
+        'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0),
         'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0),
         'date_from'      => array('label' => 'Date début', 'type' => 'date', 'required' => 0, 'default' => null),
         'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null)
@@ -571,9 +571,6 @@ class ObjectLine extends BimpObject
 
                 case 'tva_tx':
                     $tva_tx = $this->tva_tx;
-                    if (is_null($tva_tx)) {
-                        $tva_tx = 20;
-                    }
                     if ($this->isLoaded() && $this->field_exists('def_tva_tx')) {
                         $tva_tx = $this->getData('def_tva_tx');
                     }
@@ -621,8 +618,7 @@ class ObjectLine extends BimpObject
         if ($field === 'remisable') {
             return (int) $this->getData('remisable');
         }
-
-        return self::$product_line_data[$field]['default'];
+        return 0;
     }
 
     public function getProduct()
@@ -1983,9 +1979,6 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'tva_tx':
-                if (is_null($value)) {
-                    $value = 20;
-                }
                 if (!$this->isEditable() || $attribute_equipment || !$this->canEditPrixVente()) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= $value . ' %';

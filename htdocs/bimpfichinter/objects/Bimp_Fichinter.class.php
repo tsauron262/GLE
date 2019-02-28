@@ -1,8 +1,8 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/extraFI.class.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/objectInter.class.php';
 
-class Bimp_Fichinter extends extraFI
+class Bimp_Fichinter extends ObjectInter
 {
     public $force_update_date_ln = true;
     public static $dol_module = 'fichinter';
@@ -33,7 +33,27 @@ class Bimp_Fichinter extends extraFI
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info'))
     );
     
+    
+    
 
+    
+    public function getExtra($field){
+        if($field == "di"){
+            if($this->isLoaded() && is_a($this->dol_object, 'Synopsisfichinter')){
+                $return = array();
+                $dis = $this->dol_object->getDI();
+                require_once DOL_DOCUMENT_ROOT.'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php';
+                $di = new Synopsisdemandeinterv($this->db->db);
+                foreach($dis as $diI){
+                    $di->fetch($diI);
+                    $return[] = $di->getNomUrl(1);
+                }
+                return implode("<br/>", $return);
+            }
+        }
+        else
+            return parent::getExtra($field);
+    }
     
 
 

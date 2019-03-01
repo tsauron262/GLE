@@ -182,7 +182,7 @@ class OrderPDF extends BimpDocumentPDF
         ));
     }
 
-    public function renderAddresses()
+    public function renderDocInfos()
     {
         $html = '';
 

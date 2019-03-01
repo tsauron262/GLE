@@ -65,7 +65,11 @@ class PropalPDF extends BimpDocumentPDF
 
         global $conf, $db;
 
-        $docName = $this->langs->transnoentities('CommercialProposal');
+        if ($this->proforma) {
+            $docName = 'Facture Proforma';
+        } else {
+            $docName = $this->langs->transnoentities('CommercialProposal');
+        }
         $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->propal->ref);
 
         $rows = '';

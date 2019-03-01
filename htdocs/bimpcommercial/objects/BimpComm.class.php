@@ -1,6 +1,6 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT.'/bimpcore/objects/BimpDolObject.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
 
 class BimpComm extends BimpDolObject
 {
@@ -9,6 +9,19 @@ class BimpComm extends BimpDolObject
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
     public $remise_globale_line_rate = null;
+    public static $pdf_periodicities = array(
+        0  => 'Aucune',
+        1  => 'Mensuelle',
+        3  => 'Trimestrielle',
+        12 => 'Annuelle'
+    );
+    
+    public static $pdf_periodicity_label_masc = array(
+        0 => '',
+        1 => 'mois',
+        3 => 'trimestre',
+        12 => 'an'
+    );
 
     // Getters booléens: 
 
@@ -522,7 +535,6 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters - Overrides BimpObject
-
 //    public function getName()
 //    {
 //        $name = parent::getName();

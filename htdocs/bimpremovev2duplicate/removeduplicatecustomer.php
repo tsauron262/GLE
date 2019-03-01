@@ -69,7 +69,7 @@ print '</tr></tbody</table>';
 print '<div class="alert alert-info" role="alert" style="display: inline-block;">';
 print "<strong>Remarque :</strong> Les champs ci-dessous sont utilisés pour savoir si un tier est le doublon d'un autre.<br/>";
 print "Si un champ d'un tier match avec le même champ d'un autre tier, on ajoute le score de ce champ.<br/>";
-print "Si le score total est supérieur au score minimum renseigné, alors les tiers sont affichés dans un tableau.";
+print "Si le score total est égal ou supérieur au score minimum renseigné, alors les tiers sont affichés dans un tableau.";
 
 print '<table class="filter"><tbody>';
 print '<tr class="liste_titre_filter">';

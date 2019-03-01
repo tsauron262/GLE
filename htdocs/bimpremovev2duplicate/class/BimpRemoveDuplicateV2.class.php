@@ -89,7 +89,6 @@ class BimpRemoveDuplicateCustomerV2 {
 
 
             $result = $this->db->query($sql);
-            $this->nb_row = $result->num_rows;
             if ($result) {
                 while ($obj = $this->db->fetch_object($result)) {
                     $customers[] = $obj;
@@ -99,6 +98,8 @@ class BimpRemoveDuplicateCustomerV2 {
                 return 0;
             }
         }
+        $this->nb_row = sizeof($customers);
+
 
         $clean_customers = $this->cleanLines($customers);
         $clean_customers2 = $this->cleanLines($customers2);

@@ -358,8 +358,6 @@ function iniEventAfterDisplayDuplicate() {
  */
 function addLine(c, key_group, is_last, is_first, nb_in_group, a_siret_is_set) {
 
-    console.log(a_siret_is_set);
-
     if (is_last) {
         var html = '<tr id="' + c.rowid + '" key_group=' + key_group + ' class="last">';
     } else {

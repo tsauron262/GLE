@@ -5,8 +5,11 @@
  *      \ingroup    bimpcontratauto
  *      \brief      Make interface between the class and the client
  */
-if ($_POST['action'] == 'get_progress')
-    die(file_get_contents(dirname(__FILE__) . '/../../documents/progress.txt'));
+if ($_POST['action'] == 'get_progress'){
+    require_once("../conf/conf.php");
+    die(file_get_contents($dolibarr_main_data_root . '/progress.txt'));
+    
+}
 
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpremovev2duplicate/class/BimpRemoveDuplicateV2.class.php';

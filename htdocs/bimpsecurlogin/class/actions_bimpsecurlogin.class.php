@@ -39,7 +39,7 @@ class securLogSms {
 
             if (!$this->isSecur()) {
                 if ($this->user->array_options['options_echec_auth'] >= $this->max_tentative)
-                    $this->message[] = "<span class='red'>Compte bloqué</span>";
+                    $this->message[] = "<span class='red'>Compte bloqué</span><br/>Seul votre supérieur peut vous débloquer<br/>Contactez-le";
                 $message = implode("<br/>", $this->message);
                 include(DOL_DOCUMENT_ROOT . '/bimpsecurlogin/views/formCode.php');
                 die;

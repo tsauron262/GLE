@@ -1,3 +1,9 @@
+/*
+ * Global variable
+ */
+
+var doing_request = false;
+
 /**
  * Ajax functions
  */
@@ -25,6 +31,7 @@ function getAllDuplicate(limit, s_min, s_name, s_email, s_address, s_zip, s_town
         return -2;
     }
 
+    doing_request = true;
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
@@ -48,12 +55,14 @@ function getAllDuplicate(limit, s_min, s_name, s_email, s_address, s_zip, s_town
             $('input#init_duplicate').css('display', 'none');
         },
         error: function () {
+            doing_request = false;
             $('i#spinner').css('display', 'none');
             $('input#display_duplicates').css('display', 'block');
             $('input#init_duplicate').css('display', 'block');
             alert("Erreur PHP 2654");
         },
         success: function (out) {
+            doing_request = false;
             $('i#spinner').css('display', 'none');
             $('input#display_duplicates').css('display', 'block');
             $('input#init_duplicate').css('display', 'block');
@@ -72,10 +81,13 @@ function getAllDuplicate(limit, s_min, s_name, s_email, s_address, s_zip, s_town
                             first_index = index;
                             break;
                         }
-                        // Get last key
+                        // Get last key and check if a siret is set
                         var last_index;
+                        var a_siret_is_set = 0;
                         for (var index in duplicates) {
                             last_index = index;
+                            if (duplicates[index].siret != '')
+                                a_siret_is_set = 1;
                         }
 
                         var nb_line = Object.keys(duplicates).length;
@@ -90,7 +102,7 @@ function getAllDuplicate(limit, s_min, s_name, s_email, s_address, s_zip, s_town
                                 var is_first = true;
                             else
                                 var is_first = false;
-                            addLine(duplicate, key_group, is_last, is_first, nb_line);
+                            addLine(duplicate, key_group, is_last, is_first, nb_line, a_siret_is_set);
                         }
                     }
 
@@ -120,13 +132,13 @@ function getAllDuplicate(limit, s_min, s_name, s_email, s_address, s_zip, s_town
         }
     });
 
-    displayProgress(0, limit);
+    displayProgress(limit);
 
 }
 
 var progress = 0;
 
-function displayProgress(i, limit) {
+function displayProgress(limit) {
     setTimeout(function () {
         $.ajax({
             type: "POST",
@@ -140,13 +152,12 @@ function displayProgress(i, limit) {
             success: function (rowOut) {
                 progress = rowOut;
                 $('div#progress').text(progress + '/' + limit);
-                i++;
-                if (progress < limit && i < 200) {
-                    displayProgress(i, limit);
+                if (progress < limit && doing_request) {
+                    displayProgress(limit);
                 }
             }
         });
-    }, 5000);
+    }, 3000);
 }
 
 function mergeDuplicates(src_to_dest) {
@@ -345,7 +356,9 @@ function iniEventAfterDisplayDuplicate() {
  * @param {type} is_last used to split group with black tr
  * @return {undefined}
  */
-function addLine(c, key_group, is_last, is_first, nb_in_group) {
+function addLine(c, key_group, is_last, is_first, nb_in_group, a_siret_is_set) {
+
+    console.log(a_siret_is_set);
 
     if (is_last) {
         var html = '<tr id="' + c.rowid + '" key_group=' + key_group + ' class="last">';
@@ -355,7 +368,12 @@ function addLine(c, key_group, is_last, is_first, nb_in_group) {
 
     if (is_first)
         html += '<td rowspan=' + nb_in_group + ' style="border-bottom: solid black 1px;"><input type="submit" class="butAction" key_group="' + key_group + '" merge_this_group="true" value="Fusionner"></td>';
-    html += '<td><input r_keep="true" type="radio" name="' + key_group + '" value=' + c.rowid + ' checked></td>';
+
+    if (a_siret_is_set == 0 || (a_siret_is_set == 1 && c.siret != ''))
+        html += '<td><input r_keep="true" type="radio" name="' + key_group + '" value=' + c.rowid + ' checked></td>';
+    else
+        html += '<td><input r_keep="true" type="radio" name="' + key_group + '" value=' + c.rowid + '></td>';
+
     html += '<td><input cb_merge="true" type="checkbox" name="' + key_group + '" value=' + c.rowid + '></td>';
     html += '<td>' + c.nom + '</td>';
     html += '<td>' + c.email + '</td>';

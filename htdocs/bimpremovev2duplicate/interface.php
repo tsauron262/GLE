@@ -6,7 +6,7 @@
  *      \brief      Make interface between the class and the client
  */
 if ($_POST['action'] == 'get_progress')
-    die(file_get_contents('/var/www/html/bimp-8/bimp-erp/documents/progress.txt'));
+    die(file_get_contents(dirname(__FILE__) . '/../../documents/progress.txt'));
 
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpremovev2duplicate/class/BimpRemoveDuplicateV2.class.php';

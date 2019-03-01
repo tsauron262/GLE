@@ -103,7 +103,8 @@ class BimpRemoveDuplicateCustomerV2 {
         $clean_customers = $this->cleanLines($customers);
         $clean_customers2 = $this->cleanLines($customers2);
         $duplicates = $this->groupDuplicate($clean_customers, $clean_customers2, $limit);
-        return $duplicates;
+        $duplicates_clean = $this->cleanLinesAfterGroup($duplicates);
+        return $duplicates_clean;
     }
 
     private function getCommerciaux($id_soc) {
@@ -167,21 +168,31 @@ class BimpRemoveDuplicateCustomerV2 {
             $tmp->phone = str_replace('/', '', $tmp->phone);
 
             // Siret
-            if ($tmp->siret == 'NULL')
+            if ($tmp->siret == 'NULL' or $tmp->siret == NULL or $tmp->siret == null)
                 $tmp->siret = '';
 
             // Date create
             if ($tmp->datec == '0000-00-00 00:00:00')
                 $tmp->datec = null;
 
-            // CLEAN FOR DISPLAY 
-            $tmp->address = mb_strimwidth($tmp->address, 0, self::MAX_STRING_LENGTH, "..."); //TODO faire après traitement
-            $tmp->nom = mb_strimwidth($tmp->nom, 0, self::MAX_STRING_LENGTH, "..."); //TODO faire après traitement
-            $tmp->email = mb_strimwidth($tmp->email, 0, self::MAX_STRING_LENGTH, "..."); //TODO faire après traitement
 
             $out[] = $tmp;
         }
         return $out;
+    }
+
+    private function cleanLinesAfterGroup($duplicates) {
+
+
+        foreach ($duplicates as $i => $a) {
+            foreach ($a as $j => $b) {
+                // CLEAN FOR DISPLAY 
+                $duplicates[$i][$j]->address = mb_strimwidth($duplicates[$i][$j]->address, 0, self::MAX_STRING_LENGTH, "...");
+                $duplicates[$i][$j]->nom = mb_strimwidth($duplicates[$i][$j]->nom, 0, self::MAX_STRING_LENGTH, "...");
+                $duplicates[$i][$j]->email = mb_strimwidth($duplicates[$i][$j]->email, 0, self::MAX_STRING_LENGTH, "...");
+            }
+        }
+        return $duplicates;
     }
 
     /**

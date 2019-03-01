@@ -56,15 +56,15 @@ fields:
         display:
             default: 
                 type: timer
+        default_value: 3600
     fk_commandedet:
         label: Prod Commande
         type: int
         values: 
                 array: products_commande_list
-        dol_prop: comLigneId
         show: 
             callback:
-                method: asCommande
+                method: asParentCommande
     fk_contratdet:
         label: Prod Contrat
         type: int
@@ -72,7 +72,7 @@ fields:
                 array: products_contrat_list
         show: 
             callback:
-                method: asContrat
+                method: asParentContrat
     tx_tva:
         label: TVA
         type: float
@@ -143,11 +143,11 @@ lists_cols:
     fk_commandedet:
         field: fk_commandedet
         show:
-            callback: asCommande
+            callback: asParentCommande
     fk_contratdet:
         field: fk_contratdet
         show:
-            callback: asContrat
+            callback: asParentContrat
     duration:
         field: duration
     tx_tva:

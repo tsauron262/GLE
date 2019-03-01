@@ -19,6 +19,7 @@ switch ($action) {
     case 'get_all_duplicate': {
             echo json_encode(array(
                 'duplicates' => $staticRD->getAllDuplicate(GETPOST('limit'), GETPOST('details')),
+                'nb_row' => $staticRD->nb_row,
                 'errors' => $staticRD->errors
             ));
             break;

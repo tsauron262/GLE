@@ -68,6 +68,7 @@ class Synopsisdemandeinterv extends CommonObject {
     public $modelpdf;
     public $fk_di = "";
     public $lignes = array();
+    public $fk_user_author;
 
     /**
      *    \brief      Constructeur de la classe
@@ -107,6 +108,111 @@ class Synopsisdemandeinterv extends CommonObject {
         }
         return $return;
     }
+    
+    function createFi($redirige = true){
+        global $conf;
+        $synopsisdemandeinterv = $this;
+        require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
+        $fichinter = new Synopsisfichinter($this->db);
+
+        $fichinter->date = $synopsisdemandeinterv->date;
+        $fichinter->socid = $synopsisdemandeinterv->socid;
+        $fichinter->duree = $synopsisdemandeinterv->duree;
+        $fichinter->projet_id = $synopsisdemandeinterv->projetidp;
+        $fichinter->author = $synopsisdemandeinterv->fk_user_prisencharge;
+        $fichinter->description = $synopsisdemandeinterv->description;
+        $fichinter->modelpdf = $conf->global->FICHEINTER_ADDON_PDF;
+        $fichinter->fk_di = $synopsisdemandeinterv->id;
+        $fichinter->fk_contrat = $synopsisdemandeinterv->fk_contrat;
+        $fichinter->fk_commande = $synopsisdemandeinterv->fk_commande;
+        $obj = $conf->global->FICHEINTER_ADDON;
+        $obj = "mod_" . $obj;
+        require_once(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/" . $obj . ".php");
+        $modFicheinter = new $obj;
+        $societe = new Societe($this->db);
+        $societe->fetch($fichinter->socid);
+        $fichinter->ref = $modFicheinter->getNextValue($societe, $ficheinter);
+
+        if ($fichinter->socid > 0) {
+            $result = $fichinter->create($user);
+            if ($result > 0) {
+
+                //transfert toutes les lignes
+                $requete = "SELECT *  FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value WHERE typeI = 'DI' AND interv_refid =" . $synopsisdemandeinterv->id;
+                $sql1 = $this->db->query($requete);
+                while ($res1 = $this->db->fetch_object($sql1)) {
+                    if (!in_array($res1->extra_key_refid, array(24, 25, 26, 27))) {
+                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
+                                                (typeI, interv_refid,extra_key_refid,extra_value)
+                                         VALUES ('FI'," . $result . "," . $res1->extra_key_refid . ",'" . addslashes($res1->extra_value) . "')";
+                        $this->db->query($requete);
+                    }
+                }
+                $synopsisdemandeinterv->fetch_lines();
+                //all lines id if lignes[]
+                $objLigneFiche = new SynopsisfichinterLigne($this->db);
+
+                foreach ($synopsisdemandeinterv->lignes as $ligne) {
+                    $objLigneFiche->fk_fichinter = $result;
+                    $objLigneFiche->desc = $ligne->desc;
+                    $objLigneFiche->datei = $ligne->datei;
+                    if ($conf->global->FICHINTER_RESET_DURATION_DI2FI == 1) {
+                        $objLigneFiche->duration = 0;
+                        $objLigneFiche->total_ht = 0;
+                        $objLigneFiche->total_ttc = 0;
+                        $objLigneFiche->total_tva = 0;
+                        $objLigneFiche->pu_ht = 0;
+                    } else {
+                        $objLigneFiche->duration = $ligne->duration;
+                        $objLigneFiche->total_ht = $ligne->total_ht;
+                        $objLigneFiche->total_ttc = $ligne->total_ttc;
+                        $objLigneFiche->total_tva = $ligne->total_tva;
+                        $objLigneFiche->pu_ht = $ligne->pu_ht;
+                    }
+                    if (isset($ligne->fk_prod))
+                        $objLigneFiche->typeIntervProd = $ligne->fk_prod;
+
+                    $objLigneFiche->fk_typeinterv = $ligne->fk_typeinterv;
+                    $objLigneFiche->isDeplacement = $ligne->isDeplacement;
+                    //Si deplacement
+    //                $objLigneFiche->typeIntervProd = false;
+    //                if (isset($ligne->fk_commandede)) {
+    //                    $requete = "SELECT b.rowid
+    //                                      FROM " . MAIN_DB_PREFIX . "product as b,
+    //                                           " . MAIN_DB_PREFIX . "commandedet as cd
+    //                                     WHERE cd.fk_product = b.rowid
+    //                                       AND cd.rowid = " . $ligne->fk_commandedet;
+    //                    $sql3 = $db->query($requete);
+    //                    if ($db->num_rows($sql3) > 0) {
+    //                        $res3 = $db->fetch_object($sql3);
+    //                        $objLigneFiche->typeIntervProd = $res3->rowid;
+    //                        $objLigneFiche->total_ht = $ligne->total_ht;
+    //                        $objLigneFiche->total_ttc = $ligne->total_ttc;
+    //                        $objLigneFiche->total_tva = $ligne->total_tva;
+    //                        $objLigneFiche->pu_ht = $ligne->pu_ht;
+    //                    } else {
+    //                        die($requete);
+    //                    }
+    //                }
+
+                    $objLigneFiche->qte = $ligne->qte;
+                    $objLigneFiche->isForfait = $ligne->isForfait;
+                    $objLigneFiche->fk_commandedet = $ligne->fk_commandedet;
+                    $objLigneFiche->fk_contratdet = $ligne->fk_contratdet;
+                    $objLigneFiche->tx_tva = $ligne->tx_tva;
+
+    //                    print '<br/>';
+    //                    var_dump($objLigneFiche);
+    //                    print '<br/>';
+                    $objLigneFiche->insert($user);
+                }
+                if($redirige)
+                    header('Location: ' . DOL_URL_ROOT . '/synopsisfichinter/card.php?id=' . $result);
+            } else {
+                $mesg = '<div class="error ui-state-error">Impossible de créer la FI' . $fichinter->error . '</div>';
+            }
+        }
+    }
 
     function fetch_client() {
         $this->client = new Societe($this->db);
@@ -136,7 +242,7 @@ class Synopsisdemandeinterv extends CommonObject {
         $this->verifyNumRef();
         $this->statut = 0;
 
-        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisdemandeinterv (fk_soc, datec, ref, fk_user_author, description, model_pdf";
+        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisdemandeinterv (fk_soc, datec, ref, fk_user_author, description, model_pdf, note_public, note_private";
         if ($this->projet_id)
             $sql.= ", fk_projet";
         if ($this->fk_user_prisencharge > 0)
@@ -151,6 +257,8 @@ class Synopsisdemandeinterv extends CommonObject {
         $sql.= " VALUES (" . $this->socid . ",";
         $sql.= " now(), '" . $this->ref . "', " . $this->author;
         $sql.= ", '" . addslashes($this->description) . "', '" . $this->modelpdf . "'";
+        $sql .= ", '" . addslashes($this->note_public) . "'";
+        $sql .= ",  '" . addslashes($this->note_private) . "'";
         if ($this->projet_id)
             $sql .= ", " . $this->projet_id;
         if ($this->fk_user_prisencharge > 0)
@@ -1246,6 +1354,12 @@ class synopsisdemandeintervLigne {
     public $typeInterv;
     public $fk_typeinterv;
     public $dateiunformated;
+    public $qte;
+    public $fk_commandedet;
+    public $fk_contratdet;
+    public $pu_ht;
+    public $total_ttc;
+    public $total_tva;
 
     /**
      *      \brief     Constructeur d'objets ligne d'intervention
@@ -1367,8 +1481,8 @@ class synopsisdemandeintervLigne {
 //                $ligne->total_ht = floatval($ligne->duration) * floatval($pu_ht)/3600;
 //            }
 //Compute total tva / total_TTC
-        $total_ttc = 1.2 * $this->total_ht;
-        $total_tva = 0.2 * $this->total_ht;
+        
+        $this->traitePrice();
 
         // Insertion dans base de la ligne
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'synopsisdemandeintervdet';
@@ -1392,7 +1506,7 @@ class synopsisdemandeintervLigne {
         if ($this->qte > 0)
             $sql .= ' ,' . preg_replace('/,/', '.', $this->qte);
         if ($this->pu_ht != 0 && $this->pu_ht != '')
-            $sql .= "," . preg_replace('/,/', '.', $this->pu_ht) . "," . preg_replace('/,/', '.', $this->total_ht) . "," . preg_replace('/,/', '.', $total_tva) . "," . preg_replace('/,/', '.', $total_ttc);
+            $sql .= "," . preg_replace('/,/', '.', $this->pu_ht) . "," . preg_replace('/,/', '.', $this->total_ht) . "," . preg_replace('/,/', '.', $this->total_tva) . "," . preg_replace('/,/', '.', $this->total_ttc);
         if ($this->fk_commandedet > 0)
             $sql .= ', ' . $this->fk_commandedet;
         if ($this->fk_contratdet > 0)
@@ -1402,9 +1516,6 @@ class synopsisdemandeintervLigne {
         dol_syslog("synopsisdemandeintervLigne::insert sql=" . $sql);
         
         
-        echo 'oo'.$this->fk_contratdet."mm".$this->comLigneId;
-        
-        die($sql);
         $resql = $this->db->query($sql);
         if ($resql) {
             $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX . "synopsisdemandeintervdet");
@@ -1433,6 +1544,19 @@ class synopsisdemandeintervLigne {
             return -1;
         }
     }
+    
+    function traitePrice(){
+        
+
+        if ($this->isForfait == 1 && ($this->pu_ht . "x" != "x")) {
+            $this->total_ht = floatval($this->qte) * floatval($this->pu_ht);
+        } else if ($this->pu_ht . "x" != "x") {
+            $this->total_ht = floatval(($this->qte . "x" == "x" ? 1 : $this->qte)) * floatval($this->duration) * floatval($this->pu_ht) / 3600;
+        }
+
+        $this->total_ttc = 1.2 * $this->total_ht;
+        $this->total_tva = 0.2 * $this->total_ht;
+    }
 
     /**
      *      \brief         Mise a jour de l'objet ligne d'intervention en base
@@ -1441,16 +1565,8 @@ class synopsisdemandeintervLigne {
     function update() {
         $this->db->begin();
         global $user, $langs, $conf;
-
-        if ($this->isForfait == 1 && ($this->pu_ht . "x" != "x")) {
-            $this->total_ht = floatval($this->qte) * floatval($this->pu_ht);
-        } else if ($this->pu_ht . "x" != "x") {
-            $this->total_ht = floatval(($this->qte . "x" == "x" ? 1 : $this->qte)) * floatval($this->duration) * floatval($this->pu_ht) / 3600;
-        }
-
-//print "toto".$this->total_ht;
-        $total_ttc = 1.2 * $this->total_ht;
-        $total_tva = 0.2 * $this->total_ht;
+        
+        $this->traitePrice();
 
 
         // Mise a jour ligne en base
@@ -1466,13 +1582,15 @@ class synopsisdemandeintervLigne {
         if ($this->pu_ht . "x" != "x")
             $sql .= ",total_ht = " . preg_replace('/,/', '.', $this->total_ht);
         if ($this->pu_ht . "x" != "x")
-            $sql .= ",total_tva = " . preg_replace('/,/', '.', $total_tva);
+            $sql .= ",total_tva = " . preg_replace('/,/', '.', $this->total_tva);
         if ($this->pu_ht . "x" != "x")
-            $sql .= ",total_ttc = " . preg_replace('/,/', '.', $total_ttc);
+            $sql .= ",total_ttc = " . preg_replace('/,/', '.', $this->total_ttc);
         if ($this->isForfait . "x" != "x")
             $sql .= ",isForfait = " . $this->isForfait;
         if ($this->comLigneId > 0)
             $sql .= ",fk_commandedet =  " . $this->comLigneId;
+        elseif ($this->fk_commandedet > 0)
+            $sql .= ",fk_commandedet =  " . $this->fk_commandedet;
         else
             $sql .= ",fk_commandedet =  NULL";
 

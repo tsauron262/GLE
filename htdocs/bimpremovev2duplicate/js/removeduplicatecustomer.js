@@ -1,3 +1,9 @@
+/*
+ * Global variable
+ */
+
+var doing_request = false;
+
 /**
  * Ajax functions
  */
@@ -14,93 +20,151 @@ function displayMessage(message, code = 'mesgs') {
     if (message == '')
         alert("Message d'erreur vide");
 
-    $.ajax({
-        type: "POST",
-        url: DOL_URL_ROOT + "/bimpremoveduplicate/interface.php",
-        data: {
-            message: message,
-            code: code,
-            action: 'set_message'
-        },
-        error: function () {
-            console.log("Erreur PHP 1861");
-        },
-        success: function () {
-            location.reload();
-        }
-    });
+    alert(message);
 }
 
 
-function getAllFactures(limit, details) {
+function getAllDuplicate(limit, s_min, s_name, s_email, s_address, s_zip, s_town, s_phone, s_siret, commercial, details) {
 
-    if (limit > 100) {
-        displayMessage("La requête est trop longue (100 doublons ou plus) pour être exécuter.", 'errors');
-        return -1;
-    } else if (limit <= 0) {
+    if (limit <= 0) {
         displayMessage("Le nombre de doublon doit être supérieur à zéro.", 'errors');
-        return -2
+        return -2;
     }
 
+    doing_request = true;
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpremoveduplicate/interface.php",
+        url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
         data: {
             limit: limit,
+            s_min: s_min,
+            s_name: s_name,
+            s_email: s_email,
+            s_address: s_address,
+            s_zip: s_zip,
+            s_town: s_town,
+            s_phone: s_phone,
+            s_siret: s_siret,
+            commercial: commercial,
             details: details,
             action: 'get_all_duplicate'
         },
         beforeSend: function () {
             $('i#spinner').css('display', 'block');
             $('input#display_duplicates').css('display', 'none');
+            $('input#init_duplicate').css('display', 'none');
         },
         error: function () {
+            doing_request = false;
             $('i#spinner').css('display', 'none');
             $('input#display_duplicates').css('display', 'block');
+            $('input#init_duplicate').css('display', 'block');
             alert("Erreur PHP 2654");
         },
         success: function (out) {
+            doing_request = false;
             $('i#spinner').css('display', 'none');
             $('input#display_duplicates').css('display', 'block');
+            $('input#init_duplicate').css('display', 'block');
             $('table#customer > tbody > tr[key_group]').remove();
 
-            var parsed_out = JSON.parse(out);
-            var array_of_duplicate = parsed_out.duplicates;
-            for (var i in array_of_duplicate) {
-                var duplicates = array_of_duplicate[i];
-                var last = Object.keys(duplicates).length - 1;
-                duplicates.forEach(function (useless, index) {
-                    var duplicate = duplicates[index];
-                    var key_group = i;
-                    if (index == last)
-                        var is_last = true;
-                    else
-                        var is_last = false;
-                    if (index == 0)
-                        var is_first = true;
-                    else
-                        var is_first = false;
-                    add_line(duplicate, key_group, is_last, is_first, last + 1);
-                });
+            if (out) {
+                try {
+                    var parsed_out = JSON.parse(out);
+                    var array_of_duplicate = parsed_out.duplicates;
+                    for (var i in array_of_duplicate) {
+                        var duplicates = array_of_duplicate[i];
+
+                        // Get first key
+                        var first_index;
+                        for (var index in duplicates) {
+                            first_index = index;
+                            break;
+                        }
+                        // Get last key and check if a siret is set
+                        var last_index;
+                        var a_siret_is_set = 0;
+                        for (var index in duplicates) {
+                            last_index = index;
+                            if (duplicates[index].siret != '')
+                                a_siret_is_set = 1;
+                        }
+
+                        var nb_line = Object.keys(duplicates).length;
+                        for (var index in duplicates) {
+                            var duplicate = duplicates[index];
+                            var key_group = i;
+                            if (index == last_index)
+                                var is_last = true;
+                            else
+                                var is_last = false;
+                            if (index == first_index)
+                                var is_first = true;
+                            else
+                                var is_first = false;
+                            addLine(duplicate, key_group, is_last, is_first, nb_line, a_siret_is_set);
+                        }
+                    }
+
+
+                    // Add button and his event
+                    if ($('input#merge_duplicates').length == 0)
+                        $('div#id-right').append('<br/><input type="submit" class="butAction" id="merge_duplicates" value="Fusionner tous les doublons">');
+                    iniEventAfterDisplayDuplicate();
+
+                    // Display number group doublon
+                    var nb_row = parsed_out.nb_row;
+                    $('div#db_duplicate').text(nb_row);
+
+                    // Display time exec
+                    var time_exec = parseInt(parsed_out.time_exec);
+                    var date = new Date(null);
+                    date.setSeconds(time_exec);
+                    var time_string = date.toISOString().substr(11, 8);
+                    $('div#time_exec').text(time_string);
+
+                } catch (e) {
+                    displayMessage("Erreur:" + e, 'errors');
+                }
+            } else {
+                displayMessage("Aucune réponse du serveur", 'errors');
             }
-
-            // Add button and his event
-            if ($('input#merge_duplicates').length == 0)
-                $('div#id-right').append('<br/><input type="submit" class="butAction" id="merge_duplicates" value="Fusionner tous les doublons">');
-
-            // Display number group doublon
-            var nb_row = parsed_out.nb_row;
-            $('div#db_duplicate').text(nb_row);
-            iniEventAfterDisplayDuplicate();
         }
     });
+
+    displayProgress(limit);
+
+}
+
+var progress = 0;
+
+function displayProgress(limit) {
+    setTimeout(function () {
+        $.ajax({
+            type: "POST",
+            url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
+            data: {
+                action: 'get_progress'
+            },
+            error: function () {
+                alert("Erreur PHP 6464");
+            },
+            success: function (rowOut) {
+                progress = rowOut;
+                $('div#progress').text(progress + '/' + limit);
+                if (progress < limit && doing_request) {
+                    displayProgress(limit);
+                }
+            }
+        });
+    }, 3000);
 }
 
 function mergeDuplicates(src_to_dest) {
 
     $.ajax({
         type: "POST",
-        url: DOL_URL_ROOT + "/bimpremoveduplicate/interface.php",
+        url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
         data: {
             action: 'merge_duplicates',
             src_to_dest: src_to_dest
@@ -123,33 +187,113 @@ function mergeDuplicates(src_to_dest) {
     });
 }
 
+function initDuplicate() {
+
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
+        data: {
+            action: 'init_duplicate'
+        },
+        beforeSend: function () {
+            $('i#spinner_init').css('display', 'block');
+            $('input#display_duplicates').css('display', 'none');
+            $('input#init_duplicate').css('display', 'none');
+        },
+        error: function () {
+            $('i#spinner_init').css('display', 'none');
+            $('input#display_duplicates').css('display', 'block');
+            $('input#init_duplicate').css('display', 'block');
+            alert("Erreur PHP 8647");
+        },
+        success: function (rowOut) {
+            $('i#spinner_init').css('display', 'none');
+            $('input#display_duplicates').css('display', 'block');
+            $('input#init_duplicate').css('display', 'block');
+            var out = JSON.parse(rowOut);
+            if (out) {
+                try {
+                    if (parseInt(out.code) == 1)
+                        displayMessage("Tous les tiers ont été réinitialisé.", 'mesgs');
+                    else if (parseInt(out.code) == 0)
+                        displayMessage("Rien n'a été fait.", 'warnings');
+                    else
+                        displayMessage("Erreur inconnue.", 'errors');
+                } catch (e) {
+                    displayMessage("Erreur:" + e, 'errors');
+                }
+            } else {
+                displayMessage("Aucune réponse du serveur", 'errors');
+            }
+        }
+    });
+}
+
 /**
  * Ready
  */
 
 $(document).ready(function () {
     initEvents();
+    $('.select2').select2();
+
+    // Prevent leave without
+    window.addEventListener('beforeunload', function (e) {
+        e.preventDefault();
+        e.returnValue = '';
+    });
 });
+
+
 /**
  * Functions
  */
 function initEvents() {
+    // DISPLAY DUPLICATE
     // By Clicking
     $('input#display_duplicates').click(function () {
-        var limit = parseInt($('input#limit').val());
-        getAllFactures(limit, 'true');
+        preGetAllDuplicate();
     });
 
     // By pressing enter
     $('input#limit').keypress(function (e) {
         if (e.which == 13) {
-            var limit = parseInt($('input#limit').val());
-            getAllFactures(limit, 'true');
+            preGetAllDuplicate();
         }
+    });
+
+    // INIT DUPLICATE
+    $('input#init_duplicate').click(function () {
+        if (confirm("Êtes-vous sûr de vouloir réinitialiser les tiers ?\n\
+Cette action marquera TOUS les tiers comme étant non vérifiés\n\
+par ce programme de détection des doublons."))
+            initDuplicate();
     });
 }
 
-function iniEventOne() {
+function preGetAllDuplicate() {
+    var limit = parseInt($('input#limit').val());
+    var s_min = parseInt($('input#s_min').val());
+    var s_name = parseInt($('input#s_name').val());
+    var s_email = parseInt($('input#s_email').val());
+    var s_address = parseInt($('input#s_address').val());
+    var s_zip = parseInt($('input#s_zip').val());
+    var s_town = parseInt($('input#s_town').val());
+    var s_phone = parseInt($('input#s_phone').val());
+    var s_siret = parseInt($('input#s_siret').val());
+    var commercial = getCommercial();
+    getAllDuplicate(limit, s_min, s_name, s_email, s_address, s_zip, s_town, s_phone, s_siret, commercial, 'true');
+}
+
+function getCommercial() {
+    var commercial = [];
+    $.each($("select#commercial > option:selected"), function () {
+        commercial.push($(this).val());
+    });
+    return commercial;
+}
+
+function iniEventAfterDisplayDuplicate() {
     // Merge duplicate
     $('input#merge_duplicates').click(function () {
         var radio_checked = {};
@@ -169,10 +313,7 @@ function iniEventOne() {
         });
         mergeDuplicates(src_to_dest);
     });
-}
 
-
-function iniEventAfterDisplayDuplicate() {
     // Merge only group
     $('input[merge_this_group="true"]').click(function () {
         var key_group = $(this).attr('key_group');
@@ -191,6 +332,7 @@ function iniEventAfterDisplayDuplicate() {
         });
         mergeDuplicates(src_to_dest);
     });
+
     // Prevent merge it self, part 1
     $('input[r_keep=true]').change(function () {
         if ($(this).prop('checked'))
@@ -214,7 +356,7 @@ function iniEventAfterDisplayDuplicate() {
  * @param {type} is_last used to split group with black tr
  * @return {undefined}
  */
-function add_line(c, key_group, is_last, is_first, nb_in_group) {
+function addLine(c, key_group, is_last, is_first, nb_in_group, a_siret_is_set) {
 
     if (is_last) {
         var html = '<tr id="' + c.rowid + '" key_group=' + key_group + ' class="last">';
@@ -224,15 +366,21 @@ function add_line(c, key_group, is_last, is_first, nb_in_group) {
 
     if (is_first)
         html += '<td rowspan=' + nb_in_group + ' style="border-bottom: solid black 1px;"><input type="submit" class="butAction" key_group="' + key_group + '" merge_this_group="true" value="Fusionner"></td>';
-    html += '<td><input r_keep="true" type="radio" name="' + key_group + '" value=' + c.rowid + ' checked></td>'; // TODO remove "checked"
+
+    if (a_siret_is_set == 0 || (a_siret_is_set == 1 && c.siret != ''))
+        html += '<td><input r_keep="true" type="radio" name="' + key_group + '" value=' + c.rowid + ' checked></td>';
+    else
+        html += '<td><input r_keep="true" type="radio" name="' + key_group + '" value=' + c.rowid + '></td>';
+
     html += '<td><input cb_merge="true" type="checkbox" name="' + key_group + '" value=' + c.rowid + '></td>';
     html += '<td>' + c.nom + '</td>';
     html += '<td>' + c.email + '</td>';
     html += '<td>' + c.address + '</td>';
     html += '<td>' + c.zip + '</td>';
-//    html += '<td>' + ((c.statut == '1') ? 'Oui' : 'Non') + '</td>';
     html += '<td>' + c.town + '</td>';
     html += '<td>' + c.phone + '</td>';
+    html += '<td>' + c.siret + '</td>';
+    html += '<td>' + convertDate(c.datec) + '</td>';
 
     // Commerciaux
     html += '<td>';
@@ -244,7 +392,8 @@ function add_line(c, key_group, is_last, is_first, nb_in_group) {
     }
     html += '</td>';
 
-    // Link to societe
+
+// Link to societe
     html += '<td><a target=blank href="' + DOL_URL_ROOT + '/societe/card.php?socid=' + c.rowid + '" title="<div class=&quot;centpercent&quot;><u>ShowCompany</u></div>" class="classfortooltip refurl">';
     html += '<img src="/bimp-8/bimp-erp/htdocs/theme/eldy/img/object_company.png" alt="" class="paddingright classfortooltip valigntextbottom"> </a></td>';
     html += '<td name="errors"></td>';
@@ -328,3 +477,13 @@ var getUrlParameter = function getUrlParameter(sParam) {
         }
     }
 };
+
+function convertDate(inputFormat) {
+    if (inputFormat === null)
+        return '';
+    function pad(s) {
+        return (s < 10) ? '0' + s : s;
+    }
+    var d = new Date(inputFormat);
+    return [pad(d.getDate()), pad(d.getMonth() + 1), d.getFullYear()].join('/');
+}

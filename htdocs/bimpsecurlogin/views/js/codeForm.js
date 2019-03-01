@@ -9,6 +9,8 @@ $(function() {
         t = $(e.target),
         sib = t.next("input");
 
+console.log(key);
+
         if(key == 13)
             $('.btn').click();
 

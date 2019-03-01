@@ -24,7 +24,7 @@
                     </button>
 		</form>
                 <form>
-                    <button id="btn_renvoi">Code non reçus ? renvoyer le code</button>
+                    <button id="btn_renvoi">Code non reçu ? Renvoyer le code</button>
 		</form>   
             </center>    
         </section>

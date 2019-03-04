@@ -76,7 +76,7 @@ class Interfacevalidateorder extends DolibarrTriggers
             if(in_array($object->cond_reglement_id, array(0, 39))){
                     setEventMessages("Merci de séléctionné les condition de réglements", null, 'errors');
                     return -2;
-                }
+            }
             $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
             if (count($tabConatact) < 1) {
                 if (!is_object($object->thirdparty)) {

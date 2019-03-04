@@ -1111,7 +1111,7 @@ class BimpDocumentPDF extends BimpModelPDF
         if (isset($this->object->paye) && $this->object->paye) {
             $resteapayer = 0;
         } else {
-            $resteapayer = price2num($total_ttc - $deja_regle - $creditnoteamount - $depositsamount - $this->acompteHt, 'MT');
+            $resteapayer = price2num($total_ttc - $deja_regle - $creditnoteamount - $depositsamount - $this->acompteTtc, 'MT');
         }
 
         if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0) {

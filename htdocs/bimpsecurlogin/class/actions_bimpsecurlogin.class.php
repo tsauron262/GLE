@@ -56,6 +56,7 @@ class securLogSms {
             $this->user->fetch($id_user);
         } elseif (is_object($id_user))
             $this->user = $id_user;
+        $this->user->oldCopy = clone $this->user;
 
         $this->nomCookie = "secu_erp" . $this->user->id."_".str_replace(".", "_", $_SERVER['REMOTE_ADDR']);
 

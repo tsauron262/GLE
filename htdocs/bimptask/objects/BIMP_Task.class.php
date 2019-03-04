@@ -332,7 +332,7 @@ class BIMP_Task extends BimpObject
                     $buttons[] = array(
                         'label'   => 'Refuser l\'attribution',
                         'icon'    => 'window-close',
-                        'onclick' => $this->getJsActionOnclick('attribute', array('id_user_owner' => 0))
+                        'onclick' => $this->getJsActionOnclick('attribute', array('id_user_owner' => 0), array('confirm_msg' => "Refuser l\'attribution ?"))
                     );
                 }
             }

@@ -56,6 +56,7 @@ class securLogSms {
             $this->user->fetch($id_user);
         } elseif (is_object($id_user))
             $this->user = $id_user;
+        $this->user->oldCopy = clone $this->user;
 
         $this->nomCookie = "secu_erp" . $this->user->id."_".str_replace(".", "_", $_SERVER['REMOTE_ADDR']);
 
@@ -186,6 +187,8 @@ class securLogSms {
                     $okMail = true;
                 }
             }
+            
+            mailSyn2("Code envoyé", "admin@bimp.fr", "admin@bimp.fr", "Bonjour un code a été envoyé ".($okSms? "par sms ":"").($okMail? "par mail ":"")." pour l'utilisateur ".$this->user->getNomUrl(1)." ip ".$_SERVER['REMOTE_ADDR']);
 
             if($okSms || $okMail){
             }
@@ -264,7 +267,7 @@ class securLogSms {
     public function createWhiteList(){
 //        $sql = $this->db->query("SELECT count(DISTINCT(fk_user)) as nb, `ip` FROM `llx_events` WHERE `type` = 'USER_LOGIN' GROUP BY `ip` ORDER BY `nb` DESC");
         $sql = $this->db->query("SELECT COUNT(DISTINCT(id_user)) as nb, IP as ip FROM `llx_bimp_secure_log` WHERE 1 GROUP BY IP ORDER BY `nb` DESC");
-        $tabIp = array();
+        $tabIp = array("78.195.193.207//flo");
         while($ln = $this->db->fetch_object($sql))
                 if($ln->nb > 1)
                     $tabIp[] = $ln->ip;

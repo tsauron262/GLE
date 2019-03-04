@@ -31,10 +31,17 @@ class securLogSms {
         if (!$this->isSecur()) {
             $code = GETPOST("sms_code_1") . GETPOST("sms_code_2") . GETPOST("sms_code_3") . GETPOST("sms_code_4");
             if ($this->user->array_options['options_echec_auth'] < $this->max_tentative) {
+                $dateFinBloquage = time()-(60*5);
+                
+                $secondeRestante = $this->user->array_options['options_heure_sms'] - $dateFinBloquage;
+                
+                
                 if (!empty($code))
                     $this->testCode($code);
-                else
+                elseif($secondeRestante < 0)
                     $this->createSendCode();
+                else
+                    $this->message[] = "Vous devez attendre ".date("i", $secondeRestante)." minutes ".date("s", $secondeRestante)." secondes pour avoir un nouveau code !";
             }
 
             if (!$this->isSecur()) {
@@ -165,6 +172,7 @@ class securLogSms {
         $okSms = $okMail = false;
         $code = rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
         $this->user->array_options['options_code_sms'] = $code;
+        $this->user->array_options['options_heure_sms'] = dol_now();
         $this->user->update($user);
         $text = "Votre code est : " . $code;
         require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");

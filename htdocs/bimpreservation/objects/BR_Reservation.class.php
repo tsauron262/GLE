@@ -705,9 +705,9 @@ class BR_Reservation extends BimpObject
 
         $this->set('id_product', $line->fk_product);
         $product = $this->getChildObject('product');
-        echo '<pre>';
-        $product->printData();
-        echo '</pre>';
+//        echo '<pre>';
+//        $product->printData();
+//        echo '</pre>';
         if (is_null($product) || !$product->isLoaded()) {
             return array('Produit d\'ID ' . $line->fk_product . ' invalide');
         } else {

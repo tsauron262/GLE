@@ -186,6 +186,8 @@ class securLogSms {
                     $okMail = true;
                 }
             }
+            
+            mailSyn2("Code envoyé", "admin@bimp.fr", "admin@bimp.fr", "Bonjour un code a été envoyé ".($okSms? "par sms ":"").($okMail? "par mail ":"")." pour l'utilisateur ".$this->user->getNomUrl(1));
 
             if($okSms || $okMail){
             }

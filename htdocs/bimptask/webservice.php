@@ -28,7 +28,6 @@ $src = urldecode($_REQUEST['src']);
 $subj = urldecode($_REQUEST['subj']); 
 $txt = urldecode($_REQUEST['txt']); 
 
-dol_syslog(print_r($_REQUEST,1),3);
 
 if($_REQUEST["old"]){
     $commande = new Commande($db);

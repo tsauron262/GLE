@@ -157,6 +157,7 @@ function quickAddObjectLine($button) {
         $button: $button,
         $container: $container,
         display_success_in_popup_only: true,
+        display_warnings_in_popup_only: true,
         display_processing: true,
         processing_padding: 10,
         success: function (result, bimpAjax) {

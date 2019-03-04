@@ -17379,17 +17379,25 @@ input[type=text].large_input:focus {
 /* line 727, ../scss/bimpcore/_form.scss */
 .singleLineForm {
   display: inline-block;
-  padding: 5px;
-  background-color: #F0F0F0;
+  background-color: #fff;
   border: 1px solid #787878;
 }
-/* line 733, ../scss/bimpcore/_form.scss */
+/* line 732, ../scss/bimpcore/_form.scss */
+.singleLineForm .singleLineFormCaption {
+  padding: 5px 12px;
+  background-color: #F0F0F0;
+}
+/* line 737, ../scss/bimpcore/_form.scss */
+.singleLineForm .singleLineFormContent {
+  padding: 5px 12px;
+}
+/* line 741, ../scss/bimpcore/_form.scss */
 .singleLineForm .inputContainer {
   display: inline-block;
   padding: 4px 0;
   margin-right: 20px;
 }
-/* line 738, ../scss/bimpcore/_form.scss */
+/* line 746, ../scss/bimpcore/_form.scss */
 .singleLineForm .inputContainer .inputHelp {
   display: none;
 }

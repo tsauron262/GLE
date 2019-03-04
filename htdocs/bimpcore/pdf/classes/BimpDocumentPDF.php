@@ -22,11 +22,18 @@ class BimpDocumentPDF extends BimpModelPDF
     public $hideTotal = false;
     public $hideRef = false;
     public $hideLabelProd = true;
+    public $periodicity = 0;
+    public $nbPeriods = 0;
+    public $proforma = 0;
     public $totals = array("DEEE" => 0, "RPCP" => 0);
 
     public function __construct($db)
     {
         parent::__construct($db, 'P', 'A4');
+        if (!defined('BIMP_LIB')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+        }
+        BimpObject::loadClass('bimpcommercial', 'BimpComm');
     }
 
     // Initialisation
@@ -35,6 +42,7 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         if (!count($this->errors)) {
             if (!is_null($this->object) && isset($this->object->id) && $this->object->id) {
+
                 if (isset($this->object->array_options['options_pdf_hide_price'])) {
                     $this->hidePrice = true;
                     $this->hideTotal = true;
@@ -51,6 +59,16 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (isset($this->object->array_options['options_pdf_hide_ref'])) {
                     $this->hideRef = (int) $this->object->array_options['options_pdf_hide_ref'];
                 }
+                if (isset($this->object->array_options['options_pdf_periodicity'])) {
+                    $this->periodicity = (int) $this->object->array_options['options_pdf_periodicity'];
+                }
+                if (isset($this->object->array_options['options_pdf_periods_number'])) {
+                    $this->nbPeriods = (int) $this->object->array_options['options_pdf_periods_number'];
+                }
+                if (isset($this->object->array_options['options_pdf_proforma'])) {
+                    $this->proforma = (int) $this->object->array_options['options_pdf_proforma'];
+                }
+
                 if (is_null($this->contact)) {
                     $contacts = $this->object->getIdContact('external', 'CUSTOMER');
                     if (isset($contacts[0]) && $contacts[0]) {
@@ -271,7 +289,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     protected function renderContent()
     {
-        $this->renderAddresses($this->thirparty, $this->contact);
+        $this->renderDocInfos($this->thirparty, $this->contact);
         $this->renderTop();
         $this->renderBeforeLines();
         $this->renderLines();
@@ -316,7 +334,7 @@ class BimpDocumentPDF extends BimpModelPDF
         return $html;
     }
 
-    public function renderAddresses()
+    public function renderDocInfos()
     {
         $html = '';
 
@@ -839,9 +857,17 @@ class BimpDocumentPDF extends BimpModelPDF
 
         // Total remises: 
         if (!$this->hideReduc && $this->total_remises > 0) {
+            $total_remises = $this->total_remises;
+            if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
+                $total_remises /= $this->nbPeriods;
+            }
             $html .= '<tr>';
             $html .= '<td style="background-color: #F0F0F0;">Total remises HT</td>';
-            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($this->total_remises, 0, $this->langs) . '</td>';
+            $html .= '<td style="text-align: right; background-color: #F0F0F0;">' . price($total_remises, 0, $this->langs);
+            if ((int) $this->periodicity) {
+                $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+            }
+            $html .= '</td>';
             $html .= '</tr>';
         }
 
@@ -849,17 +875,40 @@ class BimpDocumentPDF extends BimpModelPDF
 
         // Total HT:
         $total_ht = ($conf->multicurrency->enabled && $this->object->mylticurrency_tx != 1 ? $this->object->multicurrency_total_ht : $this->object->total_ht);
+        $total_ht += (!empty($this->object->remise) ? $this->object->remise : 0) + $this->acompteHt;
+
+        if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
+            $total_ht /= $this->nbPeriods;
+        }
+
         $html .= '<tr>';
         $html .= '<td style="">' . $this->langs->transnoentities("TotalHT") . '</td>';
-        $html .= '<td style="text-align: right;">' . price($total_ht + (!empty($this->object->remise) ? $this->object->remise : 0) + $this->acompteHt, 0, $this->langs) . '</td>';
+        $html .= '<td style="text-align: right;">';
+        $html .= price($total_ht, 0, $this->langs);
+
+        if ((int) $this->periodicity) {
+            $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+        }
+
+        $html .= '</td>';
         $html .= '</tr>';
 
 
         // Total DEEE
         if ($this->totals['DEEE'] > 0) {
+            $total_deee = $this->totals['DEEE'];
+
+            if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
+                $total_deee /= $this->nbPeriods;
+            }
+
             $html .= '<tr>';
             $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("Dont éco-participation HT") . '</td>';
-            $html .= '<td style="background-color: #DCDCDC;text-align: right;">' . price($this->totals['DEEE']) . '</td>';
+            $html .= '<td style="background-color: #DCDCDC;text-align: right;">' . price($total_deee, 0, $this->langs);
+            if ((int) $this->periodicity) {
+                $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+            }
+            $html .= '</td>';
             $html .= '</tr>';
         }
 
@@ -882,9 +931,17 @@ class BimpDocumentPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
+                            if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
+                                $tvaval /= $this->nbPeriods;
+                            }
+
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
+                            if ((int) $this->periodicity) {
+                                $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+                            }
+                            $html .= '</td>';
                             $html .= '</tr>';
                         }
                     }
@@ -906,9 +963,17 @@ class BimpDocumentPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT2", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
+                            if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
+                                $tvaval /= $this->nbPeriods;
+                            }
+
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
+                            if ((int) $this->periodicity) {
+                                $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+                            }
+                            $html .= '</td>';
                             $html .= '</tr>';
                         }
                     }
@@ -926,9 +991,17 @@ class BimpDocumentPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalVAT", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate($tvakey, 1) . $tvacompl;
 
+                            if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
+                                $tvaval /= $this->nbPeriods;
+                            }
+
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
+                            if ((int) $this->periodicity) {
+                                $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+                            }
+                            $html .= '</td>';
                             $html .= '</tr>';
                         }
                     }
@@ -950,9 +1023,17 @@ class BimpDocumentPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT1", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
+                            if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
+                                $tvaval /= $this->nbPeriods;
+                            }
+
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
+                            if ((int) $this->periodicity) {
+                                $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+                            }
+                            $html .= '</td>';
                             $html .= '</tr>';
                         }
                     }
@@ -974,9 +1055,17 @@ class BimpDocumentPDF extends BimpModelPDF
                             $totalvat = $this->langs->transcountrynoentities("TotalLT2", $this->fromCompany->country_code) . ' ';
                             $totalvat .= vatrate(abs($tvakey), 1) . $tvacompl;
 
+                            if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
+                                $tvaval /= $this->nbPeriods;
+                            }
+
                             $html .= '<tr>';
                             $html .= '<td style="background-color: #F0F0F0;">' . $totalvat . '</td>';
-                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs) . '</td>';
+                            $html .= '<td style="background-color: #F0F0F0; text-align: right;">' . price($tvaval, 0, $this->langs);
+                            if ((int) $this->periodicity) {
+                                $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+                            }
+                            $html .= '</td>';
                             $html .= '</tr>';
                         }
                     }
@@ -984,9 +1073,19 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 // Total TTC
                 $total_ttc = ($conf->multicurrency->enabled && $this->object->multicurrency_tx != 1) ? $this->object->multicurrency_total_ttc : $this->object->total_ttc;
+                $total_ttc += $this->acompteTtc;
+
+                if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
+                    $total_ttc /= $this->nbPeriods;
+                }
+
                 $html .= '<tr>';
                 $html .= '<td style="background-color: #DCDCDC;">' . $this->langs->transnoentities("TotalTTC") . '</td>';
-                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($total_ttc + $this->acompteTtc, 0, $this->langs) . '</td>';
+                $html .= '<td style="background-color: #DCDCDC; text-align: right;">' . price($total_ttc, 0, $this->langs);
+                if ((int) $this->periodicity) {
+                    $html .= ' / ' . BimpComm::$pdf_periodicity_label_masc[(int) $this->periodicity];
+                }
+                $html .= '</td>';
                 $html .= '</tr>';
             }
         }

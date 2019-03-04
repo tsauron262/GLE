@@ -406,12 +406,9 @@ fields_tables:
         title: Montants totaux
         icon: euro
                   
-    note_public:
+    notes:
         rows: 
             - field: note_public
-    
-    note_private:
-        rows: 
             - field: note_private
     
 filters_panels: 
@@ -471,15 +468,9 @@ views:
                                 name: client
                                 
                       - cols:
-                          - type: fields_table
-                            fields_table:
-                                name: pdf
-                                
-            - cols:
-                - type: view
-                  view: 
-                      name: notes
-                      panel: 1
+                            - type: fields_table
+                              fields_table: 
+                                  name: notes
                             
     full: 
         objects_change_reload: Bimp_File
@@ -498,19 +489,23 @@ views:
     content: 
         rows: 
             - cols: 
-                - type: fields_table
-                  col_lg: 5
-                  col_md: 5
-                  col_sm: 12
-                  fields_table: 
-                      name: totals
-
-                - type: custom
+                - type: rows
                   col_lg: 7
                   col_md: 7
                   col_sm: 12
-                  custom: 
-                      callback: renderMarginsTable
+                  rows: 
+                      - cols: 
+                            - type: fields_table
+                              fields_table: 
+                                  name: totals
+                            - type: custom
+                              custom:
+                                  callback: renderMarginsTable
+                - type: fields_table
+                  col_lg: 5
+                  col_md: 5
+                  fields_table:
+                      name: pdf
                       
             - cols: 
                 - type: custom
@@ -532,26 +527,6 @@ views:
                       name: default
                       children: lines
                       title: Lignes
-                      
-    notes: 
-        title: Notes
-        icon: fas_file-alt
-        rows: 
-            - cols:
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: note_public
-                      panel: 0
-                - type: fields_table
-                  col_lg: 6
-                  col_md: 6
-                  col_sm: 12
-                  fields_table: 
-                      name: note_private
-                      panel: 0
                       
     full: 
         objects_change_reload: Bimp_File

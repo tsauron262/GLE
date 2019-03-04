@@ -25,7 +25,6 @@ class BimpDocumentPDF extends BimpModelPDF
     public $periodicity = 0;
     public $nbPeriods = 0;
     public $proforma = 0;
-    public $maxLogoWidth = 25; // mm
     public $totals = array("DEEE" => 0, "RPCP" => 0);
 
     public function __construct($db)
@@ -185,26 +184,20 @@ class BimpDocumentPDF extends BimpModelPDF
             }
         }
 
-        $logo_width = 0;
+        $logo_height = 0;
         if (!file_exists($logo_file)) {
             $logo_file = '';
         } else {
-            include_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';
-            $sizes = dol_getImageSize($logo_file, false);
+            $logo_height = pdf_getHeightForLogo($logo_file, false);
+        }
 
-            if ($sizes['width']) {
-                if ($sizes['width'] > $this->maxLogoWidth) {
-                    $logo_width = $this->maxLogoWidth;
-                } else {
-                    $logo_width = $sizes['width'];
-                }
-            }
+        if ($logo_height > 30 || $logo_height === 22) {
+            $logo_height = 30;
         }
 
         $this->header_vars = array(
             'logo_img'     => $logo_file,
-            'logo_width'   => $logo_width * BimpPDF::$pxPerMm,
-            'header_infos' => 'TEST',
+            'logo_height'  => $logo_height * BimpPDF::$pxPerMm,
             'header_right' => array('rows' => $rows)
         );
     }

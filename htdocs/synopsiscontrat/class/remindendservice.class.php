@@ -69,7 +69,7 @@ class RemindEndService {
                     'statut_line' => $obj->statut_line,
                     'id_contrat' => $obj->c_rowid,
                     'id_line' => $obj->cd_rowid,
-                    'nom' => $societe->name,
+                    'nom' => $societe->getNomUrl(1),
                     'nom_url' => $contrat->getNomUrl(1));
             }
         }

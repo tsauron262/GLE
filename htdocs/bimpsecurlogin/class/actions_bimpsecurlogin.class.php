@@ -239,7 +239,7 @@ class securLogSms {
                 $phone = "+33" . substr($phone, 1);
         }
         if (!$this->isPhoneMobile($phone) && $this->user->array_options['options_phone_perso'] != ""){//Si pas trouver 
-            $phone = $this->user->array_options['options_phone_perso'];
+            $phone = str_replace(array(" ", "-", ":"), "", $this->user->array_options['options_phone_perso']);
             if (stripos($phone, "+") === false) {
                 if (stripos($phone, "0") === 0)
                     $phone = "+33" . substr($phone, 1);

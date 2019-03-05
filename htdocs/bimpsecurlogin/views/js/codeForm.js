@@ -1,56 +1,86 @@
-$(function() {
-    "use strict"; // Appel du mode strict
-    
-    var body = $("body");
+$(function() {var body = $("body");
+  var code1 = $('input[name="sms_code_1"]');
+  var code2 = $('input[name="sms_code_2"]');
+  var code3 = $('input[name="sms_code_3"]');
+  var code4 = $('input[name="sms_code_4"]');
+  code1.select();
 
+  function Pasted(e) {
+    code1.prop("disabled", false);
+    var memoire = code1.val();
+    code1.val('');
+     setTimeout(function () {
+        traitementCode(memoire);
+    }, 100);
+  }
 
-    function goToNextInput(e) {
-        var key = e.which,
-        t = $(e.target),
-        sib = t.next("input");
+  function for_iphone(e) {
+    var memoire = code1.val();
+    traitementCode(memoire);
+  }
 
-console.log(key);
-
-        if(key == 13)
-            $('.btn').click();
-
-
-        if (key != 9 && (key < 48 || key > 57)) {
-            e.preventDefault();
-            return false;
+  function traitementCode(memoire) {
+    var pasted = code1.val();
+        if(pasted >= 0 && pasted.length == 4){
+          code1.attr("value", pasted[0]);
+          code1.val(pasted[0]);
+          code2.val(pasted[1]);
+          code3.val(pasted[2]);
+          code4.val(pasted[3]);
+          disabled('all', pasted);
+        } else { 
+          if(pasted.length != 1) {
+            $("#error_js").text('Collage impossible. Le code doit contenir 4 chiffres'); 
+          code1.val(memoire);
         }
-
-        if (key === 9) {
-            return true;
         }
+  }
 
-        if (!sib || !sib.length) {
-            sib = body.find("input").eq(0);
+  function Input(e) {
+      var key = e.key;
+      target = $(e.target);
+      next = target.next('input');
+      if(key == 'Enter') { $('.btn').click();}
+      if(key < 0 || key > 9) { e.preventDefault(); return false;}
+      if (key === 9) { return true;}
+        if (!next || !next.length) {
+            next = body.find("input").eq(0);
         }
-        
-        
         var re = new RegExp("^[0-9]");
         if(re.test(e.key)) 
-            sib.select().focus();
+            next.select().focus();
+  }
+  
+  function onSubmit(e){
+        $("input").prop("disabled", false);
+  }
+
+
+  function disabled(element, pasted) {
+    var parsed = parseInt(pasted, 10);
+     if(parsed >= 0 || pasted != '') {
+       if(element = 'all') {
+        code1.prop("disabled", true);
+        code2.prop("disabled", true);
+        code3.prop("disabled", true);
+        code4.prop("disabled", true);
+        $("#error_js").text(''); 
+      }
+     } else {
+       $("#error_js").text("Merci de copier/coller des chiffres et non du texte " + parsed);
+     }    
+  };
+$('input[name="sms_code_1"]').on("keyup", function() {
+    if($(this).val().length == 4) {
+      for_iphone();
     }
+});
+body.on("submit", function(){
+    onSubmit();
+});
 
-    function onKeyDown(e) { 
-        var key = e.which;
-        if (key === 9 || (key >= 48 && key <= 57)) {
-            return true;
-        }
 
-        e.preventDefault();
-          return false;
-    }
 
-    function onFocus(e) {
-        $(e.target).select();
-    }
-        
-
-        body.on("keyup", "input", goToNextInput);
-        body.on("keydown", "input", onKeyDown);
-        body.on("click", "input", onFocus);
-        $("input[name='sms_code_1'").trigger("click");
+  body.on("keyup", "input", Input);
+  body.on("paste", code1, Pasted);
     });

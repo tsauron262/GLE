@@ -698,7 +698,7 @@ class PDO extends AbstractBackend {
                 $stat = "NEEDS-ACTION";
                 if (preg_match("/^.*PARTSTAT=(.+);.+$/U", $ligne, $retour))
                     $stat = $retour[1];
-                $tabT = explode("mailto:", $ligne);
+                $tabT = explode("mailto:", strtolower($ligne));
                 if (isset($tabT[2])) {
                     $mailT = str_replace(" ", "", $tabT[2]);
                     $tabMail[$mailT] = array($mailT, $stat);

@@ -720,7 +720,7 @@ class PDO extends AbstractBackend {
                 }
             }
             if (stripos($ligne, "ORGANIZER") !== false || stripos($nom, "ORGANIZER") !== false) {
-                $tabT = explode("mailto:", $ligne);
+                $tabT = explode("mailto:", strtolower($ligne));
                 if (isset($tabT[2])) {
                     $mailT = str_replace(" ", "", $tabT[2]);
                     $organisateur = $mailT;

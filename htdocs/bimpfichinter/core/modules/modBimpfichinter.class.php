@@ -279,7 +279,7 @@ class modBimpfichinter extends DolibarrModules {
     public function init($options = '') {
         $sql = array();
 
-        $sql[] = "INSERT INTO `" . MAIN_DB_PREFIX . "document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'recaptemps', 1, 'fichinter', 'recaptemps', NULL);";
+        $sql[] = "INSERT INTO `" . MAIN_DB_PREFIX . "document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'recaptemps', 1, 'company', 'Recaptemps', NULL);";
 
         return $this->_init($sql, $options);
     }
@@ -294,6 +294,7 @@ class modBimpfichinter extends DolibarrModules {
      */
     public function remove($options = '') {
         $sql = array();
+        $sql[] = "DELETE FROM `" . MAIN_DB_PREFIX . "document_model`  WHERE `nom`='recaptemps'";
 
         return $this->_remove($sql, $options);
     }

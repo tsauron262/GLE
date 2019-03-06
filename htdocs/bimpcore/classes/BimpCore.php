@@ -29,6 +29,7 @@ class BimpCore
         )
     );
     public static $filesInit = false;
+    public static $config = null;
 
     public static function displayHeaderFiles()
     {
@@ -125,5 +126,20 @@ class BimpCore
         $bdb->update('bimpcore_conf', array(
             'value' => json_encode($versions)
                 ), '`name` = \'bimpcore_version\'');
+    }
+
+    public static function getParam($full_path, $default_value = '', $type = 'string')
+    {
+        if (is_null(self::$config)) {
+            if (file_exists(DOL_DATA_ROOT . '/bimpcore/config.yml')) {
+                self::$config = new BimpConfig(DOL_DATA_ROOT . '/bimpcore/', 'config.yml', new BimpObject('', ''));
+            }
+        }
+        
+        if (!is_null(self::$config)) {
+            return self::$config->get($full_path, $default_value, false, $type);
+        }
+        
+        return $default_value;
     }
 }

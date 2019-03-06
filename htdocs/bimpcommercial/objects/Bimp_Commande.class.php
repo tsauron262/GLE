@@ -19,7 +19,7 @@ class Bimp_Commande extends BimpComm
     // Gestion des droits et autorisations: 
 
     public function canCreate()
-    {        
+    {
         if (defined('NOLOGIN')) {
             return 1;
         }
@@ -1023,7 +1023,7 @@ class Bimp_Commande extends BimpComm
             }
             $result = $this->db->executeS($sql . ' AND `status` < 250');
             if ((int) $result[0]->qty !== (int) ($nCommandeProducts - $nToShipProducts - $nShippedProducts)) {
-                $errors[] = 'Le nombre de réservations non expédiées ou en attente d\'expédition est incorrect: '.$result[0]->qty.' => '.$nCommandeProducts.  ', ' . $nToShipProducts .  ', ' . $nShippedProducts;
+                $errors[] = 'Le nombre de réservations non expédiées ou en attente d\'expédition est incorrect: ' . $result[0]->qty . ' => ' . $nCommandeProducts . ', ' . $nToShipProducts . ', ' . $nShippedProducts;
             }
         }
 
@@ -1248,6 +1248,44 @@ class Bimp_Commande extends BimpComm
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        $errors = array();
+
+        if ((int) BimpTools::getValue('close_propal', 0)) {
+            $origin = BimpTools::getValue('origin', '');
+            $origin_id = (int) BimpTools::getValue('origin_id', 0);
+
+            if ($origin === 'propal') {
+                if (!$origin_id) {
+                    $errors[] = 'ID de la proposition commerciale d\'origine absent';
+                } else {
+                    $propal = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $origin_id);
+
+                    if (!BimpObject::objectLoaded($propal)) {
+                        $errors[] = 'La proposition commeciale d\'origine d\'ID ' . $origin_id . ' n\'existe pas';
+                    } else {
+                        $close_errors = array();
+                        if (!$propal->isActionAllowed('close', $close_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($close_errors, 'La proposition commerciale ne peut pas être signée');
+                        } elseif (!$propal->canSetAction('close')) {
+                            $errors[] = 'Vous n\'avez pas la permission de signer la proposition commerciale';
+                        } else {
+                            $success = '';
+                            $result = $propal->actionClose(array(
+                                'new_status' => 2
+                            ), $success);
+                            if (count($result['errors'])) {
+                                $errors = $result['errors'];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (count($errors)) {
+            return $errors;
+        }
+
         $this->set('date_creation', date('Y-m-d H:i:s'));
 
         return parent::create($warnings, $force_create);

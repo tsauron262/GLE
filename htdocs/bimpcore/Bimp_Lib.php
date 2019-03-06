@@ -53,6 +53,8 @@ if (!defined('BIMP_LIB')) {
     require_once $dir . 'BimpCore.php';
     require_once $dir . 'FixeTabs.php';
     require_once $dir . 'BimpController.php';
+    
+    
 }
 
 function checkBimpCoreVersion()

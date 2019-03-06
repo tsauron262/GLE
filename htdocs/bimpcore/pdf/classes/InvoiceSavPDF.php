@@ -39,8 +39,8 @@ class InvoiceSavPDF extends InvoicePDF
             }
         }
 
-        $this->header_vars['apple_img'] = DOL_DOCUMENT_ROOT . "/synopsistools/img/agree.jpg";
-        $this->header_vars['header_middle'] = $rows;
+//        $this->header_vars['apple_img'] = DOL_DOCUMENT_ROOT . "/synopsistools/img/agree.jpg";
+        $this->header_vars['header_right'] = $rows;
     }
 
     public function getAfterTotauxHtml()

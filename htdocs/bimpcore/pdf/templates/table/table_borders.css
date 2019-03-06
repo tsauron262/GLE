@@ -1,12 +1,13 @@
 table.header {
-    background-color: #DCDCDC;
-    border-top: solid 1px #505050;
-    border-left-color: #505050;
+    background-color: #{primary};
+    border-top: solid 1px #{primary};
+    border-left-color: #{primary};
+    color: #fff;
 }
 
 table.header td {
     font-size: 8px;
-    border-right: solid 1px #505050;
+    border-right: solid 1px #{primary};
 }
 
 table.row {

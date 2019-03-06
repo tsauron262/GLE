@@ -156,6 +156,33 @@ class Bimp_Propal extends BimpComm
                                 'form_name' => 'close'
                             ))
                         );
+
+                        $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+                        $values = array(
+                            'fields' => array(
+                                'entrepot'          => (int) $this->getData('entrepot'),
+                                'ef_type'           => $this->getData('ef_type'),
+                                'fk_soc'            => (int) $this->getData('fk_soc'),
+                                'ref_client'        => $this->getData('ref_client'),
+                                'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
+                                'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement'),
+                                'fk_availability'   => (int) $this->getData('fk_availability'),
+                                'fk_input_reason'   => (int) $this->getData('fk_input_reason'),
+                                'date_commande'     => date('Y-m-d'),
+                                'date_livraison'    => $this->getData('date_livraison'),
+                                'libelle'           => $this->getData('libelle'),
+                                'origin'            => 'propal',
+                                'origin_id'         => (int) $this->id,
+                                'close_propal'      => 1
+                            )
+                        );
+                        $onclick = $commande->getJsLoadModalForm('default', 'Création d\\\'une commande (Signature préalable de la proposition commerciale)', $values, '', 'redirect');
+
+                        $buttons[] = array(
+                            'label'   => BimpRender::renderIcon('fas_dolly', 'iconLeft') . 'Accepter et créer commande',
+                            'icon'    => 'fas_check',
+                            'onclick' => $onclick
+                        );
                     } else {
                         $buttons[] = array(
                             'label'    => 'Fermer',

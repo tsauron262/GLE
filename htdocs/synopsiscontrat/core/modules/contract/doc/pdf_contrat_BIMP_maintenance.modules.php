@@ -231,7 +231,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->SetFont('', 'B', 9);
 
         // Titre
-        $this->addLogo($pdf, 20);
+        $this->addLogo($pdf, 12);
         $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
         $pdf->SetFont('', 'B', 14);
         $pdf->setTextColor(0, 0, 0);
@@ -268,8 +268,21 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $nombre_lignes = (int) count($contrat->lines);
         foreach ($contrat->lines as $line) {
             $current_ligne++;
+            $need = 10 + 60 + ((int) count($content_service)); // En tete + Marge du bas + nombre de ligne contenu dans le service
+
+            $currentY = (int) $pdf->getY();
+            $hauteur = (int) $this->page_hauteur;
+            $reste = $hauteur - $currentY;
+
+            if ($reste < $need) {
+                $this->_pagefoot($pdf, $outputlangs);
+                $pdf->AddPage();
+                $this->addLogo($pdf, 12);
+                $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
+                $pdf->Line(15, 32, 195, 32);
+            }
             $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
-            $pdf->SetFont('', '', 9);
+            $pdf->SetFont('', '', 7);
             $pdf->setDrawColor(255, 255, 255);
             $pdf->setColor('fill', 236, 147, 0);
             $pdf->setTextColor(255, 255, 255);
@@ -277,7 +290,6 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->setDrawColor(255, 255, 255);
             $pdf->setColor('fill', 255, 255, 255);
             $pdf->setTextColor(0, 0, 0);
-            $pdf->SetFont('', '', 9);
             $affichage = str_replace("\n", ' ', $line->description);
             $pdf->Cell($W * 9, 7, $affichage, 1, null, 'L', true);
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L');
@@ -298,11 +310,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $content_service = explode(',', $associate_product->array_options['options_service_content']);
             $pdf->SetFont('', '', 8);
             $first_passage = false;
-            $for_add_page = 3 + 35 + (int) count($content_service); // En tete + Marge du bas + nombre de ligne contenu dans le service
-            //print_r( $line->description . $for_add_page . "<br />" );
-            
+
             foreach ($content_service as $row => $id) {
-               
+
                 if ($array_services[$id]) {
                     if (!$first_passage) {
                         $pdf->Cell($W, 7, '', 0, null, 'C', true);
@@ -325,7 +335,6 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", "B", 'L');
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", "T", 'L');
             $pdf->setDrawColor(255, 255, 255);
-            
         }
     }
 
@@ -369,7 +378,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                     return 0;
                 }
             }
-               
+
             if (file_exists($dir)) {
                 $client = new Societe($this->db);
                 $BimpDb = new BimpDb($this->db);
@@ -504,7 +513,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
 
                 $count = count($contrat->lines);
                 $new_page = false;
-                if ($count > 5) {
+                if ($count > 12) {
                     $new_page = true;
                     $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
                     $pdf->SetX($this->marge_gauche);

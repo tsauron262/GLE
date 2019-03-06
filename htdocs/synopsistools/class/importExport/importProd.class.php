@@ -35,7 +35,7 @@ class importProd extends importCat {
             } else {
                 $sql = $this->db->query("SELECT rowid as id FROM llx_product WHERE ref = '" . $ln['ArtCode'] . "'");
                 if ($this->db->num_rows($sql) == 0) {
-                    if ($ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X") {
+                    if ($this->isProdActif($ln)) {
                         $this->tabResult["inc"] ++;
                         $this->updateProd($this->addProd($ln), $ln);
                     }
@@ -56,6 +56,13 @@ class importProd extends importCat {
             $this->tabResult["error"] ++;
             $this->alert("Prod sans ref label : " . $ln['ArtLib']);
         }
+    }
+    
+    function isProdActif($ln){
+        if($ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X" && $ln['ArtNiv'] < 1)
+            return 1;
+        return 0;
+        
     }
 
     function addProd($ln) {
@@ -100,8 +107,8 @@ class importProd extends importCat {
 
 
 
-            $this->traiteChamp("status", ($ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X") ? "1" : "0");
-            $this->traiteChamp("status_buy", ($ln['ArtIsSupp'] != "X" && $ln['ArtIsSleep'] != "X") ? "1" : "0");
+            $this->traiteChamp("status", ($this->isProdActif($ln)) ? "1" : "0");
+            $this->traiteChamp("status_buy", ($this->isProdActif($ln)) ? "1" : "0");
 
 
             $this->traiteChamp("label", $ln['ArtLib']);

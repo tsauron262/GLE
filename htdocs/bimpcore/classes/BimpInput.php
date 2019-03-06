@@ -438,7 +438,7 @@ class BimpInput
                     }
                 }
                 ob_start();
-                $form->select_produits((int) $value, $field_name, $filter_type, $conf->product->limit_size, 0, -1, 2, '', 1);
+                $form->select_produits((int) $value, $field_name, $filter_type, $conf->product->limit_size, 0, 1, 2, '', 1);
                 $html .= ob_get_clean();
                 break;
 

@@ -19,13 +19,13 @@
                     <input type="number" name="sms_code_3" maxLength="1" size="1" min="0" max="9" pattern="[0-9]{1}"/>
                     <input type="number" name="sms_code_4" maxLength="1" size="1" min="0" max="9" pattern="[0-9]{1}" />
                     <br /><br />
-                        <center id="error_js"  style="color: #721c24; background-color:#f8d7da; border:1px solid #f5c6cb" ></center>
+                        <center id="error_js"></center>
 		    <button class='btn'>
 			<span>Valider</span>
                     </button>
 		</form>
                 <form>
-                    <button id="btn_renvoi">Code non reçus ? renvoyer le code</button>
+                    <button id="return_button">Code non reçus ? renvoyer le code</button>
 		</form>   
             </center>    
         </section>

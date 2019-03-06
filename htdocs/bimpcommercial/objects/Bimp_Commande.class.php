@@ -1250,6 +1250,7 @@ class Bimp_Commande extends BimpComm
     {
         $errors = array();
 
+        // Fermeture de la propale si nécessaire
         if ((int) BimpTools::getValue('close_propal', 0)) {
             $origin = BimpTools::getValue('origin', '');
             $origin_id = (int) BimpTools::getValue('origin_id', 0);

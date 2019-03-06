@@ -166,110 +166,13 @@ class OrderPDF extends BimpDocumentPDF
                 break;
         }
 
-        $rows = '';
-        $nRows = 0;
+//        $this->pdf->topMargin = 40;
 
-        $this->pdf->topMargin = 40;
-
-        if ($nRows > 2) {
-            $this->pdf->topMargin += 4 * ($nRows - 2);
-        }
-
-        $this->header_vars['header_right'] = $this->renderTemplate(self::$tpl_dir . 'header_right.html', array(
-            'doc_name' => $docName,
-            'doc_ref'  => $docRef,
-            'rows'     => $rows
-        ));
+        $this->header_vars['doc_name'] = $docName;
+        $this->header_vars['doc_ref'] = $docRef;
     }
 
-    public function renderDocInfos()
-    {
-        $html = '';
-
-        $town = '';
-        if (!is_null($this->entrepot)) {
-            $town = $this->entrepot->town;
-        }
-
-        if (!$town) {
-            $town = $this->fromCompany->town;
-        }
-
-        if ($town) {
-            $html .= '<div style="text-align: right">';
-            $html .= BimpTools::ucfirst($town) . ', le ' . dol_print_date(dol_now());
-            $html .= '</div>';
-        }
-
-        $html .= '<div style="font-size: 9px;" class="section addresses_section">';
-
-        $html .= '<table style="width: 100%" cellspacing="0" cellpadding="0">';
-        $html .= '<tr>';
-        $html .= '<td class="sender_address" style="width: 50%;">';
-        $html .= $this->getSenderInfosHtml();
-        $html .= '</td>';
-        $html .= '<td style="width: 3%;"></td>';
-        $html .= '<td style="width: 47%; font-size: 8px;">';
-        $html .= '<div>';
-        $html .= '<table style="width: 100%;" cellspacing="0" cellpadding="5px">';
-        $html .= '<tr>';
-        $html .= '<td colspan="2" style="border: solid 1px #505050">';
-        $html .= '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
-
-        switch ($this->doc_type) {
-            case 'commande':
-                $address = '';
-                if (!is_null($this->contact)) {
-                    if ($this->contact->address && $this->contact->zip && $this->contact->town) {
-                        $address = pdf_build_address($this->langs, $this->fromCompany, $this->contact, $this->contact, 1, 'target');
-                    }
-                }
-                if (!$address) {
-                    $address = pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, null, 0, 'target');
-                }
-
-                $address = str_replace("\n", '<br/>', $address);
-                break;
-
-            case 'bl':
-                if (!is_null($this->contact_shipment)) {
-                    $address = pdf_build_address($this->langs, $this->fromCompany, $this->contact_shipment, $this->contact_shipment, 1, 'target');
-                } else {
-                    $address = pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, (!is_null($this->contact) ? 1 : 0), 'target');
-                }
-
-                $address = str_replace("\n", '<br/>', $address);
-                break;
-        }
-
-        $html .= $address;
-        $html .= '</td>';
-        $html .= '</tr>';
-
-        if (!is_null($this->contact_invoice)) {
-            $html .= '<tr>';
-            $html .= '<td style="width: 25%; color: #787878; font-size: 7px;" class="bold">Facturation à :</td>';
-            $html .= '<td style="width: 75%;">';
-            $html .= '<div class="bold">' . pdfBuildThirdpartyName($this->contact_invoice, $this->langs) . '</div>';
-            $address = pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact_invoice, !is_null($this->contact_invoice) ? 1 : 0, 'target');
-            $address = str_replace("\n", '<br/>', $address);
-            $html .= $address;
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-
-        $html .= '</table>';
-        $html .= '</div>';
-        $html .= '</td>';
-        $html .= '</tr>';
-
-        $html .= '</table>';
-        $html .= '</div>';
-
-        $this->writeContent($html);
-    }
-
-    public function getSenderInfosHtml()
+    public function getDocInfosHtml()
     {
         $html = '';
 
@@ -375,7 +278,104 @@ class OrderPDF extends BimpDocumentPDF
         $html .= '</tr>';
         $html .= '</table>';
 
+//        $html .= parent::getDocInfosHtml();
+
         return $html;
+    }
+
+    public function renderDocInfos()
+    {
+        $primary = BimpCore::getParam('pdf/primary', '000000');
+        
+        $html = '';
+
+        $town = '';
+        if (!is_null($this->entrepot)) {
+            $town = $this->entrepot->town;
+        }
+
+        if (!$town) {
+            $town = $this->fromCompany->town;
+        }
+
+        if ($town) {
+            $html .= '<div style="text-align: right">';
+            $html .= BimpTools::ucfirst($town) . ', le ' . dol_print_date(dol_now());
+            $html .= '</div>';
+        }
+
+        $html .= '<div style="font-size: 9px;" class="section addresses_section">';
+
+        $html .= '<table style="width: 100%" cellspacing="0" cellpadding="0">';
+        $html .= '<tr>';
+        $html .= '<td class="sender_address" style="width: 50%;">';
+        $html .= $this->getDocInfosHtml();
+        $html .= '</td>';
+        $html .= '<td style="width: 3%;"></td>';
+        $html .= '<td style="width: 47%; font-size: 8px;">';
+        $html .= '<div>';
+        $html .= '<table style="width: 100%;" cellspacing="0" cellpadding="5px">';
+        $html .= '<tr>';
+        $html .= '<td colspan="2" style="border-top: solid 1px #' . $primary . '; border-bottom: solid 1px #' . $primary . '; color: #' . $primary . '">';
+        $html .= 'DESTINATAIRE';
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '<tr>';
+        $html .= '<td colspan="2">';
+
+        $html .= '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
+
+        switch ($this->doc_type) {
+            case 'commande':
+                $address = '';
+                if (!is_null($this->contact)) {
+                    if ($this->contact->address && $this->contact->zip && $this->contact->town) {
+                        $address = pdf_build_address($this->langs, $this->fromCompany, $this->contact, $this->contact, 1, 'target');
+                    }
+                }
+                if (!$address) {
+                    $address = pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, null, 0, 'target');
+                }
+
+                $address = str_replace("\n", '<br/>', $address);
+                break;
+
+            case 'bl':
+                if (!is_null($this->contact_shipment)) {
+                    $address = pdf_build_address($this->langs, $this->fromCompany, $this->contact_shipment, $this->contact_shipment, 1, 'target');
+                } else {
+                    $address = pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, (!is_null($this->contact) ? 1 : 0), 'target');
+                }
+
+                $address = str_replace("\n", '<br/>', $address);
+                break;
+        }
+
+        $html .= $address;
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        if (!is_null($this->contact_invoice)) {
+            $html .= '<tr>';
+            $html .= '<td style="width: 25%; color: #787878; font-size: 7px;" class="bold">Facturation à :</td>';
+            $html .= '<td style="width: 75%;">';
+            $html .= '<div class="bold">' . pdfBuildThirdpartyName($this->contact_invoice, $this->langs) . '</div>';
+            $address = pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact_invoice, !is_null($this->contact_invoice) ? 1 : 0, 'target');
+            $address = str_replace("\n", '<br/>', $address);
+            $html .= $address;
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</table>';
+        $html .= '</div>';
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        $html .= '</table>';
+        $html .= '</div>';
+
+        $this->writeContent($html);
     }
 
     public function renderLines()
@@ -555,10 +555,10 @@ class BLPDF extends OrderPDF
     {
         $this->num_bl = $num_bl;
 
-        $this->prefName = "BL_".$num_bl."_";
-        
+        $this->prefName = "BL_" . $num_bl . "_";
+
         $this->typeObject = "commande";
-        
+
         parent::__construct($db, 'bl');
 
         if (is_null($this->num_bl)) {

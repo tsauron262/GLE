@@ -1,15 +1,30 @@
 <table>
    <tr>
-      <td style="width: 10%">
-         <img src="{logo_img}" style="width: {logo_width}px; height: auto"/>
+      <td style="width: 70%;">
+         <table>
+            <tr>
+               <td>
+                  <img src="{logo_img}" style="width: {logo_width}px; height: auto"/>
+               </td>
+               
+               <td style="width: 5%"></td>
+
+               <td style="width: 50%">
+                  {header_infos}
+               </td>
+            </tr>
+            <tr>
+               <td colspan="2">
+                  <div>
+                     <span style="color: #{primary_color}">{doc_name}</span><br/>&nbsp;&nbsp;<span style=" font-size: 10px">{doc_ref}</span> 
+                  </div>
+               </td>
+            </tr>
+         </table>
       </td>
-      <td style="width: 60%">
-         {header_infos}
-      </td>
-      <td style="width: 30%">
-         <div style="text-align: right">
-            {header_right}
-         </div>
+
+      <td style="width: 30%; text-align: right;">
+         {header_right}
       </td>
    </tr>
 </table>

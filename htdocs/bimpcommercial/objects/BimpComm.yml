@@ -407,6 +407,8 @@ fields_tables:
         icon: euro
                   
     notes:
+        title: Notes
+        icon: fas_sticky-note
         rows: 
             - field: note_public
             - field: note_private

@@ -72,11 +72,15 @@ class Interfacevalidateorder extends DolibarrTriggers
             }
         }
 
-        if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') && !BimpDebug::isActive('bimpcommercial/no_validate')) {
+        if (!defined("NOT_VERIF") && ($action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') && !BimpDebug::isActive('bimpcommercial/no_validate')) {
             if(in_array($object->cond_reglement_id, array(0, 39))){
                     setEventMessages("Merci de séléctionné les condition de réglements", null, 'errors');
                     return -2;
             }
+        }
+            
+
+        if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') && !BimpDebug::isActive('bimpcommercial/no_validate')) {
             $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
             if (count($tabConatact) < 1) {
                 if (!is_object($object->thirdparty)) {

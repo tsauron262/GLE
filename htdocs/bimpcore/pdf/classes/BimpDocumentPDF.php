@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/BimpModelPDF.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+require_once DOL_DOCUMENT_ROOT . '/core/lib/images.lib.php';
 
 class BimpDocumentPDF extends BimpModelPDF
 {
@@ -25,7 +26,10 @@ class BimpDocumentPDF extends BimpModelPDF
     public $periodicity = 0;
     public $nbPeriods = 0;
     public $proforma = 0;
+    public $maxLogoWidth = 120; // px
+    public $maxLogoHeight = 65; // px
     public $totals = array("DEEE" => 0, "RPCP" => 0);
+    public $target_label = '';
 
     public function __construct($db)
     {
@@ -34,6 +38,8 @@ class BimpDocumentPDF extends BimpModelPDF
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         }
         BimpObject::loadClass('bimpcommercial', 'BimpComm');
+
+        $this->target_label = $this->langs->transnoentities('BillTo');
     }
 
     // Initialisation
@@ -94,13 +100,27 @@ class BimpDocumentPDF extends BimpModelPDF
                         $this->thirdparty = $this->object->thirdparty;
                     }
                 }
+
+                if (method_exists($this->object, 'fetch_optionals')) {
+                    $this->object->fetch_optionals();
+                    if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
+                        $entrepot = new Entrepot($this->db);
+                        $entrepot->fetch($this->object->array_options['options_entrepot']);
+                        if ($entrepot->address != "" && $entrepot->town != "") {
+                            global $mysoc;
+                            $mysoc->zip = $entrepot->zip;
+                            $mysoc->address = $entrepot->address;
+                            $mysoc->town = $entrepot->town;
+                        }
+                    }
+                }
             }
         }
     }
 
     protected function initHeader()
     {
-        global $conf, $mysoc;
+        global $conf;
 
         $logo_file = $conf->mycompany->dir_output . '/logos/' . $this->fromCompany->logo;
 
@@ -110,7 +130,8 @@ class BimpDocumentPDF extends BimpModelPDF
             if (is_file($testFile))
                 $logo_file = $testFile;
         }
-        if (isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
+        if (
+                isset($this->object->array_options['options_type']) && in_array($this->object->array_options['options_type'], array('S'))) {
             $testFile = str_replace(array(".jpg", ".png"), "_SAV.png", $logo_file);
             if (is_file($testFile))
                 $logo_file = $testFile;
@@ -121,84 +142,64 @@ class BimpDocumentPDF extends BimpModelPDF
                 $logo_file = $testFile;
         }
 
-        if (method_exists($this->object, 'fetch_optionals')) {
-            $this->object->fetch_optionals();
-            if (isset($this->object->array_options['options_entrepot']) && $this->object->array_options['options_entrepot'] > 0) {
-                $entrepot = new Entrepot($this->db);
-                $entrepot->fetch($this->object->array_options['options_entrepot']);
-                if ($entrepot->address != "" && $entrepot->town != "") {
-                    $mysoc->zip = $entrepot->zip;
-                    $mysoc->address = $entrepot->address;
-                    $mysoc->town = $entrepot->town;
-                }
-            }
-        }
-
-
-        // Commercial: 
-        if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
-            global $mysoc;
-            $comm1 = $comm2 = 0;
-            $contacts = array();
-            if (method_exists($this->object, 'getIdContact')) {
-                $contacts = $this->object->getIdContact('internal', 'SALESREPFOLL');
-                if (count($contacts)) {
-                    $comm1 = $contacts[0];
-                }
-
-                $contacts = $this->object->getIdContact('internal', 'SALESREPSIGN');
-                if (count($contacts)) {
-                    $comm2 = $contacts[0];
-                }
-            }
-
-            $rows = "";
-            $nRows = 0;
-            if ($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0) {
-                $usertmp = new User($this->db);
-                $usertmp->fetch($comm1);
-                $rows .= '<div class="row">' . $this->langs->transnoentities('Interlocuteur') . ' client : ' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
-                $nRows++;
-                $usertmp = new User($this->db);
-                $usertmp->fetch($comm2);
-                $rows .= '<div class="row">' . $this->langs->transnoentities('Émetteur') . ' devis : ' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
-                $nRows++;
-            } else {
-                if ($comm1 > 0) {
-                    $usertmp = new User($this->db);
-                    $usertmp->fetch($comm1);
-                    $rows .= '<div class="row">' . $this->langs->transnoentities('Interlocuteur') . ' : ' . $usertmp->getFullName($this->langs, 0, -1, 25) . '</div>';
-                    $nRows++;
-                } elseif ($comm2 > 0) {
-                    $usertmp = new User($this->db);
-                    $usertmp->fetch($comm2);
-                    $rows .= '<div class="row">' . $this->langs->transnoentities('Interlocuteur') . ' : ' . $usertmp->getFullName($this->langs, 0, -1, 25) . '</div>';
-                    $nRows++;
-                }
-            }
-            if (isset($usertmp)) {
-                if ($usertmp->office_phone != "")
-                    $mysoc->phone = $usertmp->office_phone;
-                if ($usertmp->email != "")
-                    $mysoc->email = $usertmp->email;
-            }
-        }
-
-        $logo_height = 0;
+        $logo_width = 0;
         if (!file_exists($logo_file)) {
             $logo_file = '';
         } else {
-            $logo_height = pdf_getHeightForLogo($logo_file, false);
+            $sizes = dol_getImageSize($logo_file, false);
+
+            $logo_width = $sizes['width'];
+            $logo_height = $sizes['height'];
+
+            if ($sizes['width']) {
+                if ($logo_width > $this->maxLogoWidth) {
+                    $logo_height = round(($this->maxLogoWidth / $logo_width) * $logo_height);
+                    $logo_width = $this->maxLogoWidth;
+                }
+
+                if ($logo_height > $this->maxLogoHeight) {
+                    $logo_width = round(($this->maxLogoHeight / $logo_height) * $logo_width);
+                    $logo_height = $this->maxLogoHeight;
+                }
+            }
         }
 
-        if ($logo_height > 30 || $logo_height === 22) {
-            $logo_height = 30;
+        $header_right = '';
+
+        if (isset($this->object->socid) && (int) $this->object->socid) {
+            if (isset($this->object->thirdparty->logo) && (string) $this->object->thirdparty->logo) {
+                $soc_logo_file = DOL_DATA_ROOT . '/societe/' . $this->object->thirdparty->id . '/logos/' . $this->object->thirdparty->logo;
+                if (file_exists($soc_logo_file)) {
+                    $sizes = dol_getImageSize($soc_logo_file, false);
+                    if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
+                        $soc_logo_width = $sizes['width'];
+                        $soc_logo_height = $sizes['height'];
+
+                        if ($soc_logo_width > 200) {
+                            $soc_logo_width = 200;
+                            $soc_logo_height = round((200 / $sizes['width']) * $sizes['height']);
+                        }
+
+                        if ($soc_logo_height > 100) {
+                            $soc_logo_height = 100;
+                            $soc_logo_width = round((100 / $sizes['height']) * $soc_logo_width);
+                        }
+
+                        $header_right = '<img src="' . $soc_logo_file . '" width="' . $soc_logo_width . 'px" height="' . $soc_logo_height . 'px"/>';
+                    }
+                }
+            }
         }
+
+        $this->pdf->topMargin = 50;
 
         $this->header_vars = array(
-            'logo_img'     => $logo_file,
-            'logo_height'  => $logo_height * BimpPDF::$pxPerMm,
-            'header_right' => array('rows' => $rows)
+            'logo_img'      => $logo_file,
+            'logo_width'    => $logo_width,
+            'logo_height'   => $logo_height,
+            'header_infos'  => $this->getSenderInfosHtml(),
+            'header_right'  => $header_right,
+            'primary_color' => BimpCore::getParam('pdf/primary', '000000')
         );
     }
 
@@ -305,11 +306,83 @@ class BimpDocumentPDF extends BimpModelPDF
         }
     }
 
+    public function getCommercialInfosHtml()
+    {
+        $html = '';
+
+        global $conf, $mysoc;
+        // Commercial: 
+//        if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
+        $comm1 = $comm2 = 0;
+        $contacts = array();
+        if (method_exists($this->object, 'getIdContact')) {
+            $contacts = $this->object->getIdContact('internal', 'SALESREPFOLL');
+            if (count($contacts)) {
+                $comm1 = $contacts[0];
+            }
+
+            $contacts = $this->object->getIdContact('internal', 'SALESREPSIGN');
+            if (count($contacts)) {
+                $comm2 = $contacts[0];
+            }
+        }
+
+        $primary = BimpCore::getParam('pdf/primary', '000000');
+
+        if ($comm1 != $comm2 && $comm1 > 0 && $comm2 > 0) {
+            $usertmp = new User($this->db);
+            $usertmp->fetch($comm1);
+            $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '"><span style="font-weight: bold; color: #' . $primary . ';">' . $this->langs->transnoentities('Interlocuteur') . ' client :</span><br/>' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
+            $usertmp = new User($this->db);
+            $usertmp->fetch($comm2);
+            $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '"><span style="font-weight: bold; color: #' . $primary . ';">' . $this->langs->transnoentities('Émetteur') . ' devis :</span><br/> ' . $usertmp->getFullName($this->langs, 0, -1, 20) . '</div>';
+        } else {
+            if ($comm1 > 0) {
+                $usertmp = new User($this->db);
+                $usertmp->fetch($comm1);
+                $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '"><span style="font-weight: bold; color: #' . $primary . ';">' . $this->langs->transnoentities('Interlocuteur') . ' :</span><br/> ' . $usertmp->getFullName($this->langs, 0, -1, 25) . '</div>';
+            } elseif ($comm2 > 0) {
+                $usertmp = new User($this->db);
+                $usertmp->fetch($comm2);
+                $html .= '<div class="row" style="border-top: solid 1px #' . $primary . '"><span style="font-weight: bold; color: #' . $primary . ';">' . $this->langs->transnoentities('Interlocuteur') . ' :</span><br/> ' . $usertmp->getFullName($this->langs, 0, -1, 25) . '</div>';
+            }
+        }
+        if (isset($usertmp)) {
+            if ($usertmp->office_phone != "")
+                $mysoc->phone = $usertmp->office_phone;
+            if ($usertmp->email != "")
+                $mysoc->email = $usertmp->email;
+        }
+//        }
+
+        return $html;
+    }
+
+    public function getDocInfosHtml()
+    {
+        $html = '';
+
+        $html .= $this->getCommercialInfosHtml();
+
+        return $html;
+    }
+
     public function getSenderInfosHtml()
     {
-        $html = '<div class="bold">' . $this->langs->convToOutputCharset($this->fromCompany->name) . '</div>';
-        $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty);
-        $html = str_replace("\n", '<br/>', $html);
+        $html = '<br/><span style="font-size: 16px; color: #' . BimpCore::getParam('pdf/primary', '000000') . ';">' . $this->fromCompany->name . '</span><br/>';
+        $html .= '<span style="font-size: 9px">' . $this->fromCompany->address . '<br/>' . $this->fromCompany->zip . ' ' . $this->fromCompany->town . '<br/>';
+        if ($this->fromCompany->phone) {
+            $html .= 'Tél. : ' . $this->fromCompany->phone . '<br/>';
+        }
+        $html .= '</span>';
+        $html .= '<span style="color: #' . BimpCore::getParam('pdf/primary') . '; font-size: 8px;">';
+        if ($this->fromCompany->url) {
+            $html .= $this->fromCompany->url . ($this->fromCompany->email ? ' - ' : '');
+        }
+        if ($this->fromCompany->email) {
+            $html .= $this->fromCompany->email;
+        }
+        $html .= '</span>';
         return $html;
     }
 
@@ -344,22 +417,25 @@ class BimpDocumentPDF extends BimpModelPDF
 //            $thirdparty = $object->thirdparty;
 //        }
 
+        $primary = BimpCore::getParam('pdf/primary', '000000');
+
         $html .= '<div class="section addresses_section">';
         $html .= '<table style="width: 100%" cellspacing="0" cellpadding="3px">';
         $html .= '<tr>';
-        $html .= '<td style="width: 40%">' . $this->langs->transnoentities('BillFrom') . ' : </td>';
+        $html .= '<td style="width: 55%"></td>';
         $html .= '<td style="width: 5%"></td>';
-        $html .= '<td style="width: 55%">' . $this->langs->transnoentities('BillTo') . ' : </td>';
+        $html .= '<td class="section_title" style="width: 40%; border-top: solid 1px #' . $primary . '; border-bottom: solid 1px #' . $primary . '">';
+        $html .= '<span style="color: #' . $primary . '">' . strtoupper($this->target_label) . '</span></td>';
         $html .= '</tr>';
         $html .= '</table>';
 
         $html .= '<table style="width: 100%" cellspacing="0" cellpadding="10px">';
         $html .= '<tr>';
-        $html .= '<td class="sender_address" style="width: 40%">';
-        $html .= $this->getSenderInfosHtml();
+        $html .= '<td class="sender_address" style="width: 55%">';
+        $html .= $this->getDocInfosHtml();
         $html .= '</td>';
         $html .= '<td style="width: 5%"></td>';
-        $html .= '<td style="width: 55%" class="border">';
+        $html .= '<td style="width: 40%">';
 
         $html .= $this->getTargetInfosHtml();
         $html .= '</td>';
@@ -527,7 +603,6 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 $row['total_ht'] = BimpTools::displayMoneyValue($row_total_ht, '');
 
-
                 if (!$this->hideTtc) {
                     $row['total_ttc'] = BimpTools::displayMoneyValue($row_total_ttc, '');
                 } elseif (!$this->hideReduc) {
@@ -537,7 +612,6 @@ class BimpDocumentPDF extends BimpModelPDF
                 $total_ht_without_remises += $line->subprice * (float) $line->qty;
                 $total_ttc_without_remises += BimpTools::calculatePriceTaxIn($line->subprice * (float) $line->qty, (float) $line->tva_tx);
             }
-
 
             if (isset($bimpLines[$line->id])) {
                 $bimpLine = $bimpLines[$line->id];

@@ -1,0 +1,44 @@
+table: bcontract_productservices
+
+labels:
+    name: Service
+    name_plur: Services
+           
+fields: 
+    titre: 
+        label: Titre
+        type: string
+            
+    content:
+        label: Désignation
+        type: text
+
+    active: 
+        label: Etat
+        type: bool
+        
+list:
+    checkboxes: 1
+    item_checkbox: 
+        callback: isEditable
+    bulk_actions: 
+        callback: getBulkActions
+        
+    sort_field: date_create
+    sort_way: desc
+    n: 25
+    extra_btn:
+        callback: getListExtraButtons
+    add_object_row: 1
+    update_btn: 1
+    delete_btn: 1
+    cols:
+        titre:
+            field: titre
+            edit: 1
+        content:
+            field: content
+            edit: 1
+        active:
+            field: active
+            edit: 1

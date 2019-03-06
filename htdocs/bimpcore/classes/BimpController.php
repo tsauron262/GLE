@@ -131,6 +131,7 @@ class BimpController
     }
 
     // Affichages:
+
     public function displayHeaderFiles()
     {
         $id_object = BimpTools::getValue('id');
@@ -192,6 +193,7 @@ class BimpController
             }
         }
 
+        echo '<div class="bimp_controller_content">';
         if (count($this->errors)) {
             echo BimpRender::renderAlerts($this->errors);
             if (count($this->msgs)) {
@@ -225,6 +227,7 @@ class BimpController
                 echo $this->renderSections('sections');
             }
         }
+        echo '</div>';
 
         if ($display_footer) {
             echo BimpRender::renderAjaxModal('page_modal');

@@ -59,17 +59,6 @@ class InvoicePDF extends BimpDocumentPDF
     {
         parent::initHeader();
 
-        global $db, $conf;
-
-        if (isset($this->facture->thirdparty) && !is_null($this->facture->thirdparty)) {
-            $soc = $this->facture->thirdparty;
-        } elseif (isset($this->facture->socid) && $this->facture->socid) {
-            $soc = new Societe($db);
-            $soc->fetch($this->facture->socid);
-        } else {
-            $soc = null;
-        }
-
         // Titre facture:
         $docName = '';
         switch ($this->facture->type) {
@@ -95,13 +84,28 @@ class InvoicePDF extends BimpDocumentPDF
             $docRef = '<span style="color: #800000"> ' . $docRef . ' - ' . $this->langs->transnoentities("NotValidated") . '</span>';
         }
 
-        $rows = '';
-        $nRows = 0;
+        $this->header_vars['doc_name'] = $docName;
+        $this->header_vars['doc_ref'] = $docRef;
+    }
+    
+    public function getDocInfosHtml()
+    {
+        global $db, $conf;
 
+        if (isset($this->facture->thirdparty) && !is_null($this->facture->thirdparty)) {
+            $soc = $this->facture->thirdparty;
+        } elseif (isset($this->facture->socid) && $this->facture->socid) {
+            $soc = new Societe($db);
+            $soc->fetch($this->facture->socid);
+        } else {
+            $soc = null;
+        }
+        
+        $html .= '<div>';
+        
         // Ref. client:
         if ($this->facture->ref_client) {
-            $rows .= '<div class="row">' . $this->langs->transnoentities('RefCustomer') . ' : ' . $this->langs->convToOutputCharset($this->facture->ref_client) . '</div>';
-            $nRows++;
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('RefCustomer') . ' : </span>' . $this->langs->convToOutputCharset($this->facture->ref_client) . '<br/>';
         }
 
         // Ref facture de remplacement: 
@@ -109,43 +113,36 @@ class InvoicePDF extends BimpDocumentPDF
         if ($this->facture->type == 0 && $objectidnext) {
             $factureReplacing = new Facture($db);
             $factureReplacing->fetch($objectidnext);
-            $rows .= '<div class="row">' . $this->langs->transnoentities('ReplacementByInvoice') . ' : ' . $this->langs->convToOutputCharset($factureReplacing->ref) . '</div>';
-            $nRows++;
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('ReplacementByInvoice') . ' : </span>' . $this->langs->convToOutputCharset($factureReplacing->ref) . '<br/>';
         }
 
         // Ref facture remplacée
         if ($this->facture->type == 1) {
             $factureReplaced = new Facture($db);
             $factureReplaced->fetch($this->facture->fk_facture_source);
-            $rows .= '<div class="row">' . $this->langs->transnoentities('ReplacementInvoice') . ' : ' . $this->langs->convToOutputCharset($factureReplaced->ref) . '</div>';
-            $nRows++;
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('ReplacementInvoice') . ' : </span>' . $this->langs->convToOutputCharset($factureReplaced->ref) . '<br/>';
         }
 
         if ($this->facture->type == 2 && !empty($this->facture->fk_facture_source)) {
             $factureReplaced = new Facture($db);
             $factureReplaced->fetch($this->facture->fk_facture_source);
-            $rows .= '<div class="row">' . $this->langs->transnoentities('CorrectionInvoice') . ' : ' . $this->langs->convToOutputCharset($factureReplaced->ref) . '</div>';
-            $nRows++;
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('CorrectionInvoice') . ' : </span>' . $this->langs->convToOutputCharset($factureReplaced->ref) . '<br/>';
         }
 
         // Dates: 
-        $rows .= '<div class="row">' . $this->langs->transnoentities('DateInvoice') . ' : ' . dol_print_date($this->facture->date, "day", false, $this->langs) . '</div>';
-        $nRows++;
+        $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateInvoice') . ' : </span>' . dol_print_date($this->facture->date, "day", false, $this->langs) . '<br/>';
 
         if (!empty($conf->global->INVOICE_POINTOFTAX_DATE)) {
-            $rows .= '<div class="row">' . $this->langs->transnoentities('DatePointOfTax') . ' : ' . dol_print_date($this->facture->date_pointoftax, "day", false, $this->langs) . '</div>';
-            $nRows++;
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DatePointOfTax') . ' : </span>' . dol_print_date($this->facture->date_pointoftax, "day", false, $this->langs) . '<br/>';
         }
 
         if ($this->facture->type != 2) {
-            $rows .= '<div class="row">' . $this->langs->transnoentities('DateDue') . ' : ' . dol_print_date($this->facture->date_lim_reglement, "day", false, $this->langs) . '</div>';
-            $nRows++;
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateDue') . ' : </span>' . dol_print_date($this->facture->date_lim_reglement, "day", false, $this->langs) . '<br/>';
         }
 
         // Code client: 
         if (isset($soc->code_client)) {
-            $rows .= '<div class="row">' . $this->langs->transnoentities('CustomerCode') . ' : ' . $this->langs->transnoentities($soc->code_client) . '</div>';
-            $nRows++;
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('CustomerCode') . ' : </span>' . $this->langs->transnoentities($soc->code_client) . '<br/>';
         }
 
         if (!empty($conf->global->DOC_SHOW_FIRST_SALES_REP)) {
@@ -153,8 +150,7 @@ class InvoicePDF extends BimpDocumentPDF
             if (count($contacts)) {
                 $usertmp = new User($db);
                 $usertmp->fetch($contacts[0]);
-                $rows .= '<div class="row">' . $this->langs->transnoentities('SalesRepresentative') . ' : ' . $usertmp->getFullName($this->langs) . '</div>';
-                $nRows++;
+                $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('SalesRepresentative') . ' : </span>' . $usertmp->getFullName($this->langs) . '<br/>';
             }
         }
 
@@ -163,35 +159,27 @@ class InvoicePDF extends BimpDocumentPDF
         if (!empty($linkedObjects)) {
             foreach ($linkedObjects as $lo) {
                 if (static::$type === 'sav') {
-                    $rows .= '<div class="row">' . $lo['ref_title'] . ' :</div>';
-                    $rows .= '<div class="row">' . $lo['ref_value'];
+                    $html .= '<span style="font-weight: bold;">' . $lo['ref_title'] . ' : </span>';
+                    $html .= $lo['ref_value'];
                     if (!empty($lo['date_value'])) {
-                        $rows .= ' / ' . $lo['date_value'];
+                        $html .= ' / ' . $lo['date_value'];
                     }
-                    $rows .= '</div>';
-                    $nRows += 2;
+                    $html .= '<br/>';
                 } else {
-                    $refObject = $lo['ref_title'] . ' :' . $lo['ref_value'];
+                    $refObject = '<span style="font-weight: bold">' . $lo['ref_title'] . ' : </span>' . $lo['ref_value'];
                     if (!empty($lo['date_value'])) {
                         $refObject .= ' / ' . $lo['date_value'];
                     }
-                    $rows .= '<span class="row">' . $refObject . '</span><br/>';
-                    $nRows++;
+                    $html .= $refObject . '<br/>';
                 }
             }
         }
-
-        $this->pdf->topMargin = 40;
-
-        if ($nRows > 2) {
-            $this->pdf->topMargin += 4 * ($nRows - 2);
-        }
-
-        $this->header_vars['header_right'] = $this->renderTemplate(self::$tpl_dir . 'header_right.html', array(
-            'doc_name' => $docName,
-            'doc_ref'  => $docRef,
-            'rows'     => $rows
-        ));
+        
+        $html .= '</div>';
+        
+        $html .= parent::getDocInfosHtml();
+        
+        return $html;
     }
 
     public function getPaymentInfosHtml()

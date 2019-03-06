@@ -1931,6 +1931,24 @@ class BimpObject extends BimpCache
         }
         return 0;
     }
+    
+    public function getListObjects($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC')
+    {
+        $primary = $this->getPrimary();
+        
+        $rows = $this->getList($filters, $n, $p, $order_by, $order_way, 'array', array($primary));
+     
+        $objects = array();
+        
+        foreach ($rows as $r) {
+            $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $r[$primary]);
+            if (BimpObject::objectLoaded($instance)) {
+                $objects[(int) $r[$primary]] = $instance;
+            }
+        }
+        
+        return $objects;
+    }
 
     // Affichage des données:
 

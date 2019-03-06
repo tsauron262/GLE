@@ -25,6 +25,9 @@ class BimpPDF_Table
         } else {
             $this->styles = file_get_contents(BimpModelPDF::$tpl_dir . '/table/table_no_borders.css');
         }
+        
+        $primary = BimpCore::getParam('pdf/primary', '000000');
+        $this->styles = str_replace('{primary}', $primary, $this->styles);
     }
 
     public function setMargins($top = 0, $bot = 0)

@@ -430,7 +430,7 @@ lists_cols:
             callback: 
                 method: displayLineData
                 params:
-                    - margin
+                    - margin        
 
 lists: 
     default: 

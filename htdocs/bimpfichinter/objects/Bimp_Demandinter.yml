@@ -60,12 +60,14 @@ fields:
             input: 
                 type: search_societe
                 societe_type: customer 
+        dol_prop: socid
     fk_commande: 
         label: Commande
         object: commande
         type: id_object
         values:
             array: list_commande
+        default_value: 0
     ref:
         label: Ref
         type: string
@@ -98,12 +100,15 @@ fields:
         object: user
         input: 
             type: search_user
+        dol_prop: author
     fk_user_prisencharge:
         label: Intervenant
         type: id_object
         object: user
         input: 
             type: search_user
+            include_empty: 1
+        default_value: 0
 #    fk_user_modif:
 #        label: User modif
 #        type: id_object
@@ -162,6 +167,10 @@ fields:
         label: Fiche
         type: string
         extra: 1
+    action:
+        label: Event agenda
+        type: string
+        extra: 1
     extra24:
         label: Heure d'arrivé AM
         type: string
@@ -182,6 +191,7 @@ fields:
         label: Confirmé
         type: bool
         extra: 1
+        default_value: 0
 # fields manquant :
 #    fk_projet
 #    entity
@@ -203,12 +213,10 @@ forms:
             - field: fk_soc
             - field: datei
             - field: description
-            - field: fk_contrat
-            - field: fk_commande
-            - field: fk_statut
             - field: note_public
             - field: note_private
             - field: extra37
+            - field: fk_user_author
     
         
 filters_panels: 
@@ -303,7 +311,7 @@ lists:
         n: 25
         delete_btn: 0
         modal_view: default
-#        add_form_name: default
+        add_form_name: default
         filters_panel: default
         page_btn: 1
         edit_btn: 1
@@ -383,6 +391,7 @@ fields_tables:
               display: nom_url
               edit: 1
             - field: fi
+            - field: action
     price:
         title: Prix
         icon: money

@@ -1,13 +1,14 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/extraFI.class.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/objectInter.class.php';
 
-class Bimp_Demandinter extends extraFI
+class Bimp_Demandinter extends ObjectInter
 {
     public $moduleRightsName = "synopsisdemandeinterv";
     public $force_update_date_ln = true;
     public static $dol_module = 'fichinter';
     public $extraFetch = false;
+    public static $controller_name = "demandinterv";
 
     public static $nature_list = array(
         0 => array('label' => 'Choix', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
@@ -116,27 +117,59 @@ class Bimp_Demandinter extends extraFI
         $buttons = array();
 
         if ($this->isLoaded()) {
-            $buttons[] = array(
-                'label'   => 'Générer le PDF',
-                'icon'    => 'fas_sync',
-                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
-            );
+            if($this->getData("fk_user_prisencharge") != $user->id)
+                $buttons[] = array(
+                    'label'   => 'Prendre en charge',
+                    'icon'    => 'fas_user',
+                    'onclick' => $this->getJsActionOnclick('priseEnCharge', array($user->id), array())
+                );
+            if($this->getData("fk_user_prisencharge")> 0)
+                $buttons[] = array(
+                    'label'   => 'Créer une FI',
+                    'icon'    => 'fas_ambulance',
+                    'onclick' => $this->getJsActionOnclick('createFi', array($user->id), array())
+                );
         }
         return $buttons;
     }
     
-//public function updateDolObject(&$errors) {
-//    parent::updateDolObject($errors);
-//}
+    public function actionCreateFi(){
+        $this->dol_object->createFi(false);
+    }
     
-    
-    
-    
-    
-    
-    
-    
-    
+    public function actionPriseEnCharge($params){
+        $this->updateField("fk_user_prisencharge", $params[0]);
+    }
+
+    public function getExtra($field){
+        if($field == "fi"){
+            if($this->isLoaded() && is_a($this->dol_object, 'Synopsisdemandeinterv')){
+                $return = array();
+                $dis = $this->dol_object->getFI();
+                require_once DOL_DOCUMENT_ROOT.'/synopsisfichinter/class/synopsisfichinter.class.php';
+                $di = new Synopsisfichinter($this->db->db);
+                foreach($dis as $diI){
+                    $di->fetch($diI);
+                    $return[] = $di->getNomUrl(1);
+                }
+                return implode("<br/>", $return);
+            }
+        }
+        elseif($field == "action"){
+            if($this->isLoaded() && is_a($this->dol_object, 'Synopsisdemandeinterv')){
+                $return = array();
+                require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
+                $tabAct = ActionComm::getActions($this->db->db, 0, $this->id, 'synopsisdemandeinterv');
+                foreach($tabAct as $action)
+                    $return[] = $action->getNomUrl(1);
+                return implode("<br/>", $return);
+            }
+        }
+        
+        else{
+            return parent::getExtra($field);
+        }
+    }
     
 
 }

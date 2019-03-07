@@ -726,15 +726,23 @@ input[type=text].large_input {
 
 .singleLineForm {
     display: inline-block;
-    padding: 5px; 
-    background-color: #F0F0F0;
+    background-color: #fff;
     border: 1px solid #787878;
-    
+
+    .singleLineFormCaption {
+        padding: 5px 12px; 
+        background-color: #F0F0F0;
+    }
+
+    .singleLineFormContent {
+        padding: 5px 12px; 
+    }
+
     .inputContainer {
         display: inline-block;
         padding: 4px 0;
         margin-right: 20px;
-        
+
         .inputHelp {
             display: none;
         }

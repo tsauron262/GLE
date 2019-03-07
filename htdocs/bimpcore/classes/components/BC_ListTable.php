@@ -229,10 +229,10 @@ class BC_ListTable extends BC_List
                     $controller = $object->getController();
                     if ($controller) {
                         $row['params']['url'] = DOL_URL_ROOT . '/' . $object->module . '/index.php?fc=' . $controller . '&id=' . $item[$primary];
-                        $row['params']['page_btn_label'] = 'Affichage la page';
+                        $row['params']['page_btn_label'] = 'Afficher la page';
                     } elseif ($object->isDolObject()) {
                         $row['params']['url'] = BimpTools::getDolObjectUrl($object->dol_object, (int) $item[$primary]);
-                        $row['params']['page_btn_label'] = 'Affichage la fiche ' . $object->getLabel();
+                        $row['params']['page_btn_label'] = 'Afficher la fiche ' . $object->getLabel();
                     }
                 }
 

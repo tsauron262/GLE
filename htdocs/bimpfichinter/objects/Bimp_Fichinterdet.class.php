@@ -1,8 +1,8 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/extraFI.class.php';
+require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/objectInterDet.class.php';
 
-class Bimp_Fichinterdet extends extraFI
+class Bimp_Fichinterdet extends ObjectInterDet
 {
     
     

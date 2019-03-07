@@ -147,21 +147,12 @@ class BimpDocumentPDF extends BimpModelPDF
             $logo_file = '';
         } else {
             $sizes = dol_getImageSize($logo_file, false);
+            
+            
+            $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], $this->maxLogoWidth, $this->maxLogoHeight);
 
-            $logo_width = $sizes['width'];
-            $logo_height = $sizes['height'];
-
-            if ($sizes['width']) {
-                if ($logo_width > $this->maxLogoWidth) {
-                    $logo_height = round(($this->maxLogoWidth / $logo_width) * $logo_height);
-                    $logo_width = $this->maxLogoWidth;
-                }
-
-                if ($logo_height > $this->maxLogoHeight) {
-                    $logo_width = round(($this->maxLogoHeight / $logo_height) * $logo_width);
-                    $logo_height = $this->maxLogoHeight;
-                }
-            }
+            $logo_width = $tabTaille[0];
+            $logo_height = $tabTaille[1];
         }
 
         $header_right = '';
@@ -172,20 +163,12 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (file_exists($soc_logo_file)) {
                     $sizes = dol_getImageSize($soc_logo_file, false);
                     if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
-                        $soc_logo_width = $sizes['width'];
-                        $soc_logo_height = $sizes['height'];
+                        
+                        $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], 200, 100);
 
-                        if ($soc_logo_width > 200) {
-                            $soc_logo_width = 200;
-                            $soc_logo_height = round((200 / $sizes['width']) * $sizes['height']);
-                        }
 
-                        if ($soc_logo_height > 100) {
-                            $soc_logo_height = 100;
-                            $soc_logo_width = round((100 / $sizes['height']) * $soc_logo_width);
-                        }
 
-                        $header_right = '<img src="' . $soc_logo_file . '" width="' . $soc_logo_width . 'px" height="' . $soc_logo_height . 'px"/>';
+                        $header_right = '<img src="' . $soc_logo_file . '" width="' . $tabTaille[0] . 'px" height="' . $tabTaille[1] . 'px"/>';
                     }
                 }
             }
@@ -201,6 +184,19 @@ class BimpDocumentPDF extends BimpModelPDF
             'header_right'  => $header_right,
             'primary_color' => BimpCore::getParam('pdf/primary', '000000')
         );
+    }
+    
+    public function calculeWidthHieghtLogo($width, $height, $maxWidth, $maxHeight){
+        if ($width > $maxWidth) {
+            $height = round(($maxWidth / $width) * $height);
+            $width = $maxWidth;
+        }
+
+        if ($height > $maxHeight) {
+            $width = round(($maxHeight / $height) * $width);
+            $height = $maxHeight;
+        }
+        return array($width, $height);
     }
 
     protected function initfooter()

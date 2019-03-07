@@ -633,6 +633,9 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (isset($product->array_options['options_rpcp']) && $product->array_options['options_rpcp'] > 0)
                     $this->totals['RPCP'] += $product->array_options['options_rpcp'] * $row['qte'];
             }
+            
+            
+            $row = $this->traitePeriodicity($row, array('pu_ht', 'pu_remise', 'total_ht', 'total_ttc'));
 
             $table->rows[] = $row;
         }
@@ -658,6 +661,16 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->pdf->addVMargin(1);
         $table->write();
         unset($table);
+    }
+    
+    public function traitePeriodicity($row, $champs){
+        if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
+            foreach($champs as $nomChamp){
+                if(isset($row[$nomChamp]))
+                    $row[$nomChamp] = BimpTools::displayMoneyValue(str_replace(",",".", $row[$nomChamp]) / $this->nbPeriods);
+            }
+        }
+        return $row;
     }
 
     public function renderAfterLines()

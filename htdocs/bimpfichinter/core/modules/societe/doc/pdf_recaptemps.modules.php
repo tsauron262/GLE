@@ -34,6 +34,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
+require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 
 /**
@@ -89,8 +90,6 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         $this->emetteur = $mysoc;
         if (empty($this->emetteur->country_code))
             $this->emetteur->country_code = substr($langs->defaultlang, -2);    // By default, if not defined
-
-
 
 
 
@@ -253,14 +252,21 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                 $width_table = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
 
                 // Bimp
-                $pdf->SetFont('', 'B', 12);
+                $pdf->SetFont('', '', 12);
 
                 $fichinter_obj = BimpObject::getInstance("bimpfichinter", "Bimp_Fichinter");
                 $fichinters = $fichinter_obj->getList(array('fk_soc' => $object->id));
 
 
                 $contrats = $commandes = $libres = array();
+
+
                 foreach ($fichinters as $fichinter) {
+                    $date_split = explode('-', $fichinter['datec']);
+                    $year_creation = $date_split[0];
+//                    if ($year_creation != date("Y")) // TODO reset this filter
+//                        continue;
+
                     $fk_contrat = $fichinter['fk_contrat'];
                     $fk_commande = $fichinter['fk_commande'];
                     if ($fk_contrat > 0) {
@@ -272,113 +278,45 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                     }
                 }
 
-                $html = '<head>
-<style type="text/css">
 
-    tr.title th {
-        height: 30px;
-    }
-    tr.orange {
-        background-color: #f8cbad;
-    }
-    tr.blue {
-        background-color: #b4c6e7;
-    }
-    tr.grey {
-        background-color: #e7e6e6;
-    }
-    table > tr > th, table > tr > td {
-        border: 1px solid black;
-        text-align: center;
-        padding: 25px;
-        font-size: 8px; 
-    }
-}
+                $head_css = $this->getTableCss();
 
-</style>
-</head>
-<table>';
+                $this->intervenants = array();
 
-                // Contrat
-                $html .= '<tr class="blue title">';
-                $html .= '<th>DELEGATION N° 6/6</th>';
-                $html .= '<th>N°CONTRAT</th>';
-                $html .= '<th>DATE CONTRAT</th>';
-                $html .= '<th>NOMBRE DE JOURNÉE COMMANDÉE</th>';
-                $html .= '<th>N°FICHE D\'INTERVENTION (FI)</th>';
-                $html .= '<th>DATE FI</th>';
-                $html .= '<th>INTERVENANT </th>';
-                $html .= '<th>TEMPS ESTIMÉ/JOUR</th>';
-                $html .= '<th>TEMPS RÉEL CONSOMMÉ</th>';
-                $html .= '<th>SOLDE</th>';
-
-                $html .= '</tr>';
-
-                $intervenants = array();
-                foreach ($contrats as $id_contrat => $inters) {
-//                    echo '<pre>';
-//                    print_r($contrats);
-
-                    $planned_day = 1;
-                    $time_per_day = 7 * 3600;
-
-                    $contrat = new Contrat($db);
-                    $contrat->fetch($id_contrat);
-                    $html .= '<tr class="grey title">';
-                    $html .= '<th></th>';
-                    $html .= '<th>' . $id_contrat . '</th>';
-                    $html .= '<th>' . date('d/m/Y', $contrat->date_contrat) . '</th>';
-                    $html .= '<th>' . $planned_day . '</th>';
-                    $html .= '<th></th>';
-                    $html .= '<th></th>';
-                    $html .= '<th></th>';
-                    $html .= '<th>' . $this->getTime($time_per_day) . '</th>';
-                    $html .= '<th></th>';
-                    $html .= '<th></th>';
-                    $html .= '<th></th>';
-                    $html .= '<th></th>';
-                    $html .= '</tr>';
-
-
-                    foreach ($inters as $inter) {
-                        $fk_user = $inter['fk_user_author'];
-                        if (!isset($intervenants[$fk_user])) {
-                            $user = new User($db);
-                            $user->fetch($fk_user);
-                            $intervenant[$fk_user] = $user;
-                        }
-
-                        $html .= '<tr>';
-                        $html .= '<td></td>';
-                        $html .= '<td></td>';
-                        $html .= '<td></td>';
-                        $html .= '<td></td>';
-                        $html .= '<td>' . $inter['ref'] . '</td>';
-                        $html .= '<td>' . $this->getDate($inter['datec']) . '</td>';
-                        $html .= '<td>' . $intervenant[$fk_user]->firstname . ' ' . $intervenant[$fk_user]->lastname . '</td>';
-                        $html .= '<td></td>';
-                        $html .= '<td>' . $this->getTime($inter['duree']) . '</td>';
-                        $html .= '<td></td>';
-                        $html .= '</tr>';
-                    }
+                // Contrats
+                if (sizeof($contrats) != 0) {
+                    $html = $head_css . $this->getTableContrats($contrats);
+                    $pdf->writeHTML($html, true, false, true, false, '');
+                } else {
+                    $html = '<h3>Aucune intervention liée à un contrat pour ce tier en ' . date("Y") . '</h3>';
+                    $pdf->writeHTML($html, true, false, true, false, '');
                 }
 
-                $html .= '</table>';
+                // Commandes
+                if (sizeof($contrats) != 0) {
+                    $pdf->AddPage('', '', true);
+                    $html = $head_css . $this->getTableCommandes($commandes);
+                    $pdf->writeHTML($html, true, false, true, false, '');
+                } else {
+                    $html = '<h3>Aucune intervention liée à une commande pour ce tier en ' . date("Y") . '</h3>';
+                    $pdf->writeHTML($html, true, false, true, false, '');
+                }
 
-                $pdf->writeHTML($html, true, false, true, false, '');
-
-//                $pdf->Rect($this->marge_gauche, $tab_top, $this->page_largeur - $this->marge_gauche - $this->marge_droite, 20);
-//                $main_title = strtoupper('Titre 1');
-//                $pdf->MultiCell($width_table, 20, $main_title, 1, 'C');
+                // Libres
+                if (sizeof($contrats) != 0) {
+                    $pdf->AddPage('', '', true);
+                    $html = $head_css . $this->getTableLibres($libres);
+                    $pdf->writeHTML($html, true, false, true, false, '');
+                } else {
+                    $html = '<h3>Aucune intervention libre (sans contrat ou commande) pour ce tier en ' . date("Y") . '</h3>';
+                    $pdf->writeHTML($html, true, false, true, false, '');
+                }
 
                 $iniY = $tab_top + 7;
                 $curY = $tab_top + 7;
                 $nexY = $tab_top + 7;
 
                 $pdf->SetXY($this->marge_gauche, $tab_top);
-//                $pdf->MultiCell(190, 5, $outputlangs->transnoentities("Description"), 0, 'L', 0);
-//                $pdf->line($this->marge_gauche, $tab_top + 5, $this->page_largeur - $this->marge_droite, $tab_top + 5);
-
                 $pdf->SetFont('', '', $default_font_size - 1);
 
                 $pdf->SetXY($this->marge_gauche, $tab_top + 5);
@@ -388,113 +326,10 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                     $text .= ($text ? ' - ' : '') . $langs->trans("Total") . ": " . $totaltime;
                 }
                 $desc = dol_htmlentitiesbr($text, 1);
-                //print $outputlangs->convToOutputCharset($desc); exit;
-//                $pdf->writeHTMLCell(180, 3, 10, $tab_top + 5, $outputlangs->convToOutputCharset($desc), 0, 1);
+
+
                 $nexY = $pdf->GetY();
 
-//                $pdf->line($this->marge_gauche, $nexY, $this->page_largeur - $this->marge_droite, $nexY);
-//                $nblines = count($object->lines);
-                // Loop on each lines
-//                for ($i = 0; $i < $nblines; $i++) {
-//                    $objectligne = $object->lines[$i];
-//
-//                    $valide = empty($objectligne->id) ? 0 : $objectligne->fetch($objectligne->id);
-//                    if ($valide > 0 || $object->specimen) {
-//                        $curY = $nexY;
-//                        $pdf->SetFont('', '', $default_font_size - 1);   // Into loop to work with multipage
-//                        $pdf->SetTextColor(0, 0, 0);
-//
-//                        $pdf->setTopMargin($tab_top_newpage);
-//                        $pdf->setPageOrientation('', 1, $heightforfooter + $heightforfreetext + $heightforinfotot); // The only function to edit the bottom margin of current page to set it.
-//                        $pageposbefore = $pdf->getPage();
-//
-//                        // Description of product line
-//                        $curX = $this->posxdesc - 1;
-//
-//                        // Description of product line
-//                        if (empty($conf->global->FICHINTER_DATE_WITHOUT_HOUR)) {
-//                            $txt = $outputlangs->transnoentities("Date") . " : " . dol_print_date($objectligne->datei, 'dayhour', false, $outputlangs, true);
-//                        } else {
-//                            $txt = $outputlangs->transnoentities("Date") . " : " . dol_print_date($objectligne->datei, 'day', false, $outputlangs, true);
-//                        }
-//
-//                        if ($objectligne->duration > 0) {
-//                            $txt .= " - " . $outputlangs->transnoentities("Duration") . " : " . convertSecondToTime($objectligne->duration);
-//                        }
-//                        $txt = '<strong>' . dol_htmlentitiesbr($txt, 1, $outputlangs->charset_output) . '</strong>';
-//                        $desc = dol_htmlentitiesbr($objectligne->desc, 1);
-//
-//                        $pdf->startTransaction();
-//                        $pdf->writeHTMLCell(0, 0, $curX, $curY + 1, dol_concatdesc($txt, $desc), 0, 1, 0);
-//                        $pageposafter = $pdf->getPage();
-//                        if ($pageposafter > $pageposbefore) { // There is a pagebreak
-//                            $pdf->rollbackTransaction(true);
-//                            $pageposafter = $pageposbefore;
-//                            //print $pageposafter.'-'.$pageposbefore;exit;
-//                            $pdf->setPageOrientation('', 1, $heightforfooter); // The only function to edit the bottom margin of current page to set it.
-//                            $pdf->writeHTMLCell(0, 0, $curX, $curY, dol_concatdesc($txt, $desc), 0, 1, 0);
-//                            $pageposafter = $pdf->getPage();
-//                            $posyafter = $pdf->GetY();
-//                            //var_dump($posyafter); var_dump(($this->page_hauteur - ($heightforfooter+$heightforfreetext+$heightforinfotot))); exit;
-//                            if ($posyafter > ($this->page_hauteur - ($heightforfooter + $heightforfreetext + $heightforinfotot))) { // There is no space left for total+free text
-//                                if ($i == ($nblines - 1)) { // No more lines, and no space left to show total, so we create a new page
-//                                    $pdf->AddPage('', '', true);
-//                                    if (!empty($tplidx))
-//                                        $pdf->useTemplate($tplidx);
-//                                    if (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD))
-//                                        $this->_pagehead($pdf, $object, 0, $outputlangs);
-//                                    $pdf->setPage($pageposafter + 1);
-//                                }
-//                            }
-//                        }
-//                        else { // No pagebreak
-//                            $pdf->commitTransaction();
-//                        }
-//
-//                        $nexY = $pdf->GetY();
-//                        $pageposafter = $pdf->getPage();
-//                        $pdf->setPage($pageposbefore);
-//                        $pdf->setTopMargin($this->marge_haute);
-//                        $pdf->setPageOrientation('', 1, 0); // The only function to edit the bottom margin of current page to set it.
-//                        // We suppose that a too long description is moved completely on next page
-//                        if ($pageposafter > $pageposbefore) {
-//                            $pdf->setPage($pageposafter);
-//                            $curY = $tab_top_newpage;
-//                        }
-//
-//                        $pdf->SetFont('', '', $default_font_size - 1);   // On repositionne la police par defaut
-//                        // Detect if some page were added automatically and output _tableau for past pages
-//                        while ($pagenb < $pageposafter) {
-//                            $pdf->setPage($pagenb);
-//                            if ($pagenb == 1) {
-//                                $this->_tableau($pdf, $tab_top, $this->page_hauteur - $tab_top - $heightforfooter, 0, $outputlangs, 0, 1);
-//                            } else {
-//                                $this->_tableau($pdf, $tab_top_newpage, $this->page_hauteur - $tab_top_newpage - $heightforfooter, 0, $outputlangs, 1, 1);
-//                            }
-//                            $this->_pagefoot($pdf, $object, $outputlangs, 1);
-//                            $pagenb++;
-//                            $pdf->setPage($pagenb);
-//                            $pdf->setPageOrientation('', 1, 0); // The only function to edit the bottom margin of current page to set it.
-//                            if (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD))
-//                                $this->_pagehead($pdf, $object, 0, $outputlangs);
-//                        }
-//                        if (isset($object->lines[$i + 1]->pagebreak) && $object->lines[$i + 1]->pagebreak) {
-//                            if ($pagenb == 1) {
-//                                $this->_tableau($pdf, $tab_top, $this->page_hauteur - $tab_top - $heightforfooter, 0, $outputlangs, 0, 1);
-//                            } else {
-//                                $this->_tableau($pdf, $tab_top_newpage, $this->page_hauteur - $tab_top_newpage - $heightforfooter, 0, $outputlangs, 1, 1);
-//                            }
-//                            $this->_pagefoot($pdf, $object, $outputlangs, 1);
-//                            // New page
-//                            $pdf->AddPage();
-//                            if (!empty($tplidx))
-//                                $pdf->useTemplate($tplidx);
-//                            $pagenb++;
-//                            if (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD))
-//                                $this->_pagehead($pdf, $object, 0, $outputlangs);
-//                        }
-//                    }
-//                }
                 // Show square
                 if ($pagenb == 1) {
                     $this->_tableau($pdf, $tab_top, $this->page_hauteur - $tab_top - $heightforinfotot - $heightforfreetext - $heightforfooter, 0, $outputlangs, 0, 0);
@@ -534,6 +369,495 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         }
     }
 
+    function getTableCss() {
+        $head_css = '<head>
+<style type="text/css">
+
+    tr.title th {
+        height: 15px;
+        line-height:10px;
+    }
+    .orange {
+        background-color: #f8cbad;
+    }
+    .blue {
+        background-color: #b4c6e7;
+    }
+    .grey {
+        background-color: #e7e6e6;
+    }
+    .greyDisabled {
+        background-color: #a8a4a4;
+    }
+    .green {
+        background-color: #c6e0b4;
+    }
+    
+    table > tr > th, table > tr > td {
+        border: 0.5px solid black;
+        text-align: center;
+        padding: 25px;
+        font-size: 8px; 
+    }
+    .white {
+        border: none;
+    }
+}
+
+</style>
+</head>';
+        return $head_css;
+    }
+
+    function getTableContrats($contrats) {
+        $html = '<table>';
+        $html .= '<tr class="orange title">';
+        $html .= '<th colspan="10"><strong>INTERVENTIONS CONTRATS</strong></th>';
+        $html .= '</tr>';
+        $html .= '<tr class="blue title">';
+        $html .= '<th><strong>DELEGATION N°</strong></th>';
+        $html .= '<th><strong>N°CONTRAT</strong></th>';
+        $html .= '<th><strong>DATE CONTRAT</strong></th>';
+        $html .= '<th><strong>NOMBRE DE JOURNÉE COMMANDÉE</strong></th>';
+        $html .= '<th><strong>N°FICHE D\'INTERVENTION (FI)</strong></th>';
+        $html .= '<th><strong>DATE FI</strong></th>';
+        $html .= '<th><strong>INTERVENANT</strong></th>';
+        $html .= '<th><strong>TEMPS ESTIMÉ/JOUR</strong></th>';
+        $html .= '<th><strong>TEMPS RÉEL CONSOMMÉ</strong></th>';
+        $html .= '<th><strong>SOLDE</strong></th>';
+
+        $html .= '</tr>';
+        $solde_total = 0;
+        $planned_day_total = 0;
+        $used_total = 0;
+        $hour_total = 0;
+        $cnt_contrat = 0;
+        $hours_per_day = 7 * 3600;
+
+        foreach ($contrats as $id_contrat => $inters) {
+            $used = 0;
+            ++$cnt_contrat;
+            $planned_day = $cnt_contrat;
+            $planned_day_total += $planned_day;
+            $solde_init = $solde = $planned_day * $hours_per_day;
+            $hour_total += $solde_init;
+
+            $contrat = new Contrat($this->db);
+            $contrat->fetch($id_contrat);
+            $html .= '<tr class="grey title">';
+            $html .= '<th></th>';
+            $html .= '<th><strong>' . $id_contrat . '</strong></th>';
+            $html .= '<th><strong>' . date('d/m/Y', $contrat->date_contrat) . '</strong></th>';
+            $html .= '<th><strong>' . $planned_day . '</strong></th>';
+            $html .= '<th></th>';
+            $html .= '<th></th>';
+            $html .= '<th></th>';
+            $html .= '<th><strong>' . $this->getTime($hours_per_day) . '</strong></th>';
+            $html .= '<th></th>';
+            $html .= '<th><strong>' . $this->getTime($solde_init) . '</strong></th>';
+            $html .= '</tr>';
+
+
+            foreach ($inters as $inter) {
+                $fk_user = $inter['fk_user_author'];
+                if (!isset($this->intervenants[$fk_user])) {
+                    $user = new User($this->db);
+                    $user->fetch($fk_user);
+                    $intervenant[$fk_user] = $user;
+                }
+
+                $used += $inter['duree'];
+                $solde -= $inter['duree'];
+                $html .= '<tr>';
+                $html .= '<td>' . $inter['ref'] . '</td>';
+                $html .= '<td></td>';
+                $html .= '<td></td>';
+                $html .= '<td></td>';
+                $html .= '<td>' . $inter['rowid'] . '</td>';
+                $html .= '<td>' . $this->getDate($inter['datec']) . '</td>';
+                $html .= '<td>' . $intervenant[$fk_user]->firstname . ' ' . $intervenant[$fk_user]->lastname . '</td>';
+                $html .= '<td></td>';
+                $html .= '<td>' . $this->getTime($inter['duree']) . '</td>';
+                $html .= '<td>' . $this->getTime($solde) . '</td>';
+                $html .= '</tr>';
+            }
+            $solde_total += $solde;
+            $used_total += $used;
+            // Solde
+            $html .= '<tr>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="green"><strong>SOLDE ' . $cnt_contrat . ' </strong></td>';
+            $html .= '<td class="green"><strong>' . $this->getTime($solde) . '</strong></td>';
+            $html .= '</tr>';
+
+            // Used
+            $html .= '<tr>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="orange"><strong>CONSOMMÉ ' . $cnt_contrat . '</strong></td>';
+            $html .= '<td class="orange"><strong>' . $this->getTime($used) . '</strong></td>';
+            $html .= '</tr>';
+        }
+        $contrat_number = '';
+        for ($i = 1; $i <= $cnt_contrat; $i++)
+            $contrat_number .= $i . '-';
+        $contrat_number = substr($contrat_number, 0, -1);
+
+        // Total planned hour
+        $html .= '<tr>';
+        $html .= '<td style="text-align: right;" colspan="3" class="grey"><strong>TOTAL DES JOURNEES DE DELEGATION</strong></td>';
+        $html .= '<td class="grey"><strong>' . $planned_day_total . '</strong></td>';
+        $html .= '<td class="grey"></td>';
+        $html .= '<td class="grey"></td>';
+        $html .= '<td class="grey"></td>';
+        $html .= '<td class="grey"><strong></strong></td>';
+        $html .= '<td class="grey"><strong>TOTAL HEURES ' . mb_strimwidth($contrat_number, 0, 15, "...") . '</strong></td>';
+        $html .= '<td class="grey"><strong>' . $this->getTime($hour_total) . '</strong></td>';
+        $html .= '</tr>';
+
+        // Total used
+        $html .= '<tr>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="orange"><strong>CONSOMMÉ ' . mb_strimwidth($contrat_number, 0, 15, "...") . '</strong></td>';
+        $html .= '<td class="orange"><strong>' . $this->getTime($used_total) . '</strong></td>';
+        $html .= '</tr>';
+
+        // Total solde
+        $html .= '<tr>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="green"><strong>SOLDE TOTAL ' . mb_strimwidth($contrat_number, 0, 15, "...") . '</strong></td>';
+        $html .= '<td class="green"><strong>' . $this->getTime($solde_total) . '</strong></td>';
+        $html .= '</tr>';
+
+        $html .= '</table>';
+        return $html;
+    }
+
+    function getTableCommandes($commandes) {
+        $html = '<table>';
+        $html .= '<tr class="orange title">';
+        $html .= '<th colspan="10"><strong>INTERVENTIONS COMMANDES</strong></th>';
+        $html .= '</tr>';
+        $html .= '<tr class="blue title">';
+        $html .= '<th><strong>DELEGATION N°</strong></th>';
+        $html .= '<th><strong>N°COMMANDE</strong></th>';
+        $html .= '<th><strong>DATE COMMANDE</strong></th>';
+        $html .= '<th><strong>NOMBRE DE JOURNÉE COMMANDÉE</strong></th>';
+        $html .= '<th><strong>N°FICHE D\'INTERVENTION (FI)</strong></th>';
+        $html .= '<th><strong>DATE FI</strong></th>';
+        $html .= '<th><strong>INTERVENANT</strong></th>';
+        $html .= '<th><strong>TEMPS ESTIMÉ/JOUR</strong></th>';
+        $html .= '<th><strong>TEMPS RÉEL CONSOMMÉ</strong></th>';
+        $html .= '<th><strong>SOLDE</strong></th>';
+
+        $html .= '</tr>';
+        $solde_total = 0;
+        $planned_day_total = 0;
+        $used_total = 0;
+        $hour_total = 0;
+        $cnt_commande = 0;
+        $hours_per_day = 7 * 3600;
+
+        foreach ($commandes as $id_commande => $inters) {
+            $used = 0;
+            ++$cnt_commande;
+            $planned_day = $cnt_commande;
+            $planned_day_total += $planned_day;
+            $solde_init = $solde = $planned_day * $hours_per_day;
+            $hour_total += $solde_init;
+
+            $commande = new Commande($this->db);
+            $commande->fetch($id_commande);
+            $html .= '<tr class="grey title">';
+            $html .= '<th></th>';
+            $html .= '<th><strong>' . $id_commande . '</strong></th>';
+            $html .= '<th><strong>' . date('d/m/Y', $commande->date) . '</strong></th>';
+            $html .= '<th><strong>' . $planned_day . '</strong></th>';
+            $html .= '<th></th>';
+            $html .= '<th></th>';
+            $html .= '<th></th>';
+            $html .= '<th><strong>' . $this->getTime($hours_per_day) . '</strong></th>';
+            $html .= '<th></th>';
+            $html .= '<th><strong>' . $this->getTime($solde_init) . '</strong></th>';
+            $html .= '</tr>';
+
+            foreach ($inters as $inter) {
+                $fk_user = $inter['fk_user_author'];
+                if (!isset($this->intervenants[$fk_user])) {
+                    $user = new User($this->db);
+                    $user->fetch($fk_user);
+                    $intervenant[$fk_user] = $user;
+                }
+
+                $used += $inter['duree'];
+                $solde -= $inter['duree'];
+                $html .= '<tr>';
+                $html .= '<td>' . $inter['ref'] . '</td>';
+                $html .= '<td></td>';
+                $html .= '<td></td>';
+                $html .= '<td></td>';
+                $html .= '<td>' . $inter['rowid'] . '</td>';
+                $html .= '<td>' . $this->getDate($inter['datec']) . '</td>';
+                $html .= '<td>' . $intervenant[$fk_user]->firstname . ' ' . $intervenant[$fk_user]->lastname . '</td>';
+                $html .= '<td></td>';
+                $html .= '<td>' . $this->getTime($inter['duree']) . '</td>';
+                $html .= '<td>' . $this->getTime($solde) . '</td>';
+                $html .= '</tr>';
+            }
+            $solde_total += $solde;
+            $used_total += $used;
+
+            // Solde
+            $html .= '<tr>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="green"><strong>SOLDE ' . $cnt_commande . ' </strong></td>';
+            $html .= '<td class="green"><strong>' . $this->getTime($solde) . '</strong></td>';
+            $html .= '</tr>';
+
+            // Used
+            $html .= '<tr>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="orange"><strong>CONSOMMÉ ' . $cnt_commande . '</strong></td>';
+            $html .= '<td class="orange"><strong>' . $this->getTime($used) . '</strong></td>';
+            $html .= '</tr>';
+        }
+        $commande_number = '';
+        for ($i = 1; $i <= $cnt_commande; $i++)
+            $commande_number .= $i . '-';
+        $commande_number = substr($commande_number, 0, -1);
+
+        // Total planned hour
+        $html .= '<tr>';
+        $html .= '<td style="text-align: right;" colspan="3" class="grey"><strong>TOTAL DES JOURNEES DE DELEGATION</strong></td>';
+        $html .= '<td class="grey"><strong>' . $planned_day_total . '</strong></td>';
+        $html .= '<td class="grey"></td>';
+        $html .= '<td class="grey"></td>';
+        $html .= '<td class="grey"></td>';
+        $html .= '<td class="grey"><strong></strong></td>';
+        $html .= '<td class="grey"><strong>TOTAL HEURES ' . mb_strimwidth($commande_number, 0, 15, "...") . '</strong></td>';
+        $html .= '<td class="grey"><strong>' . $this->getTime($hour_total) . '</strong></td>';
+        $html .= '</tr>';
+
+        // Total used
+        $html .= '<tr>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="orange"><strong>CONSOMMÉ ' . mb_strimwidth($commande_number, 0, 15, "...") . '</strong></td>';
+        $html .= '<td class="orange"><strong>' . $this->getTime($used_total) . '</strong></td>';
+        $html .= '</tr>';
+
+        // Total solde
+        $html .= '<tr>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="green"><strong>SOLDE TOTAL ' . mb_strimwidth($commande_number, 0, 15, "...") . '</strong></td>';
+        $html .= '<td class="green"><strong>' . $this->getTime($solde_total) . '</strong></td>';
+        $html .= '</tr>';
+
+        $html .= '</table>';
+        return $html;
+    }
+
+    function getTableLibres($libres) {
+        $html = '<table>';
+        $html .= '<tr class="orange title">';
+        $html .= '<th colspan="10"><strong>INTERVENTIONS INDÉPENDANTES</strong></th>';
+        $html .= '</tr>';
+        $html .= '<tr class="blue title">';
+        $html .= '<th><strong>DELEGATION N°</strong></th>';
+        $html .= '<th><strong></strong></th>';
+        $html .= '<th><strong></strong></th>';
+        $html .= '<th><strong>NOMBRE DE JOURNÉE COMMANDÉE</strong></th>';
+        $html .= '<th><strong>N°FICHE D\'INTERVENTION (FI)</strong></th>';
+        $html .= '<th><strong>DATE FI</strong></th>';
+        $html .= '<th><strong>INTERVENANT</strong></th>';
+        $html .= '<th><strong>TEMPS ESTIMÉ/JOUR</strong></th>';
+        $html .= '<th><strong>TEMPS RÉEL CONSOMMÉ</strong></th>';
+        $html .= '<th><strong>SOLDE</strong></th>';
+        $html .= '</tr>';
+
+        $solde_total = 0;
+        $planned_day_total = 0;
+        $used_total = 0;
+        $hour_total = 0;
+        $cnt_libre = 0;
+        $hours_per_day = 7 * 3600;
+
+        foreach ($libres as $inter) {
+            $used = 0;
+            ++$cnt_libre;
+            $planned_day = $cnt_libre;
+            $planned_day_total += $planned_day;
+            $solde_init = $solde = $planned_day * $hours_per_day;
+            $hour_total += $solde_init;
+
+            $html .= '<tr class="grey title">';
+            $html .= '<th></th>';
+            $html .= '<th><strong></strong></th>';
+            $html .= '<th><strong></strong></th>';
+            $html .= '<th><strong>' . $planned_day . '</strong></th>';
+            $html .= '<th></th>';
+            $html .= '<th></th>';
+            $html .= '<th></th>';
+            $html .= '<th><strong>' . $this->getTime($hours_per_day) . '</strong></th>';
+            $html .= '<th></th>';
+            $html .= '<th><strong>' . $this->getTime($solde_init) . '</strong></th>';
+            $html .= '</tr>';
+
+            $fk_user = $inter['fk_user_author'];
+            if (!isset($this->intervenants[$fk_user])) {
+                $user = new User($this->db);
+                $user->fetch($fk_user);
+                $intervenant[$fk_user] = $user;
+            }
+
+            $used += $inter['duree'];
+            $solde -= $inter['duree'];
+            $html .= '<tr>';
+            $html .= '<td>' . $inter['ref'] . '</td>';
+            $html .= '<td></td>';
+            $html .= '<td></td>';
+            $html .= '<td></td>';
+            $html .= '<td>' . $inter['rowid'] . '</td>';
+            $html .= '<td>' . $this->getDate($inter['datec']) . '</td>';
+            $html .= '<td>' . $intervenant[$fk_user]->firstname . ' ' . $intervenant[$fk_user]->lastname . '</td>';
+            $html .= '<td></td>';
+            $html .= '<td>' . $this->getTime($inter['duree']) . '</td>';
+            $html .= '<td>' . $this->getTime($solde) . '</td>';
+            $html .= '</tr>';
+
+            $solde_total += $solde;
+            $used_total += $used;
+            // Solde
+            $html .= '<tr>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="green"><strong>SOLDE ' . $cnt_libre . ' </strong></td>';
+            $html .= '<td class="green"><strong>' . $this->getTime($solde) . '</strong></td>';
+            $html .= '</tr>';
+
+            // Used
+            $html .= '<tr>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="greyDisabled"></td>';
+            $html .= '<td class="orange"><strong>CONSOMMÉ ' . $cnt_libre . '</strong></td>';
+            $html .= '<td class="orange"><strong>' . $this->getTime($used) . '</strong></td>';
+            $html .= '</tr>';
+        }
+        $libres_number = '';
+        for ($i = 1; $i <= $cnt_libre; $i++)
+            $libres_number .= $i . '-';
+        $libres_number = substr($libres_number, 0, -1);
+
+        // Total planned hour
+        $html .= '<tr>';
+        $html .= '<td style="text-align: right;" colspan="3" class="grey"><strong>TOTAL DES JOURNEES DE DELEGATION</strong></td>';
+        $html .= '<td class="grey"><strong>' . $planned_day_total . '</strong></td>';
+        $html .= '<td class="grey"></td>';
+        $html .= '<td class="grey"></td>';
+        $html .= '<td class="grey"></td>';
+        $html .= '<td class="grey"><strong></strong></td>';
+        $html .= '<td class="grey"><strong>TOTAL HEURES ' . mb_strimwidth($libres_number, 0, 15, "...") . '</strong></td>';
+        $html .= '<td class="grey"><strong>' . $this->getTime($hour_total) . '</strong></td>';
+        $html .= '</tr>';
+
+        // Total used
+        $html .= '<tr>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="orange"><strong>CONSOMMÉ ' . mb_strimwidth($libres_number, 0, 15, "...") . '</strong></td>';
+        $html .= '<td class="orange"><strong>' . $this->getTime($used_total) . '</strong></td>';
+        $html .= '</tr>';
+
+        // Total solde
+        $html .= '<tr>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="white"></td>';
+        $html .= '<td class="green"><strong>SOLDE TOTAL ' . mb_strimwidth($libres_number, 0, 15, "...") . '</strong></td>';
+        $html .= '<td class="green"><strong>' . $this->getTime($solde_total) . '</strong></td>';
+        $html .= '</tr>';
+
+        $html .= '</table>';
+        return $html;
+    }
+
     /**
      *   Show table for lines
      *
@@ -549,65 +873,41 @@ class pdf_recaptemps extends ModelePDFFicheinter {
     function _tableau(&$pdf, $tab_top, $tab_height, $nexY, $outputlangs, $hidetop = 0, $hidebottom = 0) {
         global $conf;
 
-
         $default_font_size = pdf_getPDFFontSize($outputlangs);
-        /*
-          $pdf->SetXY($this->marge_gauche, $tab_top);
-          $pdf->MultiCell(190,8,$outputlangs->transnoentities("Description"),0,'L',0);
-          $pdf->line($this->marge_gauche, $tab_top + 8, $this->page_largeur-$this->marge_droite, $tab_top + 8);
-
-          $pdf->SetFont('','', $default_font_size - 1);
-
-          $pdf->MultiCell(0, 3, '');		// Set interline to 3
-          $pdf->SetXY($this->marge_gauche, $tab_top + 8);
-          $text=$object->description;
-          if ($object->duration > 0)
-          {
-          $totaltime=convertSecondToTime($object->duration,'all',$conf->global->MAIN_DURATION_OF_WORKDAY);
-          $text.=($text?' - ':'').$langs->trans("Total").": ".$totaltime;
-          }
-          $desc=dol_htmlentitiesbr($text,1);
-          //print $outputlangs->convToOutputCharset($desc); exit;
-
-          $pdf->writeHTMLCell(180, 3, 10, $tab_top + 8, $outputlangs->convToOutputCharset($desc), 0, 1);
-          $nexY = $pdf->GetY();
-
-          $pdf->line($this->marge_gauche, $nexY, $this->page_largeur-$this->marge_droite, $nexY);
-
-          $pdf->MultiCell(0, 3, '');		// Set interline to 3. Then writeMultiCell must use 3 also.
-         */
-
-        // Output Rect
-//        $this->printRect($pdf, $this->marge_gauche, $tab_top, $this->page_largeur - $this->marge_gauche - $this->marge_droite, $tab_height + 1, 0, 0); // Rect prend une longueur en 3eme param et 4eme param
-//        if (empty($hidebottom)) {
-//            $pdf->SetXY(20, 230);
-//            $pdf->MultiCell(66, 5, $outputlangs->transnoentities("NameAndSignatureOfInternalContact"), 0, 'L', 0);
-//
-//            $pdf->SetXY(20, 235);
-//            $pdf->MultiCell(80, 25, '', 1);
-//
-//            $pdf->SetXY(110, 230);
-//            $pdf->MultiCell(80, 5, $outputlangs->transnoentities("NameAndSignatureOfExternalContact"), 0, 'L', 0);
-//
-//            $pdf->SetXY(110, 235);
-//            $pdf->MultiCell(80, 25, '', 1);
-//        }
     }
 
     function getTime($duree) {
+        $time_per_day = 24 * 3600;
+
+        // Manage duration negative
+        if ($duree < 0) {
+            $prefix = '-';
+            $duree *= -1;
+        } else
+            $prefix = '';
+
+        // Define the output format
         if ($duree > 3599)
-            $out = gmdate("H\hi", $duree);
+            $out = gmdate("H\Hi", $duree);
         else
             $out = gmdate("i\m", $duree);
 
-        if (strpos($out, '0') == 0)
-            return substr($out, 1);
-        return $out;
+        // Manage hours over 24
+        if ($duree > $time_per_day) {
+            $time_over_24 = $duree % $time_per_day;
+            $days = (int) (($duree - $time_over_24) / $time_per_day);
+            $array_date = explode('H', $out);
+            $hours = (int) $array_date[0] + (int) $days * 24;
+            $out = $hours . 'H' . $array_date[1];
+        }
+
+        // remove first 0 of hours if exists
+        if (strpos($out, '0') === 0) // Require === instead of == to ignore false
+            return $prefix . substr($out, 1);
+        return $prefix . $out;
     }
 
     function getDate($date) {
-//        echo $date;
-//        die($date);
         $date_obj = DateTime::createFromFormat('Y-m-d H:i:s', $date);
         return $date_obj->format('d/m/Y');
     }
@@ -791,9 +1091,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
      *      @return	integer
      */
     function _pagefoot(&$pdf, $object, $outputlangs, $hidefreetext = 0) {
-//		global $conf;
-//		$showdetails=$conf->global->MAIN_GENERATE_DOCUMENTS_SHOW_FOOT_DETAILS;
-//		return pdf_pagefoot($pdf,$outputlangs,'FICHINTER_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object,$showdetails,$hidefreetext);
+        
     }
 
 }

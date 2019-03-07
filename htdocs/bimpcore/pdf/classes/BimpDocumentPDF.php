@@ -384,18 +384,23 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function getTargetInfosHtml()
     {
-        global $conf;
-        if ($this->contact < 1)
-            $html = '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
-        elseif (!empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
-            $this->contact->firstname .= '<br/>' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '';
-        else
-            $html = "";
+        global $langs;
+        
+        $nomsoc = pdfBuildThirdpartyName($this->thirdparty, $this->langs);
+        if(is_null($this->contact) || $this->contact->getFullName($langs) != $nomsoc)
+            $html = $nomsoc."<br/>";
+       
+//        if ($this->contact < 1)
+//            $html = '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
+//        elseif (!empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
+//            $this->contact->firstname = pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '<br/>' . $this->contact->firstname;
+//        else
+//            $html = "";
 
 
-        if (strtoupper($this->thirdparty->lastname) == strtoupper($this->thirdparty->socname)) {
-            $this->thirdparty->lastname = "";
-        }
+//        if (strtoupper($this->thirdparty->lastname) == strtoupper($this->thirdparty->socname)) {
+//            $this->thirdparty->lastname = "";
+//        }
 
         $html .= pdf_build_address($this->langs, $this->fromCompany, $this->thirdparty, $this->contact, !is_null($this->contact) ? 1 : 0, 'target');
         $html = str_replace("\n", '<br/>', $html);

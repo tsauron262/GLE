@@ -3,7 +3,7 @@
 class BimpAssociation
 {
 
-    public static $table = 'bimp_objects_associations';
+    public static $table = 'bimpcore_objects_associations';
     public $db;
     public $object = null;
     public $associate = null;

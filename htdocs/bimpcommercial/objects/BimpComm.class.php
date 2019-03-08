@@ -533,6 +533,38 @@ class BimpComm extends BimpDolObject
 
         return $marginInfos;
     }
+    
+    public function getCondReglementBySociete()
+    {
+        if (!$this->isLoaded()) {
+            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+            if ($id_soc) {
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
+                if (BimpObject::objectLoaded($soc)) {
+                    return (int) $soc->dol_object->cond_reglement_id;
+                }
+            }
+            return 0;
+        }
+        
+        return $this->getData('fk_cond_reglement');
+    }
+    
+    public function getModeReglementBySociete()
+    {
+        if (!$this->isLoaded()) {
+            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+            if ($id_soc) {
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
+                if (BimpObject::objectLoaded($soc)) {
+                    return (int) $soc->dol_object->mode_reglement_id;
+                }
+            }
+            return 0;
+        }
+        
+        return $this->getData('fk_mode_reglement');
+    }
 
     // Getters - Overrides BimpObject
 //    public function getName()

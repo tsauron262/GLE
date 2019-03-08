@@ -165,6 +165,12 @@ fields:
         type: money
         default_value: 0
         
+    billets_loc: 
+        label: Nombre de spectateurs locataires
+        type: int
+        min: 0
+        default_value: 0
+        
 forms: 
     default: 
         rows: 
@@ -195,6 +201,11 @@ filters_panels:
             - field: status
             - field: type
             - field: place
+            
+    dates: 
+        filters: 
+            - field: date
+              open: 1
             
 lists:
     default: 
@@ -233,6 +244,16 @@ list_customs:
         n: 100
         sort_field: date
         sort_way: asc       
+        
+    synthese_events: 
+        title: Synthèse événements
+        icon: fas_chart-line
+        content_callback: renderSyntheseEvents
+        filters_panel: dates
+        filters_panel_open: 1
+        n: 100
+        sort_field: date
+        sort_way: asc
              
 fields_tables: 
     infos: 
@@ -267,6 +288,8 @@ fields_tables:
             - field: default_dl_dist
               edit: 1
             - field: default_dl_prod
+              edit: 1
+            - field: billets_loc
               edit: 1
               
     ca_bar:

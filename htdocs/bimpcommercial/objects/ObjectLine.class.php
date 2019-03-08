@@ -1061,6 +1061,11 @@ class ObjectLine extends BimpObject
 
         return $html;
     }
+    
+    public function displayUnitPriceHTWithRemises()
+    {
+        return BimpTools::displayMoneyValue($this->getUnitPriceHTWithRemises(), 'EUR');
+    }
 
     // Traitements:
 
@@ -2303,7 +2308,7 @@ class ObjectLine extends BimpObject
             }
         }
 
-        $content = '<label>Remise (%):&nbsp;</label>';
+        $content = '<label>Remise:&nbsp;</label>';
         $content .= BimpInput::renderInput('text', 'quick_add_default_remise', $remise, array(
                     'addon_right' => BimpRender::renderIcon('fas_percent'),
                     'data'        => array(

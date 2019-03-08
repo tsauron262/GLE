@@ -49,18 +49,7 @@ class BMP_EventBillets extends BimpObject
     {
         $event = $this->getParentInstance();
         if (BimpObject::objectLoaded($event)) {
-            $cache_key = 'bmp_event_' . $event->id . '_tarifs_array';
-            if (!isset(self::$cache[$cache_key])) {
-                self::$cache[$cache_key] = array();
-
-                $list = $event->getChildrenObjects('tarifs');
-                if (!is_null($list) && count($list)) {
-                    foreach ($list as $item) {
-                        self::$cache[$cache_key][$item->id] = $item->getData('name');
-                    }
-                }
-            }
-            return self::$cache[$cache_key];
+            return $event->getTarifsArray();
         }
 
         return array();

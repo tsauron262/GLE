@@ -43,10 +43,24 @@ sections:
         marge_prod: 
             label: Marge de production
             sections: 
-                - type: list_custom
-                  list_custom: 
-                      object: event
-                      name: marge_prod
+                - type: nav_tabs
+                  nav_tabs: 
+                      - id: synthese_montants
+                        title: Synthèse par montants
+                        struct: 
+                            type: list_custom
+                            list_custom: 
+                                object: event
+                                name: marge_prod
+                                
+                      - id: synthese_events
+                        title: Synthèse événements
+                        struct: 
+                            type: list_custom
+                            list_custom:
+                                object: event
+                                name: synthese_events
+                    
         montants:
             label: Montants
             sections: 

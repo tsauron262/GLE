@@ -31,26 +31,30 @@ class BimpCore
     public static $filesInit = false;
     public static $config = null;
 
-    public static function displayHeaderFiles()
+    public static function displayHeaderFiles($echo = true)
     {
+        $html = '';
         if (!self::$filesInit) {
             foreach (self::$files['css'] as $css_file) {
-                echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $css_file . '"/>';
+                $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $css_file . '"/>';
             }
 
             global $user;
 
-            echo '<script type="text/javascript">';
-            echo ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
-            echo ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
-            echo '</script>';
+            $html .= '<script type="text/javascript">';
+            $html .= ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
+            $html .= ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
+            $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {
-                echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
+                $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
             }
 
             self::$filesInit = true;
         }
+        if($echo)
+            echo $html;
+        return $html;
     }
 
     public static function getConf($name)

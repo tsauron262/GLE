@@ -45,13 +45,16 @@ class FixeTabs
         }
     }
 
-    public function displayHead()
+    public function displayHead($echo = true)
     {
-        echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpcore/views/css/fixeTabs.css"/>';
-        echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/fixeTabs.js"></script>';
-        echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/BimpTimer.js"></script>';
-        echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimptask/views/css/task.css"/>';
-        echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimptask/views/js/task.js"></script>';
+        $html =  '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpcore/views/css/fixeTabs.css"/>';
+        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/fixeTabs.js"></script>';
+        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/BimpTimer.js"></script>';
+        $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimptask/views/css/task.css"/>';
+        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimptask/views/js/task.js"></script>';
+        if($echo)
+            echo $html;
+        return $html;
     }
 
     public function render($content_only = false)

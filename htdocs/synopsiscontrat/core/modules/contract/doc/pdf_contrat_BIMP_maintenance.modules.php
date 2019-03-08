@@ -258,7 +258,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
 
     public function display_content_contrat($pdf, $contrat) {
         $services = BimpObject::getInstance('bimpcontract', 'BContract_Productservices'); // Appel de l'objet
-        $list_services = (object) $services->getList(array('active' => 1)); // Filtre des services activés
+        $list_services = (object) $services->getList(array('use_in_contract' => 1)); // Filtre des services activés
         // Remise en forme de l'array pour traitement
         $array_services = Array();
         foreach ($list_services as $service) {

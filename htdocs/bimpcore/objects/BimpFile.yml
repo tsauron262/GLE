@@ -1,4 +1,4 @@
-table: bimp_file
+table: bimpcore_file
 common_fields: 1
 
 parent_module: 

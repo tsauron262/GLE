@@ -49,17 +49,3 @@ CREATE TABLE IF NOT EXISTS `llx_bs_sav` (
 ) ENGINE=InnoDB;
 
 ALTER TABLE `llx_be_equipment` ADD `product_label` VARCHAR(256) NOT NULL DEFAULT '' AFTER `id_product`;
-
-CREATE TABLE IF NOT EXISTS `llx_bimp_note` (
-  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `obj_type` varchar(128) NOT NULL DEFAULT '',
-  `obj_module` varchar(128) NOT NULL DEFAULT '',
-  `obj_name` varchar(128) NOT NULL DEFAULT '',
-  `id_obj` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `visibility` int(10) UNSIGNED NOT NULL DEFAULT '2',
-  `content` text NOT NULL,
-  `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB;

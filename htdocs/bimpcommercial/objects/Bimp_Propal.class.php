@@ -427,19 +427,27 @@ class Bimp_Propal extends BimpComm
         $pdf_file = $pdf_dir . '/' . $ref . '/' . $ref . '.pdf';
         if (file_exists($pdf_file)) {
             $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . htmlentities($ref . '/' . $ref . '.pdf');
-            $onclick = 'window.open(\'' . $url . '\');';
+//            $onclick = 'window.open(\'' . $url . '\');';
 
             $html .= BimpRender::renderButton(array(
                         'classes'     => array('btn', 'btn-default'),
                         'label'       => $ref . '.pdf',
                         'icon_before' => 'fas_file-pdf',
                         'attr'        => array(
-                            'onclick' => $onclick
+                            'href' => $url,
+                            'target' => '_blanck',
                         )
-            ));
+            ), "a");
         }
 
-        $html .= "<a class='btn btn-default' href='../comm/propal/card.php?id=" . $this->id . "'><i class='fa fa-file iconLeft'></i>Ancienne version</a>";
+        $html .= BimpRender::renderButton(array(
+                    'classes'     => array('btn', 'btn-default'),
+                    'label'       => 'Ancienne version',
+                    'icon_before' => 'fa_file',
+                    'attr'        => array(
+                        'href' => "../comm/propal/card.php?id=" . $this->id
+                    )
+        ), "a");
 
         $html .= '</div>';
 

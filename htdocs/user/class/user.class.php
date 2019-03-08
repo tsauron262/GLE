@@ -2675,6 +2675,9 @@ class User extends CommonObject
                     $info['mail'] = str_replace("@", "FERME@", $info['mail']);
                 
                 /*fmoddrsi*/
+                
+                $info['telephonenumber'] = $this->office_phone != "" ? $this->office_phone  : "n/c";
+                $info['mobile'] = $this->user_mobile != "" ? $this->user_mobile  : "n/c";
 
 		return $info;
 	}

@@ -72,6 +72,9 @@ class modBimpContract extends DolibarrModules {
   `titre` varchar(128) NOT NULL default "",
   `content` text,
   `active` boolean NOT NULL default 0,
+  `use_in_contract` NOT NULL default 1,
+  `use_in_commercial` NOT NULL default 0,
+  `test`VARCHAR(255) default NULL,
   `user_create` int(10) UNSIGNED NOT NULL DEFAULT "0",
   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT "0",
@@ -80,12 +83,13 @@ class modBimpContract extends DolibarrModules {
 ) ENGINE=InnoDB;';
         $extrafields = new ExtraFields($this->db);
         $extrafields->addExtraField('service_content', 'Services Compris', 'chkbxlst', 103, null, 'product', 0, 0, "", 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::active=1";N;}}', 1, "", 1, 1, "", "", "", 1);
+        //$extrafields->update('service_content', 'Services Compris', 'chkbxlst', null, 'product', 0, 0, 103, 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::use_in_contract=1";N;}}', 1, '', 1);
         return $this->_init($sql, $options);
     }
 
    
     public function remove($options = '') {
-        $sql = array();
+        $sql = array();        
         //$extrafields = new ExtraFields($this->db);
         //$extrafields->delete('service_content', 'product');
         return $this->_remove($sql, $options);

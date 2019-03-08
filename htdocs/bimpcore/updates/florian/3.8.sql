@@ -12,6 +12,3 @@ CREATE TABLE IF NOT EXISTS `llx_br_commande_shipment` (
 ) ENGINE=InnoDB;
 
 ALTER TABLE `llx_br_reservation_cmd_fourn` ADD `id_reservation` int(10) UNSIGNED NOT NULL DEFAULT '0';
-
-INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('default_id_client', 0);
-INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('default_id_product', 0);

@@ -38,4 +38,49 @@ class ActionsBimpcore
 
         return 0;
     }
+    
+    function setContentSecurityPolicy($parameters, &$object, &$action, $hookmanager){
+        global $bimp_fixe_tabs, $conf;
+        $html = '';
+         if (stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1) {
+                if (!defined('BIMP_CONTROLLER_INIT')) {
+                    require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+                    checkBimpCoreVersion();
+                    $html .= '<script type="text/javascript">';
+                    $html .= 'if (!dol_url_root) {';
+                    $html .= 'var dol_url_root = \'' . DOL_URL_ROOT . '\';}';
+                    $html .= 'var ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/bimpcore/index.php\';';
+                    $html .= '</script>';
+                    $html .= BimpCore::displayHeaderFiles(false);
+                } else {
+                    checkBimpCoreVersion();
+                    global $main_controller;
+                    if (is_a($main_controller, 'BimpController')) {
+                        $html .= $main_controller->displayHeaderFiles(false);
+                    }
+                }
+                if(FixeTabs::canView()){
+                    $bimp_fixe_tabs = new FixeTabs();
+                    $bimp_fixe_tabs->init();
+                    $html .= $bimp_fixe_tabs->displayHead(false);
+                }
+            }
+            
+            $conf->global->MAIN_HTML_HEADER .= $html;
+    }
+    
+    function printLeftBlock($parameters, &$object, &$action, $hookmanager){
+        $html = '';
+        if (defined('BIMP_LIB')) {
+            if (!defined('BIMP_CONTROLLER_INIT')) {
+                $html .= BimpRender::renderAjaxModal('page_modal');
+            }
+            global $bimp_fixe_tabs;
+            if (is_a($bimp_fixe_tabs, 'FixeTabs')) {
+                $html .= $bimp_fixe_tabs->render();
+            }
+        }
+        $this->resprints = $html;
+        return 0;
+    }
 }

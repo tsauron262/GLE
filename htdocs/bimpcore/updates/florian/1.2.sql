@@ -1,5 +1,4 @@
 
-INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('bimpcore_version', '1.1');
 
 CREATE TABLE IF NOT EXISTS `llx_bf_demande` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -158,15 +157,4 @@ CREATE TABLE IF NOT EXISTS `llx_bh_ticket` (
   `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB;
-
-CREATE TABLE IF NOT EXISTS `llx_bimp_timer` (
-  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `obj_module` varchar(128) NOT NULL,
-  `obj_name` varchar(128) NOT NULL,
-  `id_obj` int(10) UNSIGNED NOT NULL,
-  `field_name` varchar(128) NOT NULL,
-  `time_session` int(11) NOT NULL,
-  `session_start` int(11) DEFAULT NULL,
-  `id_user` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB;

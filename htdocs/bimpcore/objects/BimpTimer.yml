@@ -1,4 +1,4 @@
-table: bimp_timer
+table: bimpcore_timer
 
 labels: 
     name: timer

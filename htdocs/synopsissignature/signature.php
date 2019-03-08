@@ -310,12 +310,16 @@ if ($selectedFile) {
             $email = "f.pineri@bimp.fr, v.gilbert@bimp.fr";
             if(is_object($soc) && $soc->id > 0){
                 foreach($soc->getSalesRepresentatives($user) as $userT){
-                    $emails[] = $userT['email'];
+                    require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
+                    $groups = new UserGroup($db);
+                    $grps = $groups->listGroupsForUser($userT['id'], false);
+                    if(!isset($grps[210])){
+                        $emails[] = $userT['email'];
+                    }
                 }
                 if(count($emails) > 0)
                     $email = implode(",", $emails);
             }
-            
             
             mailSyn2("FI Signé", $email, null, "Bonjour la FI " . $object->getNomUrl(1) . " est Signé", array(), array(), array());
         } elseif (stripos($signeFile, 'SH') === 0) {

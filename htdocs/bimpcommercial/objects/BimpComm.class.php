@@ -263,7 +263,7 @@ class BimpComm extends BimpDolObject
         $where = '`parent_module` = \'' . $this->module . '\' AND `parent_object_name` = \'' . $this->object_name . '\' AND `id_parent` = ' . (int) $this->id;
         $where .= ' AND `file_name` = \'' . $ref . '\' AND `file_ext` = \'pdf\'';
 
-        return (int) $this->db->getValue('bimp_file', 'id', $where);
+        return (int) $this->db->getValue('bimpcore_file', 'id', $where);
     }
 
     public function getJoinFilesValues()

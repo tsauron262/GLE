@@ -79,5 +79,6 @@ class ActionsBimpcore
                 print $bimp_fixe_tabs->render();
             }
         }
+        return 0;
     }
 }

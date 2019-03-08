@@ -70,15 +70,17 @@ class ActionsBimpcore
     }
     
     function printLeftBlock($parameters, &$object, &$action, $hookmanager){
+        $html = '';
         if (defined('BIMP_LIB')) {
             if (!defined('BIMP_CONTROLLER_INIT')) {
-                print BimpRender::renderAjaxModal('page_modal');
+                $html .= BimpRender::renderAjaxModal('page_modal');
             }
             global $bimp_fixe_tabs;
             if (is_a($bimp_fixe_tabs, 'FixeTabs')) {
-                print $bimp_fixe_tabs->render();
+                $html .= $bimp_fixe_tabs->render();
             }
         }
+        $this->resprints = $html;
         return 0;
     }
 }

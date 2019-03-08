@@ -20,8 +20,8 @@ class FixeTabs
     {
         global $user, $conf;
         if (isset($user->id) && (int) $user->id) {
-            if (userInGroupe(18, $user->id))
-                return 1;
+//            if (userInGroupe(18, $user->id))
+//                return 1;
 
             if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
                 $task = BimpObject::getInstance("bimptask", "BIMP_Task");

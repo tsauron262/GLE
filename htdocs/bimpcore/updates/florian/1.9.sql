@@ -1,14 +1,5 @@
 
-CREATE TABLE IF NOT EXISTS `llx_bimp_history` (
-  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `module` varchar(128) NOT NULL,
-  `object` varchar(128) NOT NULL,
-  `id_object` int(10) UNSIGNED NOT NULL,
-  `field` varchar(128) NOT NULL,
-  `value` text NOT NULL,
-  `date` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `id_user` int(10) UNSIGNED NOT NULL DEFAULT '0'
-) ENGINE=InnoDB;
+
 
 
 CREATE TABLE IF NOT EXISTS `llx_bmp_event_group` (
@@ -47,8 +38,3 @@ ALTER TABLE `llx_bmp_event_montant` ADD `comment` TEXT NOT NULL DEFAULT '' AFTER
 
 ALTER TABLE `llx_bmp_type_montant` ADD `code_compta` VARCHAR(128) NOT NULL DEFAULT '' AFTER `id_taxe`;
 
-ALTER TABLE `llx_bimp_file` ADD `id_parent` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id`;
-ALTER TABLE `llx_bimp_file` ADD `parent_object_name` VARCHAR(128) NOT NULL AFTER `id`;
-ALTER TABLE `llx_bimp_file` ADD `parent_module` VARCHAR(128) NULL DEFAULT NULL AFTER `id`;
-ALTER TABLE `llx_bimp_file` ADD `file_ext` VARCHAR(12) NULL DEFAULT NULL AFTER `file_name`;
-ALTER TABLE `llx_bimp_file` CHANGE `files_dir` `file_dir` VARCHAR(256) NOT NULL DEFAULT '';

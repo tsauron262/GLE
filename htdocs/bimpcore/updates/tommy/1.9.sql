@@ -6,5 +6,3 @@ ALTER TABLE llx_bimp_note RENAME TO llx_bimpcore_note;
 ALTER TABLE llx_bimp_objects_associations RENAME TO llx_bimpcore_objects_associations;
 ALTER TABLE llx_bimp_timer RENAME TO llx_bimpcore_timer;
 ALTER TABLE llx_bimp_note RENAME TO llx_bimpcore_note;
-ALTER TABLE llx_bimp_note RENAME TO llx_bimpcore_note;
-ALTER TABLE llx_bimp_note RENAME TO llx_bimpcore_note;

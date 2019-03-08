@@ -44,5 +44,3 @@ ALTER TABLE `llx_bmp_categorie_montant` ADD `position` INT NOT NULL DEFAULT '0';
 ALTER TABLE `llx_bmp_event_montant` ADD `id_coprod` INT UNSIGNED NOT NULL DEFAULT '0';
 
 ALTER TABLE `llx_bmp_type_montant` ADD `coprod` BOOLEAN NOT NULL DEFAULT TRUE;
-
-ALTER TABLE `llx_bimp_objects_associations` ADD `association` VARCHAR(128) NOT NULL DEFAULT '' AFTER `id`;

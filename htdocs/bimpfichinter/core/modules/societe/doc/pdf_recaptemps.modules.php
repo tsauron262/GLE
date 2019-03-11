@@ -35,7 +35,9 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
+require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+require_once DOL_DOCUMENT_ROOT . '/includes/tecnickcom/tcpdf/tcpdf.php';
 
 /**
  * 	Class to build interventions documents with model Recaptemps
@@ -115,7 +117,6 @@ class pdf_recaptemps extends ModelePDFFicheinter {
 
 
 
-
             
 // Define position of columns
         $this->posxdesc = $this->marge_gauche + 1;
@@ -133,6 +134,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
      *  @return		int									1=OK, 0=KO
      */
     function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0) {
+
         global $user, $langs, $conf, $mysoc, $db, $hookmanager;
 
         if (!is_object($outputlangs))
@@ -179,8 +181,21 @@ class pdf_recaptemps extends ModelePDFFicheinter {
 
                 $nblignes = count($object->lines);
 
+                $pdfa = false;
+                if (!empty($conf->global->PDF_USE_1A))
+                    $pdfa = true;
+
+//	 * @param $ln (string) header image logo
+//	 * @param $lw (string) header image logo width in mm
+//	 * @param $ht (string) string to print as title on document header
+//	 * @param $hs (string) string to print on document header
+//	 * @param $tc (array) RGB array color for text.
+//	 * @param $lc (array) RGB array color for line.
                 // Create pdf instance
-                $pdf = pdf_getInstance($this->format);
+                $pdf = new CustomPDF('L', 'mm', $this->format, true, 'UTF-8', false, $pdfa);
+                $pdf->setHeaderData($ln = '', $lw = 20, $ht = 'dzadzaddz', $hs = '<table cellspacing="0" cellpadding="1" border="1">tr><td rowspan="3">test</td><td>test</td></tr></table>', $tc = array(125, 120, 120), $lc = array(120, 120, 120));
+
+//                $pdf = pdf_getInstance($this->format);
                 $default_font_size = pdf_getPDFFontSize($outputlangs); // Must be after pdf_getInstance
                 $heightforinfotot = 50; // Height reserved to output the info and total part
                 $heightforfreetext = (isset($conf->global->MAIN_PDF_FREETEXT_HEIGHT) ? $conf->global->MAIN_PDF_FREETEXT_HEIGHT : 5); // Height reserved to output the free text on last page
@@ -197,6 +212,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                     $pagecount = $pdf->setSourceFile($conf->mycompany->dir_output . '/' . $conf->global->MAIN_ADD_PDF_BACKGROUND);
                     $tplidx = $pdf->importPage(1);
                 }
+
 
                 $pdf->Open();
                 $pagenb = 0;
@@ -216,7 +232,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                 if (!empty($tplidx))
                     $pdf->useTemplate($tplidx);
                 $pagenb++;
-//                $this->_pagehead($pdf, $object, 1, $outputlangs);
+//                $this->setHeader($pdf, $object, 1, $outputlangs); // TODO
                 $pdf->SetFont('', '', $default_font_size - 1);
                 $pdf->SetTextColor(0, 0, 0);
 
@@ -252,20 +268,36 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                 $width_table = $this->page_largeur - $this->marge_gauche - $this->marge_droite;
 
                 // Bimp
+                // Check if extrafield "duree_h" exists
+                $sql = 'SELECT rowid';
+                $sql .= ' FROM ' . MAIN_DB_PREFIX . 'extrafields';
+                $sql .= ' WHERE name="duree_h"';
+                $resql = $this->db->query($sql);
+
+                if ($resql) {
+                    $result = $this->db->fetch_array($resql);
+                    if ($result == NULL)
+                        setEventMessage("Le champs supplémentaire \"Durée en heure n'est pas activé\"", 'warnings');
+                }
+
                 $pdf->SetFont('', '', 12);
 
                 $fichinter_obj = BimpObject::getInstance("bimpfichinter", "Bimp_Fichinter");
                 $fichinters = $fichinter_obj->getList(array('fk_soc' => $object->id));
 
 
+                $societe = new Societe($this->db);
+                $societe->fetch($object->id);
+
+
                 $contrats = $commandes = $libres = array();
 
 
                 foreach ($fichinters as $fichinter) {
-                    $date_split = explode('-', $fichinter['datec']);
+                    $date_split = explode('-', $fichinter['datei']);
                     $year_creation = $date_split[0];
-//                    if ($year_creation != date("Y")) // TODO reset this filter
-//                        continue;
+                    if ($year_creation != date("Y")) // TODO reset this filter
+                        continue;
 
                     $fk_contrat = $fichinter['fk_contrat'];
                     $fk_commande = $fichinter['fk_commande'];
@@ -278,14 +310,15 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                     }
                 }
 
-
                 $head_css = $this->getTableCss();
 
                 $this->intervenants = array();
-
+//                $pdf->AddPage('L');
+//                $pdf->AddPage('L');
+//                $pdf->AddPage('L');
                 // Contrats
                 if (sizeof($contrats) != 0) {
-                    $html = $head_css . $this->getTableContrats($contrats);
+                    $html = $head_css . $this->getTableContrats($contrats, $societe->nom);
                     $pdf->writeHTML($html, true, false, true, false, '');
                 } else {
                     $html = '<h3>Aucune intervention liée à un contrat pour ce tier en ' . date("Y") . '</h3>';
@@ -295,7 +328,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                 // Commandes
                 if (sizeof($contrats) != 0) {
                     $pdf->AddPage('', '', true);
-                    $html = $head_css . $this->getTableCommandes($commandes);
+                    $html = $head_css . $this->getTableCommandes($commandes, $societe->nom);
                     $pdf->writeHTML($html, true, false, true, false, '');
                 } else {
                     $html = '<h3>Aucune intervention liée à une commande pour ce tier en ' . date("Y") . '</h3>';
@@ -305,7 +338,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                 // Libres
                 if (sizeof($contrats) != 0) {
                     $pdf->AddPage('', '', true);
-                    $html = $head_css . $this->getTableLibres($libres);
+                    $html = $head_css . $this->getTableLibres($libres, $societe->nom);
                     $pdf->writeHTML($html, true, false, true, false, '');
                 } else {
                     $html = '<h3>Aucune intervention libre (sans contrat ou commande) pour ce tier en ' . date("Y") . '</h3>';
@@ -409,13 +442,13 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         return $head_css;
     }
 
-    function getTableContrats($contrats) {
+    function getTableContrats($contrats, $societe_name) {
         $html = '<table>';
         $html .= '<tr class="orange title">';
-        $html .= '<th colspan="10"><strong>INTERVENTIONS CONTRATS</strong></th>';
+        $html .= '<th colspan="10"><strong>INTERVENTIONS CONTRATS ' . $societe_name . '</strong></th>';
         $html .= '</tr>';
         $html .= '<tr class="blue title">';
-        $html .= '<th><strong>DELEGATION N°</strong></th>';
+        $html .= '<th><strong>TITRE</strong></th>';
         $html .= '<th><strong>N°CONTRAT</strong></th>';
         $html .= '<th><strong>DATE CONTRAT</strong></th>';
         $html .= '<th><strong>NOMBRE DE JOURNÉE COMMANDÉE</strong></th>';
@@ -435,18 +468,31 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         $hours_per_day = 7 * 3600;
 
         foreach ($contrats as $id_contrat => $inters) {
+//            echo '<pre>';
+//            print_r($inters);
+//            die();
+            $planned_day = 0;
+
+            $contrat = new Contrat($this->db);
+            $contrat->fetch($id_contrat);
+            $contrat->fetch_lines();
+            foreach ($contrat->lines as $line) {
+                $product = new Product($this->db);
+                $product->fetch($line->fk_product);
+                if ($product->array_options['options_duree_h'] != NULL) {
+                    $planned_day += $line->qty * $product->array_options['options_duree_h'] / 7;
+                }
+            }
+
             $used = 0;
             ++$cnt_contrat;
-            $planned_day = $cnt_contrat;
             $planned_day_total += $planned_day;
             $solde_init = $solde = $planned_day * $hours_per_day;
             $hour_total += $solde_init;
 
-            $contrat = new Contrat($this->db);
-            $contrat->fetch($id_contrat);
             $html .= '<tr class="grey title">';
             $html .= '<th></th>';
-            $html .= '<th><strong>' . $id_contrat . '</strong></th>';
+            $html .= '<th><strong>' . $contrat->ref . '</strong></th>';
             $html .= '<th><strong>' . date('d/m/Y', $contrat->date_contrat) . '</strong></th>';
             $html .= '<th><strong>' . $planned_day . '</strong></th>';
             $html .= '<th></th>';
@@ -469,12 +515,12 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                 $used += $inter['duree'];
                 $solde -= $inter['duree'];
                 $html .= '<tr>';
+                $html .= '<td>' . $inter['description'] . '</td>';
+                $html .= '<td></td>';
+                $html .= '<td></td>';
+                $html .= '<td></td>';
                 $html .= '<td>' . $inter['ref'] . '</td>';
-                $html .= '<td></td>';
-                $html .= '<td></td>';
-                $html .= '<td></td>';
-                $html .= '<td>' . $inter['rowid'] . '</td>';
-                $html .= '<td>' . $this->getDate($inter['datec']) . '</td>';
+                $html .= '<td>' . $this->getDate($inter['datei']) . '</td>';
                 $html .= '<td>' . $intervenant[$fk_user]->firstname . ' ' . $intervenant[$fk_user]->lastname . '</td>';
                 $html .= '<td></td>';
                 $html .= '<td>' . $this->getTime($inter['duree']) . '</td>';
@@ -560,13 +606,13 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         return $html;
     }
 
-    function getTableCommandes($commandes) {
+    function getTableCommandes($commandes, $societe_name) {
         $html = '<table>';
         $html .= '<tr class="orange title">';
-        $html .= '<th colspan="10"><strong>INTERVENTIONS COMMANDES</strong></th>';
+        $html .= '<th colspan="10"><strong>INTERVENTIONS COMMANDES ' . $societe_name . '</strong></th>';
         $html .= '</tr>';
         $html .= '<tr class="blue title">';
-        $html .= '<th><strong>DELEGATION N°</strong></th>';
+        $html .= '<th><strong>TITRE</strong></th>';
         $html .= '<th><strong>N°COMMANDE</strong></th>';
         $html .= '<th><strong>DATE COMMANDE</strong></th>';
         $html .= '<th><strong>NOMBRE DE JOURNÉE COMMANDÉE</strong></th>';
@@ -588,16 +634,26 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         foreach ($commandes as $id_commande => $inters) {
             $used = 0;
             ++$cnt_commande;
-            $planned_day = $cnt_commande;
+            $planned_day = 0;
+
+
+            $commande = new Commande($this->db);
+            $commande->fetch($id_commande);
+            $commande->fetch_lines();
+            foreach ($commande->lines as $line) {
+                $product = new Product($this->db);
+                $product->fetch($line->fk_product);
+                if ($product->array_options['options_duree_h'] != NULL) {
+                    $planned_day += $line->qty * $product->array_options['options_duree_h'] / 7;
+                }
+            }
             $planned_day_total += $planned_day;
             $solde_init = $solde = $planned_day * $hours_per_day;
             $hour_total += $solde_init;
 
-            $commande = new Commande($this->db);
-            $commande->fetch($id_commande);
             $html .= '<tr class="grey title">';
             $html .= '<th></th>';
-            $html .= '<th><strong>' . $id_commande . '</strong></th>';
+            $html .= '<th><strong>' . $commande->ref . '</strong></th>';
             $html .= '<th><strong>' . date('d/m/Y', $commande->date) . '</strong></th>';
             $html .= '<th><strong>' . $planned_day . '</strong></th>';
             $html .= '<th></th>';
@@ -619,12 +675,12 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                 $used += $inter['duree'];
                 $solde -= $inter['duree'];
                 $html .= '<tr>';
+                $html .= '<td>' . $inter['description'] . '</td>';
+                $html .= '<td></td>';
+                $html .= '<td></td>';
+                $html .= '<td></td>';
                 $html .= '<td>' . $inter['ref'] . '</td>';
-                $html .= '<td></td>';
-                $html .= '<td></td>';
-                $html .= '<td></td>';
-                $html .= '<td>' . $inter['rowid'] . '</td>';
-                $html .= '<td>' . $this->getDate($inter['datec']) . '</td>';
+                $html .= '<td>' . $this->getDate($inter['datei']) . '</td>';
                 $html .= '<td>' . $intervenant[$fk_user]->firstname . ' ' . $intervenant[$fk_user]->lastname . '</td>';
                 $html .= '<td></td>';
                 $html .= '<td>' . $this->getTime($inter['duree']) . '</td>';
@@ -711,13 +767,13 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         return $html;
     }
 
-    function getTableLibres($libres) {
+    function getTableLibres($libres, $societe_name) {
         $html = '<table>';
         $html .= '<tr class="orange title">';
-        $html .= '<th colspan="10"><strong>INTERVENTIONS INDÉPENDANTES</strong></th>';
+        $html .= '<th colspan="10"><strong>INTERVENTIONS INDÉPENDANTES ' . $societe_name . '</strong></th>';
         $html .= '</tr>';
         $html .= '<tr class="blue title">';
-        $html .= '<th><strong>DELEGATION N°</strong></th>';
+        $html .= '<th><strong>TITRE</strong></th>';
         $html .= '<th><strong></strong></th>';
         $html .= '<th><strong></strong></th>';
         $html .= '<th><strong>NOMBRE DE JOURNÉE COMMANDÉE</strong></th>';
@@ -767,12 +823,12 @@ class pdf_recaptemps extends ModelePDFFicheinter {
             $used += $inter['duree'];
             $solde -= $inter['duree'];
             $html .= '<tr>';
+            $html .= '<td>' . $inter['description'] . '</td>';
+            $html .= '<td></td>';
+            $html .= '<td></td>';
+            $html .= '<td></td>';
             $html .= '<td>' . $inter['ref'] . '</td>';
-            $html .= '<td></td>';
-            $html .= '<td></td>';
-            $html .= '<td></td>';
-            $html .= '<td>' . $inter['rowid'] . '</td>';
-            $html .= '<td>' . $this->getDate($inter['datec']) . '</td>';
+            $html .= '<td>' . $this->getDate($inter['datei']) . '</td>';
             $html .= '<td>' . $intervenant[$fk_user]->firstname . ' ' . $intervenant[$fk_user]->lastname . '</td>';
             $html .= '<td></td>';
             $html .= '<td>' . $this->getTime($inter['duree']) . '</td>';
@@ -909,6 +965,12 @@ class pdf_recaptemps extends ModelePDFFicheinter {
 
     function getDate($date) {
         $date_obj = DateTime::createFromFormat('Y-m-d H:i:s', $date);
+        if (!$date_obj)
+            $date_obj = DateTime::createFromFormat('Y-m-d', $date);
+
+        if (!$date_obj)
+            return "Format date inconnu";
+
         return $date_obj->format('d/m/Y');
     }
 
@@ -921,164 +983,165 @@ class pdf_recaptemps extends ModelePDFFicheinter {
      *  @param  Translate	$outputlangs	Object lang for output
      *  @return	void
      */
-    function _pagehead(&$pdf, $object, $showaddress, $outputlangs) {
-        global $conf, $langs;
-        $default_font_size = pdf_getPDFFontSize($outputlangs);
-
-        $outputlangs->load("main");
-        $outputlangs->load("dict");
-        $outputlangs->load("companies");
-        $outputlangs->load("interventions");
-
-        pdf_pagehead($pdf, $outputlangs, $this->page_hauteur);
-
-        //Affiche le filigrane brouillon - Print Draft Watermark
-        if ($object->statut == 0 && (!empty($conf->global->FICHINTER_DRAFT_WATERMARK))) {
-            pdf_watermark($pdf, $outputlangs, $this->page_hauteur, $this->page_largeur, 'mm', $conf->global->FICHINTER_DRAFT_WATERMARK);
-        }
-
-        //Prepare la suite
-        $pdf->SetTextColor(0, 0, 60);
-        $pdf->SetFont('', 'B', $default_font_size + 3);
-
-        $posx = $this->page_largeur - $this->marge_droite - 100;
-        $posy = $this->marge_haute;
-
-        $pdf->SetXY($this->marge_gauche, $posy);
-
-        // Logo
-        $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
-        if ($this->emetteur->logo) {
-            if (is_readable($logo)) {
-                $height = pdf_getHeightForLogo($logo);
-                $pdf->Image($logo, $this->marge_gauche, $posy, 0, $height); // width=0 (auto)
-            } else {
-                $pdf->SetTextColor(200, 0, 0);
-                $pdf->SetFont('', 'B', $default_font_size - 2);
-                $pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorLogoFileNotFound", $logo), 0, 'L');
-                $pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorGoToGlobalSetup"), 0, 'L');
-            }
-        } else {
-            $text = $this->emetteur->name;
-            $pdf->MultiCell(100, 4, $outputlangs->convToOutputCharset($text), 0, 'L');
-        }
-
-        $pdf->SetFont('', 'B', $default_font_size + 3);
-        $pdf->SetXY($posx, $posy);
-        $pdf->SetTextColor(0, 0, 60);
-        $title = $outputlangs->transnoentities("InterventionCard");
-        $pdf->MultiCell(100, 4, $title, '', 'R');
-
-        $pdf->SetFont('', 'B', $default_font_size + 2);
-
-        $posy += 5;
-        $pdf->SetXY($posx, $posy);
-        $pdf->SetTextColor(0, 0, 60);
-        $pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref") . " : " . $outputlangs->convToOutputCharset($object->ref), '', 'R');
-
-        $posy += 1;
-        $pdf->SetFont('', '', $default_font_size);
-
-        $posy += 4;
-        $pdf->SetXY($posx, $posy);
-        $pdf->SetTextColor(0, 0, 60);
-        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Date") . " : " . dol_print_date($object->datec, "day", false, $outputlangs, true), '', 'R');
-
-        if ($object->thirdparty->code_client) {
-            $posy += 4;
-            $pdf->SetXY($posx, $posy);
-            $pdf->SetTextColor(0, 0, 60);
-            $pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode") . " : " . $outputlangs->transnoentities($object->thirdparty->code_client), '', 'R');
-        }
-
-        if ($showaddress) {
-            // Sender properties
-            $carac_emetteur = '';
-            // Add internal contact of proposal if defined
-            $arrayidcontact = $object->getIdContact('internal', 'INTERREPFOLL');
-            if (count($arrayidcontact) > 0) {
-                $object->fetch_user($arrayidcontact[0]);
-                $carac_emetteur .= ($carac_emetteur ? "\n" : '' ) . $outputlangs->transnoentities("Name") . ": " . $outputlangs->convToOutputCharset($object->user->getFullName($outputlangs)) . "\n";
-            }
-
-            $carac_emetteur .= pdf_build_address($outputlangs, $this->emetteur, $object->thirdparty, '', 0, 'source', $object);
-
-            // Show sender
-            $posy = 42;
-            $posx = $this->marge_gauche;
-            if (!empty($conf->global->MAIN_INVERT_SENDER_RECIPIENT))
-                $posx = $this->page_largeur - $this->marge_droite - 80;
-            $hautcadre = 40;
-
-            // Show sender frame
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetFont('', '', $default_font_size - 2);
-            $pdf->SetXY($posx, $posy - 5);
-            $pdf->SetXY($posx, $posy);
-            $pdf->SetFillColor(230, 230, 230);
-            $pdf->MultiCell(82, $hautcadre, "", 0, 'R', 1);
-
-            // Show sender name
-            $pdf->SetXY($posx + 2, $posy + 3);
-            $pdf->SetTextColor(0, 0, 60);
-            $pdf->SetFont('', 'B', $default_font_size);
-            $pdf->MultiCell(80, 3, $outputlangs->convToOutputCharset($this->emetteur->name), 0, 'L');
-            $posy = $pdf->getY();
-
-            // Show sender information
-            $pdf->SetFont('', '', $default_font_size - 1);
-            $pdf->SetXY($posx + 2, $posy);
-            $pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
-
-
-            // If CUSTOMER contact defined, we use it
-            $usecontact = false;
-            $arrayidcontact = $object->getIdContact('external', 'CUSTOMER');
-            if (count($arrayidcontact) > 0) {
-                $usecontact = true;
-                $result = $object->fetch_contact($arrayidcontact[0]);
-            }
-
-            //Recipient name
-            // On peut utiliser le nom de la societe du contact
-            if ($usecontact && !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) {
-                $thirdparty = $object->contact;
-            } else {
-                $thirdparty = $object->thirdparty;
-            }
-
-            $carac_client_name = pdfBuildThirdpartyName($thirdparty, $outputlangs);
-
-            $carac_client = pdf_build_address($outputlangs, $this->emetteur, $object->thirdparty, (isset($object->contact) ? $object->contact : ''), $usecontact, 'target', $object);
-
-            // Show recipient
-            $widthrecbox = 100;
-            if ($this->page_largeur < 210)
-                $widthrecbox = 84; // To work with US executive format
-            $posy = 42;
-            $posx = $this->page_largeur - $this->marge_droite - $widthrecbox;
-            if (!empty($conf->global->MAIN_INVERT_SENDER_RECIPIENT))
-                $posx = $this->marge_gauche;
-
-            // Show recipient frame
-            $pdf->SetTextColor(0, 0, 0);
-            $pdf->SetFont('', '', $default_font_size - 2);
-            $pdf->SetXY($posx + 2, $posy - 5);
-            $pdf->Rect($posx, $posy, $widthrecbox, $hautcadre);
-            $pdf->SetTextColor(0, 0, 0);
-
-            // Show recipient name
-            $pdf->SetXY($posx + 2, $posy + 3);
-            $pdf->SetFont('', 'B', $default_font_size);
-            $pdf->MultiCell($widthrecbox, 4, $carac_client_name, 0, 'L');
-
-            $posy = $pdf->getY();
-
-            // Show recipient information
-            $pdf->SetFont('', '', $default_font_size - 1);
-            $pdf->SetXY($posx + 2, $posy);
-            $pdf->MultiCell($widthrecbox, 4, $carac_client, 0, 'L');
-        }
+    function setHeader(&$pdf, $object, $showaddress, $outputlangs) {
+        $pdf->MultiCell(50, 50, 'test');
+//        global $conf, $langs;
+//        $default_font_size = pdf_getPDFFontSize($outputlangs);
+//
+//        $outputlangs->load("main");
+//        $outputlangs->load("dict");
+//        $outputlangs->load("companies");
+//        $outputlangs->load("interventions");
+//
+//        pdf_pagehead($pdf, $outputlangs, $this->page_hauteur);
+//
+//        //Affiche le filigrane brouillon - Print Draft Watermark
+//        if ($object->statut == 0 && (!empty($conf->global->FICHINTER_DRAFT_WATERMARK))) {
+//            pdf_watermark($pdf, $outputlangs, $this->page_hauteur, $this->page_largeur, 'mm', $conf->global->FICHINTER_DRAFT_WATERMARK);
+//        }
+//
+//        //Prepare la suite
+//        $pdf->SetTextColor(0, 0, 60);
+//        $pdf->SetFont('', 'B', $default_font_size + 3);
+//
+//        $posx = $this->page_largeur - $this->marge_droite - 100;
+//        $posy = $this->marge_haute;
+//
+//        $pdf->SetXY($this->marge_gauche, $posy);
+//
+//        // Logo
+//        $logo = $conf->mycompany->dir_output . '/logos/' . $this->emetteur->logo;
+//        if ($this->emetteur->logo) {
+//            if (is_readable($logo)) {
+//                $height = pdf_getHeightForLogo($logo);
+//                $pdf->Image($logo, $this->marge_gauche, $posy, 0, $height); // width=0 (auto)
+//            } else {
+//                $pdf->SetTextColor(200, 0, 0);
+//                $pdf->SetFont('', 'B', $default_font_size - 2);
+//                $pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorLogoFileNotFound", $logo), 0, 'L');
+//                $pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorGoToGlobalSetup"), 0, 'L');
+//            }
+//        } else {
+//            $text = $this->emetteur->name;
+//            $pdf->MultiCell(100, 4, $outputlangs->convToOutputCharset($text), 0, 'L');
+//        }
+//
+//        $pdf->SetFont('', 'B', $default_font_size + 3);
+//        $pdf->SetXY($posx, $posy);
+//        $pdf->SetTextColor(0, 0, 60);
+//        $title = $outputlangs->transnoentities("InterventionCard");
+//        $pdf->MultiCell(100, 4, $title, '', 'R');
+//
+//        $pdf->SetFont('', 'B', $default_font_size + 2);
+//
+//        $posy += 5;
+//        $pdf->SetXY($posx, $posy);
+//        $pdf->SetTextColor(0, 0, 60);
+//        $pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref") . " : " . $outputlangs->convToOutputCharset($object->ref), '', 'R');
+//
+//        $posy += 1;
+//        $pdf->SetFont('', '', $default_font_size);
+//
+//        $posy += 4;
+//        $pdf->SetXY($posx, $posy);
+//        $pdf->SetTextColor(0, 0, 60);
+//        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Date") . " : " . dol_print_date($object->datec, "day", false, $outputlangs, true), '', 'R');
+//
+//        if ($object->thirdparty->code_client) {
+//            $posy += 4;
+//            $pdf->SetXY($posx, $posy);
+//            $pdf->SetTextColor(0, 0, 60);
+//            $pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode") . " : " . $outputlangs->transnoentities($object->thirdparty->code_client), '', 'R');
+//        }
+//
+//        if ($showaddress) {
+//            // Sender properties
+//            $carac_emetteur = '';
+//            // Add internal contact of proposal if defined
+//            $arrayidcontact = $object->getIdContact('internal', 'INTERREPFOLL');
+//            if (count($arrayidcontact) > 0) {
+//                $object->fetch_user($arrayidcontact[0]);
+//                $carac_emetteur .= ($carac_emetteur ? "\n" : '' ) . $outputlangs->transnoentities("Name") . ": " . $outputlangs->convToOutputCharset($object->user->getFullName($outputlangs)) . "\n";
+//            }
+//
+//            $carac_emetteur .= pdf_build_address($outputlangs, $this->emetteur, $object->thirdparty, '', 0, 'source', $object);
+//
+//            // Show sender
+//            $posy = 42;
+//            $posx = $this->marge_gauche;
+//            if (!empty($conf->global->MAIN_INVERT_SENDER_RECIPIENT))
+//                $posx = $this->page_largeur - $this->marge_droite - 80;
+//            $hautcadre = 40;
+//
+//            // Show sender frame
+//            $pdf->SetTextColor(0, 0, 0);
+//            $pdf->SetFont('', '', $default_font_size - 2);
+//            $pdf->SetXY($posx, $posy - 5);
+//            $pdf->SetXY($posx, $posy);
+//            $pdf->SetFillColor(230, 230, 230);
+//            $pdf->MultiCell(82, $hautcadre, "", 0, 'R', 1);
+//
+//            // Show sender name
+//            $pdf->SetXY($posx + 2, $posy + 3);
+//            $pdf->SetTextColor(0, 0, 60);
+//            $pdf->SetFont('', 'B', $default_font_size);
+//            $pdf->MultiCell(80, 3, $outputlangs->convToOutputCharset($this->emetteur->name), 0, 'L');
+//            $posy = $pdf->getY();
+//
+//            // Show sender information
+//            $pdf->SetFont('', '', $default_font_size - 1);
+//            $pdf->SetXY($posx + 2, $posy);
+//            $pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
+//
+//
+//            // If CUSTOMER contact defined, we use it
+//            $usecontact = false;
+//            $arrayidcontact = $object->getIdContact('external', 'CUSTOMER');
+//            if (count($arrayidcontact) > 0) {
+//                $usecontact = true;
+//                $result = $object->fetch_contact($arrayidcontact[0]);
+//            }
+//
+//            //Recipient name
+//            // On peut utiliser le nom de la societe du contact
+//            if ($usecontact && !empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT)) {
+//                $thirdparty = $object->contact;
+//            } else {
+//                $thirdparty = $object->thirdparty;
+//            }
+//
+//            $carac_client_name = pdfBuildThirdpartyName($thirdparty, $outputlangs);
+//
+//            $carac_client = pdf_build_address($outputlangs, $this->emetteur, $object->thirdparty, (isset($object->contact) ? $object->contact : ''), $usecontact, 'target', $object);
+//
+//            // Show recipient
+//            $widthrecbox = 100;
+//            if ($this->page_largeur < 210)
+//                $widthrecbox = 84; // To work with US executive format
+//            $posy = 42;
+//            $posx = $this->page_largeur - $this->marge_droite - $widthrecbox;
+//            if (!empty($conf->global->MAIN_INVERT_SENDER_RECIPIENT))
+//                $posx = $this->marge_gauche;
+//
+//            // Show recipient frame
+//            $pdf->SetTextColor(0, 0, 0);
+//            $pdf->SetFont('', '', $default_font_size - 2);
+//            $pdf->SetXY($posx + 2, $posy - 5);
+//            $pdf->Rect($posx, $posy, $widthrecbox, $hautcadre);
+//            $pdf->SetTextColor(0, 0, 0);
+//
+//            // Show recipient name
+//            $pdf->SetXY($posx + 2, $posy + 3);
+//            $pdf->SetFont('', 'B', $default_font_size);
+//            $pdf->MultiCell($widthrecbox, 4, $carac_client_name, 0, 'L');
+//
+//            $posy = $pdf->getY();
+//
+//            // Show recipient information
+//            $pdf->SetFont('', '', $default_font_size - 1);
+//            $pdf->SetXY($posx + 2, $posy);
+//            $pdf->MultiCell($widthrecbox, 4, $carac_client, 0, 'L');
+//        }
     }
 
     /**
@@ -1092,6 +1155,15 @@ class pdf_recaptemps extends ModelePDFFicheinter {
      */
     function _pagefoot(&$pdf, $object, $outputlangs, $hidefreetext = 0) {
         
+    }
+
+}
+
+class CustomPDF extends TCPDF {
+
+    public function Header() {
+        die('SAlut header perso');
+        $this->MultiCell(50, 50, 'test header dans class custom');
     }
 
 }

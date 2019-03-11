@@ -55,7 +55,7 @@ class modBimptask extends DolibarrModules {
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
         // It is used to group modules by family in module setup page
-        $this->family = "BIMP";
+        $this->family = "Bimp";
         // Module position in the family
         $this->module_position = 500;
         // Gives the possibility to the module, to provide his own family info and position of this family (Overwrite $this->family and $this->module_position. Avoid this)
@@ -94,7 +94,7 @@ class modBimptask extends DolibarrModules {
 
         // Dependencies
 //        $this->hidden = false;   // A condition to hide module
-//        $this->depends = array();  // List of module class names as string that must be enabled if this module is enabled
+        $this->depends = array("modBimpcore");  // List of module class names as string that must be enabled if this module is enabled
 //        $this->requiredby = array(); // List of module ids to disable if this one is disabled
 //        $this->conflictwith = array(); // List of module class names as string this module is in conflict with
 //        $this->phpmin = array(5, 3);     // Minimum version of PHP required by module
@@ -301,6 +301,25 @@ class modBimptask extends DolibarrModules {
      */
     public function init($options = '') {
         $sql = array();
+        
+        
+        
+        $sql[] = 'CREATE TABLE `llx_bimp_task` (
+  `id` int(11) PRIMARY KEY NOT NULL AUTO_INCREMENT,
+  `src` varchar(127) NOT NULL,
+  `dst` varchar(127) NOT NULL,
+  `subj` varchar(254) NOT NULL,
+  `txt` text NOT NULL,
+  `comment` text DEFAULT NULL,
+  `id_user_owner` int(11) DEFAULT NULL,
+  `user_create` int(11) NOT NULL,
+  `user_update` int(11) DEFAULT NULL,
+  `status` int(11) DEFAULT 0,
+  `prio` int(11) NOT NULL,
+  `date_create` datetime NOT NULL DEFAULT current_timestamp,
+  `date_update` datetime NOT NULL,
+  test_ferme text
+);';
 
         // Add restrictions to all categories son of root
 //        initRestrictions();

@@ -1805,7 +1805,6 @@ class BimpController
 
     protected function ajaxProcessLoadFixeTabs($i = 0)
     {
-        global $bimp_fixe_tabs;
         $i++;
 
         $bimp_fixe_tabs = new FixeTabs();

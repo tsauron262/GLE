@@ -36,7 +36,7 @@ class FixeTabs
     {
         global $conf, $user;
         require_once DOL_DOCUMENT_ROOT . '/bimpsupport/chronos.php';
-        runBimpSupportChrono();
+        runBimpSupportChrono($this, $user);
 
 
         if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {

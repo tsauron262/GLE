@@ -318,7 +318,6 @@ class modBimptask extends DolibarrModules {
   `prio` int(11) NOT NULL,
   `date_create` datetime NOT NULL DEFAULT current_timestamp,
   `date_update` datetime NOT NULL,
-  `prio` int(11) NOT NULL,
   test_ferme text
 );';
 

@@ -22,6 +22,7 @@ class ObjectLine extends BimpObject
     public $date_from = null;
     public $date_to = null;
     public $id_remise_except = null;
+    public $id_parent_line = null;
     public static $product_line_data = array(
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1, 'default' => 0),
         'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'default' => null),
@@ -32,10 +33,12 @@ class ObjectLine extends BimpObject
         'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0, 'default' => null),
         'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0),
         'date_from'      => array('label' => 'Date début', 'type' => 'date', 'required' => 0, 'default' => null),
-        'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null)
+        'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null),
+        'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
     );
     public static $text_line_data = array(
-        'desc' => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
+        'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
+        'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
     );
     public static $types = array(
         self::LINE_PRODUCT => 'Produit / Service',
@@ -337,6 +340,21 @@ class ObjectLine extends BimpObject
                     'onclick' => $onclick
                 );
             }
+            if ($this->isParentEditable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
+                $line_instance = BimpObject::getInstance($this->module, $this->object_name);
+                $onclick = $line_instance->getJsLoadModalForm('default', 'Ajout d\\\'une sous-ligne à la ligne n°' . $this->getData('position'), array(
+                    'fields' => array(
+                        'id_obj'         => (int) $this->getData('id_obj'),
+                        'id_parent_line' => (int) $this->getData('id_line'),
+                        'type'           => self::LINE_TEXT
+                    )
+                ));
+                $buttons[] = array(
+                    'label'   => 'Ajout d\'une sous-ligne',
+                    'icon'    => 'fas_plus-circle',
+                    'onclick' => $onclick
+                );
+            }
         }
 
         return $buttons;
@@ -364,14 +382,14 @@ class ObjectLine extends BimpObject
     public function getUnitPriceHTWithRemises()
     {
         $value = $this->pu_ht;
-        
+
         if (!is_null($this->remise) && (float) $this->remise > 0) {
             $value -= ($value * ((float) $this->remise / 100));
         }
-        
+
         return $value;
     }
-    
+
     public function getTotalHT()
     {
         if (!is_null($this->pu_ht) && !is_null($this->qty)) {
@@ -1061,7 +1079,7 @@ class ObjectLine extends BimpObject
 
         return $html;
     }
-    
+
     public function displayUnitPriceHTWithRemises()
     {
         return BimpTools::displayMoneyValue($this->getUnitPriceHTWithRemises(), 'EUR');
@@ -2282,11 +2300,11 @@ class ObjectLine extends BimpObject
         $html .= ' data-object_name="' . $this->object_name . '"';
         $html .= ' data-id_obj="' . $parent->id . '"';
         $html .= '>';
-        
+
         $html .= '<div class="singleLineFormCaption">';
-        $html .= '<h4>'.BimpRender::renderIcon('fas_plus-circle', 'iconLeft').'Ajout rapide</h4>';
+        $html .= '<h4>' . BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajout rapide</h4>';
         $html .= '</div>';
-        
+
         $html .= '<div class="singleLineFormContent">';
 
         $content = '<label>Produit: </label>';
@@ -2329,7 +2347,7 @@ class ObjectLine extends BimpObject
         $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
         $html .= '</button>';
         $html .= '<div class="quickAddForm_ajax_result"></div>';
-        
+
         $html .= '</div>';
         $html .= '</div>';
 

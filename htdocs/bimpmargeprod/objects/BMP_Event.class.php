@@ -72,7 +72,7 @@ class BMP_Event extends BimpObject
     protected $montants = array();
     protected $calc_montants = array();
 
-    // Getters booléens: 
+    // Getters booléens:
 
     public function isInEditableStatus()
     {
@@ -188,7 +188,7 @@ class BMP_Event extends BimpObject
         return self::getCacheArray($cache_key, $include_empty);
     }
 
-    // Getters Montants / calcMontant : 
+    // Getters Montants / calcMontant:
 
     public function getMontant($id_type_montant, $id_coprod = 0)
     {
@@ -2858,7 +2858,7 @@ class BMP_Event extends BimpObject
             'total_gratuits' => 0,
             'total_loc'      => 0,
         );
-        
+
         foreach ($events as $id_event) {
             $event = BimpCache::getBimpObjectInstance('bimpmargeprod', 'BMP_Event', $id_event);
             if (BimpObject::objectLoaded($event)) {
@@ -2869,26 +2869,26 @@ class BMP_Event extends BimpObject
                 $billets['total_loc'] += $event_billets['total_loc'];
             }
         }
-        
+
         $html .= '<div class="row" style="margin-top: 30px">';
         $html .= '<div class="col-sm-12 col-md-10 col-lg-8">';
         $html .= '<table class="bimp_list_table" style="width: auto">';
         $html .= '<tbody>';
         $html .= '<tr>';
         $html .= '<th>Nb spectateurs payants</th>';
-        $html .= '<td style="min-width: 120px; text-align: center;">'.$billets['total_payants'].'</td>';
+        $html .= '<td style="min-width: 120px; text-align: center;">' . $billets['total_payants'] . '</td>';
         $html .= '</tr>';
         $html .= '<tr>';
         $html .= '<th>Nb spectateurs gratuits</th>';
-        $html .= '<td style="min-width: 120px; text-align: center;">'.$billets['total_gratuits'].'</td>';
+        $html .= '<td style="min-width: 120px; text-align: center;">' . $billets['total_gratuits'] . '</td>';
         $html .= '</tr>';
         $html .= '<tr>';
         $html .= '<th>Nb spectateurs locataires</th>';
-        $html .= '<td style="min-width: 120px; text-align: center;">'.$billets['total_loc'].'</td>';
+        $html .= '<td style="min-width: 120px; text-align: center;">' . $billets['total_loc'] . '</td>';
         $html .= '</tr>';
         $html .= '<tr class="total_row">';
         $html .= '<th>Nb spectateurs total</th>';
-        $html .= '<td style="min-width: 120px; text-align: center;">'.$billets['total'].'</td>';
+        $html .= '<td style="min-width: 120px; text-align: center;">' . $billets['total'] . '</td>';
         $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
@@ -2969,26 +2969,30 @@ class BMP_Event extends BimpObject
                             );
                         }
 
+                        $amount = 0;
+
                         if (isset($montant['coprods'][0]['total_part_ht'])) {
                             $amount = (float) $montant['coprods'][0]['total_part_ht'];
+                        } elseif (isset($montant['total_ht'])) {
+                            $amount = (float) $montant['total_ht'];
+                        }
 
-                            if ($amount > 0) {
-                                $montants['recettes']['total'] += $amount;
-                                $montants['recettes']['events_total'][(int) $event->id] += $amount;
-                                $montants['recettes']['categories'][$id_cat]['total'] += $amount;
-                                $montants['recettes']['categories'][$id_cat]['events_total'][(int) $event->id] += $amount;
-                                $montants['recettes']['categories'][$id_cat]['montants'][$id_montant]['total'] += $amount;
-                                $montants['recettes']['categories'][$id_cat]['montants'][$id_montant]['events'][(int) $event->id] = $amount;
-                            } elseif ($amount < 0) {
-                                $amount *= -1;
+                        if ($amount > 0) {
+                            $montants['recettes']['total'] += $amount;
+                            $montants['recettes']['events_total'][(int) $event->id] += $amount;
+                            $montants['recettes']['categories'][$id_cat]['total'] += $amount;
+                            $montants['recettes']['categories'][$id_cat]['events_total'][(int) $event->id] += $amount;
+                            $montants['recettes']['categories'][$id_cat]['montants'][$id_montant]['total'] += $amount;
+                            $montants['recettes']['categories'][$id_cat]['montants'][$id_montant]['events'][(int) $event->id] = $amount;
+                        } elseif ($amount < 0) {
+                            $amount *= -1;
 
-                                $montants['charges']['total'] += $amount;
-                                $montants['charges']['events_total'][(int) $event->id] += $amount;
-                                $montants['charges']['categories'][$id_cat]['total'] += $amount;
-                                $montants['charges']['categories'][$id_cat]['events_total'][(int) $event->id] += $amount;
-                                $montants['charges']['categories'][$id_cat]['montants'][$id_montant]['total'] += $amount;
-                                $montants['charges']['categories'][$id_cat]['montants'][$id_montant]['events'][(int) $event->id] = $amount;
-                            }
+                            $montants['charges']['total'] += $amount;
+                            $montants['charges']['events_total'][(int) $event->id] += $amount;
+                            $montants['charges']['categories'][$id_cat]['total'] += $amount;
+                            $montants['charges']['categories'][$id_cat]['events_total'][(int) $event->id] += $amount;
+                            $montants['charges']['categories'][$id_cat]['montants'][$id_montant]['total'] += $amount;
+                            $montants['charges']['categories'][$id_cat]['montants'][$id_montant]['events'][(int) $event->id] = $amount;
                         }
                     }
                 }

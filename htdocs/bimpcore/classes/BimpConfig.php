@@ -227,7 +227,7 @@ class BimpConfig
         array_pop($path);
         return implode('/', $path);
     }
-    
+
     // récupération des données de configuration: 
 
     public function get($full_path, $default_value = null, $required = false, $data_type = 'string')
@@ -1247,7 +1247,7 @@ class BimpConfig
         if (is_null($object_name)) {
             if (!$path) {
                 return null;
-        }
+            }
 
             if ($this->isDefined($path . '/instance')) {
                 $instance_path = $path . '/instance';
@@ -1255,7 +1255,7 @@ class BimpConfig
                 $object_name = $this->get($path, '', true);
                 if (!$object_name) {
                     return null;
-    }
+                }
             }
         }
 

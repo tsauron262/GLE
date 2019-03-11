@@ -15,11 +15,10 @@ class BimpComm extends BimpDolObject
         3  => 'Trimestrielle',
         12 => 'Annuelle'
     );
-    
     public static $pdf_periodicity_label_masc = array(
-        0 => '',
-        1 => 'mois',
-        3 => 'trimestre',
+        0  => '',
+        1  => 'mois',
+        3  => 'trimestre',
         12 => 'an'
     );
 
@@ -533,7 +532,7 @@ class BimpComm extends BimpDolObject
 
         return $marginInfos;
     }
-    
+
     public function getCondReglementBySociete()
     {
         if (!$this->isLoaded()) {
@@ -546,10 +545,14 @@ class BimpComm extends BimpDolObject
             }
             return 0;
         }
-        
-        return $this->getData('fk_cond_reglement');
+
+        if (isset($this->data['fk_cond_reglement'])) {
+            return (int) $this->data['fk_cond_reglement']; // pas getData() sinon boucle infinie (getCondReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
+        }
+
+        return 0;
     }
-    
+
     public function getModeReglementBySociete()
     {
         if (!$this->isLoaded()) {
@@ -562,8 +565,12 @@ class BimpComm extends BimpDolObject
             }
             return 0;
         }
-        
-        return $this->getData('fk_mode_reglement');
+
+        if (isset($this->data['fk_mode_reglement'])) {
+            return (int) $this->data['fk_mode_reglement']; // pas getData() sinon boucle infinie (getModeReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
+        }
+
+        return 0;
     }
 
     // Getters - Overrides BimpObject

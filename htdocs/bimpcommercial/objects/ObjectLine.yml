@@ -93,6 +93,14 @@ forms:
                 remises: 
                     callback: getClientDefaultRemiseFormValues
         rows: 
+            - custom: 1
+              hidden: 1
+              label: Ligne parente
+              input_name: id_parent_line
+              input: 
+                  type: hidden
+              value: 0
+              
             - field: type
               hidden: 
                   field_value: id

@@ -15529,6 +15529,16 @@ button.close {
   overflow-y: auto;
 }
 
+/* line 30, ../scss/bimpcore/_helpers.scss */
+.h_scroll {
+  overflow-x: scroll;
+}
+
+/* line 34, ../scss/bimpcore/_helpers.scss */
+.v_scroll {
+  overflow-y: scroll;
+}
+
 @-webkit-keyframes bimp-spin {
   0% {
     -webkit-transform: rotate(0deg);

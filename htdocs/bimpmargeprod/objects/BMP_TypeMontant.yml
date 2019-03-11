@@ -61,10 +61,10 @@ fields:
         type: bool
         default_value: 0
         
-    editable: 
-        label: Editable
-        type: bool
-        default_value: 1
+#    editable: 
+#        label: Editable
+#        type: bool
+#        default_value: 1
         
     has_details:
         label: Détails
@@ -107,9 +107,9 @@ list:
         required: 
             field: required
             edit: 1
-        editable: 
-            field: editable
-            edit: 1
+#        editable: 
+#            field: editable
+#            edit: 1
         details: 
             field: has_details
             edit: 1

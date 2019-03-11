@@ -54,22 +54,23 @@ class BMP_EventMontant extends BimpObject
                 if (is_null($typeMontant)) {
                     return 0;
                 }
-                $editable = (int) $typeMontant->getData('editable');
-                if (is_null($editable)) {
+
+                if ((int) $typeMontant->getData('has_details')) {
                     return 0;
                 }
 
-                if ($editable) {
-                    $event = $this->getParentInstance();
-                    if (BimpObject::objectLoaded($event)) {
-                        if ((int) $event->getData('status') === 1) {
-                            $id_type_montant = (int) $this->getData('id_montant');
-                            if (($id_type_montant === BMP_Event::$id_bar20_type_montant) ||
-                                    ($id_type_montant === BMP_Event::$id_bar55_type_montant)) {
-                                return 0;
-                            }
+                $event = $this->getParentInstance();
+                if (BimpObject::objectLoaded($event)) {
+                    if ((int) $event->getData('status') === 1) {
+                        $id_type_montant = (int) $this->getData('id_montant');
+                        if (($id_type_montant === BMP_Event::$id_bar20_type_montant) ||
+                                ($id_type_montant === BMP_Event::$id_bar55_type_montant)) {
+                            return 0;
                         }
                     }
+                    
+                    // Check des calculs auto activés: 
+                    
                 }
             }
 
@@ -348,7 +349,7 @@ class BMP_EventMontant extends BimpObject
         $buttons = array();
 
         if (BimpObject::objectLoaded($event) && $this->isLoaded()) {
-            if ($event->getData('status') === 3) {
+            if ($event->getData('status') >= 3) {
                 $edit = false;
             }
 

@@ -73,7 +73,7 @@ fields:
     fk_cond_reglement: 
         label: Conditions de règlement
         dol_prop: cond_reglement_id
-        type: int
+        type: id
         values: 
             array: condReglements
         input: 
@@ -81,6 +81,7 @@ fields:
         default_value: 
             callback: getCondReglementBySociete
         depends_on: fk_soc
+        required: 1
     fk_mode_reglement: 
         label: Mode de règlement
         dol_prop: mode_reglement_id

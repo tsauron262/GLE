@@ -202,11 +202,6 @@ filters_panels:
             - field: type
             - field: place
             
-    dates: 
-        filters: 
-            - field: date
-              open: 1
-            
 lists:
     default: 
         filters_panel: default
@@ -249,7 +244,7 @@ list_customs:
         title: Synthèse événements
         icon: fas_chart-line
         content_callback: renderSyntheseEvents
-        filters_panel: dates
+        filters_panel: default
         filters_panel_open: 1
         n: 100
         sort_field: date

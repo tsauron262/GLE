@@ -51,7 +51,8 @@ class BMP_Event extends BimpObject
     public static $status = array(
         1 => array('label' => 'Edition prévisionnel', 'classes' => array('warning')),
         2 => array('label' => 'Edition montants réels', 'classes' => array('info')),
-        3 => array('label' => 'Validé', 'classes' => array('success'))
+        3 => array('label' => 'Validé', 'classes' => array('success')),
+        4 => array('label' => 'Archivé', 'classes' => array('important'))
     );
     public static $tarifs = array(
         'TARIF NORMAL', 'TARIF REDUIT', 'FILGOOD', 'TARIF SPECIAL', 'TARIF SPECIAL LE FIL', 'TARIF CE', 'INVITATIONS', 'GUICHET NORMAL', 'GUICHET REDUIT', 'GUICHET FILGOOD'
@@ -77,7 +78,7 @@ class BMP_Event extends BimpObject
     public function isInEditableStatus()
     {
         if ($this->isLoaded()) {
-            if ((int) $this->getData('status') === 3) {
+            if ((int) $this->getData('status') >= 3) {
                 return 0;
             }
         }
@@ -315,6 +316,11 @@ class BMP_Event extends BimpObject
 
         $calc_instance = BimpObject::getInstance($this->module, 'BMP_CalcMontant');
         return (float) $calc_instance->getSavedData('percent', (int) $id_calc_montant);
+    }
+    
+    public function functionName($param)
+    {
+        
     }
 
     // Getters divers: 

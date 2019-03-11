@@ -1,18 +1,15 @@
 <?php
 
-require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
 
 class ActionsBimpcore
 {
     var $bimp_fixe_tabs = null;
 
-    function doActions($parameters, &$object, &$action, $hookmanager)
-    {
-        
-    }
+
 
     function getNomUrl($parameters, &$object, &$action, $hookmanager)
     {
+        require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
         global $langs;
 
         if (is_a($object, "product") || is_a($object, 'Bimp_Product')) {
@@ -73,6 +70,7 @@ class ActionsBimpcore
     }
     
     function printLeftBlock($parameters, &$object, &$action, $hookmanager){
+        require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
         $html = '';
         if (defined('BIMP_LIB')) {
             if (!defined('BIMP_CONTROLLER_INIT')) {

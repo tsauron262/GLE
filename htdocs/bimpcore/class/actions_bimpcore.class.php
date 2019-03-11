@@ -62,8 +62,8 @@ class ActionsBimpcore
                         $html .= $main_controller->displayHeaderFiles(false);
                     }
                 }
-                if(FixeTabs::canView()){
-                    $this->bimp_fixe_tabs = new FixeTabs();
+                $this->bimp_fixe_tabs = new FixeTabs();                
+                if($this->bimp_fixe_tabs->canView()){
                     $this->bimp_fixe_tabs->init();
                     $html .= $this->bimp_fixe_tabs->displayHead(false);
                 }
@@ -78,8 +78,9 @@ class ActionsBimpcore
             if (!defined('BIMP_CONTROLLER_INIT')) {
                 $html .= BimpRender::renderAjaxModal('page_modal');
             }
-            if (is_object($this->bimp_fixe_tabs) && is_a($this->bimp_fixe_tabs, 'FixeTabs')) {
-                $html .= $this->bimp_fixe_tabs->render();
+            if (is_object($this->bimp_fixe_tabs) && is_a($this->bimp_fixe_tabs, 'FixeTabs')) {              
+                if($this->bimp_fixe_tabs->canView())
+                    $html .= $this->bimp_fixe_tabs->render();
             }
         }
         echo $html;//bug bizarre

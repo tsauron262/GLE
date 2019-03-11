@@ -1,8 +1,7 @@
 <?php
 
-function runBimpTask()
+function runBimpTask($bimp_fixe_tabs, $user)
 {
-    global $bimp_fixe_tabs, $user;
     $content = "";
     $alert = false;
     $maxTaskView = 25;

@@ -1,0 +1,1 @@
+INSERT INTO `llx_bimp_secure_log` (`id_user`, `crypt`, `tms`, `IP`)   (SELECT fk_user as id_user, '999' as crypt, tms, ip FROM `llx_events` WHERE type = 'USER_LOGIN');

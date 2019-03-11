@@ -34,14 +34,14 @@ class FixeTabs
 
     public function init()
     {
-        global $conf;
+        global $conf, $user;
         require_once DOL_DOCUMENT_ROOT . '/bimpsupport/chronos.php';
         runBimpSupportChrono();
 
 
         if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
             require_once DOL_DOCUMENT_ROOT . '/bimptask/task.php';
-            runBimpTask();
+            runBimpTask($this, $user);
         }
     }
 

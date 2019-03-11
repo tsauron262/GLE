@@ -1,6 +1,6 @@
 <?php
 
-function runBimpSupportChrono()
+function runBimpSupportChrono($bimp_fixe_tabs, $user)
 {
     $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
 
@@ -23,16 +23,14 @@ function runBimpSupportChrono()
         )
             ), null, null, 'id', 'desc', 'array', array('id', 'obj_name'));
 
-    initTimers($timers);
+    initTimers($timers, $bimp_fixe_tabs, $user);
 }
 
-function initTimers($timers)
+function initTimers($timers, $bimp_fixe_tabs, $user)
 {
     if (!count($timers)) {
         return;
     }
-
-    global $bimp_fixe_tabs, $user;
 
     if (!isset($user->id) || !$user->id) {
         return;

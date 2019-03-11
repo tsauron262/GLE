@@ -5,10 +5,9 @@
  *      \ingroup    bimpcontratauto
  *      \brief      Make interface between the class and the client
  */
-if ($_POST['action'] == 'get_progress'){
+if ($_POST['action'] == 'get_progress') {
     require_once("../conf/conf.php");
     die(file_get_contents($dolibarr_main_data_root . '/progress.txt'));
-    
 }
 
 require '../main.inc.php';
@@ -41,6 +40,7 @@ switch ($action) {
     case 'merge_duplicates': {
             echo json_encode(array(
                 'success' => $rd->mergeDuplicate(GETPOST('src_to_dest')),
+                'code' => $rd->setAsProcessed(GETPOST('ids_processed')),
                 'errors' => $rd->errors
             ));
             break;
@@ -49,6 +49,14 @@ switch ($action) {
     case 'init_duplicate': {
             echo json_encode(array(
                 'code' => $rd->setAsUnprocessed(),
+                'errors' => $rd->errors
+            ));
+            break;
+        }
+
+    case 'set_as_processed': {
+            echo json_encode(array(
+                'code' => $rd->setAsProcessed(array(GETPOST('id'))),
                 'errors' => $rd->errors
             ));
             break;

@@ -104,7 +104,7 @@ class modBimpcore extends DolibarrModules
 		// Dependencies
 		$this->hidden = false;			// A condition to hide module
 		$this->depends = array();		// List of modules id that must be enabled if this module is enabled
-		$this->requiredby = array("modBimpmargeprod");	// List of modules id to disable if this one is disabled
+		$this->requiredby = array("modBimpmargeprod", "modBimptask");	// List of modules id to disable if this one is disabled
 		$this->conflictwith = array();	// List of modules id this module is in conflict with
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(3,0);	// Minimum version of Dolibarr required by module

@@ -1,7 +1,4 @@
 
-ALTER TABLE `llx_bimp_file` ADD `user_delete` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `date_update`;
-ALTER TABLE `llx_bimp_file` ADD `date_delete` DATETIME NULL DEFAULT NULL AFTER `date_update`;
-ALTER TABLE `llx_bimp_file` ADD `deleted` BOOLEAN NOT NULL DEFAULT FALSE AFTER `date_update`;
 
 ALTER TABLE `llx_bimp_propal_line` CHANGE `remise` `remise` FLOAT(24,8) NOT NULL DEFAULT '0';
 

@@ -30,16 +30,6 @@ CREATE TABLE IF NOT EXISTS `llx_bs_inter` (
   `user_update` int(10) UNSIGNED DEFAULT NULL
 );
 
-CREATE TABLE IF NOT EXISTS `llx_bimp_timer` (
-  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  `obj_module` varchar(128) NOT NULL,
-  `obj_name` varchar(128) NOT NULL,
-  `id_obj` int(10) UNSIGNED NOT NULL,
-  `field_name` varchar(128) NOT NULL,
-  `time_session` int(11) NOT NULL,
-  `session_start` int(11) DEFAULT NULL,
-  `id_user` int(10) UNSIGNED NOT NULL
-);
 
 CREATE TABLE IF NOT EXISTS `llx_bs_note` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,

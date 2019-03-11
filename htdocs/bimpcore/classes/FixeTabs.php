@@ -1,11 +1,28 @@
 <?php
-
 class FixeTabs
 {
 
     public $errors = array();
     protected $tabs = array();
+    public $modules = array("bimptask", "bimpsupport");
+    public $objs = array();
 
+    public function __construct() {
+        global $user;
+        foreach($this->modules as $module){
+            $file = DOL_DOCUMENT_ROOT."/".$module."/fixeTabs.php";
+            if(is_file($file)){
+                require_once($file);
+                $class = "FixeTabs_".$module;
+                $obj = new $class($this, $user);
+                if($obj->canView())
+                    $this->objs[] = $obj;
+            }
+            else
+                dol_syslog ("Class introuvable ".$file,3);
+        }
+    }
+    
     public function addTab($id, $caption, $content, $classes = array())
     {
         $this->tabs[] = array(
@@ -16,42 +33,32 @@ class FixeTabs
         );
     }
 
-    public static function canView()
+    public function canView()
     {
-        global $user, $conf;
-        if (isset($user->id) && (int) $user->id) {
-            if (userInGroupe(18, $user->id))
+        foreach($this->objs as $obj)
+            if($obj->canView())
                 return 1;
-
-            if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
-                $task = BimpObject::getInstance("bimptask", "BIMP_Task");
-                if ($task->canView())
-                    return 1;
-            }
-        }
+        
         return 0;
     }
 
     public function init()
     {
-        global $conf;
-        require_once DOL_DOCUMENT_ROOT . '/bimpsupport/chronos.php';
-        runBimpSupportChrono();
-
-
-        if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
-            require_once DOL_DOCUMENT_ROOT . '/bimptask/task.php';
-            runBimpTask();
+        foreach($this->objs as $obj){
+            $obj->init();
         }
     }
 
-    public function displayHead()
+    public function displayHead($echo = true)
     {
-        echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpcore/views/css/fixeTabs.css"/>';
-        echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/fixeTabs.js"></script>';
-        echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/BimpTimer.js"></script>';
-        echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimptask/views/css/task.css"/>';
-        echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimptask/views/js/task.js"></script>';
+        $html =  '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/bimpcore/views/css/fixeTabs.css"/>';
+        $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/bimpcore/views/js/fixeTabs.js"></script>';
+        foreach($this->objs as $obj)
+            $html .= $obj->displayHead();
+        
+        if($echo)
+            echo $html;
+        return $html;
     }
 
     public function render($content_only = false)

@@ -30,7 +30,3 @@ CREATE TABLE IF NOT EXISTS `llx_object_line_remise` (
   `per_unit` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB;
 
-
-ALTER TABLE `llx_bimp_file`
-  DROP `file_dir`,
-  DROP `file_type`;

@@ -1,0 +1,10 @@
+INSERT INTO `llx_bimpcore_conf` (`name`, `value`) VALUES ('bimpcore_version', '1.1');
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('default_id_client', 0);
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('default_id_product', 0);
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('bimpcaisse_id_cond_reglement_default', 23);
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('bimpcaisse_secteur_code', 'X');
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('bimpcaisse_id_default_account', 1);
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('defective_id_entrepot', '');
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('sav_use_caisse_for_payments', 0);
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('bimpcomm_tx_marque', 1);
+INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('CGV_BIMP', 1);

@@ -1,5 +1,7 @@
 <?php
 
+require_once(DOL_DOCUMENT_ROOT."/bimpcore/main.php");
+
 class ActionsBimpcore
 {
 

@@ -268,6 +268,16 @@ class modBimpmargeprod extends DolibarrModules
                     $this->_load_tables('/bimpmargeprod/sql/');
                 }
                 
+                $tabTva = array(2462 => 20, 14 => 5.5, 15 => 0, 16 => 2.1, 17 => 7);
+                
+                foreach($tabTva as $oldId => $taux){
+                    $sql2 = $this->db->query("SELECT rowid  FROM `llx_c_tva` WHERE `taux` = ".$taux." AND fk_pays = 1");
+                    if($this->db->num_rows($sql2)> 0){
+                        $ln = $this->db->fetch_object($sql2);
+                        $sql[] = "UPDATE llx_bmp_type_montant SET id_taxe = ".$ln->rowid." WHERE id_taxe =".$oldId;
+                    }
+                }
+                
 
 
 		return $this->_init($sql, $options);

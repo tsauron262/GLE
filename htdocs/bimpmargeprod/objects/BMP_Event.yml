@@ -238,9 +238,7 @@ list_customs:
         filters_panel_open: 1
         n: 100
         sort_field: date
-        sort_way: asc  
-#        show: 
-#            callback: canView     
+        sort_way: asc     
         
     synthese_events: 
         title: Synthèse événements
@@ -251,8 +249,6 @@ list_customs:
         n: 100
         sort_field: date
         sort_way: asc
-#        show: 
-#            callback: canView 
              
 fields_tables: 
     infos: 

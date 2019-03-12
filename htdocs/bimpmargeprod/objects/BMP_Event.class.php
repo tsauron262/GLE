@@ -130,6 +130,11 @@ class BMP_Event extends BimpObject
 
         return 0;
     }
+    
+    public function canView()
+    {
+        return 0;
+    }
 
     // Getters Array:
 

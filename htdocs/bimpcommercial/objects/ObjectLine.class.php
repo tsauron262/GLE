@@ -22,7 +22,6 @@ class ObjectLine extends BimpObject
     public $date_from = null;
     public $date_to = null;
     public $id_remise_except = null;
-    public $id_parent_line = null;
     public static $product_line_data = array(
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1, 'default' => 0),
         'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int', 'default' => null),
@@ -33,8 +32,7 @@ class ObjectLine extends BimpObject
         'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0, 'default' => null),
         'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0),
         'date_from'      => array('label' => 'Date début', 'type' => 'date', 'required' => 0, 'default' => null),
-        'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null),
-        'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
+        'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null)
     );
     public static $text_line_data = array(
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
@@ -340,21 +338,21 @@ class ObjectLine extends BimpObject
                     'onclick' => $onclick
                 );
             }
-//            if ($this->isParentEditable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
-//                $line_instance = BimpObject::getInstance($this->module, $this->object_name);
-//                $onclick = $line_instance->getJsLoadModalForm('default', 'Ajout d\\\'une sous-ligne à la ligne n°' . $this->getData('position'), array(
-//                    'fields' => array(
-//                        'id_obj'         => (int) $this->getData('id_obj'),
-//                        'id_parent_line' => (int) $this->getData('id_line'),
-//                        'type'           => self::LINE_TEXT
-//                    )
-//                ));
-//                $buttons[] = array(
-//                    'label'   => 'Ajout d\'une sous-ligne',
-//                    'icon'    => 'fas_plus-circle',
-//                    'onclick' => $onclick
-//                );
-//            }
+            if ($this->isParentEditable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
+                $line_instance = BimpObject::getInstance($this->module, $this->object_name);
+                $onclick = $line_instance->getJsLoadModalForm('default', 'Ajout d\\\'une sous-ligne à la ligne n°' . $this->getData('position'), array(
+                    'fields' => array(
+                        'id_obj'         => (int) $this->getData('id_obj'),
+                        'id_parent_line' => (int) $this->id,
+                        'type'           => self::LINE_TEXT
+                    )
+                ));
+                $buttons[] = array(
+                    'label'   => 'Ajout d\'une sous-ligne',
+                    'icon'    => 'fas_plus-circle',
+                    'onclick' => $onclick
+                );
+            }
         }
 
         return $buttons;
@@ -1203,15 +1201,15 @@ class ObjectLine extends BimpObject
                     $class_name = get_class($object);
                     switch ($class_name) {
                         case 'Propal':
-                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 'HT', 0, 0, 0, (int) $this->getData('position'), 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht, '', $date_from, $date_to, 0, null, '', 0, 0, (int) $this->id_remise_except);
+                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 'HT', 0, 0, 0, (int) $this->getData('position'), 0, (int) $this->id_parent_line, (int) $this->id_fourn_price, (float) $this->pa_ht, '', $date_from, $date_to, 0, null, '', 0, 0, (int) $this->id_remise_except);
                             break;
 
                         case 'Facture':
-                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, $date_from, $date_to, 0, 0, '', 'HT', 0, Facture::TYPE_STANDARD, (int) $this->getData('position'), 0, '', 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
+                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, $date_from, $date_to, 0, 0, '', 'HT', 0, Facture::TYPE_STANDARD, (int) $this->getData('position'), 0, '', (int) $this->id_parent_line, (int) $this->id_fourn_price, (float) $this->pa_ht);
                             break;
 
                         case 'Commande':
-                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 0, 0, 'HT', 0, $date_from, $date_to, 0, (int) $this->getData('position'), 0, 0, (int) $this->id_fourn_price, (float) $this->pa_ht);
+                            $result = $object->addLine((string) $this->desc, (float) $this->pu_ht, $this->qty, (float) $this->tva_tx, 0, 0, (int) $this->id_product, (float) $this->remise, 0, 0, 'HT', 0, $date_from, $date_to, 0, (int) $this->getData('position'), 0, (int) $this->id_parent_line, (int) $this->id_fourn_price, (float) $this->pa_ht);
                             break;
 
                         case 'CommandeFournisseur':
@@ -1838,6 +1836,120 @@ class ObjectLine extends BimpObject
             }
         }
     }
+
+//    public function resetPositions()
+//    {
+//        if ($this->getConf('positions', false, false, 'bool')) {
+//            $filters = array();
+//            $parent_id_property = $this->getParentIdProperty();
+//            if (!is_null($parent_id_property)) {
+//                $id_parent = $this->getData($parent_id_property);
+//                if (is_null($id_parent) || !$id_parent) {
+//                    return;
+//                }
+//                $filters[$parent_id_property] = $id_parent;
+//            }
+//
+//            $table = $this->getTable();
+//            $primary = $this->getPrimary();
+//
+//            $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
+//            $i = 1;
+//            foreach ($items as $item) {
+//                if ((int) $item['position'] !== (int) $i) {
+//                    $this->db->update($table, array(
+//                        'position' => (int) $i
+//                            ), '`' . $primary . '` = ' . (int) $item[$primary]);
+//                }
+//                $i++;
+//            }
+//        }
+//    }
+//
+//    public function setPosition($position)
+//    {
+//        if (!isset($this->id) || !(int) $this->id) {
+//            return false;
+//        }
+//
+//        if ($this->getConf('positions', false, false, 'bool')) {
+//            $filters = array();
+//            $parent_id_property = $this->getParentIdProperty();
+//            if (!is_null($parent_id_property)) {
+//                $id_parent = $this->getData($parent_id_property);
+//                if (is_null($id_parent) || !$id_parent) {
+//                    return;
+//                }
+//                $filters[$parent_id_property] = $id_parent;
+//            }
+//
+//            $table = $this->getTable();
+//            $primary = $this->getPrimary();
+//
+//            $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
+//
+//            $check = true;
+//
+//            if ($this->db->update($table, array(
+//                        'position' => (int) $position
+//                            ), '`' . $primary . '` = ' . (int) $this->id) <= 0) {
+//                $check = false;
+//            }
+//
+//            if ($check) {
+//                $this->set('position', (int) $position);
+//                $i = 1;
+//                foreach ($items as $item) {
+//                    if ($i === (int) $position) {
+//                        $i++;
+//                    }
+//
+//                    if ((int) $item[$primary] === (int) $this->id) {
+//                        continue;
+//                    }
+//
+//                    if ((int) $item['position'] !== (int) $i) {
+//                        if ($this->db->update($table, array(
+//                                    'position' => (int) $i
+//                                        ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
+//                            $check = false;
+//                        }
+//                    }
+//                    $i++;
+//                }
+//            }
+//            return $check;
+//        }
+//
+//        return false;
+//    }
+//
+//    public function getNextPosition()
+//    {
+//        if ($this->getConf('positions', false, false, 'bool')) {
+//            $filters = array();
+//
+//            $parent_id_property = $this->getParentIdProperty();
+//            if (!is_null($parent_id_property)) {
+//                $id_parent = $this->getData($parent_id_property);
+//                if (is_null($id_parent) || !$id_parent) {
+//                    return 0;
+//                }
+//                $filters[$parent_id_property] = $id_parent;
+//            }
+//
+//            $sql = 'SELECT MAX(`position`) as max_pos';
+//            $sql .= BimpTools::getSqlFrom($this->getTable());
+//            $sql .= BimpTools::getSqlWhere($filters);
+//
+//            $result = $this->db->executeS($sql, 'array');
+//
+//            if (!is_null($result)) {
+//                return (int) ((int) $result[0]['max_pos'] + 1);
+//            }
+//        }
+//        return 1;
+//    }
 
     // Rendus HTML: 
 

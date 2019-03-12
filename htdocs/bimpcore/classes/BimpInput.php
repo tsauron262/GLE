@@ -1173,6 +1173,9 @@ class BimpInput
 
     public static function renderInputContainer($input_name, $value, $content = '', $field_prefix = '', $required = 0, $multiple = 0, $extra_class = '', $extra_data = array())
     {
+        if (is_null($value)) {
+            $value = '';
+        }
         if (is_array($value)) {
             $value = implode(',', $value);
         }

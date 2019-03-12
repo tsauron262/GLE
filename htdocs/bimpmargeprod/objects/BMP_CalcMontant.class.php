@@ -1,6 +1,7 @@
 <?php
 
-class BMP_CalcMontant extends BimpObject
+require_once DOL_DOCUMENT_ROOT."/bimpmargeprod/objects/Abstract_margeprod.class.php";
+class BMP_CalcMontant extends Abstract_margeprod
 {
 
     // Getters : 

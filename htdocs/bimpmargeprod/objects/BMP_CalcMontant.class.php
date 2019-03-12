@@ -5,6 +5,17 @@ class BMP_CalcMontant extends BimpObject
 
     // Getters : 
 
+    public function canDelete()
+    {
+        global $user;
+        
+        if ($user->admin) {
+            return 1;
+        }
+        
+        return 0;
+    }
+    
     public function getTypes_montantsArray()
     {
         BimpObject::loadClass($this->module, 'BMP_TypeMontant');

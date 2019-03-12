@@ -317,10 +317,51 @@ class BMP_Event extends BimpObject
         $calc_instance = BimpObject::getInstance($this->module, 'BMP_CalcMontant');
         return (float) $calc_instance->getSavedData('percent', (int) $id_calc_montant);
     }
-    
-    public function functionName($param)
+
+    public function getCalcMontantsTargets($active_only)
     {
-        
+        if ($active_only) {
+            if (!$this->isLoaded()) {
+                return array();
+            }
+            $cache_key = 'event_' . $this->id . '_calc_montants_targets_active_only';
+            if (!isset(self::$cache[$cache_key])) {
+                self::$cache[$cache_key] = array();
+
+                $calc_montant = BimpObject::getInstance('bimpmargeprod', 'BMP_CalcMontant');
+
+                $rows = $calc_montant->getList(array(
+                    'ecm.id_event' => (int) $this->id,
+                    'ecm.active'   => 1
+                        ), null, null, 'id', 'asc', 'array', array('id', 'id_target'), array(
+                    'ecm' => array(
+                        'table' => 'bmp_event_calc_montant',
+                        'on'    => 'ecm.id_calc_montant = a.id',
+                        'alias' => 'ecm'
+                    )
+                ));
+
+                if (!is_null($rows)) {
+                    foreach ($rows as $r) {
+                        self::$cache[$cache_key][(int) $r['id']] = $r['id_target'];
+                    }
+                }
+            }
+        } else {
+            $cache_key = 'calc_montants_targets';
+
+            $calc_montant = BimpObject::getInstance('bimpmargeprod', 'BMP_CalcMontant');
+
+            $rows = $calc_montant->getList(array(), null, null, 'id', 'asc', 'array', array('id', 'id_target'));
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    self::$cache[$cache_key][(int) $r['id']] = $r['id_target'];
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
     }
 
     // Getters divers: 
@@ -3025,46 +3066,53 @@ class BMP_Event extends BimpObject
             $colspan += count($events);
         }
 
-        $html .= '<div class="h_auto_scroll" style="padding-bottom: 30px;">';
-        $html .= '<table class="bimp_list_table center-align" style="width: auto;">';
+        $html .= '<div class="h_auto_scroll" style="padding-bottom: 30px;max-width: 1290px;">';
+        $html .= '<table class="bimp_list_table center-align">';
         $html .= '<thead>';
         if (!$only_total) {
             $html .= '<tr>';
-            $html .= '<th style="min-width: 200px;"></th>';
+            $html .= '<th style="min-width: 200px; max-width: 200px;"></th>';
 
-            $html .= '<th>Total</th>';
+            $html .= '<th style="min-width: 100px; max-width: 100px;">Total</th>';
             foreach ($events as $event) {
                 $DT = new DateTime($event->getData('date'));
-                $html .= '<th>' . $DT->format('d/m/Y') . '</th>';
+                $html .= '<th style="min-width: 100px; max-width: 100px;">' . $DT->format('d/m/Y') . '</th>';
             }
             $html .= '</tr>';
 
             $html .= '<tr>';
-            $html .= '<td style="font-weight: bold; text-align: right; padding-right: 20px;">Evénement</td>';
-            $html .= '<td></td>';
+            $html .= '<td style="min-width: 200px; max-width: 200px;font-weight: bold; text-align: right; padding-right: 20px;">Evénement</td>';
+            $html .= '<td style="min-width: 100px; max-width: 100px;"></td>';
             foreach ($events as $event) {
-                $html .= '<td>' . $event->displayData('name') . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;">' . $event->displayData('name') . '</td>';
             }
             $html .= '</tr>';
 
             $html .= '<tr>';
-            $html .= '<td style="font-weight: bold; text-align: right; padding-right: 20px;">Type</td>';
-            $html .= '<td></td>';
+            $html .= '<td style="min-width: 200px; max-width: 200px;font-weight: bold; text-align: right; padding-right: 20px;">Type</td>';
+            $html .= '<td style="min-width: 100px; max-width: 100px;"></td>';
             foreach ($events as $event) {
-                $html .= '<td>' . $event->displayData('type') . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;">' . $event->displayData('type') . '</td>';
             }
             $html .= '</tr>';
 
             $html .= '<tr>';
-            $html .= '<td style="font-weight: bold; text-align: right; padding-right: 20px;">Lieu</td>';
-            $html .= '<td></td>';
+            $html .= '<td style="min-width: 200px; max-width: 200px;font-weight: bold; text-align: right; padding-right: 20px;">Lieu</td>';
+            $html .= '<td style="min-width: 100px; max-width: 100px;"></td>';
             foreach ($events as $event) {
-                $html .= '<td>' . $event->displayData('place') . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;">' . $event->displayData('place') . '</td>';
             }
             $html .= '</tr>';
 
             $html .= '</thead>';
         }
+        $html .= '<tbody>';
+
+        $html .= '<tr>';
+        $html .= '<td colspan="' . $colspan . '">';
+
+        $html .= '<div class="v_scroll" style="overflow-x: hidden; max-height: 600px;">';
+        $html .= '<table class="bimp_list_table center-align">';
         $html .= '<tbody>';
 
         // Recettes: 
@@ -3094,15 +3142,15 @@ class BMP_Event extends BimpObject
                     $type_montant = BimpCache::getBimpObjectInstance('bimpmargeprod', 'BMP_TypeMontant', (int) $id_montant);
 
                     if (BimpObject::objectLoaded($type_montant)) {
-                        $html .= '<td style="text-align: left;font-weight: bold; color: #' . $color . '">' . $type_montant->getData('name') . '</td>';
-                        $html .= '<td style="background-color: #F0F0F0!important; font-weight: bold;">' . BimpTools::displayMoneyValue((float) $montant['total'], '') . '</td>';
+                        $html .= '<td style="min-width: 200px; max-width: 200px;text-align: left;font-weight: bold; color: #' . $color . '">' . $type_montant->getData('name') . '</td>';
+                        $html .= '<td style="min-width: 100px; max-width: 100px;background-color: #F0F0F0!important; font-weight: bold;">' . BimpTools::displayMoneyValue((float) $montant['total'], '') . '</td>';
                         if (!$only_total) {
                             foreach ($events as $event) {
                                 $amount = 0;
                                 if (isset($montant['events'][(int) $event->id])) {
                                     $amount = (float) $montant['events'][(int) $event->id];
                                 }
-                                $html .= '<td>' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
+                                $html .= '<td style="min-width: 100px; max-width: 100px;">' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
                             }
                         }
                     } else {
@@ -3115,15 +3163,15 @@ class BMP_Event extends BimpObject
                 $bk_color = BimpTools::setColorSL('#' . $color, null, 0.9);
                 $td_style = 'background-color: ' . $bk_color . '!important;';
                 $html .= '<tr>';
-                $html .= '<td style="' . $td_style . ' text-align: right; padding-right: 20px; font-weight: bold; color: #' . $color . '">Total ' . $category->getData('name') . '</td>';
-                $html .= '<td style="' . $td_style . '">' . BimpTools::displayMoneyValue($cat['total'], '', true) . '</td>';
+                $html .= '<td style="min-width: 200px; max-width: 200px;' . $td_style . 'text-align: right; padding-right: 20px; font-weight: bold; color: #' . $color . '">Total ' . $category->getData('name') . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;' . $td_style . '">' . BimpTools::displayMoneyValue($cat['total'], '', true) . '</td>';
                 if (!$only_total) {
                     foreach ($events as $event) {
                         $amount = 0;
                         if (isset($cat['events_total'][(int) $event->id])) {
                             $amount = (float) $cat['events_total'][(int) $event->id];
                         }
-                        $html .= '<td style="' . $td_style . '">' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
+                        $html .= '<td style="min-width: 100px; max-width: 100px;' . $td_style . '">' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
                     }
                 }
                 $html .= '</tr>';
@@ -3137,15 +3185,15 @@ class BMP_Event extends BimpObject
         $html .= '</tr>';
 
         $html .= '<tr class="total_row" style="font-weight: bold; font-size: 13px;">';
-        $html .= '<th>Total Recettes</th>';
-        $html .= '<td style="background-color: #DCDCDC!important;">' . BimpTools::displayMoneyValue($montants['recettes']['total'], '', true) . '</td>';
+        $html .= '<th style="min-width: 200px; max-width: 200px;">Total Recettes</th>';
+        $html .= '<td style="min-width: 100px; max-width: 100px;background-color: #DCDCDC!important;">' . BimpTools::displayMoneyValue($montants['recettes']['total'], '', true) . '</td>';
         if (!$only_total) {
             foreach ($events as $event) {
                 $amount = 0;
                 if (isset($montants['recettes']['events_total'][(int) $event->id])) {
                     $amount = (float) $montants['recettes']['events_total'][(int) $event->id];
                 }
-                $html .= '<td>' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;">' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
             }
         }
         $html .= '</tr>';
@@ -3180,15 +3228,15 @@ class BMP_Event extends BimpObject
                     $html .= '<tr>';
                     $type_montant = BimpCache::getBimpObjectInstance('bimpmargeprod', 'BMP_TypeMontant', (int) $id_montant);
                     if (BimpObject::objectLoaded($type_montant)) {
-                        $html .= '<td style="text-align: left;font-weight: bold; color: #' . $color . '">' . $type_montant->getData('name') . '</td>';
-                        $html .= '<td style="background-color: #F0F0F0!important; font-weight: bold;">' . BimpTools::displayMoneyValue((float) $montant['total'], '') . '</td>';
+                        $html .= '<td style="min-width: 200px; max-width: 200px;text-align: left;font-weight: bold; color: #' . $color . '">' . $type_montant->getData('name') . '</td>';
+                        $html .= '<td style="min-width: 100px; max-width: 100px;background-color: #F0F0F0!important; font-weight: bold;">' . BimpTools::displayMoneyValue((float) $montant['total'], '') . '</td>';
                         if (!$only_total) {
                             foreach ($events as $event) {
                                 $amount = 0;
                                 if (isset($montant['events'][(int) $event->id])) {
                                     $amount = (float) $montant['events'][(int) $event->id];
                                 }
-                                $html .= '<td>' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
+                                $html .= '<td style="min-width: 100px; max-width: 100px;">' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
                             }
                         }
                     } else {
@@ -3200,15 +3248,15 @@ class BMP_Event extends BimpObject
                 $bk_color = BimpTools::setColorSL('#' . $color, null, 0.9);
                 $td_style = 'background-color: ' . $bk_color . '!important;';
                 $html .= '<tr>';
-                $html .= '<td style="' . $td_style . ' text-align: right; padding-right: 20px; font-weight: bold; color: #' . $color . '">Total ' . $category->getData('name') . '</td>';
-                $html .= '<td style="' . $td_style . '">' . BimpTools::displayMoneyValue($cat['total'], '', true) . '</td>';
+                $html .= '<td style="min-width: 200px; max-width: 200px;' . $td_style . ' text-align: right; padding-right: 20px; font-weight: bold; color: #' . $color . '">Total ' . $category->getData('name') . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;' . $td_style . '">' . BimpTools::displayMoneyValue($cat['total'], '', true) . '</td>';
                 if (!$only_total) {
                     foreach ($events as $event) {
                         $amount = 0;
                         if (isset($cat['events_total'][(int) $event->id])) {
                             $amount = (float) $cat['events_total'][(int) $event->id];
                         }
-                        $html .= '<td style="' . $td_style . '">' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
+                        $html .= '<td style="min-width: 100px; max-width: 100px;' . $td_style . '">' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
                     }
                 }
                 $html .= '</tr>';
@@ -3222,15 +3270,15 @@ class BMP_Event extends BimpObject
         $html .= '</tr>';
 
         $html .= '<tr class="total_row" style="font-weight: bold; font-size: 13px;">';
-        $html .= '<th>Total charges</th>';
-        $html .= '<td style="background-color: #DCDCDC!important;">' . BimpTools::displayMoneyValue($montants['charges']['total'], '', true) . '</td>';
+        $html .= '<th style="min-width: 200px; max-width: 200px;">Total charges</th>';
+        $html .= '<td style="min-width: 100px; max-width: 100px;background-color: #DCDCDC!important;">' . BimpTools::displayMoneyValue($montants['charges']['total'], '', true) . '</td>';
         if (!$only_total) {
             foreach ($events as $event) {
                 $amount = 0;
                 if (isset($montants['charges']['events_total'][(int) $event->id])) {
                     $amount = (float) $montants['charges']['events_total'][(int) $event->id];
                 }
-                $html .= '<td>' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;">' . BimpTools::displayMoneyValue($amount, '', true) . '</td>';
             }
         }
         $html .= '</tr>';
@@ -3240,9 +3288,9 @@ class BMP_Event extends BimpObject
         $html .= '</tr>';
 
         $html .= '<tr class="total_row" style="font-weight: bold; font-size: 13px; border: 2px solid #505050">';
-        $html .= '<th>Résultat</th>';
+        $html .= '<th style="min-width: 200px; max-width: 200px;">Résultat</th>';
         $resultat = (float) $montants['recettes']['total'] - (float) $montants['charges']['total'];
-        $html .= '<td style="background-color: #505050!important; color: #fff; font-weight: bold;">' . BimpTools::displayMoneyValue($resultat, '') . '</td>';
+        $html .= '<td style="min-width: 100px; max-width: 100px;background-color: #505050!important; color: #fff; font-weight: bold;">' . BimpTools::displayMoneyValue($resultat, '') . '</td>';
         if (!$only_total) {
             foreach ($events as $event) {
                 $recettes = 0;
@@ -3254,7 +3302,7 @@ class BMP_Event extends BimpObject
                     $charges = (float) $montants['charges']['events_total'][(int) $event->id];
                 }
                 $resultat = $recettes - $charges;
-                $html .= '<td>' . BimpTools::displayMoneyValue($resultat, '', true) . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;">' . BimpTools::displayMoneyValue($resultat, '', true) . '</td>';
             }
         }
         $html .= '</tr>';
@@ -3264,45 +3312,51 @@ class BMP_Event extends BimpObject
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<th>Nb Spectateurs payants</th>';
-        $html .= '<td style="background-color: #505050!important; color: #fff; font-weight: bold;">' . $billets['total_payants'] . '</td>';
+        $html .= '<th style="min-width: 200px; max-width: 200px;">Nb Spectateurs payants</th>';
+        $html .= '<td style="min-width: 100px; max-width: 100px;background-color: #505050!important; color: #fff; font-weight: bold;">' . $billets['total_payants'] . '</td>';
         if (!$only_total) {
             foreach ($events as $event) {
-                $html .= '<td>' . $billets['events'][(int) $event->id]['total_payants'] . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;">' . $billets['events'][(int) $event->id]['total_payants'] . '</td>';
             }
         }
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<th>Nb Spectateurs gratuits</th>';
-        $html .= '<td style="background-color: #505050!important; color: #fff; font-weight: bold;">' . $billets['total_gratuits'] . '</td>';
+        $html .= '<th style="min-width: 200px; max-width: 200px;">Nb Spectateurs gratuits</th>';
+        $html .= '<td style="min-width: 100px; max-width: 100px;background-color: #505050!important; color: #fff; font-weight: bold;">' . $billets['total_gratuits'] . '</td>';
         if (!$only_total) {
             foreach ($events as $event) {
-                $html .= '<td>' . $billets['events'][(int) $event->id]['total_gratuits'] . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;">' . $billets['events'][(int) $event->id]['total_gratuits'] . '</td>';
             }
         }
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<th>Nb Spectateurs locataires</th>';
-        $html .= '<td style="background-color: #505050!important; color: #fff; font-weight: bold;">' . $billets['total_loc'] . '</td>';
+        $html .= '<th style="min-width: 200px; max-width: 200px;">Nb Spectateurs locataires</th>';
+        $html .= '<td style="min-width: 100px; max-width: 100px;background-color: #505050!important; color: #fff; font-weight: bold;">' . $billets['total_loc'] . '</td>';
         if (!$only_total) {
             foreach ($events as $event) {
-                $html .= '<td>' . $billets['events'][(int) $event->id]['total_loc'] . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;">' . $billets['events'][(int) $event->id]['total_loc'] . '</td>';
             }
         }
         $html .= '</tr>';
 
         $html .= '<tr>';
-        $html .= '<th>Nb Spectateurs total</th>';
-        $html .= '<td style="background-color: #505050!important; color: #fff; font-weight: bold;">' . $billets['total'] . '</td>';
+        $html .= '<th style="min-width: 200px; max-width: 200px;">Nb Spectateurs total</th>';
+        $html .= '<td style="min-width: 100px; max-width: 100px;background-color: #505050!important; color: #fff; font-weight: bold;">' . $billets['total'] . '</td>';
         if (!$only_total) {
             foreach ($events as $event) {
-                $html .= '<td>' . $billets['events'][(int) $event->id]['total'] . '</td>';
+                $html .= '<td style="min-width: 100px; max-width: 100px;">' . $billets['events'][(int) $event->id]['total'] . '</td>';
             }
         }
         $html .= '</tr>';
 
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+
+        $html .= '</td>';
+        $html .= '</tr>';
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';

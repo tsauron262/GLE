@@ -47,8 +47,6 @@ class BMP_EventMontant extends BimpObject
                 return 0;
             }
 
-            $editable = 1;
-
             if ($field === 'amount') {
                 $typeMontant = $this->getChildObject('type_montant');
                 if (is_null($typeMontant)) {
@@ -61,8 +59,8 @@ class BMP_EventMontant extends BimpObject
 
                 $event = $this->getParentInstance();
                 if (BimpObject::objectLoaded($event)) {
+                    $id_type_montant = (int) $this->getData('id_montant');
                     if ((int) $event->getData('status') === 1) {
-                        $id_type_montant = (int) $this->getData('id_montant');
                         if (($id_type_montant === BMP_Event::$id_bar20_type_montant) ||
                                 ($id_type_montant === BMP_Event::$id_bar55_type_montant)) {
                             return 0;
@@ -70,11 +68,15 @@ class BMP_EventMontant extends BimpObject
                     }
                     
                     // Check des calculs auto activés: 
+                    $cm_targets = $event->getCalcMontantsTargets(true);
                     
+                    if (in_array($id_type_montant, $cm_targets)) {
+                        return 0;
+                    }
                 }
             }
 
-            return $editable;
+            return 1;
         }
 
         return (int) parent::isFieldEditable($field);

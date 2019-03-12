@@ -17,6 +17,17 @@ class BMP_TotalInter extends BimpObject
     );
 
     // Getters: 
+    
+    public function canDelete()
+    {
+        global $user;
+        
+        if ($user->admin) {
+            return 1;
+        }
+        
+        return 0;
+    }
 
     public function getCategoriesArray()
     {

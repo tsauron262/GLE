@@ -340,21 +340,21 @@ class ObjectLine extends BimpObject
                     'onclick' => $onclick
                 );
             }
-            if ($this->isParentEditable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
-                $line_instance = BimpObject::getInstance($this->module, $this->object_name);
-                $onclick = $line_instance->getJsLoadModalForm('default', 'Ajout d\\\'une sous-ligne à la ligne n°' . $this->getData('position'), array(
-                    'fields' => array(
-                        'id_obj'         => (int) $this->getData('id_obj'),
-                        'id_parent_line' => (int) $this->getData('id_line'),
-                        'type'           => self::LINE_TEXT
-                    )
-                ));
-                $buttons[] = array(
-                    'label'   => 'Ajout d\'une sous-ligne',
-                    'icon'    => 'fas_plus-circle',
-                    'onclick' => $onclick
-                );
-            }
+//            if ($this->isParentEditable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
+//                $line_instance = BimpObject::getInstance($this->module, $this->object_name);
+//                $onclick = $line_instance->getJsLoadModalForm('default', 'Ajout d\\\'une sous-ligne à la ligne n°' . $this->getData('position'), array(
+//                    'fields' => array(
+//                        'id_obj'         => (int) $this->getData('id_obj'),
+//                        'id_parent_line' => (int) $this->getData('id_line'),
+//                        'type'           => self::LINE_TEXT
+//                    )
+//                ));
+//                $buttons[] = array(
+//                    'label'   => 'Ajout d\'une sous-ligne',
+//                    'icon'    => 'fas_plus-circle',
+//                    'onclick' => $onclick
+//                );
+//            }
         }
 
         return $buttons;

@@ -3572,4 +3572,10 @@ class BMP_Event extends BimpObject
         }
         return $errors;
     }
+        
+    function canView(){
+        global $conf;
+        return (isset($conf->global->MAIN_MODULE_BIMPMARGEPROD) && $conf->global->MAIN_MODULE_BIMPMARGEPROD)? true : false;
+    }
+                    
 }

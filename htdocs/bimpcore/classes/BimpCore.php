@@ -138,6 +138,8 @@ class BimpCore
                     'value' => json_encode($versions)
                         ), '`name` = \'bimpcore_version\'');
             }
+                        
+            self::getConfCache();
 
             self::$conf_cache['bimpcore_version'] = $versions;
         }

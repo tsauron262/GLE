@@ -111,6 +111,7 @@ class BimpCore
 
     public static function getVersion($dev = '')
     {
+        self::getConfCache();
         if (!isset(self::$conf_cache['bimpcore_version']) || ($dev && !isset(self::$conf_cache['bimpcore_version'][$dev]))) {
             global $db;
             $bdb = new BimpDb($db);
@@ -139,7 +140,6 @@ class BimpCore
                         ), '`name` = \'bimpcore_version\'');
             }
                         
-            self::getConfCache();
 
             self::$conf_cache['bimpcore_version'] = $versions;
         }

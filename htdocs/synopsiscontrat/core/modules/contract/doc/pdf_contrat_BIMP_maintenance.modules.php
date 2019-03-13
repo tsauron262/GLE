@@ -1,22 +1,5 @@
 <?php
 
-/*
- * BIMP-ERP by Synopsis et DRSI
- *
- * Author: Tommy SAURON <tommy@drsi.fr>
- * Licence : Artistic Licence v2.0
- *
- * Version 1.2
- * Created on : 30 mars 2011
- *
- * Infos on http://www.finapro.fr
- *
- */
-/**
- *
- * Name : pdf_contrat_courrierBIMPresiliationAvoir.modules.php
- * BIMP-ERP-1.2
- */
 require_once(DOL_DOCUMENT_ROOT . "/synopsiscontrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
@@ -24,24 +7,16 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php" );
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
-//TODO  addresse livraison lié au contrat
-//TODO filtre sur statuts ???
-
-/**
-  \class      pdf_contrat_babel
-  \brief      Classe permettant de generer les contrats au modele babel
- */
 if (!defined('EURO'))
     define('EURO', chr(128));
 
 class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
-
     public $emetteur;
     var $contrat;
     var $pdf;
     public $db;
     var $margin_bottom = 2;
-
+    
     function __construct($db) {
         global $conf, $langs, $mysoc;
         $langs->load("main");

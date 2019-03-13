@@ -869,6 +869,12 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'desc':
+                    if ((int) $this->getData('id_parent_line')) {
+                        if (!$no_html) {
+                            $html .= '<span style="display: inline-block; margin: 0 0 5px 15px; height: 100%; border-left: 3px solid #787878;"></span>';
+                            $html .= '<span style="margin-right: 15px; color: #787878;font-size: 18px;">' . BimpRender::renderIcon('fas_long-arrow-alt-right') . '</span>';
+                        }
+                    }
                     if (in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
                         if ((int) $this->id_product) {
                             $html = $this->displayLineData('id_product', 0, 'nom_url', $no_html);
@@ -1837,119 +1843,60 @@ class ObjectLine extends BimpObject
         }
     }
 
-//    public function resetPositions()
-//    {
-//        if ($this->getConf('positions', false, false, 'bool')) {
-//            $filters = array();
-//            $parent_id_property = $this->getParentIdProperty();
-//            if (!is_null($parent_id_property)) {
-//                $id_parent = $this->getData($parent_id_property);
-//                if (is_null($id_parent) || !$id_parent) {
-//                    return;
-//                }
-//                $filters[$parent_id_property] = $id_parent;
-//            }
-//
-//            $table = $this->getTable();
-//            $primary = $this->getPrimary();
-//
-//            $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
-//            $i = 1;
-//            foreach ($items as $item) {
-//                if ((int) $item['position'] !== (int) $i) {
-//                    $this->db->update($table, array(
-//                        'position' => (int) $i
-//                            ), '`' . $primary . '` = ' . (int) $item[$primary]);
-//                }
-//                $i++;
-//            }
-//        }
-//    }
-//
-//    public function setPosition($position)
-//    {
-//        if (!isset($this->id) || !(int) $this->id) {
-//            return false;
-//        }
-//
-//        if ($this->getConf('positions', false, false, 'bool')) {
-//            $filters = array();
-//            $parent_id_property = $this->getParentIdProperty();
-//            if (!is_null($parent_id_property)) {
-//                $id_parent = $this->getData($parent_id_property);
-//                if (is_null($id_parent) || !$id_parent) {
-//                    return;
-//                }
-//                $filters[$parent_id_property] = $id_parent;
-//            }
-//
-//            $table = $this->getTable();
-//            $primary = $this->getPrimary();
-//
-//            $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
-//
-//            $check = true;
-//
-//            if ($this->db->update($table, array(
-//                        'position' => (int) $position
-//                            ), '`' . $primary . '` = ' . (int) $this->id) <= 0) {
-//                $check = false;
-//            }
-//
-//            if ($check) {
-//                $this->set('position', (int) $position);
-//                $i = 1;
-//                foreach ($items as $item) {
-//                    if ($i === (int) $position) {
-//                        $i++;
-//                    }
-//
-//                    if ((int) $item[$primary] === (int) $this->id) {
-//                        continue;
-//                    }
-//
-//                    if ((int) $item['position'] !== (int) $i) {
-//                        if ($this->db->update($table, array(
-//                                    'position' => (int) $i
-//                                        ), '`' . $primary . '` = ' . (int) $item[$primary]) <= 0) {
-//                            $check = false;
-//                        }
-//                    }
-//                    $i++;
-//                }
-//            }
-//            return $check;
-//        }
-//
-//        return false;
-//    }
-//
-//    public function getNextPosition()
-//    {
-//        if ($this->getConf('positions', false, false, 'bool')) {
-//            $filters = array();
-//
-//            $parent_id_property = $this->getParentIdProperty();
-//            if (!is_null($parent_id_property)) {
-//                $id_parent = $this->getData($parent_id_property);
-//                if (is_null($id_parent) || !$id_parent) {
-//                    return 0;
-//                }
-//                $filters[$parent_id_property] = $id_parent;
-//            }
-//
-//            $sql = 'SELECT MAX(`position`) as max_pos';
-//            $sql .= BimpTools::getSqlFrom($this->getTable());
-//            $sql .= BimpTools::getSqlWhere($filters);
-//
-//            $result = $this->db->executeS($sql, 'array');
-//
-//            if (!is_null($result)) {
-//                return (int) ((int) $result[0]['max_pos'] + 1);
-//            }
-//        }
-//        return 1;
-//    }
+    public function checkPosition($position)
+    {
+        if ((int) $this->getData('id_parent_line')) {
+            // Vérification de la nouvelle position de la ligne si elle est enfant d'une autre ligne.
+            $parent_line = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $this->getData('id_parent_line'));
+            if (BimpObject::objectLoaded($parent_line)) {
+                $parent_position = (int) $parent_line->getData('position');
+                if ($position <= $parent_position) {
+                    $position = $parent_position + 1;
+                } elseif ($position > ($parent_position + 1)) {
+                    // on vérifie l'existance d'autres lignes enfants pour la même ligne parente: 
+                    $rows = $this->getList(array(
+                        'id_obj'         => (int) $this->getData('id_obj'),
+                        'id_parent_line' => (int) $parent_line->id
+                            ), null, null, 'position', 'asc', 'array', array('id', 'position'));
+
+                    if (!is_null($rows)) {
+                        $max_pos = $parent_position + count($rows);
+                        if ($position > $max_pos) {
+                            $position = $max_pos;
+                        }
+                    }
+                }
+            }
+        } else {
+            // Vérification que la nouvelle position ne sépare pas des lignes enfants de leur parent.
+            $rows = $this->getList(array(
+                'id_obj' => (int) $this->getData('id_obj')
+                    ), null, null, 'position', 'asc', 'array', array('id', 'id_parent_line', 'position'));
+
+            $init_pos = (int) $this->getInitData('position');
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    if ((int) $r['id'] === (int) $this->id) {
+                        continue;
+                    }
+
+                    $r_pos = (int) $r['position'];
+
+                    if ($init_pos < $r_pos) {
+                        $r_pos--;
+                    }
+
+                    if ((int) $r_pos === (int) $position) {
+                        if ((int) $r['id_parent_line']) {
+                            $position++;
+                        }
+                    }
+                }
+            }
+        }
+        return $position;
+    }
 
     // Rendus HTML: 
 
@@ -2533,18 +2480,222 @@ class ObjectLine extends BimpObject
 
     public function resetPositions()
     {
-        parent::resetPositions();
+        if ($this->getConf('positions', false, false, 'bool')) {
+            $filters = array();
+            $parent_id_property = $this->getParentIdProperty();
+            if (is_null($parent_id_property)) {
+                return;
+            }
+            $id_parent = $this->getData($parent_id_property);
+            if (is_null($id_parent) || !$id_parent) {
+                return;
+            }
+            $filters[$parent_id_property] = $id_parent;
+
+            $table = $this->getTable();
+            $primary = $this->getPrimary();
+
+            $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position'));
+            $i = 1;
+            $done = array();
+            foreach ($items as $item) {
+                if (in_array((int) $item[$primary], $done)) {
+                    continue;
+                }
+                if ((int) $item['position'] !== (int) $i) {
+                    $this->db->update($table, array(
+                        'position' => (int) $i
+                            ), '`' . $primary . '` = ' . (int) $item[$primary]);
+                }
+                $done[] = (int) $item[$primary];
+                $i++;
+
+                $children = $this->getList(array(
+                    'id_obj'         => (int) $id_parent,
+                    'id_parent_line' => (int) $item[$primary]
+                        ), null, null, 'position', 'asc', 'array', array('id', 'position'));
+                if (!is_null($children)) {
+                    foreach ($children as $child) {
+                        if ((int) $child['position'] !== $i) {
+                            $this->db->update($table, array(
+                                'position' => (int) $i
+                                    ), '`' . $primary . '` = ' . (int) $child['id']);
+                        }
+                        $done[] = (int) $child['id'];
+                        $i++;
+                    }
+                }
+            }
+        }
 
         $this->setLinesPositions();
     }
 
     public function setPosition($position)
     {
-        $result = parent::setPosition($position);
+        $check = true;
+
+//        echo 'before: ' . $position . '<br/>';
+        $position = (int) $this->checkPosition($position);
+
+//        echo 'pos: ' . $position . ' (' . $this->id . ') <br/>';
+
+        if (!isset($this->id) || !(int) $this->id) {
+            $check = false;
+        } elseif ($this->getConf('positions', false, false, 'bool')) {
+            $filters = array();
+            $parent_id_property = $this->getParentIdProperty();
+            if (is_null($parent_id_property)) {
+                $check = false;
+            } else {
+                $id_parent = $this->getData($parent_id_property);
+                if (is_null($id_parent) || !$id_parent) {
+                    $check = false;
+                } else {
+                    $filters[$parent_id_property] = $id_parent;
+                    $table = $this->getTable();
+                    $primary = $this->getPrimary();
+
+                    $items = $this->getList($filters, null, null, 'position', 'asc', 'array', array($primary, 'position', 'id_parent_line'));
+
+                    $i = 1;
+                    $done = array();
+
+                    foreach ($items as $item) {
+//                        echo 'loop: ' . $i . ', pos: ' . $position . '<br/>';
+
+                        if ($i === $position) {
+//                            echo 'ici <br/>';
+                            // Attribution de la nouvelle position à la ligne en cours: 
+                            if (!in_array($this->id, $done)) {
+                                $this->db->update($table, array(
+                                    'position' => (int) $position
+                                        ), '`' . $primary . '` = ' . (int) $this->id);
+                                $this->set('position', $position);
+//                                echo 'attr new: ' . $position . '<br/>';
+                                $i++;
+                                $done[] = $this->id;
+
+                                if (!(int) $this->getData('id_parent_line')) {
+                                    // Attribution des positions suivantes aux enfants de cette ligne:
+                                    $children = $this->getList(array(
+                                        'id_obj'         => (int) $id_parent,
+                                        'id_parent_line' => (int) $this->id
+                                            ), null, null, 'position', 'asc', 'array', array('id', 'position'));
+                                    if (!is_null($children)) {
+                                        foreach ($children as $child) {
+                                            if ((int) $child['position'] !== $i) {
+                                                $this->db->update($table, array(
+                                                    'position' => (int) $i
+                                                        ), '`' . $primary . '` = ' . (int) $child['id']);
+                                            }
+                                            $done[] = (int) $child['id'];
+                                            $i++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        if ((int) $item[$primary] === (int) $this->id) {
+                            continue;
+                        }
+
+                        if (in_array($item[$primary], $done)) {
+                            continue;
+                        }
+
+                        if ((int) $item['id_parent_line']) {
+                            $position--;
+                            continue;
+                        }
+
+                        // Attribution de la position courante à la ligne courante: 
+                        if ((int) $item['position'] !== (int) $i) {
+                            $this->db->update($table, array(
+                                'position' => (int) $i
+                                    ), '`' . $primary . '` = ' . (int) $item[$primary]);
+                        }
+//                        echo 'attr cur: ' . $i . ' <br/>';
+                        $done[] = $item[$primary];
+                        $i++;
+
+                        // Attribution des positions suivantes aux enfants de cette ligne:
+                        $children = $this->getList(array(
+                            'id_obj'         => (int) $id_parent,
+                            'id_parent_line' => (int) $item[$primary]
+                                ), null, null, 'position', 'asc', 'array', array('id', 'position'));
+                        if (!is_null($children)) {
+                            foreach ($children as $child) {
+//                                echo 'check: ' . $i . ', ' . $position . '<br/>';
+                                if ($i === $position) {
+                                    if ((int) $this->getData('id_parent_line') === (int) $item[$primary]) {
+//                                        echo 'attr as child: ' . $position . ' (' . $this->id . ')<br/>';
+                                        $this->db->update($table, array(
+                                            'position' => (int) $position
+                                                ), '`' . $primary . '` = ' . (int) $this->id);
+                                        $i++;
+                                        $done[] = $this->id;
+                                    } else {
+                                        $position++;
+                                    }
+                                }
+                                if (!in_array((int) $child['id'], $done) && (int) $child['id'] !== $this->id) {
+//                                    echo 'attr child: ' . $i . ' (' . $child['id'] . ')<br/>';
+                                    if ((int) $child['position'] !== $i) {
+                                        $this->db->update($table, array(
+                                            'position' => (int) $i
+                                                ), '`' . $primary . '` = ' . (int) $child['id']);
+                                    }
+                                    $done[] = (int) $child['id'];
+                                    $i++;
+                                }
+                            }
+                        }
+                    }
+
+                    if (!in_array($this->id, $done)) {
+                        $this->db->update($table, array(
+                            'position' => (int) $position
+                                ), '`' . $primary . '` = ' . (int) $this->id);
+                        $this->set('position', $position);
+                    }
+                }
+            }
+        } else {
+            $check = false;
+        }
 
         $this->setLinesPositions();
 
-        return $result;
+        return $check;
+    }
+
+    public function getNextPosition()
+    {
+        if ($this->getConf('positions', false, false, 'bool')) {
+            $filters = array();
+
+            $parent_id_property = $this->getParentIdProperty();
+            if (!is_null($parent_id_property)) {
+                $id_parent = $this->getData($parent_id_property);
+                if (is_null($id_parent) || !$id_parent) {
+                    return 0;
+                }
+                $filters[$parent_id_property] = $id_parent;
+            }
+
+            $sql = 'SELECT MAX(`position`) as max_pos';
+            $sql .= BimpTools::getSqlFrom($this->getTable());
+            $sql .= BimpTools::getSqlWhere($filters);
+
+            $result = $this->db->executeS($sql, 'array');
+
+            if (!is_null($result)) {
+                return (int) ((int) $result[0]['max_pos'] + 1);
+            }
+        }
+        return 1;
     }
 
     public function reset()

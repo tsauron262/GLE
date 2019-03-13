@@ -133,7 +133,7 @@ class BMP_Event extends Abstract_margeprod
     
     public function canView()
     {
-        return 0;
+        return 1;
     }
 
     // Getters Array:

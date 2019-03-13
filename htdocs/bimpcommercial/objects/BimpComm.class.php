@@ -15,11 +15,10 @@ class BimpComm extends BimpDolObject
         3  => 'Trimestrielle',
         12 => 'Annuelle'
     );
-    
     public static $pdf_periodicity_label_masc = array(
-        0 => '',
-        1 => 'mois',
-        3 => 'trimestre',
+        0  => '',
+        1  => 'mois',
+        3  => 'trimestre',
         12 => 'an'
     );
 
@@ -263,7 +262,7 @@ class BimpComm extends BimpDolObject
         $where = '`parent_module` = \'' . $this->module . '\' AND `parent_object_name` = \'' . $this->object_name . '\' AND `id_parent` = ' . (int) $this->id;
         $where .= ' AND `file_name` = \'' . $ref . '\' AND `file_ext` = \'pdf\'';
 
-        return (int) $this->db->getValue('bimp_file', 'id', $where);
+        return (int) $this->db->getValue('bimpcore_file', 'id', $where);
     }
 
     public function getJoinFilesValues()
@@ -532,6 +531,46 @@ class BimpComm extends BimpDolObject
             $marginInfos['total_mark_rate'] = 100 * $marginInfos['total_margin'] / $marginInfos['pv_total'];
 
         return $marginInfos;
+    }
+
+    public function getCondReglementBySociete()
+    {
+        if (!$this->isLoaded()) {
+            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+            if ($id_soc) {
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
+                if (BimpObject::objectLoaded($soc)) {
+                    return (int) $soc->dol_object->cond_reglement_id;
+                }
+            }
+            return 0;
+        }
+
+        if (isset($this->data['fk_cond_reglement'])) {
+            return (int) $this->data['fk_cond_reglement']; // pas getData() sinon boucle infinie (getCondReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
+        }
+
+        return 0;
+    }
+
+    public function getModeReglementBySociete()
+    {
+        if (!$this->isLoaded()) {
+            $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+            if ($id_soc) {
+                $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
+                if (BimpObject::objectLoaded($soc)) {
+                    return (int) $soc->dol_object->mode_reglement_id;
+                }
+            }
+            return 0;
+        }
+
+        if (isset($this->data['fk_mode_reglement'])) {
+            return (int) $this->data['fk_mode_reglement']; // pas getData() sinon boucle infinie (getModeReglementBySociete() étant définie en tant que callback du param default_value pour ce champ). 
+        }
+
+        return 0;
     }
 
     // Getters - Overrides BimpObject

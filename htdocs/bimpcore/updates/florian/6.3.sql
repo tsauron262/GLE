@@ -23,6 +23,3 @@ CREATE TABLE IF NOT EXISTS `llx_bc_paiement` (
   `user_update` int(11) NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
-
-INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('sav_use_caisse_for_payments', 0);
-INSERT INTO `llx_bimpcore_conf`(`name`, `value`) VALUES ('bimpcaisse_id_default_account', 1);

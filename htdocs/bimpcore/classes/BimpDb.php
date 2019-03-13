@@ -26,8 +26,6 @@ class BimpDb
             $fields .= $name;
             if (is_int($value)) {
                 $values .= (int) $value;
-            } elseif (BimpTools::isNumericType($value) && !preg_match('/[Ee]/', $value)) {
-                $values .= $value;
             } else {
                 if (is_array($value)) {
                     $value = json_encode($value);
@@ -63,14 +61,10 @@ class BimpDb
                 $first_loop = false;
             }
             $sql .= '`' . $name . '` = ';
-            if (BimpTools::isNumericType($value)) {
-                $sql .= $value;
-            } else {
-                if (is_array($value)) {
-                    $value = json_encode($value);
-                }
-                $sql .= '"' . $this->db->escape($value) . '"';
+            if (is_array($value)) {
+                $value = json_encode($value);
             }
+            $sql .= '"' . $this->db->escape($value) . '"';
         }
         $sql .= ' WHERE ' . $where;
         return $this->execute($sql);

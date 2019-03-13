@@ -1,7 +1,7 @@
 # Dolibarr language file - Source file is en_US - holiday
 HRM=GRH
 Holidays=Congés
-CPTitreMenu=Congés
+CPTitreMenu=Congés / Absences
 MenuReportMonth=Etat mensuel
 MenuAddCP=Nouvelle demande
 NotActiveModCP=Vous devez activer le module Congés pour afficher cette page.

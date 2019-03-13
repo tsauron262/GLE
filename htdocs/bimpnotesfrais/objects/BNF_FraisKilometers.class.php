@@ -5,11 +5,11 @@ class BNF_FraisKilometers extends BimpObject
 
     // Overrides: 
     public static $chevaux_list = array(
-        1 => '3 et 4 CV',
-        2 => '5 à 7 Cv',
-        3 => '8 et 9 CV',
-        4 => '10 et 11 CV',
-        5 => '12 Cv et +'
+        3 => '3 CV',
+        4 => '4 CV',
+        5 => '5 CV',
+        6 => '6 CV',
+        7 => '7 CV'
     );
     public static $carburants = array(
         1 => 'Gazole',
@@ -17,31 +17,11 @@ class BNF_FraisKilometers extends BimpObject
         3 => 'GPL'
     );
     public static $coefs = array(
-        1 => array(
-            1 => 0.068,
-            2 => 0.091,
-            3 => 0.056
-        ),
-        2 => array(
-            1 => 0.084,
-            2 => 0.112,
-            3 => 0.068
-        ),
-        3 => array(
-            1 => 0.100,
-            2 => 0.133,
-            3 => 0.081
-        ),
-        4 => array(
-            1 => 0.113,
-            2 => 0.150,
-            3 => 0.092
-        ),
-        5 => array(
-            1 => 0.125,
-            2 => 0.166,
-            3 => 0.102
-        )
+        3 => 0.54,
+        4 => 0.60,
+        5 => 0.63,
+        6 => 0.66,
+        7 => 0.70
     );
 
     public function create()
@@ -64,15 +44,11 @@ class BNF_FraisKilometers extends BimpObject
 
     public function getMontant()
     {
+        
         $montant = 0;
-        $cv = (int) $this->getData('chevaux');
-        $carb = (int) $this->getData('carburant');
         $km = (float) $this->getData('kilometers');
-        if ($cv && $carb && $km) {
-            if (isset(self::$coefs[$cv][$carb])) {
-                $montant = (float) self::$coefs[$cv][$carb] * $km;
-            }
-        }
+        $cv = (int) $this->getData('chevaux');
+        $montant = (float) self::$coefs[$cv] * $km;
 
         return $montant;
     }

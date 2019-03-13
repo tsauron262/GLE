@@ -8,11 +8,9 @@ objects:
             bimp_object: BNF_Frais
             id_object: 
                 request: id
-    note:
+    bareme:
         instance:
-            bimp_object: BNF_Frais
-            id_object: 
-                request: id
+            bimp_object: BNF_FraisBareme
 sections:
     - type: tabs
       tabs: 
@@ -24,7 +22,13 @@ sections:
                   list: 
                       title: Toutes les notes de frais
                       object: frais
-    - type: view
-      view: 
-          object: note
-          name: default
+                
+                
+        bareme:
+            label: Barème kilometrique
+            sections:
+                - type: list
+                  panel: 1
+                  list: 
+                      title: Barème kilométrique
+                      object: bareme

@@ -2535,10 +2535,7 @@ class ObjectLine extends BimpObject
     {
         $check = true;
 
-//        echo 'before: ' . $position . '<br/>';
         $position = (int) $this->checkPosition($position);
-
-//        echo 'pos: ' . $position . ' (' . $this->id . ') <br/>';
 
         if (!isset($this->id) || !(int) $this->id) {
             $check = false;
@@ -2562,17 +2559,13 @@ class ObjectLine extends BimpObject
                     $done = array();
 
                     foreach ($items as $item) {
-//                        echo 'loop: ' . $i . ', pos: ' . $position . '<br/>';
-
                         if ($i === $position) {
-//                            echo 'ici <br/>';
                             // Attribution de la nouvelle position à la ligne en cours: 
                             if (!in_array($this->id, $done)) {
                                 $this->db->update($table, array(
                                     'position' => (int) $position
                                         ), '`' . $primary . '` = ' . (int) $this->id);
                                 $this->set('position', $position);
-//                                echo 'attr new: ' . $position . '<br/>';
                                 $i++;
                                 $done[] = $this->id;
 
@@ -2616,7 +2609,6 @@ class ObjectLine extends BimpObject
                                 'position' => (int) $i
                                     ), '`' . $primary . '` = ' . (int) $item[$primary]);
                         }
-//                        echo 'attr cur: ' . $i . ' <br/>';
                         $done[] = $item[$primary];
                         $i++;
 
@@ -2627,10 +2619,8 @@ class ObjectLine extends BimpObject
                                 ), null, null, 'position', 'asc', 'array', array('id', 'position'));
                         if (!is_null($children)) {
                             foreach ($children as $child) {
-//                                echo 'check: ' . $i . ', ' . $position . '<br/>';
                                 if ($i === $position) {
                                     if ((int) $this->getData('id_parent_line') === (int) $item[$primary]) {
-//                                        echo 'attr as child: ' . $position . ' (' . $this->id . ')<br/>';
                                         $this->db->update($table, array(
                                             'position' => (int) $position
                                                 ), '`' . $primary . '` = ' . (int) $this->id);
@@ -2641,7 +2631,6 @@ class ObjectLine extends BimpObject
                                     }
                                 }
                                 if (!in_array((int) $child['id'], $done) && (int) $child['id'] !== $this->id) {
-//                                    echo 'attr child: ' . $i . ' (' . $child['id'] . ')<br/>';
                                     if ((int) $child['position'] !== $i) {
                                         $this->db->update($table, array(
                                             'position' => (int) $i

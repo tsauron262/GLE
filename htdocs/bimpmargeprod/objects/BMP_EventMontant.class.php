@@ -1,6 +1,7 @@
 <?php
 
-class BMP_EventMontant extends BimpObject
+require_once DOL_DOCUMENT_ROOT."/bimpmargeprod/objects/Abstract_margeprod.class.php";
+class BMP_EventMontant extends Abstract_margeprod
 {
 
     protected $cp_new_parts = array();

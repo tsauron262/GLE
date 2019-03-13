@@ -1673,6 +1673,10 @@ class BimpObject extends BimpCache
 
         return false;
     }
+    
+    public function getTaxeIdDefault(){
+        return (int) BimpCore::getConf("tva_default");
+    }
 
     public function getChildObject($object_name, $id_object = null)
     {

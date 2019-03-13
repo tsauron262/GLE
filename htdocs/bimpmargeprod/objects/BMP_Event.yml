@@ -238,7 +238,7 @@ list_customs:
         filters_panel_open: 1
         n: 100
         sort_field: date
-        sort_way: asc
+        sort_way: asc     
         
     synthese_events: 
         title: Synthèse événements

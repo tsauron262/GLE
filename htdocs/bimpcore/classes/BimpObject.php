@@ -1673,6 +1673,10 @@ class BimpObject extends BimpCache
 
         return false;
     }
+    
+    public function getTaxeIdDefault(){
+        return (int) BimpCore::getConf("tva_default");
+    }
 
     public function getChildObject($object_name, $id_object = null)
     {
@@ -1758,7 +1762,7 @@ class BimpObject extends BimpCache
         return array();
     }
 
-    public function getChildrenObjects($object_name, $filters = array(), $order_by = 'id', $order_way = 'asc')
+    public function getChildrenObjects($object_name, $filters = array(), $order_by = 'id', $order_way = 'asc', $use_id_as_key = false)
     {
         $children = array();
         if ($this->isLoaded()) {
@@ -1785,7 +1789,11 @@ class BimpObject extends BimpCache
                         foreach ($list as $item) {
                             $child = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $item[$primary], $this);
                             if (BimpObject::objectLoaded($child)) {
-                                $children[] = $child;
+                                if ($use_id_as_key) {
+                                    $children[(int) $child->id] = $child;
+                                } else {
+                                    $children[] = $child;
+                                }
                             }
                         }
                     }
@@ -1931,22 +1939,22 @@ class BimpObject extends BimpCache
         }
         return 0;
     }
-    
+
     public function getListObjects($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC')
     {
         $primary = $this->getPrimary();
-        
+
         $rows = $this->getList($filters, $n, $p, $order_by, $order_way, 'array', array($primary));
-     
+
         $objects = array();
-        
+
         foreach ($rows as $r) {
             $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $r[$primary]);
             if (BimpObject::objectLoaded($instance)) {
                 $objects[(int) $r[$primary]] = $instance;
             }
         }
-        
+
         return $objects;
     }
 
@@ -2913,7 +2921,7 @@ class BimpObject extends BimpCache
             if (count($extra_errors)) {
                 $warnings[] = BimpTools::getMsgFromArray($extra_errors, 'Des erreurs sont survenues lors de la suppression des champs supplémentaires');
             }
-            
+
             // Réintialisation de la position des autres objets du même parent: 
             if ((int) $this->params['positions']) {
                 $this->resetPositions();
@@ -3168,8 +3176,8 @@ class BimpObject extends BimpCache
         }
 
         $errors = array();
-        
-        if(!isset($this->dol_object->id) && isset($this->dol_object->rowid))
+
+        if (!isset($this->dol_object->id) && isset($this->dol_object->rowid))
             $this->dol_object->id = $this->dol_object->rowid;
 
         $this->id = $this->dol_object->id;
@@ -3327,7 +3335,7 @@ class BimpObject extends BimpCache
 
         $result = call_user_func_array(array($this->dol_object, 'fetch'), $params);
 
-        
+
         if ($result <= 0) {
             if (isset($this->dol_object->error) && $this->dol_object->error) {
                 $errors[] = $this->dol_object->error;
@@ -3336,8 +3344,8 @@ class BimpObject extends BimpCache
             return false;
         }
 
-        $errors = $this->hydrateFromDolObject();        
-        
+        $errors = $this->hydrateFromDolObject();
+
         $extra_fields = $this->fetchExtraFields();
 
         foreach ($extra_fields as $field_name => $value) {

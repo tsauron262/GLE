@@ -1,6 +1,7 @@
 <?php
 
-class BMP_TotalInter extends BimpObject
+require_once DOL_DOCUMENT_ROOT."/bimpmargeprod/objects/Abstract_margeprod.class.php";
+class BMP_TotalInter extends Abstract_margeprod
 {
 
     public static $assos_name = array(
@@ -17,6 +18,17 @@ class BMP_TotalInter extends BimpObject
     );
 
     // Getters: 
+    
+    public function canDelete()
+    {
+        global $user;
+        
+        if ($user->admin) {
+            return 1;
+        }
+        
+        return 0;
+    }
 
     public function getCategoriesArray()
     {

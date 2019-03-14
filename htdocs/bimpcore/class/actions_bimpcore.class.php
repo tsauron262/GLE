@@ -40,9 +40,9 @@ class ActionsBimpcore
     }
     
     function setContentSecurityPolicy($parameters, &$object, &$action, $hookmanager){
-        global $conf;
+        global $conf, $user;
         $html = '';
-         if (stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1) {
+         if ($user->id > 0 && stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1) {
                 if (!defined('BIMP_CONTROLLER_INIT')) {
                     require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
                     checkBimpCoreVersion();

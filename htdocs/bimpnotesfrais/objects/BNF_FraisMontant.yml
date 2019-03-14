@@ -49,24 +49,24 @@ fields:
         label: Montant TTC
         type: money
         required: 1
-    periode:
-        label: Periode
-        type: int
-        values:
-            array: periode_restauration
-        display_if:
-            field_name: type
-            show_values: 1
-    type:
-        label: Type
-        type: int
-        values:
-            callback: displayTypesList
-    validate:
-        label: Ticket validé
-        required: 1
-        type: bool
-        default-value: 0
+#    periode:
+#        label: Periode
+#        type: int
+#        values:
+#            array: periode_restauration
+#        display_if:
+#            field_name: type
+#            show_values: 1
+#    type:
+#        label: Type
+#        type: int
+#        values:
+#            callback: displayTypesList
+#    validate:
+#        label: Ticket validé
+#        required: 1
+#        type: bool
+#        default-value: 0
 
 lists:
     default: 
@@ -100,18 +100,18 @@ lists:
                 field: amount
                 edit:
                     callback: canFraisEdit
-            periode:
-                field: periode
-                edit:
-                    callback: canFraisEdit
-                show: 
-                    callback: hasParentPeriod
-            type:
-                field: type
-                edit:
-                    callback: canFraisEdit
-                show:
-                    callback: hasNecessaryType
-            validate:
-                field: validate
-                edit: 1
+#            periode:
+#                field: periode
+#                edit:
+#                    callback: canFraisEdit
+#                show: 
+#                    callback: hasParentPeriod
+#            type:
+#                field: type
+#                edit:
+#                    callback: canFraisEdit
+#                show:
+#                    callback: hasNecessaryType
+#            validate:
+#                field: validate
+#                edit: 1

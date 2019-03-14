@@ -47,7 +47,7 @@ class modBimpmargeprod extends DolibarrModules
 
 		// Id for module (must be unique).
 		// Use here a free id (See in Home -> System information -> Dolibarr for list of used modules id).
-		$this->numero = 598393;		// TODO Go on page http://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+		$this->numero = 594334;		// TODO Go on page http://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
 		// Key text used to identify module (for permissions, menus, etc...)
 		$this->rights_class = 'bimpmargeprod';
 
@@ -261,7 +261,23 @@ class modBimpmargeprod extends DolibarrModules
 	{
 		$sql = array();
                 
-                $this->_load_tables('/bimpmargeprod/sql/');
+                require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
+                $name = 'module_version_bimpmargeprod';
+                if(BimpCore::getConf($name) == ""){
+                    BimpCore::setConf($name, floatval($this->version));
+                    $this->_load_tables('/bimpmargeprod/sql/');
+                }
+                
+                $tabTva = array(2462 => 20, 14 => 5.5, 15 => 0, 16 => 2.1, 17 => 7);
+                
+                foreach($tabTva as $oldId => $taux){
+                    $sql2 = $this->db->query("SELECT rowid  FROM `llx_c_tva` WHERE `taux` = ".$taux." AND fk_pays = 1");
+                    if($this->db->num_rows($sql2)> 0){
+                        $ln = $this->db->fetch_object($sql2);
+                        $sql[] = "UPDATE llx_bmp_type_montant SET id_taxe = ".$ln->rowid." WHERE id_taxe =".$oldId;
+                    }
+                }
+                
 
 
 		return $this->_init($sql, $options);

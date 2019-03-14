@@ -1,6 +1,6 @@
 table: bnf_frais
 icon: fas_sticky-note
-controller: index
+controller: note
 
 labels: 
     name: note de frais
@@ -89,9 +89,7 @@ fields:
         
     ticket_validated: 
         label: Tickets de caisse validé
-        type: bool
-        value:
-            callback: checkValidateTickets
+        type: bool     
         
     period: 
         label: Période
@@ -212,8 +210,7 @@ lists:
                     callback: displayTotalAmount
             ticket: 
                 field: ticket_validated
-                value:
-                    callback: checkValidateTickets
+                edit: 1
             status: 
                 field: status
     

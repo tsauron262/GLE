@@ -1,1558 +1,666 @@
--- ************************************************************
--- Sequel Pro SQL dump
--- Version 4541
+-- phpMyAdmin SQL Dump
+-- version 4.5.1
+-- http://www.phpmyadmin.net
 --
--- http://www.sequelpro.com/
--- https://github.com/sequelpro/sequelpro
+-- Client :  127.0.0.1:3306
+-- Généré le :  Mar 12 Mars 2019 à 11:34
+-- Version du serveur :  5.7.25-0ubuntu0.16.04.2-log
+-- Version de PHP :  7.0.33-0ubuntu0.16.04.2
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
 --
--- H�te: 10.192.20.111 (MySQL 5.5.5-10.2.15-MariaDB-log)
--- Base de donn�es: ERP_TEST8_BIMP
--- Temps de g�n�ration: 2019-03-08 16:19:13 +0000
--- ************************************************************
+-- Base de données :  `ERP_TEST_TEST8`
+--
 
+-- --------------------------------------------------------
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+--
+-- Structure de la table `llx_bmp_calc_montant`
+--
 
-
--- Affichage de la table llx_bmp_calc_montant
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_calc_montant` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `llx_bmp_calc_montant` (
+  `id` int(11) NOT NULL,
   `label` varchar(256) NOT NULL,
-  `type_source` int(11) NOT NULL DEFAULT 1,
-  `id_montant_source` int(10) unsigned NOT NULL DEFAULT 0,
-  `id_total_source` int(10) unsigned NOT NULL DEFAULT 0,
-  `source_amount` float NOT NULL DEFAULT 0,
-  `id_target` int(10) unsigned NOT NULL DEFAULT 0,
-  `percent` float NOT NULL DEFAULT 0,
-  `editable` tinyint(1) NOT NULL DEFAULT 1,
-  `required` tinyint(1) NOT NULL DEFAULT 1,
-  `active` tinyint(1) NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`)
+  `type_source` int(11) NOT NULL DEFAULT '1',
+  `id_montant_source` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `id_total_source` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `source_amount` float NOT NULL DEFAULT '0',
+  `id_target` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `percent` float NOT NULL DEFAULT '0',
+  `editable` tinyint(1) NOT NULL DEFAULT '1',
+  `required` tinyint(1) NOT NULL DEFAULT '1',
+  `active` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_calc_montant` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_calc_montant` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_calc_montant` (`id`, `label`, `type_source`, `id_montant_source`, `id_total_source`, `source_amount`, `id_target`, `percent`, `editable`, `required`, `active`)
-VALUES
-	(1,'CNV',2,21,6,0,5,3.5,1,1,1),
-	(2,'SACEM Billeterie',2,21,8,0,26,7.744,1,1,1),
-	(3,'Approvisionnement bar',2,22,3,0,24,50,1,1,1),
-	(7,'SACEM Bar',2,27,3,0,3,3.37,1,1,1),
-	(9,'Sécurité sociale SACEM',2,26,9,0,29,1.1,1,1,1),
-	(14,'Ménage Club',3,0,0,150,12,100,1,0,1),
-	(16,'SACEM Artistique',2,47,7,0,62,7.744,1,0,1),
-	(17,'Promo Locale',2,52,8,0,32,3.5,1,0,1);
+--
+-- Structure de la table `llx_bmp_calc_montant_type_montant`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_calc_montant` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_calc_montant_type_montant
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_calc_montant_type_montant` (
-  `id_calc_montant` int(10) unsigned NOT NULL,
-  `id_type_montant` int(10) unsigned NOT NULL
+CREATE TABLE `llx_bmp_calc_montant_type_montant` (
+  `id_calc_montant` int(10) UNSIGNED NOT NULL,
+  `id_type_montant` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_calc_montant_type_montant` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_calc_montant_type_montant` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_calc_montant_type_montant` (`id_calc_montant`, `id_type_montant`)
-VALUES
-	(3,23),
-	(3,22),
-	(9,62),
-	(9,26),
-	(2,21),
-	(2,52),
-	(17,21),
-	(17,52),
-	(7,23),
-	(7,22),
-	(1,21),
-	(1,52),
-	(16,48),
-	(16,47),
-	(16,67),
-	(16,54);
+--
+-- Structure de la table `llx_bmp_categorie_montant`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_calc_montant_type_montant` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_categorie_montant
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_categorie_montant` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE `llx_bmp_categorie_montant` (
+  `id` int(10) UNSIGNED NOT NULL,
   `name` varchar(128) NOT NULL DEFAULT '',
   `color` varchar(128) NOT NULL,
-  `position` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`)
+  `position` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_categorie_montant` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_categorie_montant` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_categorie_montant` (`id`, `name`, `color`, `position`)
-VALUES
-	(1,'Taxes','FFBF00',12),
-	(10,'Accueil','8A2908',13),
-	(11,'Salle','8A0886',14),
-	(12,'Coproduction','FF6E00',16),
-	(13,'Personnel Technique','8000FF',15),
-	(14,'Billetterie','FF0000',11),
-	(15,'Bar','04B4AE',3),
-	(16,'Promo','009C27',10),
-	(17,'Subvention / Mecenat','009C27',9),
-	(18,'Captation','4b4b4b',8),
-	(20,'Technique','AEB404',7),
-	(21,'Artistique / Engagement','0404B4',6),
-	(22,'Artistique / Cession','0404B4',5),
-	(23,'Divers','4b4b4b',4),
-	(24,'Partenariats','4b4b4b',2),
-	(25,'Personnel Sécurité','8000FF',1);
+--
+-- Structure de la table `llx_bmp_event`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_categorie_montant` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_event
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_event` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE `llx_bmp_event` (
+  `id` int(10) UNSIGNED NOT NULL,
   `name` varchar(128) NOT NULL,
   `date` datetime DEFAULT NULL,
-  `type` int(10) unsigned NOT NULL DEFAULT 0,
-  `place` int(10) unsigned NOT NULL DEFAULT 0,
-  `status` int(10) unsigned NOT NULL DEFAULT 0,
+  `type` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `place` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `status` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `analytics` varchar(128) NOT NULL DEFAULT '',
-  `ca_moyen_bar` float NOT NULL DEFAULT 0,
-  `tva_billets` int(11) NOT NULL DEFAULT 1,
-  `frais_billet` float NOT NULL DEFAULT 0.2,
-  `default_dl_dist` decimal(24,2) NOT NULL DEFAULT 0.00,
-  `default_dl_prod` decimal(24,2) NOT NULL DEFAULT 0.00,
-  `user_create` int(10) unsigned NOT NULL DEFAULT 0,
-  `date_create` datetime NOT NULL DEFAULT current_timestamp(),
-  `user_update` int(10) unsigned NOT NULL DEFAULT 0,
-  `date_update` datetime NOT NULL DEFAULT current_timestamp(),
-  `bar_20_save` float NOT NULL DEFAULT 0,
-  `bar_55_save` float NOT NULL DEFAULT 0,
-  `billets_loc` int(10) unsigned NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`)
+  `ca_moyen_bar` float NOT NULL DEFAULT '0',
+  `tva_billets` int(11) NOT NULL DEFAULT '1',
+  `frais_billet` float NOT NULL DEFAULT '0.2',
+  `default_dl_dist` decimal(24,2) NOT NULL DEFAULT '0.00',
+  `default_dl_prod` decimal(24,2) NOT NULL DEFAULT '0.00',
+  `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `bar_20_save` float NOT NULL DEFAULT '0',
+  `bar_55_save` float NOT NULL DEFAULT '0',
+  `billets_loc` int(10) UNSIGNED NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_event` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_event` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_event` (`id`, `name`, `date`, `type`, `place`, `status`, `analytics`, `ca_moyen_bar`, `tva_billets`, `frais_billet`, `default_dl_dist`, `default_dl_prod`, `user_create`, `date_create`, `user_update`, `date_update`, `bar_20_save`, `bar_55_save`, `billets_loc`)
-VALUES
-	(4,'TEST 1','2019-01-19 20:30:00',2,3,2,'PRO',10,1,0.2,1.20,1.00,1,'2019-01-17 17:25:58',1,'2019-01-18 17:37:32',20,10,0),
-	(5,'TEST 2','2019-02-04 23:47:31',1,1,2,'',0,1,0.2,0.00,0.00,1,'2019-02-04 23:47:40',1,'2019-03-06 15:08:55',0,0,0),
-	(6,'TEST 3','2019-02-22 23:50:25',2,1,1,'',0,1,0.2,0.00,0.00,1,'2019-02-04 23:50:29',1,'2019-03-07 03:36:36',0,1500,12),
-	(7,'test5','2019-02-14 11:22:53',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-02-13 11:22:58',1,'2019-02-13 11:22:58',0,0,0),
-	(8,'vide1','2019-03-06 14:14:33',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-03-07 14:14:36',1,'2019-03-07 14:14:36',0,0,0),
-	(9,'vide2','2019-03-09 14:14:44',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-03-07 14:14:47',1,'2019-03-07 14:14:47',0,0,0),
-	(10,'vide3','2019-03-12 14:14:56',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-03-07 14:15:00',1,'2019-03-07 14:15:00',0,0,0),
-	(11,'vide4','2019-03-12 14:15:07',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-03-07 14:15:12',1,'2019-03-07 14:15:12',0,0,0),
-	(12,'vide5','2019-03-10 14:15:19',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-03-07 14:15:22',1,'2019-03-07 14:15:22',0,0,0),
-	(13,'vide6','2019-03-21 14:15:29',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-03-07 14:15:32',1,'2019-03-07 14:15:32',0,0,0),
-	(14,'vide7','2019-03-12 14:15:38',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-03-07 14:15:41',1,'2019-03-07 14:15:41',0,0,0),
-	(15,'vide8','2019-03-29 14:16:15',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-03-07 14:16:18',1,'2019-03-07 14:16:18',0,0,0),
-	(16,'vide9','2019-03-05 14:16:24',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-03-07 14:16:27',1,'2019-03-07 14:16:27',0,0,0),
-	(17,'vide10','2019-03-20 14:16:36',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-03-07 14:16:40',1,'2019-03-07 14:16:40',0,0,0),
-	(18,'vide11','2019-03-11 14:16:49',1,1,1,'',0,1,0.2,0.00,0.00,1,'2019-03-07 14:16:53',1,'2019-03-07 14:16:53',0,0,0);
+--
+-- Structure de la table `llx_bmp_event_billets`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_event` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_event_billets
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_event_billets` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `id_event` int(10) unsigned NOT NULL DEFAULT 0,
-  `id_soc_seller` int(10) unsigned NOT NULL DEFAULT 0,
+CREATE TABLE `llx_bmp_event_billets` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_event` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `id_soc_seller` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `seller_name` varchar(256) NOT NULL DEFAULT '',
-  `id_tarif` int(10) unsigned NOT NULL DEFAULT 0,
-  `quantity` int(11) NOT NULL DEFAULT 0,
-  `dl_dist` decimal(24,2) NOT NULL DEFAULT 0.00,
-  `dl_prod` decimal(24,2) NOT NULL DEFAULT 0.00,
-  `id_coprod` int(10) unsigned NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`)
+  `id_tarif` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `quantity` int(11) NOT NULL DEFAULT '0',
+  `dl_dist` decimal(24,2) NOT NULL DEFAULT '0.00',
+  `dl_prod` decimal(24,2) NOT NULL DEFAULT '0.00',
+  `id_coprod` int(10) UNSIGNED NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_event_billets` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_event_billets` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_event_billets` (`id`, `id_event`, `id_soc_seller`, `seller_name`, `id_tarif`, `quantity`, `dl_dist`, `dl_prod`, `id_coprod`)
-VALUES
-	(17,4,0,'Fnac',15,200,1.20,1.00,2),
-	(18,4,0,'Fnac',16,100,1.20,1.00,2),
-	(19,4,0,'Fnac',17,50,1.20,1.00,2),
-	(20,4,0,'Ticketnet',15,200,1.20,1.00,1),
-	(21,4,0,'Ticketnet',16,250,1.20,1.00,1),
-	(22,4,0,'Ticketnet',17,25,1.20,1.00,1),
-	(23,4,0,'Digitick',15,50,1.20,1.00,0),
-	(24,4,0,'Digitick',16,75,1.20,1.00,0),
-	(25,4,0,'Prévente Le Fil',15,500,1.20,1.00,0),
-	(26,4,0,'Prévente Le Fil',16,200,1.20,1.00,0),
-	(27,4,0,'Prévente Le Fil',17,100,1.20,1.00,0),
-	(28,4,0,'Guichet',19,75,1.20,1.00,0),
-	(29,4,0,'Guichet',20,30,1.20,1.00,0),
-	(30,4,0,'Web Fil',15,0,1.20,1.00,0),
-	(31,4,0,'Web Fil',16,0,1.20,1.00,0),
-	(32,4,0,'Web Fil',17,0,1.20,1.00,0),
-	(33,5,0,'Fnac',21,10,5.00,0.00,0),
-	(34,5,0,'Fnac',22,0,0.00,0.00,0),
-	(35,5,0,'Fnac',23,0,0.00,0.00,0),
-	(36,5,0,'Ticketnet',21,0,0.00,0.00,0),
-	(37,5,0,'Ticketnet',22,0,0.00,0.00,0),
-	(38,5,0,'Ticketnet',23,0,0.00,0.00,0),
-	(39,5,0,'Digitick',21,0,0.00,0.00,0),
-	(40,5,0,'Digitick',22,0,0.00,0.00,0),
-	(41,5,0,'Prévente Le Fil',21,0,0.00,0.00,0),
-	(42,5,0,'Prévente Le Fil',22,0,0.00,0.00,0),
-	(43,5,0,'Prévente Le Fil',23,0,0.00,0.00,0),
-	(44,5,0,'Guichet',28,0,0.00,0.00,0),
-	(45,5,0,'Guichet',29,0,0.00,0.00,0),
-	(46,5,0,'Web Fil',21,0,0.00,0.00,0),
-	(47,5,0,'Web Fil',22,0,0.00,0.00,0),
-	(48,5,0,'Web Fil',23,0,0.00,0.00,0),
-	(49,6,0,'Fnac',31,0,0.00,0.00,0),
-	(50,6,0,'Fnac',32,0,0.00,0.00,0),
-	(51,6,0,'Fnac',33,0,0.00,0.00,0),
-	(52,6,0,'Ticketnet',31,0,0.00,0.00,0),
-	(53,6,0,'Ticketnet',32,0,0.00,0.00,0),
-	(54,6,0,'Ticketnet',33,0,0.00,0.00,0),
-	(55,6,0,'Digitick',31,0,0.00,0.00,0),
-	(56,6,0,'Digitick',32,0,0.00,0.00,0),
-	(57,6,0,'Prévente Le Fil',31,0,0.00,0.00,0),
-	(58,6,0,'Prévente Le Fil',32,0,0.00,0.00,0),
-	(59,6,0,'Prévente Le Fil',33,0,0.00,0.00,0),
-	(60,6,0,'Guichet',38,0,0.00,0.00,0),
-	(61,6,0,'Guichet',39,0,0.00,0.00,0),
-	(62,6,0,'Web Fil',31,0,0.00,0.00,0),
-	(63,6,0,'Web Fil',32,0,0.00,0.00,0),
-	(64,6,0,'Web Fil',33,0,0.00,0.00,0),
-	(65,7,0,'Fnac',41,0,0.00,0.00,0),
-	(66,7,0,'Fnac',42,0,0.00,0.00,0),
-	(67,7,0,'Fnac',43,0,0.00,0.00,0),
-	(68,7,0,'Ticketnet',41,0,0.00,0.00,0),
-	(69,7,0,'Ticketnet',42,0,0.00,0.00,0),
-	(70,7,0,'Ticketnet',43,0,0.00,0.00,0),
-	(71,7,0,'Digitick',41,0,0.00,0.00,0),
-	(72,7,0,'Digitick',42,0,0.00,0.00,0),
-	(73,7,0,'Prévente Le Fil',41,0,0.00,0.00,0),
-	(74,7,0,'Prévente Le Fil',42,0,0.00,0.00,0),
-	(75,7,0,'Prévente Le Fil',43,0,0.00,0.00,0),
-	(76,7,0,'Guichet',48,0,0.00,0.00,0),
-	(77,7,0,'Guichet',49,0,0.00,0.00,0),
-	(78,7,0,'Web Fil',41,0,0.00,0.00,0),
-	(79,7,0,'Web Fil',42,0,0.00,0.00,0),
-	(80,7,0,'Web Fil',43,0,0.00,0.00,0),
-	(81,8,0,'Fnac',51,0,0.00,0.00,0),
-	(82,8,0,'Fnac',52,0,0.00,0.00,0),
-	(83,8,0,'Fnac',53,0,0.00,0.00,0),
-	(84,8,0,'Ticketnet',51,0,0.00,0.00,0),
-	(85,8,0,'Ticketnet',52,0,0.00,0.00,0),
-	(86,8,0,'Ticketnet',53,0,0.00,0.00,0),
-	(87,8,0,'Digitick',51,0,0.00,0.00,0),
-	(88,8,0,'Digitick',52,0,0.00,0.00,0),
-	(89,8,0,'Prévente Le Fil',51,0,0.00,0.00,0),
-	(90,8,0,'Prévente Le Fil',52,0,0.00,0.00,0),
-	(91,8,0,'Prévente Le Fil',53,0,0.00,0.00,0),
-	(92,8,0,'Guichet',58,0,0.00,0.00,0),
-	(93,8,0,'Guichet',59,0,0.00,0.00,0),
-	(94,8,0,'Web Fil',51,0,0.00,0.00,0),
-	(95,8,0,'Web Fil',52,0,0.00,0.00,0),
-	(96,8,0,'Web Fil',53,0,0.00,0.00,0),
-	(97,9,0,'Fnac',61,0,0.00,0.00,0),
-	(98,9,0,'Fnac',62,0,0.00,0.00,0),
-	(99,9,0,'Fnac',63,0,0.00,0.00,0),
-	(100,9,0,'Ticketnet',61,0,0.00,0.00,0),
-	(101,9,0,'Ticketnet',62,0,0.00,0.00,0),
-	(102,9,0,'Ticketnet',63,0,0.00,0.00,0),
-	(103,9,0,'Digitick',61,0,0.00,0.00,0),
-	(104,9,0,'Digitick',62,0,0.00,0.00,0),
-	(105,9,0,'Prévente Le Fil',61,0,0.00,0.00,0),
-	(106,9,0,'Prévente Le Fil',62,0,0.00,0.00,0),
-	(107,9,0,'Prévente Le Fil',63,0,0.00,0.00,0),
-	(108,9,0,'Guichet',68,0,0.00,0.00,0),
-	(109,9,0,'Guichet',69,0,0.00,0.00,0),
-	(110,9,0,'Web Fil',61,0,0.00,0.00,0),
-	(111,9,0,'Web Fil',62,0,0.00,0.00,0),
-	(112,9,0,'Web Fil',63,0,0.00,0.00,0),
-	(113,10,0,'Fnac',71,0,0.00,0.00,0),
-	(114,10,0,'Fnac',72,0,0.00,0.00,0),
-	(115,10,0,'Fnac',73,0,0.00,0.00,0),
-	(116,10,0,'Ticketnet',71,0,0.00,0.00,0),
-	(117,10,0,'Ticketnet',72,0,0.00,0.00,0),
-	(118,10,0,'Ticketnet',73,0,0.00,0.00,0),
-	(119,10,0,'Digitick',71,0,0.00,0.00,0),
-	(120,10,0,'Digitick',72,0,0.00,0.00,0),
-	(121,10,0,'Prévente Le Fil',71,0,0.00,0.00,0),
-	(122,10,0,'Prévente Le Fil',72,0,0.00,0.00,0),
-	(123,10,0,'Prévente Le Fil',73,0,0.00,0.00,0),
-	(124,10,0,'Guichet',78,0,0.00,0.00,0),
-	(125,10,0,'Guichet',79,0,0.00,0.00,0),
-	(126,10,0,'Web Fil',71,0,0.00,0.00,0),
-	(127,10,0,'Web Fil',72,0,0.00,0.00,0),
-	(128,10,0,'Web Fil',73,0,0.00,0.00,0),
-	(129,11,0,'Fnac',81,0,0.00,0.00,0),
-	(130,11,0,'Fnac',82,0,0.00,0.00,0),
-	(131,11,0,'Fnac',83,0,0.00,0.00,0),
-	(132,11,0,'Ticketnet',81,0,0.00,0.00,0),
-	(133,11,0,'Ticketnet',82,0,0.00,0.00,0),
-	(134,11,0,'Ticketnet',83,0,0.00,0.00,0),
-	(135,11,0,'Digitick',81,0,0.00,0.00,0),
-	(136,11,0,'Digitick',82,0,0.00,0.00,0),
-	(137,11,0,'Prévente Le Fil',81,0,0.00,0.00,0),
-	(138,11,0,'Prévente Le Fil',82,0,0.00,0.00,0),
-	(139,11,0,'Prévente Le Fil',83,0,0.00,0.00,0),
-	(140,11,0,'Guichet',88,0,0.00,0.00,0),
-	(141,11,0,'Guichet',89,0,0.00,0.00,0),
-	(142,11,0,'Web Fil',81,0,0.00,0.00,0),
-	(143,11,0,'Web Fil',82,0,0.00,0.00,0),
-	(144,11,0,'Web Fil',83,0,0.00,0.00,0),
-	(145,12,0,'Fnac',91,0,0.00,0.00,0),
-	(146,12,0,'Fnac',92,0,0.00,0.00,0),
-	(147,12,0,'Fnac',93,0,0.00,0.00,0),
-	(148,12,0,'Ticketnet',91,0,0.00,0.00,0),
-	(149,12,0,'Ticketnet',92,0,0.00,0.00,0),
-	(150,12,0,'Ticketnet',93,0,0.00,0.00,0),
-	(151,12,0,'Digitick',91,0,0.00,0.00,0),
-	(152,12,0,'Digitick',92,0,0.00,0.00,0),
-	(153,12,0,'Prévente Le Fil',91,0,0.00,0.00,0),
-	(154,12,0,'Prévente Le Fil',92,0,0.00,0.00,0),
-	(155,12,0,'Prévente Le Fil',93,0,0.00,0.00,0),
-	(156,12,0,'Guichet',98,0,0.00,0.00,0),
-	(157,12,0,'Guichet',99,0,0.00,0.00,0),
-	(158,12,0,'Web Fil',91,0,0.00,0.00,0),
-	(159,12,0,'Web Fil',92,0,0.00,0.00,0),
-	(160,12,0,'Web Fil',93,0,0.00,0.00,0),
-	(161,13,0,'Fnac',101,0,0.00,0.00,0),
-	(162,13,0,'Fnac',102,0,0.00,0.00,0),
-	(163,13,0,'Fnac',103,0,0.00,0.00,0),
-	(164,13,0,'Ticketnet',101,0,0.00,0.00,0),
-	(165,13,0,'Ticketnet',102,0,0.00,0.00,0),
-	(166,13,0,'Ticketnet',103,0,0.00,0.00,0),
-	(167,13,0,'Digitick',101,0,0.00,0.00,0),
-	(168,13,0,'Digitick',102,0,0.00,0.00,0),
-	(169,13,0,'Prévente Le Fil',101,0,0.00,0.00,0),
-	(170,13,0,'Prévente Le Fil',102,0,0.00,0.00,0),
-	(171,13,0,'Prévente Le Fil',103,0,0.00,0.00,0),
-	(172,13,0,'Guichet',108,0,0.00,0.00,0),
-	(173,13,0,'Guichet',109,0,0.00,0.00,0),
-	(174,13,0,'Web Fil',101,0,0.00,0.00,0),
-	(175,13,0,'Web Fil',102,0,0.00,0.00,0),
-	(176,13,0,'Web Fil',103,0,0.00,0.00,0),
-	(177,14,0,'Fnac',111,0,0.00,0.00,0),
-	(178,14,0,'Fnac',112,0,0.00,0.00,0),
-	(179,14,0,'Fnac',113,0,0.00,0.00,0),
-	(180,14,0,'Ticketnet',111,0,0.00,0.00,0),
-	(181,14,0,'Ticketnet',112,0,0.00,0.00,0),
-	(182,14,0,'Ticketnet',113,0,0.00,0.00,0),
-	(183,14,0,'Digitick',111,0,0.00,0.00,0),
-	(184,14,0,'Digitick',112,0,0.00,0.00,0),
-	(185,14,0,'Prévente Le Fil',111,0,0.00,0.00,0),
-	(186,14,0,'Prévente Le Fil',112,0,0.00,0.00,0),
-	(187,14,0,'Prévente Le Fil',113,0,0.00,0.00,0),
-	(188,14,0,'Guichet',118,0,0.00,0.00,0),
-	(189,14,0,'Guichet',119,0,0.00,0.00,0),
-	(190,14,0,'Web Fil',111,0,0.00,0.00,0),
-	(191,14,0,'Web Fil',112,0,0.00,0.00,0),
-	(192,14,0,'Web Fil',113,0,0.00,0.00,0),
-	(193,15,0,'Fnac',121,0,0.00,0.00,0),
-	(194,15,0,'Fnac',122,0,0.00,0.00,0),
-	(195,15,0,'Fnac',123,0,0.00,0.00,0),
-	(196,15,0,'Ticketnet',121,0,0.00,0.00,0),
-	(197,15,0,'Ticketnet',122,0,0.00,0.00,0),
-	(198,15,0,'Ticketnet',123,0,0.00,0.00,0),
-	(199,15,0,'Digitick',121,0,0.00,0.00,0),
-	(200,15,0,'Digitick',122,0,0.00,0.00,0),
-	(201,15,0,'Prévente Le Fil',121,0,0.00,0.00,0),
-	(202,15,0,'Prévente Le Fil',122,0,0.00,0.00,0),
-	(203,15,0,'Prévente Le Fil',123,0,0.00,0.00,0),
-	(204,15,0,'Guichet',128,0,0.00,0.00,0),
-	(205,15,0,'Guichet',129,0,0.00,0.00,0),
-	(206,15,0,'Web Fil',121,0,0.00,0.00,0),
-	(207,15,0,'Web Fil',122,0,0.00,0.00,0),
-	(208,15,0,'Web Fil',123,0,0.00,0.00,0),
-	(209,16,0,'Fnac',131,0,0.00,0.00,0),
-	(210,16,0,'Fnac',132,0,0.00,0.00,0),
-	(211,16,0,'Fnac',133,0,0.00,0.00,0),
-	(212,16,0,'Ticketnet',131,0,0.00,0.00,0),
-	(213,16,0,'Ticketnet',132,0,0.00,0.00,0),
-	(214,16,0,'Ticketnet',133,0,0.00,0.00,0),
-	(215,16,0,'Digitick',131,0,0.00,0.00,0),
-	(216,16,0,'Digitick',132,0,0.00,0.00,0),
-	(217,16,0,'Prévente Le Fil',131,0,0.00,0.00,0),
-	(218,16,0,'Prévente Le Fil',132,0,0.00,0.00,0),
-	(219,16,0,'Prévente Le Fil',133,0,0.00,0.00,0),
-	(220,16,0,'Guichet',138,0,0.00,0.00,0),
-	(221,16,0,'Guichet',139,0,0.00,0.00,0),
-	(222,16,0,'Web Fil',131,0,0.00,0.00,0),
-	(223,16,0,'Web Fil',132,0,0.00,0.00,0),
-	(224,16,0,'Web Fil',133,0,0.00,0.00,0),
-	(225,17,0,'Fnac',141,0,0.00,0.00,0),
-	(226,17,0,'Fnac',142,0,0.00,0.00,0),
-	(227,17,0,'Fnac',143,0,0.00,0.00,0),
-	(228,17,0,'Ticketnet',141,0,0.00,0.00,0),
-	(229,17,0,'Ticketnet',142,0,0.00,0.00,0),
-	(230,17,0,'Ticketnet',143,0,0.00,0.00,0),
-	(231,17,0,'Digitick',141,0,0.00,0.00,0),
-	(232,17,0,'Digitick',142,0,0.00,0.00,0),
-	(233,17,0,'Prévente Le Fil',141,0,0.00,0.00,0),
-	(234,17,0,'Prévente Le Fil',142,0,0.00,0.00,0),
-	(235,17,0,'Prévente Le Fil',143,0,0.00,0.00,0),
-	(236,17,0,'Guichet',148,0,0.00,0.00,0),
-	(237,17,0,'Guichet',149,0,0.00,0.00,0),
-	(238,17,0,'Web Fil',141,0,0.00,0.00,0),
-	(239,17,0,'Web Fil',142,0,0.00,0.00,0),
-	(240,17,0,'Web Fil',143,0,0.00,0.00,0),
-	(241,18,0,'Fnac',151,0,0.00,0.00,0),
-	(242,18,0,'Fnac',152,0,0.00,0.00,0),
-	(243,18,0,'Fnac',153,0,0.00,0.00,0),
-	(244,18,0,'Ticketnet',151,0,0.00,0.00,0),
-	(245,18,0,'Ticketnet',152,0,0.00,0.00,0),
-	(246,18,0,'Ticketnet',153,0,0.00,0.00,0),
-	(247,18,0,'Digitick',151,0,0.00,0.00,0),
-	(248,18,0,'Digitick',152,0,0.00,0.00,0),
-	(249,18,0,'Prévente Le Fil',151,0,0.00,0.00,0),
-	(250,18,0,'Prévente Le Fil',152,0,0.00,0.00,0),
-	(251,18,0,'Prévente Le Fil',153,0,0.00,0.00,0),
-	(252,18,0,'Guichet',158,0,0.00,0.00,0),
-	(253,18,0,'Guichet',159,0,0.00,0.00,0),
-	(254,18,0,'Web Fil',151,0,0.00,0.00,0),
-	(255,18,0,'Web Fil',152,0,0.00,0.00,0),
-	(256,18,0,'Web Fil',153,0,0.00,0.00,0);
+--
+-- Structure de la table `llx_bmp_event_calc_montant`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_event_billets` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_event_calc_montant
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_event_calc_montant` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `llx_bmp_event_calc_montant` (
+  `id` int(11) NOT NULL,
   `id_event` int(11) NOT NULL,
   `id_calc_montant` int(11) NOT NULL,
   `percent` float NOT NULL,
-  `source_amount` float NOT NULL DEFAULT 0,
-  `active` tinyint(1) NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`)
+  `source_amount` float NOT NULL DEFAULT '0',
+  `active` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_event_calc_montant` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_event_calc_montant` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_event_calc_montant` (`id`, `id_event`, `id_calc_montant`, `percent`, `source_amount`, `active`)
-VALUES
-	(1,4,16,7.744,0,0),
-	(2,4,9,1.1,0,1),
-	(3,4,7,3.37,0,1),
-	(4,4,3,50,0,1),
-	(5,4,2,7.744,0,1),
-	(6,4,1,3.5,0,1),
-	(7,4,17,3.5,0,1),
-	(8,5,9,1.1,0,1),
-	(9,5,7,3.37,0,1),
-	(10,5,3,50,0,1),
-	(11,5,2,7.744,0,1),
-	(12,5,1,3.5,0,1),
-	(13,6,9,1.1,0,1),
-	(14,6,7,3.37,0,1),
-	(15,6,3,50,0,1),
-	(16,6,2,7.744,0,1),
-	(17,6,1,3.5,0,1),
-	(18,7,9,1.1,0,1),
-	(19,7,7,3.37,0,1),
-	(20,7,3,50,0,1),
-	(21,7,2,7.744,0,1),
-	(22,7,1,3.5,0,1),
-	(23,8,9,1.1,0,1),
-	(24,8,7,3.37,0,1),
-	(25,8,3,50,0,1),
-	(26,8,2,7.744,0,1),
-	(27,8,1,3.5,0,1),
-	(28,9,9,1.1,0,1),
-	(29,9,7,3.37,0,1),
-	(30,9,3,50,0,1),
-	(31,9,2,7.744,0,1),
-	(32,9,1,3.5,0,1),
-	(33,10,9,1.1,0,1),
-	(34,10,7,3.37,0,1),
-	(35,10,3,50,0,1),
-	(36,10,2,7.744,0,1),
-	(37,10,1,3.5,0,1),
-	(38,11,9,1.1,0,1),
-	(39,11,7,3.37,0,1),
-	(40,11,3,50,0,1),
-	(41,11,2,7.744,0,1),
-	(42,11,1,3.5,0,1),
-	(43,12,9,1.1,0,1),
-	(44,12,7,3.37,0,1),
-	(45,12,3,50,0,1),
-	(46,12,2,7.744,0,1),
-	(47,12,1,3.5,0,1),
-	(48,13,9,1.1,0,1),
-	(49,13,7,3.37,0,1),
-	(50,13,3,50,0,1),
-	(51,13,2,7.744,0,1),
-	(52,13,1,3.5,0,1),
-	(53,14,9,1.1,0,1),
-	(54,14,7,3.37,0,1),
-	(55,14,3,50,0,1),
-	(56,14,2,7.744,0,1),
-	(57,14,1,3.5,0,1),
-	(58,15,9,1.1,0,1),
-	(59,15,7,3.37,0,1),
-	(60,15,3,50,0,1),
-	(61,15,2,7.744,0,1),
-	(62,15,1,3.5,0,1),
-	(63,16,9,1.1,0,1),
-	(64,16,7,3.37,0,1),
-	(65,16,3,50,0,1),
-	(66,16,2,7.744,0,1),
-	(67,16,1,3.5,0,1),
-	(68,17,9,1.1,0,1),
-	(69,17,7,3.37,0,1),
-	(70,17,3,50,0,1),
-	(71,17,2,7.744,0,1),
-	(72,17,1,3.5,0,1),
-	(73,18,9,1.1,0,1),
-	(74,18,7,3.37,0,1),
-	(75,18,3,50,0,1),
-	(76,18,2,7.744,0,1),
-	(77,18,1,3.5,0,1);
+--
+-- Structure de la table `llx_bmp_event_coprod`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_event_calc_montant` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_event_coprod
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_event_coprod` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_event` int(10) unsigned NOT NULL DEFAULT 0,
-  `id_soc` int(10) unsigned NOT NULL DEFAULT 0,
-  `default_part` float NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`)
+CREATE TABLE `llx_bmp_event_coprod` (
+  `id` int(11) NOT NULL,
+  `id_event` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `id_soc` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `default_part` float NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_event_coprod` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_event_coprod` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_event_coprod` (`id`, `id_event`, `id_soc`, `default_part`)
-VALUES
-	(1,4,79980,25),
-	(2,4,79628,25),
-	(3,6,79674,30);
+--
+-- Structure de la table `llx_bmp_event_coprod_def_part`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_event_coprod` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_event_coprod_def_part
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_event_coprod_def_part` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `id_event` int(10) unsigned NOT NULL DEFAULT 0,
-  `id_category_montant` int(10) unsigned NOT NULL DEFAULT 0,
-  `id_event_coprod` int(10) unsigned NOT NULL DEFAULT 0,
-  `part` float NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`)
+CREATE TABLE `llx_bmp_event_coprod_def_part` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_event` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `id_category_montant` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `id_event_coprod` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `part` float NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+-- --------------------------------------------------------
 
+--
+-- Structure de la table `llx_bmp_event_coprod_part`
+--
 
--- Affichage de la table llx_bmp_event_coprod_part
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_event_coprod_part` (
-  `id_event_montant` int(10) unsigned NOT NULL DEFAULT 0,
-  `id_coprod` int(10) unsigned NOT NULL DEFAULT 0,
-  `part` float unsigned NOT NULL DEFAULT 0
+CREATE TABLE `llx_bmp_event_coprod_part` (
+  `id_event_montant` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `id_coprod` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `part` float UNSIGNED NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_event_coprod_part` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_event_coprod_part` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_event_coprod_part` (`id_event_montant`, `id_coprod`, `part`)
-VALUES
-	(31,2,50),
-	(47,2,0),
-	(47,1,100),
-	(35,1,99),
-	(35,2,1);
+--
+-- Structure de la table `llx_bmp_event_group`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_event_coprod_part` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_event_group
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_event_group` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `id_event` int(10) unsigned NOT NULL DEFAULT 0,
+CREATE TABLE `llx_bmp_event_group` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_event` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `name` varchar(256) NOT NULL,
-  `number` int(11) NOT NULL DEFAULT 0,
-  `rank` int(10) unsigned NOT NULL,
-  PRIMARY KEY (`id`)
+  `number` int(11) NOT NULL DEFAULT '0',
+  `rank` int(10) UNSIGNED NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+-- --------------------------------------------------------
 
+--
+-- Structure de la table `llx_bmp_event_montant`
+--
 
--- Affichage de la table llx_bmp_event_montant
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_event_montant` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `id_event` int(10) unsigned NOT NULL DEFAULT 0,
-  `id_category_montant` int(10) unsigned NOT NULL DEFAULT 0,
-  `id_montant` int(10) unsigned NOT NULL DEFAULT 0,
-  `amount` float NOT NULL DEFAULT 0,
-  `tva_tx` float NOT NULL DEFAULT 0,
-  `status` int(11) NOT NULL DEFAULT 1,
-  `type` int(11) NOT NULL DEFAULT 0,
+CREATE TABLE `llx_bmp_event_montant` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_event` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `id_category_montant` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `id_montant` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `amount` float NOT NULL DEFAULT '0',
+  `tva_tx` float NOT NULL DEFAULT '0',
+  `status` int(11) NOT NULL DEFAULT '1',
+  `type` int(11) NOT NULL DEFAULT '0',
   `comment` text NOT NULL,
-  `id_coprod` int(10) unsigned NOT NULL DEFAULT 0,
-  `paiements` text NOT NULL,
-  PRIMARY KEY (`id`)
+  `id_coprod` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `paiements` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_event_montant` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_event_montant` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_event_montant` (`id`, `id_event`, `id_category_montant`, `id_montant`, `amount`, `tva_tx`, `status`, `type`, `comment`, `id_coprod`, `paiements`)
-VALUES
-	(25,4,1,62,0,20,1,1,'',0,'[]'),
-	(26,4,11,59,1000,20,1,1,'',0,'[]'),
-	(27,4,14,57,1008.81,2.1,1,2,'',0,'[]'),
-	(28,4,14,52,0,5.5,1,2,'',0,'[]'),
-	(29,4,16,50,0,20,1,1,'',0,'[]'),
-	(30,4,14,41,371,20,1,1,'',0,'[]'),
-	(31,4,14,32,1244.54,20,1,1,'',0,'[]'),
-	(32,4,11,31,0,20,1,2,'',0,'[]'),
-	(33,4,1,29,30.29,20,1,1,'',0,'[]'),
-	(34,4,1,26,2753.63,20,1,1,'',0,'[]'),
-	(35,4,15,24,15,20,1,1,'',0,'[]'),
-	(36,4,15,23,10,7,1,2,'',0,'[]'),
-	(37,4,15,22,20,20,1,2,'',0,'[]'),
-	(38,4,14,21,19887.4,2.1,1,2,'',0,'[]'),
-	(39,4,13,20,0,0,1,1,'',0,'[]'),
-	(40,4,13,19,0,0,1,1,'',0,'[]'),
-	(41,4,11,12,1000,20,1,1,'',0,'[{\"type\":\"percent\",\"value\":0},{\"type\":\"percent\",\"value\":25},{\"type\":\"percent\",\"value\":25}]'),
-	(42,4,11,11,1000,20,1,2,'',0,'[]'),
-	(43,4,10,10,15,20,1,1,'',0,'[]'),
-	(44,4,10,9,10,20,1,1,'',0,'[]'),
-	(45,4,10,8,0,20,1,1,'',0,'[]'),
-	(46,4,1,5,1244.54,20,1,1,'',0,'[]'),
-	(47,4,25,4,0,20,1,1,'',0,'[]'),
-	(48,4,1,3,1.011,20,1,1,'',0,'[]'),
-	(49,4,14,21,9010.77,2.1,1,2,'',1,'[]'),
-	(50,4,14,57,465.23,2.1,1,2,'',1,'[]'),
-	(51,4,14,21,6660.14,2.1,1,2,'',2,'[]'),
-	(52,4,14,57,342.801,2.1,1,2,'',2,'[]'),
-	(53,4,22,47,1500,5.5,1,1,'',0,'[]'),
-	(54,5,1,62,0,20,1,1,'',0,'[]'),
-	(55,5,11,59,0,20,1,1,'',0,'[]'),
-	(56,5,14,57,0,2.1,1,2,'',0,'[]'),
-	(57,5,14,52,0,5.5,1,2,'',0,'[]'),
-	(58,5,16,50,0,20,1,1,'',0,'[]'),
-	(59,5,14,41,2,20,1,1,'',0,'[]'),
-	(60,5,14,32,0,20,1,1,'',0,'[]'),
-	(61,5,11,31,0,20,1,2,'',0,'[]'),
-	(62,5,1,29,0.47927,20,1,1,'',0,'[]'),
-	(63,5,1,26,43.57,20,1,1,'',0,'[]'),
-	(64,5,15,24,0,20,1,1,'',0,'[]'),
-	(65,5,15,23,0,7,1,2,'',0,'[]'),
-	(66,5,15,22,0,20,1,2,'',0,'[]'),
-	(67,5,14,21,0,2.1,1,2,'',0,'[]'),
-	(68,5,13,20,0,0,1,1,'',0,'[]'),
-	(69,5,13,19,0,0,1,1,'',0,'[]'),
-	(70,5,11,12,0,20,1,1,'',0,'[]'),
-	(71,5,11,11,0,20,1,2,'',0,'[]'),
-	(72,5,10,10,0,20,1,1,'',0,'[]'),
-	(73,5,10,9,0,20,1,1,'',0,'[]'),
-	(74,5,10,8,0,20,1,1,'',0,'[]'),
-	(75,5,1,5,0,20,1,1,'',0,'[]'),
-	(76,5,25,4,0,20,1,1,'',0,'[]'),
-	(77,5,1,3,0,20,1,1,'',0,'[]'),
-	(78,6,1,62,0,20,1,1,'',0,'[]'),
-	(79,6,11,59,0,20,1,1,'',0,'[]'),
-	(80,6,14,57,0,2.1,1,2,'',0,'[]'),
-	(81,6,14,52,0,5.5,1,2,'',0,'[]'),
-	(82,6,16,50,0,20,1,1,'',0,'[]'),
-	(83,6,14,41,0,20,1,1,'',0,'[]'),
-	(84,6,14,32,0,20,1,1,'',0,'[]'),
-	(85,6,11,31,0,20,1,2,'',0,'[]'),
-	(86,6,1,29,0.47927,20,1,1,'',0,'[]'),
-	(87,6,1,26,43.57,20,1,1,'',0,'[]'),
-	(88,6,15,24,0,20,1,1,'',0,'[]'),
-	(89,6,15,23,0,7,1,2,'',0,'{\"0\":{\"type\":\"amount\",\"value\":\"1405\"},\"3\":{\"type\":\"amount\",\"value\":0}}'),
-	(90,6,15,22,0,20,1,2,'',0,'[]'),
-	(91,6,14,21,0,2.1,1,2,'',0,'[]'),
-	(92,6,13,20,0,0,1,1,'',0,'[]'),
-	(93,6,13,19,0,0,1,1,'',0,'[]'),
-	(94,6,11,12,0,20,1,1,'',0,'[]'),
-	(95,6,11,11,0,20,1,2,'',0,'[]'),
-	(96,6,10,10,10,20,1,1,'',0,'[]'),
-	(97,6,10,9,64,20,1,1,'',0,'[]'),
-	(98,6,10,8,317.16,20,1,1,'',0,'[]'),
-	(99,6,1,5,0,20,1,1,'',0,'[]'),
-	(100,6,25,4,0,20,1,1,'',0,'[]'),
-	(101,6,1,3,0,20,1,1,'',0,'[]'),
-	(102,6,14,21,0,2.1,1,2,'',3,'[]'),
-	(103,6,14,57,0,2.1,1,2,'',3,'[]'),
-	(104,7,1,62,0,20,1,1,'',0,'[]'),
-	(105,7,11,59,0,20,1,1,'',0,'[]'),
-	(106,7,14,57,0,2.1,1,2,'',0,'[]'),
-	(107,7,14,52,0,5.5,1,2,'',0,'[]'),
-	(108,7,16,50,0,20,1,1,'',0,'[]'),
-	(109,7,14,41,0,20,1,1,'',0,'[]'),
-	(110,7,14,32,0,20,1,1,'',0,'[]'),
-	(111,7,11,31,0,20,1,2,'',0,'[]'),
-	(112,7,1,29,0.47927,20,1,1,'',0,'[]'),
-	(113,7,1,26,43.57,20,1,1,'',0,'[]'),
-	(114,7,15,24,0,20,1,1,'',0,'[]'),
-	(115,7,15,23,0,7,1,2,'',0,'[]'),
-	(116,7,15,22,0,20,1,2,'',0,'[]'),
-	(117,7,14,21,0,2.1,1,2,'',0,'[]'),
-	(118,7,13,20,0,0,1,1,'',0,'[]'),
-	(119,7,13,19,0,0,1,1,'',0,'[]'),
-	(120,7,11,12,0,20,1,1,'',0,'[]'),
-	(121,7,11,11,0,20,1,2,'',0,'[]'),
-	(122,7,10,10,0,20,1,1,'',0,'[]'),
-	(123,7,10,9,160,20,1,1,'',0,'[]'),
-	(124,7,10,8,0,20,1,1,'',0,'[]'),
-	(125,7,1,5,0,20,1,1,'',0,'[]'),
-	(126,7,25,4,0,20,1,1,'',0,'[]'),
-	(127,7,1,3,0,20,1,1,'',0,'[]'),
-	(128,8,1,62,0,20,1,1,'',0,'[]'),
-	(129,8,11,59,0,20,1,1,'',0,'[]'),
-	(130,8,14,57,0,2.1,1,2,'',0,'[]'),
-	(131,8,14,52,0,5.5,1,2,'',0,'[]'),
-	(132,8,16,50,0,20,1,1,'',0,'[]'),
-	(133,8,14,41,0,20,1,1,'',0,'[]'),
-	(134,8,14,32,0,20,1,1,'',0,'[]'),
-	(135,8,11,31,0,20,1,2,'',0,'[]'),
-	(136,8,1,29,0.47927,20,1,1,'',0,'[]'),
-	(137,8,1,26,43.57,20,1,1,'',0,'[]'),
-	(138,8,15,24,0,20,1,1,'',0,'[]'),
-	(139,8,15,23,0,7,1,2,'',0,'[]'),
-	(140,8,15,22,0,20,1,2,'',0,'[]'),
-	(141,8,14,21,0,2.1,1,2,'',0,'[]'),
-	(142,8,13,20,0,0,1,1,'',0,'[]'),
-	(143,8,13,19,0,0,1,1,'',0,'[]'),
-	(144,8,11,12,0,20,1,1,'',0,'[]'),
-	(145,8,11,11,0,20,1,2,'',0,'[]'),
-	(146,8,10,10,0,20,1,1,'',0,'[]'),
-	(147,8,10,9,160,20,1,1,'',0,'[]'),
-	(148,8,10,8,0,20,1,1,'',0,'[]'),
-	(149,8,1,5,0,20,1,1,'',0,'[]'),
-	(150,8,25,4,0,20,1,1,'',0,'[]'),
-	(151,8,1,3,0,20,1,1,'',0,'[]'),
-	(152,9,1,62,0,20,1,1,'',0,'[]'),
-	(153,9,11,59,0,20,1,1,'',0,'[]'),
-	(154,9,14,57,0,2.1,1,2,'',0,'[]'),
-	(155,9,14,52,0,5.5,1,2,'',0,'[]'),
-	(156,9,16,50,0,20,1,1,'',0,'[]'),
-	(157,9,14,41,0,20,1,1,'',0,'[]'),
-	(158,9,14,32,0,20,1,1,'',0,'[]'),
-	(159,9,11,31,0,20,1,2,'',0,'[]'),
-	(160,9,1,29,0.47927,20,1,1,'',0,'[]'),
-	(161,9,1,26,43.57,20,1,1,'',0,'[]'),
-	(162,9,15,24,0,20,1,1,'',0,'[]'),
-	(163,9,15,23,0,7,1,2,'',0,'[]'),
-	(164,9,15,22,0,20,1,2,'',0,'[]'),
-	(165,9,14,21,0,2.1,1,2,'',0,'[]'),
-	(166,9,13,20,0,0,1,1,'',0,'[]'),
-	(167,9,13,19,0,0,1,1,'',0,'[]'),
-	(168,9,11,12,0,20,1,1,'',0,'[]'),
-	(169,9,11,11,0,20,1,2,'',0,'[]'),
-	(170,9,10,10,0,20,1,1,'',0,'[]'),
-	(171,9,10,9,160,20,1,1,'',0,'[]'),
-	(172,9,10,8,0,20,1,1,'',0,'[]'),
-	(173,9,1,5,0,20,1,1,'',0,'[]'),
-	(174,9,25,4,0,20,1,1,'',0,'[]'),
-	(175,9,1,3,0,20,1,1,'',0,'[]'),
-	(176,10,1,62,0,20,1,1,'',0,'[]'),
-	(177,10,11,59,0,20,1,1,'',0,'[]'),
-	(178,10,14,57,0,2.1,1,2,'',0,'[]'),
-	(179,10,14,52,0,5.5,1,2,'',0,'[]'),
-	(180,10,16,50,0,20,1,1,'',0,'[]'),
-	(181,10,14,41,0,20,1,1,'',0,'[]'),
-	(182,10,14,32,0,20,1,1,'',0,'[]'),
-	(183,10,11,31,0,20,1,2,'',0,'[]'),
-	(184,10,1,29,0.47927,20,1,1,'',0,'[]'),
-	(185,10,1,26,43.57,20,1,1,'',0,'[]'),
-	(186,10,15,24,0,20,1,1,'',0,'[]'),
-	(187,10,15,23,0,7,1,2,'',0,'[]'),
-	(188,10,15,22,0,20,1,2,'',0,'[]'),
-	(189,10,14,21,0,2.1,1,2,'',0,'[]'),
-	(190,10,13,20,0,0,1,1,'',0,'[]'),
-	(191,10,13,19,0,0,1,1,'',0,'[]'),
-	(192,10,11,12,0,20,1,1,'',0,'[]'),
-	(193,10,11,11,0,20,1,2,'',0,'[]'),
-	(194,10,10,10,0,20,1,1,'',0,'[]'),
-	(195,10,10,9,160,20,1,1,'',0,'[]'),
-	(196,10,10,8,0,20,1,1,'',0,'[]'),
-	(197,10,1,5,0,20,1,1,'',0,'[]'),
-	(198,10,25,4,0,20,1,1,'',0,'[]'),
-	(199,10,1,3,0,20,1,1,'',0,'[]'),
-	(200,11,1,62,0,20,1,1,'',0,'[]'),
-	(201,11,11,59,0,20,1,1,'',0,'[]'),
-	(202,11,14,57,0,2.1,1,2,'',0,'[]'),
-	(203,11,14,52,0,5.5,1,2,'',0,'[]'),
-	(204,11,16,50,0,20,1,1,'',0,'[]'),
-	(205,11,14,41,0,20,1,1,'',0,'[]'),
-	(206,11,14,32,0,20,1,1,'',0,'[]'),
-	(207,11,11,31,0,20,1,2,'',0,'[]'),
-	(208,11,1,29,0.47927,20,1,1,'',0,'[]'),
-	(209,11,1,26,43.57,20,1,1,'',0,'[]'),
-	(210,11,15,24,0,20,1,1,'',0,'[]'),
-	(211,11,15,23,0,7,1,2,'',0,'[]'),
-	(212,11,15,22,0,20,1,2,'',0,'[]'),
-	(213,11,14,21,0,2.1,1,2,'',0,'[]'),
-	(214,11,13,20,0,0,1,1,'',0,'[]'),
-	(215,11,13,19,0,0,1,1,'',0,'[]'),
-	(216,11,11,12,0,20,1,1,'',0,'[]'),
-	(217,11,11,11,0,20,1,2,'',0,'[]'),
-	(218,11,10,10,0,20,1,1,'',0,'[]'),
-	(219,11,10,9,160,20,1,1,'',0,'[]'),
-	(220,11,10,8,0,20,1,1,'',0,'[]'),
-	(221,11,1,5,0,20,1,1,'',0,'[]'),
-	(222,11,25,4,0,20,1,1,'',0,'[]'),
-	(223,11,1,3,0,20,1,1,'',0,'[]'),
-	(224,12,1,62,0,20,1,1,'',0,'[]'),
-	(225,12,11,59,0,20,1,1,'',0,'[]'),
-	(226,12,14,57,0,2.1,1,2,'',0,'[]'),
-	(227,12,14,52,0,5.5,1,2,'',0,'[]'),
-	(228,12,16,50,0,20,1,1,'',0,'[]'),
-	(229,12,14,41,0,20,1,1,'',0,'[]'),
-	(230,12,14,32,0,20,1,1,'',0,'[]'),
-	(231,12,11,31,0,20,1,2,'',0,'[]'),
-	(232,12,1,29,0.47927,20,1,1,'',0,'[]'),
-	(233,12,1,26,43.57,20,1,1,'',0,'[]'),
-	(234,12,15,24,0,20,1,1,'',0,'[]'),
-	(235,12,15,23,0,7,1,2,'',0,'[]'),
-	(236,12,15,22,0,20,1,2,'',0,'[]'),
-	(237,12,14,21,0,2.1,1,2,'',0,'[]'),
-	(238,12,13,20,0,0,1,1,'',0,'[]'),
-	(239,12,13,19,0,0,1,1,'',0,'[]'),
-	(240,12,11,12,0,20,1,1,'',0,'[]'),
-	(241,12,11,11,0,20,1,2,'',0,'[]'),
-	(242,12,10,10,0,20,1,1,'',0,'[]'),
-	(243,12,10,9,160,20,1,1,'',0,'[]'),
-	(244,12,10,8,0,20,1,1,'',0,'[]'),
-	(245,12,1,5,0,20,1,1,'',0,'[]'),
-	(246,12,25,4,0,20,1,1,'',0,'[]'),
-	(247,12,1,3,0,20,1,1,'',0,'[]'),
-	(248,13,1,62,0,20,1,1,'',0,'[]'),
-	(249,13,11,59,0,20,1,1,'',0,'[]'),
-	(250,13,14,57,0,2.1,1,2,'',0,'[]'),
-	(251,13,14,52,0,5.5,1,2,'',0,'[]'),
-	(252,13,16,50,0,20,1,1,'',0,'[]'),
-	(253,13,14,41,0,20,1,1,'',0,'[]'),
-	(254,13,14,32,0,20,1,1,'',0,'[]'),
-	(255,13,11,31,0,20,1,2,'',0,'[]'),
-	(256,13,1,29,0.47927,20,1,1,'',0,'[]'),
-	(257,13,1,26,43.57,20,1,1,'',0,'[]'),
-	(258,13,15,24,0,20,1,1,'',0,'[]'),
-	(259,13,15,23,0,7,1,2,'',0,'[]'),
-	(260,13,15,22,0,20,1,2,'',0,'[]'),
-	(261,13,14,21,0,2.1,1,2,'',0,'[]'),
-	(262,13,13,20,0,0,1,1,'',0,'[]'),
-	(263,13,13,19,0,0,1,1,'',0,'[]'),
-	(264,13,11,12,0,20,1,1,'',0,'[]'),
-	(265,13,11,11,0,20,1,2,'',0,'[]'),
-	(266,13,10,10,0,20,1,1,'',0,'[]'),
-	(267,13,10,9,160,20,1,1,'',0,'[]'),
-	(268,13,10,8,0,20,1,1,'',0,'[]'),
-	(269,13,1,5,0,20,1,1,'',0,'[]'),
-	(270,13,25,4,0,20,1,1,'',0,'[]'),
-	(271,13,1,3,0,20,1,1,'',0,'[]'),
-	(272,14,1,62,0,20,1,1,'',0,'[]'),
-	(273,14,11,59,0,20,1,1,'',0,'[]'),
-	(274,14,14,57,0,2.1,1,2,'',0,'[]'),
-	(275,14,14,52,0,5.5,1,2,'',0,'[]'),
-	(276,14,16,50,0,20,1,1,'',0,'[]'),
-	(277,14,14,41,0,20,1,1,'',0,'[]'),
-	(278,14,14,32,0,20,1,1,'',0,'[]'),
-	(279,14,11,31,0,20,1,2,'',0,'[]'),
-	(280,14,1,29,0.47927,20,1,1,'',0,'[]'),
-	(281,14,1,26,43.57,20,1,1,'',0,'[]'),
-	(282,14,15,24,0,20,1,1,'',0,'[]'),
-	(283,14,15,23,0,7,1,2,'',0,'[]'),
-	(284,14,15,22,0,20,1,2,'',0,'[]'),
-	(285,14,14,21,0,2.1,1,2,'',0,'[]'),
-	(286,14,13,20,0,0,1,1,'',0,'[]'),
-	(287,14,13,19,0,0,1,1,'',0,'[]'),
-	(288,14,11,12,0,20,1,1,'',0,'[]'),
-	(289,14,11,11,0,20,1,2,'',0,'[]'),
-	(290,14,10,10,0,20,1,1,'',0,'[]'),
-	(291,14,10,9,160,20,1,1,'',0,'[]'),
-	(292,14,10,8,0,20,1,1,'',0,'[]'),
-	(293,14,1,5,0,20,1,1,'',0,'[]'),
-	(294,14,25,4,0,20,1,1,'',0,'[]'),
-	(295,14,1,3,0,20,1,1,'',0,'[]'),
-	(296,15,1,62,0,20,1,1,'',0,'[]'),
-	(297,15,11,59,0,20,1,1,'',0,'[]'),
-	(298,15,14,57,0,2.1,1,2,'',0,'[]'),
-	(299,15,14,52,0,5.5,1,2,'',0,'[]'),
-	(300,15,16,50,0,20,1,1,'',0,'[]'),
-	(301,15,14,41,0,20,1,1,'',0,'[]'),
-	(302,15,14,32,0,20,1,1,'',0,'[]'),
-	(303,15,11,31,0,20,1,2,'',0,'[]'),
-	(304,15,1,29,0.47927,20,1,1,'',0,'[]'),
-	(305,15,1,26,43.57,20,1,1,'',0,'[]'),
-	(306,15,15,24,0,20,1,1,'',0,'[]'),
-	(307,15,15,23,0,7,1,2,'',0,'[]'),
-	(308,15,15,22,0,20,1,2,'',0,'[]'),
-	(309,15,14,21,0,2.1,1,2,'',0,'[]'),
-	(310,15,13,20,0,0,1,1,'',0,'[]'),
-	(311,15,13,19,0,0,1,1,'',0,'[]'),
-	(312,15,11,12,0,20,1,1,'',0,'[]'),
-	(313,15,11,11,0,20,1,2,'',0,'[]'),
-	(314,15,10,10,0,20,1,1,'',0,'[]'),
-	(315,15,10,9,160,20,1,1,'',0,'[]'),
-	(316,15,10,8,0,20,1,1,'',0,'[]'),
-	(317,15,1,5,0,20,1,1,'',0,'[]'),
-	(318,15,25,4,0,20,1,1,'',0,'[]'),
-	(319,15,1,3,0,20,1,1,'',0,'[]'),
-	(320,16,1,62,0,20,1,1,'',0,'[]'),
-	(321,16,11,59,0,20,1,1,'',0,'[]'),
-	(322,16,14,57,0,2.1,1,2,'',0,'[]'),
-	(323,16,14,52,0,5.5,1,2,'',0,'[]'),
-	(324,16,16,50,0,20,1,1,'',0,'[]'),
-	(325,16,14,41,0,20,1,1,'',0,'[]'),
-	(326,16,14,32,0,20,1,1,'',0,'[]'),
-	(327,16,11,31,0,20,1,2,'',0,'[]'),
-	(328,16,1,29,0.47927,20,1,1,'',0,'[]'),
-	(329,16,1,26,43.57,20,1,1,'',0,'[]'),
-	(330,16,15,24,0,20,1,1,'',0,'[]'),
-	(331,16,15,23,0,7,1,2,'',0,'[]'),
-	(332,16,15,22,0,20,1,2,'',0,'[]'),
-	(333,16,14,21,0,2.1,1,2,'',0,'[]'),
-	(334,16,13,20,0,0,1,1,'',0,'[]'),
-	(335,16,13,19,0,0,1,1,'',0,'[]'),
-	(336,16,11,12,0,20,1,1,'',0,'[]'),
-	(337,16,11,11,0,20,1,2,'',0,'[]'),
-	(338,16,10,10,0,20,1,1,'',0,'[]'),
-	(339,16,10,9,160,20,1,1,'',0,'[]'),
-	(340,16,10,8,0,20,1,1,'',0,'[]'),
-	(341,16,1,5,0,20,1,1,'',0,'[]'),
-	(342,16,25,4,0,20,1,1,'',0,'[]'),
-	(343,16,1,3,0,20,1,1,'',0,'[]'),
-	(344,17,1,62,0,20,1,1,'',0,'[]'),
-	(345,17,11,59,0,20,1,1,'',0,'[]'),
-	(346,17,14,57,0,2.1,1,2,'',0,'[]'),
-	(347,17,14,52,0,5.5,1,2,'',0,'[]'),
-	(348,17,16,50,0,20,1,1,'',0,'[]'),
-	(349,17,14,41,0,20,1,1,'',0,'[]'),
-	(350,17,14,32,0,20,1,1,'',0,'[]'),
-	(351,17,11,31,0,20,1,2,'',0,'[]'),
-	(352,17,1,29,0.47927,20,1,1,'',0,'[]'),
-	(353,17,1,26,43.57,20,1,1,'',0,'[]'),
-	(354,17,15,24,0,20,1,1,'',0,'[]'),
-	(355,17,15,23,0,7,1,2,'',0,'[]'),
-	(356,17,15,22,0,20,1,2,'',0,'[]'),
-	(357,17,14,21,0,2.1,1,2,'',0,'[]'),
-	(358,17,13,20,0,0,1,1,'',0,'[]'),
-	(359,17,13,19,0,0,1,1,'',0,'[]'),
-	(360,17,11,12,0,20,1,1,'',0,'[]'),
-	(361,17,11,11,0,20,1,2,'',0,'[]'),
-	(362,17,10,10,0,20,1,1,'',0,'[]'),
-	(363,17,10,9,160,20,1,1,'',0,'[]'),
-	(364,17,10,8,0,20,1,1,'',0,'[]'),
-	(365,17,1,5,0,20,1,1,'',0,'[]'),
-	(366,17,25,4,0,20,1,1,'',0,'[]'),
-	(367,17,1,3,0,20,1,1,'',0,'[]'),
-	(368,18,1,62,0,20,1,1,'',0,'[]'),
-	(369,18,11,59,0,20,1,1,'',0,'[]'),
-	(370,18,14,57,0,2.1,1,2,'',0,'[]'),
-	(371,18,14,52,0,5.5,1,2,'',0,'[]'),
-	(372,18,16,50,0,20,1,1,'',0,'[]'),
-	(373,18,14,41,0,20,1,1,'',0,'[]'),
-	(374,18,14,32,0,20,1,1,'',0,'[]'),
-	(375,18,11,31,0,20,1,2,'',0,'[]'),
-	(376,18,1,29,0.47927,20,1,1,'',0,'[]'),
-	(377,18,1,26,43.57,20,1,1,'',0,'[]'),
-	(378,18,15,24,0,20,1,1,'',0,'[]'),
-	(379,18,15,23,0,7,1,2,'',0,'[]'),
-	(380,18,15,22,0,20,1,2,'',0,'[]'),
-	(381,18,14,21,0,2.1,1,2,'',0,'[]'),
-	(382,18,13,20,0,0,1,1,'',0,'[]'),
-	(383,18,13,19,0,0,1,1,'',0,'[]'),
-	(384,18,11,12,0,20,1,1,'',0,'[]'),
-	(385,18,11,11,0,20,1,2,'',0,'[]'),
-	(386,18,10,10,0,20,1,1,'',0,'[]'),
-	(387,18,10,9,160,20,1,1,'',0,'[]'),
-	(388,18,10,8,0,20,1,1,'',0,'[]'),
-	(389,18,1,5,0,20,1,1,'',0,'[]'),
-	(390,18,25,4,0,20,1,1,'',0,'[]'),
-	(391,18,1,3,0,20,1,1,'',0,'[]');
+--
+-- Structure de la table `llx_bmp_event_montant_detail`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_event_montant` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_event_montant_detail
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_event_montant_detail` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `id_event_montant` int(10) unsigned NOT NULL DEFAULT 0,
+CREATE TABLE `llx_bmp_event_montant_detail` (
+  `id` int(10) UNSIGNED NOT NULL,
+  `id_event_montant` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `label` varchar(256) NOT NULL DEFAULT '',
-  `quantity` int(11) NOT NULL DEFAULT 1,
-  `unit_price` float NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`)
+  `quantity` int(11) NOT NULL DEFAULT '1',
+  `unit_price` float NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_event_montant_detail` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_event_montant_detail` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_event_montant_detail` (`id`, `id_event_montant`, `label`, `quantity`, `unit_price`)
-VALUES
-	(11,39,'Plateau',0,330),
-	(12,39,'SON retours',0,330),
-	(13,39,'Lumière',0,330),
-	(14,39,'SON FACE',0,330),
-	(15,39,'Régisseur fil',0,450),
-	(16,39,'ROAD',0,260),
-	(17,39,'Tech1',0,300),
-	(18,47,'SECURITE Siap 2',0,121),
-	(19,47,'SECURITE Siap 1',0,118),
-	(20,47,'SECURITE',0,115),
-	(21,53,'',1,1500),
-	(22,43,'TEST',1,15),
-	(23,44,'TEST',1,10),
-	(24,68,'Plateau',0,330),
-	(25,68,'SON retours',0,330),
-	(26,68,'Lumière',0,330),
-	(27,68,'SON FACE',0,330),
-	(28,68,'Régisseur fil',0,450),
-	(29,68,'ROAD',0,260),
-	(30,68,'Tech1',0,300),
-	(31,73,'Bénévoles',0,8),
-	(32,76,'SECURITE Siap 2',0,121),
-	(33,76,'SECURITE Siap 1',0,118),
-	(34,76,'SECURITE',0,115),
-	(35,92,'Plateau',0,330),
-	(36,92,'SON retours',0,330),
-	(37,92,'Lumière',0,330),
-	(38,92,'SON FACE',0,330),
-	(39,92,'Régisseur fil',0,450),
-	(40,92,'ROAD',0,260),
-	(41,92,'Tech1',0,300),
-	(42,97,'Bénévoles',8,8),
-	(43,100,'SECURITE Siap 2',0,121),
-	(44,100,'SECURITE Siap 1',0,118),
-	(45,100,'SECURITE',0,115),
-	(46,96,'TEST',1,10),
-	(47,98,'Terminus Single',6,52.86),
-	(48,118,'Plateau',0,330),
-	(49,118,'SON retours',0,330),
-	(50,118,'Lumière',0,330),
-	(51,118,'SON FACE',0,330),
-	(52,118,'Régisseur fil',0,450),
-	(53,118,'ROAD',0,260),
-	(54,118,'Tech1',0,300),
-	(55,123,'Bénévoles',20,8),
-	(56,126,'SECURITE Siap 2',0,121),
-	(57,126,'SECURITE Siap 1',0,118),
-	(58,126,'SECURITE',0,115),
-	(59,96,'',1,0),
-	(60,142,'Plateau',0,330),
-	(61,142,'SON retours',0,330),
-	(62,142,'Lumière',0,330),
-	(63,142,'SON FACE',0,330),
-	(64,142,'Régisseur fil',0,450),
-	(65,142,'ROAD',0,260),
-	(66,142,'Tech1',0,300),
-	(67,147,'Bénévoles',20,8),
-	(68,150,'SECURITE Siap 2',0,121),
-	(69,150,'SECURITE Siap 1',0,118),
-	(70,150,'SECURITE',0,115),
-	(71,166,'Plateau',0,330),
-	(72,166,'SON retours',0,330),
-	(73,166,'Lumière',0,330),
-	(74,166,'SON FACE',0,330),
-	(75,166,'Régisseur fil',0,450),
-	(76,166,'ROAD',0,260),
-	(77,166,'Tech1',0,300),
-	(78,171,'Bénévoles',20,8),
-	(79,174,'SECURITE Siap 2',0,121),
-	(80,174,'SECURITE Siap 1',0,118),
-	(81,174,'SECURITE',0,115),
-	(82,190,'Plateau',0,330),
-	(83,190,'SON retours',0,330),
-	(84,190,'Lumière',0,330),
-	(85,190,'SON FACE',0,330),
-	(86,190,'Régisseur fil',0,450),
-	(87,190,'ROAD',0,260),
-	(88,190,'Tech1',0,300),
-	(89,195,'Bénévoles',20,8),
-	(90,198,'SECURITE Siap 2',0,121),
-	(91,198,'SECURITE Siap 1',0,118),
-	(92,198,'SECURITE',0,115),
-	(93,214,'Plateau',0,330),
-	(94,214,'SON retours',0,330),
-	(95,214,'Lumière',0,330),
-	(96,214,'SON FACE',0,330),
-	(97,214,'Régisseur fil',0,450),
-	(98,214,'ROAD',0,260),
-	(99,214,'Tech1',0,300),
-	(100,219,'Bénévoles',20,8),
-	(101,222,'SECURITE Siap 2',0,121),
-	(102,222,'SECURITE Siap 1',0,118),
-	(103,222,'SECURITE',0,115),
-	(104,238,'Plateau',0,330),
-	(105,238,'SON retours',0,330),
-	(106,238,'Lumière',0,330),
-	(107,238,'SON FACE',0,330),
-	(108,238,'Régisseur fil',0,450),
-	(109,238,'ROAD',0,260),
-	(110,238,'Tech1',0,300),
-	(111,243,'Bénévoles',20,8),
-	(112,246,'SECURITE Siap 2',0,121),
-	(113,246,'SECURITE Siap 1',0,118),
-	(114,246,'SECURITE',0,115),
-	(115,262,'Plateau',0,330),
-	(116,262,'SON retours',0,330),
-	(117,262,'Lumière',0,330),
-	(118,262,'SON FACE',0,330),
-	(119,262,'Régisseur fil',0,450),
-	(120,262,'ROAD',0,260),
-	(121,262,'Tech1',0,300),
-	(122,267,'Bénévoles',20,8),
-	(123,270,'SECURITE Siap 2',0,121),
-	(124,270,'SECURITE Siap 1',0,118),
-	(125,270,'SECURITE',0,115),
-	(126,286,'Plateau',0,330),
-	(127,286,'SON retours',0,330),
-	(128,286,'Lumière',0,330),
-	(129,286,'SON FACE',0,330),
-	(130,286,'Régisseur fil',0,450),
-	(131,286,'ROAD',0,260),
-	(132,286,'Tech1',0,300),
-	(133,291,'Bénévoles',20,8),
-	(134,294,'SECURITE Siap 2',0,121),
-	(135,294,'SECURITE Siap 1',0,118),
-	(136,294,'SECURITE',0,115),
-	(137,310,'Plateau',0,330),
-	(138,310,'SON retours',0,330),
-	(139,310,'Lumière',0,330),
-	(140,310,'SON FACE',0,330),
-	(141,310,'Régisseur fil',0,450),
-	(142,310,'ROAD',0,260),
-	(143,310,'Tech1',0,300),
-	(144,315,'Bénévoles',20,8),
-	(145,318,'SECURITE Siap 2',0,121),
-	(146,318,'SECURITE Siap 1',0,118),
-	(147,318,'SECURITE',0,115),
-	(148,334,'Plateau',0,330),
-	(149,334,'SON retours',0,330),
-	(150,334,'Lumière',0,330),
-	(151,334,'SON FACE',0,330),
-	(152,334,'Régisseur fil',0,450),
-	(153,334,'ROAD',0,260),
-	(154,334,'Tech1',0,300),
-	(155,339,'Bénévoles',20,8),
-	(156,342,'SECURITE Siap 2',0,121),
-	(157,342,'SECURITE Siap 1',0,118),
-	(158,342,'SECURITE',0,115),
-	(159,358,'Plateau',0,330),
-	(160,358,'SON retours',0,330),
-	(161,358,'Lumière',0,330),
-	(162,358,'SON FACE',0,330),
-	(163,358,'Régisseur fil',0,450),
-	(164,358,'ROAD',0,260),
-	(165,358,'Tech1',0,300),
-	(166,363,'Bénévoles',20,8),
-	(167,366,'SECURITE Siap 2',0,121),
-	(168,366,'SECURITE Siap 1',0,118),
-	(169,366,'SECURITE',0,115),
-	(170,382,'Plateau',0,330),
-	(171,382,'SON retours',0,330),
-	(172,382,'Lumière',0,330),
-	(173,382,'SON FACE',0,330),
-	(174,382,'Régisseur fil',0,450),
-	(175,382,'ROAD',0,260),
-	(176,382,'Tech1',0,300),
-	(177,387,'Bénévoles',20,8),
-	(178,390,'SECURITE Siap 2',0,121),
-	(179,390,'SECURITE Siap 1',0,118),
-	(180,390,'SECURITE',0,115);
+--
+-- Structure de la table `llx_bmp_event_tarif`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_event_montant_detail` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_event_tarif
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_event_tarif` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_event` int(10) unsigned NOT NULL DEFAULT 0,
+CREATE TABLE `llx_bmp_event_tarif` (
+  `id` int(11) NOT NULL,
+  `id_event` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `name` varchar(128) NOT NULL,
-  `amount` float NOT NULL DEFAULT 0,
-  `previsionnel` int(10) unsigned NOT NULL DEFAULT 0,
-  `droits_loc` float NOT NULL DEFAULT 0,
-  `droits_loc_coprods` float NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`)
+  `amount` float NOT NULL DEFAULT '0',
+  `previsionnel` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `droits_loc` float NOT NULL DEFAULT '0',
+  `droits_loc_coprods` float NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_event_tarif` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_event_tarif` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_event_tarif` (`id`, `id_event`, `name`, `amount`, `previsionnel`, `droits_loc`, `droits_loc_coprods`)
-VALUES
-	(15,4,'TARIF NORMAL',20,250,0,0),
-	(16,4,'TARIF REDUIT',19,100,0,0),
-	(17,4,'FILGOOD',18,200,0,0),
-	(18,4,'INVITATIONS',0,50,0,0),
-	(19,4,'GUICHET NORMAL',22,100,0,0),
-	(20,4,'GUICHET REDUIT',21,50,0,0),
-	(21,5,'TARIF NORMAL',0,0,0,0),
-	(22,5,'TARIF REDUIT',0,0,0,0),
-	(23,5,'FILGOOD',0,0,0,0),
-	(24,5,'TARIF SPECIAL',30,30,0,0),
-	(25,5,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(26,5,'TARIF CE',0,0,0,0),
-	(27,5,'INVITATIONS',0,0,0,0),
-	(28,5,'GUICHET NORMAL',0,0,0,0),
-	(29,5,'GUICHET REDUIT',0,0,0,0),
-	(30,5,'GUICHET FILGOOD',0,0,0,0),
-	(31,6,'TARIF NORMAL',0,0,0,0),
-	(32,6,'TARIF REDUIT',0,0,0,0),
-	(33,6,'FILGOOD',0,0,0,0),
-	(34,6,'TARIF SPECIAL',0,0,0,0),
-	(35,6,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(36,6,'TARIF CE',0,0,0,0),
-	(37,6,'INVITATIONS',0,0,0,0),
-	(38,6,'GUICHET NORMAL',0,0,0,0),
-	(39,6,'GUICHET REDUIT',0,0,0,0),
-	(40,6,'GUICHET FILGOOD',0,0,0,0),
-	(41,7,'TARIF NORMAL',0,0,0,0),
-	(42,7,'TARIF REDUIT',0,0,0,0),
-	(43,7,'FILGOOD',0,0,0,0),
-	(44,7,'TARIF SPECIAL',0,0,0,0),
-	(45,7,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(46,7,'TARIF CE',0,0,0,0),
-	(47,7,'INVITATIONS',0,0,0,0),
-	(48,7,'GUICHET NORMAL',0,0,0,0),
-	(49,7,'GUICHET REDUIT',0,0,0,0),
-	(50,7,'GUICHET FILGOOD',0,0,0,0),
-	(51,8,'TARIF NORMAL',0,0,0,0),
-	(52,8,'TARIF REDUIT',0,0,0,0),
-	(53,8,'FILGOOD',0,0,0,0),
-	(54,8,'TARIF SPECIAL',0,0,0,0),
-	(55,8,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(56,8,'TARIF CE',0,0,0,0),
-	(57,8,'INVITATIONS',0,0,0,0),
-	(58,8,'GUICHET NORMAL',0,0,0,0),
-	(59,8,'GUICHET REDUIT',0,0,0,0),
-	(60,8,'GUICHET FILGOOD',0,0,0,0),
-	(61,9,'TARIF NORMAL',0,0,0,0),
-	(62,9,'TARIF REDUIT',0,0,0,0),
-	(63,9,'FILGOOD',0,0,0,0),
-	(64,9,'TARIF SPECIAL',0,0,0,0),
-	(65,9,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(66,9,'TARIF CE',0,0,0,0),
-	(67,9,'INVITATIONS',0,0,0,0),
-	(68,9,'GUICHET NORMAL',0,0,0,0),
-	(69,9,'GUICHET REDUIT',0,0,0,0),
-	(70,9,'GUICHET FILGOOD',0,0,0,0),
-	(71,10,'TARIF NORMAL',0,0,0,0),
-	(72,10,'TARIF REDUIT',0,0,0,0),
-	(73,10,'FILGOOD',0,0,0,0),
-	(74,10,'TARIF SPECIAL',0,0,0,0),
-	(75,10,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(76,10,'TARIF CE',0,0,0,0),
-	(77,10,'INVITATIONS',0,0,0,0),
-	(78,10,'GUICHET NORMAL',0,0,0,0),
-	(79,10,'GUICHET REDUIT',0,0,0,0),
-	(80,10,'GUICHET FILGOOD',0,0,0,0),
-	(81,11,'TARIF NORMAL',0,0,0,0),
-	(82,11,'TARIF REDUIT',0,0,0,0),
-	(83,11,'FILGOOD',0,0,0,0),
-	(84,11,'TARIF SPECIAL',0,0,0,0),
-	(85,11,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(86,11,'TARIF CE',0,0,0,0),
-	(87,11,'INVITATIONS',0,0,0,0),
-	(88,11,'GUICHET NORMAL',0,0,0,0),
-	(89,11,'GUICHET REDUIT',0,0,0,0),
-	(90,11,'GUICHET FILGOOD',0,0,0,0),
-	(91,12,'TARIF NORMAL',0,0,0,0),
-	(92,12,'TARIF REDUIT',0,0,0,0),
-	(93,12,'FILGOOD',0,0,0,0),
-	(94,12,'TARIF SPECIAL',0,0,0,0),
-	(95,12,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(96,12,'TARIF CE',0,0,0,0),
-	(97,12,'INVITATIONS',0,0,0,0),
-	(98,12,'GUICHET NORMAL',0,0,0,0),
-	(99,12,'GUICHET REDUIT',0,0,0,0),
-	(100,12,'GUICHET FILGOOD',0,0,0,0),
-	(101,13,'TARIF NORMAL',0,0,0,0),
-	(102,13,'TARIF REDUIT',0,0,0,0),
-	(103,13,'FILGOOD',0,0,0,0),
-	(104,13,'TARIF SPECIAL',0,0,0,0),
-	(105,13,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(106,13,'TARIF CE',0,0,0,0),
-	(107,13,'INVITATIONS',0,0,0,0),
-	(108,13,'GUICHET NORMAL',0,0,0,0),
-	(109,13,'GUICHET REDUIT',0,0,0,0),
-	(110,13,'GUICHET FILGOOD',0,0,0,0),
-	(111,14,'TARIF NORMAL',0,0,0,0),
-	(112,14,'TARIF REDUIT',0,0,0,0),
-	(113,14,'FILGOOD',0,0,0,0),
-	(114,14,'TARIF SPECIAL',0,0,0,0),
-	(115,14,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(116,14,'TARIF CE',0,0,0,0),
-	(117,14,'INVITATIONS',0,0,0,0),
-	(118,14,'GUICHET NORMAL',0,0,0,0),
-	(119,14,'GUICHET REDUIT',0,0,0,0),
-	(120,14,'GUICHET FILGOOD',0,0,0,0),
-	(121,15,'TARIF NORMAL',0,0,0,0),
-	(122,15,'TARIF REDUIT',0,0,0,0),
-	(123,15,'FILGOOD',0,0,0,0),
-	(124,15,'TARIF SPECIAL',0,0,0,0),
-	(125,15,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(126,15,'TARIF CE',0,0,0,0),
-	(127,15,'INVITATIONS',0,0,0,0),
-	(128,15,'GUICHET NORMAL',0,0,0,0),
-	(129,15,'GUICHET REDUIT',0,0,0,0),
-	(130,15,'GUICHET FILGOOD',0,0,0,0),
-	(131,16,'TARIF NORMAL',0,0,0,0),
-	(132,16,'TARIF REDUIT',0,0,0,0),
-	(133,16,'FILGOOD',0,0,0,0),
-	(134,16,'TARIF SPECIAL',0,0,0,0),
-	(135,16,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(136,16,'TARIF CE',0,0,0,0),
-	(137,16,'INVITATIONS',0,0,0,0),
-	(138,16,'GUICHET NORMAL',0,0,0,0),
-	(139,16,'GUICHET REDUIT',0,0,0,0),
-	(140,16,'GUICHET FILGOOD',0,0,0,0),
-	(141,17,'TARIF NORMAL',0,0,0,0),
-	(142,17,'TARIF REDUIT',0,0,0,0),
-	(143,17,'FILGOOD',0,0,0,0),
-	(144,17,'TARIF SPECIAL',0,0,0,0),
-	(145,17,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(146,17,'TARIF CE',0,0,0,0),
-	(147,17,'INVITATIONS',0,0,0,0),
-	(148,17,'GUICHET NORMAL',0,0,0,0),
-	(149,17,'GUICHET REDUIT',0,0,0,0),
-	(150,17,'GUICHET FILGOOD',0,0,0,0),
-	(151,18,'TARIF NORMAL',0,0,0,0),
-	(152,18,'TARIF REDUIT',0,0,0,0),
-	(153,18,'FILGOOD',0,0,0,0),
-	(154,18,'TARIF SPECIAL',0,0,0,0),
-	(155,18,'TARIF SPECIAL LE FIL',0,0,0,0),
-	(156,18,'TARIF CE',0,0,0,0),
-	(157,18,'INVITATIONS',0,0,0,0),
-	(158,18,'GUICHET NORMAL',0,0,0,0),
-	(159,18,'GUICHET REDUIT',0,0,0,0),
-	(160,18,'GUICHET FILGOOD',0,0,0,0);
+--
+-- Structure de la table `llx_bmp_montant_detail_value`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_event_tarif` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_montant_detail_value
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_montant_detail_value` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_type_montant` int(10) unsigned NOT NULL DEFAULT 0,
+CREATE TABLE `llx_bmp_montant_detail_value` (
+  `id` int(11) NOT NULL,
+  `id_type_montant` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `label` varchar(256) NOT NULL,
-  `use_groupe_number` tinyint(1) NOT NULL DEFAULT 0,
-  `unit_price` float NOT NULL DEFAULT 0,
-  `qty` int(11) NOT NULL DEFAULT 0,
-  PRIMARY KEY (`id`)
+  `use_groupe_number` tinyint(1) NOT NULL DEFAULT '0',
+  `unit_price` float NOT NULL DEFAULT '0',
+  `qty` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_montant_detail_value` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_montant_detail_value` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_montant_detail_value` (`id`, `id_type_montant`, `label`, `use_groupe_number`, `unit_price`, `qty`)
-VALUES
-	(2,20,'Tech1',0,300,0),
-	(3,9,'Repas 15€',1,15,0),
-	(4,20,'ROAD',0,260,0),
-	(5,20,'Régisseur fil',0,450,0),
-	(6,4,'SECURITE',0,115,0),
-	(7,4,'SECURITE Siap 1',0,118,0),
-	(8,4,'SECURITE Siap 2',0,121,0),
-	(9,20,'SON FACE',0,330,0),
-	(14,8,'Twin',1,79.5,0),
-	(16,8,'Single',1,57.75,0),
-	(17,20,'Lumière',0,330,0),
-	(19,20,'SON retours',0,330,0),
-	(20,20,'Plateau',0,330,0),
-	(21,9,'repas 8€',1,8,0),
-	(22,9,'repas 10€',1,10,0),
-	(23,9,'repas 12€',1,12,0),
-	(24,8,'Terminus Single',1,52.86,0),
-	(26,9,'Bénévoles',0,8,20);
+--
+-- Structure de la table `llx_bmp_total_inter`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_montant_detail_value` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_total_inter
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_total_inter` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+CREATE TABLE `llx_bmp_total_inter` (
+  `id` int(11) NOT NULL,
   `name` varchar(256) NOT NULL DEFAULT '',
-  `all_frais` tinyint(1) NOT NULL DEFAULT 0,
-  `all_recettes` tinyint(1) NOT NULL DEFAULT 0,
-  `display` tinyint(1) NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`)
+  `all_frais` tinyint(1) NOT NULL DEFAULT '0',
+  `all_recettes` tinyint(1) NOT NULL DEFAULT '0',
+  `display` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_total_inter` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_total_inter` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_total_inter` (`id`, `name`, `all_frais`, `all_recettes`, `display`)
-VALUES
-	(3,'Recettes bar',0,0,1),
-	(4,'SACEM',0,0,1),
-	(5,'Total recettes hors bar et billetterie',0,1,1),
-	(6,'Vente de billets',0,0,1),
-	(7,'Frais Artistique',0,0,1),
-	(8,'Recette billetterie',0,0,1),
-	(9,'SACEM hors bar',0,0,1);
+--
+-- Structure de la table `llx_bmp_type_montant`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_total_inter` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_type_montant
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_type_montant` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+CREATE TABLE `llx_bmp_type_montant` (
+  `id` int(10) UNSIGNED NOT NULL,
   `name` varchar(128) NOT NULL,
-  `id_category` int(10) unsigned NOT NULL DEFAULT 0,
-  `type` int(10) unsigned NOT NULL DEFAULT 0,
-  `required` tinyint(1) NOT NULL DEFAULT 0,
-  `editable` tinyint(1) NOT NULL DEFAULT 1,
-  `id_taxe` int(11) NOT NULL DEFAULT 11,
+  `id_category` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `type` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `required` tinyint(1) NOT NULL DEFAULT '0',
+  `editable` tinyint(1) NOT NULL DEFAULT '1',
+  `id_taxe` int(11) NOT NULL DEFAULT '11',
   `code_compta` varchar(128) NOT NULL DEFAULT '',
-  `has_details` tinyint(1) NOT NULL DEFAULT 0,
-  `coprod` tinyint(1) NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`)
+  `has_details` tinyint(1) NOT NULL DEFAULT '0',
+  `coprod` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_type_montant` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_type_montant` DISABLE KEYS */;
+-- --------------------------------------------------------
 
-INSERT INTO `llx_bmp_type_montant` (`id`, `name`, `id_category`, `type`, `required`, `editable`, `id_taxe`, `code_compta`, `has_details`, `coprod`)
-VALUES
-	(3,'SACEM Bar',1,1,1,0,2462,'65101000',0,0),
-	(4,'Securité',25,1,1,0,2462,'61110000',1,1),
-	(5,'CNV 3.5% Billetterie',1,1,1,0,2462,'65100000',0,0),
-	(8,'Hôtel',10,1,1,0,2462,'',1,1),
-	(9,'Catering fil',10,1,1,0,2462,'',1,1),
-	(10,'Repas Exerieur',10,1,1,0,2462,'',1,1),
-	(11,'Location salle',11,2,1,1,2462,'',0,1),
-	(12,'Nettoyage',11,1,1,1,2462,'',0,1),
-	(19,'Regisseur fil',13,1,1,1,15,'',0,1),
-	(20,'Techniciens',13,1,1,0,15,'',1,1),
-	(21,'Billetterie 2,1%',14,2,1,0,16,'70620000',0,1),
-	(22,'Bar 20',15,2,1,1,2462,'70700000',0,0),
-	(23,'Bar 10',15,2,1,1,17,'70710000',0,0),
-	(24,'Achat Bar',15,1,1,0,2462,'60710000',0,0),
-	(25,'Secourismes',13,1,0,0,15,'61120000',1,1),
-	(26,'SACEM Billetterie',1,1,1,0,2462,'65101000',0,0),
-	(29,'Sécurité sociale SACEM',1,1,1,0,2462,'65101000',0,0),
-	(31,'Mise à disposition',11,2,1,1,2462,'',0,0),
-	(32,'Promo Locale',14,1,1,0,2462,'',0,1),
-	(33,'Subvention',17,2,0,1,2462,'',0,1),
-	(34,'Mécénat',17,2,0,1,2462,'',0,1),
-	(35,'Résidence',17,2,0,1,2462,'',0,0),
-	(36,'Droits de captation',18,2,0,1,2462,'',0,0),
-	(37,'Frais de captation',18,1,0,1,2462,'',0,0),
-	(38,'Transport',23,1,0,0,2462,'',1,1),
-	(40,'Facturation divers',23,2,0,0,2462,'',1,1),
-	(41,'Frais d’édition de billetterie',14,1,1,0,2462,'',0,1),
-	(42,'Sonorisation',20,1,0,0,2462,'',1,1),
-	(43,'Lumières',20,1,0,0,2462,'',1,1),
-	(44,'Vidéo',20,1,0,0,2462,'',1,1),
-	(45,'Loc véhicule',20,1,0,0,2462,'',1,1),
-	(46,'Backline',20,1,0,0,2462,'',1,1),
-	(47,'Groupe Cession',22,1,0,0,14,'',1,1),
-	(48,'Support',22,1,0,0,14,'',1,1),
-	(49,'Location salle',11,1,0,1,15,'',0,1),
-	(50,'Communication',16,1,1,0,2462,'',1,1),
-	(52,'Billetterie 5,5%',14,2,1,1,14,'70620000',0,1),
-	(54,'Groupe Engagement',21,1,0,0,15,'',1,1),
-	(55,'Catering et Loges',10,1,0,1,2462,'',0,1),
-	(56,'Cadeaux',23,1,0,1,2462,'',0,1),
-	(57,'Droits de location producteur',14,2,1,0,16,'',1,1),
-	(59,'Fluides',11,1,1,1,2462,'',0,1),
-	(60,'Partenariat',24,2,0,0,2462,'',1,1),
-	(62,'SACEM Groupe',1,1,1,0,2462,'65101000',0,0),
-	(63,'Divers Technique',20,1,0,0,2462,'',1,1),
-	(67,'Artistique',21,1,0,1,2462,'',0,1),
-	(68,'Coréa',23,1,0,1,2462,'',0,1);
+--
+-- Structure de la table `llx_bmp_vendeur`
+--
 
-/*!40000 ALTER TABLE `llx_bmp_type_montant` ENABLE KEYS */;
-UNLOCK TABLES;
-
-
--- Affichage de la table llx_bmp_vendeur
--- ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `llx_bmp_vendeur` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `id_soc` int(10) unsigned NOT NULL DEFAULT 0,
+CREATE TABLE `llx_bmp_vendeur` (
+  `id` int(11) NOT NULL,
+  `id_soc` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `label` varchar(256) NOT NULL DEFAULT '',
   `tarifs` text NOT NULL,
-  `active` tinyint(1) NOT NULL DEFAULT 1,
-  PRIMARY KEY (`id`)
+  `active` tinyint(1) NOT NULL DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-LOCK TABLES `llx_bmp_vendeur` WRITE;
-/*!40000 ALTER TABLE `llx_bmp_vendeur` DISABLE KEYS */;
+--
+-- Index pour les tables exportées
+--
 
-INSERT INTO `llx_bmp_vendeur` (`id`, `id_soc`, `label`, `tarifs`, `active`)
-VALUES
-	(2,0,'Fnac','TARIF NORMAL,TARIF REDUIT,FILGOOD',1),
-	(3,0,'Ticketnet','TARIF NORMAL,TARIF REDUIT,FILGOOD',1),
-	(4,0,'Digitick','TARIF NORMAL,TARIF REDUIT',1),
-	(5,0,'Prévente Le Fil','TARIF NORMAL,TARIF REDUIT,FILGOOD',1),
-	(6,0,'Guichet','GUICHET NORMAL,GUICHET REDUIT',1),
-	(7,0,'Web Fil','TARIF NORMAL,TARIF REDUIT,FILGOOD',1);
+--
+-- Index pour la table `llx_bmp_calc_montant`
+--
+ALTER TABLE `llx_bmp_calc_montant`
+  ADD PRIMARY KEY (`id`);
 
-/*!40000 ALTER TABLE `llx_bmp_vendeur` ENABLE KEYS */;
-UNLOCK TABLES;
+--
+-- Index pour la table `llx_bmp_categorie_montant`
+--
+ALTER TABLE `llx_bmp_categorie_montant`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_event`
+--
+ALTER TABLE `llx_bmp_event`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_event_billets`
+--
+ALTER TABLE `llx_bmp_event_billets`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_event_calc_montant`
+--
+ALTER TABLE `llx_bmp_event_calc_montant`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_event_coprod`
+--
+ALTER TABLE `llx_bmp_event_coprod`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_event_coprod_def_part`
+--
+ALTER TABLE `llx_bmp_event_coprod_def_part`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_event_coprod_part`
+--
+ALTER TABLE `llx_bmp_event_coprod_part`
+  ADD UNIQUE KEY `id_event_montant` (`id_event_montant`,`id_coprod`);
+
+--
+-- Index pour la table `llx_bmp_event_group`
+--
+ALTER TABLE `llx_bmp_event_group`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_event_montant`
+--
+ALTER TABLE `llx_bmp_event_montant`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_event_montant_detail`
+--
+ALTER TABLE `llx_bmp_event_montant_detail`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_event_tarif`
+--
+ALTER TABLE `llx_bmp_event_tarif`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_montant_detail_value`
+--
+ALTER TABLE `llx_bmp_montant_detail_value`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_total_inter`
+--
+ALTER TABLE `llx_bmp_total_inter`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_type_montant`
+--
+ALTER TABLE `llx_bmp_type_montant`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Index pour la table `llx_bmp_vendeur`
+--
+ALTER TABLE `llx_bmp_vendeur`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT pour les tables exportées
+--
+
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_calc_montant`
+--
+ALTER TABLE `llx_bmp_calc_montant`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_categorie_montant`
+--
+ALTER TABLE `llx_bmp_categorie_montant`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_event`
+--
+ALTER TABLE `llx_bmp_event`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_event_billets`
+--
+ALTER TABLE `llx_bmp_event_billets`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=289;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_event_calc_montant`
+--
+ALTER TABLE `llx_bmp_event_calc_montant`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_event_coprod`
+--
+ALTER TABLE `llx_bmp_event_coprod`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_event_coprod_def_part`
+--
+ALTER TABLE `llx_bmp_event_coprod_def_part`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_event_group`
+--
+ALTER TABLE `llx_bmp_event_group`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_event_montant`
+--
+ALTER TABLE `llx_bmp_event_montant`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=445;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_event_montant_detail`
+--
+ALTER TABLE `llx_bmp_event_montant_detail`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=204;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_event_tarif`
+--
+ALTER TABLE `llx_bmp_event_tarif`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=181;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_montant_detail_value`
+--
+ALTER TABLE `llx_bmp_montant_detail_value`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_total_inter`
+--
+ALTER TABLE `llx_bmp_total_inter`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_type_montant`
+--
+ALTER TABLE `llx_bmp_type_montant`
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
+--
+-- AUTO_INCREMENT pour la table `llx_bmp_vendeur`
+--
+ALTER TABLE `llx_bmp_vendeur`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 
 
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- phpMyAdmin SQL Dump
+-- version 4.5.1
+-- http://www.phpmyadmin.net
+--
+-- Client :  127.0.0.1:3306
+-- Généré le :  Mar 12 Mars 2019 à 11:41
+-- Version du serveur :  5.7.25-0ubuntu0.16.04.2-log
+-- Version de PHP :  7.0.33-0ubuntu0.16.04.2
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
+--
+-- Base de données :  `ERP_TEST_TEST8`
+--
+
+--
+-- Contenu de la table `llx_bmp_calc_montant`
+--
+
+INSERT INTO `llx_bmp_calc_montant` (`id`, `label`, `type_source`, `id_montant_source`, `id_total_source`, `source_amount`, `id_target`, `percent`, `editable`, `required`, `active`) VALUES
+(1, 'CNV', 2, 21, 6, 0, 5, 3.5, 1, 1, 1),
+(2, 'SACEM Billeterie', 2, 21, 8, 0, 26, 7.744, 1, 1, 1),
+(3, 'Approvisionnement bar', 2, 22, 3, 0, 24, 50, 1, 1, 1),
+(7, 'SACEM Bar', 2, 27, 3, 0, 3, 3.37, 1, 1, 1),
+(9, 'Sécurité sociale SACEM', 2, 26, 9, 0, 29, 1.1, 1, 1, 1),
+(14, 'Ménage Club', 3, 0, 0, 150, 12, 100, 1, 0, 1),
+(16, 'SACEM Artistique', 2, 47, 7, 0, 62, 7.744, 1, 0, 1),
+(17, 'Promo Locale', 2, 52, 8, 0, 32, 3.5, 1, 0, 1);
+
+--
+-- Contenu de la table `llx_bmp_calc_montant_type_montant`
+--
+
+INSERT INTO `llx_bmp_calc_montant_type_montant` (`id_calc_montant`, `id_type_montant`) VALUES
+(1, 21),
+(1, 52),
+(2, 21),
+(2, 52),
+(3, 23),
+(3, 22),
+(7, 23),
+(7, 22),
+(9, 62),
+(9, 26),
+(16, 48),
+(16, 47),
+(16, 67),
+(16, 54),
+(17, 21),
+(17, 52);
+
+--
+-- Contenu de la table `llx_bmp_categorie_montant`
+--
+
+INSERT INTO `llx_bmp_categorie_montant` (`id`, `name`, `color`, `position`) VALUES
+(1, 'Taxes', 'FFBF00', 12),
+(10, 'Accueil', '8A2908', 13),
+(11, 'Salle', '8A0886', 14),
+(12, 'Coproduction', 'FF6E00', 16),
+(13, 'Personnel Technique', '8000FF', 15),
+(14, 'Billetterie', 'FF0000', 11),
+(15, 'Bar', '04B4AE', 3),
+(16, 'Promo', '009C27', 10),
+(17, 'Subvention / Mecenat', '009C27', 9),
+(18, 'Captation', '4b4b4b', 8),
+(20, 'Technique', 'AEB404', 7),
+(21, 'Artistique / Engagement', '0404B4', 6),
+(22, 'Artistique / Cession', '0404B4', 5),
+(23, 'Divers', '4b4b4b', 4),
+(24, 'Partenariats', '4b4b4b', 2),
+(25, 'Personnel Sécurité', '8000FF', 1);
+
+--
+-- Contenu de la table `llx_bmp_montant_detail_value`
+--
+
+INSERT INTO `llx_bmp_montant_detail_value` (`id`, `id_type_montant`, `label`, `use_groupe_number`, `unit_price`, `qty`) VALUES
+(2, 20, 'Tech1', 0, 300, 0),
+(3, 9, 'Repas 15€', 1, 15, 0),
+(4, 20, 'ROAD', 0, 260, 0),
+(5, 20, 'Régisseur fil', 0, 450, 0),
+(6, 4, 'SECURITE', 0, 115, 0),
+(7, 4, 'SECURITE Siap 1', 0, 118, 0),
+(8, 4, 'SECURITE Siap 2', 0, 121, 0),
+(9, 20, 'SON FACE', 0, 330, 0),
+(14, 8, 'Twin', 1, 79.5, 0),
+(16, 8, 'Single', 1, 57.75, 0),
+(17, 20, 'Lumière', 0, 330, 0),
+(19, 20, 'SON retours', 0, 330, 0),
+(20, 20, 'Plateau', 0, 330, 0),
+(21, 9, 'repas 8€', 1, 8, 0),
+(22, 9, 'repas 10€', 1, 10, 0),
+(23, 9, 'repas 12€', 1, 12, 0),
+(24, 8, 'Terminus Single', 1, 52.86, 0),
+(26, 9, 'Bénévoles', 0, 8, 20);
+
+--
+-- Contenu de la table `llx_bmp_total_inter`
+--
+
+INSERT INTO `llx_bmp_total_inter` (`id`, `name`, `all_frais`, `all_recettes`, `display`) VALUES
+(3, 'Recettes bar', 0, 0, 1),
+(4, 'SACEM', 0, 0, 1),
+(5, 'Total recettes hors bar et billetterie', 0, 1, 1),
+(6, 'Vente de billets', 0, 0, 1),
+(7, 'Frais Artistique', 0, 0, 1),
+(8, 'Recette billetterie', 0, 0, 1),
+(9, 'SACEM hors bar', 0, 0, 1);
+
+--
+-- Contenu de la table `llx_bmp_type_montant`
+--
+
+INSERT INTO `llx_bmp_type_montant` (`id`, `name`, `id_category`, `type`, `required`, `editable`, `id_taxe`, `code_compta`, `has_details`, `coprod`) VALUES
+(3, 'SACEM Bar', 1, 1, 1, 0, 2462, '65101000', 0, 0),
+(4, 'Securité', 25, 1, 1, 0, 2462, '61110000', 1, 1),
+(5, 'CNV 3.5% Billetterie', 1, 1, 1, 0, 2462, '65100000', 0, 0),
+(8, 'Hôtel', 10, 1, 1, 0, 2462, '', 1, 1),
+(9, 'Catering 10%', 10, 1, 1, 0, 2462, '', 1, 1),
+(10, 'Repas Exerieur', 10, 1, 1, 0, 2462, '', 1, 1),
+(11, 'Location salle', 11, 2, 1, 1, 2462, '', 0, 1),
+(12, 'Nettoyage', 11, 1, 1, 1, 2462, '', 0, 1),
+(19, 'Regisseur fil', 13, 1, 1, 1, 15, '', 0, 1),
+(20, 'Techniciens', 13, 1, 1, 0, 15, '', 1, 1),
+(21, 'Billetterie 2,1%', 14, 2, 1, 0, 16, '70620000', 0, 1),
+(22, 'Bar 20', 15, 2, 1, 1, 2462, '70700000', 0, 0),
+(23, 'Bar 10', 15, 2, 1, 1, 17, '70710000', 0, 0),
+(24, 'Achat Bar', 15, 1, 1, 0, 2462, '60710000', 0, 0),
+(25, 'Secourismes', 13, 1, 0, 0, 15, '61120000', 1, 1),
+(26, 'SACEM Billetterie', 1, 1, 1, 0, 2462, '65101000', 0, 0),
+(29, 'Sécurité sociale SACEM', 1, 1, 1, 0, 2462, '65101000', 0, 0),
+(31, 'Mise à disposition', 11, 2, 1, 1, 2462, '', 0, 0),
+(32, 'Promo Locale', 14, 1, 1, 0, 2462, '', 0, 1),
+(33, 'Subvention', 17, 2, 0, 1, 2462, '', 0, 1),
+(34, 'Mécénat', 17, 2, 0, 1, 2462, '', 0, 1),
+(35, 'Résidence', 17, 2, 0, 1, 2462, '', 0, 0),
+(36, 'Droits de captation', 18, 2, 0, 1, 2462, '', 0, 0),
+(37, 'Frais de captation', 18, 1, 0, 1, 2462, '', 0, 0),
+(38, 'Transport', 23, 1, 0, 0, 2462, '', 1, 1),
+(40, 'Facturation divers', 23, 2, 0, 0, 2462, '', 1, 1),
+(41, 'Frais d’édition de billetterie', 14, 1, 1, 0, 2462, '', 0, 1),
+(42, 'Sonorisation', 20, 1, 0, 0, 2462, '', 1, 1),
+(43, 'Lumières', 20, 1, 0, 0, 2462, '', 1, 1),
+(44, 'Vidéo', 20, 1, 0, 0, 2462, '', 1, 1),
+(45, 'Loc véhicule', 20, 1, 0, 0, 2462, '', 1, 1),
+(46, 'Backline', 20, 1, 0, 0, 2462, '', 1, 1),
+(47, 'Groupe Cession', 22, 1, 0, 0, 14, '', 1, 1),
+(48, 'Support', 22, 1, 0, 0, 14, '', 1, 1),
+(49, 'Location salle', 11, 1, 0, 1, 15, '', 0, 1),
+(50, 'Communication', 16, 1, 1, 0, 2462, '', 1, 1),
+(52, 'Billetterie 5,5%', 14, 2, 1, 1, 14, '70620000', 0, 1),
+(54, 'Groupe Engagement', 21, 1, 0, 0, 15, '', 1, 1),
+(55, 'Catering et Loges', 10, 1, 0, 1, 2462, '', 0, 1),
+(56, 'Cadeaux', 23, 1, 0, 1, 2462, '', 0, 1),
+(57, 'Droits de location producteur', 14, 2, 1, 0, 16, '', 1, 1),
+(59, 'Fluides', 11, 1, 1, 1, 2462, '', 0, 1),
+(60, 'Partenariat', 24, 2, 0, 0, 2462, '', 1, 1),
+(62, 'SACEM Groupe', 1, 1, 1, 0, 2462, '65101000', 0, 0),
+(63, 'Divers Technique', 20, 1, 0, 0, 2462, '', 1, 1),
+(67, 'Artistique', 21, 1, 0, 1, 2462, '', 0, 1),
+(68, 'Coréa', 23, 1, 0, 1, 2462, '', 0, 1),
+(69, 'SUBV CNV (aide à la diffusion)', 17, 1, 0, 1, 2462, '', 0, 1),
+(70, 'SUBV CNV (aide aux résidences)', 17, 1, 0, 1, 2462, '', 0, 1),
+(71, 'SUBV CNV (droit de tirage)', 17, 1, 0, 1, 2462, '', 0, 1),
+(72, 'SUBV CONSEIL GENERAL 42 - PROJET', 25, 1, 0, 1, 2462, '', 0, 1),
+(73, 'SUBV DRAC (EDUCATION ARTISTIQUE)', 17, 1, 0, 1, 2462, '', 0, 1),
+(74, 'SUBV SACEM', 25, 1, 0, 1, 2462, '', 0, 1),
+(75, 'SUBV CONSEIL REGIONAL PROJET', 17, 1, 0, 1, 2462, '', 0, 1);
+
+--
+-- Contenu de la table `llx_bmp_vendeur`
+--
+
+INSERT INTO `llx_bmp_vendeur` (`id`, `id_soc`, `label`, `tarifs`, `active`) VALUES
+(2, 0, 'Fnac', 'TARIF NORMAL,TARIF REDUIT,FILGOOD', 1),
+(3, 0, 'Ticketnet', 'TARIF NORMAL,TARIF REDUIT,FILGOOD', 1),
+(4, 0, 'Digitick', 'TARIF NORMAL,TARIF REDUIT', 1),
+(5, 0, 'Prévente Le Fil', 'TARIF NORMAL,TARIF REDUIT,FILGOOD', 1),
+(6, 0, 'Guichet', 'GUICHET NORMAL,GUICHET REDUIT', 1),
+(7, 0, 'Web Fil', 'TARIF NORMAL,TARIF REDUIT,FILGOOD', 1);

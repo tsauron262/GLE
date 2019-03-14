@@ -19,6 +19,13 @@ class Bimp_Societe extends BimpObject
         parent::__construct($module, $object_name);
     }
 
+    public function checkValidity()
+    {
+        $errors = array();
+        
+        return $errors;
+    }
+    
     public function getSocieteLabel()
     {
         if ($this->soc_type == "client" || (int) $this->getData('client') > 0) {

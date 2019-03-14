@@ -56,7 +56,9 @@ if ($user->societe_id > 0) {
 }
 
 $socid = isset($_REQUEST['socid']) ? $_REQUEST['socid'] : 0;
-llxHeader();
+$arrayofjs = array();
+$arrayofcss = array('/includes/jquery/plugins/select2/select2.css');
+llxHeader('', 'Rapport FI', '', '', 0, 0, $arrayofjs, $arrayofcss);
 
 /*
  * Liste
@@ -107,8 +109,13 @@ $sql1 = "SELECT s.nom,
 $sql2 = "SELECT SUM(f.duree) as duree,
 	    SUM(f.total_ht) as total,
             COUNT(f.rowid) as nbLignes";
-$sql = " FROM " . MAIN_DB_PREFIX . "societe as s,
-            " . MAIN_DB_PREFIX . "synopsis_fichinter as f ";
+$sql = " FROM " . MAIN_DB_PREFIX . "societe as s";
+if (isset($_GET['commerciaux']) and $_GET['commerciaux'] > 0)
+    $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . "societe_commerciaux sc ON s.rowid=sc.fk_soc ";
+$sql .= ", " . MAIN_DB_PREFIX . "synopsis_fichinter as f ";
+
+
+
 $sql .= " WHERE f.fk_soc = s.rowid";
 
 if ($filterUser) {
@@ -132,12 +139,17 @@ if (isset($_GET['statutInter'])) {
         $sql .= " AND fk_statut = 1";
 }
 
+if (isset($_GET['commerciaux']) and $_GET['commerciaux'] > 0)
+    $sql .= ' AND sc.fk_user=' . $_GET['commerciaux'];
+
+
 $MM = isset($_REQUEST['MM']) ? $_REQUEST['MM'] : '';
 $YY = isset($_REQUEST['YY']) ? $_REQUEST['YY'] : '';
 
 if ($socid > 0) {
     $sql .= " AND s.rowid = " . $socid;
 }
+
 
 //if ($typeInter > 0)
 //{
@@ -180,6 +192,7 @@ if ($socid > 0) {
 $sql2 = $sql2 . $sql;
 $sql1 = $sql1 . $sql . " ORDER BY $sortfield $sortorder  LIMIT $offset, $limit ";
 
+//die($sql1);
 //$requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
 //$requete .= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "fichinter as f ";
 //$requete .= " WHERE f.fk_soc = s.rowid";
@@ -233,6 +246,7 @@ $selectHtml2 .= "</select>";
 
 //TODO si selection société filtrer
 //print $sql1;
+//
 $resql = $db->query($sql1);
 $resqlCount = $db->query($sql2);
 if ($resql) {
@@ -289,6 +303,8 @@ if ($resql) {
 
     $selectHtml2 = '<select name="statutInter">';
     $tabSelect = array("Choix", "Non valider", "Valider");
+    $selectHtml2 .= "<OPTION SELECTED value='" . $i . "'>" . utf8_decode($option) . "</OPTION>";
+
     foreach ($tabSelect as $i => $option) {
         if (isset($_GET['typeInter']) && $i == $_GET['statutInter']) {
             $selectHtml2 .= "<OPTION SELECTED value='" . $i . "'>" . utf8_decode($option) . "</OPTION>";
@@ -302,12 +318,35 @@ if ($resql) {
     print $selectHtml2;
 
 
+
+
+    $selectCommerciaux .= '<td align=center>Commerciaux';
+    $selectCommerciaux .= '<select name="commerciaux" class="select2">';
+    $selectCommerciaux .= '<option value=0 selected>Aucun</option>';
+
+    $sql_comm = 'SELECT rowid, lastname, firstname';
+    $sql_comm .= ' FROM ' . MAIN_DB_PREFIX . 'user';
+    $sql_comm .= ' ORDER BY firstname';
+
+    $result = $db->query($sql_comm);
+    while ($obj = $db->fetch_object($result)) {
+        if (isset($_GET['commerciaux']) && $obj->rowid == $_GET['commerciaux'])
+            $selectCommerciaux .= '<option value=' . $obj->rowid . ' selected>' . $obj->firstname . ' ' . $obj->lastname . '</option>';
+        else
+            $selectCommerciaux .= '<option value=' . $obj->rowid . '>' . $obj->firstname . ' ' . $obj->lastname . '</option>';
+    }
+    $selectCommerciaux .= '</select></td>';
+
+    print $selectCommerciaux;
+
+
     print '<td align="center">Associ&eacute; a un contrat<input type="checkbox" name="assocContrat" ' . (isset($_GET['assocContrat']) ? 'checked="checked"' : '') . '/>';
     print '<td align="center">Associ&eacute; a une commande<input type="checkbox" name="assocComm" ' . (isset($_GET['assocComm']) ? 'checked="checked"' : '') . '/>';
     print '<td align="center">Associ&eacute; a rien<input type="checkbox" name="assocNone" ' . (isset($_GET['assocNone']) ? 'checked="checked"' : '') . '/>';
 
     echo "<tr><td colspan=6 align=center><input class='button ui-state-default' style='padding: 3px;' type='submit' name='g' value='Afficher le rapport'></td>";
     echo "</table><form>";
+
     echo "</div><br/><br/><br/>";
 
     $i = 0;
@@ -379,6 +418,7 @@ if ($resql) {
         print "</tr>\n";
     }
     print "</table>";
+
 //    $db->free();
 //    $durStr = convDur($DureeTotal);
     $durStr = convDur($resultCount->duree);
@@ -406,7 +446,8 @@ print <<<EOF
 			        constrainInput: false,}, jQuery.datepicker.regional['fr']));
 		jQuery('.datePicker').datepicker();
 		jQuery('.dateTimePicker').datepicker({showTime:true});
-	});
+                $('.select2').select2();
+});
 	</script>
 EOF;
 
@@ -549,7 +590,7 @@ function afficheParType($tabIdFi, $secondFois = false) {
         }
     }
 
-    if(!$secondFois){
+    if (!$secondFois) {
         foreach ($tabType as $idT => $valT) {
             if (in_array($idT, $tabTypeNonVendue))
                 $str2 .= $valT . ", ";
@@ -590,11 +631,11 @@ function afficheParType($tabIdFi, $secondFois = false) {
         $reqF .= " AND `Date_H_Debut` < STR_TO_DATE('" . $_GET['dateFin'] . "', '%d/%m/%Y') AND `Date_H_Debut` > STR_TO_DATE('" . $_GET['dateDeb'] . "', '%d/%m/%Y')";
     $req .= $reqF;
 //    die($req);
-    
-    
+
+
     $strStat = "<div style='clear: both;'>";
     $strStat .= "<table class='tabBorder100'><tr><td>";
-    if ($user->rights->synopsisficheinter->rapportTous){
+    if ($user->rights->synopsisficheinter->rapportTous) {
         $sql = $db->query($req . " AND (Contrat IS NULL || Contrat = 0)");
         $result = $db->fetch_object($sql);
         $strStat .= "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € hors contrat<br/>";
@@ -602,7 +643,7 @@ function afficheParType($tabIdFi, $secondFois = false) {
 
 
         $sql = $db->query($req . " AND Contrat > 0");
-    //    die($req." AND Contrat is not NULL");
+        //    die($req." AND Contrat is not NULL");
         $result = $db->fetch_object($sql);
         $strStat .= "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € sous contrat<br/>";
 
@@ -613,29 +654,29 @@ function afficheParType($tabIdFi, $secondFois = false) {
         $strStat .= "<br/>" . $result->nb . " appels durant " . price($result->sum) . " h soit " . ($result->sum * 50) . " € au Total<br/>";
     }
     $strStat .= "</td><td>";
-    
+
     $tabResult[-1001][2] += ($result->sum * 50);
 
 
-    $reqTropLong = $db->query("SELECT *, TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) as duree FROM `llx_synopsischrono_chrono_100` WHERE (TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) > 9000 || TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) < 0) ".$reqF);
+    $reqTropLong = $db->query("SELECT *, TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) as duree FROM `llx_synopsischrono_chrono_100` WHERE (TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) > 9000 || TIME_TO_SEC(TIMEDIFF(Date_H_Fin, Date_H_Debut)) < 0) " . $reqF);
     $probAppel = "";
     if ($db->num_rows($reqTropLong) > 0)
-        $probAppel = "Attention ".$db->num_rows($reqTropLong)." appels pouvant posé problème dont les 30 premières sont listées ci dessous.<br/><br/>";
-    $i=0;
+        $probAppel = "Attention " . $db->num_rows($reqTropLong) . " appels pouvant posé problème dont les 30 premières sont listées ci dessous.<br/><br/>";
+    $i = 0;
     while ($result = $db->fetch_object($reqTropLong)) {
         $i++;
         require_once (DOL_DOCUMENT_ROOT . "/synopsischrono/class/chrono.class.php");
         $chr = new Chrono($db);
         $chr->fetch($result->id);
-        $probAppel .= $chr->getNomUrl(1)."   |    ".  round($result->duree / 60,2)." m";
+        $probAppel .= $chr->getNomUrl(1) . "   |    " . round($result->duree / 60, 2) . " m";
         $probAppel .= "<br/>";
-        if($i > 29)
+        if ($i > 29)
             break;
     }
 
 
 
-    if ($user->rights->synopsisficheinter->rapportTous){
+    if ($user->rights->synopsisficheinter->rapportTous) {
         $coef1 = 0.025;
         $coef2 = 0.10;
         $result = $tabResult[-1000][3] * $coef1 + ($tabResult[-1000][3] - $tabResult[-1000][2]) * $coef2;
@@ -672,11 +713,11 @@ function afficheParType($tabIdFi, $secondFois = false) {
         $precision = " (" . price($tabResult[$idType][3] - $tabResult[$idType][2]) . " € | " . (price($tabResult[$idType][1] / 3600 - $tabResult[$idType][0] / 3600)) . " h)";
 
         if (!is_numeric($pourcent1))
-            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:orange;'> " . $pourcent1 . $precision . "</td></tr>";
+            $texte .= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:orange;'> " . $pourcent1 . $precision . "</td></tr>";
         elseif ($pourcent1 >= 0)
-            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / prévu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent1, 2) . "%" . $precision . "</td></tr>";
+            $texte .= "<tr><th class='ui-widget-header'>Bonus (réalisé / prévu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent1, 2) . "%" . $precision . "</td></tr>";
         else
-            $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / prévu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent1, 2) . "%" . $precision . "</td></tr>";
+            $texte .= "<tr><th class='ui-widget-header'>Malus (réalisé / prévu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent1, 2) . "%" . $precision . "</td></tr>";
 
         if (($tabResult[$idType][5] + $tabResult[$idType][4]) > 0)
             $pourcent2 = 100 - ($tabResult[$idType][2] * 100) / ($tabResult[$idType][5] + $tabResult[$idType][4]);
@@ -693,8 +734,8 @@ function afficheParType($tabIdFi, $secondFois = false) {
             $additionP = $additionP + $tabResult[$idType][2];
         echo $texte;
     }
-        echo $strStat;
-        echo "<br/><table class='tabBorder100'><tr><td style='    min-width: 380px;'>".$probAppel;
+    echo $strStat;
+    echo "<br/><table class='tabBorder100'><tr><td style='    min-width: 380px;'>" . $probAppel;
     return $tabResult;
 }
 
@@ -777,7 +818,7 @@ function testFi($tabIdFi, $tabResult, $alert = true) {
             $i ++;
         }
     }
-    
+
     echo "</td></tr></table>";
     return $tabIdErreur;
 }

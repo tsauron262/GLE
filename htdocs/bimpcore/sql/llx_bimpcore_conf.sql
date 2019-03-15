@@ -25,6 +25,25 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_conf` (
 -- Affichage de la table llx_bimpcore_file
 -- ------------------------------------------------------------
 
+-- CREATE TABLE IF NOT EXISTS `llx_bimpcore_file` (
+--   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+--   `parent_module` varchar(128) DEFAULT NULL,
+--   `parent_object_name` varchar(128) NOT NULL,
+--   `id_parent` int(10) unsigned NOT NULL DEFAULT 0,
+--   `file_name` varchar(128) NOT NULL,
+--   `file_ext` varchar(12) DEFAULT NULL,
+--   `file_size` int(11) NOT NULL,
+--   `description` text NOT NULL,
+--   `user_create` int(10) unsigned NOT NULL DEFAULT 0,
+--   `date_create` datetime NOT NULL DEFAULT current_timestamp(),
+--   `user_update` int(10) unsigned NOT NULL DEFAULT 0,
+--   `date_update` datetime NOT NULL DEFAULT current_timestamp(),
+--   `deleted` tinyint(1) NOT NULL DEFAULT 0,
+--   `date_delete` datetime DEFAULT NULL,
+--   `user_delete` int(10) unsigned NOT NULL DEFAULT 0,
+--   PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE IF NOT EXISTS `llx_bimpcore_file` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `parent_module` varchar(128) DEFAULT NULL,
@@ -35,9 +54,9 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_file` (
   `file_size` int(11) NOT NULL,
   `description` text NOT NULL,
   `user_create` int(10) unsigned NOT NULL DEFAULT 0,
-  `date_create` datetime NOT NULL DEFAULT current_timestamp(),
+  `date_create` datetime,
   `user_update` int(10) unsigned NOT NULL DEFAULT 0,
-  `date_update` datetime NOT NULL DEFAULT current_timestamp(),
+  `date_update` datetime NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT 0,
   `date_delete` datetime DEFAULT NULL,
   `user_delete` int(10) unsigned NOT NULL DEFAULT 0,
@@ -56,7 +75,7 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_history` (
   `id_object` int(10) unsigned NOT NULL,
   `field` varchar(128) NOT NULL,
   `value` text NOT NULL,
-  `date` datetime NOT NULL DEFAULT current_timestamp(),
+  `date` datetime,
   `id_user` int(10) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -117,9 +136,9 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_note` (
   `viewed` int(11) NOT NULL DEFAULT 1,
   `visibility` int(10) unsigned NOT NULL DEFAULT 2,
   `content` text NOT NULL,
-  `date_create` datetime NOT NULL DEFAULT current_timestamp(),
+  `date_create` datetime ,
   `user_create` int(10) unsigned NOT NULL DEFAULT 0,
-  `date_update` datetime NOT NULL DEFAULT current_timestamp(),
+  `date_update` datetime,
   `user_update` int(10) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -163,10 +182,4 @@ CREATE TABLE IF NOT EXISTS `llx_bimpcore_timer` (
 
 
 
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 

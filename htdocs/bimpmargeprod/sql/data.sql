@@ -64,6 +64,28 @@ CREATE TABLE `llx_bmp_categorie_montant` (
 -- Structure de la table `llx_bmp_event`
 --
 
+-- CREATE TABLE `llx_bmp_event` (
+--   `id` int(10) UNSIGNED NOT NULL,
+--   `name` varchar(128) NOT NULL,
+--   `date` datetime DEFAULT NULL,
+--   `type` int(10) UNSIGNED NOT NULL DEFAULT '0',
+--   `place` int(10) UNSIGNED NOT NULL DEFAULT '0',
+--   `status` int(10) UNSIGNED NOT NULL DEFAULT '0',
+--   `analytics` varchar(128) NOT NULL DEFAULT '',
+--   `ca_moyen_bar` float NOT NULL DEFAULT '0',
+--   `tva_billets` int(11) NOT NULL DEFAULT '1',
+--   `frais_billet` float NOT NULL DEFAULT '0.2',
+--   `default_dl_dist` decimal(24,2) NOT NULL DEFAULT '0.00',
+--   `default_dl_prod` decimal(24,2) NOT NULL DEFAULT '0.00',
+--   `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
+--   `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
+--   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `bar_20_save` float NOT NULL DEFAULT '0',
+--   `bar_55_save` float NOT NULL DEFAULT '0',
+--   `billets_loc` int(10) UNSIGNED NOT NULL DEFAULT '0'
+-- ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 CREATE TABLE `llx_bmp_event` (
   `id` int(10) UNSIGNED NOT NULL,
   `name` varchar(128) NOT NULL,
@@ -78,9 +100,9 @@ CREATE TABLE `llx_bmp_event` (
   `default_dl_dist` decimal(24,2) NOT NULL DEFAULT '0.00',
   `default_dl_prod` decimal(24,2) NOT NULL DEFAULT '0.00',
   `user_create` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
-  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_create` datetime ,
+  `user_update` int(10) UNSIGNED,
+  `date_update` datetime,
   `bar_20_save` float NOT NULL DEFAULT '0',
   `bar_55_save` float NOT NULL DEFAULT '0',
   `billets_loc` int(10) UNSIGNED NOT NULL DEFAULT '0'

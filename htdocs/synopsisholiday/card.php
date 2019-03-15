@@ -439,8 +439,8 @@ if ($action == 'confirm_send') {
             $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " a valider.";
 
             $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n";
-            $message.= "\n";
-            $message.= 'Veuillez trouver ci-dessous une demande de ' . $typeCp . ' à valider.' . "\n";
+            $message .= "\n";
+            $message .= 'Veuillez trouver ci-dessous une demande de ' . $typeCp . ' à valider.' . "\n";
 
             $delayForRequest = $cp->getConfCP('delayForRequest');
             //$delayForRequest = $delayForRequest * (60*60*24);
@@ -449,18 +449,18 @@ if ($action == 'confirm_send') {
             // Si l'option pour avertir le valideur en cas de délai trop court
             if ($cp->getConfCP('AlertValidatorDelay')) {
                 if ($cp->date_debut < $nextMonth) {
-                    $message.= "\n";
+                    $message .= "\n";
                     $message .= 'Cette demande de ' . $typeCp . ' a été effectuée dans un délai de moins de ' . $cp->getConfCP('delayForRequest') . ' avant ceux-ci';
-                    $message.= "\n";
+                    $message .= "\n";
                 }
             }
 
             // Si rdv durant la période et pas de remplacent
             $nbRdv = count($cp->fetchRDV());
             if ($nbRdv > 0) {
-                $message.= "\n";
+                $message .= "\n";
                 $message .= '' . $nbRdv . ' rdv sont prévus sur la période';
-                $message.= "\n";
+                $message .= "\n";
             }
 
             // Si l'option pour avertir le valideur en cas de solde inférieur à la demande
@@ -470,23 +470,23 @@ if ($action == 'confirm_send') {
                     if (!isset($soldes['error'])) {
                         if (($soldes['nbOpenDayCurrent'] > 0 && $soldes['nb_holiday_current'] < $soldes['nbOpenDayCurrent']) ||
                                 ($soldes['nbOpenDayNext'] > 0 && $soldes['nb_holiday_next'] < $soldes['nbOpenDayNext'])) {
-                            $message.= "\n";
-                            $message.= $langs->transnoentities("HolidaysToValidateAlertSolde") . "\n";
+                            $message .= "\n";
+                            $message .= $langs->transnoentities("HolidaysToValidateAlertSolde") . "\n";
                         }
                     }
                 } else if ($cp->type_conges == 2) {
                     $nbopenedday = num_open_day($cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday);
                     if ($nbopenedday > $cp->getRTTforUser($cp->fk_user)) {
-                        $message.= "\n";
-                        $message.= 'L\'utilisateur ayant fait cette demande de RTT n\'a pas le solde requis.' . "\n";
+                        $message .= "\n";
+                        $message .= 'L\'utilisateur ayant fait cette demande de RTT n\'a pas le solde requis.' . "\n";
                     }
                 }
             }
-            $message.= "\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("Name") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date($cp->date_debut, 'day') . " au " . dol_print_date($cp->date_fin, 'day') . "\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
-            $message.= "\n";
+            $message .= "\n";
+            $message .= "- " . $langs->transnoentitiesnoconv("Name") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
+            $message .= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date($cp->date_debut, 'day') . " au " . dol_print_date($cp->date_fin, 'day') . "\n";
+            $message .= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
+            $message .= "\n";
 //die($message);
             $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
             $result = $mail->sendfile();
@@ -547,10 +547,10 @@ if ($action == 'confirm_valid') {
             if ($demandeurEmail) {
                 $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . ' validee par votre superviseur';
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $demandeur->firstname . ",\n\n";
-                $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été validée par votre superviseur.';
-                $message.= "\n" . 'Cette demande reste encore en attente d\'approbation par votre Directeur des Ressouces Humaines.' . "\n\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($validator->firstname, $validator->lastname) . "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
+                $message .= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été validée par votre superviseur.';
+                $message .= "\n" . 'Cette demande reste encore en attente d\'approbation par votre Directeur des Ressouces Humaines.' . "\n\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($validator->firstname, $validator->lastname) . "\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
                 $mail = new CMailFile($subject, $demandeurEmail, $validatorEmail, $message);
                 if (!$mail->sendfile())
                     $mailErrors[] = $mail->error;
@@ -559,16 +559,16 @@ if ($action == 'confirm_valid') {
             if ($drhEmail) {
                 $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " a valider";
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $drh->firstname . ",\n\n";
-                $message.= 'Veuillez trouver ci-dessous une demande de ' . $typeCp . ' à valider' . "\n";
-                $message.= 'Cette demande vient d\'être pré-validée par ' . $validator->firstname . ' ' . $validator->lastname . ".\n";
+                $message .= 'Veuillez trouver ci-dessous une demande de ' . $typeCp . ' à valider' . "\n";
+                $message .= 'Cette demande vient d\'être pré-validée par ' . $validator->firstname . ' ' . $validator->lastname . ".\n";
                 if ((!empty($demandeur->fk_user) && $demandeur->fk_user > 0) &&
                         $validator->id != $demandeur->fk_user)
                     $message .= "Attention, il ne s\'agit pas du responsable hiérarchique du demandeur.\n";
                 $message .= "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Name") . " : " . dolGetFirstLastname($demandeur->firstname, $demandeur->lastname) . "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date($cp->date_debut, 'day') . " au " . dol_print_date($cp->date_fin, 'day') . "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
-                $message.= "\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("Name") . " : " . dolGetFirstLastname($demandeur->firstname, $demandeur->lastname) . "\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date($cp->date_debut, 'day') . " au " . dol_print_date($cp->date_fin, 'day') . "\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
+                $message .= "\n";
                 $mail = new CMailFile($subject, $drhEmail, $validatorEmail, $message);
                 if (!$mail->sendfile())
                     $mailErrors[] = $mail->error;
@@ -681,10 +681,10 @@ if ($action == 'drh_confirm_valid') {
                 $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " validee par votre DRH";
 
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
-                $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été validée par votre Directeur des Ressouces Humaines.' . "\n\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
-                $message.= "\n";
+                $message .= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été validée par votre Directeur des Ressouces Humaines.' . "\n\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
+                $message .= "\n";
                 $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
                 $result = $mail->sendfile();
             }
@@ -763,7 +763,7 @@ if ($action == 'drh_group_valid') {
 //                echo 'Résult: <pre>';
 //                print_r($infos);
 //                echo '</pre>';
-                
+
                 $message = $base_message;
 
                 if (count($infos) == 1) {
@@ -934,10 +934,10 @@ if ($action == 'confirm_refuse') {
                 $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " refusee par votre superviseur";
 
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
-                $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été refusée par votre superviseur pour le motif suivant:' . "\n";
-                $message.= GETPOST('detail_refuse', 'alpha') . "\n\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("ModifiedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
+                $message .= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été refusée par votre superviseur pour le motif suivant:' . "\n";
+                $message .= GETPOST('detail_refuse', 'alpha') . "\n\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("ModifiedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
                 $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
                 $result = $mail->sendfile();
                 if (!$result) {
@@ -999,10 +999,10 @@ if ($action == 'drh_confirm_refuse') {
 
                 $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . ' refusee par votre DRH';
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
-                $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été refusée par votre DRH pour le motif suivant:' . "\n";
-                $message.= GETPOST('detail_refuse', 'alpha') . "\n\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("ModifiedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
+                $message .= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été refusée par votre DRH pour le motif suivant:' . "\n";
+                $message .= GETPOST('detail_refuse', 'alpha') . "\n\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("ModifiedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
+                $message .= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
                 $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
                 $result = $mail->sendfile();
                 if (!$result) {
@@ -1073,9 +1073,9 @@ if ($action == 'confirm_cancel' && GETPOST('confirm') == 'yes') {
 
             $subject = $societeName . " - " . 'Demande de ' . str_replace('é', 'e', $typeCp) . ' annulee';
             $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
-            $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été annulée.' . "\n\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("ModifiedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
+            $message .= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été annulée.' . "\n\n";
+            $message .= "- " . $langs->transnoentitiesnoconv("ModifiedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
+            $message .= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
             $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
             $result = $mail->sendfile();
             if (!$result) {
@@ -1134,9 +1134,9 @@ if ($action == 'confirm_group_cancel' && GETPOST('confirm') == 'yes') {
                 $societeName = $conf->global->MAIN_APPLICATION_TITLE;
 
             $subject = $societeName . " - Annulation de " . str_replace('é', 'e', $typeCp);
-            $message.= 'Vos ' . $typeCp . ' pour la période du ' . $dateBegin . ' au ' . $dateEnd . ' ont été annulé(es) par votre Directeur des Ressouces Humaines.' . "\n\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
+            $message .= 'Vos ' . $typeCp . ' pour la période du ' . $dateBegin . ' au ' . $dateEnd . ' ont été annulé(es) par votre Directeur des Ressouces Humaines.' . "\n\n";
+            $message .= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
+            $message .= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/card.php?id=" . $cp->rowid . "\n\n";
 
             foreach ($cp->fk_user as $user_id) {
 //                switch ($cp->type_conges) {
@@ -1235,8 +1235,8 @@ if ($action == 'save_substitute') {
             if ($oldSubstitute->email) {
                 $subject = $societeName . ' - ' . 'Annulation de remplacement';
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $oldSubstitute->firstname . ",\n\n";
-                $message.= 'Votre remplacement dans le cadre de la prise de congés de ' . dolGetFirstLastname($cpUser->firstname, $cpUser->lastname);
-                $message.= ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été annulé.' . "\n\n";
+                $message .= 'Votre remplacement dans le cadre de la prise de congés de ' . dolGetFirstLastname($cpUser->firstname, $cpUser->lastname);
+                $message .= ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été annulé.' . "\n\n";
                 if ($rdvErrors) {
                     $message .= 'Attention : certain rendez-vous concernant ce remplacement n\'ont pas pu être supprimés de votre agenda.' . "\n";
                     $message .= 'Veuillez les effacer manuellement.' . "\n\n";
@@ -1268,8 +1268,8 @@ if ($action == 'save_substitute') {
             if ($substitute->email) {
                 $subject = $societeName . ' - ' . 'Notification de remplacement';
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $substitute->firstname . ",\n\n";
-                $message.= 'Vous avez été désigné comme remplaçant dans le cadre de la prise de congés de ' . dolGetFirstLastname($cpUser->firstname, $cpUser->lastname);
-                $message.= ' du ' . $dateBegin . ' au ' . $dateEnd . ' par ' . dolGetFirstLastname($user->firstname, $user->lastname) . '.' . "\n\n";
+                $message .= 'Vous avez été désigné comme remplaçant dans le cadre de la prise de congés de ' . dolGetFirstLastname($cpUser->firstname, $cpUser->lastname);
+                $message .= ' du ' . $dateBegin . ' au ' . $dateEnd . ' par ' . dolGetFirstLastname($user->firstname, $user->lastname) . '.' . "\n\n";
                 if (count($rdvs)) {
                     $message .= 'La personne que vous replacez devait effectuer ' . count($rdvs) . ' rendez-vous durant cette période.' . "\"n";
                     if (!$rdvErrors) {
@@ -1409,7 +1409,6 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
 //	        }
 //       	}
 //       </script>' . "\n";
-
         // Formulaire de demande
         print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '" onsubmit="return valider()" name="demandeCP">' . "\n";
         print '<input type="hidden" name="action" value="create" />' . "\n";
@@ -1430,7 +1429,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
             print '<label for="userGroup_no">Congés collectifs</label>';
             print '</div>';
         }
-            print '<script type="text/javascript" src="' . $dolibarr_main_url_root . '/synopsisholiday/js/card.js"></script>';
+        print '<script type="text/javascript" src="' . $dolibarr_main_url_root . '/synopsisholiday/js/card.js"></script>';
         print '<div id="singleUserBlock">';
         print '<div style="display: inline-block; vertical-align: top; margin-right: 15px;">';
         if (!$droitAll) {
@@ -1454,16 +1453,16 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         $nextCPYearDate = $cp->getCPNextYearDate(true, false);
         $nextCPYearDateAfter = $cp->getCPNextYearDate(true, true);
         $nbRtt = $cp->getRTTforUser($user->id) / $cp->getConfCP('nbRTTDeducted');
-      /*  print '<b>Année en cours : </b>';
-        print $langs->trans('SoldeCPUser', round($nb_holiday_current, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_current . ' / ' . $nbdeduced . ')' : '');
-        print '&nbsp;(A utiliser avant le <b>' . $nextCPYearDate . '</b>).';
-        print '<br/>';
-        print '<b>Année n+1 : </b>';
-        print $langs->trans('SoldeCPUser', round($nb_holiday_next, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_next . ' / ' . $nbdeduced . ')' : '');
-        print '&nbsp;(A utiliser à partir du <b>' . $nextCPYearDate . '</b> et avant le <b>' . $nextCPYearDateAfter . '</b>).';
-        print '<br/>';
-        print 'Solde RTT : <b>' . round($nbRtt, 2) . ' jours</b>';
-*/
+        /*  print '<b>Année en cours : </b>';
+          print $langs->trans('SoldeCPUser', round($nb_holiday_current, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_current . ' / ' . $nbdeduced . ')' : '');
+          print '&nbsp;(A utiliser avant le <b>' . $nextCPYearDate . '</b>).';
+          print '<br/>';
+          print '<b>Année n+1 : </b>';
+          print $langs->trans('SoldeCPUser', round($nb_holiday_next, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_next . ' / ' . $nbdeduced . ')' : '');
+          print '&nbsp;(A utiliser à partir du <b>' . $nextCPYearDate . '</b> et avant le <b>' . $nextCPYearDateAfter . '</b>).';
+          print '<br/>';
+          print 'Solde RTT : <b>' . round($nbRtt, 2) . ' jours</b>';
+         */
         print '</div></div>';
 
         if ($isDrh) {
@@ -1532,7 +1531,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<td>' . $langs->trans("DescCP") . '</td>';
         print '<td>';
         print '<textarea name="description" id="description"  class="flat" rows="' . ROWS_3 . '" cols="70"></textarea>';
-        
+
         print '</td>';
         print '</tr>';
 
@@ -1543,7 +1542,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<span>';
         print '<input type="checkbox" name="is_exception" id="is_exception" style="margin-right: 10px"/>';
         print '<label for="is_exception">Il s\'agit d\'une demande d\'absence exceptionnelle (Ne décompte pas le solde)</label>';
-        
+
         print '<br/><select name="choixRapide" style="display:none;">'
                 . '<option value="">Raison</option>'
                 . '<option value="">Maladie</option>'
@@ -1555,7 +1554,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 . '<option value="">Congés paternité </option>'
                 . '<option value="">Récupération </option>'
                 . '<option value="">Autres</option>'
-            . '</select>';
+                . '</select>';
         print '</span><br/>';
         print '<span>';
         print '<input type="checkbox" name="is_rtt" id="is_rtt" style="margin-right: 10px"/>';
@@ -1688,7 +1687,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 dol_htmloutput_mesg('', $errors, 'error');
             }
 
-            // On vérifie si l'utilisateur à le droit de lire cette demande
+            // On vérifie si l'utilisateur a le droit de lire cette demande
             if ($canedit) {
                 if ($action == 'delete') {
                     if ($user->rights->holiday->delete || (is_numeric($cp->fk_user) && $user->id == $cp->fk_user)) {
@@ -1904,8 +1903,18 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 print '</tr>';
                 print '<tr>';
                 print '<td>Nombre de rdv sur la période</td>';
-                $nb = count($cp->fetchRDV());
-                print '<td' . ($nb > 0 ? ' class="redT"' : '') . '>' . $nb . '</td>';
+                $planned_rdvs = $cp->fetchRDV();
+                $nb = count($planned_rdvs);
+                print '<td' . ($nb > 0 ? ' class="redT"' : '') . '>' . $nb . ' ';
+
+                foreach ($planned_rdvs as $id_rdv) {
+                    $ac = new ActionComm($db);
+                    $ac->fetch($id_rdv);
+                    $nomUrl = $ac->getNomUrl(1);
+                    print $nomUrl . ' ';
+                }
+
+                print '</td>';
                 print '</tr>';
 
                 print '</tbody>';

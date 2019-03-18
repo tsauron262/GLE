@@ -1181,7 +1181,7 @@ if ($action == 'confirm_group_cancel' && GETPOST('confirm') == 'yes') {
 
 // Si enregistrement du remplaçant par le DRH:
 if ($action == 'save_substitute') {
-    $substitute_id = GETPOST('substitute_user_id', 'int');
+    $substitute_id = GETPOST('substitute_user_id', 'int') ?: GETPOST('substitute_user_id_other_service', 'int');
 
     $cp = new SynopsisHoliday($db);
     $cp->fetch($_GET['id']);
@@ -2031,37 +2031,61 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 if (is_numeric($cp->fk_user)) {
                     if ($cp->statut != 4 && $cp->statut != 5 &&
                             ($user->id == $drhUserId || $user->id == $cp->fk_validator || $user->id == $userRequest->fk_user)) {
-                        // Choix du remplaçant (DRH, responsable ou valideur seulement):
+                        // Choix du remplaçant du même service (DRH, responsable ou valideur seulement):
                         print '<br/><br/>' . "\n\n";
-                        print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $_GET['id'] . '&action=save_substitute">';
                         print '<table class="border" width="50%">' . "\n";
                         print '<tbody>' . "\n";
                         print '<tr class="liste_titre">';
                         print '<td colspan="3">Options réservées aux responsables hiérarchiques</td>';
                         print '</tr>' . "\n";
                         print '<tr>';
-                        print '<td width="50%">Remplaçant</td>' . "\n";
-                        print '<td>' . "\n";
+                        print '<td width="50%">Remplaçant du même service</td>' . "\n";
+                        print '<td><form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $_GET['id'] . '&action=save_substitute">' . "\n";
 
                         $tabExclude = array($cp->fk_user);
-                        $req = "SELECT DISTINCT(h2.`fk_user`) as idUser FROM `llx_holiday` h1, `llx_holiday` h2 WHERE h1.rowid = " . $cp->id . " AND ("
+                        $req = "SELECT DISTINCT(h2.`fk_user`) as idUser FROM `" . MAIN_DB_PREFIX . "holiday` h1, `" . MAIN_DB_PREFIX . "holiday` h2 WHERE h1.rowid = " . $cp->id . " AND ("
                                 . "(h2.`date_debut` >= h1.`date_debut` AND h2.`date_debut` <= h1.`date_fin`) || "//date deb dans la periode
                                 . "(h2.`date_fin` <= h1.`date_fin` AND h2.`date_fin` >= h1.`date_debut`) || "//date fin dans la periode
                                 . "(h2.`date_debut` <= h1.`date_debut` AND h2.`date_fin` >= h1.`date_fin`)"//date a cheval
                                 . ") AND h2.`statut` = 6 AND h2.fk_user > 0";
+//                                . " AND u.fk_user!=".$user->fk_user; // avec le même responsable
 
                         $sql = $db->query($req);
                         while ($ln = $db->fetch_object($sql))
                             $tabExclude[] = $ln->idUser;
 
 
-                        print $form->select_dolusers((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id', 1, $tabExclude, null, null, null, null, null, null, null, null, null, null, 1);
+                        // Exclure les utilisateurs qui ne partagent pas le même
+                        // responsable que l'utilisateur qui fait la demande
+                        $tabExclude2 = array();
+                        $req = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user";
+                        $req .= " WHERE fk_user != " . $user->fk_user;
+                        $req .= " OR fk_user IS NULL";
+                        $sql = $db->query($req);
+                        while ($ln = $db->fetch_object($sql))
+                            $tabExclude2[] = $ln->rowid;
+
+                        $excludes = array_unique(array_merge($tabExclude, $tabExclude2), SORT_REGULAR);
+
+                        print $form->select_dolusers((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id', 1, $excludes, null, null, null, null, null, null, null, null, null, null, 1);
                         print '</td>' . "\n";
                         print '<td><input type="submit" value="Enregistrer" class="butAction"></td>';
+                        print '</form>';
+
+
+
+                        // Choix du remplaçant TOUS SERVICES (DRH, responsable ou valideur seulement):
+//                        print '<br/><br/>' . "\n\n";
+                        print '<tr>';
+                        print '<td width="50%">Remplaçant d\'un service différent</td>' . "\n";
+                        print '<td><form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $_GET['id'] . '&action=save_substitute">' . "\n";
+                        print $form->select_dolusers((isset($cp->fk_substitute) ? $cp->fk_substitute : -1), 'substitute_user_id_other_service', 1, $tabExclude, null, null, null, null, null, null, null, null, null, null, 1);
+                        print '</td>' . "\n";
+                        print '<td><input type="submit" value="Enregistrer" class="butAction"></td>';
+                        print '</form>';
                         print '</tr>' . "\n";
                         print '</tbody>';
                         print '</table>';
-                        print '</form>';
                     }
                 }
 

@@ -173,7 +173,8 @@ class BimpController
         if (!defined('BIMP_CONTROLLER_INIT')) {
             define('BIMP_CONTROLLER_INIT', 1);
             $this->addDebugTime('Début affichage page');
-            llxHeader('', '', '', false, false, false);
+            if (!defined('BIMP_NO_HEADER'))
+                llxHeader('', '', '', false, false, false);
             $display_footer = true;
         } else {
             $cssFiles = $this->getConf('css', array(), false, 'array');

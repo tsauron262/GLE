@@ -1687,7 +1687,6 @@ class BC_Vente extends BimpObject
                         $errors[] = 'Aucun emplacement enregistré pour l\'équipement retourné "' . $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . '"';
                     } elseif ((int) $place->getData('type') !== BE_Place::BE_PLACE_CLIENT ||
                             (int) $place->getData('id_client') !== (int) $this->getData('id_client')) {
-                        dol_syslog(print_r($place,1),3);
                         $errors[] = 'L\'emplacement de l\'équipement retourné "' . $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . '" ne correspond pas au client sélectionné';
                     }
                 }
@@ -1926,9 +1925,9 @@ class BC_Vente extends BimpObject
     protected function createFacture(&$errors, $is_validated = false)
     {
         if (!$is_validated) {
-            if (!$this->checkVente($errors)) {
-                return 0;
-            }
+//            if (!$this->checkVente($errors)) {
+//                return 0;
+//            }
 
             if ((int) $this->getData('status') !== 2) {
                 $errors[] = 'Cette vente n\'a pas le statut "validée". Création de la facture impossible';

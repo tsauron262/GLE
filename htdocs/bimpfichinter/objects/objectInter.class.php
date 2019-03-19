@@ -61,7 +61,7 @@ class ObjectInter extends extraFI{
         $redirectModeNewOld = 2;//0 pas de redirect 1 redirect button   2 redirect direct
         
         global $user;
-        if(in_array($user->id, array(1, 375, 35, 446)))
+        if(in_array($user->id, array(1, 375, 35, 446, 277)))
                 $redirectModeNewOld = 1;
         
         if($redirectModeOldNew == 2)//pur incohérence

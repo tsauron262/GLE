@@ -1898,7 +1898,7 @@ class BC_Vente extends BimpObject
 
             // Création de la facture et de l'avoir éventuel:
             $facture_errors = array();
-            $id_facture = (int) $this->createFacture($facture_errors);
+            $id_facture = (int) $this->createFacture($facture_errors, true);
             if (!$id_facture) {
                 $errors[] = 'Echec de la création de la facture';
             } elseif (count($facture_errors)) {

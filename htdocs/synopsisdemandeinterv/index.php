@@ -40,6 +40,13 @@
   \version    $Id: index.php,v 1.40 2008/04/09 18:13:50 eldy Exp $
  */
 require("./pre.inc.php");
+
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+require_once(DOL_DOCUMENT_ROOT."/bimpfichinter/objects/Bimp_Fichinter.class.php");
+$htmlRedirect = Bimp_Fichinter::redirect(false, "list");
+
+
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
@@ -79,6 +86,7 @@ $filtreUser = (isset($_REQUEST['filtreUser']) && $_REQUEST['filtreUser']);
 
 llxHeader();
 
+echo $htmlRedirect; 
 
 $sql = "SELECT s.nom,s.rowid as socid, f.ref, f.datei as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";
 if (!$user->rights->societe->client->voir && !$socid)

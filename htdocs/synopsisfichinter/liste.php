@@ -40,6 +40,12 @@
   \version    $Id: liste.php,v 1.40 2008/04/09 18:13:50 eldy Exp $
  */
 require("./pre.inc.php");
+
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+require_once(DOL_DOCUMENT_ROOT."/bimpfichinter/objects/Bimp_Fichinter.class.php");
+$htmlRedirect = Bimp_Fichinter::redirect(false, "list");
+
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
@@ -81,6 +87,7 @@ $pagenext = $page + 1;
  */
 
 llxHeader("", "Liste des FI");
+echo $htmlRedirect;
 
 
 $sql = "SELECT s.nom,s.rowid as socid, f.fk_user_author, f.ref,f.datei as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";

@@ -1,6 +1,9 @@
 bootstrap: 1
 
 objects: 
+    demandinter: 
+        instance: 
+            bimp_object: Bimp_Demandinter
     fichinter: 
         instance: 
             bimp_object: Bimp_Fichinter
@@ -10,6 +13,13 @@ sections:
     - type: tabs
       tabs: 
         default:
+            label: Demandes d'interventions
+            sections:
+                - type: list
+                  list: 
+                      panel: 1
+                      object: demandinter
+        fi:
             label: Fiche d'interventions
             sections:
                 - type: list

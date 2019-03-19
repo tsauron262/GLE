@@ -1587,16 +1587,17 @@ class synopsisdemandeintervLigne {
             $sql .= ",total_ttc = " . preg_replace('/,/', '.', $this->total_ttc);
         if ($this->isForfait . "x" != "x")
             $sql .= ",isForfait = " . $this->isForfait;
-        if ($this->comLigneId > 0)
-            $sql .= ",fk_commandedet =  " . $this->comLigneId;
-        elseif ($this->fk_commandedet > 0)
+        if ($this->fk_commandedet > 0 || $this->fk_commandedet == "0")
             $sql .= ",fk_commandedet =  " . $this->fk_commandedet;
+        elseif ($this->comLigneId > 0)
+            $sql .= ",fk_commandedet =  " . $this->comLigneId;
         else
             $sql .= ",fk_commandedet =  NULL";
 
         if ($this->fk_contratdet > 0)
             $sql .= ",fk_contratdet =  " . $this->fk_contratdet;
-
+        else
+            $sql .= ",fk_contratdet =  NULL";
 
         $sql.= ",rang='" . $this->rang . "'";
         $sql.= " WHERE rowid = " . $this->rowid;

@@ -7,6 +7,8 @@ primary: rowid
 controller: fichinter
 list_page_url:
     controller: index
+    params: 
+        tab:fi
 header_list_name: default
 icon: fas_ambulance
 
@@ -323,7 +325,7 @@ lists_cols:
                 type: search_user
                 
 lists:
-    default: 
+    defaultAbstract: 
         checkboxes: 1
         configurable: 1
         sort_field: id
@@ -331,7 +333,7 @@ lists:
         n: 25
         delete_btn: 0
         modal_view: default
-#        add_form_name: default
+        add_form_name: default
         filters_panel: default
         page_btn: 1
         edit_btn: 1
@@ -349,6 +351,29 @@ lists:
             natureInter:
             typeInter:
             commercial:
+    default: 
+        extends: defaultAbstract     
+        cols:
+            fk_soc:
+                show:
+                    callback:
+                        method: getFieldFiltre
+                        params:
+                            - fk_soc
+                            - show
+        list_filters:
+            callback:
+                method: getFieldFiltre
+                params:
+                    - fk_soc
+                    - filtre
+        add_form_values:
+            callback:
+                method: getFieldFiltre
+                params:
+                    - fk_soc
+                    - form_value
+                
                 
 fields_tables: 
     infos:

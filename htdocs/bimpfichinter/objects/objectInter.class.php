@@ -4,7 +4,10 @@
 require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/extraFI.class.php';
 
 class ObjectInter extends extraFI{
-    public static $controller_name = "";
+    public static $dirDol = "synopsisfichinter";
+    public static $controller_name;
+    
+    
        public function getList_commandeArray(){
         $this->list_commande = array();
         if($this->isLoaded() && $this->getData("fk_soc") > 0){
@@ -21,29 +24,14 @@ class ObjectInter extends extraFI{
     }
     
     
-    public static function redirectOldToNew($id = null){
-        $mode = 0; //0 rien 1 boutons 2 force redirect
-        
-        if($mode > 0){
-            if($mode == 1)
-                $idR = $_REQUEST["idR"];
-            elseif($mode == 2)
-                $idR = $id;
-            if($idR > 0){
-                header("Location: ".DOL_URL_ROOT."/bimpfichinter/?fc=".self::$controller_name."&id=".$idR);
-                exit;
-            }
-            elseif($idR == "list"){
-                    header("Location: ".DOL_URL_ROOT."/bimpfichinter/");
-                    exit;
-            }
-            else{
-                echo "<form><input type='submit' class='btn btn-primary saveButton' name='redirige' value='Nouvelle verssion'/><input type='hidden' name='idR' value='".$id."'<form>";
-            }
-        }
-        
-            
+    
+    
+    public function renderHeaderExtraRight(){
+        global $htmlSup;
+        return $htmlSup;
     }
+    
+
         
         
     
@@ -59,5 +47,95 @@ class ObjectInter extends extraFI{
              $this->list_contrat = self::$cache[$clef];
         }
         return $this->list_contrat;
+    }
+    
+    
+    
+    
+    
+    
+    public static function redirect($newVersion = true, $id = 0){
+        
+        
+        $redirectModeOldNew = 1;//0 pas de redirect 1 redirect button   2 redirect direct
+        $redirectModeNewOld = 2;//0 pas de redirect 1 redirect button   2 redirect direct
+        
+        global $user;
+        if(in_array($user->id, array(1, 375, 35, 446, 277)))
+                $redirectModeNewOld = 1;
+        
+        if($redirectModeOldNew == 2)//pur incohérence
+            $redirectModeNewOld = 0;
+        elseif($redirectModeNewOld == 2)
+            $redirectModeOldNew = 0;
+        
+        if($id == "" || $id == 0)
+            $id = "list";
+        $html = "";
+        $location = "";
+        if($newVersion && $redirectModeNewOld > 0){
+            if($redirectModeNewOld == 1)
+                $idR = $_REQUEST["idR"];
+            elseif($redirectModeNewOld == 2)
+                $idR = $id;
+            if($idR == "list")
+                $location = "/".self::$dirDol."/list.php";
+            elseif($idR > 0){
+                $location = "/".self::$dirDol."/card.php?id=".$idR;
+            }
+            else{
+                $html .= "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='Ancienne version'/><input type='hidden' name='idR' value='".$id."'/></form>";
+            }
+        }
+        elseif(!$newVersion && $redirectModeOldNew > 0){
+            if($redirectModeOldNew == 1)
+                $idR = $_REQUEST["idR"];
+            elseif($redirectModeOldNew == 2)
+                $idR = $id;
+            
+            
+            if($idR == "list"){
+                    $location = "/bimpfichinter/";
+            }elseif($idR > 0){
+                $location = "/bimpfichinter/?fc=".self::$controller_name."&id=".$idR;
+            }
+            else{
+                $html .= "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='Nouvelle version'/><input type='hidden' name='idR' value='".$id."'/></form>";
+            }
+        }
+        if($location != ""){
+            header("Location: ".DOL_URL_ROOT.$location);
+            exit;
+        }
+        
+        return $html;
+    }
+    
+    
+    
+    function getFieldFiltre($field, $mode){//show filtre form_value
+        
+        $tabT = array("fk_soc" => GETPOST("fk_soc"));
+        
+        if(isset($tabT[$field]) && $tabT[$field] > 0){
+            $value = $tabT[$field];
+            if($mode == "show")
+                return 0;
+            elseif($mode == "filtre"){
+                return array(array("name"=>$field, "filter"=>$value));
+            }
+            elseif($mode == "form_value"){
+                return array("fields"=>array($field=>$value));
+            }
+        }
+        
+        else{
+            if($mode == "show")
+                return 1;
+            else
+                return array();
+            
+        }
+            
     }
 }

@@ -4,9 +4,9 @@ require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/objectInterDet.class.php'
 
 class Bimp_Demandinterdet extends ObjectInterDet
 {
-    public $moduleRightsName = "synopsisdemandeinterv";
+    public static $moduleRightsName = "synopsisdemandeinterv";
 
-   
+ 
     
 }
 

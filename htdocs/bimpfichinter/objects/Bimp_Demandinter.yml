@@ -6,7 +6,7 @@ table: synopsisdemandeinterv
 primary: rowid
 controller: demandinter
 list_page_url:
-    controller: index
+    controller: di
 header_list_name: default
 icon: fas_ambulance
 
@@ -303,7 +303,7 @@ lists_cols:
                 type: search_user
                 
 lists:
-    default: 
+    defaultAbstract: 
         checkboxes: 1
         configurable: 1
         sort_field: id
@@ -316,7 +316,6 @@ lists:
         page_btn: 1
         edit_btn: 1
         cols:
-            id:
             ref:
             fk_soc:
             fk_commande:
@@ -328,8 +327,29 @@ lists:
             duree:
             total_ht:
             typeInter:
-            commercial:
-                
+            commercial:  
+    default: 
+        extends: defaultAbstract     
+        cols:
+            fk_soc:
+                show:
+                    callback:
+                        method: getFieldFiltre
+                        params:
+                            - fk_soc
+                            - show
+        list_filters:
+            callback:
+                method: getFieldFiltre
+                params:
+                    - fk_soc
+                    - filtre
+        add_form_values:
+            callback:
+                method: getFieldFiltre
+                params:
+                    - fk_soc
+                    - form_value
 fields_tables: 
     infos:
         footer_extra_btn: 

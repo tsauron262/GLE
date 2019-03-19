@@ -168,6 +168,7 @@ class FournObjectLine extends ObjectLine
                             $this->id_fourn_price = 0;
                         } else {
                             $this->pu_ht = (float) $pfp->getData('price');
+                            $this->tva_tx = (float) $pfp->getData('tva_tx');
                         }
                     }
                     break;

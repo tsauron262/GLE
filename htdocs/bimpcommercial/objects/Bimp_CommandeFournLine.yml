@@ -48,6 +48,7 @@ lists_cols:
         label: Commmande client
         value: 
             callback: displayCommandeClient
+            
 lists: 
     logistique:
         extends: default
@@ -56,7 +57,7 @@ lists:
         configurable: 0
         item_checkbox: 1
         after_list_content: unset
-        objects_change_reload: Bimp_CommandeFourn,ObjectLineRemise,BR_Reservation
+        objects_change_reload: Bimp_CommandeFourn,ObjectLineRemise,BR_Reservation,BL_CommandeFournReception
         bulk_actions: 
             callback: getLogistiqueBulkActions
         extra_btn: 
@@ -72,5 +73,3 @@ lists:
             total_ttc: unset
             margin: unset
             commande_client:
-                  
-        

@@ -658,6 +658,26 @@ class Bimp_CommandeFourn extends BimpComm
         return $html;
     }
 
+    public function renderLogistiqueButtons()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $reception = BimpObject::getInstance('bimplogistique', 'BL_CommandeFournReception');
+            $onclick = $reception->getJsLoadModalForm('default', 'Nouvelle réception', array(
+                'fields' => array(
+                    'id_commande_fourn' => $this->id,
+                    'id_entrepot'       => (int) $this->getData('entrepot')
+                )
+            ));
+            $html .= '<buttons class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Nouvelle réception';
+            $html .= '</buttons>';
+        }
+
+        return $html;
+    }
+
     // Traitements:
 
     public function onCancelStatus()
@@ -735,8 +755,9 @@ class Bimp_CommandeFourn extends BimpComm
             $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de l\'approbation ' . $this->getLabel('of_this'));
         }
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 
@@ -759,8 +780,9 @@ class Bimp_CommandeFourn extends BimpComm
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

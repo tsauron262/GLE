@@ -236,7 +236,7 @@ class BL_CommandeShipment extends BimpObject
                 }
             }
         }
-        
+
         return $id_contact;
     }
 
@@ -552,6 +552,104 @@ class BL_CommandeShipment extends BimpObject
         return BimpRender::renderAlerts('Commande invalide');
     }
 
+    public function renderCommandeLinesForm()
+    {
+        $html = '';
+
+        $commande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($commande)) {
+            $html .= BimpRender::renderAlerts('ID de la commande client absent');
+        } else {
+            BimpObject::loadClass('bimpcommercial', 'ObjectLine');
+            $lines = array();
+
+            foreach ($commande->getChildrenObjects('lines', array(
+                'type' => array(
+                    'in' => array(ObjectLine::LINE_FREE, ObjectLine::LINE_PRODUCT)
+                )
+            )) as $line) {
+                if ((float) $line->qty > (float) $line->getShippedQty()) {
+                    $lines[] = $line;
+                }
+            }
+
+            if (!count($lines)) {
+                $html .= BimpRender::renderAlerts('Il ne reste aucune unité à expédier pour cette commande client', 'warning');
+            } else {
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th>N° ligne</th>';
+                $html .= '<th>Désignation</th>';
+                $html .= '<th>Qté</th>';
+                $html .= '<th>Grouper les articles</th>';
+                $html .= '</tr>';
+                $html .= '</thead>';
+
+                $html .= '<tbody class="receptions_rows">';
+                foreach ($lines as $line) {
+                    $max = (float) $line->qty - (float) $line->getShippedQty();
+                    $decimals = 3;
+                    $equipments = array();
+                    $product = $line->getProduct();
+
+                    if (BimpObject::objectLoaded($product)) {
+                        if ((int) $product->getData('fk_product_type') === 0) {
+                            $decimals = 0;
+                        }
+
+                        if ($product->isSerialisable()) {
+                            $equipments = $line->getEquipementsToAttributeToShipment();
+                        }
+                    }
+
+                    $html .= '<tr class="line_shipment_row" data-id_line="' . $line->id . '">';
+                    $html .= '<td>' . $line->getData('position') . '</td>';
+                    $html .= '<td>' . $line->displayLineData('desc') . '</td>';
+                    $html .= '<td>';
+                    $html .= BimpInput::renderInput('qty', 'line_' . $line->id . '_qty', $max, array(
+                                'data'      => array(
+                                    'data_type' => 'number',
+                                    'decimals'  => $decimals,
+                                    'min'       => 0,
+                                    'max'       => $max
+                                ),
+                                'max_label' => 1
+                    ));
+                    $html .= '</td>';
+                    $html .= '<td>';
+                    $html .= BimpInput::renderInput('toggle', 'line_' . $line->id . '_group_articles', 0);
+                    $html .= '</td>';
+                    $html .= '</tr>';
+
+                    if (count($equipments)) {
+                        $items = array();
+
+                        foreach ($equipments as $id_equipment) {
+                            $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                            if (BimpObject::objectLoaded($equipment)) {
+                                $items[$id_equipment] = $equipment->getName();
+                            }
+                        }
+                        $html .= '<tr class="line_equipments_row">';
+                        $html .= '<td colspan="4">';
+                        $html .= 'Equipements: <br/>';
+                        $html .= BimpInput::renderInput('check_list', 'line_' . $line->id . '_equipments', array(), array(
+                                    'items' => $items
+                        ));
+                        $html .= '</td>';
+                        $html .= '</tr>';
+                    }
+                }
+                $html .= '</tbody>';
+                $html .= '</table>';
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements: 
 
     public function validateShipment(&$warnings = array())
@@ -614,7 +712,7 @@ class BL_CommandeShipment extends BimpObject
         }
 
         $this->set('status', self::BLCS_EXPEDIEE);
-         $this->set('date_shipped', date('Y-m-d H:i:s'));
+        $this->set('date_shipped', date('Y-m-d H:i:s'));
 
         $update_errors = $this->update($warnings);
         if (count($update_errors)) {
@@ -922,6 +1020,69 @@ class BL_CommandeShipment extends BimpObject
             return $errors;
         }
 
-        return parent::create($warnings, $force_create);
+        // Vérification du non-dépassement des quantités max: 
+        BimpObject::loadClass('bimpcommercial', 'ObjectLine');
+        $lines = $commande->getChildrenObjects('lines', array(
+            'type' => array(
+                'in' => array(ObjectLine::LINE_FREE, ObjectLine::LINE_PRODUCT)
+            )
+        ));
+
+        foreach ($lines as $line) {
+            $qty = BimpTools::getValue('line_' . $line->id . '_qty', 0);
+            $available_qty = (float) $line->qty - (float) $line->getShippedQty();
+            if ($qty > $available_qty) {
+                $errors[] = 'Ligne n°' . $line->getData('position') . ': il ne reste que ' . $available_qty . ' unité(s) à expédiier.<br/>Veuillez retirer ' . ($qty - $available_qty) . ' unité(s)';
+            } else {
+                $product = $line->getProduct();
+                if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
+                    $equipments = BimpTools::getValue('line_' . $line->id . '_equipments', array());
+
+                    if (count($equipments) > $qty) {
+                        $errors[] = 'Ligne n°' . $line->getData('position') . ': vous ne pouvez sélectionner que ' . $qty . ' équipement(s).<br/>Veuillez désélectionner ' . (count($equipments) - $qty) . ' équipement(s).';
+                    }
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        $errors = parent::create($warnings, $force_create);
+
+        if (!count($errors)) {
+            foreach ($lines as $line) {
+                $line_warnings = array();
+
+                $qty = (float) BimpTools::getValue('line_' . $line->id . '_qty', 0);
+
+                if ($qty > 0) {
+                    $line_errors = $line->setShipmentData($this, array(
+                        'qty'            => $qty,
+                        'group_articles' => (int) BimpTools::getValue('line_' . $line->id . '_group_articles', 0)
+                            ), $line_warnings);
+
+                    $line_errors = array_merge($line_errors, $line_warnings);
+
+                    if (count($line_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': erreurs lors de l\'enregistrement des quantités');
+                    } else {
+                        $product = $line->getProduct();
+                        if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
+                            $equipments = BimpTools::getValue('line_' . $line->id . '_equipments', array());
+                            if (count($equipments)) {
+                                $line_errors = $line->addEquipmentsToShipment($this->id, $equipments);
+                                if (count($line_errors)) {
+                                    $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ': erreurs lors de l\'attribution des équipements');
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
     }
 }

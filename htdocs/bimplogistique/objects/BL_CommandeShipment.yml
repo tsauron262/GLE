@@ -83,10 +83,16 @@ forms:
     default: 
         rows: 
             - field: id_commande_client
-              hidden: 1
             - field: id_entrepot
             - field: id_contact
             - field: info
+            - custom: 1
+              label: Lignes de commande
+              show: 
+                  callback: isNotLoaded
+              input_name: lines
+              content: 
+                  callback: renderCommandeLinesForm
             
     edit: 
         rows: 
@@ -266,6 +272,7 @@ lists:
         edit_btn: 1
         update_btn: 1
         add_btn: 1
+        add_btn_label: Nouvelle expédition
         add_form_name: default
         edit_form: default
         modal_view: default

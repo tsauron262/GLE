@@ -38,6 +38,7 @@ fields:
         
     ref: 
         label: Référence BR
+        required: 1
         
     num_reception:
         label: Numéro de réception
@@ -100,6 +101,13 @@ views:
                   fields_table: 
                       name: data
                       
+    details: 
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderDetailsView
+                      
 lists_cols: 
     commande: 
         field: id_commande_fourn
@@ -153,6 +161,7 @@ lists:
         edit_btn: 1
         update_btn: 1
         add_btn: 1
+        add_btn_label: Nouvelle réception
         add_form_name: default
         edit_form: default
         modal_view: default

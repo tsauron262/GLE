@@ -139,7 +139,7 @@ views:
                   custom: 
                       callback: renderShipmentsView
                       
-lists_cols:         
+lists_cols:
     qties: 
         label: Quantités
         value: 
@@ -163,7 +163,7 @@ lists:
         item_checkbox: 
             callback: isNotTypeText
         after_list_content: unset
-        objects_change_reload: Bimp_Commande,ObjectLineRemise,BR_Reservation
+        objects_change_reload: Bimp_Commande,ObjectLineRemise,BR_Reservation,BL_CommandeShipment
         bulk_actions: 
             callback: getLogistiqueBulkActions
         extra_btn: 

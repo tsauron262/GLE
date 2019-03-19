@@ -589,6 +589,16 @@ class BimpInput
                     }
 
                     $html = '<div class="check_list_container">';
+                    if (count($options['items']) > 3) {
+                        $html .= '<div class="smallActionsContainer">';
+                        $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.'.$field_name.'_check\');">';
+                        $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
+                        $html .= '</span>';
+                        $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.'.$field_name.'_check\');">';
+                        $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
+                        $html .= '</span>';
+                        $html .= '</div>';
+                    }
                     $i = 1;
                     foreach ($options['items'] as $idx => $item) {
                         if (is_array($item)) {
@@ -605,7 +615,7 @@ class BimpInput
                         if (in_array($item_value, $value)) {
                             $html .= ' checked';
                         }
-                        $html .= '/>';
+                        $html .= ' class="'.$field_name.'_check"/>';
                         $html .= '<label for="' . $input_id . '_' . $i . '_' . $rand . '">';
                         $html .= $item_label;
                         $html .= '</label>';

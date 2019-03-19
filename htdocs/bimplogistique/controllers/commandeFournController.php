@@ -58,6 +58,10 @@ class commandeFournController extends BimpController
     {        
         $html = '';
         
+        $html .= '<div class="buttonsContainer align-right">';
+        $html .= $commande->renderLogistiqueButtons();
+        $html .= '</div>';
+        
         $html .= $commande->renderChildrenList('lines', 'logistique', 1);
         
         return $html;

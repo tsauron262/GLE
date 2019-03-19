@@ -500,7 +500,7 @@ function checkAll($container, filter) {
     }
     if ($.isOk($container)) {
         $container.find('input[type="checkbox"]' + filter).each(function () {
-            $(this).prop('checked', true);
+            $(this).prop('checked', true).change();
         });
     }
 }
@@ -511,7 +511,7 @@ function uncheckAll($container, filter) {
     }
     if ($.isOk($container)) {
         $container.find('input[type="checkbox"]' + filter).each(function () {
-            $(this).prop('checked', false);
+            $(this).prop('checked', false).change();
         });
     }
 }

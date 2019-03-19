@@ -483,7 +483,7 @@ class BR_Reservation extends BimpObject
                             }
                             $onclick = 'setReservationStatus($(this), ' . $this->id . ', 0)';
                             $buttons[] = array(
-                                'label'   => 'Réinitialiser la réservation',
+                                'label'   => 'Réinitialiser',
                                 'icon'    => 'undo',
                                 'onclick' => $this->getJsActionOnclick('setNewStatus', array(
                                     'status' => 0
@@ -1020,6 +1020,7 @@ class BR_Reservation extends BimpObject
                         $this->set('status', $current_status);
                         $this->set('qty', $current_qty - 1);
                         $this->set('id_equipment', 0);
+                        $this->update();
                     }
                 } else {
                     $this->set('qty', 1);

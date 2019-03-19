@@ -650,6 +650,7 @@ class BC_Form extends BC_Panel
             }
             $field_params['required'] = (int) $params['required'];
             $input = new BC_Input($this->object, $params['data_type'], $params['input_name'], $row_path . '/input', $params['value'], $field_params);
+            $input->display_card_mode = 'visible';
             $input->setNamePrefix($this->fields_prefix);
             $input->extraClasses[] = 'customField';
             $input->extraData['form_row'] = $row;

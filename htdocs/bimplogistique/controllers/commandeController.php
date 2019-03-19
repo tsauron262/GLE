@@ -83,7 +83,12 @@ class commandeController extends BimpController
         $html = '';
         
         if (BimpObject::objectLoaded($commande)) {
+            $html .= '<div class="buttonsContainer align-right">';
+            $html .= $commande->renderLogistiqueButtons();
+            $html .= '</div>';
+            
             $html .= $commande->renderChildrenList('lines', 'logistique', 1);
+            
         } else {
             $html .= BimpRender::renderAlerts('ID de la commande absent');
         }

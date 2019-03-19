@@ -256,6 +256,12 @@ views:
                 - type: custom
                   custom:  
                       callback: renderCommandeFournisseursList
+    logistique_equipments: 
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderLogistiqueEquipmentsView
         
 forms: 
     default: 
@@ -498,6 +504,34 @@ forms:
               content: 
                   callback: renderShipmentLinesInputs
               depends_on: id_shipment,shipment_lines_list
+              
+    shipment_equipments:
+        title: Attribution d'équipements à une expédition
+        icon: fas_arrow-circle-right
+        rows: 
+            - custom: 1
+              hidden: 1
+              label: Réservations sélectionnées
+              input_name: reservations
+              input: 
+                  type: hidden
+            - custom: 1
+              label: Expédition
+              input_name: id_shipment
+              data_type: id_object
+              required: 1
+              object: shipment
+              input: 
+                  type: select
+                  options: 
+                      array: shipments
+                  card: default
+            - custom: 1
+              label: Equipements
+              input_name: equipments
+              content: 
+                  callback: renderEquipmentsToAddToShipmentCheckList
+              depends_on: id_shipment,reservations
                   
 lists_cols: 
     ef_type:

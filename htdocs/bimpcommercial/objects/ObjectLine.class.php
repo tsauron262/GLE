@@ -890,7 +890,7 @@ class ObjectLine extends BimpObject
                                 $html .= '<br/>';
                             }
                             if (!(string) $this->desc) {
-                                $html .= $product->displayData('label');
+                                $html .= $product->displayData('label', 'default', false);
                             }
                         }
                     }

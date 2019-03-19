@@ -131,6 +131,7 @@ class BimpController
     }
 
     // Affichages:
+    
     public function displayHeaderFiles()
     {
         $id_object = BimpTools::getValue('id');

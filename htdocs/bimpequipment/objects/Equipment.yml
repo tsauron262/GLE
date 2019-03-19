@@ -298,7 +298,19 @@ views:
                             - type: fields_table
                               fields_table:
                                   name: vente
-                                  
+                              
+    full: 
+        rows: 
+            - cols: 
+                - type: view
+                  view: 
+                      name: default
+            - cols: 
+                - type: list
+                  list: 
+                      name: default
+                      children: places
+                      
     reservations: 
         panel: 0
         rows: 
@@ -348,6 +360,13 @@ list:
     sort_field: date_create
     sort_way: desc
     n: 10
+    add_form_name: default
+    edit_btn: 1
+    update_btn: 1
+    delete_btn: 1
+    view_btn: 1
+    page_btn: 1
+    modal_view: full
     cols:
         id:
             label: ID
@@ -386,13 +405,6 @@ list:
         available: 
             field: available
             edit: 1
-    add_form_name: default
-    edit_btn: 1
-    update_btn: 1
-    delete_btn: 1
-    view_btn: 1
-    page_btn: 1
-    modal_view: default
     
 searches:
     default: 

@@ -1687,6 +1687,7 @@ class BC_Vente extends BimpObject
                         $errors[] = 'Aucun emplacement enregistré pour l\'équipement retourné "' . $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . '"';
                     } elseif ((int) $place->getData('type') !== BE_Place::BE_PLACE_CLIENT ||
                             (int) $place->getData('id_client') !== (int) $this->getData('id_client')) {
+                        dol_syslog(print_r($place,1),3);
                         $errors[] = 'L\'emplacement de l\'équipement retourné "' . $equipment->displayProduct('nom', true) . ' - ' . $equipment->getData('serial') . '" ne correspond pas au client sélectionné';
                     }
                 }

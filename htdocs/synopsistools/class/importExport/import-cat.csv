@@ -91,6 +91,8 @@ Marque->Nature->Externe->Olféo;INUT1;INUT2
 Marque->Nature->Externe->SQLyog;INUT1;INUT2
 Marque->Nature->Externe->Starwind;INUT1;INUT2
 Marque->Nature->Externe->Telmat;INUT1;INUT2
+Marque->Nature->Externe->JAM SOFTWARE;INUT1;INUT2
+Marque->Nature->Externe->FINAPRO;INUT1;INUT2
 Recurrence->Périodique->Nature->Contrat->Support BtoB;INUT1;INUT2
 Recurrence->Périodique->Nature->Contrat->Support BtoC;INUT1;INUT2
 Recurrence->Périodique->Nature->Contrat->Maintenance Materiel;INUT1;INUT2
@@ -99,19 +101,21 @@ Recurrence->Périodique->Nature->Contrat->Maintenance Mixée;INUT1;INUT2
 Recurrence->Périodique->Nature->Abonnement->Télécom;INUT1;INUT2
 Recurrence->Périodique->Nature->Abonnement->Logiciel;INUT1;INUT2
 Gamme->Consommable;INUT1;INUT2
-Gamme->Autre->Générique;INUT1;INUT2
+Gamme->Autre->Nature->Générique;INUT1;INUT2
 Obsolescence->Nature->Indisponible;INUT1;INUT2
-Gamme->Autre->Opé Marketing;INUT1;INUT2
+Gamme->Autre->Nature->Opé Marketing;INUT1;INUT2
 Marque->Nature->Externe->Apple;INUT1;INUT2
 Gamme->Logiciel;INUT1;INUT2
-Gamme->Autre->Remise;INUT1;INUT2
+Gamme->Autre->Nature->Remise;INUT1;INUT2
+Gamme->Autre->Nature->Remise CRT;INUT1;INUT2
+Gamme->Autre->Nature->IMMOBILISATION;INUT1;INUT2
 Obsolescence->Nature->Indisponible;INUT1;INUT2
 Gamme->Matériel;INUT1;INUT2
 Marque->Nature->Externe;INUT1;INUT2
 Gamme->Service;INUT1;INUT2
 Marque->Nature->Interne->Bimp;INUT1;INUT2
 Gamme->Service;INUT1;INUT2
-Gamme->Autre->Livre;INUT1;INUT2
+Gamme->Autre->Nature->Livre;INUT1;INUT2
 Obsolescence->Nature->Indisponible;INUT1;INUT2
 Gamme->Textile;INUT1;INUT2
 Gamme->Transport;INUT1;INUT2
@@ -125,11 +129,9 @@ Gamme->Service->Type->Développement;INUT1;INUT2
 Gamme->Service->Compétence->Logiciel;INUT1;INUT2
 Gamme->Service->Type->Formation;INUT1;INUT2
 Recurrence->Unique;INUT1;INUT2
-Gamme->Service->Type->Installation;INUT1;INUT2
-Recurrence->Unique;INUT1;INUT2
 Obsolescence->Nature->Obsolète;INUT1;INUT2
 Gamme->Matériel->Nature->Occasion;INUT1;INUT2
-Gamme->Autre->Base de textes;INUT1;INUT2
+Gamme->Autre->Nature->Base de textes;INUT1;INUT2
 Gamme->Matériel->Type->Accessoire;INUT1;INUT2
 Gamme->Logiciel->Type->Antivirus;INUT1;INUT2
 Gamme->Matériel->Type->Montre connectée;INUT1;INUT2
@@ -176,7 +178,6 @@ Gamme->Matériel->Type->Réseau->Firewall;INUT1;INUT2
 Gamme->Service->Type->Formation;INUT1;INUT2
 Gamme->Logiciel->Type->Gestion;INUT1;INUT2
 Gamme->Matériel->Type->Accessoire->Graveur;INUT1;INUT2
-Gamme->Matériel->Type->Accessoire->Enceintes;INUT1;INUT2
 Marque->Nature->Externe->Apple;INUT1;INUT2
 Modèle->Apple HomePod;INUT1;INUT2
 Gamme->Textile->Type->Housse;INUT1;INUT2
@@ -211,6 +212,7 @@ Gamme->Logiciel->Type->Sauvegarde;INUT1;INUT2
 Gamme->Matériel->Type->Composant->SAV Apple;INUT1;INUT2
 Gamme->Matériel->Type->Accessoire->Scanner;INUT1;INUT2
 Gamme->Matériel->Type->Accessoire->Son;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Son->Enceintes;INUT1;INUT2
 Gamme->Logiciel->Type->A catégoriser;INUT1;INUT2
 Gamme->Matériel->Type->Tablette;INUT1;INUT2
 Gamme->Textile->Type->Tapis;INUT1;INUT2
@@ -245,7 +247,7 @@ Modèle->Apple Iphone;INUT1;INUT2
 Gamme->Matériel->Type->Accessoire->Balladeur->Ipod;INUT1;INUT2
 Marque->Nature->Externe->Apple;INUT1;INUT2
 Modèle->Apple Ipod;INUT1;INUT2
-Gamme->Autre->Livre;INUT1;INUT2
+Gamme->Autre->Nature->Livre;INUT1;INUT2
 Obsolescence->Nature->Indisponible;INUT1;INUT2
 Gamme->Logiciel;INUT1;INUT2
 Marque->Nature->Externe;INUT1;INUT2
@@ -262,7 +264,6 @@ Gamme->Matériel->Type->Ordinateur portable;INUT1;INUT2
 Gamme->Matériel->Type->Réseau;INUT1;INUT2
 Gamme->Matériel->Type->Serveur ;INUT1;INUT2
 Gamme->Matériel->Type->Smartphone;INUT1;INUT2
-Gamme->Matériel->Type->Accessoire->Son;INUT1;INUT2
 Gamme->Matériel->Type->Tablette;INUT1;INUT2
 Gamme->Textile;INUT1;INUT2
 Gamme->Matériel->Type->Unité centrale;INUT1;INUT2
@@ -272,3 +273,5 @@ Marque->Nature->Interne->LDLC PRO;INUT1;INUT2
 Famille;INUT1;INUT2
 Nature;INUT1;INUT2
 Categorie;INUT1;INUT2
+Recurrence->Périodique->Type->Annuel
+Recurrence->Périodique->Type->Mensuel

@@ -1,0 +1,274 @@
+CAT;INUT1;INUT2
+CAT;INUT1;INUT2
+Gamme->Logiciel->Type->Antispam;INUT1;INUT2
+Gamme->Logiciel->Type->Antivirus;INUT1;INUT2
+Gamme->Logiciel->Type->DAO;INUT1;INUT2
+Gamme->Logiciel->Type->Gestion;INUT1;INUT2
+Gamme->Logiciel->Type->Bureautique;INUT1;INUT2
+Gamme->Logiciel->Type->Filtrage url;INUT1;INUT2
+Gamme->Logiciel->Type->Messagerie;INUT1;INUT2
+Gamme->Logiciel->Type->Développement;INUT1;INUT2
+Gamme->Logiciel->Type->Police;INUT1;INUT2
+Gamme->Logiciel->Type->Sauvegarde;INUT1;INUT2
+Gamme->Logiciel->Type->Sécurité;INUT1;INUT2
+Gamme->Logiciel->Type->Système d'exploitation;INUT1;INUT2
+Gamme->Logiciel->Type->Utilitaire;INUT1;INUT2
+Gamme->Logiciel->Type->Virtual Private Network;INUT1;INUT2
+Gamme->Logiciel->Type->Virtualisation;INUT1;INUT2
+Gamme->Logiciel->Nature->Open Source;INUT1;INUT2
+Gamme->Logiciel->Nature->Freeware;INUT1;INUT2
+Gamme->Logiciel->Nature->Commercial;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Laser;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Etiquette;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Grand format;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Jet d'encre;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Matricielle;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Traceur;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Multifonction ;INUT1;INUT2
+Gamme->Matériel->Type->Armoire;INUT1;INUT2
+Gamme->Matériel->Type->Baie;INUT1;INUT2
+Gamme->Matériel->Type->Client léger;INUT1;INUT2
+Gamme->Matériel->Type->Station accueil;INUT1;INUT2
+Gamme->Matériel->Type->Station travail;INUT1;INUT2
+Gamme->Matériel->Type->Réseau->Câble réseau;INUT1;INUT2
+Gamme->Matériel->Type->Réseau->Carte réseau;INUT1;INUT2
+Gamme->Matériel->Type->Réseau->Controleur;INUT1;INUT2
+Gamme->Matériel->Type->Réseau->Firewall;INUT1;INUT2
+Gamme->Matériel->Type->Réseau->Routeur;INUT1;INUT2
+Gamme->Matériel->Type->Réseau->Modem;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Batterie;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Chargeur;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Clavier;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Batterie;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Câble USV;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Adaptateur;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Alimentation;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Hub;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Connecteur;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Câble vidéo;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Convertisseur;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Lecteur de bande;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Souris;INUT1;INUT2
+Gamme->Matériel->Type->Composant->Carte mère;INUT1;INUT2
+Gamme->Matériel->Type->Composant->Carte son;INUT1;INUT2
+Gamme->Matériel->Type->Composant->Mémoire;INUT1;INUT2
+Gamme->Matériel->Type->Composant->Processeur;INUT1;INUT2
+Gamme->Matériel->Type->Composant->Répéteur;INUT1;INUT2
+Gamme->Service->Type->Certificats;INUT1;INUT2
+Gamme->Service->Type->Installation;INUT1;INUT2
+Gamme->Service->Type->Dépannage;INUT1;INUT2
+Gamme->Service->Type->Gestion de projet;INUT1;INUT2
+Gamme->Service->Type->Formation;INUT1;INUT2
+Gamme->Service->Type->Délégation;INUT1;INUT2
+Gamme->Service->Type->Déplacement;INUT1;INUT2
+Gamme->Service->Type->Hotline;INUT1;INUT2
+Gamme->Service->Type->Maintenance;INUT1;INUT2
+Gamme->Service->Type->Audit;INUT1;INUT2
+Gamme->Service->Type->Développement;INUT1;INUT2
+Gamme->Service->Type->Livraison;INUT1;INUT2
+Gamme->Service->Type->Nom de domaine;INUT1;INUT2
+Gamme->Service->Type->Hébergement;INUT1;INUT2
+Gamme->Service->Type->Location;INUT1;INUT2
+Gamme->Service->Type->Supervision;INUT1;INUT2
+Gamme->Service->Type->Télécom;INUT1;INUT2
+Gamme->Service->Type->Frais accès service;INUT1;INUT2
+Gamme->Service->Nature->Sur site BIMP;INUT1;INUT2
+Gamme->Service->Compétence->Reseau;INUT1;INUT2
+Gamme->Service->Compétence->Anykey;INUT1;INUT2
+Gamme->Matériel->Nature->Neuf;INUT1;INUT2
+Marque->Nature->Externe->ASMX;INUT1;INUT2
+Marque->Nature->Partagé->BIMP-ASMX;INUT1;INUT2
+Marque->Nature->Partagé->BIMP-Checkpoint;INUT1;INUT2
+Marque->Nature->Externe->Data Domain;INUT1;INUT2
+Marque->Nature->Externe->Double Take;INUT1;INUT2
+Marque->Nature->Externe->MacAfee;INUT1;INUT2
+Marque->Nature->Externe->MailinBlack;INUT1;INUT2
+Marque->Nature->Externe->Mailcleaner;INUT1;INUT2
+Marque->Nature->Externe->Mdaemon;INUT1;INUT2
+Marque->Nature->Externe->NetApp;INUT1;INUT2
+Marque->Nature->Externe->Networth Télécom;INUT1;INUT2
+Marque->Nature->Externe->Olféo;INUT1;INUT2
+Marque->Nature->Externe->SQLyog;INUT1;INUT2
+Marque->Nature->Externe->Starwind;INUT1;INUT2
+Marque->Nature->Externe->Telmat;INUT1;INUT2
+Recurrence->Périodique->Nature->Contrat->Support BtoB;INUT1;INUT2
+Recurrence->Périodique->Nature->Contrat->Support BtoC;INUT1;INUT2
+Recurrence->Périodique->Nature->Contrat->Maintenance Materiel;INUT1;INUT2
+Recurrence->Périodique->Nature->Contrat->Maintenance Logiciel;INUT1;INUT2
+Recurrence->Périodique->Nature->Contrat->Maintenance Mixée;INUT1;INUT2
+Recurrence->Périodique->Nature->Abonnement->Télécom;INUT1;INUT2
+Recurrence->Périodique->Nature->Abonnement->Logiciel;INUT1;INUT2
+Gamme->Consommable;INUT1;INUT2
+Gamme->Autre->Générique;INUT1;INUT2
+Obsolescence->Nature->Indisponible;INUT1;INUT2
+Gamme->Autre->Opé Marketing;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Gamme->Logiciel;INUT1;INUT2
+Gamme->Autre->Remise;INUT1;INUT2
+Obsolescence->Nature->Indisponible;INUT1;INUT2
+Gamme->Matériel;INUT1;INUT2
+Marque->Nature->Externe;INUT1;INUT2
+Gamme->Service;INUT1;INUT2
+Marque->Nature->Interne->Bimp;INUT1;INUT2
+Gamme->Service;INUT1;INUT2
+Gamme->Autre->Livre;INUT1;INUT2
+Obsolescence->Nature->Indisponible;INUT1;INUT2
+Gamme->Textile;INUT1;INUT2
+Gamme->Transport;INUT1;INUT2
+Gamme->A catégoriser;INUT1;INUT2
+Obsolescence->Nature->Actuel;INUT1;INUT2
+Gamme->Service->Type->Maintenance;INUT1;INUT2
+Recurrence->Périodique->Nature->Contrat->Support BtoB;INUT1;INUT2
+Gamme->Service->Type->Déplacement;INUT1;INUT2
+Gamme->Service->Nature->Sur site client;INUT1;INUT2
+Gamme->Service->Type->Développement;INUT1;INUT2
+Gamme->Service->Compétence->Logiciel;INUT1;INUT2
+Gamme->Service->Type->Formation;INUT1;INUT2
+Recurrence->Unique;INUT1;INUT2
+Gamme->Service->Type->Installation;INUT1;INUT2
+Recurrence->Unique;INUT1;INUT2
+Obsolescence->Nature->Obsolète;INUT1;INUT2
+Gamme->Matériel->Nature->Occasion;INUT1;INUT2
+Gamme->Autre->Base de textes;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire;INUT1;INUT2
+Gamme->Logiciel->Type->Antivirus;INUT1;INUT2
+Gamme->Matériel->Type->Montre connectée;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple Watch;INUT1;INUT2
+Gamme->Matériel->Type->Montre connectée;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple Watch Démo;INUT1;INUT2
+Gamme->Matériel->Type->Montre connectée;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple Watch Sport;INUT1;INUT2
+Gamme->Logiciel;INUT1;INUT2
+Gamme->Logiciel->Type->Arts Graphiques;INUT1;INUT2
+Gamme->Logiciel->Type->Arts Graphiques;INUT1;INUT2
+Gamme->Logiciel->Type->Bureautique;INUT1;INUT2
+Gamme->Matériel->Type->Caméra;INUT1;INUT2
+Gamme->Logiciel->Type->CAO;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Casque;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Clef USB;INUT1;INUT2
+Gamme->Service->Type->Cloud;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Coupeuse;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Boitier CPL;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->HDD externe;INUT1;INUT2
+Gamme->Matériel->Type->Composant->HDD interne;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->HDD multimédia;INUT1;INUT2
+Gamme->Matériel->Type->Serveur->NAS;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->HDD externe;INUT1;INUT2
+Gamme->Matériel->Type->Serveur->NAS;INUT1;INUT2
+Gamme->Matériel->Type->Serveur->NAS;INUT1;INUT2
+Gamme->Service->Type->Déplacement;INUT1;INUT2
+Gamme->Service->Nature->Sur site client;INUT1;INUT2
+Gamme->Service->Type->Développement;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Dictaphone;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Douchette;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Drone;INUT1;INUT2
+Gamme->Logiciel->Type->Education;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Enceintes;INUT1;INUT2
+Gamme->Consommable->Encre Toner;INUT1;INUT2
+Gamme->Service->Type->Maintenance;INUT1;INUT2
+Marque->Nature->Externe;INUT1;INUT2
+Gamme->Service->Compétence->Materiel;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Fax;INUT1;INUT2
+Gamme->Matériel->Type->Réseau->Firewall;INUT1;INUT2
+Gamme->Service->Type->Formation;INUT1;INUT2
+Gamme->Logiciel->Type->Gestion;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Graveur;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Enceintes;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple HomePod;INUT1;INUT2
+Gamme->Textile->Type->Housse;INUT1;INUT2
+Gamme->Matériel->Type->SmartPhone->Iphone;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple Iphone;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Balladeur->Ipod;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple Ipod;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Jet d'encre;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Laser;INUT1;INUT2
+Gamme->Transport;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Matricielle;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Matricielle;INUT1;INUT2
+Gamme->Matériel->Type->Composant->RAM;INUT1;INUT2
+Gamme->Logiciel->Type->Messagerie;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Multifonctions;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Onduleur;INUT1;INUT2
+Gamme->Service->Type->Impression->PagePack;INUT1;INUT2
+Marque->Nature->Externe->Xerox;INUT1;INUT2
+Gamme->Service->Nature->Autre;INUT1;INUT2
+Gamme->Service->Compétence->Matériel & Logiciel;INUT1;INUT2
+Gamme->Consommable->Papier;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Appareil photo;INUT1;INUT2
+Gamme->Textile->Type->Pochette;INUT1;INUT2
+Gamme->Logiciel->Type->Polices Font;INUT1;INUT2
+Gamme->Logiciel->Type->Réseau;INUT1;INUT2
+Gamme->Matériel->Type->Réseau->Routeur;INUT1;INUT2
+Gamme->Textile->Type->Sac;INUT1;INUT2
+Gamme->Logiciel->Type->Sante;INUT1;INUT2
+Gamme->Logiciel->Type->Sauvegarde;INUT1;INUT2
+Gamme->Matériel->Type->Composant->SAV Apple;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Scanner;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Son;INUT1;INUT2
+Gamme->Logiciel->Type->A catégoriser;INUT1;INUT2
+Gamme->Matériel->Type->Tablette;INUT1;INUT2
+Gamme->Textile->Type->Tapis;INUT1;INUT2
+Gamme->Logiciel->Type->Telemaintenance;INUT1;INUT2
+Gamme->Matériel->Type->Téléphone bureau;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Thermique;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante->Traceur;INUT1;INUT2
+Gamme->Logiciel->Type->Utilitaire;INUT1;INUT2
+Gamme->Matériel->Type->Vidéo;INUT1;INUT2
+Gamme->Logiciel->Type->Virtualisation;INUT1;INUT2
+Gamme->Matériel->Type->Réseau->Wifi;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire;INUT1;INUT2
+Gamme->Matériel->Type->Composant;INUT1;INUT2
+Gamme->Consommable;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Ecran;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Enceintes;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple HomePod;INUT1;INUT2
+Gamme->Matériel->Type->Imprimante;INUT1;INUT2
+Gamme->Matériel->Type->Tablette;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple Ipad;INUT1;INUT2
+Gamme->Matériel->Type->Tablette;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple Ipad Mini;INUT1;INUT2
+Gamme->Matériel->Type->Tablette;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple Ipad Pro;INUT1;INUT2
+Gamme->Matériel->Type->Smartphone;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple Iphone;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Balladeur->Ipod;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->Apple Ipod;INUT1;INUT2
+Gamme->Autre->Livre;INUT1;INUT2
+Obsolescence->Nature->Indisponible;INUT1;INUT2
+Gamme->Logiciel;INUT1;INUT2
+Marque->Nature->Externe;INUT1;INUT2
+Gamme->Service->Type->Maintenance;INUT1;INUT2
+Gamme->Service->Compétence->Matériel;INUT1;INUT2
+Gamme->Service->Nature->Autre;INUT1;INUT2
+Gamme->Matériel->Type->Montre connectée;INUT1;INUT2
+Gamme->Matériel->Type->Serveur->NAS;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire;INUT1;INUT2
+Gamme->Matériel->Type->Ordinateur portable;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Modèle->MacBook;INUT1;INUT2
+Gamme->Matériel->Type->Ordinateur portable;INUT1;INUT2
+Gamme->Matériel->Type->Réseau;INUT1;INUT2
+Gamme->Matériel->Type->Serveur ;INUT1;INUT2
+Gamme->Matériel->Type->Smartphone;INUT1;INUT2
+Gamme->Matériel->Type->Accessoire->Son;INUT1;INUT2
+Gamme->Matériel->Type->Tablette;INUT1;INUT2
+Gamme->Textile;INUT1;INUT2
+Gamme->Matériel->Type->Unité centrale;INUT1;INUT2
+Marque->Nature->Externe->Apple;INUT1;INUT2
+Gamme->Matériel->Type->Unité centrale;INUT1;INUT2
+Marque->Nature->Interne->LDLC PRO;INUT1;INUT2
+Famille;INUT1;INUT2
+Nature;INUT1;INUT2
+Categorie;INUT1;INUT2

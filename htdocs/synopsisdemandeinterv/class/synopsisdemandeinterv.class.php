@@ -226,7 +226,7 @@ class Synopsisdemandeinterv extends CommonObject {
             $this->duree = 0;
         }
         if ($this->socid <= 0) {
-            $this->error = 'ErrorBadParameterForFunc';
+            $this->error = 'ErrorBadParameterForFunc no client ';
             dol_syslog("synopsisdemandeinterv::create " . $this->error, LOG_ERR);
             return -1;
         }

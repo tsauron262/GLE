@@ -323,6 +323,8 @@ class BR_Reservation extends BimpObject
                         // Réserver: 
                         $params = array();
                         if ($product->isSerialisable() || $qty > 1) {
+                            $params['form_name'] = 'reserve_equipments';
+                        } elseif ($qty > 1) {
                             $params['form_name'] = 'new_status';
                         }
 
@@ -684,6 +686,56 @@ class BR_Reservation extends BimpObject
                         'max'       => (int) $removableQty
                     )
         ));
+    }
+
+    public function renderReserveEquipmentsInput()
+    {
+        $html = '';
+
+        $errors = array();
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la réservation absent';
+        } else {
+            $product = $this->getChildObject('product');
+            if (!BimpObject::objectLoaded($product)) {
+                $errors[] = 'Produit absent';
+            } elseif (!$product->isSerialisable()) {
+                $errors[] = 'Produit non sérialisable';
+            } else {
+                $entrepot = $this->getChildObject('entrepot');
+                if (!BimpObject::objectLoaded($entrepot)) {
+                    if ((int) $this->getData('id_entrepot')) {
+                        $errors[] = 'L\'entrepôt d\'ID ' . $this->getData('id_entrepot') . ' n\'existe pas';
+                    } else {
+                        $errors[] = 'Entrepôt absent';
+                    }
+                } else {
+                    BimpObject::loadClass('bimpequipment', 'Equipment');
+                    $equipments = Equipment::getAvailableEquipmentsArray((int) $entrepot->id, (int) $product->id);
+
+                    if (!count($equipments)) {
+                        $html .= BimpRender::renderAlerts('Aucun équipement disponible dans l\'entrepôt ' . $entrepot->getNomUrl(1), 'warning');
+                    } else {
+                        $input_name = 'equipments';
+                        $max_values = (int) $this->getData('qty');
+                        $content = BimpInput::renderInput('select', $input_name . '_add_value', '', array(
+                                    'options' => $equipments
+                        ));
+
+                        $html .= '<h4>Equipements disponibles dans l\'entrepôt: ' . $entrepot->getNomUrl(1) . '<br/><br/>';
+                        $html .= 'Pour le produit ' . $product->getNomUrl(1) . '</h4><br/>';
+
+                        $html .= BimpInput::renderMultipleValuesInput($this, $input_name, $content, array(), '', false, false, false, $max_values);
+                    }
+                }
+            }
+        }
+
+        if (count($errors)) {
+            $html .= BimpRender::renderAlerts($errors);
+        }
+
+        return $html;
     }
 
     // Gestion des réservations:
@@ -1179,10 +1231,23 @@ class BR_Reservation extends BimpObject
         if (!isset($data['status'])) {
             $errors[] = 'Nouveau statut absent';
         } else {
-            $qty = isset($data['qty']) ? (int) $data['qty'] : null;
-            $id_equipment = isset($data['id_equipment']) ? (int) $data['id_equipment'] : null;
+            if (isset($data['equipments'])) {
+                if (!count($data['equipments'])) {
+                    $errors[] = 'Aucun équipement sélectionné';
+                } else {
+                    foreach ($data['equipments'] as $id_equipment) {
+                        $res_errors = $this->setNewStatus((int) $data['status'], 1, $id_equipment);
+                        if (count($res_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($res_errors, 'Equipement ' . $id_equipment);
+                        }
+                    }
+                }
+            } else {
+                $qty = isset($data['qty']) ? (int) $data['qty'] : null;
+                $id_equipment = isset($data['id_equipment']) ? (int) $data['id_equipment'] : null;
 
-            $errors = $this->setNewStatus((int) $data['status'], $qty, $id_equipment);
+                $errors = $this->setNewStatus((int) $data['status'], $qty, $id_equipment);
+            }
         }
 
         return array(

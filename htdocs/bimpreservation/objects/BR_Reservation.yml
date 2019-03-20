@@ -7,6 +7,16 @@ labels:
     is_female: 1
 
 objects:
+    entrepot: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: product/stock
+                file: entrepot
+            id_object: 
+                field_value: id_entrepot
+        
     commercial: 
         extends: user
         instance: 
@@ -329,6 +339,24 @@ forms:
               input_name: new_status
               data_type: bool
               content: <input type="hidden" name="new_status" value="1"/>
+    reserve_equipments: 
+        rows: 
+            - custom: 1
+              hidden: 1
+              input_name: status
+              data_type: bool
+              input: 
+                  type: hidden
+              value: 
+                  field_value: status
+            - custom: 1
+              label: Equipements
+              input_name: equipments
+              data_type: list
+              multiple: 1
+              content: 
+                  callback: renderReserveEquipmentsInput
+        
     remove: 
         rows: 
             - custom: 1

@@ -591,10 +591,10 @@ class BimpInput
                     $html = '<div class="check_list_container">';
                     if (count($options['items']) > 3) {
                         $html .= '<div class="smallActionsContainer">';
-                        $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.'.$field_name.'_check\');">';
+                        $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
                         $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';
                         $html .= '</span>';
-                        $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.'.$field_name.'_check\');">';
+                        $html .= '<span class="small-action" onclick="uncheckAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
                         $html .= BimpRender::renderIcon('far_square', 'iconLeft') . 'Tout désélectionner';
                         $html .= '</span>';
                         $html .= '</div>';
@@ -615,7 +615,7 @@ class BimpInput
                         if (in_array($item_value, $value)) {
                             $html .= ' checked';
                         }
-                        $html .= ' class="'.$field_name.'_check"/>';
+                        $html .= ' class="' . $field_name . '_check"/>';
                         $html .= '<label for="' . $input_id . '_' . $i . '_' . $rand . '">';
                         $html .= $item_label;
                         $html .= '</label>';
@@ -1078,7 +1078,7 @@ class BimpInput
         return $html;
     }
 
-    public static function renderMultipleValuesInput($object, $input_name, $add_input_content, $values, $label_input_suffixe = '', $auto_save = false, $required = false, $sortable = false)
+    public static function renderMultipleValuesInput($object, $input_name, $add_input_content, $values, $label_input_suffixe = '', $auto_save = false, $required = false, $sortable = false, $max_values = 'none')
     {
         $html = '';
 
@@ -1093,12 +1093,12 @@ class BimpInput
         $content .= '</div>';
 
         $html = $content;
-        $html .= self::renderMultipleValuesList($object, $input_name, $values, $label_input_name, $auto_save, $required, $sortable);
+        $html .= self::renderMultipleValuesList($object, $input_name, $values, $label_input_name, $auto_save, $required, $sortable, $max_values);
 
         return $html;
     }
 
-    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0)
+    public static function renderMultipleValuesList(BimpObject $object, $field_name, $values, $label_input_name = null, $autosave = false, $required = 0, $sortable = 0, $max_values = 'none')
     {
         if (is_null($values) || $values === '') {
             $values = array();
@@ -1134,6 +1134,7 @@ class BimpInput
             $html .= ' data-id_object="' . $object->id . '"';
         }
         $html .= ' data-required="' . $required . '"';
+        $html .= ' data-max_values="' . $max_values . '"';
         $html .= '>';
 
         $html .= '<div class="inputMultipleValues">';
@@ -1175,6 +1176,10 @@ class BimpInput
         $html .= '</tbody>';
         $html .= '</table>';
         $html .= '</div>';
+
+        if ($max_values !== 'none') {
+            $html .= '<p class="inputHelp">Max: ' . $max_values . ' élément' . ((int) $max_values > 1 ? 's' : '') . '</p>';
+        }
 
         $html .= '</div>';
 

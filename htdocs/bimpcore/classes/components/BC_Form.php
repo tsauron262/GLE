@@ -37,7 +37,8 @@ class BC_Form extends BC_Panel
         'depends_on'   => array(),
         'data_type'    => array('default' => 'string'),
         'value'        => array('data_type' => 'any', 'default' => ''),
-        'no_container' => array('data_type' => 'bool', 'default' => 0)
+        'no_container' => array('data_type' => 'bool', 'default' => 0),
+        'multiple'     => array('data_type' => 'bool', 'default' => 0),
     );
     public static $object_params = array(
         'form_name'   => array('default' => 'default'),
@@ -675,7 +676,10 @@ class BC_Form extends BC_Panel
                         }
                     }
                 }
-                $html .= BimpInput::renderInputContainer($params['input_name'], $params['value'], $content, $this->fields_prefix, $params['required'], 0, 'customField', $extra_data);
+                if ($params['multiple']) {
+                    $extra_data['values_field'] = $params['input_name'];
+                }
+                $html .= BimpInput::renderInputContainer($params['input_name'], $params['value'], $content, $this->fields_prefix, $params['required'], $params['multiple'], 'customField', $extra_data);
             } else {
                 $html .= $content;
             }

@@ -864,6 +864,21 @@ function addMultipleInputCurrentValue($button, value_input_name, label_input_nam
     var $value_input = $inputContainer.find('[name=' + value_input_name + ']');
     var $label_input = $inputContainer.find('[name=' + label_input_name + ']');
 
+    var max_values = $container.data('max_values');
+    if (max_values !== 'none') {
+        max_values = parseInt(max_values);
+
+        var $items = $container.find('tbody.multipleValuesList').find('tr.itemRow');
+        if ($items.length >= max_values) {
+            var msg = 'Vous ne pouvez sélectionner qu\'au maximum ' + max_values + ' élément';
+            if (max_values > 1) {
+                msg += 's';
+            }
+            bimp_msg(msg, 'danger');
+            return;
+        }
+    }
+
     var value = '';
     var label = '';
 

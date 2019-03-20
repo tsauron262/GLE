@@ -1336,7 +1336,7 @@ class BS_SAV extends BimpObject
             $prop->modelpdf = self::$propal_model_pdf;
             $prop->socid = $id_client;
             $prop->date = dol_now();
-            $prop->cond_reglement_id = 26;
+            $prop->cond_reglement_id = 1;
             $prop->mode_reglement_id = 0;
 
             if ($prop->create($user) <= 0) {

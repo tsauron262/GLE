@@ -1231,6 +1231,7 @@ class BS_SAV extends BimpObject
             $factureA->type = 3;
             $factureA->date = dol_now();
             $factureA->socid = $this->getData('id_client');
+            $factureA->cond_reglement_id = 1;
             $factureA->modelpdf = self::$facture_model_pdf;
             $factureA->array_options['options_type'] = "S";
             $factureA->array_options['options_entrepot'] = $this->getData('id_entrepot');
@@ -1336,7 +1337,7 @@ class BS_SAV extends BimpObject
             $prop->modelpdf = self::$propal_model_pdf;
             $prop->socid = $id_client;
             $prop->date = dol_now();
-            $prop->cond_reglement_id = 0;
+            $prop->cond_reglement_id = 26;
             $prop->mode_reglement_id = 0;
 
             if ($prop->create($user) <= 0) {

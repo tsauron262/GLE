@@ -113,8 +113,6 @@ fields:
         type: bool
 #        Fields manquant:
 #    rang
-#    fk_commandedet
-#    fk_contratdet
     
         
 
@@ -218,7 +216,7 @@ lists:
                 
 fields_tables: 
     infos:
-        title: Infos ligne FI
+        title: Infos ligne DI
         icon: id-card
         rows: 
             - field: duration 

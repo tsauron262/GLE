@@ -67,6 +67,8 @@ fields:
         label: Commande
         object: commande
         type: id_object
+        values:
+            array: list_commande
     ref:
         label: Ref
         type: string
@@ -77,32 +79,8 @@ fields:
         label: Contrat
         type: id_object
         object: contrat
-        input: 
-            type: search_list
-            search_list:
-                table: contrat
-                field_return_value: a.rowid
-                field_return_label: a.ref
-                join: societe s
-                join_on: a.fk_soc s.rowid
-                join_return_label: s.nom
-                filters: 
-                    callback: getContratInputFilters
-                options:    
-                    default:
-                        label: Recherche par client
-                        fields_search: s.nom,s.code_client
-                        join: societe s
-                        join_on: a.fk_soc = s.rowid
-                        join_return_label: s.nom
-                        help: Entrez le nom ou le code d'un client
-                    by_ref:
-                        label: Recherche par référence contrat
-                        fields_search: a.ref,a.rowid
-                        join: societe s
-                        join_on: a.fk_soc = s.rowid
-                        join_return_label: s.nom
-                        help: Entrez la référence ou l'ID d'un contrat
+        values:
+            array: list_contrat
     fk_statut:
         label: Statut
         type: int
@@ -433,8 +411,10 @@ fields_tables:
               display: nom_url
             - field: fk_commande
               display: nom_url
+              edit: 1
             - field: fk_contrat 
               display: nom_url
+              edit: 1
             - field: fk_user_author
               display: nom_url 
     price:

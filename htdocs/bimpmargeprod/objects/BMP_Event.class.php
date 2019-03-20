@@ -34,19 +34,19 @@ class BMP_Event extends Abstract_margeprod
     public static $montant_frais_billet_materiel = 0.2;
     public static $sacem_billets_min = 43.57;
     public static $types = array(
-        1 => 'Production',
-        2 => 'Co-production',
-        3 => 'Mise à disposition',
-        4 => 'Location',
-        5 => 'Autre'
+            1 => 'Production',
+            2 => 'Co-production',
+            3 => 'MAD',
+            4 => 'Location',
+            5 => 'Privat'
     );
     public static $places = array(
         1 => 'Club',
         2 => 'Grande salle coupée',
         3 => 'Grande salle',
         4 => 'Double salle',
-        5 => 'Club + grande salle',
-        6 => 'Hors les murs'
+        5 => 'Hors les murs',
+        6 => 'studios'
     );
     public static $status = array(
         1 => array('label' => 'Edition prévisionnel', 'classes' => array('warning')),

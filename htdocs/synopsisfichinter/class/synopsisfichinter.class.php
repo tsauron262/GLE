@@ -56,6 +56,7 @@ class Synopsisfichinter extends Fichinter {
     public $socid;        // Id client
     public $client;        // Objet societe client (a charger par fetch_client)
     public $author;
+    public $fk_user_author;
     public $ref;
     public $date;
     public $fk_di;
@@ -105,7 +106,7 @@ class Synopsisfichinter extends Fichinter {
             $this->duree = 0;
         }
         if ($this->socid <= 0) {
-            $this->error = 'ErrorBadParameterForFunc';
+            $this->error = 'ErrorBadParameterForFunc no CLIENT';
             dol_syslog("Fichinter::create " . $this->error, LOG_ERR);
             return -1;
         }
@@ -116,7 +117,10 @@ class Synopsisfichinter extends Fichinter {
         $soc = new Societe($this->db);
         $result = $soc->fetch($this->socid);
         $this->verifyNumRef($soc);
-
+        
+        if($this->author == "")
+            $this->author = $this->fk_user_author;
+        
         $sql = "INSERT INTO " . MAIN_DB_PREFIX . "fichinter (fk_soc, datec, ref, fk_user_author, description, model_pdf";
         if ($this->projet_id)
             $sql.= ", fk_projet";

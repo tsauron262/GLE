@@ -93,7 +93,6 @@ class BS_SAV extends BimpObject
     {
         $soc = $this->getChildObject("client");
         return $soc->dol_object->getNomUrl(1);
-        ;
     }
 
     // Getters:

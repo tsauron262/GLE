@@ -91,6 +91,7 @@ fields:
         label: Date d'intervention
         type: date
         dol_prop: date
+        required: 1
     date_valid:
         label: Date de validation
         type: date
@@ -216,7 +217,6 @@ forms:
             - field: note_public
             - field: note_private
             - field: extra37
-            - field: fk_user_author
     
         
 filters_panels: 
@@ -398,7 +398,7 @@ fields_tables:
         icon: link
         rows:
             - field: fk_soc 
-              display: nom_url
+              display: card
             - field: fk_commande
               display: nom_url
               edit: 1

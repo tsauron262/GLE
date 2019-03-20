@@ -24,6 +24,21 @@ class ObjectInter extends extraFI{
     }
     
     
+    public function create(&$warnings = array(), $force_create = false) {
+        global $user;
+        $this->data["fk_user_author"] = $user->id;
+        return parent::create($warnings, $force_create);
+    }
+    
+    
+    public function renderHeaderExtraLeft()
+    {
+        $soc = $this->getChildObject("client");
+        $soc->fetch($this->getData("fk_soc"));
+        return $soc->dol_object->getNomUrl(1);
+    }
+    
+    
     
     
     public function renderHeaderExtraRight(){

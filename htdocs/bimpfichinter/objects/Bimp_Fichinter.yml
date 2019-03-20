@@ -62,6 +62,7 @@ fields:
             input: 
                 type: search_societe
                 societe_type: customer 
+        dol_prop: socid
     fk_commande: 
         label: Commande
         object: commande
@@ -113,6 +114,7 @@ fields:
         label: Date d'intervention
         type: date
         dol_prop: date
+        required: 1
     date_valid:
         label: Date de validation
         type: date

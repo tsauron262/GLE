@@ -39,7 +39,11 @@ objects:
         card: 
             title: 
                 object_prop: ref
-            view_btn: 1 
+            view_btn: 1
+    client:
+        instance:
+            id_object:
+                field_value: fk_soc
             
     
                 

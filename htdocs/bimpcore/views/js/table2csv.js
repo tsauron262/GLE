@@ -2,7 +2,7 @@
     "use strict";
     const optionsDefaults = {
         /* action='download' options */
-        filename: "table.csv",
+        filename: "tableau_export_erp.csv",
 
         /* action='output' options */
         appendTo: "body",

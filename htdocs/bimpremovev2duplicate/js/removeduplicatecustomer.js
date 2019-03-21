@@ -456,7 +456,7 @@ function addLine(c, key_group, is_last, is_first, nb_in_group, a_siret_is_set) {
 
 
 // Link to societe
-    html += '<td><a target=blank href="' + DOL_URL_ROOT + '/societe/card.php?socid=' + c.rowid + '" title="<div class=&quot;centpercent&quot;><u>ShowCompany</u></div>" class="classfortooltip refurl">';
+    html += '<td><a target=blank href="' + DOL_URL_ROOT + '/comm/card.php?socid=' + c.rowid + '" title="<div class=&quot;centpercent&quot;><u>ShowCompany</u></div>" class="classfortooltip refurl">';
     html += '<img src="/bimp-8/bimp-erp/htdocs/theme/eldy/img/object_company.png" alt="" class="paddingright classfortooltip valigntextbottom"> </a></td>';
     html += '<td name="errors"></td>';
     $('table#customer').append(html);

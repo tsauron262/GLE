@@ -117,6 +117,15 @@ class pdf_recaptemps extends ModelePDFFicheinter {
 
 
 
+
+
+
+
+
+
+
+
+
             
 // Define position of columns
         $this->posxdesc = $this->marge_gauche + 1;
@@ -155,7 +164,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                 $dir = $conf->societe->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
-                $objectref = "recapetemps-" . dol_sanitizeFileName($object->code_client);
+                $objectref = "recaptemps-" . dol_sanitizeFileName($object->code_client);
                 $dir = $conf->societe->dir_output . "/" . $object->ref;
                 $file = $dir . "/" . $objectref . ".pdf";
             }
@@ -296,8 +305,8 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                 foreach ($fichinters as $fichinter) {
                     $date_split = explode('-', $fichinter['datei']);
                     $year_creation = $date_split[0];
-                    if ($year_creation != date("Y")) // TODO reset this filter
-                        continue;
+//                    if ($year_creation != date("Y")) // TODO reset this filter
+//                        continue;
 
                     $fk_contrat = $fichinter['fk_contrat'];
                     $fk_commande = $fichinter['fk_commande'];
@@ -564,7 +573,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
 
         // Total planned hour
         $html .= '<tr>';
-        $html .= '<td style="text-align: right;" colspan="3" class="grey"><strong>TOTAL DES JOURNEES DE DELEGATION</strong></td>';
+        $html .= '<td style="text-align: right;" colspan="3" class="grey"><strong>TOTAL DES JOURNEES DE DELEGATION </strong><img src="' . DOL_DOCUMENT_ROOT . '/bimpfichinter/img/blanc.png" width="5px" height="5px"/></td>';
         $html .= '<td class="grey"><strong>' . $planned_day_total . '</strong></td>';
         $html .= '<td class="grey"></td>';
         $html .= '<td class="grey"></td>';
@@ -725,7 +734,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
 
         // Total planned hour
         $html .= '<tr>';
-        $html .= '<td style="text-align: right;" colspan="3" class="grey"><strong>TOTAL DES JOURNEES DE DELEGATION</strong></td>';
+        $html .= '<td style="text-align: right;" colspan="3" class="grey"><strong>TOTAL DES JOURNEES DE DELEGATION </strong><img src="' . DOL_DOCUMENT_ROOT . '/bimpfichinter/img/blanc.png" width="5px" height="5px"/></td>';
         $html .= '<td class="grey"><strong>' . $planned_day_total . '</strong></td>';
         $html .= '<td class="grey"></td>';
         $html .= '<td class="grey"></td>';
@@ -767,15 +776,22 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         return $html;
     }
 
-    function getTableLibres($libres, $societe_name) {
+    function getTableLibres($libres, $societe_name, $display_empty_column = false) {
+
         $html = '<table>';
         $html .= '<tr class="orange title">';
-        $html .= '<th colspan="10"><strong>INTERVENTIONS INDÉPENDANTES ' . $societe_name . '</strong></th>';
+        if ($display_empty_column) {
+            $html .= '<th colspan="10"><strong>INTERVENTIONS INDÉPENDANTES ' . $societe_name . '</strong></th>';
+        } else {
+            $html .= '<th colspan="8"><strong>INTERVENTIONS INDÉPENDANTES ' . $societe_name . '</strong></th>';
+        }
         $html .= '</tr>';
         $html .= '<tr class="blue title">';
         $html .= '<th><strong>TITRE</strong></th>';
-        $html .= '<th><strong></strong></th>';
-        $html .= '<th><strong></strong></th>';
+        if ($display_empty_column) {
+            $html .= '<th><strong></strong></th>';
+            $html .= '<th><strong></strong></th>';
+        }
         $html .= '<th><strong>NOMBRE DE JOURNÉE COMMANDÉE</strong></th>';
         $html .= '<th><strong>N°FICHE D\'INTERVENTION (FI)</strong></th>';
         $html .= '<th><strong>DATE FI</strong></th>';
@@ -802,8 +818,10 @@ class pdf_recaptemps extends ModelePDFFicheinter {
 
             $html .= '<tr class="grey title">';
             $html .= '<th></th>';
-            $html .= '<th><strong></strong></th>';
-            $html .= '<th><strong></strong></th>';
+            if ($display_empty_column) {
+                $html .= '<th><strong></strong></th>';
+                $html .= '<th><strong></strong></th>';
+            }
             $html .= '<th><strong>' . $planned_day . '</strong></th>';
             $html .= '<th></th>';
             $html .= '<th></th>';
@@ -824,8 +842,10 @@ class pdf_recaptemps extends ModelePDFFicheinter {
             $solde -= $inter['duree'];
             $html .= '<tr>';
             $html .= '<td>' . $inter['description'] . '</td>';
-            $html .= '<td></td>';
-            $html .= '<td></td>';
+            if ($display_empty_column) {
+                $html .= '<td></td>';
+                $html .= '<td></td>';
+            }
             $html .= '<td></td>';
             $html .= '<td>' . $inter['ref'] . '</td>';
             $html .= '<td>' . $this->getDate($inter['datei']) . '</td>';
@@ -840,8 +860,10 @@ class pdf_recaptemps extends ModelePDFFicheinter {
             // Solde
             $html .= '<tr>';
             $html .= '<td class="greyDisabled"></td>';
-            $html .= '<td class="greyDisabled"></td>';
-            $html .= '<td class="greyDisabled"></td>';
+            if ($display_empty_column) {
+                $html .= '<td class="greyDisabled"></td>';
+                $html .= '<td class="greyDisabled"></td>';
+            }
             $html .= '<td class="greyDisabled"></td>';
             $html .= '<td class="greyDisabled"></td>';
             $html .= '<td class="greyDisabled"></td>';
@@ -854,8 +876,10 @@ class pdf_recaptemps extends ModelePDFFicheinter {
             // Used
             $html .= '<tr>';
             $html .= '<td class="greyDisabled"></td>';
-            $html .= '<td class="greyDisabled"></td>';
-            $html .= '<td class="greyDisabled"></td>';
+            if ($display_empty_column) {
+                $html .= '<td class="greyDisabled"></td>';
+                $html .= '<td class="greyDisabled"></td>';
+            }
             $html .= '<td class="greyDisabled"></td>';
             $html .= '<td class="greyDisabled"></td>';
             $html .= '<td class="greyDisabled"></td>';
@@ -872,7 +896,10 @@ class pdf_recaptemps extends ModelePDFFicheinter {
 
         // Total planned hour
         $html .= '<tr>';
-        $html .= '<td style="text-align: right;" colspan="3" class="grey"><strong>TOTAL DES JOURNEES DE DELEGATION</strong></td>';
+        if ($display_empty_column)
+            $html .= '<td style="text-align: right;" colspan="3" class="grey"><strong>TOTAL DES JOURNEES DE DELEGATION </strong><img src="' . DOL_DOCUMENT_ROOT . '/bimpfichinter/img/blanc.png" width="5px" height="5px"/></td>';
+        else
+            $html .= '<td style="text-align: right;" class="grey"><strong>TOTAL DES JOURNEES DE DELEGATION </strong><img src="' . DOL_DOCUMENT_ROOT . '/bimpfichinter/img/blanc.png" width="5px" height="5px"/></td>';
         $html .= '<td class="grey"><strong>' . $planned_day_total . '</strong></td>';
         $html .= '<td class="grey"></td>';
         $html .= '<td class="grey"></td>';
@@ -909,8 +936,8 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         $html .= '<td class="green"><strong>SOLDE TOTAL ' . mb_strimwidth($libres_number, 0, 15, "...") . '</strong></td>';
         $html .= '<td class="green"><strong>' . $this->getTime($solde_total) . '</strong></td>';
         $html .= '</tr>';
-
         $html .= '</table>';
+
         return $html;
     }
 

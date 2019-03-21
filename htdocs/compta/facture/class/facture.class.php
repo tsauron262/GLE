@@ -1382,7 +1382,7 @@ class Facture extends CommonInvoice
 			else
 			{
 				$this->error='Bill with id='.$rowid.' or ref='.$ref.' or ref_ext='.$ref_ext.' not found';
-				dol_syslog(get_class($this)."::fetch Error ".$this->error, LOG_ERR);
+				dol_syslog(get_class($this)."::fetch Error ".$this->error, LOG_NOTICE);
 				return 0;
 			}
 		}

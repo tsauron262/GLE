@@ -26,7 +26,7 @@ class ObjectInter extends extraFI{
     
     public function create(&$warnings = array(), $force_create = false) {
         global $user;
-        $this->data["fk_user_author"] = $user->id;
+        $this->set("fk_user_author", $user->id);
         return parent::create($warnings, $force_create);
     }
     
@@ -34,7 +34,6 @@ class ObjectInter extends extraFI{
     public function renderHeaderExtraLeft()
     {
         $soc = $this->getChildObject("client");
-        $soc->fetch($this->getData("fk_soc"));
         return $soc->dol_object->getNomUrl(1);
     }
     
@@ -76,7 +75,7 @@ class ObjectInter extends extraFI{
         $redirectModeNewOld = 2;//0 pas de redirect 1 redirect button   2 redirect direct
         
         global $user;
-        if(in_array($user->id, array(1, 375, 35, 446, 277)))
+        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42)))
                 $redirectModeNewOld = 1;
         
         if($redirectModeOldNew == 2)//pur incohérence
@@ -130,7 +129,7 @@ class ObjectInter extends extraFI{
     
     function getFieldFiltre($field, $mode){//show filtre form_value
         
-        $tabT = array("fk_soc" => GETPOST("fk_soc"));
+        $tabT = array("fk_soc" => BimpTools::getPostFieldValue("fk_soc"));
         
         if(isset($tabT[$field]) && $tabT[$field] > 0){
             $value = $tabT[$field];

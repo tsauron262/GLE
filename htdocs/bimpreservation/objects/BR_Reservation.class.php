@@ -322,7 +322,7 @@ class BR_Reservation extends BimpObject
                     case 2: // OK
                         // Réserver: 
                         $params = array();
-                        if ($product->isSerialisable() || $qty > 1) {
+                        if ($product->isSerialisable()) {
                             $params['form_name'] = 'reserve_equipments';
                         } elseif ($qty > 1) {
                             $params['form_name'] = 'new_status';

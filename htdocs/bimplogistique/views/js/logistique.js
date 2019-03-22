@@ -87,7 +87,7 @@ function saveCommandeLineShipments($button, id_line) {
                 data.id_shipment = parseInt($row.data('id_shipment'));
                 data.qty = parseFloat($row.find('input.line_shipment_qty').val());
                 if (isNaN(data.qty)) {
-                    bimp_msg('Quantités invalides pour l\'expédition n°'.$row.data('num_livraison<br/>Veuillez corriger', 'danger'));
+                    bimp_msg('Quantités invalides pour l\'expédition n°' + $row.data('num_livraison') + '<br/>Veuillez corriger', 'danger');
                     return;
                 }
                 var $groupInput = $row.find('input.line_shipment_group');
@@ -207,6 +207,77 @@ function setSelectedCommandeLinesReservationsEquipmentsToShipment($button, id_co
     }, 'shipment_equipments', null, null, null, function ($form, extra_data) {
         return onShipmentEquipmentsFormSubmit($form, extra_data);
     });
+}
+
+function onShipmentLinesViewLoaded($view) {
+    if (!parseInt($view.data('shipment_lines_view_events_init'))) {
+        var $modalContent = $view.findParentByClass('modal_content');
+
+        if ($.isOk($modalContent)) {
+            var modal_idx = parseInt($modalContent.data('idx'));
+            bimpModal.addButton('<i class="fas fa5-save iconLeft"></i>Enregistrer', 'saveShipmentLines($(this), ' + $view.data('id_object') + ', ' + modal_idx + ')', 'primary', '', modal_idx);
+        } else {
+            $view.find('.commande_shipments_form').find('.buttonsContainer').show();
+        }
+
+        $view.data('shipment_lines_view_events_init', 1);
+    }
+}
+
+function saveShipmentLines($button, id_shipment, modal_idx) {
+    var $modal = $button.findParentByClass('modal-content');
+    var $container = null;
+    if ($.isOk($modal)) {
+        var $container = $modal.find('#modal_content_' + modal_idx).find('.shipment_lines');
+    }
+
+    if (!$.isOk($container)) {
+        bimp_msg('Une erreur est survenue (Conteneur absent). Opération abandonnée');
+        return;
+    }
+
+    var $rows = $container.find('tr.shipment_line_row');
+
+    var lines = [];
+    if ($rows.length) {
+        $rows.each(function () {
+            var $row = $(this);
+            var data = {};
+            data.id_line = parseInt($row.data('id_line'));
+            data.qty = parseFloat($row.find('[name="line_' + data.id_line + '_qty"]').val());
+            if (isNaN(data.qty)) {
+                bimp_msg('Quantités invalides pour la n°' + $row.data('num_line') + '<br/>Veuillez corriger', 'danger');
+                return;
+            }
+            var $groupInput = $row.find('[name="line_' + data.id_line + '_group_article"]');
+            if ($groupInput.length) {
+                data.group = parseInt($groupInput.val());
+            }
+
+            var $eq_row = $container.find('#shipment_line_' + data.id_line + '_equipments_row');
+            if ($eq_row.length) {
+                data.equipments = [];
+                $eq_row.find('.line_' + data.id_line + '_equipments_check:checked').each(function () {
+                    data.equipments.push(parseInt($(this).val()));
+                });
+            }
+            lines.push(data);
+        });
+
+        var $resultContainer = $container.find('div.ajaxResultContainer');
+
+        setObjectAction($button, {
+            module: 'bimplogistique',
+            object_name: 'BL_CommandeShipment',
+            id_object: id_shipment
+        }, 'saveLines', {
+            lines: lines
+        }, null, $resultContainer, function () {
+            bimpModal.removeContent(modal_idx);
+        });
+    } else {
+        bimp_msg('Aucune ligne à enregistrer', 'warning');
+    }
 }
 
 // Logistique commandes fournisseur: 
@@ -452,6 +523,8 @@ $(document).ready(function () {
             onCommandeLineShipmentsViewLoaded(e.$view);
         } else if (e.$view.hasClass('Bimp_CommandeFournLine_view_reception')) {
             onCommandeFournLineReceptionViewLoaded(e.$view);
+        } else if (e.$view.hasClass('BL_CommandeShipment_view_lines')) {
+            onShipmentLinesViewLoaded(e.$view);
         }
     });
 

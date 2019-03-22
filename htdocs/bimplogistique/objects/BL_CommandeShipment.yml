@@ -187,19 +187,14 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: data
+                      
     lines: 
         title: Produits / services inclus dans l'expédition
         rows: 
             - cols: 
-                - type: list
-                  list: 
-                      name: default
-                      children: reservation_shipments
-            - cols: 
-                - type: list
-                  list: 
-                      name: default
-                      children: service_shipments
+                - type: custom
+                  custom: 
+                      callback: renderShipmentsLines
                       
 lists_cols: 
     commande: 

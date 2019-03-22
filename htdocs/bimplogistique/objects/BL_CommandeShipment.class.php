@@ -226,11 +226,11 @@ class BL_CommandeShipment extends BimpObject
         $id_contact = (int) $this->getData('id_contact');
         if (!$id_contact) {
             $commande = $this->getParentInstance();
-            $contacts = $commande->getIdContact('external', 'SHIPPING');
+            $contacts = $commande->dol_object->getIdContact('external', 'SHIPPING');
             if (isset($contacts[0]) && $contacts[0]) {
                 $id_contact = $contacts[0];
             } else {
-                $contacts = $commande->getIdContact('external', 'CUSTOMER');
+                $contacts = $commande->dol_object->getIdContact('external', 'CUSTOMER');
                 if (isset($contacts[0]) && $contacts[0]) {
                     $id_contact = $contacts[0];
                 }
@@ -282,7 +282,7 @@ class BL_CommandeShipment extends BimpObject
                                     'in' => $shipment_data['equipments']
                                 )
                                     ), null, null, 'id', 'asc', 'array', array('serial'));
-                            
+
                             foreach ($equipments as $eq) {
                                 $line_qties['serials'][] = $eq['serial'];
                             }
@@ -293,7 +293,7 @@ class BL_CommandeShipment extends BimpObject
                         $line_qties['to_ship_qty'] += (float) $shipment_data['qty'];
                     }
                 }
-                $qties[(int) $line->id] = $line_qties;
+                $qties[(int) $line->getData('id_line')] = $line_qties;
             }
         }
 
@@ -348,7 +348,7 @@ class BL_CommandeShipment extends BimpObject
 
         if ($this->isLoaded()) {
             if ((int) $this->getData('status') === 2) {
-                $url = DOL_URL_ROOT . '/bimpreservation/bl.php?id_commande=' . $this->getData('id_commande_client') . '&num_bl=' . $this->getData('num_livraison') . '&id_contact_shipment=' . (int) $this->getData('id_contact');
+                $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id;
                 $onclick = 'window.open(\'' . $url . '\')';
                 $html .= '<button type="button" class="btn btn-default" onclick="' . htmlentities($onclick) . '">';
                 $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>';
@@ -779,7 +779,7 @@ class BL_CommandeShipment extends BimpObject
             $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour de l\'expédition');
         }
 
-        $commande->checkIsFullyShipped();
+//        $commande->checkIsFullyShipped();
 
         return $errors;
     }

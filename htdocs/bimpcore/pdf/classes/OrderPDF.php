@@ -628,7 +628,6 @@ class BLPDF extends OrderPDF
                 }
             } else {
                 if (!is_null($product)) {
-                    $serials = BR_Reservation::getShippedSerials($this->commande->id, $line->id, $this->num_bl);
                     if (isset($qties[(int) $line->id]['serials']) && count($qties[(int) $line->id]['serials'])) {
                         $desc .= '<br/>';
                         $desc .= '<strong>N° de série</strong>: ';
@@ -651,9 +650,10 @@ class BLPDF extends OrderPDF
 
                 if ($this->hideReduc && $line->remise_percent) {
                     $pu_ht = (float) ($line->subprice - ($line->subprice * ($line->remise_percent / 100)));
+                    
                     $row['pu_ht'] = price($pu_ht, 0, $this->langs);
                 } else {
-                    $pu_ht = (float) $line->supprice;
+                    $pu_ht = (float) $line->subprice;
                     $row['pu_ht'] = pdf_getlineupexcltax($this->object, $i, $this->langs);
                 }
 
@@ -666,7 +666,7 @@ class BLPDF extends OrderPDF
                 $row['dl'] = isset($qties[(int) $line->id]['shipped_qty']) ? $qties[(int) $line->id]['shipped_qty'] : 0;
                 $row['ral'] = isset($qties[(int) $line->id]['to_ship_qty']) ? $qties[(int) $line->id]['to_ship_qty'] : 0;
 
-                $total_ht = (int) $qty * (float) $pu_ht;
+                $total_ht = (float) $qty * (float) $pu_ht;
 
                 $row['total_ht'] = price($total_ht);
 
@@ -721,7 +721,7 @@ class BLPDF extends OrderPDF
             }
 
             $table->rows[] = $row;
-            
+
             $i++;
             unset($product);
             $product = null;

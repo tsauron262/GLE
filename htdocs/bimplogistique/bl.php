@@ -4,7 +4,6 @@ define('NOLOGIN', '1');
 
 require_once("../main.inc.php");
 
-ini_set('display_errors', 1);
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/OrderPDF.php';
 
@@ -13,6 +12,8 @@ global $db, $langs;
 $id_shipment = (int) BimpTools::getValue('id_shipment');
 
 $errors = array();
+
+ini_set('display_errors', 1);
 
 if (!$id_shipment) {
     $errors[] = 'ID de la l\'expédition absent';

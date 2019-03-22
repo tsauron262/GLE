@@ -240,6 +240,66 @@ class BL_CommandeShipment extends BimpObject
         return $id_contact;
     }
 
+    public function getPDFQtiesAndSerials()
+    {
+        $qties = array();
+
+        $commande = $this->getParentInstance();
+        $equipment_instance = BimpObject::getInstance('bimpequipment', 'Equipment');
+
+        if (BimpObject::objectLoaded($commande)) {
+            $lines = $commande->getChildrenObjects('lines');
+            $prev_shipments = array();
+            $list = $this->getList(array(
+                'id'           => array(
+                    'operator' => '<>',
+                    'value'    => $this->id
+                ),
+                'date_shipped' => array(
+                    'operator' => '<',
+                    'value'    => $this->getData('date_shipped')
+                )
+                    ), null, null, 'num_livraison', 'asc', 'array', array('id'));
+
+            foreach ($list as $item) {
+                $prev_shipments[] = $item['id'];
+            }
+
+            foreach ($lines as $line) {
+                $line_qties = array(
+                    'qty'         => 0,
+                    'shipped_qty' => 0,
+                    'to_ship_qty' => 0,
+                    'serials'     => array()
+                );
+                $line_shipments = $line->getData('shipments');
+                foreach ($line_shipments as $id_shipment => $shipment_data) {
+                    if ((int) $id_shipment === $this->id) {
+                        $line_qties['qty'] = (float) $shipment_data['qty'];
+                        if (isset($shipment_data['equipments'])) {
+                            $equipments = $equipment_instance->getList(array(
+                                'id' => array(
+                                    'in' => $shipment_data['equipments']
+                                )
+                                    ), null, null, 'id', 'asc', 'array', array('serial'));
+                            
+                            foreach ($equipments as $eq) {
+                                $line_qties['serials'][] = $eq['serial'];
+                            }
+                        }
+                    } elseif (in_array($id_shipment, $prev_shipments)) {
+                        $line_qties['shipped_qty'] += (float) $shipment_data['qty'];
+                    } else {
+                        $line_qties['to_ship_qty'] += (float) $shipment_data['qty'];
+                    }
+                }
+                $qties[(int) $line->id] = $line_qties;
+            }
+        }
+
+        return $qties;
+    }
+
     // Affichages: 
 
     public function displayContact()
@@ -484,7 +544,7 @@ class BL_CommandeShipment extends BimpObject
                     if (is_null($line->desc) || !$line->desc) {
                         if (!is_null($product)) {
                             $desc = $product->ref;
-                            $desc.= ($desc ? ' - ' : '') . $product->label;
+                            $desc .= ($desc ? ' - ' : '') . $product->label;
                         }
                     }
                     if (!$desc) {

@@ -36,14 +36,64 @@ function addSelectedCommandeLinesToShipment($button, list_id, id_commande) {
     });
 }
 
-function addSelectedCommandeLinesToInvoice($button, list_id) {
-
-}
-
 function onShipmentFormSubmit($form, extra_data) {
     var lines = [];
 
     var $inputs = $form.find('.shipment_lines_inputContainer').find('input.line_shipment_qty');
+
+    $inputs.each(function () {
+        var id_line = parseInt($(this).data('id_line'));
+        var qty = parseFloat($(this).val());
+        lines.push({
+            id_line: id_line,
+            qty: qty
+        });
+    });
+
+    extra_data['lines'] = lines;
+    return extra_data;
+}
+
+function addSelectedCommandeLinesToFacture($button, list_id, id_commande) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        return;
+    }
+
+    var $selected = $list.find('tbody').find('input.item_check:checked')
+
+    if (!$selected.length) {
+        bimp_msg('Aucune ligne sélectionnée', 'danger');
+        return;
+    }
+
+    var extra_data = {
+        facture_lines_list: []
+    };
+
+    $selected.each(function () {
+        extra_data.facture_lines_list.push(parseInt($(this).data('id_object')));
+    });
+
+    setObjectAction($button, {
+        module: 'bimpcommercial',
+        object_name: 'Bimp_Commande',
+        id_object: id_commande
+    }, 'linesFactureQties', extra_data, 'invoice', null, null, null, function ($form, extra_data) {
+        return onFactureFormSubmit($form, extra_data);
+    });
+}
+
+function onFactureFormSubmit($form, extra_data) {
+    var lines = [];
+
+    var $inputs = $form.find('.facture_lines_inputContainer').find('input.line_facture_qty');
 
     $inputs.each(function () {
         var id_line = parseInt($(this).data('id_line'));
@@ -87,7 +137,7 @@ function saveCommandeLineShipments($button, id_line) {
                 data.id_shipment = parseInt($row.data('id_shipment'));
                 data.qty = parseFloat($row.find('input.line_shipment_qty').val());
                 if (isNaN(data.qty)) {
-                    bimp_msg('Quantités invalides pour l\'expédition n°'.$row.data('num_livraison<br/>Veuillez corriger', 'danger'));
+                    bimp_msg('Quantités invalides pour l\'expédition n°' + $row.data('num_livraison') + '<br/>Veuillez corriger', 'danger');
                     return;
                 }
                 var $groupInput = $row.find('input.line_shipment_group');
@@ -121,10 +171,10 @@ function setSelectedCommandeLinesReservationsStatus($button, id_commande, new_st
         return;
     }
 
-    var $listContainer = $button.findParentByClass('Bimp_CommandeLine_list_table_container');
+    var $list = $('#Bimp_CommandeLine_logistique_list_table_Bimp_Commande_' + id_commande);
 
-    if ($.isOk($listContainer)) {
-        var $rows = $listContainer.find('.Bimp_CommandeLine_list_table').find('tbody.listRows').find('tr.Bimp_CommandeLine_row');
+    if ($.isOk($list)) {
+        var $rows = $list.find('tbody.listRows').find('tr.Bimp_CommandeLine_row');
         var reservations = [];
         $rows.each(function () {
             $(this).find('tr.Bimp_CommandeLine_reservation_row').each(function () {
@@ -207,6 +257,77 @@ function setSelectedCommandeLinesReservationsEquipmentsToShipment($button, id_co
     }, 'shipment_equipments', null, null, null, function ($form, extra_data) {
         return onShipmentEquipmentsFormSubmit($form, extra_data);
     });
+}
+
+function onShipmentLinesViewLoaded($view) {
+    if (!parseInt($view.data('shipment_lines_view_events_init'))) {
+        var $modalContent = $view.findParentByClass('modal_content');
+
+        if ($.isOk($modalContent)) {
+            var modal_idx = parseInt($modalContent.data('idx'));
+            bimpModal.addButton('<i class="fas fa5-save iconLeft"></i>Enregistrer', 'saveShipmentLines($(this), ' + $view.data('id_object') + ', ' + modal_idx + ')', 'primary', '', modal_idx);
+        } else {
+            $view.find('.commande_shipments_form').find('.buttonsContainer').show();
+        }
+
+        $view.data('shipment_lines_view_events_init', 1);
+    }
+}
+
+function saveShipmentLines($button, id_shipment, modal_idx) {
+    var $modal = $button.findParentByClass('modal-content');
+    var $container = null;
+    if ($.isOk($modal)) {
+        var $container = $modal.find('#modal_content_' + modal_idx).find('.shipment_lines');
+    }
+
+    if (!$.isOk($container)) {
+        bimp_msg('Une erreur est survenue (Conteneur absent). Opération abandonnée');
+        return;
+    }
+
+    var $rows = $container.find('tr.shipment_line_row');
+
+    var lines = [];
+    if ($rows.length) {
+        $rows.each(function () {
+            var $row = $(this);
+            var data = {};
+            data.id_line = parseInt($row.data('id_line'));
+            data.qty = parseFloat($row.find('[name="line_' + data.id_line + '_qty"]').val());
+            if (isNaN(data.qty)) {
+                bimp_msg('Quantités invalides pour la n°' + $row.data('num_line') + '<br/>Veuillez corriger', 'danger');
+                return;
+            }
+            var $groupInput = $row.find('[name="line_' + data.id_line + '_group_article"]');
+            if ($groupInput.length) {
+                data.group = parseInt($groupInput.val());
+            }
+
+            var $eq_row = $container.find('#shipment_line_' + data.id_line + '_equipments_row');
+            if ($eq_row.length) {
+                data.equipments = [];
+                $eq_row.find('.line_' + data.id_line + '_equipments_check:checked').each(function () {
+                    data.equipments.push(parseInt($(this).val()));
+                });
+            }
+            lines.push(data);
+        });
+
+        var $resultContainer = $container.find('div.ajaxResultContainer');
+
+        setObjectAction($button, {
+            module: 'bimplogistique',
+            object_name: 'BL_CommandeShipment',
+            id_object: id_shipment
+        }, 'saveLines', {
+            lines: lines
+        }, null, $resultContainer, function () {
+            bimpModal.removeContent(modal_idx);
+        });
+    } else {
+        bimp_msg('Aucune ligne à enregistrer', 'warning');
+    }
 }
 
 // Logistique commandes fournisseur: 
@@ -452,6 +573,8 @@ $(document).ready(function () {
             onCommandeLineShipmentsViewLoaded(e.$view);
         } else if (e.$view.hasClass('Bimp_CommandeFournLine_view_reception')) {
             onCommandeFournLineReceptionViewLoaded(e.$view);
+        } else if (e.$view.hasClass('BL_CommandeShipment_view_lines')) {
+            onShipmentLinesViewLoaded(e.$view);
         }
     });
 

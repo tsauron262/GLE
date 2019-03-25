@@ -69,10 +69,6 @@ class Bimp_CommandeLine extends ObjectLine
             return 0;
         }
 
-        if ($this->isProductSerialisable()) {
-            // todo: vérifier que tous les équipements ont été assignées à l'expédition
-        }
-
         $ready_qty = (float) $this->getReadyToShipQty($id_shipment);
         if ($ready_qty < (float) $shipments[(int) $id_shipment]['qty']) {
             $diff = (float) $shipments[(int) $id_shipment]['qty'] - $ready_qty;
@@ -202,7 +198,7 @@ class Bimp_CommandeLine extends ObjectLine
                 array(
                     'label'   => 'Ajouter à une facture',
                     'icon'    => 'fas_file-invoice-dollar',
-                    'onclick' => 'addSelectedCommandeLinesToInvoice($(this), \'list_id\', ' . $commande->id . ')'
+                    'onclick' => 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ' . $commande->id . ')'
                 )
             );
         }
@@ -307,6 +303,23 @@ class Bimp_CommandeLine extends ObjectLine
             'qty'        => 0,
             'group'      => 0,
             'shipped'    => 0,
+            'equipments' => array()
+        );
+    }
+
+    public function getFactureData($id_facture)
+    {
+        $factures = $this->getData('factures');
+
+        if (isset($factures[(int) $id_facture])) {
+            return array(
+                'qty'        => (isset($factures[(int) $id_facture]['qty']) ? $factures[(int) $id_facture]['qty'] : 0),
+                'equipments' => (isset($factures[(int) $id_facture]['equipments']) ? $factures[(int) $id_facture]['equipments'] : array()),
+            );
+        }
+
+        return array(
+            'qty'        => 0,
             'equipments' => array()
         );
     }
@@ -692,7 +705,75 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
+    public function renderFactureQtyInput($id_facture, $with_total_max = false)
+    {
+        $html = '';
+
+        $factures = $this->getData('factures');
+
+        $facture_qty = 0;
+        if (isset($factures[(int) $factures]['qty'])) {
+            $facture_qty = (float) $factures[(int) $factures]['qty'];
+        }
+
+        $decimals = 3;
+
+        if ((int) $this->getData('type') === self::LINE_PRODUCT) {
+            $product = $this->getProduct();
+            if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === 0) {
+                $decimals = 0;
+            }
+        }
+
+        $max = (float) $this->qty - (float) $this->getBilledQty() + $facture_qty;
+
+        if (!$decimals) {
+            $max = (int) floor($max);
+        }
+
+        $options = array(
+            'data'        => array(
+                'id_line'   => (int) $this->id,
+                'data_type' => 'number',
+                'decimals'  => $decimals,
+                'unsigned'  => 0,
+                'min'       => 0,
+                'max'       => $max
+            ),
+            'extra_class' => 'line_facture_qty',
+            'max_label'   => 1
+        );
+
+        if ($with_total_max) {
+            $options['data']['total_max_value'] = (float) $this->qty;
+            $options['data']['total_max_inputs_class'] = 'line_facture_qty';
+            $options['extra_class'] .= ' total_max';
+        }
+
+        $value = (!$with_total_max && !(float) $facture_qty ? $max : $facture_qty);
+
+        $html .= BimpInput::renderInput('qty', 'line_' . $this->id . '_facture_' . $id_facture . '_qty', $value, $options);
+
+        if ($facture_qty > 0) {
+            if ($facture_qty === 1) {
+                $msg = $facture_qty . ' unité a déjà été assignée à cette facture.';
+            } else {
+                $msg = $facture_qty . ' unités ont déjà été assignées à cette facture.';
+            }
+
+            $msg .= '<br/>Indiquez ici le nombre total d\'unités à assigner.';
+            $html .= BimpRender::renderAlerts($msg, 'info');
+        }
+
+        return $html;
+    }
+
     public function renderShipmentEquipmentsInput($id_shipment)
+    {
+        return 'TEST';
+    }
+
+    public function renderFactureEquipmentsInput($id_fature)
     {
         return 'TEST';
     }
@@ -1064,6 +1145,9 @@ class Bimp_CommandeLine extends ObjectLine
         global $user;
         $shipment_data = $this->getShipmentData($shipment->id);
         $commande = $this->getParentInstance();
+
+        $id_client = (int) $commande->getData('fk_soc');
+        $id_contact = (int) $shipment->getcontact();
         $id_entrepot = (int) $shipment->getData('id_entrepot');
 
 
@@ -1093,26 +1177,45 @@ class Bimp_CommandeLine extends ObjectLine
             $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
 
             if ($this->isProductSerialisable()) {
-                // todo: Assigner le statut 300 à toutes les réservations des équipements associés à l'expédition. 
-                // Mettre à jour les emplacements pour chaque équipement. 
-//                $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
-//                $place_errors = $place->validateArray(array(
-//                    'id_equipment' => $id_equipment,
-//                    'type'         => BE_Place::BE_PLACE_CLIENT,
-//                    'id_client'    => (int) $id_client,
-//                    'id_contact'   => (int) $id_contact,
-//                    'infos'        => $stock_label,
-//                    'date'         => date('Y-m-d H:i:s'),
-//                    'code_mvt'     => $codemove
-//                ));
-//
-//                if (!count($place_errors)) {
-//                    $place_errors = $place->create();
-//                }
-//
-//                if (count($place_errors)) {
-//                    $warnings[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement d\'ID ' . $id_equipment . ' (Réf. réservation: "' . $item['ref_reservation'] . '")');
-//                }
+                $reservations = $this->getReservations('status', 'asc', '200');
+
+                foreach ($reservations as $reservation) {
+                    $id_equipment = (int) $reservation->getData('id_equipment');
+                    if ($id_equipment) {
+                        if (in_array($id_equipment, $shipment_data['equipments'])) {
+                            $equipment = $reservation->getChildObject('equipment');
+                            if (!BimpObject::objectLoaded($equipment)) {
+                                $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
+                            } else {
+                                $res_errors = $reservation->setNewStatus(300, 1, $id_equipment);
+                                if (count($res_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut pour l\'équipement ' . $equipment->getData('serial'));
+                                } else {
+                                    // Mise à jour de l'emplacement de l'équipement:  
+                                    $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                                    $place_errors = $place->validateArray(array(
+                                        'id_equipment' => $id_equipment,
+                                        'type'         => BE_Place::BE_PLACE_CLIENT,
+                                        'id_client'    => (int) $id_client,
+                                        'id_contact'   => (int) $id_contact,
+                                        'infos'        => $stock_label,
+                                        'date'         => date('Y-m-d H:i:s'),
+                                        'code_mvt'     => $codemove
+                                    ));
+
+                                    if (!count($place_errors)) {
+                                        $place_errors = $place->create();
+                                    }
+
+                                    if (count($place_errors)) {
+                                        $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
+                                        dol_syslog('Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ') - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             } else {
                 $reservations = $this->getReservations('status', 'asc', '200');
 
@@ -1129,13 +1232,13 @@ class Bimp_CommandeLine extends ObjectLine
                     }
                     $res_errors = $reservation->setNewStatus(300, $qty);
                     if (count($res_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour di statut de la réservation d\'ID ' . $reservation->id);
+                        $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut de la réservation d\'ID ' . $reservation->id);
                     } else {
                         // traitement des stocks
                         // todo: Voir pour utiliser un code_mov spécifique (utile en cas d'annulation pour vérifier que le mvt de stock a été correctement effectué.
                         if ($product->dol_object->correct_stock($user, $id_entrepot, $shipment_data['qty'], 1, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
                             $msg = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités à retirer: ' . $shipment_data['qty'] . ')';
-                            $warnings[] = $msg;
+                            $errors[] = $msg;
                             dol_syslog($msg, LOG_ERR);
                         }
                     }
@@ -1149,9 +1252,10 @@ class Bimp_CommandeLine extends ObjectLine
             $shipments = $this->getData('shipments');
             $shipments[(int) $shipment->id]['shipped'] = 1;
             $this->set('shipments', $shipments);
+            $warnings = array();
             $up_errors = $this->update($warnings, true);
             if (count($up_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne de commande');
+                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne de commande client');
             }
         }
 

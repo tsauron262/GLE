@@ -253,6 +253,10 @@ function submitForm(form_id) {
     if (!$form.length) {
         return;
     }
+    
+    if (parseInt($form.data('no_auto_submit'))) {
+        return;
+    }
 
     var $modal = $form.findParentByClass('modal');
     if ($.isOk($modal)) {

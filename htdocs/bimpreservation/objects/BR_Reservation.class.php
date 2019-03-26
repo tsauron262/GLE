@@ -16,6 +16,7 @@ class BR_Reservation extends BimpObject
         2   => array('label' => 'A réserver', 'icon' => 'exclamation-circle', 'classes' => array('important')),
         3   => array('label' => 'Cmde fourn. à finaliser', 'icon' => 'cart-arrow-down', 'classes' => array('important')),
         100 => array('label' => 'En attente de réception', 'icon' => 'hourglass-start', 'classes' => array('warning')),
+        101 => array('label' => 'Reçu - Attente attribution', 'icon' => 'hourglass-start', 'classes' => array('important')),
         200 => array('label' => 'Réservé / Attribué', 'icon' => 'lock', 'classes' => array('danger')),
         201 => array('label' => 'Transfert en cours', 'icon' => 'lock', 'classes' => array('danger')),
         202 => array('label' => 'Réservé', 'icon' => 'lock', 'classes' => array('danger')),
@@ -27,7 +28,7 @@ class BR_Reservation extends BimpObject
         303 => array('label' => 'Reservation annulée', 'icon' => 'times', 'classes' => array('success')),
         304 => array('label' => 'Livré au client', 'icon' => 'sign-out', 'classes' => array('success')),
     );
-    public static $commande_status = array(0, 2, 3, 100, 200, 250, 300, 303);
+    public static $commande_status = array(0, 2, 3, 100, 101, 200, 250, 300, 303);
     public static $transfert_status = array(201, 301, 303);
     public static $temp_status = array(202, 302, 303);
     public static $sav_status = array(203, 303, 304);
@@ -320,6 +321,7 @@ class BR_Reservation extends BimpObject
 
                     // Si à réserver: 
                     case 2: // OK
+                    case 101:
                         // Réserver: 
                         $params = array();
                         if ($product->isSerialisable()) {
@@ -718,7 +720,15 @@ class BR_Reservation extends BimpObject
                     } else {
                         $input_name = 'equipments';
                         $max_values = (int) $this->getData('qty');
-                        $content = BimpInput::renderInput('select', $input_name . '_add_value', '', array(
+
+                        $content = '<div style="display: inline-block; margin-right: 15px;">';
+                        $content .= '<span class="small">Numéro de série: </span><br/>';
+                        $content .= BimpInput::renderInput('text', 'search_serial', '', array(
+                                    'style' => 'border: 1px solid #DCDCDC'
+                        ));
+                        $content .= '</div>';
+
+                        $content .= BimpInput::renderInput('select', $input_name . '_add_value', '', array(
                                     'options' => $equipments
                         ));
 
@@ -992,7 +1002,7 @@ class BR_Reservation extends BimpObject
             return array('Cette réservation a déjà ce statut');
         }
 
-        if (in_array($status, self::$need_equipment_status) && ($current_status <= 100 || ($this->getData('type') === self::BR_RESERVATION_SAV)) && $this->isProductSerialisable()) {
+        if (in_array($status, self::$need_equipment_status) && ($current_status < 200 || ($this->getData('type') === self::BR_RESERVATION_SAV)) && $this->isProductSerialisable()) {
             if (is_null($id_equipment) || !$id_equipment) {
                 return array('Produit sérialisable: équipement obligatoire');
             }
@@ -1054,7 +1064,7 @@ class BR_Reservation extends BimpObject
         if ($this->isProductSerialisable()) {
             $equipment = $this->getChildObject('equipment');
             if (is_null($equipment) || !$equipment->isLoaded()) {
-                $errors[] = 'Equipement invalide';
+                $errors[] = 'Equipement invalide - ' . $this->getData('id_equipment') . ' - ' . $id_equipment;
             } else {
                 if ($current_qty > 1) {
                     $new_reservation = BimpObject::getInstance($this->module, $this->object_name, $this->id);

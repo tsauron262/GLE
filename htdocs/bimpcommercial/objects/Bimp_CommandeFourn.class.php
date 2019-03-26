@@ -483,25 +483,25 @@ class Bimp_CommandeFourn extends BimpComm
             }
 
             // Réceptionner produits:
-            if ($this->isActionAllowed('receive_products') && $this->canSetAction('receive_products')) {
-                $onclick = 'window.location = \'' . DOL_URL_ROOT . '/fourn/commande/dispatch.php?id=' . $this->id . '\'';
-                $buttons[] = array(
-                    'label'   => 'Réceptionner des produits',
-                    'icon'    => 'fas_arrow-circle-down',
-                    'onclick' => $onclick,
-                );
-            }
-
-            // Réceptionner commande:
-            if ($this->isActionAllowed('receive') && $this->canSetAction('receive')) {
-                $buttons[] = array(
-                    'label'   => 'Réceptionner commande',
-                    'icon'    => 'fas_arrow-circle-down',
-                    'onclick' => $this->getJsActionOnclick('receive', array(), array(
-                        'form_name' => 'receive'
-                    )),
-                );
-            }
+//            if ($this->isActionAllowed('receive_products') && $this->canSetAction('receive_products')) {
+//                $onclick = 'window.location = \'' . DOL_URL_ROOT . '/fourn/commande/dispatch.php?id=' . $this->id . '\'';
+//                $buttons[] = array(
+//                    'label'   => 'Réceptionner des produits',
+//                    'icon'    => 'fas_arrow-circle-down',
+//                    'onclick' => $onclick,
+//                );
+//            }
+//
+//            // Réceptionner commande:
+//            if ($this->isActionAllowed('receive') && $this->canSetAction('receive')) {
+//                $buttons[] = array(
+//                    'label'   => 'Réceptionner commande',
+//                    'icon'    => 'fas_arrow-circle-down',
+//                    'onclick' => $this->getJsActionOnclick('receive', array(), array(
+//                        'form_name' => 'receive'
+//                    )),
+//                );
+//            }
 
             // Créer facture: 
             if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
@@ -623,6 +623,13 @@ class Bimp_CommandeFourn extends BimpComm
                 $html .= ' par ' . $user->getNomUrl(1);
                 $html .= '</div>';
             }
+            if ((int) $this->getData('fk_user_resp')) {
+                $html .= '<div class="object_header_infos">';
+                $html .= 'Personne en charge: ';
+                $user->fetch((int) $this->getData('fk_user_resp'));
+                $html .= $user->getNomUrl(1);
+                $html .= '</div>';
+            }
         }
 
         return $html;
@@ -675,6 +682,17 @@ class Bimp_CommandeFourn extends BimpComm
             $html .= '</buttons>';
         }
 
+        return $html;
+    }
+    
+    public function renderHeaderStatusExtra()
+    {
+        $html = '';
+        
+        if ((int) $this->getData('attente_info')) {
+            $html .= '<span class="warning">'.BimpRender::renderIcon('fas_hourglass-start', 'iconLeft').'Attente Infos</span>';
+        }
+        
         return $html;
     }
 

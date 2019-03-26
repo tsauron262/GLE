@@ -862,6 +862,8 @@ class Bimp_Commande extends BimpComm
     public function renderLogistiqueEquipmentsView()
     {
         $html = '';
+        
+        $html .= BimpRender::renderAlerts('En développement', 'warning');
 
         return $html;
     }

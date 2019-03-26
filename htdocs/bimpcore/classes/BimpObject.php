@@ -829,7 +829,7 @@ class BimpObject extends BimpCache
         return $value;
     }
 
-    public function getDbData()
+    public function getDbData($fields = null)
     {
         $data = array();
 
@@ -837,6 +837,10 @@ class BimpObject extends BimpCache
 
         foreach ($this->data as $field => $value) {
             if ($field === $primary) {
+                continue;
+            }
+
+            if (!is_null($fields) && !empty($fields) && !in_array($field, $fields)) {
                 continue;
             }
 
@@ -1790,7 +1794,7 @@ class BimpObject extends BimpCache
                         }
                     }
                 }
-            } 
+            }
         }
         return $children;
     }
@@ -3150,8 +3154,8 @@ class BimpObject extends BimpCache
         }
 
         $errors = array();
-        
-        if(!isset($this->dol_object->id) && isset($this->dol_object->rowid))
+
+        if (!isset($this->dol_object->id) && isset($this->dol_object->rowid))
             $this->dol_object->id = $this->dol_object->rowid;
 
         $this->id = $this->dol_object->id;
@@ -3309,7 +3313,7 @@ class BimpObject extends BimpCache
 
         $result = call_user_func_array(array($this->dol_object, 'fetch'), $params);
 
-        
+
         if ($result <= 0) {
             if (isset($this->dol_object->error) && $this->dol_object->error) {
                 $errors[] = $this->dol_object->error;
@@ -3318,14 +3322,29 @@ class BimpObject extends BimpCache
             return false;
         }
 
-        $errors = $this->hydrateFromDolObject();
-        
-        
+        $bimpObjectFields = array();
+
+        $errors = $this->hydrateFromDolObject($bimpObjectFields);
+
         $extra_fields = $this->fetchExtraFields();
 
         foreach ($extra_fields as $field_name => $value) {
             $this->checkFieldValueType($field_name, $value);
             $this->data[$field_name] = $value;
+        }
+
+        if (!empty($bimpObjectFields) && $this->object_name === 'Bimp_CommandeFourn') {
+            $result = $this->db->getRow($this->getTable(), '`' . $this->getPrimary() . '` = ' . (int) $id, $bimpObjectFields, 'array');
+            if (!is_null($result)) {
+                foreach ($bimpObjectFields as $field_name) {
+                    if (!isset($result[$field_name])) {
+                        continue;
+                    }
+                    $value = $result[$field_name];
+                    $this->checkFieldValueType($field_name, $value);
+                    $this->data[$field_name] = $value;
+                }
+            }
         }
 
         $this->initData = $this->data;

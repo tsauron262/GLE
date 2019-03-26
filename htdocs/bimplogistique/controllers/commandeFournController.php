@@ -35,14 +35,14 @@ class commandeFournController extends BimpController
 
         $html .= BimpRender::renderNavTabs(array(
                     array(
-                        'id'      => 'lines',
-                        'title'   => 'Logistique produits / services',
-                        'content' => $this->renderCommandesFournLinesLogisticTab($commande)
-                    ),
-                    array(
                         'id'      => 'receptions',
                         'title'   => 'Réceptions',
                         'content' => $this->renderReceptionsTab($commande)
+                    ),
+                    array(
+                        'id'      => 'lines',
+                        'title'   => 'Logistique produits / services',
+                        'content' => $this->renderCommandesFournLinesLogisticTab($commande)
                     ),
                     array(
                         'id'      => 'invoices',
@@ -53,24 +53,24 @@ class commandeFournController extends BimpController
 
         return $html;
     }
-    
+
     public function renderCommandesFournLinesLogisticTab(Bimp_CommandeFourn $commande)
-    {        
+    {
         $html = '';
-        
+
         $html .= '<div class="buttonsContainer align-right">';
         $html .= $commande->renderLogistiqueButtons();
         $html .= '</div>';
-        
+
         $html .= $commande->renderChildrenList('lines', 'logistique', 1);
-        
+
         return $html;
     }
-    
+
     public function renderReceptionsTab(Bimp_CommandeFourn $commande)
     {
         $html = '';
-        
+
         $reception = BimpObject::getInstance('bimplogistique', 'BL_CommandeFournReception');
         $list = new BC_ListTable($reception, 'commandes_fourn', 1, (int) $commande->id, 'Liste des réceptions', 'fas_arrow-circle-down');
         $list->setAddFormValues(array(
@@ -79,10 +79,10 @@ class commandeFournController extends BimpController
             )
         ));
         $html .= $list->renderHtml();
-        
+
         return $html;
     }
-    
+
     public function renderFacturesTab(Bimp_CommandeFourn $commande)
     {
         

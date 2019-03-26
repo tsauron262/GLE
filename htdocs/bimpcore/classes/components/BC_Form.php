@@ -57,6 +57,8 @@ class BC_Form extends BC_Panel
         $this->params_def['associations_params'] = array('data_type' => 'array', 'request' => true, 'json' => true);
         $this->params_def['on_save'] = array('default' => 'close');
         $this->params_def['sub_objects'] = array('type' => 'keys');
+        $this->params_def['no_auto_submit'] = array('data_type' => 'bool', 'default' => 0);
+        
         $this->id_parent = $id_parent;
 
         $path = null;
@@ -133,6 +135,7 @@ class BC_Form extends BC_Panel
         }
 
         $this->data['on_save'] = $this->params['on_save'];
+        $this->data['no_auto_submit'] = $this->params['no_auto_submit'];
     }
 
     public function setValues($values)

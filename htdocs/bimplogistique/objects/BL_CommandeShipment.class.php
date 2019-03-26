@@ -943,7 +943,7 @@ class BL_CommandeShipment extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Produits / services  de l\'expédition enregistrés avec succès';
-
+        
         if (!isset($data['lines']) || !is_array($data['lines']) || !count($data['lines'])) {
             $errors[] = 'Aucune ligne à enregistrer';
         } else {
@@ -962,7 +962,7 @@ class BL_CommandeShipment extends BimpObject
                         $shipment_data = $line->getShipmentData($this->id);
 
                         $qty = (float) isset($line_data['qty']) ? $line_data['qty'] : 0;
-                        if ($qty > 0) {
+                        if ($qty >= 0) {
                             $available_qty = (float) $line->qty - (float) $line->getShippedQty() + (float) $shipment_data['qty'];
                             if ($qty > $available_qty) {
                                 $errors[] = 'Seules ' . $available_qty . ' unité(s) sont disponibles.<br/>Veuillez retirer ' . ($qty - $available_qty) . ' unité(s)';

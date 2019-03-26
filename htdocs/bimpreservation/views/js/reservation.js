@@ -165,6 +165,47 @@ function createSelectedShipmentsInvoice() {
     bimp_msg('ici');
 }
 
+function onReserveEquipmentsFormLoaded($form) {
+    if (!$.isOk($form)) {
+        return;
+    }
+
+    if (!parseInt($form.data('reserve_equipment_events_init'))) {
+        var $input = $form.find('[name="search_serial"]');
+        if ($input.length) {
+            $input.focus();
+            $input.keyup(function (e) {
+                if (e.key === 'Enter' || e.key === 'Tab') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var serial = $(this).val();
+                    if (serial) {
+                        var $container = $(this).findParentByClass('addValueInputContainer');
+                        if ($.isOk($container)) {
+                            var $select = $container.find('[name="equipments_add_value"]');
+                            if ($select.length) {
+                                var done = false;
+                                $select.find('option').each(function () {
+                                    if (serial === $(this).text()) {
+                                        $input.val('');
+                                        $select.val($(this).attr('value')).change();
+                                        $container.find('.addValueBtn').click();
+                                        done = true;
+                                    }
+                                });
+                                if (!done) {
+                                    bimp_msg('Ce numéro de série n\'a pas été trouvé parmi les équipements disponibles', 'warning');
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        $form.data('reserve_equipment_events_init', 1);
+    }
+}
+
 $(document).ready(function () {
     $('#findEquipmentSerial').keyup(function (e) {
         if (e.key === 'Enter') {
@@ -182,5 +223,11 @@ $(document).ready(function () {
     $('#createShipmentButton').popover();
     $('#createShipmentButton').click(function () {
         $(this).popover('hide');
+    });
+
+    $('body').on('formLoaded', function (e) {
+        if (e.$form.hasClass('BR_Reservation_form_reserve_equipments')) {
+            onReserveEquipmentsFormLoaded(e.$form);
+        }
     });
 });

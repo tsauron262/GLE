@@ -501,11 +501,9 @@ class Bimp_CommandeFournLine extends FournObjectLine
             if (!BimpObject::objectLoaded($line)) {
                 $errors[] = 'La ligne de commande client associée n\'existe plus';
             } else {
-                if ($serialisable) {
+                if ($serialisable && isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
                     // Attribution des équipements si serialisable.
-                    if (isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
-                        $line->addEquipments($equipments);
-                    }
+                    $line->addEquipments($equipments);
                 } else {
                     // Màj statuts.
                     $line->addReceivedQty($qty);

@@ -64,22 +64,33 @@ objects:
     user_author:
         extends: user
         instance: 
-            id_object: fk_user_author
+            id_object: 
+                field_value: fk_user_author
             
     user_valid:
         extends: user
         instance: 
-            id_object: fk_user_valid
+            id_object: 
+                field_value: fk_user_valid
             
     user_approve:
         extends: user
         instance: 
-            id_object: fk_user_approve
+            id_object: 
+                field_value: fk_user_approve
             
     user_approve2:
         extends: user
         instance: 
-            id_object: fk_user_approve2
+            id_object: 
+                field_value: fk_user_approve2
+            
+    user_resp:
+       extends: user
+       instance: 
+           id_object: 
+              field_value: fk_user_resp
+    
                 
 fields: 
     entrepot: 
@@ -148,12 +159,28 @@ fields:
         object: user_approve2
         input: 
             type: hidden
+    fk_user_resp: 
+        label: Personne en charge
+        type: id_object
+        object: user_resp
+        default_value: 
+            prop:
+                name: id
+                object: 
+                    global: user
+        input: 
+            type: search_user
     fk_input_method: 
         label: Méthode de commande
         dol_prop: methode_commande_id
         type: int
         values: 
             array: commandeMethods
+    attente_info: 
+        label: En attente d'infos
+        type: bool
+        default_value: 0
+        
 #    fk_account: 
 #        label: Compte bancaire
 #        type: id_object
@@ -170,12 +197,14 @@ forms:
         rows: 
             - field: entrepot
             - field: fk_soc
+            - field: fk_user_resp
             - field: ref_supplier
             - field: date_livraison
             - field: fk_cond_reglement
             - field: fk_mode_reglement
 #            - field: fk_account
             - field: model_pdf
+            - field: attente_info
             - field: note_private
             - field: note_public
             
@@ -214,6 +243,8 @@ fields_tables:
               display: nom_url
               edit: 1
             - field: fk_statut
+            - field: attente_info
+              edit: 1
             - field: date_commande
             - field: date_livraison
               edit: 1

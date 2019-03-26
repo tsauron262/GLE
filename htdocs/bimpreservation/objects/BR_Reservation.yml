@@ -313,6 +313,7 @@ forms:
             - field: origin_element
             - field: origin_id_element
             - field: note
+            
     new_status: 
         rows: 
             - custom: 1
@@ -339,7 +340,9 @@ forms:
               input_name: new_status
               data_type: bool
               content: <input type="hidden" name="new_status" value="1"/>
+              
     reserve_equipments: 
+        no_auto_submit: 1
         rows: 
             - custom: 1
               hidden: 1
@@ -385,6 +388,7 @@ forms:
                   options: 
                       array: avoirs
                   select_first: 1 
+                  
     shipment: 
         title: Ajouter à une expédition
         rows: 

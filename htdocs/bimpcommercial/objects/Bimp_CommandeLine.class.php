@@ -1246,6 +1246,13 @@ class Bimp_CommandeLine extends ObjectLine
 
         $remain_qty = (int) $qty;
 
+        $product = $this->getProduct();
+        if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
+            $new_status = 101;
+        } else {
+            $new_status = 200;
+        }
+
         foreach ($reservations as $reservation) {
             if (!$remain_qty) {
                 break;
@@ -1258,7 +1265,7 @@ class Bimp_CommandeLine extends ObjectLine
             }
             $remain_qty -= $res_qty;
 
-            $res_errors = $reservation->setNewStatus(200, $res_qty);
+            $res_errors = $reservation->setNewStatus($new_status, $res_qty);
             if (count($res_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($res_errors, 'Des erreurs sont survenues lors de la mise à jour du statut de la réservation d\'ID ' . $reservation->id);
             }

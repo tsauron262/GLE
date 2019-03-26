@@ -35,6 +35,11 @@ class BimpController
 
     public function __construct($module, $controller = 'index')
     {
+        if (BimpDebug::isActive('bimpcore/controller/display_errors')) {
+            ini_set('display_errors', 1);
+            error_reporting(E_ERROR);
+        }
+
         global $main_controller;
 
         if (is_null($main_controller)) {
@@ -131,7 +136,7 @@ class BimpController
     }
 
     // Affichages:
-    
+
     public function displayHeaderFiles()
     {
         $id_object = BimpTools::getValue('id');
@@ -523,6 +528,8 @@ class BimpController
 
     protected function ajaxProcess()
     {
+        ini_set('display_errors', 1);
+
         $errors = array();
         if (BimpTools::isSubmit('action')) {
             $action = BimpTools::getvalue('action');

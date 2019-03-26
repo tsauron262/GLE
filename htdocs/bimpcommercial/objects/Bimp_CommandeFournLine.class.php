@@ -584,6 +584,12 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 $errors[] = 'Aucun produit enregistré pour cette ligne de commande fournisseur';
             } else {
                 // Vérifications: 
+                $commande = $this->getParentInstance();
+                if (!BimpObject::objectLoaded($commande)) {
+                    $errors[] = 'ID de la commande fournisseur absent';
+                    return $errors;
+                }
+                
                 $remain_qty = $this->qty - $this->getReceivedQty();
                 $total_qty = 0;
                 $i = 1;
@@ -645,12 +651,15 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                     $i++;
                 }
+                
+                $commande->checkReceptionStatus();
             }
         }
 
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+//            'success_callback' => 'bimp_reloadPage();'
         );
     }
 }

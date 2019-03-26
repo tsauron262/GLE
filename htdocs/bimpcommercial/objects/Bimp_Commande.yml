@@ -190,6 +190,18 @@ fields:
         type: money
         
     total: unset
+    
+    shipment_status: 
+        label: Statut expédition
+        type: int
+        values: 
+            array: shipment_status
+            
+    invoice_status: 
+        label: Statut facturation
+        type: int
+        values: 
+            array: invoice_status
         
 fields_tables: 
     infos: 

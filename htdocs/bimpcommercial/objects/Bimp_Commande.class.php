@@ -15,6 +15,16 @@ class Bimp_Commande extends BimpComm
         2  => array('label' => 'Acceptée', 'icon' => 'check-circle', 'classes' => array('success')),
         3  => array('label' => 'Fermée', 'icon' => 'times', 'classes' => array('danger')),
     );
+    public static $shipment_status = array(
+        0 => array('label' => 'Non expédiée', 'icon' => 'fas_shipping-fast', 'classes' => array('danger')),
+        1 => array('label' => 'Expédiée partiellement', 'icon' => 'fas_shipping-fast', 'classes' => array('warning')),
+        2 => array('label' => 'Expédiée', 'icon' => 'fas_shipping-fast', 'classes' => array('success'))
+    );
+    public static $invoice_status = array(
+        0 => array('label' => 'Non facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('danger')),
+        1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
+        2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
+    );
 
     // Gestion des droits et autorisations: 
 
@@ -2106,9 +2116,7 @@ class Bimp_Commande extends BimpComm
         $warnings = array();
         $success = '';
 
-        echo '<pre>';
-        print_r($data);
-        exit;
+        $errors[] = 'Non opérationnel';
 
         return array(
             'errors'   => $errors,

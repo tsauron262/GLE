@@ -21,6 +21,16 @@ class Bimp_CommandeFourn extends BimpComm
         7 => array('label' => 'Annulée après commande', 'icon' => 'fas_times', 'classes' => array('danger')),
         9 => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger'))
     );
+    public static $reception_status = array(
+        0 => array('label' => 'Non réceptionnée', 'icon' => 'fas_arrow-circle-down', 'classes' => array('danger')),
+        1 => array('label' => 'Réceptionnée partiellement', 'icon' => 'fas_arrow-circle-down', 'classes' => array('warning')),
+        2 => array('label' => 'Réceptionnée', 'icon' => 'fas_arrow-circle-down', 'classes' => array('success'))
+    );
+    public static $invoice_status = array(
+        0 => array('label' => 'Non facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('danger')),
+        1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
+        2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
+    );
     public static $cancel_status = array(6, 7, 9);
     public static $livraison_types = array(
         ''    => '',
@@ -502,7 +512,6 @@ class Bimp_CommandeFourn extends BimpComm
 //                    )),
 //                );
 //            }
-
             // Créer facture: 
             if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
                 $url = DOL_URL_ROOT . '/fourn/facture/card.php?action=create&origin=' . $this->dol_object->element . '&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
@@ -684,15 +693,15 @@ class Bimp_CommandeFourn extends BimpComm
 
         return $html;
     }
-    
+
     public function renderHeaderStatusExtra()
     {
         $html = '';
-        
+
         if ((int) $this->getData('attente_info')) {
-            $html .= '<span class="warning">'.BimpRender::renderIcon('fas_hourglass-start', 'iconLeft').'Attente Infos</span>';
+            $html .= '<span class="warning">' . BimpRender::renderIcon('fas_hourglass-start', 'iconLeft') . 'Attente Infos</span>';
         }
-        
+
         return $html;
     }
 
@@ -728,6 +737,50 @@ class Bimp_CommandeFourn extends BimpComm
         }
 
         return $errors;
+    }
+
+    public function checkReceptionStatus()
+    {
+        $current_status = (int) $this->getInitData('fk_statut');
+
+        if (in_array($current_status, array(0, 1, 6, 7, 9))) {
+            return;
+        }
+
+        BimpObject::loadClass('bimpcommercial', 'ObjectLine');
+
+        $lines = $this->getChildrenObjects('lines', array(
+            'type' => array(
+                'operator' => '<>',
+                'value'    => ObjectLine::LINE_TEXT
+            )
+        ));
+
+        $hasReception = 0;
+        $isFullyReceived = 1;
+
+        foreach ($lines as $line) {
+            $received_qty = (float) $line->getReceivedQty();
+            if ($received_qty > 0) {
+                $hasReception = 1;
+            }
+
+            if ($received_qty < (float) $line->qty) {
+                $isFullyReceived = 0;
+            }
+        }
+
+        if ($isFullyReceived) {
+            $new_status = 5;
+        } elseif ($hasReception) {
+            $new_status = 4;
+        } else {
+            $new_status = $current_status;
+        }
+
+        if ($current_status !== $new_status) {
+            $this->updateField('fk_statut', $new_status);
+        }
     }
 
     // Actions:

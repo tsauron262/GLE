@@ -90,7 +90,6 @@ objects:
        instance: 
            id_object: 
               field_value: fk_user_resp
-    
                 
 fields: 
     entrepot: 
@@ -180,7 +179,17 @@ fields:
         label: En attente d'infos
         type: bool
         default_value: 0
-        
+    reception_status: 
+        label: Statut réception
+        type: int
+        values: 
+            array: reception_status
+            
+    invoice_status: 
+        label: Statut facturation
+        type: int
+        values: 
+            array: invoice_status
 #    fk_account: 
 #        label: Compte bancaire
 #        type: id_object

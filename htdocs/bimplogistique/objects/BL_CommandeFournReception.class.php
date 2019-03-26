@@ -309,6 +309,8 @@ class BL_CommandeFournReception extends BimpObject
                     }
                 }
             }
+            
+            $commande->checkReceptionStatus();
         }
 
         return $errors;

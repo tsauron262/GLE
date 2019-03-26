@@ -230,16 +230,64 @@ class BL_CommandeShipment extends BimpObject
         return $id_contact;
     }
 
-    public function getCommandeCondReglement()
+    public function getPDFQtiesAndSerials()
     {
-        if ($this->isLoaded()) {
-            $commande = $this->getChildObject('commande_client');
-            if (BimpObject::objectLoaded($commande)) {
-                return $commande->dol_object->cond_reglement_id;
+        $qties = array();
+
+        $commande = $this->getParentInstance();
+        $equipment_instance = BimpObject::getInstance('bimpequipment', 'Equipment');
+
+        if (BimpObject::objectLoaded($commande)) {
+            $lines = $commande->getChildrenObjects('lines');
+            $prev_shipments = array();
+            $list = $this->getList(array(
+                'id'           => array(
+                    'operator' => '<>',
+                    'value'    => $this->id
+                ),
+                'date_shipped' => array(
+                    'operator' => '<',
+                    'value'    => $this->getData('date_shipped')
+                )
+                    ), null, null, 'num_livraison', 'asc', 'array', array('id'));
+
+            foreach ($list as $item) {
+                $prev_shipments[] = $item['id'];
+            }
+
+            foreach ($lines as $line) {
+                $line_qties = array(
+                    'qty'         => 0,
+                    'shipped_qty' => 0,
+                    'to_ship_qty' => 0,
+                    'serials'     => array()
+                );
+                $line_shipments = $line->getData('shipments');
+                foreach ($line_shipments as $id_shipment => $shipment_data) {
+                    if ((int) $id_shipment === $this->id) {
+                        $line_qties['qty'] = (float) $shipment_data['qty'];
+                        if (isset($shipment_data['equipments'])) {
+                            $equipments = $equipment_instance->getList(array(
+                                'id' => array(
+                                    'in' => $shipment_data['equipments']
+                                )
+                                    ), null, null, 'id', 'asc', 'array', array('serial'));
+
+                            foreach ($equipments as $eq) {
+                                $line_qties['serials'][] = $eq['serial'];
+                            }
+                        }
+                    } elseif (in_array($id_shipment, $prev_shipments)) {
+                        $line_qties['shipped_qty'] += (float) $shipment_data['qty'];
+                    } else {
+                        $line_qties['to_ship_qty'] += (float) $shipment_data['qty'];
+                    }
+                }
+                $qties[(int) $line->getData('id_line')] = $line_qties;
             }
         }
 
-        return 0;
+        return $qties;
     }
 
     // Affichages: 
@@ -290,7 +338,7 @@ class BL_CommandeShipment extends BimpObject
 
         if ($this->isLoaded()) {
             if ((int) $this->getData('status') === 2) {
-                $url = DOL_URL_ROOT . '/bimpreservation/bl.php?id_commande=' . $this->getData('id_commande_client') . '&num_bl=' . $this->getData('num_livraison') . '&id_contact_shipment=' . (int) $this->getData('id_contact');
+                $url = DOL_URL_ROOT . '/bimplogistique/bl.php?id_shipment=' . $this->id;
                 $onclick = 'window.open(\'' . $url . '\')';
                 $html .= '<button type="button" class="btn btn-default" onclick="' . htmlentities($onclick) . '">';
                 $html .= '<i class="' . BimpRender::renderIconClass('fas_file-pdf') . ' iconLeft"></i>';
@@ -474,7 +522,7 @@ class BL_CommandeShipment extends BimpObject
                     if (is_null($line->desc) || !$line->desc) {
                         if (!is_null($product)) {
                             $desc = $product->ref;
-                            $desc.= ($desc ? ' - ' : '') . $product->label;
+                            $desc .= ($desc ? ' - ' : '') . $product->label;
                         }
                     }
                     if (!$desc) {
@@ -680,7 +728,9 @@ class BL_CommandeShipment extends BimpObject
                     $html .= '<th>Désignation</th>';
                     $html .= '<th>Qté</th>';
                     $html .= '<th>' . ($edit ? 'Groupes les articles' : 'Articles groupés' ) . '</th>';
-                    $html .= '<th>Statut</th>';
+                    if ($edit) {
+                        $html .= '<th>Statut</th>';
+                    }
                     $html .= '</thead>';
                     $html .= '<tbody>';
 
@@ -730,20 +780,23 @@ class BL_CommandeShipment extends BimpObject
                             }
                         }
                         $html .= '</td>';
-                        $html .= '<td>';
-                        $ready_qty = (float) $line->getReadyToShipQty((int) $this->id);
-                        if ($ready_qty >= (float) $shipment_data['qty']) {
-                            $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Prêt</span>';
-                        } else {
-                            $diff = (float) $shipment_data['qty'] - $ready_qty;
-                            $html .= '<span style="color: #636363">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . $diff . ' unité' . ($diff > 1 ? 's' : '') . ' en attente</span>';
+                        if ($edit) {
+                            $html .= '<td>';
+                            $ready_qty = (float) $line->getReadyToShipQty((int) $this->id);
+                            if ($ready_qty >= (float) $shipment_data['qty']) {
+                                $html .= '<span class="success">' . BimpRender::renderIcon('fas_check', 'iconLeft') . 'Prêt</span>';
+                            } else {
+                                $diff = (float) $shipment_data['qty'] - $ready_qty;
+                                $html .= '<span style="color: #636363">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . $diff . ' unité' . ($diff > 1 ? 's' : '') . ' en attente</span>';
+                            }
+                            $html .= '</td>';
                         }
-                        $html .= '</td>';
+
                         $html .= '</tr>';
 
                         if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
                             $html .= '<tr id="shipment_line_' . $line->id . '_equipments_row" class="shipment_line_equipments_row">';
-                            $html .= '<td colspan="5" style="padding-left: 60px">';
+                            $html .= '<td colspan="' . ($edit ? '5' : '4') . '" style="padding-left: 60px">';
 
                             $html .= 'Equipements: <br/>';
 
@@ -880,7 +933,7 @@ class BL_CommandeShipment extends BimpObject
             $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour de l\'expédition');
         }
 
-        $commande->checkIsFullyShipped();
+//        $commande->checkIsFullyShipped();
 
         return $errors;
     }

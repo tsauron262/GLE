@@ -1768,7 +1768,7 @@ class BR_Reservation extends BimpObject
                 }
             }
         }
-
+        
         return $data;
     }
 

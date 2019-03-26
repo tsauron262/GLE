@@ -92,6 +92,12 @@ objects:
                     parent_object_name: Bimp_Commande
                 
 associations: 
+    factures: 
+        object: facture
+        label: Factures
+        display: 
+            default: 
+                type: nom_url
     avoirs: 
         object: facture
         label: Avoirs
@@ -504,7 +510,31 @@ forms:
               content: 
                   callback: renderShipmentLinesInputs
               depends_on: id_shipment,shipment_lines_list
-              
+        
+    invoice: 
+        title: Facturation
+        icon: fas_file-invoice-dollar
+        rows: 
+            - custom: 1
+              label: Facture
+              input_name: id_facture
+              data_type: id_object
+              card: default
+              content: 
+                  callback: renderFacturesInput
+            - custom: 1
+              label: Lignes
+              hidden: 1
+              input_name: facture_lines_list
+              content: 
+                  callback: renderFactureLinesListInput
+            - custom: 1
+              label: Quantités et équipements
+              input_name: facture_lines
+              content: 
+                  callback: renderFactureLinesInputs
+              depends_on: id_facture,facture_lines_list
+                  
     shipment_equipments:
         title: Attribution d'équipements à une expédition
         icon: fas_arrow-circle-right

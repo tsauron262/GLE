@@ -36,14 +36,64 @@ function addSelectedCommandeLinesToShipment($button, list_id, id_commande) {
     });
 }
 
-function addSelectedCommandeLinesToInvoice($button, list_id) {
-
-}
-
 function onShipmentFormSubmit($form, extra_data) {
     var lines = [];
 
     var $inputs = $form.find('.shipment_lines_inputContainer').find('input.line_shipment_qty');
+
+    $inputs.each(function () {
+        var id_line = parseInt($(this).data('id_line'));
+        var qty = parseFloat($(this).val());
+        lines.push({
+            id_line: id_line,
+            qty: qty
+        });
+    });
+
+    extra_data['lines'] = lines;
+    return extra_data;
+}
+
+function addSelectedCommandeLinesToFacture($button, list_id, id_commande) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        return;
+    }
+
+    var $selected = $list.find('tbody').find('input.item_check:checked')
+
+    if (!$selected.length) {
+        bimp_msg('Aucune ligne sélectionnée', 'danger');
+        return;
+    }
+
+    var extra_data = {
+        facture_lines_list: []
+    };
+
+    $selected.each(function () {
+        extra_data.facture_lines_list.push(parseInt($(this).data('id_object')));
+    });
+
+    setObjectAction($button, {
+        module: 'bimpcommercial',
+        object_name: 'Bimp_Commande',
+        id_object: id_commande
+    }, 'linesFactureQties', extra_data, 'invoice', null, null, null, function ($form, extra_data) {
+        return onFactureFormSubmit($form, extra_data);
+    });
+}
+
+function onFactureFormSubmit($form, extra_data) {
+    var lines = [];
+
+    var $inputs = $form.find('.facture_lines_inputContainer').find('input.line_facture_qty');
 
     $inputs.each(function () {
         var id_line = parseInt($(this).data('id_line'));
@@ -121,10 +171,10 @@ function setSelectedCommandeLinesReservationsStatus($button, id_commande, new_st
         return;
     }
 
-    var $listContainer = $button.findParentByClass('Bimp_CommandeLine_list_table_container');
+    var $list = $('#Bimp_CommandeLine_logistique_list_table_Bimp_Commande_' + id_commande);
 
-    if ($.isOk($listContainer)) {
-        var $rows = $listContainer.find('.Bimp_CommandeLine_list_table').find('tbody.listRows').find('tr.Bimp_CommandeLine_row');
+    if ($.isOk($list)) {
+        var $rows = $list.find('tbody.listRows').find('tr.Bimp_CommandeLine_row');
         var reservations = [];
         $rows.each(function () {
             $(this).find('tr.Bimp_CommandeLine_reservation_row').each(function () {

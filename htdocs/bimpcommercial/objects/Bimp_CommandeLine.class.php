@@ -198,7 +198,7 @@ class Bimp_CommandeLine extends ObjectLine
                 array(
                     'label'   => 'Ajouter à une facture',
                     'icon'    => 'fas_file-invoice-dollar',
-                    'onclick' => 'addSelectedCommandeLinesToInvoice($(this), \'list_id\', ' . $commande->id . ')'
+                    'onclick' => 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ' . $commande->id . ')'
                 )
             );
         }
@@ -303,6 +303,23 @@ class Bimp_CommandeLine extends ObjectLine
             'qty'        => 0,
             'group'      => 0,
             'shipped'    => 0,
+            'equipments' => array()
+        );
+    }
+
+    public function getFactureData($id_facture)
+    {
+        $factures = $this->getData('factures');
+
+        if (isset($factures[(int) $id_facture])) {
+            return array(
+                'qty'        => (isset($factures[(int) $id_facture]['qty']) ? $factures[(int) $id_facture]['qty'] : 0),
+                'equipments' => (isset($factures[(int) $id_facture]['equipments']) ? $factures[(int) $id_facture]['equipments'] : array()),
+            );
+        }
+
+        return array(
+            'qty'        => 0,
             'equipments' => array()
         );
     }
@@ -688,7 +705,75 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
+    public function renderFactureQtyInput($id_facture, $with_total_max = false)
+    {
+        $html = '';
+
+        $factures = $this->getData('factures');
+
+        $facture_qty = 0;
+        if (isset($factures[(int) $factures]['qty'])) {
+            $facture_qty = (float) $factures[(int) $factures]['qty'];
+        }
+
+        $decimals = 3;
+
+        if ((int) $this->getData('type') === self::LINE_PRODUCT) {
+            $product = $this->getProduct();
+            if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === 0) {
+                $decimals = 0;
+            }
+        }
+
+        $max = (float) $this->qty - (float) $this->getBilledQty() + $facture_qty;
+
+        if (!$decimals) {
+            $max = (int) floor($max);
+        }
+
+        $options = array(
+            'data'        => array(
+                'id_line'   => (int) $this->id,
+                'data_type' => 'number',
+                'decimals'  => $decimals,
+                'unsigned'  => 0,
+                'min'       => 0,
+                'max'       => $max
+            ),
+            'extra_class' => 'line_facture_qty',
+            'max_label'   => 1
+        );
+
+        if ($with_total_max) {
+            $options['data']['total_max_value'] = (float) $this->qty;
+            $options['data']['total_max_inputs_class'] = 'line_facture_qty';
+            $options['extra_class'] .= ' total_max';
+        }
+
+        $value = (!$with_total_max && !(float) $facture_qty ? $max : $facture_qty);
+
+        $html .= BimpInput::renderInput('qty', 'line_' . $this->id . '_facture_' . $id_facture . '_qty', $value, $options);
+
+        if ($facture_qty > 0) {
+            if ($facture_qty === 1) {
+                $msg = $facture_qty . ' unité a déjà été assignée à cette facture.';
+            } else {
+                $msg = $facture_qty . ' unités ont déjà été assignées à cette facture.';
+            }
+
+            $msg .= '<br/>Indiquez ici le nombre total d\'unités à assigner.';
+            $html .= BimpRender::renderAlerts($msg, 'info');
+        }
+
+        return $html;
+    }
+
     public function renderShipmentEquipmentsInput($id_shipment)
+    {
+        return 'TEST';
+    }
+
+    public function renderFactureEquipmentsInput($id_fature)
     {
         return 'TEST';
     }

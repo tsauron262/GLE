@@ -1443,6 +1443,47 @@ class Bimp_CommandeLine extends ObjectLine
         return $errors;
     }
 
+    public function setFactureData($id_facture, $qty, &$warnings = array())
+    {
+        $errors = array();
+
+        $factures = $this->getData('factures');
+
+            if (!is_array($factures)) {
+                $factures = array();
+            }
+
+            if (!isset($factures[(int) $id_facture])) {
+                $shipments[(int) $id_facture] = array(
+                    'qty' => (float) $qty
+                );
+            } else {
+                $shipments[(int) $shipment->id]['qty'] = (float) $qty;
+            }
+
+            // Vérification des quantités: 
+            $total_qty_billed = 0;
+            foreach ($factures as $id_fac => $facture_qty) {
+                if ((int) $id_fac === (int) $id_facture) {
+                    $total_qty_billed += $qty;
+                } else {
+                    $total_qty_billed += (float) $facture_qty;
+                }
+            }
+
+            if ($total_qty_billed > (float) $this->qty) {
+                $errors[] = 'Le nombre total d\'unités ajoutées à des factures (' . $total_qty_billed . ') dépasse le nombre d\'unité enregistrées pour cette ligne de commande (' . $this->qty . ')';
+            }
+
+            // Mise à jour: 
+            if (!count($errors)) {
+                $this->set('factures', $factures);
+                $errors = $this->update($warnings, true);
+            }
+
+        return $errors;
+    }
+
     // Actions:
 
     public function actionSaveShipments($data, &$success)

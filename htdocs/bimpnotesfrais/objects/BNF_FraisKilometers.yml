@@ -19,11 +19,11 @@ fields:
         values: 
             array: chevaux_list
         required: 1
-    carburant:
-        label: Carburant
-        type: int
-        values: 
-            array: carburants
+#    carburant:
+#        label: Carburant
+#        type: int
+#        values: 
+#            array: carburants
     kilometers: 
         label: Kilomètres parcourus
         type: int
@@ -49,13 +49,13 @@ lists:
         cols: 
             chevaux:
                 field: chevaux
-                edit: 1
-            carburant: 
-                field: carburant
-                edit: 1
+                edit: 0
+#            carburant: 
+#                field: carburant
+#                edit: 1
             kilometers: 
                 field: kilometers
-                edit: 1
+                edit: 0
             montant: 
                 label: Montant
                 value: 

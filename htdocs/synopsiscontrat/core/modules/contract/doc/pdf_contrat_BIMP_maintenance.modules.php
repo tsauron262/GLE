@@ -1,42 +1,16 @@
 <?php
 
-/*
- * BIMP-ERP by Synopsis et DRSI
- *
- * Author: Tommy SAURON <tommy@drsi.fr>
- * Licence : Artistic Licence v2.0
- *
- * Version 1.2
- * Created on : 30 mars 2011
- *
- * Infos on http://www.finapro.fr
- *
- */
-/**
- *
- * Name : pdf_contrat_courrierBIMPresiliationAvoir.modules.php
- * BIMP-ERP-1.2
- */
 require_once(DOL_DOCUMENT_ROOT . "/synopsiscontrat/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php" );
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/core.class.php';
 
-//TODO  addresse livraison lié au contrat
-//TODO filtre sur statuts ???
-
-/**
-  \class      pdf_contrat_babel
-  \brief      Classe permettant de generer les contrats au modele babel
- */
 if (!defined('EURO'))
     define('EURO', chr(128));
 
 class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
-
     public $emetteur;
     var $contrat;
     var $pdf;
@@ -63,7 +37,6 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $this->emetteur = $mysoc;
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);
-
     }
 
     public static $gti = Array(2 => '2h ouvrées', 4 => '4h ouvrées', 8 => '8h ouvrées', 16 => '16h ouvrées');
@@ -233,7 +206,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $pdf->SetFont('', 'B', 9);
 
         // Titre
-        $this->addLogo($pdf, 20);
+        $this->addLogo($pdf, 12);
         $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
         $pdf->SetFont('', 'B', 14);
         $pdf->setTextColor(0, 0, 0);
@@ -260,7 +233,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
 
     public function display_content_contrat($pdf, $contrat) {
         $services = BimpObject::getInstance('bimpcontract', 'BContract_Productservices'); // Appel de l'objet
-        $list_services = (object) $services->getList(array('active' => 1)); // Filtre des services activés
+        $list_services = (object) $services->getList(array('use_in_contract' => 1)); // Filtre des services activés
         // Remise en forme de l'array pour traitement
         $array_services = Array();
         foreach ($list_services as $service) {
@@ -270,8 +243,21 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $nombre_lignes = (int) count($contrat->lines);
         foreach ($contrat->lines as $line) {
             $current_ligne++;
+            $need = 10 + 60 + ((int) count($content_service)); // En tete + Marge du bas + nombre de ligne contenu dans le service
+
+            $currentY = (int) $pdf->getY();
+            $hauteur = (int) $this->page_hauteur;
+            $reste = $hauteur - $currentY;
+
+            if ($reste < $need) {
+                $this->_pagefoot($pdf, $outputlangs);
+                $pdf->AddPage();
+                $this->addLogo($pdf, 12);
+                $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
+                $pdf->Line(15, 32, 195, 32);
+            }
             $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 10;
-            $pdf->SetFont('', '', 9);
+            $pdf->SetFont('', '', 7);
             $pdf->setDrawColor(255, 255, 255);
             $pdf->setColor('fill', 236, 147, 0);
             $pdf->setTextColor(255, 255, 255);
@@ -279,7 +265,6 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->setDrawColor(255, 255, 255);
             $pdf->setColor('fill', 255, 255, 255);
             $pdf->setTextColor(0, 0, 0);
-            $pdf->SetFont('', '', 9);
             $affichage = str_replace("\n", ' ', $line->description);
             $pdf->Cell($W * 9, 7, $affichage, 1, null, 'L', true);
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L');
@@ -300,9 +285,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $content_service = explode(',', $associate_product->array_options['options_service_content']);
             $pdf->SetFont('', '', 8);
             $first_passage = false;
-            $for_add_page = 3 + 20 + (int) count($content_service); // En tete + Marge du bas + nombre de ligne contenu dans le service
-            //print_r( $line->description . $for_add_page . "<br />" );
+
             foreach ($content_service as $row => $id) {
+
                 if ($array_services[$id]) {
                     if (!$first_passage) {
                         $pdf->Cell($W, 7, '', 0, null, 'C', true);
@@ -325,30 +310,11 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", "B", 'L');
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", "T", 'L');
             $pdf->setDrawColor(255, 255, 255);
-            $currentY = (int) $pdf->getY();
-            $pageY = (int) $this->page_hauteur;
-            if ($pageY - $currentY < $for_add_page && $current_ligne == $nombre_lignes) {
-                $new = true;
-                $this->_pagefoot($pdf, $outputlangs);
-                $pdf->AddPage();
-                $this->addLogo($pdf, 20);
-                $pdf->SetXY($this->marge_gauche, $this->marge_haute - 6);
-                $pdf->SetFont('', 'B', 14);
-                $pdf->setTextColor(0, 0, 0);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, "Conditions particulières du Contrat N°" . $contrat->ref, 0, 'C');
-                $pdf->SetFont('', 'B', 9);
-                $pdf->setDrawColor(236, 147, 0);
-                $pdf->Line(15, 32, 195, 32);
-                $pdf->Line(15, 42, 195, 42);
-                $pdf->setDrawColor(255, 255, 255);
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 6, "", 0, 'C');
-            }
         }
     }
 
     function write_file($contrat, $outputlangs = '') {
         global $user, $langs, $conf;
-        $core = new core($this, $pdf);
         if (!is_object($outputlangs))
             $outputlangs = $langs;
         $outputlangs->load("main");
@@ -522,7 +488,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
 
                 $count = count($contrat->lines);
                 $new_page = false;
-                if ($count > 5) {
+                if ($count > 12) {
                     $new_page = true;
                     $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche);
                     $pdf->SetX($this->marge_gauche);
@@ -581,7 +547,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
                 $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page ? 1 : 0));
                 $classAnnexe->getAnnexeContrat($contrat);
-                
+
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
                 $pdf->Close();

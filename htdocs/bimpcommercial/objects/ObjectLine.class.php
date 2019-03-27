@@ -22,6 +22,7 @@ class ObjectLine extends BimpObject
     public $date_from = null;
     public $date_to = null;
     public $id_remise_except = null;
+    public $id_parent_line = null;
     public static $product_line_data = array(
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1),
         'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int'),
@@ -32,10 +33,12 @@ class ObjectLine extends BimpObject
         'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0),
         'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0),
         'date_from'      => array('label' => 'Date début', 'type' => 'date', 'required' => 0, 'default' => null),
-        'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null)
+        'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null),
+        'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
     );
     public static $text_line_data = array(
-        'desc' => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
+        'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
+        'id_parent_line' => array('label' => 'Ligne parente', 'type' => 'int', 'required' => 0, 'default' => null)
     );
     public static $types = array(
         self::LINE_PRODUCT => 'Produit / Service',
@@ -356,6 +359,21 @@ class ObjectLine extends BimpObject
                     'onclick' => $onclick
                 );
             }
+//            if ($this->isParentEditable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
+//                $line_instance = BimpObject::getInstance($this->module, $this->object_name);
+//                $onclick = $line_instance->getJsLoadModalForm('default', 'Ajout d\\\'une sous-ligne à la ligne n°' . $this->getData('position'), array(
+//                    'fields' => array(
+//                        'id_obj'         => (int) $this->getData('id_obj'),
+//                        'id_parent_line' => (int) $this->getData('id_line'),
+//                        'type'           => self::LINE_TEXT
+//                    )
+//                ));
+//                $buttons[] = array(
+//                    'label'   => 'Ajout d\'une sous-ligne',
+//                    'icon'    => 'fas_plus-circle',
+//                    'onclick' => $onclick
+//                );
+//            }
         }
 
         return $buttons;
@@ -378,6 +396,17 @@ class ObjectLine extends BimpObject
         }
 
         return 0;
+    }
+
+    public function getUnitPriceHTWithRemises()
+    {
+        $value = $this->pu_ht;
+
+        if (!is_null($this->remise) && (float) $this->remise > 0) {
+            $value -= ($value * ((float) $this->remise / 100));
+        }
+
+        return $value;
     }
 
     public function getTotalHT()
@@ -1064,6 +1093,11 @@ class ObjectLine extends BimpObject
         }
 
         return $html;
+    }
+
+    public function displayUnitPriceHTWithRemises()
+    {
+        return BimpTools::displayMoneyValue($this->getUnitPriceHTWithRemises(), 'EUR');
     }
 
     // Traitements:
@@ -1894,7 +1928,7 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'qty':
-                $product_type = 0;
+                $product_type = null;
                 if ((int) $this->id_product) {
                     $product_type = (int) $this->db->getValue('product', 'fk_product_type', '`rowid` = ' . (int) $this->id_product);
                 }
@@ -1907,43 +1941,50 @@ class ObjectLine extends BimpObject
                     $html .= '<input type="hidden" value="1" name="' . $prefixe . 'qty"/>';
                     $html .= '1';
                 } else {
-                    if ($this->isLoaded()) {
-                        if (method_exists($this, 'getMinQty')) {
-                            $min = $this->getMinQty();
-                        } else {
-                            $min = 1;
-                            $equipment_lines = $this->getEquipmentLines();
-                            if (count($equipment_lines)) {
-                                $min = 0;
-                                foreach ($equipment_lines as $line) {
-                                    if ((int) $line->getData('id_equipment')) {
-                                        $min++;
-                                    }
-                                }
-                                if (!$min) {
-                                    $min = 1;
-                                }
-                            }
-                        }
-                    }
-
                     if ($product_type === 1) {
                         $html = BimpInput::renderInput('qty', $prefixe . 'qty', (float) $value, array(
-                                    'step' => 0.100,
+                                    'step' => 1,
                                     'data' => array(
                                         'data_type' => 'number',
-                                        'min'       => $min,
+                                        'min'       => 0.001,
                                         'unsigned'  => 1,
                                         'decimals'  => 3
                                     )
                         ));
                     } else {
+                        if (is_null($product_type)) {
+                            $min = 0.001;
+                            $decimals = 3;
+                        } else {
+                            $decimals = 1;
+                            $min = 1;
+                            if ($this->isLoaded()) {
+                                if (method_exists($this, 'getMinQty')) {
+                                    $min = $this->getMinQty();
+                                } else {
+                                    $equipment_lines = $this->getEquipmentLines();
+                                    if (count($equipment_lines)) {
+                                        $min = 0;
+                                        foreach ($equipment_lines as $line) {
+                                            if ((int) $line->getData('id_equipment')) {
+                                                $min++;
+                                            }
+                                        }
+                                        if (!$min) {
+                                            $min = 1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+
                         $html = BimpInput::renderInput('qty', $prefixe . 'qty', (int) $value, array(
                                     'data' => array(
                                         'data_type' => 'number',
                                         'min'       => $min,
                                         'unsigned'  => 1,
-                                        'decimals'  => 0
+                                        'decimals'  => $decimals
                                     )
                         ));
                     }
@@ -2271,7 +2312,12 @@ class ObjectLine extends BimpObject
         $html .= ' data-object_name="' . $this->object_name . '"';
         $html .= ' data-id_obj="' . $parent->id . '"';
         $html .= '>';
-        $html .= '<h4>Ajout rapide</h4>';
+
+        $html .= '<div class="singleLineFormCaption">';
+        $html .= '<h4>' . BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajout rapide</h4>';
+        $html .= '</div>';
+
+        $html .= '<div class="singleLineFormContent">';
 
         $content = '<label>Produit: </label>';
         $content .= $this->renderLineInput('id_product', false, 'quick_add_');
@@ -2281,10 +2327,40 @@ class ObjectLine extends BimpObject
         $content .= $this->renderLineInput('qty', false, 'quick_add_');
         $html .= BimpInput::renderInputContainer('quick_add_qty', 1, $content, '', 1);
 
+        $remise = 0;
+
+        if (BimpObject::objectLoaded($parent)) {
+            $client = $parent->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                if ((float) $client->dol_object->remise_percent > 0) {
+                    $remise = (float) $client->dol_object->remise_percent;
+                }
+            }
+        }
+
+        $content = '<label>Remise:&nbsp;</label>';
+        $content .= BimpInput::renderInput('text', 'quick_add_default_remise', $remise, array(
+                    'addon_right' => BimpRender::renderIcon('fas_percent'),
+                    'data'        => array(
+                        'data_type' => 'number',
+                        'min'       => 0,
+                        'max'       => 100,
+                        'decimals'  => 8
+                    ),
+                    'style'       => 'width: 80px'
+        ));
+        if ($remise > 0) {
+            $content .= '<br/><span class="small">Remise client par défaut: ' . $remise . '%</span>';
+        }
+        $html .= BimpInput::renderInputContainer('quick_add_default_remise', $remise, $content, '', 0);
+
+
         $html .= '<button type="button" class="btn btn-primary" onclick="quickAddObjectLine($(this));">';
         $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
         $html .= '</button>';
         $html .= '<div class="quickAddForm_ajax_result"></div>';
+
+        $html .= '</div>';
         $html .= '</div>';
 
         return $html;
@@ -2427,9 +2503,6 @@ class ObjectLine extends BimpObject
                 foreach ($data as $field => $params) {
                     if (BimpTools::isSubmit($field)) {
                         $this->{$field} = BimpTools::getValue($field);
-                        if ($this->field_exists('def_' . $field)) {
-                            $this->set('def_' . $field, $this->{$field});
-                        }
                     } elseif (is_null($this->{$field}) && isset($params['default'])) {
                         $this->{$field} = $params['default'];
                     }
@@ -2480,20 +2553,36 @@ class ObjectLine extends BimpObject
                     if (is_null($this->id_product) || !$this->id_product) {
                         $errors[] = 'Produit ou service obligatoire';
                     } else {
-                        if (is_null($this->pu_ht)) {
-                            $this->pu_ht = (float) $this->getValueByProduct('pu_ht');
-                        }
-                        if (is_null($this->tva_tx)) {
-                            $this->tva_tx = (float) $this->getValueByProduct('tva_tx');
-                        }
-                        if (is_null($this->id_fourn_price) && is_null($this->pa_ht)) {
-                            $this->id_fourn_price = (int) $this->getValueByProduct('id_fourn_price');
+                        $product = $this->getProduct();
+
+                        if (!BimpObject::objectLoaded($product)) {
+                            $errors[] = 'Le produit d\'ID ' . $this->id_product . ' n\'existe pas';
+                        } else {
+                            if ((int) $product->getData('fk_product_type') === 0) {
+                                $qty_str = (string) $this->qty;
+
+                                if (preg_match('/.*\..*/', $qty_str)) {
+                                    $errors[] = 'Les quantités décimales ne sont autorisées que pour les produits de type "Service". Veuillez corriger';
+                                }
+                            }
                         }
 
-                        if ((int) $this->getData('remisable')) {
-                            $product = $this->getProduct();
-                            if (!(int) $product->getData('remisable')) {
-                                $this->set('remisable', 0);
+                        if (!count($errors)) {
+                            if (is_null($this->pu_ht)) {
+                                $this->pu_ht = (float) $this->getValueByProduct('pu_ht');
+                            }
+                            if (is_null($this->tva_tx)) {
+                                $this->tva_tx = (float) $this->getValueByProduct('tva_tx');
+                            }
+                            if (is_null($this->id_fourn_price) && is_null($this->pa_ht)) {
+                                $this->id_fourn_price = (int) $this->getValueByProduct('id_fourn_price');
+                            }
+
+                            if ((int) $this->getData('remisable')) {
+                                $product = $this->getProduct();
+                                if (!(int) $product->getData('remisable')) {
+                                    $this->set('remisable', 0);
+                                }
                             }
                         }
 
@@ -2563,10 +2652,15 @@ class ObjectLine extends BimpObject
                             }
                         }
                     }
+
+                    foreach (static::$product_line_data as $field => $params) {
+                        if ($this->field_exists('def_' . $field)) {
+                            $this->set('def_' . $field, $this->{$field});
+                        }
+                    }
                     break;
             }
         }
-
         return $errors;
     }
 
@@ -2609,13 +2703,37 @@ class ObjectLine extends BimpObject
             if (count($errors)) {
                 $del_warnings = array();
                 $this->delete($del_warnings, true);
-            } elseif ($this->equipment_required) {
-                $warnings = array_merge($warnings, $this->createEquipmentsLines());
+            } else {
+                if ($this->equipment_required) {
+                    $warnings = array_merge($warnings, $this->createEquipmentsLines());
 
-                if (!is_null($equipment)) {
-                    $equipment_errors = $this->attributeEquipment((int) $equipment->id);
-                    if (count($equipment_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($equipment_errors, 'Echec de l\'attribution de l\'équipement');
+                    if (!is_null($equipment)) {
+                        $equipment_errors = $this->attributeEquipment((int) $equipment->id);
+                        if (count($equipment_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($equipment_errors, 'Echec de l\'attribution de l\'équipement');
+                        }
+                    }
+                }
+
+                if (BimpTools::isSubmit('default_remise')) {
+                    $remise_value = (float) BimpTools::getValue('default_remise', 0);
+                    if ($remise_value) {
+                        if ($this->isRemisable()) {
+                            $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+                            $remise->validateArray(array(
+                                'id_object_line' => (int) $this->id,
+                                'object_type'    => $this->getParentCommType(),
+                                'label'          => '',
+                                'type'           => 1,
+                                'percent'        => $remise_value
+                            ));
+                            $remise_errors = $remise->create();
+                            if (count($remise_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise');
+                            }
+                        } else {
+                            $warnings[] = 'ATTENTION: ce produit n\'étant pas remisable, la remise de ' . $remise_value . '% n\'a pas été prise en compte';
+                        }
                     }
                 }
             }

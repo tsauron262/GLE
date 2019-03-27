@@ -93,7 +93,6 @@ class BS_SAV extends BimpObject
     {
         $soc = $this->getChildObject("client");
         return $soc->dol_object->getNomUrl(1);
-        ;
     }
 
     // Getters:
@@ -1231,6 +1230,7 @@ class BS_SAV extends BimpObject
             $factureA->type = 3;
             $factureA->date = dol_now();
             $factureA->socid = $this->getData('id_client');
+            $factureA->cond_reglement_id = 1;
             $factureA->modelpdf = self::$facture_model_pdf;
             $factureA->array_options['options_type'] = "S";
             $factureA->array_options['options_entrepot'] = $this->getData('id_entrepot');
@@ -1336,7 +1336,7 @@ class BS_SAV extends BimpObject
             $prop->modelpdf = self::$propal_model_pdf;
             $prop->socid = $id_client;
             $prop->date = dol_now();
-            $prop->cond_reglement_id = 0;
+            $prop->cond_reglement_id = 1;
             $prop->mode_reglement_id = 0;
 
             if ($prop->create($user) <= 0) {
@@ -3436,7 +3436,28 @@ class BS_SAV extends BimpObject
 
     // Overrides:
 
-    public function create(&$warnings = array())
+    public function validate()
+    {
+        $errors = parent::validate();
+
+        if (!count($errors)) {
+            $client = $this->getChildObject('client');
+            if (!BimpObject::objectLoaded($client)) {
+                $errors[] = 'Le client d\'ID ' . $this->getData('id_client') . ' n\'existe pas';
+            } else {
+                $client_errors = $client->checkValidity();
+                if (count($client_errors)) {
+                    $url = $client->getUrl();
+                    $msg = 'Le client sélectionné n\'est pas valide. Veuillez <a href="' . $url . '" target="_blank">corriger</a>';
+                    $errors[] = BimpTools::getMsgFromArray($client_errors, $msg);
+                }
+            }
+        }
+
+        return $errors;
+    }
+
+    public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();
 
@@ -3476,7 +3497,7 @@ class BS_SAV extends BimpObject
             $this->set('id_entrepot', (int) $centre['id_entrepot']);
         }
 
-        $errors = parent::create($warnings);
+        $errors = parent::create($warnings, $force_create);
 
         if (!count($errors) && !defined('DONT_CHECK_SERIAL')) {
 

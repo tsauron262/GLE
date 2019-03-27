@@ -1,0 +1,54 @@
+table: bnf_bareme
+icon: far_user-plus
+
+labels: 
+    name: Barème kilométrique
+
+fields:
+    label:
+        label: Cheval fiscal
+        type: string
+    zero_cinq_mille:
+        label: De 0 à 5000km
+        type: money
+    cinq_mille_un_vingt_mille:
+        label: De 5001 à 20000km
+        type: money
+    plus_vingt_mille:
+        label: Plus de 20000km
+        type: money
+    ajout_euro:
+        label: Ajout en euro
+        type: money
+
+lists:
+    default: 
+        title: Barème kilometrique
+        icon: euro
+        checkboxes: 1
+        bulk_actions:
+            - label: Supprimer les montants sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        extra_btn: 
+            callback: getListExtraBtn
+        sort_field: id
+        sort_way: desc
+        n: 0
+        enable_search: 0
+        delete_btn: 1
+        update_btn: 1
+        add_object_row: 0
+        add_form_name: default
+        cols:
+            label:
+                field: label
+            zero_cinq_mille:
+                field: zero_cinq_mille
+            cinq_mille_un_vingt_mille:
+                field: cinq_mille_un_vingt_mille
+            plus_vingt_mille:
+                field: plus_vingt_mille
+            ajout_euro:
+                field: ajout_euro
+             

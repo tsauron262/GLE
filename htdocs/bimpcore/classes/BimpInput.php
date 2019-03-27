@@ -438,25 +438,27 @@ class BimpInput
                     }
                 }
                 ob_start();
-                $form->select_produits((int) $value, $field_name, $filter_type, $conf->product->limit_size, 0, -1, 2, '', 1);
+                $form->select_produits((int) $value, $field_name, $filter_type, $conf->product->limit_size, 0, 1, 2, '', 1);
                 $html .= ob_get_clean();
                 break;
 
             case 'search_societe':
-                $filter = '';
+                $filter = array();
                 if (isset($options['type']) && $options['type']) {
                     switch ($options['type']) {
                         case 'customer':
-                            $filter = 's.client != 0';
+                            $filter[] = 's.client != 0';
                             break;
 
                         case 'supplier':
-                            $filter = 's.fournisseur != 0';
+                            $filter[] = 's.fournisseur != 0';
                             break;
                     }
                 }
+                $filter[] = 'status=1';
+                
 
-                $html .= $form->select_company((int) $value, $field_name, $filter, '', 0, 0, array(), 20);
+                $html .= $form->select_company((int) $value, $field_name, implode(" AND ", $filter), '', 0, 0, array(), 20);
                 break;
 
             case 'search_user':

@@ -93,6 +93,14 @@ forms:
                 remises: 
                     callback: getClientDefaultRemiseFormValues
         rows: 
+            - custom: 1
+              hidden: 1
+              label: Ligne parente
+              input_name: id_parent_line
+              input: 
+                  type: hidden
+              value: 0
+              
             - field: type
               hidden: 
                   field_value: id
@@ -370,6 +378,10 @@ lists_cols:
                 method: displayLineData
                 params:
                     - pu_ht
+    pu_ht_remise: 
+        label: PU HT Remisé
+        value: 
+            callback: displayUnitPriceHTWithRemises
     tva:
         label: TVA
         value: 
@@ -430,7 +442,7 @@ lists_cols:
             callback: 
                 method: displayLineData
                 params:
-                    - margin
+                    - margin        
 
 lists: 
     default: 

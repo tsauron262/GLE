@@ -1,99 +1,115 @@
-	#content input {
-	  margin: 0 5px;
-	  text-align: center;
-	  line-height: 80px;
-	  font-size: 50px;
-	  border: solid 1px #ccc;
-	  box-shadow: 0 0 5px #ccc inset;
-	  outline: none;
-	  width: 70px;
-	  transition: all 0.2s ease-in-out;
-	  border-radius: 10px;
-	}
-	#content input:focus {
-	  border-color: #ef7d00;
-	  box-shadow: 0 0 5px #ef7d00 inset;
-	}
-	#content input::-moz-selection {
-	  background: transparent;
-	}
-	#content input::selection {
-	  background: transparent;
-	}
+#return_button {
+    color:#00ace6; 
+    text-decoration:none; 
+    font-size:15px
+} 
+#return_button:hover {
+    color:grey;
+}
+
+#error_js {
+    color: #721c24; 
+    background-color:#f8d7da; 
+    border-left:7px solid #721c24;
+    width:80%;
+    line-height: 225%;
+}
+#content input {
+    margin: 0 5px;
+    text-align: center;
+    line-height: 80px;
+    font-size: 50px;
+    border: solid 1px #ccc;
+    box-shadow: 0 0 5px #ccc inset;
+    outline: none;
+    width: 70px;
+    transition: all 0.2s ease-in-out;
+    border-radius: 10px;
+}
+#content input:focus {
+    border-color: #ef7d00;
+    box-shadow: 0 0 5px #ef7d00 inset;
+}
+#content input::-moz-selection {
+    background: transparent;
+}
+#content input::selection {
+    background: transparent;
+}
 
 button, .button {
-  display: inline-block;
-  position: relative;
-  cursor: pointer;
-  margin: 10px;
-  -webkit-user-select: none;
-     -moz-user-select: none;
-      -ms-user-select: none;
-          user-select: none;
-  text-decoration: none;
-  -webkit-perspective: 800px;
-          perspective: 800px;
-  border: none;
-  background: none;
-  color: #ef7d00;
-  font-size: 24px;
-  padding: 16px;
-  transition: color .25s;
-  margin-top:2%;
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    margin: 10px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    text-decoration: none;
+    -webkit-perspective: 800px;
+    perspective: 800px;
+    border: none;
+    background: none;
+    color: #ef7d00;
+    font-size: 24px;
+    padding: 16px;
+    transition: color .25s;
+    margin-top:2%;
 }
 button:after, .button:after {
-  opacity: 0;
-  transition: all .25s;
-  background: transparent;
+    opacity: 0;
+    transition: all .25s;
+    background: transparent;
 }
 button:before, .button:before {
-  background: transparent;
+    background: transparent;
 }
 button:hover:after, .button:hover:after {
-  opacity: 1;
+    opacity: 1;
 }
 button > span, .button > span {
-  position: relative;
-  z-index: 2;
+    position: relative;
+    z-index: 2;
 }
 
 button.btn:hover, .button.btn:hover {
-  color: #fff !important;
+    color: #fff !important;
 }
 button.btn:after, .button.btn:after {
-  background: #ef7d00 !important;
+    background: #ef7d00 !important;
 }
 
 button:before, button:after, .button:before, .button:after {
-  position: absolute;
-  top: 0;
-  left: 0;
-  content: "";
-  width: 100%;
-  height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    content: "";
+    width: 100%;
+    height: 100%;
 }
 body {
-  background: #efefef;
-  font-size: 62.5%;
-  font-family: 'Lato', sans-serif;
-  font-weight: 300;
-  color: #B6B6B6;
+    background: #efefef;
+    font-size: 62.5%;
+    font-family: 'Lato', sans-serif;
+    font-weight: 300;
+    color: #B6B6B6;
 }
 body section {
-  background: white;
-  margin: 60px auto 120px;
-  border-top: 15px solid #313A3D;
-  text-align: center;
-  padding: 50px 0 110px;
-  width: 80%;
-  max-width: 1100px;
+    background: white;
+    margin: 60px auto 120px;
+    border-top: 15px solid #313A3D;
+    text-align: center;
+    padding: 50px 0 110px;
+    width: 80%;
+    max-width: 1100px;
 }
 body section h1 {
-  margin-bottom: 40px;
-  font-size: 4em;
-  text-transform: uppercase;
-  font-family: 'Lato', sans-serif;
-  font-weight: 100;
+    margin-bottom: 40px;
+    font-size: 4em;
+    text-transform: uppercase;
+    font-family: 'Lato', sans-serif;
+    font-weight: 100;
 }
 
 /* Firefox */
@@ -104,24 +120,13 @@ input[type=number] {
 /* Chrome */
 input::-webkit-inner-spin-button,
 input::-webkit-outer-spin-button { 
-	-webkit-appearance: none;
-	margin:0;
+    -webkit-appearance: none;
+    margin:0;
 }
 
 /* Opéra*/
 input::-o-inner-spin-button,
 input::-o-outer-spin-button { 
-	-o-appearance: none;
-	margin:0
-}
-
-#btn_renvoi {
-    color:lightblue; 
-    text-decoration:none; 
-    font-size:15px;
-}
-
-
-.red{
-    color:red;
+    -o-appearance: none;
+    margin:0
 }

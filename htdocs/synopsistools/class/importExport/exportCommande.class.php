@@ -185,6 +185,13 @@ class exportCommande extends export8sens {
             $tabCommande[] = array("E" => "E", "code_client" => $societe->code_client, "nom" => $PcvPAdpLib, "phone" => $societe->phone, "address" => $PcvPAdpRue1, "zip" => $PcvPAdpZip, "town" => $PcvPAdpCity, "ref" => $commande->ref, "date" => dol_print_date($commande->date, "%d-%m-%Y"), "email" => $societe->email, "total" => price($commande->total_ht), "total_ttc" => price($commande->total_ttc), "id8Sens" => $this->id8sens, "codeDepot" => $entrepot->label, "secteur" => $secteur, "CodeCli"=>"",
                 "PcvPAdpTitleEnu"=>$PcvPAdpTitleEnu,
                 "PcvLAdpTitleEnu"=>$PcvLAdpTitleEnu, "PcvLAdpLib" => $PcvLAdpLib, "PcvLAdpRue1"=> $PcvLAdpRue1, "PcvLAdpZip" => $PcvLAdpZip, "PcvLAdpCity" => $PcvLAdpCity);
+            
+            
+            
+            if(isset($commande->ref_client) && $commande->ref_client != "")
+                $tabCommandeDet[] = array("L" => "L", "ref" => '', "product_type" => 'GEN-DIV-INFO', "qty" => "1", "subprice" => '0', "description" => "Ref client : ".$commande->ref_client, "buy_price_ht" => '0', "tva_code" => '0', "remise_percent" => '0', "tva_tx" => '0', "codeDepot" => $entrepot->label);
+            
+            
             $commande->fetch_lines();
             foreach ($commande->lines as $line) {
                 $type = $this->getRef($line);

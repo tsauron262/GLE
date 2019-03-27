@@ -11,11 +11,23 @@ fields:
             
     content:
         label: Désignation
-        type: text
-
-    active: 
-        label: Etat
+        type: string
+    
+    use_in_contract:
+        label: Utilisé dans les contrats
         type: bool
+    
+    use_in_commercial:
+        label: Utilisé dans commercial
+        type: bool
+    
+    test:
+        label: Test pour les commerciaux
+        type: string
+    
+#    active: 
+#        label: Etat
+#        type: bool
         
 list:
     checkboxes: 1
@@ -39,6 +51,15 @@ list:
         content:
             field: content
             edit: 1
-        active:
-            field: active
+        use_in_contract:
+            field: use_in_contract
             edit: 1
+        use_in_commercial:
+            field: use_in_commercial
+            edit: 1
+        test:
+            field: test
+            edit: 1
+#        active:
+#            field: active
+#            edit: 1

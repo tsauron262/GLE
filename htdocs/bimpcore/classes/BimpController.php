@@ -137,27 +137,31 @@ class BimpController
 
     // Affichages:
 
-    public function displayHeaderFiles()
+    public function displayHeaderFiles($echo = true)
     {
+        $html = '';
         $id_object = BimpTools::getValue('id');
 
-        echo '<script type="text/javascript">';
-        echo 'ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
-        echo '</script>';
+        $html .= '<script type="text/javascript">';
+        $html .= 'ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
+        $html .= '</script>';
 
-        BimpCore::displayHeaderFiles();
+        $html .= BimpCore::displayHeaderFiles(false);
 
         foreach ($this->cssFiles as $css_file) {
-            echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $css_file . '"/>';
+            $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $css_file . '"/>';
         }
 
         foreach ($this->jsFiles as $js_file) {
-            echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
+            $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
         }
 
-        echo '<script type="text/javascript">';
-        echo '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
-        echo '</script>';
+        $html .= '<script type="text/javascript">';
+        $html .= '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
+        $html .= '</script>';
+        if($echo)
+            echo $html;
+        return $html;
     }
 
     public function display()
@@ -174,7 +178,8 @@ class BimpController
         if (!defined('BIMP_CONTROLLER_INIT')) {
             define('BIMP_CONTROLLER_INIT', 1);
             $this->addDebugTime('Début affichage page');
-            llxHeader('', '', '', false, false, false);
+            if (!defined('BIMP_NO_HEADER'))
+                llxHeader('', '', '', false, false, false);
             $display_footer = true;
         } else {
             $cssFiles = $this->getConf('css', array(), false, 'array');
@@ -198,6 +203,7 @@ class BimpController
             }
         }
 
+        echo '<div class="bimp_controller_content">';
         if (count($this->errors)) {
             echo BimpRender::renderAlerts($this->errors);
             if (count($this->msgs)) {
@@ -231,6 +237,7 @@ class BimpController
                 echo $this->renderSections('sections');
             }
         }
+        echo '</div>';
 
         if ($display_footer) {
             echo BimpRender::renderAjaxModal('page_modal');
@@ -1806,7 +1813,6 @@ class BimpController
 
     protected function ajaxProcessLoadFixeTabs($i = 0)
     {
-        global $bimp_fixe_tabs;
         $i++;
 
         $bimp_fixe_tabs = new FixeTabs();

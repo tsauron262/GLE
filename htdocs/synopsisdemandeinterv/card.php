@@ -48,6 +48,12 @@ if (!isset($_REQUEST['action']))
 
 
 require("./pre.inc.php");
+
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+require_once(DOL_DOCUMENT_ROOT."/bimpfichinter/objects/Bimp_Demandinter.class.php");
+$htmlRedirect = Bimp_Demandinter::redirect(false, $_REQUEST['id']);
+
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
@@ -219,105 +225,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
     $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
     $synopsisdemandeinterv->id = $_REQUEST["id"];
     $synopsisdemandeinterv->fetch($_REQUEST["id"]);
-    require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
-    $fichinter = new Synopsisfichinter($db);
-
-    $fichinter->date = $synopsisdemandeinterv->date;
-    $fichinter->socid = $synopsisdemandeinterv->socid;
-    $fichinter->duree = $synopsisdemandeinterv->duree;
-    $fichinter->projet_id = $synopsisdemandeinterv->projetidp;
-    $fichinter->author = $synopsisdemandeinterv->fk_user_prisencharge;
-    $fichinter->description = $synopsisdemandeinterv->description;
-    $fichinter->modelpdf = $conf->global->FICHEINTER_ADDON_PDF;
-    $fichinter->fk_di = $synopsisdemandeinterv->id;
-    $fichinter->fk_contrat = $synopsisdemandeinterv->fk_contrat;
-    $fichinter->fk_commande = $synopsisdemandeinterv->fk_commande;
-    $obj = $conf->global->FICHEINTER_ADDON;
-    $obj = "mod_" . $obj;
-    require_once(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/" . $obj . ".php");
-    $modFicheinter = new $obj;
-    $societe = new Societe($db);
-    $societe->fetch($fichinter->socid);
-    $fichinter->ref = $modFicheinter->getNextValue($societe, $ficheinter);
-
-    if ($fichinter->socid > 0) {
-        $result = $fichinter->create($user);
-        if ($result > 0) {
-
-            //transfert toutes les lignes
-            $requete = "SELECT *  FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value WHERE typeI = 'DI' AND interv_refid =" . $synopsisdemandeinterv->id;
-            $sql1 = $db->query($requete);
-            while ($res1 = $db->fetch_object($sql1)) {
-                if (!in_array($res1->extra_key_refid, array(24, 25, 26, 27))) {
-                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
-                                            (typeI, interv_refid,extra_key_refid,extra_value)
-                                     VALUES ('FI'," . $result . "," . $res1->extra_key_refid . ",'" . addslashes($res1->extra_value) . "')";
-                    $db->query($requete);
-                }
-            }
-            $synopsisdemandeinterv->fetch_lines();
-            //all lines id if lignes[]
-            $objLigneFiche = new SynopsisfichinterLigne($db);
-
-            foreach ($synopsisdemandeinterv->lignes as $ligne) {
-                $objLigneFiche->fk_fichinter = $result;
-                $objLigneFiche->desc = $ligne->desc;
-                $objLigneFiche->datei = $ligne->datei;
-                if ($conf->global->FICHINTER_RESET_DURATION_DI2FI == 1) {
-                    $objLigneFiche->duration = 0;
-                    $objLigneFiche->total_ht = 0;
-                    $objLigneFiche->total_ttc = 0;
-                    $objLigneFiche->total_tva = 0;
-                    $objLigneFiche->pu_ht = 0;
-                } else {
-                    $objLigneFiche->duration = $ligne->duration;
-                    $objLigneFiche->total_ht = $ligne->total_ht;
-                    $objLigneFiche->total_ttc = $ligne->total_ttc;
-                    $objLigneFiche->total_tva = $ligne->total_tva;
-                    $objLigneFiche->pu_ht = $ligne->pu_ht;
-                }
-                if (isset($ligne->fk_prod))
-                    $objLigneFiche->typeIntervProd = $ligne->fk_prod;
-
-                $objLigneFiche->fk_typeinterv = $ligne->fk_typeinterv;
-                $objLigneFiche->isDeplacement = $ligne->isDeplacement;
-                //Si deplacement
-//                $objLigneFiche->typeIntervProd = false;
-//                if (isset($ligne->fk_commandede)) {
-//                    $requete = "SELECT b.rowid
-//                                      FROM " . MAIN_DB_PREFIX . "product as b,
-//                                           " . MAIN_DB_PREFIX . "commandedet as cd
-//                                     WHERE cd.fk_product = b.rowid
-//                                       AND cd.rowid = " . $ligne->fk_commandedet;
-//                    $sql3 = $db->query($requete);
-//                    if ($db->num_rows($sql3) > 0) {
-//                        $res3 = $db->fetch_object($sql3);
-//                        $objLigneFiche->typeIntervProd = $res3->rowid;
-//                        $objLigneFiche->total_ht = $ligne->total_ht;
-//                        $objLigneFiche->total_ttc = $ligne->total_ttc;
-//                        $objLigneFiche->total_tva = $ligne->total_tva;
-//                        $objLigneFiche->pu_ht = $ligne->pu_ht;
-//                    } else {
-//                        die($requete);
-//                    }
-//                }
-
-                $objLigneFiche->qte = $ligne->qte;
-                $objLigneFiche->isForfait = $ligne->isForfait;
-                $objLigneFiche->fk_commandedet = $ligne->fk_commandedet;
-                $objLigneFiche->fk_contratdet = $ligne->fk_contratdet;
-                $objLigneFiche->tx_tva = $ligne->tx_tva;
-
-//                    print '<br/>';
-//                    var_dump($objLigneFiche);
-//                    print '<br/>';
-                $objLigneFiche->insert($user);
-            }
-            header('Location: ' . DOL_URL_ROOT . '/synopsisfichinter/card.php?id=' . $result);
-        } else {
-            $mesg = '<div class="error ui-state-error">Impossible de créer la FI' . $fichinter->error . '</div>';
-        }
-    }
+    $synopsisdemandeinterv->createFi();
 }
 
 if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra') {
@@ -684,6 +592,9 @@ $js .= "<style> textarea{ width: 80%; height: 10em;}</style>";
 //  //launchRunningProcess($db,'synopsisdemandeinterv',$_GET['id']);
 
 llxHeader($js, "Demande Intervention");
+
+echo $htmlRedirect;
+
 if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'setEffUser') {
     $tmpUser = new User($db);
     $tmpUser->id = $_REQUEST['EffUserid'];

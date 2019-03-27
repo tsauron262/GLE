@@ -76,7 +76,7 @@ function initHeure(elem) {
     $(elem).parent().find(".minHeure option[value=" + minAv + "]").attr("selected", "selected");
 //Enreg
     jQuery(elem).parent().find(".heureHeure, .minHeure").change(function () {
-        secondes = (3600 * parseInt(jQuery(elem).parent().find(".heureHeure option:selected").val())) + (300 * parseInt(jQuery(elem).parent().find(".minHeure option:selected").val()));
+        secondes = (3600 * parseInt(jQuery(elem).parent().find(".heureHeure option:selected").val())) + (60 * parseInt(jQuery(elem).parent().find(".minHeure option:selected").val()));
         jQuery(elem).parent().find(".originalHeure").val(secondes);
     });
     cacherDecacherPRDV();

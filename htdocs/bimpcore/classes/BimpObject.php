@@ -1677,6 +1677,10 @@ class BimpObject extends BimpCache
 
         return false;
     }
+    
+    public function getTaxeIdDefault(){
+        return (int) BimpCore::getConf("tva_default");
+    }
 
     public function getChildObject($object_name, $id_object = null)
     {
@@ -1762,7 +1766,7 @@ class BimpObject extends BimpCache
         return array();
     }
 
-    public function getChildrenObjects($object_name, $filters = array(), $order_by = 'id', $order_way = 'asc')
+    public function getChildrenObjects($object_name, $filters = array(), $order_by = 'id', $order_way = 'asc', $use_id_as_key = false)
     {
         $children = array();
         if ($this->isLoaded()) {
@@ -1789,7 +1793,11 @@ class BimpObject extends BimpCache
                         foreach ($list as $item) {
                             $child = BimpCache::getBimpObjectInstance($instance->module, $instance->object_name, (int) $item[$primary], $this);
                             if (BimpObject::objectLoaded($child)) {
-                                $children[] = $child;
+                                if ($use_id_as_key) {
+                                    $children[(int) $child->id] = $child;
+                                } else {
+                                    $children[] = $child;
+                                }
                             }
                         }
                     }
@@ -1934,6 +1942,24 @@ class BimpObject extends BimpCache
             return (int) $obj->nb_rows;
         }
         return 0;
+    }
+
+    public function getListObjects($filters = array(), $n = null, $p = null, $order_by = 'id', $order_way = 'DESC')
+    {
+        $primary = $this->getPrimary();
+
+        $rows = $this->getList($filters, $n, $p, $order_by, $order_way, 'array', array($primary));
+
+        $objects = array();
+
+        foreach ($rows as $r) {
+            $instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name, (int) $r[$primary]);
+            if (BimpObject::objectLoaded($instance)) {
+                $objects[(int) $r[$primary]] = $instance;
+            }
+        }
+
+        return $objects;
     }
 
     // Affichage des données:

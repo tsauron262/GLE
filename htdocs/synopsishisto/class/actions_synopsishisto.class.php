@@ -57,6 +57,10 @@ class ActionsSynopsisHisto {
             setEventMessages("<a href='".DOL_URL_ROOT."/user/card.php?id=".$user->id."'>Merci de changer votre mdp (les comptes non mise à jour le 30 avril seront désactivés)</a>", null, 'errors');
        }
 
+        if(isset($user->array_options['options_alias'])){
+            if(stripos($user->array_options['options_alias'], "@itribu") > 0)
+                 setEventMessages($user->array_options['options_alias']."<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci d'utiliser  un Apple ID non itribu</a>", null, 'errors');
+        }
         if(isset($user->array_options['options_mail_sec'])){
             if($user->office_phone == ""){
                  setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre téléphone pro</a>", null, 'errors');
@@ -82,6 +86,9 @@ class ActionsSynopsisHisto {
             }
             elseif(stripos($user->array_options['options_mail_sec'], "@bimp") > 0){
                  setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours non bimp</a>", null, 'errors');
+            }
+            elseif(stripos($user->array_options['options_mail_sec'], "@itribu") > 0){
+                 setEventMessages("<a href='".DOL_URL_ROOT."/bimpcore/tabs/user.php'>Merci de renseigner votre email de secours non itribu</a>", null, 'errors');
             }
         }
        

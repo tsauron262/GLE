@@ -17,6 +17,7 @@ class BNF_Frais extends BimpObject
     const NOTE_FRAIS_POSTAL = 7; // Sous-Type : OK
     const NOTE_FRAIS_ABONNEMENT = 8;
     const NOTE_FRAIS_SALON = 9;
+    const NOTE_FRAIS_DIVERS = 10;
 
     public static $status_list = array(
         self::NOTE_FRAIS_ATT_VALIDATION    => array('label' => 'En attente de validation', 'classes' => array('warning'), 'icon' => 'hourglass-start'),
@@ -34,6 +35,7 @@ class BNF_Frais extends BimpObject
         self::NOTE_FRAIS_POSTAL         => array('label' => 'Frais postaux', 'classes' => array(''), 'icon' => 'paper-plane'),
         self::NOTE_FRAIS_ABONNEMENT     => array('label' => 'Abonnement', 'classes' => array(''), 'icon' => 'link'),
         self::NOTE_FRAIS_SALON          => array('label' => 'Salon', 'classes' => array(''), 'icon' => 'users'),
+        self::NOTE_FRAIS_DIVERS          => array('label' => 'Frais divers', 'classes' => array(''), 'icon' => 'cogs'),
     );
     public static $periods = array(1 => 'Midi',2 => 'Soir');
     public static $amounts_types = array(
@@ -44,7 +46,8 @@ class BNF_Frais extends BimpObject
         self::NOTE_FRAIS_TRANSPORT,
         self::NOTE_FRAIS_POSTAL,
         self::NOTE_FRAIS_ABONNEMENT,
-        self::NOTE_FRAIS_SALON
+        self::NOTE_FRAIS_SALON,
+        self::NOTE_FRAIS_DIVERS
     );
     public static $kilometers_types = array(self::NOTE_FRAIS_KILOMETERS);
     
@@ -239,23 +242,5 @@ class BNF_Frais extends BimpObject
             $this->set('ticket_validated', 0); $this->update();
            }
        }
-    }
-    //  public function canEdit() {
-    //     $status = $this->getData('status');
-    //     if($status == '2' OR $status == '3') {
-    //         return 0;
-    //     }
-    //     return 1;
-    // }
-    // public function canDelete(){
-    //     return $this->canEdit();
-    // }
-    public function canEdit() {
-        if($this->getData('status') > 1) return 0;
-        return 1;
-    }
-
-    public function canDelete() {
-        return $this->canEdit();
     }
 }

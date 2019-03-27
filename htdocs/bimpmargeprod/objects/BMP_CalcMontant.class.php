@@ -1,10 +1,22 @@
 <?php
 
-class BMP_CalcMontant extends BimpObject
+require_once DOL_DOCUMENT_ROOT."/bimpmargeprod/objects/Abstract_margeprod.class.php";
+class BMP_CalcMontant extends Abstract_margeprod
 {
 
     // Getters : 
 
+    public function canDelete()
+    {
+        global $user;
+        
+        if ($user->admin) {
+            return 1;
+        }
+        
+        return 0;
+    }
+    
     public function getTypes_montantsArray()
     {
         BimpObject::loadClass($this->module, 'BMP_TypeMontant');

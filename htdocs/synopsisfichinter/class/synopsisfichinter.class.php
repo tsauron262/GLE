@@ -56,6 +56,7 @@ class Synopsisfichinter extends Fichinter {
     public $socid;        // Id client
     public $client;        // Objet societe client (a charger par fetch_client)
     public $author;
+    public $fk_user_author;
     public $ref;
     public $date;
     public $fk_di;
@@ -105,7 +106,7 @@ class Synopsisfichinter extends Fichinter {
             $this->duree = 0;
         }
         if ($this->socid <= 0) {
-            $this->error = 'ErrorBadParameterForFunc';
+            $this->error = 'ErrorBadParameterForFunc no CLIENT';
             dol_syslog("Fichinter::create " . $this->error, LOG_ERR);
             return -1;
         }
@@ -116,7 +117,10 @@ class Synopsisfichinter extends Fichinter {
         $soc = new Societe($this->db);
         $result = $soc->fetch($this->socid);
         $this->verifyNumRef($soc);
-
+        
+        if($this->author == "")
+            $this->author = $this->fk_user_author;
+        
         $sql = "INSERT INTO " . MAIN_DB_PREFIX . "fichinter (fk_soc, datec, ref, fk_user_author, description, model_pdf";
         if ($this->projet_id)
             $sql.= ", fk_projet";
@@ -207,11 +211,13 @@ class Synopsisfichinter extends Fichinter {
         $sql .= ", fk_statut = " . $this->statut;
         $sql .= ", note_public = '" . $this->note_public."'";
         $sql .= ", note_private = '" . $this->note_private."'";
+        $sql .= ", fk_contrat = '" . $this->fk_contrat . "'";
         $sql .= " WHERE rowid = " . $this->id;
 
 
         $sql2 = "UPDATE " . MAIN_DB_PREFIX . "synopsisfichinter SET ";
         $sql2 .= " natureInter = '" . $this->natureInter . "'";
+        $sql2 .= ", fk_commande = '" . $this->fk_commande . "'";
         $sql2 .= " WHERE rowid = " . $this->id;
 
         dol_syslog("Fichinter::update sql=" . $sql);
@@ -1190,6 +1196,9 @@ class SynopsisfichinterLigne extends FichinterLigne{
         $total_tva = 0.2 * $this->total_ht;
 
         $isDep = false;
+        
+        if($this->comLigneId == "")
+            $this->comLigneId = $this->fk_commandedet;
         
         if($this->fk_typeinterv){
             $requete = "SELECT isDeplacement FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv WHERE id =" . $this->fk_typeinterv;

@@ -219,7 +219,7 @@ class BimpCache
                         $where .= ' AND `deleted` = 0';
                     }
 
-                    $rows = self::getBdb()->getRows('bimp_file', $where, null, 'array', array('id', 'file_name', 'file_ext'), 'id', 'asc');
+                    $rows = self::getBdb()->getRows('bimpcore_file', $where, null, 'array', array('id', 'file_name', 'file_ext'), 'id', 'asc');
 
                     if (!is_null($rows)) {
                         foreach ($rows as $r) {

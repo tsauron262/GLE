@@ -99,6 +99,16 @@ class BimpTools
         if (BimpTools::isSubmit($field_name)) {
             return BimpTools::getValue($field_name);
         }
+        
+        // Filtres listes:
+        if (BimpTools::isSubmit('param_list_filters')) {
+            $filters = json_decode(BimpTools::getValue('param_list_filters'));
+            foreach ($filters as $filter) {
+                if (isset($filter->name) && $filter->name === $field_name) {
+                    return $filter->filter;
+                }
+            }
+        }
 
         return $default_value;
     }

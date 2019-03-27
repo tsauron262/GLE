@@ -38,12 +38,13 @@ class PropalSavPDF extends PropalPDF
         $rows = '';
 
         if (!is_null($this->sav)) {
-            $rows .= $this->sav->getData('ref') . '<br/>';
+            $rows .= '<span style="color: #'.BimpCore::getParam('pdf/primary', '000000').'">' . $this->sav->getData('ref') . '</span><br/>';
             $equipment = $this->sav->getchildObject('equipment');
             if (!is_null($equipment) && $equipment->isLoaded()) {
-                if($equipment->getData('product_label') != "")
-                    $rows .= $equipment->getData('product_label')."<br/>";
-                $rows .= $equipment->getData('serial');
+                if($equipment->getData('product_label') != ""){
+                    $rows .= '<span style="font-size: 9px;">' . $equipment->getData('product_label')."</span><br/>";
+                }
+                $rows .= '<span style="font-size: 9px;">' . $equipment->getData('serial') . '</span>';
             }
             
             $infoCentre = $this->sav->getCentreData();
@@ -52,20 +53,27 @@ class PropalSavPDF extends PropalPDF
             $mysoc->phone = $infoCentre['tel'];
         }
 
-        $this->header_vars['apple_img'] = DOL_DOCUMENT_ROOT . "/synopsistools/img/agree.jpg";
-        $this->header_vars['header_middle'] = $rows;
+//        $this->header_vars['apple_img'] = DOL_DOCUMENT_ROOT . "/synopsistools/img/agree.jpg";
+        $this->header_vars['header_right'] = $rows;
     }
 
-    public function renderBeforeLines()
+    public function getCommercialInfosHtml()
     {
+        $html = parent::getCommercialInfosHtml();
+        
         if (!is_null($this->sav)) {
             if ((int) $this->sav->getData('id_user_tech')) {
                 $tech = $this->sav->getChildObject('user_tech');
                 if (!is_null($tech) && $tech->isLoaded()) {
-                    $this->writeContent('<p style="font-size: 9px"><strong>Technicien en charge : </strong>' . $tech->dol_object->getFullName($this->langs) . '</p>');
+                    $primary = BimpCore::getParam('pdf/primary', '000000') ;
+                    $html .= '<div class="row" style="border-top: solid 1px #' . $primary. '"><span style="font-weight: bold; color: #' . $primary . ';">';
+                    $html .= 'Technicien en charge :</span><br/>';
+                    $html .= $tech->dol_object->getFullName($this->langs, 0, -1, 20) . '</div>';
                 }
             }
         }
+        
+        return $html;
     }
 
     public function renderAfterBottom()

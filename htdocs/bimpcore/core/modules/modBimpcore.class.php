@@ -53,7 +53,7 @@ class modBimpcore extends DolibarrModules
 
 		// Family can be 'crm','financial','hr','projects','products','ecm','technic','other'
 		// It is used to group modules in module setup page
-		$this->family = "Synopsis";
+		$this->family = "Bimp";
 		// Gives the possibility to the module, to provide his own family info and position of this family. (canceled $this->family)
 		//$this->familyinfo = array('myownfamily' => array('position' => '001', 'label' => $langs->trans("Synopsis")));
 		// Module position in the family
@@ -92,7 +92,7 @@ class modBimpcore extends DolibarrModules
 		//							'dir' => array('output' => 'othermodulename'),      // To force the default directories names
 		//							'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@mymodule')) // Set here all workflow context managed by module
 		//                        );
-		$this->module_parts = array('login'=>1, 'hooks' => array('productdao', 'thirdpartycard'));
+		$this->module_parts = array('login'=>1, 'hooks' => array('productdao', 'thirdpartycard', 'main'));
 
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/mymodule/temp");
@@ -104,7 +104,7 @@ class modBimpcore extends DolibarrModules
 		// Dependencies
 		$this->hidden = false;			// A condition to hide module
 		$this->depends = array();		// List of modules id that must be enabled if this module is enabled
-		$this->requiredby = array();	// List of modules id to disable if this one is disabled
+		$this->requiredby = array("modBimpmargeprod", "modBimptask");	// List of modules id to disable if this one is disabled
 		$this->conflictwith = array();	// List of modules id this module is in conflict with
 		$this->phpmin = array(5,0);					// Minimum version of PHP required by module
 		$this->need_dolibarr_version = array(3,0);	// Minimum version of Dolibarr required by module
@@ -261,6 +261,7 @@ class modBimpcore extends DolibarrModules
 	{
 		$sql = array();
 
+                $this->_load_tables('/bimpcore/sql/');
 
 		return $this->_init($sql, $options);
 	}

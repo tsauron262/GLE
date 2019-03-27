@@ -72,6 +72,15 @@ class Interfacevalidateorder extends DolibarrTriggers
             }
         }
 
+        if (!defined("NOT_VERIF") && ($action == 'PROPAL_VALIDATE' || $action == 'ORDER_VALIDATE') && !BimpDebug::isActive('bimpcommercial/no_validate')) {
+            //attention pas de condition de regelment sur les facture acompte
+            if(in_array($object->cond_reglement_id, array(0, 39))){
+                    setEventMessages("Merci de séléctionné les condition de réglements", null, 'errors');
+                    return -2;
+            }
+        }
+            
+
         if (!defined("NOT_VERIF") && ($action == 'ORDER_VALIDATE' || $action == 'PROPAL_VALIDATE' || $action == 'BILL_VALIDATE') && !BimpDebug::isActive('bimpcommercial/no_validate')) {
             $tabConatact = $object->getIdContact('internal', 'SALESREPFOLL');
             if (count($tabConatact) < 1) {
@@ -126,6 +135,7 @@ class Interfacevalidateorder extends DolibarrTriggers
                 return -2;
         }
         if ($action == 'ORDER_UNVALIDATE' || ($action == 'ORDER_DELETE' && $object->statut == 1)) {
+            $this->errors[] = "Impossible de dévalidé";
             setEventMessages("Impossible de dévalidé", null, 'errors');
             return -2;
         }

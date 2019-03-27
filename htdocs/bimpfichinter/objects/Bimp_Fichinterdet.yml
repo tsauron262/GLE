@@ -103,8 +103,23 @@ fields:
         type: bool
 #        Fields manquant:
 #    rang
-#    fk_commandedet
-#    fk_contratdet
+
+    fk_contratdet:
+        label: Prod Contrat
+        type: int
+        values: 
+                array: products_contrat_list
+        show: 
+            callback:
+                method: asParentContrat
+    fk_commandedet:
+        label: Prod Commande
+        type: int
+        values: 
+                array: products_commande_list
+        show: 
+            callback:
+                method: asParentCommande
     
         
 
@@ -120,6 +135,8 @@ forms:
             - field: tx_tva
             - field: pu_ht
             - field: isForfait
+            - field: fk_commandedet
+            - field: fk_contratdet
     
             
 lists_cols: 
@@ -132,6 +149,14 @@ lists_cols:
     fk_depProduct:
         field: fk_depProduct
         display: nom_url
+    fk_commandedet:
+        field: fk_commandedet
+        show:
+            callback: asParentCommande
+    fk_contratdet:
+        field: fk_contratdet
+        show:
+            callback: asParentContrat
     duration:
         field: duration
     tx_tva:
@@ -189,6 +214,8 @@ lists:
             fk_typeinterv:
             datei:
             desc:
+            fk_commandedet:
+            fk_contratdet:
             fk_depProduct:
             duration:
             tx_tva:
@@ -210,6 +237,8 @@ fields_tables:
             - field: total_tva 
             - field: total_ttc 
             - field: natureInter
+            - field: fk_commandedet
+            - field: fk_contratdet
             
         
 views: 

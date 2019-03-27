@@ -6,7 +6,7 @@ table: synopsisdemandeinterv
 primary: rowid
 controller: demandinter
 list_page_url:
-    controller: index
+    controller: di
 header_list_name: default
 icon: fas_ambulance
 
@@ -39,7 +39,11 @@ objects:
         card: 
             title: 
                 object_prop: ref
-            view_btn: 1 
+            view_btn: 1
+    client:
+        instance:
+            id_object:
+                field_value: fk_soc
             
     
                 
@@ -60,12 +64,14 @@ fields:
             input: 
                 type: search_societe
                 societe_type: customer 
+        dol_prop: socid
     fk_commande: 
         label: Commande
         object: commande
         type: id_object
         values:
             array: list_commande
+        default_value: 0
     ref:
         label: Ref
         type: string
@@ -89,6 +95,7 @@ fields:
         label: Date d'intervention
         type: date
         dol_prop: date
+        required: 1
     date_valid:
         label: Date de validation
         type: date
@@ -98,12 +105,15 @@ fields:
         object: user
         input: 
             type: search_user
+        dol_prop: author
     fk_user_prisencharge:
         label: Intervenant
         type: id_object
         object: user
         input: 
             type: search_user
+            include_empty: 1
+        default_value: 0
 #    fk_user_modif:
 #        label: User modif
 #        type: id_object
@@ -162,6 +172,10 @@ fields:
         label: Fiche
         type: string
         extra: 1
+    action:
+        label: Event agenda
+        type: string
+        extra: 1
     extra24:
         label: Heure d'arrivé AM
         type: string
@@ -182,6 +196,7 @@ fields:
         label: Confirmé
         type: bool
         extra: 1
+        default_value: 0
 # fields manquant :
 #    fk_projet
 #    entity
@@ -203,9 +218,6 @@ forms:
             - field: fk_soc
             - field: datei
             - field: description
-            - field: fk_contrat
-            - field: fk_commande
-            - field: fk_statut
             - field: note_public
             - field: note_private
             - field: extra37
@@ -295,7 +307,7 @@ lists_cols:
                 type: search_user
                 
 lists:
-    default: 
+    defaultAbstract: 
         checkboxes: 1
         configurable: 1
         sort_field: id
@@ -303,12 +315,11 @@ lists:
         n: 25
         delete_btn: 0
         modal_view: default
-#        add_form_name: default
+        add_form_name: default
         filters_panel: default
         page_btn: 1
         edit_btn: 1
         cols:
-            id:
             ref:
             fk_soc:
             fk_commande:
@@ -320,8 +331,29 @@ lists:
             duree:
             total_ht:
             typeInter:
-            commercial:
-                
+            commercial:  
+    default: 
+        extends: defaultAbstract     
+        cols:
+            fk_soc:
+                show:
+                    callback:
+                        method: getFieldFiltre
+                        params:
+                            - fk_soc
+                            - show
+        list_filters:
+            callback:
+                method: getFieldFiltre
+                params:
+                    - fk_soc
+                    - filtre
+        add_form_values:
+            callback:
+                method: getFieldFiltre
+                params:
+                    - fk_soc
+                    - form_value
 fields_tables: 
     infos:
         footer_extra_btn: 
@@ -370,7 +402,7 @@ fields_tables:
         icon: link
         rows:
             - field: fk_soc 
-              display: nom_url
+              display: card
             - field: fk_commande
               display: nom_url
               edit: 1
@@ -383,6 +415,7 @@ fields_tables:
               display: nom_url
               edit: 1
             - field: fi
+            - field: action
     price:
         title: Prix
         icon: money

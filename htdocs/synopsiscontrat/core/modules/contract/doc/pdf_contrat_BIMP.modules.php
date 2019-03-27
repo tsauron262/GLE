@@ -856,6 +856,8 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                 
                 $this->file = $file;
                 $pdf->Output($file, 'F');
+                
+                $this->result["fullpath"] = $file;
 
 //                ////$langs->setPhpLang();    // On restaure langue session
 

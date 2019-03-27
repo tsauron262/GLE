@@ -10,15 +10,24 @@ class Bimp_Societe extends BimpObject
     public function __construct($module, $object_name)
     {
         global $langs;
-        $langs->load("companies");
-        $langs->load("commercial");
-        $langs->load("bills");
-        $langs->load("banks");
-        $langs->load("users");
+        if(isset($langs)){
+            $langs->load("companies");
+            $langs->load("commercial");
+            $langs->load("bills");
+            $langs->load("banks");
+            $langs->load("users");
+        }
 
         parent::__construct($module, $object_name);
     }
 
+    public function checkValidity()
+    {
+        $errors = array();
+        
+        return $errors;
+    }
+    
     public function getSocieteLabel()
     {
         if ($this->soc_type == "client" || (int) $this->getData('client') > 0) {

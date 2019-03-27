@@ -35,6 +35,7 @@ class BimpRemoveDuplicateCustomer {
 
     private $db;
     public $errors;
+    public $nb_row;
 
     /**
      * 	Constructor
@@ -49,45 +50,43 @@ class BimpRemoveDuplicateCustomer {
     public function getAllDuplicate($limit = 100, $detail = true) {
         $customers = array();
 
-        // TODO nom + code postal
         $sql = 'SELECT CONCAT(nom, "_", zip) as group_key, COUNT(*) as counter';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe';
         $sql .= ' WHERE zip IS NOT NULL';
         $sql .= ' GROUP BY group_key';
         $sql .= ' HAVING counter > 1';
-        $sql .= ' LIMIT 0, ' . $limit;
 
+        $cont_soc = 0;
         $result = $this->db->query($sql);
+        $this->nb_row = $result->num_rows;
         if ($result) {
-            while ($obj = $this->db->fetch_object($result)) {
+            while ($obj = $this->db->fetch_object($result) and $cont_soc < $limit) {
                 if ($detail = true)
                     $customers[] = $this->getDetail($obj->group_key);
                 else
                     $customers[] = $obj;
+                ++$cont_soc;
             }
         } else {
             $this->errors[] = "Aucun doublon n'est présent dans la base";
             return 0;
         }
+
         return $customers;
     }
 
-    private function getDetail($group_key, $link = true) {
+    private function getDetail($group_key) {
         $details = array();
 
-        $sql = 'SELECT *';
+        $sql = 'SELECT rowid, nom, email, address, zip, town, phone, datec';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe';
         $sql .= ' WHERE CONCAT(nom, "_", zip)="' . $group_key . '"';
 
         $result = $this->db->query($sql);
         if ($result) {
             while ($obj = $this->db->fetch_object($result)) {
-                if ($link) {
-                    $societe = new Societe($this->db);
-                    $societe->id = $obj->rowid;
-                    $obj->link = $societe->getNomUrl(1);
-                    $obj->group_key = str_replace(' ', '_', $group_key);
-                }
+                $obj->group_key = str_replace(' ', '_', $group_key);
+                $obj->commerciaux = $this->getCommerciaux($obj->rowid);
                 $details[] = $obj;
             }
         } else {
@@ -95,6 +94,21 @@ class BimpRemoveDuplicateCustomer {
             return 0;
         }
         return $details;
+    }
+
+    private function getCommerciaux($id_soc) {
+        $commerciaux = array();
+
+        $sql = 'SELECT u.firstname as firstname, u.lastname as lastname';
+        $sql .= ' FROM ' . MAIN_DB_PREFIX . 'societe_commerciaux as sc';
+        $sql .= ' LEFT JOIN ' . MAIN_DB_PREFIX . 'user as u ON sc.fk_user=u.rowid';
+        $sql .= ' WHERE sc.fk_soc=' . $id_soc;
+
+        $result = $this->db->query($sql);
+        while ($obj = $this->db->fetch_object($result)) {
+            $commerciaux[] = $obj->firstname . ' ' . $obj->lastname;
+        }
+        return $commerciaux;
     }
 
     /**

@@ -71,9 +71,11 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         $text = str_replace("	", ' ', $text);
 
 
-        if (!isset($ligne->datep2))
+        if (!isset($ligne->datep2)  && $ligne->fulldayevent == 1)
+            $ligne->datep2 = date_format($ligne->datep, 'Y-m-d')." 23:59:59";
+        elseif (!isset($ligne->datep2))
             $ligne->datep2 = $ligne->datep;
-        if (!isset($ligne->datep))
+        elseif (!isset($ligne->datep))
             $ligne->datep = $ligne->datep2;
 
         if ($ligne->conf == 1 && $userIdV != $user->id) {

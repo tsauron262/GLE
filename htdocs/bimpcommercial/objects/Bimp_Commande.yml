@@ -338,6 +338,13 @@ forms:
                   type: hidden
               value: 
                   request: param_values/fields/origin_id
+            - custom: 1
+              hidden: 1
+              input_name: close_propal
+              input: 
+                  type: hidden
+              value: 
+                  request: param_values/fields/close_propal
             
     remove_lines: 
         title: Retirer des produits / services

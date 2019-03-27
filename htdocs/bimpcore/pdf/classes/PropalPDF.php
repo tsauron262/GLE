@@ -63,35 +63,42 @@ class PropalPDF extends BimpDocumentPDF
     {
         parent::initHeader();
 
-        global $conf, $db;
-
-        $docName = $this->langs->transnoentities('CommercialProposal');
+        if ($this->proforma) {
+            $docName = 'Facture Proforma';
+        } else {
+            $docName = $this->langs->transnoentities('CommercialProposal');
+        }
         $docRef = $this->langs->transnoentities("Ref") . " : " . $this->langs->convToOutputCharset($this->propal->ref);
 
-        $rows = '';
-        $nRows = 0;
+        $this->header_vars['doc_name'] = $docName;
+        $this->header_vars['doc_ref'] = $docRef;
+    }
+
+    public function getDocInfosHtml()
+    {
+        global $conf, $db;
+
+        $html = '';
+
+        $html .= '<div>';
 
         // Réf client: 
         if ($this->propal->ref_client) {
-            $rows .= '<div class="row">' . $this->langs->transnoentities('RefCustomer') . ' : ' . $this->langs->convToOutputCharset($this->propal->ref_client) . '</div>';
-            $nRows++;
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('RefCustomer') . ' : </span>' . $this->langs->convToOutputCharset($this->propal->ref_client) . '<br/>';
         }
 
         // Dates: 
         if (!empty($this->propal->date)) {
-            $rows .= '<div class="row">' . $this->langs->transnoentities('Date') . ' : ' . dol_print_date($this->propal->date, "day", false, $this->langs) . '</div>';
-            $nRows++;
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('Date') . ' : </span>' . dol_print_date($this->propal->date, "day", false, $this->langs) . '<br/>';
         }
 
         if (!empty($this->propal->fin_validite)) {
-            $rows .= '<div class="row">' . $this->langs->transnoentities('DateEndPropal') . ' : ' . dol_print_date($this->propal->fin_validite, "day", false, $this->langs, true) . '</div>';
-            $nRows++;
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('DateEndPropal') . ' : </span>' . dol_print_date($this->propal->fin_validite, "day", false, $this->langs, true) . '<br/>';
         }
 
         // Code client: 
         if (isset($this->propal->thirdparty->code_client)) {
-            $rows .= '<div class="row">' . $this->langs->transnoentities('CustomerCode') . ' : ' . $this->langs->transnoentities($this->propal->thirdparty->code_client) . '</div>';
-            $nRows++;
+            $html .= '<span style="font-weight: bold;">' . $this->langs->transnoentities('CustomerCode') . ' : </span>' . $this->langs->transnoentities($this->propal->thirdparty->code_client) . '<br/>';
         }
 
         // Objets liés:
@@ -99,27 +106,20 @@ class PropalPDF extends BimpDocumentPDF
 
         if (!empty($linkedObjects)) {
             foreach ($linkedObjects as $lo) {
-                $refObject = $lo['ref_title'] . ' : ' . $lo['ref_value'];
+                $refObject = '<span style="font-weight: bold;">' . $lo['ref_title'] . '</span> : ' . $lo['ref_value'];
                 if (!empty($lo['date_value'])) {
                     $refObject .= ' / ' . $lo['date_value'];
                 }
 
-                $rows .= '<div class="row">' . $refObject . '</div>';
-                $nRows++;
+                $html .= $refObject . '<br/>';
             }
         }
 
-        $this->pdf->topMargin = 40;
+        $html .= '</div>';
 
-        if ($nRows > 2) {
-            $this->pdf->topMargin += 4 * ($nRows - 2);
-        }
+        $html .= parent::getDocInfosHtml();
 
-        $this->header_vars['header_right'] = $this->renderTemplate(self::$tpl_dir . 'header_right.html', array(
-            'doc_name' => $docName,
-            'doc_ref'  => $docRef,
-            'rows'     => $this->header_vars['header_right']['rows'] . $rows
-        ));
+        return $html;
     }
 
     public function renderTop()

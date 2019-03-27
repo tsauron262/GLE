@@ -151,7 +151,7 @@ class BMP_Event extends Abstract_margeprod
         return self::$cache['bmp_predef_tarifs_array'];
     }
 
-    public static function getTarifsArray()
+    public function getTarifsArray()
     {
         if ($this->isLoaded()) {
             $cache_key = 'bmp_event_' . $this->id . '_tarifs_array';

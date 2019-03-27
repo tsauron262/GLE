@@ -35,7 +35,6 @@ class commandeController extends BimpController
 
 //        $html .= '<div class="page_content container-fluid">';
 //        $html .= '<h1>Commande client "' . $commande->dol_object->ref . '"</h1>';
-
 //        $errors = $commande->checkIntegrity();
 
         if (count($errors)) {
@@ -68,8 +67,8 @@ class commandeController extends BimpController
                     ),
                     array(
                         'id'      => 'invoices',
-                        'title'   => 'Factures',
-                        'content' => $this->renderAvoirsTab($commande)
+                        'title'   => 'Factures / Avoirs',
+                        'content' => $this->renderFacturesTab($commande)
                     ),
         ));
 
@@ -81,18 +80,17 @@ class commandeController extends BimpController
     protected function renderCommandesLinesLogisticTab(Bimp_Commande $commande)
     {
         $html = '';
-        
+
         if (BimpObject::objectLoaded($commande)) {
             $html .= '<div class="buttonsContainer align-right">';
             $html .= $commande->renderLogistiqueButtons();
             $html .= '</div>';
-            
+
             $html .= $commande->renderChildrenList('lines', 'logistique', 1);
-            
         } else {
             $html .= BimpRender::renderAlerts('ID de la commande absent');
         }
-        
+
         return $html;
     }
 
@@ -129,7 +127,7 @@ class commandeController extends BimpController
 
         $html .= '<div class="row">';
         $html .= '<div class="col-lg-12">';
-        
+
         $html .= $commande->renderView('commandes_fourn', true);
 
         $html .= '</div>';
@@ -138,7 +136,7 @@ class commandeController extends BimpController
         return $html;
     }
 
-    protected function renderAvoirsTab($commande)
+    protected function renderFacturesTab($commande)
     {
         $html = '';
 
@@ -146,13 +144,15 @@ class commandeController extends BimpController
         $html .= '<div class="col-lg-12">';
 
         $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-        $list = new BC_ListTable($instance, 'default', 1, null, 'Liste des avoirs en lien avec cette commande');
+        $list = new BC_ListTable($instance, 'default', 1, null, 'Factures');
+        $list->addObjectAssociationFilter($commande, $commande->id, 'factures');
+        $list->addObjectChangeReload('Bimp_Commande');
+
+        $html .= $list->renderHtml();
+
+        $list = new BC_ListTable($instance, 'default', 1, null, 'Avoirs');
         $list->addObjectAssociationFilter($commande, $commande->id, 'avoirs');
-        $list->addObjectChangeReload('BR_ReservationShipment');
-        $list->addObjectChangeReload('BR_ServiceShipment');
-        $list->addObjectChangeReload('BL_CommandeShipment');
-        $list->addObjectChangeReload('BR_Reservation');
-        $list->addObjectChangeReload('BR_OrderLine');
+        $list->addObjectChangeReload('Bimp_Commande');
 
         $html .= $list->renderHtml();
 

@@ -1308,6 +1308,7 @@ class Bimp_Facture extends BimpComm
 
         if ($ret > 0) {
             $this->fetch($this->dol_object->id);
+            $this->checkLines();
 
             // Actions hooked (by external module)
             $hookmanager->initHooks(array('invoicedao'));

@@ -184,6 +184,8 @@ fields:
         type: int
         values: 
             array: reception_status
+    fk_cond_reglement:
+        required: 0
             
     invoice_status: 
         label: Statut facturation

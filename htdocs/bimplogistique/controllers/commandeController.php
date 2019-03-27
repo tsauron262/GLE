@@ -145,12 +145,14 @@ class commandeController extends BimpController
 
         $instance = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
         $list = new BC_ListTable($instance, 'default', 1, null, 'Factures');
+        $list->params['add_btn'] = 0;
         $list->addObjectAssociationFilter($commande, $commande->id, 'factures');
         $list->addObjectChangeReload('Bimp_Commande');
 
         $html .= $list->renderHtml();
 
         $list = new BC_ListTable($instance, 'default', 1, null, 'Avoirs');
+        $list->params['add_btn'] = 0;
         $list->addObjectAssociationFilter($commande, $commande->id, 'avoirs');
         $list->addObjectChangeReload('Bimp_Commande');
 

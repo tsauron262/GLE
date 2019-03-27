@@ -1045,7 +1045,17 @@ class Bimp_Commande extends BimpComm
         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
         $html .= BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Nouvelle expédition';
         $html .= '</button>';
+        
+        $onclick = $this->getJsActionOnclick('linesFactureQties', array(
+            'id_client' => (int) $this->getData('fk_soc')
+        ), array(
+            'form_name' => 'invoice'
+        ));
 
+        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+        $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture';
+        $html .= '</button>';
+        
         $onclick = $this->getJsLoadModalView('logistique_equipments', 'Attribuer des équipements');
 
         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';

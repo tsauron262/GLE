@@ -542,6 +542,26 @@ forms:
               content: 
                   callback: renderFacturesInput
             - custom: 1
+              label: Client
+              input_name: id_client
+              data_type: id_object
+              object: client
+              card: default
+              input: 
+                  type: search_societe
+                  societe_type: customer
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Contact
+              input_name: id_contact
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      array: 
+            - custom: 1
               label: Lignes
               hidden: 1
               input_name: facture_lines_list

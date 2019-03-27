@@ -617,7 +617,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (isset($bimpLines[$line->id])) {
                 $bimpLine = $bimpLines[$line->id];
                 if ($bimpLine->getData("force_qty_1") && $row['qte'] > 1) {
-                    $row['pu_ht'] = $row['pu_ht'] * $row['qte'];
+                    $row['pu_ht'] = price(str_replace(",",".", $row['pu_ht']) * $row['qte']);
                     $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                     $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
                     $row['qte'] = 1;

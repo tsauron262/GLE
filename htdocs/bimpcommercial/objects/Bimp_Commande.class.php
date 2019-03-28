@@ -528,6 +528,13 @@ class Bimp_Commande extends BimpComm
 
         $id_shipment = (int) BimpTools::getPostFieldValue('id_shipment', 0);
 
+        if (!$id_shipment) {
+            foreach ($shipments as $id_s => $shipment) {
+                $id_shipment = $id_s;
+                break;
+            }
+        }
+
         return BimpInput::renderInput('select', 'id_shipment', $id_shipment, array(
                     'options' => $shipments
         ));
@@ -579,12 +586,25 @@ class Bimp_Commande extends BimpComm
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
             if ($line->isLoaded()) {
+                $available_qty = (float) $line->qty - (float) $line->getShippedQty();
+
+                if ($id_shipment) {
+                    $shipment_data = $line->getShipmentData($id_shipment);
+                    if (isset($shipment_data['qty'])) {
+                        $available_qty += (float) $shipment_data['qty'];
+                    }
+                }
+
+                if ($available_qty <= 0) {
+                    continue;
+                }
+
                 $product = null;
 
                 if ((int) $line->getData('type') === ObjectLine::LINE_PRODUCT) {
                     $product = $line->getProduct();
                 }
-                
+
                 $html .= '<tr>';
                 $html .= '<td>';
                 $html .= $line->getData('position');
@@ -614,7 +634,7 @@ class Bimp_Commande extends BimpComm
 
                 if (BimpObject::objectLoaded($product)) {
                     if ($product->isSerialisable()) {
-                        $html .= '<tr id="shipment_line_'.$line->id.'_equipments" class="shipment_line_equipments">';
+                        $html .= '<tr id="shipment_line_' . $line->id . '_equipments" class="shipment_line_equipments">';
                         $html .= '<td colspan="4">';
                         $html .= '<div style="padding-left: 45px">';
                         $html .= $line->renderShipmentEquipmentsInput($id_shipment, null, 'line_' . $line->id . '_shipment_' . $id_shipment . '_qty');
@@ -668,26 +688,11 @@ class Bimp_Commande extends BimpComm
             }
         }
 
-        $fac_lines = array();
-
-        if (is_string($lines)) {
-            $lines = explode(',', $lines);
+        if (is_array($lines)) {
+            $lines = implode(',', $lines);
         }
 
-        foreach ($lines as $id_line) {
-            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
-            if (BimpObject::objectLoaded($line)) {
-                if ((float) $line->qty > (float) $line->getBilledQty()) {
-                    $fac_lines[] = $line->id;
-                }
-            }
-        }
-
-        if (is_array($fac_lines)) {
-            $fac_lines = implode(',', $fac_lines);
-        }
-
-        return '<input type="hidden" value="' . $fac_lines . '" name="facture_lines_list"/>';
+        return '<input type="hidden" value="' . $lines . '" name="facture_lines_list"/>';
     }
 
     public function renderFactureLinesInputs()
@@ -710,19 +715,22 @@ class Bimp_Commande extends BimpComm
         $html .= '<th>Tx TVA</th>';
         $html .= '<th>Qté</th>';
         $html .= '</tr>';
+        $html .= '</thead>';
+
+        $html .= '<tbody>';
 
         $has_lines = false;
 
         foreach ($lines as $id_line) {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
-            $product = null;
-
-            if ((int) $line->getData('type') === ObjectLine::LINE_PRODUCT) {
-                $product = $line->getProduct();
-            }
-
             if ($line->isLoaded()) {
+                $product = null;
+
+                if ((int) $line->getData('type') === ObjectLine::LINE_PRODUCT) {
+                    $product = $line->getProduct();
+                }
+
                 $has_lines = true;
 
                 $html .= '<tr>';
@@ -745,11 +753,10 @@ class Bimp_Commande extends BimpComm
 
                 if (BimpObject::objectLoaded($product)) {
                     if ($product->isSerialisable()) {
-                        $html .= '<tr>';
-                        $html .= '<td colspan="3">';
-                        $html .= '<div style="display: inline-block; font-weight: bold">Equipement: </div>';
-                        $html .= '<div style="display: inline-block">';
-                        $html .= $line->renderFactureEquipmentsInput($id_facture);
+                        $html .= '<tr class="facture_line_' . $line->id . '_equipments">';
+                        $html .= '<td colspan="5">';
+                        $html .= '<div style="padding-left: 45px;">';
+                        $html .= $line->renderFactureEquipmentsInput($id_facture, null, 'line_' . $line->id . '_facture_' . $id_facture . '_qty');
                         $html .= '</div>';
                         $html .= '</td>';
                         $html .= '</tr>';
@@ -766,7 +773,7 @@ class Bimp_Commande extends BimpComm
             $html .= '</tr>';
         }
 
-        $html .= '</thead>';
+        $html .= '</tbody>';
         $html .= '</table>';
 
         return $html;
@@ -1812,7 +1819,7 @@ class Bimp_Commande extends BimpComm
         return $errors;
     }
 
-    public function checkFactureLinesQties($lines_qties)
+    public function checkFactureLinesQties($lines_qties, $id_facture = null)
     {
         $errors = array();
 
@@ -1830,6 +1837,13 @@ class Bimp_Commande extends BimpComm
             } else {
                 $billed_qty = (float) $line->getBilledQty();
                 $available_qty = (float) $line->qty - $billed_qty;
+
+                if (!is_null($id_facture) && (int) $id_facture) {
+                    $facture_data = $line->getFactureData($id_facture);
+                    if (isset($facture_data['qty'])) {
+                        $available_qty += (float) $facture_data['qty'];
+                    }
+                }
                 if ($qty > $available_qty) {
                     if ($available_qty > 0) {
                         $msg = 'Toutes les unités ont déjà facturées';
@@ -1862,7 +1876,7 @@ class Bimp_Commande extends BimpComm
         }
 
         if ($check_qties) {
-            $errors = $this->checkFactureLinesQties($lines_qties);
+            $errors = $this->checkFactureLinesQties($lines_qties, $id_facture);
             if (count($errors)) {
                 return $errors;
             }
@@ -1881,12 +1895,15 @@ class Bimp_Commande extends BimpComm
                                 ), true);
 
                 if (BimpObject::objectLoaded($fac_line)) {
-                    $fac_line->qty += (float) $line_qty;
-                    $line_qty = (float) $fac_line->qty;
+                    $fac_line->qty = (float) $line_qty;
 
                     $fac_line_warnings = array();
                     $fac_line_errors = $fac_line->update($fac_line_warnings);
                     $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
+
+                    if (count($fac_line_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
+                    }
                 } else {
                     // Création de la ligne de facture: 
                     $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
@@ -1944,17 +1961,16 @@ class Bimp_Commande extends BimpComm
                         $fac_line->updateField('editable', 0);
                         $fac_line->updateField('deletable', 0);
                     }
+                }
+                if (!count($fac_line_errors)) {
+                    // Enregistrement des quantités facturées pour la ligne de commande: 
+                    $line_warnings = array();
+                    $line_errors = $line->setFactureData((int) $facture->id, $line_qty, $line_warnings);
 
-                    if (!count($fac_line_errors)) {
-                        // Enregistrement des quantités facturées pour la ligne de commande: 
-                        $line_warnings = array();
-                        $line_errors = $line->setFactureData((int) $facture->id, $line_qty, $line_warnings);
+                    $line_errors = array_merge($line_errors, $line_warnings);
 
-                        $line_errors = array_merge($line_errors, $line_warnings);
-
-                        if (count($line_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'enregistrement des quantités facturées pour la ligne n°' . $line->getData('position') . ' (ID: ' . $line->id . ')');
-                        }
+                    if (count($line_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'enregistrement des quantités facturées pour la ligne n°' . $line->getData('position') . ' (ID: ' . $line->id . ')');
                     }
                 }
             } else {
@@ -2172,7 +2188,7 @@ class Bimp_Commande extends BimpComm
     }
 
     public function actionLinesShipmentQties($data, &$success)
-    {        
+    {
         $errors = array();
         $warnings = array();
         $success = '';
@@ -2245,7 +2261,7 @@ class Bimp_Commande extends BimpComm
 
             if ((int) $data['id_facture']) {
                 $success = 'Ajout des unités à la facture effectué avec succès';
-                $errors[] = $this->addLinesToFacture((int) $data['id_facture'], $lines_qties, true);
+                $errors = $this->addLinesToFacture((int) $data['id_facture'], $lines_qties, true);
             } else {
                 $success = 'Création de la facture effectuée avec succès';
                 $id_client = isset($data['id_client']) ? $data['id_client'] : null;

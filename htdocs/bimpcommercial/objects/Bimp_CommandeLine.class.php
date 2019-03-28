@@ -742,11 +742,12 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $html = '';
 
-        $factures = $this->getData('factures');
+        $facture_data = $this->getFactureData($id_facture);
 
-        $facture_qty = 0;
-        if (isset($factures[(int) $factures]['qty'])) {
-            $facture_qty = (float) $factures[(int) $factures]['qty'];
+        if (isset($facture_data['qty'])) {
+            $facture_qty = (float) $facture_data['qty'];
+        } else {
+            $facture_qty = 0;
         }
 
         $decimals = 3;
@@ -854,9 +855,57 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
-    public function renderFactureEquipmentsInput($id_fature)
+    public function renderFactureEquipmentsInput($id_fature, $input_name = null, $qty_input_name = null)
     {
-        return '';
+        $html = '';
+
+        if (is_null($input_name)) {
+            $input_name = 'line_' . $this->id . '_shipment_' . $id_fature . '_equipments';
+        }
+
+        $items = array();
+        $values = array();
+
+        $factureData = $this->getShipmentData($id_fature);
+        if (isset($factureData['equipments'])) {
+            foreach ($factureData['equipments'] as $id_equipment) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                if (BimpObject::objectLoaded($equipment)) {
+                    $items[$id_equipment] = $equipment->getData('serial');
+                    $values[] = $id_equipment;
+                }
+            }
+        }
+
+        $equipments = $this->getEquipementsToAttributeToFacture();
+
+        if (count($equipments)) {
+            foreach ($equipments as $id_equipment) {
+                if (array_key_exists((int) $id_equipment, $items)) {
+                    continue;
+                }
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                if (BimpObject::objectLoaded($equipment)) {
+                    $items[$id_equipment] = $equipment->getData('serial');
+                }
+            }
+        }
+
+        if (count($items)) {
+            $html .= '<span style="font-weight: bold; font-size: 14px">Equipements: </span><br/>';
+
+            $options = array(
+                'items' => $items
+            );
+
+            if (!is_null($qty_input_name)) {
+                $options['max_input_name'] = $qty_input_name;
+            }
+
+            $html .= BimpInput::renderInput('check_list', $input_name, $values, $options);
+        }
+
+        return $html;
     }
 
     public function renderShipmentsView()
@@ -1689,6 +1738,9 @@ class Bimp_CommandeLine extends ObjectLine
 
         // Mise à jour: 
         if (!count($errors)) {
+            echo $this->getData('position') . '<pre>';
+            print_r($factures);
+            echo '</pre>';
             $this->set('factures', $factures);
             $errors = $this->update($warnings, true);
         }

@@ -423,7 +423,6 @@ function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_cli
 }
 
 function onFactureFormSubmit($form, extra_data) {
-    bimp_msg('ici');
     var lines = [];
 
     var $inputs = $form.find('.facture_lines_inputContainer').find('input.line_facture_qty');
@@ -431,9 +430,19 @@ function onFactureFormSubmit($form, extra_data) {
     $inputs.each(function () {
         var id_line = parseInt($(this).data('id_line'));
         var qty = parseFloat($(this).val());
+        var equipments = [];
+
+        var $row = $form.find('#sfacture_line_' + id_line + '_equipments');
+        if ($row.length) {
+            $row.find('.check_list_item_input:checked').each(function () {
+                equipments.push(parseInt($(this).val()));
+            });
+        }
+        
         lines.push({
             id_line: id_line,
-            qty: qty
+            qty: qty,
+            equipments: equipments
         });
     });
 

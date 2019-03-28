@@ -537,6 +537,9 @@ class BimpComm extends BimpDolObject
     {
         if (!$this->isLoaded()) {
             $id_soc = (int) BimpTools::getPostFieldValue('fk_soc', 0);
+            if (!$id_soc) {
+                $id_soc = (int) BimpTools::getPostFieldValue('id_client', 0);
+            }
             if ($id_soc) {
                 $soc = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Societe', $id_soc);
                 if (BimpObject::objectLoaded($soc)) {

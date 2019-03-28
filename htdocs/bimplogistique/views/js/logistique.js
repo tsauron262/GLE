@@ -1,5 +1,62 @@
 // Logistique commande client: 
 
+function setSelectedCommandeLinesReservationsStatus($button, id_commande, new_status) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $list = $('#Bimp_CommandeLine_logistique_list_table_Bimp_Commande_' + id_commande);
+
+    if ($.isOk($list)) {
+        var $rows = $list.find('tbody.listRows').find('tr.Bimp_CommandeLine_row');
+        var reservations = [];
+        $rows.each(function () {
+            $(this).find('tr.Bimp_CommandeLine_reservation_row').each(function () {
+                var $input = $(this).find('input.reservation_check');
+                if ($input.prop('checked')) {
+                    reservations.push(parseInt($input.data('id_reservation')));
+                }
+            });
+        });
+
+        if (!reservations.length) {
+            bimp_msg('Aucun statut sélectionné', 'danger');
+            return;
+        }
+
+        var msg = 'Veuillez confirmer ';
+        if (new_status === 0) {
+            msg += 'la réinitialisation';
+        } else if (new_status === 2) {
+            msg += 'la mise au statut "A réserver"';
+        } else if (new_status === 200) {
+            msg += 'réservation';
+        } else {
+            msg += 'le nouveau statut';
+        }
+        msg += ' de tous les éléments sélectionnés';
+
+        if (!confirm(msg)) {
+            return;
+        }
+
+        setObjectAction($button, {
+            module: 'bimpcommercial',
+            object_name: 'Bimp_Commande',
+            id_object: id_commande
+        }, 'setLinesReservationsStatus', {
+            reservations: reservations,
+            status: new_status
+        });
+
+        return;
+    }
+
+    bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger');
+}
+
+// Expéditions commande client: 
+
 function addSelectedCommandeLinesToShipment($button, list_id, id_commande) {
     if ($button.hasClass('disabled')) {
         return;
@@ -44,63 +101,18 @@ function onShipmentFormSubmit($form, extra_data) {
     $inputs.each(function () {
         var id_line = parseInt($(this).data('id_line'));
         var qty = parseFloat($(this).val());
+        var equipments = [];
+
+        var $row = $form.find('#shipment_line_' + id_line + '_equipments');
+        if ($row.length) {
+            $row.find('.check_list_item_input:checked').each(function () {
+                equipments.push(parseInt($(this).val()));
+            });
+        }
         lines.push({
             id_line: id_line,
-            qty: qty
-        });
-    });
-
-    extra_data['lines'] = lines;
-    return extra_data;
-}
-
-function addSelectedCommandeLinesToFacture($button, list_id, id_commande) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    var $list = $('#' + list_id);
-
-    if (!$list.length) {
-        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
-        return;
-    }
-
-    var $selected = $list.find('tbody').find('input.item_check:checked')
-
-    if (!$selected.length) {
-        bimp_msg('Aucune ligne sélectionnée', 'danger');
-        return;
-    }
-
-    var extra_data = {
-        facture_lines_list: []
-    };
-
-    $selected.each(function () {
-        extra_data.facture_lines_list.push(parseInt($(this).data('id_object')));
-    });
-
-    setObjectAction($button, {
-        module: 'bimpcommercial',
-        object_name: 'Bimp_Commande',
-        id_object: id_commande
-    }, 'linesFactureQties', extra_data, 'invoice', null, null, null, function ($form, extra_data) {
-        return onFactureFormSubmit($form, extra_data);
-    });
-}
-
-function onFactureFormSubmit($form, extra_data) {
-    var lines = [];
-
-    var $inputs = $form.find('.facture_lines_inputContainer').find('input.line_facture_qty');
-
-    $inputs.each(function () {
-        var id_line = parseInt($(this).data('id_line'));
-        var qty = parseFloat($(this).val());
-        lines.push({
-            id_line: id_line,
-            qty: qty
+            qty: qty,
+            equipments: equipments
         });
     });
 
@@ -164,61 +176,6 @@ function saveCommandeLineShipments($button, id_line) {
             });
         }
     }
-}
-
-function setSelectedCommandeLinesReservationsStatus($button, id_commande, new_status) {
-    if ($button.hasClass('disabled')) {
-        return;
-    }
-
-    var $list = $('#Bimp_CommandeLine_logistique_list_table_Bimp_Commande_' + id_commande);
-
-    if ($.isOk($list)) {
-        var $rows = $list.find('tbody.listRows').find('tr.Bimp_CommandeLine_row');
-        var reservations = [];
-        $rows.each(function () {
-            $(this).find('tr.Bimp_CommandeLine_reservation_row').each(function () {
-                var $input = $(this).find('input.reservation_check');
-                if ($input.prop('checked')) {
-                    reservations.push(parseInt($input.data('id_reservation')));
-                }
-            });
-        });
-
-        if (!reservations.length) {
-            bimp_msg('Aucun statut sélectionné', 'danger');
-            return;
-        }
-
-        var msg = 'Veuillez confirmer ';
-        if (new_status === 0) {
-            msg += 'la réinitialisation';
-        } else if (new_status === 2) {
-            msg += 'la mise au statut "A réserver"';
-        } else if (new_status === 200) {
-            msg += 'réservation';
-        } else {
-            msg += 'le nouveau statut';
-        }
-        msg += ' de tous les éléments sélectionnés';
-
-        if (!confirm(msg)) {
-            return;
-        }
-
-        setObjectAction($button, {
-            module: 'bimpcommercial',
-            object_name: 'Bimp_Commande',
-            id_object: id_commande
-        }, 'setLinesReservationsStatus', {
-            reservations: reservations,
-            status: new_status
-        });
-
-        return;
-    }
-
-    bimp_msg('Une erreur est survenue. Opération abandonnée', 'danger');
 }
 
 function setSelectedCommandeLinesReservationsEquipmentsToShipment($button, id_commande) {
@@ -328,6 +285,160 @@ function saveShipmentLines($button, id_shipment, modal_idx) {
     } else {
         bimp_msg('Aucune ligne à enregistrer', 'warning');
     }
+}
+
+function onShipmentEquipmentFormEquipmentsLoaded($form) {
+    if ($.isOk($form)) {
+        $form.find('.line_equipments_container').each(function () {
+            var $container = $(this);
+            if (!parseInt($container.data('line_equipments_container_events_init'))) {
+                var id_line = parseInt($container.data('id_line'));
+                var $input = $container.find('input[name="line_' + id_line + '_qty"]');
+
+                if ($input.length) {
+                    $input.change(function () {
+                        var qty = parseInt($(this).val());
+                        var min = parseInt($(this).data('min'));
+                        var max_equipments = qty - min;
+
+                        $container.find('.max_nb_equipments').text(max_equipments);
+                        checkShipmentEquipmentsFormEquipmentsNumber($container);
+                    });
+                }
+
+                $container.find('input.equipments_check').each(function () {
+                    $(this).change(function () {
+                        checkShipmentEquipmentsFormEquipmentsNumber($(this).findParentByClass('line_equipments_container'));
+                    });
+                });
+
+                checkShipmentEquipmentsFormEquipmentsNumber($container);
+                $container.data('line_equipments_container_events_init', 1);
+            }
+        });
+    }
+}
+
+function checkShipmentEquipmentsFormEquipmentsNumber($container) {
+    var $selected = $container.find('input.equipments_check:checked');
+    var max = parseInt($container.find('.max_nb_equipments').text());
+
+    var remain = max - $selected.length;
+
+    var msg = '';
+    var className = '';
+    var check = true;
+
+    if (remain > 0) {
+        msg = 'Il reste ' + remain + ' équipement(s) à sélectionner';
+        className = 'warning';
+    } else if (remain < 0) {
+        msg = 'Vous devez désélectionner ' + (-remain) + ' équipement(s)';
+        className = 'danger';
+        check = false;
+    } else {
+        msg = 'Il ne reste plus aucun équipement à sélectionner';
+        className = 'success';
+    }
+
+    var html = '<div class="alert alert-' + className + '">' + msg + '</div>';
+    $container.find('.equipments_selection_infos').html(html);
+
+    var $modal_content = $container.findParentByClass('modal_content');
+    if ($.isOk($modal_content)) {
+        var modal_idx = parseInt($modal_content.data('idx'));
+        var $button = $modal_content.findParentByClass('modal-content').find('.modal-footer').find('button.set_action_button.modal_' + modal_idx);
+        if ($.isOk($button)) {
+            if (!check) {
+                $button.addClass('disabled');
+            } else {
+                $button.removeClass('disabled');
+            }
+        }
+    }
+}
+
+function onShipmentEquipmentsFormSubmit($form, extra_data) {
+    extra_data['lines'] = [];
+
+    $form.find('.line_equipments_container').each(function () {
+        var $container = $(this);
+        var id_line = parseInt($container.data('id_line'));
+        var qty = parseInt($container.find('input[name="line_' + id_line + '_qty"]').val());
+        var equipments = [];
+
+        $container.find('input.equipments_check:checked').each(function () {
+            equipments.push(parseInt($(this).val()));
+        });
+
+        extra_data['lines'].push({
+            id_line: id_line,
+            qty: qty,
+            equipments: equipments
+        });
+    });
+
+    return extra_data;
+}
+
+// Factures commandes client: 
+
+function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_client, id_contact, id_cond_reglement) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var $list = $('#' + list_id);
+
+    if (!$list.length) {
+        bimp_msg('Erreur technique: identifiant de la liste invalide', 'danger');
+        return;
+    }
+
+    var $selected = $list.find('tbody').find('input.item_check:checked')
+
+    if (!$selected.length) {
+        bimp_msg('Aucune ligne sélectionnée', 'danger');
+        return;
+    }
+
+    var extra_data = {
+        facture_lines_list: [],
+        id_client: id_client,
+        id_contact: id_contact,
+        id_cond_reglement: id_cond_reglement
+    };
+
+    $selected.each(function () {
+        extra_data.facture_lines_list.push(parseInt($(this).data('id_object')));
+    });
+
+    setObjectAction($button, {
+        module: 'bimpcommercial',
+        object_name: 'Bimp_Commande',
+        id_object: id_commande
+    }, 'linesFactureQties', extra_data, 'invoice', null, null, null, function ($form, extra_data) {
+        return onFactureFormSubmit($form, extra_data);
+    });
+}
+
+function onFactureFormSubmit($form, extra_data) {
+    bimp_msg('ici');
+    var lines = [];
+
+    var $inputs = $form.find('.facture_lines_inputContainer').find('input.line_facture_qty');
+
+    $inputs.each(function () {
+        var id_line = parseInt($(this).data('id_line'));
+        var qty = parseFloat($(this).val());
+        lines.push({
+            id_line: id_line,
+            qty: qty
+        });
+    });
+
+    extra_data['lines'] = lines;
+    return extra_data;
 }
 
 // Logistique commandes fournisseur: 
@@ -471,100 +582,6 @@ function removeCommandeFournLineReceptionRow($button, id_line) {
 
     $button.parent('td').parent('tr').remove();
     checkTotalMaxQtyInput($container.find('input[name="line_' + id_line + '_reception_1_qty"]'));
-}
-
-function onShipmentEquipmentFormEquipmentsLoaded($form) {
-    if ($.isOk($form)) {
-        $form.find('.line_equipments_container').each(function () {
-            var $container = $(this);
-            if (!parseInt($container.data('line_equipments_container_events_init'))) {
-                var id_line = parseInt($container.data('id_line'));
-                var $input = $container.find('input[name="line_' + id_line + '_qty"]');
-
-                if ($input.length) {
-                    $input.change(function () {
-                        var qty = parseInt($(this).val());
-                        var min = parseInt($(this).data('min'));
-                        var max_equipments = qty - min;
-
-                        $container.find('.max_nb_equipments').text(max_equipments);
-                        checkShipmentEquipmentsFormEquipmentsNumber($container);
-                    });
-                }
-
-                $container.find('input.equipments_check').each(function () {
-                    $(this).change(function () {
-                        checkShipmentEquipmentsFormEquipmentsNumber($(this).findParentByClass('line_equipments_container'));
-                    });
-                });
-
-                checkShipmentEquipmentsFormEquipmentsNumber($container);
-                $container.data('line_equipments_container_events_init', 1);
-            }
-        });
-    }
-}
-
-function checkShipmentEquipmentsFormEquipmentsNumber($container) {
-    var $selected = $container.find('input.equipments_check:checked');
-    var max = parseInt($container.find('.max_nb_equipments').text());
-
-    var remain = max - $selected.length;
-
-    var msg = '';
-    var className = '';
-    var check = true;
-
-    if (remain > 0) {
-        msg = 'Il reste ' + remain + ' équipement(s) à sélectionner';
-        className = 'warning';
-    } else if (remain < 0) {
-        msg = 'Vous devez désélectionner ' + (-remain) + ' équipement(s)';
-        className = 'danger';
-        check = false;
-    } else {
-        msg = 'Il ne reste plus aucun équipement à sélectionner';
-        className = 'success';
-    }
-
-    var html = '<div class="alert alert-' + className + '">' + msg + '</div>';
-    $container.find('.equipments_selection_infos').html(html);
-
-    var $modal_content = $container.findParentByClass('modal_content');
-    if ($.isOk($modal_content)) {
-        var modal_idx = parseInt($modal_content.data('idx'));
-        var $button = $modal_content.findParentByClass('modal-content').find('.modal-footer').find('button.set_action_button.modal_' + modal_idx);
-        if ($.isOk($button)) {
-            if (!check) {
-                $button.addClass('disabled');
-            } else {
-                $button.removeClass('disabled');
-            }
-        }
-    }
-}
-
-function onShipmentEquipmentsFormSubmit($form, extra_data) {
-    extra_data['lines'] = [];
-
-    $form.find('.line_equipments_container').each(function () {
-        var $container = $(this);
-        var id_line = parseInt($container.data('id_line'));
-        var qty = parseInt($container.find('input[name="line_' + id_line + '_qty"]').val());
-        var equipments = [];
-
-        $container.find('input.equipments_check:checked').each(function () {
-            equipments.push(parseInt($(this).val()));
-        });
-
-        extra_data['lines'].push({
-            id_line: id_line,
-            qty: qty,
-            equipments: equipments
-        });
-    });
-
-    return extra_data;
 }
 
 $(document).ready(function () {

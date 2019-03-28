@@ -253,7 +253,7 @@ function submitForm(form_id) {
     if (!$form.length) {
         return;
     }
-    
+
     if (parseInt($form.data('no_auto_submit'))) {
         return;
     }
@@ -779,6 +779,8 @@ function getFieldValue($form, field_name) {
 
     return '';
 }
+
+// Traitements des inputs: 
 
 function getInputsValues($container) {
     var values = {};
@@ -1379,6 +1381,36 @@ function resetInputValue($container) {
                     $container.find('.search_input_selected_label').hide().find('span').html('');
                 }
             }
+        }
+    }
+}
+
+function checkCheckList($container) {
+    var max = $container.data('max');
+
+    if (typeof (max) !== 'undefined' && max !== 'none') {
+        max = parseInt(max);
+
+        var $selected = $container.find('.check_list_item_input:checked');
+
+        if ($selected.length > max) {
+            $container.find('span.check_list_nb_items_to_unselect').text($selected.length - max);
+            $container.find('.check_list_max_alert').stop().slideDown(250);
+        } else {
+            $container.find('.check_list_max_alert').stop().slideUp(250);
+        }
+    }
+
+}
+
+function onCheckListMaxInputChange($container, $input) {
+    if ($.isOk($container) && $.isOk($input)) {
+        var max = $input.val();
+        if (!isNaN(max)) {
+            max = parseInt(max);
+            $container.data('max', max);
+            $container.find('.check_list_max_label').text(max);
+            checkCheckList($container);
         }
     }
 }
@@ -2003,6 +2035,39 @@ function setInputsEvents($container) {
         $(this).change(function () {
             checkTotalMaxQtyInput($(this));
         });
+    });
+    $container.find('.check_list_container').each(function () {
+        if (!parseInt($(this).data('check_list_events_init'))) {
+            var $checkListContainer = $(this);
+            $(this).find('.check_list_item_input').each(function () {
+                $(this).change(function () {
+                    var $checkListContainer = $(this).findParentByClass('check_list_container');
+                    if ($.isOk($checkListContainer)) {
+                        checkCheckList($checkListContainer);
+                    }
+                });
+            });
+
+            var max_input_name = $(this).data('max_input_name');
+            if (max_input_name) {
+                var $form = $(this).findParentByClass('object_form');
+                if (!$.isOk($form)) {
+                    $form = $(this).findParentByTag('form');
+                }
+                if ($.isOk($form)) {
+                    var $input = $form.find('[name="' + max_input_name + '"]');
+                    if ($input.length) {
+                        $input.change(function () {
+                            onCheckListMaxInputChange($checkListContainer, $(this));
+                        });
+                        onCheckListMaxInputChange($checkListContainer, $input);
+                    }
+                }
+            }
+
+            checkCheckList($checkListContainer);
+            $(this).data('check_list_events_init', 1);
+        }
     });
 }
 

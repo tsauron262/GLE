@@ -456,7 +456,7 @@ class BimpInput
                     }
                 }
                 $filter[] = 'status=1';
-                
+
 
                 $html .= $form->select_company((int) $value, $field_name, implode(" AND ", $filter), '', 0, 0, array(), 20);
                 break;
@@ -590,7 +590,16 @@ class BimpInput
                         }
                     }
 
-                    $html = '<div class="check_list_container">';
+                    if (!isset($options['max'])) {
+                        $options['max'] = 'none';
+                    }
+
+                    $nb_selected = 0;
+
+                    $html = '<div class="check_list_container"';
+                    $html .= ' data-max="' . $options['max'] . '"';
+                    $html .= ' data-max_input_name="' . (isset($options['max_input_name']) ? $options['max_input_name'] : '') . '"';
+                    $html .= '>';
                     if (count($options['items']) > 3) {
                         $html .= '<div class="smallActionsContainer">';
                         $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
@@ -615,12 +624,22 @@ class BimpInput
                         $html .= '<div class="check_list_item">';
                         $html .= '<input type="checkbox" name="' . $field_name . '[]" value="' . $item_value . '" id="' . $input_id . '_' . $i . '_' . $rand . '"';
                         if (in_array($item_value, $value)) {
+                            $nb_selected++;
                             $html .= ' checked';
                         }
-                        $html .= ' class="' . $field_name . '_check"/>';
+                        $html .= ' class="' . $field_name . '_check check_list_item_input"/>';
                         $html .= '<label for="' . $input_id . '_' . $i . '_' . $rand . '">';
                         $html .= $item_label;
                         $html .= '</label>';
+                        $html .= '</div>';
+                    }
+
+                    if ($options['max'] !== 'none' || $options['max_input_name']) {
+                        $max = ($options['max'] !== 'none') ? (int) $options['max'] : 0;
+                        $html .= '<p class="small">Max: <span class="check_list_max_label">' . $max . '</span></p>';
+
+                        $html .= '<div class="check_list_max_alert"' . ($nb_selected > $max ? '' : ' style="display: none"') . '>';
+                        $html .= BimpRender::renderAlerts('Veuillez désélectionner <span class="check_list_nb_items_to_unselect">' . ($nb_selected - $max) . '</span> élément(s)', 'danger');
                         $html .= '</div>';
                     }
                     $html .= '</div>';

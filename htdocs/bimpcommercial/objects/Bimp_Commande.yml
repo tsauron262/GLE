@@ -541,6 +541,8 @@ forms:
               card: default
               content: 
                   callback: renderFacturesInput
+              hidden: 
+                  request_field: new_facture
             - custom: 1
               label: Client
               input_name: id_client
@@ -560,7 +562,23 @@ forms:
               input: 
                   type: select
                   options: 
-                      array: 
+                      array: clientContacts
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+              depends_on: id_client
+            - custom: 1
+              label: Conditions de réglement
+              input_name: id_cond_reglement
+              data_type: id
+              input: 
+                  type: select_cond_reglement
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+              depends_on: id_client
+              value: 
+                  callback: getCondReglementBySociete
             - custom: 1
               label: Lignes
               hidden: 1

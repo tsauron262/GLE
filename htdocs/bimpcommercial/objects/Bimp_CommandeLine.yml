@@ -139,6 +139,14 @@ views:
                   custom: 
                       callback: renderShipmentsView
                       
+    invoices: 
+        panel: 0
+        rows: 
+            - cols: 
+                - type: custom
+                  custom: 
+                      callback: renderInvoicesView
+                      
 lists_cols:
     qties: 
         label: Quantités

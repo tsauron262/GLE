@@ -198,7 +198,7 @@ class Bimp_CommandeLine extends ObjectLine
                 array(
                     'label'   => 'Ajouter à une facture',
                     'icon'    => 'fas_file-invoice-dollar',
-                    'onclick' => 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ' . $commande->id . ')'
+                    'onclick' => 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ' . $commande->id . ', ' . (int) $commande->getData('fk_soc') . ', ' . (int) $commande->dol_object->contactid . ', ' . (int) $commande->getData('fk_cond_reglement') . ')'
                 )
             );
         }
@@ -238,13 +238,11 @@ class Bimp_CommandeLine extends ObjectLine
                         'onclick' => $this->getJsLoadModalView('shipments', 'Gestion des expéditions')
                     );
 
-                    if ((float) $this->getBilledQty() < (float) $this->qty) {
-                        $buttons[] = array(
-                            'label'   => 'Ajouter à une facture',
-                            'icon'    => 'fas_file-invoice-dollar',
-                            'onclick' => ''
-                        );
-                    }
+                    $buttons[] = array(
+                        'label'   => 'Gérer les factures',
+                        'icon'    => 'fas_file-invoice-dollar',
+                        'onclick' => $this->getJsLoadModalView('invoices', 'Gestion des factures')
+                    );
                 }
             }
         }
@@ -368,7 +366,7 @@ class Bimp_CommandeLine extends ObjectLine
         if (is_array($shipments)) {
             foreach ($shipments as $id_shipment => $data) {
                 if (isset($data['equipments']) && in_array($id_equipment, $data['equipments'])) {
-                    return $id_shipment;
+                    return (int) $id_shipment;
                 }
             }
         }
@@ -385,7 +383,42 @@ class Bimp_CommandeLine extends ObjectLine
             foreach ($reservations as $reservation) {
                 $id_equipment = (int) $reservation->getData('id_equipment');
                 if ($id_equipment) {
-                    $id_shipment = (int) $this->getEquipmentIdShipment($id_equipment);
+                    $id_s = (int) $this->getEquipmentIdShipment($id_equipment);
+                    if (!$id_s) {
+                        $equipments[] = $id_equipment;
+                    }
+                }
+            }
+        }
+
+        return $equipments;
+    }
+
+    public function getEquipmentIdFacture($id_equipment)
+    {
+        $factures = $this->getData('factures');
+
+        if (is_array($factures)) {
+            foreach ($factures as $id_facture => $data) {
+                if (isset($data['equipments']) && in_array($id_equipment, $data['equipments'])) {
+                    return (int) $id_facture;
+                }
+            }
+        }
+
+        return 0;
+    }
+
+    public function getEquipementsToAttributeToFacture()
+    {
+        $equipments = array();
+
+        if ($this->isLoaded()) {
+            $reservations = $this->getReservations();
+            foreach ($reservations as $reservation) {
+                $id_equipment = (int) $reservation->getData('id_equipment');
+                if ($id_equipment) {
+                    $id_shipment = (int) $this->getEquipmentIdFacture($id_equipment);
                     if (!$id_shipment) {
                         $equipments[] = $id_equipment;
                     }
@@ -768,14 +801,62 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
-    public function renderShipmentEquipmentsInput($id_shipment)
+    public function renderShipmentEquipmentsInput($id_shipment, $input_name = null, $qty_input_name = null)
     {
-        return 'TEST';
+        $html = '';
+
+        if (is_null($input_name)) {
+            $input_name = 'line_' . $this->id . '_shipment_' . $id_shipment . '_equipments';
+        }
+
+        $items = array();
+        $values = array();
+
+        $shipment_data = $this->getShipmentData($id_shipment);
+        if (isset($shipment_data['equipments'])) {
+            foreach ($shipment_data['equipments'] as $id_equipment) {
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                if (BimpObject::objectLoaded($equipment)) {
+                    $items[$id_equipment] = $equipment->getData('serial');
+                    $values[] = $id_equipment;
+                }
+            }
+        }
+
+        $equipments = $this->getEquipementsToAttributeToShipment();
+
+        if (count($equipments)) {
+            foreach ($equipments as $id_equipment) {
+                if (array_key_exists((int) $id_equipment, $items)) {
+                    continue;
+                }
+                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                if (BimpObject::objectLoaded($equipment)) {
+                    $items[$id_equipment] = $equipment->getData('serial');
+                }
+            }
+        }
+
+        if (count($items)) {
+            $html .= '<span style="font-weight: bold; font-size: 14px">Equipements: </span><br/>';
+
+            $options = array(
+                'items' => $items
+            );
+
+            if (!is_null($qty_input_name)) {
+                $options['max_input_name'] = $qty_input_name;
+            }
+
+            $html .= BimpInput::renderInput('check_list', $input_name, $values, $options);
+        }
+
+        return $html;
     }
 
     public function renderFactureEquipmentsInput($id_fature)
     {
-        return 'TEST';
+        return '';
     }
 
     public function renderShipmentsView()
@@ -933,6 +1014,112 @@ class Bimp_CommandeLine extends ObjectLine
         return $html;
     }
 
+    public function renderInvoicesView()
+    {
+        return BimpRender::renderAlerts('En cours de développement', 'warning');
+
+        $html = '';
+
+        $commande = $this->getParentInstance();
+        $product = null;
+
+        if ((int) $this->getData('type') === ObjectLine::LINE_PRODUCT) {
+            $product = $this->getProduct();
+        }
+
+        if (!BimpObject::objectLoaded($commande)) {
+            $html .= BimpRender::renderAlerts('ID de la commande associée absent');
+        } else {
+            $shipments = $commande->getChildrenObjects('shipments');
+            $line_shipments = $this->getData('shipments');
+
+            if (count($shipments)) {
+                $html .= '<div id="commande_line_' . $this->id . '_shipments_form' . '" class="commande_shipments_form line_shipment_qty_container">';
+                $html .= '<table class="bimp_list_table">';
+                $html .= '<thead>';
+                $html .= '<tr>';
+                $html .= '<th style="width: 400px;">Expédition</th>';
+                $html .= '<th>Qté</th>';
+
+                if ($use_group) {
+                    $html .= '<th>Grouper les articles</th>';
+                }
+
+                $html .= '</tr>';
+                $html .= '</thead>';
+                $html .= '<tbody>';
+
+                foreach ($shipments as $shipment) {
+                    $html .= '<tr id="commande_line_shipment_' . $shipment->id . '_row" class="shipment_row" data-id_shipment="' . $shipment->id . '">';
+                    $html .= '<td style="width: 400px;">';
+                    $card = new BC_Card($shipment, null, 'default');
+                    $html .= $card->renderHtml();
+                    $html .= '</td>';
+
+                    $qty = isset($line_shipments[(int) $shipment->id]['qty']) ? (float) $line_shipments[(int) $shipment->id]['qty'] : 0;
+                    $group = isset($line_shipments[(int) $shipment->id]['group']) ? (float) $line_shipments[(int) $shipment->id]['group'] : 0;
+
+                    if ((int) $shipment->getData('status') === BL_CommandeShipment::BLCS_BROUILLON) {
+                        $html .= '<td>';
+                        $html .= $this->renderShipmentQtyInput((int) $shipment->id, true);
+                        $html .= '</td>';
+                        if ($use_group) {
+                            $html .= '<td>';
+                            $html .= BimpInput::renderInput('toggle', 'shipment_' . $shipment->id . '_group', $group, array(
+                                        'extra_class' => 'line_shipment_group'
+                            ));
+                            $html .= '</td>';
+                        }
+                    } else {
+                        $html .= '<td>';
+                        $html .= '<input type="hidden" name="line_' . $this->id . '_shipment_' . $shipment->id . '_qty" value="' . $qty . '" class="line_shipment_qty total_max"/>';
+                        $html .= $qty;
+                        $html .= '</td>';
+                        if ($use_group) {
+                            $html .= '<td>';
+                            if ($group) {
+                                $html .= '<span class="success">OUI</span>';
+                            } else {
+                                $html .= '<span class="danger">NON</span>';
+                            }
+                            $html .= '</td>';
+                        }
+                    }
+                    $html .= '</tr>';
+                }
+
+                $html .= '</tbody>';
+                $html .= '</table>';
+
+                $html .= '<div class="ajaxResultContainer" style="display: none"></div>';
+
+                $html .= '<div style="display: none" class="buttonsContainer align-right">';
+                $html .= '<button class="btn btn-primary" onclick="saveCommandeLineShipments($(this), ' . $this->id . ')">';
+                $html .= BimpRender::renderIcon('fas_save', 'iconLeft') . 'Enregistrer';
+                $html .= '</button>';
+                $html .= '</div>';
+
+                $html .= '</div>';
+            } else {
+                $html .= BimpRender::renderAlerts('Aucune expédition créée');
+                $html .= '<div class="buttonsContainer align-center">';
+
+                $shipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
+                $onclick = $shipment->getJsLoadModalForm('default', 'Nouvelle expédition', array(
+                    'fields' => array(
+                        'id_commande_client' => (int) $commande->id
+                    )
+                        ), addslashes('function() {' . $this->getJsLoadModalView('shipments', 'Gestion des expéditions') . '}'));
+                $html .= '<button class="btn btn-default btn-large" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Créer une expédition';
+                $html .= '</button>';
+                $html .= '</div>';
+            }
+        }
+
+        return $html;
+    }
+
     // Traitements:
 
     public function createReservation()
@@ -1069,7 +1256,32 @@ class Bimp_CommandeLine extends ObjectLine
             }
 
             if ($total_qty_shipped > (float) $this->qty) {
-                $errors[] = 'Le nombre total d\'unités ajoutées à des expéditions (' . $total_qty_shipped . ') dépasse le nombre d\'unité enregistrées pour cette ligne de commande (' . $this->qty . ')';
+                $errors[] = 'Le nombre total d\'unités ajoutées à des expéditions (' . $total_qty_shipped . ') dépasse le nombre d\'unités enregistrées pour cette ligne de commande (' . $this->qty . ')';
+            }
+
+            // Equipements:
+            $equipments = array();
+            $product = $this->getProduct();
+            if (isset($data['equipments']) && BimpObject::objectLoaded($product) && $product->isSerialisable()) {
+                if (is_array($data['equipments']) && count($data['equipments']) > (int) $data['qty']) {
+                    $errors[] = 'Veuillez retirer ' . (count($data['equipments']) - (int) $data['qty']) . ' équipement(s)';
+                } else {
+                    $current_equipments = isset($shipments[(int) $id_shipment]['equipments']) ? $shipments[(int) $id_shipment]['equipments'] : array();
+                    $available_equipments = $this->getEquipementsToAttributeToShipment();
+
+                    foreach ($data['equipments'] as $id_equipment) {
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                        if (!BimpObject::objectLoaded($equipment)) {
+                            $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
+                        } elseif (!in_array((int) $id_equipment, $current_equipments) && !in_array((int) $id_equipment, $available_equipments)) {
+                            $errors[] = 'L\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ') n\'est plus disponible pour cette expédition';
+                        } else {
+                            $equipments[] = $id_equipment;
+                        }
+                    }
+
+                    $shipments[(int) $id_shipment]['equipments'] = $equipments;
+                }
             }
 
             // Mise à jour: 
@@ -1474,7 +1686,7 @@ class Bimp_CommandeLine extends ObjectLine
         if ($total_qty_billed > (float) $this->qty) {
             $errors[] = 'Le nombre total d\'unités ajoutées à des factures (' . $total_qty_billed . ') dépasse le nombre d\'unité enregistrées pour cette ligne de commande (' . $this->qty . ')';
         }
-        
+
         // Mise à jour: 
         if (!count($errors)) {
             $this->set('factures', $factures);

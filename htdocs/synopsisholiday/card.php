@@ -2059,7 +2059,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                         // responsable que l'utilisateur qui fait la demande
                         $tabExclude2 = array();
                         $req = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user";
-                        $req .= " WHERE fk_user != " . $user->fk_user;
+                        $req .= " WHERE fk_user != " . $userRequest->fk_user;
                         $req .= " OR fk_user IS NULL";
                         $sql = $db->query($req);
                         while ($ln = $db->fetch_object($sql))

@@ -320,7 +320,7 @@ if ($resql) {
 
 
 
-    $selectCommerciaux .= '<td align=center>Commerciaux';
+    $selectCommerciaux .= '<td align=center>Commercial';
     $selectCommerciaux .= '<select name="commerciaux" class="select2">';
     $selectCommerciaux .= '<option value=0 selected>Aucun</option>';
 

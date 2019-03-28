@@ -88,3 +88,5 @@ class ActionsBimpcore
         return 0;
     }
 }
+
+//require_once(DOL_DOCUMENT_ROOT."/bimptheme/main.inc.php");

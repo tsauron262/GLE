@@ -147,6 +147,14 @@ class BS_Ticket extends BimpObject
         }
         return null;
     }
+    
+    public function canEdit(){
+        if($this->getData('id') == 6320)
+            return false;
+        
+        return true;
+    }
+    
 
     public function getOpenIntersArray()
     {

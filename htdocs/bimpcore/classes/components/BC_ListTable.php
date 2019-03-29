@@ -88,10 +88,10 @@ class BC_ListTable extends BC_List
                 $this->params['add_object_row'] = 0;
             }
 
-            if (!(int) $this->object->canView()) {
+            if (!(int) $this->object->can("view")) {
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
             }
-            if (!(int) $this->object->canEdit()) {
+            if (!(int) $this->object->can("edit")) {
                 $this->params['enable_edit'] = 0;
                 $this->params['positions'] = 0;
             }
@@ -215,8 +215,8 @@ class BC_ListTable extends BC_List
                         'checkbox'       => (int) $object->getConf($this->config_path . '/item_checkbox', true, false, 'bool'),
                         'single_cell'    => false,
                         'item_params'    => $item_params,
-                        'canEdit'        => (int) ($object->canEdit() && $object->isEditable()),
-                        'canView'        => (int) $object->canView(),
+                        'canEdit'        => (int) ($object->can("edit") && $object->isEditable()),
+                        'canView'        => (int) $object->can("view"),
                         'canDelete'      => (int) ($object->canDelete() && $object->isDeletable()),
                         'instance_name'  => $object->getInstanceName(),
                         'url'            => '',
@@ -368,7 +368,7 @@ class BC_ListTable extends BC_List
         $view_check = false;
         if ((int) $this->params['inline_view_item']) {
             if ($this->object->fetch((int) $this->params['inline_view_item'])) {
-                if ($this->object->canView()) {
+                if ($this->object->can("view")) {
                     $view_name = $this->object->getConf($this->config_path . '/inline_view', '');
                     if ($view_name) {
                         $view = new BC_View($this->object, $view_name, false);
@@ -874,7 +874,7 @@ class BC_ListTable extends BC_List
 
         $buttons = array();
 
-        if ($this->object->canEdit()) {
+        if ($this->object->can("edit")) {
             $buttons[] = BimpRender::renderButton(array(
                         'classes'     => array('btn', 'btn-light-default'),
                         'label'       => 'Enregistrer toutes les modifications',

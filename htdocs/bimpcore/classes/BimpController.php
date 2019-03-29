@@ -227,7 +227,7 @@ class BimpController
                 }
             }
 
-            if (!$this->canView()) {
+            if (!$this->can("view")) {
                 echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
             } elseif (BimpTools::isSubmit('search')) {
                 echo $this->renderSearchResults();
@@ -526,7 +526,7 @@ class BimpController
         return $html;
     }
 
-    public function canView()
+    public function can($right)
     {
         return 1;
     }

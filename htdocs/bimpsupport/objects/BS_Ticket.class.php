@@ -148,10 +148,7 @@ class BS_Ticket extends BimpObject
         return null;
     }
     
-    public function canEdit(){
-        if($this->getData('id') == 6320)
-            return false;
-        
+    protected function canEdit(){
         return true;
     }
     

@@ -20,7 +20,7 @@ class FixeTabs_bimptask extends FixeTabs_module {
         BIMP_Task::$nbAlert = 0;
         foreach ($tasks as $taskData) {
             $task->fetch($taskData["id"]);
-            if ($task->canView()) {
+            if ($task->can("view")) {
                 if ($j < $maxTaskView) {
                     $content .= $task->renderLight();
                     $content .= "<br/>";
@@ -55,7 +55,7 @@ class FixeTabs_bimptask extends FixeTabs_module {
         BIMP_Task::$nbAlert = 0;
         foreach ($tasks as $taskData) {
             $task->fetch($taskData["id"]);
-            if ($task->canView()) {
+            if ($task->can("view")) {
                 if ($j2 < $maxTaskView) {
                     $content2 .= $task->renderLight();
                     $content2 .= "<br/>";
@@ -91,13 +91,17 @@ class FixeTabs_bimptask extends FixeTabs_module {
             $this->bimp_fixe_tabs->addTab("taskAPersonne", "<span class='" . implode(" ", $class2) . "' >" . $i2 . (($j2 != $i2) ? " / " . $j2 : "") . " tâche" . ($i2 > 1 ? 's' : '') . " non attribuée" . ($i2 > 1 ? 's' : '') . ($nonLu2 > 0 ? " <span class='red'>" . $nonLu2 . " message" . ($nonLu2 > 1 ? 's' : '') . " non lu" . ($nonLu2 > 1 ? 's' : '') . ".</span>" : "") . "</span>", $content2);
     }
 
-    function canView(){
+    function can($right){
         global $conf;
-        if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
-            $task = BimpObject::getInstance("bimptask", "BIMP_Task");
-            if ($task->canView())
-                return 1;
+        $retour = false;
+        if($right == "view"){
+            if (isset($conf->global->MAIN_MODULE_BIMPTASK)) {
+                $task = BimpObject::getInstance("bimptask", "BIMP_Task");
+                if ($task->can("view"))
+                    $retour = true;
+            }
         }
+        return $retour;
     }
     
     function displayHead() {

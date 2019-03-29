@@ -65,7 +65,7 @@ class BC_ListViews extends BC_List
         }
 
         if (!count($this->errors)) {
-            if (!$this->object->canView()) {
+            if (!$this->object->can("view")) {
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
             }
         }

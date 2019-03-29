@@ -3664,15 +3664,15 @@ class BS_SAV extends BimpObject
 
     public function canCreate()
     {
-        return $this->canView();
+        return $this->can("view");
     }
 
-    public function canEdit()
+    protected function canEdit()
     {
-        return $this->canView();
+        return $this->can("view");
     }
 
-    public function canView()
+    protected function canView()
     {
         global $user;
         return (int) $user->rights->BimpSupport->read;

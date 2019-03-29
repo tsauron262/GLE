@@ -2515,7 +2515,7 @@ class BimpObject extends BimpCache
 
         $errors = array();
 
-        if (!$force_update && !$this->canEdit()) {
+        if (!$force_update && !$this->can("edit")) {
             $errors[] = 'Vous n\'avez pas la permission de modifier ' . $this->getLabel('this');
         }
 
@@ -3532,6 +3532,25 @@ class BimpObject extends BimpCache
     }
 
     // Gestion des droits users: 
+    
+    //Gere actuelement que le view et le edit
+    public function can($right){
+        switch ($right){
+            case "view" :
+                if(BimpTools::isClientUserContxte())
+                    return ($this->canView() && $this->canClientView());
+                else
+                    return $this->canView();
+            case 'edit' :
+                if(BimpTools::isClientUserContxte())
+                    return ($this->canEdit() && $this->canClientEdit());
+                else
+                    return $this->canEdit();
+                
+            default:
+                return 0;
+        }
+    }
 
     public function canCreate()
     {
@@ -3544,7 +3563,11 @@ class BimpObject extends BimpCache
         return 1;
     }
 
-    public function canEdit()
+    public function canClientEdit(){
+        return 0;
+    }
+
+    protected function canEdit()
     {
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
@@ -3555,7 +3578,12 @@ class BimpObject extends BimpCache
         return 1;
     }
 
-    public function canView()
+    public function canClientView()
+    {
+        return 0;
+    }
+
+    protected function canView()
     {
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
@@ -3579,12 +3607,12 @@ class BimpObject extends BimpCache
 
     public function canEditField($field_name)
     {
-        return (int) $this->canEdit();
+        return (int) $this->can("edit");
     }
 
     public function canViewField($field_name)
     {
-        return (int) $this->canView();
+        return (int) $this->can("view");
     }
 
     public function canCreateChild($child_name)
@@ -3594,12 +3622,12 @@ class BimpObject extends BimpCache
 
     public function canEditChild($child_name)
     {
-        return (int) $this->canEdit();
+        return (int) $this->can("edit");
     }
 
     public function canViewChild($child_name)
     {
-        return (int) $this->canView();
+        return (int) $this->can("view");
     }
 
     public function canDeleteChild($child_name)

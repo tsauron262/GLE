@@ -60,7 +60,7 @@ class ActionsBimpcore
                     }
                 }
                 $this->bimp_fixe_tabs = new FixeTabs();                
-                if($this->bimp_fixe_tabs->canView()){
+                if($this->bimp_fixe_tabs->can("view")){
                     $this->bimp_fixe_tabs->init();
                     $html .= $this->bimp_fixe_tabs->displayHead(false);
                 }
@@ -77,7 +77,7 @@ class ActionsBimpcore
                 $html .= BimpRender::renderAjaxModal('page_modal');
             }
             if (is_object($this->bimp_fixe_tabs) && is_a($this->bimp_fixe_tabs, 'FixeTabs')) {              
-                if($this->bimp_fixe_tabs->canView())
+                if($this->bimp_fixe_tabs->can("view"))
                     $html .= $this->bimp_fixe_tabs->render();
             }
         }

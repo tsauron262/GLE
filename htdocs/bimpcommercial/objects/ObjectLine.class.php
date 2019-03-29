@@ -213,13 +213,13 @@ class ObjectLine extends BimpObject
     {
         return 0;
     }
-    
+
     public function isNotTypeText()
     {
         if ((int) $this->getData('type') === self::LINE_TEXT) {
             return 0;
         }
-        
+
         return 1;
     }
 
@@ -346,7 +346,7 @@ class ObjectLine extends BimpObject
                         $buttons[] = array(
                             'label'   => 'Détails équipements',
                             'icon'    => 'bars',
-                            'onclick' => 'loadModalList(\'' . $instance->module . '\', \'' . $instance->object_name . '\', \'default\', ' . $this->id . ', $(this), \'Equipements\')'
+                            'onclick' => 'loadModalList(\'' . $instance->module . '\', \'' . $instance->object_name . '\', \'default\', ' . $this->id . ', $(this), \'Equipements assignés à la ligne n°' . $this->getData('position') . '\')'
                         );
                     }
                 }
@@ -1852,6 +1852,16 @@ class ObjectLine extends BimpObject
                 $this->calcRemise();
             }
         }
+    }
+    
+    public function setEquipments($equipments)
+    {
+        
+    }
+    
+    public function addEquipment($id_equipment, $pu_ht = null, $tva_tx = null)
+    {
+        
     }
 
     // Rendus HTML: 

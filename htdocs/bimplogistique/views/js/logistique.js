@@ -432,7 +432,7 @@ function onFactureFormSubmit($form, extra_data) {
         var qty = parseFloat($(this).val());
         var equipments = [];
 
-        var $row = $form.find('#sfacture_line_' + id_line + '_equipments');
+        var $row = $form.find('#facture_line_' + id_line + '_equipments');
         if ($row.length) {
             $row.find('.check_list_item_input:checked').each(function () {
                 equipments.push(parseInt($(this).val()));

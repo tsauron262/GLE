@@ -363,6 +363,10 @@ forms:
                   callback: isParentEditable
 
 lists_cols: 
+    position: 
+        label: N°
+        field: position
+        max-width: 45px
     desc:
         label: Description
         value: 
@@ -482,6 +486,7 @@ lists:
         extra_btn: 
             callback: getListExtraBtn
         cols:
+            position: 
             desc:
             pu_ht: 
             tva:

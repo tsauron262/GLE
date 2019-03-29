@@ -191,12 +191,12 @@ class Bimp_CommandeLine extends ObjectLine
         if (BimpObject::objectLoaded($commande)) {
             return array(
                 array(
-                    'label'   => 'Ajouter à une expédition',
+                    'label'   => 'Quantités expédition',
                     'icon'    => 'fas_shipping-fast',
                     'onclick' => 'addSelectedCommandeLinesToShipment($(this), \'list_id\', ' . $commande->id . ')'
                 ),
                 array(
-                    'label'   => 'Ajouter à une facture',
+                    'label'   => 'Quantités facture',
                     'icon'    => 'fas_file-invoice-dollar',
                     'onclick' => 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ' . $commande->id . ', ' . (int) $commande->getData('fk_soc') . ', ' . (int) $commande->dol_object->contactid . ', ' . (int) $commande->getData('fk_cond_reglement') . ')'
                 )
@@ -656,6 +656,15 @@ class Bimp_CommandeLine extends ObjectLine
                                 $html .= '</button>';
                             }
                         }
+
+                        $id_facture = (int) $this->getEquipmentIdFacture($id_equipment);
+                        if ($id_facture) {
+                            $html .= '<br/>Fac: ';
+                            $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+                            if (BimpObject::objectLoaded($facture)) {
+                                $html .= $facture->getNomUrl(1, 1, 1, 'full');
+                            }
+                        }
                         $html .= '</td>';
                     }
                 }
@@ -789,7 +798,7 @@ class Bimp_CommandeLine extends ObjectLine
         $html .= BimpInput::renderInput('qty', 'line_' . $this->id . '_facture_' . $id_facture . '_qty', $value, $options);
 
         if ($facture_qty > 0) {
-            if ($facture_qty === 1) {
+            if ($facture_qty == 1) {
                 $msg = $facture_qty . ' unité a déjà été assignée à cette facture.';
             } else {
                 $msg = $facture_qty . ' unités ont déjà été assignées à cette facture.';
@@ -1738,9 +1747,6 @@ class Bimp_CommandeLine extends ObjectLine
 
         // Mise à jour: 
         if (!count($errors)) {
-            echo $this->getData('position') . '<pre>';
-            print_r($factures);
-            echo '</pre>';
             $this->set('factures', $factures);
             $errors = $this->update($warnings, true);
         }

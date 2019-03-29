@@ -7,6 +7,7 @@ class Bimp_FactureLine extends ObjectLine
 
     public static $parent_comm_type = 'facture';
     public static $dol_line_table = 'facturedet';
+    public $equipment_required = true;
 
     // Gestion des droits: 
     public function canCreate()

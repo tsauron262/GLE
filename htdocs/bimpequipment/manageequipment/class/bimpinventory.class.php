@@ -530,7 +530,7 @@ class BimpInventoryLigne {
         $sql.= ', fk_product';
         $sql.= ', fk_equipment';
         $sql.= ') ';
-        $sql.= 'VALUES (' . $this->db->idate(dol_now());
+        $sql.= 'VALUES ("' . $this->db->idate(dol_now()).'"';
         $sql.= ', ' . $quantity;
         $sql.= ', ' . $id_inventory;
         $sql.= ', ' . $id_user;

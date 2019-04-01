@@ -78,7 +78,7 @@ class BimpInventory {
         $sql.= ') ';
         $sql.= 'VALUES (' . $id_entrepot;
         $sql.= ', ' . $id_user;
-        $sql.= ', ' . $this->db->idate(dol_now());
+        $sql.= ', "' . $this->db->idate(dol_now()).'"';
         $sql.= ', ' . $this::STATUT_DRAFT;
         $sql.= ')';
 

@@ -508,8 +508,23 @@ lists:
             date_create:
             resp:
             contrat:
-            client: 
-                
+            client:
+    
+    client: 
+        extends: default
+        cols:
+            client: unset
+            resp: unset
+        page_btn: 0
+        extra_btn:
+            callback: getExtraBtnListInterfaceClient
+            #method: getExtraBtnListInterfaceClient
+                #params:
+                   # -
+                    
+        add_form_values: 
+            fields:
+                status: 20
 cards:
     default:
         title: nom

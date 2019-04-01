@@ -638,11 +638,11 @@ else
                         
                         
                         
-                        foreach(array(1,2,3,4) as $month)
-                                $db->query("call update_llx_mat_view_facturedet_months(2019, ".$month.")");
-                        foreach(array(1,2,3,4,5,6,7,8,9,10,11,12) as $month)
-                                $db->query("call update_llx_mat_view_facturedet_months(2018, ".$month.")");
-                        die;
+//                        foreach(array(1,2,3,4) as $month)
+//                                $db->query("call update_llx_mat_view_facturedet_months(2019, ".$month.")");
+//                        foreach(array(1,2,3,4,5,6,7,8,9,10,11,12) as $month)
+//                                $db->query("call update_llx_mat_view_facturedet_months(2018, ".$month.")");
+//                        die;
                     
                     
                     

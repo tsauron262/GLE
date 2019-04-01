@@ -37,7 +37,7 @@ print '<div id="alertPlaceHolder" style="clear:both"></div>';
 
 if ($user->rights->bimpequipment->inventory->read) {
     print '<div class="object_list_table">';
-    print '<table id="productTable" class="noborder objectlistTable" style="margin-top:20px">';
+    print '<table id="productTable" class="noborder" style="margin-top:20px">';
     print '<thead><tr class="headerRow">';
     print '<th>Numéro du groupe</th>';
     print '<th>Identifiant</th>';

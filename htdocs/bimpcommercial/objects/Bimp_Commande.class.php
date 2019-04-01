@@ -1908,10 +1908,6 @@ class Bimp_Commande extends BimpComm
 
                     if (count($fac_line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
-                    } else {
-                        if (BimpObject::objectLoaded($product) && $product->isSerialisable() && isset($lines_equipments[(int) $id_line])) {
-                            $line_equipments = $lines_equipments[(int) $id_line];
-                        }
                     }
                 } else {
                     // Création de la ligne de facture: 
@@ -1968,10 +1964,29 @@ class Bimp_Commande extends BimpComm
                         }
                     }
                 }
-                if (!count($fac_line_errors)) {
+                if (!count($fac_line_errors)) {                    
+                    // Assignation des équipements ) la ligne de facture: 
+                    if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
+                        $line_equipments = array();
+                        
+                        if (isset($lines_equipments[(int) $id_line])) {
+                            foreach ($lines_equipments[(int) $id_line] as $id_equipment) {
+                                $line_equipments[] = array(
+                                    'id_equipment' => (int) $id_equipment
+                                );
+                            }
+                        }
+
+                        $eq_errors = $fac_line->setEquipments($line_equipments);
+                        if (count($eq_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Ligne n°' . $line->getData('position'));
+                        }
+                    }
+
                     // Enregistrement des quantités facturées pour la ligne de commande: 
                     $line_warnings = array();
-                    $line_errors = $line->setFactureData((int) $facture->id, $line_qty, $line_warnings);
+
+                    $line_errors = $line->setFactureData((int) $facture->id, $line_qty, isset($lines_equipments[(int) $id_line]) ? $lines_equipments[(int) $id_line] : array(), $line_warnings);
 
                     $line_errors = array_merge($line_errors, $line_warnings);
 
@@ -1986,56 +2001,6 @@ class Bimp_Commande extends BimpComm
 
         $this->checkInvoiceStatus();
 
-        return $errors;
-    }
-
-    public function setFactureLineEquipments($id_facture_line, $equipments)
-    {
-        $errors = array();
-        
-        $current_equipments = array();
-
-        $fac_line_equipments = $fac_line->getEquipmentLines();
-
-        foreach ($fac_line_equipments as $fac_line_equipment) {
-            $id_equipment = (int) $fac_line_equipment->getData('id_equipment');
-            if (!$id_equipment || !in_array($id_equipment, $line_equipments)) {
-                $del_warnings = array();
-                $fac_line_equipment->delete($del_warnings, true);
-            } else {
-                $current_equipments[] = $id_equipment;
-            }
-        }
-
-        foreach ($line_equipments as $id_equipment) {
-            if (!in_array($id_equipment, $current_equipments)) {
-                // Ajout de l'équipement à la ligne de facture: 
-                $lineEquipment = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLineEquipment');
-
-                $lineEquipment->validateArray(array(
-                    'id_object_line' => (int) $fac_line->id,
-                    'object_type'    => 'facture',
-                    'id_equipment'   => (int) $id_equipment
-                ));
-
-                $line_eq_warnings = array();
-                $line_eq_errors = $lineEquipment->create($line_eq_warnings, true);
-
-                $line_eq_errors = array_merge($line_eq_errors, $line_eq_warnings);
-
-                if (count($line_eq_errors)) {
-                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-
-                    if (BimpObject::objectLoaded($equipment)) {
-                        $eq_label = '"' . $equipment->getData('serial') . '"';
-                    } else {
-                        $eq_label = 'd\'ID ' . $id_equipment;
-                    }
-                    $errors[] = BimpTools::getMsgFromArray($line_eq_errors, 'Ligne n°' . $line->getData('position') . ': échec de l\'attribution de l\'équipement ' . $eq_label . ' à la ligne de facture');
-                }
-            }
-        }
-        
         return $errors;
     }
 

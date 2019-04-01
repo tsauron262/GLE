@@ -875,7 +875,9 @@ class Bimp_CommandeLine extends ObjectLine
         $items = array();
         $values = array();
 
-        $factureData = $this->getShipmentData($id_fature);
+        
+        $factureData = $this->getFactureData($id_fature);
+        
         if (isset($factureData['equipments'])) {
             foreach ($factureData['equipments'] as $id_equipment) {
                 $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
@@ -1713,7 +1715,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $errors;
     }
 
-    public function setFactureData($id_facture, $qty, &$warnings = array())
+    public function setFactureData($id_facture, $qty, $equipments = array(), &$warnings = array())
     {
         $errors = array();
 
@@ -1744,6 +1746,38 @@ class Bimp_CommandeLine extends ObjectLine
         if ($total_qty_billed > (float) $this->qty) {
             $errors[] = 'Le nombre total d\'unités ajoutées à des factures (' . $total_qty_billed . ') dépasse le nombre d\'unité enregistrées pour cette ligne de commande (' . $this->qty . ')';
         }
+
+        $line_equipments = array();
+
+        if (count($equipments) > $facture_qty) {
+            $errors[] = 'Le nombre d\'équipements dépasse le nombre d\'unités assignées à cette facture';
+        } else {
+            foreach ($equipments as $id_equipment) {
+                $eq_id_facture = (int) $this->getEquipmentIdFacture($id_equipment);
+                if ($eq_id_facture) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', $id_equipment);
+                    if (BimpObject::objectLoaded($equipment)) {
+                        $serial = ' - ns: ' . $equipment->getData('serial');
+                    } else {
+                        $serial = '';
+                    }
+                    $errors[] = 'L\'équipement ' . $id_equipment . $serial . ' est déjà assigné à une facture';
+                } else {
+                    $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
+                                'id_commande_client_line' => (int) $this->id,
+                                'id_equipment'            => (int) $id_equipment
+                                    ), false, false);
+
+                    if (!BimpObject::objectLoaded($reservation)) {
+                        $errors[] = 'L\'équipement ' . $id_equipment . ' - ns: ' . $equipments->getData('serial') . ' n\'est pas associé à cette ligne de commande';
+                    } else {
+                        $line_equipments[] = $id_equipment;
+                    }
+                }
+            }
+        }
+
+        $factures[(int) $id_facture]['equipments'] = $line_equipments;
 
         // Mise à jour: 
         if (!count($errors)) {

@@ -151,12 +151,12 @@ class commandeController extends BimpController
 
         $html .= $list->renderHtml();
 
-        $list = new BC_ListTable($instance, 'default', 1, null, 'Avoirs');
-        $list->params['add_btn'] = 0;
-        $list->addObjectAssociationFilter($commande, $commande->id, 'avoirs');
-        $list->addObjectChangeReload('Bimp_Commande');
-
-        $html .= $list->renderHtml();
+//        $list = new BC_ListTable($instance, 'default', 1, null, 'Avoirs');
+//        $list->params['add_btn'] = 0;
+//        $list->addObjectAssociationFilter($commande, $commande->id, 'avoirs');
+//        $list->addObjectChangeReload('Bimp_Commande');
+//
+//        $html .= $list->renderHtml();
 
         $html .= '</div>';
         $html .= '</div>';

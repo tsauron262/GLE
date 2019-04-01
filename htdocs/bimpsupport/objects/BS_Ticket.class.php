@@ -8,6 +8,7 @@ class BS_Ticket extends BimpObject
     const BS_TICKET_ATT_COMMERCIAL = 3;
     const BS_TICKET_ATT_TECHNICIEN = 4;
     const BS_TICKET_ATT_PRESTATAIRE = 5;
+    const BS_TICKET_DEMANDE_CLIENT = 20;
     const BS_TICKET_CLOT = 999;
 
     public static $priorities = array(
@@ -26,6 +27,7 @@ class BS_Ticket extends BimpObject
         3 => array('label' => 'Non couvert', 'classes' => array('danger'), 'icon' => 'fas_times'),
     );
     public static $status_list = array(
+        self::BS_TICKET_DEMANDE_CLIENT       => array('label' => 'Demande client', 'icon' => 'fas_cogs', 'classes' => array('important')),
         self::BS_TICKET_EN_COURS        => array('label' => 'En cours', 'icon' => 'fas_cogs', 'classes' => array('info')),
         self::BS_TICKET_ATT_CLIENT      => array('label' => 'En attente client', 'icon' => 'fas_hourglass-start', 'classes' => array('important')),
         self::BS_TICKET_ATT_COMMERCIAL  => array('label' => 'En attente commercial', 'icon' => 'fas_hourglass-start', 'classes' => array('important')),
@@ -547,5 +549,30 @@ class BS_Ticket extends BimpObject
         }
 
         return $errors;
+    }
+    
+//    public function canEdit() {
+//        global $user_client;
+//        
+//        if(isset($user_client) && $user_client->id > 0 && $this->getData('status') != self::BS_TICKET_DEMANDE_CLIENT) {
+//            return false;
+//        }
+//        return true;
+//    }
+//    
+//    public function canEditField($fieldName) {
+//        
+//    }
+    
+    public function getExtraBtnListInterfaceClient() {
+        $buttons = array();
+                $buttons[] = array(
+                    'label'   => 'Voir le ticket',
+                    'icon'    => 'fas_file',
+                    "onclick" => "window.location.href = '".DOL_URL_ROOT."/bimpinterfaceclient/?page=ticket&id=".$this->getData('id')."'"
+                );
+           
+
+        return $buttons;
     }
 }

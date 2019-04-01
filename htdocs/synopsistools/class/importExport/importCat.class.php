@@ -3,7 +3,7 @@
 require_once DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/import8sens.class.php";
 
 class importCat extends import8sens {
-    var $catDef = 2;
+    var $catDef = 9086;
     var $marqueOk = false;
     var $obsolescenceOk = false;
     var $tabConvert = array(
@@ -573,27 +573,27 @@ class importCat extends import8sens {
         $catDef = null;
         
         
-//        foreach ($this->tabConvert as $grandeCatTest => $tabT) {
-//            if($grandeCat == $grandeCatTest){
-//                foreach($tabT as $catTest => $tabT2){
-//                    if(strtoupper($catTest) == strtoupper($cat)){
-//                        $converti = true;
-//                        foreach($tabT2 as $tabConverssion){
-//                            if($tabConverssion[0] == "")
-//                                $tabConverssion[0] = $grandeCatTest;
-//                            $this->traiteCat($tabConverssion[0], $tabConverssion[1]);
-//                        }
-//                    }
-//                }
-//            }
-//            
-//        }
-//        
-//        if(!$converti && $grandeCat == "Collection"){
-//            $grandeCat = "Externe";
-//            $catDef = $this->getCatIDByNom("Marque");
-//            $catDef = $this->getCatIDByNom("Nature", $catDef);
-//        }
+        foreach ($this->tabConvert as $grandeCatTest => $tabT) {
+            if($grandeCat == $grandeCatTest){
+                foreach($tabT as $catTest => $tabT2){
+                    if(strtoupper($catTest) == strtoupper($cat)){
+                        $converti = true;
+                        foreach($tabT2 as $tabConverssion){
+                            if($tabConverssion[0] == "")
+                                $tabConverssion[0] = $grandeCatTest;
+                            $this->traiteCat($tabConverssion[0], $tabConverssion[1]);
+                        }
+                    }
+                }
+            }
+            
+        }
+        
+        if(!$converti && $grandeCat == "Collection"){
+            $grandeCat = "Externe";
+            $catDef = $this->getCatIDByNom("Marque");
+            $catDef = $this->getCatIDByNom("Nature", $catDef);
+        }
         
 
         if(!$converti)

@@ -1664,4 +1664,9 @@ class BimpTools
     {
         return str_pad(dechex($rgb * 255), 2, '0', STR_PAD_LEFT);
     }
+    
+    
+    public static function isClientUserContxte(){
+        return false;
+    }
 }

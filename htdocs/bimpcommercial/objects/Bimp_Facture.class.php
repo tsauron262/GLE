@@ -1548,7 +1548,7 @@ class Bimp_Facture extends BimpComm
         global $conf, $langs, $user;
         $langs->load('errors');
 
-        if (!$this->canEdit()) {
+        if (!$this->can("edit")) {
             $errors[] = 'Vous n\'avez pas la permission de modifier ' . $this->getLabel('this');
         } elseif (!$this->isModifiable() || $this->dol_object->getIdReplacingInvoice() || !$this->dol_object->is_last_in_cycle()) {
             $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' n\'est pas modifiable';
@@ -2101,7 +2101,7 @@ class Bimp_Facture extends BimpComm
         return $user->rights->facture->creer;
     }
 
-    public function canEdit()
+    protected function canEdit()
     {
         return $this->canCreate();
     }

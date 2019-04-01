@@ -2780,7 +2780,7 @@ class SynopsisHoliday extends Holiday {
 
         $sql = "SELECT `id` FROM " . MAIN_DB_PREFIX . "actioncomm WHERE `fk_user_action` = " . (($fk_user >= 0) ? $fk_user : $this->fk_user);
         $sql .= " AND `datep` <= ";
-        $sql .= "'" . $dateEnd->format('Y-m-d H:i:s') . "' AND `datep2` >= '" . $dateBegin->format('Y-m-d H:i:s') . "';";
+        $sql .= "'" . $dateEnd->format('Y-m-d H:i:s') . "' AND fk_action != 40 AND `datep2` >= '" . $dateBegin->format('Y-m-d H:i:s') . "';";
 
         dol_syslog(get_class($this) . "::fetchRDV sql=" . $sql, LOG_DEBUG);
         date_default_timezone_set("GMT");

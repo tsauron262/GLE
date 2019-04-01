@@ -32,7 +32,7 @@ class Bimp_Commande extends BimpComm
         return 0;
     }
 
-    public function canEdit()
+    protected function canEdit()
     {
         return $this->canCreate();
     }

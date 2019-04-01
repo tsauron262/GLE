@@ -135,7 +135,7 @@ class Bimp_FactureFourn extends BimpComm
         return 1;
     }
 
-    public function canEdit()
+    protected function canEdit()
     {
         return $this->canCreate();
     }

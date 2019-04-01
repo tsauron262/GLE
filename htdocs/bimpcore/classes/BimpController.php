@@ -136,19 +136,24 @@ class BimpController
     {
         $html = '';
         $id_object = BimpTools::getValue('id');
-
+        
+        $prefixe = DOL_URL_ROOT;
+        if($prefixe == "/")
+            $prefixe = "";
+        elseif($prefixe != "")
+            $prefixe .= "/";
         $html .= '<script type="text/javascript">';
-        $html .= 'ajaxRequestsUrl = \'' . DOL_URL_ROOT . '/' . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
+        $html .= 'ajaxRequestsUrl = \'' . $prefixe . "/" . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
         $html .= '</script>';
 
         $html .= BimpCore::displayHeaderFiles(false);
 
         foreach ($this->cssFiles as $css_file) {
-            $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $css_file . '"/>';
+            $html .= '<link type="text/css" rel="stylesheet" href="' . $prefixe . $css_file . '"/>';
         }
 
         foreach ($this->jsFiles as $js_file) {
-            $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
+            $html .= '<script type="text/javascript" src="' . $prefixe . $js_file . '"></script>';
         }
 
         $html .= '<script type="text/javascript">';
@@ -222,7 +227,7 @@ class BimpController
                 }
             }
 
-            if (!$this->canView()) {
+            if (!$this->can("view")) {
                 echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
             } elseif (BimpTools::isSubmit('search')) {
                 echo $this->renderSearchResults();
@@ -521,7 +526,7 @@ class BimpController
         return $html;
     }
 
-    public function canView()
+    public function can($right)
     {
         return 1;
     }

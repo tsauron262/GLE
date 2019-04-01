@@ -23,7 +23,7 @@ class savController extends gsxController
         parent::display();
     }
 
-    public function canView()
+    protected function canView()
     {
         global $user;
         return (int) $user->rights->BimpSupport->read;

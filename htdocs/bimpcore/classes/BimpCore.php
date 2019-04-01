@@ -21,7 +21,9 @@ class BimpCore
             '/bimpcore/views/js/view.js',
             '/bimpcore/views/js/viewsList.js',
             '/bimpcore/views/js/listCustom.js',
-            '/bimpcore/views/js/page.js'
+            '/bimpcore/views/js/page.js',
+            '/bimpcore/views/js/table2csv.js'
+
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',

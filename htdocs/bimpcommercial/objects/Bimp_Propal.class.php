@@ -791,7 +791,7 @@ class Bimp_Propal extends BimpComm
         return 1;
     }
 
-    public function canEdit()
+    protected function canEdit()
     {
         return $this->canCreate();
     }
@@ -829,7 +829,7 @@ class Bimp_Propal extends BimpComm
                 return 0;
 
             case 'modify':
-                return $this->canEdit();
+                return $this->can("edit");
 
             case 'createOrder':
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
@@ -846,7 +846,7 @@ class Bimp_Propal extends BimpComm
                 return $facture->canCreate();
 
             case 'setRemiseGlobale':
-                return $this->canEdit();
+                return $this->can("edit");
         }
         return 1;
     }

@@ -160,14 +160,25 @@ function displayProgress(limit) {
     }, 3000);
 }
 
-function mergeDuplicates(src_to_dest) {
+function mergeDuplicates(src_to_dest, ids_processed) {
+    
+//    console.log('salut');
+//    console.log(src_to_dest);
+//    console.log(ids_processed);
+//
+//    ids_processed.forEach(function (id) {
+//        console.log(id);
+//        console.log($('table#customer > tr#' + id));
+//    });
+//    return;
 
     $.ajax({
         type: "POST",
         url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
         data: {
             action: 'merge_duplicates',
-            src_to_dest: src_to_dest
+            src_to_dest: src_to_dest,
+            ids_processed: ids_processed
         },
         beforeSend: function () {
             $('i#spinner').css('display', 'block');
@@ -229,6 +240,38 @@ function initDuplicate() {
     });
 }
 
+
+function setAsProcessed(id) {
+
+    $.ajax({
+        type: "POST",
+        url: DOL_URL_ROOT + "/bimpremovev2duplicate/interface.php",
+        data: {
+            action: 'set_as_processed',
+            id: id
+        },
+        error: function () {
+            alert("Erreur PHP 1649");
+        },
+        success: function (rowOut) {
+            var out = JSON.parse(rowOut);
+            if (parseInt(out.code) === 1) {
+                var key_group = $('tr#' + id).attr('key_group');
+                var sucess_first = '';
+                if ($('table#customer > tbody > tr#' + id).attr('id') == $('table#customer > tbody > tr[key_group=' + key_group + ']:first').attr('id'))
+                    sucess_first += ' > td:not(:first)';
+                $('table#customer > tbody > tr#' + id + sucess_first).css('background-color', 'rgb(153, 153, 153)');
+                $('table#customer > tbody > tr#' + id + ' > td[name=errors]').html('Ignoré');
+                $('tr#' + id).find('input:not([merge_this_group="true"])').remove();
+                removeLastInput(key_group);
+            } else {
+                displayMessage("Erreur serveur 4318", 'errors');
+            }
+        }
+    });
+}
+
+
 /**
  * Ready
  */
@@ -236,12 +279,6 @@ function initDuplicate() {
 $(document).ready(function () {
     initEvents();
     $('.select2').select2();
-
-    // Prevent leave without
-    window.addEventListener('beforeunload', function (e) {
-        e.preventDefault();
-        e.returnValue = '';
-    });
 });
 
 
@@ -294,6 +331,8 @@ function getCommercial() {
 }
 
 function iniEventAfterDisplayDuplicate() {
+    var ids_processed = [];
+
     // Merge duplicate
     $('input#merge_duplicates').click(function () {
         var radio_checked = {};
@@ -301,6 +340,9 @@ function iniEventAfterDisplayDuplicate() {
             var group_name = $(this).attr('name');
             var radio_value = $(this).val();
             radio_checked[group_name] = radio_value;
+            var is_processed = $(this).parent().parent().attr('processed');
+            if (is_processed === 'true')
+                ids_processed.push(radio_value);
         });
         var src_to_dest = {};
         $('table#customer > tbody > tr[key_group]').each(function () {
@@ -311,16 +353,21 @@ function iniEventAfterDisplayDuplicate() {
                 src_to_dest[src] = dest;
             }
         });
-        mergeDuplicates(src_to_dest);
+        mergeDuplicates(src_to_dest, ids_processed);
     });
 
     // Merge only group
     $('input[merge_this_group="true"]').click(function () {
+        var ids_processed = [];
+
         var key_group = $(this).attr('key_group');
         var radio_checked = {};
         $('input[name=' + key_group + '][type="radio"][r_keep="true"]:checked').each(function () {
             var radio_value = $(this).val();
             radio_checked[key_group] = radio_value;
+            var is_processed = $(this).parent().parent().attr('processed');
+            if (is_processed === 'true')
+                ids_processed.push(radio_value);
         });
         var src_to_dest = {};
         $('table#customer > tbody > tr[key_group="' + key_group + '"]').each(function () {
@@ -330,7 +377,7 @@ function iniEventAfterDisplayDuplicate() {
                 src_to_dest[src] = dest;
             }
         });
-        mergeDuplicates(src_to_dest);
+        mergeDuplicates(src_to_dest, ids_processed);
     });
 
     // Prevent merge it self, part 1
@@ -347,6 +394,13 @@ function iniEventAfterDisplayDuplicate() {
             }
         }
     });
+
+    // Set as processed
+    $('input[set_as_processed="true"]').click(function () {
+        var id = $(this).attr('id');
+        setAsProcessed(id);
+    });
+
 }
 
 /**
@@ -359,9 +413,9 @@ function iniEventAfterDisplayDuplicate() {
 function addLine(c, key_group, is_last, is_first, nb_in_group, a_siret_is_set) {
 
     if (is_last) {
-        var html = '<tr id="' + c.rowid + '" key_group=' + key_group + ' class="last">';
+        var html = '<tr id="' + c.rowid + '" key_group=' + key_group + ' processed=' + c.not_processed + ' class="last">';
     } else {
-        var html = '<tr id="' + c.rowid + '" key_group=' + key_group + '>';
+        var html = '<tr id="' + c.rowid + '" key_group=' + key_group + ' processed=' + c.not_processed + '>';
     }
 
     if (is_first)
@@ -372,7 +426,15 @@ function addLine(c, key_group, is_last, is_first, nb_in_group, a_siret_is_set) {
     else
         html += '<td><input r_keep="true" type="radio" name="' + key_group + '" value=' + c.rowid + '></td>';
 
-    html += '<td><input cb_merge="true" type="checkbox" name="' + key_group + '" value=' + c.rowid + '></td>';
+    html += '<td><input cb_merge="true" not_processed=' + c.not_processed + ' type="checkbox" name="' + key_group + '" value=' + c.rowid + '></td>';
+
+    // Button to set as processed
+    if (c.not_processed === true)
+        html += '<td><input type="submit" class="butAction" set_as_processed="true" id=' + c.rowid + ' value="Ignorer"></td>';
+    else
+        html += '<td></td>';
+
+
     html += '<td>' + c.nom + '</td>';
     html += '<td>' + c.email + '</td>';
     html += '<td>' + c.address + '</td>';
@@ -394,7 +456,7 @@ function addLine(c, key_group, is_last, is_first, nb_in_group, a_siret_is_set) {
 
 
 // Link to societe
-    html += '<td><a target=blank href="' + DOL_URL_ROOT + '/societe/card.php?socid=' + c.rowid + '" title="<div class=&quot;centpercent&quot;><u>ShowCompany</u></div>" class="classfortooltip refurl">';
+    html += '<td><a target=blank href="' + DOL_URL_ROOT + '/comm/card.php?socid=' + c.rowid + '" title="<div class=&quot;centpercent&quot;><u>ShowCompany</u></div>" class="classfortooltip refurl">';
     html += '<img src="/bimp-8/bimp-erp/htdocs/theme/eldy/img/object_company.png" alt="" class="paddingright classfortooltip valigntextbottom"> </a></td>';
     html += '<td name="errors"></td>';
     $('table#customer').append(html);

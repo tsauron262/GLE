@@ -149,6 +149,11 @@ class BS_Ticket extends BimpObject
         }
         return null;
     }
+    
+    protected function canEdit(){
+        return true;
+    }
+    
 
     public function getOpenIntersArray()
     {

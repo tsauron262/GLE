@@ -1698,12 +1698,8 @@ class BS_SAV extends BimpObject
 
         foreach ($this->getChildrenObjects('propal_lines', array(
             'type'               => array("in" => array(BS_SavPropalLine::LINE_PRODUCT, BS_SavPropalLine::LINE_FREE)),
-            'linked_id_object'   => 0,
-            'linked_object_name' => ''
         )) as $line) {
-            if ((int) $line->id_product) {
-                $product = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Product', (int) $line->id_product);
-                if ($product->isLoaded()) {
+            if ((int) $line->pu_ht > 0) {
                     if (!(int) $line->getData('out_of_warranty')) {
                         $line->fetch($line->id);
                         $remise = (float) $line->remise;
@@ -1715,23 +1711,22 @@ class BS_SAV extends BimpObject
                         $this->allGarantie = false;
                     }
                 }
-            }
         }
 
-        foreach ($this->getChildrenObjects('propal_lines', array(
-            'linked_object_name' => 'sav_apple_part'
-        )) as $line) {
-            if (!(int) $line->getData('out_of_warranty')) {
-                $line->fetch($line->id);
-                $remise = (float) $line->remise;
-                $coefRemise = (100 - $remise) / 100;
-                $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
-                $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
-                $garantiePa += (float) $line->pa_ht * (float) $line->qty;
-            } else {
-                $this->allGarantie = false;
-            }
-        }
+//        foreach ($this->getChildrenObjects('propal_lines', array(
+//            'linked_object_name' => 'sav_apple_part'
+//        )) as $line) {
+//            if (!(int) $line->getData('out_of_warranty')) {
+//                $line->fetch($line->id);
+//                $remise = (float) $line->remise;
+//                $coefRemise = (100 - $remise) / 100;
+//                $garantieHt += ((float) $line->pu_ht * (float) $line->qty * (float) $coefRemise);
+//                $garantieTtc += ((float) $line->pu_ht * (float) $line->qty * ((float) $line->tva_tx / 100) * $coefRemise);
+//                $garantiePa += (float) $line->pa_ht * (float) $line->qty;
+//            } else {
+//                $this->allGarantie = false;
+//            }
+//        }
 
         $line = BimpCache::findBimpObjectInstance('bimpsupport', 'BS_SavPropalLine', array(
                     'id_obj'             => (int) $propal->id,
@@ -2122,8 +2117,14 @@ class BS_SAV extends BimpObject
     public function setAllStatutWarranty($garantie = false)
     {
         foreach ($this->getChildrenObjects("propal_lines") as $line) {
-            $line->set("out_of_warranty", $garantie ? "0" : "1");
-            $line->update();
+            $prod = $line->getProduct();
+            if($line->getData('linked_object_name') == 'sav_apple_part' || (BimpObject::objectLoaded($prod) && stripos($prod->getData("ref"), "sav-niveau") !== false)){
+                $out_of_warranty = $garantie ? "0" : "1";
+                if($line->getData("out_of_warranty") != $out_of_warranty){
+                    $line->set("out_of_warranty", $out_of_warranty);
+                    $line->update();
+                }
+            }
         }
     }
 
@@ -3663,15 +3664,15 @@ class BS_SAV extends BimpObject
 
     public function canCreate()
     {
-        return $this->canView();
+        return $this->can("view");
     }
 
-    public function canEdit()
+    protected function canEdit()
     {
-        return $this->canView();
+        return $this->can("view");
     }
 
-    public function canView()
+    protected function canView()
     {
         global $user;
         return (int) $user->rights->BimpSupport->read;

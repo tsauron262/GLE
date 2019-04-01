@@ -451,6 +451,10 @@ else
             print_liste_field_titre("Vente","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             print_liste_field_titre("Der date Achat","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
             print_liste_field_titre("Der date Vente","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
+            print_liste_field_titre("Der prix Achat","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
+            print_liste_field_titre("Ventes 3 mois","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
+            print_liste_field_titre("Ventes 6 mois","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
+            print_liste_field_titre("Ventes 1 an","", "","&amp;id=".$id,"",'align="right"',$sortfield,$sortorder);
 //			if ($user->rights->stock->mouvement->creer) print_liste_field_titre('');
 //			if ($user->rights->stock->creer)            print_liste_field_titre('');
 			print "</tr>\n";
@@ -563,7 +567,7 @@ else
                             $nb = $ln->nb;
                         
                         print '<td align="right">';
-                        print $nb;
+                        print price($nb);
                         print '</td>';
                         
                         
@@ -574,22 +578,71 @@ else
                             $date = dol_print_date($ln->datef, "%d/%m/%Y");
                         }
                         else{
-                            $date = "01/04/2018";
+//                            $date = "01/04/2018";
+                            $date = "05/10/2014";
                         }
-                        print '<td align="right">';
-                        print $date;
-                        print '</td>';
                         
                         
-                    $date = "";
+                    $date2 = "";
                         $sql = $db->query("SELECT datef FROM `llx_facturedet` fd, `llx_facture` f WHERE fk_statut > 0 AND `fk_product` = ".$productstatic->id." AND fd.`fk_facture` = f.rowid ORDER BY datef DESC");
                         if($db->num_rows($sql) > 0){
                             $ln = $db->fetch_object($sql);
-                            $date = dol_print_date($ln->datef, "%d/%m/%Y");
+                            $date2 = dol_print_date($ln->datef, "%d/%m/%Y");
                         }
+                        
+                        
+                        $prix = "";
+                        $sql = $db->query("SELECT price, tms FROM llx_product_fournisseur_price  WHERE `fk_product` = ".$productstatic->id." ORDER BY tms DESC");
+                        if($db->num_rows($sql) > 0){
+                            $ln = $db->fetch_object($sql);
+                            $prix = price($ln->price);
+                            $date = dol_print_date($ln->tms, "%d/%m/%Y");
+                        }
+                        
+                        $tabVente = array(3=>"",6=>"",12=>"");
+                        foreach(array(3=>array(1,2,3), 6=>array(4,5,6), 12=>array(7,8,9,10,11,12)) as $id => $tab){
+                            $req = "SELECT SUM(facturedet_prodqty) as nb FROM `llx_mat_view_facturedet_months` WHERE  prod_ref = '".$productstatic->ref."' AND ( 0 ";
+                            foreach($tab as $nb){
+                                $newDate = strtotime($_REQUEST['dateStock'] . "-".$nb.' month');
+                                $month = dol_print_date($newDate, "%m");
+                                $year = dol_print_date($newDate, "%Y");
+                                $req .= " || `facture_valid_month` = ".$month." AND `facture_valid_year` = ".$year."";
+                            }
+                            $req .= ")";
+                            $sql = $db->query($req);
+                            if($db->num_rows($sql) > 0){
+                                $ln = $db->fetch_object($sql);
+                                $tabVente[$id] = $ln->nb;
+                            }
+                        }
+                        
+                        
                         print '<td align="right">';
                         print $date;
                         print '</td>';
+                        print '<td align="right">';
+                        print $date2;
+                        print '</td>';
+                        print '<td align="right">';
+                        print $prix;
+                        print '</td>';
+                        print '<td align="right">';
+                        print price($tabVente[3]);
+                        print '</td>';
+                        print '<td align="right">';
+                        print price($tabVente[6]);
+                        print '</td>';
+                        print '<td align="right">';
+                        print price($tabVente[12]);
+                        print '</td>';
+                        
+                        
+                        
+                        foreach(array(1,2,3,4) as $month)
+                                $db->query("call update_llx_mat_view_facturedet_months(2019, ".$month.")");
+                        foreach(array(1,2,3,4,5,6,7,8,9,10,11,12) as $month)
+                                $db->query("call update_llx_mat_view_facturedet_months(2018, ".$month.")");
+                        die;
                     
                     
                     

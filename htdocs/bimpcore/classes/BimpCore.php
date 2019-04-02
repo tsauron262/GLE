@@ -46,6 +46,7 @@ class BimpCore
             $html .= '<script type="text/javascript">';
             $html .= ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
             $html .= ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
+            $html .= ' var isClientUserContxte = ' . (BimpTools::isClientUserContxte()? 1 : 0) . ';';
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {

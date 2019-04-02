@@ -740,7 +740,10 @@ function bimp_reloadPage() {
 
 $.fn.tagName = function () {
     if (this.length) {
-        return this.get(0).tagName.toLowerCase();
+        var elem = this.get(0);
+        if (elem && elem.tagName) {
+            return elem.tagName.toLowerCase();
+        }
     }
     return '';
 };

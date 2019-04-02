@@ -1854,9 +1854,10 @@ class ObjectLine extends BimpObject
         }
     }
 
-    public function setEquipments($equipments)
+    public function setEquipments($equipments, &$equipments_set = array())
     {
         $errors = array();
+        $equipments_set = array();
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la ligne d facture absent';
@@ -1877,25 +1878,31 @@ class ObjectLine extends BimpObject
 
         foreach ($equipments as $equipment_data) {
             if (isset($equipment_data['id_equipment']) && (int) $equipment_data['id_equipment']) {
-                if ((!in_array((int) $equipment_data['id_equipment'], $current_equipments))) {
-                    $new_equipments[] = (int) $equipment_data['id_equipment'];
-                }
+                $new_equipments[] = (int) $equipment_data['id_equipment'];
             }
         }
 
-        if ((count($new_equipments) + count($current_equipments)) > (int) $this->qty) {
-            $errors[] = 'Le nombre d\'équipemements (' . (count($new_equipments) + count($current_equipments)) . ') dépasse le nombre d\'unités asssignées à cette facture (' . $this->qty . ')';
+        if (count($new_equipments) > (int) $this->qty) {
+            $errors[] = 'Le nombre d\'équipements (' . count($new_equipments) . ') dépasse le nombre d\'unités asssignées à cette facture (' . $this->qty . ')';
             return $errors;
         }
 
         foreach ($equipments as $equipment_data) {
-            if (isset($equipment_data['id_equipment']) && in_array((int) $equipment_data['id_equipment'], $new_equipments)) {
-                $pu_ht = isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : null;
-                $tva_tx = isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : null;
-                $eq_errors = $this->addEquipment($equipment_data['id_equipment'], $pu_ht, $tva_tx);
+            if (isset($equipment_data['id_equipment'])) {
+                if (!in_array((int) $equipment_data['id_equipment'], $current_equipments)) {
+                    $pu_ht = isset($equipment_data['pu_ht']) ? $equipment_data['pu_ht'] : null;
+                    $tva_tx = isset($equipment_data['tva_tx']) ? $equipment_data['tva_tx'] : null;
+                    $eq_errors = $this->addEquipment($equipment_data['id_equipment'], $pu_ht, $tva_tx);
 
-                if (count($eq_errors)) {
-                    $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Erreurs lors de l\'attribution des équipements');
+                    if (count($eq_errors)) {
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $equipment_data['id_equipment']);
+                        if (BimpObject::objectLoaded($equipment)) {
+                            $label = '"' . $equipment->getData('serial') . '" (ID: ' . $equipment_data['id_equipment'] . ')';
+                        } else {
+                            $label = 'd\'ID ' . $equipment_data['id_equipment'];
+                        }
+                        $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Erreurs lors de l\'attribution de l\'équipement ' . $label);
+                    }
                 }
             }
         }
@@ -1912,6 +1919,11 @@ class ObjectLine extends BimpObject
                     $errors[] = BimpTools::getMsgFromArray($del_errors, 'Erreur lors de la suppression de la ligne d\'équipement d\'ID ' . $line_equipment->id);
                 }
             }
+        }
+
+        $line_equipments = $this->getEquipmentLines();
+        foreach ($line_equipments as $line_equipment) {
+            $equipments_set[] = (int) $line_equipment->getData('id_equipment');
         }
 
         return $errors;

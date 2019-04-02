@@ -411,6 +411,17 @@ cards:
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
+                  
+    light: 
+        title: 
+            field_value: facnumber
+        view_btn: 1
+        fields: 
+            - field: total_ttc
+            - field: fk_statut
+            - label: Payé
+              value: 
+                  callback: displayPaid
         
 searches:
     default: 

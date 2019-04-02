@@ -154,6 +154,11 @@ forms:
                   type: textarea
                   rows: 3
                   auto_expand: 1
+            - custom: 1
+              label: Quantités et équipements
+              input_name: lines
+              content: 
+                  callback: renderFactureFormLinesInputs
                   
 fields_tables: 
     data: 
@@ -194,7 +199,7 @@ views:
             - cols: 
                 - type: custom
                   custom: 
-                      callback: renderShipmentsLines
+                      callback: renderShipmentLines
                       
 lists_cols: 
     commande: 

@@ -383,6 +383,68 @@ function onShipmentEquipmentsFormSubmit($form, extra_data) {
 
 // Factures commandes client: 
 
+function onCommandeLineFacturesViewLoaded($view) {
+    if (!parseInt($view.data('line_factures_view_events_init'))) {
+        var $modalContent = $view.findParentByClass('modal_content');
+
+        if ($.isOk($modalContent)) {
+            var modal_idx = parseInt($modalContent.data('idx'));
+            bimpModal.addButton('<i class="fas fa5-save iconLeft"></i>Enregistrer', 'saveCommandeLineFactures($(this), ' + $view.data('id_object') + ')', 'primary', '', modal_idx);
+        } else {
+            $view.find('.commande_factures_form').find('.buttonsContainer').show();
+        }
+
+        $view.data('line_factures_view_events_init', 1);
+    }
+}
+
+function saveCommandeLineFactures($button, id_line) {
+    var $form = $('#commande_line_' + id_line + '_factures_form');
+
+    if ($form.length) {
+        var $rows = $form.find('tr.facture_row');
+
+        var factures = [];
+        if ($rows.length) {
+            $rows.each(function () {
+                var $row = $(this);
+                var data = {};
+                data.id_facture = parseInt($row.data('id_facture'));
+                data.qty = parseFloat($row.find('input.line_facture_qty').val());
+                if (isNaN(data.qty)) {
+                    bimp_msg('Quantités invalides pour la facture "' + $row.data('facnumber') + '"<br/>Veuillez corriger', 'danger');
+                    return;
+                }
+                data.equipments = [];
+                
+                $row.find('[name="line_'+id_line+'_facture_'+data.id_facture+'_equipments[]"]:checked').each(function() {
+                    var id_equipment = parseInt($(this).val());
+                    if (!isNaN(id_equipment) && id_equipment) {
+                        data.equipments.push(id_equipment);
+                    }
+                });
+                factures.push(data);
+            });
+
+            var $resultContainer = $form.find('div.ajaxResultContainer');
+
+            setObjectAction($button, {
+                module: 'bimpcommercial',
+                object_name: 'Bimp_CommandeLine',
+                id_object: id_line
+            }, 'saveFactures', {
+                factures: factures
+            }, null, $resultContainer, function () {
+                var $modalContent = $form.findParentByClass('modal_content');
+                if ($.isOk($modalContent)) {
+                    var modal_idx = parseInt($modalContent.data('idx'));
+                    bimpModal.removeContent(modal_idx);
+                }
+            });
+        }
+    }
+}
+
 function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_client, id_contact, id_cond_reglement) {
     if ($button.hasClass('disabled')) {
         return;
@@ -597,6 +659,8 @@ $(document).ready(function () {
     $('body').on('viewLoaded', function (e) {
         if (e.$view.hasClass('Bimp_CommandeLine_view_shipments')) {
             onCommandeLineShipmentsViewLoaded(e.$view);
+        } else if (e.$view.hasClass('Bimp_CommandeLine_view_invoices')) {
+            onCommandeLineFacturesViewLoaded(e.$view);
         } else if (e.$view.hasClass('Bimp_CommandeFournLine_view_reception')) {
             onCommandeFournLineReceptionViewLoaded(e.$view);
         } else if (e.$view.hasClass('BL_CommandeShipment_view_lines')) {

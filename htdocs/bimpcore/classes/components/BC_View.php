@@ -88,7 +88,7 @@ class BC_View extends BC_Panel
                 $html .= ' onclick="loadModalFormFromView(\'' . $this->identifier . '\', \'' . $this->params['edit_form'] . '\', $(this), \'' . addslashes($title) . '\');"';
                 $html .= '><i class="fas fa5-edit iconLeft"></i>Editer</button>';
             }
-            if ($this->params['delete_btn'] && $this->object->canDelete() && $this->object->isDeletable()) {
+            if ($this->params['delete_btn'] && $this->object->can("delete") && $this->object->isDeletable()) {
                 $html .= '<button type="button" class="btn btn-danger"';
                 $html .= ' onclick="deleteObject($(this), \'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', $(\'#' . $this->identifier . '_result\'));"';
                 $html .= '><i class="fas fa5-trash-alt iconLeft"></i>Supprimer</button>';

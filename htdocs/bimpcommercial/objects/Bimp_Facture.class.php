@@ -360,7 +360,7 @@ class Bimp_Facture extends BimpComm
                 if ($this->isModifiable()) {
                     $msg = '';
                     if (!$objectidnext && $isLastInCycle) {
-                        if ($this->canCreate()) {
+                        if ($this->can("create")) {
                             $buttons[] = array(
                                 'label'   => 'Modifier',
                                 'icon'    => 'undo',
@@ -481,7 +481,7 @@ class Bimp_Facture extends BimpComm
                     }
 
 
-                    if ($this->canCreate() && $status == 1 && !$paye) {
+                    if ($this->can("create") && $status == 1 && !$paye) {
                         switch ($type) {
                             case Facture::TYPE_STANDARD:
                                 if ($remainToPay < 0 && empty($discount->id)) {
@@ -572,7 +572,7 @@ class Bimp_Facture extends BimpComm
                 }
 
                 // Cloner: 
-                if ($this->canCreate()) {
+                if ($this->can("create")) {
                     $buttons[] = array(
                         'label'   => 'Cloner',
                         'icon'    => 'copy',
@@ -584,7 +584,7 @@ class Bimp_Facture extends BimpComm
                 }
 
 
-                if (in_array($type, array(Facture::TYPE_DEPOSIT, Facture::TYPE_STANDARD, Facture::TYPE_PROFORMA)) && $this->canCreate()) {
+                if (in_array($type, array(Facture::TYPE_DEPOSIT, Facture::TYPE_STANDARD, Facture::TYPE_PROFORMA)) && $this->can("create")) {
                     if ($status == 0) {
                         // Convertir en facture modèle:
                         if (!$objectidnext && count($this->dol_object->lines) > 0) {
@@ -1965,7 +1965,7 @@ class Bimp_Facture extends BimpComm
     {
         global $user, $conf, $langs;
 
-        if (!$force_create && !$this->canCreate()) {
+        if (!$force_create && !$this->can("create")) {
             return array('Vous n\'avez pas la permission de créer ' . $this->getLabel('a'));
         }
 
@@ -2103,7 +2103,7 @@ class Bimp_Facture extends BimpComm
 
     protected function canEdit()
     {
-        return $this->canCreate();
+        return $this->can("create");
     }
 
     public function canSetAction($action)
@@ -2128,7 +2128,7 @@ class Bimp_Facture extends BimpComm
             case 'convertToReduc':
             case 'addContact':
             case 'cancel':
-                return $this->canCreate();
+                return $this->can("create");
 
             case 'classifyPaid':
                 if ($user->rights->facture->paiement) {

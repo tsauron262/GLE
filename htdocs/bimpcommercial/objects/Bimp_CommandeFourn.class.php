@@ -183,7 +183,7 @@ class Bimp_CommandeFourn extends BimpComm
 
     protected function canEdit()
     {
-        return $this->canCreate();
+        return $this->can("create");
     }
 
     public function canDelete()
@@ -536,7 +536,7 @@ class Bimp_CommandeFourn extends BimpComm
             }
 
             // Cloner: 
-            if ($this->canCreate()) {
+            if ($this->can("create")) {
                 $buttons[] = array(
                     'label'   => 'Cloner',
                     'icon'    => 'fas_copy',

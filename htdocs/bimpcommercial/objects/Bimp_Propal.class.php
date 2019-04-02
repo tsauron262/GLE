@@ -300,7 +300,7 @@ class Bimp_Propal extends BimpComm
                 }
 
                 // Cloner: 
-                if ($this->canCreate()) {
+                if ($this->can("create")) {
                     $buttons[] = array(
                         'label'   => 'Cloner',
                         'icon'    => 'copy',
@@ -793,7 +793,7 @@ class Bimp_Propal extends BimpComm
 
     protected function canEdit()
     {
-        return $this->canCreate();
+        return $this->can("create");
     }
 
     public function canSetAction($action)
@@ -833,7 +833,7 @@ class Bimp_Propal extends BimpComm
 
             case 'createOrder':
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
-                return $commande->canCreate();
+                return $commande->can("create");
 
             case 'createContract':
                 if ($user->rights->contrat->creer) {
@@ -843,7 +843,7 @@ class Bimp_Propal extends BimpComm
 
             case 'createInvoice':
                 $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-                return $facture->canCreate();
+                return $facture->can("create");
 
             case 'setRemiseGlobale':
                 return $this->can("edit");

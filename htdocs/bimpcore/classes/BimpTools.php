@@ -1667,6 +1667,10 @@ class BimpTools
     
     
     public static function isClientUserContxte(){
+        global $userClient;
+        if(isset($userClient)){
+            return true;
+        }
         return false;
     }
 }

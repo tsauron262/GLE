@@ -176,19 +176,23 @@ class EquipmentManager {
         foreach ($equipments as $id => $equipment) {
             $id_product = $equipment['id_product'];
 
-            if ($cacheProducts[$id_product]) {
-                $equipments[$id]['ref'] = $cacheProducts[$id_product]['ref'];
-                $equipments[$id]['label'] = $cacheProducts[$id_product]['label'];
-            } else {
-                // fill the cache
-                $doli_prod = new Product($this->db);
-                $doli_prod->fetch($id_product);
-                $cacheProducts[$id_product]['ref'] = $doli_prod->getNomUrl(1);
-                $cacheProducts[$id_product]['label'] = dol_trunc($doli_prod->label, 25);
-                // then the equipment array
-                $equipments[$id]['ref'] = $cacheProducts[$id_product]['ref'];
-                $equipments[$id]['label'] = $cacheProducts[$id_product]['label'];
+            if($id_product > 0){
+                if ($cacheProducts[$id_product]) {
+                    $equipments[$id]['ref'] = $cacheProducts[$id_product]['ref'];
+                    $equipments[$id]['label'] = $cacheProducts[$id_product]['label'];
+                } else {
+                    // fill the cache
+                    $doli_prod = new Product($this->db);
+                    $doli_prod->fetch($id_product);
+                    $cacheProducts[$id_product]['ref'] = $doli_prod->getNomUrl(1);
+                    $cacheProducts[$id_product]['label'] = dol_trunc($doli_prod->label, 25);
+                    // then the equipment array
+                    $equipments[$id]['ref'] = $cacheProducts[$id_product]['ref'];
+                    $equipments[$id]['label'] = $cacheProducts[$id_product]['label'];
+                }
             }
+            else
+                unset($equipments[$id]);
         }
         return (array('equipments' => $equipments, 'products' => $products, 'errors' => $this->errors));
     }

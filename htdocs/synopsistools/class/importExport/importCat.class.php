@@ -3,7 +3,7 @@
 require_once DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/import8sens.class.php";
 
 class importCat extends import8sens {
-    var $catDef = 9086;
+    var $catDef = 2;
     var $marqueOk = false;
     var $obsolescenceOk = false;
     var $tabConvert = array(

@@ -140,7 +140,8 @@ class BL_CommandeShipment extends BimpObject
                     'label'   => 'Créer une facture',
                     'icon'    => 'far_file-alt',
                     'onclick' => $this->getJsActionOnclick('createFacture', array(), array(
-                        'form_name' => 'facture'
+                        'form_name' => 'facture',
+                        'on_form_submit' => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } '
                     ))
                 );
             }
@@ -867,7 +868,7 @@ class BL_CommandeShipment extends BimpObject
         ));
 
         $qties = array();
-//        $equipments = array();
+        $equipments = array();
 
         foreach ($lines as $line) {
             $facture_data = null;
@@ -888,12 +889,6 @@ class BL_CommandeShipment extends BimpObject
             if ($qty) {
                 $qties[(int) $line->id] = $qty;
             }
-
-//            $equipments[(int) $line->id] = array();
-//            
-//            if (isset($shipment_data['equipments'])) {
-//                
-//            }
         }
 
         $html .= '<table class="bimp_list_table">';
@@ -915,7 +910,7 @@ class BL_CommandeShipment extends BimpObject
             if (!isset($qties[(int) $line->id]) || !(float) $qties[(int) $line->id]) {
                 continue;
             }
-            
+
             $product = null;
 
             if ((int) $line->getData('type') === ObjectLine::LINE_PRODUCT) {
@@ -942,17 +937,45 @@ class BL_CommandeShipment extends BimpObject
             $html .= '</td>';
             $html .= '</tr>';
 
-//            if (BimpObject::objectLoaded($product)) {
-//                if ($product->isSerialisable()) {
-//                    $html .= '<tr id="facture_line_' . $line->id . '_equipments" class="facture_line_equipments">';
-//                    $html .= '<td colspan="5">';
-//                    $html .= '<div style="padding-left: 45px;">';
-//                    $html .= $line->renderFactureEquipmentsInput($id_facture, null, 'line_' . $line->id . '_facture_' . $id_facture . '_qty');
-//                    $html .= '</div>';
-//                    $html .= '</td>';
-//                    $html .= '</tr>';
-//                }
-//            }
+            if (BimpObject::objectLoaded($product)) {
+                if ($product->isSerialisable()) {
+                    $shipment_data = $line->getShipmentData((int) $this->id);
+                    $items = array();
+                    $values = array();
+                    
+                    if (isset($shipment_data['equipments'])) {
+                        foreach ($shipment_data['equipments'] as $id_equipment) {
+                            $id_eq_fac = (int) $line->getEquipmentIdFacture((int) $id_equipment);
+                            if (!$id_eq_fac || ($id_facture && $id_eq_fac === (int) $id_facture)) {
+                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                if (BimpObject::objectLoaded($equipment)) {
+                                    $items[(int) $id_equipment] = $equipment->getData('serial');
+                                    $values[] = (int) $id_equipment;
+                                }
+                            }
+                        }
+                    }
+
+                    foreach ($line->getEquipementsToAttributeToFacture() as $id_equipment) {
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                        if (BimpObject::objectLoaded($equipment)) {
+                            $items[(int) $id_equipment] = $equipment->getData('serial');
+                        }
+                    }
+
+                    $html .= '<tr id="facture_line_' . $line->id . '_equipments" class="facture_line_equipments">';
+                    $html .= '<td colspan="5">';
+                    $html .= '<div style="padding-left: 45px;">';
+                    $html .= '<div style="font-weight: bold; font-size: 13px; margin-bottom: 6px">Equipements: </div>';
+                    $html .= BimpInput::renderInput('check_list', 'line_' . $line->id . '_facture_' . (int) $id_facture . '_equipments', $values, array(
+                                'items'          => $items,
+                                'max_input_name' => 'line_' . $line->id . '_facture_' . $id_facture . '_qty'
+                    ));
+                    $html .= '</div>';
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+            }
         }
 
         if (!$has_lines) {
@@ -1241,13 +1264,13 @@ class BL_CommandeShipment extends BimpObject
 //            $this->update();
 //        }
     }
-    
+
     public function actionCreateFacture($data, &$success)
     {
         $errors = array();
         $warnings = array();
         $success = '';
-        
+
         $errors[] = 'Non opérationnel';
 
         return array(

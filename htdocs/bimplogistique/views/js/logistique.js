@@ -381,6 +381,9 @@ function onShipmentEquipmentsFormSubmit($form, extra_data) {
     return extra_data;
 }
 
+function onShipmentFactureFormSubmit($form, extra_data) {
+    return extra_data;
+}
 // Factures commandes client: 
 
 function onCommandeLineFacturesViewLoaded($view) {
@@ -416,8 +419,8 @@ function saveCommandeLineFactures($button, id_line) {
                     return;
                 }
                 data.equipments = [];
-                
-                $row.find('[name="line_'+id_line+'_facture_'+data.id_facture+'_equipments[]"]:checked').each(function() {
+
+                $row.find('[name="line_' + id_line + '_facture_' + data.id_facture + '_equipments[]"]:checked').each(function () {
                     var id_equipment = parseInt($(this).val());
                     if (!isNaN(id_equipment) && id_equipment) {
                         data.equipments.push(id_equipment);
@@ -500,7 +503,7 @@ function onFactureFormSubmit($form, extra_data) {
                 equipments.push(parseInt($(this).val()));
             });
         }
-        
+
         lines.push({
             id_line: id_line,
             qty: qty,

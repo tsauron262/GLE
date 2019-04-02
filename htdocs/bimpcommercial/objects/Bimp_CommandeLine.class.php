@@ -877,7 +877,7 @@ class Bimp_CommandeLine extends ObjectLine
         $html = '';
 
         if (is_null($input_name)) {
-            $input_name = 'line_' . $this->id . '_shipment_' . $id_fature . '_equipments';
+            $input_name = 'line_' . $this->id . '_facture_' . $id_fature . '_equipments';
         }
 
         $items = array();

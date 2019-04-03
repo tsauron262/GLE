@@ -54,7 +54,7 @@ class modBimpsupport extends DolibarrModules {
 
         // Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
         // It is used to group modules by family in module setup page
-        $this->family = "synopsis";
+        $this->family = "Bimp";
         // Module position in the family
         $this->module_position = 500;
         // Gives the possibility to the module, to provide his own family info and position of this family (Overwrite $this->family and $this->module_position. Avoid this)
@@ -304,6 +304,15 @@ class modBimpsupport extends DolibarrModules {
     public function init($options = '') {
         $sql = array();
 
+        
+        
+        require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+        $name = 'module_version_'.strtolower($this->name);
+        if(BimpCore::getConf($name) == "") {
+            BimpCore::setConf($name, floatval($this->version));
+            $this->_load_tables('/bimpsupport/sql/');
+        }
+        
 //        $this->_load_tables('/bimpgroupmanager/sql/');
         // Add restrictions to all categories son of root
         // Create extrafields

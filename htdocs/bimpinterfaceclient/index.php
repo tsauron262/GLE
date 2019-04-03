@@ -1,9 +1,9 @@
 <?php
 
-if($_REQUEST['fc'] == 'adminInterface')
-    require 'admin.php';
-else
+if($_REQUEST['context'] == 'public')
     require 'client.php';
+else
+    require 'admin.php';
 
 
 ?>

@@ -580,6 +580,50 @@ forms:
               value: 
                   callback: getCondReglementBySociete
             - custom: 1
+              label: Compte financier
+              input_name: id_account
+              data_type: id_object
+              input: 
+                  type: select_mysoc_account
+              required: 1
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Avoirs client à utiliser
+              input_name: id_remises_list
+              input: 
+                  multiple: 1
+                  type: select_remises
+                  id_client:
+                      request_field: id_client
+              depends_on: id_client
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Note publique
+              input_name: note_public
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
+              label: Note privée
+              input_name: note_private
+              data_type: text
+              input: 
+                  type: textarea
+                  rows: 3
+                  auto_expand: 1
+              display_if: 
+                  field_name: id_facture
+                  show_values: 0
+            - custom: 1
               label: Lignes
               hidden: 1
               input_name: facture_lines_list

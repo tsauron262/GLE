@@ -63,6 +63,10 @@ fields:
         type: id_object
         object: facture
         default_value: 0
+        display: 
+            card_light: 
+                type: card
+                card: light
         
     signed: 
         label: Signé
@@ -117,6 +121,26 @@ forms:
     facture: 
         rows: 
             - custom: 1
+              label: Client
+              input_name: id_client
+              data_type: id_object
+              object: client
+              card: default
+              input: 
+                  type: search_societe
+                  societe_type: customer
+            - custom: 1
+              label: Contact
+              input_name: id_contact
+              data_type: id
+              input: 
+                  type: select
+                  options: 
+                      callback: 
+                          method: getClientContactsArray
+                          object: commande
+              depends_on: id_client
+            - custom: 1
               label: Conditions de réglement
               input_name: cond_reglement
               value: 
@@ -137,7 +161,8 @@ forms:
                   multiple: 1
                   type: select_remises
                   id_client:
-                      callback: getIdClient
+                      request_field: id_client
+              depends_on: id_client
             - custom: 1
               label: Note publique
               input_name: note_public
@@ -154,6 +179,22 @@ forms:
                   type: textarea
                   rows: 3
                   auto_expand: 1
+            - custom: 1
+              label: Quantités et équipements
+              input_name: lines
+              content: 
+                  callback: renderFactureFormLinesInputs
+                  
+    facture_edit: 
+        rows: 
+            - custom: 1
+              label: Facture
+              content: 
+                  callback: 
+                      method: displayData
+                      params: 
+                          - id_facture
+                          - card_light
             - custom: 1
               label: Quantités et équipements
               input_name: lines
@@ -236,6 +277,9 @@ lists_cols:
                 method: displayPdfButtons
                 params: 
                     - 1
+    facture: 
+        field: id_facture
+        display: nom_url
                     
 lists: 
     default: 

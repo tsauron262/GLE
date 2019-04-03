@@ -530,9 +530,9 @@ class Bimp_CommandeLine extends ObjectLine
                         if (isset($stocks['dispo'])) {
                             $qty_available = $stocks['dispo'];
                         }
-                        if ($qty_available < $qty_wanted) {
+                        if ($qty_wanted > 0 && $qty_available < $qty_wanted) {
                             $class = 'danger';
-                        } elseif ($qty_available === $qty_wanted) {
+                        } elseif ($qty_wanted > 0 && $qty_available === $qty_wanted) {
                             $class = 'warning';
                         } else {
                             $class = 'success';
@@ -1574,7 +1574,7 @@ class Bimp_CommandeLine extends ObjectLine
 
             // traitement des réservations: 
 
-            $stock_label = 'Expédition n°' . $this->getData('num_livraison') . ' pour la commande client "' . $commande->ref . '"';
+            $stock_label = 'Expédition n°' . $shipment->getData('num_livraison') . ' pour la commande client "' . $commande->getRef() . '"';
             $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
 
             if ($this->isProductSerialisable()) {
@@ -1665,7 +1665,124 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function cancelShipmentShipped(BL_CommandeShipment $shipment)
     {
-        // todo
+        $errors = array();
+        global $user;
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la ligne de commande absent';
+            return $errors;
+        }
+
+        $shipment_data = $this->getShipmentData((int) $shipment->id);
+        
+        if (!isset($shipment_data['qty']) || !(float) $shipment_data['qty']) {
+            return array();
+        }
+
+        if (!isset($shipment_data['shipped']) || !$shipment_data['shipped']) {
+            $errors[] = 'L\'expédition n\'est pas marquée comme validée pour cette ligne de commande';
+            return $errors;
+        }
+
+        $commande = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($commande)) {
+            $errors[] = 'ID de la commande client absent';
+            return $errors;
+        }
+
+        $id_entrepot = (int) $shipment->getData('id_entrepot');
+
+        $product = $this->getProduct();
+        $stock_label = 'Annulation de l\'expédition n°' . $shipment->getData('num_livraison') . ' pour la commande client "' . $commande->getRef() . '"';
+        $codemove = dol_print_date(dol_now(), '%y%m%d%H%M%S');
+
+        if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
+
+            // Traitement des réservations: 
+            $reservations = $this->getReservations('status', 'asc', '300');
+
+            foreach ($reservations as $reservation) {
+                $id_equipment = (int) $reservation->getData('id_equipment');
+                if ($id_equipment) {
+                    if (in_array($id_equipment, $shipment_data['equipments'])) {
+                        $equipment = $reservation->getChildObject('equipment');
+                        if (!BimpObject::objectLoaded($equipment)) {
+                            $errors[] = 'L\'équipement d\'ID ' . $id_equipment . ' n\'existe pas';
+                        } else {
+                            $res_errors = $reservation->setNewStatus(200, 1, $id_equipment);
+                            if (count($res_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut pour l\'équipement ' . $equipment->getData('serial'));
+                            } else {
+                                // Mise à jour de l'emplacement de l'équipement:  
+                                $place = BimpObject::getInstance('bimpequipment', 'BE_Place');
+                                $place_errors = $place->validateArray(array(
+                                    'id_equipment' => $id_equipment,
+                                    'type'         => BE_Place::BE_PLACE_ENTREPOT,
+                                    'id_entrepot'  => $id_entrepot,
+                                    'infos'        => $stock_label,
+                                    'date'         => date('Y-m-d H:i:s'),
+                                    'code_mvt'     => $codemove
+                                ));
+
+                                if (!count($place_errors)) {
+                                    $place_errors = $place->create();
+                                }
+
+                                if (count($place_errors)) {
+                                    $errors[] = BimpTools::getMsgFromArray($place_errors, 'Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ')');
+                                    dol_syslog('Echec de la création du nouvel emplacement pour l\'équipement ' . $equipment->getData('serial') . ' (ID ' . $id_equipment . ') - Commande client: ' . $commande->getRef() . '(ID ' . $commande->id . ')', LOG_ERR);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            $reservations = $this->getReservations('status', 'asc', '300');
+
+            $remain_qty = $shipment_data['qty'];
+
+            foreach ($reservations as $reservation) {
+                if ($remain_qty <= 0) {
+                    break;
+                }
+                $qty = $remain_qty;
+                if ($qty > (int) $reservation->getData('qty')) {
+                    $qty = (int) $reservation->getData(('qty'));
+                    $remain_qty -= $qty;
+                }
+                $res_errors = $reservation->setNewStatus(200, $qty);
+                if (count($res_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut de la réservation d\'ID ' . $reservation->id);
+                } else {
+                    // traitement des stocks
+                    // todo: Voir pour utiliser un code_mov spécifique (utile en cas d'annulation pour vérifier que le mvt de stock a été correctement effectué.
+                    if ($product->dol_object->correct_stock($user, $id_entrepot, $shipment_data['qty'], 0, $stock_label, 0, $codemove, 'commande', $commande->id) <= 0) {
+                        $msg = 'Echec de la mise à jour des stocks pour le produit "' . $product->dol_object->label . '" (ID ' . $product->id . ', quantités à ajouter: ' . $shipment_data['qty'] . ')';
+                        $errors[] = $msg;
+                        dol_syslog($msg, LOG_ERR);
+                    }
+                }
+            }
+        }
+
+        // Mise à jour des données de l'expédition: 
+
+        if (!count($errors)) {
+            $shipments = $this->getData('shipments');
+            if (isset($shipments[(int) $shipment->id])) {
+                unset($shipments[(int) $shipment->id]);
+            }
+            $this->set('shipments', $shipments);
+            $warnings = array();
+            $up_errors = $this->update($warnings, true);
+            if (count($up_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($up_errors, 'Echec de la mise à jour de la ligne de commande client');
+            }
+        }
+
+        return $errors;
     }
 
     public function addEquipmentsToShipment($id_shipment, $equipments, $new_qty = null)

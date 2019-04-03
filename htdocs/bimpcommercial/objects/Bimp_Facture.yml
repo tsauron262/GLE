@@ -321,7 +321,8 @@ fields_tables:
             
     payment:
         rows:
-            - field: fk_account                  
+            - field: fk_account    
+              edit: 1
             - field: fk_cond_reglement
               edit: 
                   callback: isEditable
@@ -415,7 +416,7 @@ cards:
     light: 
         title: 
             field_value: facnumber
-        view_btn: 1
+        view_btn: 0
         fields: 
             - field: total_ttc
             - field: fk_statut

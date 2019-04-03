@@ -461,7 +461,7 @@ class Bimp_Commande extends BimpComm
 
                     if ($facture->isLoaded()) {
                         if ($editable_only) {
-                            if (!$facture->isEditable()) {
+                            if ((int) $facture->getData('fk_statut') !== Facture::STATUS_DRAFT) {
                                 continue;
                             }
 
@@ -725,6 +725,18 @@ class Bimp_Commande extends BimpComm
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
             if ($line->isLoaded()) {
+                $max_qty = (float) $line->qty - (float) $line->getBilledQty();
+                if ($id_facture) {
+                    $facture_data = $line->getFactureData($id_facture);
+                    if (isset($facture_data['qty'])) {
+                        $max_qty += (float) $facture_data['qty'];
+                    }
+                }
+
+                if (!$max_qty) {
+                    continue;
+                }
+
                 $product = null;
 
                 if ((int) $line->getData('type') === ObjectLine::LINE_PRODUCT) {
@@ -1835,6 +1847,7 @@ class Bimp_Commande extends BimpComm
         }
 
         foreach ($lines_qties as $id_line => $line_qty) {
+            $update_line = false;
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
             if (BimpObject::objectLoaded($line)) {
@@ -1847,17 +1860,7 @@ class Bimp_Commande extends BimpComm
                             'linked_id_object'   => (int) $line->id
                                 ), true);
 
-                if (BimpObject::objectLoaded($fac_line)) {
-                    $fac_line->qty = (float) $line_qty;
-
-                    $fac_line_warnings = array();
-                    $fac_line_errors = $fac_line->update($fac_line_warnings);
-                    $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
-
-                    if (count($fac_line_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
-                    }
-                } else {
+                if (!BimpObject::objectLoaded($fac_line)) {
                     // Création de la ligne de facture: 
                     $fac_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
                     $fac_line->validateArray(array(
@@ -1911,7 +1914,10 @@ class Bimp_Commande extends BimpComm
                             }
                         }
                     }
+                } else {
+                    $update_line = true;
                 }
+
                 if (!count($fac_line_errors)) {
                     // Assignation des équipements à la ligne de facture: 
                     $equipments_set = array();
@@ -1924,11 +1930,26 @@ class Bimp_Commande extends BimpComm
                                     'id_equipment' => (int) $id_equipment
                                 );
                             }
+                            if ($update_line) {
+                                $fac_line->qty = count($line_equipments);
+                            }
                         }
 
                         $eq_errors = $fac_line->setEquipments($line_equipments, $equipments_set);
                         if (count($eq_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Ligne n°' . $line->getData('position'));
+                        }
+
+                        if ($update_line) {
+                            $fac_line->qty = (float) $line_qty;
+
+                            $fac_line_warnings = array();
+                            $fac_line_errors = $fac_line->update($fac_line_warnings);
+                            $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
+
+                            if (count($fac_line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
+                            }
                         }
                     }
 
@@ -1959,135 +1980,6 @@ class Bimp_Commande extends BimpComm
     }
 
     // Actions:
-
-    public function actionRemoveOrderLines($data, &$success)
-    {
-        $success = 'Produits retirés de la commande avec succès';
-        $errors = array();
-        $warnings = array();
-
-        return array(
-            'errors'   => $errors,
-            'warnings' => $warnings
-        );
-    }
-
-    public function actionCreateFacture($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Création de la facture effectuée avec succès';
-        $success_callback = '';
-
-        $id_shipment = (isset($data['id_shipment']) ? (int) $data['id_shipment'] : null);
-        $cond_reglement = (isset($data['cond_reglement']) ? (int) $data['cond_reglement'] : 0);
-        $id_account = (isset($data['id_account']) ? (int) $data['id_account'] : 0);
-        $remises = (isset($data['id_remises_list']) ? $data['id_remises_list'] : array());
-        $public_note = (isset($data['note_public']) ? $data['note_public'] : '');
-        $private_note = (isset($data['note_private']) ? $data['note_private'] : '');
-
-        if ((is_null($id_account) || !$id_account)) {
-            $errors[] = 'Compte financier absent';
-        }
-
-        if ((is_null($id_shipment) || !$id_shipment) && !(int) $this->getData('id_facture')) {
-            $success_callback = 'bimp_reloadPage();';
-        }
-
-        $errors = $this->createFactureOld($id_shipment, $cond_reglement, $id_account, $remises, $public_note, $private_note);
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
-
-    public function actionAddLine($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = '';
-        $success_callback = 'bimp_reloadPage();';
-        $success = 'Produit / service ajouté à la commande avec succès - ' . $data['qty'];
-
-        if (!isset($data['id_product']) || !$data['id_product']) {
-            $errors[] = 'Produit absent';
-        } else {
-            $id_product = (int) $data['id_product'];
-        }
-
-        if (!isset($data['id_fournisseur_price']) || !$data['id_fournisseur_price']) {
-            $errors[] = 'Prix fournisseur absent';
-        } else {
-            $id_fournisseur_price = (int) $data['id_fournisseur_price'];
-        }
-
-        if (isset($data['qty'])) {
-            $qty = (int) $data['qty'];
-        } else {
-            $qty = 1;
-        }
-
-        if (isset($data['desc'])) {
-            $desc = $data['desc'];
-        } else {
-            $desc = '';
-        }
-
-        if (isset($data['reduc'])) {
-            $remise_percent = $data['reduc'];
-        } else {
-            $remise_percent = 0;
-        }
-
-        if (!isset($data['limited']) || !(int) $data['limited']) {
-            $data['date_start'] = '';
-            $data['date_end'] = '';
-        }
-
-        $errors = $this->addOrderLine($id_product, $qty, $desc, $id_fournisseur_price, $remise_percent, $data['date_start'], $data['date_end']);
-
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
-
-    public function actionValidateFacture($data, &$success)
-    {
-        $errors = array();
-        $warnings = array();
-        $success = 'Facture validée avec succès';
-        $success_callback = 'bimp_reloadPage();';
-
-        if (!$this->isLoaded()) {
-            $errors[] = 'ID de la commande absent';
-        } elseif (!(int) $this->getData('id_facture')) {
-            $errors[] = 'Aucune facture enregistrée pour cette commande';
-        } else {
-            $facture = $this->getChildObject('facture');
-            if (!BimpObject::objectLoaded($facture)) {
-                $errors[] = 'Facture d\'ID ' . $this->getData('id_facture') . ' non trouvée';
-            } elseif ((int) $facture->getData('fk_statut') > 0) {
-                $errors[] = 'Cette facture a déjà été validée';
-            } else {
-                global $user, $langs;
-
-                if ($facture->dol_object->validate($user) <= 0) {
-                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), 'Echec de la validation de la facture');
-                }
-
-                $facture->dol_object->generateDocument('bimpfact', $langs);
-            }
-        }
-        return array(
-            'errors'           => $errors,
-            'warnings'         => $warnings,
-            'success_callback' => $success_callback
-        );
-    }
 
     public function actionValidate($data, &$success)
     {
@@ -2247,12 +2139,17 @@ class Bimp_Commande extends BimpComm
                     $id_client = isset($data['id_client']) ? $data['id_client'] : null;
                     $id_contact = isset($data['id_contact']) ? $data['id_contact'] : null;
                     $id_cond_reglement = isset($data['id_cond_reglement']) ? $data['id_cond_reglement'] : null;
-                    $id_facture = $this->createFacture($errors, $id_client, $id_contact, $id_cond_reglement);
+                    $id_account = isset($data['id_account']) ? (int) $data['id_account'] : null;
+                    $remises = isset($data['id_remises_list']) ? (int) $data['id_remises_list'] : array();
+                    $note_public = isset($data['note_public']) ? (int) $data['note_public'] : '';
+                    $note_private = isset($data['note_private']) ? (int) $data['note_private'] : '';
+                    
+                    $id_facture = $this->createFacture($errors, $id_client, $id_contact, $id_cond_reglement, $id_account, $note_public, $note_private);
 
                     // Ajout des lignes à la facture: 
                     if ($id_facture && !count($errors)) {
                         $lines_errors = $this->addLinesToFacture($id_facture, $lines_qties, $lines_equipments, false);
-                        
+
                         if (count($lines_errors)) {
                             $warnings[] = BimpTools::getMsgFromArray($lines_errors, 'Erreurs lors de l\'ajout des lignes à la facture');
                         }
@@ -2356,6 +2253,141 @@ class Bimp_Commande extends BimpComm
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+    
+    // Actions obsolètes: 
+    
+    public function actionRemoveOrderLines($data, &$success)
+    {
+        $success = 'Produits retirés de la commande avec succès';
+        $errors = array();
+        $warnings = array();
+
+        $errors[] = 'Action obsolète';
+        
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
+    public function actionCreateFacture($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        
+        $errors[] = 'Action obsolète';
+//        $success = 'Création de la facture effectuée avec succès';
+//        $success_callback = '';
+//
+//        $id_shipment = (isset($data['id_shipment']) ? (int) $data['id_shipment'] : null);
+//        $cond_reglement = (isset($data['cond_reglement']) ? (int) $data['cond_reglement'] : 0);
+//        $id_account = (isset($data['id_account']) ? (int) $data['id_account'] : 0);
+//        $remises = (isset($data['id_remises_list']) ? $data['id_remises_list'] : array());
+//        $public_note = (isset($data['note_public']) ? $data['note_public'] : '');
+//        $private_note = (isset($data['note_private']) ? $data['note_private'] : '');
+//
+//        if ((is_null($id_account) || !$id_account)) {
+//            $errors[] = 'Compte financier absent';
+//        }
+//
+//        if ((is_null($id_shipment) || !$id_shipment) && !(int) $this->getData('id_facture')) {
+//            $success_callback = 'bimp_reloadPage();';
+//        }
+//
+//        $errors = $this->createFactureOld($id_shipment, $cond_reglement, $id_account, $remises, $public_note, $private_note);
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionAddLine($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = 'bimp_reloadPage();';
+        $success = 'Produit / service ajouté à la commande avec succès - ' . $data['qty'];
+
+        if (!isset($data['id_product']) || !$data['id_product']) {
+            $errors[] = 'Produit absent';
+        } else {
+            $id_product = (int) $data['id_product'];
+        }
+
+        if (!isset($data['id_fournisseur_price']) || !$data['id_fournisseur_price']) {
+            $errors[] = 'Prix fournisseur absent';
+        } else {
+            $id_fournisseur_price = (int) $data['id_fournisseur_price'];
+        }
+
+        if (isset($data['qty'])) {
+            $qty = (int) $data['qty'];
+        } else {
+            $qty = 1;
+        }
+
+        if (isset($data['desc'])) {
+            $desc = $data['desc'];
+        } else {
+            $desc = '';
+        }
+
+        if (isset($data['reduc'])) {
+            $remise_percent = $data['reduc'];
+        } else {
+            $remise_percent = 0;
+        }
+
+        if (!isset($data['limited']) || !(int) $data['limited']) {
+            $data['date_start'] = '';
+            $data['date_end'] = '';
+        }
+
+        $errors = $this->addOrderLine($id_product, $qty, $desc, $id_fournisseur_price, $remise_percent, $data['date_start'], $data['date_end']);
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
+        );
+    }
+
+    public function actionValidateFacture($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Facture validée avec succès';
+        $success_callback = 'bimp_reloadPage();';
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la commande absent';
+        } elseif (!(int) $this->getData('id_facture')) {
+            $errors[] = 'Aucune facture enregistrée pour cette commande';
+        } else {
+            $facture = $this->getChildObject('facture');
+            if (!BimpObject::objectLoaded($facture)) {
+                $errors[] = 'Facture d\'ID ' . $this->getData('id_facture') . ' non trouvée';
+            } elseif ((int) $facture->getData('fk_statut') > 0) {
+                $errors[] = 'Cette facture a déjà été validée';
+            } else {
+                global $user, $langs;
+
+                if ($facture->dol_object->validate($user) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($facture->dol_object), 'Echec de la validation de la facture');
+                }
+
+                $facture->dol_object->generateDocument('bimpfact', $langs);
+            }
+        }
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

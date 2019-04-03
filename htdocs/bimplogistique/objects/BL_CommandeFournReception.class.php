@@ -155,9 +155,28 @@ class BL_CommandeFournReception extends BimpObject
 
             foreach ($lines_data as $line_data) {
                 $line = $line_data['line'];
+                $isSerialisable = false;
+
+                $product = $line->getProduct();
+                if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
+                    $isSerialisable = true;
+                }
+
                 $html .= '<tr>';
+                
+                // Desc: 
                 $html .= '<td>' . $line->displayLineData('desc') . '</td>';
-                $html .= '<td>' . $line_data['qty'] . '</td>';
+                
+                // Qté: 
+                $html .= '<td>';
+//                if ($isSerialisable) {
+                    $html .= $line_data['qty'];
+//                } else {
+                    // todo: rendre les quantités éditables en controllant les quantités min et max notamment en fonction des résas de la ligne de commande client associée. 
+//                }
+                $html .= '</td>';
+                
+                // PA HT: 
                 $html .= '<td>';
                 foreach ($line_data['pa_ht'] as $pa_ht => $qty) {
                     if ((float) $qty !== (float) $line_data['qty']) {
@@ -166,6 +185,8 @@ class BL_CommandeFournReception extends BimpObject
                     $html .= BimpTools::displayMoneyValue((float) $pa_ht) . '<br/>';
                 }
                 $html .= '</td>';
+                
+                // TVA TX: 
                 $html .= '<td>';
                 foreach ($line_data['tva_tx'] as $tva_tx => $qty) {
                     if ((float) $qty !== (float) $line_data['qty']) {
@@ -174,16 +195,17 @@ class BL_CommandeFournReception extends BimpObject
                     $html .= BimpTools::displayFloatValue((float) $tva_tx) . '%<br/>';
                 }
                 $html .= '</td>';
-                $html .= '<td>';
                 
-                $product = $line->getProduct();
-                if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
-                foreach ($line_data['equipments'] as $id_equipment) {
-                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                    if (BimpObject::objectLoaded($equipment)) {
-                        $html .= $equipment->getNomUrl(1, 1, 1) . '<br/>';
+                // Equipements: 
+                $html .= '<td>';
+
+                if ($isSerialisable) {
+                    foreach ($line_data['equipments'] as $id_equipment) {
+                        $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                        if (BimpObject::objectLoaded($equipment)) {
+                            $html .= $equipment->getNomUrl(1, 1, 1) . '<br/>';
+                        }
                     }
-                }
                 } else {
                     $html .= '<span class="warning">Non sérialisable</span>';
                 }
@@ -309,7 +331,7 @@ class BL_CommandeFournReception extends BimpObject
                     }
                 }
             }
-            
+
             $commande->checkReceptionStatus();
         }
 

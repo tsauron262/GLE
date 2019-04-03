@@ -412,6 +412,8 @@ i.iconRight {
 
 .panel {
     .panel-body {
+        overflow-x: auto;
+        
         .beforePanelContainer {
             margin-bottom: 10px;
         }

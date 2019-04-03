@@ -235,10 +235,6 @@ if ($userClient->isLoged()) {
                 </div>
             </div>
         </body>
-        
-        <script src="views/js/bootstrap.min.js" type="text/javascript"></script>
-        <script src="views/js/chartist.min.js"></script>
-        <script src="views/js/bootstrap-notify.js"></script>
         <script src="views/js/light-bootstrap-dashboard.js?v=1.4.0"></script>
         <script src="views/js/demo.js"></script>
     </html>

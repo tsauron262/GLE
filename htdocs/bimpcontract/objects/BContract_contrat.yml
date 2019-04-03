@@ -1,0 +1,260 @@
+# Contrat hérite de bimpComm
+extends: 
+    module: bimpcommercial
+    object_name: BimpComm
+
+header_btn: 
+    callback: getActionsButtons
+
+# Utilisation de l'object dolibarr contrat
+dol_object: 
+    instance: 
+        dol_object: 
+            module: contrat
+            file: contrat
+
+objects:
+    lines:
+        instance:
+            bimp_object: BContract_contratLine
+    
+    files:
+        relation: hasMany
+        delete: 1
+        instance:
+            bimp_object:
+                module: bimpcore
+                name: BimpFile
+        list: 
+            filters:
+                parent_module: bimpcontract
+                parent_object_name: BContract_contrat
+                deleted: 0
+        add_form: 
+            name: upload
+            values:
+                fields: 
+                    parent_module: bimpcontract
+                    parent_object_name: BContract_contrat
+
+force_extrafields_update: 1
+
+table: contrat
+controller: contrat
+icon: fas_file
+list_page_url: 
+    controller: contrat
+
+labels: 
+    name: contrat
+
+fields:
+    # Champs du contrat
+    ref: 
+        label: Référence
+        type: string
+    fk_soc:
+        request: id_client
+    datec:
+        label: Date du contrat
+        type: date
+        dol_prop: date_contrat
+    statut:
+        label: Statut
+        type: int
+        values:
+            array: status_list
+    fk_cond_reglement: unset
+        
+            
+    # Extrafields
+    date_start:
+        label: Date de début
+        type: date
+        dol_extra_field: 1
+    duree_mois:
+        label: Durée en mois
+        type: qty
+        dol_extra_field: 1
+    periodicity:
+        label: Périodicité de facturation
+        type: int
+        dol_extra_field: 1
+        values:
+            array: period
+    gti:
+        label: Delais d'intervention
+        type: int
+        dol_extra_field: 1
+        values:
+            array: gti
+    syntec:
+        label: Indice SYNTEC appliqué si renouvellement
+        type: float
+        dol_extra_field: 1
+    tacite:
+        label: Renouvellement
+        type: int
+        dol_extra_field: 1
+        values:
+            array: renouvellement
+    denounce:
+        label: Contrat dénoncé
+        type: int
+        dol_extra_field: 1
+        values:
+            array: denounce
+    moderegl:
+        label: Mode de règlement
+        type: int
+        dol_extra_field: 1
+        values:
+            array: mode_reglement
+        
+        
+
+fields_tables:
+    infos:
+        rows:
+            - field: ref
+              label: Référence du contrat
+              edit: 0
+            - field: date_start
+              edit: 0
+            - field: duree_mois
+              edit: 0
+            - label: Date de fin
+              value: 
+                  callback:
+                      method: displayEndDate
+                      params:
+                          - value:
+                              callback:
+                                  method: getData
+                                  params:
+                                      - date_start
+                          - value:
+                              callback:
+                                  method: getData
+                                  params:
+                                      - duree_mois
+            - field: periodicity
+              edit: 0
+            - field: moderegl
+              edit: 0
+            - field: gti
+              edit: 0
+            - field: syntec
+              edit: 0
+            - field: tacite
+              edit: 0
+            - field: denounce
+              edit: 0
+    client: 
+        rows: 
+            - field: fk_soc
+              display: card
+            - label: Remises client
+              value: 
+                  callback: displayRemisesClient
+              
+                              
+                            
+    
+lists: 
+    default: 
+        title: Contrat
+        icon: fas_file-contract
+        list_filters: 
+            callback: getListFilters
+        sort_field: datec
+        sort_way: desc
+        n: 20
+        add_form_name: create_contrat
+        add_btn_label: Créer un nouveau contrat
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 0
+        modal_view: fiche_contrat
+        page_btn: 1
+        cols: 
+            ref: 
+                field: ref
+            statut:
+                field: statut
+            fk_soc:
+                field: fk_soc
+                display: nom_url
+            datec:
+                field: datec
+
+forms:
+    edit_contrat:
+        rows:
+            - field: ref
+              edit: 0
+            - custom: 1
+              input_name: id_user_commercial
+              label: Commercial suivi contrat
+              input: 
+                  type: search_user
+              value: 
+                  prop: 
+                      object: 
+                          global: user
+                      name: id
+            - field: fk_soc
+              edit: 0
+            - field: date_start
+            - field: duree_mois
+            - field: periodicity
+            - field: moderegl
+            - field: gti
+            - field: syntec
+            - field: tacite
+            - field: denounce
+            
+        
+views:
+    fiche_contrat:
+        title:
+            callback: displayRef
+        objects_change_reload: BContract_contract
+        delete_btn: 1
+        edit_form: edit_contrat
+        footer_extra_btn: 
+            callback: getActionsButtons
+        rows:
+            - cols: 
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  rows:                        
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: infos
+                - type: rows
+                  col_lg: 6
+                  col_md: 6
+                  rows:
+                      - cols:
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table:
+                                name: client
+    file:
+        title: Fichiers joint
+        rows:
+            - cols: 
+                - type: rows
+                  col_md: 12
+                  col_lg: 12
+                  rows:
+                      - cols:
+                          - type: list
+                            list: 
+                               children: files
+        
+        

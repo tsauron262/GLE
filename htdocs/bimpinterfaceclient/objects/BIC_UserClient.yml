@@ -57,10 +57,12 @@ fields:
             array: status
     renew_required:
         label: Doit changer sont mot de passe
-        type: int
+        type: bool
     lang:
         label: Langue par defaut
-        type: string
+        type: int
+        values: 
+            array: langs_list
         
 
 lists:
@@ -84,6 +86,16 @@ lists:
                 field: role
             status:
                 field: status
+    full:
+        extends: default
+        edit_form: editFull
+        cols:
+            attached_societe:
+                field: attached_societe
+            renew_required:
+                field: renew_required
+            lang:
+                field: lang
 
 fields_table:
     default:
@@ -118,4 +130,14 @@ forms:
             - field: email
             - field: role
             - field: status
+            - field: lang
+    editFull:
+        extends: edit
+        rows:
+            - field: email
+            - field: role
+            - field: status
+            - field: lang
+            - field: attached_societe
+            - field: renew_required
         

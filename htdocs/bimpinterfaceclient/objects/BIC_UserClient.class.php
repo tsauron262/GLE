@@ -8,6 +8,7 @@ class BIC_UserClient extends BimpObject {
     public $loginUser = "client_user";
     public $init = false;
     public $ref = 'hjgfghj';
+    public static $langs_list = array("fr_FR", 'en_US', 'de_DE', 'es_ES');
     # Constantes
 
     CONST USER_CLIENT_ROLE_ADMIN = 1;
@@ -194,7 +195,8 @@ class BIC_UserClient extends BimpObject {
     public function switch_lang($new_lang) {
         global $db;
         $bimp = new BimpDb($db);
-        $bimp->update('bic_user', Array('lang' => $new_lang), 'id = ' . $this->id);
+        $this->updateField("lang", $new_lang);
+//        $bimp->update('bic_user', Array('lang' => $new_lang), 'id = ' . $this->id);
         echo '<script>window.location.href = "' . DOL_URL_ROOT . '/bimpinterfaceclient/"</script>';
     }
 
@@ -221,7 +223,6 @@ class BIC_UserClient extends BimpObject {
             }
         }
         $this->init = true;
-        $this->runContxte();
     }
 
     public function isLoged() {

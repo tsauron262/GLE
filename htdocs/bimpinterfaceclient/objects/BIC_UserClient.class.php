@@ -264,8 +264,13 @@ class BIC_UserClient extends BimpObject {
                 $instance = null;
             }
             return $return;
+        } else {
+            foreach ($list as $on_contrat) {
+                $return[$on_contrat['rowid']] = $on_contrat['ref'];
+            }
         }
-        return $list;
+        
+        return $return;
     }
 
     public function isLoged() {

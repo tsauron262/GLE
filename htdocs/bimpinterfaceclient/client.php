@@ -34,7 +34,7 @@ elseif ($_REQUEST['action'] == 'deconnexion') {
 // Si le client est connecter
 $userClient->init();
 if ($userClient->isLoged()) {
-    
+
     if (isset($_REQUEST['lang'])) {
         $userClient->switch_lang($_REQUEST['lang']);
     }
@@ -45,7 +45,9 @@ if ($userClient->isLoged()) {
         $content_request = $_REQUEST['page'];
     }
     $couverture = $userClient->my_soc_is_cover();
-        //$couverture = Array();
+    //$couverture = Array();
+    BimpCore::displayHeaderFiles();
+    define('BIMP_NO_HEADER', 1);
     ?>
 
     <!doctype html>
@@ -63,9 +65,9 @@ if ($userClient->isLoged()) {
             <meta name="viewport" content="width=device-width" />
             <link href="views/css/light-bootstrap-dashboard.css?v=1.4.0" rel="stylesheet"/>
             <link href="views/css/demo.css" rel="stylesheet" />
-            
+
             <!-- DOL REQUIRE -->
-         
+
             <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
             <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
             <link href="views/css/pe-icon-7-stroke.css" rel="stylesheet" />
@@ -82,29 +84,29 @@ if ($userClient->isLoged()) {
                                 </a>
 
                             </li>
-                                <li <?= ($content_request == 'ticket') ? 'class="active"' : "" ?> >
-                                    <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?page=ticket' ?>">
-                                        <i class="pe-7s-paperclip"></i>
-                                        <p><?= $langs->trans('menuTickets') ?></p>
-                                    </a>
-                                </li>
+                            <li <?= ($content_request == 'ticket') ? 'class="active"' : "" ?> >
+                                <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?fc=ticket' ?>">
+                                    <i class="pe-7s-paperclip"></i>
+                                    <p><?= $langs->trans('menuTickets') ?></p>
+                                </a>
+                            </li>
                             <?php
                             if ($userClient->i_am_admin()) {
                                 ?>
                                 <li <?= ($content_request == 'contrat') ? 'class="active"' : "" ?> >
-                                    <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?page=contrat' ?>">
+                                    <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?fc=contrat' ?>">
                                         <i class="pe-7s-graph"></i>
                                         <p><?= $langs->trans('menuContrat') ?></p>
                                     </a>
                                 </li>
                                 <li <?= ($content_request == 'facture') ? 'class="active"' : "" ?>>
-                                    <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?page=facture' ?>">
+                                    <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?fc=facture' ?>">
                                         <i class="pe-7s-file"></i>
                                         <p><?= $langs->trans('menuFacture') ?></p>
                                     </a>
                                 </li>
                                 <li <?= ($content_request == 'devis') ? 'class="active"' : "" ?>>
-                                    <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?page=devis' ?>">
+                                    <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?fc=devis' ?>">
                                         <i class="pe-7s-file"></i>
                                         <p><?= $langs->trans('menuDevis') ?></p>
                                     </a>
@@ -113,7 +115,7 @@ if ($userClient->isLoged()) {
                                 //if (count($couverture) > 0) {
                                 ?>
                                 <li <?= ($content_request == 'users') ? 'class="active"' : "" ?>>
-                                    <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?page=users' ?>">
+                                    <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?fc=users' ?>">
                                         <i class="pe-7s-users"></i>
                                         <p><?= $langs->trans('menuUser') ?></p>
                                     </a>
@@ -162,15 +164,13 @@ if ($userClient->isLoged()) {
                                 </ul>
                                 <ul class="nav navbar-nav navbar-right">
                                     <?php
-                                    foreach(BIC_UserClient::$langs_list as $idT => $valT){
+                                    foreach (BIC_UserClient::$langs_list as $idT => $valT) {
                                         echo '
                                     <div class="css-tooltip bottom">
-                                        <li><a href="?lang='.$idT.'" class=""><img width="20px" src="'.DOL_URL_ROOT. '/bimpinterfaceclient/views/img/lang/'.strtolower($valT).'.png" /></a></li>
-                                        <span class="tt-content">'.$langs->trans('menuLang-'.$valT).'</span>
+                                        <li><a href="?lang=' . $idT . '" class=""><img width="20px" src="' . DOL_URL_ROOT . '/bimpinterfaceclient/views/img/lang/' . strtolower($valT) . '.png" /></a></li>
+                                        <span class="tt-content">' . $langs->trans('menuLang-' . $valT) . '</span>
                                     </div>';
                                     }
-                                    
-                                    
                                     ?>
 
                                 </ul>
@@ -181,25 +181,12 @@ if ($userClient->isLoged()) {
                     </nav>
                     <div class="content" style="background: rgba(203, 203, 210, 0.15)">
                         <div class="container-fluid">
-                            <?php
-                            $page = DOL_DOCUMENT_ROOT . '/bimpinterfaceclient/views/' . GETPOST('page') . '.php';
-                            //die($page);
-                            if (!$request)
-                                $page = DOL_DOCUMENT_ROOT . '/bimpinterfaceclient/views/accueil.php';
-                            if (file_exists($page)) {
-                                if ($_REQUEST['page'] == 'login') {
-                                    echo BimpRender::renderAlerts("Vous ne pouvez pas accéder à la page de connexion car vous êtes déjà connecté ", 'warning', false);
-                                } else {
-                                    if (!$userClient->i_am_admin() && in_array($_REQUEST['page'], $page_need_admin)) {
-                                        echo BimpRender::renderAlerts("Vous n'avez pas l'autorisation d'accéder à la page " . $_REQUEST['page'], 'danger', false);
-                                    } else {
-                                        include $page;
-                                    }
-                                }
-                            } else {
-                                echo BimpRender::renderAlerts($langs->trans("quatre_zero_quatre", $_REQUEST['page']), 'info', false);
-                            }
-                            ?>
+    <?php
+
+    $nameController = $_REQUEST['fc'] ? $_REQUEST['fc'] : 'index';
+    $controller = BimpController::getInstance('bimpinterfaceclient', $nameController);
+    $controller->display();
+    ?>
                         </div>
                     </div>
                     <script>
@@ -218,9 +205,9 @@ if ($userClient->isLoged()) {
                                 <ul>
                                     <li>
                                         <a href="#">
-                                            <?php
-                                            print($mysoc->address . ", " . $mysoc->zip . " " . $mysoc->town);
-                                            ?>
+    <?php
+    print($mysoc->address . ", " . $mysoc->zip . " " . $mysoc->town);
+    ?>
                                         </a>
                                     </li>
 

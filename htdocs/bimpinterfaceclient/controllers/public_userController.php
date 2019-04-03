@@ -1,6 +1,6 @@
 <?php
 
-class userController extends BimpController {
+class public_userController extends BimpController {
 
     public function renderHtml() {
         global $userClient;

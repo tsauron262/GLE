@@ -76,7 +76,9 @@ lists:
         delete_btn: 1
         #page_btn: 1
         edit_form: edit
-        add_object_row: 1
+        add_object_row: 0
+        add_btn: 1
+        add_form_name: edit
         update_btn: 1
         edit_btn: 1
         cols:
@@ -131,6 +133,8 @@ forms:
             - field: role
             - field: status
             - field: lang
+            - field: attached_societe
+              hidden: 1
     editFull:
         extends: edit
         rows:

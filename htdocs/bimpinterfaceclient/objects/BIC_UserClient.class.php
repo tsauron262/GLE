@@ -37,8 +37,8 @@ class BIC_UserClient extends BimpObject {
         return parent::__construct($module, $object_name);
     }
     
-    public function getFullName(){
-        return "ll";
+    public function getName(){
+        return $this->getData("email");
     }
 
     public function renderHeaderStatusExtra() {
@@ -256,7 +256,7 @@ class BIC_UserClient extends BimpObject {
     }
 
     public function isLoged() {
-        if ($_SESSION['userClient'] && BimpTools::isClientUserContxte()) {
+        if ($_SESSION['userClient'] && BimpTools::getContext() == "public") {
             
             if ($this->getData('status') == self::USER_CLIENT_STATUS_INACTIF) {
 

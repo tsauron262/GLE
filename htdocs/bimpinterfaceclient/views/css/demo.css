@@ -1,0 +1,190 @@
+@media (min-width: 992px){
+    .typo-line{
+        padding-left: 140px;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .typo-line .category{
+        transform: translateY(-50%);
+        top: 50%;
+        left: 0px;
+        position: absolute;
+    }
+}
+
+.all-icons [class*="pe-"]{
+    font-size: 40px;
+}
+.all-icons input{
+    border: 0;
+}
+.all-icons .font-icon-detail{
+    text-align: center;
+    padding: 45px 0px 30px;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    margin: 15px 0;
+}
+.all-icons .font-icon-detail input{
+    margin: 25px auto 0;
+    width: 100%;
+    text-align: center;
+    display: block;
+    color: #aaa;
+    font-size: 13px;
+}
+
+#map{
+    position:relative;
+    width:100%;
+    height: calc(100% - 60px);
+}
+
+.places-buttons .btn{
+    margin-bottom: 30px
+}
+.sidebar .nav > li.active-pro{
+    position: absolute;
+    width: 100%;
+    bottom: 10px;
+}
+.sidebar .nav > li.active-pro a{
+    background: rgba(255, 255, 255, 0.14);
+    opacity: 1;
+    color: #FFFFFF;
+}
+
+.table-upgrade td:nth-child(2),
+.table-upgrade td:nth-child(3){
+    text-align: center;
+}
+
+@media all and (max-width: 991px)  {
+    .sidebar .nav > li.active-pro{
+        position: initial;
+    }
+}
+
+#passwd {
+    position: fixed;
+    z-index:9999;
+    top:0;left:35%;right:35%;
+    width:30%;
+    text-align: center;
+    background-color: white;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    box-shadow: 0 0 12px 0 rgba(0,0,0,.12);
+    display:none;
+}
+
+.close-passwd {
+    position: fixed;
+    right:36%;top:10px;
+    display:none;
+}
+
+.css-tooltip {
+  position: relative;
+  margin-top:17px;
+  display: inline-block;
+  cursor:pointer;
+}
+.css-tooltip .tt-content {
+  position: absolute;
+  color: #31708f;
+  background-color: #d9edf7;
+  font-weight: normal;
+  font-size: 12px;
+  z-index: 99999999;
+  box-sizing: border-box;
+  padding: 10px;
+  min-width: 200px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
+  display: none;
+}
+.css-tooltip .tt-content i {
+  position: absolute;
+  overflow: hidden;
+}
+.css-tooltip .tt-content i:after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: #d9edf7;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.5);
+}
+.css-tooltip.top .tt-content {
+  top: -10px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+}
+.css-tooltip.top .tt-content i {
+  top: 100%;
+  left: 50%;
+  margin-left: -12px;
+  width: 24px;
+  height: 12px;
+}
+.css-tooltip.top .tt-content i:after {
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+.css-tooltip.right .tt-content {
+  top: 50%;
+  left: 100%;
+  margin-left: 10px;
+  transform: translate(0, -50%);
+}
+.css-tooltip.right .tt-content i {
+  top: 50%;
+  right: 100%;
+  margin-top: -12px;
+  width: 12px;
+  height: 24px;
+}
+.css-tooltip.right .tt-content i:after {
+  left: 0;
+  top: 50%;
+  transform: translate(50%, -50%) rotate(-45deg);
+}
+.css-tooltip.bottom .tt-content {
+  top: 40px;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+.css-tooltip.bottom .tt-content i {
+  bottom: 100%;
+  left: 50%;
+  margin-left: -12px;
+  width: 24px;
+  height: 12px;
+}
+.css-tooltip.bottom .tt-content i:after {
+  left: 50%;
+  transform: translate(-50%, 50%) rotate(45deg);
+}
+.css-tooltip.left .tt-content {
+  top: 50%;
+  right: 100%;
+  margin-right: 20px;
+  transform: translate(0, -50%);
+}
+.css-tooltip.left .tt-content i {
+  top: 50%;
+  left: 100%;
+  margin-top: -12px;
+  width: 12px;
+  height: 24px;
+}
+.css-tooltip.left .tt-content i:after {
+  left: 0;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+.css-tooltip:hover .tt-content {
+  display: block;
+}

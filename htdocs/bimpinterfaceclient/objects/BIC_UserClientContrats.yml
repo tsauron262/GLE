@@ -1,0 +1,48 @@
+table: bic_user_contrat
+icon: fas_file
+common_fields: 0
+
+parent_id_property: id_user
+parent_object: BIC_UserClient
+
+fields:
+    id_user:
+        label: Utilisateur
+        type: id_parent
+        input:
+            type: hidden
+        required: 1
+    id_contrat:
+        label: Contrat
+        type: int
+        values:
+            callback: getCouverture
+    read_ticket_in_contrat:
+        label: Voir tous les tickets du contrat
+        type: bool
+
+lists:
+    default:
+        object_change_reload: BIC_UserClientContrats
+        title: Liste
+        icon: file
+        checkboxes: 1
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        delete_btn: 1
+        add_object_row: 1  
+        update_btn: 1
+        edit_btn: 1
+        cols:
+            id_contrat:
+                field: id_contrat
+                type: int
+                values:
+                    callback: getCouverture
+            read_ticket_in_contrat:
+                field: read_ticket_in_contrat
+#            valide_contrat:
+#                label: Etat du contrat
+#                type: int
+#                values:

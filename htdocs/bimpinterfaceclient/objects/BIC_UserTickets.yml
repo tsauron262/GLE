@@ -1,0 +1,47 @@
+extends: 
+    module: bimpsupport
+    object_name: BS_Ticket
+
+fields:
+    id_contrat:
+        label: Contrat
+        type: int
+        values:
+            callback: getCouverture
+
+lists:
+    interface_client:
+        title: Tickets support
+        sort_field: date_create
+        sort_way: desc
+        n: 25
+        add_form_name: addUserTicket
+        add_btn_label: Nouveau ticket support
+        edit_btn: 1
+        edit_form: editUserTicket
+        #page_btn: 1
+        cols:
+            id:
+            contrat:
+            status:
+            sujet:
+            date_create:
+
+forms:
+    editUserTicket:
+        rows:
+            - field: id_contrat
+              edit: 0
+            - field: status
+              edit: 0
+            - field: sujet
+            
+    addUserTicket:
+        rows:
+            - field: id_contrat
+              values:
+                  callback: getCouverture
+            - field: sujet
+              required: 1
+            - field: priorite
+            - field: impact

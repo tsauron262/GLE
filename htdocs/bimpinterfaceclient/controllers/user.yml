@@ -1,0 +1,24 @@
+bootstrap: 1
+    
+objects:
+    userClient:
+        instance:
+            module: bimpinterfaceclient
+            bimp_object: BIC_UserClient
+
+sections:
+    - type: list
+      list:
+          panel: 1
+          name: default
+          object: userClient
+#      nav_tabs: 
+#          - id: card
+#            title: Liste des comptes
+#            struct: 
+#                type: list
+#                list: 
+#                    panel: 1
+#                    name: default
+#                    object: userClient
+#           

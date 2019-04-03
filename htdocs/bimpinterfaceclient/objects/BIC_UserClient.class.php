@@ -218,11 +218,31 @@ class BIC_UserClient extends BimpObject {
             if ($user->id < 1)
                 die('Attention ' . $this->loginUser . ' user existe pas');
 
-            if (count($couverture) > 0) {
-                //$this->check_all_attached_contrat($couverture);
-            }
+//            if (count($couverture) > 0) {
+//                //$this->check_all_attached_contrat($couverture);
+//            }
         }
         $this->init = true;
+    }
+    
+    public function getContratVisible($ouvert = false){//todo renvoie les contrat (bimp object visible par le user   viré le global couverture
+        $retour = array();
+        $socContrats = $this->getAllContrats($ouvert);
+        if($this->i_am_admin()){
+            $retour = $socContrats;
+        }
+        else{
+            foreach($socContrats as $contrat){
+                if(1/*on test la visiblité du contrat*/)
+                    $retour[] = $contrat;
+            }
+        }
+        return $retour;
+    }
+    
+    public function getAllContrats($ouvert = false){
+        //renvoie tous les contrat de nottre soc avec suivant $ouvert que les actifs ou tous
+        
     }
 
     public function isLoged() {
@@ -251,7 +271,7 @@ class BIC_UserClient extends BimpObject {
         }
     }
     
-    public function my_soc_is_cover() {
+    public function my_soc_is_cover() {//todo a viré
         global $db;
         $bimp = new BimpDb($db);
         $in_covers = Array();

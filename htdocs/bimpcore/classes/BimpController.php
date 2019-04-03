@@ -22,6 +22,9 @@ class BimpController
         if (is_null($controller)) {
             $controller = BimpTools::getValue('fc', 'index');
         }
+        if(BimpTools::getContext() == "public")
+            $controller = "public_".$controller;
+        
         $controllerClass = $controller . 'Controller';
 
         if (file_exists($dir . '/controllers/' . $controllerClass . '.php')) {

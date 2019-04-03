@@ -40,7 +40,3 @@ CREATE TABLE IF NOT EXISTS `llx_bnf_period` (
   `date_from` date DEFAULT NULL,
   `date_to` date DEFAULT NULL
 ) ENGINE=InnoDB;
-
-ALTER TABLE `llx_bs_sav` CHANGE `system` `system` INT(11) UNSIGNED NOT NULL DEFAULT '0';
-
-ALTER TABLE `llx_bs_sav` ADD `extra_infos` TEXT NOT NULL DEFAULT '' AFTER `resolution`;

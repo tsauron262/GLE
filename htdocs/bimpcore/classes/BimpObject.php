@@ -3537,22 +3537,22 @@ class BimpObject extends BimpCache
     public function can($right){
         switch ($right){
             case "view" :
-                if(BimpTools::isClientUserContxte())
+                if(BimpTools::getContext() == "public")
                     return ($this->canView() && $this->canClientView());
                 else
                     return $this->canView();
             case 'edit' :
-                if(BimpTools::isClientUserContxte())
+                if(BimpTools::getContext() == "public")
                     return ($this->canEdit() && $this->canClientEdit());
                 else
                     return $this->canEdit();
             case "create" :
-                if(BimpTools::isClientUserContxte())
+                if(BimpTools::getContext() == "public")
                     return ($this->canCreate() && $this->canClientCreate());
                 else
                     return $this->canCreate();
             case "delete" :
-                if(BimpTools::isClientUserContxte())
+                if(BimpTools::getContext() == "public")
                     return ($this->canDelete() && $this->canClientDelete());
                 else
                     return $this->canDelete();

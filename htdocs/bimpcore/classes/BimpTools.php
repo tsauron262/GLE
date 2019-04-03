@@ -1666,11 +1666,11 @@ class BimpTools
     }
     
     
-    public static function isClientUserContxte(){
+    public static function getContext(){
         global $userClient;
         if(isset($userClient)){
-            return true;
+            return "public";
         }
-        return false;
+        return "private";
     }
 }

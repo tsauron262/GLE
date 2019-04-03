@@ -15,7 +15,7 @@ class modBimpinterfaceclient extends DolibarrModules
 		// Key text used to identify module (for permissions, menus, etc...)
 		$this->rights_class = 'bimpinterfaceclient';
 
-		$this->family = "BIMP";
+		$this->family = "Bimp";
 		// Module position in the family
 		$this->module_position = 500;
 		// Gives the possibility to the module, to provide his own family info and position of this family (Overwrite $this->family and $this->module_position. Avoid this)

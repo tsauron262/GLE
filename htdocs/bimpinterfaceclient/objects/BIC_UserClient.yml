@@ -141,3 +141,12 @@ forms:
             - field: attached_societe
             - field: renew_required
         
+cards:
+    default:
+        title: nom
+        fields: 
+            - label: Email
+              field: email
+            - label: Societe
+              field: attached_societe
+        view_btn: 1

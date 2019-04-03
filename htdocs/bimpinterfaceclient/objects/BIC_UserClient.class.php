@@ -30,6 +30,16 @@ class BIC_UserClient extends BimpObject {
         self::USER_CLIENT_STATUS_ACTIF => Array('label' => 'Actif', 'classes' => Array('success'), 'icon' => 'check'),
         self::USER_CLIENT_STATUS_INACTIF => Array('label' => 'Inactif', 'classes' => Array('danger'), 'icon' => 'times')
     );
+    
+    public function __construct($module, $object_name) {
+        global $langs;
+        $langs->load('bimp@bimpinterfaceclient');
+        return parent::__construct($module, $object_name);
+    }
+    
+    public function getFullName(){
+        return "ll";
+    }
 
     public function renderHeaderStatusExtra() {
 
@@ -204,9 +214,9 @@ class BIC_UserClient extends BimpObject {
         global $langs;
         return $langs->trans($field);
     }
-
+    
     public function init() {
-        global $user, $langs;
+        global $user;
         if(isset($_SESSION['userClient'])){
             $this->GOT($_SESSION['userClient']);
             $connected_client = $this->id;

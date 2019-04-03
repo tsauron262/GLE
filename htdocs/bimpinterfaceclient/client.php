@@ -39,7 +39,6 @@ if ($userClient->isLoged()) {
         $userClient->switch_lang($_REQUEST['lang']);
     }
     $langs->setDefaultLang(BIC_UserClient::$langs_list[$userClient->getData('lang')]);
-    $langs->load('bimp@bimpinterfaceclient');
     $userClient->runContxte();
     $request = isset($_REQUEST['page']);
     if ($request) {

@@ -90,7 +90,6 @@ class BContract_contrat extends BimpDolObject {
 
     public function displayRef() {
         return $this->getData('ref');
-        
     }
 
     public function displayEndDate($date_start, $duree_mois) {
@@ -114,47 +113,36 @@ class BContract_contrat extends BimpDolObject {
         }
         return $buttons;
     }
-    
+
     public function canClientView() {
         return true;
     }
-    
-    
-//    public function isValide() {
-//        global $db;
-//        $bimp = new BimpDb($db);
-//        $in_covers = Array();
-//        $liste_contrat = $bimp->getRows('contrat', 'fk_soc = ' . $this->getData('attached_societe'));
-//        foreach ($liste_contrat as $contrat) {
-//            $current = new Contrat($db);
-//            $current->fetch($contrat->rowid);
-//            $extra = (object) $current->array_options;
-//
-//            if ($extra->options_date_start) { // Nouveau contrat
-//                $debut = new DateTime();
-//                $fin = new DateTime();
-//                $debut->setTimestamp($extra->options_date_start);
-//                $fin->setTimestamp($extra->options_date_start);
-//                $fin = $fin->add(new DateInterval("P" . $extra->options_duree_mois . "M"));
-//                $fin = $fin->sub(new DateInterval("P1D"));
-//
-//                $fin = strtotime($fin->format('Y-m-d'));
-//                $debut = strtotime($debut->format('Y-m-d'));
-//                $aujourdhui = strtotime(date('Y-m-d'));
-//
-//                if ($fin - $aujourdhui > 0) {
-//                    $in_covers[$current->id] = $current->ref;
-//                }
-//            } else {
-//                foreach ($current->lines as $line) {
-//                    if ($line->statut == 4) {
-//                        $in_covers[$current->id] = $current->ref;
-//                    }
-//                }
-//            }
-//        }
-//        return $in_covers;
-//    }
-    
+
+    public function isValide() {
+        if ($this->getData('date_start') && $this->getData('duree_mois')) { // On est dans les nouveaux contrats
+            $debut = new DateTime();
+            $fin = new DateTime();
+            $Timestamp_debut = strtotime($this->getData('date_start'));
+            $debut->setTimestamp($Timestamp_debut);
+            $fin->setTimestamp($Timestamp_debut);
+            $fin = $fin->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
+            $fin = $fin->sub(new DateInterval("P1D"));
+            $fin = strtotime($fin->format('Y-m-d'));
+            $debut = strtotime($debut->format('Y-m-d'));
+            $aujourdhui = strtotime(date('Y-m-d'));
+            if ($fin - $aujourdhui > 0) {
+                return true;
+            }
+            echo 'Nouveaux contrats <br />';
+        } else { // On est dans les anciens contrats
+            $lines = $this->dol_object->lines; // Changera quand l'objet BContract_contratLine sera OP
+            foreach ($lines as $line) {
+                    if ($line->statut == 4) {
+                        return true;
+                    }
+                }
+        }
+        return false;
+    }
 
 }

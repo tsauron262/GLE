@@ -165,7 +165,7 @@ class BIC_UserClient extends BimpObject {
     
     public function canClientCreate() {
         global $userClient;
-        if($this->getData('status') == self::USER_CLIENT_ROLE_ADMIN)
+        if($userClient->getData('status') == self::USER_CLIENT_ROLE_ADMIN)
             return true;
     }
 
@@ -205,18 +205,20 @@ class BIC_UserClient extends BimpObject {
 
     public function init() {
         global $user, $langs;
-        $this->GOT($_SESSION['userClient']);
-        $connected_client = $this->id;
-        $client = new Societe($this->db->db);
-        $client->fetch($connected_client);
+        if(isset($_SESSION['userClient'])){
+            $this->GOT($_SESSION['userClient']);
+            $connected_client = $this->id;
+            $client = new Societe($this->db->db);
+            $client->fetch($connected_client);
 
-        $user = new User($this->db->db);
-        $user->fetch(null, $this->loginUser);
-        if ($user->id < 1)
-            die('Attention ' . $this->loginUser . ' user existe pas');
-        
-        if (count($couverture) > 0) {
-            //$this->check_all_attached_contrat($couverture);
+            $user = new User($this->db->db);
+            $user->fetch(null, $this->loginUser);
+            if ($user->id < 1)
+                die('Attention ' . $this->loginUser . ' user existe pas');
+
+            if (count($couverture) > 0) {
+                //$this->check_all_attached_contrat($couverture);
+            }
         }
         $this->init = true;
         $this->runContxte();

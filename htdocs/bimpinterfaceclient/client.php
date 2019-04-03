@@ -40,9 +40,9 @@ if ($userClient->isLoged()) {
     }
     $langs->setDefaultLang(BIC_UserClient::$langs_list[$userClient->getData('lang')]);
     $userClient->runContxte();
-    $request = isset($_REQUEST['page']);
+    $request = isset($_REQUEST['fc']);
     if ($request) {
-        $content_request = $_REQUEST['page'];
+        $content_request = $_REQUEST['fc'];
     }
     $couverture = $userClient->my_soc_is_cover();
     //$couverture = Array();
@@ -114,8 +114,8 @@ if ($userClient->isLoged()) {
                                 <?php
                                 //if (count($couverture) > 0) {
                                 ?>
-                                <li <?= ($content_request == 'users') ? 'class="active"' : "" ?>>
-                                    <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?fc=users' ?>">
+                                <li <?= ($content_request == 'user') ? 'class="active"' : "" ?>>
+                                    <a href="<?= DOL_URL_ROOT . '/bimpinterfaceclient/?fc=user' ?>">
                                         <i class="pe-7s-users"></i>
                                         <p><?= $langs->trans('menuUser') ?></p>
                                     </a>

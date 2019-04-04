@@ -157,9 +157,6 @@ class BIC_UserClient extends BimpObject {
 
     public function canClientView() {
         global $userClient;
-        if (!defined('CONTEXTE_CLIENT')) {
-            return false;
-        }
         if (!$this->isLoaded()) {
             return true;
         }

@@ -15,7 +15,7 @@ objects:
                 module: societe
                 file: societe
                 id_object:
-                    field_value: attachad_societe
+                    field_value: attached_societe
 
 header_btn: 
     callback: getActionsButtons

@@ -1,5 +1,6 @@
 table: bic_user
 icon: fas_user
+controller: pageUser
 
 objects:
     user_client_contrat:
@@ -7,6 +8,14 @@ objects:
         delete: 0
         instance:
             bimp_object: BIC_UserClientContrats
+    
+    societe:
+        instance:
+            dol_object:
+                module: societe
+                file: societe
+                id_object:
+                    field_value: attachad_societe
 
 header_btn: 
     callback: getActionsButtons
@@ -36,7 +45,8 @@ fields:
         type: password
     attached_societe:
         label: Société du compte
-        type: string
+        type: id_object
+        object: societe
     role:
         label: 
             callback:
@@ -74,7 +84,7 @@ lists:
         sort_way: desc
         n: 10
         delete_btn: 1
-        #page_btn: 1
+        page_btn: 1
         edit_form: edit
         add_object_row: 0
         add_btn: 1
@@ -88,6 +98,8 @@ lists:
                 field: role
             status:
                 field: status
+            attached_societe:
+                field: attached_societe
     full:
         extends: default
         edit_form: editFull
@@ -98,7 +110,7 @@ lists:
                 field: renew_required
             lang:
                 field: lang
-
+                
 fields_table:
     default:
         title: Status

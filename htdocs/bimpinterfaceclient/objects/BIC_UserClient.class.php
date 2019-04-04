@@ -252,7 +252,25 @@ class BIC_UserClient extends BimpObject {
     
     public function getAllContrats($ouvert = false){
         //renvoie tous les contrat de nottre soc avec suivant $ouvert que les actifs ou tous
+        $contrat = $this->getInstance('bimpcontract', 'BContract_contrat');
+        $list = $contrat->getList(Array('fk_soc' => $this->getData('attached_societe')));
+        if($ouvert) {
+            $return = Array();
+            foreach($list as $on_contrat){
+                $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $on_contrat['rowid']);
+                if($instance->isValide()) {
+                    $return[$on_contrat['rowid']] = $on_contrat['ref'];
+                }
+                $instance = null;
+            }
+            return $return;
+        } else {
+            foreach ($list as $on_contrat) {
+                $return[$on_contrat['rowid']] = $on_contrat['ref'];
+            }
+        }
         
+        return $return;
     }
 
     public function isLoged() {

@@ -4,6 +4,7 @@ objects:
     tickets:
         instance:
             bimp_object: BIC_UserClientTickets
+            
 
 sections:
     - type: tabs

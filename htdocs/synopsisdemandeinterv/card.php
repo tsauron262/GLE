@@ -48,6 +48,12 @@ if (!isset($_REQUEST['action']))
 
 
 require("./pre.inc.php");
+
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+require_once(DOL_DOCUMENT_ROOT."/bimpfichinter/objects/Bimp_Demandinter.class.php");
+$htmlRedirect = Bimp_Demandinter::redirect(false, $_REQUEST['id']);
+
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
@@ -586,6 +592,9 @@ $js .= "<style> textarea{ width: 80%; height: 10em;}</style>";
 //  //launchRunningProcess($db,'synopsisdemandeinterv',$_GET['id']);
 
 llxHeader($js, "Demande Intervention");
+
+echo $htmlRedirect;
+
 if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'setEffUser') {
     $tmpUser = new User($db);
     $tmpUser->id = $_REQUEST['EffUserid'];

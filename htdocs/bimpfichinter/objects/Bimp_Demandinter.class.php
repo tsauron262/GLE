@@ -4,11 +4,12 @@ require_once DOL_DOCUMENT_ROOT.'/bimpfichinter/objects/objectInter.class.php';
 
 class Bimp_Demandinter extends ObjectInter
 {
-    public $moduleRightsName = "synopsisdemandeinterv";
+    public static $moduleRightsName = "synopsisdemandeinterv";
+    public static $dirDol = "synopsisdemandeinterv";
     public $force_update_date_ln = true;
     public static $dol_module = 'fichinter';
     public $extraFetch = false;
-    public static $controller_name = "demandinterv";
+    public static $controller_name = "demandinter";
 
     public static $nature_list = array(
         0 => array('label' => 'Choix', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
@@ -171,6 +172,12 @@ class Bimp_Demandinter extends ObjectInter
         }
     }
     
+    public static function redirect($newVersion = true, $id = 0) {
+        parent::$controller_name = self::$controller_name;
+        parent::$dirDol = self::$dirDol;
+//        die( parent::$dirDol);
+        return parent::redirect($newVersion, $id);
+    }
 
 }
 

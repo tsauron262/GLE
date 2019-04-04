@@ -4,7 +4,7 @@
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/objects/BimpDolObject.class.php';
 
 abstract class extraFI extends BimpDolObject{
-    public $moduleRightsName = "synopsisficheinter";
+    public static $moduleRightsName = "synopsisficheinter";
     
     
     /*
@@ -41,7 +41,7 @@ abstract class extraFI extends BimpDolObject{
     
     public function getDolRights($nom){
         global $user;
-        $module = $this->moduleRightsName;
+        $module = self::$moduleRightsName;
         return (isset($user->rights->$module->$nom))? 1 : 0;
     }
     

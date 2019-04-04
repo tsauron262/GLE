@@ -6,24 +6,24 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 //error_reporting(E_ERROR);
 //ini_set('display_errors', 1);
 
-if(BimpTools::isSubmit('di') || $_REQUEST['fc'] == "demandinterv"){
-    if (BimpTools::isSubmit('id') && GETPOST('id') > 0) {
-        $controller = BimpController::getInstance('bimpfichinter', 'demandinter');
-        $controller->display();
+$controllerName = "fichinter_list";
+$objName = "Bimp_Fichinter";
+
+
+if (BimpTools::isSubmit('id') && GETPOST('id') > 0) {
+    if(BimpTools::isSubmit('di') || $_REQUEST['fc'] == "demandinter"){
+        $controllerName = "demandinter";
+        $objName = "Bimp_Demandinter";
     }
-    else{
-        $controller = BimpController::getInstance('bimpfichinter', 'demandinter_list');
-        $controller->display();
-    }
-}
-else{
-    if (BimpTools::isSubmit('id') && GETPOST('id') > 0) {
-        $controller = BimpController::getInstance('bimpfichinter', 'fichinter');
-        $controller->display();
-    }
-    else{
-        $controller = BimpController::getInstance('bimpfichinter', 'fichinter_list');
-        $controller->display();
-    }
+    else
+        $controllerName = "fichinter";
 }
 
+$htmlSup = "";
+if(!BimpTools::isSubmit("ajax")){
+    require_once(DOL_DOCUMENT_ROOT."/bimpfichinter/objects/".$objName.".class.php");
+    $htmlSup =  $objName::redirect(true, GETPOST("id"));
+}
+
+$controller = BimpController::getInstance('bimpfichinter', $controllerName);
+$controller->display();

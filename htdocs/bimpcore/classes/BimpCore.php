@@ -36,7 +36,7 @@ class BimpCore
         $html = '';
         if (!self::$filesInit) {
             foreach (self::$files['css'] as $css_file) {
-                $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/' . $css_file . '"/>';
+                $html .= '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT   . $css_file . '"/>';
             }
 
             global $user;
@@ -47,7 +47,7 @@ class BimpCore
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {
-                $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/' . $js_file . '"></script>';
+                $html .= '<script type="text/javascript" src="' . DOL_URL_ROOT  . $js_file . '"></script>';
             }
 
             self::$filesInit = true;

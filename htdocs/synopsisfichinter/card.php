@@ -55,6 +55,11 @@ $afficherLigneContrat = false;
 
 
 require("../synopsisfichinter/pre.inc.php");
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+require_once(DOL_DOCUMENT_ROOT."/bimpfichinter/objects/Bimp_Fichinter.class.php");
+$htmlRedirect = Bimp_Fichinter::redirect(false, $_REQUEST['id']);
+
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/modules_fichinter.php");
@@ -574,6 +579,8 @@ $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Common
 launchRunningProcess($db, 'Fichinter', $_GET['id']);
 
 llxHeader($js, "Fiche intervention");
+
+echo $htmlRedirect;
 
 if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
     /*

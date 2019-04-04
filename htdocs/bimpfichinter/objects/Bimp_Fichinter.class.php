@@ -35,6 +35,7 @@ class Bimp_Fichinter extends ObjectInter
     
     
     
+    
 
     
     public function getExtra($field){

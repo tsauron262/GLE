@@ -101,6 +101,10 @@ class importCat extends import8sens {
             "Occa" => array(
                 array("Gamme", "Occasion")
             ),
+            "PRESTA PRO" => array(
+                array("Gamme", "Sur site client"),
+                array("Gamme", "Matériel & Logiciel")
+            ),
             // "Stats" => array(
             //     array("", "")
             // ),
@@ -160,6 +164,19 @@ class importCat extends import8sens {
             ),
             "CLOUD SERVICES" => array(
                 array("Gamme", "Cloud")
+            ),
+            "CONTRAT BOUTIQUE" => array(
+                array("Gamme", "Sur site BIMP"),
+                array("Gamme", "Dépannage"),
+                array("Recurrence", "Maintenance Materiel")
+            ),
+            "CONTRATS RESERVES" => array(
+                array("Gamme", "Service"),
+                array("Recurrence", "Périodique")
+            ),
+            "CONTRATS" => array(
+                array("Gamme", "Service"),
+                array("Recurrence", "Périodique")
             ),
             "COUPEUSE" => array(
                 array("Gamme", "Coupeuse")
@@ -485,6 +502,24 @@ class importCat extends import8sens {
             // ),
             "LDLC PRO" => array(
                 array("Marque", "LDLC PRO")
+            ),
+            "OCCASION" => array(
+                array("Gamme", "Occasion")
+            ),
+            "Remises Volumes CRT" => array(
+                array("Gamme", "Remise CRT")
+            ),
+            "JAM SOFTWARE" => array(
+                array("Marque", "JAM SOFTWARE")
+            ),
+            "FINAPRO" => array(
+                array("Marque", "FINAPRO")
+            ),
+            "IMMOBILISATION" => array(
+                array("Gamme", "IMMOBILISATION")
+            ),
+            "POCHETTES" => array(
+                array("Gamme", "Pochette")
             ),
             "xxxxxxx" => array(
                 array("Marque", "XXXXXXX")

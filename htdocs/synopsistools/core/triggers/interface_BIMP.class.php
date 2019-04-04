@@ -31,8 +31,7 @@ class InterfaceSpecialSoc extends DolibarrTriggers {
         global $conf, $user;
         
         
-        
-        if($action == "USER_CREATE"){
+        if($action == "USER_CREATE" && $object->array_options['options_mail_bienvenue']){
             $msg = "Bonjour, un nouveau collaborateur : ".$object->getFullName($langs)." viens de rejoindre l'équipe";
             $msg .= "<br/>à ".$user->getFullAddress();
             $msg .= "<br/>en tant que ".$user->job;

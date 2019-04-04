@@ -3953,6 +3953,13 @@ class Societe extends CommonObject
 
 		// Get current users
 		$existing = $this->getSalesRepresentatives($user, 1);
+                
+                
+                if((!isset($user->rights->bimpcommercial->commerciauxToSoc) || !$user->rights->bimpcommercial->commerciauxToSoc) && count($existing) == 1 && $existing[0] != $user->id){
+                    if((count($salesrep) != count($existing)) || ($salesrep[0] != $existing[0]))
+                        setEventMessage ("Pas le doit de modifié les commerciaux", "warnings");
+                    return 1;
+                }
 
 		// Diff
 		if (is_array($existing)) {

@@ -36,11 +36,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         $qty = 0;
 
-        foreach ($receptions as $reception) {
-            if (!is_null($id_reception) && ((int) $reception['id_reception'] !== (int) $id_reception)) {
+        foreach ($receptions as $id_r => $reception_data) {
+            if (!is_null($id_reception) && ((int) $id_r !== (int) $id_reception)) {
                 continue;
             }
-            $qty += (float) $reception['qty'];
+            $qty += (float) $reception_data['qty'];
         }
 
         return $qty;

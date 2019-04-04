@@ -571,7 +571,7 @@ class BL_CommandeFournReception extends BimpObject
 
                     if (isset($line_data['serials']) && !empty($line_data['serials'])) {
                         foreach ($line_data['serials'] as $serial_data) {
-                            if (isset($serial_data['serial']) && (float) $serial_data['serial']) {
+                            if (isset($serial_data['serial']) && (string) $serial_data['serial']) {
                                 $serials[] = array(
                                     'serial' => $serial_data['serial'],
                                     'pu_ht'  => (float) (isset($serial_data['pu_ht']) ? $serial_data['pu_ht'] : $line->pu_ht),
@@ -605,6 +605,8 @@ class BL_CommandeFournReception extends BimpObject
                     );
                 }
             }
+            
+//            exit;
 
             $errors = $this->saveLinesData($lines_data, $warnings);
         }

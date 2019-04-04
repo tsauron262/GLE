@@ -40,7 +40,7 @@ class ActionsBimpcore
     }
     
     function setContentSecurityPolicy($parameters, &$object, &$action, $hookmanager){
-        global $conf, $user;
+        global $conf, $user, $langs;
         $html = '';
          if ($user->id > 0 && stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1) {
                 if (!defined('BIMP_CONTROLLER_INIT')) {
@@ -59,10 +59,13 @@ class ActionsBimpcore
                         $html .= $main_controller->displayHeaderFiles(false);
                     }
                 }
-                $this->bimp_fixe_tabs = new FixeTabs();                
-                if($this->bimp_fixe_tabs->can("view")){
-                    $this->bimp_fixe_tabs->init();
-                    $html .= $this->bimp_fixe_tabs->displayHead(false);
+                
+                if (is_object($langs) && (!class_exists('BimpTools') || BimpTools::getContext() == "private")) {
+                    $this->bimp_fixe_tabs = new FixeTabs();                
+                    if($this->bimp_fixe_tabs->can("view")){
+                        $this->bimp_fixe_tabs->init();
+                        $html .= $this->bimp_fixe_tabs->displayHead(false);
+                    }
                 }
             }
             

@@ -721,9 +721,7 @@ function saveCommandeFournReceptionLinesData($button, id_reception, modal_idx) {
         id_object: id_reception
     }, 'saveLinesData', {
         lines: lines
-    }, null, $content.find('.ajaxResultContainer'), function () {
-        bimp_msg('ici');
-    });
+    }, null, $content.find('.ajaxResultContainer'));
 }
 
 function onCommandeFournLineReceptionViewLoaded($view) {

@@ -394,21 +394,19 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     public function explodeSerials($serials)
     {
-        if (is_array($serials)) {
-            return $serials;
-        }
-
         if (is_string($serials) && $serials) {
             $serials = str_replace("\n", ';', $serials);
             $serials = str_replace(" ", ';', $serials);
             $serials = str_replace(",", ';', $serials);
             $serials = explode(';', $serials);
+        }
+
+        if (is_array($serials)) {
             foreach ($serials as $idx => $serial) {
                 if (!(string) $serial) {
                     unset($serials[$idx]);
                 }
             }
-
             return $serials;
         }
 
@@ -563,41 +561,53 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return $errors;
     }
 
-    public function setReceptionData($id_reception, $data, $check_qties = true)
+    public function setReceptionData($id_reception, $data, $check_data = true, &$warnings = array())
     {
         $errors = array();
 
         $isSerialisable = $this->isProductSerialisable();
 
         if ($isSerialisable) {
-            if (!isset($data['serials'])) {
-                $data['serials'] = array();
+            $edit = 1;
+            $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+            if (BimpObject::objectLoaded($reception) && ((int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_BROUILLON)) {
+                $edit = 0;
+            }
+
+            if ($edit) {
+                if (!isset($data['serials'])) {
+                    $data['serials'] = array();
+                    $data['qty'] = 0;
+                } else {
+                    $data['qty'] = count($data['serials']);
+                }
             } else {
-                $data['serials'] = $this->explodeSerials($data['serials']);
+                if (!isset($data['equipments'])) {
+                    $data['equipments'] = array();
+                    $data['qty'] = 0;
+                } else {
+                    $data['qty'] = count($data['equipments']);
+                }
             }
         } else {
             if (!isset($data['qty'])) {
                 $data['qty'] = 0;
+                if (isset($data['qties'])) {
+                    foreach ($data['qties'] as $qty_data) {
+                        $data['qty'] += (float) $qty_data['qty'];
+                    }
+                }
             }
         }
 
-        if ($check_qties) {
-            if ($isSerialisable) {
-                $errors = $this->checkReceptionSerials($data['serials'], $id_reception);
-            } else {
-                $errors = $this->checkReceptionQty((float) $data['qty'], $id_reception);
-            }
-
-            if (count($errors)) {
-                return $errors;
-            }
+        if ($check_data) {
+            $errors = $this->checkReceptionData($id_reception, $data);
         }
 
         $receptions = $this->getData('receptions');
         $receptions[(int) $id_reception] = $data;
 
         $this->set('receptions', $receptions);
-        $warnings = array();
         $errors = $this->update($warnings, true);
 
         $errors = array_merge($errors, $warnings);

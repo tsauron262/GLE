@@ -335,13 +335,47 @@ class BL_CommandeFournReception extends BimpObject
                         $max -= count($reception_data['serials']);
                     }
 
-                    $html .= '<div class="inputHelp">N° de série à ajouter: </div>';
+                    $html .= '<div style="margin-top: 12px">N° de série à ajouter: </div>';
                     $html .= BimpInput::renderInput('textarea', 'line_' . $line->id . '_reception_' . $this->id . '_new_serials', '', array(
                                 'auto_expand' => true
                     ));
                     $html .= '<p class="inputHelp">Séparateurs possibles: sauts de ligne, espaces, virgules ou points-virgules.<br/>';
                     $html .= 'Max: ' . $max . ' numéro' . ($max > 1 ? 's' : '') . ' de série.';
                     $html .= '</p>';
+
+                    $html .= '<div style="margin-top: 12px">';
+                    $html .= '<table class="bimp_list_table">';
+                    $html .= '<tbody>';
+                    $html .= '<tr>';
+                    $html .= '<td style="width: 160px">Nouveaux n° de série: </td>';
+                    $html .= '<td style="width: 160px">';
+                    $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_new_serials_pu_ht', (float) $line->pu_ht, array(
+                                'addon_right' => BimpRender::renderIcon('fas_euro-sign'),
+                                'data'        => array(
+                                    'data_type' => 'number',
+                                    'decimals'  => 6,
+                                    'min'       => 'none',
+                                    'max'       => 'none'
+                                )
+                    ));
+                    $html .= '</td>';
+
+                    $html .= '<td style="width: 160px">';
+                    $html .= BimpInput::renderInput('text', 'line_' . $line->id . '_reception_' . $this->id . '_new_serials_tva_tx', $line->tva_tx, array(
+                                'addon_right' => BimpRender::renderIcon('fas_percent'),
+                                'data'        => array(
+                                    'data_type' => 'number',
+                                    'decimals'  => 3,
+                                    'min'       => 0,
+                                    'max'       => 100
+                                )
+                    ));
+                    $html .= '</td>';
+                    $html .= '<td></td>';
+                    $html .= '</tr>';
+                    $html .= '</tbody>';
+                    $html .= '</table>';
+                    $html .= '</div>';
 
                     if (BimpObject::objectLoaded($commande_client_line)) {
                         $assign = (int) (isset($reception_data['assign_to_commande_client']) ? $reception_data['assign_to_commande_client'] : 1);
@@ -443,7 +477,7 @@ class BL_CommandeFournReception extends BimpObject
 
     // Traitements
 
-    public function checkLinesData($id_reception, $lines_data)
+    public function checkLinesData($lines_data)
     {
         $errors = array();
 
@@ -452,7 +486,7 @@ class BL_CommandeFournReception extends BimpObject
             if (!BimpObject::objectLoaded($line)) {
                 $errors[] = 'La ligne de commande fournisseur d\'ID ' . $id_line . ' n\'existe pas';
             } else {
-                $line_errors = $line->checkReceptionData($id_reception, $line_data);
+                $line_errors = $line->checkReceptionData((int) $this->id, $line_data);
                 if (count($line_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
                 }
@@ -462,9 +496,31 @@ class BL_CommandeFournReception extends BimpObject
         return $errors;
     }
 
-    public function saveLinesData($lines_data)
+    public function saveLinesData($lines_data, &$warnings = array())
     {
-        
+        $errors = $this->checkLinesData($lines_data);
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        foreach ($lines_data as $id_line => $line_data) {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $id_line);
+            if (BimpObject::objectLoaded($line)) {
+                $line_warnings = array();
+                $line_errors = $line->setReceptionData((int) $this->id, $line_data, false, $line_warnings);
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                }
+
+                if (count($line_warnings)) {
+                    $warnings[] = BimpTools::getMsgFromArray($line_warnings, 'Ligne n°' . $line->getData('position'));
+                }
+            }
+        }
+
+        return $errors;
     }
 
     public function validateReception()
@@ -478,7 +534,7 @@ class BL_CommandeFournReception extends BimpObject
     {
         $errors = array();
         $warnings = array();
-        $success = '';
+        $success = 'Mise à jour de la réception effectuée avec succès';
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la réception absent';
@@ -526,6 +582,21 @@ class BL_CommandeFournReception extends BimpObject
                         }
                     }
 
+                    if (isset($line_data['new_serials']) && (string) $line_data['new_serials']) {
+                        $new_serials = $line->explodeSerials($line_data['new_serials']);
+
+                        if (count($new_serials)) {
+                            foreach ($new_serials as $new_serial) {
+                                $serials[] = array(
+                                    'serial' => $new_serial,
+                                    'pu_ht'  => (float) $line->pu_ht,
+                                    'tva_tx' => (float) $line->tva_tx,
+                                );
+                                $qty++;
+                            }
+                        }
+                    }
+
                     $lines_data[(int) $line_data['id_line']] = array(
                         'qty'                       => $qty,
                         'qties'                     => $qties,
@@ -534,8 +605,8 @@ class BL_CommandeFournReception extends BimpObject
                     );
                 }
             }
-            // Vérification des quantités: 
-            $errors = $this->checkLinesQties((int) $this->id, $lines_data);
+
+            $errors = $this->saveLinesData($lines_data, $warnings);
         }
 
         return array(

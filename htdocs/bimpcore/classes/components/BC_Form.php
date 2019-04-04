@@ -631,7 +631,8 @@ class BC_Form extends BC_Panel
             $params = array_merge($params, $this->fetchParams($row_path, self::$custom_row_params));
         }
 
-        if ((is_null($params['value']) || $params['value'] === '') && isset($this->params['values']['fields'][$params['input_name']])) {
+//        if ((is_null($params['value']) || $params['value'] === '') && isset($this->params['values']['fields'][$params['input_name']])) {
+        if (isset($this->params['values']['fields'][$params['input_name']])) {
             $params['value'] = $this->params['values']['fields'][$params['input_name']];
         }
 

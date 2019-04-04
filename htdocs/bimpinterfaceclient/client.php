@@ -1,14 +1,20 @@
 <?php
+
+require_once '../bimpcore/main.php';
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+
+
+define('SET_CONTEXT', "public");
+
+
 // Désactivation de l'autantification DOLIBARR
 define('NOLOGIN', 1);
-define('CONTEXTE_CLIENT', 1);
 
-// Les pages protéger par le status Admin
-$page_need_admin = Array('contrat', 'facture', 'users', 'devis');
 
 // REQUIREMENTS
 require_once '../main.inc.php';
-require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+//require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 
 if (BimpCore::getConf('module_version_bimpinterfaceclient') == "") {

@@ -53,13 +53,50 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return $receptions[$id_reception];
         }
 
-        return array(
-            'id_reception' => $id_reception,
-            'qty'          => 0,
-            'equipments'   => array(),
-            'tav_tx'       => array(),
-            'pa_ht'        => array(),
-        );
+        $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+        if (BimpObject::objectLoaded($reception)) {
+            if ((int) $reception->getData('status') === BL_CommandeFournReception::BLCFR_BROUILLON) {
+                return array(
+                    'qty'     => 0,
+                    'qties'   => array(
+                        0 => array()
+                    ),
+                    'serials' => array()
+                );
+            } else {
+                return array(
+                    'qty'        => 0,
+                    'qties'      => array(
+                        0 => array()
+                    ),
+                    'equipments' => array()
+                );
+            }
+        } else {
+            return array(
+                'qty'        => 0,
+                'qties'      => array(
+                    0 => array()
+                ),
+                'equipments' => array(),
+                'serials'    => array()
+            );
+        }
+    }
+
+    public function getReceptionAvailableQty($id_reception = 0)
+    {
+        if (is_null($id_reception)) {
+            $id_reception = 0;
+        }
+
+        $qty = (float) $this->qty - (float) $this->getReceivedQty();
+
+        if ($id_reception) {
+            $qty += (float) $this->getReceivedQty($id_reception);
+        }
+
+        return $qty;
     }
 
     // Getters config: 
@@ -355,7 +392,225 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     // Traitements: 
 
-    public function addReception(BL_CommandeFournReception $reception, $reception_data)
+    public function explodeSerials($serials)
+    {
+        if (is_array($serials)) {
+            return $serials;
+        }
+
+        if (is_string($serials) && $serials) {
+            $serials = str_replace("\n", ';', $serials);
+            $serials = str_replace(" ", ';', $serials);
+            $serials = str_replace(",", ';', $serials);
+            $serials = explode(';', $serials);
+            foreach ($serials as $idx => $serial) {
+                if (!(string) $serial) {
+                    unset($serials[$idx]);
+                }
+            }
+
+            return $serials;
+        }
+
+        return array();
+    }
+
+    public function checkReceptionData($id_reception, $data)
+    {
+        $errors = array();
+
+        if (!((int) $id_reception)) {
+            $errors[] = 'ID de la réception non spécifié';
+            return $errors;
+        }
+
+        $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+        if (!BimpObject::objectLoaded($reception)) {
+            $errors[] = 'La réception d\'ID ' . $id_reception . ' n\'existe pas';
+            return $errors;
+        }
+
+        if ($reception->getData('status') === BL_CommandeFournReception::BLCFR_BROUILLON) {
+            if ($this->isProductSerialisable()) {
+                if (isset($data['serials']) && !empty($data['serials'])) {
+                    $serials = array();
+                    foreach ($data['serials'] as $serial_data) {
+                        if (isset($serial_data['serial']) && (string) $serial_data['serial']) {
+                            $serials[] = $serial_data['serial'];
+                        }
+                    }
+                    if (count($serials)) {
+                        $errors = $this->checkReceptionSerials($serials, $id_reception);
+                    }
+                }
+            } else {
+                $errors = $this->checkReceptionQty((float) $data['qty'], $id_reception);
+            }
+        } else {
+            // todo
+        }
+        return $errors;
+    }
+
+    public function checkReceptionQty($qty, $id_reception = 0)
+    {
+        $errors = array();
+
+        if ($qty > 0) {
+            $remain_qty = (float) $this->getReceptionAvailableQty($id_reception);
+
+            if ($qty > $remain_qty) {
+                $msg = 'Il ne reste que ' . $remain_qty . ' unité(s) à réceptionner pour cette ligne de commande fournisseur.<br/>';
+                $msg .= 'Veuillez retirer ' . ($qty - $remain_qty) . ' unité(s)';
+                $errors[] = $msg;
+            }
+        }
+
+        return $errors;
+    }
+
+    public function checkReceptionSerials($serials, $id_reception = 0)
+    {
+        $errors = array();
+
+        $commande = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($commande)) {
+            $errors[] = 'ID de la commande fournisseur absent';
+            return $errors;
+        }
+
+        if (!empty($serials)) {
+            $serials = $this->explodeSerials($serials);
+        } else {
+            return array();
+        }
+
+        // Vérification des serials en double: 
+        $serials_checked = array();
+        foreach ($serials as $serial) {
+            if ((string) $serial) {
+                if (in_array($serial, $serials_checked)) {
+                    $errors[] = 'Le numéro de série "' . $serial . '" a été ajouté deux fois pour cette réception';
+                } else {
+                    $serials_checked[] = $serial;
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        // Vérification qu'un serial n'a pas déjà été attributé à une autre réception: 
+        $lines = $commande->getChildrenObjects('lines', array(
+            'type' => array(
+                'in' => array(self::LINE_FREE, self::LINE_PRODUCT)
+            )
+        ));
+
+        foreach ($lines as $line) {
+            $receptions = $line->getData('receptions');
+            if (is_array($receptions)) {
+                foreach ($receptions as $id_r => $reception_data) {
+                    if ((int) $line->id === (int) $this->id && (int) $id_r === (int) $id_reception) {
+                        continue;
+                    }
+
+                    if (isset($reception_data['serials']) && !empty($reception_data['serials'])) {
+                        foreach ($reception_data['serials'] as $serial_data) {
+                            if (in_array($serial_data['serial'], $serials_checked)) {
+                                $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_r);
+                                $errors[] = 'Le numéro de série "' . $serial_data['serial'] . '" a déjà été utilisé pour la réception n°' . $reception->getData('num_reception') . ' (' . $reception->getRef() . ') de la ligne n°' . $line->getData('position');
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        // Vérification qu'un équipement n'existe pas déjà pour chaque numéro de série:
+        $id_product = (int) $this->getData('id_product');
+        if ($id_product) {
+            $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+            foreach ($serials_checked as $serial) {
+                if ($equipment->find(array(
+                            'id_product' => $id_product,
+                            'serial'     => $serial
+                                ), true)) {
+                    $errors[] = 'Un équipement existe déjà pour le numéro de série "' . $serial . '": ' . $equipment->getNomUrl(1, 0, 1, 'default') . '';
+                }
+            }
+        }
+
+        if (count($errors)) {
+            return $errors;
+        }
+
+        $qty = count($serials_checked);
+
+        $remain_qty = (float) $this->getReceptionAvailableQty($id_reception);
+
+        if ($qty > $remain_qty) {
+            $msg = 'Il ne reste que ' . $remain_qty . ' équipement(s) à réceptionner pour cette ligne de commande fournisseur.<br/>';
+            $msg .= 'Veuillez retirer ' . ($qty - $remain_qty) . ' numéro(s) de série';
+            $errors[] = $msg;
+        }
+
+        return $errors;
+    }
+
+    public function setReceptionData($id_reception, $data, $check_qties = true)
+    {
+        $errors = array();
+
+        $isSerialisable = $this->isProductSerialisable();
+
+        if ($isSerialisable) {
+            if (!isset($data['serials'])) {
+                $data['serials'] = array();
+            } else {
+                $data['serials'] = $this->explodeSerials($data['serials']);
+            }
+        } else {
+            if (!isset($data['qty'])) {
+                $data['qty'] = 0;
+            }
+        }
+
+        if ($check_qties) {
+            if ($isSerialisable) {
+                $errors = $this->checkReceptionSerials($data['serials'], $id_reception);
+            } else {
+                $errors = $this->checkReceptionQty((float) $data['qty'], $id_reception);
+            }
+
+            if (count($errors)) {
+                return $errors;
+            }
+        }
+
+        $receptions = $this->getData('receptions');
+        $receptions[(int) $id_reception] = $data;
+
+        $this->set('receptions', $receptions);
+        $warnings = array();
+        $errors = $this->update($warnings, true);
+
+        $errors = array_merge($errors, $warnings);
+
+        return $errors;
+    }
+
+    public function addReception($id_reception, $data, $check_qties = true)
+    {
+        
+    }
+
+    public function validateReception($id_reception)
     {
         $errors = array();
 
@@ -589,7 +844,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $errors[] = 'ID de la commande fournisseur absent';
                     return $errors;
                 }
-                
+
                 $remain_qty = $this->qty - $this->getReceivedQty();
                 $total_qty = 0;
                 $i = 1;
@@ -610,7 +865,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                     $serials = explode(';', $serials);
                                     foreach ($serials as $idx => $serial) {
                                         if (!(string) $serial) {
-                                            unset($serials[$idx]); 
+                                            unset($serials[$idx]);
                                         }
                                     }
                                 } else {
@@ -651,7 +906,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                     $i++;
                 }
-                
+
                 $commande->checkReceptionStatus();
             }
         }

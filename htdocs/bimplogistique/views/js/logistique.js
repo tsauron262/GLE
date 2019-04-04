@@ -417,7 +417,7 @@ function onShipmentFactureFormSubmit($form, extra_data) {
             });
         }
     }
-    
+
     extra_data.lines = lines;
 
     return extra_data;
@@ -555,6 +555,176 @@ function onFactureFormSubmit($form, extra_data) {
 }
 
 // Logistique commandes fournisseur: 
+
+function onCommandeFournReceptionDetailsViewLoaded($view) {
+    if (!$.isOk($view)) {
+        return;
+    }
+    var $container = $view.find('.reception_details');
+    if (!$container.length) {
+        return;
+    }
+
+    if (!parseInt($container.data('edit'))) {
+        return;
+    }
+
+    if (!parseInt($view.data('reception_view_events_init'))) {
+        var $modalContent = $view.findParentByClass('modal_content');
+
+        if ($.isOk($modalContent)) {
+            var modal_idx = parseInt($modalContent.data('idx'));
+            bimpModal.addButton('Valider<i class="fas fa5-arrow-circle-right iconRight"></i>', 'saveCommandeFournReceptionLinesData($(this), ' + $view.data('id_object') + ', ' + modal_idx + ')', 'primary', '', modal_idx);
+        }
+
+        $view.data('reception_view_events_init', 1);
+    }
+}
+
+function addCommandeFournReceptionLineQtyRow($button, id_line) {
+    var $container = $button.findParentByClass('line_' + id_line + '_qty_input_container');
+    if (!$.isOk($container)) {
+        bimp_msg('Erreur (conteneur absent', 'danger');
+        return;
+    }
+
+    var tpl = $container.find('tr.line_' + id_line + '_qty_row_tpl').html();
+    if (!tpl) {
+        bimp_msg('Erreur (template absent)', 'danger');
+        return;
+    }
+
+    var idx = parseInt($container.find('tr.line_' + id_line + '_qty_row').last().data('qty_idx'));
+    if (isNaN(idx)) {
+        idx = 0;
+    }
+
+    idx++;
+
+    tpl = tpl.replace(/qtyidx/g, idx);
+
+    var html = '<tr class="line_' + id_line + '_qty_row" data-qty_idx="' + idx + '">';
+    html += tpl;
+    html += '<tr>';
+
+    $container.find('tbody.line_' + id_line + '_qty_rows').append(html);
+
+    var $new_row = $container.find('tr.line_' + id_line + '_qty_row').last();
+
+    setCommonEvents($new_row);
+    setInputsEvents($new_row);
+    
+    var $input = $new_row.find('input.qtyInput');
+    if ($input.length) {
+        checkTotalMaxQtyInput($input);
+    }
+}
+
+function saveCommandeFournReceptionLinesData($button, id_reception, modal_idx) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+
+    var lines = [];
+
+    var $modal = $button.findParentByClass('modal');
+    if (!$.isOk($modal)) {
+        bimp_msg('Erreur (Modale absente)', 'danger');
+        return;
+    }
+
+    var $content = $modal.find('#modal_content_' + modal_idx);
+    if (!$.isOk($content)) {
+        bimp_msg('Erreur (Contenu non trouvé)', 'danger');
+        return;
+    }
+
+    $content.find('tr.line_row').each(function () {
+        var $row = $(this);
+        var id_line = parseInt($row.data('id_line'));
+        var serialisable = parseInt($row.data('serialisable'));
+
+        if (serialisable) {
+            var serials = [];
+            $row.find('tr.line_' + id_line + '_serial_data').each(function () {
+                var serial = $(this).find('td.serial').data('serial');
+                var pu_ht = 0;
+                var tva_tx = 0;
+
+                var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_serial_' + serial + '_pu_ht"]');
+                if ($.isOk($input)) {
+                    pu_ht = parseFloat($input.val());
+                }
+
+                $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_serial_' + serial + '_tva_tx"]');
+                if ($.isOk($input)) {
+                    tva_tx = parseFloat($input.val());
+                }
+                serials.push({
+                    serial: serial,
+                    pu_ht: pu_ht,
+                    tva_tx: tva_tx
+                });
+            });
+
+            var new_serials = '';
+
+            var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials"]');
+            if ($input.length) {
+                new_serials = $input.val();
+            }
+
+            lines.push({
+                id_line: id_line,
+                serials: serials,
+                new_serials: new_serials
+            });
+        } else {
+            var qties = [];
+            $row.find('tr.line_' + id_line + '_qty_row').each(function () {
+                var idx = parseInt($(this).data('qty_idx'));
+                var qty = 0;
+                var pu_ht = 0;
+                var tva_tx = 0;
+
+                var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_qty"]');
+                if ($.isOk($input)) {
+                    qty = parseFloat($input.val());
+                }
+
+                var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_pu_ht"]');
+                if ($.isOk($input)) {
+                    pu_ht = parseFloat($input.val());
+                }
+
+                $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_tva_tx"]');
+                if ($.isOk($input)) {
+                    tva_tx = parseFloat($input.val());
+                }
+                qties.push({
+                    qty: qty,
+                    pu_ht: pu_ht,
+                    tva_tx: tva_tx
+                });
+            });
+
+            lines.push({
+                id_line: id_line,
+                qties: qties
+            });
+        }
+    });
+
+    setObjectAction($button, {
+        module: 'bimplogistique',
+        object_name: 'BL_CommandeFournReception',
+        id_object: id_reception
+    }, 'saveLinesData', {
+        lines: lines
+    }, null, $content.find('.ajaxResultContainer'), function () {
+        bimp_msg('ici');
+    });
+}
 
 function onCommandeFournLineReceptionViewLoaded($view) {
     if (!parseInt($view.data('line_reception_view_events_init'))) {
@@ -703,10 +873,12 @@ $(document).ready(function () {
             onCommandeLineShipmentsViewLoaded(e.$view);
         } else if (e.$view.hasClass('Bimp_CommandeLine_view_invoices')) {
             onCommandeLineFacturesViewLoaded(e.$view);
-        } else if (e.$view.hasClass('Bimp_CommandeFournLine_view_reception')) {
-            onCommandeFournLineReceptionViewLoaded(e.$view);
         } else if (e.$view.hasClass('BL_CommandeShipment_view_lines')) {
             onShipmentLinesViewLoaded(e.$view);
+        } else if (e.$view.hasClass('BL_CommandeFournReception_view_details')) {
+            onCommandeFournReceptionDetailsViewLoaded(e.$view);
+        } else if (e.$view.hasClass('Bimp_CommandeFournLine_view_reception')) {
+            onCommandeFournLineReceptionViewLoaded(e.$view);
         }
     });
 

@@ -35,11 +35,18 @@ fields:
         display: 
             default: 
                 type: nom_url
-        
+                
     ref: 
         label: Référence BR
         required: 1
-        
+    
+    status: 
+        label: Statut
+        type: int
+        values: 
+            array: status_list
+        default_value: 0
+            
     num_reception:
         label: Numéro de réception
         type: int
@@ -66,16 +73,23 @@ forms:
               hidden: 1
             - field: id_entrepot
             - field: ref
-            - field: date_received
             - field: info
+#            - custom: 1
+#              label: Lignes commande fournisseur
+#              show: 
+#                  callback: isNotLoaded
+#              input_name: lines
+#              content: 
+#                  callback: renderCommandeFournLinesForm
+                  
+    validate: 
+        rows: 
+            - field: date_received
             - custom: 1
-              label: Lignes commande fournisseur
-              show: 
-                  callback: isNotLoaded
               input_name: lines
               content: 
-                  callback: renderCommandeFournLinesForm
-                  
+                  callback: renderValidateLinesForm
+                 
 fields_tables: 
     data: 
         title: Infos
@@ -84,6 +98,7 @@ fields_tables:
             - field: id_commande_fourn
               display: card
             - field: ref
+            - field: status
             - field: num_reception
             - field: id_entrepot
             - field: date_received
@@ -171,6 +186,7 @@ lists:
         cols:
             num_reception:
             ref:
+            status:
             date: 
             entrepot:
             info: 

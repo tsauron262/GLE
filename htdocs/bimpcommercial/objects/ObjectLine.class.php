@@ -149,6 +149,16 @@ class ObjectLine extends BimpObject
 
         return 1;
     }
+    
+    public function isProductSerialisable()
+    {
+        $product = $this->getProduct();
+        if (BimpObject::objectLoaded($product)) {
+            return (int) $product->isSerialisable();
+        }
+        
+        return 0;
+    }
 
     public function isEquipmentAvailable(Equipment $equipment = null)
     {

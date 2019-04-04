@@ -107,7 +107,7 @@ class Bimp_CommandeLine extends ObjectLine
                     'id_commande_client_line' => $this->id
                 );
                 if (!is_null($status)) {
-                    $filters['status'] = (int) $status;
+                    $filters['status'] = $status;
                 }
                 $rows = $reservation->getList($filters, null, null, $order_by, $order_way, 'array', array('id'));
 

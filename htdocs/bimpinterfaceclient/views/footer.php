@@ -1,4 +1,5 @@
 
+<?php global $mysoc; ?>
     </div>
     </div>
     <script>

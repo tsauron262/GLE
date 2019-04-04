@@ -1,6 +1,6 @@
 <?php
 
-class public_indexController extends BimpController {
+class public_indexController extends Bimp_user_client_controller {
 
     public function renderHtml() {
         global $langs, $userClient;

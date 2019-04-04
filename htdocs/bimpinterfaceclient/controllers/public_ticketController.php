@@ -1,6 +1,6 @@
 <?php
 
-class public_ticketController extends BimpController {
+class public_ticketController extends Bimp_user_client_controller {
     public function renderHtml() {
         global $userClient;
         $tickets = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserTickets');

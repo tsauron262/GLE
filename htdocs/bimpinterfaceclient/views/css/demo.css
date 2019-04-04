@@ -188,3 +188,8 @@
 .css-tooltip:hover .tt-content {
   display: block;
 }
+
+
+.navbar-brand{
+    display: contents;
+}

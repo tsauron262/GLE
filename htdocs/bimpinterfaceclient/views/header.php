@@ -1,33 +1,18 @@
 
 
-    <!doctype html>
-    <html lang="fr">
-        <head>
-            <meta charset="utf-8" />
-            <!--<script src="views/js/jquery.3.2.1.min.js" type="text/javascript"></script>-->
-            <link rel="icon" type="image/png" href="<?php
-            global $mysoc;
-            echo DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=' . $mysoc->logo
-            ?>">
-            <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-            <title>BIMP-ERP Interface Client</title>
-            <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport' />
-            <meta name="viewport" content="width=device-width" />
-            <link href="views/css/light-bootstrap-dashboard.css?v=1.4.0" rel="stylesheet"/>
-            <link href="views/css/demo.css" rel="stylesheet" />
 
-            <!-- DOL REQUIRE -->
+<?php global $userClient, $langs; 
 
-            <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-            <link href='http://fonts.googleapis.com/css?family=Roboto:400,700,300' rel='stylesheet' type='text/css'>
-            <link href="views/css/pe-icon-7-stroke.css" rel="stylesheet" />
-        </head>
+$content_request = $_REQUEST['fc'];
+
+?>
+
         <body>
             <div class="wrapper">
-                <div class="sidebar" data-color="bimp" data-image="assets/img/sidebar-5.jpg">
+                <div class="sidebar" data-color="bimp" <!--data-image="assets/img/sidebar-5.jpg"-->>
                     <div class="sidebar-wrapper">
                         <ul class="nav">
-                            <li <?= (!$request) ? 'class="active"' : "" ?> >
+                            <li <?= ($content_request == "") ? 'class="active"' : "" ?> >
                                 <a href="?">
                                     <i class="pe-7s-home"></i>
                                     <p><?= $langs->trans('menuAccueil') ?></p>
@@ -117,7 +102,7 @@
                                     foreach (BIC_UserClient::$langs_list as $idT => $valT) {
                                         echo '
                                     <div class="css-tooltip bottom">
-                                        <li><a href="?lang=' . $idT . '" class=""><img width="20px" src="' . DOL_URL_ROOT . '/bimpinterfaceclient/views/img/lang/' . strtolower($valT) . '.png" /></a></li>
+                                        <li><a href="?new_lang=' . $idT . '" class=""><img width="20px" src="' . DOL_URL_ROOT . '/bimpinterfaceclient/views/img/lang/' . strtolower($valT) . '.png" /></a></li>
                                         <span class="tt-content">' . $langs->trans('menuLang-' . $valT) . '</span>
                                     </div>';
                                     }

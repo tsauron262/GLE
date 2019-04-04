@@ -46,7 +46,17 @@ fields:
     attached_societe:
         label: Société du compte
         type: id_object
-        object: societe
+        object: client
+        required: 1
+        input: 
+            type: search_societe
+            societe_type: customer
+            help: Entrez le nom ou la référence d'un client pour effectuer une recherche
+            card: default
+        search:
+            input: 
+                type: search_societe
+                societe_type: customer 
     role:
         label: 
             callback:
@@ -148,7 +158,6 @@ forms:
             - field: attached_societe
               hidden: 1
     editFull:
-        extends: edit
         rows:
             - field: email
             - field: role

@@ -30,12 +30,7 @@ class BIC_UserClient extends BimpObject {
         self::USER_CLIENT_STATUS_ACTIF => Array('label' => 'Actif', 'classes' => Array('success'), 'icon' => 'check'),
         self::USER_CLIENT_STATUS_INACTIF => Array('label' => 'Inactif', 'classes' => Array('danger'), 'icon' => 'times')
     );
-    
-    public function __construct($module, $object_name) {
-        global $langs;
-        $langs->load('bimp@bimpinterfaceclient');
-        return parent::__construct($module, $object_name);
-    }
+   
     
     public function getName(){
         return $this->getData("email");
@@ -157,7 +152,7 @@ class BIC_UserClient extends BimpObject {
 
     public function canClientView() {
         global $userClient;
-        if (!$this->isLoaded()) {
+        if (!$this->isLoaded() || !is_object($userClient)) {
             return true;
         }
         if ($this->getData('attached_societe') == $userClient->getData('attached_societe') && ($userClient->getData('role') == 1) || $this->id == $userClient->id) {
@@ -173,7 +168,7 @@ class BIC_UserClient extends BimpObject {
     
     public function canClientCreate() {
         global $userClient;
-        if($userClient->getData('status') == self::USER_CLIENT_ROLE_ADMIN)
+        if(is_object($userClient) && $userClient->getData('status') == self::USER_CLIENT_ROLE_ADMIN)
             return true;
     }
 
@@ -200,11 +195,11 @@ class BIC_UserClient extends BimpObject {
     }
 
     public function switch_lang($new_lang) {
-        global $db;
-        $bimp = new BimpDb($db);
-        $this->updateField("lang", $new_lang);
+        $this->updateField("lang", $new_lang, true);
+        $this->set("lang", $new_lang);
+        $this->update($warning = array(), true);
 //        $bimp->update('bic_user', Array('lang' => $new_lang), 'id = ' . $this->id);
-        echo '<script>window.location.href = "' . DOL_URL_ROOT . '/bimpinterfaceclient/"</script>';
+        echo '<script>window.location.href = "?"</script>';
     }
 
     public function lang($field) {
@@ -283,18 +278,6 @@ class BIC_UserClient extends BimpObject {
         }
     }
 
-    public function runContxte() {
-        if (BimpTools::isSubmit('ajax')) {
-            if($this->isLoged()){
-                require_once DOL_DOCUMENT_ROOT . '/bimpcore/index.php';
-            } else {
-                die(json_encode(Array("request_id" => $_REQUEST['request_id'], 'nologged' => 1)));
-            }
-            
-        } else {
-            top_htmlhead("");
-        }
-    }
     
     public function my_soc_is_cover() {//todo a viré
         global $db;

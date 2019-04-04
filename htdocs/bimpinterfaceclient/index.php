@@ -1,13 +1,15 @@
 <?php
 
+
+    define("NO_REDIRECT_LOGIN", 1);
+
 require_once '../bimpcore/main.php';
 
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
 
 
 
-
-if(BimpTools::getContext() == 'public')
+if(BimpTools::getContext() == 'public' || $user->id < 1)
     require 'client.php';
 else
     require 'admin.php';

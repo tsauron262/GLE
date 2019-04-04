@@ -1666,8 +1666,25 @@ class BimpTools
     }
     
     
+    public static function setContext($context){
+        $_SESSION['context'] = $context;
+    }
+    
     public static function getContext(){
         global $userClient;
+        
+        if(isset($_REQUEST['context'])){
+            self::setContext($_REQUEST['context']);
+        }
+        if(defined("SET_CONTEXT")){
+            self::setContext(SET_CONTEXT);
+        }
+        
+        if(isset($_SESSION['context'])){
+            return $_SESSION['context'];
+        }
+        
+        
         if(isset($userClient)){
             return "public";
         }

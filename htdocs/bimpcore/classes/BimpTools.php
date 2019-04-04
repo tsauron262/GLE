@@ -1685,6 +1685,6 @@ class BimpTools
             return $_SESSION['context'];
         }
         
-        return "public";
+        return "";
     }
 }

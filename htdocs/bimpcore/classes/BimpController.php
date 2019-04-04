@@ -33,6 +33,8 @@ class BimpController
             }
             return new $controllerClass($module, $controller);
         }
+        if(BimpTools::getContext() == "public")
+            return new Bimp_user_client_controller($module, $controller);
         return new BimpController($module, $controller);
     }
 
@@ -181,8 +183,7 @@ class BimpController
         if (!defined('BIMP_CONTROLLER_INIT')) {
             define('BIMP_CONTROLLER_INIT', 1);
             $this->addDebugTime('Début affichage page');
-            if (!defined('BIMP_NO_HEADER'))
-                llxHeader('', '', '', false, false, false);
+            llxHeader('', '', '', false, false, false);
             $display_footer = true;
         } else {
             $cssFiles = $this->getConf('css', array(), false, 'array');

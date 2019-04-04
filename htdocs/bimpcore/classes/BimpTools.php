@@ -15,6 +15,8 @@ class BimpTools
             'html'  => '&#36;'
         )
     );
+    
+    private static $context = "";
 
     // Gestion GET / POST
 
@@ -1667,27 +1669,22 @@ class BimpTools
     
     
     public static function setContext($context){
+        self::$context = $context;
         $_SESSION['context'] = $context;
     }
     
     public static function getContext(){
-        global $userClient;
+        if(self::$context != "")
+            return self::$context;
         
         if(isset($_REQUEST['context'])){
             self::setContext($_REQUEST['context']);
-        }
-        if(defined("SET_CONTEXT")){
-            self::setContext(SET_CONTEXT);
         }
         
         if(isset($_SESSION['context'])){
             return $_SESSION['context'];
         }
         
-        
-        if(isset($userClient)){
-            return "public";
-        }
-        return "private";
+        return "public";
     }
 }

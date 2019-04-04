@@ -26,6 +26,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             ($resultContainer && !$resultContainer.length)) {
         $resultContainer = null;
     }
+    
 
     this.$resultContainer = $resultContainer;
     this.$button = null;
@@ -34,6 +35,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.url = ajaxRequestsUrl;
     this.type = 'POST';
     this.dataType = 'json';
+    
 
     this.display_success = true;
     this.display_errors = true;
@@ -78,6 +80,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         bimpAjax.url += '&';
     }
     bimpAjax.url += 'ajax=1&action=' + action + '&request_id=' + request_id;
+    
+    
+    bimpAjax.url += "&context="+context;
 
     if (this.display_processing) {
         if (this.$resultContainer) {
@@ -276,7 +281,12 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             if (!$login.length) {
                 if (typeof (dol_url_root) !== 'undefined') {
                     var html = '<div id="bimp_login_popup">';
-                    html += '<iframe id="bimp_login_iframe" frameborder="0" src="' + dol_url_root + '/bimpcore/ajax_login.php"></iframe>';
+                    if(!context == "public"){
+                        html += '<iframe id="bimp_login_iframe" frameborder="0" src="' + dol_url_root + '/bimpcore/ajax_login.php"></iframe>';
+                        
+                    }
+                    else
+                        html += '<span class="red">todo formulaire ou iframe (moins classe)       pour relog userClient dans /bimpcore/views/js/ajax.js line 284</span>';
                     html += '</div>';
                     $container.append(html);
                     $('#bimp_login_iframe').on('load', function () {

@@ -24,6 +24,10 @@ if ((isset($_GET['ajax']) && $_GET['ajax']) ||
     if (isset($_SESSION["dol_login"])) {
         $user->fetch(null, $_SESSION["dol_login"]);
         $user->getrights();
+    } elseif(class_exists ("BimpTools") && BimpTools::getContext() == "public"){
+        if($user->id < 1)
+            die('Attention pas de client ne devrais jamais arrivé');
+        
     } else {
         die(json_encode(array(
             'request_id' => $request_id,

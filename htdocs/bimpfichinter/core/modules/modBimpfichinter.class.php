@@ -259,19 +259,19 @@ class modBimpfichinter extends DolibarrModules
 	 */
 	public function init($options='')
 	{
-		$sql = array();
+            $sql = array();
+
+            require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
+            $name = 'module_version_'. strtolower($this->name);
+            if(BimpCore::getConf($name) == ""){
+                BimpCore::setConf($name, floatval($this->version));
+            }
+
+            $sql[] = "INSERT INTO `" . MAIN_DB_PREFIX . "document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'recaptemps', 1, 'company', 'Recaptemps', NULL);";
                 
-                require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
-                $name = 'module_version_'. strtolower($this->name);
-                if(BimpCore::getConf($name) == ""){
-                    BimpCore::setConf($name, floatval($this->version));
-                    $this->_load_tables('/bimpmargeprod/sql/');
-                }
-
-                
 
 
-		return $this->_init($sql, $options);
+            return $this->_init($sql, $options);
 	}
 
 	/**
@@ -284,10 +284,11 @@ class modBimpfichinter extends DolibarrModules
 	 */
 	public function remove($options = '')
 	{
-		$sql = array();
-                
+            $sql = array();
+            $sql[] = "DELETE FROM `" . MAIN_DB_PREFIX . "document_model`  WHERE `nom`='recaptemps'";
 
-		return $this->_remove($sql, $options);
+
+            return $this->_remove($sql, $options);
 	}
 
 }

@@ -2409,7 +2409,7 @@ class BimpObject extends BimpCache
         $errors = array();
 
         if (!$force_create) {
-            if (!$this->canCreate()) {
+            if (!$this->can("create")) {
                 $errors[] = 'Vous n\'avez pas la permission de créer ' . $this->getLabel('a');
             } elseif (!$this->isCreatable()) {
                 $errors[] = 'Il n\'est pas possible de créer ' . $this->getLabel('a');
@@ -2515,7 +2515,7 @@ class BimpObject extends BimpCache
 
         $errors = array();
 
-        if (!$force_update && !$this->canEdit()) {
+        if (!$force_update && !$this->can("edit")) {
             $errors[] = 'Vous n\'avez pas la permission de modifier ' . $this->getLabel('this');
         }
 
@@ -2880,7 +2880,7 @@ class BimpObject extends BimpCache
         if (!$this->isLoaded()) {
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
         } else if (!$force_delete) {
-            if (!$this->canDelete()) {
+            if (!$this->can("delete")) {
                 $errors[] = 'Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this');
             } elseif (!$this->isDeletable()) {
                 $errors[] = 'Il n\'est pas possible de supprimer ' . $this->getLabel('this');
@@ -3532,6 +3532,35 @@ class BimpObject extends BimpCache
     }
 
     // Gestion des droits users: 
+    
+    
+    public function can($right){
+        switch ($right){
+            case "view" :
+                if(BimpTools::getContext() == "public")
+                    return ($this->canView() && $this->canClientView());
+                else
+                    return $this->canView();
+            case 'edit' :
+                if(BimpTools::getContext() == "public")
+                    return ($this->canEdit() && $this->canClientEdit());
+                else
+                    return $this->canEdit();
+            case "create" :
+                if(BimpTools::getContext() == "public")
+                    return ($this->canCreate() && $this->canClientCreate());
+                else
+                    return $this->canCreate();
+            case "delete" :
+                if(BimpTools::getContext() == "public")
+                    return ($this->canDelete() && $this->canClientDelete());
+                else
+                    return $this->canDelete();
+                
+            default:
+                return 0;
+        }
+    }
 
     public function canCreate()
     {
@@ -3543,8 +3572,13 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
+    
+    public function canClientCreate(){
+        return 0;
+    }
 
-    public function canEdit()
+
+    protected function canEdit()
     {
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
@@ -3554,8 +3588,12 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
+    public function canClientEdit(){
+        return 0;
+    }
 
-    public function canView()
+
+    protected function canView()
     {
         if ($this->params['parent_object']) {
             $parent = $this->getParentInstance();
@@ -3564,6 +3602,10 @@ class BimpObject extends BimpCache
             }
         }
         return 1;
+    }
+    public function canClientView()
+    {
+        return 0;
     }
 
     public function canDelete()
@@ -3576,35 +3618,38 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
+    public function canClientDelete(){
+        return 0;
+    }
 
     public function canEditField($field_name)
     {
-        return (int) $this->canEdit();
+        return (int) $this->can("edit");
     }
 
     public function canViewField($field_name)
     {
-        return (int) $this->canView();
+        return (int) $this->can("view");
     }
 
     public function canCreateChild($child_name)
     {
-        return (int) $this->canCreate();
+        return (int) $this->can("create");
     }
 
     public function canEditChild($child_name)
     {
-        return (int) $this->canEdit();
+        return (int) $this->can("edit");
     }
 
     public function canViewChild($child_name)
     {
-        return (int) $this->canView();
+        return (int) $this->can("view");
     }
 
     public function canDeleteChild($child_name)
     {
-        return (int) $this->canDelete();
+        return (int) $this->can("delete");
     }
 
     public function canSetAction($action)

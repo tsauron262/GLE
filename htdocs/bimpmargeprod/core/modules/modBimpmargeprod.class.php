@@ -200,7 +200,7 @@ class modBimpmargeprod extends DolibarrModules
 		// Example to declare a new Top Menu entry and its Left menu entry:
 		 $this->menu[$r]=array(	'fk_menu'=>'',			                // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 									'type'=>'top',			                // This is a Top menu entry
-									'titre'=>'Marge de prod ',
+									'titre'=>'Diff ',
 									'mainmenu'=>'margeprod',
 									'leftmenu'=>'margeprod',
 									'url'=>'/bimpmargeprod/',

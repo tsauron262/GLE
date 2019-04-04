@@ -1,0 +1,168 @@
+table: bic_user
+icon: fas_user
+controller: pageUser
+
+objects:
+    user_client_contrat:
+        relation: hasMany
+        delete: 0
+        instance:
+            bimp_object: BIC_UserClientContrats
+    
+    societe:
+        instance:
+            dol_object:
+                module: societe
+                file: societe
+                id_object:
+                    field_value: attached_societe
+
+header_btn: 
+    callback: getActionsButtons
+
+labels:
+    name:
+        callback:
+            method: lang
+            params:
+                - labelUserSing
+    name_plur:
+        callback:
+            method: lang
+            params:
+                - labelUserPlur
+
+fields:
+    email:
+        label:
+            callback:
+                method: lang
+                params:
+                    - labelFieldEmail
+        type: string
+    password:
+        label: Mot de passe 
+        type: password
+    attached_societe:
+        label: Société du compte
+        type: id_object
+        object: societe
+    role:
+        label: 
+            callback:
+                method: lang
+                params:
+                    - labelFieldRole
+        type: int
+        values:
+            array: role
+    status:
+        label:
+            callback:
+                method: lang
+                params:
+                    - labelFieldStatus
+        type: int
+        values:
+            array: status
+    renew_required:
+        label: Doit changer sont mot de passe
+        type: bool
+    lang:
+        label: Langue par defaut
+        type: int
+        values: 
+            array: langs_list
+        
+
+lists:
+    default:
+        checkboxes: 0
+        sort_field: date_create
+        extra_btn:
+            callback: getListExtraButtons
+        sort_way: desc
+        n: 10
+        delete_btn: 1
+        page_btn: 1
+        edit_form: edit
+        add_object_row: 0
+        add_btn: 1
+        add_form_name: edit
+        update_btn: 1
+        edit_btn: 1
+        cols:
+            email:
+                field: email
+            role:
+                field: role
+            status:
+                field: status
+            attached_societe:
+                field: attached_societe
+    full:
+        extends: default
+        edit_form: editFull
+        cols:
+            attached_societe:
+                field: attached_societe
+            renew_required:
+                field: renew_required
+            lang:
+                field: lang
+                
+fields_table:
+    default:
+        title: Status
+        icon: fas_file-signature
+        rows: 
+            - field: email
+              edit: 0
+            - field: password
+              edit: 0
+            - field: role
+              edit: 0
+            - field: status
+              edit: 0
+
+views:
+    pageUser: 
+        title: 
+            callback: displayEmail
+        edit_form: default
+        delete_btn: 1
+        rows:
+            - cols: 
+                - type: list
+                  list:
+                        children: user_client_contrat
+
+forms:
+    edit:
+        objects_change_reload: BIC_UserClient, BIC_UserClientContrats
+        rows:
+            - field: email
+            - field: role
+            - field: status
+            - field: lang
+            - field: attached_societe
+              hidden: 1
+    editFull:
+        extends: edit
+        rows:
+            - field: email
+            - field: role
+            - field: status
+            - field: lang
+            - field: attached_societe
+            - field: renew_required
+        
+cards:
+    default:
+        title: nom
+        fields: 
+            - label: Email
+              field: email
+            - label: Societe
+              field: attached_societe
+        view_btn: 1

@@ -18,7 +18,7 @@ class BIMP_Task extends BimpObject
 
     public function areNotesEditable()
     {
-        return ($this->canEdit() && $this->isEditable());
+        return ($this->can("edit") && $this->isEditable());
     }
 
     public function fetch($id, $parent = null)
@@ -164,7 +164,7 @@ class BIMP_Task extends BimpObject
         return $list;
     }
 
-    public function canView()
+    protected function canView()
     {
         global $user;
         if ($this->isNotLoaded())
@@ -175,7 +175,7 @@ class BIMP_Task extends BimpObject
         return $this->getRight("read");
     }
 
-    public function canEdit()
+    protected function canEdit()
     {
         return $this->getRight("write");
     }
@@ -305,7 +305,7 @@ class BIMP_Task extends BimpObject
         global $user;
         $buttons = array();
         if ($this->isEditable()) {
-            if ($this->canEdit()) {
+            if ($this->can("edit")) {
                 if (filter_var($this->getData("src"), FILTER_VALIDATE_EMAIL) && filter_var($this->getData("dst"), FILTER_VALIDATE_EMAIL))
                     $buttons[] = array(
                         'label'      => 'Répondre par mail',
@@ -320,7 +320,7 @@ class BIMP_Task extends BimpObject
                     'onclick'    => $this->getJsActionOnclick('close', array(), array('confirm_msg' => 'Terminer la tâche ?'))
                 );
             }
-            if ($this->canEdit() || $this->canAttribute()) {
+            if ($this->can("edit") || $this->canAttribute()) {
                 if ($this->getData("id_user_owner") < 1) {
                     $buttons[] = array(
                         'label'   => 'Attribuer',

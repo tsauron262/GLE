@@ -84,19 +84,19 @@ class BC_ListTable extends BC_List
         parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon);
 
         if ($this->isObjectValid()) {
-            if (!(int) $this->object->canCreate()) {
+            if (!(int) $this->object->can("create")) {
                 $this->params['add_object_row'] = 0;
             }
 
-            if (!(int) $this->object->canView()) {
+            if (!(int) $this->object->can("view")) {
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('the_plur');
             }
-            if (!(int) $this->object->canEdit()) {
+            if (!(int) $this->object->can("edit")) {
                 $this->params['enable_edit'] = 0;
                 $this->params['positions'] = 0;
             }
 
-            if (!(int) $this->object->canDelete()) {
+            if (!(int) $this->object->can("delete")) {
                 foreach ($this->params['bulk_actions'] as $idx => $bulk_action) {
                     $onclick = isset($bulk_action['onclick']) ? $bulk_action['onclick'] : '';
                     if (preg_match('/^deleteSelectedObjects\(/', $onclick)) {
@@ -215,9 +215,9 @@ class BC_ListTable extends BC_List
                         'checkbox'       => (int) $object->getConf($this->config_path . '/item_checkbox', true, false, 'bool'),
                         'single_cell'    => false,
                         'item_params'    => $item_params,
-                        'canEdit'        => (int) ($object->canEdit() && $object->isEditable()),
-                        'canView'        => (int) $object->canView(),
-                        'canDelete'      => (int) ($object->canDelete() && $object->isDeletable()),
+                        'canEdit'        => (int) ($object->can("edit") && $object->isEditable()),
+                        'canView'        => (int) $object->can("view"),
+                        'canDelete'      => (int) ($object->can("delete") && $object->isDeletable()),
                         'instance_name'  => $object->getInstanceName(),
                         'url'            => '',
                         'page_btn_label' => '',
@@ -368,7 +368,7 @@ class BC_ListTable extends BC_List
         $view_check = false;
         if ((int) $this->params['inline_view_item']) {
             if ($this->object->fetch((int) $this->params['inline_view_item'])) {
-                if ($this->object->canView()) {
+                if ($this->object->can("view")) {
                     $view_name = $this->object->getConf($this->config_path . '/inline_view', '');
                     if ($view_name) {
                         $view = new BC_View($this->object, $view_name, false);
@@ -748,7 +748,7 @@ class BC_ListTable extends BC_List
 
     public function renderAddObjectRow()
     {
-        if (!$this->object->canCreate()) {
+        if (!$this->object->can("create")) {
             return '';
         }
 
@@ -874,7 +874,7 @@ class BC_ListTable extends BC_List
 
         $buttons = array();
 
-        if ($this->object->canEdit()) {
+        if ($this->object->can("edit")) {
             $buttons[] = BimpRender::renderButton(array(
                         'classes'     => array('btn', 'btn-light-default'),
                         'label'       => 'Enregistrer toutes les modifications',
@@ -925,7 +925,7 @@ class BC_ListTable extends BC_List
 
             if ($label && $onclick) {
                 if (preg_match('/^deleteSelectedObjects\(/', $onclick)) {
-                    if (!$this->object->canDelete()) {
+                    if (!$this->object->can("delete")) {
                         continue;
                     }
                 }

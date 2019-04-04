@@ -102,7 +102,7 @@ print '</div>';
 print '<table id="customer" class="liste_titre_filter">';
 print '<tr id="tr_header" class="liste_titre last">';
 $arrayofheader = array(
-    '', 'Garder', 'Fusionner', 'Nom', 'Email', 'Adresse', 'Code Postal', 'Ville', 'Téléphone', 'Siret', 'Création', 'Commerciaux', 'Lien', 'Retour fusion'
+    '', 'Garder', 'Fusionner', 'Ignorer', 'Nom', 'Email', 'Adresse', 'Code Postal', 'Ville', 'Téléphone', 'Siret', 'Création', 'Commerciaux', 'Lien', 'Retour fusion'
 );
 displayHeader($arrayofheader);
 print '</tr>';

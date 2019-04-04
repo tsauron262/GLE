@@ -21,7 +21,9 @@ class BimpCore
             '/bimpcore/views/js/view.js',
             '/bimpcore/views/js/viewsList.js',
             '/bimpcore/views/js/listCustom.js',
-            '/bimpcore/views/js/page.js'
+            '/bimpcore/views/js/page.js',
+            '/bimpcore/views/js/table2csv.js'
+
         ),
         'css' => array(
             '/includes/jquery/plugins/jpicker/css/jPicker-1.1.6.css',
@@ -44,6 +46,7 @@ class BimpCore
             $html .= '<script type="text/javascript">';
             $html .= ' var dol_url_root = \'' . DOL_URL_ROOT . '\';';
             $html .= ' var id_user = ' . (BimpObject::objectLoaded($user) ? $user->id : 0) . ';';
+            $html .= ' var context = "' . BimpTools::getContext() . '";';
             $html .= '</script>';
 
             foreach (self::$files['js'] as $js_file) {

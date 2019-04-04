@@ -15,6 +15,8 @@ class BimpTools
             'html'  => '&#36;'
         )
     );
+    
+    private static $context = "";
 
     // Gestion GET / POST
 
@@ -1663,5 +1665,26 @@ class BimpTools
     public static function rgb2hex($rgb)
     {
         return str_pad(dechex($rgb * 255), 2, '0', STR_PAD_LEFT);
+    }
+    
+    
+    public static function setContext($context){
+        self::$context = $context;
+        $_SESSION['context'] = $context;
+    }
+    
+    public static function getContext(){
+        if(self::$context != "")
+            return self::$context;
+        
+        if(isset($_REQUEST['context'])){
+            self::setContext($_REQUEST['context']);
+        }
+        
+        if(isset($_SESSION['context'])){
+            return $_SESSION['context'];
+        }
+        
+        return "public";
     }
 }

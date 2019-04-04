@@ -18,7 +18,3 @@ CREATE TABLE IF NOT EXISTS `llx_bimp_gsx_repair` (
   `user_update` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
-
-ALTER TABLE `llx_bs_apple_part` ADD `id_sav` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id`;
-
-ALTER TABLE `llx_bs_sav` ADD `code_centre` VARCHAR(128) NOT NULL DEFAULT '' AFTER `status`;

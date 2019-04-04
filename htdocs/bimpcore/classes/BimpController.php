@@ -22,6 +22,9 @@ class BimpController
         if (is_null($controller)) {
             $controller = BimpTools::getValue('fc', 'index');
         }
+        if(BimpTools::getContext() == "public")
+            $controller = "public_".$controller;
+        
         $controllerClass = $controller . 'Controller';
 
         if (file_exists($dir . '/controllers/' . $controllerClass . '.php')) {
@@ -227,7 +230,7 @@ class BimpController
                 }
             }
 
-            if (!$this->canView()) {
+            if (!$this->can("view")) {
                 echo BimpRender::renderAlerts('Vous n\'avez pas la permission de voir ce contenu');
             } elseif (BimpTools::isSubmit('search')) {
                 echo $this->renderSearchResults();
@@ -526,7 +529,7 @@ class BimpController
         return $html;
     }
 
-    public function canView()
+    public function can($right)
     {
         return 1;
     }

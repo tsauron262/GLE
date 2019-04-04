@@ -37,7 +37,7 @@ class BC_ListCustom extends BC_List
             return parent::renderHtml();
         }
         
-        if (!$this->object->canView()) {
+        if (!$this->object->can("view")) {
             return BimpRender::renderAlerts('Vous n\'avez pas la permission de voir '.$this->object->getLabel('the_plur'));
         }
 

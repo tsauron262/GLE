@@ -45,7 +45,7 @@ class BC_View extends BC_Panel
         }
 
         if (!count($this->errors)) {
-            if (!$this->object->canView()) {
+            if (!$this->object->can("view")) {
                 $this->errors[] = 'Vous n\'avez pas la permission de voir ' . $this->object->getLabel('this');
             }
         }
@@ -82,13 +82,13 @@ class BC_View extends BC_Panel
         $html = '';
         if ($this->params['edit_form'] || $this->params['delete_btn']) {
             $html .= '<div class="panelFooterButtons" style="text-align: right">';
-            if ($this->params['edit_form'] && $this->object->canEdit() && $this->object->isEditable()) {
+            if ($this->params['edit_form'] && $this->object->can("edit") && $this->object->isEditable()) {
                 $title = 'Edition ' . $this->object->getLabel('of_the') . ' ' . $this->object->getInstanceName();
                 $html .= '<button type="button" class="btn btn-primary"';
                 $html .= ' onclick="loadModalFormFromView(\'' . $this->identifier . '\', \'' . $this->params['edit_form'] . '\', $(this), \'' . addslashes($title) . '\');"';
                 $html .= '><i class="fas fa5-edit iconLeft"></i>Editer</button>';
             }
-            if ($this->params['delete_btn'] && $this->object->canDelete() && $this->object->isDeletable()) {
+            if ($this->params['delete_btn'] && $this->object->can("delete") && $this->object->isDeletable()) {
                 $html .= '<button type="button" class="btn btn-danger"';
                 $html .= ' onclick="deleteObject($(this), \'' . $this->object->module . '\', \'' . $this->object->object_name . '\', ' . $this->object->id . ', $(\'#' . $this->identifier . '_result\'));"';
                 $html .= '><i class="fas fa5-trash-alt iconLeft"></i>Supprimer</button>';

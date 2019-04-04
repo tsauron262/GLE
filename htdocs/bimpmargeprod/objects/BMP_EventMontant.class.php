@@ -34,8 +34,10 @@ class BMP_EventMontant extends Abstract_margeprod
 
     public function isEditable()
     {
-        return (int) $this->isEventEditable();
+        return (int) ($this->isEventEditable());
     }
+    
+
 
     public function isDeletable()
     {
@@ -77,8 +79,9 @@ class BMP_EventMontant extends Abstract_margeprod
                     }
                 }
             }
-
-            return 1;
+            if($this->getInitData("status") != 2 || $field == "status")
+                return 1;
+            return 0;
         }
 
         return (int) parent::isFieldEditable($field);

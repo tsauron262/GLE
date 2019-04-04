@@ -568,6 +568,7 @@ class BL_CommandeFournReception extends BimpObject
                             }
                         }
                     }
+                    
 
                     if (isset($line_data['serials']) && !empty($line_data['serials'])) {
                         foreach ($line_data['serials'] as $serial_data) {
@@ -584,13 +585,15 @@ class BL_CommandeFournReception extends BimpObject
 
                     if (isset($line_data['new_serials']) && (string) $line_data['new_serials']) {
                         $new_serials = $line->explodeSerials($line_data['new_serials']);
+                        $pu_ht = (isset($line_data['new_serials_pu_ht']) ? (float) $line_data['new_serials_pu_ht'] : (float) $line->pu_ht);
+                        $tva_tx = (isset($line_data['new_serials_tva_tx']) ? (float) $line_data['new_serials_tva_tx'] : (float) $line->tva_tx);
 
                         if (count($new_serials)) {
                             foreach ($new_serials as $new_serial) {
                                 $serials[] = array(
                                     'serial' => $new_serial,
-                                    'pu_ht'  => (float) $line->pu_ht,
-                                    'tva_tx' => (float) $line->tva_tx,
+                                    'pu_ht'  => (float) $pu_ht,
+                                    'tva_tx' => (float) $tva_tx,
                                 );
                                 $qty++;
                             }

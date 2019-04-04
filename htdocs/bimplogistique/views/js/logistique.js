@@ -673,11 +673,32 @@ function saveCommandeFournReceptionLinesData($button, id_reception, modal_idx) {
             if ($input.length) {
                 new_serials = $input.val();
             }
+            
+            var new_serials_pu_ht = 0;
+            var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials_pu_ht"]');
+            if ($input.length) {
+                new_serials_pu_ht = parseFloat($input.val());
+            }
+            
+            var new_serials_tva_tx = 0;
+            var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials_tva_tx"]');
+            if ($input.length) {
+                new_serials_tva_tx = parseFloat($input.val());
+            }
+            
+            var assign_to_commande_client = 0;
+            var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_assign_to_commande_client"]');
+            if ($input.length) {
+                assign_to_commande_client = parseInt($input.val());
+            }
 
             lines.push({
                 id_line: id_line,
                 serials: serials,
-                new_serials: new_serials
+                new_serials: new_serials,
+                new_serials_pu_ht: new_serials_pu_ht,
+                new_serials_tva_tx: new_serials_tva_tx,
+                assign_to_commande_client: assign_to_commande_client
             });
         } else {
             var qties = [];

@@ -171,6 +171,11 @@ class BimpController
 
     public function display()
     {
+        global $user;
+        if($user->id < 1)
+            die("Pas de User <a href='".DOL_URL_ROOT."'> Allé a la page de login</a>");
+        
+        
         if (BimpTools::isSubmit('ajax')) {
             $this->ajaxProcess();
             return;

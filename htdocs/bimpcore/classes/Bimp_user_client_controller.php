@@ -18,8 +18,6 @@ class Bimp_user_client_controller extends BimpController {
             <link href="views/css/demo.css" rel="stylesheet" />
 
 
-            <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-            <link href="https://fonts.googleapis.com/css?family=Roboto:400,700,300" rel="stylesheet" type="text/css">
             <link href="views/css/pe-icon-7-stroke.css" rel="stylesheet" />');
             require_once DOL_DOCUMENT_ROOT . "/bimpinterfaceclient/views/header.php";
             parent::display();

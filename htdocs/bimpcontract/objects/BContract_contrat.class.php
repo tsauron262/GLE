@@ -133,7 +133,6 @@ class BContract_contrat extends BimpDolObject {
             if ($fin - $aujourdhui > 0) {
                 return true;
             }
-            echo 'Nouveaux contrats <br />';
         } else { // On est dans les anciens contrats
             $lines = $this->dol_object->lines; // Changera quand l'objet BContract_contratLine sera OP
             foreach ($lines as $line) {

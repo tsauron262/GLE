@@ -157,6 +157,12 @@ forms:
             - field: lang
             - field: attached_societe
               hidden: 1
+            - custom: 1
+              label: Envoyer le mot de passe par mail ?
+              input_name: send_mail
+              input:
+                  type: toggle
+              value: 1
     editFull:
         rows:
             - field: email

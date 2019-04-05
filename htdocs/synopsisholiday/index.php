@@ -267,7 +267,7 @@ if ($id > 0 || $id2 > 0) {
 
     // FirstName
     print '<tr><td width="25%" valign="top">' . $langs->trans("FirstName") . '</td>';
-    print '<td colspan="2">' . $fuser->firstname . '</td>';
+    print '<td>' . $fuser->firstname . '</td>';
     print "</tr>\n";
 
     print '</table><br>';
@@ -316,11 +316,16 @@ if ($isDrh || $droitAll) {
     print "$('input[name=show_groups_cp]').change(function() {";
     print "$('#searchForm').submit();";
     print "});";
+    print 'setTimeout(function(){';
+    print '$("#search_valideur").select2({ width: "200px" });';
+    print '$("#search_employe").select2({ width: "200px" });';
+    print '}, 0);';
     print '});';
     print '</script>';
 }
 print '<table class="noborder" width="100%;">';
 print "<tr class=\"liste_titre\">";
+print '<td></td>';
 print_liste_field_titre($langs->trans("Ref"), $_SERVER["PHP_SELF"], "cp.rowid", "", $morefiltre, '', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("DateCreateCP"), $_SERVER["PHP_SELF"], "cp.date_create", "", $morefiltre, 'align="center"', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("Type"), $_SERVER["PHP_SELF"], "cp.type_conges", "", $morefiltre, 'align="center"', $sortfield, $sortorder);
@@ -333,11 +338,16 @@ print_liste_field_titre($langs->trans("DateDebCP"), $_SERVER["PHP_SELF"], "cp.da
 print_liste_field_titre($langs->trans("DateFinCP"), $_SERVER["PHP_SELF"], "cp.date_fin", "", $morefiltre, 'align="center"', $sortfield, $sortorder);
 print_liste_field_titre($langs->trans("Duration"));
 print_liste_field_titre($langs->trans("Status"), $_SERVER["PHP_SELF"], "cp.statut", "", $morefiltre, 'align="center"', $sortfield, $sortorder);
-print '<td></td>';
 print "</tr>\n";
 
-// FILTRES
+// ACTION
 print '<tr class="liste_titre">';
+print '<td align="right">';
+print '<input type="image" class="liste_titre" name="button_search" src="' . img_picto($langs->trans("Search"), 'search.png', '', '', 1) . '" alt="' . $langs->trans('Search') . '">';
+print '</td>';
+
+
+// FILTRES
 print '<td class="liste_titre" align="left" width="50">';
 print '<input class="flat" size="4" type="text" name="search_ref" value="' . $search_ref . '">';
 print '</td>';
@@ -403,11 +413,6 @@ print '<td class="liste_titre" width="70px;" align="center">';
 $holiday->selectStatutCP($search_statut);
 print '</td>';
 
-// ACTION
-print '<td align="right">';
-print '<input type="image" class="liste_titre" name="button_search" src="' . img_picto($langs->trans("Search"), 'search.png', '', '', 1) . '" alt="' . $langs->trans('Search') . '">';
-print '</td>';
-
 print "</tr>\n";
 
 
@@ -439,7 +444,7 @@ if (!empty($holiday->holiday)) {
 
         $tabColor = array("16"=>"green", "17"=>"blue", "18"=>"orange", "19"=>"purple");
         print '<tr ' . $bc[$var] . '  style=" color:'.$tabColor[dol_print_date($infos_CP['date_debut'], '%y')].'">';
-        print '<td>';
+        print '<td colspan="2">';
         $holidaystatic->id = $infos_CP['rowid'];
         $holidaystatic->ref = $infos_CP['rowid'];
         print $holidaystatic->getNomUrl(1);
@@ -463,7 +468,7 @@ if (!empty($holiday->holiday)) {
         print '<td align="right">';
         $nbopenedday = num_open_day($infos_CP['date_debut_gmt'], $infos_CP['date_fin_gmt'], 0, 1, $infos_CP['halfday']);
         print $nbopenedday . ' ' . $langs->trans('DurationDays');
-        print '<td align="right" colspan="2">' . $holidaystatic->LibStatut($infos_CP['statut'], 5) . '</td>';
+        print '<td align="right" colspan="1">' . $holidaystatic->LibStatut($infos_CP['statut'], 5) . '</td>';
         print '</tr>' . "\n";
     }
 }
@@ -471,7 +476,7 @@ if (!empty($holiday->holiday)) {
 // Si il n'y a pas d'enregistrement suite à une recherche
 if ($holiday_payes == '2') {
     print '<tr>';
-    print '<td colspan="9" class="pair" style="text-align: center; padding: 5px;">' . $langs->trans('None') . '</td>';
+    print '<td colspan="10" class="pair" style="text-align: center; padding: 5px;">' . $langs->trans('None') . '</td>';
     print '</tr>';
 }
 

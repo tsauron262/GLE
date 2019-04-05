@@ -85,6 +85,12 @@ fields:
         object: contrat
         values:
             array: list_contrat
+    fk_facture:
+        label: Facture
+        type: id_object
+        object: facture
+        values:
+            array: list_facture
     fk_statut:
         label: Statut
         type: int
@@ -419,6 +425,9 @@ fields_tables:
             - field: fk_contrat 
               display: nom_url
               edit: 1
+            - field: fk_facture
+              display: nom_url
+              edit: 1
             - field: fk_user_author
               display: nom_url 
     price:
@@ -459,6 +468,12 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: lien
+                      
+#                - type: custom
+#                  col_lg: 6
+#                  custom:
+#                     callback: renderFacture
+
             
                 - type: fields_table
                   col_lg: 6

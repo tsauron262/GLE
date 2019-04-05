@@ -325,5 +325,9 @@ class BIC_UserClient extends BimpObject {
             ;
         return $s;
     }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        parent::create($warnings, $force_create);
+    }
 
 }

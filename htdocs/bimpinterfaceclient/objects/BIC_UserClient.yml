@@ -108,8 +108,6 @@ lists:
                 field: role
             status:
                 field: status
-            attached_societe:
-                field: attached_societe
     full:
         extends: default
         edit_form: editFull

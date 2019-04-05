@@ -281,7 +281,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             if (!$login.length) {
                 if (typeof (dol_url_root) !== 'undefined') {
                     var html = '<div id="bimp_login_popup">';
-                    if(!context == "public"){
+                    if(context != "public"){
                         html += '<iframe id="bimp_login_iframe" frameborder="0" src="' + dol_url_root + '/bimpcore/ajax_login.php"></iframe>';
                         
                     }

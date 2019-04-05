@@ -60,7 +60,7 @@ class ActionsBimpcore
                     }
                 }
                 
-                if (is_object($langs) && (!class_exists('BimpTools') || BimpTools::getContext() == "private")) {
+                if (is_object($langs) && (!class_exists('BimpTools') || BimpTools::getContext() != "public")) {
                     $this->bimp_fixe_tabs = new FixeTabs();                
                     if($this->bimp_fixe_tabs->can("view")){
                         $this->bimp_fixe_tabs->init();

@@ -49,7 +49,7 @@ class public_indexController extends Bimp_user_client_controller {
             $return .= '</p>';
             $return .= '</div>';
             $return .= '<div class="content"><div class="footer"><div class="legend">';
-            $return .= ($valide) ? '<i class="fa fa-plus text-success"></i> <a href="'.DOL_URL_ROOT.'/bimpinterfaceclient/?fc=ticket&contrat='.$id_contrat.'">Créer un ticket support</a>' : '';
+            $return .= ($valide) ? '<i class="fa fa-plus text-success"></i> <a href="'.DOL_URL_ROOT.'/bimpinterfaceclient/?fc=contrat_ticket&contrat='.$id_contrat.'">Créer un ticket support</a>' : '';
             $return .= '<i class="fa fa-eye text-info"></i> Voir le contrat</div><hr><div class="stats"></div></div></div>';
             $return .= '</div></div>';
         }

@@ -580,4 +580,16 @@ class BS_Ticket extends BimpObject
 
         return $buttons;
     }
+    
+     public function canClientView() {
+        return true;
+    }
+
+    public function canClientEdit() {
+        return true;
+    }
+
+    public function canClientCreate() {
+        return true;
+    }
 }

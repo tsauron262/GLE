@@ -99,10 +99,10 @@ $content_request = $_REQUEST['fc'];
                             if (count(BIC_UserClient::$langs_list) > 1) {
                                 foreach (BIC_UserClient::$langs_list as $idT => $valT) {
                                     echo '
-                                    <div class="css-tooltip bottom">
-                                        <li><a href="?new_lang=' . $idT . '" class=""><img width="20px" src="' . DOL_URL_ROOT . '/bimpinterfaceclient/views/img/lang/' . strtolower($valT) . '.png" /></a></li>
-                                        <span class="tt-content">' . $langs->trans('menuLang-' . $valT) . '</span>
-                                    </div>';
+                                            <div class="css-tooltip bottom">
+                                                <li><a href="?new_lang=' . $idT . '" class=""><img width="20px" src="' . DOL_URL_ROOT . '/bimpinterfaceclient/views/img/lang/' . strtolower($valT) . '.png" /></a></li>
+                                                <span class="tt-content">' . $langs->trans('menuLang-' . $valT) . '</span>
+                                            </div>';
                                 }
                             }
                             ?>

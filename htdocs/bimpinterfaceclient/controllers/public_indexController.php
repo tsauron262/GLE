@@ -42,18 +42,7 @@ class public_indexController extends Bimp_user_client_controller {
     public function display_list_card($objects, $valide = false) {
         $return = "";
         foreach ($objects as $id_contrat => $object) { // Display client card dans contrac
-            $return .= '<div class="col-md-4">';
-            $return .= '<div class="card">';
-            $return .= '<div class="header">';
-            $return .= '<h4 class="title">' . $object->getName() . '</h4>';
-            $return .= '<p class="category">';
-            $return .= ($valide) ? 'Contrat en cours de vadité' : 'Contrat échu';
-            $return .= '</p>';
-            $return .= '</div>';
-            $return .= '<div class="content"><div class="footer"><div class="legend">';
-            $return .= ($valide) ? '<i class="fa fa-plus text-success"></i> <a href="?fc=contrat_ticket&id='.$object->id.'">Créer un ticket support</a>' : '';
-            $return .= '<i class="fa fa-eye text-info"></i> Voir le contrat</div><hr><div class="stats"></div></div></div>';
-            $return .= '</div></div>';
+           $return .= $object->display_card();
         }
         return $return;
     }

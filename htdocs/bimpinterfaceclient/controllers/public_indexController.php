@@ -39,7 +39,7 @@ class public_indexController extends Bimp_user_client_controller {
         return $html;
     }
 
-    public function display_list_card($objects, $valide = false) {
+    public function display_list_card($objects) {
         $return = "";
         foreach ($objects as $id_contrat => $object) { // Display client card dans contrac
            $return .= $object->display_card();

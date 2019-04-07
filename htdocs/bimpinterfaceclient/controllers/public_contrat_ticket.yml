@@ -8,6 +8,10 @@ objects:
                 name: BContract_contrat
             id_object:
                 request: id
+    
+    tickets:
+        instance:
+            bimp_object: BIC_UserTickets
                 
 sections:
     - type: object_header
@@ -15,25 +19,20 @@ sections:
           object: contrat
     - type: nav_tabs
       nav_tabs: 
-          - id: fiche_contrat
-            title: Fiche contrat
+          - id: details_contrat
+            title: Détails du contrat
             struct: 
                 type: view
                 view: 
                     panel: 1
                     name: fiche_contrat
                     object: contrat
-          - id: contenu_contrat
-            title: Contenu
-          - id: contact_adresse_contrat
-            title: Contact / Adresse
-          - id: fichier_contrat
-            title: Fichiers
-            struct: 
-                type: view
-                view: 
+          - id: tickets
+            title: Tickets support
+            struct:
+                type: list
+                list:
                     panel: 1
-                    name: file
-                    object: contrat
-          - id: suivi
-            title: Suivi
+                    name: interface_client
+                    object: tickets
+                

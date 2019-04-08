@@ -1,0 +1,2 @@
+ALTER TABLE `llx_be_equipment` ADD `achat_tva_tx` DECIMAL(3,3) NULL DEFAULT NULL AFTER `prix_achat`;
+ALTER TABLE `llx_be_equipment` ADD `vente_tva_tx` DECIMAL(3,3) NULL DEFAULT NULL AFTER `prix_vente_except`; 

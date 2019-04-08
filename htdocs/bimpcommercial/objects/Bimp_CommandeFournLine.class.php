@@ -428,6 +428,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return $errors;
         }
 
+
         if ($reception->getData('status') === BL_CommandeFournReception::BLCFR_BROUILLON) {
             if ($this->isProductSerialisable()) {
                 if (isset($data['serials']) && !empty($data['serials'])) {
@@ -620,9 +621,15 @@ class Bimp_CommandeFournLine extends FournObjectLine
         
     }
 
-    public function validateReception($id_reception)
+    public function validateReception($id_reception, $check_data = true)
     {
         $errors = array();
+
+        $reception_data = $this->getReceptionData((int) $id_reception);
+
+        if (!isset($reception_data['qty']) || !(float) $reception_data['qty']) {
+            return array();
+        }
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la ligne de commande fournisseur absent';
@@ -639,6 +646,14 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return $errors;
         }
 
+        $isSerialisable = $product->isSerialisable();
+
+        $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+        if (!BimpObject::objectLoaded($reception)) {
+            $errors[] = 'La réception d\'ID ' . $id_reception . ' n\'existe pas';
+            return $errors;
+        }
+
         $entrepot = $reception->getChildObject('entrepot');
 
         if (!BimpObject::objectLoaded($entrepot)) {
@@ -652,64 +667,34 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return $errors;
         }
 
-        $pa_ht = isset($reception_data['pa_ht']) && !is_null($reception_data['pa_ht']) ? (float) $reception_data['pa_ht'] : (float) $this->pu_ht;
-        $tva_tx = isset($reception_data['tva_tx']) && !is_null($reception_data['tva_tx']) ? (float) $reception_data['tva_tx'] : (float) $this->tva_tx;
+        if ($check_data) {
+            $errors = $this->checkReceptionData($id_reception, $reception_data);
+            if (count($errors)) {
+                return $errors;
+            }
+        }
+
         $equipments = array();
-
-        $serialisable = $product->isSerialisable();
-
-        $total_qty = (float) $this->qty;
-        $received_qty = (float) $this->getReceivedQty();
-        $remain_qty = $total_qty - $received_qty;
-
-        if ($serialisable) {
-            $serials = isset($reception_data['serials']) ? $reception_data['serials'] : '';
-            if ($serials) {
-                $serials = str_replace("\n", ';', $serials);
-                $serials = str_replace(" ", ';', $serials);
-                $serials = str_replace(",", ';', $serials);
-                $serials = explode(';', $serials);
-                foreach ($serials as $idx => $serial) {
-                    if (!(string) $serial) {
-                        unset($serials[$idx]);
-                    }
-                }
-            } else {
-                $serials = array();
-            }
-
-            $qty = count($serials);
-
-            if ($qty > $remain_qty) {
-                $errors[] = 'Il ne reste que ' . $remain_qty . ' équipements à réceptionner pour cette ligne de commande fournisseur.<br/>Veuillez retirer ' . ($qty - $remain_qty) . ' numéro(s) de série';
-            }
-        } else {
-            $qty = isset($reception_data['qty']) ? (float) $reception_data['qty'] : 0;
-
-            if ($qty > $remain_qty) {
-                $qty = $remain_qty;
-            }
-        }
-
-        if (!$qty || count($errors)) {
-            return $errors;
-        }
 
         $stock_label = 'Réception n°' . $reception->getData('num_reception') . ' BR: ' . $reception->getData('ref') . ' - Commande fournisseur: ' . $commande_fourn->getData('ref');
         $code_mvt = 'CMDF_' . $commande_fourn->id . '_LN_' . $this->id . '_RECEP_' . $reception->id;
 
-        if ($serialisable) {
-            foreach ($serials as $serial) {
+        if ($isSerialisable) {
+            foreach ($reception_data['serials'] as $serial_data) {
                 // Création de l'équipement: 
                 $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
+
+                $pu_ht = (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->pu_ht);
+                $tva_tx = (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $this->tva_tx);
 
                 $eq_errors = $equipment->validateArray(array(
                     'id_product'    => $product->id,
                     'type'          => 1, // Dans produits? à sélectionner ? 
-                    'serial'        => $serial,
+                    'serial'        => $serial_data['serial'],
                     'available'     => 1,
                     'date_purchase' => $commande_fourn->getData('date_commande'),
-                    'prix_achat'    => $pa_ht
+                    'prix_achat'    => $pu_ht,
+                    'achat_tva_tx'  => $tva_tx
                 ));
 
                 $eq_warnings = array();
@@ -719,14 +704,13 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                 if (count($eq_errors)) {
                     $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Echec de la création de l\'équipement pour le numéro de série "' . $serial . '"');
-                    $qty--;
                 }
 
                 if (count($eq_warnings)) {
                     $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Des erreurs sont survenues suite à la création de l\'équipement pour le numéro de série "' . $serial . '"');
                 }
 
-                if (!count($eq_errors)) {
+                if (!count($eq_errors) && !count($eq_warnings)) {
                     $equipments[] = $equipment->id;
 
                     // Création de l'emplacement: 
@@ -744,68 +728,44 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         $pl_errors = $place->create($pl_warnings, true);
                     }
 
-                    if (count($pl_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($pl_errors, 'Echec de la création de l\'emplacement pour le numéro de série "' . $serial . '"');
-                        $msg = 'ECHEC CREATION EMPLACEMENT EQUIPEMENT - A CORRIGER MANUELLEMENT' . "\n";
-                        $msg .= 'Plateforme: ' . DOL_URL_ROOT . ' - Equipement: ' . $equipment->id . ' - Entrepot: ' . $entrepot->id;
-                        $msg .= 'Erreurs:' . "\n";
-                        $msg .= print_r($pl_errors, 1);
-                        dol_syslog($msg, LOG_ERR);
-                        mailSyn2('[ERREUR]', 'debugerp@bimp.fr', 'BIMP<no-reply@bimp.fr>', $msg);
-                    }
+                    // Commenté car si erreurs la validation de la réception sera annulée
+//                    if (count($pl_errors)) {
+//                        $errors[] = BimpTools::getMsgFromArray($pl_errors, 'Echec de la création de l\'emplacement pour le numéro de série "' . $serial . '"');
+//                        $msg = 'ECHEC CREATION EMPLACEMENT EQUIPEMENT - A CORRIGER MANUELLEMENT' . "\n";
+//                        $msg .= 'Plateforme: ' . DOL_URL_ROOT . ' - Equipement: ' . $equipment->id . ' - Entrepot: ' . $entrepot->id;
+//                        $msg .= 'Erreurs:' . "\n";
+//                        $msg .= print_r($pl_errors, 1);
+//                        dol_syslog($msg, LOG_ERR);
+//                        mailSyn2('[ERREUR]', 'debugerp@bimp.fr', 'BIMP<no-reply@bimp.fr>', $msg);
+//                    }
                 }
             }
         } else {
             // Incrémentation des stocks produit: 
             global $user;
-            $product->dol_object->correct_stock($user, $entrepot->id, $qty, 0, $stock_label, $code_mvt);
+            $product->dol_object->correct_stock($user, $entrepot->id, (int) $reception_data['qty'], 0, $stock_label, $code_mvt);
         }
 
+        $reception_data['equipments'] = $equipments;
+        
         if ($this->getData('linked_object_name') === 'commande_line') {
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
             if (!BimpObject::objectLoaded($line)) {
                 $errors[] = 'La ligne de commande client associée n\'existe plus';
             } else {
-                if ($serialisable && isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
+                if ($isSerialisable && isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
                     // Attribution des équipements si serialisable.
                     $line->addEquipments($equipments);
                 } else {
                     // Màj statuts.
-                    $line->addReceivedQty($qty);
+                    $line->addReceivedQty((int) $reception_data['qty']);
                 }
             }
         }
 
         $receptions = $this->getData('receptions');
 
-        if (!isset($receptions[(int) $reception->id])) {
-            $receptions[(int) $reception->id] = array(
-                'id_reception' => (int) $reception->id,
-                'qty'          => 0,
-                'pa_ht'        => array(),
-                'tva_tx'       => array()
-            );
-            if ($serialisable) {
-                $receptions[(int) $reception->id]['equipments'] = array();
-            }
-        }
-
-        $receptions[(int) $reception->id]['qty'] += $qty;
-        if ($serialisable) {
-            $receptions[(int) $reception->id]['equipments'] = array_merge($receptions[(int) $reception->id]['equipments'], $equipments);
-        }
-
-        if (!isset($receptions[(int) $reception->id]['pa_ht'][(float) $pa_ht])) {
-            $receptions[(int) $reception->id]['pa_ht'][(float) $pa_ht] = 0;
-        }
-
-        $receptions[(int) $reception->id]['pa_ht'][(float) $pa_ht] += $qty;
-
-        if (!isset($receptions[(int) $reception->id]['tva_tx'][(float) $tva_tx])) {
-            $receptions[(int) $reception->id]['tva_tx'][(float) $tva_tx] = 0;
-        }
-
-        $receptions[(int) $reception->id]['tva_tx'][(float) $tva_tx] += $qty;
+        $receptions[(int) $reception->id] = $reception_data;
 
         $this->set('receptions', $receptions);
         $up_warnings = array();

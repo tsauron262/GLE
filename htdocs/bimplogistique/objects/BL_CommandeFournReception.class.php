@@ -477,6 +477,11 @@ class BL_CommandeFournReception extends BimpObject
 
     // Traitements
 
+    public function processLinesFormData($data)
+    {
+        
+    }
+
     public function checkLinesData($lines_data)
     {
         $errors = array();
@@ -525,7 +530,41 @@ class BL_CommandeFournReception extends BimpObject
 
     public function validateReception()
     {
-        
+        $errors = array();
+
+        $commande = $this->getParentInstance();
+        if (!BimpObject::objectLoaded($commande)) {
+            $errors[] = 'ID de la commande fournisseur absent';
+            return $errors;
+        }
+
+        BimpObject::loadClass('bimpcommercial', 'ObjectLine');
+
+        $lines = $commande->getChildrenObjects('lines', array(
+            'type' => array(
+                'in' => array(ObjectLine::LINE_PRODUCT, ObjectLine::LINE_FREE)
+            )
+        ));
+
+        $lines_done = array();
+
+        foreach ($lines as $line) {
+            $line_errors = $line->validateReception((int) $this->id);
+
+            if (count($line_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+            } else {
+                $lines_done[] = $line;
+            }
+        }
+
+        if (count($errors)) {
+            foreach ($lines_done as $line) {
+                $line->cancelReceptionValidation((int) $this->id);
+            }
+        }
+
+        return $errors;
     }
 
     // Actions: 
@@ -568,7 +607,7 @@ class BL_CommandeFournReception extends BimpObject
                             }
                         }
                     }
-                    
+
 
                     if (isset($line_data['serials']) && !empty($line_data['serials'])) {
                         foreach ($line_data['serials'] as $serial_data) {
@@ -624,6 +663,23 @@ class BL_CommandeFournReception extends BimpObject
         $warnings = array();
         $success = '';
 
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la réception absent';
+        } else {
+            $lines_data = $this->processLinesFormData($data, $errors);
+
+            if (!count($errors)) {
+                $errors = $this->checkLinesData($lines_data);
+
+                if (!count($errors)) {
+                    $errors = $this->saveLinesData($lines_data);
+
+                    if (!count($errors)) {
+                        $errors = $this->validateReception();
+                    }
+                }
+            }
+        }
 
         return array(
             'errors'   => $errors,

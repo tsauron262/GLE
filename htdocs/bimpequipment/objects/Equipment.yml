@@ -152,11 +152,15 @@ fields:
     warranty_type: 
         label: Type de garantie
         type: string
-            
+        
     prix_achat:
         label: Prix d'achat HT
         type: money
         default_value: 0
+        
+    achat_tva_tx: 
+        label: Tx TVA achat
+        type: percent
         
     prix_vente_except: 
         label: Prix de vente exceptionnel (TTC)
@@ -164,6 +168,9 @@ fields:
         default_value: 0
         input: 
             help: Laisser vide pour utiliser le prix de vente du produit
+    vente_tva_tx: 
+        label: Tx TVA vente
+        type: percent
         
     prix_vente: 
         label: Prix de vente

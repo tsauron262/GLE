@@ -4,7 +4,9 @@ class public_indexController extends Bimp_user_client_controller {
 
     public function renderHtml() {
         global $langs, $userClient;
-
+        if(!is_object($userClient)) {
+            return BimpRender::renderAlerts('Problème de contexte', 'danger', false);
+        }
         $valide_contrat = $userClient->getContratVisible(true);
         // $valide_contrat = Array(); // Simuler que la société n'est pas sous contrat
         $all_contrat = $userClient->getContratVisible();
@@ -37,21 +39,10 @@ class public_indexController extends Bimp_user_client_controller {
         return $html;
     }
 
-    public function display_list_card($object, $valide = false) {
+    public function display_list_card($objects) {
         $return = "";
-        foreach ($object as $id_contrat => $ref) {
-            $return .= '<div class="col-md-4">';
-            $return .= '<div class="card">';
-            $return .= '<div class="header">';
-            $return .= '<h4 class="title">' . $ref . '</h4>';
-            $return .= '<p class="category">';
-            $return .= ($valide) ? 'Contrat en cours de vadité' : 'Contrat échu';
-            $return .= '</p>';
-            $return .= '</div>';
-            $return .= '<div class="content"><div class="footer"><div class="legend">';
-            $return .= ($valide) ? '<i class="fa fa-plus text-success"></i> <a href="?fc=contrat_ticket&contrat='.$id_contrat.'">Créer un ticket support</a>' : '';
-            $return .= '<i class="fa fa-eye text-info"></i> Voir le contrat</div><hr><div class="stats"></div></div></div>';
-            $return .= '</div></div>';
+        foreach ($objects as $id_contrat => $object) { // Display client card dans contrac
+           $return .= $object->display_card();
         }
         return $return;
     }

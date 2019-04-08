@@ -235,7 +235,7 @@ class BIC_UserClient extends BimpObject {
         }
         else{
             foreach($socContrats as $contrat){
-                if(1/*on test la visiblité du contrat*/)
+                if($contrat->can('view'))
                     $retour[] = $contrat;
             }
         }
@@ -246,21 +246,21 @@ class BIC_UserClient extends BimpObject {
         //renvoie tous les contrat de nottre soc avec suivant $ouvert que les actifs ou tous
         $contrat = $this->getInstance('bimpcontract', 'BContract_contrat');
         $list = $contrat->getList(Array('fk_soc' => $this->getData('attached_societe')));
-        if($ouvert) {
+        //if($ouvert) {
             $return = Array();
             foreach($list as $on_contrat){
                 $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $on_contrat['rowid']);
-                if($instance->isValide()) {
-                    $return[$on_contrat['rowid']] = $on_contrat['ref'];
+                if($ouvert == false || $instance->isValide()) {
+                    $return[$on_contrat['rowid']] = $instance; // Passer tous l'object
                 }
                 $instance = null;
             }
             return $return;
-        } else {
-            foreach ($list as $on_contrat) {
-                $return[$on_contrat['rowid']] = $on_contrat['ref'];
-            }
-        }
+        //} else {
+//            foreach ($list as $on_contrat) {
+//                $return[$on_contrat['rowid']] = $on_contrat['ref'];
+//            }
+        //}
         
         return $return;
     }
@@ -324,6 +324,11 @@ class BIC_UserClient extends BimpObject {
         for ($i = 0, $z = strlen($c) - 1, $s = $c{rand(0, $z)}, $i = 1; $i != $l; $x = rand(0, $z), $s .= $c{$x}, $s = ($s{$i} == $s{$i - 1} ? substr($s, 0, -1) : $s), $i = strlen($s))
             ;
         return $s;
+    }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        parent::create($warnings, $force_create);
+        //BimpTools::getValue('send_mail');
     }
 
 }

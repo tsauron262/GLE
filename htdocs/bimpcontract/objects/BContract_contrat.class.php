@@ -101,7 +101,11 @@ class BContract_contrat extends BimpDolObject {
         $dateTime->sub(new DateInterval("P1D"));
         return $dateTime->format('d / m / Y');
     }
-
+    
+    public function getEndDate() {
+        
+    }
+    
     public function getActionsButtons() {
         $buttons = array();
         if ($this->getData('statut') != self::CONTRAT_STATUS_VALIDE) {
@@ -133,7 +137,6 @@ class BContract_contrat extends BimpDolObject {
             if ($fin - $aujourdhui > 0) {
                 return true;
             }
-            echo 'Nouveaux contrats <br />';
         } else { // On est dans les anciens contrats
             $lines = $this->dol_object->lines; // Changera quand l'objet BContract_contratLine sera OP
             foreach ($lines as $line) {
@@ -143,6 +146,29 @@ class BContract_contrat extends BimpDolObject {
                 }
         }
         return false;
+    }
+    
+    public function display_card(){
+        $card = "";
+        
+        $card .= '<div class="col-md-4">';
+        $card .= '<div class="card">';
+        $card .= '<div class="header">';
+        $card .= '<h4 class="title">' . $this->getName() . '</h4>';
+        $card .= '<p class="category">';
+        $card .= ($this->isValide()) ? 'Contrat en cours de vadité' : 'Contrat échu';
+        $card .= '</p>';
+        $card .= '</div>';
+        $card .= '<div class="content"><div class="footer"><div class="legend">';
+        $card .= ($this->isValide()) ? '<i class="fa fa-plus text-success"></i> <a href="?fc=contrat_ticket&id='.$this->getData('id').'">Créer un ticket support</a>' : '';
+        $card .= '<i class="fa fa-eye text-info"></i> Voir le contrat</div><hr><div class="stats"></div></div></div>';
+        $card .= '</div></div>';
+        
+        return $card;
+    }
+    
+    public function getName() {
+        return $this->getData('ref');
     }
 
 }

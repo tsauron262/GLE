@@ -108,6 +108,8 @@ lists:
                 field: role
             status:
                 field: status
+            lang:
+                field: lang
     full:
         extends: default
         edit_form: editFull

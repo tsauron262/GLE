@@ -2186,4 +2186,13 @@ class BimpComm extends BimpDolObject
 
         return 1;
     }
+    
+    public function getDefaultEntrepot(){
+        global $user;
+        if(!isset($user->array_options)){
+            $user->fetch_optionals();
+        }
+        if(isset($user->array_options["options_defaultentrepot"]))
+            return $user->array_options["options_defaultentrepot"];
+    }
 }

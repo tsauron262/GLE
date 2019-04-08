@@ -147,14 +147,14 @@ class ObjectLine extends BimpObject
 
         return 1;
     }
-    
+
     public function isProductSerialisable()
     {
         $product = $this->getProduct();
         if (BimpObject::objectLoaded($product)) {
             return (int) $product->isSerialisable();
         }
-        
+
         return 0;
     }
 
@@ -1921,6 +1921,8 @@ class ObjectLine extends BimpObject
             }
         }
         return $position;
+    }
+
     public function setEquipments($equipments, &$equipments_set = array())
     {
         $errors = array();
@@ -1996,7 +1998,6 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-//
     public function addEquipment($id_equipment, $pu_ht = null, $tva_tx = null, $pa_ht = null, $id_fourn_price = null)
     {
         $errors = array();

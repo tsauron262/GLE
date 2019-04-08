@@ -18,6 +18,7 @@ class BimpInput
             global $db;
             $form = new Form($db);
         }
+        
         $extra_class = isset($options['extra_class']) ? $options['extra_class'] : '';
 
         switch ($type) {

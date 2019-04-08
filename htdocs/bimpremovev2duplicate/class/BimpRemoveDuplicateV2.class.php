@@ -67,6 +67,7 @@ class BimpRemoveDuplicateCustomerV2 {
         $sql2 = 'SELECT rowid, nom, email, address, zip, town, phone, datec, siret';
         $sql2 .= ' FROM ' . MAIN_DB_PREFIX . 'societe';
         $sql2 .= ' WHERE duplicate=0';
+        $sql2 .= ' ORDER BY rowid';
         $result2 = $this->db->query($sql2);
         if ($result2) {
             while ($obj2 = $this->db->fetch_object($result2)) {
@@ -86,6 +87,7 @@ class BimpRemoveDuplicateCustomerV2 {
             $sql .= ' WHERE duplicate=0';
             $sql .= ' AND sc.fk_soc=s.rowid';
             $sql .= ' AND sc.fk_user IN (' . implode(',', $commercial) . ')';
+            $sql .= ' ORDER BY s.rowid';
 
 
             $result = $this->db->query($sql);
@@ -215,6 +217,7 @@ class BimpRemoveDuplicateCustomerV2 {
             $ids_processed[] = $a->rowid;
             foreach ($customers2 as $j => $b) {
                 if ($a->rowid != $b->rowid and $this->compare($a, $b) == 1) {
+                    $customers[$i]->not_processed = true;
                     $a->commerciaux = $this->getCommerciaux($a->rowid);
                     $b->commerciaux = $this->getCommerciaux($b->rowid);
                     if (isset($a->grp)) {
@@ -231,25 +234,15 @@ class BimpRemoveDuplicateCustomerV2 {
                     }
                     $out[$grp][$a->rowid] = $a;
                     $out[$grp][$b->rowid] = $b;
+
+                    if (end($ids_processed) == $a->rowid)
+                        array_pop($ids_processed);
                 }
             }
             if ($limit <= $i)
                 break;
         }
-
         $this->setAsProcessed($ids_processed);
-
-        // Create group and push customer in each group
-//        $duplicate = array();
-//        foreach ($customers2 as $key => $c) {
-//            if (isset($c->grp)) {
-//                $customers2[$key]->commerciaux = $this->getCommerciaux($c->rowid);
-//                if (isset($duplicate[$c->grp]))
-//                    $duplicate[$c->grp][] = $c;
-//                else
-//                    $duplicate[$c->grp] = array($c);
-//            }
-//        }
 
         return $out;
     }
@@ -262,9 +255,11 @@ class BimpRemoveDuplicateCustomerV2 {
         try {
             $this->db->query($sql);
             $this->db->commit();
+            return 1;
         } catch (Exception $e) {
             $this->errors[] = $e->getMessage();
             $this->db->rollback();
+            return 0;
         }
     }
 

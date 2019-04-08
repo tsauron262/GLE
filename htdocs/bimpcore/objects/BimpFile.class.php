@@ -457,7 +457,7 @@ class BimpFile extends BimpObject
             return array('ID ' . $this->getLabel('of_the') . ' absent');
         }
 
-        if (!$force_delete && !$this->canDelete()) {
+        if (!$force_delete && !$this->can("delete")) {
             return array('Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this'));
         }
 

@@ -29,7 +29,7 @@ class FixeTabs_bimpsupport extends FixeTabs_module{
         $this->initTimers($timers);
     }
     
-    function canView(){
+    function can($right){
 //            if (userInGroupe(18, $this->user->id))
         return 1;
     }

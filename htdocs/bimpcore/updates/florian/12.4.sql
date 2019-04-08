@@ -1,8 +1,7 @@
 
-ALTER TABLE `llx_commande_fournisseur` ADD `fk_user_resp` INT UNSIGNED NOT NULL DEFAULT '0';
-ALTER TABLE `llx_commande_fournisseur` ADD `attente_info` BOOLEAN NOT NULL DEFAULT FALSE;
-ALTER TABLE `llx_commande_fournisseur` ADD `reception_status` INT NOT NULL DEFAULT '0';
-ALTER TABLE `llx_commande_fournisseur` ADD `invoice_status` INT NOT NULL DEFAULT '0';
-
-ALTER TABLE `llx_commande` ADD `shipment_status` INT NOT NULL DEFAULT '0';
-ALTER TABLE `llx_commande` ADD `invoice_status` INT NOT NULL DEFAULT '0';
+ALTER TABLE `llx_bimp_commande_fourn_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
+ALTER TABLE `llx_bimp_commande_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
+ALTER TABLE `llx_bimp_facture_fourn_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
+ALTER TABLE `llx_bimp_facture_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
+ALTER TABLE `llx_bimp_propal_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;
+ALTER TABLE `llx_bs_sav_propal_line` ADD `id_parent_line` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_line`;

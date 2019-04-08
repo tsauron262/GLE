@@ -15,5 +15,5 @@ abstract class FixeTabs_module{
     
     abstract function init();
     
-    abstract function canView();
+    abstract function can($right);
 }

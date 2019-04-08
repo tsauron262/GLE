@@ -42,9 +42,9 @@ class Bimp_Commande extends BimpComm
         return 0;
     }
 
-    public function canEdit()
+    protected function canEdit()
     {
-        return $this->canCreate();
+        return $this->can("create");
     }
 
     public function canSetAction($action)
@@ -74,7 +74,7 @@ class Bimp_Commande extends BimpComm
 
             case 'reopen':
             case 'duplicate':
-                return (int) $this->canCreate();
+                return (int) $this->can("create");
         }
         return 1;
     }
@@ -295,7 +295,7 @@ class Bimp_Commande extends BimpComm
             }
 
             // Edit (désactivé)
-//            if ($status == Commande::STATUS_VALIDATED && $this->canCreate()) {
+//            if ($status == Commande::STATUS_VALIDATED && $this->can("create")) {
 //                $buttons[] = array(
 //                    'label'   => 'Modifier',
 //                    'icon'    => 'undo',

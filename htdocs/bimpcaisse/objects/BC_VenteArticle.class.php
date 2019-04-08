@@ -32,6 +32,8 @@ class BC_VenteArticle extends BimpObject
         if ($this->isLoaded()) {
 
             $product = $this->getChildObject('product');
+            if($product->type == 1)//service
+                return 999;
             $product->load_stock();
 
             if (isset($product->stock_warehouse[(int) $id_entrepôt])) {

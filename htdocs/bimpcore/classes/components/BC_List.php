@@ -72,7 +72,7 @@ class BC_List extends BC_Panel
                 $this->params['icon'] = 'fas_list';
             }
 
-            if (!$this->object->canCreate()) {
+            if (!$this->object->can("create")) {
                 $this->params['add_btn'] = 0;
                 $this->params['add_form_name'] = null;
             }

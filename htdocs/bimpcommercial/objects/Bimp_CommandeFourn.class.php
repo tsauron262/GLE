@@ -191,9 +191,9 @@ class Bimp_CommandeFourn extends BimpComm
         return (int) $user->rights->fournisseur->commande->creer;
     }
 
-    public function canEdit()
+    protected function canEdit()
     {
-        return $this->canCreate();
+        return $this->can("create");
     }
 
     public function canDelete()
@@ -545,7 +545,7 @@ class Bimp_CommandeFourn extends BimpComm
             }
 
             // Cloner: 
-            if ($this->canCreate()) {
+            if ($this->can("create")) {
                 $buttons[] = array(
                     'label'   => 'Cloner',
                     'icon'    => 'fas_copy',

@@ -15,7 +15,7 @@ class FixeTabs
                 require_once($file);
                 $class = "FixeTabs_".$module;
                 $obj = new $class($this, $user);
-                if($obj->canView())
+                if($obj->can("view"))
                     $this->objs[] = $obj;
             }
             else
@@ -33,10 +33,10 @@ class FixeTabs
         );
     }
 
-    public function canView()
+    public function can($right)
     {
         foreach($this->objs as $obj)
-            if($obj->canView())
+            if($obj->can($right))
                 return 1;
         
         return 0;

@@ -399,6 +399,13 @@ forms:
                   type: text
               value: 
                   callback: getFactureAmountToPay
+            - custom: 1
+              label: Notifier le client
+              input_name: send_msg
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 1
                   
     close_refused: 
         title: Fermeture

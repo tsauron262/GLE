@@ -1,0 +1,5 @@
+Redirection dans l'onglet client à la place de la fiche quand on clique sur un lien vers un tier:
+class societe > méthode getNomUrl
+dans le if quand aucone option n'est définie (comportement par défaut)
+remplacer : $linkstart = '<a href="'.DOL_URL_ROOT.'/societe/card.php?socid='.$this->id;
+par :       $linkstart = '<a href="'.DOL_URL_ROOT.'/comm/card.php?socid='.$this->id;

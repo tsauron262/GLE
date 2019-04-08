@@ -1,0 +1,14 @@
+bootstrap: 1
+    
+objects:
+    userClient:
+        instance:
+            module: bimpinterfaceclient
+            bimp_object: BIC_UserClient
+
+sections:
+    - type: list
+      list:
+          panel: 1
+          name: full
+          object: userClient

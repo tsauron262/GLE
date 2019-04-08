@@ -1,0 +1,81 @@
+extends: 
+    module: bimpsupport
+    object_name: BS_Ticket
+
+objects:
+    contrat:
+        instance:
+            dol_object:
+                module: contrat
+                file: contrat
+            id_object:
+                request: id
+    
+    societe:
+        instance:
+            dol_object:
+                module: societe
+                file: societe
+            id_object:
+                field_value: id_client
+                
+fields:
+    id_contrat:
+        label: Contrat
+        type: id_object
+        object: contrat
+    
+    id_client:
+        label: Pour la société
+        type: id_object
+        object: societe
+        
+    sujet:
+        label: Sujet
+        type: text
+
+lists:
+    interface_client:
+        title: Tickets support
+        sort_field: date_create
+        sort_way: desc
+        n: 25
+        add_form_name: addUserTicket
+        add_btn_label: Nouveau ticket support
+        edit_btn: 1
+        edit_form: editUserTicket
+        list_filters: 
+            callback: getListFilters
+        add_form_values: 
+            fields:
+                status: 20
+        #page_btn: 1
+        cols:
+            id:
+            sujet:
+            client:
+                value:
+                    display: nom
+            status:
+            date_create:
+        
+forms:
+    editUserTicket:
+        rows:
+            - field: id_contrat
+              edit: 0
+            - field: status
+              edit: 0
+            - field: sujet
+            
+    addUserTicket:
+        rows:
+            - field: id_contrat
+              edit: 0
+            - field: id_client
+              edit: 0
+            - field: status
+              edit: 0
+            - field: sujet
+              required: 1
+            - field: prioritet

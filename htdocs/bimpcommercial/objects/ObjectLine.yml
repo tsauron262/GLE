@@ -43,6 +43,13 @@ fields:
         label: Ligne
         type: id
         
+    id_parent_line: 
+        label: Ligne parente
+        type: id
+        default_value: 0
+        input: 
+            type: hidden
+            
     type: 
         label: Type
         type: int
@@ -93,13 +100,7 @@ forms:
                 remises: 
                     callback: getClientDefaultRemiseFormValues
         rows: 
-            - custom: 1
-              hidden: 1
-              label: Ligne parente
-              input_name: id_parent_line
-              input: 
-                  type: hidden
-              value: 0
+            - field: id_parent_line
               
             - field: type
               hidden: 

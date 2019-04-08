@@ -146,6 +146,10 @@ class Bimp_Product extends BimpObject
         if (is_null($this->stocks)) {
             $this->fetchStocks();
         }
+        
+        if(is_null($id_entrepot) || $id_entrepot == ""){
+            $id_entrepot = self::getDefaultEntrepot();
+        }
 
         $html = '';
 

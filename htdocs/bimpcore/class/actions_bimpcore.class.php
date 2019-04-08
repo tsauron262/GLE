@@ -12,9 +12,9 @@ class ActionsBimpcore
         require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
         global $langs;
 
-        if (is_a($object, "product") || is_a($object, 'Bimp_Product')) {
+        if ((is_a($object, "product") && $object->type == 0) || is_a($object, 'Bimp_Product')) {
             BimpObject::loadClass('bimpcore', 'Bimp_Product');
-            $hookmanager->resPrint = Bimp_Product::getStockIconStatic($object->id); // $id_entrepôt facultatif, peut être null.
+            $hookmanager->resPrint = Bimp_Product::getStockIconStatic(); // $id_entrepôt facultatif, peut être null.
         }
 
         return 0;
@@ -40,7 +40,7 @@ class ActionsBimpcore
     }
     
     function setContentSecurityPolicy($parameters, &$object, &$action, $hookmanager){
-        global $conf, $user;
+        global $conf, $user, $langs;
         $html = '';
          if ($user->id > 0 && stripos($_SERVER['PHP_SELF'], "synopsistools/agenda/vue.php") < 1) {
                 if (!defined('BIMP_CONTROLLER_INIT')) {
@@ -59,10 +59,13 @@ class ActionsBimpcore
                         $html .= $main_controller->displayHeaderFiles(false);
                     }
                 }
-                $this->bimp_fixe_tabs = new FixeTabs();                
-                if($this->bimp_fixe_tabs->canView()){
-                    $this->bimp_fixe_tabs->init();
-                    $html .= $this->bimp_fixe_tabs->displayHead(false);
+                
+                if (is_object($langs) && (!class_exists('BimpTools') || BimpTools::getContext() != "public")) {
+                    $this->bimp_fixe_tabs = new FixeTabs();                
+                    if($this->bimp_fixe_tabs->can("view")){
+                        $this->bimp_fixe_tabs->init();
+                        $html .= $this->bimp_fixe_tabs->displayHead(false);
+                    }
                 }
             }
             
@@ -77,7 +80,7 @@ class ActionsBimpcore
                 $html .= BimpRender::renderAjaxModal('page_modal');
             }
             if (is_object($this->bimp_fixe_tabs) && is_a($this->bimp_fixe_tabs, 'FixeTabs')) {              
-                if($this->bimp_fixe_tabs->canView())
+                if($this->bimp_fixe_tabs->can("view"))
                     $html .= $this->bimp_fixe_tabs->render();
             }
         }
@@ -88,3 +91,5 @@ class ActionsBimpcore
         return 0;
     }
 }
+
+//require_once(DOL_DOCUMENT_ROOT."/bimptheme/main.inc.php");

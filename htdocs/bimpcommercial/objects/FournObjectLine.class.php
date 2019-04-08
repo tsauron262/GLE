@@ -76,7 +76,7 @@ class FournObjectLine extends ObjectLine
 
     public function displayLineData($field, $edit = 0, $display_name = 'default', $no_html = false)
     {
-        if ($edit && $this->isEditable() && $this->canEdit()) {
+        if ($edit && $this->isEditable() && $this->can("edit")) {
             return parent::displayLineData($field, $edit, $display_name, $no_html);
         }
 

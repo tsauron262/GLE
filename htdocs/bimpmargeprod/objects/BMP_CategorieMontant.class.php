@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT."/bimpmargeprod/objects/Abstract_margeprod.class.php";
+
 class BMP_CategorieMontant extends Abstract_margeprod
 {
 

@@ -11,13 +11,13 @@ abstract class extraFI extends BimpDolObject{
      * Gestion des droits
      */
 
-    public function canView() {
+    protected function canView() {
         return $this->getDolRights("lire");
     }
-    public function canEdit() {
+    protected function canEdit() {
         $parent = $this->getParentInstance();
         if(is_object($parent) && $parent->isLoaded())
-            return $parent->canEdit();
+            return $parent->can("edit");
         
         if($this->canEditAll())
             return 1;
@@ -33,7 +33,7 @@ abstract class extraFI extends BimpDolObject{
         return $this->getDolRights("supprimer");
     }
     public function canCreate() {
-        return ($this->canEdit() &&$this->getDolRights("creer"));
+        return ($this->can("edit") &&$this->getDolRights("creer"));
     }
     public function canViewPrice() {
         return ($this->getDolRights("voirPrix") || $this->getDolRights("config"))? 1 : 0;

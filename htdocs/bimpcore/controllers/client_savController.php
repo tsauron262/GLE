@@ -28,6 +28,8 @@ class client_savController extends BimpController
         if (!BimpTools::isSubmit('id')) {
             return BimpRender::renderAlerts('ID du client absent');
         }
+        
+        $return = '';
 
         $client = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_Client', (int) BimpTools::getValue('id', 0));
 
@@ -39,6 +41,21 @@ class client_savController extends BimpController
 
         $list = new BC_ListTable($sav, 'default', 1, null, 'SAV enregistrés pour ce client', 'wrench');
         $list->addFieldFilterValue('id_client', (int) $client->id);
-        return $list->renderHtml();
+        $return .= $list->renderHtml();
+        
+        
+        $ticket = BimpObject::getInstance('bimpsupport', 'BS_Ticket');
+
+        $list = new BC_ListTable($ticket, 'default', 1, null, 'Ticket enregistrés pour ce client', 'wrench');
+        $list->addFieldFilterValue('id_client', (int) $client->id);
+        $return .= $list->renderHtml();
+        
+        
+        $pret = BimpObject::getInstance('bimpsupport', 'BS_SavPret');
+
+        $list = new BC_ListTable($pret, 'default', 1, null, 'Pret enregistrés pour ce client', 'wrench');
+        $list->addFieldFilterValue('id_client', (int) $client->id);
+        $return .= $list->renderHtml();
+        return $return;
     }
 }

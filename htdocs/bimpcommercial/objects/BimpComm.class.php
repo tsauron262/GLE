@@ -1533,7 +1533,7 @@ class BimpComm extends BimpDolObject
     {
         $errors = array();
 
-        if (!$force_create && !$this->canCreate()) {
+        if (!$force_create && !$this->can("create")) {
             return array('Vous n\'avez pas la permission de créer ' . $this->getLabel('a'));
         }
 
@@ -1755,7 +1755,7 @@ class BimpComm extends BimpDolObject
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-        } elseif (!$this->canEdit()) {
+        } elseif (!$this->can("edit")) {
             $errors[] = 'Vous n\'avez pas la permission d\'effectuer cette action';
         } elseif (!method_exists($this->dol_object, 'set_draft')) {
             $errors[] = 'Erreur: cette action n\'est pas possible';
@@ -2157,7 +2157,7 @@ class BimpComm extends BimpDolObject
 
     // Gestion des droits: 
 
-    public function canView()
+    protected function canView()
     {
         global $user;
 

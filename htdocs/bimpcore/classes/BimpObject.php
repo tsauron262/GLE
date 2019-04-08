@@ -5472,4 +5472,14 @@ class BimpObject extends BimpCache
             return true;
         return false;
     }
+    
+    
+    public static function getDefaultEntrepot(){
+        global $user;
+        if(!isset($user->array_options)){
+            $user->fetch_optionals();
+        }
+        if(isset($user->array_options["options_defaultentrepot"]))
+            return $user->array_options["options_defaultentrepot"];
+    }
 }

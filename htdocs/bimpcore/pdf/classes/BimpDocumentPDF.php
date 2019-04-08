@@ -111,6 +111,12 @@ class BimpDocumentPDF extends BimpModelPDF
                             $mysoc->zip = $entrepot->zip;
                             $mysoc->address = $entrepot->address;
                             $mysoc->town = $entrepot->town;
+                            
+                            if($entrepot->ref == "PR"){//patch new adresse
+                                $mysoc->zip = "69760";
+                                $mysoc->address = "Bimp Groupe OLYS <br/>2 rue des Erables CS 21055  ";
+                                $mysoc->town = "LIMONEST";
+                            }
                         }
                     }
                 }

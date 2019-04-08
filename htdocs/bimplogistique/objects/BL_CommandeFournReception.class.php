@@ -637,7 +637,6 @@ class BL_CommandeFournReception extends BimpObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        BimpObject::loadClass('bimpcommercial', 'Bimp_CommandeFournLine');
         $errors = array();
 
         $commande = $this->getParentInstance();
@@ -670,60 +669,6 @@ class BL_CommandeFournReception extends BimpObject
             return $errors;
         }
 
-//        $lines = $commande->getChildrenObjects('lines', array(
-//            'type' => Bimp_CommandeFournLine::LINE_PRODUCT
-//        ));
-//
-        // Vérification du non-dépassement des qtés max: 
-//        foreach ($lines as $line) {
-//
-//            $line_errors = array();
-//
-//            if ($line->isProductSerialisable()) {
-//                $serials = BimpTools::isSubmit('line_' . $line->id . '_reception_1_equipments', '');
-//                $line_errors = $line->checkReceptionSerials($serials);
-//            } else {
-//                $qty = (float) BimpTools::getValue('line_' . $line->id . '_reception_1_qty', 0);
-//                $line_errors = $line->checkReceptionQty($qty);
-//            }
-//            if (count($line_errors)) {
-//                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
-//            }
-//        }
-//
-//        if (count($errors)) {
-//            return $errors;
-//        }
-
-        $errors = parent::create($warnings, $force_create);
-
-//        if (!count($errors)) {
-//            foreach ($lines as $line) {
-//                $data = array();
-//
-//                if ($line->isProductSerialisable()) {
-//                    $data['serials'] = BimpTools::getValue('line_' . $line->id . '_reception_1_equipments', '');
-//                    if (!(string) $data['serials']) {
-//                        continue;
-//                    }
-//                    $data['assign_to_commande_client'] = BimpTools::getValue('line_' . $line->id . '_assign_to_commande_client', 0);
-//                } else {
-//                    $data['qty'] = BimpTools::getValue('line_' . $line->id . '_reception_1_qty', 0);
-//                    if ($qty <= 0) {
-//                        continue;
-//                    }
-//                }
-//
-//                $data['pa_ht'] = BimpTools::getValue('line_' . $line->id . '_reception_1_pu_ht', null);
-//                $data['tva_tx'] = BimpTools::getValue('line_' . $line->id . '_reception_1_tva_tx', null);
-//
-//                $line_errors = $line->setReceptionData($this->id, $data, false);
-//                if (count($line_errors)) {
-//                    $warnings = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
-//                }
-//            }
-//        }
-
-        return $errors;
+        return parent::create($warnings, $force_create);
     }
 }

@@ -814,7 +814,7 @@ function addCommandeFournLineReceptions($button, id_line, modal_idx) {
 
             $input = $(this).find('[name="line_' + id_line + '_reception_' + idx + '_pu_ht"]');
             if ($input.length) {
-                row_data['pa_ht'] = parseFloat($input.val());
+                row_data['pu_ht'] = parseFloat($input.val());
             }
 
             $input = $(this).find('[name="line_' + id_line + '_reception_' + idx + '_tva_tx"]');

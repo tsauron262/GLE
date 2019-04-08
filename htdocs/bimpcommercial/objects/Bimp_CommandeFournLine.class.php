@@ -615,11 +615,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return $errors;
     }
 
-    public function addReception($id_reception, $data, $check_qties = true)
-    {
-        
-    }
-
     public function validateReception($id_reception)
     {
         $errors = array();
@@ -844,87 +839,114 @@ class Bimp_CommandeFournLine extends FournObjectLine
         if (!count($data)) {
             $errors[] = 'Aucunes données reçues';
         } else {
-            $product = $this->getProduct();
-            if (!BimpObject::objectLoaded($product)) {
-                $errors[] = 'Aucun produit enregistré pour cette ligne de commande fournisseur';
-            } else {
-                // Vérifications: 
-                $commande = $this->getParentInstance();
-                if (!BimpObject::objectLoaded($commande)) {
-                    $errors[] = 'ID de la commande fournisseur absent';
-                    return $errors;
-                }
+            $isSerialisable = $this->isProductSerialisable();
 
-                $remain_qty = $this->qty - $this->getReceivedQty();
-                $total_qty = 0;
-                $i = 1;
-                foreach ($data as $reception_data) {
-                    if (!isset($reception_data['id_reception']) || !(int) $reception_data['id_reception']) {
-                        $errors[] = 'Aucune réception sélectionnée pour l\'ajout n°' . $i;
+            $commande = $this->getParentInstance();
+            if (!BimpObject::objectLoaded($commande)) {
+                $errors[] = 'ID de la commande fournisseur absent';
+                return $errors;
+            }
+
+            $receptions = $this->getData('receptions');
+
+            $i = 1;
+
+            $new_receptions = array();
+
+            // Trie des données: 
+            foreach ($data as $reception_data) {
+                if (!isset($reception_data['id_reception']) || !(int) $reception_data['id_reception']) {
+                    $errors[] = 'Aucune réception sélectionnée pour l\'ajout n°' . $i;
+                } else {
+                    $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $reception_data['id_reception']);
+                    if (!BimpObject::objectLoaded($reception)) {
+                        $errors[] = 'La réception d\'ID ' . $reception_data['id_reception'] . ' n\'existe pas';
+                    } elseif ((int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_BROUILLON) {
+                        $errors[] = 'La réception n°' . $reception->getData('num_reception') . ' (' . $reception->getRef() . ') n\'est plus éditable';
                     } else {
-                        $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $reception_data['id_reception']);
-                        if (!BimpObject::objectLoaded($reception)) {
-                            $errors[] = 'La réception d\'ID ' . $reception_data['id_reception'] . ' n\'existe pas';
-                        } else {
-                            if ($product->isSerialisable()) {
-                                $serials = $reception_data['serials'];
-                                if ($serials) {
-                                    $serials = str_replace("\n", ';', $serials);
-                                    $serials = str_replace(" ", ';', $serials);
-                                    $serials = str_replace(",", ';', $serials);
-                                    $serials = explode(';', $serials);
-                                    foreach ($serials as $idx => $serial) {
-                                        if (!(string) $serial) {
-                                            unset($serials[$idx]);
-                                        }
-                                    }
-                                } else {
-                                    $serials = array();
-                                }
-                                if (!count($serials)) {
-                                    $errors[] = 'Aucun numéro de série spécifié pour l\'ajout n°' . $i;
-                                } else {
-                                    $total_qty += count($serials);
-                                }
+                        if (!in_array($reception->id, $new_receptions)) {
+                            $new_receptions[] = (int) $reception->id;
+                        }
+                        $pu_ht = (isset($reception_data['pu_ht']) ? (float) $reception_data['pu_ht'] : (float) $this->pu_ht);
+                        $tva_tx = (isset($reception_data['tva_tx']) ? (float) $reception_data['tva_tx'] : (float) $this->tva_tx);
+                        if (!isset($receptions[(int) $reception->id])) {
+                            $receptions[(int) $reception->id] = array(
+                                'qty'                       => 0,
+                                'qties'                     => array(),
+                                'serials'                   => array(),
+                                'assign_to_commande_client' => 0
+                            );
+                        }
+                        if ($isSerialisable) {
+                            $serials = $this->explodeSerials($reception_data['serials']);
+                            if (!count($serials)) {
+                                $errors[] = 'Aucun numéro de série spécifié pour l\'ajout n°' . $i;
                             } else {
-                                $total_qty += (isset($reception_data['qty']) ? (int) $reception_data['qty'] : 0);
+                                foreach ($serials as $serial) {
+                                    $receptions[(int) $reception->id]['serials'][] = array(
+                                        'serial' => $serial,
+                                        'pu_ht'  => $pu_ht,
+                                        'tva_tx' => $tva_tx
+                                    );
+                                }
+                            }
+                        } else {
+                            if (isset($reception_data['qty']) && (float) $reception_data['qty']) {
+                                $receptions[(int) $reception->id]['qty'] += (float) $reception_data['qty'];
+                                $receptions[(int) $reception->id]['qties'][] = array(
+                                    'qty'    => (float) $reception_data['qty'],
+                                    'pu_ht'  => $pu_ht,
+                                    'tva_tx' => $tva_tx
+                                );
                             }
                         }
                     }
-                    $i++;
                 }
+                $i++;
+            }
 
-                if ($total_qty > $remain_qty) {
-                    $errors[] = 'Il ne reste que ' . $remain_qty . ' unité(s) à réceptionner.<br/>Veuillez retirer ' . ($total_qty - $remain_qty) . ' unité(s).';
+            // Vérifications: 
+            foreach ($new_receptions as $id_reception) {
+                if (isset($receptions[(int) $id_reception])) {
+                    $reception_errors = $this->checkReceptionData($id_reception, $receptions[(int) $id_reception]);
+                    if (count($reception_errors)) {
+                        $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+                        if (BimpObject::objectLoaded($reception)) {
+                            $label = 'n°' . $reception->getData('num_reception') . ' (' . $reception->getRef() . ')';
+                        } else {
+                            $label = 'd\'ID ' . $id_reception;
+                        }
+                        $errors[] = BimpTools::getMsgFromArray($reception_errors, 'Réception ' . $label);
+                    }
                 }
+            }
 
-                if (count($errors)) {
-                    return $errors;
-                }
+            if (count($errors)) {
+                return $errors;
+            }
 
-                // Ajouts aux réceptions: 
-                $i = 1;
-                foreach ($data as $reception_data) {
-                    $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $reception_data['id_reception']);
-                    $reception_errors = $this->addReception($reception, $reception_data);
+            // Enregistrements: 
+            foreach ($new_receptions as $id_reception) {
+                if (isset($receptions[(int) $id_reception])) {
+                    $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+
+                    $reception_warnings = array();
+                    $reception_errors = $this->setReceptionData($id_reception, $receptions[(int) $id_reception], false, $reception_warnings);
+
+                    $reception_errors = array_merge($reception_errors, $reception_warnings);
 
                     if (count($reception_errors)) {
-                        $warnings[] = BimpTools::getMsgFromArray($reception_errors, 'Ajout n°' . $i);
+                        $warnings[] = BimpTools::getMsgFromArray($reception_errors, 'Réception n°' . $reception->getData('num_reception') . ' (' . $reception->getData('ref') . ')');
                     } else {
-                        $success .= ($success ? '<br/>' : '') . 'Ajout n°' . $i . ' (Réception: ' . $reception->getData('ref') . ') effectué avec succès';
+                        $success .= ($success ? '<br/>' : '') . 'Mise à jour de la réception n°' . $reception->getData('num_reception') . ' (' . $reception->getData('ref') . ') effectuée avec succès';
                     }
-
-                    $i++;
                 }
-
-                $commande->checkReceptionStatus();
             }
         }
 
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
-//            'success_callback' => 'bimp_reloadPage();'
         );
     }
 }

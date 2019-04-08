@@ -613,19 +613,122 @@ function addCommandeFournReceptionLineQtyRow($button, id_line) {
 
     setCommonEvents($new_row);
     setInputsEvents($new_row);
-    
+
     var $input = $new_row.find('input.qtyInput');
     if ($input.length) {
         checkTotalMaxQtyInput($input);
     }
 }
 
+function getReceptionLinesDataFromForm($content, id_reception) {
+    var lines = [];
+
+    if ($.isOk($content)) {
+        $content.find('tr.line_row').each(function () {
+            var $row = $(this);
+            var id_line = parseInt($row.data('id_line'));
+            var serialisable = parseInt($row.data('serialisable'));
+
+            if (serialisable) {
+                var serials = [];
+                $row.find('tr.line_' + id_line + '_serial_data').each(function () {
+                    var serial = $(this).find('td.serial').data('serial');
+                    var pu_ht = 0;
+                    var tva_tx = 0;
+
+                    var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_serial_' + serial + '_pu_ht"]');
+                    if ($.isOk($input)) {
+                        pu_ht = parseFloat($input.val());
+                    }
+
+                    $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_serial_' + serial + '_tva_tx"]');
+                    if ($.isOk($input)) {
+                        tva_tx = parseFloat($input.val());
+                    }
+                    serials.push({
+                        serial: serial,
+                        pu_ht: pu_ht,
+                        tva_tx: tva_tx
+                    });
+                });
+
+                var new_serials = '';
+
+                var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials"]');
+                if ($input.length) {
+                    new_serials = $input.val();
+                }
+
+                var new_serials_pu_ht = 0;
+                var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials_pu_ht"]');
+                if ($input.length) {
+                    new_serials_pu_ht = parseFloat($input.val());
+                }
+
+                var new_serials_tva_tx = 0;
+                var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials_tva_tx"]');
+                if ($input.length) {
+                    new_serials_tva_tx = parseFloat($input.val());
+                }
+
+                var assign_to_commande_client = 0;
+                var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_assign_to_commande_client"]');
+                if ($input.length) {
+                    assign_to_commande_client = parseInt($input.val());
+                }
+
+                lines.push({
+                    id_line: id_line,
+                    serials: serials,
+                    new_serials: new_serials,
+                    new_serials_pu_ht: new_serials_pu_ht,
+                    new_serials_tva_tx: new_serials_tva_tx,
+                    assign_to_commande_client: assign_to_commande_client
+                });
+            } else {
+                var qties = [];
+                $row.find('tr.line_' + id_line + '_qty_row').each(function () {
+                    var idx = parseInt($(this).data('qty_idx'));
+                    var qty = 0;
+                    var pu_ht = 0;
+                    var tva_tx = 0;
+
+                    var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_qty"]');
+                    if ($.isOk($input)) {
+                        qty = parseFloat($input.val());
+                    }
+
+                    var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_pu_ht"]');
+                    if ($.isOk($input)) {
+                        pu_ht = parseFloat($input.val());
+                    }
+
+                    $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_tva_tx"]');
+                    if ($.isOk($input)) {
+                        tva_tx = parseFloat($input.val());
+                    }
+                    qties.push({
+                        qty: qty,
+                        pu_ht: pu_ht,
+                        tva_tx: tva_tx
+                    });
+                });
+
+                lines.push({
+                    id_line: id_line,
+                    qties: qties
+                });
+            }
+        });
+    }
+
+    return lines;
+}
+
 function saveCommandeFournReceptionLinesData($button, id_reception, modal_idx) {
     if ($button.hasClass('disabled')) {
         return;
     }
-
-    var lines = [];
 
     var $modal = $button.findParentByClass('modal');
     if (!$.isOk($modal)) {
@@ -639,102 +742,7 @@ function saveCommandeFournReceptionLinesData($button, id_reception, modal_idx) {
         return;
     }
 
-    $content.find('tr.line_row').each(function () {
-        var $row = $(this);
-        var id_line = parseInt($row.data('id_line'));
-        var serialisable = parseInt($row.data('serialisable'));
-
-        if (serialisable) {
-            var serials = [];
-            $row.find('tr.line_' + id_line + '_serial_data').each(function () {
-                var serial = $(this).find('td.serial').data('serial');
-                var pu_ht = 0;
-                var tva_tx = 0;
-
-                var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_serial_' + serial + '_pu_ht"]');
-                if ($.isOk($input)) {
-                    pu_ht = parseFloat($input.val());
-                }
-
-                $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_serial_' + serial + '_tva_tx"]');
-                if ($.isOk($input)) {
-                    tva_tx = parseFloat($input.val());
-                }
-                serials.push({
-                    serial: serial,
-                    pu_ht: pu_ht,
-                    tva_tx: tva_tx
-                });
-            });
-
-            var new_serials = '';
-
-            var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials"]');
-            if ($input.length) {
-                new_serials = $input.val();
-            }
-            
-            var new_serials_pu_ht = 0;
-            var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials_pu_ht"]');
-            if ($input.length) {
-                new_serials_pu_ht = parseFloat($input.val());
-            }
-            
-            var new_serials_tva_tx = 0;
-            var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_new_serials_tva_tx"]');
-            if ($input.length) {
-                new_serials_tva_tx = parseFloat($input.val());
-            }
-            
-            var assign_to_commande_client = 0;
-            var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_assign_to_commande_client"]');
-            if ($input.length) {
-                assign_to_commande_client = parseInt($input.val());
-            }
-
-            lines.push({
-                id_line: id_line,
-                serials: serials,
-                new_serials: new_serials,
-                new_serials_pu_ht: new_serials_pu_ht,
-                new_serials_tva_tx: new_serials_tva_tx,
-                assign_to_commande_client: assign_to_commande_client
-            });
-        } else {
-            var qties = [];
-            $row.find('tr.line_' + id_line + '_qty_row').each(function () {
-                var idx = parseInt($(this).data('qty_idx'));
-                var qty = 0;
-                var pu_ht = 0;
-                var tva_tx = 0;
-
-                var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_qty"]');
-                if ($.isOk($input)) {
-                    qty = parseFloat($input.val());
-                }
-
-                var $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_pu_ht"]');
-                if ($.isOk($input)) {
-                    pu_ht = parseFloat($input.val());
-                }
-
-                $input = $(this).find('[name="line_' + id_line + '_reception_' + id_reception + '_qty_' + idx + '_tva_tx"]');
-                if ($.isOk($input)) {
-                    tva_tx = parseFloat($input.val());
-                }
-                qties.push({
-                    qty: qty,
-                    pu_ht: pu_ht,
-                    tva_tx: tva_tx
-                });
-            });
-
-            lines.push({
-                id_line: id_line,
-                qties: qties
-            });
-        }
-    });
+    var lines = getReceptionLinesDataFromForm($content, id_reception);
 
     setObjectAction($button, {
         module: 'bimplogistique',
@@ -814,7 +822,7 @@ function addCommandeFournLineReceptions($button, id_line, modal_idx) {
 
             $input = $(this).find('[name="line_' + id_line + '_reception_' + idx + '_pu_ht"]');
             if ($input.length) {
-                row_data['pa_ht'] = parseFloat($input.val());
+                row_data['pu_ht'] = parseFloat($input.val());
             }
 
             $input = $(this).find('[name="line_' + id_line + '_reception_' + idx + '_tva_tx"]');

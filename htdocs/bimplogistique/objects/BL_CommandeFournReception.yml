@@ -88,7 +88,7 @@ forms:
             - custom: 1
               input_name: lines
               content: 
-                  callback: renderValidateLinesForm
+                  callback: renderDetailsView
                  
 fields_tables: 
     data: 

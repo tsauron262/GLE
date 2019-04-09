@@ -40,6 +40,9 @@ fields:
         label: Sujet
         type: text
         require: 1
+    
+    id_user_client:
+        label: Propriétaire
 
 lists:
     interface_client:
@@ -63,7 +66,11 @@ lists:
                             - attached_societe
                 id_contrat:
                     callback: currentContrat
-                            
+                id_user_client:
+                    callback:
+                        method: userClient
+                        params:
+                            - id
         #page_btn: 1
         cols:
             id:
@@ -91,6 +98,8 @@ forms:
               edit: 0
             - field: id_contrat
               edit: 0
+            - field: id_user_client
+              edit: 0
             - field: status
               edit: 0
             - field: sujet
@@ -101,6 +110,6 @@ forms:
               input:
                   type: toggle
               value: 0
-              label: Me notifier et notifier les admins
+              label: Me notifier et notifier les admins par email
             - object: note
               multiple: 1

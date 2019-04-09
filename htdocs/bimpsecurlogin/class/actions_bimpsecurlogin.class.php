@@ -9,7 +9,7 @@ class Actionsbimpsecurlogin {
     function setContentSecurityPolicy($parameters, &$object, &$action, $hookmanager) {
         global $user, $db, $conf;
         if ($user->id > 0) {//l'adresse n'est pas wite liste et le module est activé
-            if (!class_exists('BimpTools') || BimpTools::getContext() == "private") {
+            if (!class_exists('BimpTools') || BimpTools::getContext() != "public") {
                 $secur = new securLogSms($db);
                 $secur->fetch($user);
             }

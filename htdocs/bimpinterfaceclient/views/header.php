@@ -6,8 +6,8 @@ $content_request = $_REQUEST['fc'];
 
 <body>
     <div class="wrapper">
-        <div class="sidebar" data-color="bimp" <!--data-image="assets/img/sidebar-5.jpg"-->>
-             <div class="sidebar-wrapper">
+        <div class="sidebar" data-color="bimp" >
+            <div class="sidebar-wrapper">
                 <ul class="nav">
                     <li <?= ($content_request == "") ? 'class="active"' : "" ?> >
                         <a href="?">
@@ -16,8 +16,12 @@ $content_request = $_REQUEST['fc'];
                         </a>
 
                     </li>
+
+
+
+
                     <?php
-                    if ($activate_page) {
+                    if ($userClient->i_am_admin()) {
                         ?>
                         <li <?= ($content_request == 'ticket') ? 'class="active"' : "" ?> >
                             <a href="?fc=ticket">
@@ -26,13 +30,9 @@ $content_request = $_REQUEST['fc'];
                             </a>
                         </li>
                         <?php
-                    }
-                    ?>
-
-                    <?php
-                    if ($userClient->i_am_admin()) {
                         if ($activate_page) {
                             ?>
+
                             <li <?= ($content_request == 'contrat') ? 'class="active"' : "" ?> >
                                 <a href="?fc=contrat">
                                     <i class="pe-7s-graph"></i>
@@ -103,6 +103,7 @@ $content_request = $_REQUEST['fc'];
                     </div>
                     <div class="collapse navbar-collapse">
                         <ul class="nav navbar-nav navbar-right">
+                            <li><a href="?fc=pageUser&id=<?= $userClient->getData('id') ?>">Ma page utilisateur</a></li>
                             <li><a href="#" class="passwd"><?= $langs->trans('changePassword') ?></a></li>
                             <li><a href="?action=deconnexion"><?= $langs->trans('deconnexion') ?></a></li>
                         </ul>

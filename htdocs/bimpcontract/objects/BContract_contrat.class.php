@@ -129,8 +129,6 @@ class BContract_contrat extends BimpDolObject {
             $aujourdhui = strtotime(date('Y-m-d'));
             $fin = $this->getEndDate();
             $fin = $fin->getTimestamp();
-            echo $fin . '<br />';
-            echo $this->displayEndDate() . '<br >';
             if ($fin - $aujourdhui > 0) {
                 return true;
             }

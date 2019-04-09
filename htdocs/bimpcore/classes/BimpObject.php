@@ -5029,6 +5029,17 @@ class BimpObject extends BimpCache
 
         return $html;
     }
+    
+    public function getListUrl()
+    {
+        $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+        
+        if (!$url && $this->isDolObject()) {
+            $url = BimpTools::getDolObjectListUrl($object);
+        }
+        
+        return $url;
+    }
 
     public function getChildObjectUrl($object_name, $object = null)
     {

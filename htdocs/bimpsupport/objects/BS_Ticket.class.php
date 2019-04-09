@@ -586,7 +586,11 @@ class BS_Ticket extends BimpObject
     }
 
     public function canClientEdit() {
-        return true;
+        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT) {
+            return true;
+        }
+        
+        return false;
     }
 
     public function canClientCreate() {

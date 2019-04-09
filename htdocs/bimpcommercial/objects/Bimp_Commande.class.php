@@ -891,7 +891,7 @@ class Bimp_Commande extends BimpComm
                         } else {
                             $comm_cli_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $line->getData('linked_id_object'));
                             if (BimpObject::objectLoaded($comm_cli_line)) {
-                                $html .= BimpRender::renderRowButton('Annuler', 'fas_times-circle', $comm_cli_line->getJsActionOnclick('cancelCommandeFourn', array(
+                                $html .= BimpRender::renderRowButton('Retirer de la commande fournisseur', 'fas_times-circle', $comm_cli_line->getJsActionOnclick('cancelCommandeFourn', array(
                                                     'id_commande_fourn_line' => $line->id
                                                         ), array(
                                                     'confirm_msg' => 'Veuillez confirmer le retrait de cet élément de la commande fournisseur'

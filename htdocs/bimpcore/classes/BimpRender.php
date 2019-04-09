@@ -138,6 +138,7 @@ class BimpRender
         $html .= '<' . $tag . ' class="rowButton' . ((string) $class ? ' ' . $class : '');
 
         $html .= ' bs-popover"';
+        $html .= ' data-container="body"';
         $html .= ' data-toggle="popover"';
         $html .= ' data-trigger="hover"';
         $html .= ' data-placement="top"';

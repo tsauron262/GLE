@@ -9,7 +9,7 @@ class Bimp_CommandeLine extends ObjectLine
     public static $dol_line_table = 'commandedet';
     public static $reservations_ordered_status = array(3, 100);
 
-    // Getters:
+    // Getters booléens:
 
     public function isCreatable()
     {
@@ -83,6 +83,18 @@ class Bimp_CommandeLine extends ObjectLine
         }
         return 1;
     }
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        switch ($action) {
+            case 'cancelCommandeFourn':
+
+                break;
+        }
+        return parent::isActionAllowed($action, $errors);
+    }
+
+    // Getters valeurs: 
 
     public function getMinQty()
     {
@@ -427,6 +439,19 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return $equipments;
+    }
+
+    public function getLinkedCommandeFournLine($id_commande_fourn)
+    {
+        if ($this->isLoaded() && (int) $id_commande_fourn) {
+            return BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
+                        'id_obj'             => (int) $id_commande_fourn,
+                        'linked_object_name' => 'commande_line',
+                        'linked_id_object'   => (int) $this->id
+            ));
+        }
+
+        return null;
     }
 
     // Getters Array:
@@ -1674,7 +1699,7 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         $shipment_data = $this->getShipmentData((int) $shipment->id);
-        
+
         if (!isset($shipment_data['qty']) || !(float) $shipment_data['qty']) {
             return array();
         }
@@ -2121,118 +2146,143 @@ class Bimp_CommandeLine extends ObjectLine
             } elseif (!BimpObject::objectLoaded($commande)) {
                 $errors[] = 'ID de la commande client absent';
             } else {
-                $id_entrepot = isset($data['id_entrepot']) ? (int) $data['id_entrepot'] : (int) $commande->getData('entrepot');
-
-                $type_price = isset($data['type_price']) ? (int) $data['type_price'] : 1;
-                $id_fourn = 0;
-                $pa_ht = 0;
-                $tva_tx = 0;
-
-                $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
-//                $line = new Bimp_CommandeFournLine($module, $object_name);
-                $line->validateArray(array(
-                    'type'               => ObjectLine::LINE_PRODUCT,
-                    'deletable'          => 0,
-                    'editable'           => 0,
-                    'remisable'          => 1,
-                    'linked_id_object'   => (int) $this->id,
-                    'linked_object_name' => 'commande_line'
-                ));
-                $line->id_product = (int) $product->id;
-                $line->qty = (int) $qty;
-
-
-                switch ($type_price) {
-                    case 1:
-                        $id_fourn_price = isset($data['id_fourn_price']) ? (int) $data['id_fourn_price'] : 0;
-                        if (!$id_fourn_price) {
-                            $errors[] = 'Aucun prix fournisseur sélectionné';
-                        } else {
-                            $fourn_price = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_fourn_price);
-                            if (!$fourn_price->isLoaded()) {
-                                $errors[] = 'Le prix fournisseur d\'ID ' . $id_fourn_price . ' n\'existe pas';
-                            } else {
-                                $id_fourn = (int) $fourn_price->getData('fk_soc');
-                                if (!$id_fourn) {
-                                    $errors[] = 'Aucun fournisseur associé au prix d\'achat sélectionné';
-                                } else {
-                                    $line->id_fourn_price = $id_fourn_price;
-                                }
-                            }
+                if ((int) $id_commande_fourn) {
+                    $commande_fourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $id_commande_fourn);
+                    if (!BimpObject::objectLoaded($commande_fourn)) {
+                        $errors[] = 'La commande fournisseur d\'ID ' . $id_commande_fourn . ' n\'existe pas';
+                    } else {
+                        if ((int) $commande_fourn->getData('fk_statut') !== 0) {
+                            $errors[] = 'La commande fournisseur sélectionnée n\'est plus modifiable';
                         }
-                        break;
-
-                    case 2:
-                        $id_fourn = isset($data['id_fourn']) ? (int) $data['id_fourn'] : 0;
-                        if (!$id_fourn) {
-                            $errors[] = 'Veuillez sélectionner un fournisseur';
-                        } else {
-                            $pa_ht = isset($data['pa_ht']) ? (float) $data['pa_ht'] : 0;
-                            $tva_tx = isset($data['tva_tx']) ? (float) $data['tva_tx'] : 0;
-
-                            if (!$pa_ht) {
-                                $errors[] = 'Veuillez saisir un prix d\'achat supérieur à 0';
-                            }
-                            if (!$tva_tx) {
-                                $errors[] = 'Veuillez saisir un taux de TVA supérieur à 0';
-                            }
-
-                            $line->id_fourn_price = 0;
-                            $line->tva_tx = $tva_tx;
-                            $line->pa_ht = $pa_ht;
-                        }
-                        break;
+//                        else {
+//                            $line = $this->getLinkedCommandeFournLine($id_commande_fourn);
+//                            if (BimpObject::objectLoaded($line)) {
+//                                $line->qty += (float) $qty;
+//                                $line_warnings = array();
+//                                $line_errors = $line->update($line_warnings);
+//                                
+//                                if (count($line_errors)) {
+//                                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour des quantités de la ligne de commande fournisseur');
+//                                }
+//                            }
+//                        }
+                    }
                 }
 
-                if (!count($errors)) {
-                    if ($id_commande_fourn === 'new') {
-                        $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
-                        $commande_fourn->validateArray(array(
-                            'entrepot' => $id_entrepot,
-                            'fk_soc'   => $id_fourn
-                        ));
+                if (!count($errors) && !BimpObject::objectLoaded($line)) {
+                    $id_entrepot = isset($data['id_entrepot']) ? (int) $data['id_entrepot'] : (int) $commande->getData('entrepot');
 
-                        $comm_warnings = array();
-                        $comm_errors = $commande_fourn->create($warnings, true);
+                    $type_price = isset($data['type_price']) ? (int) $data['type_price'] : 1;
+                    $id_fourn = 0;
+                    $pa_ht = 0;
+                    $tva_tx = 0;
 
-                        $comm_errors = array_merge($comm_errors, $comm_warnings);
-                        if (count($comm_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($comm_errors, 'Des erreurs sont survenues lors de la création de la commande fournisseur');
-                        }
-                    } else {
-                        $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn', $id_commande_fourn);
-                        if (!$commande_fourn->isLoaded()) {
-                            $errors[] = 'La commande fournisseur sélectionnée n\'existe plus (ID ' . $id_commande_fourn . ')';
-                        }
+                    $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+
+                    $line->validateArray(array(
+                        'type'               => ObjectLine::LINE_PRODUCT,
+                        'deletable'          => 0,
+                        'editable'           => 0,
+                        'remisable'          => 1,
+                        'linked_id_object'   => (int) $this->id,
+                        'linked_object_name' => 'commande_line'
+                    ));
+                    $line->id_product = (int) $product->id;
+                    $line->qty = (int) $qty;
+
+
+                    switch ($type_price) {
+                        case 1:
+                            $id_fourn_price = isset($data['id_fourn_price']) ? (int) $data['id_fourn_price'] : 0;
+                            if (!$id_fourn_price) {
+                                $errors[] = 'Aucun prix fournisseur sélectionné';
+                            } else {
+                                $fourn_price = BimpCache::getBimpObjectInstance('bimpcore', 'Bimp_ProductFournisseurPrice', $id_fourn_price);
+                                if (!$fourn_price->isLoaded()) {
+                                    $errors[] = 'Le prix fournisseur d\'ID ' . $id_fourn_price . ' n\'existe pas';
+                                } else {
+                                    $id_fourn = (int) $fourn_price->getData('fk_soc');
+                                    if (!$id_fourn) {
+                                        $errors[] = 'Aucun fournisseur associé au prix d\'achat sélectionné';
+                                    } else {
+                                        $line->id_fourn_price = $id_fourn_price;
+                                    }
+                                }
+                            }
+                            break;
+
+                        case 2:
+                            $id_fourn = isset($data['id_fourn']) ? (int) $data['id_fourn'] : 0;
+                            if (!$id_fourn) {
+                                $errors[] = 'Veuillez sélectionner un fournisseur';
+                            } else {
+                                $pa_ht = isset($data['pa_ht']) ? (float) $data['pa_ht'] : 0;
+                                $tva_tx = isset($data['tva_tx']) ? (float) $data['tva_tx'] : 0;
+
+                                if (!$pa_ht) {
+                                    $errors[] = 'Veuillez saisir un prix d\'achat supérieur à 0';
+                                }
+                                if (!$tva_tx) {
+                                    $errors[] = 'Veuillez saisir un taux de TVA supérieur à 0';
+                                }
+
+                                $line->id_fourn_price = 0;
+                                $line->tva_tx = $tva_tx;
+                                $line->pa_ht = $pa_ht;
+                            }
+                            break;
                     }
 
                     if (!count($errors)) {
-                        $line->set('id_obj', (int) $commande_fourn->id);
-                        $line_errors = $line->create($line_warnings, true);
+                        if ($id_commande_fourn === 'new') {
+                            $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
+                            $commande_fourn->validateArray(array(
+                                'entrepot' => $id_entrepot,
+                                'fk_soc'   => $id_fourn
+                            ));
 
-                        if (count($line_warnings)) {
-                            $errors[] = BimpTools::getMsgFromArray($line_warnings, 'Des erreurs sont survenues suite à la création de la ligne de commande fournisseur');
+                            $comm_warnings = array();
+                            $comm_errors = $commande_fourn->create($warnings, true);
+
+                            $comm_errors = array_merge($comm_errors, $comm_warnings);
+                            if (count($comm_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($comm_errors, 'Des erreurs sont survenues lors de la création de la commande fournisseur');
+                            }
+                        } else {
+                            $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn', $id_commande_fourn);
+                            if (!$commande_fourn->isLoaded()) {
+                                $errors[] = 'La commande fournisseur sélectionnée n\'existe plus (ID ' . $id_commande_fourn . ')';
+                            }
                         }
 
-                        if (count($line_errors)) {
-                            $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues durant la création de la ligne de commande fournisseur');
-                        } else {
-                            $remain_qty = $qty;
+                        if (!count($errors)) {
+                            $line->set('id_obj', (int) $commande_fourn->id);
+                            $line_errors = $line->create($line_warnings, true);
 
-                            $reservations = $this->getReservations('status', 'asc', 0);
-                            foreach ($reservations as $reservation) {
-                                $res_qty = (int) $reservation->getData('qty');
-                                if ($remain_qty > $res_qty) {
-                                    $remain_qty -= $res_qty;
-                                } else {
-                                    $res_qty = $remain_qty;
-                                    $remain_qty = 0;
-                                }
+                            if (count($line_warnings)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_warnings, 'Des erreurs sont survenues suite à la création de la ligne de commande fournisseur');
+                            }
 
-                                $res_errors = $reservation->setNewStatus(100, $res_qty);
+                            if (count($line_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues durant la création de la ligne de commande fournisseur');
+                            } else {
+                                $remain_qty = $qty;
 
-                                if (count($res_errors)) {
-                                    $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut des produits pour ' . $res_qty . ' unité(s)');
+                                $reservations = $this->getReservations('status', 'asc', 0);
+                                foreach ($reservations as $reservation) {
+                                    $res_qty = (int) $reservation->getData('qty');
+                                    if ($remain_qty > $res_qty) {
+                                        $remain_qty -= $res_qty;
+                                    } else {
+                                        $res_qty = $remain_qty;
+                                        $remain_qty = 0;
+                                    }
+
+                                    $res_errors = $reservation->setNewStatus(100, $res_qty);
+
+                                    if (count($res_errors)) {
+                                        $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut des produits pour ' . $res_qty . ' unité(s)');
+                                    }
                                 }
                             }
                         }
@@ -2253,7 +2303,7 @@ class Bimp_CommandeLine extends ObjectLine
         $warnings = array();
         $success = '';
 
-        $errors[] = 'Non fonctionnel pour le moment';
+//        $commande
 
         return array(
             'errors'   => $errors,

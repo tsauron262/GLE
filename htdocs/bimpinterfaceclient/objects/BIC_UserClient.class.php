@@ -69,25 +69,6 @@ class BIC_UserClient extends BimpObject {
         return $html;
     }
 
-    public function getCouverture() {
-        global $couverture;
-        return Array(1 => 'kjhgf');
-    }
-
-    # Bouttons supplémentaires
-
-    public function getListExtraButtons() {
-        $buttons = array();
-
-        $buttons[] = array(
-            'label' => 'Page utilisateur',
-            'icon' => 'fas_file',
-            'onclick' => $this->getJsActionOnclick('redirect')
-        );
-
-        return $buttons;
-    }
-
     public function getActionsButtons() {
         $buttons = array();
 
@@ -141,7 +122,10 @@ class BIC_UserClient extends BimpObject {
     }
 
     public function actionGeneratePassword() {
-        return 'ok';
+        $mot_de_passe = $this->generatePassword();
+        $this->updateField('password', $mot_de_passe->sha256);
+        $this->updateField('renew_required', 1);
+        mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'),'noreply@bimp.fr', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
     }
 
     public function displayEmail() {
@@ -217,10 +201,6 @@ class BIC_UserClient extends BimpObject {
             $user->fetch(null, $this->loginUser);
             if ($user->id < 1)
                 die('Attention ' . $this->loginUser . ' user existe pas');
-
-//            if (count($couverture) > 0) {
-//                //$this->check_all_attached_contrat($couverture);
-//            }
         }
         $this->init = true;
     }
@@ -254,12 +234,6 @@ class BIC_UserClient extends BimpObject {
                 $instance = null;
             }
             return $return;
-        //} else {
-//            foreach ($list as $on_contrat) {
-//                $return[$on_contrat['rowid']] = $on_contrat['ref'];
-//            }
-        //}
-        
         return $return;
     }
 
@@ -292,8 +266,14 @@ class BIC_UserClient extends BimpObject {
         return (object) Array('clear' => $password, 'sha256' => hash('sha256', $password));
     }
     
-    public function create(&$warnings = array(), $force_create = false) {
+    public function create(&$warnings = array(), $force_create = false) {        
         $mot_de_passe = $this->generatePassword();
+        if($this->getList(array('email' => BimpTools::getValue('email')))) {
+            return $this->lang('ERemailExist');
+        }
+        if(empty(BimpTools::getValue('email'))){
+            return $this->lang('ERemailVide');
+        }
         if(parent::create($warnings, $force_create) > 1) {
             $this->updateField('password', $mot_de_passe->sha256);
             $this->updateField('renew_required', 1);

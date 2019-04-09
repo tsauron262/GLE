@@ -377,6 +377,15 @@ fields_tables:
               display: card
             - field: id_user_client
               display: card
+    
+    client_infos:
+        title: Informations
+        icon: info-circle
+        rows:
+            - field: id_contrat
+            - field: id_user_client
+            - field: status
+            - field: priorite
               
 views: 
     default:
@@ -446,7 +455,23 @@ views:
                 - type: list
                   list: 
                       children: files
-            
+    client:
+        rows:
+            - cols:
+                - type: fields_table
+                  col_lg: 12
+                  col_md: 12
+                  fields_table: 
+                      name: client_infos
+            - cols:
+                - cols: 
+                - type: list
+                  list:
+                      children: notes
+    
+    client_inters:
+        rows:
+    
 lists_cols:
     id: 
         label: N°

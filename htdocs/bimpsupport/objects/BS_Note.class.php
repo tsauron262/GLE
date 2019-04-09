@@ -28,4 +28,8 @@ class BS_Note extends BimpObject
 
         return $array;
     }
+    
+    public function canClientView() {
+        return true;
+    }
 }

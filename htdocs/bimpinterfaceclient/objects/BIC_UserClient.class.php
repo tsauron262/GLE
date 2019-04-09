@@ -3,7 +3,9 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 class BIC_UserClient extends BimpObject {
-
+    
+    public $use_email = false; // Mettre true pour recevoir le mail de création de compte 
+    
     public $db;
     public $loginUser = "client_user";
     public $init = false;
@@ -35,9 +37,9 @@ class BIC_UserClient extends BimpObject {
     public function getName(){
         return $this->getData("email");
     }
-
+    
     public function renderHeaderStatusExtra() {
-
+        
         $extra = '';
         if ($this->getData('role') == self::USER_CLIENT_ROLE_ADMIN) {
             $extra .= '&nbsp;&nbsp;<span class="important">' . BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Administrateur</span>';
@@ -320,15 +322,20 @@ class BIC_UserClient extends BimpObject {
         $userClient = null;
     }
 
-    public function random_password($c, $l) {
+    public function random_password($l, $c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789') {
         for ($i = 0, $z = strlen($c) - 1, $s = $c{rand(0, $z)}, $i = 1; $i != $l; $x = rand(0, $z), $s .= $c{$x}, $s = ($s{$i} == $s{$i - 1} ? substr($s, 0, -1) : $s), $i = strlen($s))
             ;
         return $s;
     }
     
     public function create(&$warnings = array(), $force_create = false) {
-        parent::create($warnings, $force_create);
-        //BimpTools::getValue('send_mail');
+        $mot_de_passe = $this->random_password(7);
+        if(parent::create($warnings, $force_create) > 1) {
+            $this->updateField('password', hash('sha256', $mot_de_passe));
+            if($this->use_email){
+                mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'),'noreply@bimp.fr', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe);
+            }
+            
+        }
     }
-
 }

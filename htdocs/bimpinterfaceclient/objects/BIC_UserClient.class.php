@@ -4,12 +4,12 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 class BIC_UserClient extends BimpObject {
     
-    public $use_email = false; // Mettre true pour recevoir le mail de création de compte 
+    public $use_email = true; // Mettre true pour recevoir le mail de création de compte 
     
     public $db;
     public $loginUser = "client_user";
     public $init = false;
-    public $ref = 'hjgfghj';
+    public $ref = '';
     public static $langs_list = array("fr_FR", 'en_US', 'de_DE', 'es_ES');
     # Constantes
 
@@ -123,10 +123,6 @@ class BIC_UserClient extends BimpObject {
     }
 
     # Actions
-
-    public function actionRedirect() {
-        return '<script>window.location.href = "' . DOL_URL_ROOT . '/bimpinterfaceclient/?page=users&id=' . $this->getData('id') . '"</script>';
-    }
 
     public function actionSwitchUser() {
         $this->updateField('role', self::USER_CLIENT_ROLE_USER);
@@ -280,43 +276,6 @@ class BIC_UserClient extends BimpObject {
         }
     }
 
-    
-    public function my_soc_is_cover() {//todo a viré
-        global $db;
-        $bimp = new BimpDb($db);
-        $in_covers = Array();
-        $liste_contrat = $bimp->getRows('contrat', 'fk_soc = ' . $this->getData('attached_societe'));
-        foreach ($liste_contrat as $contrat) {
-            $current = new Contrat($db);
-            $current->fetch($contrat->rowid);
-            $extra = (object) $current->array_options;
-
-            if ($extra->options_date_start) { // Nouveau contrat
-                $debut = new DateTime();
-                $fin = new DateTime();
-                $debut->setTimestamp($extra->options_date_start);
-                $fin->setTimestamp($extra->options_date_start);
-                $fin = $fin->add(new DateInterval("P" . $extra->options_duree_mois . "M"));
-                $fin = $fin->sub(new DateInterval("P1D"));
-
-                $fin = strtotime($fin->format('Y-m-d'));
-                $debut = strtotime($debut->format('Y-m-d'));
-                $aujourdhui = strtotime(date('Y-m-d'));
-
-                if ($fin - $aujourdhui > 0) {
-                    $in_covers[$current->id] = $current->ref;
-                }
-            } else {
-                foreach ($current->lines as $line) {
-                    if ($line->statut == 4) {
-                        $in_covers[$current->id] = $current->ref;
-                    }
-                }
-            }
-        }
-        return $in_covers;
-    }
-    
     public function deconnexion() {
         $_SESSION['userClient'] = null;
         $userClient = null;
@@ -328,12 +287,18 @@ class BIC_UserClient extends BimpObject {
         return $s;
     }
     
+    public function generatePassword($lenght = 7) {
+        $password = $this->random_password($lenght);
+        return (object) Array('clear' => $password, 'sha256' => hash('sha256', $password));
+    }
+    
     public function create(&$warnings = array(), $force_create = false) {
-        $mot_de_passe = $this->random_password(7);
+        $mot_de_passe = $this->generatePassword();
         if(parent::create($warnings, $force_create) > 1) {
-            $this->updateField('password', hash('sha256', $mot_de_passe));
+            $this->updateField('password', $mot_de_passe->sha256);
+            $this->updateField('renew_required', 1);
             if($this->use_email){
-                mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'),'noreply@bimp.fr', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe);
+                mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'),'noreply@bimp.fr', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
             }
             
         }

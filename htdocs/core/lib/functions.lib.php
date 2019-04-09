@@ -4463,7 +4463,7 @@ function price($amount, $form=0, $outlangs='', $trunc=1, $rounding=-1, $forcerou
 	// Clean parameters
 	if (empty($amount)) $amount=0;	// To have a numeric value if amount not defined or = ''
 	$amount = (is_numeric($amount)?$amount:0); // Check if amount is numeric, for example, an error occured when amount value = o (letter) instead 0 (number)
-	if ($rounding < 0) $rounding=min($conf->global->MAIN_MAX_DECIMALS_UNIT,$conf->global->MAIN_MAX_DECIMALS_TOT, $conf->global->MAIN_MAX_DECIMALS_SHOWN);
+	if ($rounding < 0) $rounding=min($conf->global->MAIN_MAX_DECIMALS_UNIT,$conf->global->MAIN_MAX_DECIMALS_TOT, str_replace("...", "", $conf->global->MAIN_MAX_DECIMALS_SHOWN));
 	$nbdecimal=$rounding;
 
 	// Output separators by default (french)

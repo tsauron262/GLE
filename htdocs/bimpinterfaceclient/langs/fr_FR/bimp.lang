@@ -20,3 +20,5 @@ labelFieldEmail= Adresse mail
 labelFieldRole= Rôle du compte
 labelFieldStatus= Statut
 
+ERemailExist = Un autre compte avec cette adresse email existe déjà
+ERemailVide= L'adresse mail est obligatoire

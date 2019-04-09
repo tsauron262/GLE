@@ -71,7 +71,7 @@ lists:
                         method: userClient
                         params:
                             - id
-        #page_btn: 1
+        page_btn: 1
         cols:
             id:
             sujet:

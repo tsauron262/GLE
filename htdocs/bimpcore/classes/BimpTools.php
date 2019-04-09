@@ -1324,7 +1324,7 @@ class BimpTools
             $value = 0;
         }
 
-        $value = round($value, 2);
+//        $value = round($value, 2);
 
         $price = price($value, 1, '', 1, -1, -1, $currency);
 

@@ -34,8 +34,8 @@ class BIC_UserTickets extends BS_Ticket {
             if (BimpTools::getValue('notif_email')) {
                 $liste_destinataires = $userClient->getData('email');
                 $listUser = $userClient->getList(array('attached_societe' => 142));
-                foreach($listUser as $user) {
-                    if($user['id'] != $userClient->getData('id') && $user['role'] == 1) {
+                foreach ($listUser as $user) {
+                    if ($user['id'] != $userClient->getData('id') && $user['role'] == 1) {
                         $liste_destinataires .= ', ' . $user['email'];
                     }
                 }

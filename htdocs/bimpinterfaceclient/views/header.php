@@ -16,33 +16,45 @@ $content_request = $_REQUEST['fc'];
                         </a>
 
                     </li>
-                    <li <?= ($content_request == 'ticket') ? 'class="active"' : "" ?> >
-                        <a href="?fc=ticket">
-                            <i class="pe-7s-paperclip"></i>
-                            <p><?= $langs->trans('menuTickets') ?></p>
-                        </a>
-                    </li>
+                    <?php
+                    if ($activate_page) {
+                        ?>
+                        <li <?= ($content_request == 'ticket') ? 'class="active"' : "" ?> >
+                            <a href="?fc=ticket">
+                                <i class="pe-7s-paperclip"></i>
+                                <p><?= $langs->trans('menuTickets') ?></p>
+                            </a>
+                        </li>
+                        <?php
+                    }
+                    ?>
+
                     <?php
                     if ($userClient->i_am_admin()) {
+                        if ($activate_page) {
+                            ?>
+                            <li <?= ($content_request == 'contrat') ? 'class="active"' : "" ?> >
+                                <a href="?fc=contrat">
+                                    <i class="pe-7s-graph"></i>
+                                    <p><?= $langs->trans('menuContrat') ?></p>
+                                </a>
+                            </li>
+                            <li <?= ($content_request == 'facture') ? 'class="active"' : "" ?>>
+                                <a href="?fc=facture">
+                                    <i class="pe-7s-file"></i>
+                                    <p><?= $langs->trans('menuFacture') ?></p>
+                                </a>
+                            </li>
+                            <li <?= ($content_request == 'devis') ? 'class="active"' : "" ?>>
+                                <a href="?fc=devis">
+                                    <i class="pe-7s-file"></i>
+                                    <p><?= $langs->trans('menuDevis') ?></p>
+                                </a>
+                            </li>
+                            <?php
+                        }
                         ?>
-                        <li <?= ($content_request == 'contrat') ? 'class="active"' : "" ?> >
-                            <a href="?fc=contrat">
-                                <i class="pe-7s-graph"></i>
-                                <p><?= $langs->trans('menuContrat') ?></p>
-                            </a>
-                        </li>
-                        <li <?= ($content_request == 'facture') ? 'class="active"' : "" ?>>
-                            <a href="?fc=facture">
-                                <i class="pe-7s-file"></i>
-                                <p><?= $langs->trans('menuFacture') ?></p>
-                            </a>
-                        </li>
-                        <li <?= ($content_request == 'devis') ? 'class="active"' : "" ?>>
-                            <a href="?fc=devis">
-                                <i class="pe-7s-file"></i>
-                                <p><?= $langs->trans('menuDevis') ?></p>
-                            </a>
-                        </li>
+
                         <?php
                         //if (count($couverture) > 0) {
                         ?>

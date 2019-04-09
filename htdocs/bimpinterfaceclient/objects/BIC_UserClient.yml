@@ -116,6 +116,7 @@ lists:
         cols:
             attached_societe:
                 field: attached_societe
+                display: nom_url
             renew_required:
                 field: renew_required
             lang:

@@ -2,15 +2,16 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
+
 class BIC_UserClient extends BimpObject {
-    
+
     public $use_email = true; // Mettre true pour recevoir le mail de création de compte 
-    
     public $db;
     public $loginUser = "client_user";
     public $init = false;
     public $ref = '';
     public static $langs_list = array("fr_FR", 'en_US', 'de_DE', 'es_ES');
+
     # Constantes
 
     CONST USER_CLIENT_ROLE_ADMIN = 1;
@@ -32,14 +33,13 @@ class BIC_UserClient extends BimpObject {
         self::USER_CLIENT_STATUS_ACTIF => Array('label' => 'Actif', 'classes' => Array('success'), 'icon' => 'check'),
         self::USER_CLIENT_STATUS_INACTIF => Array('label' => 'Inactif', 'classes' => Array('danger'), 'icon' => 'times')
     );
-   
-    
-    public function getName(){
+
+    public function getName() {
         return $this->getData("email");
     }
-    
+
     public function renderHeaderStatusExtra() {
-        
+
         $extra = '';
         if ($this->getData('role') == self::USER_CLIENT_ROLE_ADMIN) {
             $extra .= '&nbsp;&nbsp;<span class="important">' . BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Administrateur</span>';
@@ -53,52 +53,42 @@ class BIC_UserClient extends BimpObject {
         return $extra;
     }
 
-    public function renderAssociateContrat() {
-        global $couverture;
-        $html = '';
-
-        $socid = $this->getData('attachet_societe');
-
-        if ($this->isLoaded()) {
-            $contrat = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClientContrats');
-            $bc_list = new BC_ListTable($contrat, 'default', 1, null, 'Contrat associés à ' . $this->displayEmail(), 'fas_file-invoice-dollar');
-            $bc_list->addFieldFilterValue('id_user', $this->getData('id'));
-            $html = $bc_list->renderHtml();
-        }
-
-        return $html;
-    }
-
     public function getActionsButtons() {
+        global $userClient;
         $buttons = array();
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
 
-        $buttons[] = array(
-            'label' => 'Réinitialiser le mot de passe',
-            'icon' => 'fas_lock',
-            'onclick' => $this->getJsActionOnclick('generatePassword', array(), array(
-                'success_callback' => $callback
-            ))
-        );
+        if ($this->i_am_admin()) {
+            $buttons[] = array(
+                'label' => 'Réinitialiser le mot de passe',
+                'icon' => 'fas_lock',
+                'onclick' => $this->getJsActionOnclick('generatePassword', array(), array(
+                    'success_callback' => $callback
+                ))
+            );
 
-        if ($this->getData('role') == self::USER_CLIENT_ROLE_USER) {
-            $buttons[] = array(
-                'label' => 'Mettre administrateur',
-                'icon' => 'fas_cog',
-                'onclick' => $this->getJsActionOnclick('switchAdmin', array(), array(
-                    'success_callback' => $callback
-                ))
-            );
-        } elseif ($this->getData('role') == self::USER_CLIENT_ROLE_ADMIN) {
-            $buttons[] = array(
-                'label' => 'Mettre utilisateur',
-                'icon' => 'fas_user',
-                'onclick' => $this->getJsActionOnclick('switchUser', array(), array(
-                    'success_callback' => $callback
-                ))
-            );
+
+
+            if ($this->getData('role') == self::USER_CLIENT_ROLE_USER) {
+                $buttons[] = array(
+                    'label' => 'Mettre administrateur',
+                    'icon' => 'fas_cog',
+                    'onclick' => $this->getJsActionOnclick('switchAdmin', array(), array(
+                        'success_callback' => $callback
+                    ))
+                );
+            } elseif ($this->getData('role') == self::USER_CLIENT_ROLE_ADMIN) {
+                $buttons[] = array(
+                    'label' => 'Mettre utilisateur',
+                    'icon' => 'fas_user',
+                    'onclick' => $this->getJsActionOnclick('switchUser', array(), array(
+                        'success_callback' => $callback
+                    ))
+                );
+            }
         }
+
 
         return $buttons;
     }
@@ -125,7 +115,7 @@ class BIC_UserClient extends BimpObject {
         $mot_de_passe = $this->generatePassword();
         $this->updateField('password', $mot_de_passe->sha256);
         $this->updateField('renew_required', 1);
-        mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'),'noreply@bimp.fr', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
+        mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'), 'noreply@bimp.fr', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
     }
 
     public function displayEmail() {
@@ -140,18 +130,19 @@ class BIC_UserClient extends BimpObject {
         if ($this->getData('attached_societe') == $userClient->getData('attached_societe') && ($userClient->getData('role') == 1) || $this->id == $userClient->id) {
             return true;
         }
-
         return false;
     }
 
     public function canClientEdit() {
         return $this->canClientView();
     }
-    
+
     public function canClientCreate() {
         global $userClient;
-        if(is_object($userClient) && $userClient->getData('status') == self::USER_CLIENT_ROLE_ADMIN)
+        if (is_object($userClient) && $userClient->getData('status') == self::USER_CLIENT_ROLE_ADMIN)
             return true;
+
+        return false;
     }
 
     public function connexion($mail, $password) {
@@ -188,10 +179,10 @@ class BIC_UserClient extends BimpObject {
         global $langs;
         return $langs->trans($field);
     }
-    
+
     public function init() {
         global $user;
-        if(isset($_SESSION['userClient'])){
+        if (isset($_SESSION['userClient'])) {
             $this->GOT($_SESSION['userClient']);
             $connected_client = $this->id;
             $client = new Societe($this->db->db);
@@ -204,42 +195,40 @@ class BIC_UserClient extends BimpObject {
         }
         $this->init = true;
     }
-    
-    public function getContratVisible($ouvert = false){//todo renvoie les contrat (bimp object visible par le user   viré le global couverture
+
+    public function getContratVisible($ouvert = false) {
         $retour = array();
         $socContrats = $this->getAllContrats($ouvert);
-        if($this->i_am_admin()){
+        if ($this->i_am_admin()) {
             $retour = $socContrats;
-        }
-        else{
-            foreach($socContrats as $contrat){
-                if($contrat->can('view'))
+        } else {
+            foreach ($socContrats as $contrat) {
+                if ($contrat->can('view'))
                     $retour[] = $contrat;
             }
         }
         return $retour;
     }
-    
-    public function getAllContrats($ouvert = false){
+
+    public function getAllContrats($ouvert = false) {
         //renvoie tous les contrat de nottre soc avec suivant $ouvert que les actifs ou tous
         $contrat = $this->getInstance('bimpcontract', 'BContract_contrat');
         $list = $contrat->getList(Array('fk_soc' => $this->getData('attached_societe')));
         //if($ouvert) {
-            $return = Array();
-            foreach($list as $on_contrat){
-                $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $on_contrat['rowid']);
-                if($ouvert == false || $instance->isValide()) {
-                    $return[$on_contrat['rowid']] = $instance; // Passer tous l'object
-                }
-                $instance = null;
+        $return = Array();
+        foreach ($list as $on_contrat) {
+            $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $on_contrat['rowid']);
+            if ($ouvert == false || $instance->isValide()) {
+                $return[$on_contrat['rowid']] = $instance;
             }
-            return $return;
+            $instance = null;
+        }
         return $return;
     }
 
     public function isLoged() {
         if ($_SESSION['userClient'] && BimpTools::getContext() == "public") {
-            
+
             if ($this->getData('status') == self::USER_CLIENT_STATUS_INACTIF) {
 
                 return false;
@@ -260,27 +249,27 @@ class BIC_UserClient extends BimpObject {
             ;
         return $s;
     }
-    
+
     public function generatePassword($lenght = 7) {
         $password = $this->random_password($lenght);
         return (object) Array('clear' => $password, 'sha256' => hash('sha256', $password));
     }
-    
-    public function create(&$warnings = array(), $force_create = false) {        
+
+    public function create(&$warnings = array(), $force_create = false) {
         $mot_de_passe = $this->generatePassword();
-        if($this->getList(array('email' => BimpTools::getValue('email')))) {
+        if ($this->getList(array('email' => BimpTools::getValue('email')))) {
             return $this->lang('ERemailExist');
         }
-        if(empty(BimpTools::getValue('email'))){
+        if (empty(BimpTools::getValue('email'))) {
             return $this->lang('ERemailVide');
         }
-        if(parent::create($warnings, $force_create) > 1) {
+        if (parent::create($warnings, $force_create) > 1) {
             $this->updateField('password', $mot_de_passe->sha256);
             $this->updateField('renew_required', 1);
-            if($this->use_email){
-                mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'),'noreply@bimp.fr', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
+            if ($this->use_email && BimpTools::getValue('send_mail')) {
+                mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'), 'noreply@bimp.fr', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
             }
-            
         }
     }
+
 }

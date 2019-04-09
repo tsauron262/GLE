@@ -33,6 +33,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function __construct($db)
     {
+        global $conf;
+        $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...","", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
         parent::__construct($db, 'P', 'A4');
         if (!defined('BIMP_LIB')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';

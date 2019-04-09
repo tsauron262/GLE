@@ -86,6 +86,7 @@ forms:
         rows: 
             - field: date_received
             - custom: 1
+              label: Unités réceptionnées
               input_name: lines
               content: 
                   callback: renderDetailsView

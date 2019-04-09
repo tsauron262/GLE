@@ -894,6 +894,35 @@ function removeCommandeFournLineReceptionRow($button, id_line) {
     checkTotalMaxQtyInput($container.find('input[name="line_' + id_line + '_reception_1_qty"]'));
 }
 
+function onReceptionValidationFormSubmit($form, extra_data) {
+    if ($.isOk($form)) {
+        var id_reception = parseInt($form.data('id_object'));
+        if (id_reception) {
+            extra_data['lines'] = getReceptionLinesDataFromForm($form, id_reception);
+        }
+    }
+
+    return extra_data;
+}
+
+function setAllReceptionLinesToMax($button) {
+    var $container = $button.findParentByClass('reception_details');
+
+    if (!$.isOk($container)) {
+        bimp_msg('Erreur (conteneur absent)', 'danger');
+        return;
+    }
+
+    $container.find('tr.line_qty_row').each(function () {
+        $(this).find('.qtyInput').each(function () {
+            var max = parseFloat($(this).data('max'));
+            if (!isNaN(max)) {
+                $(this).val(max).change();
+            }
+        });
+    });
+}
+
 $(document).ready(function () {
     $('body').on('viewLoaded', function (e) {
         if (e.$view.hasClass('Bimp_CommandeLine_view_shipments')) {

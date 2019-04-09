@@ -168,6 +168,7 @@ fields:
         default_value: 0
         input: 
             help: Laisser vide pour utiliser le prix de vente du produit
+            
     vente_tva_tx: 
         label: Tx TVA vente
         type: percent
@@ -254,6 +255,7 @@ fields_tables:
             - field: available
             - field: date_purchase
             - field: prix_achat
+            - field: achat_tva_tx
             - field: prix_vente_except 
             - field: warranty_type
             - field: date_warranty_end
@@ -336,7 +338,9 @@ forms:
             - field: available
             - field: date_purchase
             - field: prix_achat
+            - field: achat_tva_tx
             - field: prix_vente_except
+            - field: vente_tva_tx
             - field: origin_element
             - field: origin_id_element
             - field: warranty_type

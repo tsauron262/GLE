@@ -18,7 +18,7 @@ class public_indexController extends Bimp_user_client_controller {
         $html .= ($valide_contrat) ? '<b style="color:green">sous contrat <i class="fa fa-check" ></i></b>' : '<b style="color:red">hors contrat <i class="fa fa-times" ></i></b>';
         $html .= '</div>';
         $html .= '<br /><br /><br />';
-        $html .= '<h4>Mes contrats gérés valide</h4>';
+        $html .= '<h4>Mes contrats valide</h4>';
         if ($valide_contrat) { $html .= $this->display_list_card($valide_contrat, true);}
         if ($all_contrat) {
             foreach ($all_contrat as $id_contrat => $ref) {
@@ -31,7 +31,7 @@ class public_indexController extends Bimp_user_client_controller {
         $html .= '</div>';
         $html .= '</div></div>';
         $html .= '<br /><br /><br />';
-        $html .= '<h4>Mes contrats gérés échus</h4>';
+        $html .= '<h4>Mes contrats échus</h4>';
         $html .= '<div class="row">';
         $html .= '<div class="content" >';
         $html .= $this->display_list_card($contracts);

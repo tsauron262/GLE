@@ -154,6 +154,21 @@ class BS_Ticket extends BimpObject
         return true;
     }
     
+    function canDelete(){
+        global $user;
+        if($user->admin)
+            return true;
+        
+       $dateC = new DateTime($this->getData("date_create"));
+        if($dateC->add(new DateInterval('PT2H')) > new DateTime())
+            if(($this->getData("status") == self::BS_TICKET_DEMANDE_CLIENT || $this->getData("status") == self::BS_TICKET_EN_COURS)&&
+                    $this->getData("date_create"))
+                if($this->getData("id_user_resp") == $user->id)
+                    if($this->getData("timer") == 0 && $this->getDureeTotale() == 0)
+                        return true;
+        return false;
+    }
+    
 
     public function getOpenIntersArray()
     {

@@ -27,7 +27,7 @@ class BIC_UserTickets extends BS_Ticket {
     public function currentContrat() {
         return $_REQUEST['id'];
     }
-
+    
     public function create(&$warnings, $force_create = false) {
         global $userClient;
         if (parent::create($warnings, $force_create) > 1) {

@@ -3588,7 +3588,7 @@ class BimpObject extends BimpCache
                 return (int) $parent->canEditChild($this->object_name);
             }
         }
-        return 1;
+        return $this->canView();
     }
     public function canClientEdit(){
         return 0;
@@ -3618,7 +3618,7 @@ class BimpObject extends BimpCache
                 return (int) $parent->canDeleteChild($this->object_name);
             }
         }
-        return 1;
+        return $this->canEdit();
     }
     public function canClientDelete(){
         return 0;

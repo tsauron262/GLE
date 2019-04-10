@@ -87,7 +87,14 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_REGLEMENT_REMBOURCEMENT => 'Rembourcement',
         self::CONTRAT_REGLEMENT_AMERICAN_EXPRESS => 'American Express'
     );
-
+    
+    function __construct($module, $object_name) {
+        if(BimpTools::getContext() == 'public') {
+            $this->redirectMode = 4;
+        }
+        return parent::__construct($module, $object_name);
+    }
+    
     public function displayRef() {
         return $this->getData('ref');
     }
@@ -121,7 +128,15 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function canClientView() {
-        return true;
+        global $userClient;
+        $list = $userClient->getChildrenObjects('user_client_contrat');
+        foreach ($list as $obj) {
+            if($obj->getData('id_contrat') == $this->id) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     public function isValide() {
@@ -165,5 +180,5 @@ class BContract_contrat extends BimpDolObject {
     public function getName() {
         return $this->getData('ref');
     }
-
+        
 }

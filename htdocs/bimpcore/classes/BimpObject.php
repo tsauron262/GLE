@@ -5563,7 +5563,7 @@ class BimpObject extends BimpCache
     public function iAmAdminRedirect(){
         global $user;
 //        return 0;
-        if($user-admin)
+        if($user->admin)
             return 1;
     }
 }

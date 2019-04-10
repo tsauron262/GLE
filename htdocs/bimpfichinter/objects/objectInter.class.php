@@ -7,12 +7,6 @@ class ObjectInter extends extraFI{
     public static $dirDol = "synopsisfichinter";
     public static $controller_name;
     
-    public function __construct($module, $object_name) {
-        global $user ;
-        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42)))
-            $this->redirectMode = 1;
-        return parent::__construct($module, $object_name);
-    }
     
     
        public function getList_commandeArray(){
@@ -153,5 +147,12 @@ class ObjectInter extends extraFI{
             
         }
             
+    }
+    
+    public function iAmAdminRedirect() {
+        global $user;
+        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42)))
+            return true;
+        parent::iAmAdminRedirect();
     }
 }

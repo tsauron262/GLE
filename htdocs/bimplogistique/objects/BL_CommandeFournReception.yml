@@ -65,6 +65,11 @@ fields:
         input: 
             auto_expand: 1
             rows: 1
+            
+    assign_lines_to_commandes_client:
+        label: Assigner les équipements reçus aux commandes client d'origine
+        type: bool
+        default_value: 1
         
 forms: 
     default: 
@@ -73,6 +78,7 @@ forms:
               hidden: 1
             - field: id_entrepot
             - field: ref
+            - field: assign_lines_to_commandes_client
             - field: info
 #            - custom: 1
 #              label: Lignes commande fournisseur

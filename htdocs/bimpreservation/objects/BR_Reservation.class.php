@@ -1022,44 +1022,44 @@ class BR_Reservation extends BimpObject
             $this->updateField('id_equipment', 0);
         }
 
-        if (!$status && (in_array($current_status, array(3, 100))) && ((int) $this->getData('type') === self::BR_RESERVATION_COMMANDE)) {
-            $rcf = BimpObject::getInstance($this->module, 'BR_ReservationCmdFourn');
-            $list = $rcf->getList(array(
-                'ref_reservation' => $ref
-            ));
-
-            if (!is_null($list) && count($list)) {
-                foreach ($list as $item) {
-                    $rcf = BimpCache::getBimpObjectInstance($this->module, 'BR_ReservationCmdFourn', (int) $item['id']);
-                    if ($rcf->isLoaded()) {
-                        $delete = true;
-                        if ((int) $rcf->getData('id_commande_fournisseur')) {
-                            $remove_errors = array();
-                            if (!$rcf->removeFromCommandeFournisseur($remove_errors)) {
-                                $errors = array_merge($errors, $remove_errors);
-                                $delete = false;
-                            }
-                        }
-
-                        if ($delete) {
-                            $del_warnings = array();
-                            $delete_errors = $rcf->delete($del_warnings, true);
-                            if (count($delete_errors)) {
-                                $errors[] = 'Echec de la suppression de la ligne de commande fournisseur d\'ID ' . $item['id'];
-                                $errors = array_merge($errors, $delete_errors);
-                                $qty -= (int) $rcf->getData('qty');
-                            }
-                        } else {
-                            $qty -= (int) $rcf->getData('qty');
-                        }
-                    }
-                }
-            }
-
-            if ($qty <= 0) {
-                return $errors;
-            }
-        }
+//        if (!$status && (in_array($current_status, array(3, 100))) && ((int) $this->getData('type') === self::BR_RESERVATION_COMMANDE)) {
+//            $rcf = BimpObject::getInstance($this->module, 'BR_ReservationCmdFourn');
+//            $list = $rcf->getList(array(
+//                'ref_reservation' => $ref
+//            ));
+//
+//            if (!is_null($list) && count($list)) {
+//                foreach ($list as $item) {
+//                    $rcf = BimpCache::getBimpObjectInstance($this->module, 'BR_ReservationCmdFourn', (int) $item['id']);
+//                    if ($rcf->isLoaded()) {
+//                        $delete = true;
+//                        if ((int) $rcf->getData('id_commande_fournisseur')) {
+//                            $remove_errors = array();
+//                            if (!$rcf->removeFromCommandeFournisseur($remove_errors)) {
+//                                $errors = array_merge($errors, $remove_errors);
+//                                $delete = false;
+//                            }
+//                        }
+//
+//                        if ($delete) {
+//                            $del_warnings = array();
+//                            $delete_errors = $rcf->delete($del_warnings, true);
+//                            if (count($delete_errors)) {
+//                                $errors[] = 'Echec de la suppression de la ligne de commande fournisseur d\'ID ' . $item['id'];
+//                                $errors = array_merge($errors, $delete_errors);
+//                                $qty -= (int) $rcf->getData('qty');
+//                            }
+//                        } else {
+//                            $qty -= (int) $rcf->getData('qty');
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if ($qty <= 0) {
+//                return $errors;
+//            }
+//        }
 
         if ($this->isProductSerialisable()) {
             $equipment = $this->getChildObject('equipment');
@@ -1137,11 +1137,12 @@ class BR_Reservation extends BimpObject
             } elseif ($qty < $current_qty) {
                 $new_reservation = BimpObject::getInstance($this->module, $this->object_name, $this->id);
                 $new_reservation->id = null;
+                $new_reservation->set('id', null);
                 $new_reservation->set('qty', $qty);
                 $new_reservation->set('status', $status);
                 $new_reservation->set('ref', $ref);
                 $new_errors = $new_reservation->create();
-
+                
                 if (count($new_errors)) {
                     $errors[] = 'Echec de la création d\'une nouvelle réservation pour ' . $qty . ' produit' . ($qty > 1 ? 's' : '') . ' "' . $product->getData('label') . '"';
                     $errors = array_merge($errors, $new_errors);
@@ -1768,7 +1769,7 @@ class BR_Reservation extends BimpObject
                 }
             }
         }
-        
+
         return $data;
     }
 

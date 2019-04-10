@@ -108,7 +108,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     // Getters données: 
 
-    public function getReceivedQty($id_reception = null)
+    public function getReceivedQty($id_reception = null, $validated_reception = false)
     {
         $receptions = $this->getData('receptions');
 
@@ -117,6 +117,13 @@ class Bimp_CommandeFournLine extends FournObjectLine
         foreach ($receptions as $id_r => $reception_data) {
             if (!is_null($id_reception) && ((int) $id_r !== (int) $id_reception)) {
                 continue;
+            }
+
+            if ($validated_reception) {
+                $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_r);
+                if (!BimpObject::objectLoaded($reception) || (int) $reception->getData('status') !== BL_CommandeFournReception::BLCFR_RECEPTIONNEE) {
+                    continue;
+                }
             }
             $qty += (float) $reception_data['qty'];
         }
@@ -813,8 +820,14 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     // Attribution des équipements si serialisable.
                     $line->addEquipments($equipments);
                 } else {
+                    if (isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
+                        $new_status = 200;
+                    } else {
+                        $new_status = 101;
+                    }
+
                     // Màj statuts.
-                    $line->addReceivedQty((int) $reception_data['qty']);
+                    $line->addReceivedQty((int) $reception_data['qty'], $new_status);
                 }
             }
         }
@@ -919,9 +932,15 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 if ((float) $reception_data['qty'] > 0) {
                     // Traitement de la réservation correspondante: 
                     if ($id_commande_client_line) {
+                        if (isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
+                            $status = 200;
+                        } else {
+                            $status = 101;
+                        }
+
                         $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
                                     'id_commande_client_line' => (int) $id_commande_client_line,
-                                    'status'                  => 200
+                                    'status'                  => $status
                                         ), true);
                         if (BimpObject::objectLoaded($reservation)) {
                             $res_errors = $reservation->setNewStatus(100, (int) $reception_data['qty']);

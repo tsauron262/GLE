@@ -22,9 +22,9 @@ class BimpController
         if (is_null($controller)) {
             $controller = BimpTools::getValue('fc', 'index');
         }
-        if(BimpTools::getContext() == "public")
-            $controller = "public_".$controller;
-        
+        if (BimpTools::getContext() == "public")
+            $controller = "public_" . $controller;
+
         $controllerClass = $controller . 'Controller';
 
         if (file_exists($dir . '/controllers/' . $controllerClass . '.php')) {
@@ -33,7 +33,7 @@ class BimpController
             }
             return new $controllerClass($module, $controller);
         }
-        if(BimpTools::getContext() == "public")
+        if (BimpTools::getContext() == "public")
             return new Bimp_user_client_controller($module, $controller);
         return new BimpController($module, $controller);
     }
@@ -146,11 +146,11 @@ class BimpController
     {
         $html = '';
         $id_object = BimpTools::getValue('id');
-        
+
         $prefixe = DOL_URL_ROOT;
-        if($prefixe == "/")
+        if ($prefixe == "/")
             $prefixe = "";
-        elseif($prefixe != "")
+        elseif ($prefixe != "")
             $prefixe .= "/";
         $html .= '<script type="text/javascript">';
         $html .= 'ajaxRequestsUrl = \'' . $prefixe . "/" . $this->module . '/index.php?fc=' . $this->controller . (!is_null($id_object) ? '&id=' . $id_object : '') . '\';';
@@ -169,7 +169,7 @@ class BimpController
         $html .= '<script type="text/javascript">';
         $html .= '$(document).ready(function() {$(\'body\').trigger($.Event(\'bimp_ready\'));});';
         $html .= '</script>';
-        if($echo)
+        if ($echo)
             echo $html;
         return $html;
     }
@@ -177,10 +177,10 @@ class BimpController
     public function display()
     {
         global $user;
-        if($user->id < 1)
-            die("Pas de User <a href='".DOL_URL_ROOT."'> Allé a la page de login</a>");
-        
-        
+        if ($user->id < 1)
+            die("Pas de User <a href='" . DOL_URL_ROOT . "'> Allé a la page de login</a>");
+
+
         if (BimpTools::isSubmit('ajax')) {
             $this->ajaxProcess();
             return;
@@ -1263,7 +1263,7 @@ class BimpController
     {
         $errors = array();
         $html = '';
-        $header_html = '';
+//        $header_html = '';
         $view_id = '';
 
         $id_parent = BimpTools::getValue('id_parent', null);
@@ -1311,14 +1311,14 @@ class BimpController
                 $html = $view->renderHtml();
             }
 
-            $header_html = $object->renderHeader(true);
+//            $header_html = $object->renderHeader(true);
             $view_id = $view->identifier;
         }
 
         die(json_encode(array(
             'errors'      => $errors,
             'html'        => $html,
-            'header_html' => $header_html,
+//            'header_html' => $header_html,
             'view_id'     => $view_id,
             'request_id'  => BimpTools::getValue('request_id', 0)
         )));
@@ -1888,6 +1888,47 @@ class BimpController
 
         die(json_encode(array(
             'errors'     => $errors,
+            'html'       => $html,
+            'request_id' => BimpTools::getValue('request_id', 0)
+        )));
+    }
+
+    protected function ajaxProcessReloadObjectHeader()
+    {
+        $errors = array();
+        $sucess = '';
+        $html = '';
+
+        $module = BimpTools::getValue('module', '');
+        $object_name = BimpTools::getValue('object_name', '');
+        $id_object = BimpTools::getValue('id_object', 0);
+
+        if (!$module) {
+            $errors[] = 'Nom du module absent';
+        }
+        if (!$object_name) {
+            $errors[] = 'Type d\'object absent';
+        }
+        if (!$id_object) {
+            $errors[] = 'ID de l\'objet absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
+            if (!BimpObject::objectLoaded($object)) {
+                if (!is_a($object, 'BimpObject')) {
+                    $errors[] = BimpTools::ucfirst($object->getLabel('the')) . ' d\'ID ' . $id_object . ' n\'existe pas';
+                } else {
+                    $errors[] = 'l\'Objet de type "' . $object_name . '" d\'ID ' . $id_object . ' n\'existe pas';
+                }
+            } else {
+                $html = $object->renderHeader(true);
+            }
+        }
+
+        die(json_encode(array(
+            'errors'     => $errors,
+            'success'    => $sucess,
             'html'       => $html,
             'request_id' => BimpTools::getValue('request_id', 0)
         )));

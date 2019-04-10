@@ -112,4 +112,20 @@ $(document).ready(function () {
     } else {
         $('#openModalBtn').css('bottom', '0');
     }
+
+    $('body').on('objectChange', function (e) {
+        reloadObjectHeader({
+            module: e.module,
+            object_name: e.object_name,
+            id_object: e.id_object
+        });
+    });
+
+    $('body').on('objectDelete', function (e) {
+        reloadObjectHeader({
+            module: e.module,
+            object_name: e.object_name,
+            id_object: e.id_object
+        });
+    });
 });

@@ -603,7 +603,7 @@ function addCommandeFournReceptionLineQtyRow($button, id_line) {
 
     tpl = tpl.replace(/qtyidx/g, idx);
 
-    var html = '<tr class="line_' + id_line + '_qty_row" data-qty_idx="' + idx + '">';
+    var html = '<tr class="line_' + id_line + '_qty_row line_qty_row" data-qty_idx="' + idx + '">';
     html += tpl;
     html += '<tr>';
 
@@ -714,9 +714,16 @@ function getReceptionLinesDataFromForm($content, id_reception) {
                     });
                 });
 
+                var assign_to_commande_client = 0;
+                var $input = $row.find('[name="line_' + id_line + '_reception_' + id_reception + '_assign_to_commande_client"]');
+                if ($input.length) {
+                    assign_to_commande_client = parseInt($input.val());
+                }
+
                 lines.push({
                     id_line: id_line,
-                    qties: qties
+                    qties: qties,
+                    assign_to_commande_client: assign_to_commande_client
                 });
             }
         });

@@ -26,7 +26,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             ($resultContainer && !$resultContainer.length)) {
         $resultContainer = null;
     }
-    
+
 
     this.$resultContainer = $resultContainer;
     this.$button = null;
@@ -35,7 +35,7 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
     this.url = ajaxRequestsUrl;
     this.type = 'POST';
     this.dataType = 'json';
-    
+
 
     this.display_success = true;
     this.display_errors = true;
@@ -80,9 +80,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
         bimpAjax.url += '&';
     }
     bimpAjax.url += 'ajax=1&action=' + action + '&request_id=' + request_id;
-    
-    
-    bimpAjax.url += "&context="+context;
+
+
+    bimpAjax.url += "&context=" + context;
 
     if (this.display_processing) {
         if (this.$resultContainer) {
@@ -225,16 +225,25 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
 
                     if (bimpAjax.append_html) {
                         if ($.isOk(bimpAjax.$resultContainer) && typeof (result.html) === 'string') {
-                            bimpAjax.$resultContainer.stop().slideUp(250, function () {
-                                bimpAjax.$resultContainer.html(result.html).slideDown(250, function () {
-                                    setCommonEvents(bimpAjax.$resultContainer);
-                                    setInputsEvents(bimpAjax.$resultContainer);
-                                    bimpAjax.$resultContainer.css('height', 'auto');
-                                    if (typeof (bimpAjax.success) === 'function') {
-                                        bimpAjax.success(result, bimpAjax);
-                                    }
+                            if (bimpAjax.remove_current_content) {
+                                bimpAjax.$resultContainer.stop().slideUp(250, function () {
+                                    bimpAjax.$resultContainer.html(result.html).slideDown(250, function () {
+                                        setCommonEvents(bimpAjax.$resultContainer);
+                                        setInputsEvents(bimpAjax.$resultContainer);
+                                        bimpAjax.$resultContainer.css('height', 'auto');
+                                        if (typeof (bimpAjax.success) === 'function') {
+                                            bimpAjax.success(result, bimpAjax);
+                                        }
+                                    });
                                 });
-                            });
+                            } else {
+                                bimpAjax.$resultContainer.stop().fadeOut(250, function () {
+                                    bimpAjax.$resultContainer.html(result.html).fadeIn(250, function () {
+                                        setCommonEvents(bimpAjax.$resultContainer);
+                                        setInputsEvents(bimpAjax.$resultContainer);
+                                    });
+                                });
+                            }
                         }
                     } else {
                         if (typeof (bimpAjax.success) === 'function') {
@@ -281,9 +290,9 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             if (!$login.length) {
                 if (typeof (dol_url_root) !== 'undefined') {
                     var html = '<div id="bimp_login_popup">';
-                    if(context != "public"){
+                    if (context != "public") {
                         html += '<iframe id="bimp_login_iframe" frameborder="0" src="' + dol_url_root + '/bimpcore/ajax_login.php"></iframe>';
-                        
+
                     }
                     else
                         html += '<span class="red">todo formulaire ou iframe (moins classe)       pour relog userClient dans /bimpcore/views/js/ajax.js line 284</span>';

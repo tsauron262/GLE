@@ -84,16 +84,6 @@ class Bimp_CommandeLine extends ObjectLine
         return 1;
     }
 
-    public function isActionAllowed($action, &$errors = array())
-    {
-        switch ($action) {
-            case 'cancelCommandeFourn':
-
-                break;
-        }
-        return parent::isActionAllowed($action, $errors);
-    }
-
     // Getters valeurs: 
 
     public function getMinQty()
@@ -439,19 +429,6 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return $equipments;
-    }
-
-    public function getLinkedCommandeFournLine($id_commande_fourn)
-    {
-        if ($this->isLoaded() && (int) $id_commande_fourn) {
-            return BimpCache::findBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', array(
-                        'id_obj'             => (int) $id_commande_fourn,
-                        'linked_object_name' => 'commande_line',
-                        'linked_id_object'   => (int) $this->id
-            ));
-        }
-
-        return null;
     }
 
     // Getters Array:
@@ -1379,7 +1356,7 @@ class Bimp_CommandeLine extends ObjectLine
         return $errors;
     }
 
-    public function addReceivedQty($qty)
+    public function addReceivedQty($qty, $new_status = 200)
     {
         $errors = array();
 
@@ -1391,11 +1368,8 @@ class Bimp_CommandeLine extends ObjectLine
 
         $remain_qty = (int) $qty;
 
-        $product = $this->getProduct();
-        if (BimpObject::objectLoaded($product) && $product->isSerialisable()) {
+        if ($this->isProductSerialisable()) {
             $new_status = 101;
-        } else {
-            $new_status = 200;
         }
 
         foreach ($reservations as $reservation) {
@@ -2154,18 +2128,6 @@ class Bimp_CommandeLine extends ObjectLine
                         if ((int) $commande_fourn->getData('fk_statut') !== 0) {
                             $errors[] = 'La commande fournisseur sélectionnée n\'est plus modifiable';
                         }
-//                        else {
-//                            $line = $this->getLinkedCommandeFournLine($id_commande_fourn);
-//                            if (BimpObject::objectLoaded($line)) {
-//                                $line->qty += (float) $qty;
-//                                $line_warnings = array();
-//                                $line_errors = $line->update($line_warnings);
-//                                
-//                                if (count($line_errors)) {
-//                                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la mise à jour des quantités de la ligne de commande fournisseur');
-//                                }
-//                            }
-//                        }
                     }
                 }
 
@@ -2269,6 +2231,7 @@ class Bimp_CommandeLine extends ObjectLine
                                 $remain_qty = $qty;
 
                                 $reservations = $this->getReservations('status', 'asc', 0);
+                                
                                 foreach ($reservations as $reservation) {
                                     $res_qty = (int) $reservation->getData('qty');
                                     if ($remain_qty > $res_qty) {
@@ -2301,9 +2264,47 @@ class Bimp_CommandeLine extends ObjectLine
     {
         $errors = array();
         $warnings = array();
-        $success = '';
+        $success = 'Suppression de la ligne de commande fournisseur effectuée avec succès';
 
-//        $commande
+        if (!isset($data['id_commande_fourn_line']) || !(int) $data['id_commande_fourn_line']) {
+            $errors[] = 'ID de la commande fournisseur absent';
+        } else {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFournLine', (int) $data['id_commande_fourn_line']);
+            if (!BimpObject::objectLoaded($line)) {
+                $errors[] = 'La ligne de commande fournisseur d\'ID ' . $data['id_commande_fourn_line'] . ' n\'existe pas';
+            } else {
+                $commande_fourn = $line->getParentInstance();
+                if (!BimpObject::objectLoaded($commande_fourn)) {
+                    $errors[] = 'Commande fournisseur non trouvée';
+                } elseif ((int) $commande_fourn->getData('fk_status') !== 0) {
+                    $errors[] = 'La commande fournisseur "' . $commande_fourn->getRef() . '" n\'a plus le statut "brouillon"';
+                } else {
+                    $qty = (int) $line->qty;
+                    $errors = $line->delete($warnings, true);
+
+                    if (!count($errors)) {
+                        $remain_qty = $qty;
+
+                        $reservations = $this->getReservations('status', 'asc', 100);
+                        foreach ($reservations as $reservation) {
+                            $res_qty = (int) $reservation->getData('qty');
+                            if ($remain_qty > $res_qty) {
+                                $remain_qty -= $res_qty;
+                            } else {
+                                $res_qty = $remain_qty;
+                                $remain_qty = 0;
+                            }
+
+                            $res_errors = $reservation->setNewStatus(0, $res_qty);
+
+                            if (count($res_errors)) {
+                                $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Echec de la mise à jour du statut des produits pour ' . $res_qty . ' unité(s)');
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         return array(
             'errors'   => $errors,

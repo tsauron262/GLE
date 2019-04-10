@@ -147,6 +147,14 @@ class BimpCache
         }
     }
 
+    public static function setBimpObjectInstance($object)
+    {
+        if (is_a($object, 'BimpObject') && $object->isLoaded()) {
+            $cache_key = 'bimp_object_' . $object->module . '_' . $object->object_name . '_' . $object->id;
+            self::$cache[$cache_key] = $object;
+        }
+    }
+
     public static function unsetDolObjectInstance($id_object, $module, $file = null, $class = null)
     {
         if (is_null($file)) {

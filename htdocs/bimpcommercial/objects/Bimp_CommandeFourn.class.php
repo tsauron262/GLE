@@ -21,11 +21,6 @@ class Bimp_CommandeFourn extends BimpComm
         7 => array('label' => 'Annulée après commande', 'icon' => 'fas_times', 'classes' => array('danger')),
         9 => array('label' => 'Refusée', 'icon' => 'fas_times', 'classes' => array('danger'))
     );
-    public static $reception_status = array(
-        0 => array('label' => 'Non réceptionnée', 'icon' => 'fas_arrow-circle-down', 'classes' => array('danger')),
-        1 => array('label' => 'Réceptionnée partiellement', 'icon' => 'fas_arrow-circle-down', 'classes' => array('warning')),
-        2 => array('label' => 'Réceptionnée', 'icon' => 'fas_arrow-circle-down', 'classes' => array('success'))
-    );
     public static $invoice_status = array(
         0 => array('label' => 'Non facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('danger')),
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
@@ -96,7 +91,7 @@ class Bimp_CommandeFourn extends BimpComm
                     $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
                     return 0;
                 }
-                if (empty($conf->global->SUPPLIER_ORDER_3_STEPS_TO_BE_APPROVED) || $conf->global->MAIN_FEATURES_LEVEL < 1 || $this->getData('total_ht') <= $conf->global->SUPPLIER_ORDER_3_STEPS_TO_BE_APPROVED){
+                if (empty($conf->global->SUPPLIER_ORDER_3_STEPS_TO_BE_APPROVED) || $conf->global->MAIN_FEATURES_LEVEL < 1 || $this->getData('total_ht') <= $conf->global->SUPPLIER_ORDER_3_STEPS_TO_BE_APPROVED) {
                     $errors[] = '2ème approbation non nécessaire';
                     return 0;
                 }
@@ -121,7 +116,11 @@ class Bimp_CommandeFourn extends BimpComm
                 return 1;
 
             case 'reopen':
-                if (!in_array($status, array(1, 2, 3, 4, 5, 6, 7, 9))) {
+                if (in_array($status, array(4, 5))) {
+                    $errors[] = 'Une ou plusieurs réceptions ont déjà été enregistrées pour cette commande fournisseur';
+                    return 0;
+                }
+                if (!in_array($status, array(1, 2, 3, 6, 7, 9))) {
                     $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
                     return 0;
                 }
@@ -743,7 +742,7 @@ class Bimp_CommandeFourn extends BimpComm
     {
         $current_status = (int) $this->getInitData('fk_statut');
 
-        if (in_array($current_status, array(0, 1, 6, 7, 9))) {
+        if (in_array($current_status, array(0, 1, 2, 6, 7, 9))) {
             return;
         }
 
@@ -760,7 +759,7 @@ class Bimp_CommandeFourn extends BimpComm
         $isFullyReceived = 1;
 
         foreach ($lines as $line) {
-            $received_qty = (float) $line->getReceivedQty();
+            $received_qty = (float) $line->getReceivedQty(null, true);
             if ($received_qty > 0) {
                 $hasReception = 1;
             }
@@ -775,7 +774,7 @@ class Bimp_CommandeFourn extends BimpComm
         } elseif ($hasReception) {
             $new_status = 4;
         } else {
-            $new_status = $current_status;
+            $new_status = 3;
         }
 
         if ($current_status !== $new_status) {
@@ -1042,6 +1041,14 @@ class Bimp_CommandeFourn extends BimpComm
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        if (is_null($this->data['fk_user_resp']) || !(int) $this->data['fk_user_resp']) {
+            global $user;
+
+            if (BimpObject::objectLoaded($user)) {
+                $this->set('fk_user_resp', (int) $user->id);
+            }
+        }
+
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {

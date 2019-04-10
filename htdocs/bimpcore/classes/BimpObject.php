@@ -1677,8 +1677,9 @@ class BimpObject extends BimpCache
 
         return false;
     }
-    
-    public function getTaxeIdDefault(){
+
+    public function getTaxeIdDefault()
+    {
         return (int) BimpCore::getConf("tva_default");
     }
 
@@ -2464,8 +2465,7 @@ class BimpObject extends BimpCache
                         $warnings[] = BimpTools::getMsgFromArray($extra_errors, 'Des erreurs sont survenues lors de l\'enregistrement des champs supplémentaires');
                     }
 
-                    $cache_key = 'bimp_object_' . $this->module . '_' . $this->object_name . '_' . $this->id;
-                    self::$cache[$cache_key] = $this;
+                    self::setBimpObjectInstance($this);
 
                     if ($this->getConf('positions', false, false, 'bool')) {
                         $insert_mode = $this->getConf('position_insert', 'before');
@@ -2554,7 +2554,7 @@ class BimpObject extends BimpCache
                             $errors[] = 'Fichier de configuration invalide (table non renseignée)';
                             $result = 0;
                         } else {
-                            $result = $this->db->update($table, $this->getDbData(''), '`' . $primary . '` = ' . (int) $this->id);
+                            $result = $this->db->update($table, $this->getDbData(), '`' . $primary . '` = ' . (int) $this->id);
                         }
                     }
 
@@ -2572,6 +2572,7 @@ class BimpObject extends BimpCache
                         }
 
                         $this->initData = $this->data;
+                        self::setBimpObjectInstance($this);
 
                         $warnings = array_merge($warnings, $this->updateAssociations());
                         $warnings = array_merge($warnings, $this->saveHistory());
@@ -3228,7 +3229,8 @@ class BimpObject extends BimpCache
             return 0;
         }
 
-        $errors = $this->hydrateDolObject();
+        $bimpObjectFields = array();
+        $errors = $this->hydrateDolObject($bimpObjectFields);
 
         if (!count($errors)) {
             if (method_exists($this, 'beforeCreateDolObject')) {
@@ -3243,7 +3245,7 @@ class BimpObject extends BimpCache
             }
 
             $result = call_user_func_array(array($this->dol_object, 'create'), $params);
-            if ($result < 0) {
+            if ($result <= 0) {
                 if (isset($this->dol_object->error) && $this->dol_object->error) {
                     $errors[] = $this->dol_object->error;
                 } elseif (count($this->dol_object->errors)) {
@@ -3252,6 +3254,15 @@ class BimpObject extends BimpCache
                     foreach ($this->dol_object->errors as $error) {
                         $errors[] = 'Erreur: ' . $langs->trans($error);
                     }
+                }
+            } else {
+                if (!empty($bimpObjectFields)) {
+                    $fields = array();
+                    foreach ($bimpObjectFields as $field_name => $value) {
+                        $fields[] = $field_name;
+                    }
+                    
+                    $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $result);
                 }
             }
 
@@ -3552,31 +3563,32 @@ class BimpObject extends BimpCache
     }
 
     // Gestion des droits users: 
-    
-    
-    public function can($right){
-        switch ($right){
+
+
+    public function can($right)
+    {
+        switch ($right) {
             case "view" :
-                if(BimpTools::getContext() == "public")
+                if (BimpTools::getContext() == "public")
                     return ($this->canView() && $this->canClientView());
                 else
                     return $this->canView();
             case 'edit' :
-                if(BimpTools::getContext() == "public")
+                if (BimpTools::getContext() == "public")
                     return ($this->canEdit() && $this->canClientEdit());
                 else
                     return $this->canEdit();
             case "create" :
-                if(BimpTools::getContext() == "public")
+                if (BimpTools::getContext() == "public")
                     return ($this->canCreate() && $this->canClientCreate());
                 else
                     return $this->canCreate();
             case "delete" :
-                if(BimpTools::getContext() == "public")
+                if (BimpTools::getContext() == "public")
                     return ($this->canDelete() && $this->canClientDelete());
                 else
                     return $this->canDelete();
-                
+
             default:
                 return 0;
         }
@@ -3592,11 +3604,11 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
-    
-    public function canClientCreate(){
+
+    public function canClientCreate()
+    {
         return 0;
     }
-
 
     protected function canEdit()
     {
@@ -3608,10 +3620,11 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
-    public function canClientEdit(){
+
+    public function canClientEdit()
+    {
         return 0;
     }
-
 
     protected function canView()
     {
@@ -3623,6 +3636,7 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
+
     public function canClientView()
     {
         return 0;
@@ -3638,7 +3652,9 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
-    public function canClientDelete(){
+
+    public function canClientDelete()
+    {
         return 0;
     }
 
@@ -5492,14 +5508,14 @@ class BimpObject extends BimpCache
             return true;
         return false;
     }
-    
-    
-    public static function getDefaultEntrepot(){
+
+    public static function getDefaultEntrepot()
+    {
         global $user;
-        if(!isset($user->array_options)){
+        if (!isset($user->array_options)) {
             $user->fetch_optionals();
         }
-        if(isset($user->array_options["options_defaultentrepot"]))
+        if (isset($user->array_options["options_defaultentrepot"]))
             return $user->array_options["options_defaultentrepot"];
     }
 }

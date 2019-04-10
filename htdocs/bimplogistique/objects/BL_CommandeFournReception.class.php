@@ -100,13 +100,20 @@ class BL_CommandeFournReception extends BimpObject
             'onclick' => $this->getJsLoadModalView('details', 'Détails de la réception ' . $this->getData('ref'))
         );
 
+        $success_callback = '';
+        $commande_fourn = $this->getParentInstance();
+        if (BimpObject::objectLoaded($commande_fourn)) {
+            $success_callback = 'function() {reloadObjectHeader(' . $commande_fourn->getJsObjectData() . ')}';
+        }
+
         if ($this->isActionAllowed('validateReception')) {
             $buttons[] = array(
                 'label'   => 'Valider la réception',
                 'icon'    => 'fas_check-circle',
                 'onclick' => $this->getJsActionOnclick('validateReception', array(), array(
-                    'form_name'      => 'validate',
-                    'on_form_submit' => 'function($form, extra_data) {return onReceptionValidationFormSubmit($form, extra_data);}'
+                    'form_name'        => 'validate',
+                    'on_form_submit'   => 'function($form, extra_data) {return onReceptionValidationFormSubmit($form, extra_data);}',
+                    'success_callback' => $success_callback
                 ))
             );
         }
@@ -116,7 +123,8 @@ class BL_CommandeFournReception extends BimpObject
                 'label'   => 'Annuler la réception',
                 'icon'    => 'fas_times-circle',
                 'onclick' => $this->getJsActionOnclick('cancelReception', array(), array(
-                    'confirm_msg' => 'Veuillez confirmer l\\\'annulation de cette réception. Les équipements créés seront supprimés'
+                    'confirm_msg'      => 'Veuillez confirmer l\\\'annulation de cette réception. Les équipements créés seront supprimés',
+                    'success_callback' => $success_callback
                 ))
             );
         }
@@ -449,9 +457,9 @@ class BL_CommandeFournReception extends BimpObject
                     $html .= '</div>';
 
                     if (BimpObject::objectLoaded($commande_client_line)) {
-                        $assign = (int) (isset($reception_data['assign_to_commande_client']) ? $reception_data['assign_to_commande_client'] : 1);
+                        $assign = (int) (isset($reception_data['assign_to_commande_client']) ? $reception_data['assign_to_commande_client'] : $this->getData('assign_lines_to_commandes_client'));
                         $html .= '<div style="margin-top: 12px">';
-                        $html .= 'Assigner les équipements à la ligne de commande client d\'origine: <br/>';
+                        $html .= 'Assigner les équipements reçus à la ligne de commande client d\'origine: <br/>';
                         $html .= BimpInput::renderInput('toggle', 'line_' . $line->id . '_reception_' . $this->id . '_assign_to_commande_client', $assign);
                         $html .= '</div>';
                     }
@@ -494,6 +502,16 @@ class BL_CommandeFournReception extends BimpObject
                     $html .= '</span>';
                     $html .= '</div>';
                     $html .= '</div>';
+
+                    if (BimpObject::objectLoaded($commande_client_line)) {
+                        $assign = (int) (isset($reception_data['assign_to_commande_client']) ? $reception_data['assign_to_commande_client'] : $this->getData('assign_lines_to_commandes_client'));
+                        $html .= '<div style="margin-top: 12px">';
+                        $html .= 'Assigner les unités reçues à la ligne de commande client d\'origine: <br/>';
+                        $html .= BimpInput::renderInput('toggle', 'line_' . $line->id . '_reception_' . $this->id . '_assign_to_commande_client', $assign);
+                        $html .= '</div>';
+                    }
+
+                    $html .= '</td>';
                 }
             } else {
                 $html .= '<td colspan="' . $colspan . '">';
@@ -742,6 +760,8 @@ class BL_CommandeFournReception extends BimpObject
             }
         }
 
+        $commande->checkReceptionStatus();
+
         return $errors;
     }
 
@@ -794,10 +814,12 @@ class BL_CommandeFournReception extends BimpObject
             $this->update();
         }
 
+        $commande->checkReceptionStatus();
+
         return $errors;
     }
 
-    // Actions: 
+    // Actions:
 
     public function actionSaveLinesData($data, &$success)
     {
@@ -828,6 +850,7 @@ class BL_CommandeFournReception extends BimpObject
         $errors = array();
         $warnings = array();
         $success = 'Validation de la réception effectuée avec succès';
+        $success_callback = '';
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID de la réception absent';

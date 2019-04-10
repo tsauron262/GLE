@@ -24,7 +24,7 @@ $content_request = $_REQUEST['fc'];
                     if ($userClient->i_am_admin()) {
                         ?>
                         <li <?= ($content_request == 'ticket') ? 'class="active"' : "" ?> >
-                            <a href="?fc=ticket">
+                            <a href="?fc=tickets">
                                 <i class="pe-7s-paperclip"></i>
                                 <p><?= $langs->trans('menuTickets') ?></p>
                             </a>

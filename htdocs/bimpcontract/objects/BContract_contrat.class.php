@@ -129,8 +129,6 @@ class BContract_contrat extends BimpDolObject {
             $aujourdhui = strtotime(date('Y-m-d'));
             $fin = $this->getEndDate();
             $fin = $fin->getTimestamp();
-            echo $fin . '<br />';
-            echo $this->displayEndDate() . '<br >';
             if ($fin - $aujourdhui > 0) {
                 return true;
             }
@@ -157,8 +155,8 @@ class BContract_contrat extends BimpDolObject {
         $card .= '</p>';
         $card .= '</div>';
         $card .= '<div class="content"><div class="footer"><div class="legend">';
-        $card .= ($this->isValide()) ? '<i class="fa fa-plus text-success"></i> <a href="?fc=contrat_ticket&id=' . $this->getData('id') . '">Créer un ticket support</a>' : '';
-        $card .= '<i class="fa fa-eye text-info"></i> Voir le contrat</div><hr><div class="stats"></div></div></div>';
+        $card .= ($this->isValide()) ? '<i class="fa fa-plus text-success"></i> <a href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets">Créer un ticket support</a>' : '';
+        $card .= '<i class="fa fa-eye text-info"></i><a href="?fc=contrat_ticket&id='.$this->getData('id').'">Voir le contrat</a></div><hr><div class="stats"></div></div></div>';
         $card .= '</div></div>';
 
         return $card;

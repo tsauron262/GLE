@@ -9,7 +9,10 @@ objects:
     user_contrat:
         instance:
             bimp_obejct: BIC_UserClientContrats
-            
+    
+    tickets:
+        instance:
+            bimp_object: BIC_UserTickets
 
 sections:
     - type: object_header
@@ -28,5 +31,11 @@ sections:
                     object: userClient
           - id: my_tickets
             title: Tickets support
+            struct:
+                type: list
+                list:
+                    panel: 1
+                    name: pageUser
+                    object: tickets
             
     

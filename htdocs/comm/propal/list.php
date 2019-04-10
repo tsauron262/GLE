@@ -37,13 +37,9 @@
 require '../../main.inc.php';
 
 
-if(isset($_REQUEST["sall"]) && $_REQUEST["sall"] != "")
-    header("Location: ../../bimpcommercial/?fc=propals&search=1&object=propal&sall=".$_REQUEST["sall"]);
-elseif(isset($_REQUEST["socid"]) && $_REQUEST["socid"] > 0)
-    header("Location: ../../bimpcommercial/?fc=clientPropals&id=".$_REQUEST["socid"]);
-else
-    header("Location: ../../bimpcommercial/?fc=propals");
-die;
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_Propal", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
 
 
 
@@ -272,6 +268,7 @@ $formcompany=new FormCompany($db);
 
 $help_url='EN:Commercial_Proposals|FR:Proposition_commerciale|ES:Presupuestos';
 llxHeader('',$langs->trans('Proposal'),$help_url);
+echo $htmlRedirect;
 
 $sql = 'SELECT';
 if ($sall || $search_product_category > 0) $sql = 'SELECT DISTINCT';

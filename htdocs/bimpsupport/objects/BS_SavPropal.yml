@@ -28,9 +28,13 @@ fields_tables:
               edit: 1
             - field: libelle
               edit: 1
+            - field: fk_cond_reglement
+              edit: 1
             - field: pdf_hide_reduc
               edit: 1
             - field: pdf_hide_total
+              edit: 1
+            - field: pdf_proforma
               edit: 1
             - label: Fichier PDF
               value: 

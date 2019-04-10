@@ -1,7 +1,6 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 
 class BIC_UserClient extends BimpObject {
 
@@ -39,7 +38,7 @@ class BIC_UserClient extends BimpObject {
     }
 
     public function renderHeaderStatusExtra() {
-
+        
         $extra = '';
         if ($this->getData('role') == self::USER_CLIENT_ROLE_ADMIN) {
             $extra .= '&nbsp;&nbsp;<span class="important">' . BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Administrateur</span>';

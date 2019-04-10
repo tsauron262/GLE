@@ -29,6 +29,11 @@
  */
 
 require ("../main.inc.php");
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcontract", "BContract_contrat", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+
 require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
@@ -330,6 +335,9 @@ if ($num == 1 && ! empty($conf->global->MAIN_SEARCH_DIRECT_OPEN_IF_ONLY_ONE) && 
 // --------------------------------------------------------------------
 
 llxHeader('', $langs->trans("Contracts"));
+
+echo $htmlRedirect;
+
 
 $i = 0;
 

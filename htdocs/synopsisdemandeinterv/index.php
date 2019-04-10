@@ -43,8 +43,8 @@ require("./pre.inc.php");
 
 
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-require_once(DOL_DOCUMENT_ROOT."/bimpfichinter/objects/Bimp_Fichinter.class.php");
-$htmlRedirect = Bimp_Fichinter::redirect(false, "list");
+$bObj = BimpObject::getInstance("bimpfichinter", "Bimp_Demandinter");
+$htmlRedirect = $bObj->processRedirect();
 
 
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");

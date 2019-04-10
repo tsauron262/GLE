@@ -95,6 +95,9 @@ lists:
                 params:
                     - user
         cols:
+            id_contrat:
+                label: Contrat
+                field: id_contrat
             
 forms:
     editUserTicket:

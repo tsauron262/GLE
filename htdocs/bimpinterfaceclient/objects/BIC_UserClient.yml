@@ -164,6 +164,8 @@ forms:
               input:
                   type: toggle
               value: 1
+            - object: user_client_contrat
+              multiple: 1
     editFull:
         rows:
             - field: email

@@ -547,6 +547,12 @@ if (!defined('NOLOGIN')) {
         }
 
         // End test login / passwords
+        
+        /*moddrsi*/
+        if(!$login && defined("NO_REDIRECT_LOGIN")){
+            define("NOLOGIN",1);
+        }else{
+        /*fmoddrsi*/
         if (!$login || (in_array('ldap', $authmode) && empty($passwordtotest))) { // With LDAP we refused empty password because some LDAP are "opened" for anonymous access so connexion is a success.
             // No data to test login, so we show the login page
             dol_syslog("--- Access to " . $_SERVER["PHP_SELF"] . " showing the login form and exit");
@@ -607,6 +613,9 @@ if (!defined('NOLOGIN')) {
             header('Location: ' . DOL_URL_ROOT . '/index.php' . (count($paramsurl) ? '?' . implode('&', $paramsurl) : ''));
             exit;
         }
+        /*moddrsi*/
+        }
+        /*fmoddrsi*/
     }
     else {
         // We are already into an authenticated session

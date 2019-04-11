@@ -49,6 +49,8 @@ fields:
         object: entrepot
         input: 
             type: search_entrepot
+        default_value: 
+            callback: getDefaultEntrepot
     ref: 
         label: Référence
     fk_statut: 

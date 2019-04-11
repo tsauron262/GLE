@@ -1,0 +1,28 @@
+bootstrap: 1
+title: Bimp Contrat
+
+objects:
+    contrat:
+        instance:
+            bimp_object: BContract_contrat
+    assistance_contrat:
+        instance:
+            bimp_object: BContract_Productservices
+    
+sections:
+    - type: nav_tabs
+      nav_tabs: 
+          - id: liste
+            title: Liste complète des contrats
+            struct: 
+                type: list
+                list: 
+                    panel: 1
+                    object: contrat
+          - id: assistance
+            title: Assistance incluses
+            struct: 
+                type: list
+                list: 
+                    panel: 1
+                    object: assistance_contrat

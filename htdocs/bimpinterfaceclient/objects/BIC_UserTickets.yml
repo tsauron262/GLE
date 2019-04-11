@@ -1,0 +1,115 @@
+extends: 
+    module: bimpsupport
+    object_name: BS_Ticket
+
+objects:
+    contrat:
+        instance:
+            dol_object:
+                module: contrat
+                file: contrat
+            id_object:
+                request: id
+    
+    societe:
+        instance:
+            dol_object:
+                module: societe
+                file: societe
+            id_object:
+                field_value: id_client
+                
+    note:
+        instance:
+            bimp_object:
+                module: bimpsupport
+                name: BS_Note
+                
+fields:
+    id_contrat:
+        label: Contrat
+        type: id_object
+        object: contrat
+    
+    id_client:
+        label: Pour la société
+        type: id_object
+        object: societe
+        
+    sujet:
+        label: Sujet
+        type: text
+        require: 1
+    
+    id_user_client:
+        label: Propriétaire
+
+lists:
+    interface_client:
+        title: Tickets support
+        sort_field: date_create
+        sort_way: desc
+        n: 25
+        add_form_name: addUserTicket
+        add_btn_label: Nouveau ticket support
+        edit_btn: 1
+        edit_form: editUserTicket
+        list_filters: 
+            callback: getListFiltersInterface
+        add_form_values: 
+            fields:
+                status: 20
+                id_client:
+                    callback: 
+                        method: userClient
+                        params:
+                            - attached_societe
+                id_contrat:
+                    callback: currentContrat
+                id_user_client:
+                    callback:
+                        method: userClient
+                        params:
+                            - id
+        page_btn: 1
+        cols:
+            id:
+            sujet:
+            client:
+                value:
+                    display: nom
+            status:
+            priorite:
+            date_create:
+        
+forms:
+    editUserTicket:
+        rows:
+            - field: id_contrat
+              edit: 0
+            - field: status
+              edit: 0
+            - field: sujet
+            - field: priorite
+            
+    addUserTicket:
+        rows:
+            - field: id_client
+              edit: 0
+            - field: id_contrat
+              edit: 0
+            - field: id_user_client
+              edit: 0
+            - field: status
+              edit: 0
+            - field: sujet
+              required: 1
+            - field: priorite
+            - custom: 1
+              input_name: notif_email
+              input:
+                  type: toggle
+              value: 0
+              label: Me notifier et notifier les admins par email
+            - object: note
+              multiple: 1

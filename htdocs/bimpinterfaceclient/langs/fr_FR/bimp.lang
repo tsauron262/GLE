@@ -1,0 +1,24 @@
+menuAccueil= Accueil
+menuTickets= Tickets support
+menuContrat= Contrats
+menuFacture= Factures
+menuDevis= Devis
+menuUser= Comptes utilisateur
+menuLang-fr_FR= Français
+menuLang-en_US= Anglais
+menuLang-de_DE= Allemand
+menuLang-es_ES= Espagnol
+changePassword= Changer mon mot de passe
+deconnexion= Déconnexion
+quatre_zero_quatre= Nous sommes désolé mais la page %s n'existe pas
+bonjour= Bienvenue dans votre espace client BIMP
+labelConstActif= Actif
+labelConstInactif= Inactif
+labelUserPlur= Utilisateurs
+labelUserSing= Utilisateur
+labelFieldEmail= Adresse mail
+labelFieldRole= Rôle du compte
+labelFieldStatus= Statut
+
+ERemailExist = Un autre compte avec cette adresse email existe déjà
+ERemailVide= L'adresse mail est obligatoire

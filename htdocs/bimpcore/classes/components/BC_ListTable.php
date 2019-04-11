@@ -84,7 +84,7 @@ class BC_ListTable extends BC_List
         parent::__construct($object, $path, $name, $level, $id_parent, $title, $icon);
 
         if ($this->isObjectValid()) {
-            if (!(int) $this->object->canCreate()) {
+            if (!(int) $this->object->can("create")) {
                 $this->params['add_object_row'] = 0;
             }
 
@@ -96,7 +96,7 @@ class BC_ListTable extends BC_List
                 $this->params['positions'] = 0;
             }
 
-            if (!(int) $this->object->canDelete()) {
+            if (!(int) $this->object->can("delete")) {
                 foreach ($this->params['bulk_actions'] as $idx => $bulk_action) {
                     $onclick = isset($bulk_action['onclick']) ? $bulk_action['onclick'] : '';
                     if (preg_match('/^deleteSelectedObjects\(/', $onclick)) {
@@ -217,7 +217,7 @@ class BC_ListTable extends BC_List
                         'item_params'    => $item_params,
                         'canEdit'        => (int) ($object->can("edit") && $object->isEditable()),
                         'canView'        => (int) $object->can("view"),
-                        'canDelete'      => (int) ($object->canDelete() && $object->isDeletable()),
+                        'canDelete'      => (int) ($object->can("delete") && $object->isDeletable()),
                         'instance_name'  => $object->getInstanceName(),
                         'url'            => '',
                         'page_btn_label' => '',
@@ -748,7 +748,7 @@ class BC_ListTable extends BC_List
 
     public function renderAddObjectRow()
     {
-        if (!$this->object->canCreate()) {
+        if (!$this->object->can("create")) {
             return '';
         }
 
@@ -925,7 +925,7 @@ class BC_ListTable extends BC_List
 
             if ($label && $onclick) {
                 if (preg_match('/^deleteSelectedObjects\(/', $onclick)) {
-                    if (!$this->object->canDelete()) {
+                    if (!$this->object->can("delete")) {
                         continue;
                     }
                 }

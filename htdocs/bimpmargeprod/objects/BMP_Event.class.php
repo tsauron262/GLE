@@ -1,5 +1,7 @@
 <?php
-require_once DOL_DOCUMENT_ROOT."/bimpmargeprod/objects/Abstract_margeprod.class.php";
+
+require_once DOL_DOCUMENT_ROOT . "/bimpmargeprod/objects/Abstract_margeprod.class.php";
+
 class BMP_Event extends Abstract_margeprod
 {
 
@@ -3572,6 +3574,4 @@ class BMP_Event extends Abstract_margeprod
         }
         return $errors;
     }
-
-                    
 }

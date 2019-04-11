@@ -16,6 +16,7 @@ class Bimp_Propal extends BimpComm
         3 => array('label' => 'Non signée (fermée)', 'icon' => 'exclamation-circle', 'classes' => array('important')),
         4 => array('label' => 'Facturée (fermée)', 'icon' => 'check', 'classes' => array('success')),
     );
+    public $redirectMode = 4;//5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
     // Getters: 
 
@@ -300,7 +301,7 @@ class Bimp_Propal extends BimpComm
                 }
 
                 // Cloner: 
-                if ($this->canCreate()) {
+                if ($this->can("create")) {
                     $buttons[] = array(
                         'label'   => 'Cloner',
                         'icon'    => 'copy',
@@ -440,14 +441,6 @@ class Bimp_Propal extends BimpComm
             ), "a");
         }
 
-        $html .= BimpRender::renderButton(array(
-                    'classes'     => array('btn', 'btn-default'),
-                    'label'       => 'Ancienne version',
-                    'icon_before' => 'fa_file',
-                    'attr'        => array(
-                        'href' => "../comm/propal/card.php?id=" . $this->id
-                    )
-        ), "a");
 
         $html .= '</div>';
 
@@ -793,7 +786,7 @@ class Bimp_Propal extends BimpComm
 
     protected function canEdit()
     {
-        return $this->canCreate();
+        return $this->can("create");
     }
 
     public function canSetAction($action)
@@ -833,7 +826,7 @@ class Bimp_Propal extends BimpComm
 
             case 'createOrder':
                 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
-                return $commande->canCreate();
+                return $commande->can("create");
 
             case 'createContract':
                 if ($user->rights->contrat->creer) {
@@ -843,7 +836,7 @@ class Bimp_Propal extends BimpComm
 
             case 'createInvoice':
                 $facture = BimpObject::getInstance('bimpcommercial', 'Bimp_Facture');
-                return $facture->canCreate();
+                return $facture->can("create");
 
             case 'setRemiseGlobale':
                 return $this->can("edit");
@@ -958,5 +951,12 @@ class Bimp_Propal extends BimpComm
         }
 
         return 1;
+    }
+    
+    public function iAmAdminRedirect() {
+        global $user;
+        if(in_array($user->id, array(60)))
+            return true;
+        return parent::iAmAdminRedirect();
     }
 }

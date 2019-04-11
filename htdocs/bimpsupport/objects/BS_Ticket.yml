@@ -28,6 +28,15 @@ objects:
             id_object: 
                 field_value: id_user_resp
                 
+    user_client:
+        instance:
+            bimp_object:
+                module: bimpinterfaceclient
+                name: BIC_UserClient
+            id_object: 
+                field_value: id_user_client
+            
+                
     inters:
         relation: hasMany
         delete: 1
@@ -122,7 +131,11 @@ fields:
         search:
             input: 
                 type: search_societe
-                societe_type: customer       
+                societe_type: customer  
+    id_user_client:
+        label: Utilisateur client
+        type: id_object
+        object: user_client      
     id_contact:
         label: Contact
         type: id_object
@@ -362,6 +375,17 @@ fields_tables:
             - association: equipments
               label: Equipements concernés
               display: card
+            - field: id_user_client
+              display: card
+    
+    client_infos:
+        title: Informations
+        icon: info-circle
+        rows:
+            - field: id_contrat
+            - field: id_user_client
+            - field: status
+            - field: priorite
               
 views: 
     default:
@@ -431,7 +455,23 @@ views:
                 - type: list
                   list: 
                       children: files
-            
+    client:
+        rows:
+            - cols:
+                - type: fields_table
+                  col_lg: 12
+                  col_md: 12
+                  fields_table: 
+                      name: client_infos
+            - cols:
+                - cols: 
+                - type: list
+                  list:
+                      children: notes
+    
+    client_inters:
+        rows:
+    
 lists_cols:
     id: 
         label: N°
@@ -508,8 +548,23 @@ lists:
             date_create:
             resp:
             contrat:
-            client: 
-                
+            client:
+    
+    client: 
+        extends: default
+        cols:
+            client: unset
+            resp: unset
+        page_btn: 0
+        extra_btn:
+            callback: getExtraBtnListInterfaceClient
+            #method: getExtraBtnListInterfaceClient
+                #params:
+                   # -
+                    
+        add_form_values: 
+            fields:
+                status: 20
 cards:
     default:
         title: nom

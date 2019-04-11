@@ -1,0 +1,32 @@
+bootstrap: 1
+
+objects:
+    userClient:
+        instance:
+            bimp_object: BIC_UserClient
+            id_object: 
+                request: id
+    user_contrat:
+        instance:
+            bimp_obejct: BIC_UserClientContrats
+            
+
+sections:
+    - type: object_header
+      object_header: 
+          object: userClient
+    
+    - type: nav_tabs
+      nav_tabs: 
+          - id: attached_contrat
+            title: Contrats associés
+            struct: 
+                type: view
+                view: 
+                    panel: 0
+                    name: pageUser
+                    object: userClient
+          - id: my_tickets
+            title: Tickets support
+            
+    

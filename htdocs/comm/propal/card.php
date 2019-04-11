@@ -35,6 +35,13 @@
  */
 
 require '../../main.inc.php';
+
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_Propal", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+
+
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formpropal.class.php';
@@ -1373,6 +1380,7 @@ if (empty($reshook))
  */
 
 llxHeader('', $langs->trans('Proposal'), 'EN:Commercial_Proposals|FR:Proposition_commerciale|ES:Presupuestos');
+echo $htmlRedirect;
 
 $form = new Form($db);
 $formother = new FormOther($db);
@@ -1789,7 +1797,8 @@ if ($action == 'create')
 	$head = propal_prepare_head($object);
 	dol_fiche_head($head, 'comm', $langs->trans('Proposal'), -1, 'propal');
 
-        echo "<a href='../../bimpcommercial/index.php?fc=propal&id=".$object->id."' class='butAction' style='margin-left: 40%;'> New VERSION</a>";
+
+//        echo "<a href='../../bimpcommercial/index.php?fc=propal&id=".$object->id."' class='butAction' style='margin-left: 40%;'> New VERSION</a>";
 	$formconfirm = '';
 
 	// Clone confirmation

@@ -1,11 +1,6 @@
 ALTER TABLE `llx_bc_vente` ADD `vente_ht` BOOLEAN NOT NULL DEFAULT FALSE AFTER `id_facture`;
 ALTER TABLE `llx_bc_vente` ADD `id_avoir` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `id_facture`;
 
-ALTER TABLE `llx_bs_sav` ADD `version` FLOAT NOT NULL DEFAULT '0';
-
-ALTER TABLE `llx_bs_sav_propal_line` ADD `def_id_fourn_price` INT UNSIGNED NOT NULL DEFAULT '0' AFTER `position`;
-ALTER TABLE `llx_bs_sav_propal_line` ADD `def_tva_tx` FLOAT NOT NULL DEFAULT '0' AFTER `position`;
-ALTER TABLE `llx_bs_sav_propal_line` ADD `def_pu_ht` FLOAT NOT NULL DEFAULT '0' AFTER `position`;
 
 CREATE TABLE IF NOT EXISTS `llx_bc_vente_return` (
   `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,

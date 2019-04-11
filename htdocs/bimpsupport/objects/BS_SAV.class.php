@@ -741,7 +741,7 @@ class BS_SAV extends BimpObject
         }
 
         global $user;
-        if ($user->admin && BimpObject::objectLoaded($propal)) {
+        if (($user->admin || $user->id == 60) && BimpObject::objectLoaded($propal)) {
             $propal->module = 'bimpcommercial';
             $buttons[] = array(
                 'label'   => 'Fiche Propale ' . $propal->id,
@@ -1991,6 +1991,10 @@ class BS_SAV extends BimpObject
                     }
                 }
                 break;
+                
+            case 'sav_closed': 
+                break;
+            
         }
 
         $contact = $this->getChildObject('contact');
@@ -2934,7 +2938,7 @@ class BS_SAV extends BimpObject
     }
 
     public function actionClose($data, &$success)
-    {
+    {                
         global $user, $langs;
         $errors = array();
         $caisse = null;

@@ -22,6 +22,9 @@ class BimpController
         if (is_null($controller)) {
             $controller = BimpTools::getValue('fc', 'index');
         }
+        if(BimpTools::getContext() == "public")
+            $controller = "public_".$controller;
+        
         $controllerClass = $controller . 'Controller';
 
         if (file_exists($dir . '/controllers/' . $controllerClass . '.php')) {
@@ -30,6 +33,8 @@ class BimpController
             }
             return new $controllerClass($module, $controller);
         }
+        if(BimpTools::getContext() == "public")
+            return new Bimp_user_client_controller($module, $controller);
         return new BimpController($module, $controller);
     }
 
@@ -166,6 +171,11 @@ class BimpController
 
     public function display()
     {
+        global $user;
+        if($user->id < 1)
+            die("Pas de User <a href='".DOL_URL_ROOT."'> Allé a la page de login</a>");
+        
+        
         if (BimpTools::isSubmit('ajax')) {
             $this->ajaxProcess();
             return;
@@ -178,8 +188,7 @@ class BimpController
         if (!defined('BIMP_CONTROLLER_INIT')) {
             define('BIMP_CONTROLLER_INIT', 1);
             $this->addDebugTime('Début affichage page');
-            if (!defined('BIMP_NO_HEADER'))
-                llxHeader('', '', '', false, false, false);
+            llxHeader('', '', '', false, false, false);
             $display_footer = true;
         } else {
             $cssFiles = $this->getConf('css', array(), false, 'array');

@@ -1,0 +1,36 @@
+bootstrap: 1
+    
+objects:
+    ticket:
+        instance:
+            bimp_object:
+                module: bimpsupport
+                name: BS_Ticket
+            id_object:
+                request: id
+            
+
+sections:
+    - type: object_header
+      object_header: 
+          object: ticket
+    - type: nav_tabs
+      nav_tabs: 
+          - id: infos_ticket
+            title: Informations du ticket
+            struct: 
+                type: view
+                view: 
+                    panel: 0
+                    name: client
+                    object: ticket
+          - id: interventions
+            title: Interventions
+            struct:
+                type: view
+                view:
+                    panel: 0
+                    name: client_inters
+                    object: ticket
+                
+            

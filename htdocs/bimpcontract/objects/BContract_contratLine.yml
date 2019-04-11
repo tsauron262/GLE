@@ -1,0 +1,21 @@
+table: contratdet
+
+parent_module: bimpcontract
+parent_object: BContract_contrat
+
+labels: 
+    name: ligne du contrat
+    name_plur: lignes du contrat
+    is_female: 0
+    
+objects: 
+    line: 
+        relation: hasOne
+        delete: 0
+        instance: 
+            dol_object: 
+                module: comm/propal
+                file: propal
+                class: PropaleLigne
+            id_object: 
+                field_value: id_line

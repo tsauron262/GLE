@@ -1530,7 +1530,7 @@ class BimpComm extends BimpDolObject
     {
         $errors = array();
 
-        if (!$force_create && !$this->canCreate()) {
+        if (!$force_create && !$this->can("create")) {
             return array('Vous n\'avez pas la permission de créer ' . $this->getLabel('a'));
         }
 

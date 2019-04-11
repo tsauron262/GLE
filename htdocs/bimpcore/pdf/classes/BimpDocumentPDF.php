@@ -33,6 +33,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function __construct($db)
     {
+        global $conf;
+        $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...","", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
         parent::__construct($db, 'P', 'A4');
         if (!defined('BIMP_LIB')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
@@ -111,6 +113,12 @@ class BimpDocumentPDF extends BimpModelPDF
                             $mysoc->zip = $entrepot->zip;
                             $mysoc->address = $entrepot->address;
                             $mysoc->town = $entrepot->town;
+                            
+                            if($entrepot->ref == "PR"){//patch new adresse
+                                $mysoc->zip = "69760";
+                                $mysoc->address = "Bimp Groupe OLYS <br/>2 rue des Erables CS 21055  ";
+                                $mysoc->town = "LIMONEST";
+                            }
                         }
                     }
                 }

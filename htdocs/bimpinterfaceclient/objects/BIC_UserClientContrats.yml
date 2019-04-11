@@ -1,0 +1,59 @@
+table: bic_user_contrat
+icon: fas_file
+common_fields: 0
+parent_id_property: id_user
+parent_object: BIC_UserClient
+
+fields:
+    id_user:
+        label: Utilisateur
+        type: id_parent
+        input:
+            type: hidden
+        required: 1
+    id_contrat:
+        label: Contrat
+        type: int
+        values:
+            callback: getContrats
+    read_ticket_in_contrat:
+        label: Voir tous les tickets du contrat
+        type: bool
+        default_value: 1
+
+lists:
+    default:
+        object_change_reload: BIC_UserClientContrats
+        title: Liste des contrats associés
+        icon: file
+        checkboxes: 1
+        sort_field: date_create
+        sort_way: desc
+        n: 10
+        add_btn: 1
+        add_form_name: addAssoContrat
+        add_btn_label: Associer un contrat à cet utilisateur
+        edit_form: editAssoContrat
+        list_filters: 
+            callback: getFilterAssoContrat
+        delete_btn: 1
+        edit_btn: 1
+        cols:
+            id_contrat:
+                field: id_contrat
+                type: int
+                values:
+                    callback: getContrats
+            read_ticket_in_contrat:
+                field: read_ticket_in_contrat
+
+forms: 
+    addAssoContrat:
+        rows:
+            - field: id_contrat
+            - field: read_ticket_in_contrat
+    editAssoContrat:
+        rows:
+            - field: id_contrat
+              edit: 0
+            - field: read_ticket_in_contrat

@@ -65,6 +65,8 @@ class BimpObject extends BimpCache
     public $parent = null;
     public $dol_object = null;
     public $extends = array();
+    
+    public $redirectMode = 5;//5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
     // Gestion instance:
 
@@ -2409,7 +2411,7 @@ class BimpObject extends BimpCache
         $errors = array();
 
         if (!$force_create) {
-            if (!$this->canCreate()) {
+            if (!$this->can("create")) {
                 $errors[] = 'Vous n\'avez pas la permission de créer ' . $this->getLabel('a');
             } elseif (!$this->isCreatable()) {
                 $errors[] = 'Il n\'est pas possible de créer ' . $this->getLabel('a');
@@ -2880,7 +2882,7 @@ class BimpObject extends BimpCache
         if (!$this->isLoaded()) {
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
         } else if (!$force_delete) {
-            if (!$this->canDelete()) {
+            if (!$this->can("delete")) {
                 $errors[] = 'Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this');
             } elseif (!$this->isDeletable()) {
                 $errors[] = 'Il n\'est pas possible de supprimer ' . $this->getLabel('this');
@@ -3533,19 +3535,29 @@ class BimpObject extends BimpCache
 
     // Gestion des droits users: 
     
-    //Gere actuelement que le view et le edit
+    
     public function can($right){
         switch ($right){
             case "view" :
-                if(BimpTools::isClientUserContxte())
+                if(BimpTools::getContext() == "public")
                     return ($this->canView() && $this->canClientView());
                 else
                     return $this->canView();
             case 'edit' :
-                if(BimpTools::isClientUserContxte())
+                if(BimpTools::getContext() == "public")
                     return ($this->canEdit() && $this->canClientEdit());
                 else
                     return $this->canEdit();
+            case "create" :
+                if(BimpTools::getContext() == "public")
+                    return ($this->canCreate() && $this->canClientCreate());
+                else
+                    return $this->canCreate();
+            case "delete" :
+                if(BimpTools::getContext() == "public")
+                    return ($this->canDelete() && $this->canClientDelete());
+                else
+                    return $this->canDelete();
                 
             default:
                 return 0;
@@ -3562,10 +3574,11 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
-
-    public function canClientEdit(){
+    
+    public function canClientCreate(){
         return 0;
     }
+
 
     protected function canEdit()
     {
@@ -3577,11 +3590,10 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
-
-    public function canClientView()
-    {
+    public function canClientEdit(){
         return 0;
     }
+
 
     protected function canView()
     {
@@ -3593,6 +3605,10 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
+    public function canClientView()
+    {
+        return 0;
+    }
 
     public function canDelete()
     {
@@ -3603,6 +3619,9 @@ class BimpObject extends BimpCache
             }
         }
         return 1;
+    }
+    public function canClientDelete(){
+        return 0;
     }
 
     public function canEditField($field_name)
@@ -3617,7 +3636,7 @@ class BimpObject extends BimpCache
 
     public function canCreateChild($child_name)
     {
-        return (int) $this->canCreate();
+        return (int) $this->can("create");
     }
 
     public function canEditChild($child_name)
@@ -3632,7 +3651,7 @@ class BimpObject extends BimpCache
 
     public function canDeleteChild($child_name)
     {
-        return (int) $this->canDelete();
+        return (int) $this->can("delete");
     }
 
     public function canSetAction($action)
@@ -4046,6 +4065,11 @@ class BimpObject extends BimpCache
             if (method_exists($this, 'renderHeaderExtraRight')) {
                 $html .= '<div style="margin: 10px 0;">';
                 $html .= $this->renderHeaderExtraRight();
+                $html .= '</div>';
+            }
+            if (method_exists($this, 'renderHeaderBtnRedir')) {
+                $html .= '<div style="margin: 10px 0;">';
+                $html .= $this->renderHeaderBtnRedir();
                 $html .= '</div>';
             }
             $html .= '</div>';
@@ -5012,6 +5036,17 @@ class BimpObject extends BimpCache
 
         return $html;
     }
+    
+    public function getListUrl()
+    {
+        $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+        
+        if (!$url && $this->isDolObject()) {
+            $url = BimpTools::getDolObjectListUrl($object);
+        }
+        
+        return $url;
+    }
 
     public function getChildObjectUrl($object_name, $object = null)
     {
@@ -5454,5 +5489,81 @@ class BimpObject extends BimpCache
         if (filter_var($mail, FILTER_VALIDATE_EMAIL))
             return true;
         return false;
+    }
+    
+    
+    public static function getDefaultEntrepot(){
+        global $user;
+        if(!isset($user->array_options)){
+            $user->fetch_optionals();
+        }
+        if(isset($user->array_options["options_defaultentrepot"]))
+            return $user->array_options["options_defaultentrepot"];
+    }
+    
+    
+    
+    
+    public function renderHeaderBtnRedir(){
+        return $this->processRedirect(false);
+    }
+    public function processRedirect($newVersion = true){
+        $redirect = ((BimpTools::getValue("redirectForce") == 1)? 1 : 0);
+        $redirectMode = $this->redirectMode;
+        $texteBtn = "";
+        if($this->iAmAdminRedirect()){
+            if($redirectMode == 4){
+                $redirectMode = 1;
+                $texteBtn = "ADMIN (N) : ";
+            }
+            elseif($redirectMode == 5){
+                $redirectMode = 1;
+                $texteBtn = "ADMIN (A) : ";
+            }
+        }
+        $btn = false;
+        if($newVersion){
+            if($this->id > 0)
+                $url = $this->getUrl();
+            else
+                $url = $this->getListUrl();
+            $texteBtn .= "Nouvelle version";
+            if($redirectMode == 4)
+                $redirect = true;
+            elseif(in_array ($redirectMode, array(3,5)))
+                $redirect = false;
+            elseif($redirectMode != 0)
+                $btn = true;
+        }
+        else{
+            $url = BimpTools::getDolObjectUrl ($this->dol_object, $this->id);
+            $texteBtn .= "Ancienne version";
+            if($redirectMode == 5)
+                $redirect = true;
+            elseif(in_array ($redirectMode, array(2,4)))
+                $redirect = false;
+            elseif($redirectMode != 0)
+                $btn = true;
+        }
+        if($redirect && $url != ""){
+            $ob = ob_get_contents();
+            if($ob != "")
+                die("<script>window.location = '".$url."';</script>");
+            else{
+                header("location: ".$url);
+                die("<script>window.location = '".$url."';</script>");
+            }
+        }
+        elseif($btn && $url != "")
+            return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='".$texteBtn."'/><input type='hidden' name='redirectForce' value='1'/></form>";
+        
+        return '';
+    }
+    
+    public function iAmAdminRedirect(){
+        global $user;
+//        return 0;
+        if($user-admin)
+            return 1;
     }
 }

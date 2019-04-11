@@ -51,8 +51,9 @@ require("./pre.inc.php");
 
 
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-require_once(DOL_DOCUMENT_ROOT."/bimpfichinter/objects/Bimp_Demandinter.class.php");
-$htmlRedirect = Bimp_Demandinter::redirect(false, $_REQUEST['id']);
+$bObj = BimpObject::getInstance("bimpfichinter", "Bimp_Demandinter", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+//$htmlRedirect = Bimp_Demandinter::redirect(false, $_REQUEST['id']);
 
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");

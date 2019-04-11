@@ -156,6 +156,10 @@ fields:
     defaultentrepot: 
         label: Entrepot par default
         dol_extra_field: 1
+        type: id_object
+        object: entrepot
+        input: 
+            type: search_entrepot
     apple_centre: 
         label: Centre SAV
         dol_extra_field: 1

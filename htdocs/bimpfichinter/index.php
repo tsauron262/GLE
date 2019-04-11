@@ -19,11 +19,6 @@ if (BimpTools::isSubmit('id') && GETPOST('id') > 0) {
         $controllerName = "fichinter";
 }
 
-$htmlSup = "";
-if(!BimpTools::isSubmit("ajax")){
-    require_once(DOL_DOCUMENT_ROOT."/bimpfichinter/objects/".$objName.".class.php");
-    $htmlSup =  $objName::redirect(true, GETPOST("id"));
-}
 
 $controller = BimpController::getInstance('bimpfichinter', $controllerName);
 $controller->display();

@@ -7,12 +7,17 @@ class BIC_UserTickets extends BS_Ticket {
 
     public function getListFiltersInterface($filter_send = null) {
         global $userClient;
+        
+        
         $filter = Array(Array('name' => 'id_client','filter' => $userClient->getData('attached_societe')));
         if($filter_send == 'contrat') {
             $filter = array_merge($filter, Array(Array('name' => 'id_contrat','filter' => $_REQUEST['id'])));
         }
         if($filter_send == 'user') {
-            $filter = array_merge($filter, Array(Array('name' => 'id_user_client','filter' => $userClient->id)));
+            $idUser = BimpTools::getValue("id");
+            if($idUser < 1)
+                $idUser = $userClient->id;
+            $filter = array_merge($filter, Array(Array('name' => 'id_user_client','filter' => $idUser)));
         }
         return $filter;        
     }

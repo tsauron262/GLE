@@ -84,7 +84,6 @@ lists:
     
     pageUser:
         extends: interface_client
-        edit_btn: 0
         add_btn: 0
         list_filters: 
             callback:
@@ -97,7 +96,6 @@ lists:
                 field: id_contrat
     pageClient:
         extends: interface_client
-        edit_btn: 0
         add_btn: 0
         list_filters: 
             callback:

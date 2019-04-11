@@ -741,7 +741,7 @@ class BS_SAV extends BimpObject
         }
 
         global $user;
-        if (($user->admin || $user->id == 60) && BimpObject::objectLoaded($propal)) {
+        if (($user->admin || $user->id == 60 || $user->id == 282) && BimpObject::objectLoaded($propal)) {
             $propal->module = 'bimpcommercial';
             $buttons[] = array(
                 'label'   => 'Fiche Propale ' . $propal->id,

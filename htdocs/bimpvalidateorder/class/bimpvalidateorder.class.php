@@ -55,7 +55,7 @@ class BimpValidateOrder {
                         $error = true;
                 }
                 if (!$error) {
-                    setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande financiérement.", null, 'warnings');
+                    setEventMessages("Un mail a été envoyé à un responsable pour qu'il valide cette commande financiérement.", null, 'warnings');
                 }
                 else
                         $this->errors[] = 'Envoi d\'email impossible';
@@ -78,7 +78,7 @@ class BimpValidateOrder {
                         $error2 = true;
                 }
                 if (!$error2) {
-                    setEventMessages("Un mail à été envoyé à un responsable pour qu'il valide cette commande commercialement.", null, 'warnings');
+                    setEventMessages("Un mail a été envoyé à un responsable pour qu'il valide cette commande commercialement.", null, 'warnings');
                 }
                 else
                         $this->errors[] = 'Envoi d\'email impossible';

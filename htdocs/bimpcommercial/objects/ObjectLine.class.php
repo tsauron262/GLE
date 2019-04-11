@@ -1985,23 +1985,23 @@ class ObjectLine extends BimpObject
                     $html .= '<input type="hidden" value="1" name="' . $prefixe . 'qty"/>';
                     $html .= '1';
                 } else {
-                    if ($product_type === 1) {
+                    if ($product_type == Product::TYPE_SERVICE) {
                         $html = BimpInput::renderInput('qty', $prefixe . 'qty', (float) $value, array(
                                     'step' => 1,
                                     'data' => array(
                                         'data_type' => 'number',
-                                        'min'       => 0.001,
-                                        'unsigned'  => 1,
+                                        'min'       => 'none',
+                                        'unsigned'  => 0,
                                         'decimals'  => 3
                                     )
                         ));
                     } else {
-                        if (is_null($product_type)) {
-                            $min = 0.001;
+                        if (is_null($product_type)) {//ligne libre ou autre
+                            $min = 'none';
                             $decimals = 3;
-                        } else {
-                            $decimals = 1;
-                            $min = 1;
+                        } else {//produit
+                            $decimals = 0;
+                            $min = 'none';
                             if ($this->isLoaded()) {
                                 if (method_exists($this, 'getMinQty')) {
                                     $min = $this->getMinQty();
@@ -2027,7 +2027,7 @@ class ObjectLine extends BimpObject
                                     'data' => array(
                                         'data_type' => 'number',
                                         'min'       => $min,
-                                        'unsigned'  => 1,
+                                        'unsigned'  => 0,
                                         'decimals'  => $decimals
                                     )
                         ));

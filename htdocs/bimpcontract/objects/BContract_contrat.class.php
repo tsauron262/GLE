@@ -114,10 +114,26 @@ class BContract_contrat extends BimpDolObject {
         $fin = $fin->sub(new DateInterval("P1D"));
         return $fin;
     }
+    
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        $this->autoClose();
+        return $return;
+    }
+    
+    public function autoClose(){//passer les contrat au statut clos quand toutes les enssiéne ligne sont close
+        if($this->id > 0 && $this->getData("statut") == 1 && $this->getEndDate() < new DateTime()){
+            $sql = $this->db->db->query("SELECT * FROM `llx_contratdet` WHERE statut != 5 AND `fk_contrat` = ".$this->id);
+            if($this->db->db->num_rows($sql) == 0){
+                $this->updateField("statut", 2);
+            }
+        }
+        
+    }
 
     public function getActionsButtons() {
         $buttons = array();
-        if ($this->getData('statut') != self::CONTRAT_STATUS_VALIDE) {
+        if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
             $buttons[] = array(
                 'label' => 'Valider le contrat',
                 'icon' => 'fas_check',
@@ -125,6 +141,12 @@ class BContract_contrat extends BimpDolObject {
             );
         }
         return $buttons;
+    }
+    
+    public function canEdit(){
+        if($this->getData("statut") != self::CONTRAT_STATUS_CLOS)
+            return true;
+        return false;
     }
 
     public function canClientView() {

@@ -101,18 +101,23 @@ class BContract_contrat extends BimpDolObject {
 
     public function displayEndDate() {
         $fin = $this->getEndDate();
-        return $fin->format('d/m/Y');
+        if($fin > 0)
+            return $fin->format('d/m/Y');
     }
 
     public function getEndDate() {
         $debut = new DateTime();
         $fin = new DateTime();
         $Timestamp_debut = strtotime($this->getData('date_start'));
-        $debut->setTimestamp($Timestamp_debut);
+        if($Timestamp_debut > 0){
+            $debut->setTimestamp($Timestamp_debut);
         $fin->setTimestamp($Timestamp_debut);
-        $fin = $fin->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
+        if($this->getData('duree_mois') > 0)
+            $fin = $fin->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
         $fin = $fin->sub(new DateInterval("P1D"));
         return $fin;
+        }
+        return '';
     }
     
     public function fetch($id, $parent = null) {
@@ -151,13 +156,15 @@ class BContract_contrat extends BimpDolObject {
 
     public function canClientView() {
         global $userClient;
+        if($userClient->i_am_admin()){
+            return true;
+        }
         $list = $userClient->getChildrenObjects('user_client_contrat');
         foreach ($list as $obj) {
             if($obj->getData('id_contrat') == $this->id) {
                 return true;
             }
         }
-        
         return false;
     }
 

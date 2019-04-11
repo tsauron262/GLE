@@ -9,5 +9,5 @@ sections:
     - type: list
       list:
           panel: 1
-          name: interface_client
+          name: pageClient
           object: tickets

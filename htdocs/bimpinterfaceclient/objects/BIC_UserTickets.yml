@@ -78,9 +78,6 @@ lists:
         cols:
             id:
             sujet:
-            client:
-                value:
-                    display: nom
             status:
             priorite:
             date_create:
@@ -94,6 +91,19 @@ lists:
                 method: getListFiltersInterface
                 params:
                     - user
+        cols:
+            id_contrat:
+                label: Contrat
+                field: id_contrat
+    pageClient:
+        extends: interface_client
+        edit_btn: 0
+        add_btn: 0
+        list_filters: 
+            callback:
+                method: getListFiltersInterface
+                params:
+                    - client
         cols:
             id_contrat:
                 label: Contrat

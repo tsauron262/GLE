@@ -5534,6 +5534,15 @@ class BimpObject extends BimpCache
                 $redirect = false;
             elseif($redirectMode != 0)
                 $btn = true;
+            
+            if(BimpTools::getValue("sall") != ""){
+                $objName = "";
+                if(isset($this->dol_object) && isset($this->dol_object->element))
+                    $objName = $this->dol_object->element;
+                $url .= "&search=1&object=".$this->dol_object->element."&sall=".BimpTools::getValue("sall");
+            }
+                
+                https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
         }
         else{
             $url = BimpTools::getDolObjectUrl ($this->dol_object, $this->id);

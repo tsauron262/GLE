@@ -4,6 +4,10 @@ common_fields: 0
 parent_id_property: id_user
 parent_object: BIC_UserClient
 
+
+labels: 
+    name: Contrats associés
+
 fields:
     id_user:
         label: Utilisateur

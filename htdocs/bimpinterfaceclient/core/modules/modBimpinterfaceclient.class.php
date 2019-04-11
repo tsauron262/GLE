@@ -150,7 +150,7 @@ class modBimpinterfaceclient extends DolibarrModules
                 $name = 'module_version_'.strtolower($this->name);
                 if(BimpCore::getConf($name) == "") {
                     BimpCore::setConf($name, floatval($this->version));
-                    $this->_load_tables('/bimpinterfaceclient/sql/');
+                    $this->_load_tables('/'.strtolower($this->name).'/sql/');
                 }
                 
 		return $this->_init($sql, $options);

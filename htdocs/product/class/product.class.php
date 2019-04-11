@@ -724,7 +724,7 @@ class Product extends CommonObject
 		if (! $this->label) $this->label = 'MISSING LABEL';
 
 		// Clean parameters
-                $forbidden_chars_to_replace=array(" ", "'", "\\", "*", "?", "\"", "<", ">", "|", "[", "]", ",", ";", "=", '°');
+                $forbidden_chars_to_replace=array(" ", "'", "\\", "*", "?", "\"", "<", /*">", "/",*/ "|", "[", "]", ",", ";", "=", '°');
 		$this->ref = dol_string_nospecial(trim($this->ref), "_", $forbidden_chars_to_replace);
 		$this->label = trim($this->label);
 		$this->description = trim($this->description);

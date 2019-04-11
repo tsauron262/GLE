@@ -25,11 +25,14 @@ class importVente extends import8sens {
     }
 
     public function go() {
-        $this->dateDepart = "31/12/2018";
-        $this->dateAchatDef = "05/10/2014";
-        $this->path .= "../inventaire/olys/exportVente/";
-//        $this->dateAchatDef = "01/01/2016";
-//        $this->path .= "../inventaire/comp/exportVente/";
+        $this->dateDepart = "31/03/2019";
+        
+        
+//        $this->dateAchatDef = "05/10/2014";
+//        $this->path .= "../inventaire/olys/exportVente/";
+        
+        $this->dateAchatDef = "01/01/2016";
+        $this->path .= "../inventaire/comp/exportVente/";
         
         
         
@@ -119,7 +122,7 @@ class importVente extends import8sens {
             
             
             
-            if($ln['PlvGArtCode'] == "ADA-USBCGE/WH "){
+            if($ln['PlvGArtCode'] == "APP-ME182Z/A"){
                 echo "month:".$nbmonth."year:".$nbyear."date:".$ln['PlvDate']."<br/>";
             }
             

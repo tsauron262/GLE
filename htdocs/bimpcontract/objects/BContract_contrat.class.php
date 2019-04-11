@@ -87,30 +87,58 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_REGLEMENT_REMBOURCEMENT => 'Rembourcement',
         self::CONTRAT_REGLEMENT_AMERICAN_EXPRESS => 'American Express'
     );
-
+    
+    function __construct($module, $object_name) {
+        if(BimpTools::getContext() == 'public') {
+            $this->redirectMode = 4;
+        }
+        return parent::__construct($module, $object_name);
+    }
+    
     public function displayRef() {
         return $this->getData('ref');
     }
 
     public function displayEndDate() {
         $fin = $this->getEndDate();
-        return $fin->format('d/m/Y');
+        if($fin > 0)
+            return $fin->format('d/m/Y');
     }
 
     public function getEndDate() {
         $debut = new DateTime();
         $fin = new DateTime();
         $Timestamp_debut = strtotime($this->getData('date_start'));
-        $debut->setTimestamp($Timestamp_debut);
+        if($Timestamp_debut > 0){
+            $debut->setTimestamp($Timestamp_debut);
         $fin->setTimestamp($Timestamp_debut);
-        $fin = $fin->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
+        if($this->getData('duree_mois') > 0)
+            $fin = $fin->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
         $fin = $fin->sub(new DateInterval("P1D"));
         return $fin;
+        }
+        return '';
+    }
+    
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        $this->autoClose();
+        return $return;
+    }
+    
+    public function autoClose(){//passer les contrat au statut clos quand toutes les enssiéne ligne sont close
+        if($this->id > 0 && $this->getData("statut") == 1 && $this->getEndDate() < new DateTime()){
+            $sql = $this->db->db->query("SELECT * FROM `llx_contratdet` WHERE statut != 5 AND `fk_contrat` = ".$this->id);
+            if($this->db->db->num_rows($sql) == 0){
+                $this->updateField("statut", 2);
+            }
+        }
+        
     }
 
     public function getActionsButtons() {
         $buttons = array();
-        if ($this->getData('statut') != self::CONTRAT_STATUS_VALIDE) {
+        if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
             $buttons[] = array(
                 'label' => 'Valider le contrat',
                 'icon' => 'fas_check',
@@ -119,9 +147,25 @@ class BContract_contrat extends BimpDolObject {
         }
         return $buttons;
     }
+    
+    public function canEdit(){
+        if($this->getData("statut") != self::CONTRAT_STATUS_CLOS)
+            return true;
+        return false;
+    }
 
     public function canClientView() {
-        return true;
+        global $userClient;
+        if($userClient->i_am_admin()){
+            return true;
+        }
+        $list = $userClient->getChildrenObjects('user_client_contrat');
+        foreach ($list as $obj) {
+            if($obj->getData('id_contrat') == $this->id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function isValide() {
@@ -165,5 +209,5 @@ class BContract_contrat extends BimpDolObject {
     public function getName() {
         return $this->getData('ref');
     }
-
+        
 }

@@ -5,18 +5,16 @@ require_once DOL_DOCUMENT_ROOT . '/bimpsupport/objects/BS_Ticket.class.php';
 
 class BIC_UserTickets extends BS_Ticket {
 
-    public function getListFiltersInterface() {
+    public function getListFiltersInterface($filter_send = null) {
         global $userClient;
-        return Array(
-            Array(
-                'name' => 'id_client',
-                'filter' => $userClient->getData('attached_societe')
-            ),
-            Array(
-                'name' => 'id_contrat',
-                'filter' => $_REQUEST['id']
-            )
-        );
+        $filter = Array(Array('name' => 'id_client','filter' => $userClient->getData('attached_societe')));
+        if($filter_send == 'contrat') {
+            $filter = array_merge($filter, Array(Array('name' => 'id_contrat','filter' => $_REQUEST['id'])));
+        }
+        if($filter_send == 'user') {
+            $filter = array_merge($filter, Array(Array('name' => 'id_user_client','filter' => $userClient->id)));
+        }
+        return $filter;        
     }
 
     public function userClient($field) {
@@ -27,7 +25,7 @@ class BIC_UserTickets extends BS_Ticket {
     public function currentContrat() {
         return $_REQUEST['id'];
     }
-
+    
     public function create(&$warnings, $force_create = false) {
         global $userClient;
         if (parent::create($warnings, $force_create) > 1) {

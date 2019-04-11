@@ -261,12 +261,13 @@ class modBimpmargeprod extends DolibarrModules
 	{
 		$sql = array();
                 
-                require_once(DOL_DOCUMENT_ROOT."/bimpcore/Bimp_Lib.php");
-                $name = 'module_version_bimpmargeprod';
-                if(BimpCore::getConf($name) == ""){
+                require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+                $name = 'module_version_'.strtolower($this->name);
+                if(BimpCore::getConf($name) == "") {
                     BimpCore::setConf($name, floatval($this->version));
-                    $this->_load_tables('/bimpmargeprod/sql/');
+                    $this->_load_tables('/'.strtolower($this->name).'/sql/');
                 }
+                
                 
                 $tabTva = array(2462 => 20, 14 => 5.5, 15 => 0, 16 => 2.1, 17 => 7);
                 

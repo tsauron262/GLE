@@ -14,12 +14,13 @@ $content_request = $_REQUEST['fc'];
                             <i class="pe-7s-home"></i>
                             <p><?= $langs->trans('menuAccueil') ?></p>
                         </a>
-
                     </li>
-
-
-
-
+                    <li <?= ($content_request == 'pageUser') ? 'class="active"' : "" ?> >
+                        <a href="?fc=pageUser&id=<?= $userClient->getData('id') ?>">
+                            <i class="pe-7s-paperclip"></i>
+                            <p>Ma page utilisateur</p>
+                        </a>
+                    </li>
                     <?php
                     if ($userClient->i_am_admin()) {
                         ?>
@@ -103,7 +104,6 @@ $content_request = $_REQUEST['fc'];
                     </div>
                     <div class="collapse navbar-collapse">
                         <ul class="nav navbar-nav navbar-right">
-                            <li><a href="?fc=pageUser&id=<?= $userClient->getData('id') ?>">Ma page utilisateur</a></li>
                             <li><a href="#" class="passwd"><?= $langs->trans('changePassword') ?></a></li>
                             <li><a href="?action=deconnexion"><?= $langs->trans('deconnexion') ?></a></li>
                         </ul>

@@ -12,7 +12,7 @@ class Bimp_Propal extends BimpComm
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
-        2 => array('label' => 'Signée (A facturer)', 'icon' => 'check', 'classes' => array('info')),
+        2 => array('label' => 'Signée (A facturer)', 'icon' => 'check', 'classes' => array('success')),
         3 => array('label' => 'Non signée (fermée)', 'icon' => 'exclamation-circle', 'classes' => array('important')),
         4 => array('label' => 'Facturée (fermée)', 'icon' => 'check', 'classes' => array('success')),
     );

@@ -597,11 +597,14 @@ class BS_Ticket extends BimpObject
     }
     
      public function canClientView() {
-        return true;
+         global $userClient;
+         if(!$this->isLoaded() || (is_object($userClient) && $userClient->getData("attached_societe") == $this->getData("id_client")))
+             return true;
+         return false;
     }
 
     public function canClientEdit() {
-        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT) {
+        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->can("view")) {
             return true;
         }
         

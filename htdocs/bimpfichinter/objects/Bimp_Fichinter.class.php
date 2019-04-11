@@ -7,7 +7,6 @@ class Bimp_Fichinter extends ObjectInter
     public $force_update_date_ln = true;
     public static $dol_module = 'fichinter';
     public $extraFetch = false;
-    public $redirectMode = 4;
     
     public static $nature_list = array(
         0 => array('label' => 'Choix', 'icon' => 'fas_file-alt', 'classes' => array('warning')),

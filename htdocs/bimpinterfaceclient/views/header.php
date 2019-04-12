@@ -78,7 +78,7 @@ $content_request = $_REQUEST['fc'];
             <h4>Changer de mot de passe</h4>
             <hr>
             <form method="post">
-                <center><input type="password" class="form-control" style="width:80%" placeholder="Nouveau mot de passe" name="new_passwd" id="new_passwd" ></center>
+                <center><input type="password" class="form-control" style="width:80%" placeholder="Nouveau mot de passe" name="new_password" id="new_passwd" ></center>
                 <br />
                 <button type="submit" class="btn btn-warning btn-fill pull-center">Modifier mon mot de passe</button>
             </form>

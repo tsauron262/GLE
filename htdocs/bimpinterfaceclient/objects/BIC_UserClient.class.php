@@ -253,6 +253,12 @@ class BIC_UserClient extends BimpObject {
         $password = $this->random_password($lenght);
         return (object) Array('clear' => $password, 'sha256' => hash('sha256', $password));
     }
+    
+    public function change_password($post) {
+        $this->updateField('password', hash('sha256', $post));
+        mailSyn2('Changement de votre mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Vous avez changer votre mot de passe de votre interface client <br /> Votre nouveau mot de passe est : $post" );
+        $this->updateField('renew_required', 0);
+    }
 
     public function create(&$warnings = array(), $force_create = false) {
         $mot_de_passe = $this->generatePassword();

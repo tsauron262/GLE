@@ -30,6 +30,40 @@ class BS_Note extends BimpObject
     }
     
     public function canClientView() {
-        return true;
+        return 1;
+    }
+    
+    public function canClientEdit() {
+        return $this->canClientCreate();
+    }
+    
+    public function canClientCreate() {
+        $parent = $this->getParentInstance();
+        if($parent->getData('status') == 20 || $parent->getData('status') == 2) {
+            return 1;
+        }
+        return 0;
+    }
+    
+    public function canCreate() {
+        return 1;
+    }
+    
+    public function canEdit(){
+        return 1;
+    }
+    
+    public function getListFilterNotesInterface() {
+        $parent = $this->getParentInstance();
+        return Array(
+            Array(
+                'name' => 'id_ticket',
+                'filter' => $parent->getData('id')
+            ),
+            Array(
+                'name' => 'visibility',
+                'filter' => 0 // A changer après avoir fait le créate
+            )
+        );
     }
 }

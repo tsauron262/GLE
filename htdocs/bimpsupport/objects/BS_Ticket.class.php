@@ -591,7 +591,7 @@ class BS_Ticket extends BimpObject
                     'icon'    => 'fas_file',
                     "onclick" => "window.location.href = '".DOL_URL_ROOT."/bimpinterfaceclient/?page=ticket&id=".$this->getData('id')."'"
                 );
-           
+                
 
         return $buttons;
     }
@@ -599,19 +599,24 @@ class BS_Ticket extends BimpObject
      public function canClientView() {
          global $userClient;
          if(!$this->isLoaded() || (is_object($userClient) && $userClient->getData("attached_societe") == $this->getData("id_client")))
-             return true;
-         return false;
+             return 1;
+         return 0;
     }
 
     public function canClientEdit() {
-        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->can("view")) {
-            return true;
+        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->can("view") && $this->canClientCreate()) {
+            return 1;
         }
         
-        return false;
+        return 0;
     }
 
     public function canClientCreate() {
-        return true;
+        $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
+        if($instance->getData('statut') == 1) {
+            return 1;
+        }
+        return 0;
+        
     }
 }

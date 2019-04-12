@@ -9,7 +9,7 @@ class BIC_UserClient extends BimpObject {
     public $loginUser = "client_user";
     public $init = false;
     public $ref = '';
-    public static $langs_list = array("fr_FR", 'en_US', 'de_DE', 'es_ES');
+    public static $langs_list = array("fr_FR");
 
     # Constantes
 
@@ -256,7 +256,7 @@ class BIC_UserClient extends BimpObject {
     
     public function change_password($post) {
         $this->updateField('password', hash('sha256', $post));
-        mailSyn2('Changement de votre mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Vous avez changer votre mot de passe de votre interface client <br /> Votre nouveau mot de passe est : $post" );
+        mailSyn2('Changement de votre mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer, si vous n'êtes pas à l'origine de cette actions veuillez contacter votre administrateur" );
         $this->updateField('renew_required', 0);
     }
 

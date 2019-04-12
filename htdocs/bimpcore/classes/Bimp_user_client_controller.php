@@ -69,6 +69,10 @@ class Bimp_user_client_controller extends BimpController {
         if (isset($_REQUEST['new_lang'])) {
             $userClient->switch_lang($_REQUEST['new_lang']);
         }
+        
+        if(isset($_POST['new_password'])) {
+            $userClient->change_password($_POST['new_password']);
+        }
 
 
         if (isset($_POST['new_passwd'])) {

@@ -50,38 +50,57 @@ fields:
         sortable: 0
         searchable: 0
         
-list:
-    title: Notes
-    icon: fas_file-alt
-    checkboxes: 1
-    bulk_actions: 
-        - label: Supprimer les notes sélectionnées
-          icon: fas_trash-alt
-          onclick: deleteSelectedObjects('list_id', $(this));
-          btn_class: deleteSelectedObjects
-    sort_field: date_create
-    sort_way: desc
-    n: 50
-    cols:
-        date_create:
-            label: Date
-            field: date_create
-        user_create:
-            label: Auteur
-            field: user_create
-        inter:
-            label: Intervention
-            field: id_inter
-            edit: 1
-        visibilite:
-            label: Visibilité
-            field: visibility
-            edit: 1
-        contenu:
-            label: Contenu
-            field: content
-            edit: 1
-            min_width: 40%
-    add_object_row: 1
-    update_btn: 1
-    delete_btn: 1
+lists:
+    default:
+        title: Notes
+        icon: fas_file-alt
+        checkboxes: 1
+        bulk_actions: 
+            - label: Supprimer les notes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        sort_field: date_create
+        sort_way: desc
+        n: 50
+        cols:
+            date_create:
+                label: Date
+                field: date_create
+            user_create:
+                label: Auteur
+                field: user_create
+            inter:
+                label: Intervention
+                field: id_inter
+                edit: 1
+            visibilite:
+                label: Visibilité
+                field: visibility
+                edit: 1
+            contenu:
+                label: Contenu
+                field: content
+                edit: 1
+                min_width: 40%
+        add_object_row: 1
+        update_btn: 1
+        delete_btn: 1
+    client:
+        extends: default
+        cols:
+            visibilite: unset
+            inter: unset
+            user_create: unset
+        add_form_name: addClientNote
+        add_btn: 1
+        add_object_row: 0
+        list_filters:
+            callback: getListFilterNotesInterface
+        
+    
+forms:
+    addClientNote:
+        title: Ajouter un note au ticket support
+        rows:
+            - field: content

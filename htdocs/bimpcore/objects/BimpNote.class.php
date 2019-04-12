@@ -82,25 +82,25 @@ class BimpNote extends BimpObject
         return $filters;
     }
 
-    public function isCreatable()
+    public function isCreatable($force_create = false)
     {        
-        return (int) $this->isEditable();
+        return (int) $this->isEditable($force_create);
     }
 
-    public function isEditable()
+    public function isEditable($force_edit = false)
     {
         $parent = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($parent) && is_a($parent, 'BimpObject')) {
-            return (int) $parent->areNotesEditable();
+            return (int) $parent->areNotesEditable($force_edit);
         }
 
         return 1;
     }
     
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
-        return (int) $this->isEditable();
+        return (int) $this->isEditable($force_delete);
     }
 
     // Affichage: 

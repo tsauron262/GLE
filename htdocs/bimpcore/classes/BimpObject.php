@@ -2129,6 +2129,7 @@ class BimpObject extends BimpCache
     {
         $errors = array();
         $prev_path = $this->config->current_path;
+        $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0);
 
         $fields = $this->getConf('fields', array(), true, 'array');
 
@@ -2143,7 +2144,7 @@ class BimpObject extends BimpCache
 //                    $errors[] = 'Vous n\'avez pas la permission de modifier le champ "' . $label . '"';
                     continue;
                 }
-                if (!$this->isFieldEditable($field)) {
+                if (!$this->isFieldEditable($field, $force_edit)) {
 //                    $errors[] = 'Le champ "' . $label . '" n\'est pas modifiable';
                     continue;
                 }
@@ -2349,9 +2350,6 @@ class BimpObject extends BimpCache
 
         $errors = array();
         foreach ($fields as $field => $params) {
-//            if (!(int) $this->getConf('fields/' . $field . '/editable', 1, false, 'bool')) {
-//                continue;
-//            }
             $errors = array_merge($errors, $this->validateValue($field, isset($this->data[$field]) ? $this->data[$field] : null));
         }
         return $errors;
@@ -2369,8 +2367,9 @@ class BimpObject extends BimpCache
         $errors = $this->validatePost();
 
         if (!count($errors)) {
+            $force_edit = (int) BimpTools::getPostFieldValue('force_edit', 0);
             if ($this->isLoaded()) {
-                $errors = $this->update($warnings);
+                $errors = $this->update($warnings, $force_edit);
                 if (!count($errors)) {
                     $success = 'Mise à jour ' . $this->getLabel('of_the') . ' effectuée avec succès';
                     if (method_exists($this, 'getUpdateJsCallback')) {
@@ -2378,7 +2377,7 @@ class BimpObject extends BimpCache
                     }
                 }
             } else {
-                $errors = $this->create($warnings);
+                $errors = $this->create($warnings, $force_edit);
                 if (!count($errors)) {
                     $success = 'Création ' . $this->getLabel('of_the') . ' effectuée avec succès';
                     if (method_exists($this, 'getCreateJsCallback')) {
@@ -2413,12 +2412,12 @@ class BimpObject extends BimpCache
 
         $errors = array();
 
-        if (!$force_create) {
-            if (!$this->can("create")) {
-                $errors[] = 'Vous n\'avez pas la permission de créer ' . $this->getLabel('a');
-            } elseif (!$this->isCreatable()) {
-                $errors[] = 'Il n\'est pas possible de créer ' . $this->getLabel('a');
-            }
+        if (!$force_create && !$this->can("create")) {
+            $errors[] = 'Vous n\'avez pas la permission de créer ' . $this->getLabel('a');
+        }
+
+        if (!$this->isCreatable($force_create)) {
+            $errors[] = 'Il n\'est pas possible de créer ' . $this->getLabel('a');
         }
 
         if (!count($errors)) {
@@ -2523,7 +2522,7 @@ class BimpObject extends BimpCache
             $errors[] = 'Vous n\'avez pas la permission de modifier ' . $this->getLabel('this');
         }
 
-        if (!$force_update && !$this->isEditable()) {
+        if (!$this->isEditable($force_update)) {
             $errors[] = 'Il n\'est pas possible de modifier ' . $this->getLabel('this');
         }
 
@@ -2884,12 +2883,14 @@ class BimpObject extends BimpCache
 
         if (!$this->isLoaded()) {
             $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
-        } else if (!$force_delete) {
-            if (!$this->can("delete")) {
-                $errors[] = 'Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this');
-            } elseif (!$this->isDeletable()) {
-                $errors[] = 'Il n\'est pas possible de supprimer ' . $this->getLabel('this');
-            }
+        } elseif (!$force_delete && !$this->can("delete")) {
+            $errors[] = 'Vous n\'avez pas la permission de supprimer ' . $this->getLabel('this');
+        } elseif (!$this->isDeletable($force_delete)) {
+            $errors[] = 'Il n\'est pas possible de supprimer ' . $this->getLabel('this');
+        }
+
+        if (count($errors)) {
+            return $errors;
         }
 
         $parent = $this->getParentInstance();
@@ -3261,7 +3262,7 @@ class BimpObject extends BimpCache
                     foreach ($bimpObjectFields as $field_name => $value) {
                         $fields[] = $field_name;
                     }
-                    
+
                     $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $result);
                 }
             }
@@ -3370,7 +3371,7 @@ class BimpObject extends BimpCache
             $this->data[$field_name] = $value;
         }
 
-        if (!empty($bimpObjectFields) && $this->object_name === 'Bimp_CommandeFourn') {
+        if (!empty($bimpObjectFields)) {
             $result = $this->db->getRow($this->getTable(), '`' . $this->getPrimary() . '` = ' . (int) $id, $bimpObjectFields, 'array');
             if (!is_null($result)) {
                 foreach ($bimpObjectFields as $field_name) {
@@ -3522,24 +3523,24 @@ class BimpObject extends BimpCache
         return 0;
     }
 
-    public function isCreatable()
+    public function isCreatable($force_create = false)
     {
         return 1;
     }
 
-    public function isEditable()
+    public function isEditable($force_edit = false)
     {
         return 1;
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
         return 1;
     }
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
-        return $this->isEditable();
+        return $this->isEditable($force_edit);
     }
 
     public function isFormAllowed($form_name, &$errors = array())
@@ -3892,64 +3893,8 @@ class BimpObject extends BimpCache
             $html .= '<div class="row">';
 
             $html .= '<div class="col-lg-6 col-sm-8 col-xs-12">';
-            if (!is_null($this->params['header_list_name']) && $this->params['header_list_name']) {
-                $html .= '<div class="header_button">';
-                $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
-                if ($url) {
-                    $items = array(
-                        '<span class="dropdown-title">' . BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur') . '</span>'
-                    );
-                    $items[] = BimpRender::renderButton(array(
-                                'label'       => 'Vue rapide',
-                                'icon_before' => 'far_eye',
-                                'classes'     => array(
-                                    'btn', 'btn-light-default'
-                                ),
-                                'attr'        => array(
-                                    'onclick' => 'loadModalList(\'' . $this->module . '\', \'' . $this->object_name . '\', \'' . $this->params['header_list_name'] . '\', 0, $(this))'
-                                )
-                                    ), 'button');
-                    $items[] = BimpRender::renderButton(array(
-                                'label'       => 'Afficher la page',
-                                'icon_before' => 'far_file-alt',
-                                'classes'     => array(
-                                    'btn', 'btn-light-default'
-                                ),
-                                'attr'        => array(
-                                    'onclick' => 'window.location = \'' . $url . '\''
-                                )
-                                    ), 'button');
-                    $items[] = BimpRender::renderButton(array(
-                                'label'       => 'Afficher la page dans un nouvel onglet',
-                                'icon_before' => 'fas_external-link-alt',
-                                'classes'     => array(
-                                    'btn', 'btn-light-default'
-                                ),
-                                'attr'        => array(
-                                    'onclick' => 'window.open(\'' . $url . '\');'
-                                )
-                                    ), 'button');
-                    $html .= BimpRender::renderDropDownButton('', $items, array(
-                                'icon' => 'fas_list'
-                    ));
-                } else {
-                    $html .= BimpRender::renderButton(array(
-                                'icon_before' => 'bars',
-                                'classes'     => array(
-                                    'btn', 'btn-default', 'bs-popover'
-                                ),
-                                'attr'        => array(
-                                    'onclick'        => 'loadModalList(\'' . $this->module . '\', \'' . $this->object_name . '\', \'' . $this->params['header_list_name'] . '\', 0, $(this))',
-                                    'data-toggle'    => 'popover',
-                                    'data-trigger'   => 'hover',
-                                    'data-placement' => 'top',
-                                    'data-container' => 'body',
-                                    'data-content'   => 'Afficher la liste des ' . $this->getLabel('name_plur')
-                                )
-                                    ), 'button');
-                }
-                $html .= '</div>';
-            }
+
+            $html .= $this->renderObjectMenu();
 
             $html .= '<div style="display: inline-block">';
             $html .= '<h1>';
@@ -4111,6 +4056,71 @@ class BimpObject extends BimpCache
             if (!$content_only) {
                 $html .= '</div>';
             }
+        }
+
+        return $html;
+    }
+
+    public function renderObjectMenu()
+    {
+        $html = '';
+        if (!is_null($this->params['header_list_name']) && $this->params['header_list_name']) {
+            $html .= '<div class="header_button">';
+            $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+            if ($url) {
+                $items = array(
+                    '<span class="dropdown-title">' . BimpRender::renderIcon('fas_list', 'iconLeft') . 'Liste des ' . $this->getLabel('name_plur') . '</span>'
+                );
+                $items[] = BimpRender::renderButton(array(
+                            'label'       => 'Vue rapide',
+                            'icon_before' => 'far_eye',
+                            'classes'     => array(
+                                'btn', 'btn-light-default'
+                            ),
+                            'attr'        => array(
+                                'onclick' => 'loadModalList(\'' . $this->module . '\', \'' . $this->object_name . '\', \'' . $this->params['header_list_name'] . '\', 0, $(this))'
+                            )
+                                ), 'button');
+                $items[] = BimpRender::renderButton(array(
+                            'label'       => 'Afficher la page',
+                            'icon_before' => 'far_file-alt',
+                            'classes'     => array(
+                                'btn', 'btn-light-default'
+                            ),
+                            'attr'        => array(
+                                'onclick' => 'window.location = \'' . $url . '\''
+                            )
+                                ), 'button');
+                $items[] = BimpRender::renderButton(array(
+                            'label'       => 'Afficher la page dans un nouvel onglet',
+                            'icon_before' => 'fas_external-link-alt',
+                            'classes'     => array(
+                                'btn', 'btn-light-default'
+                            ),
+                            'attr'        => array(
+                                'onclick' => 'window.open(\'' . $url . '\');'
+                            )
+                                ), 'button');
+                $html .= BimpRender::renderDropDownButton('', $items, array(
+                            'icon' => 'fas_list'
+                ));
+            } else {
+                $html .= BimpRender::renderButton(array(
+                            'icon_before' => 'bars',
+                            'classes'     => array(
+                                'btn', 'btn-default', 'bs-popover'
+                            ),
+                            'attr'        => array(
+                                'onclick'        => 'loadModalList(\'' . $this->module . '\', \'' . $this->object_name . '\', \'' . $this->params['header_list_name'] . '\', 0, $(this))',
+                                'data-toggle'    => 'popover',
+                                'data-trigger'   => 'hover',
+                                'data-placement' => 'top',
+                                'data-container' => 'body',
+                                'data-content'   => 'Afficher la liste des ' . $this->getLabel('name_plur')
+                            )
+                                ), 'button');
+            }
+            $html .= '</div>';
         }
 
         return $html;
@@ -4493,7 +4503,7 @@ class BimpObject extends BimpCache
         return $js;
     }
 
-    public function getJsLoadModalForm($form_name = 'default', $title = '', $values = array(), $success_callback = '', $on_save = '')
+    public function getJsLoadModalForm($form_name = 'default', $title = '', $values = array(), $success_callback = '', $on_save = '', $force_edit = 0)
     {
         $data = '{';
         $data .= 'module: "' . $this->module . '", ';
@@ -4503,8 +4513,12 @@ class BimpObject extends BimpCache
         $data .= 'form_name: "' . $form_name . '", ';
 
         if (count($values)) {
-            $data .= 'param_values: ' . json_encode($values);
+            $data .= 'param_values: ' . json_encode($values) . ', ';
+        } else {
+            $data .= 'null, ';
         }
+
+        $data .= 'force_edit: ' . $force_edit;
 
         $data .= '}';
 

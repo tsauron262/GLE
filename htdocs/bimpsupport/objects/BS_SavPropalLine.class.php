@@ -218,7 +218,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
         return parent::getValueByProduct($field);
     }
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         if ($field === 'qty') {
             if (!(int) $this->getData('editable')) {
@@ -227,7 +227,7 @@ class BS_SavPropalLine extends Bimp_PropalLine
             return 1;
         }
 
-        return (int) parent::isFieldEditable($field);
+        return (int) parent::isFieldEditable($field, $force_edit);
     }
 
     public function validate()

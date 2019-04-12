@@ -140,6 +140,11 @@ class BimpController
         );
     }
 
+    public function can($right)
+    {
+        return 1;
+    }
+
     // Affichages:
 
     public function displayHeaderFiles($echo = true)
@@ -538,11 +543,6 @@ class BimpController
         $html .= '</div>';
 
         return $html;
-    }
-
-    public function can($right)
-    {
-        return 1;
     }
 
     // Traitements Ajax:
@@ -1013,6 +1013,7 @@ class BimpController
         $form_name = BimpTools::getValue('form_name', 'default');
         $form_id = BimpTools::getValue('form_id', null);
         $full_panel = BimpTools::getValue('full_panel', false);
+        $force_edit = BimpTools::getValue('force_edit', 0);
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type de l\'objet absent';
@@ -1032,6 +1033,9 @@ class BimpController
 
             if (!count($errors)) {
                 $form = new BC_Form($object, $id_parent, $form_name, 1, !$full_panel);
+                if ($force_edit) {
+                    $form->force_edit = true;
+                }
                 if (!is_null($form_id)) {
                     $form->identifier = $form_id;
                 } else {
@@ -1263,7 +1267,7 @@ class BimpController
     {
         $errors = array();
         $html = '';
-//        $header_html = '';
+        $header_html = '';
         $view_id = '';
 
         $id_parent = BimpTools::getValue('id_parent', null);
@@ -1311,14 +1315,14 @@ class BimpController
                 $html = $view->renderHtml();
             }
 
-//            $header_html = $object->renderHeader(true);
+            $header_html = $object->renderHeader(true);
             $view_id = $view->identifier;
         }
 
         die(json_encode(array(
             'errors'      => $errors,
             'html'        => $html,
-//            'header_html' => $header_html,
+            'header_html' => $header_html,
             'view_id'     => $view_id,
             'request_id'  => BimpTools::getValue('request_id', 0)
         )));

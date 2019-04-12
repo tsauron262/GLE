@@ -125,14 +125,14 @@ class BIMP_Task extends BimpObject
         return self::$valStatus;
     }
 
-    public function isEditable()
+    public function isEditable($force_edit = false)
     {
         return ($this->getInitData("status") < 4);
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
-        return $this->isEditable();
+        return $this->isEditable($force_delete);
     }
 
     public function getRight($right)

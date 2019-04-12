@@ -58,7 +58,8 @@ class BC_Form extends BC_Panel
         $this->params_def['on_save'] = array('default' => 'close');
         $this->params_def['sub_objects'] = array('type' => 'keys');
         $this->params_def['no_auto_submit'] = array('data_type' => 'bool', 'default' => 0);
-        
+        $this->params_def['force_edit'] = array('data_type' => 'bool', 'default' => 0);
+
         $this->id_parent = $id_parent;
 
         $path = null;
@@ -220,6 +221,7 @@ class BC_Form extends BC_Panel
         $html .= '<input type="hidden" name="' . $this->fields_prefix . 'module" value="' . $this->object->module . '"/>';
         $html .= '<input type="hidden" name="' . $this->fields_prefix . 'object_name" value="' . $this->object->object_name . '"/>';
         $html .= '<input type="hidden" name="' . $this->fields_prefix . 'id_object" value="' . ((isset($this->object->id) && $this->object->id) ? $this->object->id : 0) . '"/>';
+        $html .= '<input type="hidden" name="' . $this->fields_prefix . 'force_edit" value="' . $this->params['force_edit'] . '"/>';
 
         if (!is_null($parent_id_property)) {
             $html .= '<input type="hidden" name="' . $this->fields_prefix . $parent_id_property . '" value="' . $this->id_parent . '"/>';
@@ -233,9 +235,10 @@ class BC_Form extends BC_Panel
                 }
                 $html .= $this->renderFieldRow($field_name);
             }
-        } else {
+        } else {            
             foreach ($this->params['rows'] as $row) {
                 $row_params = parent::fetchParams($this->config_path . '/rows/' . $row, self::$row_params);
+                
                 if (!(int) $row_params['show']) {
                     continue;
                 }
@@ -294,7 +297,7 @@ class BC_Form extends BC_Panel
 
     public function renderFieldRow($field_name, $params = array(), $label_cols = 3)
     {
-        $field = new BC_Field($this->object, $field_name, true);
+        $field = new BC_Field($this->object, $field_name, true, 'fields', true);
         $field->name_prefix = $this->fields_prefix;
         $field->display_card_mode = 'visible';
 
@@ -304,6 +307,10 @@ class BC_Form extends BC_Panel
 
         if (!$field->params['show']) {
             return '';
+        }
+
+        if ((int) $this->params['force_edit']) {
+            $field->force_edit = true;
         }
 
         if ($this->object->isDolObject()) {

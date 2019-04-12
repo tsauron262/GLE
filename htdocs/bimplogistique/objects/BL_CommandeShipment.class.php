@@ -172,18 +172,26 @@ class BL_CommandeShipment extends BimpObject
 
         if ($this->isLoaded()) {
 
+            $commande = $this->getParentInstance();
+
             $buttons[] = array(
                 'label'   => 'Produits / services inclus',
                 'icon'    => 'fas_list',
                 'onclick' => $this->getJsLoadModalView('lines', 'Expédition n°' . $this->getData('num_livraison') . ': produits / services inclus')
             );
 
+            $reload_commande_header_callback = '';
+            if (BimpObject::objectLoaded($commande)) {
+                $reload_commande_header_callback = 'function() {reloadObjectHeader(' . $commande->getJsObjectData() . ')}';
+            }
+
             if ($this->isActionAllowed('validateShipment')) {
                 $buttons[] = array(
                     'label'   => 'Expédier',
                     'icon'    => 'fas_sign-out-alt',
                     'onclick' => $this->getJsActionOnclick('validateShipment', array(), array(
-                        'form_name' => 'validation'
+                        'form_name'        => 'validation',
+                        'success_callback' => $reload_commande_header_callback
                     ))
                 );
             }
@@ -193,14 +201,13 @@ class BL_CommandeShipment extends BimpObject
                     'label'   => 'Annuler l\'expédition',
                     'icon'    => 'fas_times-circle',
                     'onclick' => $this->getJsActionOnclick('cancelShipment', array(), array(
-                        'confirm_msg' => 'Veuillez confirmer l\\\'annulation de l\\\'expédition. Cette opération est irréversible'
+                        'confirm_msg'      => 'Veuillez confirmer l\\\'annulation de l\\\'expédition. Cette opération est irréversible',
+                        'success_callback' => $reload_commande_header_callback
                     ))
                 );
             }
 
             if ($this->isActionAllowed('createFacture') && $this->canSetAction('createFacture')) {
-                $commande = $this->getParentInstance();
-
                 if (BimpObject::objectLoaded($commande)) {
                     $buttons[] = array(
                         'label'   => 'Créer une facture',
@@ -210,8 +217,9 @@ class BL_CommandeShipment extends BimpObject
                             'id_contact'     => (int) $this->getcontact(),
                             'cond_reglement' => (int) $commande->getData('fk_cond_reglement')
                                 ), array(
-                            'form_name'      => 'facture',
-                            'on_form_submit' => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } '
+                            'form_name'        => 'facture',
+                            'on_form_submit'   => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } ',
+                            'success_callback' => $reload_commande_header_callback
                         ))
                     );
                 }
@@ -220,8 +228,9 @@ class BL_CommandeShipment extends BimpObject
                     'label'   => 'Editer la facture',
                     'icon'    => 'fas_file-signature',
                     'onclick' => $this->getJsActionOnclick('editFacture', array(), array(
-                        'form_name'      => 'facture_edit',
-                        'on_form_submit' => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } '
+                        'form_name'        => 'facture_edit',
+                        'on_form_submit'   => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } ',
+                        'success_callback' => $reload_commande_header_callback
                     ))
                 );
             }
@@ -1171,6 +1180,8 @@ class BL_CommandeShipment extends BimpObject
         if (count($update_errors)) {
             $errors[] = BimpTools::getMsgFromArray($update_errors, 'Echec de la mise à jour de l\'expédition');
         }
+
+        $commande->checkShipmentStatus();
 
         return $errors;
     }

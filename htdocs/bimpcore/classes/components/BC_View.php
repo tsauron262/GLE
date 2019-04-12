@@ -14,7 +14,7 @@ class BC_View extends BC_Panel
         $this->params_def['edit_form'] = array();
 
         $path = '';
-        
+
         if (!is_null($object) && is_a($object, 'BimpObject')) {
             if (!$name || $name === 'default') {
                 if ($object->config->isDefined('view')) {
@@ -112,5 +112,21 @@ class BC_View extends BC_Panel
         }
 
         return $html;
+    }
+
+    public function getHeaderIcons()
+    {
+        $icons = array();
+        if (isset($this->params['header_icons']) && is_array($this->params['header_icons'])) {
+            $icons = $this->params['header_icons'];
+        }
+
+        $icons[] = array(
+            'label'   => 'Actualiser',
+            'icon'    => 'fas_redo-alt',
+            'onclick' => 'reloadObjectView(\'' . $this->identifier . '\')'
+        );
+
+        return $icons;
     }
 }

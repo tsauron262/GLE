@@ -53,15 +53,14 @@ function reloadObjectView(view_id) {
                     });
                 }
             }
-//             Une fonction globale a été mise en place pour le reload des header des objets 
-//            if (typeof (result.header_html) !== 'undefined') {
-//                if (result.header_html) {
-//                    var $header = $('#' + bimpAjax.$view.data('object_name') + '_' + bimpAjax.$view.data('id_object') + '_header');
-//                    if ($header.length) {
-//                        $header.html(result.header_html);
-//                    }
-//                }
-//            }
+            if (typeof (result.header_html) !== 'undefined') {
+                if (result.header_html) {
+                    var $header = $('#' + bimpAjax.$view.data('object_name') + '_' + bimpAjax.$view.data('id_object') + '_header');
+                    if ($header.length) {
+                        $header.html(result.header_html);
+                    }
+                }
+            }
         }
     });
 }

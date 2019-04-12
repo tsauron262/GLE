@@ -10,24 +10,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     // Getters booléens: 
 
-    public function isEditable($force_edit = false)
-    {
-        if (!$force_edit && !(int) $this->getData('editable')) {
-            return 0;
-        }
-
-        $parent = $this->getParentInstance();
-        if (!BimpObject::objectLoaded($parent)) {
-            return 0;
-        }
-
-//        if ($parent->field_exists('fk_statut') && in_array((int) $parent->getData('fk_statut'), array(0, 1))) {
-//            return 1;
-//        }
-
-        return 1;
-    }
-
     public function isReceptionCancellable($id_reception, &$errors = array())
     {
         if (!$this->isLoaded()) {
@@ -226,13 +208,27 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $total_qty = (float) $this->qty;
 
         // Qté totale
-        $html .= '<span class="bold bs-popover"' . BimpRender::renderPopoverData('Qtés commandées') . '>';
+        $html .= '<span class="bold bs-popover"' . BimpRender::renderPopoverData('Qtés commandées') . ' style="display: inline-block; padding: 3px 0; margin-right: 15px">';
         $html .= BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft');
         $html .= $total_qty;
         $html .= '</span>';
 
         // Qté reçues:
         $qty_received = (float) $this->getReceivedQty();
+        $qty_received_valid = (float) $this->getReceivedQty(null, true);
+
+        if ($qty_received_valid <= 0) {
+            $class = 'danger';
+        } elseif ($qty_received_valid < $total_qty) {
+            $class = 'warning';
+        } else {
+            $class = 'success';
+        }
+
+        $html .= '<span class="bs-popover ' . $class . '" style="display: inline-block; padding: 3px 0"';
+        $html .= BimpRender::renderPopoverData('Qtés ajoutées à une réception / Qtés réceptionnées');
+        $html .= '>';
+        $html .= BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft');
 
         if ($qty_received <= 0) {
             $class = 'danger';
@@ -242,11 +238,20 @@ class Bimp_CommandeFournLine extends FournObjectLine
             $class = 'success';
         }
 
-        $html .= '<span class="bs-popover ' . $class . '" style="display: inline-block; margin-left: 15px"';
-        $html .= BimpRender::renderPopoverData('Qtés réceptionnées');
-        $html .= '>';
-        $html .= BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft');
-        $html .= $qty_received;
+        $html .= '<span class="' . $class . '">' . $qty_received . '</span>';
+
+        $html .= ' / ';
+
+        if ($qty_received_valid <= 0) {
+            $class = 'danger';
+        } elseif ($qty_received_valid < $total_qty) {
+            $class = 'warning';
+        } else {
+            $class = 'success';
+        }
+
+        $html .= '<span class="' . $class . '">' . $qty_received_valid . '</span>';
+
         $html .= '</span>';
 
 //        // Qté facturée: 
@@ -1101,5 +1106,39 @@ class Bimp_CommandeFournLine extends FournObjectLine
             'errors'   => $errors,
             'warnings' => $warnings
         );
+    }
+
+    // Overrides: 
+
+    public function create(&$warnings = array(), $force_create = false)
+    {
+        $errors = array();
+        $commande_fourn = $this->getParentInstance();
+
+        if (!BimpObject::objectLoaded($commande_fourn)) {
+            $errors[] = 'ID de la commande fournisseur absent';
+            return $errors;
+        }
+
+        $is_extra_line = false;
+        $current_commande_status = (int) $commande_fourn->getData('fk_statut');
+
+        if ($current_commande_status !== 0) {
+            $is_extra_line = true;
+
+            $this->set('qty_modif', (float) $this->qty);
+            $this->qty = 0;
+            $this->set('fk_statut', 0);
+            $commande_fourn->dol_object->statut = 0;
+        }
+
+        $errors = parent::create($warnings, $force_create);
+
+        if ($is_extra_line) {
+            $commande_fourn->set('fk_statut', $current_commande_status);
+            $commande_fourn->dol_object->statut = $current_commande_status;
+        }
+
+        return $errors;
     }
 }

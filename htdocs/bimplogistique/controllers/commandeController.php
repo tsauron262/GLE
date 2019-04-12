@@ -13,7 +13,7 @@ class commandeController extends BimpController
 //        $head = commande_prepare_head($commande->dol_object);
 //        dol_fiche_head($head, 'bimplogisitquecommande', $langs->trans("CustomerOrder"), -1, 'order');
 //    }
-
+    
     public function renderContentHtml()
     {
         if (!BimpTools::isSubmit('id')) {

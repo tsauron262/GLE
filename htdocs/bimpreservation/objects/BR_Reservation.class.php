@@ -1142,7 +1142,7 @@ class BR_Reservation extends BimpObject
                 $new_reservation->set('status', $status);
                 $new_reservation->set('ref', $ref);
                 $new_errors = $new_reservation->create();
-                
+
                 if (count($new_errors)) {
                     $errors[] = 'Echec de la création d\'une nouvelle réservation pour ' . $qty . ' produit' . ($qty > 1 ? 's' : '') . ' "' . $product->getData('label') . '"';
                     $errors = array_merge($errors, $new_errors);
@@ -1150,12 +1150,18 @@ class BR_Reservation extends BimpObject
                     $this->set('id_equipment', 0);
                     $this->set('status', $current_status);
                     $this->set('qty', ($current_qty - $qty));
-                    $this->update();
+                    $up_errors = $this->update();
+                    if (count($up_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la réservation actuelle');
+                    }
                 }
             } else {
                 $this->set('qty', $qty);
                 $this->set('status', $status);
-                $this->update();
+                $up_errors = $this->update();
+                if (count($up_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la réservation actuelle');
+                }
             }
         }
 

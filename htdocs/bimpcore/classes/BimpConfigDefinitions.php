@@ -64,4 +64,10 @@ class BimpConfigDefinitions
         'name'  => array('default' => 'default'),
         'open'  => array('data_type' => 'bool', 'default' => 0)
     );
+    public static $icon_button = array(
+        'label'   => array('default' => ''),
+        'icon'    => array('required' => true),
+        'onclick' => array('default' => '')
+    );
+
 }

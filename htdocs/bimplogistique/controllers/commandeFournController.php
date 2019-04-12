@@ -25,8 +25,9 @@ class commandeFournController extends BimpController
             return BimpRender::renderAlerts('Aucune commande fournisseur trouvée pour l\'ID ' . BimpTools::getValue('id', ''));
         }
 
-        if ($commande->getData('fk_statut') < 1) {
-            return BimpRender::renderAlerts('Cette commande fournisseur doit etre validée pour accéder à cet onglet');
+        $status = (int) $commande->getData('fk_statut');
+        if ($status < 3 || $status > 6) {
+            return BimpRender::renderAlerts('Cette commande fournisseur doit avoir été commandée pour accéder à cet onglet');
         }
 
         $_GET['id_entrepot'] = (int) $commande->getData('entrepot');

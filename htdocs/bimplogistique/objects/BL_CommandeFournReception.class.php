@@ -15,13 +15,13 @@ class BL_CommandeFournReception extends BimpObject
 
     // Getters booléens: 
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         if ($field === 'id_entrepot' && $this->isLoaded()) {
             return 0;
         }
 
-        return parent::isFieldEditable($field);
+        return parent::isFieldEditable($field, $force_edit);
     }
 
     public function isActionAllowed($action, &$errors)

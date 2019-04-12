@@ -52,6 +52,15 @@ class ObjectLine extends BimpObject
 
     // Getters booléens: 
 
+    public function isCreatable($force_create = false)
+    {
+        if ($force_create) {
+            return 1;
+        }
+
+        return $this->isParentEditable();
+    }
+
     public function isEditable($force_edit = false)
     {
         if (!$force_edit && !(int) $this->getData('editable')) {
@@ -61,6 +70,10 @@ class ObjectLine extends BimpObject
         $parent = $this->getParentInstance();
         if (!BimpObject::objectLoaded($parent)) {
             return 0;
+        }
+
+        if ($force_edit) {
+            return 1;
         }
 
         if ($parent->field_exists('fk_statut') && (int) $parent->getData('fk_statut') === 0) {
@@ -79,6 +92,10 @@ class ObjectLine extends BimpObject
                 return 0;
             }
 
+            if ($force_delete) {
+                return 1;
+            }
+            
             $parent = $this->getParentInstance();
             if (!BimpObject::objectLoaded($parent)) {
                 return 0;
@@ -283,7 +300,7 @@ class ObjectLine extends BimpObject
         return $values;
     }
 
-    // Getters params: 
+    // Getters params:
 
     public function getParentCommType()
     {
@@ -387,7 +404,7 @@ class ObjectLine extends BimpObject
         return $buttons;
     }
 
-    // Getters valeurs:     
+    // Getters valeurs:
 
     public function getUnitPriceTTC()
     {
@@ -1284,7 +1301,7 @@ class ObjectLine extends BimpObject
                     $errors[] = 'Type invalide';
                     break;
             }
-            if (!is_null($result) && $result <= 0) {
+            if (is_null($result) || $result <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Des erreurs sont survenues lors de l\'ajout de la ligne ' . BimpObject::getInstanceLabel($instance, 'to'));
             } else {
                 if ($this->isLoaded()) {
@@ -2035,7 +2052,7 @@ class ObjectLine extends BimpObject
 
     // Rendus HTML: 
 
-    public function renderLineInput($field, $attribute_equipment = false, $prefixe = '')
+    public function renderLineInput($field, $attribute_equipment = false, $prefixe = '', $force_edit = false)
     {
         $html = '';
 
@@ -2081,7 +2098,8 @@ class ObjectLine extends BimpObject
                 }
 
                 $values = $this->getProductFournisseursPricesArray();
-                if (!$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable()) {
+//                return 'f: '.(int) $force_edit . ' p:' .$prefixe;
+                if (!$attribute_equipment && $this->canEditPrixAchat() && $this->isEditable($force_edit)) {
                     $html = BimpInput::renderInput('select', $prefixe . 'id_fourn_price', (int) $value, array(
                                 'options' => $values
                     ));
@@ -2126,17 +2144,16 @@ class ObjectLine extends BimpObject
                                     'data' => array(
                                         'data_type' => 'number',
                                         'min'       => 0.001,
-                                        'unsigned'  => 1,
+                                        'unsigned'  => 0,
                                         'decimals'  => 3
                                     )
                         ));
                     } else {
+                        $min = 'none';
                         if (is_null($product_type)) {
-                            $min = 0.001;
                             $decimals = 3;
                         } else {
                             $decimals = 1;
-                            $min = 1;
                             if ($this->isLoaded()) {
                                 if (method_exists($this, 'getMinQty')) {
                                     $min = $this->getMinQty();
@@ -2150,19 +2167,18 @@ class ObjectLine extends BimpObject
                                             }
                                         }
                                         if (!$min) {
-                                            $min = 1;
+                                            $min = 'none';
                                         }
                                     }
                                 }
                             }
                         }
 
-
                         $html = BimpInput::renderInput('qty', $prefixe . 'qty', (int) $value, array(
                                     'data' => array(
                                         'data_type' => 'number',
                                         'min'       => $min,
-                                        'unsigned'  => 1,
+                                        'unsigned'  => 0,
                                         'decimals'  => $decimals
                                     )
                         ));
@@ -2180,7 +2196,7 @@ class ObjectLine extends BimpObject
                         }
                     }
                 }
-                if (!$this->isEditable() || $attribute_equipment || !$this->canEditPrixVente()) {
+                if (!$this->isEditable($force_edit) || $attribute_equipment || !$this->canEditPrixVente()) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'pu_ht"/>';
                     $html .= BimpTools::displayMoneyValue($value, 'EUR');
                     if (!$this->isEditable()) {
@@ -2199,7 +2215,7 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'tva_tx':
-                if (!$this->isEditable() || $attribute_equipment || !$this->canEditPrixVente()) {
+                if (!$this->isEditable($force_edit) || $attribute_equipment || !$this->canEditPrixVente()) {
                     $html = '<input type="hidden" value="' . $value . '" name="' . $prefixe . 'tva_tx"/>';
                     $html .= $value . ' %';
                     if (!$this->isEditable()) {
@@ -2219,7 +2235,7 @@ class ObjectLine extends BimpObject
                 break;
 
             case 'remise':
-                if ($this->isEditable()) {
+                if ($this->isEditable($force_edit)) {
                     $html = BimpInput::renderInput('text', $prefixe . 'remise', (float) $value, array(
                                 'data'        => array(
                                     'data_type' => 'number',
@@ -3341,7 +3357,7 @@ class ObjectLine extends BimpObject
             return $errors;
         }
 
-        if (!$force_delete && !$this->isDeletable(true)) {
+        if (!$this->isDeletable($force_delete)) {
             return array('Suppression de la ligne impossible');
         }
 

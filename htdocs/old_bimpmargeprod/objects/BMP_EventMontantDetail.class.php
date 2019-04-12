@@ -3,7 +3,7 @@
 class BMP_EventMontantDetail extends BimpObject
 {
 
-    public function isEditable()
+    public function isEditable($force_edit = false)
     {
         $montant = $this->getParentInstance();
         return $montant->isEventEditable();

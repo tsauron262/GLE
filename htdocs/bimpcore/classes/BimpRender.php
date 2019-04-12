@@ -247,6 +247,21 @@ class BimpRender
                 }
             }
 
+            if (isset($params['header_icons']) && is_array($params['header_icons']) && count($params['header_icons'])) {
+                foreach ($params['header_icons'] as $icon_data) {
+                    if (isset($icon_data['icon'])) {
+                        
+                    }
+                }
+                $html .= '<span class="panel_header_icon bs-popover"';
+                if (isset($icon_data['label']) && $icon_data['label']) {
+                    $html .= BimpRender::renderPopoverData($icon_data['label']);
+                }
+                $html .= ' onclick="' . (isset($icon_data['onclick']) ? $icon_data['onclick'] : '') . '">';
+                $html .= BimpRender::renderIcon($icon_data['icon']);
+                $html .= '</span>';
+            }
+
             if ($params['foldable']) {
                 $html .= '<span class="panel-caret"></span>';
             }

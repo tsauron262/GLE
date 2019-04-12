@@ -21,9 +21,7 @@ sections:
             logistic: 
                 label: Logistique
                 show: 
-                    field_value: 
-                        field_name: fk_statut
-                        object: commande_fourn
+                    callback: showLogistique
                 module: bimplogistique
                 controller: commandeFourn
                 url_params: 

@@ -14,6 +14,7 @@ class BC_Field extends BimpComponent
     public $no_html = false;
     public $name_prefix = '';
     public $display_card_mode = 'none'; // hint / visible
+    public $force_edit = false;
     public static $type_params_def = array(
         'id_parent'  => array(
             'object'             => array('default' => ''),
@@ -54,7 +55,7 @@ class BC_Field extends BimpComponent
         'string', 'text', 'password', 'html', 'id', 'id_object', 'id_parent', 'time', 'date', 'datetime', 'color'
     );
 
-    public function __construct(BimpObject $object, $name, $edit = false, $path = 'fields')
+    public function __construct(BimpObject $object, $name, $edit = false, $path = 'fields', $force_edit = false)
     {
         $this->params_def['label'] = array('required' => true);
         $this->params_def['type'] = array('default' => 'string');
@@ -78,6 +79,7 @@ class BC_Field extends BimpComponent
         $this->params_def['extra'] = array('data_type' => 'bool', 'default' => 0);
 
         $this->edit = $edit;
+        $this->force_edit = $force_edit;
 
         parent::__construct($object, $name, $path);
 
@@ -91,7 +93,9 @@ class BC_Field extends BimpComponent
         $this->params['viewable'] = 1;
 
         if ($this->isObjectValid()) {
-            $this->params['editable'] = (int) ($this->object->canEditField($name) && $this->object->isFieldEditable($name));
+            if (!$this->force_edit) {
+                $this->params['editable'] = (int) ($this->object->canEditField($name) && $this->object->isFieldEditable($name, $force_edit));
+            }
             $this->params['viewable'] = (int) $this->object->canViewField($name);
         }
 

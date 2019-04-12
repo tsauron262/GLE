@@ -110,7 +110,7 @@ class BMP_Event extends Abstract_margeprod
         return 0;
     }
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         if ($this->isLoaded()) {
             if (in_array($field, array('type', 'tva_billets', 'ca_moyen_bar', 'frais_billet', 'default_dl_dist', 'default_dl_prod'))) {

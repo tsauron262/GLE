@@ -67,7 +67,7 @@ class BimpFile extends BimpObject
         return DOL_URL_ROOT . '/document.php?modulepart=bimpcore&file=' . urlencode($file);
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
         return (int) (!(int) $this->getData('deleted'));
     }

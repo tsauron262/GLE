@@ -24,12 +24,12 @@ class BimpComm extends BimpDolObject
 
     // Getters booléens: 
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
         return 1;
     }
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         return 1;
     }
@@ -134,6 +134,51 @@ class BimpComm extends BimpDolObject
     }
 
     // Getters données: 
+
+    public function getLines($types = null)
+    {
+        if ($this->isLoaded()) {
+            BimpObject::loadClass('bimpcommercial', 'ObjectLine');
+
+            $filters = array();
+            if (!is_null($types)) {
+                if (is_string($types)) {
+                    $type_code = $types;
+                    $types = array();
+                    switch ($type_code) {
+                        case 'product':
+                            $types[] = ObjectLine::LINE_PRODUCT;
+                            break;
+
+                        case 'free':
+                            $types[] = ObjectLine::LINE_FREE;
+                            break;
+
+                        case 'text':
+                            $types[] = ObjectLine::LINE_TEXT;
+                            break;
+
+                        case 'not_text':
+                            $types[] = ObjectLine::LINE_PRODUCT;
+                            $types[] = ObjectLine::LINE_FREE;
+                            break;
+                    }
+                }
+
+                if (is_array($types) && !empty($types)) {
+                    $filters = array(
+                        'type' => array(
+                            'in' => $types
+                        )
+                    );
+                }
+            }
+
+            return $this->getChildrenObjects('lines', $filters);
+        }
+
+        return array();
+    }
 
     public function getTotalHt()
     {

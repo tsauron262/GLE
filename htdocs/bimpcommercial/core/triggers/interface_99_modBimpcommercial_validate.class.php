@@ -40,6 +40,16 @@ class Interfacevalidate extends DolibarrTriggers
             $bimp_object->dol_object->statut = 0;
             $bimp_object->checkLines();
         }
+
+        if ($action == 'BILL_VALIDATE') {
+            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
+            if (BimpObject::objectLoaded($bimp_object)) {
+                $bimp_object->onValidate();
+            } else {
+                echo 'FAIL <br/>';
+            }
+        }
+
         return 0;
     }
 }

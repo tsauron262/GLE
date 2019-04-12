@@ -164,22 +164,23 @@ fields:
     fk_user_author:
         label: Créée par
         type: int
-        default_value: 0
+        default_value: 
+            prop: 
+                name: id
+                object: 
+                    global: user
         
     fk_user_modif: 
         label: Dernière modification par
         type: int
-        default_value: 0
         
     fk_user_valid: 
         label: Validée par
         type: int
-        default_value: 0
         
     fk_user_cloture: 
         label: Fermée par
         type: int
-        default_value: 0
         
     date_livraison: 
         label: Date prévue de livraison
@@ -196,17 +197,21 @@ fields:
         type: int
         values: 
             array: shipment_status
+        default_value: 0
             
     invoice_status: 
         label: Statut facturation
         type: int
         values: 
             array: invoice_status
+        default_value: 0
         
 fields_tables: 
     infos: 
         rows: 
             - field: fk_statut
+            - field: shipment_status
+            - field: invoice_status
             - field: entrepot
               display: nom_url
               edit: 1

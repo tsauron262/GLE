@@ -10,7 +10,7 @@ class BMP_EventMontant extends BimpObject
         3 => array('label' => 'Optionnel', 'icon' => 'question-circle', 'classes' => array('info'))
     );
 
-    public function isEditable()
+    public function isEditable($force_edit = false)
     {
         if (!(int) $this->isEventEditable()) {
             return 0;
@@ -86,7 +86,7 @@ class BMP_EventMontant extends BimpObject
         return (int) $required;
     }
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
         if (!(int) $this->isEventEditable()) {
             return 0;
@@ -98,7 +98,7 @@ class BMP_EventMontant extends BimpObject
             return 1;
         }
 
-        return (int) $this->isEditable();
+        return (int) $this->isEditable($force_delete);
     }
 
     public function hasDetails()

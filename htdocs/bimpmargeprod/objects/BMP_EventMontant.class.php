@@ -24,7 +24,7 @@ class BMP_EventMontant extends Abstract_margeprod
         return 0;
     }
 
-    public function isCreatable()
+    public function isCreatable($force_create = false)
     {
         if (!(int) $this->isEventEditable()) {
             return 0;
@@ -32,19 +32,19 @@ class BMP_EventMontant extends Abstract_margeprod
         return 1;
     }
 
-    public function isEditable()
+    public function isEditable($force_edit = false)
     {
         return (int) ($this->isEventEditable());
     }
     
 
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
-        return (int) $this->isFieldEditable('amount');
+        return (int) $this->isFieldEditable('amount', $force_delete);
     }
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array('amount', 'tva_tx'))) {
             if (!$this->isEventEditable()) {
@@ -84,7 +84,7 @@ class BMP_EventMontant extends Abstract_margeprod
             return 0;
         }
 
-        return (int) parent::isFieldEditable($field);
+        return (int) parent::isFieldEditable($field, $force_edit);
     }
 
     public function isRequired()

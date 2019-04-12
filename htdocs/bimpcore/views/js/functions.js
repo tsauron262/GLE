@@ -191,6 +191,9 @@ function setCommonEvents($container) {
             $panel.children('.panel-heading').find('.headerBtn').click(function (e) {
                 e.stopPropagation();
             });
+            $panel.children('.panel-heading').find('.panel_header_icon').click(function (e) {
+                e.stopPropagation();
+            });
             $(this).data('foldable_event_init', 1);
         }
     });

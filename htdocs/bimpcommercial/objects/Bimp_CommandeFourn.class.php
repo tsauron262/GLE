@@ -37,13 +37,13 @@ class Bimp_CommandeFourn extends BimpComm
 
     // Gestion des autorisations objet: 
 
-    public function isFieldEditable($field)
+    public function isFieldEditable($field, $force_edit = false)
     {
         if (in_array($field, array('date_commande', 'fk_input_method'))) {
             return (int) $this->isActionAllowed('make_order');
         }
 
-        return parent::isFieldEditable($field);
+        return parent::isFieldEditable($field, $force_edit);
     }
 
     public function isActionAllowed($action, &$errors = array())
@@ -685,9 +685,20 @@ class Bimp_CommandeFourn extends BimpComm
                     'id_entrepot'       => (int) $this->getData('entrepot')
                 )
             ));
-            $html .= '<buttons class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
             $html .= BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Nouvelle réception';
-            $html .= '</buttons>';
+            $html .= '</button>';
+            
+            $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+            
+            $onclick = $line->getJsLoadModalForm('fournline_forced', 'Ajout d\\\'une ligne de commande supplémentaire', array(
+                'fields' => array(
+                    'id_obj' => (int) $this->id
+                )
+            ));
+            $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter une ligne de commande';
+            $html .= '</button>';
         }
 
         return $html;
@@ -748,12 +759,7 @@ class Bimp_CommandeFourn extends BimpComm
 
         BimpObject::loadClass('bimpcommercial', 'ObjectLine');
 
-        $lines = $this->getChildrenObjects('lines', array(
-            'type' => array(
-                'operator' => '<>',
-                'value'    => ObjectLine::LINE_TEXT
-            )
-        ));
+        $lines = $this->getLines('not_text');
 
         $hasReception = 0;
         $isFullyReceived = 1;
@@ -950,7 +956,8 @@ class Bimp_CommandeFourn extends BimpComm
 
         return array(
             'errors'   => $errors,
-            'warnings' => $warnings
+            'warnings' => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

@@ -27,6 +27,7 @@ class BC_Panel extends BimpComponent
         $this->params_def['objects_change_reload'] = array('data_type' => 'array', 'default' => array());
         $this->params_def['no_reload'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['header_buttons'] = array('data_type' => 'array', 'compile' => true);
+        $this->params_def['header_icons'] = array('type' => 'definitions', 'defs_type' => 'icon_button', 'multiple' => true);
         $this->params_def['footer_extra_btn'] = array('data_type' => 'array', 'default' => array(), 'compile' => true);
         $this->params_def['footer_extra_content'] = array('default' => '');
         $this->params_def['msgs'] = array('data_type' => 'array', 'default' => null, 'compile' => true);
@@ -166,6 +167,7 @@ class BC_Panel extends BimpComponent
                             'id'             => $this->identifier . '_panel',
                             'icon'           => $icon,
                             'header_buttons' => $this->getHeaderButtons(),
+                            'header_icons'   => $this->getHeaderIcons(),
                             'no_header'      => (int) !$this->params['panel_header'],
                             'no_footer'      => (int) !$this->params['panel_footer']
                 ));
@@ -295,6 +297,14 @@ class BC_Panel extends BimpComponent
     {
         if (isset($this->params['header_buttons'])) {
             return $this->params['header_buttons'];
+        }
+        return array();
+    }
+    
+    public function getHeaderIcons()
+    {
+        if (isset($this->params['header_icons'])) {
+            return $this->params['header_icons'];
         }
         return array();
     }

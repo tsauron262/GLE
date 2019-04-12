@@ -28,7 +28,7 @@ class Bimp_Facture extends BimpComm
 
     // Getters:
 
-    public function isDeletable()
+    public function isDeletable($force_delete = false)
     {
         if (!$this->isLoaded()) {
             return 0;
@@ -1215,6 +1215,22 @@ class Bimp_Facture extends BimpComm
     }
 
     // Traitements: 
+
+    public function onValidate()
+    {
+        if ($this->isLoaded()) {
+            $this->set('fk_statut', Facture::STATUS_VALIDATED);
+            $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
+            $asso = new BimpAssociation($commande, 'factures');
+
+            $list = $asso->getObjectsList((int) $this->id);
+
+            foreach ($list as $id_commande) {
+                $commande = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $id_commande);
+                $commande->checkInvoiceStatus($this->id);
+            }
+        }
+    }
 
     public function onDelete()
     {

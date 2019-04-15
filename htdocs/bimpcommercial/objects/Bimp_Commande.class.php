@@ -220,6 +220,22 @@ class Bimp_Commande extends BimpComm
 
     // Getters: 
 
+    public function getDefaultListExtraButtons()
+    {
+        $buttons = parent::getDefaultListExtraButtons();
+
+        if ($this->isLoaded() && (int) $this->getData('fk_statut') > 0) {
+            $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $this->id;
+            $buttons[] = array(
+                'label'   => 'Page logistique',
+                'icon'    => 'fas_truck-loading',
+                'onclick' => 'window.open(\'' . $url . '\')'
+            );
+        }
+
+        return $buttons;
+    }
+
     public function getModelsPdfArray()
     {
         if (!class_exists('ModelePDFPropales')) {
@@ -893,6 +909,7 @@ class Bimp_Commande extends BimpComm
 
                             $html .= '<td rowspan="' . count($comm_lines) . '">';
                             $html .= $commande->getNomUrl(1, false, true, 'full') . '&nbsp;&nbsp;&nbsp;' . $commande->displayData('fk_statut');
+                            if ((int) $commande->getData('fk_statut') >= 3)
                             $html .= '</td>';
                             $fl = false;
                         }

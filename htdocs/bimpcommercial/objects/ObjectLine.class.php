@@ -95,7 +95,7 @@ class ObjectLine extends BimpObject
             if ($force_delete) {
                 return 1;
             }
-            
+
             $parent = $this->getParentInstance();
             if (!BimpObject::objectLoaded($parent)) {
                 return 0;
@@ -603,10 +603,10 @@ class ObjectLine extends BimpObject
 
     public function getValueByProduct($field)
     {
-        $id_product = (int) $this->getIdProductFromPost();
-
         $product = $this->getProduct();
+
         if (BimpObject::objectLoaded($product)) {
+            $id_product = (int) $product->id;
             switch ($field) {
                 case 'pu_ht':
                     if (BimpObject::objectLoaded($this->post_equipment)) {
@@ -677,6 +677,7 @@ class ObjectLine extends BimpObject
 
     public function getProduct()
     {
+        $this->getIdProductFromPost();
         if ((int) $this->id_product) {
             if (is_null($this->product)) {
                 $this->product = BimpObject::getInstance('bimpcore', 'Bimp_Product', (int) $this->id_product);
@@ -835,6 +836,19 @@ class ObjectLine extends BimpObject
         }
 
         return array();
+    }
+
+    public function getQtyDecimals()
+    {
+        $product = $this->getProduct();
+
+        if (BimpObject::objectLoaded($product)) {
+            if ($product->getData('fk_product_type') === 0) {
+                return 1;
+            }
+        }
+
+        return 3;
     }
 
     // Affichages: 
@@ -2143,32 +2157,29 @@ class ObjectLine extends BimpObject
                                     'step' => 1,
                                     'data' => array(
                                         'data_type' => 'number',
-                                        'min'       => 0.001,
+                                        'min'       => 'none',
                                         'unsigned'  => 0,
                                         'decimals'  => 3
                                     )
                         ));
                     } else {
                         $min = 'none';
-                        if (is_null($product_type)) {
-                            $decimals = 3;
-                        } else {
-                            $decimals = 1;
-                            if ($this->isLoaded()) {
-                                if (method_exists($this, 'getMinQty')) {
-                                    $min = $this->getMinQty();
-                                } else {
-                                    $equipment_lines = $this->getEquipmentLines();
-                                    if (count($equipment_lines)) {
-                                        $min = 0;
-                                        foreach ($equipment_lines as $line) {
-                                            if ((int) $line->getData('id_equipment')) {
-                                                $min++;
-                                            }
+                        $decimals = $this->getQtyDecimals();
+
+                        if ($this->isLoaded()) {
+                            if (method_exists($this, 'getMinQty')) {
+                                $min = $this->getMinQty();
+                            } else {
+                                $equipment_lines = $this->getEquipmentLines();
+                                if (count($equipment_lines)) {
+                                    $min = 0;
+                                    foreach ($equipment_lines as $line) {
+                                        if ((int) $line->getData('id_equipment')) {
+                                            $min++;
                                         }
-                                        if (!$min) {
-                                            $min = 'none';
-                                        }
+                                    }
+                                    if (!$min) {
+                                        $min = 'none';
                                     }
                                 }
                             }

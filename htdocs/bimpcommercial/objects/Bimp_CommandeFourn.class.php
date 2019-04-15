@@ -34,6 +34,8 @@ class Bimp_CommandeFourn extends BimpComm
         'nev' => array('label' => 'Jamais reçue', 'classes' => array('danger')),
         'can' => array('label' => 'Annulée', 'classes' => array('danger')),
     );
+    
+    public static $logistique_active_status = array(3, 4, 5, 7);
 
     // Gestion des autorisations objet: 
 
@@ -180,6 +182,14 @@ class Bimp_CommandeFourn extends BimpComm
                 return 1;
         }
         return parent::isActionAllowed($action);
+    }
+    
+    public function isLogistiqueActive()
+    {
+        $status = (int) $this->getData('fk_statut');
+        if () {
+            
+        }
     }
 
     // Gestion des droits user - overrides BimpObject: 
@@ -770,7 +780,7 @@ class Bimp_CommandeFourn extends BimpComm
                 $hasReception = 1;
             }
 
-            if ($received_qty < (float) $line->qty) {
+            if ($received_qty < (float) $line->getFullQty()) {
                 $isFullyReceived = 0;
             }
         }

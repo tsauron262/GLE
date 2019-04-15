@@ -153,7 +153,7 @@ class BL_CommandeFournReception extends BimpObject
                 if ((int) $line->getData('type') === Bimp_CommandeFournLine::LINE_PRODUCT) {
                     $product = $line->getProduct();
                     if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === 0) {
-                        if ((float) $line->qty > (float) $line->getReceivedQty()) {
+                        if ((float) $line->getFullQty() > (float) $line->getReceivedQty()) {
                             $lines[] = $line;
                         }
                     }

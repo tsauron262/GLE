@@ -53,6 +53,11 @@ class Bimp_CommandeLine extends ObjectLine
     }
 
     // Getters valeurs:
+    
+    public function getFullQty()
+    {
+        return (float) $this->qty + (float) $this->getData('qty_modif');
+    }
 
     public function getMinQty()
     {

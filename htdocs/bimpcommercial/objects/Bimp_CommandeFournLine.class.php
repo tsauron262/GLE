@@ -68,14 +68,14 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         }
                     } else {
                         $shipped_qty = (float) $line->getShippedQty();
-                        $available_qty = (float) $line->qty - $shipped_qty;
+                        $available_qty = (float) $line->getFullQty() - $shipped_qty;
 
                         if ((float) $reception_data['qty'] > $available_qty) {
                             $errors[] = 'Certaines unités ont été ajouté à une expédition';
                         }
 
                         $billed_qty = (float) $line->getBilledQty();
-                        $available_qty = (float) $line->qty - $billed_qty;
+                        $available_qty = (float) $line->getFullQty() - $billed_qty;
 
                         if ((float) $reception_data['qty'] > $available_qty) {
                             $errors[] = 'Certaines unités ont été ajouté à une facture';
@@ -89,6 +89,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
     }
 
     // Getters données: 
+
+    public function getFullQty()
+    {
+        return (float) $this->qty + (float) $this->GetData('qty_modif');
+    }
 
     public function getReceivedQty($id_reception = null, $validated_reception = false)
     {
@@ -137,7 +142,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             $id_reception = 0;
         }
 
-        $qty = (float) $this->qty - (float) $this->getReceivedQty();
+        $qty = (float) $this->getFullQty() - (float) $this->getReceivedQty();
 
         if ($id_reception) {
             $qty += (float) $this->getReceivedQty($id_reception);
@@ -157,7 +162,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
     {
         $buttons = array();
 
-        if ((float) $this->getReceivedQty() < (float) $this->qty) {
+        if ((float) $this->getReceivedQty() < (float) $this->getFullQty()) {
             $buttons[] = array(
                 'label'   => 'Ajouter à une réception',
                 'icon'    => 'fas_arrow-circle-down',
@@ -205,12 +210,17 @@ class Bimp_CommandeFournLine extends FournObjectLine
     {
         $html = '';
 
-        $total_qty = (float) $this->qty;
+        $total_qty = (float) $this->getFullQty();
+        $qty_modif = (float) $this->getData('qty_modif');
 
         // Qté totale
         $html .= '<span class="bold bs-popover"' . BimpRender::renderPopoverData('Qtés commandées') . ' style="display: inline-block; padding: 3px 0; margin-right: 15px">';
         $html .= BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft');
         $html .= $total_qty;
+
+        if ($qty_modif) {
+            $html .= '<span class="important"> (' . ($qty_modif > 0 ? '+' : '') . $qty_modif . ')</span>';
+        }
         $html .= '</span>';
 
         // Qté reçues:
@@ -294,7 +304,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
             if (!BimpObject::objectLoaded($product)) {
                 $html .= BimpRender::renderAlerts('Aucun produit associé à cette ligne');
             } else {
-                $qty = (float) $this->qty - (float) $this->getReceivedQty();
+                $qty = (float) $this->getFullQty() - (float) $this->getReceivedQty();
                 if ($qty <= 0) {
                     $html .= BimpRender::renderAlerts('Toutes les unités de cette ligne de commande fournisseur ont déjà été réceptionnées', 'warning');
                 } else {
@@ -370,7 +380,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
     public function renderReceptionFormRowTpl($include_receptions = false)
     {
-        $qty = (float) $this->qty - (float) $this->getReceivedQty();
+        $qty = (float) $this->getFullQty() - (float) $this->getReceivedQty();
 
         if ($qty <= 0) {
             return '';
@@ -458,6 +468,25 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $tpl .= '</td>';
 
         return $tpl;
+    }
+
+    public function renderQtyModifiedInput()
+    {
+        if (!$this->isLoaded()) {
+            return BimpRender::renderAlerts('ID de la ligne de commande fournisseur absent', 'danger');
+        }
+        $decimals = $this->getQtyDecimals();
+        $min = (float) $this->getReceivedQty();
+
+        return BimpInput::renderInput('qty', 'qty_modified', (float) $this->getFullQty(), array(
+                    'data' => array(
+                        'data_type' => 'number',
+                        'min'       => $min,
+                        'max'       => 'none',
+                        'decimals'  => $decimals,
+                        'unsigned'  => 0
+                    )
+        ));
     }
 
     // Traitements: 

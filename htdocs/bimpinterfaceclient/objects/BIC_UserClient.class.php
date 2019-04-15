@@ -9,7 +9,7 @@ class BIC_UserClient extends BimpObject {
     public $loginUser = "client_user";
     public $init = false;
     public $ref = '';
-    public static $langs_list = array("fr_FR", 'en_US', 'de_DE', 'es_ES');
+    public static $langs_list = array("fr_FR");
 
     # Constantes
 
@@ -54,15 +54,14 @@ class BIC_UserClient extends BimpObject {
 
     public function getActionsButtons() {
         global $userClient;
-        $buttons = array();
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-
-        if ($this->i_am_admin()) {
+        // Voir avec Tommy : $userClient->getData('role') = error getData on null; POur le IF du dessous
+        if (1) {
             $buttons[] = array(
                 'label' => 'Réinitialiser le mot de passe',
                 'icon' => 'fas_lock',
-                'onclick' => $this->getJsActionOnclick('generatePassword', array(), array(
+                'onclick' => $this->getJsActionOnclick('reinit_password', array(), array(
                     'success_callback' => $callback
                 ))
             );
@@ -252,6 +251,20 @@ class BIC_UserClient extends BimpObject {
     public function generatePassword($lenght = 7) {
         $password = $this->random_password($lenght);
         return (object) Array('clear' => $password, 'sha256' => hash('sha256', $password));
+    }
+    
+    public function change_password($post) {
+        $this->updateField('password', hash('sha256', $post));
+        mailSyn2('Changement de votre mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer, si vous n'êtes pas à l'origine de cette actions veuillez contacter votre administrateur" );
+        $this->updateField('renew_required', 0);
+    }
+    
+    public function actionReinit_password() {
+        $passwords = $this->generatePassword();
+        $this->updateField('renew_required', 1);
+        mailSyn2('Changement de mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer par votre administrateur <br /> Votre nouveau mot de passe est : $passwords->clear");
+        $this->updateField('password', $password->sha256);
+        return Array('success' => 'Mot de passe rénitialisé');
     }
 
     public function create(&$warnings = array(), $force_create = false) {

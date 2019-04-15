@@ -21,6 +21,11 @@ objects:
             title: 
                 object_prop: ref
             view_btn: 1
+            # Pas mis car autrement fait foiré les tickets sur la version de prod
+#        instance:
+#            bimp_object:
+#                module: bimpcontract
+#                name: BContract_contrat
                 
     user_resp: 
         extends: user
@@ -464,10 +469,10 @@ views:
                   fields_table: 
                       name: client_infos
             - cols:
-                - cols: 
                 - type: list
                   list:
                       children: notes
+                      name: client
     
     client_inters:
         rows:
@@ -561,6 +566,7 @@ lists:
             #method: getExtraBtnListInterfaceClient
                 #params:
                    # -
+        
                     
         add_form_values: 
             fields:

@@ -24,6 +24,12 @@ objects:
             bimp_object:
                 module: bimpsupport
                 name: BS_Note
+    
+    userClient:
+        instance:
+            bimp_object: BIC_UserClient
+        id_object:
+            field: id_user_client
                 
 fields:
     id_contrat:
@@ -43,6 +49,8 @@ fields:
     
     id_user_client:
         label: Propriétaire
+        type: id_object
+        object: userClient
 
 lists:
     interface_client:
@@ -106,6 +114,9 @@ lists:
             id_contrat:
                 label: Contrat
                 field: id_contrat
+            id_user_client:
+                label: Propriétaire
+                field: id_user_client
             
 forms:
     editUserTicket:

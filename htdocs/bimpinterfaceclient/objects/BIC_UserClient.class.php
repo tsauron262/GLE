@@ -57,7 +57,8 @@ class BIC_UserClient extends BimpObject {
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
         // Voir avec Tommy : $userClient->getData('role') = error getData on null; POur le IF du dessous
-        if (1) {
+        if ((isset($userClient) && $userClient->getData('role') == self::USER_CLIENT_ROLE_ADMIN && $this->id != $userClient->id ) || BimpTools::getContext() == 'private') {
+            
             $buttons[] = array(
                 'label' => 'Réinitialiser le mot de passe',
                 'icon' => 'fas_lock',
@@ -103,10 +104,15 @@ class BIC_UserClient extends BimpObject {
 
     public function i_am_admin() {
         if ($this->getData('role') == self::USER_CLIENT_ROLE_ADMIN) {
-            return true;
+            return 1;
         } else {
-            return false;
+            return 0;
         }
+    }
+    
+    public function it_is_not_admin() {
+        return ($this->i_am_admin()) ? 0 : 1;
+        //return 1;
     }
 
     public function actionGeneratePassword() {
@@ -259,12 +265,16 @@ class BIC_UserClient extends BimpObject {
         $this->updateField('renew_required', 0);
     }
     
-    public function actionReinit_password() {
+    public function actionReinit_password($data, &$success) {
         $passwords = $this->generatePassword();
         $this->updateField('renew_required', 1);
         mailSyn2('Changement de mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer par votre administrateur <br /> Votre nouveau mot de passe est : $passwords->clear");
-        $this->updateField('password', $password->sha256);
-        return Array('success' => 'Mot de passe rénitialisé');
+        $this->updateField('password', $passwords->sha256);
+        $success = 'Mot de passe réinitialisé';
+        return array(
+          'errors' => array(),
+            'warnings' => array()
+        );
     }
 
     public function create(&$warnings = array(), $force_create = false) {

@@ -186,6 +186,7 @@ class BimpComm extends BimpDolObject
             $this->remise_globale_line_rate = 0;
 
             $remise_globale = (float) $this->getData('remise_globale');
+            
             if ($remise_globale) {
                 $ttc = $this->getTotalTtcWithoutRemises();
                 $remise_amount = $ttc * ($remise_globale / 100);
@@ -2095,7 +2096,9 @@ class BimpComm extends BimpDolObject
                 if (!isset($data['remise_globale'])) {
                     $errors[] = 'Montant de la remise globale absent';
                 } else {
-                    $errors = $this->updateField('remise_globale', round((float) $data['remise_globale'], 8));
+//                    $errors = $this->updateField('remise_globale', round((float) $data['remise_globale'], 8));
+                    $this->set('remise_globale', (float) $data['remise_globale']);
+                    $errors = $this->update();
 
                     if (!count($errors)) {
                         $lines = $this->getChildrenObjects('lines');

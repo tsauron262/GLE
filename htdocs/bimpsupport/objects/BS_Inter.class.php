@@ -230,4 +230,17 @@ class BS_Inter extends BimpObject
         }
         parent::isActionAllowed($action, $errors);
     }
+    
+    public function getListFiltersInterfaceClient(){
+        return Array(
+          Array(
+              'name' => 'id_ticket',
+              'filter' => $_REQUEST['id']
+          )  
+        );
+    }
+    
+    public function canClientView() {
+        return 1;
+    }
 }

@@ -117,6 +117,7 @@ lists:
     full:
         extends: default
         edit_form: editFull
+        add_form_name: editFull
         cols:
             attached_societe:
                 field: attached_societe

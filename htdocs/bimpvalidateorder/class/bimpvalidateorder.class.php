@@ -55,7 +55,7 @@ class BimpValidateOrder {
                         $error = true;
                 }
                 if (!$error) {
-                    setEventMessages("Un mail a été envoyé à un responsable pour qu'il valide cette commande financiérement.", null, 'warnings');
+                    setEventMessages("Un mail a été envoyé à un responsable pour qu'il valide cette commande financièrement.", null, 'warnings');
                 }
                 else
                         $this->errors[] = 'Envoi d\'email impossible';
@@ -135,7 +135,7 @@ class BimpValidateOrder {
         
         $contacts = $order->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
         foreach($contacts as $contact)
-                mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, vottre commande ".$order->getNomUrl(1). " est validée.");
+                mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande ".$order->getNomUrl(1). " est validée.");
         
         
         

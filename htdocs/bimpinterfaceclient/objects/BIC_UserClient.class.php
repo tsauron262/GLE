@@ -102,7 +102,7 @@ class BIC_UserClient extends BimpObject {
         $this->updateField('role', self::USER_CLIENT_ROLE_ADMIN);
     }
 
-    public function i_am_admin() {
+    public function it_is_admin() {
         if ($this->getData('role') == self::USER_CLIENT_ROLE_ADMIN) {
             return 1;
         } else {
@@ -111,7 +111,7 @@ class BIC_UserClient extends BimpObject {
     }
     
     public function it_is_not_admin() {
-        return ($this->i_am_admin()) ? 0 : 1;
+        return ($this->it_is_admin()) ? 0 : 1;
         //return 1;
     }
 
@@ -203,7 +203,7 @@ class BIC_UserClient extends BimpObject {
     public function getContratVisible($ouvert = false) {
         $retour = array();
         $socContrats = $this->getAllContrats($ouvert);
-        if ($this->i_am_admin()) {
+        if ($this->it_is_admin()) {
             $retour = $socContrats;
         } else {
             foreach ($socContrats as $contrat) {

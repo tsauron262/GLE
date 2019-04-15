@@ -244,6 +244,28 @@ views:
                             col_lg: 12
                             fields_table:
                                 name: client
+    
+    interface_client:
+        title:
+            callback: displayRef
+        objects_change_reload: BContract_contract
+        delete_btn: 1
+        edit_form: edit_contrat
+        footer_extra_btn: 
+            callback: getActionsButtons
+        rows:
+            - cols: 
+                - type: rows
+                  col_lg: 12
+                  col_md: 12
+                  rows:                        
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: infos
+
+    
     file:
         title: Fichiers joint
         rows:

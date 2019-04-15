@@ -22,7 +22,7 @@ $content_request = $_REQUEST['fc'];
                         </a>
                     </li>
                     <?php
-                    if ($userClient->i_am_admin()) {
+                    if ($userClient->it_is_admin()) {
                         ?>
                         <li <?= ($content_request == 'ticket') ? 'class="active"' : "" ?> >
                             <a href="client.php?fc=tickets">

@@ -65,8 +65,7 @@ class BimpObject extends BimpCache
     public $parent = null;
     public $dol_object = null;
     public $extends = array();
-    
-    public $redirectMode = 5;//5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
     // Gestion instance:
 
@@ -831,7 +830,7 @@ class BimpObject extends BimpCache
         return $value;
     }
 
-    public function getDbData()
+    public function getDbData($fields = null)
     {
         $data = array();
 
@@ -839,6 +838,10 @@ class BimpObject extends BimpCache
 
         foreach ($this->data as $field => $value) {
             if ($field === $primary) {
+                continue;
+            }
+
+            if (!is_null($fields) && !empty($fields) && !in_array($field, $fields)) {
                 continue;
             }
 
@@ -895,7 +898,7 @@ class BimpObject extends BimpCache
         foreach ($this->params['objects'] as $nom => $infoObj) {
             $value = "";
             if ($infoObj['relation'] == "hasMany") {
-                $html.= "<" . $nom . ">";
+                $html .= "<" . $nom . ">";
                 $lines = $this->getChildrenObjects($nom);
                 $i = 0;
                 $value = array();
@@ -1032,6 +1035,11 @@ class BimpObject extends BimpCache
         }
 
         return $fields;
+    }
+
+    public function getTaxeIdDefault()
+    {
+        return (int) BimpCore::getConf("tva_default");
     }
 
     // Gestion des données:
@@ -1674,10 +1682,6 @@ class BimpObject extends BimpCache
         }
 
         return false;
-    }
-    
-    public function getTaxeIdDefault(){
-        return (int) BimpCore::getConf("tva_default");
     }
 
     public function getChildObject($object_name, $id_object = null)
@@ -2552,7 +2556,7 @@ class BimpObject extends BimpCache
                             $errors[] = 'Fichier de configuration invalide (table non renseignée)';
                             $result = 0;
                         } else {
-                            $result = $this->db->update($table, $this->getDbData(''), '`' . $primary . '` = ' . (int) $this->id);
+                            $result = $this->db->update($table, $this->getDbData(), '`' . $primary . '` = ' . (int) $this->id);
                         }
                     }
 
@@ -3226,7 +3230,8 @@ class BimpObject extends BimpCache
             return 0;
         }
 
-        $errors = $this->hydrateDolObject();
+        $bimpObjectFields = array();
+        $errors = $this->hydrateDolObject($bimpObjectFields);
 
         if (!count($errors)) {
             if (method_exists($this, 'beforeCreateDolObject')) {
@@ -3250,6 +3255,15 @@ class BimpObject extends BimpCache
                     foreach ($this->dol_object->errors as $error) {
                         $errors[] = 'Erreur: ' . $langs->trans($error);
                     }
+                }
+            } else {
+                if (!empty($bimpObjectFields)) {
+                    $fields = array();
+                    foreach ($bimpObjectFields as $field_name => $value) {
+                        $fields[] = $field_name;
+                    }
+
+                    $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $result);
                 }
             }
 
@@ -3310,6 +3324,15 @@ class BimpObject extends BimpCache
                     }
                 }
                 return 0;
+            } else {
+                if (!empty($bimpObjectFields)) {
+                    $fields = array();
+                    foreach ($bimpObjectFields as $field_name => $value) {
+                        $fields[] = $field_name;
+                    }
+
+                    $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $result);
+                }
             }
             return 1;
         }
@@ -3346,13 +3369,29 @@ class BimpObject extends BimpCache
             return false;
         }
 
-        $errors = $this->hydrateFromDolObject();
+        $bimpObjectFields = array();
+
+        $errors = $this->hydrateFromDolObject($bimpObjectFields);
 
         $extra_fields = $this->fetchExtraFields();
 
         foreach ($extra_fields as $field_name => $value) {
             $this->checkFieldValueType($field_name, $value);
             $this->data[$field_name] = $value;
+        }
+
+        if (!empty($bimpObjectFields)) {
+            $result = $this->db->getRow($this->getTable(), '`' . $this->getPrimary() . '` = ' . (int) $id, $bimpObjectFields, 'array');
+            if (!is_null($result)) {
+                foreach ($bimpObjectFields as $field_name) {
+                    if (!isset($result[$field_name])) {
+                        continue;
+                    }
+                    $value = $result[$field_name];
+                    $this->checkFieldValueType($field_name, $value);
+                    $this->data[$field_name] = $value;
+                }
+            }
         }
 
         $this->initData = $this->data;
@@ -3534,31 +3573,32 @@ class BimpObject extends BimpCache
     }
 
     // Gestion des droits users: 
-    
-    
-    public function can($right){
-        switch ($right){
+
+
+    public function can($right)
+    {
+        switch ($right) {
             case "view" :
-                if(BimpTools::getContext() == "public")
+                if (BimpTools::getContext() == "public")
                     return ($this->canView() && $this->canClientView());
                 else
                     return $this->canView();
             case 'edit' :
-                if(BimpTools::getContext() == "public")
+                if (BimpTools::getContext() == "public")
                     return ($this->canEdit() && $this->canClientEdit());
                 else
                     return $this->canEdit();
             case "create" :
-                if(BimpTools::getContext() == "public")
+                if (BimpTools::getContext() == "public")
                     return ($this->canCreate() && $this->canClientCreate());
                 else
                     return $this->canCreate();
             case "delete" :
-                if(BimpTools::getContext() == "public")
+                if (BimpTools::getContext() == "public")
                     return ($this->canDelete() && $this->canClientDelete());
                 else
                     return $this->canDelete();
-                
+
             default:
                 return 0;
         }
@@ -3574,11 +3614,11 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
-    
-    public function canClientCreate(){
+
+    public function canClientCreate()
+    {
         return 0;
     }
-
 
     protected function canEdit()
     {
@@ -3590,10 +3630,11 @@ class BimpObject extends BimpCache
         }
         return $this->canView();
     }
-    public function canClientEdit(){
+
+    public function canClientEdit()
+    {
         return 0;
     }
-
 
     protected function canView()
     {
@@ -3605,6 +3646,7 @@ class BimpObject extends BimpCache
         }
         return 1;
     }
+
     public function canClientView()
     {
         return 0;
@@ -3620,7 +3662,9 @@ class BimpObject extends BimpCache
         }
         return $this->canEdit();
     }
-    public function canClientDelete(){
+
+    public function canClientDelete()
+    {
         return 0;
     }
 
@@ -5036,15 +5080,15 @@ class BimpObject extends BimpCache
 
         return $html;
     }
-    
+
     public function getListUrl()
     {
         $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
-        
+
         if (!$url && $this->isDolObject()) {
             $url = BimpTools::getDolObjectListUrl($object);
         }
-        
+
         return $url;
     }
 
@@ -5490,98 +5534,97 @@ class BimpObject extends BimpCache
             return true;
         return false;
     }
-    
-    
-    public static function getDefaultEntrepot(){
+
+    public static function getDefaultEntrepot()
+    {
         global $user;
-        if(!isset($user->array_options)){
+        if (!isset($user->array_options)) {
             $user->fetch_optionals();
         }
-        if(isset($user->array_options["options_defaultentrepot"]))
+        if (isset($user->array_options["options_defaultentrepot"]))
             return $user->array_options["options_defaultentrepot"];
     }
-    
-    
-    
-    
-    public function renderHeaderBtnRedir(){
+
+    public function renderHeaderBtnRedir()
+    {
         return $this->processRedirect(false);
     }
-    public function processRedirect($newVersion = true){
-        $redirect = ((BimpTools::getValue("redirectForce") == 1)? 1 : 0);
+
+    public function processRedirect($newVersion = true)
+    {
+        $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
         $redirectMode = $this->redirectMode;
         $texteBtn = "";
-        if($this->iAmAdminRedirect()){
-            if($redirectMode == 4){
+        if ($this->iAmAdminRedirect()) {
+            if ($redirectMode == 4) {
                 $redirectMode = 1;
                 $texteBtn = "ADMIN (N) : ";
-            }
-            elseif($redirectMode == 5){
+            } elseif ($redirectMode == 5) {
                 $redirectMode = 1;
                 $texteBtn = "ADMIN (A) : ";
             }
         }
         $btn = false;
-        if($newVersion){
-            if($this->id > 0)
+        if ($newVersion) {
+            if ($this->id > 0)
                 $url = $this->getUrl();
             else
                 $url = $this->getListUrl();
             $texteBtn .= "Nouvelle version";
-            if($redirectMode == 4)
+            if ($redirectMode == 4)
                 $redirect = true;
-            elseif(in_array ($redirectMode, array(3,5)))
+            elseif (in_array($redirectMode, array(3, 5)))
                 $redirect = false;
-            elseif($redirectMode != 0)
+            elseif ($redirectMode != 0)
                 $btn = true;
-            
-            
-            if(BimpTools::getValue("sall") != ""){
+
+
+            if (BimpTools::getValue("sall") != "") {
                 $objName = "";
-                if(isset($this->dol_object) && isset($this->dol_object->element))
+                if (isset($this->dol_object) && isset($this->dol_object->element))
                     $objName = $this->dol_object->element;
-                $url .= "&search=1&object=".$this->dol_object->element."&sall=".BimpTools::getValue("sall");
+                $url .= "&search=1&object=" . $this->dol_object->element . "&sall=" . BimpTools::getValue("sall");
             }
-            if(BimpTools::getValue("socid") != ""){
+            if (BimpTools::getValue("socid") != "") {
                 $objName = "";
-                if(isset($this->dol_object) && isset($this->dol_object->element))
+                if (isset($this->dol_object) && isset($this->dol_object->element))
                     $objName = $this->dol_object->element;
-                $url .= "&socid=".BimpTools::getValue("socid");
+                $url .= "&socid=" . BimpTools::getValue("socid");
             }
-            
-            
-                
-                https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
+
+
+
+            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
         }
-        else{
-            $url = BimpTools::getDolObjectUrl ($this->dol_object, $this->id);
+        else {
+            $url = BimpTools::getDolObjectUrl($this->dol_object, $this->id);
             $texteBtn .= "Ancienne version";
-            if($redirectMode == 5)
+            if ($redirectMode == 5)
                 $redirect = true;
-            elseif(in_array ($redirectMode, array(2,4)))
+            elseif (in_array($redirectMode, array(2, 4)))
                 $redirect = false;
-            elseif($redirectMode != 0)
+            elseif ($redirectMode != 0)
                 $btn = true;
         }
-        if($redirect && $url != ""){
+        if ($redirect && $url != "") {
             $ob = ob_get_contents();
-            if($ob != "")
-                die("<script>window.location = '".$url."';</script>");
-            else{
-                header("location: ".$url);
-                die("<script>window.location = '".$url."';</script>");
+            if ($ob != "")
+                die("<script>window.location = '" . $url . "';</script>");
+            else {
+                header("location: " . $url);
+                die("<script>window.location = '" . $url . "';</script>");
             }
-        }
-        elseif($btn && $url != "")
-            return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='".$texteBtn."'/><input type='hidden' name='redirectForce' value='1'/></form>";
-        
+        } elseif ($btn && $url != "")
+            return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/></form>";
+
         return '';
     }
-    
-    public function iAmAdminRedirect(){
+
+    public function iAmAdminRedirect()
+    {
         global $user;
 //        return 0;
-        if($user->admin)
+        if ($user->admin)
             return 1;
     }
 }

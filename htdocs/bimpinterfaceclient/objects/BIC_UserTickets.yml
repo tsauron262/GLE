@@ -48,7 +48,7 @@ fields:
         require: 1
     
     id_user_client:
-        label: Propriétaire
+        label: Demandeur
         type: id_object
         object: userClient
 
@@ -89,6 +89,8 @@ lists:
             status:
             priorite:
             date_create:
+            id_user_client:
+                field: id_user_client
     
     pageUser:
         extends: interface_client
@@ -112,10 +114,10 @@ lists:
                     - client
         cols:
             id_contrat:
-                label: Contrat
+                #label: Contrat
                 field: id_contrat
             id_user_client:
-                label: Propriétaire
+                #label: Propriétaire
                 field: id_user_client
             
 forms:

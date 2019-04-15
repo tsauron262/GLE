@@ -114,6 +114,8 @@ lists:
                 field: status
             lang:
                 field: lang
+                show:
+                    callback: showLang
     full:
         extends: default
         edit_form: editFull

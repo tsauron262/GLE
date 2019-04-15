@@ -36,6 +36,10 @@ class BIC_UserClient extends BimpObject {
     public function getName() {
         return $this->getData("email");
     }
+    
+    public function showLang() {
+        return (count(self::$langs_list == 1)) ? 0 : 1;
+    }
 
     public function renderHeaderStatusExtra() {
         

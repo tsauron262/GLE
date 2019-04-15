@@ -104,6 +104,11 @@ $content_request = $_REQUEST['fc'];
                     </div>
                     <div class="collapse navbar-collapse">
                         <ul class="nav navbar-nav navbar-right">
+                            <?php 
+                                if($content_request == 'pageUser'){ // POur la RGPD
+                                    echo '<li><a href="#" class="rgpd">Télécharger mes données</a></li>';
+                                }
+                            ?>
                             <li><a href="#" class="passwd"><?= $langs->trans('changePassword') ?></a></li>
                             <li><a href="?action=deconnexion"><?= $langs->trans('deconnexion') ?></a></li>
                         </ul>

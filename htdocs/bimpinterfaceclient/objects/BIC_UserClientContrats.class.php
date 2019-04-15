@@ -20,9 +20,17 @@ class BIC_UserClientContrats extends BimpObject {
     public function canClientCreate() {
         return $this->canClientEdit();
     }
-    
+        
     public function canClientDelete() {
-        return true;
+        global $userClient;
+        if(isset($userClient) && $userClient->it_is_admin()) {
+            return 1;
+        }
+        return 0;
+    }
+    
+    public function canDelete() {
+        return 1;
     }
 
     public function getContrats() {

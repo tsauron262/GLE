@@ -34,7 +34,16 @@ class BS_Note extends BimpObject
     }
     
     public function canClientEdit() {
-        return $this->canClientCreate();
+        global $userClient;
+        if($this->canClientCreate() && $this->getData('id_user_client') == $userClient->id){
+            // Vérifier que c'est la dernière
+            return 1;
+        } elseif(!$this->isLoaded()) {
+            return 1;
+        }
+        return 0;
+        
+        
     }
     
     public function canClientCreate() {
@@ -62,7 +71,7 @@ class BS_Note extends BimpObject
             ),
             Array(
                 'name' => 'visibility',
-                'filter' => 0 // A changer après avoir fait le créate
+                'filter' => 1 // A changer après avoir fait le créate
             )
         );
     }

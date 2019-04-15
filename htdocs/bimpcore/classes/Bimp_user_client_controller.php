@@ -73,11 +73,6 @@ class Bimp_user_client_controller extends BimpController {
         if(isset($_POST['new_password'])) {
             $userClient->change_password($_POST['new_password']);
         }
-        
-        if(isset($_REQUEST['reinit_password'])) {
-            $userClient->reinit_password();
-        }
-
         $langs->setDefaultLang(BIC_UserClient::$langs_list[$userClient->getData('lang')]);
         $langs->load('bimp@bimpinterfaceclient');
     }

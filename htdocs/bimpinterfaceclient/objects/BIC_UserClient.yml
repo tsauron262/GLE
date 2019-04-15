@@ -16,6 +16,10 @@ objects:
                 file: societe
                 id_object:
                     field_value: attached_societe
+                    
+    tickets:
+        instance:
+            bimp_object: BIC_UserTickets
 
 header_btn: 
     callback: getActionsButtons
@@ -145,9 +149,36 @@ views:
         rows:
             - cols: 
                 - type: list
+                  show:
+                      callback: it_is_not_admin
                   list:
                         children: user_client_contrat
-
+    
+    for_controller:
+        rows:
+            title: infos
+            - cols:
+                - type: nav_tabs
+                  nav_tabs:
+                      - id: attached_contrat
+                        title: Contrats associés
+                        show:
+                            callback: it_is_not_admin
+                        struct:
+                            type: list
+                            list:
+                                children: user_client_contrat
+                      - id: attached_tickets
+                        title: Tickets support
+                        struct: 
+                            type: list
+                            list:
+                                name: pageUser
+                                object: tickets
+                            
+                            
+                        
+                
 forms:
     edit:
         objects_change_reload: BIC_UserClient, BIC_UserClientContrats

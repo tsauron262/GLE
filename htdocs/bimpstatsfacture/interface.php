@@ -9,6 +9,10 @@ require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFacture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpstatsfacture/class/BimpStatsFactureFournisseur.class.php';
 
+
+global $conf;
+$conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...","", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
+
 $staticSF = new BimpStatsFacture($db);
 $staticSFF = new BimpStatsFactureFournisseur($db);
 

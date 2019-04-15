@@ -24,10 +24,10 @@ class BimpComm extends BimpDolObject
 
     // Getters booléens: 
 
-    public function isDeletable()
-    {
-        return 1;
-    }
+//    public function isDeletable()
+//    {
+//        return 1;
+//    }
 
     public function isFieldEditable($field)
     {
@@ -2164,6 +2164,13 @@ class BimpComm extends BimpDolObject
 
         return 0;
     }
+    
+    public function isEditable(){
+        if($this->getData("fk_statut") == 0)
+            return 1;
+        return 0;
+    }
+    
 
     public function isActionAllowed($action, &$errors = array())
     {
@@ -2185,5 +2192,21 @@ class BimpComm extends BimpDolObject
         }
 
         return 1;
+    }
+    
+    
+        public function getListFilters()
+    {   
+        global $user;
+        $return = array();
+        if(BimpTools::getValue("my") == 1){
+            $return[] =
+                array(
+                    'name'   => 'fk_user_author',
+                    'filter' => 2
+                );
+        }
+        
+        return $return;
     }
 }

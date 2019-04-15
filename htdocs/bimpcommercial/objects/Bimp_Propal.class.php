@@ -82,10 +82,7 @@ class Bimp_Propal extends BimpComm
         );
     }
 
-    public function getListFilters()
-    {
-        return array();
-    }
+
 
     public function getActionsButtons()
     {

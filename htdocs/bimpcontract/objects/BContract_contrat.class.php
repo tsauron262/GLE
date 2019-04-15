@@ -156,7 +156,7 @@ class BContract_contrat extends BimpDolObject {
 
     public function canClientView() {
         global $userClient;
-        if($userClient->i_am_admin()){
+        if($userClient->it_is_admin()){
             return true;
         }
         $list = $userClient->getChildrenObjects('user_client_contrat');

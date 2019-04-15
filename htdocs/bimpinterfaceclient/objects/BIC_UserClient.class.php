@@ -60,7 +60,6 @@ class BIC_UserClient extends BimpObject {
         global $userClient;
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-        // Voir avec Tommy : $userClient->getData('role') = error getData on null; POur le IF du dessous
         if ((isset($userClient) && $userClient->getData('role') == self::USER_CLIENT_ROLE_ADMIN && $this->id != $userClient->id ) || BimpTools::getContext() == 'private') {
             
             $buttons[] = array(
@@ -98,12 +97,14 @@ class BIC_UserClient extends BimpObject {
 
     # Actions
 
-    public function actionSwitchUser() {
+    public function actionSwitchUser($data, &$success) {
         $this->updateField('role', self::USER_CLIENT_ROLE_USER);
+        $success = "Changer au statut utilisateur avec succes";
     }
 
-    public function actionSwitchAdmin() {
+    public function actionSwitchAdmin($data, &$success) {
         $this->updateField('role', self::USER_CLIENT_ROLE_ADMIN);
+        $success = "Changer au statut administrateur avec succes";
     }
 
     public function it_is_admin() {
@@ -226,7 +227,7 @@ class BIC_UserClient extends BimpObject {
         $return = Array();
         foreach ($list as $on_contrat) {
             $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $on_contrat['rowid']);
-            if ($ouvert == false || $instance->isValide()) {
+            if (($ouvert == false || $instance->isValide()) && $instance->getData('statut') > 0) {
                 $return[$on_contrat['rowid']] = $instance;
             }
             $instance = null;

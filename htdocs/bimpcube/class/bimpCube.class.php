@@ -2,6 +2,10 @@
 
 class BimpCube{
     
+    public function __construct($db) {
+        $this->db = $db;
+    }
+    
     public function callTrigerRefresh(){
 //        $result1 = $this->db->query("CALL refresh_llx_mat_view_propaldet();");
 //        $result2 = $this->db->query("CALL refresh_llx_mat_view_facturedet();");

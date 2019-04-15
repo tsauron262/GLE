@@ -54,11 +54,10 @@ class BIC_UserClient extends BimpObject {
 
     public function getActionsButtons() {
         global $userClient;
-        $buttons = array();
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-
-        if ($this->i_am_admin()) {
+        // Voir avec Tommy : $userClient->getData('role') = error getData on null; POur le IF du dessous
+        if (1) {
             $buttons[] = array(
                 'label' => 'Réinitialiser le mot de passe',
                 'icon' => 'fas_lock',
@@ -258,6 +257,13 @@ class BIC_UserClient extends BimpObject {
         $this->updateField('password', hash('sha256', $post));
         mailSyn2('Changement de votre mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer, si vous n'êtes pas à l'origine de cette actions veuillez contacter votre administrateur" );
         $this->updateField('renew_required', 0);
+    }
+    
+    public function reinit_password() {
+        $passwords = $this->generatePassword();
+        $this->updateField('renew_required', 1);
+        mailSyn2('Changement de mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer par votre administrateur <br /> Votre nouveau mot de passe est : $password->clear");
+        $this->updateField('password', $password->sha256);
     }
 
     public function create(&$warnings = array(), $force_create = false) {

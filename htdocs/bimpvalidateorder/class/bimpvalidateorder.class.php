@@ -135,7 +135,7 @@ class BimpValidateOrder {
         
         $contacts = $order->liste_contact(-1, 'internal', 0, 'SALESREPFOLL');
         foreach($contacts as $contact)
-                mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, vottre commande ".$order->getNomUrl(1). " est validée.");
+                mailSyn2("Commande Validée", $contact['email'], "gle@bimp.fr", "Bonjour, votre commande ".$order->getNomUrl(1). " est validée.");
         
         
         

@@ -11,7 +11,7 @@ class BIC_UserClientContrats extends BimpObject {
 
     public function canClientEdit() {
         global $userClient;
-        if ($userClient->i_am_admin()) {
+        if ($userClient->it_is_admin()) {
             return true;
         }
         return false;

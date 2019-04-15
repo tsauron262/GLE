@@ -1,0 +1,335 @@
+--
+-- Table llx_mat_view_product_cat
+-- Categories de produits
+--
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+START TRANSACTION;
+DROP TABLE IF EXISTS `llx_mat_view_product_cat`;
+CREATE TABLE `llx_mat_view_product_cat` (
+  `rowid` int(11) NOT NULL,
+  `ref` varchar(128) CHARACTER SET utf8 NOT NULL,
+  `label` varchar(255) CHARACTER SET utf8 NOT NULL,
+  `price` double(24,8) DEFAULT NULL,
+  `price_rand` double DEFAULT NULL,
+  `path` varchar(255) CHARACTER SET utf8 NOT NULL,
+  `lvl` bigint(1) NOT NULL,
+  `id_root` int(11) NOT NULL,
+  `id_subroot` bigint(1) NOT NULL,
+  `id_level_1` bigint(1) NOT NULL,
+  `id_level_2` bigint(1) NOT NULL,
+  `id_level_3` bigint(1) NOT NULL,
+  `id_level_4` bigint(1) NOT NULL,
+  `id_level_5` bigint(1) NOT NULL,
+  `id_leaf` bigint(1) NOT NULL,
+  `id_leaf_1` bigint(1) GENERATED ALWAYS AS (`id_leaf`) STORED,
+  PRIMARY KEY (`rowid`,`id_root`,`id_subroot`,`id_level_1`,`id_level_2`,`id_level_3`,`id_level_4`,`id_level_5`,`id_leaf`),
+  KEY `idx_rowid` (`rowid`),
+  KEY `idx_id_root` (`id_root`),
+  KEY `idx_id_subroot` (`id_subroot`),
+  KEY `idx_id_level_1` (`id_level_1`),
+  KEY `idx_id_level_2` (`id_level_2`),
+  KEY `idx_id_level_3` (`id_level_3`),
+  KEY `idx_id_level_4` (`id_level_4`),
+  KEY `idx_id_level_5` (`id_level_5`),
+  KEY `idx_id_leaf` (`id_leaf`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+COMMIT;
+--
+-- Table llx_mat_view_categorie
+-- Categories de materiel
+--
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+START TRANSACTION;
+DROP TABLE IF EXISTS `llx_mat_view_categorie`;
+CREATE TABLE `llx_mat_view_categorie` (
+  `rowid` int(11) NOT NULL,
+  `type` varchar(45) NOT NULL,
+  `path` varchar(255) CHARACTER SET utf8 NOT NULL,
+  `lvl` bigint(1) NOT NULL,
+  `root` varchar(255) CHARACTER SET utf8 NOT NULL,
+  `id_root` int(11) NOT NULL,
+  `subroot` varchar(254) CHARACTER SET utf8 NOT NULL,
+  `id_subroot` bigint(1) NOT NULL,
+  `rootsubroot` varchar(254) CHARACTER SET utf8 NOT NULL,
+  `level_1` varchar(254) CHARACTER SET utf8 NOT NULL,
+  `id_level_1` bigint(1) NOT NULL,
+  `level_2` varchar(254) CHARACTER SET utf8 NOT NULL,
+  `id_level_2` bigint(1) NOT NULL,
+  `level_3` varchar(254) CHARACTER SET utf8 NOT NULL,
+  `id_level_3` bigint(1) NOT NULL,
+  `level_4` varchar(254) CHARACTER SET utf8 NOT NULL,
+  `id_level_4` bigint(1) NOT NULL,
+  `level_5` varchar(254) CHARACTER SET utf8 NOT NULL,
+  `id_level_5` bigint(1) NOT NULL,
+  `leaf` varchar(255) CHARACTER SET utf8 NOT NULL,
+  `id_leaf` bigint(1) NOT NULL,
+  PRIMARY KEY (`rowid`),
+  UNIQUE KEY `idx_path` (`path`),
+  KEY `idx_id_root` (`id_root`),
+  KEY `idx_id_subroot` (`id_subroot`),
+  KEY `idx_id_level_1` (`id_level_1`),
+  KEY `idx_id_level_2` (`id_level_2`),
+  KEY `idx_id_level_3` (`id_level_3`),
+  KEY `idx_id_level_4` (`id_level_4`),
+  KEY `idx_id_level_5` (`id_level_5`),
+  KEY `idx_id_leaf` (`id_leaf`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+COMMIT;
+--
+-- Table llx_mat_view_product_cat_flat
+-- Categories de produits (a plat)
+--
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+START TRANSACTION;
+DROP TABLE IF EXISTS `llx_mat_view_product_cat_flat`;
+CREATE TABLE `llx_mat_view_product_cat_flat` (
+  `rowid` int(11) NOT NULL,
+  `ref` varchar(128) NOT NULL,
+  `label` varchar(255) NOT NULL,
+  `price` double(24,8) NOT NULL DEFAULT 0.00000000,
+  `path_1` varchar(255) NOT NULL,
+  `lvl_1` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_1` bigint(1) NOT NULL DEFAULT 0,
+  `path_2` varchar(255) NOT NULL,
+  `lvl_2` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_2` bigint(1) NOT NULL DEFAULT 0,
+  `path_3` varchar(255) NOT NULL,
+  `lvl_3` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_3` bigint(1) NOT NULL DEFAULT 0,
+  `path_4` varchar(255) NOT NULL,
+  `lvl_4` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_4` bigint(1) NOT NULL DEFAULT 0,
+  `path_5` varchar(255) NOT NULL,
+  `lvl_5` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_5` bigint(1) NOT NULL DEFAULT 0,
+  `path_6` varchar(255) NOT NULL,
+  `lvl_6` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_6` bigint(1) NOT NULL DEFAULT 0,
+  `path_7` varchar(255) NOT NULL,
+  `lvl_7` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_7` bigint(1) NOT NULL DEFAULT 0,
+  `path_8` varchar(255) NOT NULL,
+  `lvl_8` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_8` bigint(1) NOT NULL DEFAULT 0,
+  `path_9` varchar(255) NOT NULL,
+  `lvl_9` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_9` bigint(1) NOT NULL DEFAULT 0,
+  `path_10` varchar(255) NOT NULL,
+  `lvl_10` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_10` bigint(1) NOT NULL DEFAULT 0,
+  `path_11` varchar(255) NOT NULL,
+  `lvl_11` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_11` bigint(1) NOT NULL DEFAULT 0,
+  `path_12` varchar(255) NOT NULL,
+  `lvl_12` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_12` bigint(1) NOT NULL DEFAULT 0,
+  `path_13` varchar(255) NOT NULL,
+  `lvl_13` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_13` bigint(1) NOT NULL DEFAULT 0,
+  `path_14` varchar(255) NOT NULL,
+  `lvl_14` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_14` bigint(1) NOT NULL DEFAULT 0,
+  `path_15` varchar(255) NOT NULL,
+  `lvl_15` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_15` bigint(1) NOT NULL DEFAULT 0,
+  `path_16` varchar(255) NOT NULL,
+  `lvl_16` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_16` bigint(1) NOT NULL DEFAULT 0,
+  `path_17` varchar(255) NOT NULL,
+  `lvl_17` bigint(1) NOT NULL DEFAULT 0,
+  `id_leaf_17` bigint(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (`rowid`),
+  KEY `idx_id_leaf_1` (`id_leaf_1`),
+  KEY `idx_id_leaf_2` (`id_leaf_2`),
+  KEY `idx_id_leaf_3` (`id_leaf_3`),
+  KEY `idx_id_leaf_4` (`id_leaf_4`),
+  KEY `idx_id_leaf_5` (`id_leaf_5`),
+  KEY `idx_id_leaf_6` (`id_leaf_6`),
+  KEY `idx_id_leaf_7` (`id_leaf_7`),
+  KEY `idx_id_leaf_8` (`id_leaf_8`),
+  KEY `idx_id_leaf_9` (`id_leaf_9`),
+  KEY `idx_id_leaf_10` (`id_leaf_10`),
+  KEY `idx_id_leaf_11` (`id_leaf_11`),
+  KEY `idx_id_leaf_12` (`id_leaf_12`),
+  KEY `idx_id_leaf_13` (`id_leaf_13`),
+  KEY `idx_id_leaf_14` (`id_leaf_14`),
+  KEY `idx_id_leaf_15` (`id_leaf_15`),
+  KEY `idx_id_leaf_16` (`id_leaf_16`),
+  KEY `idx_id_leaf_17` (`id_leaf_17`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+COMMIT;
+--
+-- Table llx_mat_view_propaldet
+-- Details de propals (avec categories)
+--
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+START TRANSACTION;
+DROP TABLE IF EXISTS `llx_mat_view_propaldet`;
+CREATE TABLE `llx_mat_view_propaldet` (
+  `propaldet_rowid` bigint(20) NOT NULL DEFAULT 0,
+  `propal_rowid` bigint(20) NOT NULL DEFAULT 0,
+  `date_valid` datetime DEFAULT NULL,
+  `date_valid_year` int(4) DEFAULT NULL,
+  `date_valid_quarter` int(1) DEFAULT NULL,
+  `date_valid_month` int(2) DEFAULT NULL,
+  `date_valid_day` int(2) DEFAULT NULL,
+  `id_user` bigint(20) DEFAULT NULL,
+  `id_societe` bigint(20) DEFAULT NULL,
+  `id_statut` smallint(6) DEFAULT 0,
+  `marge` double DEFAULT NULL,
+  `marge_rand` double DEFAULT NULL,
+  `price_ht` double(24,8) DEFAULT 0.00000000,
+  `price_rand` double DEFAULT NULL,
+  `buy_price_ht` double(24,8) DEFAULT 0.00000000,
+  `prod_rowid` bigint(20) DEFAULT 0,
+  `prod_ref` varchar(128) DEFAULT NULL,
+  `prod_label` varchar(255) DEFAULT NULL,
+  `id_prod_root` bigint(11) NOT NULL,
+  `id_prod_subroot` bigint(20) NOT NULL,
+  `id_prod_level_1` bigint(20) NOT NULL,
+  `id_prod_level_2` bigint(20) NOT NULL,
+  `id_prod_level_3` bigint(20) NOT NULL,
+  `id_prod_level_4` bigint(20) NOT NULL,
+  `id_prod_level_5` bigint(20) NOT NULL,
+  `id_prod_leaf` bigint(20) NOT NULL,
+  `id_entrepot` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`propaldet_rowid`,`propal_rowid`,`id_prod_root`,`id_prod_subroot`,`id_prod_level_1`,`id_prod_level_2`,`id_prod_level_3`,`id_prod_level_4`,`id_prod_level_5`,`id_prod_leaf`),
+  KEY `idx_propaldet_rowid` (`propaldet_rowid`),
+  KEY `idx_date_valid_year` (`date_valid_year`),
+  KEY `idx_date_valid_quarter` (`date_valid_quarter`),
+  KEY `idx_date_valid_month` (`date_valid_month`),
+  KEY `idx_date_valid_day` (`date_valid_day`),
+  KEY `idx_prod_rowid` (`prod_rowid`),
+  KEY `idx_id_prod_root` (`id_prod_root`),
+  KEY `idx_id_prod_subroot` (`id_prod_subroot`),
+  KEY `idx_id_prod_level_1` (`id_prod_level_1`),
+  KEY `idx_id_prod_level_2` (`id_prod_level_2`),
+  KEY `idx_id_prod_level_3` (`id_prod_level_3`),
+  KEY `idx_id_prod_level_4` (`id_prod_level_4`),
+  KEY `idx_id_prod_level_5` (`id_prod_level_5`),
+  KEY `idx_id_prod_leaf` (`id_prod_leaf`),
+  KEY `idx_propal_rowid` (`propal_rowid`),
+  KEY `idx_fk_statut` (`id_statut`),
+  KEY `idx_id_user` (`id_user`),
+  KEY `idx_id_societe` (`id_societe`),
+  KEY `idx_id_entrepot` (`id_entrepot`),
+  KEY `idx_date_valid` (`date_valid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+COMMIT;
+--
+-- Table llx_mat_view_commandedet
+-- Details de commandes (avec categories)
+--
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+START TRANSACTION;
+DROP TABLE IF EXISTS `llx_mat_view_commandedet`;
+CREATE TABLE `llx_mat_view_commandedet` (
+  `commandedet_rowid` bigint(20) NOT NULL DEFAULT 0,
+  `commande_rowid` bigint(20) NOT NULL DEFAULT 0,
+  `date_valid` datetime DEFAULT NULL,
+  `date_valid_year` int(4) DEFAULT NULL,
+  `date_valid_quarter` int(1) DEFAULT NULL,
+  `date_valid_month` int(2) DEFAULT NULL,
+  `date_valid_day` int(2) DEFAULT NULL,
+  `id_user` bigint(20) DEFAULT NULL,
+  `id_societe` bigint(20) DEFAULT NULL,
+  `id_statut` smallint(6) DEFAULT 0,
+  `facture` varchar(4) DEFAULT NULL,
+  `marge` double DEFAULT NULL,
+  `marge_rand` double DEFAULT NULL,
+  `price_ht` double(24,8) DEFAULT 0.00000000,
+  `price_rand` double DEFAULT NULL,
+  `buy_price_ht` double(24,8) DEFAULT 0.00000000,
+  `prod_rowid` bigint(20) DEFAULT 0,
+  `prod_ref` varchar(128) CHARACTER SET utf8 DEFAULT NULL,
+  `prod_label` varchar(255) CHARACTER SET utf8 DEFAULT NULL,
+  `id_prod_root` bigint(20) NOT NULL,
+  `id_prod_subroot` bigint(1) NOT NULL,
+  `id_prod_level_1` bigint(1) NOT NULL,
+  `id_prod_level_2` bigint(1) NOT NULL,
+  `id_prod_level_3` bigint(1) NOT NULL,
+  `id_prod_level_4` bigint(1) NOT NULL,
+  `id_prod_level_5` bigint(1) NOT NULL,
+  `id_prod_leaf` bigint(1) NOT NULL,
+  `id_entrepot` bigint(20) unsigned DEFAULT NULL,
+  `id_prod_leaf_1` bigint(1) NOT NULL DEFAULT `id_prod_leaf`,
+  PRIMARY KEY (`commandedet_rowid`,`commande_rowid`,`id_prod_root`,`id_prod_subroot`,`id_prod_level_1`,`id_prod_level_2`,`id_prod_level_3`,`id_prod_level_4`,`id_prod_level_5`,`id_prod_leaf`),
+  KEY `idx_commandedet_rowid` (`commandedet_rowid`),
+  KEY `idx_date_valid_year` (`date_valid_year`),
+  KEY `idx_date_valid_quarter` (`date_valid_quarter`),
+  KEY `idx_date_valid_month` (`date_valid_month`),
+  KEY `idx_date_valid_day` (`date_valid_day`),
+  KEY `idx_prod_rowid` (`prod_rowid`),
+  KEY `idx_id_prod_root` (`id_prod_root`),
+  KEY `idx_id_prod_subroot` (`id_prod_subroot`),
+  KEY `idx_id_prod_level_1` (`id_prod_level_1`),
+  KEY `idx_id_prod_level_2` (`id_prod_level_2`),
+  KEY `idx_id_prod_level_3` (`id_prod_level_3`),
+  KEY `idx_id_prod_level_4` (`id_prod_level_4`),
+  KEY `idx_id_prod_level_5` (`id_prod_level_5`),
+  KEY `idx_id_prod_leaf` (`id_prod_leaf`),
+  KEY `idx_commande_rowid` (`commande_rowid`),
+  KEY `idx_facture` (`facture`),
+  KEY `idx_id_user` (`id_user`),
+  KEY `idx_id_societe` (`id_societe`),
+  KEY `idx_id_entrepot` (`id_entrepot`),
+  KEY `idx_date_valid` (`date_valid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+COMMIT;
+--
+-- Table llx_mat_view_facturedet
+-- Details de factures (avec categories)
+--
+SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+START TRANSACTION;
+DROP TABLE IF EXISTS `llx_mat_view_facturedet`;
+CREATE TABLE `llx_mat_view_facturedet` (
+  `facturedet_rowid` bigint(20) NOT NULL DEFAULT 0,
+  `facture_rowid` bigint(20) NOT NULL DEFAULT 0,
+  `date_valid` datetime DEFAULT NULL,
+  `date_valid_year` int(4) DEFAULT NULL,
+  `date_valid_quarter` int(1) DEFAULT NULL,
+  `date_valid_month` int(2) DEFAULT NULL,
+  `date_valid_day` int(2) DEFAULT NULL,
+  `id_user` bigint(20) DEFAULT NULL,
+  `id_societe` bigint(20) DEFAULT NULL,
+  `id_statut` smallint(6) DEFAULT 0,
+  `marge` double DEFAULT NULL,
+  `marge_rand` double DEFAULT NULL,
+  `price_ht` double(24,8) DEFAULT NULL,
+  `price_rand` double DEFAULT NULL,
+  `buy_price_ht` double(24,8) DEFAULT 0.00000000,
+  `prod_rowid` bigint(20) DEFAULT 0,
+  `prod_ref` varchar(128) DEFAULT NULL,
+  `prod_label` varchar(255) DEFAULT NULL,
+  `id_prod_root` bigint(20) NOT NULL,
+  `id_prod_subroot` bigint(1) NOT NULL,
+  `id_prod_level_1` bigint(1) NOT NULL,
+  `id_prod_level_2` bigint(1) NOT NULL,
+  `id_prod_level_3` bigint(1) NOT NULL,
+  `id_prod_level_4` bigint(1) NOT NULL,
+  `id_prod_level_5` bigint(1) NOT NULL,
+  `id_prod_leaf` bigint(1) NOT NULL,
+  `id_entrepot` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`facturedet_rowid`,`facture_rowid`,`id_prod_root`,`id_prod_subroot`,`id_prod_level_1`,`id_prod_level_2`,`id_prod_level_3`,`id_prod_level_4`,`id_prod_level_5`,`id_prod_leaf`),
+  KEY `idx_facturedet_rowid` (`facturedet_rowid`),
+  KEY `idx_facture_rowid` (`facture_rowid`),
+  KEY `idx_date_valid` (`date_valid`),
+  KEY `idx_date_valid_year` (`date_valid_year`),
+  KEY `idx_date_valid_quarter` (`date_valid_quarter`),
+  KEY `idx_date_valid_month` (`date_valid_month`),
+  KEY `idx_date_valid_day` (`date_valid_day`),
+  KEY `idx_id_user` (`id_user`),
+  KEY `idx_id_societe` (`id_societe`),
+  KEY `idx_prod_rowid` (`prod_rowid`),
+  KEY `idx_id_entrepot` (`id_entrepot`),
+  KEY `idx_id_prod_root` (`id_prod_root`),
+  KEY `idx_id_prod_subroot` (`id_prod_subroot`),
+  KEY `idx_id_prod_level_1` (`id_prod_level_1`),
+  KEY `idx_id_prod_level_2` (`id_prod_level_2`),
+  KEY `idx_id_prod_level_3` (`id_prod_level_3`),
+  KEY `idx_id_prod_level_4` (`id_prod_level_4`),
+  KEY `idx_id_prod_level_5` (`id_prod_level_5`),
+  KEY `idx_id_prod_leaf` (`id_prod_leaf`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+COMMIT;

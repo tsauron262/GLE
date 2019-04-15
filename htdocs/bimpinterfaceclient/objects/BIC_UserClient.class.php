@@ -61,7 +61,7 @@ class BIC_UserClient extends BimpObject {
             $buttons[] = array(
                 'label' => 'Réinitialiser le mot de passe',
                 'icon' => 'fas_lock',
-                'onclick' => $this->getJsActionOnclick('generatePassword', array(), array(
+                'onclick' => $this->getJsActionOnclick('reinit_password', array(), array(
                     'success_callback' => $callback
                 ))
             );
@@ -259,11 +259,12 @@ class BIC_UserClient extends BimpObject {
         $this->updateField('renew_required', 0);
     }
     
-    public function reinit_password() {
+    public function actionReinit_password() {
         $passwords = $this->generatePassword();
         $this->updateField('renew_required', 1);
-        mailSyn2('Changement de mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer par votre administrateur <br /> Votre nouveau mot de passe est : $password->clear");
+        mailSyn2('Changement de mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer par votre administrateur <br /> Votre nouveau mot de passe est : $passwords->clear");
         $this->updateField('password', $password->sha256);
+        return Array('success' => 'Mot de passe rénitialisé');
     }
 
     public function create(&$warnings = array(), $force_create = false) {

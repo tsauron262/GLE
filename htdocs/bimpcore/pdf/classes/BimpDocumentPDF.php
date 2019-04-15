@@ -654,13 +654,13 @@ class BimpDocumentPDF extends BimpModelPDF
                 'desc'     => 'Remise exceptionnelle sur l\'intégralité ' . $this->bimpCommObject->getLabel('of_the'),
                 'qte'      => 1,
                 'tva'      => '',
-                'pu_ht'    => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], ''),
-                'total_ht' => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], '')
+                'pu_ht'    => BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], ''),
+                'total_ht' => BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], '')
             );
             if (!$this->hideTtc)
-                $row['total_ttc'] = BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ttc'], '');
+                $row['total_ttc'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ttc'], '');
             else
-                $row['pu_remise'] = BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], '');
+                $row['pu_remise'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], '');
 
             $table->rows[] = $row;
         }

@@ -186,10 +186,11 @@ class Bimp_CommandeFourn extends BimpComm
     
     public function isLogistiqueActive()
     {
-        $status = (int) $this->getData('fk_statut');
-        if () {
-            
+        if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status)) {
+            return 1;
         }
+        
+        return 0;
     }
 
     // Gestion des droits user - overrides BimpObject: 
@@ -564,6 +565,22 @@ class Bimp_CommandeFourn extends BimpComm
                     ))
                 );
             }
+        }
+
+        return $buttons;
+    }
+    
+    public function getDefaultListExtraButtons()
+    {
+        $buttons = parent::getDefaultListExtraButtons();
+
+        if ($this->isLoaded() && $this->isLogistiqueActive()) {
+            $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commandeFourn&id=' . $this->id;
+            $buttons[] = array(
+                'label'   => 'Page logistique',
+                'icon'    => 'fas_truck-loading',
+                'onclick' => 'window.open(\'' . $url . '\')'
+            );
         }
 
         return $buttons;

@@ -156,6 +156,15 @@ class ObjectLine extends BimpObject
         return (int) ((int) $this->getData('type') === self::LINE_TEXT);
     }
 
+    public function isNotTypeText()
+    {
+        if ((int) $this->getData('type') === self::LINE_TEXT) {
+            return 0;
+        }
+
+        return 1;
+    }
+
     public function isProductEditable()
     {
         if ($this->isLoaded()) {
@@ -237,15 +246,6 @@ class ObjectLine extends BimpObject
     public function showMarginsInForms()
     {
         return 0;
-    }
-
-    public function isNotTypeText()
-    {
-        if ((int) $this->getData('type') === self::LINE_TEXT) {
-            return 0;
-        }
-
-        return 1;
     }
 
     // Getters array: 

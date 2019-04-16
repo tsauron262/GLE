@@ -25,7 +25,7 @@ class commandeController extends BimpController
             return BimpRender::renderAlerts('Aucune commande trouvée pour l\'ID ' . BimpTools::getValue('id', ''));
         }
 
-        if ($commande->getData('fk_statut') < 1) {
+        if (!$commande->isLogistiqueActive()) {
             return BimpRender::renderAlerts('Cette commande doit etre validée pour accéder à cet onglet');
         }
 

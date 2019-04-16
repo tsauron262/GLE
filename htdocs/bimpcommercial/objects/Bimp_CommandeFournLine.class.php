@@ -88,7 +88,42 @@ class Bimp_CommandeFournLine extends FournObjectLine
         return (count($errors)) ? 0 : 1;
     }
 
+    public function isActionAllowed($action, &$errors = array())
+    {
+        if (in_array($action, array('modifyQty'))) {
+            if (!$this->isLoaded()) {
+                $errors[] = 'ID de la ligne de commande fournisseur absent';
+                return 0;
+            }
+        }
+
+        switch ($action) {
+            case 'modifyQty':
+                $commande = $this->getParentInstance();
+                if ($this->isLineText()) {
+                    $errors[] = 'Cette ligne est de type "Texte"';
+                    return 0;
+                }
+                if (!BimpObject::objectLoaded($commande)) {
+                    $errors[] = 'ID de la commande fournisseur absent';
+                    return 0;
+                }
+                if (!in_array((int) $commande->getData('fk_statut'), array(1, 2, 3, 4, 5))) {
+                    $errors[] = 'Le statut actuel de la commande fournisseur ne permet pas cette action';
+                    return 0;
+                }
+                return 1;
+        }
+
+        return parent::isActionAllowed($action, $errors);
+    }
+
     // Getters données: 
+
+    public function getMinQty()
+    {
+        return (float) $this->getReceivedQty();
+    }
 
     public function getFullQty()
     {
@@ -170,6 +205,16 @@ class Bimp_CommandeFournLine extends FournObjectLine
             );
         }
 
+        if ($this->isActionAllowed('modifyQty')) {
+            $buttons[] = array(
+                'label'   => 'Modifier les quantités',
+                'icon'    => 'fas_edit',
+                'onclick' => $this->getJsActionOnclick('modifyQty', array(), array(
+                    'form_name' => 'qty_modified'
+                ))
+            );
+        }
+
         return $buttons;
     }
 
@@ -214,12 +259,18 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $qty_modif = (float) $this->getData('qty_modif');
 
         // Qté totale
-        $html .= '<span class="bold bs-popover"' . BimpRender::renderPopoverData('Qtés commandées') . ' style="display: inline-block; padding: 3px 0; margin-right: 15px">';
+
+        if ($qty_modif) {
+            $popover .= 'Qtés totales (qtés commandées +/- qtés modifiées)';
+        } else {
+            $popover = 'Qtés commandées';
+        }
+        $html .= '<span class="bold bs-popover"' . BimpRender::renderPopoverData($popover) . ' style="display: inline-block; padding: 3px 0; margin-right: 15px">';
         $html .= BimpRender::renderIcon('fas_cart-arrow-down', 'iconLeft');
         $html .= $total_qty;
 
         if ($qty_modif) {
-            $html .= '<span class="important"> (' . ($qty_modif > 0 ? '+' : '') . $qty_modif . ')</span>';
+            $html .= '<span class="important"> (' . $this->qty . ($qty_modif > 0 ? '+' : '-') . abs($qty_modif) . ')</span>';
         }
         $html .= '</span>';
 
@@ -476,16 +527,17 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return BimpRender::renderAlerts('ID de la ligne de commande fournisseur absent', 'danger');
         }
         $decimals = $this->getQtyDecimals();
-        $min = (float) $this->getReceivedQty();
+        $min = (float) $this->getMinQty();
 
         return BimpInput::renderInput('qty', 'qty_modified', (float) $this->getFullQty(), array(
-                    'data' => array(
+                    'data'      => array(
                         'data_type' => 'number',
                         'min'       => $min,
                         'max'       => 'none',
                         'decimals'  => $decimals,
                         'unsigned'  => 0
-                    )
+                    ),
+                    'min_label' => 1
         ));
     }
 
@@ -1137,6 +1189,46 @@ class Bimp_CommandeFournLine extends FournObjectLine
         );
     }
 
+    public function actionModifyQty($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Mise à jour des quantités effectuée avec succès';
+
+        if (!isset($data['qty_modified'])) {
+            $errors[] = 'Nouvelles quantités de la ligne de commande fournisseur absentes';
+        } else {
+            $min = (float) $this->getMinQty();
+            if ((float) $data['qty_modified'] < $min) {
+                $msg = '';
+                if ($min > 1) {
+                    $msg .= $min . ' unités ont déjà été ajoutées à une réception';
+                } else {
+                    $msg .= $min . ' unité a déjà ajoutée à une réception';
+                }
+
+                $msg .= '<br/>Veuillez indiquer une quantité supérieure ou égale à ' . $min;
+                $errors[] = $msg;
+            } else {
+                $qty_modified = (float) $data['qty_modified'] - (float) $this->qty;
+                $errors = $this->updateField('qty_modif', $qty_modified);
+
+                if (!count($errors)) {
+                    $commande = $this->getParentInstance();
+
+                    if (BimpObject::objectLoaded($commande)) {
+                        $commande->checkReceptionStatus();
+                    }
+                }
+            }
+        }
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings
+        );
+    }
+
     // Overrides: 
 
     public function create(&$warnings = array(), $force_create = false)
@@ -1157,7 +1249,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
             $this->set('qty_modif', (float) $this->qty);
             $this->qty = 0;
-            $this->set('fk_statut', 0);
+            $commande_fourn->set('fk_statut', 0);
             $commande_fourn->dol_object->statut = 0;
         }
 
@@ -1166,6 +1258,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         if ($is_extra_line) {
             $commande_fourn->set('fk_statut', $current_commande_status);
             $commande_fourn->dol_object->statut = $current_commande_status;
+            $commande_fourn->checkReceptionStatus();
         }
 
         return $errors;

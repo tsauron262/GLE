@@ -25,6 +25,7 @@ class Bimp_Commande extends BimpComm
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
         2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
     );
+    public static $logistique_active_status = array(1, 2, 3);
 
     // Gestion des droits et autorisations: 
 
@@ -130,6 +131,15 @@ class Bimp_Commande extends BimpComm
 
     // Getters booléens:
 
+    public function isLogistiqueActive()
+    {
+        if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status)) {
+            return 1;
+        }
+
+        return 0;
+    }
+
     public function isFullyShipped()
     {
         if ($this->isLoaded()) {
@@ -224,7 +234,7 @@ class Bimp_Commande extends BimpComm
     {
         $buttons = parent::getDefaultListExtraButtons();
 
-        if ($this->isLoaded() && (int) $this->getData('fk_statut') > 0) {
+        if ($this->isLoaded() && $this->isLogistiqueActive()) {
             $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commande&id=' . $this->id;
             $buttons[] = array(
                 'label'   => 'Page logistique',
@@ -620,7 +630,7 @@ class Bimp_Commande extends BimpComm
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
             if ($line->isLoaded()) {
-                $available_qty = (float) $line->qty - (float) $line->getShippedQty();
+                $available_qty = (float) $line->getFullQty() - (float) $line->getShippedQty();
 
                 if ($id_shipment) {
                     $shipment_data = $line->getShipmentData($id_shipment);
@@ -759,7 +769,7 @@ class Bimp_Commande extends BimpComm
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
             if ($line->isLoaded()) {
-                $max_qty = (float) $line->qty - (float) $line->getBilledQty();
+                $max_qty = (float) $line->getFullQty() - (float) $line->getBilledQty();
                 if ($id_facture) {
                     $facture_data = $line->getFactureData($id_facture);
                     if (isset($facture_data['qty'])) {
@@ -908,8 +918,15 @@ class Bimp_Commande extends BimpComm
                             $comm_status = (int) $commande->getData('fk_statut');
 
                             $html .= '<td rowspan="' . count($comm_lines) . '">';
-                            $html .= $commande->getNomUrl(1, false, true, 'full') . '&nbsp;&nbsp;&nbsp;' . $commande->displayData('fk_statut');
-                            if ((int) $commande->getData('fk_statut') >= 3)
+                            $html .= $commande->getNomUrl(1, false, true, 'full') . '&nbsp;&nbsp;&nbsp;';
+                            if ((int) $commande->isLogistiqueActive()) {
+                                $url = DOL_URL_ROOT . '/bimplogistique/index.php?fc=commandeFourn&id=' . $commande->id;
+                                $html .= '<a href="' . $url . '" target="_blank">';
+                                $html .= 'Logistique' . BimpRender::renderIcon('fas_external-link-alt', 'iconRight');
+                                $html .= '</a>';
+                            }
+
+                            $html .= '<br/>' . $commande->displayData('fk_statut');
                             $html .= '</td>';
                             $fl = false;
                         }
@@ -1004,7 +1021,7 @@ class Bimp_Commande extends BimpComm
                         'selected'       => array()
                     );
                     $line_shipments = $line->getData('shipments');
-                    $line_total_qty = (int) $line->qty;
+                    $line_total_qty = (int) $line->getFullQty();
                     $remain_qty = $line_total_qty;
                     foreach ($line_shipments as $id_s => $shipment_data) {
                         if ((int) $id_s === $id_shipment) {
@@ -1113,6 +1130,7 @@ class Bimp_Commande extends BimpComm
     {
         $html = '';
 
+        // Nouvelle expédition:
         $expedition = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
 
         $onclick = $expedition->getJsLoadModalForm('default', 'Nouvelle expédition', array(
@@ -1126,6 +1144,7 @@ class Bimp_Commande extends BimpComm
         $html .= BimpRender::renderIcon('fas_shipping-fast', 'iconLeft') . 'Nouvelle expédition';
         $html .= '</button>';
 
+        // Nouvelle facture: 
         $onclick = $this->getJsActionOnclick('linesFactureQties', array(
             'new_facture'       => 1,
             'id_client'         => (int) $this->getData('fk_soc'),
@@ -1140,12 +1159,25 @@ class Bimp_Commande extends BimpComm
         $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture';
         $html .= '</button>';
 
-        $onclick = $this->getJsLoadModalView('logistique_equipments', 'Attribuer des équipements');
+        // Ajout ligne: 
+        $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeLine');
 
+        $onclick = $line->getJsLoadModalForm('line_forced', 'Ajout d\\\'une ligne de commande supplémentaire', array(
+            'fields' => array(
+                'id_obj' => (int) $this->id
+            )
+        ));
         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-        $html .= BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Attribuer des équipements';
+        $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter une ligne de commande';
         $html .= '</button>';
 
+        // Attribuer équipements:   
+//        $onclick = $this->getJsLoadModalView('logistique_equipments', 'Attribuer des équipements');
+//
+//        $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+//        $html .= BimpRender::renderIcon('fas_desktop', 'iconLeft') . 'Attribuer des équipements';
+//        $html .= '</button>';
+        // Statuts sélectionnés: 
         $items = array();
 
         $items[] = '<button class="btn btn-light-default" onclick="setSelectedCommandeLinesReservationsStatus($(this), ' . $this->id . ', 2);">' . BimpRender::renderIcon('fas_exclamation-circle', 'iconLeft') . 'A réserver</button>';
@@ -1180,6 +1212,7 @@ class Bimp_Commande extends BimpComm
         return $errors;
     }
 
+    // Traitements divers (obsolètes):
     public function addOrderLine($id_product, $qty = 1, $desc = '', $id_fournisseur_price = 0, $remise_percent = 0, $date_start = '', $date_end = '')
     {
         $errors = array();
@@ -2027,7 +2060,7 @@ class Bimp_Commande extends BimpComm
                     $hasInvoice = 1;
                 }
 
-                if ($billed_qty < (float) $line->qty) {
+                if ($billed_qty < (float) $line->getFullQty()) {
                     $isFullyInvoiced = 0;
                 }
             }
@@ -2064,7 +2097,7 @@ class Bimp_Commande extends BimpComm
                     $hasShipment = 1;
                 }
 
-                if ($shipped_qty < (float) $line->qty) {
+                if ($shipped_qty < (float) $line->getFullQty()) {
                     $isFullyShipped = 0;
                 }
             }

@@ -43,6 +43,15 @@ fields:
         label: Factures
         type: json
         
+    qty_modif: 
+        label: Qté modifiée
+        type: qty
+        min: none
+        max: none
+        decimals: 3
+        unsigned: 0
+        default_value: 0
+        
 forms: 
     commande_fourn: 
         title: Ajouter à une commande fournisseur
@@ -129,6 +138,14 @@ forms:
                   options: 
                       array: commandesFournisseurs
               depends_on: type_price,id_fourn_price,id_fourn
+              
+    qty_modified: 
+        rows: 
+            - custom: 1
+              label: Quantité totale commande
+              input_name: qty_modified
+              content: 
+                  callback: renderQtyModifiedInput
             
 views: 
     shipments: 

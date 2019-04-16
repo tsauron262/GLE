@@ -317,7 +317,7 @@ class BR_Reservation extends BimpObject
 //                                );
 //                            }
 //                        }
-                        break;
+//                        break;
 
                     // Si à réserver: 
                     case 2: // OK
@@ -523,15 +523,15 @@ class BR_Reservation extends BimpObject
             }
 
             // Retrait de la commande client: 
-            if (in_array($status, array(0, 2, 200, 303))) {
-                $buttons[] = array(
-                    'label'   => 'Retirer de la commande client',
-                    'icon'    => 'times-circle',
-                    'onclick' => $this->getJsActionOnclick('removeFromOrder', array(), array(
-                        'form_name' => 'remove'
-                    )),
-                );
-            }
+//            if (in_array($status, array(0, 2, 200, 303))) {
+//                $buttons[] = array(
+//                    'label'   => 'Retirer de la commande client',
+//                    'icon'    => 'times-circle',
+//                    'onclick' => $this->getJsActionOnclick('removeFromOrder', array(), array(
+//                        'form_name' => 'remove'
+//                    )),
+//                );
+//            }
         }
 
         return $buttons;

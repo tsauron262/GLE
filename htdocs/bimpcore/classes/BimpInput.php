@@ -18,7 +18,7 @@ class BimpInput
             global $db;
             $form = new Form($db);
         }
-        
+
         $extra_class = isset($options['extra_class']) ? $options['extra_class'] : '';
 
         switch ($type) {
@@ -134,8 +134,11 @@ class BimpInput
                     $html .= '<span class="qtyUp">';
                     $html .= '<i class="fa fa-plus"></i>';
                     $html .= '</span>';
+                    if (isset($options['min_label']) && $options['min_label']) {
+                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
+                    }
                     if (isset($options['max_label']) && $options['max_label']) {
-                        $html .= '<span class="inputHelp max_label">Max: ' . (isset($options['data']['max']) ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
                     }
                     $html .= '</div>';
 
@@ -165,8 +168,11 @@ class BimpInput
                     $html .= '<span class="qtyUp">';
                     $html .= '<i class="fa fa-plus"></i>';
                     $html .= '</span>';
+                    if (isset($options['min_label']) && $options['min_label']) {
+                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['min']) && $option['data']['min'] !== 'none') ? 'Min: ' . $options['data']['min'] : '') . '</span>';
+                    }
                     if (isset($options['max_label']) && $options['max_label']) {
-                        $html .= '<span class="inputHelp max_label">' . (isset($options['data']['max']) ? 'Max: ' . $options['data']['max'] : '') . '</span>';
+                        $html .= '<span class="inputHelp max_label">' . ((isset($options['data']['max']) && $option['data']['max'] !== 'none') ? 'Max: ' . $options['data']['max'] : '') . '</span>';
                     }
                     $html .= '</div>';
                 }

@@ -25,8 +25,7 @@ class commandeFournController extends BimpController
             return BimpRender::renderAlerts('Aucune commande fournisseur trouvée pour l\'ID ' . BimpTools::getValue('id', ''));
         }
 
-        $status = (int) $commande->getData('fk_statut');
-        if ($status < 3 || $status > 6) {
+        if (!$commande->isLogistiqueActive()) {
             return BimpRender::renderAlerts('Cette commande fournisseur doit avoir été commandée pour accéder à cet onglet');
         }
 
@@ -45,11 +44,11 @@ class commandeFournController extends BimpController
                         'title'   => 'Logistique produits / services',
                         'content' => $this->renderCommandesFournLinesLogisticTab($commande)
                     ),
-                    array(
-                        'id'      => 'invoices',
-                        'title'   => 'Factures / Avoirs',
-                        'content' => $this->renderFacturesTab($commande)
-                    ),
+//                    array(
+//                        'id'      => 'invoices',
+//                        'title'   => 'Factures / Avoirs',
+//                        'content' => $this->renderFacturesTab($commande)
+//                    ),
         ));
 
         return $html;

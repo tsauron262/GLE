@@ -1,3 +1,7 @@
+#NOTE IMPORTANTE: 
+#    NE PAS INTERCALER NE NOUVEAUX CHAMPS DANS LE FORM DEFAULT (PLUSIEURS EXTENSIONS UTILISENT DES CLES NU%ERIQUES) 
+#   AJOUTER DES NOUVEAUX CHAMPS EN LES PLACANT UNIQUEMENT A LA FIN DU FORMULAIRE
+
 positions: 1
 position_insert: after
 common_fields: 0
@@ -362,6 +366,71 @@ forms:
               depends_on: id_equipment
               show: 
                   callback: isParentEditable
+                  
+    line_forced: 
+        extends: default
+        force_edit: 1
+        rows: 
+            2: 
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - id_product
+                            - 0
+                            - ''
+                            - 1
+                          
+            3: 
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - pu_ht
+                            - 0
+                            - ''
+                            - 1
+              
+            4:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - tva_tx
+                            - 0
+                            - ''
+                            - 1
+              
+            5:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - qty
+                            - 0
+                            - ''
+                            - 1
+                            
+            6:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - id_fourn_price
+                            - 0
+                            - ''
+                            - 1
+              
+            11:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - desc
+                            - 0
+                            - ''
+                            - 1
+        
 
 lists_cols: 
     position: 

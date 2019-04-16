@@ -23,7 +23,9 @@ class BC_Input extends BimpComponent
             'allow_custom' => array('data_type' => 'bool', 'default' => 1)
         ),
         'qty'                         => array(
-            'step' => array('data_type' => 'float', 'default' => 1)
+            'step'      => array('data_type' => 'float', 'default' => 1),
+            'min_label' => array('data_type' => 'bool', 'default' => 0),
+            'max_label' => array('data_type' => 'bool', 'default' => 0),
         ),
         'time'                        => array(
             'display_now' => array('data_type' => 'bool', 'default' => 0)
@@ -232,9 +234,10 @@ class BC_Input extends BimpComponent
                 $options['allow_custom'] = (int) (isset($this->params['allow_custom']) ? $this->params['allow_custom'] : 1);
             case 'qty':
                 $options['data'] = array();
-                if ($this->params['type'] === 'qty') {
-                    $options['step'] = $this->params['step'];
-                }
+                $options['step'] = isset($this->params['step']) ? $this->params['step'] : 1;
+                $options['min_label'] = isset($this->params['min_label']) ? $this->params['min_label'] : 0;
+                $options['max_label'] = isset($this->params['max_label']) ? $this->params['max_label'] : 0;
+                
                 $min = 'none';
                 $max = 'none';
                 $decimals = 0;

@@ -681,7 +681,7 @@ class BL_CommandeShipment extends BimpObject
                     'in' => array(ObjectLine::LINE_FREE, ObjectLine::LINE_PRODUCT)
                 )
             )) as $line) {
-                if ((float) $line->qty > (float) $line->getShippedQty()) {
+                if ((float) $line->getFullQty() > (float) $line->getShippedQty()) {
                     $lines[] = $line;
                 }
             }
@@ -701,7 +701,7 @@ class BL_CommandeShipment extends BimpObject
 
                 $html .= '<tbody class="receptions_rows">';
                 foreach ($lines as $line) {
-                    $max = (float) $line->qty - (float) $line->getShippedQty();
+                    $max = (float) $line->getFullQty() - (float) $line->getShippedQty();
                     $decimals = 3;
                     $equipments = array();
                     $product = $line->getProduct();
@@ -785,7 +785,7 @@ class BL_CommandeShipment extends BimpObject
                     )
                 )) as $line) {
                     $shipment_data = $line->getShipmentData($this->id);
-                    if ((float) $shipment_data['qty'] > 0 || ((float) $line->qty > (float) $line->getShippedQty())) {
+                    if ((float) $shipment_data['qty'] > 0 || ((float) $line->getFullQty() > (float) $line->getShippedQty())) {
                         $lines[] = $line;
                     }
                 }
@@ -820,7 +820,7 @@ class BL_CommandeShipment extends BimpObject
                         $html .= '<td>' . $line->displayLineData('desc') . '</td>';
                         $html .= '<td>';
                         if ($edit) {
-                            $max = ((float) $line->qty - (float) $line->getShippedQty()) + (float) $shipment_data['qty'];
+                            $max = ((float) $line->getFullQty() - (float) $line->getShippedQty()) + (float) $shipment_data['qty'];
                             $decimals = 3;
                             if (BimpObject::objectLoaded($product)) {
                                 if ((int) $product->getData('fk_product_type') === 0) {
@@ -971,7 +971,7 @@ class BL_CommandeShipment extends BimpObject
                 $qty = isset($shipment_data['qty']) ? (float) $shipment_data['qty'] : 0;
             }
 
-            $max = (float) $line->qty - (float) $line->getBilledQty();
+            $max = (float) $line->getFullQty() - (float) $line->getBilledQty();
             if ($id_facture) {
                 $max += (float) $facture_data['qty'];
             }
@@ -1260,7 +1260,7 @@ class BL_CommandeShipment extends BimpObject
 
                         $qty = (float) isset($line_data['qty']) ? $line_data['qty'] : 0;
                         if ($qty >= 0) {
-                            $available_qty = (float) $line->qty - (float) $line->getShippedQty() + (float) $shipment_data['qty'];
+                            $available_qty = (float) $line->getFullQty() - (float) $line->getShippedQty() + (float) $shipment_data['qty'];
                             if ($qty > $available_qty) {
                                 $errors[] = 'Seules ' . $available_qty . ' unité(s) sont disponibles.<br/>Veuillez retirer ' . ($qty - $available_qty) . ' unité(s)';
                             } else {
@@ -1518,7 +1518,7 @@ class BL_CommandeShipment extends BimpObject
 
         foreach ($lines as $line) {
             $qty = BimpTools::getValue('line_' . $line->id . '_qty', 0);
-            $available_qty = (float) $line->qty - (float) $line->getShippedQty();
+            $available_qty = (float) $line->getFullQty() - (float) $line->getShippedQty();
             if ($qty > $available_qty) {
                 $errors[] = 'Ligne n°' . $line->getData('position') . ': il ne reste que ' . $available_qty . ' unité(s) à expédiier.<br/>Veuillez retirer ' . ($qty - $available_qty) . ' unité(s)';
             } else {

@@ -258,7 +258,7 @@ class BL_CommandeFournReception extends BimpObject
         $html .= '</td>';
 
         $html .= '<td>';
-        $onclick = '$(this).parent(\'td\').parent(\'tr\').remove();';
+        $onclick = '$(this).popover(\'hide\'); $(this).parent(\'td\').parent(\'tr\').remove();';
         $html .= BimpRender::renderRowButton('Suppprimer', 'fas_trash-alt', $onclick);
         $html .= '</td>';
 
@@ -359,9 +359,13 @@ class BL_CommandeFournReception extends BimpObject
                 continue;
             }
 
-            $has_lines = true;
-
             $reception_data = $line->getReceptionData($this->id);
+            
+            if (!$edit && !(float) $reception_data['qty']) {
+                continue;
+            }
+            
+            $has_lines = true;
             $isSerialisable = false;
 
             $product = $line->getProduct();

@@ -42,8 +42,8 @@ forms:
     qty_modified: 
         rows: 
             - custom: 1
-              label: Quantité
-              input_name: qty
+              label: Quantité totale reçue
+              input_name: qty_modified
               content: 
                   callback: renderQtyModifiedInput
         

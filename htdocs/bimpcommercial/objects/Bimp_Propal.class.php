@@ -952,7 +952,7 @@ class Bimp_Propal extends BimpComm
     
     public function iAmAdminRedirect() {
         global $user;
-        if(in_array($user->id, array(60)))
+        if(in_array($user->id, array(60,282)))
             return true;
         return parent::iAmAdminRedirect();
     }

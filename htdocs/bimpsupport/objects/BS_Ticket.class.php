@@ -619,4 +619,12 @@ class BS_Ticket extends BimpObject
         return 0;
         
     }
+    
+    public function it_is_a_customer_request() {
+        return ($this->getData('id_user_client') == 0) ? 0 : 1;
+    }
+    
+    public function it_is_not_a_customer_requets() {
+        return ($this->it_is_a_customer_request() == 0) ? 1 : 0;
+    }
 }

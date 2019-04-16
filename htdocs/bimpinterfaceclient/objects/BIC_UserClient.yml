@@ -120,6 +120,9 @@ lists:
         extends: default
         edit_form: editFull
         add_form_name: editFull
+        add_form_values:
+            fields:
+                role: 1
         cols:
             attached_societe:
                 field: attached_societe
@@ -190,6 +193,8 @@ forms:
             - field: role
             - field: status
             - field: lang
+              show:
+                  callback: showLang
             - field: attached_societe
               hidden: 1
             - custom: 1
@@ -206,8 +211,16 @@ forms:
             - field: role
             - field: status
             - field: lang
+              show:
+                  callback: showLang
             - field: attached_societe
             - field: renew_required
+            - custom: 1
+              label: Envoyer le mot de passe par mail ?
+              input_name: send_mail
+              input:
+                  type: toggle
+              value: 1
         
 cards:
     default:

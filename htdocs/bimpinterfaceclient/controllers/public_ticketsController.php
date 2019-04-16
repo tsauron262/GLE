@@ -5,7 +5,6 @@ class public_ticketsController extends Bimp_user_client_controller {
         global $userClient;
         $html = '';
         
-        $html .= '<center><h4></h4></center>';
         $html .= BimpRender::renderAlerts('<b>Pour créer un ticket support, merci de sélectionner un contrat sur <a href="?">la page d\'accueil</a></b>', 'warning', false);
         
         $html .= '<div class="page_content container-fluid">';

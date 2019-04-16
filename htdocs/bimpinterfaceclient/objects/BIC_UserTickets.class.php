@@ -8,8 +8,10 @@ class BIC_UserTickets extends BS_Ticket {
     public function getListFiltersInterface($filter_send = null) {
         global $userClient;
         
+        if(BimpTools::getContext() == 'public'){
+            $filter = Array(Array('name' => 'id_client','filter' => $userClient->getData('attached_societe')));
+        }
         
-        $filter = Array(Array('name' => 'id_client','filter' => $userClient->getData('attached_societe')));
         if($filter_send == 'contrat') {
             $filter = array_merge($filter, Array(Array('name' => 'id_contrat','filter' => $_REQUEST['id'])));
         }
@@ -24,7 +26,10 @@ class BIC_UserTickets extends BS_Ticket {
 
     public function userClient($field) {
         global $userClient;
-        return $userClient->getData($field);
+        if(isset($userClient)){
+            return $userClient->getData($field);
+        }
+        
     }
 
     public function currentContrat() {

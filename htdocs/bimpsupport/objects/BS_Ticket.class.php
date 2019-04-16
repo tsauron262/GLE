@@ -206,7 +206,7 @@ class BS_Ticket extends BimpObject
         $buttons = array();
         if ($this->isLoaded()) {
             $openInters = $this->getOpenIntersArray();
-            if (count($openInters)) {
+            if (count($openInters) && BimpTools::getContext() == 'private') {
                 $buttons[] = array(
                     'label'   => 'Fermer des interventions',
                     'icon'    => 'fas_times',

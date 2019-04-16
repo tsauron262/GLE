@@ -39,7 +39,9 @@ class BIC_UserTickets extends BS_Ticket {
     public function create(&$warnings, $force_create = false) {
         global $userClient;
         if (parent::create($warnings, $force_create) > 1) {
-            if (BimpTools::getValue('notif_email')) {
+            $this->updateField('impact_demande_client', BimpTools::getValue('impact'));
+            $this->updateField('priorite_demande_client', BimpTools::getValue('priorite'));
+            $this->updateField('cover', 1);
                 $liste_destinataires = $userClient->getData('email');
                 $listUser = $userClient->getList(array('attached_societe' => $this->getData('attached_societe')));
                 foreach ($listUser as $user) {
@@ -47,8 +49,19 @@ class BIC_UserTickets extends BS_Ticket {
                         $liste_destinataires .= ', ' . $user['email'];
                     }
                 }
-                mailSyn2('Création Ticket Support BIMP N°' . $this->getData('ticket_number'), $liste_destinataires, 'noreply@bimp.fr', 'Notification email');
-            }
+                $prio = 'Non Urgent'; $prio = ($this->getData('priorite') == 2) ? 'Urgent' : $prio; $prio = ($this->getData('priorite') == 3) ? 'Très Urgent' : $prio;
+                $impact = 'Faible'; $impact = ($this->getData('priorite') == 2) ? 'Moyen' : $impact; $impact = ($this->getData('priorite') == 3) ? 'Haut' : $impact;
+                $tmpContrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
+                mailSyn2('BIMP-CLIENT : Création Ticket Support N°' . $this->getData('ticket_number'), $liste_destinataires, 'noreply@bimp.fr',
+                        '<h3>Ticket support numéro : '.$this->getData('ticket_number').'</h3>'
+                        . 'Sujet du ticket : ' . $this->getData('sujet') . '<br />'
+                        . 'Demandeur : ' . $userClient->getData('email') . '<br />'
+                        . 'Contact dans la société : ' . $this->getData('contact_in_soc') . '<br />'
+                        . 'Contrat : ' . $tmpContrat->getData('ref') . '<br />'
+                        . 'Prioritée : ' . $prio . '<br />'
+                        . 'Impact : ' . $impact . '<br />'
+                        );
+                $tmpContrat = null;
         }
     }
 

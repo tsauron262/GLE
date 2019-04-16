@@ -226,11 +226,6 @@ class Bimp_Commande extends BimpComm
         return $conf->commande->dir_output;
     }
 
-    public function getListFilters()
-    {
-        return array();
-    }
-
     public function getActionsButtons()
     {
         global $conf, $langs, $user;

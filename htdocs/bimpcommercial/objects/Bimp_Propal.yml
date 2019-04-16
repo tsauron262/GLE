@@ -361,7 +361,9 @@ lists:
             commercial:
             total_ttc: 
         
+        
     user: 
+        title: Mes propositions commerciales
         extends: default
         cols: 
             commercial: unset

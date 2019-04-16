@@ -285,11 +285,6 @@ class Bimp_Facture extends BimpComm
         return $this->getData('model_pdf');
     }
 
-    public function getListFilters()
-    {
-        return array();
-    }
-
     public function getActionsButtons()
     {
         global $conf, $langs, $user;

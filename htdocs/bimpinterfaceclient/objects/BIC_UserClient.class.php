@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 
 class BIC_UserClient extends BimpObject {
 
@@ -280,6 +281,30 @@ class BIC_UserClient extends BimpObject {
           'errors' => array(),
             'warnings' => array()
         );
+    }
+    
+    public function get_dest($type) {
+        $return = "";
+        switch ($type) {
+            case 'commerciaux':
+                $ListCommerciaux = $this->db->getRows('societe_commerciaux', 'fk_soc = ' . $this->getData('attached_societe'));
+                foreach($ListCommerciaux as $commercial) {
+                    $instanceComm = new User($this->db->db);
+                    $instanceComm->fetch($commercial->fk_user);
+                    $return .= ', ' . $instanceComm->email;
+                    $instanceComm = null;
+                }
+                break;
+            case 'admin':
+                $listUser = $this->getList(array('attached_societe' => $this->getData('attached_societe')));
+                foreach ($listUser as $user) {
+                    if ($user['id'] != $this->id && $user['role'] == 1) {
+                        $return .= ', ' . $user['email'];
+                    }
+                }
+                break;
+        }
+        return $return;
     }
 
     public function create(&$warnings = array(), $force_create = false) {

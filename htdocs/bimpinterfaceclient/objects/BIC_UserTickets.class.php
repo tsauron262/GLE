@@ -43,12 +43,8 @@ class BIC_UserTickets extends BS_Ticket {
             $this->updateField('priorite_demande_client', BimpTools::getValue('priorite'));
             $this->updateField('cover', 1);
                 $liste_destinataires = $userClient->getData('email');
-                $listUser = $userClient->getList(array('attached_societe' => $this->getData('attached_societe')));
-                foreach ($listUser as $user) {
-                    if ($user['id'] != $userClient->getData('id') && $user['role'] == 1) {
-                        $liste_destinataires .= ', ' . $user['email'];
-                    }
-                }
+                $liste_destinataires .= $userClient->get_dest('admin');
+                $liste_destinataires .= $userClient->get_dest('commerciaux');
                 $prio = 'Non Urgent'; $prio = ($this->getData('priorite') == 2) ? 'Urgent' : $prio; $prio = ($this->getData('priorite') == 3) ? 'Très Urgent' : $prio;
                 $impact = 'Faible'; $impact = ($this->getData('priorite') == 2) ? 'Moyen' : $impact; $impact = ($this->getData('priorite') == 3) ? 'Haut' : $impact;
                 $tmpContrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));

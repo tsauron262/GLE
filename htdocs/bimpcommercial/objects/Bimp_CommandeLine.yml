@@ -87,7 +87,8 @@ forms:
                   type: select
                   options: 
                       array: productFournisseursPrices
-              value: 0
+              value: 
+                  prop: id_fourn_price
               display_if: 
                   field_name: type_price
                   show_values: 1
@@ -180,6 +181,7 @@ lists:
             callback: isCreatable
         edit_btn: 
             callback: isParentEditable
+            
     logistique:
         extends: default
         title: Logistique produits / services

@@ -915,6 +915,40 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     // Màj statuts.
                     $line->addReceivedQty((int) $reception_data['qty'], $new_status);
                 }
+
+                // Mise à jour du prix d'achat moyen pondéré pour la ligne de commande client si non sérialisable: 
+                if (!$isSerialisable) {
+                    $pa_total = 0;
+                    $pa_qty = 0;
+
+                    if (isset($reception_data['qties'])) {
+                        foreach ($reception_data['qties'] as $qty_data) {
+                            if (isset($qty_data['pu_ht']) && isset($qty_data['qty'])) {
+                                $pa_total += ((float) $qty_data['pu_ht'] * (float) $qty_data['qty']);
+                                $pa_qty += (float) $qty_data['qty'];
+                            }
+                        }
+                    }
+
+                    if ($pa_qty < (float) $reception_data['qty']) {
+                        $pa_total += (((float) $reception_data['qty'] - $pa_qty) * (float) $this->pu_ht);
+                    }
+
+                    if ((float) $reception_data['qty'] > 0) {
+                        $pa_moyen = $pa_total / (float) $reception_data['qty'];
+                    } else {
+                        $pa_moyen = 0;
+                    }
+
+                    $line_qty = (float) $line->getFullQty();
+                    if ($pa_moyen && $line_qty) {
+                        $new_line_pa = (float) ((((float) $line->pa_ht * ($line_qty - (float) $reception_data['qty'])) + ($pa_moyen * (float) $reception_data['qty'])) / $line_qty);
+
+                        if ($new_line_pa !== (float) $line->pa_ht) {
+                            $line->setPrixAchat($new_line_pa);
+                        }
+                    }
+                }
             }
         }
 
@@ -931,7 +965,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $up_errors = array_merge($up_errors, $up_warnings);
 
         if (count($up_errors)) {
-            $errors[] = BimpTools::getMsgFromArray($up_errors, 'Des erreurs sont survenues lors de la mise à jour de la ligne de commande fournisseur');
+            $errors[] = BimpTools::getMsgFromArray($up_errors, 'Erreurs lors de la mise à jour de la ligne de commande fournisseur');
         }
 
         return $errors;
@@ -1045,6 +1079,35 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                             if ($product->dol_object->correct_stock($user, $id_entrepot, (int) $reception_data['qty'], 1, $stock_label, $code_mvt) <= 0) {
                                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($product->dol_object), 'Echec de la correction du stock');
+                            }
+                        }
+                    }
+
+                    // Mise à jour du prix d'achat moyen pondéré pour la ligne de commande client si non sérialisable: 
+
+                    if ($id_commande_client_line) {
+                        $pa_total = 0;
+                        $pa_qty = 0;
+
+                        if (isset($reception_data['qties'])) {
+                            foreach ($reception_data['qties'] as $qty_data) {
+                                if (isset($qty_data['pu_ht']) && isset($qty_data['qty'])) {
+                                    $pa_total += ((float) $qty_data['pu_ht'] * (float) $qty_data['qty']);
+                                    $pa_qty += (float) $qty_data['qty'];
+                                }
+                            }
+                        }
+
+                        if ($pa_qty < (float) $reception_data['qty']) {
+                            $pa_total += (((float) $reception_data['qty'] - $pa_qty) * (float) $this->pu_ht);
+                        }
+
+                        $line_qty = (float) $commande_line->getFullQty();
+                        if ($pa_total && $line_qty) {
+                            $new_line_pa = (float) ((((float) $commande_line->pa_ht * $line_qty) - $pa_total) / ($line_qty - (float) $reception_data['qty']));
+
+                            if ($new_line_pa !== (float) $commande_line->pa_ht) {
+                                $commande_line->setPrixAchat($new_line_pa);
                             }
                         }
                     }

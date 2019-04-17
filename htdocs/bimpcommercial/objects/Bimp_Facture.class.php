@@ -1105,7 +1105,7 @@ class Bimp_Facture extends BimpComm
         if ($this->isLoaded()) {
             $type = (int) $this->getData('type');
             $mult = 1;
-            $title = 'Paiements effectuées';
+            $title = 'Paiements effectués';
 
 
             $rows = $this->db->getRows('paiement_facture', '`fk_facture` = ' . (int) $this->id, null, 'array');

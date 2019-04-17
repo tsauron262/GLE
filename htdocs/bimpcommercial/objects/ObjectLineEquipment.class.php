@@ -9,7 +9,7 @@ class ObjectLineEquipment extends BimpObject
 
         if ($this->isLoaded()) {
             $objectLine = $this->getParentInstance();
-            if (BimpObject::objectLoaded($objectLine)) {
+            if (BimpObject::objectLoaded($objectLine) && $objectLine->isEditable()) {
                 $onclick = $objectLine->getJsActionOnclick('attributeEquipment', array(
                     'id_line_equipment' => (int) $this->id,
                     'id_equipment'      => (int) $this->getData('id_equipment'),

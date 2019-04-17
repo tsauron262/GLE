@@ -1985,6 +1985,11 @@ class Bimp_Commande extends BimpComm
                                 $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création d\'une remise pour la ligne de facture d\'ID ' . $fac_line->id);
                             }
                         }
+                        
+                        $fac_line->set('editable', 0);
+                        $fac_line->set('deletable', 0);
+                        $fac_line_warnings = array();
+                        $fac_line->update($fac_line_warnings, true);
                     }
                 } else {
                     $update_line = true;
@@ -2016,7 +2021,7 @@ class Bimp_Commande extends BimpComm
                             $fac_line->qty = (float) $line_qty;
 
                             $fac_line_warnings = array();
-                            $fac_line_errors = $fac_line->update($fac_line_warnings);
+                            $fac_line_errors = $fac_line->update($fac_line_warnings, true);
                             $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
 
                             if (count($fac_line_errors)) {

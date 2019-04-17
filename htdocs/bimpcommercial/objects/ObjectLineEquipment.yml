@@ -55,8 +55,6 @@ lists:
         sort_field: id
         sort_way: asc
         n: 0
-        edit_btn: 
-            callback: isEditable
         update_btn: 
             callback: isEditable
         extra_btn: 

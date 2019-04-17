@@ -2204,6 +2204,43 @@ class Bimp_CommandeLine extends ObjectLine
         return $this->update($warnings, true);
     }
 
+    // Traitements divers: 
+
+    public function setPrixAchat($pa_ht)
+    {
+        $errors = array();
+
+        if ($this->isLoaded()) {
+            if ((float) $this->pa_ht !== (float) $pa_ht) {
+                $this->pa_ht = $pa_ht;
+                $this->id_fourn_price = 0;
+
+                $errors = $this->forceUpdateLine();
+
+                $facture_line = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureLine');
+                $factures_lines_list = $facture_line->getList(array(
+                    'linked_object_name' => 'commande_line',
+                    'linked_id_object'   => (int) $this->id
+                        ), null, null, 'id', 'asc', 'array', array('id'));
+                
+                if (!is_null($factures_lines_list)) {
+                    foreach ($factures_lines_list as $item) {
+                        $facture_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', (int) $item['id']);
+                        if (BimpObject::objectLoaded($facture_line)) {
+                            $facture_line->pa_ht = $pa_ht;
+                            $facture_line->id_fourn_price = 0;
+                            $facture_line->forceUpdateLine();
+                        }
+                    }
+                }
+            }
+        } else {
+            $errors[] = 'ID de la ligne de commande client absent. Mise à jour du prix d\'achat impossible';
+        }
+
+        return $errors;
+    }
+
     // Actions:
 
     public function actionSaveShipments($data, &$success)

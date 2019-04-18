@@ -3324,6 +3324,25 @@ class BimpObject extends BimpCache
                     }
                 }
                 return 0;
+            } else {
+                if (!empty($bimpObjectFields)) {
+                    $fields = array();
+                    foreach ($bimpObjectFields as $field_name => $value) {
+                        $fields[] = $field_name;
+                    }
+
+                    $up_result = $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $this->id);
+
+                    if ($up_result <= 0) {
+                        $msg = 'Echec de la mise à jour des champs additionnels';
+                        $sql_errors = $this->db->db->lasterror;
+                        if ($sql_errors) {
+                            $msg .= ' - Erreur SQL: ' . $sql_errors;
+                        }
+
+                        $errors[] = $msg;
+                    }
+                }
             }
             return 1;
         }

@@ -21,8 +21,8 @@ sections:
             logistic: 
                 label: Logistique
                 show: 
-                    field_value: 
-                        field_name: fk_statut
+                    callback: 
+                        method: isLogistiqueActive
                         object: commande
                 module: bimplogistique
                 controller: commande

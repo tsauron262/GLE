@@ -331,6 +331,23 @@ class BimpTools
             }
         }
     }
+    
+    public static function getObjectFilePath($object, $full_path = false)
+    {
+        if (is_object($object)) {
+            $refl = new ReflectionClass($object);
+            $file = $refl->getFileName();
+            
+            if (!$full_path) {
+                $file = preg_replace('/^.*htdocs\/(.*)$/', '$1', $file);
+            }
+            
+            unset($refl);
+            return $file;
+        }
+        
+        return '';
+    }
 
     // Gestion générique des objets: 
 

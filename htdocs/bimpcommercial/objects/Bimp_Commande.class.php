@@ -15,6 +15,14 @@ class Bimp_Commande extends BimpComm
         2  => array('label' => 'Acceptée', 'icon' => 'check-circle', 'classes' => array('success')),
         3  => array('label' => 'Fermée', 'icon' => 'times', 'classes' => array('danger')),
     );
+    public static $logistique_status = array(
+        0 => array('label' => 'A traiter', 'icon' => 'fas_exclamation-circle', 'classes' => array('important')),
+        1 => array('label' => 'En cours de traitement', 'icon' => 'fas_cogs', 'classes' => array('info')),
+        2 => array('label' => 'Traitée', 'icon' => 'fas_check', 'classes' => array('success')),
+        3 => array('label' => 'Compléte', 'icon' => 'fas_check', 'classes' => array('success')),
+        4 => array('label' => 'En attente', 'icon' => 'fas_hourglass-start', 'classes' => array('warning')),
+        5 => array('label' => 'A supprimer', 'icon' => 'fas_exclamation-triangle', 'classes' => array('danger')),
+    );
     public static $shipment_status = array(
         0 => array('label' => 'Non expédiée', 'icon' => 'fas_shipping-fast', 'classes' => array('danger')),
         1 => array('label' => 'Expédiée partiellement', 'icon' => 'fas_shipping-fast', 'classes' => array('warning')),
@@ -76,6 +84,9 @@ class Bimp_Commande extends BimpComm
             case 'reopen':
             case 'duplicate':
                 return (int) $this->can("create");
+
+            case 'processLogitique':
+                return 1;
         }
         return 1;
     }
@@ -125,6 +136,17 @@ class Bimp_Commande extends BimpComm
                     return 0;
                 }
                 return 1;
+
+            case 'processLogitique':
+                if (!in_array($status, self::$logistique_active_status)) {
+                    $errors[] = 'La logistique n\'est pas active pour cette commande';
+                    return 0;
+                }
+                if ((int) $this->getData('logistique_status') > 0) {
+                    $errors[] = 'La logistique est déjà prise en charge pour cette commande';
+                    return 0;
+                }
+                return 1;
         }
         return parent::isActionAllowed($action, $errors);
     }
@@ -133,7 +155,7 @@ class Bimp_Commande extends BimpComm
 
     public function isLogistiqueActive()
     {
-        if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status)) {
+        if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status) && (int) $this->getData('logistique_status') > 0) {
             return 1;
         }
 
@@ -399,6 +421,27 @@ class Bimp_Commande extends BimpComm
 //                print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $this->dol_object->id . '&amp;action=shipped">' . $langs->trans('ClassifyShipped') . '</a></div>';
 //            }
 //
+            // Prendre en charge logistique:
+            if ($this->isActionAllowed('processLogitique')) {
+                if ($this->canSetAction('processLogitique')) {
+                    $buttons[] = array(
+                        'label'   => 'Prendre en charge logistique',
+                        'icon'    => 'fas_truck-loading',
+                        'onclick' => $this->getJsActionOnclick('processLogitique', array(), array(
+                            'confirm_msg' => 'Veuillez confirmer la prise en charge de la logistique pour cette commande'
+                        ))
+                    );
+                } else {
+                    $buttons[] = array(
+                        'label'    => $langs->trans('AddIntervention'),
+                        'icon'     => 'plus-circle',
+                        'onclick'  => '',
+                        'disabled' => 1,
+                        'popover'  => 'Vous n\'avez pas la permission'
+                    );
+                }
+            }
+
             // Cloner
             if ($this->canSetAction('duplicate')) {
                 $buttons[] = array(
@@ -536,6 +579,16 @@ class Bimp_Commande extends BimpComm
                 $html .= '</div>';
             }
 
+            if ((int) $this->getData('id_user_resp')) {
+                $user_resp = $this->getChildObject('user_resp');
+                if (BimpObject::objectLoaded($user_resp)) {
+                    $html .= '<div class="object_header_infos">';
+                    $html .= 'Responsable logistique: ';
+                    $html .= $user_resp->dol_object->getNomUrl(1);
+                    $html .= '</div>';
+                }
+            }
+
             $client = $this->getChildObject('client');
             if (BimpObject::objectLoaded($client)) {
                 $html .= '<div style="margin-top: 10px">';
@@ -553,6 +606,10 @@ class Bimp_Commande extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
+            if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status)) {
+                $html .= '<br/>Logistique:';
+                $html .= $this->displayData('logistique_status');
+            }
             if ((int) $this->getData('shipment_status') > 0) {
                 $html .= '<br/>';
                 $html .= $this->displayData('shipment_status');
@@ -1213,6 +1270,7 @@ class Bimp_Commande extends BimpComm
     }
 
     // Traitements divers (obsolètes):
+
     public function addOrderLine($id_product, $qty = 1, $desc = '', $id_fournisseur_price = 0, $remise_percent = 0, $date_start = '', $date_end = '')
     {
         $errors = array();
@@ -1985,7 +2043,7 @@ class Bimp_Commande extends BimpComm
                                 $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création d\'une remise pour la ligne de facture d\'ID ' . $fac_line->id);
                             }
                         }
-                        
+
                         $fac_line->set('editable', 0);
                         $fac_line->set('deletable', 0);
                         $fac_line_warnings = array();
@@ -2049,43 +2107,13 @@ class Bimp_Commande extends BimpComm
         return $errors;
     }
 
-    public function checkInvoiceStatus()
+    // Checks statuts: 
+
+    public function checkLogistiqueStatus()
     {
-        if ($this->isLoaded()) {
-            $lines = $this->getLines('not_text');
-
-            $hasInvoice = 0;
-            $isFullyInvoiced = 1;
-
-            $current_status = (int) $this->getInitData('invoice_status');
-
-            foreach ($lines as $line) {
-                $billed_qty = (float) $line->getBilledQty(null, true);
-                if ($billed_qty > 0) {
-                    $hasInvoice = 1;
-                }
-
-                if ($billed_qty < (float) $line->getFullQty()) {
-                    $isFullyInvoiced = 0;
-                }
-            }
-
-            if ($isFullyInvoiced) {
-                $new_status = 2;
-            } elseif ($hasInvoice) {
-                $new_status = 1;
-            } else {
-                $new_status = 0;
-            }
-
-            if ($new_status !== $current_status) {
-                $this->updateField('invoice_status', $new_status);
-            }
-        }
+        // todo
     }
-
-    // Traitements des expéditions: 
-
+    
     public function checkShipmentStatus()
     {
         if ($this->isLoaded()) {
@@ -2117,6 +2145,41 @@ class Bimp_Commande extends BimpComm
 
             if ($new_status !== $current_status) {
                 $this->updateField('shipment_status', $new_status);
+            }
+        }
+    }
+    
+    public function checkInvoiceStatus()
+    {
+        if ($this->isLoaded()) {
+            $lines = $this->getLines('not_text');
+
+            $hasInvoice = 0;
+            $isFullyInvoiced = 1;
+
+            $current_status = (int) $this->getInitData('invoice_status');
+
+            foreach ($lines as $line) {
+                $billed_qty = (float) $line->getBilledQty(null, true);
+                if ($billed_qty > 0) {
+                    $hasInvoice = 1;
+                }
+
+                if ($billed_qty < (float) $line->getFullQty()) {
+                    $isFullyInvoiced = 0;
+                }
+            }
+
+            if ($isFullyInvoiced) {
+                $new_status = 2;
+            } elseif ($hasInvoice) {
+                $new_status = 1;
+            } else {
+                $new_status = 0;
+            }
+
+            if ($new_status !== $current_status) {
+                $this->updateField('invoice_status', $new_status);
             }
         }
     }
@@ -2395,6 +2458,30 @@ class Bimp_Commande extends BimpComm
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionProcessLogitique($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Prise en charge de la logistique effectuée avec succès';
+
+        global $user;
+
+        if (!BimpObject::objectLoaded($user)) {
+            $errors[] = 'Aucun utilisateur connecté';
+        } else {
+            $this->set('id_user_resp', (int) $user->id);
+            $this->set('logistique_status', 1);
+
+            $errors = $this->update($warnings);
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => 'bimp_reloadPage();'
         );
     }
 

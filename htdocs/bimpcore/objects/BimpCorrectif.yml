@@ -1,0 +1,75 @@
+table: bimpcore_correctif
+common_fields: 0
+
+labels: 
+    name: correctif
+                    
+fields: 
+    obj_type: 
+        label: Type d'objet
+    obj_module: 
+        label: Module
+    obj_name:
+        label: Objet
+    id_obj:
+        label: ID Objet
+        type: id
+    field: 
+        label: Champ
+        type: string
+    value:
+        label: Valeur
+        type: float
+    date: 
+        label: Date
+        type: datetime
+    id_user: 
+        label: Utilisateur
+        type: id_object
+        object: user
+    done: 
+        label: Traité
+        type: bool
+        defaut_value: 0
+        
+lists_cols: 
+    object: 
+        label: Objet
+        value: 
+            callback: displayObject
+    field: 
+        field: field
+    value: 
+        field: value
+    date: 
+        field: date
+    user: 
+        field: id_user
+        display: nom_url
+    done: 
+        field: done
+        edit: 1
+            
+    
+            
+lists:
+    default:
+        title: Correctifs
+        checkboxes: 1
+        bulk_actions: 
+            - label: Supprimer les correctifs sélectionnés
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        delete_btn: 1
+        update_btn: 1
+        sort_field: id
+        sort_way: desc
+        n: 10
+        cols:
+            object: 
+            field: 
+            value: 
+            date: 
+            user: 
+            done: 

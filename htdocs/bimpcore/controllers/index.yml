@@ -18,6 +18,10 @@ objects:
         instance: 
             bimp_object: Bimp_Product
             
+    correctifs: 
+        instance: 
+            bimp_object: BimpCorrectif
+            
 sections:
     - type: tabs
       tabs: 
@@ -51,4 +55,12 @@ sections:
                   list: 
                       panel: 1
                       object: products
+                      name: default
+        correctifs: 
+            label: Correctifs
+            sections: 
+                - type: list
+                  list: 
+                      panel: 1
+                      object: correctifs
                       name: default

@@ -90,6 +90,12 @@ objects:
             values:
                 fields: 
                     parent_object_name: Bimp_Commande
+                    
+    user_resp: 
+        extends: user
+        instance: 
+            id_object: 
+                field_value: id_user_resp
                 
 associations: 
     factures: 
@@ -192,6 +198,12 @@ fields:
         
     total: unset
     
+    logistique_status: 
+        label: Statut logistique
+        type: int
+        values: 
+            array: logistique_status
+        default_value: 0
     shipment_status: 
         label: Statut expédition
         type: int
@@ -206,10 +218,17 @@ fields:
             array: invoice_status
         default_value: 0
         
+    id_user_resp: 
+        label: Responsable logistique
+        type: id_object
+        object: user_resp
+        default_value: 0
+        
 fields_tables: 
     infos: 
         rows: 
             - field: fk_statut
+            - field: logistique_status
             - field: shipment_status
             - field: invoice_status
             - field: entrepot

@@ -1,4 +1,5 @@
 <?php
+
 require_once("../../main.inc.php");
 
 ini_set('display_errors', 1);
@@ -16,14 +17,21 @@ echo '</head>';
 
 echo '<body>';
 
-global $db;
-$bdb = new BimpDb($db);
+$timer = BimpObject::getInstance('bimpcore', 'BimpTimer', 10);
 
+BimpObject::loadClass('bimpcore', 'BimpCorrectif');
 
-BimpTools::changeBimpObjectId(213202, 213203, 'bimpcore', 'Bimp_Societe');
-BimpTools::changeBimpObjectId(213202, 213203, 'bimpcore', 'Bimp_Client');
-BimpTools::changeBimpObjectId(213202, 213203, 'bimpcore', 'Bimp_Fournisseur');
-BimpTools::changeDolObjectId(213202, 213203, 'societe');
+//$errors = BimpCorrectif::setValue($timer, 'time_session', 222, false);
+
+//if (count($errors)) {
+//    echo '<pre>';
+//    print_r($errors);
+//    echo '</pre>';
+//} else {
+//    echo 'Ok';
+//}
+
+//echo 'val: '.BimpCorrectif::getValue($timer, 'session_start');
 
 echo '</body></html>';
 

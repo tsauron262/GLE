@@ -26,7 +26,7 @@ class commandeController extends BimpController
         }
 
         if (!$commande->isLogistiqueActive()) {
-            return BimpRender::renderAlerts('Cette commande doit etre validée pour accéder à cet onglet');
+            return BimpRender::renderAlerts('Cette commande doit etre validée et prise en charge pour accéder à cet onglet');
         }
 
         $_GET['id_entrepot'] = (int) $commande->getData('entrepot');

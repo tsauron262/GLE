@@ -2,7 +2,7 @@ table: bimpcore_history
 common_fields: 0
 
 labels: 
-    name: Historique
+    name: historique
     
 objects: 
     object: 

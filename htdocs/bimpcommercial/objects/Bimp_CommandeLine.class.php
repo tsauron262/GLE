@@ -2222,14 +2222,43 @@ class Bimp_CommandeLine extends ObjectLine
                     'linked_object_name' => 'commande_line',
                     'linked_id_object'   => (int) $this->id
                         ), null, null, 'id', 'asc', 'array', array('id'));
-                
+
                 if (!is_null($factures_lines_list)) {
                     foreach ($factures_lines_list as $item) {
                         $facture_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureLine', (int) $item['id']);
                         if (BimpObject::objectLoaded($facture_line)) {
-                            $facture_line->pa_ht = $pa_ht;
-                            $facture_line->id_fourn_price = 0;
-                            $facture_line->forceUpdateLine();
+                            if ($facture_line->isParentEditable()) {
+                                // Màj de la ligne de facture: 
+                                $facture_line->pa_ht = $pa_ht;
+                                $facture_line->id_fourn_price = 0;
+                                $w = array();
+                                $fac_errors = $facture_line->update($w, true);
+                                $fac_errors = array_merge($fac_errors, $w);
+
+                                if (count($fac_errors)) {
+                                    $facture = $facture_line->getParentInstance();
+                                    $fac_label = '';
+                                    if (BimpObject::objectLoaded($facture)) {
+                                        $fac_label = ' (facture "' . $facture->getData('facnumber') . '")';
+                                    }
+                                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de la mise à jour du prix d\'achat pour la ligne de facture n°' . $facture_line->getData('position') . $fac_label);
+                                }
+                            } else {
+                                // Ajout d'un correctif:     
+                                BimpObject::loadClass('bimpcore', 'BimpCorrectif');
+
+                                $diff = (float) $pa_ht - (float) $facture_line->pa_ht;
+                                $fac_errors = BimpCorrectif::setValue($facture_line, 'pa_ht', $diff);
+
+                                if (count($fac_errors)) {
+                                    $facture = $facture_line->getParentInstance();
+                                    $fac_label = '';
+                                    if (BimpObject::objectLoaded($facture)) {
+                                        $fac_label = ' (facture "' . $facture->getData('facnumber') . '")';
+                                    }
+                                    $errors[] = BimpTools::getMsgFromArray($fac_errors, 'Echec de l\'ajout d\'un correctif du prix d\'achat pour la ligne de facture n°' . $facture_line->getData('position') . $fac_label);
+                                }
+                            }
                         }
                     }
                 }

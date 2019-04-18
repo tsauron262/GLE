@@ -1,4 +1,4 @@
-CREATE TABLE `llx_bcontract_prelevement` (
+CREATE TABLE IF NOT EXISTS `llx_bcontract_prelevement` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `id_contrat` int(11) NOT NULL,
   `next_facture_date` datetime NOT NULL,

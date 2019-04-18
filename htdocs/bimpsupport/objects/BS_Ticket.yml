@@ -138,7 +138,7 @@ fields:
                 type: search_societe
                 societe_type: customer  
     id_user_client:
-        label: Utilisateur client
+        label: Demandeur
         type: id_object
         object: user_client      
     id_contact:

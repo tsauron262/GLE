@@ -42,6 +42,7 @@ class BIC_UserTickets extends BS_Ticket {
             $this->updateField('impact_demande_client', BimpTools::getValue('impact'));
             $this->updateField('priorite_demande_client', BimpTools::getValue('priorite'));
             $this->updateField('cover', 1);
+            $this->updateField('id_user_resp', 0);
                 $liste_destinataires = $userClient->getData('email');
                 $liste_destinataires .= $userClient->get_dest('admin');
                 $liste_destinataires .= $userClient->get_dest('commerciaux');

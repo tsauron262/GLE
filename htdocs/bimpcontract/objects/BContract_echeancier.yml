@@ -27,7 +27,6 @@ fields:
         label: Validation automatique des factures
         type: bool
         
-        
 lists:
     default:
         title: Récapitulatif des échéanciers contrat
@@ -50,3 +49,4 @@ lists:
                 field: next_facture_amount
             validate:
                 field: validate
+                

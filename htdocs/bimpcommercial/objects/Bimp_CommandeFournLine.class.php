@@ -1129,6 +1129,22 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         return $errors;
     }
+    
+    public function unsetReception($id_reception)
+    {
+        $receptions = $this->getData('receptions');
+        
+        if (isset($receptions[(int) $id_reception])) {
+            unset($receptions[(int) $id_reception]);
+            
+            $this->set('receptions', $receptions);
+            $warnings = array();
+            $errors = $this->update($warnings, true);
+            $errors = array_merge($errors, $warnings);
+        }
+        
+        return $errors;
+    }
 
     // Actions: 
 

@@ -287,7 +287,7 @@ class BR_Reservation extends BimpObject
                         );
 
 
-                        // Ajouter à une commande fournisseur: 
+                    // Ajouter à une commande fournisseur: 
 //                        if ($type === self::BR_RESERVATION_COMMANDE) {
 //                            $id_commande_client = (int) $this->getData('id_commande_client');
 //                            $id_entrepot = (int) $this->getData('id_entrepot');
@@ -318,7 +318,6 @@ class BR_Reservation extends BimpObject
 //                            }
 //                        }
 //                        break;
-
                     // Si à réserver: 
                     case 2: // OK
                     case 101:
@@ -1611,6 +1610,17 @@ class BR_Reservation extends BimpObject
         }
 
         return $errors;
+    }
+
+    public function onSave(&$errors = array(), &$warnings = array())
+    {
+        if ((int) $this->getData('id_commande_client')) {
+            $commande = $this->getChildObject('commande_client');
+
+            if (BimpObject::objectLoaded($commande)) {
+                $commande->checkLogistiqueStatus();
+            }
+        }
     }
 
     // Méthodes statiques: 

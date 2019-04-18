@@ -536,17 +536,3 @@ views:
                       name: default
                       children: lines
                       title: Lignes
-                      
-    full: 
-        objects_change_reload: Bimp_File
-        rows: 
-            - cols: 
-                - type: object_header
-            - cols: 
-                - type: view
-                  view: 
-                      name: default
-            - cols: 
-                - type: view
-                  view: 
-                      name: content

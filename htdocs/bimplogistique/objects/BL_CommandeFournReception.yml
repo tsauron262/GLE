@@ -158,6 +158,7 @@ lists:
         sort_way: desc
         n: 25
         edit_btn: 1
+        delete_btn: 1
         update_btn: 1
         edit_form: edit
         modal_view: default
@@ -185,6 +186,7 @@ lists:
         add_btn: 1
         add_btn_label: Nouvelle réception
         add_form_name: default
+        delete_btn: 1
         edit_form: default
         modal_view: default
         objects_change_reload: BR_Reservation

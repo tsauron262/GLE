@@ -2111,9 +2111,42 @@ class Bimp_Commande extends BimpComm
 
     public function checkLogistiqueStatus()
     {
-        // todo
+        if ($this->isLoaded()) {
+            if (!in_array((int) $this->getData('logistique_status'), array(0, 4, 5))) {
+                $lines = $this->getLines('not_text');
+
+                $hasToProcess = false;
+                $isCompleted = true;
+                foreach ($lines as $line) {
+                    $qties = $line->getReservedQties();
+
+                    if (isset($qties['status'][0]) && (float) $qties['status'][0] > 0) {
+                        $isCompleted = false;
+                        $hasToProcess = true;
+                        break;
+                    }
+
+                    if (isset($qties['not_reserved']) && (float) $qties['not_reserved'] > 0) {
+                        $isCompleted = false;
+                    }
+                }
+
+                if ($hasToProcess) {
+                    $new_status = 1;
+                } elseif (!$isCompleted) {
+                    $new_status = 2;
+                } else {
+                    $new_status = 3;
+                }
+
+                if ($new_status !== (int) $this->getInitData('logistique_status')) {
+                    $this->set('logistique_status', $new_status);
+                    $this->update();
+                }
+            }
+        }
     }
-    
+
     public function checkShipmentStatus()
     {
         if ($this->isLoaded()) {
@@ -2148,7 +2181,7 @@ class Bimp_Commande extends BimpComm
             }
         }
     }
-    
+
     public function checkInvoiceStatus()
     {
         if ($this->isLoaded()) {
@@ -2636,6 +2669,8 @@ class Bimp_Commande extends BimpComm
         $new_data['fk_user_cloture'] = 0;
         $new_data['shipment_status'] = 0;
         $new_data['invoice_status'] = 0;
+        $new_data['logistique_status'] = 0;
+        $new_data['id_user_rest'] = 0;
 
         return parent::duplicate($new_data, $warnings, $force_create);
     }

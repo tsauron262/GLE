@@ -368,7 +368,7 @@ lists:
         edit_btn: 1
         edit_form: default
         delete_btn: 0
-        modal_view: default
+        modal_view: full
         page_btn: 1
         cols: 
             ref: 

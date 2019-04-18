@@ -81,6 +81,15 @@ class BL_CommandeFournReception extends BimpObject
         return 0;
     }
 
+    public function isDeletable($force_delete = false)
+    {
+        if ((int) $this->getData('status') === 0) {
+            return 1;
+        }
+
+        return 0;
+    }
+
     // Getters valeurs: 
 
     public function getName($with_generic = true)
@@ -360,11 +369,11 @@ class BL_CommandeFournReception extends BimpObject
             }
 
             $reception_data = $line->getReceptionData($this->id);
-            
+
             if (!$edit && !(float) $reception_data['qty']) {
                 continue;
             }
-            
+
             $has_lines = true;
             $isSerialisable = false;
 
@@ -930,5 +939,35 @@ class BL_CommandeFournReception extends BimpObject
         }
 
         return parent::create($warnings, $force_create);
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $errors = array();
+
+        if ((int) $this->getData('status') !== 0) {
+            $errors[] = 'Seules les récceptions au statut "brouillon" peuvent être supprimées';
+        } else {
+            $commande = $this->getParentInstance();
+            $id_reception = (int) $this->id;
+
+            $errors = parent::delete($warnings, $force_delete);
+
+            if (!count($errors)) {
+                if (BimpObject::objectLoaded($commande)) {
+                    $lines = $commande->getLines('not_text');
+
+                    foreach ($lines as $line) {
+                        $line_errors = $line->unsetReception($id_reception);
+
+                        if (count($line_errors)) {
+                            $warnings[] = BimpTools::getMsgFromArray($line_errors, 'Erreurs lors de la mise à jour de la ligne de commande fournisseur n°' . $line->getData('position'));
+                        }
+                    }
+                }
+            }
+        }
+
+        return $errors;
     }
 }

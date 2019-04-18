@@ -209,5 +209,13 @@ class BContract_contrat extends BimpDolObject {
     public function getName() {
         return $this->getData('ref');
     }
+    
+    public function renderEcheancier() {
+        
+        // TODO a viré (voir pour objet)
+        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+        $instance->find(Array('id_contrat' => $this->id));
+        return $instance->display();
+    }
         
 }

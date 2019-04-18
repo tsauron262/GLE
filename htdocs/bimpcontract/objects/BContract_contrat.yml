@@ -36,7 +36,11 @@ objects:
                 fields: 
                     parent_module: bimpcontract
                     parent_object_name: BContract_contrat
-
+        
+        echeancier:
+            instance:
+                bimp_object: BContract_echeancier
+        
 force_extrafields_update: 1
 
 table: contrat
@@ -278,5 +282,14 @@ views:
                           - type: list
                             list: 
                                children: files
-        
-        
+                               
+    echeancier:
+        title: titre
+        panel: 1
+        rows:
+            - cols:
+                - type: custom
+                  col_lg: 12
+                  col_md: 12
+                  custom:
+                      callback: renderEcheancier

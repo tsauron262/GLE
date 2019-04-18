@@ -1,0 +1,52 @@
+bootstrap: 1
+
+table: contrat_next_facture
+
+parent_id_property: id_contrat
+parent_object: BContract_contrat
+
+objects:
+    contrat:
+        instance:
+            bimp_object: BContract_contrat
+            id_object:
+                field_value: id_contrat
+            
+fields:
+    id_contrat:
+        label: Numéro de contrat
+        type: id_object
+        object: contrat
+    next_facture_date:
+        label: Date de la prochaine facture
+        type: date
+    next_facture_amount:
+        label: Montant de la prochaine facture
+        type: money
+    validate:
+        label: Validation automatique des factures
+        type: bool
+        
+        
+lists:
+    default:
+        title: Récapitulatif des échéanciers contrat
+        icon: fas_euro
+        sort_field: id
+        sort_way: desc
+        n: 25
+        delete_btn: 0
+        edit_btn: 0
+        add_object_row: 0
+        modal_view: fiche_contrat
+        #page_btn: 1
+        cols: 
+            id_contrat:
+                field: id_contrat
+                display: nom_url
+            next_facture_date:
+                field: next_facture_date
+            next_facture_amount:
+                field: next_facture_amount
+            validate:
+                field: validate

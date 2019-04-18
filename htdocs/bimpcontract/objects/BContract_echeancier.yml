@@ -1,6 +1,6 @@
 bootstrap: 1
 
-table: contrat_next_facture
+table: bcontract_prelevement
 
 parent_id_property: id_contrat
 parent_object: BContract_contrat

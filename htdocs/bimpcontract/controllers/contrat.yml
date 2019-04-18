@@ -45,3 +45,11 @@ sections:
                     panel: 1
                     name: echeancier
                     object: contrat
+    - type: buttons
+      buttons:
+          - label: Liste des contrats
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

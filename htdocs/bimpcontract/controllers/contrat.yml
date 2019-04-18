@@ -37,3 +37,11 @@ sections:
                     object: contrat
           - id: suivi
             title: Suivi
+          - id: echeancier
+            title: Echéancier
+            struct:
+                type: view
+                view:
+                    panel: 1
+                    name: echeancier
+                    object: contrat

@@ -151,6 +151,7 @@ fields:
     ref_client: unset
     total: unset
     remise_globale: unset
+    remise_globale_label: unset
     
 fields_tables: 
     infos: 

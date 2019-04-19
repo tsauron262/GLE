@@ -18,7 +18,7 @@ $content_request = $_REQUEST['fc'];
                     <li <?= ($content_request == 'pageUser') ? 'class="active"' : "" ?> >
                         <a href="client.php?fc=pageUser&id=<?= $userClient->getData('id') ?>">
                             <i class="pe-7s-paperclip"></i>
-                            <p>Ma page utilisateur</p>
+                            <p><?= $langs->trans('menuUserPage') ?></p>
                         </a>
                     </li>
                     <?php
@@ -80,7 +80,7 @@ $content_request = $_REQUEST['fc'];
             <form method="post">
                 <center><input type="password" class="form-control" style="width:80%" placeholder="Nouveau mot de passe" name="new_password" id="new_passwd" ></center>
                 <br />
-                <button type="submit" class="btn btn-warning btn-fill pull-center">Modifier mon mot de passe</button>
+                <button type="submit" class="btn btn-warning btn-fill pull-center"><?= $langs->trans('menuChangePassword') ?></button>
             </form>
             <br /> <br />
         </div>
@@ -104,11 +104,8 @@ $content_request = $_REQUEST['fc'];
                     </div>
                     <div class="collapse navbar-collapse">
                         <ul class="nav navbar-nav navbar-right">
-                            <?php 
-                                if($content_request == 'pageUser'){ // POur la RGPD
-                                    echo '<li><a href="#" class="rgpd">Télécharger mes données</a></li>';
-                                }
-                            ?>
+                            <li><a href="#" class="rgpd">Connecté en tant que : <i style="color:#EF7D00"><?= $userClient->getData('email') ?></i></a></li>'
+
                             <li><a href="#" class="passwd"><?= $langs->trans('changePassword') ?></a></li>
                             <li><a href="?action=deconnexion"><?= $langs->trans('deconnexion') ?></a></li>
                         </ul>

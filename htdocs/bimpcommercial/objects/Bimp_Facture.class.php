@@ -289,7 +289,7 @@ class Bimp_Facture extends BimpComm
     {
         global $conf, $langs, $user;
 
-        $buttons = array();
+        $buttons = parent::getActionsButtons();
 
         if ($this->isLoaded()) {
             $status = $this->getData('fk_statut');

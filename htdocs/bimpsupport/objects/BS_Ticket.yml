@@ -116,7 +116,7 @@ fields:
                         help: Entrez la référence ou l'ID d'un contrat
         display_if: 
             field_name: no_contrat
-            hide_values: 1
+            hide_values: 1      
     id_client:
         label: Client
         type: id_object
@@ -138,7 +138,7 @@ fields:
                 type: search_societe
                 societe_type: customer  
     id_user_client:
-        label: Utilisateur client
+        label: Demandeur
         type: id_object
         object: user_client      
     id_contact:
@@ -209,6 +209,29 @@ fields:
         display: 
             icon:
                 icon_only: 1
+    
+                
+    impact_demande_client:
+        label: Impact lors de la demande client
+        type: int
+        values: 
+            array: impacts
+        show:
+            callback: it_is_a_customer_request
+  
+    priorite_demande_client:
+        label: Prioritée lors de la demande client
+        type: int
+        values:
+            array: priorities
+        show:
+            callback: it_is_a_customer_request
+    contact_in_soc:
+        label: Contact dans la société
+        type: string
+        show:
+            callback: it_is_a_customer_request
+    
     cover:
         label: Type de couverture
         type: int
@@ -345,10 +368,16 @@ forms:
                                                 
 fields_tables: 
     infos: 
-        title: Informations
+        title: Informations générales
         icon: info-circle
         rows: 
             - field: ticket_number
+            - field: impact_demande_client
+              edit: 0
+            - field: priorite_demande_client
+              edit: 0
+            - field: contact_in_soc
+              edit: 0
             - label: Durée totale interventions
               value:
                   callback: displayDureeTotale
@@ -358,11 +387,14 @@ fields_tables:
             - field: impact
               edit: 1
             - field: cover
-              edit: 1
+              edit: 
+                  callback: it_is_not_a_customer_requets
             - field: status
-              edit: 1
+              edit:
+                  callback: it_is_pris_en_charge
             - field: sujet
-              edit: 1
+              edit:
+                  callback: it_is_not_a_customer_requets
               
     objects:
         title: Elements liés
@@ -387,10 +419,11 @@ fields_tables:
         title: Informations
         icon: info-circle
         rows:
-            - field: id_contrat
-            - field: id_user_client
+            - field: sujet
             - field: status
             - field: priorite
+            - field: id_contrat
+            - field: id_user_client
               
 views: 
     default:
@@ -461,6 +494,7 @@ views:
                   list: 
                       children: files
     client:
+        edit_form: default
         rows:
             - cols:
                 - type: fields_table

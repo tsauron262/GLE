@@ -142,6 +142,7 @@ fields:
     fk_availability: unset
     fk_input_reason: unset
     remise_globale: unset
+    remise_globale_label: unset
     
 forms: 
     default: 

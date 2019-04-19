@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 class BContract_contrat extends BimpDolObject {
 
@@ -138,14 +139,26 @@ class BContract_contrat extends BimpDolObject {
 
     public function getActionsButtons() {
         $buttons = array();
+        $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
         if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
             $buttons[] = array(
                 'label' => 'Valider le contrat',
                 'icon' => 'fas_check',
-                'onclick' => $this->getJsNewStatusOnclick(self::CONTRAT_STATUS_VALIDE)
+                'onclick' => $this->getJsActionOnclick('validation', array(), array(
+                    'success_callback' => $callback
+                ))
             );
         }
         return $buttons;
+    }
+    
+    public function actionValidation($data, &$success) {
+        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+        $instance->find(Array('id_contrat' => $this->id));
+        if($instance->updateLine($this->id)) {
+            $success = 'Contrat validé et échéancier créer';
+            $this->updateField('statut', self::CONTRAT_STATUS_VALIDE);
+        }
     }
     
     public function canEdit(){
@@ -209,5 +222,13 @@ class BContract_contrat extends BimpDolObject {
     public function getName() {
         return $this->getData('ref');
     }
+    
+    public function renderEcheancier() {
         
+        // TODO a viré (voir pour objet)
+        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+        $instance->find(Array('id_contrat' => $this->id));
+        return $instance->display();
+    }
+    
 }

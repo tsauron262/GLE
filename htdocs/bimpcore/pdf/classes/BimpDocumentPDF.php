@@ -648,8 +648,15 @@ class BimpDocumentPDF extends BimpModelPDF
 
         if (!$this->hideReduc && $remise_globale) {
             $remise_infos = $this->bimpCommObject->getRemisesInfos();
+            
+            $remise_label = $this->bimpCommObject->getData('remise_globale_label');
+            
+            if (!$remise_label) {
+                $remise_label = 'Remise exceptionnelle sur l\'intégralité ' . $this->bimpCommObject->getLabel('of_the');
+            }
+            
             $row = array(
-                'desc'     => 'Remise exceptionnelle sur l\'intégralité ' . $this->bimpCommObject->getLabel('of_the'),
+                'desc'     => $remise_label,
                 'qte'      => 1,
                 'tva'      => '',
                 'pu_ht'    => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], ''),

@@ -91,7 +91,7 @@ class Bimp_Propal extends BimpComm
         global $conf, $langs, $user;
         $langs->load('propal');
 
-        $buttons = array();
+        $buttons = parent::getActionsButtons();
 
         if ($this->isLoaded()) {
             $buttons[] = array(
@@ -279,23 +279,11 @@ class Bimp_Propal extends BimpComm
                 }
 
                 // Classer facturée
-
                 if ($this->isActionAllowed('classifyBilled') && $this->canSetAction('classifyBilled')) {
                     $buttons[] = array(
                         'label'   => 'Classer facturée',
                         'icon'    => 'check',
                         'onclick' => $this->getJsActionOnclick('classifyBilled')
-                    );
-                }
-
-                // Remise globale: 
-                if ($this->isActionAllowed('setRemiseGlobale') && $this->canSetAction('setRemiseGlobale')) {
-                    $buttons[] = array(
-                        'label'   => 'Remise globale',
-                        'icon'    => 'percent',
-                        'onclick' => $this->getJsActionOnclick('setRemiseGlobale', array('remise_globale' => (float) $this->getData('remise_globale')), array(
-                            'form_name' => 'remise_globale'
-                        ))
                     );
                 }
 
@@ -434,10 +422,10 @@ class Bimp_Propal extends BimpComm
                         'label'       => $ref . '.pdf',
                         'icon_before' => 'fas_file-pdf',
                         'attr'        => array(
-                            'href' => $url,
+                            'href'   => $url,
                             'target' => '_blanck',
                         )
-            ), "a");
+                            ), "a");
         }
 
         $html .= BimpRender::renderButton(array(
@@ -447,7 +435,7 @@ class Bimp_Propal extends BimpComm
                     'attr'        => array(
                         'href' => "../comm/propal/card.php?id=" . $this->id
                     )
-        ), "a");
+                        ), "a");
 
         $html .= '</div>';
 

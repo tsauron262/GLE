@@ -104,7 +104,6 @@ fields:
     fk_availability: unset
     fk_input_reason: unset
     total_ht: unset
-    remise_globale: unset
         
 forms: 
     default: 

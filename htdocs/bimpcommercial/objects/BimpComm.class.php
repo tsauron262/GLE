@@ -34,6 +34,17 @@ class BimpComm extends BimpDolObject
         return 1;
     }
 
+    public function areLinesEditable()
+    {
+        if ($this->field_exists('fk_statut')) {
+            if ((int) $this->getData('fk_statut') > 0) {
+                return 0;
+            }
+        }
+
+        return 1;
+    }
+
     // Getters array: 
 
     public function getModelsPdfArray()
@@ -87,7 +98,23 @@ class BimpComm extends BimpDolObject
 
     public function getActionsButtons()
     {
-        return array();
+        $buttons = array();
+
+        // Remise globale: 
+        if ($this->isActionAllowed('setRemiseGlobale') && $this->canSetAction('setRemiseGlobale')) {
+            $buttons[] = array(
+                'label'   => 'Remise globale',
+                'icon'    => 'percent',
+                'onclick' => $this->getJsActionOnclick('setRemiseGlobale', array(
+                    'remise_globale'       => (float) $this->getData('remise_globale'),
+                    'remise_globale_label' => addslashes($this->getData('remise_globale_label'))
+                        ), array(
+                    'form_name' => 'remise_globale'
+                ))
+            );
+        }
+
+        return $buttons;
     }
 
     public function getDirOutput()
@@ -131,6 +158,11 @@ class BimpComm extends BimpDolObject
         }
 
         return $filter;
+    }
+
+    public function getDefaultRemiseGlobaleLabel()
+    {
+        return 'Remise exceptionnelle sur l\'intégralité ' . $this->getLabel('of_the');
     }
 
     // Getters données: 
@@ -2143,6 +2175,9 @@ class BimpComm extends BimpDolObject
                 if (!isset($data['remise_globale'])) {
                     $errors[] = 'Montant de la remise globale absent';
                 } else {
+                    if ($this->field_exists('remise_globale_label') && isset($data['remise_globale_label'])) {
+                        $this->updateField('remise_globale_label', (string) $data['remise_globale_label']);
+                    }
                     $errors = $this->updateField('remise_globale', round((float) $data['remise_globale'], 8));
 
                     if (!count($errors)) {
@@ -2225,7 +2260,7 @@ class BimpComm extends BimpDolObject
                     $errors[] = 'Les remises globales ne sont pas disponibles pour ' . $this->getLabel('the_plur');
                     return 0;
                 }
-                if (!$this->isEditable()) {
+                if (!$this->areLinesEditable()) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' ne peut plus être éditée';
                     return 0;
                 }

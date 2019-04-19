@@ -12,35 +12,38 @@ class Bimp_user_client_controller extends BimpController {
                 die(json_encode(Array("request_id" => $_REQUEST['request_id'], 'nologged' => 1)));
             }
         } else {
-            define('BIMP_CONTROLLER_INIT', 1);
-            top_htmlhead('
+            if ($userClient->getData('renew_required') == 1) {
+                require_once DOL_DOCUMENT_ROOT . "/bimpinterfaceclient/views/change_password.php";
+            } else {
+                define('BIMP_CONTROLLER_INIT', 1);
+                top_htmlhead('
             <link href="views/css/light-bootstrap-dashboard.css?v=1.4.0" rel="stylesheet"/>
             <link href="views/css/demo.css" rel="stylesheet" />
 
 
             <link href="views/css/pe-icon-7-stroke.css" rel="stylesheet" />');
-            require_once DOL_DOCUMENT_ROOT . "/bimpinterfaceclient/views/header.php";
-            parent::display();
-            
-            echo BimpRender::renderAjaxModal('page_modal');
+                require_once DOL_DOCUMENT_ROOT . "/bimpinterfaceclient/views/header.php";
+                parent::display();
 
-            $this->addDebugTime('Fin affichage page');
+                echo BimpRender::renderAjaxModal('page_modal');
 
-            if (BimpDebug::isActive('bimpcore/controller/display_times')) {
-                echo $this->renderDebugTime();
+                $this->addDebugTime('Fin affichage page');
+
+                if (BimpDebug::isActive('bimpcore/controller/display_times')) {
+                    echo $this->renderDebugTime();
+                }
+
+                llxFooter();
+
+                require_once DOL_DOCUMENT_ROOT . "/bimpinterfaceclient/views/footer.php";
             }
-
-            llxFooter();
-
-            require_once DOL_DOCUMENT_ROOT . "/bimpinterfaceclient/views/footer.php";
         }
     }
-    
 
     static function initUserClient() {
         global $langs, $userClient;
-        
-        
+
+
         define('NOLOGIN', 1);
         require_once '../main.inc.php';
         if (BimpCore::getConf('module_version_bimpinterfaceclient') == "") {
@@ -65,18 +68,14 @@ class Bimp_user_client_controller extends BimpController {
             require DOL_DOCUMENT_ROOT . '/bimpinterfaceclient/views/login.php';
             die;
         }
-        
+
         if (isset($_REQUEST['new_lang'])) {
             $userClient->switch_lang($_REQUEST['new_lang']);
         }
 
-
-        if (isset($_POST['new_passwd'])) {
-            $passwd = hash('sha256', $_POST['new_passwd']);
-            $userClient->password = $passwd;
-            $userClient->change_password();
+        if (isset($_POST['new_password'])) {
+            $userClient->change_password($_POST['new_password']);
         }
-
         $langs->setDefaultLang(BIC_UserClient::$langs_list[$userClient->getData('lang')]);
         $langs->load('bimp@bimpinterfaceclient');
     }

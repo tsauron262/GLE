@@ -1,19 +1,41 @@
 bootstrap: 1
     
 objects:
-    tickets:
+    ticket:
         instance:
-            bimp_object: BIC_UserClientTickets
+            bimp_object:
+                module: bimpsupport
+                name: BS_Ticket
+            id_object:
+                request: id
+    inters:
+        instance:
+            bimp_object:
+                module: bimpsupport
+                name: BS_Inter
             
 
 sections:
-    - type: tabs
-      tabs: 
-        default:
-            label: Liste des tickets
-            icon: fas_headset
-            sections:
-                - type: list
-                  list:
-                      name: interface_client
-                      object: tickets
+    - type: object_header
+      object_header: 
+          object: ticket
+    - type: nav_tabs
+      nav_tabs: 
+          - id: infos_ticket
+            title: Informations du ticket
+            struct: 
+                type: view
+                view: 
+                    panel: 0
+                    name: client
+                    object: ticket
+          - id: interventions
+            title: Interventions
+            struct:
+                type: list
+                list:
+                    panel: 0
+                    object: inters
+                    name: client_inters
+                
+            

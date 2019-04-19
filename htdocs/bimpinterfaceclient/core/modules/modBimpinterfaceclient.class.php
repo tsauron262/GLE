@@ -11,7 +11,7 @@ class modBimpinterfaceclient extends DolibarrModules
 
         $this->db = $db;
 
-		$this->numero = 514586;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
+		$this->numero = 553554356;		// TODO Go on page https://wiki.dolibarr.org/index.php/List_of_modules_id to reserve id number for your module
 		// Key text used to identify module (for permissions, menus, etc...)
 		$this->rights_class = 'bimpinterfaceclient';
 
@@ -66,8 +66,9 @@ class modBimpinterfaceclient extends DolibarrModules
 		$this->const = array();
                 
                 
-         
-        $this->tabs = array();
+         $this->tabs = array(
+            'thirdparty:+client_user:Utilisateurs:@bimpsupport:$user->rights->bimpinterfaceclient->read:/bimpinterfaceclient/admin.php?fc=user&socid=__ID__'
+        );
 
 		if (! isset($conf->mymodule) || ! isset($conf->mymodule->enabled))
         {
@@ -144,12 +145,12 @@ class modBimpinterfaceclient extends DolibarrModules
 	{
 		global $conf;
 		$sql = array();
-                
+                $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("default_id_commercial", 62)';
                 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
                 $name = 'module_version_'.strtolower($this->name);
                 if(BimpCore::getConf($name) == "") {
                     BimpCore::setConf($name, floatval($this->version));
-                    $this->_load_tables('/bimpinterfaceclient/sql/');
+                    $this->_load_tables('/'.strtolower($this->name).'/sql/');
                 }
                 
 		return $this->_init($sql, $options);

@@ -6,8 +6,7 @@ class fichinter_listController extends BimpController
 
     public function displayHead()
     {
-        global $db, $langs, $user,$htmlSup; 
-        echo $htmlSup;
+        global $db, $langs, $user;
         $fk_soc = $_REQUEST[$this->nomIdClient];
         if($fk_soc > 0){
             require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';

@@ -28,6 +28,12 @@
  */
 
 require '../../main.inc.php';
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_CommandeFourn", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+
+
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.class.php';
@@ -474,6 +480,7 @@ if ($search_billed > 0) $title.=' - '.$langs->trans("Billed");
 //$help_url="EN:Module_Customers_Orders|FR:Module_Commandes_Clients|ES:Módulo_Pedidos_de_clientes";
 $help_url='';
 llxHeader('',$title,$help_url);
+echo $htmlRedirect;
 
 $sql = 'SELECT';
 if ($sall || $search_product_category > 0) $sql = 'SELECT DISTINCT';

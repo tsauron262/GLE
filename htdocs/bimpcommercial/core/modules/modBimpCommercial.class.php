@@ -55,7 +55,7 @@ class modBimpCommercial extends DolibarrModules
 
 		// Family can be 'crm','financial','hr','projects','products','ecm','technic','interface','other'
 		// It is used to group modules by family in module setup page
-		$this->family = "Synopsis";
+		$this->family = "Bimp";
 		// Module position in the family
 		$this->module_position = 500;
 		// Gives the possibility to the module, to provide his own family info and position of this family (Overwrite $this->family and $this->module_position. Avoid this)
@@ -231,10 +231,10 @@ class modBimpCommercial extends DolibarrModules
 		/* BEGIN MODULEBUILDER TOPMENU */
 		$this->menu[$r++]=array('fk_menu'=>'fk_mainmenu=commercial,fk_leftmenu=propals',			                // '' if this is a top menu. For left menu, use 'fk_mainmenu=xxx' or 'fk_mainmenu=xxx,fk_leftmenu=yyy' where xxx is mainmenucode and yyy is a leftmenucode
 								'type'=>'left',			                // This is a Top menu entry
-								'titre'=>'MyPropal',
+								'titre'=>'Mes Propals',
 								'mainmenu'=>'',
 								'leftmenu'=>'',
-								'url'=>'/bimpcommercial/index.php?fc=userPropals&id=1',
+								'url'=>'/bimpcommercial/index.php?fc=userPropals',
 								'langs'=>'bimpcomm@bimpcommercial',	        // Lang file to use (without .lang) by module. File must be in langs/code_CODE/ directory.
 								'position'=>1000+$r,
 								'enabled'=>'1',	// Define condition to show or hide menu entry. Use '$conf->mymodule->enabled' if entry must be visible if module is enabled.
@@ -306,6 +306,14 @@ class modBimpCommercial extends DolibarrModules
 	public function init($options='')
 	{
 		$sql = array();
+                
+                require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+                $name = 'module_version_'.strtolower($this->name);
+                if(BimpCore::getConf($name) == "") {
+                    BimpCore::setConf($name, floatval($this->version));
+                    $this->_load_tables('/'.strtolower($this->name).'/sql/');
+                }
+                
 
                 //$sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'einstein';";
                 $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'azur';";

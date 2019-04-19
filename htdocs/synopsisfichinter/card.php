@@ -56,9 +56,10 @@ $afficherLigneContrat = false;
 
 require("../synopsisfichinter/pre.inc.php");
 
+
 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
-require_once(DOL_DOCUMENT_ROOT."/bimpfichinter/objects/Bimp_Fichinter.class.php");
-$htmlRedirect = Bimp_Fichinter::redirect(false, $_REQUEST['id']);
+$bObj = BimpObject::getInstance("bimpfichinter", "Bimp_Fichinter", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
 
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");

@@ -65,6 +65,7 @@ class BimpObject extends BimpCache
     public $parent = null;
     public $dol_object = null;
     public $extends = array();
+    public $redirectMode = 5; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
     // Gestion instance:
 
@@ -897,7 +898,7 @@ class BimpObject extends BimpCache
         foreach ($this->params['objects'] as $nom => $infoObj) {
             $value = "";
             if ($infoObj['relation'] == "hasMany") {
-                $html.= "<" . $nom . ">";
+                $html .= "<" . $nom . ">";
                 $lines = $this->getChildrenObjects($nom);
                 $i = 0;
                 $value = array();
@@ -1034,6 +1035,11 @@ class BimpObject extends BimpCache
         }
 
         return $fields;
+    }
+
+    public function getTaxeIdDefault()
+    {
+        return (int) BimpCore::getConf("tva_default");
     }
 
     // Gestion des données:
@@ -3554,7 +3560,7 @@ class BimpObject extends BimpCache
 
     public function isDeletable($force_delete = false)
     {
-        return 1;
+        return $this->isEditable();
     }
 
     public function isFieldEditable($field, $force_edit = false)
@@ -3638,7 +3644,7 @@ class BimpObject extends BimpCache
                 return (int) $parent->canEditChild($this->object_name);
             }
         }
-        return 1;
+        return $this->canView();
     }
 
     public function canClientEdit()
@@ -3670,7 +3676,7 @@ class BimpObject extends BimpCache
                 return (int) $parent->canDeleteChild($this->object_name);
             }
         }
-        return 1;
+        return $this->canEdit();
     }
 
     public function canClientDelete()
@@ -4063,6 +4069,11 @@ class BimpObject extends BimpCache
             if (method_exists($this, 'renderHeaderExtraRight')) {
                 $html .= '<div style="margin: 10px 0;">';
                 $html .= $this->renderHeaderExtraRight();
+                $html .= '</div>';
+            }
+            if (method_exists($this, 'renderHeaderBtnRedir')) {
+                $html .= '<div style="margin: 10px 0;">';
+                $html .= $this->renderHeaderBtnRedir();
                 $html .= '</div>';
             }
             $html .= '</div>';
@@ -5099,6 +5110,17 @@ class BimpObject extends BimpCache
         return $html;
     }
 
+    public function getListUrl()
+    {
+        $url = BimpTools::makeUrlFromConfig($this->config, 'list_page_url', $this->module, $this->getController());
+
+        if (!$url && $this->isDolObject()) {
+            $url = BimpTools::getDolObjectListUrl($object);
+        }
+
+        return $url;
+    }
+
     public function getChildObjectUrl($object_name, $object = null)
     {
         if (is_null($object)) {
@@ -5550,5 +5572,88 @@ class BimpObject extends BimpCache
         }
         if (isset($user->array_options["options_defaultentrepot"]))
             return $user->array_options["options_defaultentrepot"];
+    }
+
+    public function renderHeaderBtnRedir()
+    {
+        return $this->processRedirect(false);
+    }
+
+    public function processRedirect($newVersion = true)
+    {
+        $redirect = ((BimpTools::getValue("redirectForce") == 1) ? 1 : 0);
+        $redirectMode = $this->redirectMode;
+        $texteBtn = "";
+        if ($this->iAmAdminRedirect()) {
+            if ($redirectMode == 4) {
+                $redirectMode = 1;
+                $texteBtn = "ADMIN (N) : ";
+            } elseif ($redirectMode == 5) {
+                $redirectMode = 1;
+                $texteBtn = "ADMIN (A) : ";
+            }
+        }
+        $btn = false;
+        if ($newVersion) {
+            if ($this->id > 0)
+                $url = $this->getUrl();
+            else
+                $url = $this->getListUrl();
+            $texteBtn .= "Nouvelle version";
+            if ($redirectMode == 4)
+                $redirect = true;
+            elseif (in_array($redirectMode, array(3, 5)))
+                $redirect = false;
+            elseif ($redirectMode != 0)
+                $btn = true;
+
+
+            if (BimpTools::getValue("sall") != "") {
+                $objName = "";
+                if (isset($this->dol_object) && isset($this->dol_object->element))
+                    $objName = $this->dol_object->element;
+                $url .= "&search=1&object=" . $this->dol_object->element . "&sall=" . BimpTools::getValue("sall");
+            }
+            if (BimpTools::getValue("socid") != "") {
+                $objName = "";
+                if (isset($this->dol_object) && isset($this->dol_object->element))
+                    $objName = $this->dol_object->element;
+                $url .= "&socid=" . BimpTools::getValue("socid");
+            }
+
+
+
+            https://erp.bimp.fr/test11/bimpcommercial/index.php?search=1&object=propal&sall=PR1809-91794&fc=propals
+        }
+        else {
+            $url = BimpTools::getDolObjectUrl($this->dol_object, $this->id);
+            $texteBtn .= "Ancienne version";
+            if ($redirectMode == 5)
+                $redirect = true;
+            elseif (in_array($redirectMode, array(2, 4)))
+                $redirect = false;
+            elseif ($redirectMode != 0)
+                $btn = true;
+        }
+        if ($redirect && $url != "") {
+            $ob = ob_get_contents();
+            if ($ob != "")
+                die("<script>window.location = '" . $url . "';</script>");
+            else {
+                header("location: " . $url);
+                die("<script>window.location = '" . $url . "';</script>");
+            }
+        } elseif ($btn && $url != "")
+            return "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='" . $texteBtn . "'/><input type='hidden' name='redirectForce' value='1'/></form>";
+
+        return '';
+    }
+
+    public function iAmAdminRedirect()
+    {
+        global $user;
+//        return 0;
+        if ($user->admin)
+            return 1;
     }
 }

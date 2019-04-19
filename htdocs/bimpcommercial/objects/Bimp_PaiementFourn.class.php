@@ -239,7 +239,7 @@ class Bimp_PaiementFourn extends Bimp_Paiement
         if (is_null($type_paiement) || !(string) $type_paiement) {
             $errors[] = 'Mode paiement invalide';
         } elseif (($total_paid + $total_avoirs) > $total_to_pay && $type_paiement !== 'LIQ') {
-            $errors[] = 'Le versement d\'une somme supérieure au total des factures n\'est possible que pour un paiement en espèce';
+            $errors[] = 'Le versement d\'une somme supérieure au total des factures n\'est possible que pour un paiement en espèces';
         }
 
         if (count($errors)) {

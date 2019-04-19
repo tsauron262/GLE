@@ -7,7 +7,7 @@ objects:
             bimp_object: BContract_contrat
             id_object:
                 request: id
-    
+        
 
 sections:
     - type: object_header
@@ -25,6 +25,12 @@ sections:
                     object: contrat
           - id: contenu_contrat
             title: Contenu
+            struct:
+                type: view
+                view:
+                    panel: 1
+                    object: contrat
+                    name: lines
           - id: contact_adresse_contrat
             title: Contact / Adresse
           - id: fichier_contrat
@@ -37,3 +43,19 @@ sections:
                     object: contrat
           - id: suivi
             title: Suivi
+          - id: echeancier
+            title: Echéancier
+            struct:
+                type: view
+                view:
+                    panel: 1
+                    name: echeancier
+                    object: contrat
+    - type: buttons
+      buttons:
+          - label: Liste des contrats
+            url:
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

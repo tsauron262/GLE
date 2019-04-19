@@ -34,6 +34,12 @@
  */
 
 require '../main.inc.php';
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_Commande", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+
+
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formorder.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formmargin.class.php';
@@ -1418,6 +1424,7 @@ if (empty($reshook))
  */
 
 llxHeader('', $langs->trans('Order'), 'EN:Customers_Orders|FR:Commandes_Clients|ES:Pedidos de clientes');
+echo $htmlRedirect;
 
 $form = new Form($db);
 $formfile = new FormFile($db);

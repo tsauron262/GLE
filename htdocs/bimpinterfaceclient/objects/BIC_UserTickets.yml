@@ -24,6 +24,12 @@ objects:
             bimp_object:
                 module: bimpsupport
                 name: BS_Note
+    
+    userClient:
+        instance:
+            bimp_object: BIC_UserClient
+        id_object:
+            field: id_user_client
                 
 fields:
     id_contrat:
@@ -40,7 +46,14 @@ fields:
         label: Sujet
         type: text
         require: 1
-
+    
+    id_user_client:
+        label: Demandeur
+        type: id_object
+        object: userClient
+    
+    sujet:
+        type: html
 lists:
     interface_client:
         title: Tickets support
@@ -52,7 +65,10 @@ lists:
         edit_btn: 1
         edit_form: editUserTicket
         list_filters: 
-            callback: getListFiltersInterface
+            callback:
+                method: getListFiltersInterface
+                params:
+                    - contrat
         add_form_values: 
             fields:
                 status: 20
@@ -63,18 +79,49 @@ lists:
                             - attached_societe
                 id_contrat:
                     callback: currentContrat
-                            
-        #page_btn: 1
+                id_user_client:
+                    callback:
+                        method: userClient
+                        params:
+                            - id
+        page_btn: 1
         cols:
             id:
             sujet:
-            client:
-                value:
-                    display: nom
             status:
             priorite:
             date_create:
-        
+            id_user_client:
+                field: id_user_client
+    
+    pageUser:
+        extends: interface_client
+        add_btn: 0
+        list_filters: 
+            callback:
+                method: getListFiltersInterface
+                params:
+                    - user
+        cols:
+            id_contrat:
+                label: Contrat
+                field: id_contrat
+    pageClient:
+        extends: interface_client
+        add_btn: 0
+        list_filters: 
+            callback:
+                method: getListFiltersInterface
+                params:
+                    - client
+        cols:
+            id_contrat:
+                #label: Contrat
+                field: id_contrat
+            id_user_client:
+                #label: Propriétaire
+                field: id_user_client
+            
 forms:
     editUserTicket:
         rows:
@@ -84,6 +131,7 @@ forms:
               edit: 0
             - field: sujet
             - field: priorite
+            - field: impact
             
     addUserTicket:
         rows:
@@ -91,16 +139,14 @@ forms:
               edit: 0
             - field: id_contrat
               edit: 0
+            - field: id_user_client
+              edit: 0
+            - field: contact_in_soc
             - field: status
               edit: 0
             - field: sujet
               required: 1
             - field: priorite
-            - custom: 1
-              input_name: notif_email
-              input:
-                  type: toggle
-              value: 0
-              label: Me notifier et notifier les admins
+            - field: impact
             - object: note
               multiple: 1

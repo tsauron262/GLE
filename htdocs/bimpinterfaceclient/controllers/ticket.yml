@@ -1,0 +1,11 @@
+bootstrap: 1
+
+objects:
+    tickets:
+        instance:
+            bimp_object:
+                module: bimpsupport
+                name: BS_Ticket
+            id_object:
+                request: id
+                

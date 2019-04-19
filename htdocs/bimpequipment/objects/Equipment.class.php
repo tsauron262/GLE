@@ -14,6 +14,7 @@ class Equipment extends BimpObject
         13 => 'Matériel réseau',
         50 => 'Autre'
     );
+    public static $typesPlace = array();
     public static $origin_elements = array(
         0 => '',
         1 => 'Fournisseur',
@@ -24,6 +25,8 @@ class Equipment extends BimpObject
 
     public function __construct($db)
     {
+        require_once(DOL_DOCUMENT_ROOT."/bimpequipment/objects/BE_Place.class.php");
+        self::$typesPlace = BE_Place::$types;
         parent::__construct("bimpequipment", get_class($this));
         $this->iconeDef = "fa-laptop";
     }
@@ -237,6 +240,10 @@ class Equipment extends BimpObject
                         'part_type' => 'middle',
                         'part'      => $value
                     ),
+                    'place_entrepot.ref'      => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    ),
                     'place_user.firstname'     => array(
                         'part_type' => 'middle',
                         'part'      => $value
@@ -253,6 +260,27 @@ class Equipment extends BimpObject
                         'part_type' => 'middle',
                         'part'      => $value
                     ),
+                )
+            );
+        }
+    }
+
+    public function getPlace2SearchFilters(&$filters, $value, &$joins = array(), $main_alias = 'a')
+    {
+        if ((string) $value) {
+            $joins['placeType'] = array(
+                'table' => 'be_equipment_place',
+                'alias' => 'placeType',
+                'on'    => 'placeType.id_equipment = ' . $main_alias . '.id'
+            );
+
+            $filters['placeType.position'] = 1;
+            $filters['or_placeType'] = array(
+                'or' => array(
+                    'placeType.type'         => array(
+                        'part_type' => 'middle',
+                        'part'      => $value
+                    )
                 )
             );
         }
@@ -362,6 +390,16 @@ class Equipment extends BimpObject
         $place = $this->getCurrentPlace();
         if (!is_null($place) && $place->isLoaded()) {
             return $place->displayPlace();
+        }
+
+        return '';
+    }
+    
+    public function displayCurrentPlaceType()
+    {
+        $place = $this->getCurrentPlace();
+        if (!is_null($place) && $place->isLoaded()) {
+            return $place->displayData("type");
         }
 
         return '';

@@ -56,6 +56,11 @@
   \version    $Id: card.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
  */
 require("./pre.inc.php");
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpfichinter", "Bimp_Fichinter", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/modules_fichinter.php");
@@ -99,6 +104,9 @@ $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/synopsisfichint
 launchRunningProcess($db, 'Fichinter', $_GET['id']);
 
 llxHeader($js, "Fiche intervention");
+
+echo $htmlRedirect;
+
 if ($_REQUEST["id"] > 0) {
     /*
      * Affichage en mode visu

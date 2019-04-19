@@ -1,0 +1,13 @@
+bootstrap: 1
+    
+objects:
+    tickets:
+        instance:
+            bimp_object: BIC_UserTickets
+      
+sections:
+    - type: list
+      list:
+          panel: 1
+          name: pageClient
+          object: tickets

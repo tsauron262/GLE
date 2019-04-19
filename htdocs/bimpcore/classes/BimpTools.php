@@ -15,7 +15,6 @@ class BimpTools
             'html'  => '&#36;'
         )
     );
-    
     private static $context = "";
 
     // Gestion GET / POST
@@ -101,7 +100,7 @@ class BimpTools
         if (BimpTools::isSubmit($field_name)) {
             return BimpTools::getValue($field_name);
         }
-        
+
         // Filtres listes:
         if (BimpTools::isSubmit('param_list_filters')) {
             $filters = json_decode(BimpTools::getValue('param_list_filters'));
@@ -168,6 +167,20 @@ class BimpTools
         }
         if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
             return DOL_URL_ROOT . '/' . $file . (!is_null($id_object) && $id_object ? '?' . $primary . '=' . $id_object : '');
+        }
+        return '';
+    }
+
+    public static function getDolObjectListUrl($object)
+    {
+        $file = strtolower(get_class($object)) . '/card.php';
+
+        switch (get_class($object)) {
+            // gérer les exceptions... 
+        }
+
+        if (file_exists(DOL_DOCUMENT_ROOT . '/' . $file)) {
+            return DOL_URL_ROOT . '/' . $file;
         }
         return '';
     }
@@ -1341,7 +1354,7 @@ class BimpTools
             $value = 0;
         }
 
-        $value = round($value, 2);
+//        $value = round($value, 2);
 
         $price = price($value, 1, '', 1, -1, -1, $currency);
 
@@ -1683,25 +1696,26 @@ class BimpTools
     {
         return str_pad(dechex($rgb * 255), 2, '0', STR_PAD_LEFT);
     }
-    
-    
-    public static function setContext($context){
+
+    public static function setContext($context)
+    {
         self::$context = $context;
         $_SESSION['context'] = $context;
     }
-    
-    public static function getContext(){
-        if(self::$context != "")
+
+    public static function getContext()
+    {
+        if (self::$context != "")
             return self::$context;
-        
-        if(isset($_REQUEST['context'])){
+
+        if (isset($_REQUEST['context'])) {
             self::setContext($_REQUEST['context']);
         }
-        
-        if(isset($_SESSION['context'])){
+
+        if (isset($_SESSION['context'])) {
             return $_SESSION['context'];
         }
-        
+
         return "";
     }
 }

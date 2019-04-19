@@ -1,47 +1,69 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpinterfaceclient/objects/BIC_UserClient.class.php';
 
 class BIC_UserClientContrats extends BimpObject {
-    
-    CONST USER_CLIENT_ROLE_ADMIN = 1;
-    CONST USER_CLIENT_ROLE_USER = 0;
-    CONST USER_CLIENT_STATUS_ACTIF = 1;
-    CONST USER_CLIENT_STATUS_INACTIF = 2;
-    CONST CONTRAT_NON_VALIDE = 0;
-    CONST CONTRAT_VALIDE = 1;
-    
-    public static $etat_contrat = Array(
-        self::CONTRAT_NON_VALIDE => Array('label' => 'Fermé', 'classes' => Array('danger'), 'icon' => 'times'),
-        self::CONTRAT_VALIDE => Array('label' => 'Ouvert', 'classes' => Array('success'), 'icon' => 'check')
-    );
-    
-    public function etatContrat() {
-        global $couverture;
-        
-        return self::$etat_contrat[1];
-    }
-    
-    public function getCouverture() {
-        global $couverture;
-        return $couverture;
-    }
-    
-    public function hasAdmin() {
-        $parent = $this->getParentInstance();
-        return $parent->id;
-    }
-    
-    public function getNomContrat() {
-        global $db;
-        require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
-        $contrat = new Contrat($db);
-        $contrat->fetch($this->getData('id_contrat'));
-        return 'ok';
-    }
-    
+
     public function canClientView() {
         return true;
     }
+
+    public function canClientEdit() {
+        global $userClient;
+        if ($userClient->it_is_admin()) {
+            return true;
+        }
+        return false;
+    }
+
+    public function canClientCreate() {
+        return $this->canClientEdit();
+    }
+        
+    public function canClientDelete() {
+        global $userClient;
+        if(isset($userClient) && $userClient->it_is_admin()) {
+            return 1;
+        }
+        return 0;
+    }
     
+    public function canDelete() {
+        return 1;
+    }
+
+    public function getContrats() {
+        global $userClient;
+        if (isset($userClient)) {
+            foreach ($userClient->getContratVisible(true) as $id_contrat => $contrat) {
+                $return[$id_contrat] = $contrat->getName();
+            }
+            return $return;
+        }
+    }
+
+    public function getFilterAssoContrat() {
+        return Array(
+            Array(
+                'name' => 'id_user',
+                'filter' => $_REQUEST['id']
+            )
+        );
+    }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        
+        $id_contrat = BimpTools::getValue('id_contrat');
+        $id_user = BimpTools::getValue('id_user');
+        if ($this->getList(array('id_contrat' => $id_contrat))) {
+            if($this->getList(array('id_user' => $id_user))){
+                return 'Ce contrat est déjà associer à cette utilisateur';
+            }
+        } else {
+            parent::create($warnings, $force_create);
+        }
+        
+    }
+
 }

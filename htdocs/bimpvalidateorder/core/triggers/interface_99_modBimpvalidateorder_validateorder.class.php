@@ -135,8 +135,8 @@ class Interfacevalidateorder extends DolibarrTriggers
                 return -2;
         }
         if ($action == 'ORDER_UNVALIDATE' || ($action == 'ORDER_DELETE' && $object->statut == 1)) {
-            $this->errors[] = "Impossible de dévalidé";
-            setEventMessages("Impossible de dévalidé", null, 'errors');
+            $this->errors[] = "Impossible de dévalider";
+            setEventMessages("Impossible de dévalider", null, 'errors');
             return -2;
         }
 

@@ -12,10 +12,11 @@ class Bimp_Propal extends BimpComm
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),
         1 => array('label' => 'Validée', 'icon' => 'check', 'classes' => array('info')),
-        2 => array('label' => 'Signée (A facturer)', 'icon' => 'check', 'classes' => array('info')),
+        2 => array('label' => 'Signée (A facturer)', 'icon' => 'check', 'classes' => array('success')),
         3 => array('label' => 'Non signée (fermée)', 'icon' => 'exclamation-circle', 'classes' => array('important')),
         4 => array('label' => 'Facturée (fermée)', 'icon' => 'check', 'classes' => array('success')),
     );
+    public $redirectMode = 4;//5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
 
     // Getters: 
 
@@ -79,11 +80,6 @@ class Bimp_Propal extends BimpComm
             2 => self::$status_list[2]['label'],
             3 => self::$status_list[3]['label']
         );
-    }
-
-    public function getListFilters()
-    {
-        return array();
     }
 
     public function getActionsButtons()
@@ -946,5 +942,12 @@ class Bimp_Propal extends BimpComm
         }
 
         return 1;
+    }
+    
+    public function iAmAdminRedirect() {
+        global $user;
+        if(in_array($user->id, array(60,282)))
+            return true;
+        return parent::iAmAdminRedirect();
     }
 }

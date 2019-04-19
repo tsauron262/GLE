@@ -33,6 +33,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function __construct($db)
     {
+        global $conf;
+        $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...", "", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
         parent::__construct($db, 'P', 'A4');
         if (!defined('BIMP_LIB')) {
             require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
@@ -111,8 +113,8 @@ class BimpDocumentPDF extends BimpModelPDF
                             $mysoc->zip = $entrepot->zip;
                             $mysoc->address = $entrepot->address;
                             $mysoc->town = $entrepot->town;
-                            
-                            if($entrepot->ref == "PR"){//patch new adresse
+
+                            if ($entrepot->ref == "PR") {//patch new adresse
                                 $mysoc->zip = "69760";
                                 $mysoc->address = "Bimp Groupe OLYS <br/>2 rue des Erables CS 21055  ";
                                 $mysoc->town = "LIMONEST";
@@ -153,8 +155,8 @@ class BimpDocumentPDF extends BimpModelPDF
             $logo_file = '';
         } else {
             $sizes = dol_getImageSize($logo_file, false);
-            
-            
+
+
             $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], $this->maxLogoWidth, $this->maxLogoHeight);
 
             $logo_width = $tabTaille[0];
@@ -169,7 +171,7 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (file_exists($soc_logo_file)) {
                     $sizes = dol_getImageSize($soc_logo_file, false);
                     if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
-                        
+
                         $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], 200, 100);
 
 
@@ -191,8 +193,9 @@ class BimpDocumentPDF extends BimpModelPDF
             'primary_color' => BimpCore::getParam('pdf/primary', '000000')
         );
     }
-    
-    public function calculeWidthHieghtLogo($width, $height, $maxWidth, $maxHeight){
+
+    public function calculeWidthHieghtLogo($width, $height, $maxWidth, $maxHeight)
+    {
         if ($width > $maxWidth) {
             $height = round(($maxWidth / $width) * $height);
             $width = $maxWidth;
@@ -292,7 +295,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
     protected function renderContent()
     {
-        $this->renderDocInfos($this->thirparty, $this->contact);
+        if(is_object($this->thirparty) || is_object($this->contact))
+            $this->renderDocInfos($this->thirparty, $this->contact);
         $this->renderTop();
         $this->renderBeforeLines();
         $this->renderLines();
@@ -391,19 +395,17 @@ class BimpDocumentPDF extends BimpModelPDF
     public function getTargetInfosHtml()
     {
         global $langs;
-        
+
         $nomsoc = pdfBuildThirdpartyName($this->thirdparty, $this->langs);
-        if(is_null($this->contact) || $this->contact->getFullName($langs) != $nomsoc)
-            $html = $nomsoc."<br/>";
-       
+        if (is_null($this->contact) || $this->contact->getFullName($langs) != $nomsoc)
+            $html = $nomsoc . "<br/>";
+
 //        if ($this->contact < 1)
 //            $html = '<div class="bold">' . pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '</div>';
 //        elseif (!empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
 //            $this->contact->firstname = pdfBuildThirdpartyName($this->thirdparty, $this->langs) . '<br/>' . $this->contact->firstname;
 //        else
 //            $html = "";
-
-
 //        if (strtoupper($this->thirdparty->lastname) == strtoupper($this->thirdparty->socname)) {
 //            $this->thirdparty->lastname = "";
 //        }
@@ -623,7 +625,7 @@ class BimpDocumentPDF extends BimpModelPDF
             if (isset($bimpLines[$line->id])) {
                 $bimpLine = $bimpLines[$line->id];
                 if ($bimpLine->getData("force_qty_1") && $row['qte'] > 1) {
-                    $row['pu_ht'] = price(str_replace(",",".", $row['pu_ht']) * $row['qte']);
+                    $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
                     $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                     $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
                     $row['qte'] = 1;
@@ -639,8 +641,8 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (isset($product->array_options['options_rpcp']) && $product->array_options['options_rpcp'] > 0)
                     $this->totals['RPCP'] += $product->array_options['options_rpcp'] * $row['qte'];
             }
-            
-            
+
+
             $row = $this->traitePeriodicity($row, array('pu_ht', 'pu_remise', 'total_ht', 'total_ttc'));
 
             $table->rows[] = $row;
@@ -659,13 +661,13 @@ class BimpDocumentPDF extends BimpModelPDF
                 'desc'     => $remise_label,
                 'qte'      => 1,
                 'tva'      => '',
-                'pu_ht'    => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], ''),
-                'total_ht' => BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], '')
+                'pu_ht'    => BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], ''),
+                'total_ht' => BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], '')
             );
             if (!$this->hideTtc)
-                $row['total_ttc'] = BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ttc'], '');
+                $row['total_ttc'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ttc'], '');
             else
-                $row['pu_remise'] = BimpTools::displayMoneyValue($remise_infos['remise_globale_amount_ht'], '');
+                $row['pu_remise'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], '');
 
             $table->rows[] = $row;
         }
@@ -675,12 +677,13 @@ class BimpDocumentPDF extends BimpModelPDF
         $table->write();
         unset($table);
     }
-    
-    public function traitePeriodicity($row, $champs){
+
+    public function traitePeriodicity($row, $champs)
+    {
         if ((int) $this->periodicity && (int) $this->nbPeriods > 0) {
-            foreach($champs as $nomChamp){
-                if(isset($row[$nomChamp]))
-                    $row[$nomChamp] = BimpTools::displayMoneyValue(str_replace(",",".", $row[$nomChamp]) / $this->nbPeriods);
+            foreach ($champs as $nomChamp) {
+                if (isset($row[$nomChamp]))
+                    $row[$nomChamp] = BimpTools::displayMoneyValue(str_replace(",", ".", $row[$nomChamp]) / $this->nbPeriods);
             }
         }
         return $row;

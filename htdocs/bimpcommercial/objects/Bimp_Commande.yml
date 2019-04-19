@@ -272,6 +272,10 @@ fields_tables:
                   
     pdf: 
         rows: 
+            - field: remise_globale_label
+              edit: 1
+              show: 
+                  callback: hasRemiseGlobale
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton

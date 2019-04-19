@@ -12,13 +12,3 @@ sections:
           panel: 1
           name: default
           object: userClient
-#      nav_tabs: 
-#          - id: card
-#            title: Liste des comptes
-#            struct: 
-#                type: list
-#                list: 
-#                    panel: 1
-#                    name: default
-#                    object: userClient
-#           

@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/objects/BimpDolObject.class.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 
 class BContract_contrat extends BimpDolObject {
 
@@ -87,70 +88,121 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_REGLEMENT_REMBOURCEMENT => 'Rembourcement',
         self::CONTRAT_REGLEMENT_AMERICAN_EXPRESS => 'American Express'
     );
-
+    
+    function __construct($module, $object_name) {
+        if(BimpTools::getContext() == 'public') {
+            $this->redirectMode = 4;
+        }
+        return parent::__construct($module, $object_name);
+    }
+    
     public function displayRef() {
         return $this->getData('ref');
     }
 
-    public function displayEndDate($date_start, $duree_mois) {
-        $date_start = $date_start['value'];
-        $date = strtotime($date_start);
-        $dateTime = new DateTime();
-        $dateTime->setTimestamp($date);
-        $dateTime->add(new DateInterval("P" . $duree_mois['value'] . "M"));
-        $dateTime->sub(new DateInterval("P1D"));
-        return $dateTime->format('d / m / Y');
+    public function displayEndDate() {
+        $fin = $this->getEndDate();
+        if($fin > 0)
+            return $fin->format('d/m/Y');
+    }
+
+    public function getEndDate() {
+        $debut = new DateTime();
+        $fin = new DateTime();
+        $Timestamp_debut = strtotime($this->getData('date_start'));
+        if($Timestamp_debut > 0){
+            $debut->setTimestamp($Timestamp_debut);
+        $fin->setTimestamp($Timestamp_debut);
+        if($this->getData('duree_mois') > 0)
+            $fin = $fin->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
+        $fin = $fin->sub(new DateInterval("P1D"));
+        return $fin;
+        }
+        return '';
     }
     
-    public function getEndDate() {
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        $this->autoClose();
+        return $return;
+    }
+    
+    public function autoClose(){//passer les contrat au statut clos quand toutes les enssiéne ligne sont close
+        if($this->id > 0 && $this->getData("statut") == 1 && $this->getEndDate() < new DateTime()){
+            $sql = $this->db->db->query("SELECT * FROM `llx_contratdet` WHERE statut != 5 AND `fk_contrat` = ".$this->id);
+            if($this->db->db->num_rows($sql) == 0){
+                $this->updateField("statut", 2);
+            }
+        }
         
     }
-    
+
     public function getActionsButtons() {
         $buttons = array();
-        if ($this->getData('statut') != self::CONTRAT_STATUS_VALIDE) {
+        $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+        if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
             $buttons[] = array(
                 'label' => 'Valider le contrat',
                 'icon' => 'fas_check',
-                'onclick' => $this->getJsNewStatusOnclick(self::CONTRAT_STATUS_VALIDE)
+                'onclick' => $this->getJsActionOnclick('validation', array(), array(
+                    'success_callback' => $callback
+                ))
             );
         }
         return $buttons;
     }
+    
+    public function actionValidation($data, &$success) {
+        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+        $instance->find(Array('id_contrat' => $this->id));
+        if($instance->updateLine($this->id)) {
+            $success = 'Contrat validé et échéancier créer';
+            $this->updateField('statut', self::CONTRAT_STATUS_VALIDE);
+        }
+    }
+    
+    public function canEdit(){
+        if($this->getData("statut") != self::CONTRAT_STATUS_CLOS)
+            return true;
+        return false;
+    }
 
     public function canClientView() {
-        return true;
+        global $userClient;
+        if($userClient->it_is_admin()){
+            return true;
+        }
+        $list = $userClient->getChildrenObjects('user_client_contrat');
+        foreach ($list as $obj) {
+            if($obj->getData('id_contrat') == $this->id) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public function isValide() {
         if ($this->getData('date_start') && $this->getData('duree_mois')) { // On est dans les nouveaux contrats
-            $debut = new DateTime();
-            $fin = new DateTime();
-            $Timestamp_debut = strtotime($this->getData('date_start'));
-            $debut->setTimestamp($Timestamp_debut);
-            $fin->setTimestamp($Timestamp_debut);
-            $fin = $fin->add(new DateInterval("P" . $this->getData('duree_mois') . "M"));
-            $fin = $fin->sub(new DateInterval("P1D"));
-            $fin = strtotime($fin->format('Y-m-d'));
-            $debut = strtotime($debut->format('Y-m-d'));
             $aujourdhui = strtotime(date('Y-m-d'));
+            $fin = $this->getEndDate();
+            $fin = $fin->getTimestamp();
             if ($fin - $aujourdhui > 0) {
                 return true;
             }
         } else { // On est dans les anciens contrats
             $lines = $this->dol_object->lines; // Changera quand l'objet BContract_contratLine sera OP
             foreach ($lines as $line) {
-                    if ($line->statut == 4) {
-                        return true;
-                    }
+                if ($line->statut == 4) {
+                    return true;
                 }
+            }
         }
         return false;
     }
-    
-    public function display_card(){
+
+    public function display_card() {
         $card = "";
-        
+
         $card .= '<div class="col-md-4">';
         $card .= '<div class="card">';
         $card .= '<div class="header">';
@@ -160,15 +212,23 @@ class BContract_contrat extends BimpDolObject {
         $card .= '</p>';
         $card .= '</div>';
         $card .= '<div class="content"><div class="footer"><div class="legend">';
-        $card .= ($this->isValide()) ? '<i class="fa fa-plus text-success"></i> <a href="?fc=contrat_ticket&id='.$this->getData('id').'">Créer un ticket support</a>' : '';
-        $card .= '<i class="fa fa-eye text-info"></i> Voir le contrat</div><hr><div class="stats"></div></div></div>';
+        $card .= ($this->isValide()) ? '<i class="fa fa-plus text-success"></i> <a href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets">Créer un ticket support</a>' : '';
+        $card .= '<i class="fa fa-eye text-info"></i><a href="?fc=contrat_ticket&id='.$this->getData('id').'">Voir le contrat</a></div><hr><div class="stats"></div></div></div>';
         $card .= '</div></div>';
-        
+
         return $card;
     }
-    
+
     public function getName() {
         return $this->getData('ref');
     }
-
+    
+    public function renderEcheancier() {
+        
+        // TODO a viré (voir pour objet)
+        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+        $instance->find(Array('id_contrat' => $this->id));
+        return $instance->display();
+    }
+    
 }

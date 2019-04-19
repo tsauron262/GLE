@@ -16,6 +16,10 @@ objects:
                 file: societe
                 id_object:
                     field_value: attached_societe
+                    
+    tickets:
+        instance:
+            bimp_object: BIC_UserTickets
 
 header_btn: 
     callback: getActionsButtons
@@ -44,14 +48,22 @@ fields:
         label: Mot de passe 
         type: password
     attached_societe:
-        label: Société du compte
+        label: 
+            callback:
+                method: lang
+                params:
+                    - societeOfAccount
         type: id_object
         object: client
         required: 1
         input: 
             type: search_societe
             societe_type: customer
-            help: Entrez le nom ou la référence d'un client pour effectuer une recherche
+            help: 
+                callback:
+                    method: lang
+                    params:
+                        - helpSearchSociete
             card: default
         search:
             input: 
@@ -76,7 +88,11 @@ fields:
         values:
             array: status
     renew_required:
-        label: Doit changer sont mot de passe
+        label: 
+            callback:
+                method: lang
+                params:
+                    - mustChangePassword
         type: bool
     lang:
         label: Langue par defaut
@@ -110,12 +126,19 @@ lists:
                 field: status
             lang:
                 field: lang
+                show:
+                    callback: showLang
     full:
         extends: default
         edit_form: editFull
+        add_form_name: editFull
+        add_form_values:
+            fields:
+                role: 1
         cols:
             attached_societe:
                 field: attached_societe
+                display: nom_url
             renew_required:
                 field: renew_required
             lang:
@@ -144,9 +167,36 @@ views:
         rows:
             - cols: 
                 - type: list
+                  show:
+                      callback: it_is_not_admin
                   list:
                         children: user_client_contrat
-
+    
+    for_controller:
+        rows:
+            title: infos
+            - cols:
+                - type: nav_tabs
+                  nav_tabs:
+                      - id: attached_contrat
+                        title: Contrats associés
+                        show:
+                            callback: it_is_not_admin
+                        struct:
+                            type: list
+                            list:
+                                children: user_client_contrat
+                      - id: attached_tickets
+                        title: Tickets support
+                        struct: 
+                            type: list
+                            list:
+                                name: pageUser
+                                object: tickets
+                            
+                            
+                        
+                
 forms:
     edit:
         objects_change_reload: BIC_UserClient, BIC_UserClientContrats
@@ -155,22 +205,42 @@ forms:
             - field: role
             - field: status
             - field: lang
+              show:
+                  callback: showLang
             - field: attached_societe
               hidden: 1
             - custom: 1
-              label: Envoyer le mot de passe par mail ?
+              label: 
+                  callback:
+                      method: lang
+                      params:
+                          - sendEmail
               input_name: send_mail
               input:
                   type: toggle
               value: 1
+            - object: user_client_contrat
+              multiple: 1
     editFull:
         rows:
             - field: email
             - field: role
             - field: status
             - field: lang
+              show:
+                  callback: showLang
             - field: attached_societe
             - field: renew_required
+            - custom: 1
+              label: 
+                  callback:
+                      mathod: lang
+                      params:
+                          - sendEmail
+              input_name: send_mail
+              input:
+                  type: toggle
+              value: 1
         
 cards:
     default:

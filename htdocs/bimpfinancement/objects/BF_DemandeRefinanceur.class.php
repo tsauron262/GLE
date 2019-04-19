@@ -116,7 +116,8 @@ class BF_DemandeRefinanceur extends BimpObject {
             $isEchoir = $this->isEchouar();
 
 
-            $vr = 11850;
+            $parent = $this->getParentInstance();
+            $vr = $parent->getData("vr_vente");
             $tauxPM = $taux / 100 / (12/$dureePeriode);
 
             $loyer = $this->vpm($tauxPM, 0, $nbPeriodes, $totalDemande, -$vr, $isEchoir);

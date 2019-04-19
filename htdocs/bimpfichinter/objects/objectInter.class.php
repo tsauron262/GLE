@@ -8,6 +8,7 @@ class ObjectInter extends extraFI{
     public static $controller_name;
     
     
+    
        public function getList_commandeArray(){
         $this->list_commande = array();
         if($this->isLoaded() && $this->getData("fk_soc") > 0){
@@ -31,6 +32,7 @@ class ObjectInter extends extraFI{
     }
     
     
+    
     public function renderHeaderExtraLeft()
     {
         $soc = $this->getChildObject("client");
@@ -40,10 +42,6 @@ class ObjectInter extends extraFI{
     
     
     
-    public function renderHeaderExtraRight(){
-        global $htmlSup;
-        return $htmlSup;
-    }
     
 
         
@@ -54,7 +52,7 @@ class ObjectInter extends extraFI{
             $clef = 'getList_contratArray_user_'.$this->getData("fk_soc");
             if(!isset(self::$cache[$clef])){
                 self::$cache[$clef] = array(0=>array('label'=>''));
-                $sql = $this->db->db->query("SELECT ref, rowid FROM llx_contrat WHERE fk_soc = ".$this->getData("fk_soc"));
+                $sql = $this->db->db->query("SELECT ref, rowid FROM llx_contrat WHERE fk_soc = ".$this->getData("fk_soc")." AND (statut = 1 || rowid = '".$this->getData("fk_contrat")."')");
                 while($ln = $this->db->db->fetch_object($sql))
                         self::$cache[$clef][$ln->rowid] = array('label' => $ln->ref, 'icon' => '', 'classes' => array('info'));
             }
@@ -67,63 +65,61 @@ class ObjectInter extends extraFI{
     
     
     
-    
-    public static function redirect($newVersion = true, $id = 0){
-        
-        
-        $redirectModeOldNew = 1;//0 pas de redirect 1 redirect button   2 redirect direct
-        $redirectModeNewOld = 2;//0 pas de redirect 1 redirect button   2 redirect direct
-        
-        global $user;
-        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42)))
-                $redirectModeNewOld = 1;
-        
-        if($redirectModeOldNew == 2)//pur incohérence
-            $redirectModeNewOld = 0;
-        elseif($redirectModeNewOld == 2)
-            $redirectModeOldNew = 0;
-        
-        if($id == "" || $id == 0)
-            $id = "list";
-        $html = "";
-        $location = "";
-        if($newVersion && $redirectModeNewOld > 0){
-            if($redirectModeNewOld == 1)
-                $idR = $_REQUEST["idR"];
-            elseif($redirectModeNewOld == 2)
-                $idR = $id;
-            if($idR == "list")
-                $location = "/".self::$dirDol."/list.php";
-            elseif($idR > 0){
-                $location = "/".self::$dirDol."/card.php?id=".$idR;
-            }
-            else{
-                $html .= "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='Ancienne version'/><input type='hidden' name='idR' value='".$id."'/></form>";
-            }
-        }
-        elseif(!$newVersion && $redirectModeOldNew > 0){
-            if($redirectModeOldNew == 1)
-                $idR = $_REQUEST["idR"];
-            elseif($redirectModeOldNew == 2)
-                $idR = $id;
-            
-            
-            if($idR == "list"){
-                    $location = "/bimpfichinter/";
-            }elseif($idR > 0){
-                $location = "/bimpfichinter/?fc=".self::$controller_name."&id=".$idR;
-            }
-            else{
-                $html .= "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='Nouvelle version'/><input type='hidden' name='idR' value='".$id."'/></form>";
-            }
-        }
-        if($location != ""){
-            header("Location: ".DOL_URL_ROOT.$location);
-            exit;
-        }
-        
-        return $html;
-    }
+//    public static function redirect($newVersion = true, $id = 0){
+//        
+//        $redirectModeOldNew = 1;//0 pas de redirect 1 redirect button   2 redirect direct
+//        $redirectModeNewOld = 2;//0 pas de redirect 1 redirect button   2 redirect direct
+//        
+//        global $user;
+//        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42)))
+//                $redirectModeNewOld = 1;
+//        
+//        if($redirectModeOldNew == 2)//pur incohérence
+//            $redirectModeNewOld = 0;
+//        elseif($redirectModeNewOld == 2)
+//            $redirectModeOldNew = 0;
+//        
+//        if($id == "" || $id == 0)
+//            $id = "list";
+//        $html = "";
+//        $location = "";
+//        if($newVersion && $redirectModeNewOld > 0){
+//            if($redirectModeNewOld == 1)
+//                $idR = $_REQUEST["idR"];
+//            elseif($redirectModeNewOld == 2)
+//                $idR = $id;
+//            if($idR == "list")
+//                $location = "/".self::$dirDol."/list.php";
+//            elseif($idR > 0){
+//                $location = "/".self::$dirDol."/card.php?id=".$idR;
+//            }
+//            else{
+//                $html .= "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='Ancienne version'/><input type='hidden' name='idR' value='".$id."'/></form>";
+//            }
+//        }
+//        elseif(!$newVersion && $redirectModeOldNew > 0){
+//            if($redirectModeOldNew == 1)
+//                $idR = $_REQUEST["idR"];
+//            elseif($redirectModeOldNew == 2)
+//                $idR = $id;
+//            
+//            
+//            if($idR == "list"){
+//                    $location = "/bimpfichinter/";
+//            }elseif($idR > 0){
+//                $location = "/bimpfichinter/?fc=".self::$controller_name."&id=".$idR;
+//            }
+//            else{
+//                $html .= "<form method='POST'><input type='submit' class='btn btn-primary saveButton' name='redirige' value='Nouvelle version'/><input type='hidden' name='idR' value='".$id."'/></form>";
+//            }
+//        }
+//        if($location != ""){
+//            header("Location: ".DOL_URL_ROOT.$location);
+//            exit;
+//        }
+//        
+//        return $html;
+//    }
     
     
     
@@ -151,5 +147,12 @@ class ObjectInter extends extraFI{
             
         }
             
+    }
+    
+    public function iAmAdminRedirect() {
+        global $user;
+        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42)))
+            return true;
+        parent::iAmAdminRedirect();
     }
 }

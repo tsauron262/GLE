@@ -169,6 +169,9 @@ forms:
             - field: pdf_periodicity
             - field: pdf_periods_number
             - field: pdf_proforma
+            - field: remise_globale_label
+              show: 
+                  callback: hasRemiseGlobale
             - field: note_private
             - field: note_public
             
@@ -263,6 +266,10 @@ fields_tables:
               edit: 1
             - field: pdf_proforma
               edit: 1
+            - field: remise_globale_label
+              edit: 1
+              show: 
+                  callback: hasRemiseGlobale
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton
@@ -362,7 +369,9 @@ lists:
             commercial:
             total_ttc: 
         
+        
     user: 
+        title: Mes propositions commerciales
         extends: default
         cols: 
             commercial: unset

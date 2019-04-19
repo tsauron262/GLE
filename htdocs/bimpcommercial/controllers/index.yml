@@ -1,0 +1,51 @@
+bootstrap: 1
+title: Les 5 derniéers objets créer
+
+objects: 
+    propal: 
+        instance:
+            bimp_object: Bimp_Propal
+    commande: 
+        instance:
+            bimp_object: Bimp_Commande
+    commandeFourn: 
+        instance:
+            bimp_object: Bimp_CommandeFourn
+    facture: 
+        instance:
+            bimp_object: Bimp_Facture
+    factureFourn: 
+        instance:
+            bimp_object: Bimp_FactureFourn
+            
+sections: 
+    - type: rows
+      rows:
+        - cols: 
+              - type: list
+                col_lg: 6
+                list: 
+                    object: propal
+                    name: mini_user_create
+              - type: list
+                col_lg: 6
+                list: 
+                    object: commande
+                    name: mini_user_create
+              - type: list
+                col_lg: 6
+                list: 
+                    object: commandeFourn
+                    name: mini_user_create
+              - type: list
+                col_lg: 6
+                list: 
+                    object: facture
+                    name: mini_user_create
+              - type: list
+                col_lg: 6
+                list: 
+                    object: factureFourn
+                    name: mini_user_create
+          
+    

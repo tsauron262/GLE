@@ -36,7 +36,11 @@ objects:
                 fields: 
                     parent_module: bimpcontract
                     parent_object_name: BContract_contrat
-
+        
+        echeancier:
+            instance:
+                bimp_object: BContract_echeancier
+        
 force_extrafields_update: 1
 
 table: contrat
@@ -244,6 +248,28 @@ views:
                             col_lg: 12
                             fields_table:
                                 name: client
+    
+    interface_client:
+        title:
+            callback: displayRef
+        objects_change_reload: BContract_contract
+        delete_btn: 1
+        edit_form: edit_contrat
+        footer_extra_btn: 
+            callback: getActionsButtons
+        rows:
+            - cols: 
+                - type: rows
+                  col_lg: 12
+                  col_md: 12
+                  rows:                        
+                      - cols: 
+                          - type: fields_table
+                            col_lg: 12
+                            fields_table: 
+                                name: infos
+
+    
     file:
         title: Fichiers joint
         rows:
@@ -256,5 +282,24 @@ views:
                           - type: list
                             list: 
                                children: files
-        
-        
+                               
+    echeancier:
+        title: titre
+        panel: 1
+        rows:
+            - cols:
+                - type: custom
+                  col_lg: 12
+                  col_md: 12
+                  custom:
+                      callback: renderEcheancier
+                      
+    
+    lines:
+        title: Contenu du contrat
+        panel: 0
+        rows:
+            - cols:
+                - type: list
+                  list:
+                      children: lines

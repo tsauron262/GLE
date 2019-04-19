@@ -31,6 +31,13 @@
  */
 
 require '../../main.inc.php';
+
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_CommandeFourn", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+
+
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formorder.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/modules/supplier_order/modules_commandefournisseur.php';
@@ -1369,6 +1376,7 @@ if (! empty($conf->projet->enabled)) { $formproject = new FormProjets($db); }
 
 $help_url='EN:Module_Suppliers_Orders|FR:CommandeFournisseur|ES:Módulo_Pedidos_a_proveedores';
 llxHeader('',$langs->trans("Order"),$help_url);
+echo $htmlRedirect;
 
 
 $now=dol_now();

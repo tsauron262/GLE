@@ -230,7 +230,7 @@ class Bimp_Commande extends BimpComm
     {
         global $conf, $langs, $user;
 
-        $buttons = array();
+        $buttons = parent::getActionsButtons();
 
         if ($this->isLoaded()) {
             $status = (int) $this->getData('fk_statut');

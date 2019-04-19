@@ -3331,7 +3331,17 @@ class BimpObject extends BimpCache
                         $fields[] = $field_name;
                     }
 
-                    $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $result);
+                    $up_result = $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $this->id);
+                    
+                    if ($up_result <= 0) {
+                        $msg = 'Echec de la mise à jour des champs additionnels';
+                        $sql_errors = $this->db->db->lasterror;
+                        if ($sql_errors) {
+                            $msg .= ' - Erreur SQL: ' . $sql_errors;
+                        }
+
+                        $errors[] = $msg;
+                    }
                 }
             }
             return 1;

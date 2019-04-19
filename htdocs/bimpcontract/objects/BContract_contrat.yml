@@ -293,3 +293,13 @@ views:
                   col_md: 12
                   custom:
                       callback: renderEcheancier
+                      
+    
+    lines:
+        title: Contenu du contrat
+        panel: 0
+        rows:
+            - cols:
+                - type: list
+                  list:
+                      children: lines

@@ -295,7 +295,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
     protected function renderContent()
     {
-        $this->renderDocInfos($this->thirparty, $this->contact);
+        if(is_object($this->thirparty) || is_object($this->contact))
+            $this->renderDocInfos($this->thirparty, $this->contact);
         $this->renderTop();
         $this->renderBeforeLines();
         $this->renderLines();

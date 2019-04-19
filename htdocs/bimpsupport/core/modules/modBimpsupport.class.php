@@ -324,8 +324,8 @@ class modBimpsupport extends DolibarrModules {
         $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpdevissav', 1, 'propal', 'Devis SAV', NULL);";
         $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpinvoicesav', 1, 'invoice', 'Facture SAV', NULL);";
         
-        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette1', 1, 'product', 'Etiquette Stock', NULL);";
-        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette2', 1, 'product', 'Etiquette Client', NULL);";
+//        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette1', 1, 'product', 'Etiquette Stock', NULL);";
+//        $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'prodetiquette2', 1, 'product', 'Etiquette Client', NULL);";
 
         return $this->_init($sql, $options);
     }
@@ -343,8 +343,8 @@ class modBimpsupport extends DolibarrModules {
         $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevissav';";
         $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpinvoicesav';";
         
-        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette1';";
-        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette2';";
+//        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette1';";
+//        $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'prodetiquette2';";
                 
         return $this->_remove($sql, $options);
     }

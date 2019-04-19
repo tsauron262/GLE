@@ -419,10 +419,11 @@ fields_tables:
         title: Informations
         icon: info-circle
         rows:
-            - field: id_contrat
-            - field: id_user_client
+            - field: sujet
             - field: status
             - field: priorite
+            - field: id_contrat
+            - field: id_user_client
               
 views: 
     default:

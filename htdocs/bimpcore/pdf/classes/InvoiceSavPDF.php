@@ -66,4 +66,27 @@ class InvoiceSavPDF extends InvoicePDF
 
         return $html;
     }
+
+    public function renderAfterBottom()
+    {
+        $html .= '<table cellpadding="20px"><tr><td>';
+//        $html .= '<p style="font-size: 7px; color: #002E50">';
+        $html .= '<div style="text-indent: 15px; font-size: 7px; color: #002E50">';
+        $html .= 'Si le service est requis conformément à une obligation de réparation d’un tiers, ces informations seront ';
+        $html .= 'transférées au tiers pour vérification et des objectifs de qualité, notamment la confirmation de la transaction de réparation et la ';
+        $html .= 'soumission d’une enquéte client. En signant, vous acceptez ce transfert ainsi que l’utilisation de ces informations par un tiers.';
+        $html .= '<br/>';
+        $html .= 'Les pièces de maintenance ou les produits utilisés pour la réparation de votre produit sont neufs ou d\'un état équivalent à neuf ';
+        $html .= 'en termes de performance et de fiabilité. ';
+        $html .= '<br/>';
+        $html .= 'Pour du matériel couvert par Apple, la garantie initiale s\'applique. Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d\'oeuvre. Les pannes logicielles ne sont pas couvertes par la garantie du fabricant. Une garantie de 30 jours est appliquée pour les réparations logicielles.';
+        $html .= '<br/>';
+        $html .= 'Les informations personnelles requises suivantes (nom, adresse, téléphone et adresse mail) sont nécessaires pour poursuivre la ';
+        $html .= 'demande de réparation.';
+        $html .= '</div>';
+//        $html .= '</p>';
+        $html .= '</td></tr></table>';
+
+        $this->writeContent($html);
+    }
 }

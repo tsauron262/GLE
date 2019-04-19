@@ -36,6 +36,7 @@ lists:
         n: 25
         delete_btn: 0
         edit_btn: 0
+        update_btn: 1
         add_object_row: 0
         modal_view: fiche_contrat
         #page_btn: 1
@@ -45,8 +46,11 @@ lists:
                 display: nom_url
             next_facture_date:
                 field: next_facture_date
+                edit: 1
             next_facture_amount:
                 field: next_facture_amount
+                edit: 1
             validate:
                 field: validate
+                edit: 1
                 

@@ -215,7 +215,7 @@ class BS_Ticket extends BimpObject
                     ))
                 );
             }
-            if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT){
+            if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && BimpTools::getContext() == 'private'){
                 $buttons[] = array(
                     'label' => 'Prendre en compte le ticket',
                     'icon' => 'fas_thumbs-up',
@@ -567,7 +567,7 @@ class BS_Ticket extends BimpObject
             return $errors;
         }
         
-        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT) {
+        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->getData('id_user_client') > 0) {
             return 'Impossible de repasser le ticket en demande client';
         }
         

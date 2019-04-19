@@ -82,14 +82,12 @@ class Bimp_Propal extends BimpComm
         );
     }
 
-
-
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
         $langs->load('propal');
 
-        $buttons = array();
+        $buttons = parent::getActionsButtons();
 
         if ($this->isLoaded()) {
             $buttons[] = array(

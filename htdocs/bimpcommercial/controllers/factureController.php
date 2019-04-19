@@ -7,8 +7,8 @@ class factureController extends BimpCommController
 
     public function init()
     {
-        header("Location: " . DOL_URL_ROOT.'/compta/facture/card.php?id='.(int) BimpTools::getValue('id', 0));
-        exit;
+//        header("Location: " . DOL_URL_ROOT.'/compta/facture/card.php?id='.(int) BimpTools::getValue('id', 0));
+//        exit;
         global $langs, $conf;
 
         $langs->load('bills');

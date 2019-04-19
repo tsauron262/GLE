@@ -1769,7 +1769,14 @@ class ObjectLine extends BimpObject
     {
         if ($this->isLoaded()) {
             $remises_infos = $this->getRemiseTotalInfos(true, $remise_globale_rate);
-            if ((float) $this->remise !== (float) $remises_infos['total_percent'] ||
+            
+//            echo 'parent: ';
+//            
+//            $parent = $this->getParentInstance();
+//            
+//            $parent->printData();
+
+            if (is_null($this->remise) || (float) $this->remise !== (float) $remises_infos['total_percent'] ||
                     $remises_infos['total_percent'] !== (float) $this->getData('remise') ||
                     $remises_infos['total_percent'] !== (float) $this->getInitData('remise')) {
                 $this->update($warnings, true);

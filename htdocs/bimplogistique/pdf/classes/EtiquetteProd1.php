@@ -27,8 +27,6 @@ class EtiquetteProd1 extends BimpEtiquettePDF {
         $this->pdf->setXY(6,8);
         $this->pdf->SetFont('times', '', 10);
         
-        $this->object->description .= $this->object->description;
-        
         if(strlen($this->object->description) > 53)
             $this->pdf->SetFont('times', '', 9);
         

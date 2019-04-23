@@ -72,6 +72,16 @@ fields:
     date_delete: 
         label: Supprimé le
         type: datetime
+    
+    visibility:
+        label: Visibilitée
+        values:
+            array: visibilities
+        default_value:
+            callback:
+                method: currentContext
+                params:
+                    - default_value
 
 forms:
     upload: 
@@ -88,10 +98,18 @@ forms:
             - field: file_name
               label: Nom à donner au fichier
             - field: description
+            - field: visibility
+              edit:
+                  callback: currentContext
+                  
+                          
     edit:
         rows:
             - field: file_name
             - field: description
+            - field: visibility
+              edit:
+                  callback: currentContext
       
 lists_cols: 
     parent: 
@@ -111,6 +129,9 @@ lists_cols:
         field: date_create
     descripton: 
         field: description
+    visibility:
+        field: visibility
+        
 lists:
     default:
         title: Fichiers
@@ -140,8 +161,9 @@ lists:
             nom:
             size: 
             date:
-            descripton: 
-                
+            descripton:
+            visibility:                    
+        
     associates: 
         title: Fichiers associés
         checkboxes: 1

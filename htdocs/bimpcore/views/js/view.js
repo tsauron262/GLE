@@ -174,6 +174,8 @@ function saveObjectfromFieldsTable(fields_table_id, $button) {
     var $resultContainer = $fieldsTable.find('#' + fields_table_id + '_result');
 
     var data = getInputsValues($fieldsTable);
+    
+    console.table(data);
 
     data['module'] = $fieldsTable.data('module');
     data['object_name'] = $fieldsTable.data('object_name');

@@ -138,6 +138,8 @@ forms:
         msgs:
             - content: Ne pas mettre d'informations confidentielles dans le champ sujet
               type: info
+            - content: Pour envoyer un fichier joint merci d'aller sur la page ticket après sa création
+              type: info
         rows:
             - field: id_client
               edit: 0

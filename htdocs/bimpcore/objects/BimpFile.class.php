@@ -7,7 +7,43 @@ class BimpFile extends BimpObject
 
     // Chemins des fichier : DOL_DATA_ROOT/nom_module/nom_objet/id_objet/nom_fichier.ext
     private $dontRemove = false;
-
+    public static $visibilities = array(
+        1 => 'Membres Bimp et client',
+        2 => 'Membres BIMP',
+    );
+    
+    // CAN CONTEXTE CLIENT
+    public function canClientView(){
+        global $userClient;
+        if(isset($userClient)){
+            return 1;
+        }
+        return 0;
+    }
+    
+    public function canClientCreate() {
+       $instance = $this->getInstance('bimpsupport', 'BS_Ticket', $this->getData('id_parent'));
+       if($instance->getData('status') != 999) {
+           return 1;
+       }
+       return 0;
+    }
+    
+    public function canClientEdit() {
+        return $this->canClientCreate();
+    }
+    
+    public function currentContext($default_value = null) {
+        if(BimpTools::getContext() == 'public') {
+            if($default_value == 'default_value')
+                return 1;
+            return 0;
+        }
+        if($default_value = 'default_value')
+                return 2;
+        return 1;
+    }
+    
     // Getters: 
 
     public function getFilePath()
@@ -27,7 +63,7 @@ class BimpFile extends BimpObject
 
         return $dir . $file . '.' . $ext;
     }
-
+    
     public function getFileDir()
     {
         $parent = $this->getParentInstance();

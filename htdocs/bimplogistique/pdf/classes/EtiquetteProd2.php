@@ -18,18 +18,19 @@ class EtiquetteProd2 extends BimpEtiquettePDF
        protected function renderContent() {
 
 //        $html = "";
-        if(strlen($this->object->description) < 23)
+        $label = $this->object->label;
+        if(strlen($label) < 23)
             $this->pdf->SetFont('times', 'B', 10);
-        elseif(strlen($this->object->description) < 35)
+        elseif(strlen($label) < 35)
             $this->pdf->SetFont('times', 'B', 7);
-        elseif(strlen($this->object->description) < 46)
+        elseif(strlen($label) < 46)
             $this->pdf->SetFont('times', 'B', 6);
         else{
-            $this->object->description = substr($this->object->description,0,43)."...";
+            $label = substr($label,0,43)."...";
             $this->pdf->SetFont('times', 'B', 6);
         }
         $this->pdf->setXY(6,1);
-        $this->pdf->Cell(40,5,$this->object->description,0,0,'C');
+        $this->pdf->Cell(40,5,$label,0,0,'C');
         
         
         $this->pdf->SetFont('times', '', 8);

@@ -27,16 +27,17 @@ class EtiquetteProd1 extends BimpEtiquettePDF {
         $this->pdf->setXY(6,8);
         $this->pdf->SetFont('times', '', 10);
         
-        if(strlen($this->object->description) > 53)
+        $label = $this->object->label;
+        if(strlen($label) > 53)
             $this->pdf->SetFont('times', '', 9);
         
-        if(strlen($this->object->description) > 118)
-            $this->object->description = substr($this->object->description,0,115)."...";
+        if(strlen($label) > 118)
+            $label = substr($label,0,115)."...";
         
         
-        $this->pdf->MultiCell(77,5,$this->object->description,0,'C');
+        $this->pdf->MultiCell(77,5,$label,0,'C');
         
-//         $html .= "<span class='center'>".$this->object->description."</span>";
+//         $html .= "<span class='center'>".$label."</span>";
 //
 //        $html .= "<div class='tier fleft'></div>";
 //        $html .= "<div class='cadre tier fleft'>".dol_print_date(dol_now(), "%B %Y")."</div>";

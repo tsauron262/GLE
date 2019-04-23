@@ -1,0 +1,27 @@
+.center {
+  text-align: center;
+  width: 100%;
+  margin: auto;
+}
+
+.cadre{
+  border: 3px solid black;
+}
+
+.tier{
+  text-align: center;
+  padding: 0 30px;
+  margin: 10px 30px;
+  width: 25%
+}
+
+.fleft{
+    float: left;
+}
+.gras{
+    font-weight:bold;
+}
+
+.deuxtier{
+    width: 60%;
+}

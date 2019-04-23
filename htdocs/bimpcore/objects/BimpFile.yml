@@ -149,6 +149,8 @@ lists:
         add_form_name: upload
         edit_btn: 1
         edit_form: edit
+        list_filters:
+            callback: getFilterListInterfaceClient
         delete_btn: 
             callback: isDeletable
         sort_field: id

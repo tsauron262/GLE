@@ -96,6 +96,17 @@ fields:
         type: percent
         default_value: 0
         decimals: 8
+        
+    remise_pa: 
+        label: Remise sur le prix d'achat
+        type: percent
+        default_value: 0
+        decimals: 8
+        
+    remise_crt: 
+        label: Remise CRT 
+        type: bool
+        default_value: 0
 
 forms: 
     default: 
@@ -104,203 +115,213 @@ forms:
                 remises: 
                     callback: getClientDefaultRemiseFormValues
         rows: 
-            - field: id_parent_line
-              
-            - field: type
-              hidden: 
-                  field_value: id
-            
-            - custom: 1
-              label: Produit
-              value: 
-                  callback: getIdProductFromPost
-              input_name: id_product
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - id_product
-              display_if: 
-                  field_name: type
-                  hide_values: 2
-              show:
-                  callback: isProductEditable
-                          
-            - custom: 1
-              label: Prix unitaire HT
-              value: 
-                  prop: pu_ht
-              input_name: pu_ht
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - pu_ht
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              depends_on: id_product
-              
-            - custom: 1
-              label: Taux de TVA
-              value: 
-                  prop: tva_tx
-              input_name: tva_tx
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - tva_tx
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              depends_on: id_product
-              
-            - custom: 1
-              label: Quantité
-              value: 
-                  prop: qty
-              input_name: qty
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - qty
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              depends_on: id_product
-                  
-#            - custom: 1
-#              label: Remise
-#              value: 
-#                  prop: remise
-#              input_name: remise
-#              content: 
-#                  callback: 
-#                      method: renderLineInput
-#                      params: 
-#                          - remise
-#              display_if: 
-#                  field_name: type
-#                  show_values: 1
-            
-            - custom: 1
-              label: Prix d'achat
-              input_name: id_fourn_price
-              data_type: id_object
-              object: fournisseur_price
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - id_fourn_price
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              depends_on: id_product
-              create_form: 
-                  callback: getFournisseurPriceCreateForm
-              create_form_values: 
-                  fields: 
-                      fk_product: 
-                          callback: getIdProductFromPost
-              value: 
-                  callback: getIdFournPriceFromPost
-                  
-            - custom: 1
-              label: Service à durée limitée
-              input_name: limited
-              data_type: bool
-              input: 
-                  type: toggle
-              value: 
-                  callback: isLimited
-              display_if: 
-                  field_name: type
-                  show_values: 1
-                  
-            - custom: 1
-              label: Du
-              input_name: date_from
-              data_type: date
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - date_from
-              display_if: 
-                  fields_names: type,limited
-                  type: 
-                      show_values: 1
-                  limited: 
-                      hide_values: 0
-                          
-            - custom: 1
-              label: Au
-              input_name: date_to
-              data_type: date
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - date_to
-              display_if: 
-                  fields_names: type,limited
-                  type: 
-                      show_values: 1
-                  limited: 
-                      hide_values: 0
-                      
-            - custom: 1
-              label: Marges
-              input_name: margins_table
-              content: 
-                  callback: renderFormMargins
-              show: 
-                  callback: showMarginsInForms
-              display_if: 
-                  field_name: type
-                  hide_values: 2
-              
-            - custom: 1
-              label: Description
-              value: 
-                  prop: desc
-              input_name: desc
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params: 
-                          - desc
-            
-            - field: force_qty_1
-                     
-            - custom: 1
-              label: Remises autorisées
-              input_name: remisable
-              content: 
-                  callback: 
-                      method: renderLineInput
-                      params:
-                          - remisable
-              depends_on: id_product
-              display_if: 
-                  field_name: type
-                  show_values: 1
-              
-            - object: remises
-              multiple: 1
-              form_values: 
-                  fields: 
-                      object_type: 
-                          callback: getParentCommType
-              display_if: 
-                  fields_names: type,remisable
-                  type: 
-                      show_values: 1
-                  remisable: 
-                      hide_values: 0
+            id_parent_line: 
+                field: id_parent_line
+            type: 
+                field: type
+                hidden: 
+                    field_value: id
+            product: 
+                custom: 1
+                label: Produit
+                value: 
+                    callback: getIdProductFromPost
+                input_name: id_product
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - id_product
+                display_if: 
+                    field_name: type
+                    hide_values: 2
+                show:
+                    callback: isProductEditable
+            pu_ht: 
+                custom: 1
+                label: Prix unitaire HT
+                value: 
+                    prop: pu_ht
+                input_name: pu_ht
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - pu_ht
+                display_if: 
+                    field_name: type
+                    show_values: 1
+                depends_on: id_product
+            tva_tx: 
+                custom: 1
+                label: Taux de TVA
+                value: 
+                    prop: tva_tx
+                input_name: tva_tx
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - tva_tx
+                display_if: 
+                    field_name: type
+                    show_values: 1
+                depends_on: id_product
+            qty:
+                custom: 1
+                label: Quantité
+                value: 
+                    prop: qty
+                input_name: qty 
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - qty
+                display_if: 
+                    field_name: type
+                    show_values: 1
+                depends_on: id_product
+            fourn_price:
+                custom: 1
+                label: Prix d'achat
+                input_name: id_fourn_price
+                data_type: id_object
+                object: fournisseur_price
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - id_fourn_price
+                display_if: 
+                    field_name: type
+                    show_values: 1
+                depends_on: id_product
+                create_form: 
+                    callback: getFournisseurPriceCreateForm
+                create_form_values: 
+                    fields: 
+                        fk_product: 
+                            callback: getIdProductFromPost
+                value: 
+                    callback: getIdFournPriceFromPost
+            limited: 
+                custom: 1
+                label: Service à durée limitée
+                input_name: limited
+                data_type: bool
+                input: 
+                    type: toggle
+                value: 
+                    callback: isLimited
+                display_if: 
+                    field_name: type
+                    show_values: 1
+            date_from: 
+                custom: 1
+                label: Du
+                input_name: date_from
+                data_type: date
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - date_from
+                display_if: 
+                    fields_names: type,limited
+                    type: 
+                        show_values: 1
+                    limited: 
+                        hide_values: 0
+            date_to: 
+                custom: 1
+                label: Au
+                input_name: date_to
+                data_type: date
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - date_to
+                display_if: 
+                    fields_names: type,limited
+                    type: 
+                        show_values: 1
+                    limited: 
+                        hide_values: 0
+            margins: 
+                custom: 1
+                label: Marges
+                input_name: margins_table
+                content: 
+                    callback: renderFormMargins
+                show: 
+                    callback: showMarginsInForms
+                display_if: 
+                    field_name: type
+                    hide_values: 2
+            desc: 
+                custom: 1
+                label: Description
+                value: 
+                    prop: desc
+                input_name: desc
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - desc
+            force_qty_1: 
+                field: force_qty_1
+            remisable: 
+                custom: 1
+                label: Remises autorisées
+                input_name: remisable
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params:
+                            - remisable
+                depends_on: id_product
+                display_if: 
+                    field_name: type
+                    show_values: 1
+            remise_crt: 
+                custom: 1
+                label: Remise CRT
+                input_name: remise_crt
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - remise_crt
+                depends_on: id_product
+                display_if: 
+                    field_name: type
+                    show_values: 1
+            remise_pa:
+                custom: 1
+                label: Remise sur le prix d'achat
+                input_name: remise_pa
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - remise_pa
+                depends_on: id_product,remise_crt
+            remises: 
+                object: remises
+                multiple: 1
+                form_values: 
+                    fields: 
+                        object_type: 
+                            callback: getParentCommType
+                display_if: 
+                    fields_names: type,remisable
+                    type: 
+                        show_values: 1
+                    remisable: 
+                        hide_values: 0
                           
     equipment:
         title: Attribuer un équipement
@@ -371,7 +392,7 @@ forms:
         extends: default
         force_edit: 1
         rows: 
-            2: 
+            product: 
                 content: 
                     callback: 
                         method: renderLineInput
@@ -379,9 +400,8 @@ forms:
                             - id_product
                             - 0
                             - ''
-                            - 1
-                          
-            3: 
+                            - 1            
+            pu_ht: 
                 content: 
                     callback: 
                         method: renderLineInput
@@ -390,8 +410,7 @@ forms:
                             - 0
                             - ''
                             - 1
-              
-            4:
+            tva_tx:
                 content: 
                     callback: 
                         method: renderLineInput
@@ -400,8 +419,7 @@ forms:
                             - 0
                             - ''
                             - 1
-              
-            5:
+            qty:
                 content: 
                     callback: 
                         method: renderLineInput
@@ -410,8 +428,7 @@ forms:
                             - 0
                             - ''
                             - 1
-                            
-            6:
+            fourn_price:
                 content: 
                     callback: 
                         method: renderLineInput
@@ -420,13 +437,30 @@ forms:
                             - 0
                             - ''
                             - 1
-              
-            11:
+            desc:
                 content: 
                     callback: 
                         method: renderLineInput
                         params: 
                             - desc
+                            - 0
+                            - ''
+                            - 1
+            remise_crt:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - remise_crt
+                            - 0
+                            - ''
+                            - 1
+            remise_pa:
+                content: 
+                    callback: 
+                        method: renderLineInput
+                        params: 
+                            - remise_pa
                             - 0
                             - ''
                             - 1

@@ -111,6 +111,11 @@ class Bimp_Product extends BimpObject
         return '';
     }
 
+    public function getRemiseCrt()
+    {
+        return 10;
+    }
+
     public function fetchStocks()
     {
         $this->stocks = array();
@@ -146,8 +151,8 @@ class Bimp_Product extends BimpObject
         if (is_null($this->stocks)) {
             $this->fetchStocks();
         }
-        
-        if(is_null($id_entrepot) || $id_entrepot == ""){
+
+        if (is_null($id_entrepot) || $id_entrepot == "") {
             $id_entrepot = self::getDefaultEntrepot();
         }
 
@@ -273,7 +278,7 @@ class Bimp_Product extends BimpObject
 
         return $prices;
     }
-    
+
     public static function getFournisseursArray($id_product, $include_empty = true)
     {
         $fournisseurs = array();

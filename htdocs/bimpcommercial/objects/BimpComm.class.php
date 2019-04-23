@@ -45,17 +45,6 @@ class BimpComm extends BimpDolObject
         return 1;
     }
 
-    public function areLinesEditable()
-    {
-        if ($this->field_exists('fk_statut')) {
-            if ((int) $this->getData('fk_statut') > 0) {
-                return 0;
-            }
-        }
-
-        return 1;
-    }
-
     public function hasRemiseGlobale()
     {
         if ($this->field_exists('remise_globale') && (float) $this->getData('remise_globale')) {
@@ -178,11 +167,6 @@ class BimpComm extends BimpDolObject
         }
 
         return $filter;
-    }
-
-    public function getDefaultRemiseGlobaleLabel()
-    {
-        return 'Remise exceptionnelle sur l\'intégralité ' . $this->getLabel('of_the');
     }
 
     public function getListFilters()

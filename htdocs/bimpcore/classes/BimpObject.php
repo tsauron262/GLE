@@ -1037,11 +1037,6 @@ class BimpObject extends BimpCache
         return $fields;
     }
 
-    public function getTaxeIdDefault()
-    {
-        return (int) BimpCore::getConf("tva_default");
-    }
-
     // Gestion des données:
 
     public function printData()

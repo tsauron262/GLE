@@ -1356,12 +1356,12 @@ class ObjectLine extends BimpObject
             $object->errors = array();
 
             $initial_brouillon = null;
-            
+
             if ($force_update) {
                 $initial_brouillon = isset($object->brouillon) ? $object->brouillon : null;
                 $object->brouillon = 1;
             }
-            
+
             $result = null;
             $class_name = get_class($object);
 
@@ -1450,7 +1450,7 @@ class ObjectLine extends BimpObject
             if (!is_null($result) && $result <= 0) {
                 $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($object), 'Des erreurs sont survenues lors de la mise à jour de la ligne ' . BimpObject::getInstanceLabel($instance, 'of_the'));
             }
-            
+
             if ($force_update) {
                 if (is_null($initial_brouillon)) {
                     unset($object->brouillon);
@@ -1878,7 +1878,7 @@ class ObjectLine extends BimpObject
     {
         if ($this->isLoaded()) {
             $remises_infos = $this->getRemiseTotalInfos(true, $remise_globale_rate);
-            
+
 //            echo 'parent: ';
 //            
 //            $parent = $this->getParentInstance();
@@ -2286,6 +2286,43 @@ class ObjectLine extends BimpObject
                     }
                 }
                 $html .= BimpInput::renderInput('toggle', $prefixe . 'remisable', (int) $value);
+                break;
+
+            case 'remise_crt':
+                $product = $this->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    $remise_pa = (float) $product->getRemiseCrt();
+                    if ($remise_pa) {
+                        $html .= BimpInput::renderInput('toggle', $prefixe . 'remise_crt', (int) $value);
+                    } else {
+                        $html .= '<span class="warning">Non applicable</span>';
+                    }
+                } else {
+                    $html .= '<span class="warning">Attente sélection d\'un produit</span>';
+                }
+                break;
+
+            case 'remise_pa':
+                $product = $this->getProduct();
+                if (BimpObject::objectLoaded($product)) {
+                    if ((int) BimpTools::getPostFieldValue('remise_crt', 0)) {
+                        $remise_pa = (float) $product->getRemiseCrt();
+                        $html .= BimpTools::displayFloatValue($remise_pa, 8) . '%';
+                    } else {
+                        $html .= BimpInput::renderInput('text', $prefixe . 'remise_pa', (float) $value, array(
+                                    'addon_right' => BimpRender::renderIcon('fas_percent'),
+                                    'data'        => array(
+                                        'data_type' => 'number',
+                                        'decimals'  => 8,
+                                        'min'       => 0,
+                                        'max'       => 100,
+                                        'unsigned'  => 1
+                                    )
+                        ));
+                    }
+                } else {
+                    $html .= '<span class="warning">Attente sélection d\'un produit</span>';
+                }
                 break;
         }
 

@@ -64,7 +64,7 @@ class EtiquetteProd2 extends BimpEtiquettePDF
         $this->pdf->setXY(17,10);
         $this->pdf->Cell(25,5,"Prix TTC : ".price($price)." €",0,0,'L');
         $this->pdf->SetFont('times', '', 8);
-        if($deee){            
+        if($deee && $deee != "0,00"){            
             $this->pdf->setXY(17,13);
             $this->pdf->SetFont('times', '', 7);
             $this->pdf->Cell(25,5,"Dont ".$deee." € d'EcoTaxe",0,1,'L');

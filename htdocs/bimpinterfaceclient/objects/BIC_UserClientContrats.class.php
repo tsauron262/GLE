@@ -11,7 +11,7 @@ class BIC_UserClientContrats extends BimpObject {
 
     public function canClientEdit() {
         global $userClient;
-        if ($userClient->i_am_admin()) {
+        if ($userClient->it_is_admin()) {
             return true;
         }
         return false;
@@ -20,9 +20,17 @@ class BIC_UserClientContrats extends BimpObject {
     public function canClientCreate() {
         return $this->canClientEdit();
     }
-    
+        
     public function canClientDelete() {
-        return true;
+        global $userClient;
+        if(isset($userClient) && $userClient->it_is_admin()) {
+            return 1;
+        }
+        return 0;
+    }
+    
+    public function canDelete() {
+        return 1;
     }
 
     public function getContrats() {
@@ -42,6 +50,20 @@ class BIC_UserClientContrats extends BimpObject {
                 'filter' => $_REQUEST['id']
             )
         );
+    }
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        
+        $id_contrat = BimpTools::getValue('id_contrat');
+        $id_user = BimpTools::getValue('id_user');
+        if ($this->getList(array('id_contrat' => $id_contrat))) {
+            if($this->getList(array('id_user' => $id_user))){
+                return 'Ce contrat est déjà associer à cette utilisateur';
+            }
+        } else {
+            parent::create($warnings, $force_create);
+        }
+        
     }
 
 }

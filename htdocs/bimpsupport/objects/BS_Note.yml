@@ -15,6 +15,14 @@ objects:
             id_object:
                 field_value: id_inter
                 
+    userClient:
+        instance:
+            bimp_object:
+                module: bimpinterfaceclient
+                name: BIC_UserClient
+            id_object:
+                field_value: id_user_client
+                
 fields:
     id_ticket: 
         label: Ticket
@@ -49,39 +57,70 @@ fields:
             rows: 2
         sortable: 0
         searchable: 0
+    
+    id_user_client:
+        label: Demandeur
+        type: id_object
+        object: userClient
+    
+lists:
+    default:
+        title: Notes
+        icon: fas_file-alt
+        checkboxes: 1
+        bulk_actions: 
+            - label: Supprimer les notes sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this));
+              btn_class: deleteSelectedObjects
+        sort_field: date_create
+        sort_way: desc
+        n: 50
+        cols:
+            date_create:
+                label: Date
+                field: date_create
+            user_create:
+                label: Auteur
+                field: user_create
+            inter:
+                label: Intervention
+                field: id_inter
+                edit: 1
+            visibilite:
+                label: Visibilité
+                field: visibility
+                edit: 1
+            contenu:
+                label: Contenu
+                field: content
+                edit: 1
+                min_width: 40%
+            id_user_client:
+                field: id_user_client
+        add_object_row: 1
+        update_btn: 1
+        delete_btn: 1
+    client:
+        extends: default
+        cols:
+            visibilite: unset
+            inter: unset
+            user_create: unset
+        add_form_name: addClientNote
+        add_btn: 1
+        add_form_values:
+            fields:
+                visibility: 1
+        add_object_row: 0
+        list_filters:
+            callback: getListFilterNotesInterface
         
-list:
-    title: Notes
-    icon: fas_file-alt
-    checkboxes: 1
-    bulk_actions: 
-        - label: Supprimer les notes sélectionnées
-          icon: fas_trash-alt
-          onclick: deleteSelectedObjects('list_id', $(this));
-          btn_class: deleteSelectedObjects
-    sort_field: date_create
-    sort_way: desc
-    n: 50
-    cols:
-        date_create:
-            label: Date
-            field: date_create
-        user_create:
-            label: Auteur
-            field: user_create
-        inter:
-            label: Intervention
-            field: id_inter
-            edit: 1
-        visibilite:
-            label: Visibilité
-            field: visibility
-            edit: 1
-        contenu:
-            label: Contenu
-            field: content
-            edit: 1
-            min_width: 40%
-    add_object_row: 1
-    update_btn: 1
-    delete_btn: 1
+    
+forms:
+    addClientNote:
+        title: Ajouter un note au ticket support
+        rows:
+            - field: visibility
+              edit: 0
+            - field: content

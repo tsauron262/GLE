@@ -25,7 +25,7 @@ sections:
                 type: view
                 view: 
                     panel: 1
-                    name: fiche_contrat
+                    name: interface_client
                     object: contrat
           - id: tickets
             title: Tickets support

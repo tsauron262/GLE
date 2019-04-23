@@ -321,7 +321,7 @@ if ($selectedFile) {
                     $email = implode(",", $emails);
             }
             
-            mailSyn2("FI Signé", $email, null, "Bonjour la FI " . $object->getNomUrl(1) . " est Signé", array(), array(), array());
+            mailSyn2("FI Signé", $email, null, "Bonjour la FI " . $object->getNomUrl(1) . " est signée", array(), array(), array());
         } elseif (stripos($signeFile, 'SH') === 0) {
             $pdf->setXY(25, 240);
             $pdf->image($nomSign, 25, 245, 40);

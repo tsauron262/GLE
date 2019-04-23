@@ -1,21 +1,45 @@
+bootstrap: 1
 table: contratdet
 
-parent_module: bimpcontract
+parent_id_property: fk_contrat
 parent_object: BContract_contrat
 
 labels: 
     name: ligne du contrat
     name_plur: lignes du contrat
     is_female: 0
-    
-objects: 
-    line: 
-        relation: hasOne
-        delete: 0
+
+objects:
+    produit:
         instance: 
-            dol_object: 
-                module: comm/propal
-                file: propal
-                class: PropaleLigne
-            id_object: 
-                field_value: id_line
+            bimp_object:
+                module: bimpcore
+                name: Bimp_Product
+            id_object:
+                field_value:
+                    fk_product
+
+fields:
+    fk_product:
+        label: Produit
+        type: id_object
+        object: produit
+        
+lists: 
+    default: 
+        title: Lignes du contrat
+        icon: fas_file-contract
+        sort_field: tms
+        sort_way: desc
+        n: 20
+        add_object_row: 1
+#        add_form_name: create_contrat
+#        add_btn_label: Créer un nouveau contrat
+        edit_btn: 1
+        edit_form: default
+        delete_btn: 0
+#        modal_view: fiche_contrat
+        page_btn: 1
+        cols: 
+            fk_product:
+                field: fk_product

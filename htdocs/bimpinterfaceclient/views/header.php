@@ -10,22 +10,22 @@ $content_request = $_REQUEST['fc'];
             <div class="sidebar-wrapper">
                 <ul class="nav">
                     <li <?= ($content_request == "") ? 'class="active"' : "" ?> >
-                        <a href="?">
+                        <a href="client.php?">
                             <i class="pe-7s-home"></i>
                             <p><?= $langs->trans('menuAccueil') ?></p>
                         </a>
                     </li>
                     <li <?= ($content_request == 'pageUser') ? 'class="active"' : "" ?> >
-                        <a href="?fc=pageUser&id=<?= $userClient->getData('id') ?>">
+                        <a href="client.php?fc=pageUser&id=<?= $userClient->getData('id') ?>">
                             <i class="pe-7s-paperclip"></i>
-                            <p>Ma page utilisateur</p>
+                            <p><?= $langs->trans('menuUserPage') ?></p>
                         </a>
                     </li>
                     <?php
-                    if ($userClient->i_am_admin()) {
+                    if ($userClient->it_is_admin()) {
                         ?>
                         <li <?= ($content_request == 'ticket') ? 'class="active"' : "" ?> >
-                            <a href="?fc=tickets">
+                            <a href="client.php?fc=tickets">
                                 <i class="pe-7s-paperclip"></i>
                                 <p><?= $langs->trans('menuTickets') ?></p>
                             </a>
@@ -35,19 +35,19 @@ $content_request = $_REQUEST['fc'];
                             ?>
 
                             <li <?= ($content_request == 'contrat') ? 'class="active"' : "" ?> >
-                                <a href="?fc=contrat">
+                                <a href="client.php?fc=contrat">
                                     <i class="pe-7s-graph"></i>
                                     <p><?= $langs->trans('menuContrat') ?></p>
                                 </a>
                             </li>
                             <li <?= ($content_request == 'facture') ? 'class="active"' : "" ?>>
-                                <a href="?fc=facture">
+                                <a href="client.php?fc=facture">
                                     <i class="pe-7s-file"></i>
                                     <p><?= $langs->trans('menuFacture') ?></p>
                                 </a>
                             </li>
                             <li <?= ($content_request == 'devis') ? 'class="active"' : "" ?>>
-                                <a href="?fc=devis">
+                                <a href="client.php?fc=devis">
                                     <i class="pe-7s-file"></i>
                                     <p><?= $langs->trans('menuDevis') ?></p>
                                 </a>
@@ -60,7 +60,7 @@ $content_request = $_REQUEST['fc'];
                         //if (count($couverture) > 0) {
                         ?>
                         <li <?= ($content_request == 'user') ? 'class="active"' : "" ?>>
-                            <a href="?fc=user">
+                            <a href="client.php?fc=user">
                                 <i class="pe-7s-users"></i>
                                 <p><?= $langs->trans('menuUser') ?></p>
                             </a>
@@ -78,9 +78,9 @@ $content_request = $_REQUEST['fc'];
             <h4>Changer de mot de passe</h4>
             <hr>
             <form method="post">
-                <center><input type="password" class="form-control" style="width:80%" placeholder="Nouveau mot de passe" name="new_passwd" id="new_passwd" ></center>
+                <center><input type="password" class="form-control" style="width:80%" placeholder="Nouveau mot de passe" name="new_password" id="new_passwd" ></center>
                 <br />
-                <button type="submit" class="btn btn-warning btn-fill pull-center">Modifier mon mot de passe</button>
+                <button type="submit" class="btn btn-warning btn-fill pull-center"><?= $langs->trans('menuChangePassword') ?></button>
             </form>
             <br /> <br />
         </div>
@@ -104,6 +104,8 @@ $content_request = $_REQUEST['fc'];
                     </div>
                     <div class="collapse navbar-collapse">
                         <ul class="nav navbar-nav navbar-right">
+                            <li><a href="#" class="rgpd">Connecté en tant que : <i style="color:#EF7D00"><?= $userClient->getData('email') ?></i></a></li>'
+
                             <li><a href="#" class="passwd"><?= $langs->trans('changePassword') ?></a></li>
                             <li><a href="?action=deconnexion"><?= $langs->trans('deconnexion') ?></a></li>
                         </ul>

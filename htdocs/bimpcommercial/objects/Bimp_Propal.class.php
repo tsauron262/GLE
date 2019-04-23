@@ -82,17 +82,12 @@ class Bimp_Propal extends BimpComm
         );
     }
 
-    public function getListFilters()
-    {
-        return array();
-    }
-
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
         $langs->load('propal');
 
-        $buttons = array();
+        $buttons = parent::getActionsButtons();
 
         if ($this->isLoaded()) {
             $buttons[] = array(
@@ -955,7 +950,7 @@ class Bimp_Propal extends BimpComm
     
     public function iAmAdminRedirect() {
         global $user;
-        if(in_array($user->id, array(60)))
+        if(in_array($user->id, array(60,282)))
             return true;
         return parent::iAmAdminRedirect();
     }

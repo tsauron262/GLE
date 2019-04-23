@@ -348,6 +348,9 @@ list:
     sort_field: date_create
     sort_way: desc
     n: 10
+    list_filters: 
+        callback:
+            method: getListFilters
     cols:
         id:
             label: ID
@@ -372,6 +375,18 @@ list:
                 callback: displayCurrentPlace
             search: 
                 type: value_part
+        place2: 
+            label: Type emplacement
+            value:
+                callback: displayCurrentPlaceType
+            search: 
+                type: values
+                input: 
+                    type: select
+                    options: 
+                        options: 
+                            array: typesPlace
+                
         reserved: 
             label: Réservé / transfert en cours
             value: 

@@ -24,6 +24,12 @@ objects:
             bimp_object:
                 module: bimpsupport
                 name: BS_Note
+    
+    userClient:
+        instance:
+            bimp_object: BIC_UserClient
+        id_object:
+            field: id_user_client
                 
 fields:
     id_contrat:
@@ -42,8 +48,12 @@ fields:
         require: 1
     
     id_user_client:
-        label: Propriétaire
-
+        label: Demandeur
+        type: id_object
+        object: userClient
+    
+    sujet:
+        type: html
 lists:
     interface_client:
         title: Tickets support
@@ -78,16 +88,14 @@ lists:
         cols:
             id:
             sujet:
-            client:
-                value:
-                    display: nom
             status:
             priorite:
             date_create:
+            id_user_client:
+                field: id_user_client
     
     pageUser:
         extends: interface_client
-        edit_btn: 0
         add_btn: 0
         list_filters: 
             callback:
@@ -98,6 +106,21 @@ lists:
             id_contrat:
                 label: Contrat
                 field: id_contrat
+    pageClient:
+        extends: interface_client
+        add_btn: 0
+        list_filters: 
+            callback:
+                method: getListFiltersInterface
+                params:
+                    - client
+        cols:
+            id_contrat:
+                #label: Contrat
+                field: id_contrat
+            id_user_client:
+                #label: Propriétaire
+                field: id_user_client
             
 forms:
     editUserTicket:
@@ -108,8 +131,12 @@ forms:
               edit: 0
             - field: sujet
             - field: priorite
+            - field: impact
             
     addUserTicket:
+        msgs:
+            - content: Ne pas mettre d'informations confidentielles dans le champ sujet
+              type: info
         rows:
             - field: id_client
               edit: 0
@@ -117,16 +144,12 @@ forms:
               edit: 0
             - field: id_user_client
               edit: 0
+            - field: contact_in_soc
             - field: status
               edit: 0
             - field: sujet
               required: 1
             - field: priorite
-            - custom: 1
-              input_name: notif_email
-              input:
-                  type: toggle
-              value: 0
-              label: Me notifier et notifier les admins par email
+            - field: impact
             - object: note
               multiple: 1

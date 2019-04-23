@@ -3957,7 +3957,7 @@ class Societe extends CommonObject
                 
                 if((!isset($user->rights->bimpcommercial->commerciauxToSoc) || !$user->rights->bimpcommercial->commerciauxToSoc) && count($existing) == 1 && $existing[0] != $user->id){
                     if((count($salesrep) != count($existing)) || ($salesrep[0] != $existing[0]))
-                        setEventMessage ("Pas le doit de modifié les commerciaux", "warnings");
+                        setEventMessage ("Pas le droit de modifier les commerciaux", "warnings");
                     return 1;
                 }
 

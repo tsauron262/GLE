@@ -114,6 +114,20 @@ fields:
         input: 
             type: select_input_reasons
         default_value: 0
+    fk_user_author: 
+        label: Créée par
+        dol_prop: user_author_id
+        type: id_object
+        object: user_author
+        input: 
+            type: hidden
+    fk_user_valid: 
+        label: Validée par
+        dol_prop: user_valid_id
+        type: id_object
+        object: user_valid
+        input: 
+            type: hidden
     total: 
         label: Total TTC
         dol_prop: total_ttc
@@ -147,6 +161,14 @@ fields:
         display_if: 
             field_name: use_amount
             show_values: 0
+    remise_globale_label: 
+        label: Intitulé de la remise globale
+        type: text
+        input: 
+            rows: 1
+            auto_expand: 1
+        default_value: 
+            callback: getDefaultRemiseGlobaleLabel
         
 lists_cols: 
     entrepot: 
@@ -276,6 +298,7 @@ forms:
         title: Remise Globale
         icon: percent
         rows: 
+            - field: remise_globale_label
             - custom: 1
               label: Définir à partir d'un montant fixe
               input_name: use_amount
@@ -441,6 +464,17 @@ lists:
     default: 
         extra_btn: 
             callback: getDefaultListExtraButtons
+        list_filters: 
+            callback: getListFilters
+    mini_user_create:
+        extends: default
+        n: 5
+        cols: 
+            user_author: unset
+            entrepot: unset
+            secteur: unset
+            date_create: unset
+            commercial: unset
             
 views: 
     default: 

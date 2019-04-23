@@ -8,6 +8,11 @@ objects:
                 name: BS_Ticket
             id_object:
                 request: id
+    inters:
+        instance:
+            bimp_object:
+                module: bimpsupport
+                name: BS_Inter
             
 
 sections:
@@ -27,10 +32,10 @@ sections:
           - id: interventions
             title: Interventions
             struct:
-                type: view
-                view:
+                type: list
+                list:
                     panel: 0
+                    object: inters
                     name: client_inters
-                    object: ticket
                 
             

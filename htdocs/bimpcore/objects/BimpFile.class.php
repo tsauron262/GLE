@@ -44,6 +44,17 @@ class BimpFile extends BimpObject
         return 1;
     }
     
+    public function getFilterListInterfaceClient() {
+        if(BimpTools::getContext() == 'public') {
+            return Array(
+                Array(
+                    'name' => 'visibility',
+                    'filter' => 1
+                )
+            );
+        }
+    }
+    
     // Getters: 
 
     public function getFilePath()

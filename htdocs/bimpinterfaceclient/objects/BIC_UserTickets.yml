@@ -30,7 +30,7 @@ objects:
             bimp_object: BIC_UserClient
         id_object:
             field: id_user_client
-                
+    
 fields:
     id_contrat:
         label: Contrat
@@ -118,6 +118,7 @@ lists:
             id_contrat:
                 #label: Contrat
                 field: id_contrat
+                display: nom
             id_user_client:
                 #label: Propriétaire
                 field: id_user_client

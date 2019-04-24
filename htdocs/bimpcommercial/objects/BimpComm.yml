@@ -322,7 +322,7 @@ forms:
     email: 
         rows: 
             - custom: 1
-              label: Emmetteur
+              label: Emetteur
               input_name: from
               input: 
                   type: select

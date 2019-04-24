@@ -873,11 +873,12 @@ class ObjectLine extends BimpObject
                         if (!$no_html) {
                             $html .= '<span style="display: inline-block; margin: 0 0 5px 15px; height: 100%; border-left: 3px solid #787878;"></span>';
                             $html .= '<span style="margin-right: 15px; color: #787878;font-size: 18px;">' . BimpRender::renderIcon('fas_long-arrow-alt-right') . '</span>';
+                            $html .= '<div style="display: inline-block">';
                         }
                     }
                     if (in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
                         if ((int) $this->id_product) {
-                            $html = $this->displayLineData('id_product', 0, 'nom_url', $no_html);
+                            $html .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
                             $product = $this->getProduct();
 //                            if (BimpObject::objectLoaded($product)) {
 //                                $html .= '&nbsp;&nbsp;' . $product->getData('label');
@@ -918,6 +919,10 @@ class ObjectLine extends BimpObject
                     } else {
                         $html .= (string) $this->desc;
                     }
+                    if ((int) $this->getData('id_parent_line')) {
+                        $html .= '</div>';
+                    }
+                    
                     break;
 
                 case 'qty':

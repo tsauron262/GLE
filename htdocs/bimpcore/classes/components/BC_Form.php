@@ -37,7 +37,8 @@ class BC_Form extends BC_Panel
         'depends_on'   => array(),
         'data_type'    => array('default' => 'string'),
         'value'        => array('data_type' => 'any', 'default' => ''),
-        'no_container' => array('data_type' => 'bool', 'default' => 0)
+        'no_container' => array('data_type' => 'bool', 'default' => 0),
+        'keep_new_value'     => array('data_type' => 'bool', 'default' => 0)
     );
     public static $object_params = array(
         'form_name'   => array('default' => 'default'),
@@ -417,7 +418,7 @@ class BC_Form extends BC_Panel
         $html .= '</div>';
 
         if (!is_null($params['depends_on'])) {
-            $html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['association'], $params['depends_on'], $this->fields_prefix);
+            $html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['association'], $params['depends_on'], $this->fields_prefix, 0);
         }
 
         unset($asso);
@@ -464,7 +465,7 @@ class BC_Form extends BC_Panel
         $html .= '</div>';
 
         if (!is_null($params['depends_on'])) {
-            $html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['input_name'], $params['depends_on'], $this->fields_prefix);
+            $html .= BC_Field::renderDependsOnScriptStatic($this->object, $this->identifier, $params['input_name'], $params['depends_on'], $this->fields_prefix, (int) $params['keep_new_value']);
         }
 
         return $html;

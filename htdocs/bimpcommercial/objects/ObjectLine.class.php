@@ -28,7 +28,7 @@ class ObjectLine extends BimpObject
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
         'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1),
         'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => null),
-        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => 20),
+        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => null),
         'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0, 'default' => null),
         'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0),
         'date_from'      => array('label' => 'Date début', 'type' => 'date', 'required' => 0, 'default' => null),
@@ -579,14 +579,14 @@ class ObjectLine extends BimpObject
 
                 case 'tva_tx':
                     $tva_tx = $this->tva_tx;
-                    if (is_null($tva_tx)) {
-                        $tva_tx = 20;
-                    }
                     if ($this->isLoaded() && $this->field_exists('def_tva_tx')) {
                         $tva_tx = $this->getData('def_tva_tx');
                     }
                     if ($id_product && (is_null($tva_tx) || (int) $this->id_product !== $id_product)) {
                         return (float) $product->getData('tva_tx');
+                    }
+                    if (is_null($tva_tx)) {
+                        $tva_tx = 20;
                     }
                     return (float) $tva_tx;
 

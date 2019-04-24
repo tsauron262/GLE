@@ -491,7 +491,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
         $tpl .= '</td>';
 
         $tpl .= '<td>';
-        $tpl .= BimpInput::renderInput('text', 'line_' . $this->id . '_reception_receptionidx_pu_ht', $this->pu_ht, array(
+        $tpl .= BimpInput::renderInput('text', 'line_' . $this->id . '_reception_receptionidx_pu_ht', $this->getUnitPriceHTWithRemises(), array(
                     'addon_right' => BimpRender::renderIcon('fas_euro-sign'),
                     'data'        => array(
                         'data_type' => 'number',
@@ -831,7 +831,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 // Création de l'équipement: 
                 $equipment = BimpObject::getInstance('bimpequipment', 'Equipment');
 
-                $pu_ht = (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->pu_ht);
+                $pu_ht = (isset($serial_data['pu_ht']) ? (float) $serial_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
                 $tva_tx = (isset($serial_data['tva_tx']) ? (float) $serial_data['tva_tx'] : (float) $this->tva_tx);
 
                 $eq_errors = $equipment->validateArray(array(
@@ -931,7 +931,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     }
 
                     if ($pa_qty < (float) $reception_data['qty']) {
-                        $pa_total += (((float) $reception_data['qty'] - $pa_qty) * (float) $this->pu_ht);
+                        $pa_total += (((float) $reception_data['qty'] - $pa_qty) * (float) $this->getUnitPriceHTWithRemises());
                     }
 
                     if ((float) $reception_data['qty'] > 0) {
@@ -942,7 +942,18 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
                     $line_qty = (float) $line->getFullQty();
                     if ($pa_moyen && $line_qty) {
-                        $new_line_pa = (float) ((((float) $line->pa_ht * ($line_qty - (float) $reception_data['qty'])) + ($pa_moyen * (float) $reception_data['qty'])) / $line_qty);
+                        $line_pa = (float) $line->pa_ht;
+                        $remise_pa = (float) $line->getData('remise_pa');
+
+                        if ($remise_pa) {
+                            $line_pa -= ((float) $line->pa_ht * ($remise_pa / 100));
+                        }
+
+                        $new_line_pa = (float) ((((float) $line_pa * ($line_qty - (float) $reception_data['qty'])) + ($pa_moyen * (float) $reception_data['qty'])) / $line_qty);
+
+                        if ($remise_pa) {
+                            $new_line_pa = ($new_line_pa / (1 - ($remise_pa / 100)));
+                        }
 
                         if ($new_line_pa !== (float) $line->pa_ht) {
                             $line->setPrixAchat($new_line_pa);
@@ -1099,12 +1110,24 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         }
 
                         if ($pa_qty < (float) $reception_data['qty']) {
-                            $pa_total += (((float) $reception_data['qty'] - $pa_qty) * (float) $this->pu_ht);
+                            $pa_total += (((float) $reception_data['qty'] - $pa_qty) * (float) $this->getUnitPriceHTWithRemises());
                         }
 
                         $line_qty = (float) $commande_line->getFullQty();
                         if ($pa_total && $line_qty) {
-                            $new_line_pa = (float) ((((float) $commande_line->pa_ht * $line_qty) - $pa_total) / ($line_qty - (float) $reception_data['qty']));
+                            $line_pa = (float) $commande_line->pa_ht;
+                            $remise_pa = (float) $commande_line->getData('remise_pa');
+                            
+                            if ($remise_pa) {
+                                $line_pa -= ($line_pa * ($remise_pa / 100));
+                            }
+                            
+                            $new_line_pa = (float) ((((float) $line_pa * $line_qty) - $pa_total) / ($line_qty - (float) $reception_data['qty']));
+
+                            
+                            if ($remise_pa) {
+                                $new_line_pa = ($new_line_pa / (1 - ($remise_pa / 100)));
+                            }
 
                             if ($new_line_pa !== (float) $commande_line->pa_ht) {
                                 $commande_line->setPrixAchat($new_line_pa);
@@ -1129,20 +1152,20 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         return $errors;
     }
-    
+
     public function unsetReception($id_reception)
     {
         $receptions = $this->getData('receptions');
-        
+
         if (isset($receptions[(int) $id_reception])) {
             unset($receptions[(int) $id_reception]);
-            
+
             $this->set('receptions', $receptions);
             $warnings = array();
             $errors = $this->update($warnings, true);
             $errors = array_merge($errors, $warnings);
         }
-        
+
         return $errors;
     }
 
@@ -1185,7 +1208,7 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         if (!in_array($reception->id, $new_receptions)) {
                             $new_receptions[] = (int) $reception->id;
                         }
-                        $pu_ht = (isset($reception_data['pu_ht']) ? (float) $reception_data['pu_ht'] : (float) $this->pu_ht);
+                        $pu_ht = (isset($reception_data['pu_ht']) ? (float) $reception_data['pu_ht'] : (float) $this->getUnitPriceHTWithRemises());
                         $tva_tx = (isset($reception_data['tva_tx']) ? (float) $reception_data['tva_tx'] : (float) $this->tva_tx);
                         if (!isset($receptions[(int) $reception->id])) {
                             $receptions[(int) $reception->id] = array(

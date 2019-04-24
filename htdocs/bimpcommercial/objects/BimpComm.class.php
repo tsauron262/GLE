@@ -735,7 +735,7 @@ class BimpComm extends BimpDolObject
             $lines = $this->getChildrenObjects('lines');
 
             $remise_globale_lines_rate = (float) $this->getRemiseGlobaleLineRate(true);
-            
+
             foreach ($lines as $line) {
                 $line->calcRemise($remise_globale_lines_rate);
             }
@@ -1763,6 +1763,8 @@ class BimpComm extends BimpDolObject
         $i = 0;
 
         // Création des lignes: 
+        $lines_new = array();
+
         foreach ($lines as $line) {
             $i++;
             $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
@@ -1784,10 +1786,23 @@ class BimpComm extends BimpDolObject
             $line_instance->date_to = $line->date_to;
             $line_instance->id_remise_except = $line->id_remise_except;
 
+            if ($line->field_exists('remise_crt') &&
+                    $line_instance->field_exists('remise_crt')) {
+                $line_instance->set('remise_crt', (int) $line->getData('remise_crt'));
+            }
+
+            if ($line->field_exists('remise_pa') &&
+                    $line_instance->field_exists('remise_pa')) {
+                $line_instance->set('remise_pa', (float) $line->getData('remise_pa'));
+            }
+
             $line_errors = $line_instance->create($warnings, true);
             if (count($line_errors)) {
                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne n°' . $i);
+                continue;
             }
+
+            $lines_new[(int) $line->id] = (int) $line_instance->id;
 
             // Création des remises pour la ligne en cours:
             $remises = $line->getRemises();
@@ -1814,6 +1829,19 @@ class BimpComm extends BimpDolObject
             }
         }
 
+        // Attribution des lignes parentes: 
+        foreach ($lines as $line) {
+            $id_parent_line = (int) $line->getData('id_parent_line');
+
+            if ($id_parent_line) {
+                if (isset($lines_new[(int) $line->id]) && (int) $lines_new[(int) $line->id] && isset($lines_new[$id_parent_line]) && (int) $lines_new[$id_parent_line]) {
+                    $line_instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name . 'Line', (int) $lines_new[(int) $line->id]);
+                    if (BimpObject::objectLoaded($line_instance)) {
+                        $line_instance->updateField('id_parent_line', (int) $lines_new[(int) $id_parent_line]);
+                    }
+                }
+            }
+        }
         return $errors;
     }
 

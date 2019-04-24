@@ -82,6 +82,87 @@ class Bimp_CommandeLine extends ObjectLine
         return parent::isActionAllowed($action, $errors);
     }
 
+    // Getters params:
+
+    public function getLogistiqueBulkActions()
+    {
+        $commande = $this->getParentInstance();
+
+        if (BimpObject::objectLoaded($commande)) {
+            return array(
+                array(
+                    'label'   => 'Quantités expédition',
+                    'icon'    => 'fas_shipping-fast',
+                    'onclick' => 'addSelectedCommandeLinesToShipment($(this), \'list_id\', ' . $commande->id . ')'
+                ),
+                array(
+                    'label'   => 'Quantités facture',
+                    'icon'    => 'fas_file-invoice-dollar',
+                    'onclick' => 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ' . $commande->id . ', ' . (int) $commande->getData('fk_soc') . ', ' . (int) $commande->dol_object->contactid . ', ' . (int) $commande->getData('fk_cond_reglement') . ')'
+                )
+            );
+        }
+
+        return array();
+    }
+
+    public function getLogistiqueExtraButtons()
+    {
+        $buttons = array();
+
+        if ($this->isLoaded()) {
+            $commande = $this->getParentInstance();
+
+            if (BimpObject::objectLoaded($commande)) {
+                $type = (int) $this->getData('type');
+                $reserved_qties = $this->getReservedQties();
+
+                if ($type === self::LINE_PRODUCT) {
+                    $product = $this->getProduct();
+                    if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === 0) {
+                        if (isset($reserved_qties['status'][0]) && $reserved_qties['status'][0] > 0)
+                            $buttons[] = array(
+                                'label'   => 'Commander',
+                                'icon'    => 'fas_cart-arrow-down',
+                                'onclick' => $this->getJsActionOnclick('addToCommandeFourn', array(
+                                    'remise_pa'       => (float) $this->getData('remise_pa'),
+                                    'remise_pa_label' => ((int) $this->getData('remise_crt') ? 'Remise CRT' : '')
+                                        ), array(
+                                    'form_name' => 'commande_fourn'
+                                ))
+                            );
+                    }
+                }
+
+                if ($type !== self::LINE_TEXT) {
+                    $buttons[] = array(
+                        'label'   => 'Gérer les expéditions',
+                        'icon'    => 'fas_shipping-fast',
+                        'onclick' => $this->getJsLoadModalView('shipments', 'Gestion des expéditions')
+                    );
+
+                    $buttons[] = array(
+                        'label'   => 'Gérer les factures',
+                        'icon'    => 'fas_file-invoice-dollar',
+                        'onclick' => $this->getJsLoadModalView('invoices', 'Gestion des factures')
+                    );
+
+                    if ($this->isActionAllowed('modifyQty')) {
+                        $buttons[] = array(
+                            'label'   => 'Modifier les quantités',
+                            'icon'    => 'fas_edit',
+                            'onclick' => $this->getJsActionOnclick('modifyQty', array(), array(
+                                'form_name' => 'qty_modified'
+                            ))
+                        );
+                    }
+                }
+            }
+        }
+
+        return $buttons;
+    }
+
     // Getters valeurs:
 
     public function getFullQty()
@@ -239,82 +320,6 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         return $qty;
-    }
-
-    public function getLogistiqueBulkActions()
-    {
-        $commande = $this->getParentInstance();
-
-        if (BimpObject::objectLoaded($commande)) {
-            return array(
-                array(
-                    'label'   => 'Quantités expédition',
-                    'icon'    => 'fas_shipping-fast',
-                    'onclick' => 'addSelectedCommandeLinesToShipment($(this), \'list_id\', ' . $commande->id . ')'
-                ),
-                array(
-                    'label'   => 'Quantités facture',
-                    'icon'    => 'fas_file-invoice-dollar',
-                    'onclick' => 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ' . $commande->id . ', ' . (int) $commande->getData('fk_soc') . ', ' . (int) $commande->dol_object->contactid . ', ' . (int) $commande->getData('fk_cond_reglement') . ')'
-                )
-            );
-        }
-
-        return array();
-    }
-
-    public function getLogistiqueExtraButtons()
-    {
-        $buttons = array();
-
-        if ($this->isLoaded()) {
-            $commande = $this->getParentInstance();
-
-            if (BimpObject::objectLoaded($commande)) {
-                $type = (int) $this->getData('type');
-                $reserved_qties = $this->getReservedQties();
-
-                if ($type === self::LINE_PRODUCT) {
-                    $product = $this->getProduct();
-                    if (BimpObject::objectLoaded($product) && (int) $product->getData('fk_product_type') === 0) {
-                        if (isset($reserved_qties['status'][0]) && $reserved_qties['status'][0] > 0)
-                            $buttons[] = array(
-                                'label'   => 'Commander',
-                                'icon'    => 'fas_cart-arrow-down',
-                                'onclick' => $this->getJsActionOnclick('addToCommandeFourn', array(), array(
-                                    'form_name' => 'commande_fourn'
-                                ))
-                            );
-                    }
-                }
-
-                if ($type !== self::LINE_TEXT) {
-                    $buttons[] = array(
-                        'label'   => 'Gérer les expéditions',
-                        'icon'    => 'fas_shipping-fast',
-                        'onclick' => $this->getJsLoadModalView('shipments', 'Gestion des expéditions')
-                    );
-
-                    $buttons[] = array(
-                        'label'   => 'Gérer les factures',
-                        'icon'    => 'fas_file-invoice-dollar',
-                        'onclick' => $this->getJsLoadModalView('invoices', 'Gestion des factures')
-                    );
-
-                    if ($this->isActionAllowed('modifyQty')) {
-                        $buttons[] = array(
-                            'label'   => 'Modifier les quantités',
-                            'icon'    => 'fas_edit',
-                            'onclick' => $this->getJsActionOnclick('modifyQty', array(), array(
-                                'form_name' => 'qty_modified'
-                            ))
-                        );
-                    }
-                }
-            }
-        }
-
-        return $buttons;
     }
 
     public function getShippedQty($id_shipment = null, $shipments_validated_only = false)
@@ -2454,6 +2459,28 @@ class Bimp_CommandeLine extends ObjectLine
                             if (count($line_errors)) {
                                 $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues durant la création de la ligne de commande fournisseur');
                             } else {
+                                if (isset($data['remise_pa']) && (float) $data['remise_pa']) {
+                                    // Création de la remise sur le prix d'achat: 
+                                    $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+                                    $rem_errors = $remise->validateArray(array(
+                                        'id_object_line' => (int) $line->id,
+                                        'object_type'    => 'commande_fournisseur',
+                                        'label'          => (isset($data['remise_pa_label']) ? $data['remise_pa_label'] : ''),
+                                        'type'           => 1,
+                                        'percent'        => (float) $data['remise_pa']
+                                    ));
+
+                                    if (!count($rem_errors)) {
+                                        $rem_warnings = array();
+                                        $rem_errors = $remise->create($rem_warnings, true);
+                                        $rem_errors = array_merge($rem_errors, $rem_warnings);
+                                    }
+
+                                    if (count($rem_errors)) {
+                                        $warnings[] = BimpTools::getMsgFromArray($rem_errors, 'Erreurs lors de la création de la remise');
+                                    }
+                                }
+
                                 $remain_qty = $qty;
 
                                 $reservations = $this->getReservations('status', 'asc', 0);

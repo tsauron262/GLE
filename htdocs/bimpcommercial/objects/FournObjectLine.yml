@@ -297,6 +297,9 @@ lists_cols:
                 params: 
                     - ref_supplier
                     
+    remise_crt: unset
+    remise_pa: unset
+                    
 lists: 
     default: 
         add_form_name: fournline

@@ -98,6 +98,11 @@ table.objectlistTable {
             .popover {
                 color: $gray-darker;
             }
+            
+            .toggle-label-off,
+            .toggle-label-on {
+                display: none;
+            }
         }
 
         &.deactivated {

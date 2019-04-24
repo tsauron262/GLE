@@ -3166,7 +3166,7 @@ class BimpObject extends BimpCache
                         $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
                     } if (property_exists($this->dol_object, $prop)) {
                         $this->dol_object->{$prop} = $this->getDolValue($field, $value);
-                    } else {
+                    } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                         $bimpObjectFields[$field] = $value;
                     }
                 }
@@ -3206,7 +3206,7 @@ class BimpObject extends BimpCache
                     $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
                 } elseif (property_exists($this->dol_object, $prop)) {
                     $value = $this->dol_object->{$prop};
-                } else {
+                } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                     $bimpObjectFields[] = $field;
                 }
             }

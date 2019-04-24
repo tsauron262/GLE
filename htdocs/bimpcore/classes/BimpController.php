@@ -1076,7 +1076,7 @@ class BimpController
         $fields = BimpTools::getValue('fields', array());
         $custom_field = BimpTools::getValue('custom_field', false);
         $id_object = BimpTools::getValue('id_object', 0);
-        $value = BimpTools::getValue('value', '');
+        $value = BimpTools::getValue('value', null);
         $field_prefix = BimpTools::getValue('field_prefix', '');
         $is_object = (int) BimpTools::getValue('is_object', 0);
 
@@ -1110,7 +1110,7 @@ class BimpController
             }
 
             if (!count($errors)) {
-                if ($value && $object->field_exists($field_name)) {
+                if (!is_null($value) && $object->field_exists($field_name)) {
                     $object->set($field_name, $value);
                 }
 
@@ -1140,11 +1140,13 @@ class BimpController
                         if (!is_null($form_row)) {
                             $form = new BC_Form($object, $id_parent, $form_name, 1, true);
                             $form->fields_prefix = $field_prefix;
-                            $form->setValues(array(
-                                'fields' => array(
-                                    $field_name => $value
-                                )
-                            ));
+                            if (!is_null($value)) {
+                                $form->setValues(array(
+                                    'fields' => array(
+                                        $field_name => $value
+                                    )
+                                ));
+                            }
                             $html = $form->renderCustomInput($form_row);
                         } else {
                             $html = BimpRender::renderAlerts('Erreur de configuration - contenu du champ personnalisé non défini');

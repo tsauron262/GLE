@@ -744,6 +744,7 @@ class FormFile
 				foreach($file_list as $file)
 				{
 					// Define relative path for download link (depends on module)
+                                        $modulesubdir = str_replace("/", "_", $modulesubdir);
 					$relativepath=$file["name"];										// Cas general
 					if ($modulesubdir) $relativepath=$modulesubdir."/".$file["name"];	// Cas propal, facture...
 					if ($modulepart == 'export') $relativepath = $file["name"];			// Other case

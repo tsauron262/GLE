@@ -325,6 +325,9 @@ class modBimpCommercial extends DolibarrModules
                 $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpfact', 1, 'invoice', 'Facture', NULL);";
                 
 		//$this->_load_tables('/bimpcommercial/sql/');
+                
+                $extrafields = new ExtraFields($this->db);
+                $extrafields->addExtraField('crt', 'Remise CRT', 'int', 1, 10, 'product');
 
 		return $this->_init($sql, $options);
 	}

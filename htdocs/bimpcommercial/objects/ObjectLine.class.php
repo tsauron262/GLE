@@ -27,9 +27,9 @@ class ObjectLine extends BimpObject
         'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int'),
         'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
         'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1),
-        'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0),
-        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0),
-        'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0),
+        'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => null),
+        'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => null),
+        'pa_ht'          => array('label' => 'Prix d\'achat HT', 'type' => 'float', 'required' => 0, 'default' => null),
         'remise'         => array('label' => 'Remise', 'type' => 'float', 'required' => 0, 'default' => 0),
         'date_from'      => array('label' => 'Date début', 'type' => 'date', 'required' => 0, 'default' => null),
         'date_to'        => array('label' => 'Date fin', 'type' => 'date', 'required' => 0, 'default' => null)
@@ -631,6 +631,9 @@ class ObjectLine extends BimpObject
                     if ($id_product && (is_null($tva_tx) || (int) $this->id_product !== $id_product)) {
                         return (float) $product->getData('tva_tx');
                     }
+                    if (is_null($tva_tx)) {
+                        $tva_tx = 20;
+                    }
                     return (float) $tva_tx;
 
                 case 'id_fourn_price':
@@ -929,11 +932,12 @@ class ObjectLine extends BimpObject
                         if (!$no_html) {
                             $html .= '<span style="display: inline-block; margin: 0 0 5px 15px; height: 100%; border-left: 3px solid #787878;"></span>';
                             $html .= '<span style="margin-right: 15px; color: #787878;font-size: 18px;">' . BimpRender::renderIcon('fas_long-arrow-alt-right') . '</span>';
+                            $html .= '<div style="display: inline-block">';
                         }
                     }
                     if (in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
                         if ((int) $this->id_product) {
-                            $html = $this->displayLineData('id_product', 0, 'nom_url', $no_html);
+                            $html .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
                             $product = $this->getProduct();
 //                            if (BimpObject::objectLoaded($product)) {
 //                                $html .= '&nbsp;&nbsp;' . $product->getData('label');
@@ -974,6 +978,10 @@ class ObjectLine extends BimpObject
                     } else {
                         $html .= (string) $this->desc;
                     }
+                    if ((int) $this->getData('id_parent_line')) {
+                        $html .= '</div>';
+                    }
+                    
                     break;
 
                 case 'qty':

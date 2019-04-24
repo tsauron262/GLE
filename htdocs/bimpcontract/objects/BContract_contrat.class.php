@@ -97,7 +97,7 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function displayRef() {
-        return $this->getData('ref');
+        return $this->getData('ref') . ' - ' . $this->getData('objet_contrat');
     }
 
     public function displayEndDate() {
@@ -220,7 +220,7 @@ class BContract_contrat extends BimpDolObject {
     }
 
     public function getName() {
-        return $this->getData('ref');
+        return $this->getData('objet_contrat');
     }
     
     public function renderEcheancier() {

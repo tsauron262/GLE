@@ -145,7 +145,7 @@ class modBimpinterfaceclient extends DolibarrModules
 	{
 		global $conf;
 		$sql = array();
-                $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("default_id_commercial", 62)';
+                $sql[] = 'INSERT INTO ' . MAIN_DB_PREFIX . 'bimpcore_conf (name, value) VALUES ("default_id_commercial", 62)'; //
                 require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
                 $name = 'module_version_'.strtolower($this->name);
                 if(BimpCore::getConf($name) == "") {

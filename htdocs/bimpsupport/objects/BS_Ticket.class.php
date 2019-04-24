@@ -215,7 +215,7 @@ class BS_Ticket extends BimpObject
                     ))
                 );
             }
-            if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT){
+            if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && BimpTools::getContext() == 'private'){
                 $buttons[] = array(
                     'label' => 'Prendre en compte le ticket',
                     'icon' => 'fas_thumbs-up',
@@ -233,14 +233,19 @@ class BS_Ticket extends BimpObject
     }
     
     public function actionPrendre_en_compte($data, &$success) {
-        global $user;
-        $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
-        $listDest = $instance->getData('email');
-        $listDest .= $instance->get_dest('commerciaux');
-        $listDest .= $instance->get_dest('admin');
-        $this->updateField('status', self::BS_TICKET_EN_COURS);
+        global $user, $userClient;
+        if($this->getData('id_user_client') > 0){
+            $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
+            $listDest = $instance->getData('email');
+            $listDest .= $instance->get_dest('admin');
+            $commerciaux = BimpTools::getCommercialArray($instance->getData('attached_societe'));
+            foreach ($commerciaux as $id_commercial) {
+                $listDest .= ', ' . $id_commercial->email;
+            }
+            mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), $listDest, 'noreply@bimp.fr', "Votre ticket numéro ".$this->getData('ticket_number')." à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
+        }
         $this->updateField('id_user_resp', $user->id);
-        mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), $listDest, 'noreply@bimp.fr', "Votre ticket numéro ".$this->getData('ticket_number')." à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
+        $this->updateField('status', self::BS_TICKET_EN_COURS);
         $success = 'Ticket bien pris en compte';
     }
     
@@ -562,7 +567,7 @@ class BS_Ticket extends BimpObject
             return $errors;
         }
         
-        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT) {
+        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->getData('id_user_client') > 0) {
             return 'Impossible de repasser le ticket en demande client';
         }
         
@@ -571,7 +576,10 @@ class BS_Ticket extends BimpObject
         if(!count($errors) && $this->getData('id_user_client') > 0) {
             $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
             $listDest = $instance->getData('email');
-            $listDest .= $instance->get_dest('commerciaux');
+            $commerciaux = BimpTools::getCommercialArray($instance->getData('attached_societe'));
+            foreach ($commerciaux as $id_commercial) {
+                $listDest .= ', ' . $id_commercial->email;
+            }
             $listDest .= $instance->get_dest('admin');
             mailSyn2('BIMP-CLIENT - Modification de votre ticket', $listDest, 'noreply@bimp.fr', 'Votre ticket ' . $this->getData('ticket_number') . ' à été modifier');
         }

@@ -43,6 +43,32 @@ class BimpTools
         }
         return 1;
     }
+    
+    public static function getCommercialArray($socid) {
+        global $db; $conf;
+        require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+        $bimp = new BimpDb($db);
+        $return = Array();
+        $comm_list = $bimp->getRows('societe_commerciaux', 'fk_soc = ' . $socid);
+        $need_default = true;
+        $instance = new User($db);
+        if(count($comm_list) > 0) {
+            foreach ($comm_list as $comm) {
+                $instance->fetch($comm->fk_user);
+                if($instance->statut == 1) {
+                    $return[$comm->fk_user] = $instance;
+                    $need_default = false;
+                }
+            }
+        }
+        if($need_default) {
+            $default_id_commercial = BimpCore::getConf('default_id_commercial');
+            $instance->fetch($default_id_commercial);
+            $return[$default_id_commercial] = $instance;
+        }
+        $instance = null;
+        return $return;
+    }
 
     public static function getValue($key, $default_value = null, $decode = true)
     {

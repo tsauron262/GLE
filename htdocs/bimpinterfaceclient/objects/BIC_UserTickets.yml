@@ -30,7 +30,7 @@ objects:
             bimp_object: BIC_UserClient
         id_object:
             field: id_user_client
-                
+    
 fields:
     id_contrat:
         label: Contrat
@@ -118,6 +118,7 @@ lists:
             id_contrat:
                 #label: Contrat
                 field: id_contrat
+                display: nom
             id_user_client:
                 #label: Propriétaire
                 field: id_user_client
@@ -134,6 +135,11 @@ forms:
             - field: impact
             
     addUserTicket:
+        msgs:
+            - content: Ne pas mettre d'informations confidentielles dans le champ sujet
+              type: info
+            - content: Pour envoyer un fichier joint merci d'aller sur la page ticket après sa création
+              type: info
         rows:
             - field: id_client
               edit: 0

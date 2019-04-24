@@ -33,12 +33,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     public function __construct($db)
     {
-        global $conf;
-        $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...", "", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
         parent::__construct($db, 'P', 'A4');
-        if (!defined('BIMP_LIB')) {
-            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
-        }
         BimpObject::loadClass('bimpcommercial', 'BimpComm');
 
         $this->target_label = $this->langs->transnoentities('BillTo');
@@ -116,7 +111,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
                             if ($entrepot->ref == "PR") {//patch new adresse
                                 $mysoc->zip = "69760";
-                                $mysoc->address = "Bimp Groupe OLYS <br/>2 rue des Erables CS 21055  ";
+                                $mysoc->address = "2 rue des Erables CS 21055  ";
                                 $mysoc->town = "LIMONEST";
                             }
                         }
@@ -295,8 +290,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
     protected function renderContent()
     {
-        if(is_object($this->thirparty) || is_object($this->contact))
-            $this->renderDocInfos($this->thirparty, $this->contact);
+        if(is_object($this->thirdparty) || is_object($this->contact))
+            $this->renderDocInfos($this->thirdparty, $this->contact);
         $this->renderTop();
         $this->renderBeforeLines();
         $this->renderLines();

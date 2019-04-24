@@ -114,6 +114,11 @@ fields:
         dol_extra_field: 1
         values:
             array: mode_reglement
+    
+    objet_contrat:
+        label: Objet du contrat
+        type: string
+        dol_extra_field: 1
         
         
 

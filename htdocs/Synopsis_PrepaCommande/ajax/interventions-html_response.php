@@ -84,10 +84,13 @@ if ($res > 0) {
                     }
                     $durStr.= $langs->trans($dur[$prod->duration_unit]) . "&nbsp;";
 
+                    
+                    $desc = ($val->desc != "")? $val->desc : $val->product_desc;
+                    
                     print "<tr>";
                     print "    <td nowrap width=95 align=center class='ui-widget-content'>" . $prod->getNomUrl(1);
                     print "    <td width=95 align=center class='ui-widget-content'>" . price($val->total_ht) . " &euro;";
-                    print "    <td width=200 class='ui-widget-content'>" . $val->desc;
+                    print "    <td width=200 class='ui-widget-content'>" . $desc;
                     print "    <td width=20 class='ui-widget-content'><span class='toRight'>></span>";
                     print "</table>";
                 }

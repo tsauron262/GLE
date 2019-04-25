@@ -121,26 +121,6 @@ class Bimp_Fichinter extends ObjectInter {
         return $buttons;
     }
 
-    public function renderFacture() {
-        require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
-        $return = array();
-        $facture = new Facture($this->db->db);
-        foreach ($this->getFacture() as $id_facture) {
-            $facture->fetch($id_facture);
-            $return[] = $facture->getNomUrl(1);
-        }
-        return implode($return, '<br/>');
-    }
-
-    public function getFacture() {
-        $tab_facture = array();
-        $tab_temp = getElementElement('FI', 'facture', $this->id);
-        foreach ($tab_temp as $temp) {
-            $tab_facture[] = $temp['d'];
-        }
-        return $tab_facture;
-    }
-
     public function getFactures() {
         $tabFact = array();
         $sql = BimpTools::getSqlSelect(array('fk_target'));
@@ -226,8 +206,7 @@ class Bimp_Fichinter extends ObjectInter {
     }
 
     public function checkLink() {
-//        die('nb facture = '.count($this->getFacture()));
-        if ($this->getData('fk_commande') > 0 or $this->getData('fk_contrat') > 0 or count($this->getFacture()) > 0)
+        if ($this->getData('fk_commande') > 0 or $this->getData('fk_contrat') > 0 or count($this->getFactures()) > 0)
             return 1;
         return 0;
     }

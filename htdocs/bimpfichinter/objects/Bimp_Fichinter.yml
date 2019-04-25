@@ -476,10 +476,6 @@ views:
                   fields_table: 
                       name: lien
                       
-#                - type: custom
-#                  col_lg: 6
-#                  custom:
-#                     callback: renderFacture
 
             
                 - type: fields_table

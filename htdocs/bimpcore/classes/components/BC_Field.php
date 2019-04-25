@@ -71,7 +71,7 @@ class BC_Field extends BimpComponent
         $this->params_def['next_sort_way'] = array('default' => 'asc');
 //        $this->params_def['display'] = array('type' => 'definitions', 'defs_type' => 'display', 'multiple' => 1);
         $this->params_def['depends_on'] = array('data_type' => 'array', 'compile' => true);
-        $this->params_def['keep_new_value'] = array('data_type' => 'bool', 'default' => 1);
+        $this->params_def['keep_new_value'] = array('data_type' => 'bool', 'default' => 0);
         $this->params_def['values'] = array('data_type' => 'array', 'compile' => true);
         $this->params_def['display_if'] = array('data_type' => 'array', 'compile' => true);
         $this->params_def['history'] = array('data_type' => 'bool', 'default' => 0);

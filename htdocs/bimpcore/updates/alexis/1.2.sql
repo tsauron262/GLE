@@ -1,0 +1,1 @@
+ALTER TABLE `llx_bimpcore_file` ADD `visibility` INT(11) NOT NULL DEFAULT '2';

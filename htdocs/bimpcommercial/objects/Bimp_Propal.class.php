@@ -284,17 +284,6 @@ class Bimp_Propal extends BimpComm
                     );
                 }
 
-                // Remise globale: 
-                if ($this->isActionAllowed('setRemiseGlobale') && $this->canSetAction('setRemiseGlobale')) {
-                    $buttons[] = array(
-                        'label'   => 'Remise globale',
-                        'icon'    => 'percent',
-                        'onclick' => $this->getJsActionOnclick('setRemiseGlobale', array('remise_globale' => (float) $this->getData('remise_globale')), array(
-                            'form_name' => 'remise_globale'
-                        ))
-                    );
-                }
-
                 // Cloner: 
                 if ($this->can("create")) {
                     $buttons[] = array(

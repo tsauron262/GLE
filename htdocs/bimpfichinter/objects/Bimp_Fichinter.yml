@@ -79,18 +79,19 @@ fields:
     model_pdf:
         label: Model PDF
         type: string
+        dol_prop: modelpdf
     fk_contrat:
         label: Contrat
         type: id_object
         object: contrat
         values:
             array: list_contrat
-    fk_facture:
-        label: Facture
-        type: id_object
-        object: facture
-        values:
-            array: list_facture
+#    fk_facture:
+#        label: Facture
+#        type: id_object
+#        object: facture
+#        values:
+#            array: list_facture
     fk_statut:
         label: Statut
         type: int
@@ -425,7 +426,13 @@ fields_tables:
             - field: fk_contrat 
               display: nom_url
               edit: 1
+            - custom: 1
+              label: Facture
+              value: 
+                  callback: display_fact
             - field: fk_facture
+              custom: 1
+              callback: display_fact
               display: nom_url
               edit: 1
             - field: fk_user_author

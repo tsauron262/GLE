@@ -2,74 +2,59 @@
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpEtiquettePDF.php';
 
-class EtiquetteProd2 extends BimpEtiquettePDF
-{
+class EtiquetteProd2 extends BimpEtiquettePDF {
 
-
-    public function __construct($db)
-    {
-        parent::__construct($db, 'L', array(51,19));
+    public function __construct($db) {
+        parent::__construct($db, 'L', array(51, 19));
 
         $this->langs->load("products");
         $this->typeObject = "product";
         $this->prefName = "Etiquette_Magasin_";
     }
 
-       protected function renderContent() {
-
+    protected function renderContent() {
+        $debug = false;
 //        $html = "";
         $label = $this->object->label;
-        if(strlen($label) < 23)
+        $this->pdf->setXY(6, 1);
+//        $label = substr($label, 0, 3);
+        $deuxLigne = false;
+        if (strlen($label) < 23)
             $this->pdf->SetFont('times', 'B', 10);
-        elseif(strlen($label) < 35)
-            $this->pdf->SetFont('times', 'B', 7);
-        elseif(strlen($label) < 46)
+        elseif (strlen($label) < 27)
+            $this->pdf->SetFont('times', 'B', 8);
+        else {
+            $label = dol_trunc($label, 69);
             $this->pdf->SetFont('times', 'B', 6);
-        else{
-            $label = substr($label,0,43)."...";
-            $this->pdf->SetFont('times', 'B', 6);
+            if(strlen($label) > 36)
+                $deuxLigne = true;
         }
-        $this->pdf->setXY(6,1);
-        $this->pdf->Cell(40,5,$label,0,0,'C');
-        
-        
+        $this->pdf->MultiCell(43, 5, ($label), $debug, 'C');
+
         $this->pdf->SetFont('times', '', 8);
-        $this->pdf->setXY(6,6);
-        $this->pdf->MultiCell(40,5,$this->object->ref,0,'C');
-        
-//         $html .= "<span class='center'>".$this->object->description."</span>";
-//
-//        $html .= "<div class='tier fleft'></div>";
-//        $html .= "<div class='cadre tier fleft'>".dol_print_date(dol_now(), "%B %Y")."</div>";
-//        $html .= "<div class='tier fleft'>".price($this->object->price)." €</div>";
+        $this->pdf->setXY(6, ($deuxLigne)? 6 : 4);
 
+        $this->pdf->MultiCell(43, 2, dol_trunc($this->object->ref, 18), $debug, 'C');
 
-        
-//        $this->writeContent($html);
-        if (file_exists(static::$tpl_dir . '/' . static::$type . '/logomininoir.jpg'))
-            $this->pdf->Image( static::$tpl_dir . '/' . static::$type . '/logomininoir.jpg', 6,10,10,7);
-        
-        
-//        $codeBar = ($this->object->barcode != "")? $this->object->barcode : $this->object->ref;
-//        $this->pdf->write1DBarcode($codeBar, 'C128', 26, 16, 35, 8, '', array('text'=> true));
-//        
-//        
-//        
-//        $this->pdf->setXY(30,29);
-//        $this->pdf->Cell(25,5,dol_print_date(dol_now(), "%B %Y"),1,0,'C');
-        $price = $this->object->price * (1+$this->object->tva_tx/100);
+        $price = $this->object->price * (1 + $this->object->tva_tx / 100);
         $deee = false;
-        if(isset($this->object->array_options['options_deee']))
+        if (isset($this->object->array_options['options_deee']))
             $deee = price($this->object->array_options['options_deee']);
-        
-        $this->pdf->setXY(17,10);
-        $this->pdf->Cell(25,5,"Prix TTC : ".price($price)." €",0,0,'L');
+
+        $this->pdf->setXY(19, 10);
+        $this->pdf->Cell(30, 2, "Prix TTC : " . price($price) . " €", $debug, 0, 'R');
         $this->pdf->SetFont('times', '', 8);
-        if($deee && $deee != "0,00"){            
-            $this->pdf->setXY(17,13);
-            $this->pdf->SetFont('times', '', 7);
-            $this->pdf->Cell(25,5,"Dont ".$deee." € d'EcoTaxe",0,1,'L');
+        if ($deee && $deee != "0,00") {
+            $this->pdf->setXY(19, 13);
+            $this->pdf->SetFont('times', '', 5);
+            $this->pdf->Cell(30, 2, "Dont " . $deee . " € d'EcoTaxe", $debug, 0, 'R');
         }
+        if (file_exists(static::$tpl_dir . '/' . static::$type . '/logomininoir.jpg'))
+            $this->pdf->Image(static::$tpl_dir . '/' . static::$type . '/logomininoir.jpg', 6, ($deuxLigne)? 8.9: 7.9, 9, 6.5);
+        
+        $codeBar = ($this->object->barcode != "") ? $this->object->barcode : $this->object->ref;
+        $hCodeBar = (strlen($codeBar) < 20) ? 1.8 : 2.3;
+        $this->pdf->write1DBarcode($codeBar, 'C128', 7, (18 - $hCodeBar), 42, $hCodeBar, '', array('text' => false));
     }
 
 }

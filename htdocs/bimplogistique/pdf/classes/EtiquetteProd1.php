@@ -16,26 +16,25 @@ class EtiquetteProd1 extends BimpEtiquettePDF {
     }
 
     protected function renderContent() {
-
+        $debug = false;
 //        $html = "";
         
         $this->pdf->SetFont('times', 'B', 15);
         $this->pdf->setXY(6,1);
-        $this->pdf->Cell(77,5,$this->object->ref,1,0,'C');
+        $this->pdf->Cell(77,5,dol_trunc($this->object->ref,18),1,0,'C');
         
         
         $this->pdf->setXY(6,8);
         $this->pdf->SetFont('times', '', 10);
         
         $label = $this->object->label;
+        $label = dol_trunc($label,90);
         if(strlen($label) > 53)
             $this->pdf->SetFont('times', '', 9);
         
-        if(strlen($label) > 118)
-            $label = substr($label,0,115)."...";
         
         
-        $this->pdf->MultiCell(77,5,$label,0,'C');
+        $this->pdf->MultiCell(77,5,$label,$debug,'C');
         
 //         $html .= "<span class='center'>".$label."</span>";
 //
@@ -47,19 +46,21 @@ class EtiquetteProd1 extends BimpEtiquettePDF {
         
 //        $this->writeContent($html);
         if (file_exists(static::$tpl_dir . '/' . static::$type . '/logomininoir.jpg'))
-            $this->pdf->Image( static::$tpl_dir . '/' . static::$type . '/logomininoir.jpg', 5,25,15,10);
+            $this->pdf->Image( static::$tpl_dir . '/' . static::$type . '/logomininoir.jpg', 6,25,15,10);
         
         
         $codeBar = ($this->object->barcode != "")? $this->object->barcode : $this->object->ref;
-        $this->pdf->write1DBarcode($codeBar, 'C128', 26, 16, 35, 8, '', array('text'=> true));
+        $maxLn = 35;
+        $longeur = (strlen($codeBar) < $maxLn)? strlen($codeBar) : $maxLn;
+        $this->pdf->write1DBarcode($codeBar, 'C128', 41-($longeur), 18, 7+($longeur*2), 5, '', array('text'=> true));
         
         
         
-        $this->pdf->setXY(30,29);
+        $this->pdf->setXY(32,29);
         $this->pdf->Cell(25,5,dol_print_date(dol_now(), "%B %Y"),1,0,'C');
-        $this->pdf->setXY(60,29);
+        $this->pdf->setXY(59,29);
         $price = $this->object->price * (1+$this->object->tva_tx/100);
-        $this->pdf->Cell(25,5,price($price)." €",0,0,'C');
+        $this->pdf->Cell(24,5,price($price)." €",$debug,0,'R');
     }
 
 }

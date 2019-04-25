@@ -210,21 +210,25 @@ class BimpDocumentPDF extends BimpModelPDF
 
         global $conf;
 
-        if ($this->fromCompany->forme_juridique_code) {
-            $line1 .= $this->langs->convToOutputCharset(getFormeJuridiqueLabel($this->fromCompany->forme_juridique_code));
+        if ($this->fromCompany->name) {
+            $line1 .= $this->langs->convToOutputCharset($this->fromCompany->name);
         }
 
-        if ($this->fromCompany->name) {
-            $line1 .= " " . $this->langs->convToOutputCharset($this->fromCompany->name);
+        if ($this->fromCompany->forme_juridique_code) {
+            $line1 .= " - " . $this->langs->convToOutputCharset(getFormeJuridiqueLabel($this->fromCompany->forme_juridique_code));
         }
 
         if ($this->fromCompany->capital) {
             $captital = price2num($this->fromCompany->capital);
             if (is_numeric($captital) && $captital > 0) {
-                $line1 .= ($line1 ? " - " : "") . $this->langs->transnoentities("CapitalOf", price($captital, 0, $this->langs, 0, 0, 0, $conf->currency));
+                $line1 .= ($line1 ? " au " : "") . $this->langs->transnoentities("CapitalOf", price($captital, 0, $this->langs, 0, 0, 0, $conf->currency));
             } else {
-                $line1 .= ($line1 ? " - " : "") . $this->langs->transnoentities("CapitalOf", $this->fromCompany->capital, $this->langs);
+                $line1 .= ($line1 ? " au " : "") . $this->langs->transnoentities("CapitalOf", $this->fromCompany->capital, $this->langs);
             }
+        }
+        
+        if ($this->fromCompany->address) {
+            $line1 .= " - ".$this->fromCompany->address." - ".$this->fromCompany->zip." ".$this->fromCompany->town." - Tél ".$this->fromCompany->phone;
         }
 
         if ($this->fromCompany->idprof1 && ($this->fromCompany->country_code != 'FR' || !$this->fromCompany->idprof2)) {

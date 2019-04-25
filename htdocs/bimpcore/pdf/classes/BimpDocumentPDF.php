@@ -108,6 +108,9 @@ class BimpDocumentPDF extends BimpModelPDF
                             $mysoc->zip = $entrepot->zip;
                             $mysoc->address = $entrepot->address;
                             $mysoc->town = $entrepot->town;
+                            
+                            if($mysoc->name == "Bimp Groupe Olys")
+                                $mysoc->name = "Bimp Olys SAS";
 
                             if ($entrepot->ref == "PR") {//patch new adresse
                                 $mysoc->zip = "69760";

@@ -170,7 +170,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $sizes = dol_getImageSize($soc_logo_file, false);
                     if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
 
-                        $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'], $sizes['height'], 200, 100);
+                        $tabTaille = $this->calculeWidthHieghtLogo($sizes['width']/4, $sizes['height']/4, 200, 100);
 
 
 

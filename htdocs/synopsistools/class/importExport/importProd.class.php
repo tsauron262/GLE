@@ -115,7 +115,7 @@ class importProd extends importCat {
             
             $desc = ($ln['ArtGCmtTxt'] != "")? $ln['ArtGCmtTxt'] : $ln['ArtLib'];
             
-            $this->traiteChamp("description", $ln['ArtLib']);
+            $this->traiteChamp("description", $desc);
             $this->traiteChamp("ref", $ln['ArtCode']);
             $this->traiteChamp("import_key", $ln['ArtID']);
             

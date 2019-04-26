@@ -212,6 +212,7 @@ class Synopsisfichinter extends Fichinter {
         $sql .= ", note_public = '" . $this->note_public."'";
         $sql .= ", note_private = '" . $this->note_private."'";
         $sql .= ", fk_contrat = '" . $this->fk_contrat . "'";
+        $sql.= ",model_pdf='" . $this->modelpdf . "'";
         $sql .= " WHERE rowid = " . $this->id;
 
 

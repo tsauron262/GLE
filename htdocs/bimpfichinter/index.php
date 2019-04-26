@@ -20,5 +20,6 @@ if (BimpTools::isSubmit('id') && GETPOST('id') > 0) {
 }
 
 
+
 $controller = BimpController::getInstance('bimpfichinter', $controllerName);
 $controller->display();

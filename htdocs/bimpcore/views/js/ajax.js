@@ -133,10 +133,12 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             msg = bimpAjax.error_msg;
         }
 
-        if (bimpAjax.display_errors_in_popup_only) {
-            bimp_msg(msg, 'danger');
-        } else {
-            bimp_msg(msg, 'danger', bimpAjax.$resultContainer);
+        if (msg) {
+            if (bimpAjax.display_errors_in_popup_only) {
+                bimp_msg(msg, 'danger');
+            } else {
+                bimp_msg(msg, 'danger', bimpAjax.$resultContainer);
+            }
         }
     };
 
@@ -178,10 +180,12 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
             msg = bimpAjax.success_msg;
         }
 
-        if (bimpAjax.display_success_in_popup_only) {
-            bimp_msg(msg, 'success');
-        } else {
-            bimp_msg(msg, 'success', bimpAjax.$resultContainer);
+        if (msg) {
+            if (bimpAjax.display_success_in_popup_only) {
+                bimp_msg(msg, 'success');
+            } else {
+                bimp_msg(msg, 'success', bimpAjax.$resultContainer);
+            }
         }
     };
 
@@ -245,10 +249,19 @@ function BimpAjaxObject(request_id, action, data, $resultContainer, params) {
                                 });
                             }
                         }
-                    } else {
-                        if (typeof (bimpAjax.success) === 'function') {
-                            bimpAjax.success(result, bimpAjax);
+                    }
+
+                    if (typeof (result.modal_html) === 'string' && result.modal_html) {
+                        var modal_title = '';
+                        if (typeof (result.modal_title) === 'string') {
+                            modal_title = result.modal_title;
                         }
+
+                        bimpModal.newContent(modal_title, result.modal_html, false, '', null);
+                    }
+
+                    if (typeof (bimpAjax.success) === 'function') {
+                        bimpAjax.success(result, bimpAjax);
                     }
 
                     if (result.success_callback && typeof (result.success_callback) === 'string') {

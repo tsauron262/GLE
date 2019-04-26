@@ -37,10 +37,11 @@ class BC_Input extends BimpComponent
             'display_now' => array('data_type' => 'bool', 'default' => 0)
         ),
         'textarea'                    => array(
-            'rows'        => array('data_type' => 'int', 'default' => 3),
-            'auto_expand' => array('data_type' => 'bool', 'default' => 0),
-            'note'        => array('data_type' => 'bool', 'default' => 0),
-            'values'      => array('data_type' => 'array', 'default' => array()),
+            'rows'             => array('data_type' => 'int', 'default' => 3),
+            'auto_expand'      => array('data_type' => 'bool', 'default' => 0),
+            'note'             => array('data_type' => 'bool', 'default' => 0),
+            'tab_key_as_enter' => array('data_type' => 'bool', 'default' => 0),
+            'values'           => array('data_type' => 'array', 'default' => array()),
         ),
         'select'                      => array(
             'options'      => array('data_type' => 'array', 'compile' => true, 'default' => array()),
@@ -55,7 +56,8 @@ class BC_Input extends BimpComponent
             'toggle_off' => array('default' => 'NON')
         ),
         'check_list'                  => array(
-            'items' => array('data_type' => 'array', 'default' => array(), 'compile' => true)
+            'items'              => array('data_type' => 'array', 'default' => array(), 'compile' => true),
+            'select_all_buttons' => array('data_type' => 'bool', 'default' => 1)
         ),
         'custom'                      => array(
             'content' => array('default' => '')
@@ -237,7 +239,7 @@ class BC_Input extends BimpComponent
                 $options['step'] = isset($this->params['step']) ? $this->params['step'] : 1;
                 $options['min_label'] = isset($this->params['min_label']) ? $this->params['min_label'] : 0;
                 $options['max_label'] = isset($this->params['max_label']) ? $this->params['max_label'] : 0;
-                
+
                 $min = 'none';
                 $max = 'none';
                 $decimals = 0;
@@ -283,6 +285,7 @@ class BC_Input extends BimpComponent
                 $options['rows'] = isset($this->params['rows']) ? $this->params['rows'] : 3;
                 $options['auto_expand'] = isset($this->params['auto_expand']) ? $this->params['auto_expand'] : 0;
                 $options['note'] = isset($this->params['note']) ? $this->params['note'] : 0;
+                $options['tab_key_as_enter'] = isset($this->params['tab_key_as_enter']) ? $this->params['tab_key_as_enter'] : 0;
                 $options['values'] = isset($this->params['values']) ? $this->params['values'] : array();
                 break;
 
@@ -303,6 +306,7 @@ class BC_Input extends BimpComponent
 
             case 'check_list':
                 $options['items'] = isset($this->params['items']) ? $this->params['items'] : array();
+                $options['select_all_buttons'] = isset($this->params['select_all_buttons']) ? $this->params['select_all_buttons'] : 1;
                 break;
 
             case 'items_list':

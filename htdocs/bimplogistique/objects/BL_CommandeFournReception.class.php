@@ -428,7 +428,8 @@ class BL_CommandeFournReception extends BimpObject
 
                     $html .= '<div style="margin-top: 12px">N° de série à ajouter: </div>';
                     $html .= BimpInput::renderInput('textarea', 'line_' . $line->id . '_reception_' . $this->id . '_new_serials', '', array(
-                                'auto_expand' => true
+                                'auto_expand'      => true,
+                                'tab_key_as_enter' => true
                     ));
                     $html .= '<p class="inputHelp">Séparateurs possibles: sauts de ligne, espaces, virgules ou points-virgules.<br/>';
                     $html .= 'Max: ' . $max . ' numéro' . ($max > 1 ? 's' : '') . ' de série.';
@@ -607,7 +608,7 @@ class BL_CommandeFournReception extends BimpObject
                     $qty = 0;
                     $qties = array();
                     $serials = array();
-                    
+
                     $line_pu_ht = (float) $line->getUnitPriceHTWithRemises();
 
                     if (isset($line_data['qties']) && !empty($line_data['qties'])) {

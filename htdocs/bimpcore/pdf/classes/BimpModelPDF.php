@@ -30,7 +30,7 @@ Abstract class BimpModelPDF
     public function __construct($db, $orientation = 'P', $format = 'A4')
     {
         global $mysoc, $langs, $conf;
-        
+
         $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...", "", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
 
         $this->db = $db;
@@ -80,7 +80,7 @@ Abstract class BimpModelPDF
 
     // Construction du document:
 
-    public function render($file_name, $display)
+    public function render($file_name, $display, $display_only = false)
     {
         if (!$this->isInit)
             $this->init(null);
@@ -95,8 +95,8 @@ Abstract class BimpModelPDF
 
         if (count($this->errors)) {
             return 0;
-            $this->displayErrors();
-            exit;
+//            $this->displayErrors();
+//            exit;
         }
 
         $this->pdf->createHeader($this->header);
@@ -114,7 +114,7 @@ Abstract class BimpModelPDF
 
         $this->renderContent();
 
-        return $this->pdf->render($file_name, $display);
+        return $this->pdf->render($file_name, $display, $display_only);
     }
 
     protected function renderContent()
@@ -220,8 +220,8 @@ Abstract class BimpModelPDF
 
         if (isset($this->object) && isset($this->object->ref))
             $path .= dol_sanitizeFileName($this->object->ref) . "/";
-        if(!is_dir($path))
-            dol_mkdir ($path);
+        if (!is_dir($path))
+            dol_mkdir($path);
 
         return $path;
     }
@@ -249,7 +249,7 @@ Abstract class BimpModelPDF
     }
 
     // Affichages erreurs: 
-    
+
     public function displayErrors()
     {
         if (count($this->errors)) {

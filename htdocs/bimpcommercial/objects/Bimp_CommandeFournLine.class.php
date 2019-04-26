@@ -17,70 +17,158 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return 0;
         }
 
+        $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+
+        if (BimpObject::objectLoaded($reception)) {
+            $entrepot = $reception->getChildObject('entrepot');
+        } else {
+            $entrepot = null;
+        }
+
         $reception_data = $this->getReceptionData($id_reception);
 
         if ((int) $reception_data['received']) {
-            if ($this->getData('linked_object_name') === 'commande_line') {
+            if ($this->getData('linked_object_name') === 'commande_line' &&
+                    isset($reception_data['assign_to_commande_client']) && (int) $reception_data['assign_to_commande_client']) {
                 $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('linked_id_object'));
+            }
+
+            if ($this->isProductSerialisable()) {
+                $line_equipments_shipped = array();
+                $line_equipments_billed = array();
 
                 if (BimpObject::objectLoaded($line)) {
-                    if ($this->isProductSerialisable()) {
-                        $line_shipments = $line->getData('shipments');
-                        $line_equipments_shipped = array();
+                    // Liste des équipements expédiés pour la ligne de commande client associée
+                    $line_shipments = $line->getData('shipments');
+                    $line_equipments_shipped = array();
 
-                        foreach ($line_shipments as $id_shipment => $shipment_data) {
-                            if (isset($shipment_data['equipments'])) {
-                                foreach ($shipment_data['equipments'] as $id_equipment) {
-                                    $line_equipments_shipped[] = (int) $id_equipment;
-                                }
+                    foreach ($line_shipments as $id_shipment => $shipment_data) {
+                        if (isset($shipment_data['equipments'])) {
+                            foreach ($shipment_data['equipments'] as $id_equipment) {
+                                $line_equipments_shipped[] = (int) $id_equipment;
                             }
-                        }
-
-                        $line_factures = $line->getData('factures');
-                        $line_equipments_billed = array();
-
-                        foreach ($line_factures as $id_facture => $facture_data) {
-                            if (isset($facture_data['equipments'])) {
-                                foreach ($facture_data['equipments'] as $id_equipment) {
-                                    $line_equipments_billed[] = (int) $id_equipment;
-                                }
-                            }
-                        }
-
-                        // todo: revoir la section en allant chercher pour les équipements n'importe quelle expédition (se baser sur la réservation) ou facture + vérif de l'emplacement et disponibilité à la vente. 
-                        foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
-                            if (in_array((int) $id_equipment, $line_equipments_shipped) ||
-                                    in_array((int) $id_equipment, $line_equipments_billed)) {
-                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
-                                if (BimpObject::objectLoaded($equipment)) {
-                                    $label = '"' . $equipment->getData('serial') . '" (ID ' . $id_equipment . ')';
-                                } else {
-                                    $label = 'd\'ID ' . $id_equipment;
-                                }
-
-                                if (in_array((int) $id_equipment, $line_equipments_shipped)) {
-                                    $errors[] = 'L\'équipement ' . $label . ' a été ajouté à une expédition';
-                                }
-                                if (in_array((int) $id_equipment, $line_equipments_billed)) {
-                                    $errors[] = 'L\'équipement ' . $label . ' a été ajouté à une facture';
-                                }
-                            }
-                        }
-                    } else {
-                        $shipped_qty = (float) $line->getShippedQty();
-                        $available_qty = (float) $line->getFullQty() - $shipped_qty;
-
-                        if ((float) $reception_data['qty'] > $available_qty) {
-                            $errors[] = 'Certaines unités ont été ajouté à une expédition';
-                        }
-
-                        $billed_qty = (float) $line->getBilledQty();
-                        $available_qty = (float) $line->getFullQty() - $billed_qty;
-
-                        if ((float) $reception_data['qty'] > $available_qty) {
-                            $errors[] = 'Certaines unités ont été ajouté à une facture';
                         }
                     }
+
+                    // Liste des équipements facturés pour la ligne de commande client associée
+                    $line_factures = $line->getData('factures');
+                    $line_equipments_billed = array();
+
+                    foreach ($line_factures as $id_facture => $facture_data) {
+                        if (isset($facture_data['equipments'])) {
+                            foreach ($facture_data['equipments'] as $id_equipment) {
+                                $line_equipments_billed[] = (int) $id_equipment;
+                            }
+                        }
+                    }
+                }
+
+                foreach ($reception_data['equipments'] as $id_equipment => $equipment_data) {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+
+                    if (BimpObject::objectLoaded($equipment)) {
+
+                        // Vérification de la disponibilité à la vente: 
+                        if (!(int) $equipment->getData('available')) {
+                            $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" n\'est plus disponible à la vente';
+                            continue;
+                        }
+
+                        // Vérification de l'emplacement: 
+                        if (BimpObject::objectLoaded($entrepot)) {
+                            $place = $equipment->getCurrentPlace();
+
+                            if (BimpObject::objectLoaded($place)) {
+                                if (!(int) $place->getData('id_entrepot') || (int) $place->getData('id_entrepot') !== (int) $entrepot->id) {
+                                    $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" n\'est plus dans l\'entrepot "' . $entrepot->libelle . '" (' . $entrepot->id . ', ' . $place->getData('id_entrepot') . ')';
+                                    continue;
+                                }
+                            }
+                        }
+
+                        if (BimpObject::objectLoaded($line)) {
+                            // On vérifie la réservation de la ligne de commande client associée:  
+                            $reservation = BimpObject::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
+                                        'id_equipment'            => (int) $id_equipment,
+                                        'status'                  => 200,
+                                        'id_commande_client_line' => (int) $line->id
+                                            )
+                            );
+                            if (!BimpObject::objectLoaded($reservation)) {
+                                $commande = $line->getParentInstance();
+                                if (BimpObject::objectLoaded($commande)) {
+                                    $commande_ref = '"' . $commande->getRef() . '"';
+                                } else {
+                                    $commande_ref = 'd\'ID ' . $line->getData('id_obj');
+                                }
+                                $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" n\'est plus au statut "Réservé" pour la commande client ' . $commande_ref;
+                            } else {
+                                // La réservation est ok : on vérifie l'ajout de l'équipement à une facture ou une expédition de la ligne de commande client:
+                                if (in_array((int) $id_equipment, $line_equipments_shipped)) {
+                                    $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" a été ajouté à une expédition';
+                                }
+                                if (in_array((int) $id_equipment, $line_equipments_billed)) {
+                                    $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" a été ajouté à une facture';
+                                }
+                            }
+                        } else {
+                            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+
+                            // Liste des réservations de l'équipement: 
+                            $list = $reservation->getList(array(
+                                'id_equipment' => (int) $id_equipment
+                                    ), null, null, 'id', 'asc', 'array');
+
+                            if (!is_null($list)) {
+                                foreach ($list as $item) {
+                                    $status = (int) $item['status'];
+                                    if ((int) $item['type'] === BR_Reservation::BR_RESERVATION_COMMANDE) {
+                                        if ($status !== 200) {
+                                            $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" est attributé à une commande client mais n\'est plus au statut "Réservé"';
+                                        } else {
+                                            // Une réservation de commande client au bon statut est trouvé, on vérifie l'ajout à une expédition ou une facture: 
+                                            $commande_line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $item['id_commande_client_line']);
+                                            if (BimpObject::objectLoaded($commande_line)) {
+                                                $line_shipments = $commande_line->getData('shipments');
+                                                foreach ($line_shipments as $id_shipment => $shipment_data) {
+                                                    if (isset($shipment_data['equipments']) && in_array((int) $id_equipment, $shipment_data['equipments'])) {
+                                                        $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" est attributé à une expédition';
+                                                        break;
+                                                    }
+                                                }
+
+                                                $line_factures = $commande_line->getData('factures');
+                                                foreach ($line_factures as $id_facture => $facture_data) {
+                                                    if (isset($facture_data['equipments']) && in_array((int) $id_equipment, $facture_data['equipments'])) {
+                                                        $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" est attribué à une facture';
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        if (in_array($status, BR_Reservation::$unavailable_status)) {
+                                            $errors[] = 'L\'équipement "' . $equipment->getData('serial') . '" est réservé en dehors d\'une commande client';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } elseif (BimpObject::objectLoaded($line)) {
+                $shipped_qty = (float) $line->getShippedQty();
+                $available_qty = (float) $line->getFullQty() - $shipped_qty;
+
+                if ((float) $reception_data['qty'] > $available_qty) {
+                    $errors[] = 'Certaines unités ont été ajouté à une expédition';
+                }
+
+                $billed_qty = (float) $line->getBilledQty();
+                $available_qty = (float) $line->getFullQty() - $billed_qty;
+
+                if ((float) $reception_data['qty'] > $available_qty) {
+                    $errors[] = 'Certaines unités ont été ajouté à une facture';
                 }
             }
         }
@@ -160,14 +248,22 @@ class Bimp_CommandeFournLine extends FournObjectLine
             return $receptions[$id_reception];
         }
 
+        $reception = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeFournReception', (int) $id_reception);
+
+        $assign_to_commande_client = 0;
+        if (BimpObject::objectLoaded($reception)) {
+            $assign_to_commande_client = (int) $reception->getData('assign_lines_to_commandes_client');
+        }
+
         return array(
-            'qty'        => 0,
-            'qties'      => array(
+            'qty'                       => 0,
+            'qties'                     => array(
                 0 => array()
             ),
-            'equipments' => array(),
-            'serials'    => array(),
-            'received'   => 0
+            'equipments'                => array(),
+            'serials'                   => array(),
+            'assign_to_commande_client' => $assign_to_commande_client,
+            'received'                  => 0
         );
     }
 
@@ -1034,7 +1130,6 @@ class Bimp_CommandeFournLine extends FournObjectLine
                                     if ($id_commande_client_line && ((int) $reservation->getData('id_commande_client_line') === (int) $id_commande_client_line)) {
                                         $new_status = 100;
                                     } else {
-                                        echo (int) $reservation->getData('id_commande_client_line') . ', ' . $id_commande_client_line . '<br/>';
                                         $new_status = 2;
                                     }
                                     $res_errors = $reservation->setNewStatus($new_status);
@@ -1117,14 +1212,14 @@ class Bimp_CommandeFournLine extends FournObjectLine
                         if ($pa_total && $line_qty) {
                             $line_pa = (float) $commande_line->pa_ht;
                             $remise_pa = (float) $commande_line->getData('remise_pa');
-                            
+
                             if ($remise_pa) {
                                 $line_pa -= ($line_pa * ($remise_pa / 100));
                             }
-                            
+
                             $new_line_pa = (float) ((((float) $line_pa * $line_qty) - $pa_total) / ($line_qty - (float) $reception_data['qty']));
 
-                            
+
                             if ($remise_pa) {
                                 $new_line_pa = ($new_line_pa / (1 - ($remise_pa / 100)));
                             }

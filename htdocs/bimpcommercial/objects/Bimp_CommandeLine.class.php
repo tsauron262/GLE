@@ -876,7 +876,7 @@ class Bimp_CommandeLine extends ObjectLine
             $options['extra_class'] .= ' total_max';
         }
 
-        $value = (!$with_total_max && !(float) $shipment_qty ? $max : $shipment_qty);
+        $value = (!$with_total_max && !(float) $shipment_qty && !(int) $id_shipment ? $max : $shipment_qty);
 
         $html .= BimpInput::renderInput('qty', 'line_' . $this->id . '_shipment_' . $id_shipment . '_qty', $value, $options);
 
@@ -947,7 +947,7 @@ class Bimp_CommandeLine extends ObjectLine
         }
 
         if (is_null($value)) {
-            $value = (!$with_total_max && !(float) $facture_qty ? $max : $facture_qty);
+            $value = (!$with_total_max && !(float) $facture_qty && !(int) $id_facture ? $max : $facture_qty);
         }
 
         $html .= BimpInput::renderInput('qty', 'line_' . $this->id . '_facture_' . $id_facture . '_qty', $value, $options);
@@ -1632,10 +1632,10 @@ class Bimp_CommandeLine extends ObjectLine
                             $equipments[] = $id_equipment;
                         }
                     }
-
-                    $shipments[(int) $id_shipment]['equipments'] = $equipments;
                 }
             }
+
+            $shipments[(int) $id_shipment]['equipments'] = $equipments;
 
             // Mise à jour: 
             if (!count($errors)) {

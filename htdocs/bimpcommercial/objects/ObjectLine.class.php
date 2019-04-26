@@ -981,7 +981,7 @@ class ObjectLine extends BimpObject
                     if ((int) $this->getData('id_parent_line')) {
                         $html .= '</div>';
                     }
-                    
+
                     break;
 
                 case 'qty':
@@ -1893,6 +1893,36 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
+    public function checkEquipmentsAttribution()
+    {
+        $errors = array();
+
+        if ($this->equipment_required) {
+            if ($this->isProductSerialisable()) {
+                $equipment_lines = $this->getEquipmentLines();
+
+                $qty_set = 0;
+                foreach ($equipment_lines as $equipment_line) {
+                    if ((int) $equipment_line->getData('id_equipment')) {
+                        $qty_set++;
+                    }
+                }
+                
+                if ($qty_set < (int) $this->qty) {
+                    $diff = (int) $this->qty - $qty_set;
+
+                    if ($diff > 1) {
+                        $errors[] = $diff . ' équipements n\'ont pas été attribués';
+                    } else {
+                        $errors[] = $diff . ' équipement n\'a pas été attribué';
+                    }
+                }
+            }
+        }
+
+        return $errors;
+    }
+
     // Gestion remises: 
 
     public function calcRemise($remise_globale_rate = null)
@@ -2334,7 +2364,7 @@ class ObjectLine extends BimpObject
                         $remise_pa = (float) $product->getRemiseCrt();
                         $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="' . $remise_pa . '"/>';
                         $html .= BimpTools::displayFloatValue($remise_pa, 8) . '%';
-                    } else {
+                    } elseif ($this->canEditRemisePa()) {
                         $html .= BimpInput::renderInput('text', $prefixe . 'remise_pa', (float) $value, array(
                                     'addon_right' => BimpRender::renderIcon('fas_percent'),
                                     'data'        => array(
@@ -2345,6 +2375,9 @@ class ObjectLine extends BimpObject
                                         'unsigned'  => 1
                                     )
                         ));
+                    } else {
+                        $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="0"/>';
+                        $html .= '0%';
                     }
                 } else {
                     $html .= '<input type="hidden" name="' . $prefixe . 'remise_pa" value="0"/>';
@@ -3486,7 +3519,7 @@ class ObjectLine extends BimpObject
         return $errors;
     }
 
-    // Gestion des droits:
+    // Gestion des droits utilisateurs:
 
     public function canEditPrixAchat()
     {
@@ -3503,6 +3536,11 @@ class ObjectLine extends BimpObject
         if (!isset($user->rights->bimpcommercial->priceVente) || (int) $user->rights->bimpcommercial->priceVente) {
             return 1;
         }
+        return 0;
+    }
+
+    public function canEditRemisePa()
+    {
         return 0;
     }
 

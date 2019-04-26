@@ -298,7 +298,12 @@ class BC_Filter extends BimpComponent
         $html = '';
 
         $input_name = 'add_' . $this->field->name . '_filter';
-        $input_path = 'fields/' . $this->field->name . '/input';
+
+        if ($this->object->config->isDefined('fields/' . $this->field->name . '/filter/input')) {
+            $input_path = 'fields/' . $this->field->name . '/filter/input';
+        } else {
+            $input_path = 'fields/' . $this->field->name . '/input';
+        }
 
         $onclick = 'addFieldFilterValue($(this), \'' . $this->field->name . '\');';
 
@@ -308,8 +313,6 @@ class BC_Filter extends BimpComponent
         $add_btn_html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter';
         $add_btn_html .= '</button>';
         $add_btn_html .= '</div>';
-
-
 
         switch ($this->params['type']) {
             case 'value':
@@ -347,7 +350,8 @@ class BC_Filter extends BimpComponent
                     $this->params['items'] = array();
                 }
                 $html .= BimpInput::renderInput('check_list', $input_name, $this->values, array(
-                            'items' => $this->params['items']
+                            'items'              => $this->params['items'],
+                            'select_all_buttons' => 0
                 ));
                 break;
         }

@@ -944,7 +944,7 @@ $(document).ready(function () {
             onCommandeFournLineReceptionViewLoaded(e.$view);
         }
     });
-
+    
     $('body').on('inputReloaded', function (e) {
         if (e.input_name === 'equipments' && $.isOk(e.$form) && e.$form.hasClass('Bimp_Commande_form_shipment_equipments')) {
             onShipmentEquipmentFormEquipmentsLoaded(e.$form);

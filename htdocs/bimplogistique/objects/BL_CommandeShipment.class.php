@@ -73,6 +73,13 @@ class BL_CommandeShipment extends BimpObject
                     return 0;
                 }
                 return 1;
+
+            case 'generateVignettes':
+                if ((int) $this->getData('status') === self::BLCS_ANNULEE) {
+                    $errors[] = 'Cette exépédition a été annulée';
+                    return 0;
+                }
+                return 1;
         }
 
         return (int) parent::isActionAllowed($action, $errors);
@@ -231,6 +238,16 @@ class BL_CommandeShipment extends BimpObject
                         'form_name'        => 'facture_edit',
                         'on_form_submit'   => 'function($form, extra_data) { return onShipmentFactureFormSubmit($form, extra_data); } ',
                         'success_callback' => $reload_commande_header_callback
+                    ))
+                );
+            }
+
+            if ($this->isActionAllowed('generateVignettes')) {
+                $buttons[] = array(
+                    'label'   => 'Générer des vigettes',
+                    'icon'    => 'fas_sticky-note',
+                    'onclick' => $this->getJsActionOnclick('generateVignettes', array(), array(
+                        'form_name' => 'vignettes'
                     ))
                 );
             }
@@ -1465,6 +1482,30 @@ class BL_CommandeShipment extends BimpObject
         return array(
             'errors'   => $errors,
             'warnings' => $warnings
+        );
+    }
+
+    public function actionGenerateVignettes($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de l\'expédition absent';
+        } else {
+            $qty = isset($data['qty']) ? (int) $data['qty'] : 1;
+
+            $url = DOL_URL_ROOT . '/bimplogistique/etiquettes_expedition.php?id_shipment=' . $this->id . '&qty=' . $qty;
+
+            $success_callback = 'window.open(\'' . $url . '\')';
+        }
+
+        return array(
+            'errors'           => $errors,
+            'warnings'         => $warnings,
+            'success_callback' => $success_callback
         );
     }
 

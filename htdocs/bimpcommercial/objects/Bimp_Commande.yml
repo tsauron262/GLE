@@ -63,7 +63,7 @@ objects:
                 
     shipments: 
         relation: hasMany
-        delete: 0
+        delete: 1
         instance: 
             bimp_object: 
                 module: bimplogistique
@@ -112,14 +112,6 @@ associations:
                 type: nom_url
                 
 fields: 
-    entrepot: 
-        label: Entrepôt
-        dol_extra_field: 1
-        type: id_object
-        object: entrepot
-        input: 
-            type: search_entrepot
-            
     validComm:
         label: Validation Commerciale
         type: bool
@@ -129,17 +121,6 @@ fields:
         label: Validation Financiére
         type: bool
         edit: 0
-            
-    ef_type: 
-        label: Secteur
-        dol_extra_field: 1
-        values: 
-            array: secteurs
-        required: 1
-            
-    libelle: 
-        label: Libellé
-        dol_extra_field: 1
         
     id_facture: 
         label: Facture globale
@@ -167,22 +148,12 @@ fields:
         label: Fermée le
         type: datetime
         
-    fk_user_author:
-        label: Créée par
-        type: int
-        default_value: 
-            prop: 
-                name: id
-                object: 
-                    global: user
-        
     fk_user_modif: 
         label: Dernière modification par
         type: int
         
     fk_user_valid: 
-        label: Validée par
-        type: int
+        dol_prop: user_valid
         
     fk_user_cloture: 
         label: Fermée par
@@ -195,8 +166,6 @@ fields:
     total_ttc: 
         label: Total TTC
         type: money
-        
-    total: unset
     
     logistique_status: 
         label: Statut logistique
@@ -204,6 +173,7 @@ fields:
         values: 
             array: logistique_status
         default_value: 0
+        
     shipment_status: 
         label: Statut expédition
         type: int
@@ -223,6 +193,8 @@ fields:
         type: id_object
         object: user_resp
         default_value: 0
+        
+    total: unset
         
 fields_tables: 
     infos: 
@@ -691,10 +663,26 @@ forms:
               content: 
                   callback: renderEquipmentsToAddToShipmentCheckList
               depends_on: id_shipment,reservations
-                  
+            
+filters_panels: 
+    default: 
+        filters: 
+            id_user_resp: 
+                field: id_user_resp
+            total_ttc: 
+                field: total_ttc
+            date_create: 
+                field: date_creation
+            logistique_status:
+                field: logistique_status
+            shipment_status: 
+                field: shipment_status
+            invoice_status: 
+                field: invoice_status
+            date_livraison: 
+                field: date_livraison
+            
 lists_cols: 
-    ef_type:
-        field: ef_type
     date_create: 
         field: date_creation
         date_commande:
@@ -704,8 +692,6 @@ lists_cols:
         field: date_livraison
     total_ttc: 
         field: total_ttc
-    libelle: 
-        field: libelle
     facture: 
         field: id_facture
         display: nom_url
@@ -717,33 +703,29 @@ lists_cols:
         label: Valid. fin.
         field: validFin
         max_width: 45px
+    logistique_status:
+        field: logistique_status
+    shipment_status: 
+        field: shipment_status
+    invoice_status: 
+        field: invoice_status
+    id_user_resp: 
+        field: id_user_resp
     
 lists: 
     default: 
         title: Liste des commandes
         icon: fas_dolly
-        configurable: 1
-        checkboxes: 1
         bulk_actions:
             - label: supprimer les commandes sélectionnées
-              icon: fas_trash-alt
-              onclick: deleteSelectedObjects('list_id', $(this))
         sort_field: date_creation
         sort_way: desc
-        n: 10
-        add_form_name: default
         add_form_values: 
             fields: 
                 entrepot: 
                     request: id_entrepot
                 fk_soc:
                     request: id_client
-        edit_btn: 1
-        edit_form: default
-        delete_btn: 
-            callback: isDeletable
-        modal_view: full
-        page_btn: 1
         cols: 
             ref: 
             statut: 

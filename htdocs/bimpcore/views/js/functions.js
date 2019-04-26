@@ -235,16 +235,13 @@ function setCommonEvents($container) {
         }
     });
     // Auto-expand: 
-    $container.on('input.auto_expand', 'textarea.auto_expand', function () {
-        var minRows = $(this).data('min_rows'), rows;
-        if (!minRows) {
-            minRows = 3;
-        }
-        this.rows = minRows;
-        rows = Math.floor((this.scrollHeight - this.baseScrollHeight) / 16);
-        this.rows = rows + minRows;
-    });
-    $container.find('textarea.auto_expand').each(function () {
+    if (!parseInt($container.data('auto_expand_event_init'))) {
+        $container.on('input.auto_expand', 'textarea.auto_expand', function () {
+            checkInputAutoExpand(this);
+        });
+        $container.data('auto_expand_event_init', 1);
+    }
+    $container.find('.auto_expand').each(function () {
         var minRows = parseInt($(this).data('min_rows')), rows;
         if (!minRows) {
             minRows = 3;
@@ -267,10 +264,19 @@ function setCommonEvents($container) {
     });
     $container.find('.nav-tabs').each(function () {
         if (!parseInt($(this).data('nav_tabs_event_init'))) {
-            $(this).find('li > a').click(function (e) {
+            $(this).find('li > a[data-toggle="tab"]').click(function (e) {
                 e.preventDefault();
                 $(this).tab('show');
             });
+            $(this).find('li > a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var $tabContent = $($(e.target).attr('href'));
+                if ($.isOk($tabContent)) {
+                    $tabContent.find('.object_list_table').each(function () {
+                        checkListWidth($(this));
+                    });
+                }
+            });
+
             $(this).data('nav_tabs_event_init', 1);
         }
     });
@@ -332,6 +338,7 @@ function setCommonEvents($container) {
             content: $(this).data('title')
         });
     });
+
     checkMultipleValues();
 }
 
@@ -380,6 +387,16 @@ function renderLoading(msg, id_container) {
 }
 
 // Inputs
+
+function checkInputAutoExpand(input) {
+    var minRows = $(input).data('min_rows'), rows;
+    if (!minRows) {
+        minRows = 3;
+    }
+    input.rows = minRows;
+    rows = Math.floor((input.scrollHeight - input.baseScrollHeight) / 16);
+    input.rows = rows + minRows;
+}
 
 function selectSwitchOption($button) {
     if ($button.hasClass('selected')) {

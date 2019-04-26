@@ -188,6 +188,9 @@ class BimpInput
                 if (!isset($options['note'])) {
                     $options['note'] = false;
                 }
+                if (!isset($options['tab_key_as_enter'])) {
+                    $options['tab_key_as_enter'] = false;
+                }
 
                 if (isset($options['maxlength']) && $options['maxlength']) {
                     $html .= '<p class="inputHelp" style="text-align: right">Caractères max: ' . $options['maxlength'] . '</p>';
@@ -195,7 +198,7 @@ class BimpInput
 
                 $html .= '<textarea id="' . $input_id . '" rows="' . $options['rows'] . '" name="' . $field_name . '"';
                 if ($options['auto_expand'] || $options['note']) {
-                    $html .= ' class="' . ($options['auto_expand'] ? 'auto_expand' : '') . ($options['note'] ? ' note' : '') . ' ' . $extra_class . '"';
+                    $html .= ' class="' . ($options['auto_expand'] ? 'auto_expand' : '') . ($options['note'] ? ' note' : '') . ($options['tab_key_as_enter'] ? ' tab_key_as_enter' : '') . ' ' . $extra_class . '"';
                     $html .= ' data-min_rows="' . $options['rows'] . '"';
                 }
                 if (isset($options['maxlength']) && $options['maxlength']) {
@@ -607,7 +610,7 @@ class BimpInput
                     $html .= ' data-max="' . $options['max'] . '"';
                     $html .= ' data-max_input_name="' . (isset($options['max_input_name']) ? $options['max_input_name'] : '') . '"';
                     $html .= '>';
-                    if (count($options['items']) > 3) {
+                    if (count($options['items']) > 3 && (!isset($options['select_all_buttons']) || (int) $options['select_all_buttons'])) {
                         $html .= '<div class="smallActionsContainer">';
                         $html .= '<span class="small-action" onclick="checkAll($(this).parent().parent(), \'.' . $field_name . '_check\');">';
                         $html .= BimpRender::renderIcon('fas_check-square', 'iconLeft') . 'Tout sélectionner';

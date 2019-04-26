@@ -2069,6 +2069,20 @@ function setInputsEvents($container) {
             $(this).data('check_list_events_init', 1);
         }
     });
+    $container.find('.tab_key_as_enter').each(function () {
+        if (!parseInt($(this).data('tab_key_as_enter_event_init'))) {
+            $(this).keydown(function (e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    var val = $(this).val();
+                    val += "\n";
+                    $(this).val(val).change();
+                    checkInputAutoExpand(this);
+                }
+            });
+            $(this).data('tab_key_as_enter_event_init', 1);
+        }
+    });
 }
 
 function setInputEvents($form, $input) {

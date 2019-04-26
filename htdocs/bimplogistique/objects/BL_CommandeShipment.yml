@@ -201,6 +201,16 @@ forms:
               content: 
                   callback: renderFactureFormLinesInputs
                   
+    vignettes: 
+        rows: 
+            - custom: 1
+              label: Nombre de vignettes à générer
+              data_type: qty
+              input_name: qty
+              input: 
+                  type: qty
+              value: 1
+                  
 fields_tables: 
     data: 
         panel: 0

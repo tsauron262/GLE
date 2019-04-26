@@ -290,7 +290,7 @@ class BimpDocumentPDF extends BimpModelPDF
 
     protected function renderContent()
     {
-        if(is_object($this->thirdparty) || is_object($this->contact))
+        if (is_object($this->thirdparty) || is_object($this->contact))
             $this->renderDocInfos($this->thirdparty, $this->contact);
         $this->renderTop();
         $this->renderBeforeLines();
@@ -376,7 +376,7 @@ class BimpDocumentPDF extends BimpModelPDF
             $html .= 'Tél. : ' . $this->fromCompany->phone . '<br/>';
         }
         $html .= '</span>';
-        $html .= '<span style="color: #' . BimpCore::getParam('pdf/primary') . '; font-size: 8px;">';
+        $html .= '<span style="color: #' . BimpCore::getParam('pdf/primary', '000000') . '; font-size: 8px;">';
         if ($this->fromCompany->url) {
             $html .= $this->fromCompany->url . ($this->fromCompany->email ? ' - ' : '');
         }
@@ -525,6 +525,8 @@ class BimpDocumentPDF extends BimpModelPDF
         foreach ($this->object->lines as $line) {
             $i++;
 
+            $bimpLine = isset($bimpLines[(int) $line->id]) ? $bimpLines[(int) $line->id] : null;
+
             if ($this->object->type != 3 && ($line->desc == "(DEPOSIT)" || $line->desc === 'Acompte')) {
 //                $acompteHt = $line->subprice * (float) $line->qty;
 //                $acompteTtc = BimpTools::calculatePriceTaxIn($acompteHt, (float) $line->tva_tx);
@@ -552,6 +554,40 @@ class BimpDocumentPDF extends BimpModelPDF
 
             $desc = $this->getLineDesc($line, $product);
 
+            if (!is_null($bimpLine)) {
+                if ($bimpLine->equipment_required && $bimpLine->isProductSerialisable()) {
+                    $equipment_lines = $bimpLine->getEquipmentLines();
+                    if (count($equipment_lines)) {
+                        $equipments = array();
+
+                        foreach ($equipment_lines as $equipment_line) {
+                            if ((int) $equipment_line->getData('id_equipment')) {
+                                $equipments[] = (int) $equipment_line->getData('id_equipment');
+                            }
+                        }
+
+                        if (count($equipments)) {
+                            $desc .= '<br/>';
+                            $desc .= '<span style="font-size: 6px;">N° de série: </span>';
+                            $fl = true;
+                            $desc .= '<span style="font-size: 6px; font-style: italic">';
+                            foreach ($equipments as $id_equipment) {
+                                $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                                if (BimpObject::objectLoaded($equipment)) {
+                                    if (!$fl) {
+                                        $desc .= ', ';
+                                    } else {
+                                        $fl = false;
+                                    }
+                                    $desc.= $equipment->getData('serial');
+                                }
+                            }
+                            $desc .= '</span>';
+                        }
+                    }
+                }
+            }
+
             if ($line->subprice == 0) {
                 $row['desc'] = array(
                     'colspan' => 99,
@@ -561,8 +597,8 @@ class BimpDocumentPDF extends BimpModelPDF
             } else {
                 $line_remise = $line->remise_percent;
 
-                if (isset($bimpLines[(int) $line->id])) {
-                    if ($bimpLines[(int) $line->id]->isRemisable()) {
+                if (!is_null($bimpLine)) {
+                    if ($bimpLine->isRemisable()) {
                         $line_remise -= $remise_globale_line_rate;
                     } else {
                         $line_remise = 0;
@@ -645,13 +681,13 @@ class BimpDocumentPDF extends BimpModelPDF
 
         if (!$this->hideReduc && $remise_globale) {
             $remise_infos = $this->bimpCommObject->getRemisesInfos();
-            
+
             $remise_label = $this->bimpCommObject->getData('remise_globale_label');
-            
+
             if (!$remise_label) {
                 $remise_label = 'Remise exceptionnelle sur l\'intégralité ' . $this->bimpCommObject->getLabel('of_the');
             }
-            
+
             $row = array(
                 'desc'     => $remise_label,
                 'qte'      => 1,

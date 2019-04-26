@@ -1968,7 +1968,6 @@ class Bimp_Commande extends BimpComm
         }
 
         foreach ($lines_qties as $id_line => $line_qty) {
-            $update_line = false;
             $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $id_line);
 
             if (BimpObject::objectLoaded($line)) {
@@ -2045,7 +2044,20 @@ class Bimp_Commande extends BimpComm
                         $fac_line->update($fac_line_warnings, true);
                     }
                 } else {
-                    $update_line = true;
+                    $fac_line->qty = (float) $line_qty;
+                    $fac_line_errors = $fac_line->setEquipments(array());
+
+                    if (count($fac_line_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la liste des équipements pour la ligne de facture n°' . $fac_line->getData('position'));
+                    } else {
+                        $fac_line_warnings = array();
+                        $fac_line_errors = $fac_line->update($fac_line_warnings, true);
+                        $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
+
+                        if (count($fac_line_errors)) {
+                            $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
+                        }
+                    }
                 }
 
                 if (!count($fac_line_errors)) {
@@ -2060,26 +2072,11 @@ class Bimp_Commande extends BimpComm
                                     'id_equipment' => (int) $id_equipment
                                 );
                             }
-                            if ($update_line) {
-                                $fac_line->qty = count($line_equipments);
-                            }
                         }
 
                         $eq_errors = $fac_line->setEquipments($line_equipments, $equipments_set);
                         if (count($eq_errors)) {
                             $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Ligne n°' . $line->getData('position'));
-                        }
-
-                        if ($update_line) {
-                            $fac_line->qty = (float) $line_qty;
-
-                            $fac_line_warnings = array();
-                            $fac_line_errors = $fac_line->update($fac_line_warnings, true);
-                            $fac_line_errors = array_merge($fac_line_errors, $fac_line_warnings);
-
-                            if (count($fac_line_errors)) {
-                                $errors[] = BimpTools::getMsgFromArray($fac_line_errors, 'Echec de la mise à jour de la ligne de facture depuis la ligne de commande n°' . $line->getData('position') . ' (ID ' . $line->id . ')');
-                            }
                         }
                     }
 
@@ -2087,9 +2084,7 @@ class Bimp_Commande extends BimpComm
                     $line_warnings = array();
 
                     $line_errors = $line->setFactureData((int) $facture->id, $line_qty, $equipments_set, $line_warnings, false);
-
                     $line_errors = array_merge($line_errors, $line_warnings);
-
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de l\'enregistrement des quantités facturées pour la ligne n°' . $line->getData('position') . ' (ID: ' . $line->id . ')');
                     }
@@ -2721,5 +2716,33 @@ class Bimp_Commande extends BimpComm
         $this->set('date_creation', date('Y-m-d H:i:s'));
 
         return parent::create($warnings, $force_create);
+    }
+
+    public function delete(&$warnings = array(), $force_delete = false)
+    {
+        $id_commande = (int) $this->id;
+
+        $errors = parent::delete($warnings, $force_delete);
+
+        if (!count($errors)) {
+            // Suppression des réservations: 
+            $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
+
+            $reservations = $reservation->getListObjects(array(
+                'id_commande_client' => $id_commande
+            ));
+
+            foreach ($reservations as $res) {
+                $res_warnings = array();
+                $res_errors = $res->delete($res_warnings, true);
+                $res_errors = array_merge($res_errors, $res_warnings);
+
+                if (count($res_errors)) {
+                    $warnings[] = BimpTools::getMsgFromArray($res_errors, 'Erreur lors de la suppression d\'une réservation');
+                }
+            }
+        }
+
+        return $errors;
     }
 }

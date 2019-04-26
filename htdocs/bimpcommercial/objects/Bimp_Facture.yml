@@ -44,7 +44,7 @@ objects:
                 fields: 
                     parent_object_name: Bimp_Facture
                     
-fields:         
+fields: 
     facnumber: 
         label: Référence
         dol_prop: ref
@@ -60,9 +60,6 @@ fields:
         depends_on: fk_soc
     model_pdf: 
         default_value: bimpfact
-    libelle: 
-        label: Libellé
-        dol_extra_field: 1
     datec: 
         label: Créée le
         type: datetime
@@ -82,12 +79,6 @@ fields:
         object: account
         input: 
             type: select_mysoc_account
-    ef_type: 
-        label: Secteur
-        dol_extra_field: 1
-        values: 
-            array: secteurs
-        required: 1
     centre: 
         label: Centre
         dol_extra_field: 1
@@ -100,6 +91,11 @@ fields:
     total_ttc: 
         label: Total TTC
         type: money
+    fk_user_author: 
+        dol_prop: user_author
+    fk_user_valid: 
+        dol_prop: user_valid
+        
     ref: unset
     fk_availability: unset
     fk_input_reason: unset
@@ -353,17 +349,55 @@ views:
         objects_change_reload: Bimp_FactureLine
     content: 
         objects_change_reload: Bimp_FactureLine
-        
+      
+filters_panels: 
+    default: 
+        filters: 
+            ref: 
+                field: facnumber
+            type: 
+                field: type
+            total_ht:
+                field: total
+            total_ttc: 
+                field: total_ttc
+                
+            availability: unset
+            
+lists_cols: 
+    ref: 
+        field: facnumber
+    type: 
+        field: type
+    paid: 
+        label: Payée
+        value: 
+            callback: 
+                method: displayPaidStatus
+                params: 
+                    - 0
+                    - 1
+    total_ht: 
+        field: total
+    total_ttc: 
+        field: total_ttc
+    pdf: 
+        label: Fichier PDF
+        value: 
+            callback: 
+                method: displayPDFButton
+                params: 
+                    - false
+    availability: unset
+    input_reason: unset
+    
 lists: 
     default: 
         title: Factures
         icon: fas_file-invoice-dollar
-        list_filters: 
-            callback: getListFilters
+        bulk_actions: unset
         sort_field: datec
         sort_way: desc
-        n: 10
-        add_form_name: default
         add_btn_label: Créer une nouvelle facture
         add_form_values: 
             fields: 
@@ -371,38 +405,15 @@ lists:
                     request: id_entrepot
                 fk_soc:
                     request: id_client
-        edit_btn: 1
-        edit_form: default
         delete_btn: 0
-        modal_view: full
-        page_btn: 1
         cols: 
             ref: 
-                field: facnumber
             type: 
-                field: type
-            status: 
-                field: fk_statut
+            statut: 
             paid: 
-                label: Payée
-                value: 
-                    callback: 
-                        method: displayPaidStatus
-                        params: 
-                            - 0
-                            - 1
-            client: 
-                field: fk_soc
-                display: nom_url
-            total: 
-                field: total_ttc
-            pdf: 
-                label: Fichier PDF
-                value: 
-                    callback: 
-                        method: displayPDFButton
-                        params: 
-                            - false
+            soc: 
+            total_ttc: 
+            pdf:
         
 cards: 
     default: 

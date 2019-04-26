@@ -16036,7 +16036,7 @@ i.iconRight {
 }
 /* line 466, ../scss/bimpcore/_styles.scss */
 .panel .panel-body {
-  overflow-x: auto;
+  /*overflow-x: auto;*/
 }
 /* line 469, ../scss/bimpcore/_styles.scss */
 .panel .panel-body .beforePanelContainer {

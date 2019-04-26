@@ -176,10 +176,10 @@ class BimpCore
 
     public static function getParam($full_path, $default_value = '', $type = 'string')
     {
-
-        if ($full_path == "pdf/primary")
-            return "EF7D00"; //"ff9300";
         if (is_null(self::$config)) {
+            if (!file_exists(DOL_DATA_ROOT. '/bimpcore/config.yml')) {
+                copy(DOL_DOCUMENT_ROOT.'/bimpcore/default_config.yml', DOL_DATA_ROOT.'/bimpcore/config.yml');
+            }
             if (file_exists(DOL_DATA_ROOT . '/bimpcore/config.yml')) {
                 self::$config = new BimpConfig(DOL_DATA_ROOT . '/bimpcore/', 'config.yml', new BimpObject('', ''));
             }

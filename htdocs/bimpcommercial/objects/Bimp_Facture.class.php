@@ -1476,78 +1476,100 @@ class Bimp_Facture extends BimpComm
     {
         $errors = array();
         $warnings = array();
-        $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
-        if ($this->isLabelFemale()) {
-            $success .= 'e';
-        }
-        $success .= ' avec succès';
+        $success = '';
+        $success_callback = '';
+        $modal_html = '';
 
-        $success_callback = 'bimp_reloadPage();';
-
-        global $conf, $langs, $user, $mysoc;
-        $langs->load("errors");
-
-        $this->dol_object->fetch_thirdparty();
-
-        $id_entrepot = (int) $this->getData('entrepot');
-
-        // Check parameters
-        // Check for mandatory prof id (but only if country is than than ours)
-        if ($mysoc->country_id > 0 && $this->dol_object->thirdparty->country_id == $mysoc->country_id) {
-            for ($i = 1; $i <= 6; $i++) {
-                $idprof_mandatory = 'SOCIETE_IDPROF' . ($i) . '_INVOICE_MANDATORY';
-                $idprof = 'idprof' . $i;
-                if (!$this->dol_object->thirdparty->$idprof && !empty($conf->global->$idprof_mandatory)) {
-                    $errors[] = $langs->trans('ErrorProdIdIsMandatory', $langs->transcountry('ProfId' . $i, $this->dol_object->thirdparty->country_code));
-                }
+        if (!isset($data['force_validate']) || !(int) $data['force_validate']) {
+            $lines_errors = array();
+            if (!$this->checkEquipmentsAttribution($lines_errors)) {
+                $modal_html = BimpRender::renderAlerts($lines_errors, 'warning');
+                $onclick = $this->getJsActionOnclick('validate', array(
+                    'force_validate' => 1
+                ));
+                $modal_html .= '<div style="text-align: center">';
+                $modal_html .= '<span class="btn btn-default" onclick="' . $onclick . '">';
+                $modal_html .= BimpRender::renderIcon('fas_check', 'iconLeft') . 'Forcer la validation';
+                $modal_html .= '</span>';
+                $modal_html .= '</div>';
             }
         }
 
-        $qualified_for_stock_change = 0;
-        if (empty($conf->global->STOCK_SUPPORTS_SERVICES)) {
-            $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(2);
-        } else {
-            $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(1);
-        }
-
-        // Check for warehouse
-        // todo: checker si les stocks doivent être corrigés ou non selon le type de la facture.
-        if ((int) $this->getData('type') != Facture::TYPE_DEPOSIT && !empty($conf->global->STOCK_CALCULATE_ON_BILL) && $qualified_for_stock_change) {
-            if (!$id_entrepot) {
-                $errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Warehouse"));
+        if (!$modal_html) {
+            $success = BimpTools::ucfirst($this->getLabel('')) . ' validé';
+            if ($this->isLabelFemale()) {
+                $success .= 'e';
             }
-        }
+            $success .= ' avec succès';
 
-        if (!count($errors)) {
-            $result = $this->dol_object->validate($user, '', $id_entrepot);
-            if ($result >= 0) {
-                // Define output language
-                if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
-                    $outputlangs = $langs;
-                    $newlang = '';
-                    if ($conf->global->MAIN_MULTILANGS)
-                        $newlang = $this->dol_object->thirdparty->default_lang;
-                    if (!empty($newlang)) {
-                        $outputlangs = new Translate("", $conf);
-                        $outputlangs->setDefaultLang($newlang);
-                    }
-                    $model = $this->getModelPdf();
-                    $this->fetch($this->id);
+            $success_callback = 'bimp_reloadPage();';
 
-                    $result = $this->dol_object->generateDocument($model, $outputlangs);
-                    if ($result <= 0) {
-                        $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du document PDF');
+            global $conf, $langs, $user, $mysoc;
+            $langs->load("errors");
+
+            $this->dol_object->fetch_thirdparty();
+
+            $id_entrepot = (int) $this->getData('entrepot');
+
+            // Check parameters
+            // Check for mandatory prof id (but only if country is than than ours)
+            if ($mysoc->country_id > 0 && $this->dol_object->thirdparty->country_id == $mysoc->country_id) {
+                for ($i = 1; $i <= 6; $i++) {
+                    $idprof_mandatory = 'SOCIETE_IDPROF' . ($i) . '_INVOICE_MANDATORY';
+                    $idprof = 'idprof' . $i;
+                    if (!$this->dol_object->thirdparty->$idprof && !empty($conf->global->$idprof_mandatory)) {
+                        $errors[] = $langs->trans('ErrorProdIdIsMandatory', $langs->transcountry('ProfId' . $i, $this->dol_object->thirdparty->country_code));
                     }
                 }
+            }
+
+            $qualified_for_stock_change = 0;
+            if (empty($conf->global->STOCK_SUPPORTS_SERVICES)) {
+                $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(2);
             } else {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la validation');
+                $qualified_for_stock_change = $this->dol_object->hasProductsOrServices(1);
+            }
+
+            // Check for warehouse
+            // todo: checker si les stocks doivent être corrigés ou non selon le type de la facture.
+            if ((int) $this->getData('type') != Facture::TYPE_DEPOSIT && !empty($conf->global->STOCK_CALCULATE_ON_BILL) && $qualified_for_stock_change) {
+                if (!$id_entrepot) {
+                    $errors[] = $langs->trans('ErrorFieldRequired', $langs->transnoentitiesnoconv("Warehouse"));
+                }
+            }
+
+            if (!count($errors)) {
+                $result = $this->dol_object->validate($user, '', $id_entrepot);
+                if ($result >= 0) {
+                    // Define output language
+                    if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
+                        $outputlangs = $langs;
+                        $newlang = '';
+                        if ($conf->global->MAIN_MULTILANGS)
+                            $newlang = $this->dol_object->thirdparty->default_lang;
+                        if (!empty($newlang)) {
+                            $outputlangs = new Translate("", $conf);
+                            $outputlangs->setDefaultLang($newlang);
+                        }
+                        $model = $this->getModelPdf();
+                        $this->fetch($this->id);
+
+                        $result = $this->dol_object->generateDocument($model, $outputlangs);
+                        if ($result <= 0) {
+                            $warnings[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Des erreurs sont survenues lors de la génération du document PDF');
+                        }
+                    }
+                } else {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la validation');
+                }
             }
         }
 
         return array(
             'errors'           => $errors,
             'warnings'         => $warnings,
-            'success_callback' => $success_callback
+            'success_callback' => $success_callback,
+            'modal_html'       => $modal_html
         );
     }
 

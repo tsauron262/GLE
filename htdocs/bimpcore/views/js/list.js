@@ -961,6 +961,7 @@ function checkListWidth($list) {
 
         if ($filtersPanel.length && $filtersPanel.css('display') !== 'none') {
             width += $filtersPanel.width();
+            bimp_msg('filters: '+width);
         }
 
         if ($table.length) {

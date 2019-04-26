@@ -1153,4 +1153,5 @@ class Bimp_CommandeFourn extends BimpComm
 
         return 1;
     }
+    
 }

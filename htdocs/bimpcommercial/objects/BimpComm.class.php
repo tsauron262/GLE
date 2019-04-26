@@ -1862,6 +1862,22 @@ class BimpComm extends BimpDolObject
         }
     }
 
+    public function checkEquipmentsAttribution(&$errors)
+    {
+        $errors = array();
+
+        $lines = $this->getChildrenObjects('lines');
+
+        foreach ($lines as $line) {
+            $line_errors = $line->checkEquipmentsAttribution();
+            if (count($line_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+            }
+        }
+
+        return count($errors) ? 0 : 1;
+    }
+
     // Actions:
 
 

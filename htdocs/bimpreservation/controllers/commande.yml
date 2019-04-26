@@ -25,9 +25,9 @@ sections:
           default: 
               label: Logistique
               sections: 
-                  - type: object_header
-                    object_header: 
-                        object: commande
+#                  - type: object_header   //commenté le temmps d'activé cela car sinon redirect sur ancienne verssion
+#                    object_header: 
+#                        object: commande
                   - type: custom
                     custom: 
                         callback: renderContentHtml

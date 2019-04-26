@@ -507,6 +507,10 @@ views:
                   list:
                       children: notes
                       name: client
+                
+                - type: list
+                  list:
+                      children: files
     
     client_inters:
         rows:

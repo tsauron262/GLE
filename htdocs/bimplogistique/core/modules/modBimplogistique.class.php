@@ -315,8 +315,8 @@ class modBimpLogistique extends DolibarrModules
                 }
                 
 
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpprod1', 1, 'product', 'Etiquette prod1', NULL);";
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpprod2', 1, 'product', 'Etiquette prod2', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpprod1', 1, 'product', 'Etiquette stock', NULL);";
+                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'bimpprod2', 1, 'product', 'Etiquette magasin', NULL);";
                 
                 
 		//$this->_load_tables('/bimpcommercial/sql/');
@@ -336,18 +336,9 @@ class modBimpLogistique extends DolibarrModules
 	{
 		$sql = array();
                 
-                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpcommercial';";
-                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimployerdevis';";
-                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpdevis';";
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpprod1';";
+                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpprod2';";
 
-//                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'einstein', 1, 'propal', 'einstein', NULL);";
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'azur', 1, 'propal', 'azur', NULL);";
-                
-                
-                //Facture
-                $sql[]="DELETE FROM ".MAIN_DB_PREFIX."document_model WHERE nom like 'bimpfact';";
-                $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` ( `nom`, `entity`, `type`, `libelle`, `description`) VALUES( 'crabe', 1, 'invoice', 'crabe', NULL);";
-                
 		return $this->_remove($sql, $options);
 	}
 

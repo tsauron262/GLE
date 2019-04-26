@@ -277,7 +277,6 @@ if ($id > 0 || $id2 > 0) {
     dol_fiche_head('');
 }
 
-
 $nbaquis_current = $holiday->getCurrentYearCPforUser($user_id);
 $nbaquis_next = $holiday->getNextYearCPforUser($user_id);
 $nbdeduced = $holiday->getConfCP('nbHolidayDeducted');
@@ -286,16 +285,25 @@ $nb_holiday_next = $nbaquis_next / $nbdeduced;
 $nextCPYearDate = $holiday->getCPNextYearDate(true, false);
 $nextCPYearDateAfter = $holiday->getCPNextYearDate(true, true);
 $nbRtt = $holiday->getRTTforUser($user_id);
-/*print '<b>Année en cours : </b>';
+
+$tabT = explode("/", str_replace(" ", "", $nextCPYearDate));
+$tabT2 = explode("/", str_replace(" ", "", $nextCPYearDateAfter));
+$nbAnneeFuturConge = getNbHolidays(new DateTime('NOW'), new DateTime($tabT[2]."/".$tabT[1]."/".$tabT[0]), $user_id);
+$nbAnneePlus1FuturConge = getNbHolidays(new DateTime($tabT[2]."/".$tabT[1]."/".$tabT[0]), new DateTime($tabT2[2]."/".$tabT2[1]."/".$tabT2[0]), $user_id);
+print '<b>Année en cours : </b>';
 print $langs->trans('SoldeCPUser', round($nb_holiday_current, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_current . ' / ' . $nbdeduced . ')' : '');
+if($nbAnneeFuturConge)
+    print " plus ".$nbAnneeFuturConge." congé validé mais non passé";
 print '&nbsp;(A utiliser avant le <b>' . $nextCPYearDate . '</b>).';
 print '<br/>';
 print '<b>Année n+1 : </b>';
 print $langs->trans('SoldeCPUser', round($nb_holiday_next, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_next . ' / ' . $nbdeduced . ')' : '');
 print '&nbsp;(A utiliser à partir du <b>' . $nextCPYearDate . '</b> et avant le <b>' . $nextCPYearDateAfter . '</b>).';
+if($nbAnneePlus1FuturConge)
+    print " plus ".$nbAnneePlus1FuturConge." congé validé mais non passé";
 print '<br/>';
 print 'Solde RTT : <b>' . round($nbRtt, 2) . ' jours</b>';
-*/
+
 if ($id > 0) {
     dol_fiche_end();
     print '</br>';
@@ -466,7 +474,7 @@ if (!empty($holiday->holiday)) {
         print '<td align="center">' . dol_print_date($infos_CP['date_debut'], 'day') . '</td>';
         print '<td align="center">' . dol_print_date($infos_CP['date_fin'], 'day') . '</td>';
         print '<td align="right">';
-        $nbopenedday = num_open_day($infos_CP['date_debut_gmt'], $infos_CP['date_fin_gmt'], 0, 1, $infos_CP['halfday']);
+        $nbopenedday = num_open_dayUser($infos_CP['fk_user'], $infos_CP['date_debut_gmt'], $infos_CP['date_fin_gmt'], 0, 1, $infos_CP['halfday']);
         print $nbopenedday . ' ' . $langs->trans('DurationDays');
         print '<td align="right" colspan="1">' . $holidaystatic->LibStatut($infos_CP['statut'], 5) . '</td>';
         print '</tr>' . "\n";

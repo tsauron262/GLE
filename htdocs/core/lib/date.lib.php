@@ -654,7 +654,11 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR', $
 			// Calul des samedis et dimanches
 			$jour_julien = unixtojd($timestampStart);
 			$jour_semaine = jddayofweek($jour_julien, 0);
-			if($jour_semaine == 0 || $jour_semaine == 6) $ferie=true;
+                        /*moddrsi pour choisir le jours de congé*/
+                        global $jourCongeUser;
+                        $jourConge = (isset($jourCongeUser) && $jourCongeUser > 0)? $jourCongeUser : 6;
+			if($jour_semaine == 0 || $jour_semaine == $jourConge) $ferie=true;
+                        /*fmoddrsi*/
 			// Samedi (6) et dimanche (0)
 		}
 

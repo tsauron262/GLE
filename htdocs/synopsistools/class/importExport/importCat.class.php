@@ -398,6 +398,10 @@ class importCat extends import8sens {
             "CONSOMMABLES" => array(
                 array("Gamme", "Consommable")
             ),
+            "CONTRAT PRO" => array(
+                array("Gamme", "Service"),
+                array("Marque", "BIMP")
+            ),
             "ECRANS" => array(
                 array("Gamme", "Ecran")
             ),

@@ -541,6 +541,35 @@ class Bimp_Commande extends BimpComm
         return array();
     }
 
+    public function getClientFacture()
+    {
+        if ((int) $this->getData('id_client_facture')) {
+            $client = $this->getChildObject('client_facture');
+            if (BimpObject::objectLoaded($client)) {
+                return $client;
+            }
+        }
+
+        if ((int) $this->getData('fk_soc')) {
+            $client = $this->getChildObject('client');
+            if (BimpObject::objectLoaded($client)) {
+                return $client;
+            }
+        }
+
+        return null;
+    }
+    
+    public function getClientFactureContactsArray()
+    {
+        $client = $this->getClientFacture();
+        if (is_null($client)) {
+            return array();
+        }
+        
+        return self::getSocieteContactsArray($client->id);
+    }
+
     // Rendus HTML: 
 
     public function renderHeaderExtraLeft()
@@ -1197,10 +1226,11 @@ class Bimp_Commande extends BimpComm
         $html .= '</button>';
 
         // Nouvelle facture: 
+        $client_facture = $this->getClientFacture();
         $onclick = $this->getJsActionOnclick('linesFactureQties', array(
             'new_facture'       => 1,
-            'id_client'         => (int) $this->getData('fk_soc'),
-            'id_contact'        => (int) $this->dol_object->contactid,
+            'id_client'         => (int) (!is_null($client_facture) ? $client_facture->id : 0),
+            'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contactid : 0),
             'id_cond_reglement' => (int) $this->getData('fk_cond_reglement')
                 ), array(
             'form_name'      => 'invoice',

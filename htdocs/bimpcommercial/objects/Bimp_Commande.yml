@@ -97,6 +97,12 @@ objects:
             id_object: 
                 field_value: id_user_resp
                 
+    client_facture: 
+        extends: client
+        instance: 
+            id_object: 
+                field_value: id_client_facture
+                
 associations: 
     factures: 
         object: facture
@@ -195,6 +201,18 @@ fields:
         default_value: 0
         
     total: unset
+    
+    id_client_facture: 
+        label: Client facturation
+        type: id_object
+        object: client_facture
+        default_value: 
+            field_value: 0
+        input: 
+            type: search_societe
+            societe_type: customer
+            card: default
+            help: Laissez vide si même client
         
 fields_tables: 
     infos: 
@@ -235,6 +253,10 @@ fields_tables:
         rows: 
             - field: fk_soc
               display: card
+            - field: id_client_facture
+              display: card
+              show: 
+                  field_value: id_client_facture
             - field: ref_client
               edit: 
                   callback: isEditable
@@ -294,6 +316,7 @@ forms:
             - field: fk_soc
               show: 
                   callback: isNotLoaded
+            - field: id_client_facture
             - field: ref_client
             - field: fk_input_reason
               show: 
@@ -547,7 +570,7 @@ forms:
               label: Client
               input_name: id_client
               data_type: id_object
-              object: client
+              object: client_facture
               card: default
               input: 
                   type: search_societe
@@ -562,7 +585,7 @@ forms:
               input: 
                   type: select
                   options: 
-                      array: clientContacts
+                      array: clientFactureContacts
               display_if: 
                   field_name: id_facture
                   show_values: 0
@@ -711,6 +734,10 @@ lists_cols:
         field: invoice_status
     id_user_resp: 
         field: id_user_resp
+    client_facture:
+        field: id_client_facture
+        display: nom_url
+        
     
 lists: 
     default: 

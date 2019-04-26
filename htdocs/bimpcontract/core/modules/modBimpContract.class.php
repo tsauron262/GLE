@@ -66,24 +66,18 @@ class modBimpContract extends DolibarrModules {
 
     public function init($options = '') {
         $sql = array();
-        $sql[] = 
-'CREATE TABLE IF NOT EXISTS `llx_bcontract_productservices` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `titre` varchar(128) NOT NULL default "",
-  `content` text,
-  `active` boolean NOT NULL default 0,
-  `use_in_contract` NOT NULL default 1,
-  `use_in_commercial` NOT NULL default 0,
-  `test`VARCHAR(255) default NULL,
-  `user_create` int(10) UNSIGNED NOT NULL DEFAULT "0",
-  `date_create` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `user_update` int(10) UNSIGNED NOT NULL DEFAULT "0",
-  `date_update` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB;';
+        
+        require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+        $name = 'module_version_'.strtolower($this->name);
+        if(BimpCore::getConf($name) == "") {
+            BimpCore::setConf($name, floatval($this->version));
+            $this->_load_tables('/'.strtolower($this->name).'/sql/');
+        }
+        
         $extrafields = new ExtraFields($this->db);
         $extrafields->addExtraField('service_content', 'Services Compris', 'chkbxlst', 103, null, 'product', 0, 0, "", 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::active=1";N;}}', 1, "", 1, 1, "", "", "", 1);
-        //$extrafields->update('service_content', 'Services Compris', 'chkbxlst', null, 'product', 0, 0, 103, 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::use_in_contract=1";N;}}', 1, '', 1);
+        $extrafields->addExtraField('objet_contrat', 'Objet du contrat', 'varchar', 104, 100, 'contrat');
+//$extrafields->update('service_content', 'Services Compris', 'chkbxlst', null, 'product', 0, 0, 103, 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::use_in_contract=1";N;}}', 1, '', 1);
         return $this->_init($sql, $options);
     }
 

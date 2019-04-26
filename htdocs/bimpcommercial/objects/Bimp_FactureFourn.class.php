@@ -349,11 +349,6 @@ class Bimp_FactureFourn extends BimpComm
         return $conf->fournisseur->facture->dir_output . '/' . $subdir;
     }
 
-    public function getListFilters()
-    {
-        return array();
-    }
-
     public function getTotalPaid()
     {
         $alreadypaid += $this->dol_object->getSommePaiement();

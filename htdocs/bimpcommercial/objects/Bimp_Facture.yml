@@ -104,7 +104,6 @@ fields:
     fk_availability: unset
     fk_input_reason: unset
     total_ht: unset
-    remise_globale: unset
         
 forms: 
     default: 
@@ -247,6 +246,9 @@ forms:
               show: 
                   callback: isNotLoaded
                   
+            - field: remise_globale_label
+              show: 
+                  callback: hasRemiseGlobale
             - field: note_private
             
             - field: note_public
@@ -331,6 +333,10 @@ fields_tables:
                 
     pdf: 
         rows: 
+            - field: remise_globale_label
+              edit: 1
+              show: 
+                  callback: hasRemiseGlobale
             - label: Fichier PDF
               value: 
                   callback: displayPDFButton

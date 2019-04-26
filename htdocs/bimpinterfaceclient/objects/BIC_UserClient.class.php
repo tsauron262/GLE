@@ -1,6 +1,7 @@
 <?php
 
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 
 class BIC_UserClient extends BimpObject {
 
@@ -36,13 +37,13 @@ class BIC_UserClient extends BimpObject {
     public function getName() {
         return $this->getData("email");
     }
-    
+
     public function showLang() {
         return (count(self::$langs_list == 1)) ? 0 : 1;
     }
 
     public function renderHeaderStatusExtra() {
-        
+
         $extra = '';
         if ($this->getData('role') == self::USER_CLIENT_ROLE_ADMIN) {
             $extra .= '&nbsp;&nbsp;<span class="important">' . BimpRender::renderIcon('fas_cog', 'iconLeft') . 'Administrateur</span>';
@@ -60,16 +61,17 @@ class BIC_UserClient extends BimpObject {
         global $userClient;
 
         $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-        // Voir avec Tommy : $userClient->getData('role') = error getData on null; POur le IF du dessous
         if ((isset($userClient) && $userClient->getData('role') == self::USER_CLIENT_ROLE_ADMIN && $this->id != $userClient->id ) || BimpTools::getContext() == 'private') {
-            
-            $buttons[] = array(
-                'label' => 'Réinitialiser le mot de passe',
-                'icon' => 'fas_lock',
-                'onclick' => $this->getJsActionOnclick('reinit_password', array(), array(
-                    'success_callback' => $callback
-                ))
-            );
+            if ($this->getData('status') == self::USER_CLIENT_STATUS_ACTIF) {
+                $buttons[] = array(
+                    'label' => 'Envoyer le mot de passe par mail',
+                    'icon' => 'fas_at',
+                    'onclick' => $this->getJsActionOnclick('reinit_password', array(), array(
+                        'success_callback' => $callback
+                    ))
+                );
+            }
+
 
 
 
@@ -92,18 +94,34 @@ class BIC_UserClient extends BimpObject {
             }
         }
 
+        if ($this->id == $userClient->id) {
+            $buttons[] = array(
+                'label' => 'Télécharger mes données personnelles',
+                'icon' => 'fas_cloud-download-alt',
+                'onclick' => $this->getJsActionOnclick('download_my_data', array(), array(
+                    'success_callback' => $callback
+                ))
+            );
+        }
+
 
         return $buttons;
     }
 
     # Actions
-
-    public function actionSwitchUser() {
-        $this->updateField('role', self::USER_CLIENT_ROLE_USER);
+    
+    public function download_my_data() {
+        
     }
 
-    public function actionSwitchAdmin() {
+    public function actionSwitchUser($data, &$success) {
+        $this->updateField('role', self::USER_CLIENT_ROLE_USER);
+        $success = "Changer au statut utilisateur avec succes";
+    }
+
+    public function actionSwitchAdmin($data, &$success) {
         $this->updateField('role', self::USER_CLIENT_ROLE_ADMIN);
+        $success = "Changer au statut administrateur avec succes";
     }
 
     public function it_is_admin() {
@@ -113,7 +131,7 @@ class BIC_UserClient extends BimpObject {
             return 0;
         }
     }
-    
+
     public function it_is_not_admin() {
         return ($this->it_is_admin()) ? 0 : 1;
         //return 1;
@@ -226,7 +244,7 @@ class BIC_UserClient extends BimpObject {
         $return = Array();
         foreach ($list as $on_contrat) {
             $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $on_contrat['rowid']);
-            if ($ouvert == false || $instance->isValide()) {
+            if (($ouvert == false || $instance->isValide()) && $instance->getData('statut') > 0) {
                 $return[$on_contrat['rowid']] = $instance;
             }
             $instance = null;
@@ -262,13 +280,13 @@ class BIC_UserClient extends BimpObject {
         $password = $this->random_password($lenght);
         return (object) Array('clear' => $password, 'sha256' => hash('sha256', $password));
     }
-    
+
     public function change_password($post) {
         $this->updateField('password', hash('sha256', $post));
-        mailSyn2('Changement de votre mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer, si vous n'êtes pas à l'origine de cette actions veuillez contacter votre administrateur" );
+        mailSyn2('Changement de votre mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer, si vous n'êtes pas à l'origine de cette actions veuillez contacter votre administrateur");
         $this->updateField('renew_required', 0);
     }
-    
+
     public function actionReinit_password($data, &$success) {
         $passwords = $this->generatePassword();
         $this->updateField('renew_required', 1);
@@ -276,9 +294,33 @@ class BIC_UserClient extends BimpObject {
         $this->updateField('password', $passwords->sha256);
         $success = 'Mot de passe réinitialisé';
         return array(
-          'errors' => array(),
+            'errors' => array(),
             'warnings' => array()
         );
+    }
+
+    public function get_dest($type) {
+        $return = "";
+        switch ($type) {
+            case 'commerciaux':
+                $ListCommerciaux = $this->db->getRows('societe_commerciaux', 'fk_soc = ' . $this->getData('attached_societe'));
+                foreach ($ListCommerciaux as $commercial) {
+                    $instanceComm = new User($this->db->db);
+                    $instanceComm->fetch($commercial->fk_user);
+                    $return .= ', ' . $instanceComm->email;
+                    $instanceComm = null;
+                }
+                break;
+            case 'admin':
+                $listUser = $this->getList(array('attached_societe' => $this->getData('attached_societe')));
+                foreach ($listUser as $user) {
+                    if ($user['id'] != $this->id && $user['role'] == 1) {
+                        $return .= ', ' . $user['email'];
+                    }
+                }
+                break;
+        }
+        return $return;
     }
 
     public function create(&$warnings = array(), $force_create = false) {

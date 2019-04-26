@@ -205,8 +205,6 @@ fields_tables:
     interface_client:
         panel_header: 0
         rows:
-            - field: id_ticket
-              display: card
             - field: status
               edit: 1
             - field: description

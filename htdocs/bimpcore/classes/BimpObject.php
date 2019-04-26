@@ -3165,7 +3165,7 @@ class BimpObject extends BimpCache
                         $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
                     } if (property_exists($this->dol_object, $prop)) {
                         $this->dol_object->{$prop} = $this->getDolValue($field, $value);
-                    } else {
+                    } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                         $bimpObjectFields[$field] = $value;
                     }
                 }
@@ -3205,7 +3205,7 @@ class BimpObject extends BimpCache
                     $errors[] = 'Erreur de configuration: propriété de l\'objet Dolibarr non définie pour le champ "' . $field . '"';
                 } elseif (property_exists($this->dol_object, $prop)) {
                     $value = $this->dol_object->{$prop};
-                } else {
+                } elseif ($this->field_exists($field) && !$this->isExtraField($field)) {
                     $bimpObjectFields[] = $field;
                 }
             }
@@ -3331,7 +3331,17 @@ class BimpObject extends BimpCache
                         $fields[] = $field_name;
                     }
 
-                    $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $result);
+                    $up_result = $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $this->id);
+
+                    if ($up_result <= 0) {
+                        $msg = 'Echec de la mise à jour des champs additionnels';
+                        $sql_errors = $this->db->db->lasterror;
+                        if ($sql_errors) {
+                            $msg .= ' - Erreur SQL: ' . $sql_errors;
+                        }
+
+                        $errors[] = $msg;
+                    }
                 }
             }
             return 1;
@@ -3544,7 +3554,7 @@ class BimpObject extends BimpCache
 
     public function isDeletable()
     {
-        return 1;
+        return $this->isEditable();
     }
 
     public function isFieldEditable($field)

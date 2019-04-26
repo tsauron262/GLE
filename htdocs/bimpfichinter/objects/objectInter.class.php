@@ -7,9 +7,12 @@ class ObjectInter extends extraFI{
     public static $dirDol = "synopsisfichinter";
     public static $controller_name;
     
-    
-    
-       public function getList_commandeArray(){
+    public $extra_left = '';
+
+
+
+
+    public function getList_commandeArray(){
         $this->list_commande = array();
         if($this->isLoaded() && $this->getData("fk_soc") > 0){
             $clef = 'getList_commandeArray_user_'.$this->getData("fk_soc");
@@ -36,7 +39,7 @@ class ObjectInter extends extraFI{
     public function renderHeaderExtraLeft()
     {
         $soc = $this->getChildObject("client");
-        return $soc->dol_object->getNomUrl(1);
+        return $soc->dol_object->getNomUrl(1).$this->extra_left;
     }
     
     
@@ -61,7 +64,19 @@ class ObjectInter extends extraFI{
         return $this->list_contrat;
     }
     
-    
+    public function getList_factureArray(){
+        if($this->isLoaded() && $this->getData("fk_soc") > 0){
+            $clef = 'getList_factureArray_user_'.$this->getData("fk_soc");
+            if(!isset(self::$cache[$clef])){
+                self::$cache[$clef] = array(0=>array('label'=>''));
+                $sql = $this->db->db->query("SELECT facnumber, rowid FROM llx_facture WHERE fk_soc = ".$this->getData("fk_soc"));
+                while($ln = $this->db->db->fetch_object($sql))
+                        self::$cache[$clef][$ln->rowid] = array('label' => $ln->facnumber, 'icon' => '', 'classes' => array('info'));
+            }
+             $this->list_facture = self::$cache[$clef];
+        }
+        return $this->list_facture;
+    }
     
     
     
@@ -151,7 +166,7 @@ class ObjectInter extends extraFI{
     
     public function iAmAdminRedirect() {
         global $user;
-        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42)))
+        if(in_array($user->id, array(1, 375, 35, 446, 277, 242, 42, 330)))
             return true;
         parent::iAmAdminRedirect();
     }

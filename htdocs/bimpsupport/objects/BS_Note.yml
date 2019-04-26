@@ -15,6 +15,14 @@ objects:
             id_object:
                 field_value: id_inter
                 
+    userClient:
+        instance:
+            bimp_object:
+                module: bimpinterfaceclient
+                name: BIC_UserClient
+            id_object:
+                field_value: id_user_client
+                
 fields:
     id_ticket: 
         label: Ticket
@@ -49,7 +57,12 @@ fields:
             rows: 2
         sortable: 0
         searchable: 0
-        
+    
+    id_user_client:
+        label: Demandeur
+        type: id_object
+        object: userClient
+    
 lists:
     default:
         title: Notes
@@ -83,6 +96,8 @@ lists:
                 field: content
                 edit: 1
                 min_width: 40%
+            id_user_client:
+                field: id_user_client
         add_object_row: 1
         update_btn: 1
         delete_btn: 1
@@ -94,6 +109,9 @@ lists:
             user_create: unset
         add_form_name: addClientNote
         add_btn: 1
+        add_form_values:
+            fields:
+                visibility: 1
         add_object_row: 0
         list_filters:
             callback: getListFilterNotesInterface
@@ -103,4 +121,6 @@ forms:
     addClientNote:
         title: Ajouter un note au ticket support
         rows:
+            - field: visibility
+              edit: 0
             - field: content

@@ -61,6 +61,10 @@ class BimpCache
             if (!is_a(self::$cache[$cache_key], $object_name) || !self::$cache[$cache_key]->isLoaded() ||
                     (int) self::$cache[$cache_key]->id !== (int) $id_object) {
                 self::$cache[$cache_key] = null;
+            } else {
+                if (!is_null($parent)) {
+                    self::$cache[$cache_key]->parent = $parent;
+                }
             }
         }
 

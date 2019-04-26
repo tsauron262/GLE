@@ -82,17 +82,12 @@ class Bimp_Propal extends BimpComm
         );
     }
 
-    public function getListFilters()
-    {
-        return array();
-    }
-
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
         $langs->load('propal');
 
-        $buttons = array();
+        $buttons = parent::getActionsButtons();
 
         if ($this->isLoaded()) {
             $buttons[] = array(
@@ -286,17 +281,6 @@ class Bimp_Propal extends BimpComm
                         'label'   => 'Classer facturée',
                         'icon'    => 'check',
                         'onclick' => $this->getJsActionOnclick('classifyBilled')
-                    );
-                }
-
-                // Remise globale: 
-                if ($this->isActionAllowed('setRemiseGlobale') && $this->canSetAction('setRemiseGlobale')) {
-                    $buttons[] = array(
-                        'label'   => 'Remise globale',
-                        'icon'    => 'percent',
-                        'onclick' => $this->getJsActionOnclick('setRemiseGlobale', array('remise_globale' => (float) $this->getData('remise_globale')), array(
-                            'form_name' => 'remise_globale'
-                        ))
                     );
                 }
 
@@ -955,7 +939,7 @@ class Bimp_Propal extends BimpComm
     
     public function iAmAdminRedirect() {
         global $user;
-        if(in_array($user->id, array(60)))
+        if(in_array($user->id, array(60,282)))
             return true;
         return parent::iAmAdminRedirect();
     }

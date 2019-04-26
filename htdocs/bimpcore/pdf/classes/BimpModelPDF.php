@@ -29,7 +29,9 @@ Abstract class BimpModelPDF
 
     public function __construct($db, $orientation = 'P', $format = 'A4')
     {
-        global $mysoc, $langs;
+        global $mysoc, $langs, $conf;
+        
+        $conf->global->MAIN_MAX_DECIMALS_SHOWN = str_replace("...", "", $conf->global->MAIN_MAX_DECIMALS_SHOWN);
 
         $this->db = $db;
         $this->langs = $langs;
@@ -44,6 +46,9 @@ Abstract class BimpModelPDF
         $this->fromCompany = $mysoc;
         if (empty($this->fromCompany->country_code)) {
             $this->fromCompany->country_code = substr($langs->defaultlang, -2);
+        }
+        if (!defined('BIMP_LIB')) {
+            require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
         }
     }
 

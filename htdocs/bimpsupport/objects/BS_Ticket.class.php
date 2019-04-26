@@ -37,7 +37,7 @@ class BS_Ticket extends BimpObject
     );
 
     // Getters:
-
+    
     public function getPostIdClient()
     {
         $id_client = (int) BimpTools::getPostFieldValue('id_client_contrat', 0);
@@ -206,7 +206,7 @@ class BS_Ticket extends BimpObject
         $buttons = array();
         if ($this->isLoaded()) {
             $openInters = $this->getOpenIntersArray();
-            if (count($openInters)) {
+            if (count($openInters) && BimpTools::getContext() == 'private') {
                 $buttons[] = array(
                     'label'   => 'Fermer des interventions',
                     'icon'    => 'fas_times',
@@ -215,11 +215,40 @@ class BS_Ticket extends BimpObject
                     ))
                 );
             }
+            if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && BimpTools::getContext() == 'private'){
+                $buttons[] = array(
+                    'label' => 'Prendre en compte le ticket',
+                    'icon' => 'fas_thumbs-up',
+                    'onclick' => $this->getJsActionOnclick('prendre_en_compte', array(), array(
+                        'success_callback' => $callback
+                    ))
+                );
+            } 
         }
-
         return $buttons;
     }
-
+    
+    public function it_is_pris_en_charge() {
+        return ($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT) ? 0 : 1;
+    }
+    
+    public function actionPrendre_en_compte($data, &$success) {
+        global $user, $userClient;
+        if($this->getData('id_user_client') > 0){
+            $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
+            $listDest = $instance->getData('email');
+            $listDest .= $instance->get_dest('admin');
+            $commerciaux = BimpTools::getCommercialArray($instance->getData('attached_societe'));
+            foreach ($commerciaux as $id_commercial) {
+                $listDest .= ', ' . $id_commercial->email;
+            }
+            mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), $listDest, 'noreply@bimp.fr', "Votre ticket numéro ".$this->getData('ticket_number')." à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
+        }
+        $this->updateField('id_user_resp', $user->id);
+        $this->updateField('status', self::BS_TICKET_EN_COURS);
+        $success = 'Ticket bien pris en compte';
+    }
+    
     public function hasNoContrat()
     {
         if ($this->isLoaded()) {
@@ -537,9 +566,24 @@ class BS_Ticket extends BimpObject
         if (count($errors)) {
             return $errors;
         }
-
+        
+        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->getData('id_user_client') > 0) {
+            return 'Impossible de repasser le ticket en demande client';
+        }
+        
         $errors = parent::update($warnings, $force_update);
-
+        
+        if(!count($errors) && $this->getData('id_user_client') > 0) {
+            $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
+            $listDest = $instance->getData('email');
+            $commerciaux = BimpTools::getCommercialArray($instance->getData('attached_societe'));
+            foreach ($commerciaux as $id_commercial) {
+                $listDest .= ', ' . $id_commercial->email;
+            }
+            $listDest .= $instance->get_dest('admin');
+            mailSyn2('BIMP-CLIENT - Modification de votre ticket', $listDest, 'noreply@bimp.fr', 'Votre ticket ' . $this->getData('ticket_number') . ' à été modifier');
+        }
+        
         if (!count($errors) && (int) $this->getData('status') === self::BS_TICKET_CLOT) {
             $timer = $this->getTimer();
             if (BimpObject::objectLoaded($timer)) {
@@ -618,5 +662,13 @@ class BS_Ticket extends BimpObject
         }
         return 0;
         
+    }
+    
+    public function it_is_a_customer_request() {
+        return ($this->getData('id_user_client') == 0) ? 0 : 1;
+    }
+    
+    public function it_is_not_a_customer_requets() {
+        return ($this->it_is_a_customer_request() == 0) ? 1 : 0;
     }
 }

@@ -55,7 +55,7 @@ fields:
             default: 
                 type: timer
     fk_typeinterv:
-        label: typoe interv
+        label: Type d'interv
         type: int
         values: 
             array: typeinter_list

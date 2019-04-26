@@ -8,6 +8,9 @@ objects:
     assistance_contrat:
         instance:
             bimp_object: BContract_Productservices
+    echeancier:
+        instance: 
+            bimp_object: BContract_echeancier
     
 sections:
     - type: nav_tabs
@@ -26,3 +29,12 @@ sections:
                 list: 
                     panel: 1
                     object: assistance_contrat
+          
+          - id: recap_contrat_echeancier
+            title: Récapitulatif des prélèvements contrat
+            struct:
+                type: list
+                list:
+                    panel: 1
+                    object: echeancier
+                    name: default

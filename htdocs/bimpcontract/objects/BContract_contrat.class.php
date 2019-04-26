@@ -206,7 +206,7 @@ class BContract_contrat extends BimpDolObject {
         $card .= '<div class="col-md-4">';
         $card .= '<div class="card">';
         $card .= '<div class="header">';
-        $card .= '<h4 class="title">' . $this->getName() . '</h4>';
+        $card .= '<h4 class="title">' . $this->getRef() . '</h4>';
         $card .= '<p class="category">';
         $card .= ($this->isValide()) ? 'Contrat en cours de vadité' : 'Contrat échu';
         $card .= '</p>';

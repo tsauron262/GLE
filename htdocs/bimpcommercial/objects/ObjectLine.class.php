@@ -669,6 +669,16 @@ class ObjectLine extends BimpObject
                         return (int) $product->getData('remisable');
                     }
                     return (int) $this->isRemisable();
+
+                case 'desc':
+                    $desc = $this->desc;
+                    if ($id_product && (is_null($desc) || !(string) $desc || (int) $this->id_product !== $id_product)) {
+                        return (string) $product->dol_object->description;
+                    }
+                    if (is_null($desc)) {
+                        $desc = '';
+                    }
+                    return $desc;
             }
         }
 
@@ -935,31 +945,29 @@ class ObjectLine extends BimpObject
                             $html .= '<div style="display: inline-block">';
                         }
                     }
-                    if (in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
-                        if ((int) $this->id_product) {
-                            $html .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
-                            $product = $this->getProduct();
-//                            if (BimpObject::objectLoaded($product)) {
-//                                $html .= '&nbsp;&nbsp;' . $product->getData('label');
-//                                if (($this->equipment_required && $product->isSerialisable()) || (int) $this->getData('id_equipment')) {
-//                                    if ($no_html) {
-//                                        $html .= "\n";
-//                                    } else {
-//                                        $html .= '<br/>';
-//                                    }
-//                                    $html .= 'Equipement: ' . $this->displayEquipment();
-//                                }
-//                            }
-                            if ((int) $product->getData('fk_product_type') == 1) {
-                                if ($this->date_from && $this->date_to) {
-                                    if ($no_html) {
-                                        $html .= "\n";
-                                    } else {
-                                        $html .= '<br/>';
-                                    }
-                                    $dt_from = new DateTime($this->date_from);
-                                    $dt_to = new DateTime($this->date_to);
-                                    $html .= '(Du ' . $dt_from->format('d/m/Y') . ' au ' . $dt_to->format('d/m/Y') . ')';
+
+                    $desc = $this->desc;
+                    $product = $this->getProduct();
+                    if (BimpObject::objectLoaded($product)) {
+                        $product_label = $product->getData('label');
+                        if (preg_match('/^' . $product_label . '(.*)$/', $desc, $matches)) {
+                            $desc = $matches[1];
+                        }
+
+                        $html .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
+                        if ($no_html) {
+                            $html .= "\n";
+                        } else {
+                            $html .= '<br/>';
+                        }
+                        $html .= $product_label;
+
+                        if ((int) $product->getData('fk_product_type') == 1) {
+                            if ($this->date_from && $this->date_to) {
+                                if ($no_html) {
+                                    $html .= "\n";
+                                } else {
+                                    $html .= '<br/>';
                                 }
                             }
                             if ($no_html) {
@@ -969,15 +977,23 @@ class ObjectLine extends BimpObject
                             }
                             if (!(string) $this->desc) {
                                 $html .= $product->displayData('label', 'default', false);
+                                $dt_from = new DateTime($this->date_from);
+                                $dt_to = new DateTime($this->date_to);
+                                $html .= '(Du ' . $dt_from->format('d/m/Y') . ' au ' . $dt_to->format('d/m/Y') . ')';
                             }
                         }
                     }
-                    if ($no_html) {
-                        $value = BimpTools::replaceBr($this->desc);
-                        $html .= (string) strip_tags($value);
-                    } else {
-                        $html .= (string) $this->desc;
+
+                    if ($desc) {
+                        if ($no_html) {
+                            $value = BimpTools::replaceBr($desc);
+                            $html .= (string) strip_tags($value);
+                        } else {
+                            $html .= '<br/>';
+                            $html .= (string) $desc;
+                        }
                     }
+
                     if ((int) $this->getData('id_parent_line')) {
                         $html .= '</div>';
                     }
@@ -2128,7 +2144,7 @@ class ObjectLine extends BimpObject
 
         if ($field === 'id_product') {
             $value = (int) $this->id_product;
-        } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'remisable'))) {
+        } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'remisable', 'desc'))) {
             $value = $this->getValueByProduct($field);
         } else {
             if (BimpTools::isSubmit($field)) {
@@ -3076,6 +3092,9 @@ class ObjectLine extends BimpObject
                             }
                             if (is_null($this->id_fourn_price) && is_null($this->pa_ht)) {
                                 $this->id_fourn_price = (int) $this->getValueByProduct('id_fourn_price');
+                            }
+                            if (is_null($this->desc) || !(string) $this->desc) {
+                                $this->desc = $this->getValueByProduct('desc');
                             }
 
                             $product = $this->getProduct();

@@ -325,6 +325,204 @@ forms:
                         show_values: 1
                     remisable: 
                         hide_values: 0
+            - field: id_parent_line
+              
+            - field: type
+              hidden: 
+                  field_value: id
+            
+            - custom: 1
+              label: Produit
+              value: 
+                  callback: getIdProductFromPost
+              input_name: id_product
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params: 
+                          - id_product
+              display_if: 
+                  field_name: type
+                  hide_values: 2
+              show:
+                  callback: isProductEditable
+                          
+            - custom: 1
+              label: Prix unitaire HT
+              value: 
+                  prop: pu_ht
+              input_name: pu_ht
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params: 
+                          - pu_ht
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              depends_on: id_product
+              
+            - custom: 1
+              label: Taux de TVA
+              value: 
+                  prop: tva_tx
+              input_name: tva_tx
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params: 
+                          - tva_tx
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              depends_on: id_product
+              
+            - custom: 1
+              label: Quantité
+              value: 
+                  prop: qty
+              input_name: qty
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params: 
+                          - qty
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              depends_on: id_product
+                  
+#            - custom: 1
+#              label: Remise
+#              value: 
+#                  prop: remise
+#              input_name: remise
+#              content: 
+#                  callback: 
+#                      method: renderLineInput
+#                      params: 
+#                          - remise
+#              display_if: 
+#                  field_name: type
+#                  show_values: 1
+            
+            - custom: 1
+              label: Prix d'achat
+              input_name: id_fourn_price
+              data_type: id_object
+              object: fournisseur_price
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params: 
+                          - id_fourn_price
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              depends_on: id_product
+              create_form: 
+                  callback: getFournisseurPriceCreateForm
+              create_form_values: 
+                  fields: 
+                      fk_product: 
+                          callback: getIdProductFromPost
+              value: 
+                  callback: getIdFournPriceFromPost
+                  
+            - custom: 1
+              label: Service à durée limitée
+              input_name: limited
+              data_type: bool
+              input: 
+                  type: toggle
+              value: 
+                  callback: isLimited
+              display_if: 
+                  field_name: type
+                  show_values: 1
+                  
+            - custom: 1
+              label: Du
+              input_name: date_from
+              data_type: date
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params: 
+                          - date_from
+              display_if: 
+                  fields_names: type,limited
+                  type: 
+                      show_values: 1
+                  limited: 
+                      hide_values: 0
+                          
+            - custom: 1
+              label: Au
+              input_name: date_to
+              data_type: date
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params: 
+                          - date_to
+              display_if: 
+                  fields_names: type,limited
+                  type: 
+                      show_values: 1
+                  limited: 
+                      hide_values: 0
+                      
+            - custom: 1
+              label: Marges
+              input_name: margins_table
+              content: 
+                  callback: renderFormMargins
+              show: 
+                  callback: showMarginsInForms
+              display_if: 
+                  field_name: type
+                  hide_values: 2
+              
+            - custom: 1
+              label: Description
+              value: 
+                  prop: desc
+              input_name: desc
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params: 
+                          - desc
+              depends_on: id_product
+            
+            - field: force_qty_1
+                     
+            - custom: 1
+              label: Remises autorisées
+              input_name: remisable
+              content: 
+                  callback: 
+                      method: renderLineInput
+                      params:
+                          - remisable
+              depends_on: id_product
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              
+            - object: remises
+              multiple: 1
+              form_values: 
+                  fields: 
+                      object_type: 
+                          callback: getParentCommType
+              display_if: 
+                  fields_names: type,remisable
+                  type: 
+                      show_values: 1
+                  remisable: 
+                      hide_values: 0
                           
     equipment:
         title: Attribuer un équipement

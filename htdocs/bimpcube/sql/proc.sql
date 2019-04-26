@@ -121,6 +121,8 @@ BEGIN
     DECLARE v_id_recurr int(3) DEFAULT 0;
     DECLARE v_lvl_gamme int(3) DEFAULT 0;
     DECLARE v_lvl_recurr int(3) DEFAULT 0;
+    DECLARE v_path_gamme varchar(255) DEFAULT '';
+    DECLARE v_path_recurr varchar(255) DEFAULT '';
     
 	DECLARE cur_prod CURSOR FOR 
         SELECT  `rowid`,`ref`,`label`,
@@ -161,26 +163,12 @@ BEGIN
         IF v_id_leaf=0 THEN ITERATE prod_loop;
         END IF;
         
-        SELECT get_prod_gamme_idcat(v_path) INTO v_idcat_gamme;
-        IF v_idcat_gamme>0 THEN
-            SET v_lvl_gamme=1;
-		ELSE
-            SET v_lvl_gamme=0;
-        END IF;
-        
-        SELECT get_prod_recurr_idcat(v_path) INTO v_idcat_recurr;
-        IF v_idcat_recurr>0 THEN
-            SET v_lvl_recurr=1;
-		ELSE
-			SET v_lvl_recurr=0;
-        END IF;
-        
 		SELECT get_prod_cat_flat_id(v_path) INTO v_id_flat;
         IF v_id_flat=0 THEN ITERATE prod_loop;
         END IF;
-        
+
         SELECT lvl_max INTO v_lvl_max FROM `llx_olap_prod_cat_flat` WHERE id=v_id_flat;
-        IF v_lvl_max<2 THEN ITERATE prod_loop;
+        IF v_lvl_max<1 THEN ITERATE prod_loop;
         END IF;
 
 #		INSERT INTO `llx_debug` (`msg`) VALUES(CONCAT('v_lvl_max=',v_lvl_max));
@@ -199,7 +187,25 @@ BEGIN
 			ELSE
 				SET v_path_esc = v_path;
 		END IF;
+
+        SELECT get_prod_gamme_idcat(v_path) INTO v_idcat_gamme;
+        IF v_idcat_gamme>0 THEN
+            SET v_lvl_gamme=1;
+            SET v_path_gamme=v_path_esc;
+		ELSE
+            SET v_lvl_gamme=0;
+            SET v_path_gamme='';
+        END IF;
         
+        SELECT get_prod_recurr_idcat(v_path) INTO v_idcat_recurr;
+        IF v_idcat_recurr>0 THEN
+            SET v_lvl_recurr=1;
+            SET v_path_recurr=v_path_esc;
+		ELSE
+			SET v_lvl_recurr=0;
+            SET v_path_recurr='';
+        END IF;
+                        
 #        SELECT COUNT(rowid) INTO n FROM `llx_mat_view_product_cat_flat` WHERE `rowid`=v_rowid;
 #        IF n>0
         IF NOT EXISTS(SELECT * FROM `llx_mat_view_product_cat_flat` 
@@ -224,11 +230,11 @@ BEGIN
                     v_lvl,',',
 					v_id_leaf,',');
                 SET v_insert_values = CONCAT(v_insert_values,
-					'\'',v_path_esc,'\',',
+					'\'',v_path_gamme,'\',',
                     v_lvl_gamme,',',
 					v_idcat_gamme,',');
                 SET v_insert_values = CONCAT(v_insert_values,
-					'\'',v_path_esc,'\',',
+					'\'',v_path_recurr,'\',',
                     v_lvl_recurr,',',
 					v_idcat_recurr,')');
                 SET @v_insert_stmt = CONCAT('INSERT INTO `llx_mat_view_product_cat_flat` ',
@@ -255,36 +261,36 @@ BEGIN
                 EXECUTE stmt_update;
                 COMMIT;
 				DEALLOCATE PREPARE stmt_update;
-        END IF;
-        IF v_lvl_gamme=1 THEN
-			SET v_update_set = CONCAT(
-				'`',v_path_field,v_id_gamme,'`=\'',v_path_esc,'\',',
-				'`',v_lvl_field,v_id_gamme,'`=',v_lvl_gamme,',',
-				'`',v_id_leaf_field,v_id_gamme,'`=',v_idcat_gamme);
-			SET @v_update_stmt = CONCAT('UPDATE `llx_mat_view_product_cat_flat` SET ',
-				v_update_set,
-				' WHERE rowid=',v_rowid);
-#				INSERT INTO `llx_debug` (`msg`) VALUES(CONCAT('@v_update_stmt=',@v_update_stmt));
-			START TRANSACTION;
-			PREPARE stmt_update FROM @v_update_stmt;
-			EXECUTE stmt_update;
-			COMMIT;
-			DEALLOCATE PREPARE stmt_update;        
-        END IF;
-        IF v_lvl_recurr=1 THEN
-			SET v_update_set = CONCAT(
-				'`',v_path_field,v_id_recurr,'`=\'',v_path_esc,'\',',
-				'`',v_lvl_field,v_id_recurr,'`=',v_lvl_recurr,',',
-				'`',v_id_leaf_field,v_id_recurr,'`=',v_idcat_recurr);
-			SET @v_update_stmt = CONCAT('UPDATE `llx_mat_view_product_cat_flat` SET ',
-				v_update_set,
-				' WHERE rowid=',v_rowid);
-#				INSERT INTO `llx_debug` (`msg`) VALUES(CONCAT('@v_update_stmt=',@v_update_stmt));
-			START TRANSACTION;
-			PREPARE stmt_update FROM @v_update_stmt;
-			EXECUTE stmt_update;
-			COMMIT;
-			DEALLOCATE PREPARE stmt_update;        
+				IF v_lvl_gamme=1 THEN
+					SET v_update_set = CONCAT(
+						'`',v_path_field,v_id_gamme,'`=\'',v_path_esc,'\',',
+						'`',v_lvl_field,v_id_gamme,'`=',v_lvl_gamme,',',
+						'`',v_id_leaf_field,v_id_gamme,'`=',v_idcat_gamme);
+					SET @v_update_stmt = CONCAT('UPDATE `llx_mat_view_product_cat_flat` SET ',
+						v_update_set,
+						' WHERE rowid=',v_rowid);
+#						INSERT INTO `llx_debug` (`msg`) VALUES(CONCAT('@v_update_stmt=',@v_update_stmt));
+					START TRANSACTION;
+					PREPARE stmt_update FROM @v_update_stmt;
+					EXECUTE stmt_update;
+					COMMIT;
+					DEALLOCATE PREPARE stmt_update;        
+				END IF;
+				IF v_lvl_recurr=1 THEN
+					SET v_update_set = CONCAT(
+						'`',v_path_field,v_id_recurr,'`=\'',v_path_esc,'\',',
+						'`',v_lvl_field,v_id_recurr,'`=',v_lvl_recurr,',',
+						'`',v_id_leaf_field,v_id_recurr,'`=',v_idcat_recurr);
+					SET @v_update_stmt = CONCAT('UPDATE `llx_mat_view_product_cat_flat` SET ',
+						v_update_set,
+						' WHERE rowid=',v_rowid);
+#						INSERT INTO `llx_debug` (`msg`) VALUES(CONCAT('@v_update_stmt=',@v_update_stmt));
+					START TRANSACTION;
+					PREPARE stmt_update FROM @v_update_stmt;
+					EXECUTE stmt_update;
+					COMMIT;
+					DEALLOCATE PREPARE stmt_update;        
+				END IF;
         END IF;
     END LOOP prod_loop;
     CLOSE cur_prod;

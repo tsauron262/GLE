@@ -623,6 +623,16 @@ class ObjectLine extends BimpObject
                         return (int) $product->getData('remisable');
                     }
                     return (int) $this->isRemisable();
+
+                case 'desc':
+                    $desc = $this->desc;
+                    if ($id_product && (is_null($desc) || !(string) $desc || (int) $this->id_product !== $id_product)) {
+                        return (string) $product->dol_object->description;
+                    }
+                    if (is_null($desc)) {
+                        $desc = '';
+                    }
+                    return $desc;
             }
         }
 
@@ -876,7 +886,7 @@ class ObjectLine extends BimpObject
                             $html .= '<div style="display: inline-block">';
                         }
                     }
-                    
+
                     $desc = $this->desc;
                     $product = $this->getProduct();
                     if (BimpObject::objectLoaded($product)) {
@@ -1920,7 +1930,7 @@ class ObjectLine extends BimpObject
 
         if ($field === 'id_product') {
             $value = (int) $this->id_product;
-        } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'remisable'))) {
+        } elseif (in_array($field, array('pu_ht', 'tva_tx', 'id_fourn_price', 'remisable', 'desc'))) {
             $value = $this->getValueByProduct($field);
         } else {
             if (BimpTools::isSubmit($field)) {
@@ -2826,6 +2836,9 @@ class ObjectLine extends BimpObject
                             }
                             if (is_null($this->id_fourn_price) && is_null($this->pa_ht)) {
                                 $this->id_fourn_price = (int) $this->getValueByProduct('id_fourn_price');
+                            }
+                            if (is_null($this->desc) || !(string) $this->desc) {
+                                $this->desc = $this->getValueByProduct('desc');
                             }
 
                             if ((int) $this->getData('remisable')) {

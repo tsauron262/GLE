@@ -269,6 +269,7 @@ forms:
                       method: renderLineInput
                       params: 
                           - desc
+              depends_on: id_product
             
             - field: force_qty_1
                      

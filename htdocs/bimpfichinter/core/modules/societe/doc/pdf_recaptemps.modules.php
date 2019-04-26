@@ -36,6 +36,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
 require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
 require_once DOL_DOCUMENT_ROOT . '/product/class/product.class.php';
+require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/tecnickcom/tcpdf/tcpdf.php';
 
@@ -92,35 +93,6 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         $this->emetteur = $mysoc;
         if (empty($this->emetteur->country_code))
             $this->emetteur->country_code = substr($langs->defaultlang, -2);    // By default, if not defined
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -294,6 +266,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                 $fichinter_obj = BimpObject::getInstance("bimpfichinter", "Bimp_Fichinter");
                 $fichinters = $fichinter_obj->getList(array('fk_soc' => $object->id));
 
+                // sql = SELECT * FROM llx_synopsis_fichinter a WHERE a.fk_soc = 8627 ORDER BY a.rowid DESC
 
                 $societe = new Societe($this->db);
                 $societe->fetch($object->id);
@@ -322,9 +295,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
                 $head_css = $this->getTableCss();
 
                 $this->intervenants = array();
-//                $pdf->AddPage('L');
-//                $pdf->AddPage('L');
-//                $pdf->AddPage('L');
+
                 // Contrats
                 if (sizeof($contrats) != 0) {
                     $html = $head_css . $this->getTableContrats($contrats, $societe->nom);
@@ -477,9 +448,6 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         $hours_per_day = 7 * 3600;
 
         foreach ($contrats as $id_contrat => $inters) {
-//            echo '<pre>';
-//            print_r($inters);
-//            die();
             $planned_day = 0;
 
             $contrat = new Contrat($this->db);
@@ -809,9 +777,37 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         $hours_per_day = 7 * 3600;
 
         foreach ($libres as $inter) {
+
+            $sql = BimpTools::getSqlSelect(array('fk_target'));
+            $sql .= BimpTools::getSqlFrom('element_element');
+            $sql .= BimpTools::getSqlWhere(array(
+                        'fk_source' => (int) $inter['rowid'],
+                        'sourcetype' => 'FI',
+                        'targettype' => 'facture'));
+
+            $bimp_db = new BimpDb($this->db);
+            $rows = $bimp_db->executeS($sql);
+
+            if (!empty($rows)) {
+                $id_facture = $rows[0]->fk_target;
+            }
+
             $used = 0;
             ++$cnt_libre;
-            $planned_day = $cnt_libre;
+            $facture = new Facture($this->db);
+            $facture->fetch($id_facture);
+            $facture->fetch_lines();
+            foreach ($facture->lines as $line) {
+//                echo 'id_facture ='.$id_facture.'<br/>';
+                $product = new Product($this->db);
+                $product->fetch($line->fk_product);
+                if ($product->array_options['options_duree_h'] != NULL) {
+                    $planned_day += $line->qty * $product->array_options['options_duree_h'] / 7;
+                }
+//                echo '<pre>';
+//                print_r($product);
+//                die();
+            }
             $planned_day_total += $planned_day;
             $solde_init = $solde = $planned_day * $hours_per_day;
             $hour_total += $solde_init;
@@ -917,8 +913,6 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         $html .= '<td class="white"></td>';
         $html .= '<td class="white"></td>';
         $html .= '<td class="white"></td>';
-        $html .= '<td class="white"></td>';
-        $html .= '<td class="white"></td>';
         $html .= '<td class="orange"><strong>CONSOMMÉ ' . mb_strimwidth($libres_number, 0, 15, "...") . '</strong></td>';
         $html .= '<td class="orange"><strong>' . $this->getTime($used_total) . '</strong></td>';
         $html .= '</tr>';
@@ -931,13 +925,11 @@ class pdf_recaptemps extends ModelePDFFicheinter {
         $html .= '<td class="white"></td>';
         $html .= '<td class="white"></td>';
         $html .= '<td class="white"></td>';
-        $html .= '<td class="white"></td>';
-        $html .= '<td class="white"></td>';
         $html .= '<td class="green"><strong>SOLDE TOTAL ' . mb_strimwidth($libres_number, 0, 15, "...") . '</strong></td>';
         $html .= '<td class="green"><strong>' . $this->getTime($solde_total) . '</strong></td>';
         $html .= '</tr>';
         $html .= '</table>';
-
+        
         return $html;
     }
 
@@ -1189,7 +1181,7 @@ class pdf_recaptemps extends ModelePDFFicheinter {
 class CustomPDF extends TCPDF {
 
     public function Header() {
-        die('SAlut header perso');
+        die('Test header perso');
         $this->MultiCell(50, 50, 'test header dans class custom');
     }
 

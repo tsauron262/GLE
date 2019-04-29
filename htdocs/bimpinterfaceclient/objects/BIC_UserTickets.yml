@@ -36,6 +36,7 @@ fields:
         label: Contrat
         type: id_object
         object: contrat
+        display: nom
     
     id_client:
         label: Pour la société
@@ -106,6 +107,7 @@ lists:
             id_contrat:
                 label: Contrat
                 field: id_contrat
+                display: nom
     pageClient:
         extends: interface_client
         add_btn: 0

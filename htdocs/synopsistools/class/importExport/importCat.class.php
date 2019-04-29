@@ -4,6 +4,7 @@ require_once DOL_DOCUMENT_ROOT . "/synopsistools/class/importExport/import8sens.
 
 class importCat extends import8sens {
     var $catDef = 2;
+//    var $catDef = 12986;
     var $marqueOk = false;
     var $obsolescenceOk = false;
     var $tabConvert = array(

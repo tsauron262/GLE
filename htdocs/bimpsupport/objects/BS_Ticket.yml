@@ -420,8 +420,10 @@ fields_tables:
         icon: info-circle
         rows:
             - field: sujet
+              edit: 1
             - field: status
             - field: priorite
+              edit: 1
             - field: id_contrat
             - field: id_user_client
               
@@ -494,10 +496,13 @@ views:
                   list: 
                       children: files
     client:
-        edit_form: default
+        
         rows:
             - cols:
                 - type: fields_table
+                  edit_form: default
+                  edit_btn: 1
+                  # Voir pour boutton modifier en bas
                   col_lg: 12
                   col_md: 12
                   fields_table: 

@@ -206,7 +206,7 @@ class BS_Ticket extends BimpObject
         $buttons = array();
         if ($this->isLoaded()) {
             $openInters = $this->getOpenIntersArray();
-            if (count($openInters) && BimpTools::getContext() == 'private') {
+            if (count($openInters) && BimpTools::getContext() != 'public') {
                 $buttons[] = array(
                     'label'   => 'Fermer des interventions',
                     'icon'    => 'fas_times',
@@ -215,7 +215,7 @@ class BS_Ticket extends BimpObject
                     ))
                 );
             }
-            if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && BimpTools::getContext() == 'private'){
+            if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && BimpTools::getContext() != 'public'){
                 $buttons[] = array(
                     'label' => 'Prendre en compte le ticket',
                     'icon' => 'fas_thumbs-up',
@@ -567,7 +567,7 @@ class BS_Ticket extends BimpObject
             return $errors;
         }
         
-        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->getData('id_user_client') > 0) {
+        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->getData('id_user_client') > 0 && BimpTools::getContext() == 'private') {
             return 'Impossible de repasser le ticket en demande client';
         }
         
@@ -655,11 +655,17 @@ class BS_Ticket extends BimpObject
         return 0;
     }
 
-    public function canClientCreate() {
-        $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
-        if($instance->getData('statut') == 1) {
-            return 1;
+    public function canClientCreate($id_contrat = 0) {
+        if($this->isLoaded() && $this->getData('id_contrat') > 0 && $id_contrat == 0){
+            $id_contrat = $this->getData('id_contrat');
         }
+        $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
+        if($id_contrat >0) {
+            if($instance->getData('statut') == 1) {
+                return 1;
+            }
+        }
+        
         return 0;
         
     }

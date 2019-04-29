@@ -894,6 +894,8 @@ class ObjectLine extends BimpObject
                         if (preg_match('/^' . $product_label . '(.*)$/', $desc, $matches)) {
                             $desc = $matches[1];
                         }
+                        if(stripos($desc, $product_label) !== false)
+                                $desc = str_replace($product_label, "", $desc);
 
                         $html .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
                         if ($no_html) {

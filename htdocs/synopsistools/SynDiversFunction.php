@@ -1079,7 +1079,7 @@ function setUserJourConge($id_user){
     $userT->fetch($id_user);
     if(isset($userT->array_options['options_j_repos']) && $userT->array_options['options_j_repos'])
         $jourCongeUser = $userT->array_options['options_j_repos'];  
-    echo 'jour :'.$jourCongeUser;
+//    echo 'jour :'.$jourCongeUser;
 }
 function num_open_dayUser($id_user, $timestampStart, $timestampEnd, $inhour=0, $lastday=0, $halfday=0, $country_code=''){
     setUserJourConge($id_user);
@@ -1090,18 +1090,21 @@ function num_public_holidayUser($id_user, $timestampnum_public_holidayStart, $ti
     return num_public_holiday($timestampnum_public_holidayStart, $timestampEnd, $countrycode, $lastday);
 }
 
-function getNbHolidays($date_debut, $date_fin, $id_user) {
+function getNbHolidays($date_debut, $date_fin, $id_user, $type = -1) {
     global $db;
         $holidays = array();
 
 
-        $sql = 'SELECT fk_user, date_debut, date_fin, type_conges, halfday';
+        $sql = 'SELECT fk_user, date_debut, date_fin, type_conges, halfday, rowid';
         $sql .= ' FROM ' . MAIN_DB_PREFIX . 'holiday';
         $sql .= ' WHERE statut=6';
         $sql .= ' AND  (';
         $sql .= '(date_debut BETWEEN "' . $date_debut->format('Y-m-d') . '" AND "' . $date_fin->format('Y-m-d') . '")';
         $sql .= ' OR (date_fin BETWEEN "' . $date_debut->format('Y-m-d') . '" AND "' . $date_fin->format('Y-m-d') . '")';
         $sql .= ') AND fk_user = '.$id_user;
+        if($type >= 0){
+            $sql .= " AND type_conges =".$type;
+        }
 //die($sql);
 
         // Retrieve holy days
@@ -1129,9 +1132,9 @@ function getNbHolidays($date_debut, $date_fin, $id_user) {
             $holidays[] = $obj;
         }
         
-        echo "<pre>";
-        print_r($holidays);
-        echo "</pre>";
+//        echo "<pre>";
+//        print_r($holidays);
+//        echo "</pre>";
 
         return $nb;
     }

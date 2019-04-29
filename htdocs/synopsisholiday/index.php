@@ -282,25 +282,27 @@ $nbaquis_next = $holiday->getNextYearCPforUser($user_id);
 $nbdeduced = $holiday->getConfCP('nbHolidayDeducted');
 $nb_holiday_current = $nbaquis_current / $nbdeduced;
 $nb_holiday_next = $nbaquis_next / $nbdeduced;
-$nextCPYearDate = $holiday->getCPNextYearDate(true, false);
-$nextCPYearDateAfter = $holiday->getCPNextYearDate(true, true);
+$dateFinThisYear = date_create($holiday->getCPNextYearDate(false, false));
+$dateDebNextYear = date_create($holiday->getCPNextYearDate(false, false));
+$dateDebNextYear->add(new DateInterval('P1D'));
+$dateFinNextYear = date_create($holiday->getCPNextYearDate(false, true));
+
+
 $nbRtt = $holiday->getRTTforUser($user_id);
 
-$tabT = explode("/", str_replace(" ", "", $nextCPYearDate));
-$tabT2 = explode("/", str_replace(" ", "", $nextCPYearDateAfter));
-$nbAnneeFuturConge = getNbHolidays(new DateTime('NOW'), new DateTime($tabT[2]."/".$tabT[1]."/".$tabT[0]), $user_id);
-$nbAnneePlus1FuturConge = getNbHolidays(new DateTime($tabT[2]."/".$tabT[1]."/".$tabT[0]), new DateTime($tabT2[2]."/".$tabT2[1]."/".$tabT2[0]), $user_id);
+$nbAnneeFuturConge = getNbHolidays(new DateTime('NOW'), $dateFinThisYear, $user_id, 0);
+$nbAnneePlus1FuturConge = getNbHolidays($dateDebNextYear, $dateFinNextYear, $user_id, 0);
 print '<b>Année en cours : </b>';
 print $langs->trans('SoldeCPUser', round($nb_holiday_current, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_current . ' / ' . $nbdeduced . ')' : '');
 if($nbAnneeFuturConge)
     print " plus ".$nbAnneeFuturConge." congé validé mais non passé";
-print '&nbsp;(A utiliser avant le <b>' . $nextCPYearDate . '</b>).';
+print '&nbsp;(A utiliser avant le <b>' . date_format($dateFinThisYear, 'd / m / Y') . '</b>).';
 print '<br/>';
 print '<b>Année n+1 : </b>';
 print $langs->trans('SoldeCPUser', round($nb_holiday_next, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_next . ' / ' . $nbdeduced . ')' : '');
-print '&nbsp;(A utiliser à partir du <b>' . $nextCPYearDate . '</b> et avant le <b>' . $nextCPYearDateAfter . '</b>).';
 if($nbAnneePlus1FuturConge)
     print " plus ".$nbAnneePlus1FuturConge." congé validé mais non passé";
+print '&nbsp;(A utiliser à partir du <b>' . date_format($dateDebNextYear, 'd / m / Y') . '</b> et avant le <b>' . date_format($dateFinNextYear, 'd / m / Y') . '</b>).';
 print '<br/>';
 print 'Solde RTT : <b>' . round($nbRtt, 2) . ' jours</b>';
 

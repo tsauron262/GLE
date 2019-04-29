@@ -1,0 +1,141 @@
+#forms:
+#    remove_lines: 
+#        title: Retirer des produits / services
+#        rows: 
+#            - object: order_lines
+#              label: Produits / Services
+#              form_name: remove
+#              multiple: 1
+#              on_edit: 1
+              
+#    facture:
+#        title: Créer une facture à partir des produits non facturés de cette commande
+#        rows: 
+#            - custom: 1
+#              label: Conditions de réglement
+#              input_name: cond_reglement
+#              value: 
+#                  callback: getCommandeCondReglement
+#              input: 
+#                  type: select_cond_reglement
+#            - custom: 1
+#              label: Compte financier
+#              input_name: id_account
+#              data_type: id_object
+#              input: 
+#                  type: select_mysoc_account
+#              required: 1
+#            - custom: 1
+#              label: Avoirs client à utiliser
+#              input_name: id_remises_list
+#              input: 
+#                  multiple: 1
+#                  type: select_remises
+#                  id_client:
+#                      prop:
+#                          name: socid
+#                          object:
+#                              prop: dol_object
+#            - custom: 1
+#              label: Note publique
+#              input_name: note_public
+#              data_type: text
+#              input: 
+#                  type: textarea
+#                  rows: 3
+#                  auto_expand: 1
+#              value: 
+#                  prop: 
+#                      name: note_public
+#                      object: 
+#                          prop: dol_object
+#                  
+#            - custom: 1
+#              label: Note privée
+#              input_name: note_private
+#              data_type: text
+#              input: 
+#                  type: textarea
+#                  rows: 3
+#                  auto_expand: 1
+#              value: 
+#                  prop: 
+#                      name: note_private
+#                      object: 
+#                          prop: dol_object
+                  
+#    add_line: 
+#        title: Ajouter un produit / service
+#        rows: 
+#            - custom: 1
+#              label: Produit / Service
+#              data_type: id_object
+#              input_name: id_product
+#              input: 
+#                  type: search_product
+#              required: 1
+#            - custom: 1
+#              label: Quantité
+#              input_name: qty
+#              data_type: int
+#              input: 
+#                  type: qty
+#              value: 1
+#              min: 1
+#            - custom: 1
+#              label: Réduction
+#              input_name: reduc
+#              data_type: percent
+#              input: 
+#                  type: text
+#            - custom: 1
+#              label: Prix d'achat
+#              input_name: id_fournisseur_price
+#              data_type: id_object
+#              object: fournisseur_price
+#              input: 
+#                  type: select
+#                  options:
+#                      array: productFournisseursPrices
+#              display_if: 
+#                  field_name: id_product
+#                  hide_values: 0,
+#              depends_on: id_product
+#              create_form: default
+#              create_form_values: 
+#                  fields: 
+#                      fk_product: 
+#                          request: fields/id_product
+#              value: 
+#                  request: fields/id_fournisseur_price
+#            - custom: 1
+#              label: Description
+#              input_name: desc
+#              data_type: html
+#              input: 
+#                  type: html
+#            - custom: 1
+#              label: Service à durée limitée
+#              input_name: limited
+#              data_type: bool
+#              input: 
+#                  type: toggle
+#              value: 0
+#            - custom: 1
+#              label: Du
+#              input_name: date_start
+#              data_type: date
+#              input: 
+#                  type: date
+#              display_if: 
+#                  field_name: limited
+#                  show_values: 1
+#            - custom: 1
+#              label: Au
+#              input_name: date_end
+#              data_type: date
+#              input: 
+#                  type: date
+#              display_if: 
+#                  field_name: limited
+#                  show_values: 1 

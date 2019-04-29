@@ -22,7 +22,6 @@ class BimpDocumentPDF extends BimpModelPDF
     public $hideTtc = false;
     public $hideTotal = false;
     public $hideRef = false;
-    public $hideLabelProd = false;
     public $periodicity = 0;
     public $nbPeriods = 0;
     public $proforma = 0;
@@ -39,7 +38,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->target_label = $this->langs->transnoentities('BillTo');
     }
 
-    // Initialisation
+    // Initialisation:
 
     protected function initData()
     {

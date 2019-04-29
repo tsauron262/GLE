@@ -482,8 +482,7 @@ filters_panels:
                 field: note_private
             note_public: 
                 field: note_public
-            
-        
+                    
 lists_cols: 
     libelle: 
         field: libelle

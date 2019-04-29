@@ -86,24 +86,37 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function getLogistiqueBulkActions()
     {
+        $actions = array();
+
         $commande = $this->getParentInstance();
 
         if (BimpObject::objectLoaded($commande)) {
-            return array(
-                array(
-                    'label'   => 'Quantités expédition',
-                    'icon'    => 'fas_shipping-fast',
-                    'onclick' => 'addSelectedCommandeLinesToShipment($(this), \'list_id\', ' . $commande->id . ')'
-                ),
-                array(
-                    'label'   => 'Quantités facture',
-                    'icon'    => 'fas_file-invoice-dollar',
-                    'onclick' => 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ' . $commande->id . ', ' . (int) $commande->getData('fk_soc') . ', ' . (int) $commande->dol_object->contactid . ', ' . (int) $commande->getData('fk_cond_reglement') . ')'
-                )
+            $client_facture = $commande->getClientFacture();
+            if (BimpObject::objectLoaded($client_facture)) {
+                $id_client_facture = (int) $client_facture->id;
+            } else {
+                $id_client_facture = (int) $commande->getData('fk_soc');
+            }
+
+            $actions[] = array(
+                'label'   => 'Quantités expédition',
+                'icon'    => 'fas_shipping-fast',
+                'onclick' => 'addSelectedCommandeLinesToShipment($(this), \'list_id\', ' . $commande->id . ')'
+            );
+
+            $onclick = 'addSelectedCommandeLinesToFacture($(this), \'list_id\', ';
+            $onclick .= $commande->id . ', ' . (int) $id_client_facture . ', ';
+            $onclick .= (($id_client_facture === (int) $commande->getData('fk_soc')) ? (int) $commande->dol_object->contactid : 0) . ', ';
+            $onclick .= (int) $commande->getData('fk_cond_reglement') . ')';
+            
+            $actions[] = array(
+                'label'   => 'Quantités facture',
+                'icon'    => 'fas_file-invoice-dollar',
+                'onclick' => $onclick
             );
         }
 
-        return array();
+        return $actions;
     }
 
     public function getLogistiqueExtraButtons()

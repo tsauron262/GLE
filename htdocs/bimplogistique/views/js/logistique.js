@@ -487,7 +487,7 @@ function saveCommandeLineFactures($button, id_line) {
     }
 }
 
-function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_client, id_contact, id_cond_reglement) {
+function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_client_facture, id_contact, id_cond_reglement) {
     if ($button.hasClass('disabled')) {
         return;
     }
@@ -508,7 +508,7 @@ function addSelectedCommandeLinesToFacture($button, list_id, id_commande, id_cli
 
     var extra_data = {
         facture_lines_list: [],
-        id_client: id_client,
+        id_client_facture: id_client_facture,
         id_contact: id_contact,
         id_cond_reglement: id_cond_reglement
     };

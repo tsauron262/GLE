@@ -362,6 +362,18 @@ class Bimp_FactureFourn extends BimpComm
         return (float) $this->getData('total_ttc') - (float) $this->getTotalPaid();
     }
 
+    // Getters callbacks: 
+
+    public function getCreateFromOriginCheckMsg()
+    {
+        if (BimpTools::getPostFieldValue('origin', '') === 'commande_fournisseur') {
+            return array(array(
+                    'content' => 'Attention: après la création de la facture, les quantités de la commande fournisseurs ne seront plus modifiables dans la logistique',
+                    'type'    => 'warning'
+            ));
+        }
+    }
+
     // Affichages: 
 
     public function displayPaid()
@@ -373,7 +385,7 @@ class Bimp_FactureFourn extends BimpComm
 
         return '';
     }
-    
+
     // Rendus HTML - overrides BimpObject:
 
     public function renderHeaderExtraLeft()
@@ -481,6 +493,11 @@ class Bimp_FactureFourn extends BimpComm
 
     // Overrides - BimpComm: 
 
+    public function createLinesFromOrigin($origin_object)
+    {
+        // todo...
+    }
+    
     protected function updateDolObject(&$errors)
     {
         

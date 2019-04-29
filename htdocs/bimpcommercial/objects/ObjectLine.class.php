@@ -672,18 +672,21 @@ class ObjectLine extends BimpObject
 
                 case 'desc':
                     $desc = $this->desc;
-                    if ($id_product && (is_null($desc) || !(string) $desc || (int) $this->id_product !== $id_product)) {
-                        return (string) $product->dol_object->description;
-                    }
-                    if (is_null($desc)) {
+                    if ($id_product && (is_null($desc) || !$desc || (int) $this->id_product !== $id_product)) {
+                        $desc = (string) $product->dol_object->description;
+                    } elseif (is_null($desc)) {
                         $desc = '';
                     }
                     return $desc;
             }
         }
 
-        if ($field === 'remisable') {
-            return (int) $this->getData('remisable');
+        switch($field) {
+            case 'remisable': 
+                return (int) $this->getData('remisable');
+                
+            case 'desc': 
+                return (string) $this->desc;
         }
         return 0;
     }
@@ -947,57 +950,60 @@ class ObjectLine extends BimpObject
                     }
 
                     $desc = $this->desc;
+                    $text = '';
                     $product = $this->getProduct();
                     if (BimpObject::objectLoaded($product)) {
-                        $product_label = $product->getData('label');
-                        if (preg_match('/^' . $product_label . '(.*)$/', $desc, $matches)) {
-                            $desc = $matches[1];
-                        }
+                        $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
 
-                        $html .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
-                        if ($no_html) {
-                            $html .= "\n";
-                        } else {
-                            $html .= '<br/>';
+                        $product_label = $product->getData('label');
+
+                        if ($product_label) {
+                            if (preg_match('/^' . $product_label . '(.*)$/', $desc, $matches)) {
+                                $desc = $matches[1];
+                            }
+                            $text .= '<br/>' . $product_label;
                         }
-                        $html .= $product_label;
 
                         if ((int) $product->getData('fk_product_type') == 1) {
-                            if ($this->date_from && $this->date_to) {
-                                if ($no_html) {
-                                    $html .= "\n";
-                                } else {
-                                    $html .= '<br/>';
-                                }
-                            }
-                            if ($no_html) {
-                                $html .= "\n";
-                            } else {
-                                $html .= '<br/>';
-                            }
-                            if (!(string) $this->desc) {
-                                $html .= $product->displayData('label', 'default', false);
+                            if ($this->date_from) {
                                 $dt_from = new DateTime($this->date_from);
+                                if ($text) {
+                                    $text .= '<br/>';
+                                }
+                                if ($this->date_to) {
+                                    $text .= 'Du ';
+                                } else {
+                                    $text .= 'A partir du ';
+                                }
+                                $text .= $dt_from->format('d/m/Y');
+                            }
+
+                            if ($this->date_to) {
                                 $dt_to = new DateTime($this->date_to);
-                                $html .= '(Du ' . $dt_from->format('d/m/Y') . ' au ' . $dt_to->format('d/m/Y') . ')';
+                                if (!$this->date_from) {
+                                    $text .= ($text ? '<br/>' : '') . 'Jusqu\'au ';
+                                } else {
+                                    $text .= ' au ';
+                                }
+                                $text .= $dt_to->format('d/m/Y');
                             }
                         }
                     }
 
                     if ($desc) {
-                        if ($no_html) {
-                            $value = BimpTools::replaceBr($desc);
-                            $html .= (string) strip_tags($value);
-                        } else {
-                            $html .= '<br/>';
-                            $html .= (string) $desc;
-                        }
+                        $text .= ($text ? '<br/>' : '') . (string) $desc;
                     }
 
-                    if ((int) $this->getData('id_parent_line')) {
+                    if ($no_html) {
+                        $text = BimpTools::replaceBr($text);
+                        $text = (string) strip_tags($text);
+                    }
+
+                    $html .= $text;
+
+                    if (!$no_html && (int) $this->getData('id_parent_line')) {
                         $html .= '</div>';
                     }
-
                     break;
 
                 case 'qty':
@@ -1923,7 +1929,7 @@ class ObjectLine extends BimpObject
                         $qty_set++;
                     }
                 }
-                
+
                 if ($qty_set < (int) $this->qty) {
                     $diff = (int) $this->qty - $qty_set;
 

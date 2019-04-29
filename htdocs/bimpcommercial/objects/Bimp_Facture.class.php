@@ -627,16 +627,6 @@ class Bimp_Facture extends BimpComm
         return $conf->facture->dir_output;
     }
 
-    public function getRequestOrigin()
-    {
-        return BimpTools::getValue('origin', BimpTools::getValue('param_values/fields/origin', ''));
-    }
-
-    public function getRequestIdOrigin()
-    {
-        return BimpTools::getValue('id_origin', BimpTools::getValue('param_values/fields/id_origin', 0));
-    }
-
     public function getRequestIdFactureReplaced()
     {
         return BimpTools::getValue('id_facture_replaced', BimpTools::getValue('param_values/fields/id_facture_replaced', 0));

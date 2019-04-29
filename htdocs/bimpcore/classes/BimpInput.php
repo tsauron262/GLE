@@ -1228,7 +1228,7 @@ class BimpInput
 
         $html .= '<div class="inputContainer ' . $field_prefix . $input_name . '_inputContainer ' . $extra_class . '"';
         $html .= ' data-field_name="' . $field_prefix . $input_name . '"';
-        $html .= ' data-initial_value="' . $value . '"';
+        $html .= ' data-initial_value="' . htmlentities($value) . '"';
         $html .= ' data-multiple="' . (int) $multiple . '"';
         $html .= ' data-field_prefix="' . $field_prefix . '"';
         $html .= ' data-required="' . (int) $required . '"';

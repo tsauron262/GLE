@@ -22,7 +22,6 @@ class BimpDocumentPDF extends BimpModelPDF
     public $hideTtc = false;
     public $hideTotal = false;
     public $hideRef = false;
-    public $hideLabelProd = true;
     public $periodicity = 0;
     public $nbPeriods = 0;
     public $proforma = 0;
@@ -39,7 +38,7 @@ class BimpDocumentPDF extends BimpModelPDF
         $this->target_label = $this->langs->transnoentities('BillTo');
     }
 
-    // Initialisation
+    // Initialisation:
 
     protected function initData()
     {
@@ -108,8 +107,8 @@ class BimpDocumentPDF extends BimpModelPDF
                             $mysoc->zip = $entrepot->zip;
                             $mysoc->address = $entrepot->address;
                             $mysoc->town = $entrepot->town;
-                            
-                            if($mysoc->name == "Bimp Groupe Olys")
+
+                            if ($mysoc->name == "Bimp Groupe Olys")
                                 $mysoc->name = "Bimp Olys SAS";
 
                             if ($entrepot->ref == "PR") {//patch new adresse
@@ -170,7 +169,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $sizes = dol_getImageSize($soc_logo_file, false);
                     if (isset($sizes['width']) && (int) $sizes['width'] && isset($sizes['height']) && $sizes['height']) {
 
-                        $tabTaille = $this->calculeWidthHieghtLogo($sizes['width']/3, $sizes['height']/3, 200, 100);
+                        $tabTaille = $this->calculeWidthHieghtLogo($sizes['width'] / 3, $sizes['height'] / 3, 200, 100);
 
 
 
@@ -229,9 +228,9 @@ class BimpDocumentPDF extends BimpModelPDF
                 $line1 .= ($line1 ? " au " : "") . $this->langs->transnoentities("CapitalOf", $this->fromCompany->capital, $this->langs);
             }
         }
-        
+
         if ($this->fromCompany->address) {
-            $line1 .= " - ".$this->fromCompany->address." - ".$this->fromCompany->zip." ".$this->fromCompany->town." - Tél ".$this->fromCompany->phone;
+            $line1 .= " - " . $this->fromCompany->address . " - " . $this->fromCompany->zip . " " . $this->fromCompany->town . " - Tél " . $this->fromCompany->phone;
         }
 
         if ($this->fromCompany->idprof1 && ($this->fromCompany->country_code != 'FR' || !$this->fromCompany->idprof2)) {
@@ -473,17 +472,43 @@ class BimpDocumentPDF extends BimpModelPDF
     {
         $desc = '';
         if (!is_null($product)) {
-            if (!$this->hideRef)
+            if (!$this->hideRef) {
                 $desc .= $product->ref;
-            if (!$this->hideLabelProd || strlen($line->desc) < 5)
-                $desc .= ($desc ? ' - ' : '') . $product->label;
+            }
+
+            $desc .= ($desc ? ' - ' : '') . $product->label;
+
+            if ($product->type == 1) {
+                if ($line->date_start) {
+                    if (!$line->date_end) {
+                        $desc .= '<br/>A partir du ';
+                    } else {
+                        $desc .= '<br/>Du ';
+                    }
+                    $desc .= date('d / m / Y', $line->date_start);
+                }
+                if ($line->date_end) {
+                    if (!$line->date_start) {
+                        $desc .= '<br/>Jusqu\'au ';
+                    } else {
+                        $desc .= ' au ';
+                    }
+                    $desc .= date('d / m / Y', $line->date_end);
+                }
+            }
         }
 
         if (!is_null($line->desc) && $line->desc) {
             $line_desc = $line->desc;
             if (!is_null($product)) {
-                if (!$this->hideLabelProd)
-                    $line_desc = str_replace($product->label, '', $line_desc);
+                if (preg_match('/^'.$product->label.'(.*)$/', $line_desc, $matches)) {
+                    $line_desc = $matches[0];
+                }
+                $line_desc = str_replace("  ", " ", $line_desc);
+                $product->label = str_replace("  ", " ", $product->label);
+                if(stripos($line_desc, $product->label) !== false)
+                      $line_desc = str_replace($product->label, "", $line_desc);  
+                
             }
             if ($line_desc) {
                 $desc .= ($desc ? (strlen($desc) > 20 ? '<br/>' : ' - ') : '') . $line_desc;

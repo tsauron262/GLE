@@ -335,7 +335,10 @@ class BIC_UserClient extends BimpObject {
             $this->updateField('password', $mot_de_passe->sha256);
             $this->updateField('renew_required', 1);
             if ($this->use_email && BimpTools::getValue('send_mail')) {
-                mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'), 'noreply@bimp.fr', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
+                $sujet = "Mot de passe BIMP ERP Interface Client";
+                $message = 'Bonjour,<br /> Voici votre accès pour votre espace client <br />'
+                        . '<a href="https://erp.bimp.fr/bimp8/bimpinterfaceclient/client.php">Espace client BIMP ERP</a><br />Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
+                mailSyn2($sujet, $this->getData('email'), 'noreply@bimp.fr', $message);
             }
         }
     }

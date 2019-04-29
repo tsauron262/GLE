@@ -4514,6 +4514,11 @@ class BimpObject extends BimpCache
         }
         return BimpRender::renderAlerts('Erreur de configuration: objet "' . $object_name . '" non défini');
     }
+    
+    public function renderHeaderBtnRedir()
+    {
+        return $this->processRedirect(false);
+    }
 
     // Générations javascript: 
 
@@ -5567,11 +5572,6 @@ class BimpObject extends BimpCache
         }
         if (isset($user->array_options["options_defaultentrepot"]))
             return $user->array_options["options_defaultentrepot"];
-    }
-
-    public function renderHeaderBtnRedir()
-    {
-        return $this->processRedirect(false);
     }
 
     public function processRedirect($newVersion = true)

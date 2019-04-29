@@ -110,17 +110,17 @@ forms:
               input: 
                   type: hidden
               value: 
-                  callback: getRequestOrigin
+                  request_field: origin
               hidden: 1
               
             - custom: 1
               lable: Origine
-              input_name: origin
+              input_name: origin_id
               data_type: int
               input: 
                   type: hidden
               value: 
-                  callback: getRequestIdOrigin
+                  request_field: origin_id
               hidden: 1
               
             - field: fk_soc

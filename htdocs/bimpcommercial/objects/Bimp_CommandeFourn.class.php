@@ -34,7 +34,6 @@ class Bimp_CommandeFourn extends BimpComm
         'nev' => array('label' => 'Jamais reçue', 'classes' => array('danger')),
         'can' => array('label' => 'Annulée', 'classes' => array('danger')),
     );
-    
     public static $logistique_active_status = array(3, 4, 5, 7);
 
     // Gestion des autorisations objet: 
@@ -183,13 +182,13 @@ class Bimp_CommandeFourn extends BimpComm
         }
         return parent::isActionAllowed($action);
     }
-    
+
     public function isLogistiqueActive()
     {
         if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status)) {
             return 1;
         }
-        
+
         return 0;
     }
 
@@ -524,12 +523,24 @@ class Bimp_CommandeFourn extends BimpComm
 //            }
             // Créer facture: 
             if ($this->isActionAllowed('createInvoice') && $this->canSetAction('createInvoice')) {
-                $url = DOL_URL_ROOT . '/fourn/facture/card.php?action=create&origin=' . $this->dol_object->element . '&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
-                $onclick = 'window.location = \'' . $url . '\';';
+//                $url = DOL_URL_ROOT . '/fourn/facture/card.php?action=create&origin=' . $this->dol_object->element . '&originid=' . $this->id . '&socid=' . (int) $this->getData('fk_soc');
+//                $onclick = 'window.location = \'' . $url . '\';';
+                $factureFourn = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn');
+                $values = array(
+                    'fields' => array(
+                        'origin'            => 'commande_fournisseur',
+                        'origin_id'         => (int) $this->id,
+                        'entrepot'          => (int) $this->getData('entrepot'),
+                        'fk_soc'            => (int) $this->getData('fk_soc'),
+                        'ref_supplier'      => (string) $this->getData('ref_supplier'),
+                        'fk_cond_reglement' => (int) $this->getData('fk_cond_reglement'),
+                        'fk_mode_reglement' => (int) $this->getData('fk_mode_reglement')
+                    )
+                );
+                $onclick = $factureFourn->getJsLoadModalForm('default', 'Création d\\\'une facture', $values, '', 'redirect');
                 $buttons[] = array(
                     'label'   => 'Créer une facture fournisseur',
                     'icon'    => 'fas_file-invoice-dollar',
-//                        'onclick' => $this->getJsActionOnclick('createInvoice')
                     'onclick' => $onclick
                 );
             }
@@ -569,7 +580,7 @@ class Bimp_CommandeFourn extends BimpComm
 
         return $buttons;
     }
-    
+
     public function getDefaultListExtraButtons()
     {
         $buttons = parent::getDefaultListExtraButtons();
@@ -715,9 +726,9 @@ class Bimp_CommandeFourn extends BimpComm
             $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
             $html .= BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Nouvelle réception';
             $html .= '</button>';
-            
+
             $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
-            
+
             $onclick = $line->getJsLoadModalForm('fournline_forced', 'Ajout d\\\'une ligne de commande supplémentaire', array(
                 'fields' => array(
                     'id_obj' => (int) $this->id
@@ -982,8 +993,8 @@ class Bimp_CommandeFourn extends BimpComm
         }
 
         return array(
-            'errors'   => $errors,
-            'warnings' => $warnings,
+            'errors'           => $errors,
+            'warnings'         => $warnings,
             'success_callback' => 'bimp_reloadPage();'
         );
     }
@@ -1153,5 +1164,4 @@ class Bimp_CommandeFourn extends BimpComm
 
         return 1;
     }
-    
 }

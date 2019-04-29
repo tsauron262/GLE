@@ -1,7 +1,9 @@
-# Contrat hérite de bimpComm
-extends: 
-    module: bimpcommercial
-    object_name: BimpComm
+## Contrat hérite de bimpComm
+#extends: 
+#    module: bimpcommercial
+#    object_name: BimpComm
+
+primary: rowid
 
 header_btn: 
     callback: getActionsButtons
@@ -68,7 +70,6 @@ fields:
         type: int
         values:
             array: status_list
-    fk_cond_reglement: unset
         
             
     # Extrafields

@@ -159,5 +159,10 @@ forms:
             - object: note
               multiple: 1
             - object: files
-              name: upload
               multiple: 1
+              form_name: upload
+              form_values:
+                  fields:
+                      parent_module: bimpsupport
+                      parent_object_name: BS_Ticket
+                      id_parent: 1

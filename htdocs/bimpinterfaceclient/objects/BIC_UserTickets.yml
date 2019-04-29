@@ -158,3 +158,6 @@ forms:
             - field: impact
             - object: note
               multiple: 1
+            - object: files
+              name: upload
+              multiple: 1

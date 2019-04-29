@@ -953,17 +953,12 @@ class ObjectLine extends BimpObject
                     $text = '';
                     $product = $this->getProduct();
                     if (BimpObject::objectLoaded($product)) {
+                        $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
+                        
                         $product_label = $product->getData('label');
-                        if (preg_match('/^' . $product_label . '(.*)$/', $desc, $matches)) {
-                            $desc = $matches[1];
-                        }
+                        
                         $desc = str_replace("  ", " ", $desc);
                         $product_label = str_replace("  ", " ", $product_label);
-                        if(stripos($desc, $product_label) !== false)
-                                $desc = str_replace($product_label, "", $desc);
-                        $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
-
-                        $product_label = $product->getData('label');
 
                         if ($product_label) {
                             if (preg_match('/^' . $product_label . '(.*)$/', $desc, $matches)) {

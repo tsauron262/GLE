@@ -1,0 +1,1 @@
+ALTER TABLE `llx_commande` ADD `id_client_facture` INT NOT NULL DEFAULT '0'; 

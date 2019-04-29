@@ -3,6 +3,8 @@
 #    module: bimpcommercial
 #    object_name: BimpComm
 
+primary: rowid
+
 header_btn: 
     callback: getActionsButtons
 

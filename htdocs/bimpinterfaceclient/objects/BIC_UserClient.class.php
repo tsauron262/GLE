@@ -322,7 +322,12 @@ class BIC_UserClient extends BimpObject {
         }
         return $return;
     }
-
+    
+    public function what_is_the_context() {
+        if(BimpTools::getContext() == 'public') return 0;
+        return 1;
+    }
+    
     public function create(&$warnings = array(), $force_create = false) {
         $mot_de_passe = $this->generatePassword();
         if ($this->getList(array('email' => BimpTools::getValue('email')))) {

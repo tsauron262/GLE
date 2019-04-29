@@ -505,6 +505,8 @@ class BimpDocumentPDF extends BimpModelPDF
                 if (preg_match('/^'.$product->label.'(.*)$/', $line_desc, $matches)) {
                     $line_desc = $matches[0];
                 }
+                if(stripos($line_desc, $product->label) !== false)
+                      $line_desc = str_replace($product->label, "", $line_desc);  
                 
             }
             if ($line_desc) {

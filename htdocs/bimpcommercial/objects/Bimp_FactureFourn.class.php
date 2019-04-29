@@ -493,9 +493,97 @@ class Bimp_FactureFourn extends BimpComm
 
     // Overrides - BimpComm: 
 
-    public function createLinesFromOrigin($origin_object)
+    public function createLinesFromOrigin($origin)
     {
-        // todo...
+        $errors = array();
+
+        if (!BimpObject::objectLoaded($origin) || !is_a($origin, 'BimpComm')) {
+            return array('Element d\'origine absent ou invalide');
+        }
+
+        if (!is_a($origin, 'Bimp_CommandeFourn')) {
+            return parent::createLinesFromOrigin($origin);
+        }
+
+        $lines = $origin->getChildrenObjects('lines', array(), 'position', 'asc');
+
+        $warnings = array();
+        $i = 0;
+
+        // Création des lignes: 
+        $lines_new = array();
+
+        foreach ($lines as $line) {
+            $i++;
+            $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
+            $line_instance->validateArray(array(
+                'id_obj'    => (int) $this->id,
+                'type'      => $line->getData('type'),
+                'deletable' => 1,
+                'editable'  => 1,
+                'remisable' => $line->getData('remisable')
+            ));
+            
+            $qty = (float) $line->getFullQty();
+            
+            $line_instance->desc = $line->desc;
+            $line_instance->tva_tx = $line->tva_tx;
+            $line_instance->id_product = $line->id_product;
+            $line_instance->qty = $qty;
+            $line_instance->pu_ht = $line->pu_ht;
+            $line_instance->pa_ht = $line->pa_ht;
+            $line_instance->id_fourn_price = $line->id_fourn_price;
+            $line_instance->date_from = $line->date_from;
+            $line_instance->date_to = $line->date_to;
+            $line_instance->id_remise_except = $line->id_remise_except;
+
+            $line_errors = $line_instance->create($warnings, true);
+            if (count($line_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne n°' . $i);
+                continue;
+            }
+
+            $lines_new[(int) $line->id] = (int) $line_instance->id;
+
+            // Création des remises pour la ligne en cours:
+            $remises = $line->getRemises();
+            if (!is_null($remises) && count($remises)) {
+
+                $j = 0;
+                foreach ($remises as $r) {
+                    $j++;
+                    $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+                    $remise->validateArray(array(
+                        'id_object_line' => (int) $line_instance->id,
+                        'object_type'    => $line_instance::$parent_comm_type,
+                        'label'          => $r->getData('label'),
+                        'type'           => (int) $r->getData('type'),
+                        'percent'        => (float) $r->getData('percent'),
+                        'montant'        => (float) $r->getData('montant'),
+                        'per_unit'       => (int) $r->getData('per_unit')
+                    ));
+                    $remise_errors = $remise->create($warnings, true);
+                    if (count($remise_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise n°' . $j . ' pour la ligne n°' . $i);
+                    }
+                }
+            }
+        }
+
+        // Attribution des lignes parentes: 
+        foreach ($lines as $line) {
+            $id_parent_line = (int) $line->getData('id_parent_line');
+
+            if ($id_parent_line) {
+                if (isset($lines_new[(int) $line->id]) && (int) $lines_new[(int) $line->id] && isset($lines_new[$id_parent_line]) && (int) $lines_new[$id_parent_line]) {
+                    $line_instance = BimpCache::getBimpObjectInstance($this->module, $this->object_name . 'Line', (int) $lines_new[(int) $line->id]);
+                    if (BimpObject::objectLoaded($line_instance)) {
+                        $line_instance->updateField('id_parent_line', (int) $lines_new[(int) $id_parent_line]);
+                    }
+                }
+            }
+        }
+        return $errors;
     }
     
     protected function updateDolObject(&$errors)

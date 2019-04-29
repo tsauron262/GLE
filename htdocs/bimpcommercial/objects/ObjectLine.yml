@@ -483,7 +483,7 @@ lists_cols:
                 params:
                     - desc
         max_width: 460px
-        min_width: 340px
+#        min_width: 280px
     pu_ht: 
         label: PU HT
         value: 

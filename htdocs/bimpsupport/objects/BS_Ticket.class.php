@@ -655,11 +655,17 @@ class BS_Ticket extends BimpObject
         return 0;
     }
 
-    public function canClientCreate() {
-        $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
-        if($instance->getData('statut') == 1) {
-            return 1;
+    public function canClientCreate($id_contrat = 0) {
+        if($this->isLoaded() && $this->getData('id_contrat') > 0 && $id_contrat == 0){
+            $id_contrat = $this->getData('id_contrat');
         }
+        $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
+        if($id_contrat >0) {
+            if($instance->getData('statut') == 1) {
+                return 1;
+            }
+        }
+        
         return 0;
         
     }

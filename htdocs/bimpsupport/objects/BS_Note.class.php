@@ -62,7 +62,7 @@ class BS_Note extends BimpObject
     
     public function canClientCreate() {
         $parent = $this->getParentInstance();
-        if($parent->getData('status') == 20 || $parent->getData('status') == 2) {
+        if($parent->getData('status') < 999) {
             return 1;
         }
         return 0;
@@ -99,6 +99,13 @@ class BS_Note extends BimpObject
         if(BimpTools::getContext() == 'public') {
             global $userClient;
             $this->updateField('id_user_client', $userClient->id);
+            $this->updateField('visibility', 1);
+            
+            $parent = $this->getParentInstance();
+            
+            if($parent->getData('status') != $parent::BS_TICKET_DEMANDE_CLIENT && $parent->getData('status') != $parent::BS_TICKET_CLOT) {
+                
+            }
         }
     }
 }

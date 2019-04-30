@@ -4,6 +4,9 @@ table: contratdet
 parent_id_property: fk_contrat
 parent_object: BContract_contrat
 
+
+primary: rowid
+
 labels: 
     name: ligne du contrat
     name_plur: lignes du contrat

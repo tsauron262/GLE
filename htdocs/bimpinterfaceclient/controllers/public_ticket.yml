@@ -26,7 +26,7 @@ sections:
             struct: 
                 type: view
                 view: 
-                    panel: 0
+                    panel: 1
                     name: client
                     object: ticket
           - id: interventions

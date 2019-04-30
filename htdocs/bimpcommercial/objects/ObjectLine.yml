@@ -57,6 +57,13 @@ fields:
             array: types
         required: 1
         
+#    label: 
+#        label: Libellé
+#        display_if: 
+#            field_name: type
+#            hide_values: 3
+#        depends_on: id_product
+        
     deletable: 
         label: Supprimable
         type: bool
@@ -92,6 +99,14 @@ fields:
         type: percent
         default_value: 0
         decimals: 8
+        
+    hide_product_label: 
+        label: Ne pas afficher l'intitulé du produit
+        type: bool
+        default_value: 0
+        display_if: 
+            field_name: type
+            show_values: 1
 
 forms: 
     default: 
@@ -121,7 +136,8 @@ forms:
                   hide_values: 2
               show:
                   callback: isProductEditable
-                          
+                       
+#            - field: label
             - custom: 1
               label: Prix unitaire HT
               value: 
@@ -271,6 +287,7 @@ forms:
                           - desc
               depends_on: id_product
             
+            - field: hide_product_label
             - field: force_qty_1
                      
             - custom: 1

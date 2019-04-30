@@ -927,7 +927,7 @@ class Bimp_Commande extends BimpComm
                                 $html .= '</a>';
                             }
 
-                            $html .= '<br/>' . $commande->displayData('fk_statut');
+                            $html .= '<br/>' . $commande->displayData('fk_statut') . '  -  ' . $commande->displayData('invoice_status');
                             $html .= '</td>';
                             $fl = false;
                         }
@@ -1149,7 +1149,7 @@ class Bimp_Commande extends BimpComm
         $client_facture = $this->getClientFacture();
         $onclick = $this->getJsActionOnclick('linesFactureQties', array(
             'new_facture'       => 1,
-            'id_client_facture'         => (int) (!is_null($client_facture) ? $client_facture->id : 0),
+            'id_client_facture' => (int) (!is_null($client_facture) ? $client_facture->id : 0),
             'id_contact'        => (int) ($client_facture->id === (int) $this->getData('fk_soc') ? $this->dol_object->contactid : 0),
             'id_cond_reglement' => (int) $this->getData('fk_cond_reglement')
                 ), array(

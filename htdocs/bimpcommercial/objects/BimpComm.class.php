@@ -91,9 +91,12 @@ class BimpComm extends BimpDolObject
                 return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $id_object);
 
             case 'commande_fournisseur':
+            case 'order_supplier':
                 return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', $id_object);
 
             case 'facture_fourn':
+            case 'facture_fournisseur':
+            case 'invoice_supplier':
                 return BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $id_object);
         }
 
@@ -1336,16 +1339,15 @@ class BimpComm extends BimpDolObject
                             break;
 
                         case 'invoice_supplier':
-                            $facture_fourn_instance = BimpCache::getDolObjectInstance((int) $item['id_object'], 'fourn', 'fournisseur.facture', 'FactureFournisseur');
-                            BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+                            $facture_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $item['id_object']);
                             if (BimpObject::objectLoaded($facture_fourn_instance)) {
-                                $date_facture = new DateTime(BimpTools::getDateFromDolDate($facture_fourn_instance->date));
+                                $icon = $facture_fourn_instance->params['icon'];
                                 $objects[] = array(
-                                    'type'     => 'Facture fournisseur',
-                                    'ref'      => BimpObject::getInstanceNomUrlWithIcons($facture_fourn_instance),
-                                    'date'     => $date_facture->format('d / m / Y'),
-                                    'total_ht' => BimpTools::displayMoneyValue((float) $facture_fourn_instance->total_ht, 'EUR'),
-                                    'status'   => Bimp_Facture::$status_list[(int) $facture_fourn_instance->statut]['label']
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_fourn_instance->getLabel()),
+                                    'ref'      => $facture_fourn_instance->getNomUrl(0, true, true, 'full'),
+                                    'date'     => $facture_fourn_instance->displayData('datef'),
+                                    'total_ht' => $facture_fourn_instance->displayData('total_ht'),
+                                    'status'   => $facture_fourn_instance->displayData('fk_statut')
                                 );
                             }
                             break;
@@ -1880,7 +1882,6 @@ class BimpComm extends BimpDolObject
 
     // Actions:
 
-
     public function actionValidate($data, &$success)
     {
         $errors = array();
@@ -2295,7 +2296,9 @@ class BimpComm extends BimpDolObject
                 $this->dol_object->origin = $origin;
                 $this->dol_object->origin_id = $origin_id;
 
-                $this->dol_object->linked_objects[$this->dol_object->origin] = $origin_id;
+                if ($this->object_name !== 'Bimp_FactureFourn') {
+                    $this->dol_object->linked_objects[$this->dol_object->origin] = $origin_id;
+                }
             }
 
             if ($this->field_exists('remise_globale_label') && $origin_object->field_exists('remise_globale_label')) {

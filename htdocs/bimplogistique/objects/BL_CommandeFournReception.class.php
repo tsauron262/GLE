@@ -40,9 +40,24 @@ class BL_CommandeFournReception extends BimpObject
                     $errors[] = 'La réception n\'a pas le statut "réceptionnée"';
                     return 0;
                 }
+                $commande = $this->getParentInstance();
+                if ((int) $commande->isBilled()) {
+                    $errors[] = 'Une facture a été créée pour la commande fournisseur';
+                    return 0;
+                }
                 return 1;
         }
         return parent::isActionAllowed($action, $errors);
+    }
+
+    public function isCreatable($force_create = false)
+    {
+        $commande = $this->getParentInstance();
+        if (BimpObject::objectLoaded($commande) && !((int) $commande->isBilled())) {
+            return 1;
+        }
+
+        return 0;
     }
 
     public function isCancellable(&$errors = array())

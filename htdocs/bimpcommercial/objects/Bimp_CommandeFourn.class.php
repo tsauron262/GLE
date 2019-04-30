@@ -153,15 +153,17 @@ class Bimp_CommandeFourn extends BimpComm
                 return 1;
 
             case 'createInvoice':
+                $this->checkInvoiceStatus();
                 if (empty($conf->facture->enabled)) {
                     $errors[] = 'Factures désactivées';
                     return 0;
                 }
-                if ((int) $this->getData('billed')) {
+                if ((int) $this->getData('billed') || (int) $this->getData('invoice_status')) {
                     $errors[] = BimpTools::ucfirst($this->getLabel('this')) . ' a déjà été facturée';
                     return 0;
                 }
-                if (!in_array($status, array(2, 3, 4, 5))) {
+                $this->checkReceptionStatus();
+                if (!in_array($status, array(5))) { // Seulement si reçue entièrement: 
                     $errors[] = 'Statut actuel ' . $this->getLabel('of_the') . ' invalide';
                     return 0;
                 }
@@ -186,6 +188,21 @@ class Bimp_CommandeFourn extends BimpComm
     public function isLogistiqueActive()
     {
         if (in_array((int) $this->getData('fk_statut'), self::$logistique_active_status)) {
+            return 1;
+        }
+
+        return 0;
+    }
+
+    public function isBilled()
+    {
+        if (!$this->isLoaded()) {
+            return 0;
+        }
+
+        $this->checkInvoiceStatus();
+
+        if ((int) $this->getData('billed') || (int) $this->getData('invoice_status')) {
             return 1;
         }
 
@@ -528,7 +545,7 @@ class Bimp_CommandeFourn extends BimpComm
                 $factureFourn = BimpObject::getInstance('bimpcommercial', 'Bimp_FactureFourn');
                 $values = array(
                     'fields' => array(
-                        'origin'            => 'commande_fournisseur',
+                        'origin'            => 'order_supplier',
                         'origin_id'         => (int) $this->id,
                         'entrepot'          => (int) $this->getData('entrepot'),
                         'fk_soc'            => (int) $this->getData('fk_soc'),
@@ -716,27 +733,30 @@ class Bimp_CommandeFourn extends BimpComm
         $html = '';
 
         if ($this->isLoaded()) {
-            $reception = BimpObject::getInstance('bimplogistique', 'BL_CommandeFournReception');
-            $onclick = $reception->getJsLoadModalForm('default', 'Nouvelle réception', array(
-                'fields' => array(
-                    'id_commande_fourn' => $this->id,
-                    'id_entrepot'       => (int) $this->getData('entrepot')
-                )
-            ));
-            $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-            $html .= BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Nouvelle réception';
-            $html .= '</button>';
+            if (!((int) $this->isBilled())) {
+                if (in_array((int) $this->getData('fk_statut'), array(3, 4, 5))) {
+                    $reception = BimpObject::getInstance('bimplogistique', 'BL_CommandeFournReception');
+                    $onclick = $reception->getJsLoadModalForm('default', 'Nouvelle réception', array(
+                        'fields' => array(
+                            'id_commande_fourn' => $this->id,
+                            'id_entrepot'       => (int) $this->getData('entrepot')
+                        )
+                    ));
+                    $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+                    $html .= BimpRender::renderIcon('fas_arrow-circle-down', 'iconLeft') . 'Nouvelle réception';
+                    $html .= '</button>';
+                }
 
-            $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
-
-            $onclick = $line->getJsLoadModalForm('fournline_forced', 'Ajout d\\\'une ligne de commande supplémentaire', array(
-                'fields' => array(
-                    'id_obj' => (int) $this->id
-                )
-            ));
-            $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-            $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter une ligne de commande';
-            $html .= '</button>';
+                $line = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFournLine');
+                $onclick = $line->getJsLoadModalForm('fournline_forced', 'Ajout d\\\'une ligne de commande supplémentaire', array(
+                    'fields' => array(
+                        'id_obj' => (int) $this->id
+                    )
+                ));
+                $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
+                $html .= BimpRender::renderIcon('fas_plus-circle', 'iconLeft') . 'Ajouter une ligne de commande';
+                $html .= '</button>';
+            }
         }
 
         return $html;
@@ -746,8 +766,11 @@ class Bimp_CommandeFourn extends BimpComm
     {
         $html = '';
 
+        if ((int) $this->getData('invoice_status') > 0) {
+            $html .= '<span>' . $this->displayData('invoice_status') . '</span>';
+        }
         if ((int) $this->getData('attente_info')) {
-            $html .= '<span class="warning">' . BimpRender::renderIcon('fas_hourglass-start', 'iconLeft') . 'Attente Infos</span>';
+            $html .= '<br/><span class="warning">' . BimpRender::renderIcon('fas_hourglass-start', 'iconLeft') . 'Attente Infos</span>';
         }
 
         return $html;
@@ -823,6 +846,37 @@ class Bimp_CommandeFourn extends BimpComm
 
         if ($current_status !== $new_status) {
             $this->updateField('fk_statut', $new_status);
+        }
+    }
+
+    public function checkInvoiceStatus()
+    {
+        if (!$this->isLoaded()) {
+            return;
+        }
+
+        $invoice_status = 0;
+
+        foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
+            if ($item['type'] === 'invoice_supplier') {
+                $facture_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', (int) $item['id_object']);
+                if (BimpObject::objectLoaded($facture_fourn_instance)) {
+                    if ((int) $facture_fourn_instance->getData('fk_statut') !== FactureFournisseur::STATUS_ABANDONED) {
+                        $invoice_status = 2;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($invoice_status !== (int) $this->getInitData('invoice_status')) {
+            $this->updateField('invoice_status', $invoice_status);
+        }
+
+        if ($invoice_status > 0) {
+            if (!((int) $this->getInitData('billed'))) {
+                $this->updateField('billed', 1);
+            }
         }
     }
 

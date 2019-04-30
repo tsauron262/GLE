@@ -158,6 +158,10 @@ fields:
         type: int
         values: 
             array: invoice_status
+    billed: 
+        label: Facturé
+        type: bool
+        default_value: 0
 #    fk_account: 
 #        label: Compte bancaire
 #        type: id_object

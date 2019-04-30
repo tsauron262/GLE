@@ -177,6 +177,7 @@ forms:
 fields_tables: 
     infos: 
         rows: 
+            - field: entrepot
             - field: libelle
               edit: 1
             - field: datef

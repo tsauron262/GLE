@@ -200,6 +200,10 @@ class Bimp_CommandeFournLine extends FournObjectLine
                     $errors[] = 'Le statut actuel de la commande fournisseur ne permet pas cette action';
                     return 0;
                 }
+                if ((int) $commande->isBilled()) {
+                    $errors[] = 'Une facture a été créée pour cette commande fournisseur';
+                    return 0;
+                }
                 return 1;
         }
 
@@ -280,6 +284,57 @@ class Bimp_CommandeFournLine extends FournObjectLine
         }
 
         return $qty;
+    }
+
+    public function getLinesDataByUnitPriceAndTva()
+    {
+        $lines = array();
+        $full_qty = $this->getFullQty();
+        $is_serialisable = (int) $this->isProductSerialisable();
+
+        $receptions = $this->getData('receptions');
+
+        foreach ($receptions as $id_reception => $reception_data) {
+            if ($is_serialisable) {
+                if (isset($reception_data['equipments'])) {
+                    foreach ($reception_data['equipments'] as $id_equiment => $equipment_data) {
+                        $pu_ht = (string) (isset($equipment_data['pu_ht']) ? (float) $equipment_data['pu_ht'] : (float) $this->pu_ht);
+                        $tva_tx = (string) (isset($equipment_data['tva_tx']) ? (float) $equipment_data['tva_tx'] : (float) $this->tva_tx);
+
+                        if (!isset($lines[$pu_ht])) {
+                            $lines[$pu_ht] = array();
+                        }
+
+                        if (!isset($lines[$pu_ht][$tva_tx])) {
+                            $lines[$pu_ht][$tva_tx] = array(
+                                'equipments' => array()
+                            );
+                        }
+                        $lines[$pu_ht][$tva_tx]['equipments'][] = $id_equiment;
+                    }
+                }
+            } else {
+                if (isset($reception_data['qties'])) {
+                    foreach ($reception_data['qties'] as $qty_data) {
+                        $qty = (float) (isset($qty_data['qty']) ? $qty_data['qty'] : 0);
+                        $pu_ht = (string) (isset($qty_data['pu_ht']) ? $qty_data['pu_ht'] : $this->pu_ht);
+                        $tva_tx = (string) (isset($qty_data['tva_tx']) ? $qty_data['tva_tx'] : $this->tva_tx);
+
+                        if (!isset($lines[$pu_ht])) {
+                            $lines[$pu_ht] = array();
+                        }
+
+                        if (!isset($lines[$pu_ht][$tva_tx])) {
+                            $lines[$pu_ht][$tva_tx] = 0;
+                        }
+
+                        $lines[$pu_ht][$tva_tx] += $qty;
+                    }
+                }
+            }
+        }
+
+        return $lines;
     }
 
     // Getters config: 
@@ -1435,6 +1490,11 @@ class Bimp_CommandeFournLine extends FournObjectLine
 
         if (!BimpObject::objectLoaded($commande_fourn)) {
             $errors[] = 'ID de la commande fournisseur absent';
+            return $errors;
+        }
+        
+        if ((int) $commande_fourn->isBilled()) {
+            $errors[] = 'Une facture a été créée pour cette commande fournisseur';
             return $errors;
         }
 

@@ -45,8 +45,13 @@ class Interfacevalidate extends DolibarrTriggers
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
             if (BimpObject::objectLoaded($bimp_object)) {
                 $bimp_object->onValidate();
-            } else {
-                echo 'FAIL <br/>';
+            }
+        }
+        
+        if ($action == 'BILL_SUPPLIER_CREATE') {
+            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $object->id);
+            if (BimpObject::objectLoaded($bimp_object)) {
+                $bimp_object->onCreate();
             }
         }
 

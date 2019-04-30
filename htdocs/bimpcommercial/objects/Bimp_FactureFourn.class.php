@@ -443,6 +443,24 @@ class Bimp_FactureFourn extends BimpComm
         return $html;
     }
 
+    // Traitements: 
+
+    public function onCreate()
+    {
+        if (!$this->isLoaded()) {
+            return;
+        }
+
+        foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
+            if ($item['type'] === 'order_supplier') {
+                $commande_fourn = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $item['id_object']);
+                if (BimpObject::objectLoaded($commande_fourn)) {
+                    $commande_fourn->checkInvoiceStatus();
+                }
+            }
+        }
+    }
+
     // Actions: 
 
     public function actionValidate($data, &$success)
@@ -514,57 +532,87 @@ class Bimp_FactureFourn extends BimpComm
         $lines_new = array();
 
         foreach ($lines as $line) {
-            $i++;
-            $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
-            $line_instance->validateArray(array(
-                'id_obj'    => (int) $this->id,
-                'type'      => $line->getData('type'),
-                'deletable' => 1,
-                'editable'  => 1,
-                'remisable' => $line->getData('remisable')
-            ));
-            
-            $qty = (float) $line->getFullQty();
-            
-            $line_instance->desc = $line->desc;
-            $line_instance->tva_tx = $line->tva_tx;
-            $line_instance->id_product = $line->id_product;
-            $line_instance->qty = $qty;
-            $line_instance->pu_ht = $line->pu_ht;
-            $line_instance->pa_ht = $line->pa_ht;
-            $line_instance->id_fourn_price = $line->id_fourn_price;
-            $line_instance->date_from = $line->date_from;
-            $line_instance->date_to = $line->date_to;
-            $line_instance->id_remise_except = $line->id_remise_except;
 
-            $line_errors = $line_instance->create($warnings, true);
-            if (count($line_errors)) {
-                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne n°' . $i);
-                continue;
-            }
+            $lines_data = $line->getLinesDataByUnitPriceAndTva();
 
-            $lines_new[(int) $line->id] = (int) $line_instance->id;
+            $isSerialisable = $line->isProductSerialisable();
 
-            // Création des remises pour la ligne en cours:
-            $remises = $line->getRemises();
-            if (!is_null($remises) && count($remises)) {
+            foreach ($lines_data as $pu_ht => $pu_data) {
+                foreach ($pu_data as $tva_tx => $line_data) {
+                    $i++;
+                    if ($isSerialisable) {
+                        $qty = count($line_data['equipments']);
+                    } else {
+                        $qty = (float) $line_data;
+                    }
+                    $pu_ht = (float) $pu_ht;
+                    $tva_tx = (float) $tva_tx;
 
-                $j = 0;
-                foreach ($remises as $r) {
-                    $j++;
-                    $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
-                    $remise->validateArray(array(
-                        'id_object_line' => (int) $line_instance->id,
-                        'object_type'    => $line_instance::$parent_comm_type,
-                        'label'          => $r->getData('label'),
-                        'type'           => (int) $r->getData('type'),
-                        'percent'        => (float) $r->getData('percent'),
-                        'montant'        => (float) $r->getData('montant'),
-                        'per_unit'       => (int) $r->getData('per_unit')
+                    $line_instance = BimpObject::getInstance($this->module, $this->object_name . 'Line');
+                    $line_instance->validateArray(array(
+                        'id_obj'    => (int) $this->id,
+                        'type'      => $line->getData('type'),
+                        'deletable' => 1,
+                        'editable'  => 1,
+                        'remisable' => $line->getData('remisable')
                     ));
-                    $remise_errors = $remise->create($warnings, true);
-                    if (count($remise_errors)) {
-                        $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise n°' . $j . ' pour la ligne n°' . $i);
+
+                    $line_instance->desc = $line->desc;
+                    $line_instance->tva_tx = $tva_tx;
+                    $line_instance->id_product = $line->id_product;
+                    $line_instance->qty = $qty;
+                    $line_instance->pu_ht = $pu_ht;
+                    $line_instance->pa_ht = $line->pa_ht;
+                    $line_instance->id_fourn_price = $line->id_fourn_price;
+                    $line_instance->date_from = $line->date_from;
+                    $line_instance->date_to = $line->date_to;
+                    $line_instance->id_remise_except = $line->id_remise_except;
+
+                    $line_errors = $line_instance->create($warnings, true);
+                    if (count($line_errors)) {
+                        $errors[] = BimpTools::getMsgFromArray($line_errors, 'Echec de la création de la ligne n°' . $i);
+                        continue;
+                    }
+
+                    $lines_new[(int) $line->id] = (int) $line_instance->id;
+
+                    // Création des remises pour la ligne en cours:
+                    $remises = $line->getRemises();
+                    if (!is_null($remises) && count($remises)) {
+                        $j = 0;
+                        foreach ($remises as $r) {
+                            $j++;
+                            $remise = BimpObject::getInstance('bimpcommercial', 'ObjectLineRemise');
+                            $remise->validateArray(array(
+                                'id_object_line' => (int) $line_instance->id,
+                                'object_type'    => $line_instance::$parent_comm_type,
+                                'label'          => $r->getData('label'),
+                                'type'           => (int) $r->getData('type'),
+                                'percent'        => (float) $r->getData('percent'),
+                                'montant'        => (float) $r->getData('montant'),
+                                'per_unit'       => (int) $r->getData('per_unit')
+                            ));
+                            $remise_errors = $remise->create($warnings, true);
+                            if (count($remise_errors)) {
+                                $errors[] = BimpTools::getMsgFromArray($remise_errors, 'Echec de la création de la remise n°' . $j . ' pour la ligne n°' . $i);
+                            }
+                        }
+                    }
+
+                    // Ajout des équipements: 
+                    if ($isSerialisable) {
+                        foreach ($line_data['equipments'] as $id_equipment) {
+                            $eq_errors = $line_instance->attributeEquipment((int) $id_equipment);
+                            if (count($eq_errors)) {
+                                $equipment = BimpCache::getBimpObjectFullListArray('bimpequipment', 'Equipment', (int) $id_equipment);
+                                if (BimpObject::objectLoaded($equipment)) {
+                                    $eq_label = '"' . $equipment->getData('serial') . '"';
+                                } else {
+                                    $eq_label = 'd\'ID ' . $id_equipment;
+                                }
+                                $errors[] = BimpTools::getMsgFromArray($eq_errors, 'Ligne n°' . $i . ': échec de l\'attribution de l\'équipement ' . $eq_label);
+                            }
+                        }
                     }
                 }
             }
@@ -585,9 +633,9 @@ class Bimp_FactureFourn extends BimpComm
         }
         return $errors;
     }
-    
+
     protected function updateDolObject(&$errors)
     {
-        
+        return parent::updateDolObject($errors);
     }
 }

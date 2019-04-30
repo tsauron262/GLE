@@ -969,25 +969,26 @@ class ObjectLine extends BimpObject
                         }
                     }
 
+                    $product = $this->getProduct();
                     $desc = $this->desc;
                     $text = '';
-                    $product = $this->getProduct();
-                    $text = '';
-
 
                     if (BimpObject::objectLoaded($product)) {
                         $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
-                        
+
                         $product_label = $product->getData('label');
-                        
+
                         $desc = str_replace("  ", " ", $desc);
                         $product_label = str_replace("  ", " ", $product_label);
 
                         if ($product_label) {
-                            if (preg_match('/^' . $product_label . '(.*)$/', $desc, $matches)) {
+                            if (preg_match('/^' . preg_quote($product_label, '/') . '(.*)$/', $desc, $matches)) {
                                 $desc = $matches[1];
                             }
-                            $text .= '<br/>' . $product_label;
+
+                            if (!(int) $this->getData('hide_product_label')) {
+                                $text .= ($text ? '<br/>' : '') . $product_label;
+                            }
                         }
 
                         if ((int) $product->getData('fk_product_type') == 1) {

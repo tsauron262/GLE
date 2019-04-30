@@ -13,7 +13,7 @@ class BIC_UserClient extends BimpObject {
     public static $langs_list = array("fr_FR");
 
     # Constantes
-
+        
     CONST USER_CLIENT_ROLE_ADMIN = 1;
     CONST USER_CLIENT_ROLE_USER = 0;
     CONST USER_CLIENT_STATUS_ACTIF = 1;
@@ -300,22 +300,19 @@ class BIC_UserClient extends BimpObject {
     }
 
     public function get_dest($type) {
-        $return = "";
+        $return = Array();
         switch ($type) {
             case 'commerciaux':
-                $ListCommerciaux = $this->db->getRows('societe_commerciaux', 'fk_soc = ' . $this->getData('attached_societe'));
-                foreach ($ListCommerciaux as $commercial) {
-                    $instanceComm = new User($this->db->db);
-                    $instanceComm->fetch($commercial->fk_user);
-                    $return .= ', ' . $instanceComm->email;
-                    $instanceComm = null;
+                $commerciaux = BimpTools::getCommercialArray($this->getData('attached_societe'));
+                foreach ($commerciaux as $id_commercial) {
+                    $return[$id_commercial->email] =  $id_commercial->email;
                 }
                 break;
             case 'admin':
                 $listUser = $this->getList(array('attached_societe' => $this->getData('attached_societe')));
                 foreach ($listUser as $user) {
                     if ($user['id'] != $this->id && $user['role'] == 1) {
-                        $return .= ', ' . $user['email'];
+                        $return[$user['email']] =  $user['email'];
                     }
                 }
                 break;

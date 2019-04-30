@@ -469,7 +469,7 @@ class BimpDocumentPDF extends BimpModelPDF
         
     }
 
-    public function getLineDesc($line, Product $product = null)
+    public function getLineDesc($line, Product $product = null, $hide_product_label = false)
     {
         $desc = '';
         if (!is_null($product)) {
@@ -477,7 +477,9 @@ class BimpDocumentPDF extends BimpModelPDF
                 $desc .= $product->ref;
             }
 
-            $desc .= ($desc ? ' - ' : '') . $product->label;
+            if (!$hide_product_label) {
+                $desc .= ($desc ? ' - ' : '') . $product->label;
+            }
 
             if ($product->type == 1) {
                 if ($line->date_start) {
@@ -502,14 +504,13 @@ class BimpDocumentPDF extends BimpModelPDF
         if (!is_null($line->desc) && $line->desc) {
             $line_desc = $line->desc;
             if (!is_null($product)) {
-                if (preg_match('/^'.$product->label.'(.*)$/', $line_desc, $matches)) {
+                if (preg_match('/^' . $product->label . '(.*)$/', $line_desc, $matches)) {
                     $line_desc = $matches[0];
                 }
                 $line_desc = str_replace("  ", " ", $line_desc);
                 $product->label = str_replace("  ", " ", $product->label);
-                if(stripos($line_desc, $product->label) !== false)
-                      $line_desc = str_replace($product->label, "", $line_desc);  
-                
+                if (stripos($line_desc, $product->label) !== false)
+                    $line_desc = str_replace($product->label, "", $line_desc);
             }
             if ($line_desc) {
                 $desc .= ($desc ? (strlen($desc) > 20 ? '<br/>' : ' - ') : '') . $line_desc;
@@ -583,7 +584,9 @@ class BimpDocumentPDF extends BimpModelPDF
                 continue;
             }
 
-            $desc = $this->getLineDesc($line, $product);
+            $hide_product_label = isset($bimpLines[(int) $line->id]) ? (int) $bimpLines[(int) $line->id]->getData('hide_product_label') : 0;
+
+            $desc = $this->getLineDesc($line, $product, $hide_product_label);
 
             if ($line->subprice == 0) {
                 $row['desc'] = array(

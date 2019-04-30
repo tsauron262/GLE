@@ -99,6 +99,13 @@ class BS_Note extends BimpObject
         if(BimpTools::getContext() == 'public') {
             global $userClient;
             $this->updateField('id_user_client', $userClient->id);
+            $this->updateField('visibility', 1);
+            
+            $parent = $this->getParentInstance();
+            
+            if($parent->getData('status') != $parent::BS_TICKET_DEMANDE_CLIENT && $parent->getData('status') != $parent::BS_TICKET_CLOT) {
+                
+            }
         }
     }
 }

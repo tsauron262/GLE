@@ -78,6 +78,8 @@ fields:
         type: int
         values:
             array: role
+        default_value: 
+            callback: what_is_the_context
     status:
         label:
             callback:

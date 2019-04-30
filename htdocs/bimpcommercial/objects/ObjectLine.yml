@@ -61,6 +61,13 @@ fields:
             array: types
         required: 1
         
+#    label: 
+#        label: Libellé
+#        display_if: 
+#            field_name: type
+#            hide_values: 3
+#        depends_on: id_product
+        
     deletable: 
         label: Supprimable
         type: bool
@@ -107,6 +114,13 @@ fields:
         label: Remise CRT 
         type: bool
         default_value: 0
+    hide_product_label: 
+        label: Ne pas afficher l'intitulé du produit
+        type: bool
+        default_value: 0
+        display_if: 
+            field_name: type
+            show_values: 1
 
 forms: 
     default: 
@@ -272,6 +286,8 @@ forms:
                         params: 
                             - desc
                 depends_on: id_product
+            hide_product_label: 
+                field: hide_product_label
             force_qty_1: 
                 field: force_qty_1
             remisable: 

@@ -577,6 +577,9 @@ class BimpObject extends BimpCache
 
     public function isChild($instance)
     {
+        if(is_a($instance, 'BimpFile'))
+                return true;
+        
         if (is_a($instance, 'BimpObject')) {
             $instance_parent_module = $instance->getParentModule();
             $instance_parent_object_name = $instance->getParentObjectName();
@@ -3086,13 +3089,20 @@ class BimpObject extends BimpCache
                     }
                     $multiple = BimpTools::getValue($object_name . '_multiple', 0);
                     $post_temp = $_POST;
+                    $files_temp = $_FILES;
                     if ($multiple) {
                         $count = BimpTools::getValue($object_name . '_count', 0);
                         for ($i = 1; $i <= $count; $i++) {
                             $_POST = array();
+                            $_FILES = array();
                             foreach ($post_temp as $key => $value) {
                                 if (preg_match('/^' . $object_name . '_' . $i . '_(.*)$/', $key, $matches)) {
                                     $_POST[$matches[1]] = $value;
+                                }
+                            }
+                            foreach ($files_temp as $key => $value) {
+                                if (preg_match('/^' . $object_name . '_' . $i . '_(.*)$/', $key, $matches)) {
+                                    $_FILES[$matches[1]] = $value;
                                 }
                             }
                             if (count($_POST)) {
@@ -3136,6 +3146,7 @@ class BimpObject extends BimpCache
                         }
                     }
                     $_POST = $post_temp;
+                    $_FILES = $files_temp;
                 }
             }
         }

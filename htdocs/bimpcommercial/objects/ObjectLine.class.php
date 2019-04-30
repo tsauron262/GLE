@@ -672,23 +672,43 @@ class ObjectLine extends BimpObject
 
                 case 'desc':
                     $desc = $this->desc;
-                    if ($id_product && (is_null($desc) || !$desc || (int) $this->id_product !== $id_product)) {
+                    if ($id_product && ((is_null($desc) || !(string) $desc || (int) $this->id_product !== $id_product))) {
                         $desc = (string) $product->dol_object->description;
-                    } elseif (is_null($desc)) {
+//                        $product_label = (string) $product->getData('label');
+//
+//                        if (preg_match('/^' . $product_label . '(.*)$/', $desc, $matches)) {
+//                            $desc = $matches[1];
+//                        }
+                    }
+
+                    if (is_null($desc)) {
                         $desc = '';
                     }
+
                     return $desc;
+
+//                case 'label':
+//                    $label = (string) $this->getData('label');
+//                    if ($id_product && ((is_null($label) || !(string) $label || (int) $this->id_product !== $id_product))) {
+//                        return (string) $product->getData('label');
+//                    }
+//                    return $label;
             }
         }
 
-        switch($field) {
-            case 'remisable': 
+        switch ($field) {
+            case 'remisable':
                 return (int) $this->getData('remisable');
-                
-            case 'desc': 
-                return (string) $this->desc;
+
+            case 'desc':
+                return $this->getData('desc');
+
+//            case 'label':
+//                return $this->getData('label');
         }
-        return 0;
+
+
+        return self::$product_line_data[$field]['default'];
     }
 
     public function getProduct()
@@ -952,6 +972,9 @@ class ObjectLine extends BimpObject
                     $desc = $this->desc;
                     $text = '';
                     $product = $this->getProduct();
+                    $text = '';
+
+
                     if (BimpObject::objectLoaded($product)) {
                         $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
                         

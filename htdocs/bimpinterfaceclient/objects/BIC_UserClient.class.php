@@ -13,7 +13,7 @@ class BIC_UserClient extends BimpObject {
     public static $langs_list = array("fr_FR");
 
     # Constantes
-
+        
     CONST USER_CLIENT_ROLE_ADMIN = 1;
     CONST USER_CLIENT_ROLE_USER = 0;
     CONST USER_CLIENT_STATUS_ACTIF = 1;
@@ -300,29 +300,31 @@ class BIC_UserClient extends BimpObject {
     }
 
     public function get_dest($type) {
-        $return = "";
+        $return = Array();
         switch ($type) {
             case 'commerciaux':
-                $ListCommerciaux = $this->db->getRows('societe_commerciaux', 'fk_soc = ' . $this->getData('attached_societe'));
-                foreach ($ListCommerciaux as $commercial) {
-                    $instanceComm = new User($this->db->db);
-                    $instanceComm->fetch($commercial->fk_user);
-                    $return .= ', ' . $instanceComm->email;
-                    $instanceComm = null;
+                $commerciaux = BimpTools::getCommercialArray($this->getData('attached_societe'));
+                foreach ($commerciaux as $id_commercial) {
+                    $return[$id_commercial->email] =  $id_commercial->email;
                 }
                 break;
             case 'admin':
                 $listUser = $this->getList(array('attached_societe' => $this->getData('attached_societe')));
                 foreach ($listUser as $user) {
                     if ($user['id'] != $this->id && $user['role'] == 1) {
-                        $return .= ', ' . $user['email'];
+                        $return[$user['email']] =  $user['email'];
                     }
                 }
                 break;
         }
         return $return;
     }
-
+    
+    public function what_is_the_context() {
+        if(BimpTools::getContext() == 'public') return 0;
+        return 1;
+    }
+    
     public function create(&$warnings = array(), $force_create = false) {
         $mot_de_passe = $this->generatePassword();
         if ($this->getList(array('email' => BimpTools::getValue('email')))) {
@@ -337,7 +339,7 @@ class BIC_UserClient extends BimpObject {
             if ($this->use_email && BimpTools::getValue('send_mail')) {
                 $sujet = "Mot de passe BIMP ERP Interface Client";
                 $message = 'Bonjour,<br /> Voici votre accès pour votre espace client <br />'
-                        . '<a href="https://erp.bimp.fr/bimp8/bimpinterfaceclient/client.php">Espace client BIMP ERP</a><br />Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
+                        . '<a href="'.$_SERVER['SERVER_NAME']. DOL_URL_ROOT . '/bimpinterfaceclient/client.php">Espace client BIMP ERP</a><br />Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
                 mailSyn2($sujet, $this->getData('email'), 'noreply@bimp.fr', $message);
             }
         }

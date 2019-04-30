@@ -262,6 +262,7 @@ fields:
         searchable: 0 
     sujet:
         label: Sujet ticket
+        type: html
         
 forms: 
     default:
@@ -365,6 +366,14 @@ forms:
                               status: 
                                   operator: !=
                                   value: 2
+                                  
+    edit_ticket_interface:
+        rows:
+            - field: status
+              edit: 0
+            - field: priorite
+            - field: sujet
+              
                                                 
 fields_tables: 
     infos: 
@@ -393,8 +402,7 @@ fields_tables:
               edit:
                   callback: it_is_pris_en_charge
             - field: sujet
-              edit:
-                  callback: it_is_not_a_customer_requets
+              edit: 0
               
     objects:
         title: Elements liés
@@ -418,6 +426,7 @@ fields_tables:
     client_infos:
         title: Informations
         icon: info-circle
+        
         rows:
             - field: sujet
             - field: status
@@ -494,10 +503,13 @@ views:
                   list: 
                       children: files
     client:
-        edit_form: default
+        edit_form: edit_ticket_interface
+        edit_btn: 1
         rows:
             - cols:
                 - type: fields_table
+                  
+                  # Voir pour boutton modifier en bas
                   col_lg: 12
                   col_md: 12
                   fields_table: 

@@ -1,7 +1,9 @@
-# Contrat hérite de bimpComm
-extends: 
-    module: bimpcommercial
-    object_name: BimpComm
+## Contrat hérite de bimpComm
+#extends: 
+#    module: bimpcommercial
+#    object_name: BimpComm
+
+primary: rowid
 
 header_btn: 
     callback: getActionsButtons
@@ -37,9 +39,9 @@ objects:
                     parent_module: bimpcontract
                     parent_object_name: BContract_contrat
         
-        echeancier:
-            instance:
-                bimp_object: BContract_echeancier
+    echeancier:
+        instance:
+            bimp_object: BContract_echeancier
         
 force_extrafields_update: 1
 
@@ -58,7 +60,20 @@ fields:
         label: Référence
         type: string
     fk_soc:
-        request: id_client
+        label: Client
+        type: id_object
+        object: client
+        required: 1
+        input: 
+            type: search_societe
+            societe_type: customer
+            help: Entrez le nom ou la référence d'un client pour effectuer une recherche
+            card: default
+        search:
+            input: 
+                type: search_societe
+                societe_type: customer    
+        create_form: light
     datec:
         label: Date du contrat
         type: date
@@ -68,7 +83,6 @@ fields:
         type: int
         values:
             array: status_list
-    fk_cond_reglement: unset
         
             
     # Extrafields

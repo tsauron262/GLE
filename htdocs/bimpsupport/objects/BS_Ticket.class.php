@@ -655,13 +655,35 @@ class BS_Ticket extends BimpObject
         return 0;
     }
 
-    public function canClientCreate() {
-        $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $_REQUEST['id']);
-        if($instance->getData('statut') == 1) {
-            return 1;
+    public function canClientCreate($id_contrat = 0) {
+        if($id_contrat == 0){
+            if(/*$this->isLoaded() && */$this->getData('id_contrat') > 0){
+                $id_contrat = $this->getData('id_contrat');
+            }
+            elseif(BimpTools::getValue("fc") == "contrat_ticket" && BimpTools::getValue("id") > 0){
+                $id_contrat = BimpTools::getValue("id");
+            }
         }
+        if($id_contrat > 0){
+            $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
+            if($id_contrat >0) {
+                if($instance->getData('statut') == 1) {
+                    return 1;
+                }
+            }
+        }
+        
         return 0;
         
+    }
+    
+    public function isFieldEditable($field) {
+        
+        if($field == 'sujet') {
+            return $this->it_is_not_a_customer_requets();
+        }
+        
+        return parent::isFieldEditable($field);
     }
     
     public function it_is_a_customer_request() {

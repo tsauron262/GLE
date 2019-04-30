@@ -1,6 +1,7 @@
 table: bic_user
 icon: fas_user
 controller: pageUser
+common_fields: 0
 
 objects:
     user_client_contrat:

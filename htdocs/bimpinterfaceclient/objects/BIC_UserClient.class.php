@@ -216,6 +216,7 @@ class BIC_UserClient extends BimpObject {
 
             $user = new User($this->db->db);
             $user->fetch(null, $this->loginUser);
+            $user->getrights();
             if ($user->id < 1)
                 die('Attention ' . $this->loginUser . ' user existe pas');
         }

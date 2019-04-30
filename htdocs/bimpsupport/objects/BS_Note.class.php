@@ -62,7 +62,7 @@ class BS_Note extends BimpObject
     
     public function canClientCreate() {
         $parent = $this->getParentInstance();
-        if($parent->getData('status') == 20 || $parent->getData('status') == 2) {
+        if($parent->getData('status') < 999) {
             return 1;
         }
         return 0;

@@ -1,5 +1,5 @@
 bootstrap: 1
-title: Les 5 derniéers objets créer
+title: Les 5 derniers objets créés
 
 objects: 
     propal: 
@@ -21,31 +21,38 @@ objects:
 sections: 
     - type: rows
       rows:
-        - cols: 
-              - type: list
+          - cols:
+              - type: rows
                 col_lg: 6
-                list: 
-                    object: propal
-                    name: mini_user_create
-              - type: list
+                rows: 
+                    - cols: 
+                        - type: list
+                          list: 
+                              object: propal
+                              name: mini_user_create
+                    - cols: 
+                        - type: list
+                          list: 
+                              object: commandeFourn
+                              name: mini_user_create
+                    - cols: 
+                        - type: list
+                          list: 
+                              object: factureFourn
+                              name: mini_user_create         
+              - type: rows
                 col_lg: 6
-                list: 
-                    object: commande
-                    name: mini_user_create
-              - type: list
-                col_lg: 6
-                list: 
-                    object: commandeFourn
-                    name: mini_user_create
-              - type: list
-                col_lg: 6
-                list: 
-                    object: facture
-                    name: mini_user_create
-              - type: list
-                col_lg: 6
-                list: 
-                    object: factureFourn
-                    name: mini_user_create
+                rows: 
+                    - cols: 
+                        - type: list
+                          list: 
+                              object: commande
+                              name: mini_user_create    
+                    - cols: 
+                        - type: list
+                          list: 
+                              object: facture
+                              name: mini_user_create
+              
           
     

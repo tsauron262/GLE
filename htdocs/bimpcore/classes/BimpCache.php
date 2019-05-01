@@ -38,6 +38,14 @@ class BimpCache
         return array();
     }
 
+    public static function cacheExists($cache_key)
+    {
+        if ((string) $cache_key) {
+            return (int) isset(self::$cache[$cache_key]);
+        }
+        
+        return 0;
+    }
     // Objets: 
 
     public static function getBimpObjectInstance($module, $object_name, $id_object, $parent = null)

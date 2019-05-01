@@ -8,7 +8,7 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/../Bimp_Lib.php';
 
 //llxHeader();
-
+ 
 echo '<!DOCTYPE html>';
 echo '<html lang="fr">';
 
@@ -21,10 +21,11 @@ echo '<body>';
 
 global $db;
 $bdb = new BimpDb($db);
+$factures_set = array();
 
 // Traitement des lignes d'expédition (réservations): 
 
-$rows = $bdb->getRows('br_reservation_shipment', '1', null, 'array');
+$rows = $bdb->getRows('br_reservation_shipment', '`converted` = 0', null, 'array', null, 'id', 'asc');
 
 foreach ($rows as $r) {
     echo 'Traitement reservation_shipment ' . $r['id'] . ': ';
@@ -64,19 +65,35 @@ foreach ($rows as $r) {
                     $shipments[(int) $r['id_shipment']]['qty'] += (float) $r['qty'];
 
                     if ((int) $r['id_equipment']) {
-                        $shipments[(int) $r['equipments']][] = (int) $r['id_equipment'];
+                        $shipments[(int) $r['id_shipment']]['equipments'][] = (int) $r['id_equipment'];
                     }
+
+                    echo '<pre>';
+                    print_r($shipments);
+                    echo '</pre>';
 
                     echo ' Maj expéditions ligne: ';
                     $up_errors = $line->updateField('shipments', $shipments);
                     if (count($up_errors)) {
                         echo '[ECHEC]<br/>';
                         echo BimpRender::renderAlerts($up_errors, 'danger');
+                    } else {
+                        echo '[OK]';
                     }
-
+//                    
                     // Check facturation: 
-                    if ((int) $shipment->getData(('id_facture'))) {
-                        $id_facture = (int) $shipment->getData('id_facture');
+                    if ((int) $br_shipment->getData(('id_facture'))) {
+                        $id_facture = (int) $br_shipment->getData('id_facture');
+
+                        if (!in_array($id_facture, $factures_set)) {
+                            $asso = new BimpAssociation($commande, 'factures');
+                            $asso_errors = $asso->addObjectAssociation($id_facture);
+                            if (count($asso_errors)) {
+                                echo '<br/>[ECHEC ASSO FACTURE ' . $id_facture . ']';
+                                echo BimpRender::renderAlerts($asso_errors);
+                            }
+                        }
+
                         $factures = $line->getData('factures');
                         if (is_null($factures)) {
                             $factures = array();
@@ -91,6 +108,10 @@ foreach ($rows as $r) {
 
                         $factures[(int) $id_facture]['qty'] += (float) $r['qty'];
 
+                        echo 'fac: <pre>';
+                        print_r($factures[(int) $id_facture]);
+                        echo '</pre>';
+
                         echo ' Maj facturation ligne: ';
                         $up_errors = $line->updateField('factures', $factures);
                         if (count($up_errors)) {
@@ -100,6 +121,16 @@ foreach ($rows as $r) {
                             echo '[OK]';
                         }
                     }
+
+                    if ($bdb->update('br_reservation_shipment', array(
+                                'converted' => 1
+                                    ), '`id` = ' . (int) $r['id']) <= 0) {
+                        echo ' - [ECHEC MAJ br_reservation_shipment ' . $r['id'] . '] ' . $bdb->db->lasterror() . '<br/>';
+                    }
+
+                    echo '<br/><br/>';
+
+                    break;
                 } else {
                     echo '[LIGNE DE COMMANDE INVALIDE: ' . $r['id_commande_client_line'] . ']';
                 }
@@ -117,7 +148,7 @@ foreach ($rows as $r) {
 
 // Traitement des lignes d'expédition (services) 
 
-$rows = $bdb->getRows('br_reservation_shipment', '1', null, 'array');
+$rows = $bdb->getRows('br_service_shipment', '`converted` = 0', null, 'array');
 
 foreach ($rows as $r) {
     echo 'Traitement service_shipment ' . $r['id'] . ': ';
@@ -156,6 +187,10 @@ foreach ($rows as $r) {
 
                     $shipments[(int) $r['id_shipment']]['qty'] += (float) $r['qty'];
 
+                    echo '<pre>';
+                    print_r($shipments);
+                    echo '</pre>';
+
                     echo 'Maj expéditions ligne: ';
                     $up_errors = $line->updateField('shipments', $shipments);
                     if (count($up_errors)) {
@@ -167,8 +202,18 @@ foreach ($rows as $r) {
 
                     // Check facturation: 
 
-                    if ((int) $shipment->getData(('id_facture'))) {
-                        $id_facture = (int) $shipment->getData('id_facture');
+                    if ((int) $br_shipment->getData(('id_facture'))) {
+                        $id_facture = (int) $br_shipment->getData('id_facture');
+
+                        if (!in_array($id_facture, $factures_set)) {
+                            $asso = new BimpAssociation($commande, 'factures');
+                            $asso_errors = $asso->addObjectAssociation($id_facture);
+                            if (count($asso_errors)) {
+                                echo '<br/>[ECHEC ASSO FACTURE ' . $id_facture . ']';
+                                echo BimpRender::renderAlerts($asso_errors);
+                            }
+                        }
+
                         $factures = $line->getData('factures');
                         if (is_null($factures)) {
                             $factures = array();
@@ -183,6 +228,10 @@ foreach ($rows as $r) {
 
                         $factures[(int) $id_facture]['qty'] += (float) $r['qty'];
 
+                        echo '<pre>';
+                        print_r($factures);
+                        echo '</pre>';
+
                         echo ' Maj facturation ligne: ';
                         $up_errors = $line->updateField('factures', $factures);
                         if (count($up_errors)) {
@@ -192,6 +241,16 @@ foreach ($rows as $r) {
                             echo '[OK]';
                         }
                     }
+
+                    if ($bdb->update('br_service_shipment', array(
+                                'converted' => 1
+                                    ), '`id` = ' . (int) $r['id']) <= 0) {
+                        echo ' - [ECHEC MAJ br_service_shipment ' . $r['id'] . '] ' . $bdb->db->lasterror() . '<br/>';
+                    }
+
+                    echo '<br/><br/>';
+
+                    break;
                 } else {
                     echo '[LIGNE DE COMMANDE INVALIDE: ' . $r['id_commande_client_line'] . ']';
                 }
@@ -206,21 +265,22 @@ foreach ($rows as $r) {
     }
     echo '<br/>';
 }
-
 // Traitement des réservations (id_dol_line => id_bimp_line): 
 
 $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
 
 $rows = $reservation->getList(array(
-    'id_commande_client'      => array(
+    'id_commande_client'        => array(
         'operator' => '>',
         'value'    => 0
     ),
-    'id_commande_client_line' => array(
+    'id_commande_client_line'   => array(
         'operator' => '>',
         'value'    => 0
-    )
+    ),
+    'commande_client_converted' => 0
         ), null, null, 'id', 'asc', 'array');
+
 
 foreach ($rows as $r) {
     echo 'Traitement BR_Reservation ' . $r['id'] . ': ';
@@ -241,13 +301,23 @@ foreach ($rows as $r) {
             ));
 
             if (BimpObject::objectLoaded($line)) {
+                echo '<br/> Bimp_line: ' . $line->id . ', dol_line: ' . $r['id_commande_client_line'] . '<br/>';
                 $result = $bdb->update('br_reservation', array(
                     'id_commande_client_line' => (int) $line->id
                         ), '`id` = ' . (int) $r['id']);
 
-                if ($result < 0) {
+                if ($result <= 0) {
                     echo '[ECHEC MAJ] ' . $bdb->db->lasterror();
+                } else {
+                    if ($bdb->update('br_reservation', array(
+                                'commande_client_converted' => 1
+                                    ), '`id` = ' . (int) $r['id']) <= 0) {
+                        echo ' - [ECHEC MAJ br_reservation ' . $r['id'] . '] ' . $bdb->db->lasterror() . '<br/>';
+                    }
                 }
+
+                echo '<br/><br/>';
+                break;
             } else {
                 echo '[LIGNE DE COMMANDE INVALIDE: ' . $r['id_commande_client_line'] . ']';
             }
@@ -259,21 +329,30 @@ foreach ($rows as $r) {
     }
     echo '<br/>';
 }
-
 // Traitements des factures globales commandes: 
 
 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
 
 $list = $commande->getListObjects(array(
-    'id_facture' => array(
+    'id_facture'        => array(
         'operator' => '>',
         'value'    => 0
-    )
+    ),
+    'facture_converted' => 0
         ));
 
 foreach ($list as $commande) {
     $lines = $commande->getLines('not_text');
     $id_facture = (int) $commande->getData('id_facture');
+
+    if (!in_array($id_facture, $factures_set)) {
+        $asso = new BimpAssociation($commande, 'factures');
+        $asso_errors = $asso->addObjectAssociation($id_facture);
+        if (count($asso_errors)) {
+            echo '<br/>[ECHEC ASSO FACTURE ' . $id_facture . ']';
+            echo BimpRender::renderAlerts($asso_errors);
+        }
+    }
 
     echo 'Traitement facture globale commande ' . $commande->id . '<br/>';
     foreach ($lines as $line) {
@@ -298,6 +377,11 @@ foreach ($list as $commande) {
             }
 
             $factures[(int) $id_facture]['qty'] += $qty;
+
+            echo '<pre>';
+            print_r($factures);
+            echo '</pre>';
+
             $up_errors = $line->updateField('factures', $factures);
             if (count($up_errors)) {
                 echo '[ECHEC]<br/>';
@@ -307,6 +391,15 @@ foreach ($list as $commande) {
             }
         }
     }
+
+    if ($bdb->update('commande', array(
+                'facture_converted' => 1
+                    ), '`rowid` = ' . (int) $commande->id) <= 0) {
+        echo ' - [ECHEC MAJ commande ' . $commande->id . '] ' . $bdb->db->lasterror() . '<br/>';
+    }
+
+    echo '<br/><br/>';
+    break;
 }
 
 

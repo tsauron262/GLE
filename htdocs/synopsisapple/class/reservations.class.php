@@ -32,7 +32,7 @@ class Reservations
 
         $date = new DateTime();
         $dateBegin = $date->format('Y-m-d');
-        $date->add(new DateInterval('P2D'));
+        $date->add(new DateInterval('P14D'));
         $dateEnd = $date->format('Y-m-d');
         unset($date);
 

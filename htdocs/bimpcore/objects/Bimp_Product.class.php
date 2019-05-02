@@ -18,6 +18,8 @@ class Bimp_Product extends BimpObject
         1  => 'Service'
     );
 
+    // Getters booléens
+
     public function isSerialisable()
     {
         if ($this->isLoaded()) {
@@ -31,6 +33,8 @@ class Bimp_Product extends BimpObject
     {
         return (int) !$this->isSerialisable();
     }
+
+    // Getters: 
 
     public function getDolObjectUpdateParams()
     {
@@ -113,95 +117,11 @@ class Bimp_Product extends BimpObject
 
     public function getRemiseCrt()
     {
-        return 10;
-    }
-
-    public function fetchStocks()
-    {
-        $this->stocks = array();
-
-        $where = '`statut` > 0';
-        $rows = $this->db->getRows('entrepot', $where, null, 'array', array(
-            'rowid', 'ref'
-        ));
-
-
-        if (!is_null($rows)) {
-            foreach ($rows as $r) {
-                $stocks = $this->getStocksForEntrepot((int) $r['rowid']);
-                $this->stocks[(int) $r['rowid']] = array(
-                    'entrepot_label' => $r['ref'],
-                    'reel'           => $stocks['reel'],
-                    'dispo'          => $stocks['dispo'],
-                    'virtuel'        => $stocks['virtuel'],
-                    'commandes'      => $stocks['commandes'],
-                    'total_reserves' => $stocks['total_reserves'],
-                    'reel_reserves'  => $stocks['reel_reserves']
-                );
-            }
-        }
-    }
-
-    public function renderStocksByEntrepots($id_entrepot = null)
-    {
-        if (!$this->isLoaded()) {
-            return BimpRender::renderAlerts('ID du produit absent');
+        if ($this->dol_field_exists('crt')) {
+            return (float) $this->getData('crt');
         }
 
-        if (is_null($this->stocks)) {
-            $this->fetchStocks();
-        }
-
-        if (is_null($id_entrepot) || $id_entrepot == "") {
-            $id_entrepot = self::getDefaultEntrepot();
-        }
-
-        $html = '';
-
-        $html .= '<div class="productStocksContent" data-id_product="' . $this->id . '">';
-        $html .= '<h3><i class="fas fa5-box-open iconLeft"></i>Stocks produit ' . $this->getData('ref') . '</h3>';
-        $html .= '<div class="stockSearchContainer">';
-        $html .= '<i class="fa fa-search iconLeft"></i>';
-        $html .= BimpInput::renderInput('text', 'stockSearch', '');
-        $html .= '</div>';
-        $html .= '<table class="productStockTable bimp_list_table">';
-        $html .= '<thead>';
-        $html .= '<tr>';
-        $html .= '<th>Entrepôt</th>';
-        $html .= '<th>Réel</th>';
-        $html .= '<th>Dispo</th>';
-        $html .= '<th>Virtuel</th>';
-        $html .= '</tr>';
-        $html .= '</thead>';
-
-        $html .= '<tbody>';
-
-        if (!is_null($id_entrepot) && isset($this->stocks[(int) $id_entrepot])) {
-            $html .= '<tr class="currentEntrepot">';
-            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['entrepot_label'] . '</td>';
-            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['reel'] . '</td>';
-            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['dispo'] . '</td>';
-            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['virtuel'] . '</td>';
-            $html .= '</tr>';
-        }
-
-        foreach ($this->stocks as $id_ent => $stocks) {
-            if (!is_null($id_entrepot) && ((int) $id_entrepot === (int) $id_ent)) {
-                continue;
-            }
-            $html .= '<tr>';
-            $html .= '<td>' . $stocks['entrepot_label'] . '</td>';
-            $html .= '<td>' . $stocks['reel'] . '</td>';
-            $html .= '<td>' . $stocks['dispo'] . '</td>';
-            $html .= '<td>' . $stocks['virtuel'] . '</td>';
-            $html .= '</tr>';
-        }
-
-        $html .= '</tbody>';
-        $html .= '</table>';
-        $html .= '</div>';
-
-        return $html;
+        return 0;
     }
 
     public static function getStockIconStatic($id_product, $id_entrepot = null)
@@ -305,5 +225,97 @@ class Bimp_Product extends BimpObject
     public function getProductFournisseursPricesArray()
     {
         
+    }
+
+    // traitements: 
+
+    public function fetchStocks()
+    {
+        $this->stocks = array();
+
+        $where = '`statut` > 0';
+        $rows = $this->db->getRows('entrepot', $where, null, 'array', array(
+            'rowid', 'ref'
+        ));
+
+
+        if (!is_null($rows)) {
+            foreach ($rows as $r) {
+                $stocks = $this->getStocksForEntrepot((int) $r['rowid']);
+                $this->stocks[(int) $r['rowid']] = array(
+                    'entrepot_label' => $r['ref'],
+                    'reel'           => $stocks['reel'],
+                    'dispo'          => $stocks['dispo'],
+                    'virtuel'        => $stocks['virtuel'],
+                    'commandes'      => $stocks['commandes'],
+                    'total_reserves' => $stocks['total_reserves'],
+                    'reel_reserves'  => $stocks['reel_reserves']
+                );
+            }
+        }
+    }
+
+    // Rendus HTML: 
+
+    public function renderStocksByEntrepots($id_entrepot = null)
+    {
+        if (!$this->isLoaded()) {
+            return BimpRender::renderAlerts('ID du produit absent');
+        }
+
+        if (is_null($this->stocks)) {
+            $this->fetchStocks();
+        }
+
+        if (is_null($id_entrepot) || $id_entrepot == "") {
+            $id_entrepot = self::getDefaultEntrepot();
+        }
+
+        $html = '';
+
+        $html .= '<div class="productStocksContent" data-id_product="' . $this->id . '">';
+        $html .= '<h3><i class="fas fa5-box-open iconLeft"></i>Stocks produit ' . $this->getData('ref') . '</h3>';
+        $html .= '<div class="stockSearchContainer">';
+        $html .= '<i class="fa fa-search iconLeft"></i>';
+        $html .= BimpInput::renderInput('text', 'stockSearch', '');
+        $html .= '</div>';
+        $html .= '<table class="productStockTable bimp_list_table">';
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>Entrepôt</th>';
+        $html .= '<th>Réel</th>';
+        $html .= '<th>Dispo</th>';
+        $html .= '<th>Virtuel</th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $html .= '<tbody>';
+
+        if (!is_null($id_entrepot) && isset($this->stocks[(int) $id_entrepot])) {
+            $html .= '<tr class="currentEntrepot">';
+            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['entrepot_label'] . '</td>';
+            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['reel'] . '</td>';
+            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['dispo'] . '</td>';
+            $html .= '<td>' . $this->stocks[(int) $id_entrepot]['virtuel'] . '</td>';
+            $html .= '</tr>';
+        }
+
+        foreach ($this->stocks as $id_ent => $stocks) {
+            if (!is_null($id_entrepot) && ((int) $id_entrepot === (int) $id_ent)) {
+                continue;
+            }
+            $html .= '<tr>';
+            $html .= '<td>' . $stocks['entrepot_label'] . '</td>';
+            $html .= '<td>' . $stocks['reel'] . '</td>';
+            $html .= '<td>' . $stocks['dispo'] . '</td>';
+            $html .= '<td>' . $stocks['virtuel'] . '</td>';
+            $html .= '</tr>';
+        }
+
+        $html .= '</tbody>';
+        $html .= '</table>';
+        $html .= '</div>';
+
+        return $html;
     }
 }

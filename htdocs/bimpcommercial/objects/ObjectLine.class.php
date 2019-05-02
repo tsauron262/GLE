@@ -384,10 +384,13 @@ class ObjectLine extends BimpObject
                     'onclick' => $onclick
                 );
             }
-            if ($this->isParentEditable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE))) {
+            if ($this->isParentEditable() && in_array((int) $this->getData('type'), array(self::LINE_PRODUCT, self::LINE_FREE)) && !(int) $this->getData('id_parent_line')) {
                 $line_instance = BimpObject::getInstance($this->module, $this->object_name);
                 $onclick = $line_instance->getJsLoadModalForm('default', 'Ajout d\\\'une sous-ligne à la ligne n°' . $this->getData('position'), array(
-                    'fields' => array(
+                    'objects' => array(
+                        'remises' => $this->getClientDefaultRemiseFormValues()
+                    ),
+                    'fields'  => array(
                         'id_obj'         => (int) $this->getData('id_obj'),
                         'id_parent_line' => (int) $this->id,
                         'type'           => self::LINE_TEXT
@@ -674,11 +677,11 @@ class ObjectLine extends BimpObject
                     $desc = $this->desc;
                     if ($id_product && ((is_null($desc) || !(string) $desc || (int) $this->id_product !== $id_product))) {
                         $desc = (string) $product->dol_object->description;
-//                        $product_label = (string) $product->getData('label');
-//
-//                        if (preg_match('/^' . $product_label . '(.*)$/', $desc, $matches)) {
-//                            $desc = $matches[1];
-//                        }
+                        $product_label = (string) $product->getData('label');
+
+                        if (preg_match('/^' . preg_quote($product_label, '/') . '(.*)$/', $desc, $matches)) {
+                            $desc = $matches[1];
+                        }
                     }
 
                     if (is_null($desc)) {
@@ -701,7 +704,7 @@ class ObjectLine extends BimpObject
                 return (int) $this->getData('remisable');
 
             case 'desc':
-                return $this->getData('desc');
+                return (string) $this->getData('desc');
 
 //            case 'label':
 //                return $this->getData('label');
@@ -970,13 +973,14 @@ class ObjectLine extends BimpObject
                     }
 
                     $product = $this->getProduct();
-                    $desc = $this->desc;
+                    $desc = BimpTools::cleanString($this->desc);
                     $text = '';
+
 
                     if (BimpObject::objectLoaded($product)) {
                         $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
 
-                        $product_label = $product->getData('label');
+                        $product_label = BimpTools::cleanString($product->getData('label'));
 
                         $desc = str_replace("  ", " ", $desc);
                         $product_label = str_replace("  ", " ", $product_label);
@@ -1422,6 +1426,7 @@ class ObjectLine extends BimpObject
             }
 
             $object = $instance->dol_object;
+
             $object->error = '';
             $object->errors = array();
 
@@ -3238,7 +3243,7 @@ class ObjectLine extends BimpObject
             return $errors;
         }
 
-        if (!$this->isEditable(true)) {
+        if (!$this->isEditable($force_create)) {
             return array('Création de la ligne impossible');
         }
 
@@ -3476,7 +3481,7 @@ class ObjectLine extends BimpObject
                 $new_warnings = array();
                 $errors = $this->update($new_warnings, $force_update);
             }
-            if (BimpObject::objectLoaded($parent)) {
+            if (!$force_update && BimpObject::objectLoaded($parent)) {
                 if ($parent->field_exists('remise_globale') &&
                         (float) $parent->getData('remise_globale')) {
                     $warnings[] = 'Attention: le montant de la remise globale a pu être modifié. Veuillez vérifier.';

@@ -140,6 +140,13 @@ fields:
             array: sousTypes
         dol_extra_field: 1
         default_value: 0
+    crt: 
+        label: Remise CRT
+        type: percent
+        decimals: 3
+        dol_extra_field: 1
+        default_value: 0
+        
         
 #    Champs non gérés
 #    ref_ext

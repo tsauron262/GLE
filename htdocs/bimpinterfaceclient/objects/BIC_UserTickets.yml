@@ -90,7 +90,8 @@ lists:
             id:
             sujet:
             status:
-            priorite:
+            priorite_demande_client:
+                field: priorite_demande_client
             date_create:
             id_user_client:
                 field: id_user_client

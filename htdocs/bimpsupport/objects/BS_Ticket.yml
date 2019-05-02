@@ -430,7 +430,7 @@ fields_tables:
         rows:
             - field: sujet
             - field: status
-            - field: priorite
+            - field: priorite_demande_client
             - field: id_contrat
             - field: id_user_client
               

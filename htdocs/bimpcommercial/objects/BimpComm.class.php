@@ -564,15 +564,21 @@ class BimpComm extends BimpDolObject
             return $marginInfos;
         }
 
-        $object = $this->dol_object;
+        $lines = $this->getChildrenObjects('lines');
+        foreach ($lines as $bimp_line) {
+            $line = $bimp_line->getChildObject('line');
 
-        foreach ($object->lines as $line) {
+//        foreach ($object->lines as $line) {
             if (empty($line->pa_ht) && isset($line->fk_fournprice) && !$force_price) {
                 require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
                 $product = new ProductFournisseur($db);
                 if ($product->fetch_product_fournisseur_price($line->fk_fournprice))
                     $line->pa_ht = $product->fourn_unitprice * (1 - $product->fourn_remise_percent / 100);
             }
+            if($bimp_line->getData("remise_pa") > 0){
+                $line->pa_ht = $line->pa_ht * (100 - $bimp_line->getData("remise_pa")) / 100;
+            }
+            
             // si prix d'achat non renseigné et devrait l'être, alors prix achat = prix vente
             if ((!isset($line->pa_ht) || $line->pa_ht == 0) && $line->subprice > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)) {
                 $line->pa_ht = $line->subprice * (1 - ($line->remise_percent / 100));
@@ -1851,13 +1857,15 @@ class BimpComm extends BimpDolObject
     {
         if ($this->isLoaded()) {
             if (is_a($child, 'objectLine')) {
-                // Vérification du changement de taux de remise globale: 
-                $current_rate = (float) $this->remise_globale_line_rate;
-                $new_rate = (float) $this->getRemiseGlobaleLineRate(true);
+                if ($this->areLinesEditable()) {
+                    // Vérification du changement de taux de remise globale: 
+                    $current_rate = (float) $this->remise_globale_line_rate;
+                    $new_rate = (float) $this->getRemiseGlobaleLineRate(true);
 
-                if ($new_rate !== $current_rate) {
-                    foreach ($this->getChildrenObjects('lines') as $line) {
-                        $line->calcRemise($new_rate);
+                    if ($new_rate !== $current_rate) {
+                        foreach ($this->getChildrenObjects('lines') as $line) {
+                            $line->calcRemise($new_rate);
+                        }
                     }
                 }
             }

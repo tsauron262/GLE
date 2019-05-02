@@ -290,14 +290,14 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
     var $form = $('#' + parent_form_id);
 
     if (!$form.length) {
-        bimp_msg('Une erreur est survenue. Impossible de charger le formulaire', 'danger');
+        bimp_msg('Une erreur est survenue. Impossible de charger le formulaire (1)', 'danger');
         return;
     }
 
     var $resultContainer = $form.find('#' + parent_form_id + '_result');
 
     if (!$resultContainer) {
-        bimp_msg('Une erreur est survenue. Impossible de charger le formulaire', 'danger');
+        bimp_msg('Une erreur est survenue. Impossible de charger le formulaire (2)', 'danger');
         return;
     }
 

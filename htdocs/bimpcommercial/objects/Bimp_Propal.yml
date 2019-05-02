@@ -289,7 +289,7 @@ fields_tables:
 views: 
     default: 
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
-    content: 
+    content_infos: 
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile
     full: 
         objects_change_reload: Bimp_PropalLine,ObjectLineRemise,BimpFile

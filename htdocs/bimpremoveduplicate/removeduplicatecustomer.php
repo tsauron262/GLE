@@ -39,11 +39,11 @@ print '<table class="noborder" width="100%"><tr/></table>';
 
 print '<table><tbody>';
 print '<tr class="liste_titre_filter">';
-print '<td style="padding:10px;"><label>Nombre de groupe de doublons à afficher</label><br/>';
+print '<td style="padding:10px;"><label>Nombre de groupes de doublons à afficher</label><br/>';
 print '<input id="limit" type="number" min=1 max=100 class="flat" value=30></td>';
 print '<td style="padding:10px;"><input id="display_duplicates" type="submit" class="butAction" value="Afficher doublons">';
 print '<i id="spinner" style="display: none; font-size: 30px;" class="fa fa-spinner fa-spin"></i></td>';
-print '<td style="padding:10px;"><label>Nombre de groupe de doublons total</label><br/>';
+print '<td style="padding:10px;"><label>Nombre de groupes de doublons total</label><br/>';
 print '<div id="db_duplicate"></td>';
 print '</tr></tbody</table>';
 
@@ -57,7 +57,7 @@ print '</tr>';
 print '</table>';
 
 print '<div class="alert alert-info" role="alert" style="display: inline-block;">';
-print '<strong>Remarque :</strong> Actuellement les tiers considérés comme étant<br/> des doublons sont les homonymes avec le même code postale.';
+print '<strong>Remarque :</strong> Actuellement les tiers considérés comme étant<br/> des doublons sont les homonymes avec le même code postal.';
 print '</div>';
 
 

@@ -347,7 +347,7 @@ fields_tables:
 views: 
     default: 
         objects_change_reload: Bimp_FactureLine
-    content: 
+    content_infos: 
         objects_change_reload: Bimp_FactureLine
       
 filters_panels: 

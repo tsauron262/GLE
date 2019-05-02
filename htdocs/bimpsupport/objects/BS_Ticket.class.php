@@ -567,7 +567,7 @@ class BS_Ticket extends BimpObject
             return $errors;
         }
         
-        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->getData('id_user_client') > 0 && BimpTools::getContext() == 'private') {
+        if($this->getData('status') == self::BS_TICKET_DEMANDE_CLIENT && $this->getInitData('status') != self::BS_TICKET_DEMANDE_CLIENT && $this->getData('id_user_client') > 0 && BimpTools::getContext() == 'private') {
             return 'Impossible de repasser le ticket en demande client';
         }
         
@@ -679,7 +679,7 @@ class BS_Ticket extends BimpObject
     
     public function isFieldEditable($field) {
         
-        if($field == 'sujet') {
+        if($field == 'sujet' && BimpTools::getContext() != "public") {
             return $this->it_is_not_a_customer_requets();
         }
         

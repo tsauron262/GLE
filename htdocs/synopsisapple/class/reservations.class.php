@@ -72,7 +72,7 @@ class Reservations
                     $dateEnd = $date->format('Y-m-d');
                     if(!$this->fetchReservationSummary($n['soldTo'], $n['shipTo'], $dateBegin, $dateEnd))
                             break;
-                    $date->add(new DateInterval('P3D'));
+                    $date->add(new DateInterval('P2D'));
                 }
             }
         }

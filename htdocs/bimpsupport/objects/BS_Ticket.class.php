@@ -679,7 +679,7 @@ class BS_Ticket extends BimpObject
     
     public function isFieldEditable($field) {
         
-        if($field == 'sujet') {
+        if($field == 'sujet' && BimpTools::getContext() != "public") {
             return $this->it_is_not_a_customer_requets();
         }
         

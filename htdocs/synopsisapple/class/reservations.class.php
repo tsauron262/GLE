@@ -30,12 +30,6 @@ class Reservations
     {
         global $user, $productCodes;
 
-        $date = new DateTime();
-        $date->add(new DateInterval('P3D'));
-        $dateBegin = $date->format('Y-m-d');
-        $date->add(new DateInterval('P2D'));
-        $dateEnd = $date->format('Y-m-d');
-        unset($date);
 
         $user = new User($this->db);
         $user->fetch(1);
@@ -71,8 +65,15 @@ class Reservations
 
         foreach ($numbers as $n) {
             if (!empty($n['soldTo']) && !empty($n['shipTo'])) {
-                if(!$this->fetchReservationSummary($n['soldTo'], $n['shipTo'], $dateBegin, $dateEnd))
-                        break;
+                $date = new DateTime();
+                foreach(array(1,2,3) as $inut){
+                    $dateBegin = $date->format('Y-m-d');
+                    $date->add(new DateInterval('P2D'));
+                    $dateEnd = $date->format('Y-m-d');
+                    if(!$this->fetchReservationSummary($n['soldTo'], $n['shipTo'], $dateBegin, $dateEnd))
+                            break;
+                    $date->add(new DateInterval('P3D'));
+                }
             }
         }
         

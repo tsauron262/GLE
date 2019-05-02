@@ -8,7 +8,7 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/../Bimp_Lib.php';
 
 //llxHeader();
- 
+
 echo '<!DOCTYPE html>';
 echo '<html lang="fr">';
 
@@ -26,6 +26,8 @@ $factures_set = array();
 // Traitement des lignes d'expédition (réservations): 
 
 $rows = $bdb->getRows('br_reservation_shipment', '`converted` = 0', null, 'array', null, 'id', 'asc');
+
+$full = BimpTools::getValue('full', 0);
 
 foreach ($rows as $r) {
     echo 'Traitement reservation_shipment ' . $r['id'] . ': ';
@@ -68,9 +70,11 @@ foreach ($rows as $r) {
                         $shipments[(int) $r['id_shipment']]['equipments'][] = (int) $r['id_equipment'];
                     }
 
-                    echo '<pre>';
-                    print_r($shipments);
-                    echo '</pre>';
+                    if (!$full) {
+                        echo '<pre>';
+                        print_r($shipments);
+                        echo '</pre>';
+                    }
 
                     echo ' Maj expéditions ligne: ';
                     $up_errors = $line->updateField('shipments', $shipments);
@@ -108,9 +112,11 @@ foreach ($rows as $r) {
 
                         $factures[(int) $id_facture]['qty'] += (float) $r['qty'];
 
-                        echo 'fac: <pre>';
-                        print_r($factures[(int) $id_facture]);
-                        echo '</pre>';
+                        if (!$full) {
+                            echo 'fac: <pre>';
+                            print_r($factures[(int) $id_facture]);
+                            echo '</pre>';
+                        }
 
                         echo ' Maj facturation ligne: ';
                         $up_errors = $line->updateField('factures', $factures);
@@ -130,7 +136,9 @@ foreach ($rows as $r) {
 
                     echo '<br/><br/>';
 
-                    break;
+                    if (!$full) {
+                        break;
+                    }
                 } else {
                     echo '[LIGNE DE COMMANDE INVALIDE: ' . $r['id_commande_client_line'] . ']';
                 }
@@ -187,9 +195,11 @@ foreach ($rows as $r) {
 
                     $shipments[(int) $r['id_shipment']]['qty'] += (float) $r['qty'];
 
-                    echo '<pre>';
-                    print_r($shipments);
-                    echo '</pre>';
+                    if (!$full) {
+                        echo '<pre>';
+                        print_r($shipments);
+                        echo '</pre>';
+                    }
 
                     echo 'Maj expéditions ligne: ';
                     $up_errors = $line->updateField('shipments', $shipments);
@@ -228,9 +238,11 @@ foreach ($rows as $r) {
 
                         $factures[(int) $id_facture]['qty'] += (float) $r['qty'];
 
-                        echo '<pre>';
-                        print_r($factures);
-                        echo '</pre>';
+                        if (!$full) {
+                            echo '<pre>';
+                            print_r($factures);
+                            echo '</pre>';
+                        }
 
                         echo ' Maj facturation ligne: ';
                         $up_errors = $line->updateField('factures', $factures);
@@ -250,7 +262,9 @@ foreach ($rows as $r) {
 
                     echo '<br/><br/>';
 
-                    break;
+                    if (!$full) {
+                        break;
+                    }
                 } else {
                     echo '[LIGNE DE COMMANDE INVALIDE: ' . $r['id_commande_client_line'] . ']';
                 }
@@ -317,8 +331,10 @@ foreach ($rows as $r) {
                     }
                 }
 
-                echo '<br/><br/>';
-                break;
+                if (!$full) {
+                    echo '<br/><br/>';
+                    break;
+                }
             } else {
                 echo '[LIGNE DE COMMANDE INVALIDE: ' . $r['id_commande_client_line'] . ']';
             }
@@ -379,9 +395,11 @@ foreach ($list as $commande) {
 
             $factures[(int) $id_facture]['qty'] += $qty;
 
-            echo '<pre>';
-            print_r($factures);
-            echo '</pre>';
+            if (!$full) {
+                echo '<pre>';
+                print_r($factures);
+                echo '</pre>';
+            }
 
             $up_errors = $line->updateField('factures', $factures);
             if (count($up_errors)) {
@@ -399,8 +417,10 @@ foreach ($list as $commande) {
         echo ' - [ECHEC MAJ commande ' . $commande->id . '] ' . $bdb->db->lasterror() . '<br/>';
     }
 
-    echo '<br/><br/>';
-    break;
+    if (!$full) {
+        echo '<br/><br/>';
+        break;
+    }
 }
 
 

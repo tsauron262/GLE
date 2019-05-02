@@ -1601,6 +1601,14 @@ class BimpTools
     {
         return preg_replace("/<[ \/]*br[ \/]*>/", $replacement, $text);
     }
+    
+    public static function cleanString($string)
+    {
+        $string = str_replace("\xc2\xa0", ' ', $string);
+        $string = str_replace("  ", " ", $string);
+        
+        return $string;
+    }
 
     // Gestion des couleurs: 
 

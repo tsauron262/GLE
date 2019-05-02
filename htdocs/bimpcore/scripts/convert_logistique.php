@@ -8,7 +8,7 @@ ini_set('display_errors', 1);
 require_once __DIR__ . '/../Bimp_Lib.php';
 
 //llxHeader();
- 
+
 echo '<!DOCTYPE html>';
 echo '<html lang="fr">';
 
@@ -329,7 +329,8 @@ foreach ($rows as $r) {
     }
     echo '<br/>';
 }
-// Traitements des factures globales commandes: 
+
+// Traitements commandes: 
 
 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
 
@@ -342,6 +343,19 @@ $list = $commande->getListObjects(array(
         ));
 
 foreach ($list as $commande) {
+    // Traitement id_user_resp. 
+
+    if ((int) $commande->getData('fk_statut') > 0) {
+        if (!(int) $commande->getData('id_user_resp')) {
+            $up_errors = $commande->updateField('id_user_resp', (int) $commande->getData('fk_user_valid'));
+            if (count($up_errors)) {
+                echo 'Commmande ' . $commande->id . ': ECHEC MAJ ID USER RESP: <br/>';
+                echo BimpRender::renderAlerts($up_errors);
+            }
+        }
+    }
+
+    // Traitement facture globale: 
     $lines = $commande->getLines('not_text');
     $id_facture = (int) $commande->getData('id_facture');
 

@@ -31,8 +31,9 @@ class Reservations
         global $user, $productCodes;
 
         $date = new DateTime();
+        $date->add(new DateInterval('P10D'));
         $dateBegin = $date->format('Y-m-d');
-        $date->add(new DateInterval('P14D'));
+        $date->add(new DateInterval('P2D'));
         $dateEnd = $date->format('Y-m-d');
         unset($date);
 

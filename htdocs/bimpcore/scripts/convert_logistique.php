@@ -265,6 +265,7 @@ foreach ($rows as $r) {
     }
     echo '<br/>';
 }
+
 // Traitement des réservations (id_dol_line => id_bimp_line): 
 
 $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');

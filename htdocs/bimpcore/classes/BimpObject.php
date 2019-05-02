@@ -577,9 +577,9 @@ class BimpObject extends BimpCache
 
     public function isChild($instance)
     {
-        if(is_a($instance, 'BimpFile'))
-                return true;
-        
+        if (is_a($instance, 'BimpFile'))
+            return true;
+
         if (is_a($instance, 'BimpObject')) {
             $instance_parent_module = $instance->getParentModule();
             $instance_parent_object_name = $instance->getParentObjectName();
@@ -4525,7 +4525,7 @@ class BimpObject extends BimpCache
         }
         return BimpRender::renderAlerts('Erreur de configuration: objet "' . $object_name . '" non défini');
     }
-    
+
     public function renderHeaderBtnRedir()
     {
         return $this->processRedirect(false);
@@ -4546,11 +4546,24 @@ class BimpObject extends BimpCache
 
     public function getJsLoadModalForm($form_name = 'default', $title = '', $values = array(), $success_callback = '', $on_save = '', $force_edit = 0)
     {
+        $id_parent = 0;
+        $parent_id_property = $this->getParentIdProperty();
+
+        if ($parent_id_property) {
+            if (isset($values['fields'][$parent_id_property])) {
+                $id_parent = (int) $values['fields'][$parent_id_property];
+            }
+        }
+
+        if (!$id_parent) {
+            $id_parent = (int) $this->getParentId();
+        }
+
         $data = '{';
         $data .= 'module: "' . $this->module . '", ';
         $data .= 'object_name: "' . $this->object_name . '", ';
         $data .= 'id_object: "' . ($this->isLoaded() ? $this->id : 0) . '", ';
-        $data .= 'id_parent: "' . (int) $this->getParentId() . '", ';
+        $data .= 'id_parent: "' . $id_parent . '", ';
         $data .= 'form_name: "' . $form_name . '", ';
 
         if (count($values)) {

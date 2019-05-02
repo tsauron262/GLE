@@ -173,7 +173,6 @@ forms:
             - field: note_public
             - field: note_private
             
-            
 fields_tables: 
     infos: 
         rows: 
@@ -222,6 +221,11 @@ fields_tables:
             - field: total_tva
             - field: total_ttc
         
+views: 
+    default: 
+        objects_change_reload: Bimp_FactureFournLine
+    content_infos: 
+        objects_change_reload: Bimp_FactureFournLine
 filters_panels: 
     default: 
         filters: 

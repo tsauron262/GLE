@@ -1314,7 +1314,8 @@ class BL_CommandeShipment extends BimpObject
                                     $shipments = $line->getData('shipments');
                                     $shipments[(int) $this->id] = $shipment_data;
                                     $line->set('shipments', $shipments);
-                                    $line_errors = $line->update();
+                                    $line_warnings = array();
+                                    $line_errors = $line->update($line_warnings, true);
 
                                     if (count($line_errors)) {
                                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $i . ': Echec de l\'enregistrement des données de l\'expédition');

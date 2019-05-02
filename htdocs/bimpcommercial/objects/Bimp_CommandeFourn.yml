@@ -271,6 +271,7 @@ fields_tables:
             - field: total_ttc
             
 views: 
+    objects_change_reload: Bimp_CommandeFournLine
     default: 
         rows: 
             0: 
@@ -284,6 +285,7 @@ views:
                                             name: fournisseur  
                                             
     content: 
+        objects_change_reload: Bimp_CommandeFournLine
         rows: 
             0: 
                 cols: 

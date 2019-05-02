@@ -577,7 +577,6 @@ lists_cols:
     remise_crt: 
         label: Rem. CRT
         field: remise_crt
-        edit: 1
         max_width: 50px
         min_width: 50px
     remise_pa: 

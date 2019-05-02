@@ -604,7 +604,7 @@ views:
                   view: 
                       name: content
         
-    content: 
+    content_infos: 
         rows: 
             - cols: 
                 - type: rows
@@ -638,7 +638,15 @@ views:
                   col_sm: 12
                   custom: 
                       callback: renderContentExtraRight
-                                
+                
+    content: 
+        no_reload: 1
+        rows:          
+            - cols: 
+                - type: view
+                  view: 
+                      name: content_infos
+                      panel: 0
             - cols: 
                 - type: list
                   list: 

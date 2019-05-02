@@ -1851,13 +1851,15 @@ class BimpComm extends BimpDolObject
     {
         if ($this->isLoaded()) {
             if (is_a($child, 'objectLine')) {
-                // Vérification du changement de taux de remise globale: 
-                $current_rate = (float) $this->remise_globale_line_rate;
-                $new_rate = (float) $this->getRemiseGlobaleLineRate(true);
+                if ($this->areLinesEditable()) {
+                    // Vérification du changement de taux de remise globale: 
+                    $current_rate = (float) $this->remise_globale_line_rate;
+                    $new_rate = (float) $this->getRemiseGlobaleLineRate(true);
 
-                if ($new_rate !== $current_rate) {
-                    foreach ($this->getChildrenObjects('lines') as $line) {
-                        $line->calcRemise($new_rate);
+                    if ($new_rate !== $current_rate) {
+                        foreach ($this->getChildrenObjects('lines') as $line) {
+                            $line->calcRemise($new_rate);
+                        }
                     }
                 }
             }

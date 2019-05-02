@@ -28,13 +28,8 @@ class Reservations
 
     public function get_reservations()
     {
-        global $user, $dateBegin, $dateEnd, $productCodes;
+        global $user, $productCodes;
 
-        $date = new DateTime();
-        $dateBegin = $date->format('Y-m-d');
-        $date->add(new DateInterval('P2D'));
-        $dateEnd = $date->format('Y-m-d');
-        unset($date);
 
         $user = new User($this->db);
         $user->fetch(1);
@@ -70,8 +65,15 @@ class Reservations
 
         foreach ($numbers as $n) {
             if (!empty($n['soldTo']) && !empty($n['shipTo'])) {
-                if(!$this->fetchReservationSummary($n['soldTo'], $n['shipTo']))
-                        break;
+                $date = new DateTime();
+                foreach(array(1,2,3) as $inut){
+                    $dateBegin = $date->format('Y-m-d');
+                    $date->add(new DateInterval('P2D'));
+                    $dateEnd = $date->format('Y-m-d');
+                    if(!$this->fetchReservationSummary($n['soldTo'], $n['shipTo'], $dateBegin, $dateEnd))
+                            break;
+                    $date->add(new DateInterval('P2D'));
+                }
             }
         }
         
@@ -548,9 +550,9 @@ L’équipe BIMP";
         }
     }
 
-    function fetchReservationSummary($soldTo, $shipTo)
+    function fetchReservationSummary($soldTo, $shipTo, $du, $au)
     {
-        global $tabCert, $dateBegin, $dateEnd, $productCodes;
+        global $tabCert, $productCodes;
 
         if ($this->display_debug) {
             echo '<br/><br/>FetchReservationSummary pour shipTo: ' . $shipTo . ' (soldTo: ' . $soldTo . '): <br/>';
@@ -579,7 +581,7 @@ L’équipe BIMP";
             if ($this->display_debug) {
                 echo 'Code ' . $productCode . ': <br/>';
             }
-            $data = $RS->fetch($dateBegin, $dateEnd, $productCode);
+            $data = $RS->fetch($du, $au, $productCode);
             if ($data === false) {
                 $this->logError('Echec de la récupération des réservations pour le code produit "' . $productCode . '" - ' . $RS->getLastError());
                 return 0;

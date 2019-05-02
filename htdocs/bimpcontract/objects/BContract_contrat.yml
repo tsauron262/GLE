@@ -42,7 +42,7 @@ objects:
     echeancier:
         instance:
             bimp_object: BContract_echeancier
-        
+          
 force_extrafields_update: 1
 
 table: contrat
@@ -180,10 +180,10 @@ fields_tables:
             - label: Remises client
               value: 
                   callback: displayRemisesClient
+    
+   
               
                               
-                            
-    
 lists: 
     default: 
         title: Contrat
@@ -303,12 +303,12 @@ views:
                                children: files
                                
     echeancier:
-        title: titre
+        title: Echéancier prévisionnel
         panel: 1
         rows:
             - cols:
                 - type: custom
-                  col_lg: 12
+                  col_lg: 18
                   col_md: 12
                   custom:
                       callback: renderEcheancier
@@ -322,3 +322,15 @@ views:
                 - type: list
                   list:
                       children: lines
+
+    info_echeancier:
+        object: BContract_echeancier
+        title: Informations échéancier
+        panel: 1
+        rows: 
+            - cols:
+                - type: custom
+                  col_lg: 18
+                  col_md: 12
+                  custom:
+                      callback: information_echeancier

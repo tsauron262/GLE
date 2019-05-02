@@ -78,7 +78,8 @@ require_once './bimpcore/main.php';
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
 if(BimpTools::getContext() == "public" && BimpTools::getValue("modulepart") == "bimpcore"){
     $userC = BimpObject::getInstance("bimpinterfaceclient", "BIC_UserClient");
-    $userC->init();
+    if(method_exists($userC, "init"))
+        $userC->init();
 }
 
 require_once 'main.inc.php';	// Load $user and permissions

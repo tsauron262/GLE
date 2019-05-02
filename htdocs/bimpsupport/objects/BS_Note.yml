@@ -121,6 +121,4 @@ forms:
     addClientNote:
         title: Ajouter un note au ticket support
         rows:
-            - field: visibility
-              edit: 0
             - field: content

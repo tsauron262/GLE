@@ -677,6 +677,15 @@ class BS_Ticket extends BimpObject
         
     }
     
+    public function isFieldEditable($field) {
+        
+        if($field == 'sujet') {
+            return $this->it_is_not_a_customer_requets();
+        }
+        
+        return parent::isFieldEditable($field);
+    }
+    
     public function it_is_a_customer_request() {
         return ($this->getData('id_user_client') == 0) ? 0 : 1;
     }

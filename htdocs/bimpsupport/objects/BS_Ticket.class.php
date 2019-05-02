@@ -550,6 +550,7 @@ class BS_Ticket extends BimpObject
 
     public function update(&$warnings, $force_update = false)
     {
+        global $userClient;
         if ((int) $this->getData('status') === self::BS_TICKET_CLOT) {
             $open_inters = $this->getOpenIntersArray();
             if (count($open_inters)) {
@@ -574,6 +575,12 @@ class BS_Ticket extends BimpObject
         $errors = parent::update($warnings, $force_update);
         
         if(!count($errors) && $this->getData('id_user_client') > 0) {
+            
+            if(isset($userClient)) {
+                $this->updateField('priorite', $this->getData('priorite_demande_client'));
+                $this->updateField('impact', $this->getData('impact_demande_client'));
+            }
+
             $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
             $listDest = $instance->getData('email');
             $commerciaux = BimpTools::getCommercialArray($instance->getData('attached_societe'));

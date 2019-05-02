@@ -973,13 +973,14 @@ class ObjectLine extends BimpObject
                     }
 
                     $product = $this->getProduct();
-                    $desc = $this->desc;
+                    $desc = BimpTools::cleanString($this->desc);
                     $text = '';
+
 
                     if (BimpObject::objectLoaded($product)) {
                         $text .= $this->displayLineData('id_product', 0, 'nom_url', $no_html);
 
-                        $product_label = $product->getData('label');
+                        $product_label = BimpTools::cleanString($product->getData('label'));
 
                         $desc = str_replace("  ", " ", $desc);
                         $product_label = str_replace("  ", " ", $product_label);
@@ -987,8 +988,6 @@ class ObjectLine extends BimpObject
                         if ($product_label) {
                             if (preg_match('/^' . preg_quote($product_label, '/') . '(.*)$/', $desc, $matches)) {
                                 $desc = $matches[1];
-                            } else {
-                                $desc = str_replace($product_label, '', $desc);
                             }
 
                             if (!(int) $this->getData('hide_product_label')) {

@@ -195,7 +195,7 @@ class BS_Ticket extends BimpObject
             unset($covers[1]);
         } else {
             unset($covers[2]);
-            unset($covers[3]);
+            //unset($covers[3]);
         }
 
         return $covers;

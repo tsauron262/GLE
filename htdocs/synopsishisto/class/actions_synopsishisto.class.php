@@ -92,6 +92,7 @@ class ActionsSynopsisHisto {
             }
         }
        
+//        die("finfff");
        
        
 
@@ -138,7 +139,7 @@ class histoNavigation {
             $conf->syslog->enabled = 0;
             $result = $obj->fetch($res->element_id);
             $conf->syslog->enabled = $sysLogActive;
-            if ($result > 0 && $obj->ref . "x" != "x") {
+            if ($result > 0 && $obj->id > 0) {
                 $replace = ($tabMenu[0] ? '&mainmenu=' . $tabMenu[0] : '') . ($tabMenu[1] ? '&leftmenu=' . $tabMenu[1] : '') . '">';
                 if ($res->element_type == "propal")
                     $nomUrl = str_replace('">', $replace, $obj->getNomUrl(1));
@@ -173,28 +174,32 @@ class histoNavigation {
         if (isset($element_id) && isset($element_type) && $element_type != '' && $element_id > 0) {
             $obj = self::getObj($element_type);
             if ($obj) {
-                $obj->fetch($element_id);
-                $ref = $obj->ref;
-                global $user, $db;
-                $requete = "SELECT *
-                  FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User
-                 WHERE user_refid = " . $user->id . "
-                   AND element_type = '" . $element_type . "'
-                   AND element_id = " . $element_id;
-                $sql = $db->query($requete);
-                if ($db->num_rows($sql) > 0) {
-                    $res = $db->fetch_object($sql);
-                    $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Histo_User
-                       SET tms = now(),
-                           ref = '" . addslashes($ref) . "'
-                     WHERE id = " . $res->id;
-                } else {
-                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Histo_User
-                                (`user_refid`,`element_id`,`ref`,`element_type`)
-                         VALUES (" . $user->id . "," . $element_id . ",'" . addslashes($ref) . "','" . $element_type . "')";
+                if($obj->fetch($element_id)){
+                    if(method_exists($obj, "getData"))
+                            $ref = $obj->getData("ref");
+                    else
+                        $ref = $obj->ref;
+                    global $user, $db;
+                    $requete = "SELECT *
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User
+                     WHERE user_refid = " . $user->id . "
+                       AND element_type = '" . $element_type . "'
+                       AND element_id = " . $element_id;
+                    $sql = $db->query($requete);
+                    if ($db->num_rows($sql) > 0) {
+                        $res = $db->fetch_object($sql);
+                        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Histo_User
+                           SET tms = now(),
+                               ref = '" . addslashes($ref) . "'
+                         WHERE id = " . $res->id;
+                    } else {
+                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Histo_User
+                                    (`user_refid`,`element_id`,`ref`,`element_type`)
+                             VALUES (" . $user->id . "," . $element_id . ",'" . addslashes($ref) . "','" . $element_type . "')";
+                    }
+                    $sql = $db->query($requete);
+                    return($sql);
                 }
-                $sql = $db->query($requete);
-                return($sql);
             }
         }
     }
@@ -212,7 +217,12 @@ class histoNavigation {
                 require_once DOL_DOCUMENT_ROOT . $data['path'];
                 $nomObj = $data['obj'];
                 if(class_exists($nomObj)){
-                    $obj = new $nomObj($db);
+                    if(stripos($nomObj, "bimp") !== false){
+                        $obj = BimpObject::getInstance($data['module'], $nomObj);
+                    }
+                    else{
+                        $obj = new $nomObj($db);
+                    }
                     if(!method_exists($obj, "getNomUrl")){
                         dol_syslog("Pas de methode getNomUrl dans la class ".$nomObj,3);
                         $obj = false;
@@ -232,8 +242,11 @@ class histoNavigation {
 
 
 
-        if (is_object($obj))
+        if (is_object($obj)){
             @$obj->loadObject = false;
+        }
+        else
+            dol_syslog("Pas d'objet : " . $type, 3);
         return array($obj, $tabMenu, $data);
     }
 

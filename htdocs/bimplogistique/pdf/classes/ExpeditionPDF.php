@@ -56,13 +56,16 @@ class ExpeditionPDF extends BimpEtiquettePDF
                     }
 
                     $html .= '<table>';
-                    $html .= '<tr><td style="font-size: 12px; font-weight: bold; color: #' . BimpCore::getParam('pdf/primary', '000000') . '">Commande ' . $commande->getRef() . '</td></tr>';
-                    $html .= '<tr><td style="font-size: 10px;font-weight: bold">Livraison n°' . $this->object->getData('num_livraison') . '</td></tr>';
+                    $html .= '<tr>';
+                    $html .= '<td width="175px" style="font-size: 12px; font-weight: bold; color: #' . BimpCore::getParam('pdf/primary', '000000') . '">Commande ' . $commande->getRef().'</td>';
+                    $html .= '<td width="55px" style="text-align: right; color: #000000; font-weight: bold"> etiquette_number / '.$this->qty_etiquettes.'</td>';
+                    $html .= '</tr>';
+                    $html .= '<tr><td colspan="2" style="font-size: 10px;font-weight: bold">Livraison n°' . $this->object->getData('num_livraison') . '</td></tr>';
                     if (BimpObject::objectLoaded($commercial)) {
-                        $html .= '<tr><td style="font-size: 9px;">Commercial: ' . $commercial->getName() . '</td></tr>';
+                        $html .= '<tr><td  colspan="2" style="font-size: 9px;">Commercial: ' . $commercial->getName() . '</td></tr>';
                     }
                     $html .= '<tr>';
-                    $html .= '<td>';
+                    $html .= '<td colspan="2">';
                     $html .= '<div style="text-align: center;font-size: 8px">';
                     $html .= '<br/><span style="font-size: 9px">Client:</span><br/>';
                     $html .= '<span style="font-size: 10px; font-weight: bold">' . $client->getName() . '</span>';
@@ -74,11 +77,11 @@ class ExpeditionPDF extends BimpEtiquettePDF
             }
         }
 
-        $this->writeContent($html);
+        $this->writeContent(str_replace('etiquette_number', 1, $html));
 
-        for ($i = 1; $i < $this->qty_etiquettes; $i++) {
+        for ($i = 2; $i <= $this->qty_etiquettes; $i++) {
             $this->pdf->newPage();
-            $this->writeContent($html);
+            $this->writeContent(str_replace('etiquette_number', $i, $html));
         }
     }
 }

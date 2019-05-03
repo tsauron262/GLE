@@ -162,16 +162,16 @@ fields:
         label: Fermée le
         type: datetime
         
-    fk_user_modif: 
-        label: Dernière modification par
-        type: int
+#    fk_user_modif: 
+#        label: Dernière modification par
+#        type: int
         
     fk_user_valid: 
         dol_prop: user_valid
         
-    fk_user_cloture: 
-        label: Fermée par
-        type: int
+#    fk_user_cloture: 
+#        label: Fermée par
+#        type: int
         
     date_livraison: 
         label: Date prévue de livraison

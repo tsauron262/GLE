@@ -10,6 +10,7 @@ $langs->load('errors');
 class Bimp_Facture extends BimpComm
 {
 
+    public $redirectMode = 4;//5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'facture';
     public static $status_list = array(
         0 => array('label' => 'Brouillon', 'icon' => 'fas_file-alt', 'classes' => array('warning')),

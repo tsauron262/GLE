@@ -311,6 +311,8 @@ filters_panels:
             libelle: unset
             secteur: unset
             ref_client: unset
+            remise_globale: unset
+            remise_globale_label: unset
             
 lists_cols: 
     ref_supplier: 

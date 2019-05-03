@@ -627,3 +627,7 @@ lists:
             soc:
             date_create: 
             total_ttc:
+    client: 
+        extends: default
+        cols: 
+            client: unset

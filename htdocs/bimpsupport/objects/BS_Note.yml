@@ -97,8 +97,6 @@ lists:
                 field: content
                 edit: 1
                 min_width: 40%
-                edit: 
-                    callback: is_a_note_of_client
             id_user_client:
                 field: id_user_client
         add_object_row: 1
@@ -122,6 +120,6 @@ lists:
     
 forms:
     addClientNote:
-        title: Ajouter un note au ticket support
+        title: Ajouter une note au ticket support
         rows:
             - field: content

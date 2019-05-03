@@ -29,3 +29,9 @@ sections:
                 url_params: 
                     id: 
                         request: id
+            logistic: 
+                label: Prepa/Commande
+                url: ../Synopsis_PrepaCommande/prepacommande.php?
+                url_params: 
+                    id: 
+                        request: id

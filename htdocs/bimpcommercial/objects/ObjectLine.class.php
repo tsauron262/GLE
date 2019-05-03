@@ -964,6 +964,7 @@ class ObjectLine extends BimpObject
                     break;
 
                 case 'desc':
+                case 'desc_light':
                     if ((int) $this->getData('id_parent_line')) {
                         if (!$no_html) {
                             $html .= '<span style="display: inline-block; margin: 0 0 5px 15px; height: 100%; border-left: 3px solid #787878;"></span>';
@@ -1021,7 +1022,7 @@ class ObjectLine extends BimpObject
                         }
                     }
 
-                    if ($desc) {
+                    if ($field !== 'desc_light' && $desc) {
                         $text .= ($text ? '<br/>' : '') . (string) $desc;
                     }
 

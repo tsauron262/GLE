@@ -13,7 +13,8 @@ class commandeController extends BimpController
 //        $head = commande_prepare_head($commande->dol_object);
 //        dol_fiche_head($head, 'bimplogisitquecommande', $langs->trans("CustomerOrder"), -1, 'order');
 //    }
-    
+   
+   
     public function renderContentHtml()
     {
         if (!BimpTools::isSubmit('id')) {
@@ -99,12 +100,6 @@ class commandeController extends BimpController
         $html = '';
         $html .= '<div class="row">';
         $html .= '<div class="col-lg-12">';
-
-        if ((int) $commande->getData('id_facture')) {
-            $html .= '<div class="buttonsContainer align-right">';
-            $html .= $this->renderGlobalFactureButton($commande);
-            $html .= '</div>';
-        }
 
         $shipment = BimpObject::getInstance('bimplogistique', 'BL_CommandeShipment');
         $list = new BC_ListTable($shipment, 'commandes', 1, (int) $commande->id, 'Liste des expéditions', 'fas_shipping-fast');

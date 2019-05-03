@@ -61,6 +61,14 @@ objects:
                 module: bimplogistique
                 name: BL_CommandeShipment
                 
+    old_shipments: 
+        relation: hasMany
+        delete: 1
+        instance: 
+            bimp_object: 
+                module: bimpreservation
+                name: BR_CommandeShipment
+                
     shipments: 
         relation: hasMany
         delete: 1

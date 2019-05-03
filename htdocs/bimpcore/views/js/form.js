@@ -2080,6 +2080,11 @@ function setInputsEvents($container) {
                     checkInputAutoExpand(this);
                 }
             });
+            $(this).change(function() {
+                var val = $(this).val();
+                val = val.replace("\t", "\n");
+                $(this).val(val);
+            });
             $(this).data('tab_key_as_enter_event_init', 1);
         }
     });

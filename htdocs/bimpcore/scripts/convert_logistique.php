@@ -3,10 +3,10 @@
 define('NOLOGIN', '1');
 
 require_once("../../main.inc.php");
-
-ini_set('display_errors', 1);
 require_once __DIR__ . '/../Bimp_Lib.php';
 
+ini_set('display_errors', 1);
+set_time_limit(1200);
 //llxHeader();
 
 echo '<!DOCTYPE html>';
@@ -23,11 +23,19 @@ global $db;
 $bdb = new BimpDb($db);
 $factures_set = array();
 
+$full = BimpTools::getValue('full', 0);
+$id_commande = (int) BimpTools::getValue('id_commande', 0);
+
 // Traitement des lignes d'expédition (réservations): 
 
-$rows = $bdb->getRows('br_reservation_shipment', '`converted` = 0', null, 'array', null, 'id', 'asc');
+$where = '`converted` = 0';
 
-$full = BimpTools::getValue('full', 0);
+if ($id_commande) {
+    $filters['id_commande_client'] = $id_commande;
+    $where .= ' AND `id_commande_client` = ' . $id_commande;
+}
+
+$rows = $bdb->getRows('br_reservation_shipment', $where, null, 'array', null, 'id', 'asc');
 
 foreach ($rows as $r) {
     echo 'Traitement reservation_shipment ' . $r['id'] . ': ';
@@ -156,7 +164,14 @@ foreach ($rows as $r) {
 
 // Traitement des lignes d'expédition (services) 
 
-$rows = $bdb->getRows('br_service_shipment', '`converted` = 0', null, 'array');
+$where = '`converted` = 0';
+
+if ($id_commande) {
+    $filters['id_commande_client'] = $id_commande;
+    $where .= ' AND `id_commande_client` = ' . $id_commande;
+}
+
+$rows = $bdb->getRows('br_service_shipment', $where, null, 'array');
 
 foreach ($rows as $r) {
     echo 'Traitement service_shipment ' . $r['id'] . ': ';
@@ -284,18 +299,23 @@ foreach ($rows as $r) {
 
 $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
 
-$rows = $reservation->getList(array(
-    'id_commande_client'        => array(
-        'operator' => '>',
-        'value'    => 0
-    ),
+$filters = array(
     'id_commande_client_line'   => array(
         'operator' => '>',
         'value'    => 0
     ),
     'commande_client_converted' => 0
-        ), null, null, 'id', 'asc', 'array');
+);
 
+if ($id_commande) {
+    $filters['id_commande_client'] = $id_commande;
+} else {
+    $filters['id_commande_client'] = array(
+        'operator' => '>',
+        'value'    => 0
+    );
+}
+$rows = $reservation->getList($filters, null, null, 'id', 'asc', 'array');
 
 foreach ($rows as $r) {
     echo 'Traitement BR_Reservation ' . $r['id'] . ': ';
@@ -347,34 +367,54 @@ foreach ($rows as $r) {
     echo '<br/>';
 }
 
-// Traitements commandes: 
+// Traitement factures globales: 
 
 $commande = BimpObject::getInstance('bimpcommercial', 'Bimp_Commande');
 
-$list = $commande->getListObjects(array(
-    'id_facture'        => array(
-        'operator' => '>',
-        'value'    => 0
-    ),
+$filters = array(
     'facture_converted' => 0
-        ));
+);
+
+if ($id_commande) {
+    $filters['rowid'] = $id_commande;
+}
+
+$list = $commande->getListObjects($filters);
 
 foreach ($list as $commande) {
-    // Traitement id_user_resp. 
+    $lines = $commande->getLines('not_text');
 
-    if ((int) $commande->getData('fk_statut') > 0) {
-        if (!(int) $commande->getData('id_user_resp')) {
-            $up_errors = $commande->updateField('id_user_resp', (int) $commande->getData('fk_user_valid'));
-            if (count($up_errors)) {
-                echo 'Commmande ' . $commande->id . ': ECHEC MAJ ID USER RESP: <br/>';
-                echo BimpRender::renderAlerts($up_errors);
+    $id_facture = (int) $commande->getData('id_facture');
+
+    if (!$id_facture) {
+        // Recherche facture liée non enregistrée dans id_facture: 
+        $linked_objects = BimpTools::getDolObjectLinkedObjectsList($commande->dol_object, $bdb);
+
+        foreach ($linked_objects as $object) {
+            if ($object['type'] === 'facture') {
+                $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $object['id_object']);
+                if (BimpObject::objectLoaded($facture)) {
+                    if ((int) $facture->getData('type') === 0) {
+                        $id_facture = $object['id_object'];
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ($id_facture) {
+            $shipments = $commande->getChildrenObjects('old_shipments');
+            foreach ($shipments as $br_shipment) {
+                if ((int) $br_shipment->getData('id_facture')) {
+                    continue 2;
+                }
             }
         }
     }
 
-    // Traitement facture globale: 
-    $lines = $commande->getLines('not_text');
-    $id_facture = (int) $commande->getData('id_facture');
+    if (!$id_facture) {
+        continue;
+    }
 
     if (!in_array($id_facture, $factures_set)) {
         $asso = new BimpAssociation($commande, 'factures');
@@ -437,6 +477,84 @@ foreach ($list as $commande) {
     }
 }
 
+// Traitements id_user_resp / statut logistique:
+
+$filters = array(
+    'fk_statut' => array(
+        'operator' => '>',
+        'value'    => 0
+    )
+);
+
+if ($id_commande) {
+    $filters['rowid'] = $id_commande;
+}
+
+$list = $commande->getListObjects($filters);
+
+foreach ($list as $commande) {
+    if (!(int) $commande->getData('id_user_resp')) {
+        $up_errors = $commande->updateField('id_user_resp', (int) $commande->getData('fk_user_valid'));
+        if (count($up_errors)) {
+            echo 'Commmande ' . $commande->id . ': ECHEC MAJ ID USER RESP: <br/>';
+            echo BimpRender::renderAlerts($up_errors);
+        }
+    }
+
+    if (!(int) $commande->getData('logistique_status')) {
+        $up_errors = $commande->updateField('logistique_status', 1);
+        if (count($up_errors)) {
+            echo 'Commmande ' . $commande->id . ': ECHEC MAJ STATUT LOGISTIQUE: <br/>';
+            echo BimpRender::renderAlerts($up_errors);
+        }
+    }
+
+    if (!$full) {
+        break;
+    }
+}
+
+//  Cheks Statuts commandes: 
+
+$filters = array(
+    'fk_statut' => array(
+        'operator' => '>',
+        'value'    => 0
+    )
+);
+
+if ($id_commande) {
+    $filters['rowid'] = $id_commande;
+}
+
+$list = $commande->getListObjects($filters);
+
+foreach ($list as $commande) {
+    $commande->checkLogistiqueStatus();
+    $commande->checkShipmentStatus();
+    $commande->checkInvoiceStatus();
+
+    if (!$full) {
+        break;
+    }
+}
+
+// Checks statuts commandes fourn: 
+
+if (!$id_commande) {
+    $commande_fourn = BimpObject::getInstance('bimpcommercial', 'Bimp_CommandeFourn');
+
+    $list = $commande_fourn->getListObjects($filters);
+
+    foreach ($list as $commande) {
+        $commande->checkReceptionStatus();
+        $commande->checkInvoiceStatus();
+
+        if (!$full) {
+            break;
+        }
+    }
+}
 
 echo '</body></html>';
 

@@ -1508,8 +1508,7 @@ class Bimp_Commande extends BimpComm
                 }
 
                 if ($new_status !== (int) $this->getInitData('logistique_status')) {
-                    $this->set('logistique_status', $new_status);
-                    $this->update();
+                    $this->updateField('logistique_status', $new_status);
                 }
             }
         }

@@ -515,12 +515,15 @@ class Bimp_Commande extends BimpComm
                 $html .= '</div>';
             }
 
-            if ($status >= 3 && (int) $this->getData('fk_user_cloture')) {
-                $html .= '<div class="object_header_infos">';
-                $html .= 'Fermée le ' . $this->displayData('date_cloture');
-                $user->fetch((int) $this->getData('fk_user_cloture'));
-                $html .= ' par ' . $user->getNomUrl(1);
-                $html .= '</div>';
+            if ($status >= 3) {
+                $id_user_cloture = (int) $this->db->getValue($this->getTable(), 'fk_user_cloture', '`rowid` = ' . (int) $this->id);
+                if ($id_user_cloture) {
+                    $user->fetch($id_user_cloture);
+                    $html .= '<div class="object_header_infos">';
+                    $html .= 'Fermée le ' . $this->displayData('date_cloture');
+                    $html .= ' par ' . $user->getNomUrl(1);
+                    $html .= '</div>';
+                }
             }
 
             if ((int) $this->getData('id_user_resp')) {

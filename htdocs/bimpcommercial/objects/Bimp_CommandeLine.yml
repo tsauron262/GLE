@@ -205,6 +205,11 @@ lists:
         title: Logistique produits / services
         icon: fas_truck-loading
         configurable: 0
+        list_filters: 
+            - name: type
+              filter: 
+                  operator: <>
+                  value: 2
         item_checkbox: 
             callback: isNotTypeText
         after_list_content: unset
@@ -217,6 +222,11 @@ lists:
             callback: renderLogistiqueListFooterExtraContent
         cols: 
             desc:
+                value: 
+                    callback: 
+                        method: displayLineData
+                        params:
+                           - desc_light
             pu_ht: unset
             tva: unset
             pa_ht: unset

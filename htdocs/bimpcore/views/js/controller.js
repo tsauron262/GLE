@@ -1,11 +1,21 @@
 function loadTabContent(url, tab_name) {
     var $container = $('#controllerTabContentContainer');
     var $tabs = $('.tabs');
+    if (!$.isOk($tabs)) {
+        return;
+    }
+    
+    var $tab = $tabs.find('#'+tab_name);
+    
+    if (!$.isOk($yab)) {
+        return;
+    }
+
     $tabs.find('.tabactive').each(function () {
         $(this).removeClass('tabactive').addClass('tabunactive');
     });
 
-    $tabs.find('#' + tab_name).removeClass('tabunactive').addClass('tabactive');
+    $tab.removeClass('tabunactive').addClass('tabactive');
 
     if ($container.length) {
         $container.fadeOut(250, function () {

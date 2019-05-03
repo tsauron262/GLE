@@ -34,6 +34,12 @@
  */
 
 require '../../main.inc.php';
+
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_Facture", $_REQUEST['id']);
+$htmlRedirect = $bObj->processRedirect();
+
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
@@ -360,6 +366,7 @@ $formcompany=new FormCompany($db);
 $thirdpartystatic=new Societe($db);
 
 llxHeader('',$langs->trans('CustomersInvoices'),'EN:Customers_Invoices|FR:Factures_Clients|ES:Facturas_a_clientes');
+echo $htmlRedirect;
 
 $sql = 'SELECT';
 if ($sall || $search_product_category > 0) $sql = 'SELECT DISTINCT';

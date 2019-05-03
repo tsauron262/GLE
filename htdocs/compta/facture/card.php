@@ -36,6 +36,11 @@
  */
 
 require '../../main.inc.php';
+
+require_once DOL_DOCUMENT_ROOT.'/bimpcore/Bimp_Lib.php';
+$bObj = BimpObject::getInstance("bimpcommercial", "Bimp_Facture", ($_REQUEST['facid'] > 0? $_REQUEST['facid'] : $_REQUEST['id']));
+$htmlRedirect = $bObj->processRedirect();
+
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/facture/class/facture-rec.class.php';
 require_once DOL_DOCUMENT_ROOT . '/compta/bank/class/account.class.php';
@@ -2639,6 +2644,7 @@ $now = dol_now();
 $title = $langs->trans('InvoiceCustomer') . " - " . $langs->trans('Card');
 $helpurl = "EN:Customers_Invoices|FR:Factures_Clients|ES:Facturas_a_clientes";
 llxHeader('', $title, $helpurl);
+echo $htmlRedirect;
 
 
 // Mode creation

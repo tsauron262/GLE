@@ -58,7 +58,7 @@ class BIC_UserClientContrats extends BimpObject {
         $id_user = BimpTools::getValue('id_user');
         if ($this->getList(array('id_contrat' => $id_contrat))) {
             if($this->getList(array('id_user' => $id_user))){
-                return 'Ce contrat est déjà associer à cette utilisateur';
+                return 'Ce contrat est déjà associé à cet utilisateur';
             }
         } else {
             parent::create($warnings, $force_create);

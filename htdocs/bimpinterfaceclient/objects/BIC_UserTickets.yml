@@ -19,7 +19,7 @@ objects:
             id_object:
                 field_value: id_client
                 
-    note:
+    notes:
         instance:
             bimp_object:
                 module: bimpsupport
@@ -42,19 +42,20 @@ fields:
         label: Pour la société
         type: id_object
         object: societe
-        
-    sujet:
-        label: Sujet
-        type: text
-        require: 1
     
     id_user_client:
         label: Demandeur
         type: id_object
         object: userClient
+        
+    priorite_demande_client:
+        label: Priorité
+        values:
+            array: priorities
     
-    sujet:
-        type: html
+    impact_demande_client:
+        label: Impact
+    
 lists:
     interface_client:
         title: Tickets support
@@ -92,6 +93,7 @@ lists:
             status:
             priorite_demande_client:
                 field: priorite_demande_client
+                
             date_create:
             id_user_client:
                 field: id_user_client
@@ -139,7 +141,7 @@ forms:
             
     addUserTicket:
         msgs:
-            - content: Ne pas mettre d'informations confidentielles dans le champ sujet
+            - content: Ne pas mettre d'informations confidentielles dans le sujet du ticket
               type: info
         rows:
             - field: id_client
@@ -155,7 +157,7 @@ forms:
               required: 1
             - field: priorite
             - field: impact
-            - object: note
+            - object: notes
               form_name: addClientNote
               multiple: 1
             - object: files

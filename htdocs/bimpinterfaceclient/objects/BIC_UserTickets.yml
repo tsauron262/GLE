@@ -50,8 +50,6 @@ fields:
         
     priorite_demande_client:
         label: Priorité
-        values:
-            array: priorities
     
     impact_demande_client:
         label: Impact

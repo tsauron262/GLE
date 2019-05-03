@@ -159,9 +159,10 @@ forms:
                 input_name: pu_ht
                 content: 
                     callback: 
-                        method: renderLineInput
+                        method: displayLineData
                         params: 
                             - pu_ht
+                            - 1
                 display_if: 
                     field_name: type
                     show_values: 1

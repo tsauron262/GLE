@@ -195,7 +195,7 @@ class BS_Ticket extends BimpObject
             unset($covers[1]);
         } else {
             unset($covers[2]);
-            unset($covers[3]);
+            //unset($covers[3]);
         }
 
         return $covers;
@@ -236,13 +236,10 @@ class BS_Ticket extends BimpObject
         global $user, $userClient;
         if($this->getData('id_user_client') > 0){
             $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
-            $listDest = $instance->getData('email');
-            $listDest .= $instance->get_dest('admin');
-            $commerciaux = BimpTools::getCommercialArray($instance->getData('attached_societe'));
-            foreach ($commerciaux as $id_commercial) {
-                $listDest .= ', ' . $id_commercial->email;
-            }
-            mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), $listDest, 'noreply@bimp.fr', "Votre ticket numéro ".$this->getData('ticket_number')." à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
+            $liste_destinataires = Array($instance->getData('email'));
+            $liste_destinataires = array_merge($liste_destinataires, $instance->get_dest('admin'));
+            $liste_destinataires = array_merge($liste_destinataires, $instance->get_dest('commerciaux'));
+            mailSyn2("BIMP CLIENT : Prise en compte du ticket : " . $this->getData('ticket_number'), implode(', ', $liste_destinataires), 'noreply@bimp.fr', "Votre ticket numéro ".$this->getData('ticket_number')." à été pris en compte par nos équipes<br /> Responssable de votre demande : " . $user->firstname . ' ' . $user->lastname);
         }
         $this->updateField('id_user_resp', $user->id);
         $this->updateField('status', self::BS_TICKET_EN_COURS);
@@ -550,6 +547,7 @@ class BS_Ticket extends BimpObject
 
     public function update(&$warnings, $force_update = false)
     {
+        global $userClient;
         if ((int) $this->getData('status') === self::BS_TICKET_CLOT) {
             $open_inters = $this->getOpenIntersArray();
             if (count($open_inters)) {
@@ -574,6 +572,12 @@ class BS_Ticket extends BimpObject
         $errors = parent::update($warnings, $force_update);
         
         if(!count($errors) && $this->getData('id_user_client') > 0) {
+            
+            if(isset($userClient)) {
+                $this->updateField('priorite', $this->getData('priorite_demande_client'));
+                $this->updateField('impact', $this->getData('impact_demande_client'));
+            }
+
             $instance = BimpObject::getInstance('bimpinterfaceclient', 'BIC_UserClient', $this->getData('id_user_client'));
             $listDest = $instance->getData('email');
             $commerciaux = BimpTools::getCommercialArray($instance->getData('attached_societe'));

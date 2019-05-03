@@ -95,17 +95,39 @@ class BS_Note extends BimpObject
     }
     
     public function create(&$warnings = array(), $force_create = false) {
-        parent::create($warnings, $force_create);
-        if(BimpTools::getContext() == 'public') {
-            global $userClient;
-            $this->updateField('id_user_client', $userClient->id);
-            $this->updateField('visibility', 1);
-            
-            $parent = $this->getParentInstance();
-            
-            if($parent->getData('status') != $parent::BS_TICKET_DEMANDE_CLIENT && $parent->getData('status') != $parent::BS_TICKET_CLOT) {
+        global $userClient;
+        $parent = $this->getParentInstance();
+        $errors = parent::create($warnings, $force_create);
+        
+        if(!$errors){
+            if(BimpTools::getContext() == 'public') {
+                $this->updateField('id_user_client', $userClient->id);
+                $this->updateField('visibility', 1);
                 
             }
+        
+            if($parent->getData('status') != $parent::BS_TICKET_DEMANDE_CLIENT && $parent->getData('status') != $parent::BS_TICKET_CLOT && $this->getData('visibility') == 1) {
+                if($parent->getData('id_user_client') > 0) {
+                    if(isset($userClient)) {
+                        $client = $userClient;
+                    } else {
+                        $client = $this->getInstance('bimpinterfaceclient', 'BIC_UserClient', $parent->getData('id_user_client'));
+                    }
+                    $liste_destinataires = Array($client->getData('email'));
+                    $liste_destinataires = array_merge($liste_destinataires, $client->get_dest('admin'));
+                    $liste_destinataires = array_merge($liste_destinataires, $client->get_dest('commerciaux'));
+                    
+                    mailSyn2('BIMP-CLIENT : Note sur votre ticket', implode(', ', $liste_destinataires), 'noreply@bimp.fr', 'Une note à été créer sur votre ticket support : ' . $parent->getData('ticket_number'));
+                    
+                }
+            }
         }
+        
+    }
+    
+    public function is_a_note_of_client() {
+        if($this->getData('id_user_client') > 0) return 0;
+        
+        return 1;
     }
 }

@@ -220,7 +220,7 @@ fields:
             callback: it_is_a_customer_request
   
     priorite_demande_client:
-        label: Prioritée lors de la demande client
+        label: Priorité lors de la demande client
         type: int
         values:
             array: priorities
@@ -263,6 +263,7 @@ fields:
     sujet:
         label: Sujet ticket
         type: html
+        required: 1
         
 forms: 
     default:
@@ -397,8 +398,7 @@ fields_tables:
             - field: impact
               edit: 1
             - field: cover
-              edit: 
-                  callback: it_is_not_a_customer_requets
+              edit: 1
             - field: status
               edit:
                   callback: it_is_pris_en_charge

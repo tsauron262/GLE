@@ -68,6 +68,12 @@ function getTabTypeObject($typeFiltre = null) {
             'path' => '/bimpsupport/objects/BS_SAV.class.php'),
         'Equipment' => array('urls' => array("bimpequipment/index.php?fc=equipment"),
             'path' => '/bimpequipment/objects/Equipment.class.php'),
+        'Bimp_Propal' => array('urls' => array("bimpcommercial/index.php?fc=propal"),
+            'module' => 'bimpcommercial'),
+        'Bimp_Commande' => array('urls' => array("bimpcommercial/index.php?fc=commande"),
+            'module' => 'bimpcommercial'),
+        'Bimp_Facture' => array('urls' => array("bimpcommercial/index.php?fc=factures"),
+            'module' => 'bimpcommercial'),
     );
 
     $tabTypeObject2 = array();
@@ -78,8 +84,12 @@ function getTabTypeObject($typeFiltre = null) {
             if (!isset($data['obj']))
                 $data['obj'] = ucfirst($typeT);
 
-            if (!isset($data['path']))
-                $data['path'] = "/" . $data['type'] . "/class/" . strtolower($data['obj']) . ".class.php";
+            if (!isset($data['path'])){
+                if(stripos($data['obj'], "bimp") !== false && isset($data['module']))
+                     $data['path'] = $data['module']."/objects/".$data['obj'].".class.php";
+                else
+                    $data['path'] = "/" . $data['type'] . "/class/" . strtolower($data['obj']) . ".class.php";
+            }
             if (!is_file(DOL_DOCUMENT_ROOT . $data['path'])) {
                 $data['path1'] = $data['path'];
                 $data['path'] = "/core/class/" . $data['obj'] . ".class.php";

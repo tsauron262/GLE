@@ -91,11 +91,14 @@ lists:
                 label: Visibilité
                 field: visibility
                 edit: 1
+                default_value: 1
             contenu:
                 label: Contenu
                 field: content
                 edit: 1
                 min_width: 40%
+                edit: 
+                    callback: is_a_note_of_client
             id_user_client:
                 field: id_user_client
         add_object_row: 1

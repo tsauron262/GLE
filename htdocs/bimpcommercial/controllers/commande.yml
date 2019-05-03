@@ -31,7 +31,7 @@ sections:
                         request: id
             logistic: 
                 label: Prepa/Commande
-                url: ../Synopsis_PrepaCommande/prepacommande.php?
+                url: ../Synopsis_PrepaCommande/prepacommande.php?new=1
                 url_params: 
                     id: 
                         request: id

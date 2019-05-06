@@ -52,7 +52,7 @@ class BIC_UserClient extends BimpObject {
         }
 
         if ($this->getData('renew_required')) {
-            $extra .= '&nbsp;&nbsp;<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Doit changer sont mot de passe</span>';
+            $extra .= '&nbsp;&nbsp;<span class="danger">' . BimpRender::renderIcon('fas_times', 'iconLeft') . 'Doit changer son mot de passe</span>';
         }
         return $extra;
     }
@@ -77,7 +77,7 @@ class BIC_UserClient extends BimpObject {
 
             if ($this->getData('role') == self::USER_CLIENT_ROLE_USER) {
                 $buttons[] = array(
-                    'label' => 'Mettre administrateur',
+                    'label' => 'Passer en administrateur',
                     'icon' => 'fas_cog',
                     'onclick' => $this->getJsActionOnclick('switchAdmin', array(), array(
                         'success_callback' => $callback
@@ -85,7 +85,7 @@ class BIC_UserClient extends BimpObject {
                 );
             } elseif ($this->getData('role') == self::USER_CLIENT_ROLE_ADMIN) {
                 $buttons[] = array(
-                    'label' => 'Mettre utilisateur',
+                    'label' => 'Passer en utilisateur',
                     'icon' => 'fas_user',
                     'onclick' => $this->getJsActionOnclick('switchUser', array(), array(
                         'success_callback' => $callback
@@ -116,12 +116,12 @@ class BIC_UserClient extends BimpObject {
 
     public function actionSwitchUser($data, &$success) {
         $this->updateField('role', self::USER_CLIENT_ROLE_USER);
-        $success = "Changer au statut utilisateur avec succes";
+        $success = "Passé au statut utilisateur avec succes";
     }
 
     public function actionSwitchAdmin($data, &$success) {
         $this->updateField('role', self::USER_CLIENT_ROLE_ADMIN);
-        $success = "Changer au statut administrateur avec succes";
+        $success = "Passé au statut administrateur avec succes";
     }
 
     public function it_is_admin() {
@@ -189,7 +189,7 @@ class BIC_UserClient extends BimpObject {
         if ($resql = $db->fetch_object($sql)) {
             $this->fetch($resql->id);
         } else {
-            echo BimpRender::renderAlerts("Utilisateur Non trouvé dans nos bases", 'danger', false);
+            echo BimpRender::renderAlerts("Utilisateur non trouvé dans nos bases", 'danger', false);
         }
     }
 
@@ -218,7 +218,7 @@ class BIC_UserClient extends BimpObject {
             $user->fetch(null, $this->loginUser);
             $user->getrights();
             if ($user->id < 1)
-                die('Attention ' . $this->loginUser . ' user existe pas');
+                die('Attention ' . $this->loginUser . ' n\'existe pas');
         }
         $this->init = true;
     }
@@ -284,14 +284,14 @@ class BIC_UserClient extends BimpObject {
 
     public function change_password($post) {
         $this->updateField('password', hash('sha256', $post));
-        mailSyn2('Changement de votre mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer, si vous n'êtes pas à l'origine de cette actions veuillez contacter votre administrateur");
+        mailSyn2('Changement de votre mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe a été changé, si vous n'êtes pas à l'origine de cette action veuillez contacter votre administrateur");
         $this->updateField('renew_required', 0);
     }
 
     public function actionReinit_password($data, &$success) {
         $passwords = $this->generatePassword();
         $this->updateField('renew_required', 1);
-        mailSyn2('Changement de mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe à été changer par votre administrateur <br /> Votre nouveau mot de passe est : $passwords->clear");
+        mailSyn2('Changement de mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe a été changé par votre administrateur <br /> Votre nouveau mot de passe est : $passwords->clear");
         $this->updateField('password', $passwords->sha256);
         $success = 'Mot de passe réinitialisé';
         return array(
@@ -339,7 +339,7 @@ class BIC_UserClient extends BimpObject {
             $this->updateField('renew_required', 1);
             if ($this->use_email && BimpTools::getValue('send_mail')) {
                 $sujet = "Mot de passe BIMP ERP Interface Client";
-                $message = 'Bonjour,<br /> Voici votre accès pour votre espace client <br />'
+                $message = 'Bonjour,<br /> Voici votre accès à votre espace client <br />'
                         . '<a href="'.$_SERVER['SERVER_NAME']. DOL_URL_ROOT . '/bimpinterfaceclient/client.php">Espace client BIMP ERP</a><br />Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
                 mailSyn2($sujet, $this->getData('email'), 'noreply@bimp.fr', $message);
             }

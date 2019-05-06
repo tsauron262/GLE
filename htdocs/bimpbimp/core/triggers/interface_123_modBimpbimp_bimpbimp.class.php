@@ -37,8 +37,7 @@ class InterfaceBimpbimp extends DolibarrTriggers {
             if($object->job != "")
                 $msg .= "<br/>en tant que ".$object->job;
             
-            die($msg);
-            mailSyn2("Nouveau Collaborateur", "tommy@bimp.fr", "admin@bimp.fr", $msg);
+            mailSyn2("Nouveau Collaborateur", "go@bimp.fr", "admin@bimp.fr", $msg);
         }
     }
 

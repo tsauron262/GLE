@@ -2083,7 +2083,7 @@ class Societe extends CommonObject
 
                 /*mod drsi*/
                 if($this->id > 0){
-                    $sql = $this->db->query("SELECT * FROM `llx_societe_commerciaux` WHERE `fk_soc` = ".$this->id);
+                    $sql = $this->db->query("SELECT * FROM `".MAIN_DB_PREFIX."societe_commerciaux` WHERE `fk_soc` = ".$this->id);
                     while($ln = $this->db->fetch_object($sql)){
                         $userT = new User($this->db);
                         $userT->fetch($ln->fk_user);

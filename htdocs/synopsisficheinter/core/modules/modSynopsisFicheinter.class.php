@@ -623,10 +623,10 @@ class modSynopsisFicheinter extends DolibarrModules {
         $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."synopsis_fichinter;";
         $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."synopsis_fichinter;";
         $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."synopsis_fichinterdet;";
-        $sql[] = "CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
+        $sql[] = "CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW 
 ". MAIN_DB_PREFIX ."synopsis_fichinter as (SELECT f.`rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `fk_commande`, `ref`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, `total_ht`, `total_tva`, `total_ttc`, `natureInter`, `entity` 
 FROM ".MAIN_DB_PREFIX."fichinter f left join ".MAIN_DB_PREFIX."synopsisfichinter sf on f.rowid = sf.rowid);";
-        $sql[] = "CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW ".MAIN_DB_PREFIX."synopsis_fichinterdet as (SELECT f.`rowid`, `fk_fichinter`, `date`, `description`, `duree`, `rang`, `fk_typeinterv`, `fk_depProduct`, `tx_tva`, `pu_ht`, `qte`, `total_ht`, `total_tva`, `total_ttc`, `fk_contratdet`, `fk_commandedet`, `isForfait` 
+        $sql[] = "CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW ".MAIN_DB_PREFIX."synopsis_fichinterdet as (SELECT f.`rowid`, `fk_fichinter`, `date`, `description`, `duree`, `rang`, `fk_typeinterv`, `fk_depProduct`, `tx_tva`, `pu_ht`, `qte`, `total_ht`, `total_tva`, `total_ttc`, `fk_contratdet`, `fk_commandedet`, `isForfait` 
 FROM ". MAIN_DB_PREFIX ."fichinterdet f  left join ".MAIN_DB_PREFIX."synopsisfichinterdet sf on f.rowid = sf.rowid);";
         
 //        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."fichinterdet;";

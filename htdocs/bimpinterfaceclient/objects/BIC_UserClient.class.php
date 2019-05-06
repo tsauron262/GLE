@@ -141,7 +141,7 @@ class BIC_UserClient extends BimpObject {
         $mot_de_passe = $this->generatePassword();
         $this->updateField('password', $mot_de_passe->sha256);
         $this->updateField('renew_required', 1);
-        mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'), 'noreply@bimp.fr', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
+        mailSyn2('Mot de passe BIMP ERP Interface Client', $this->getData('email'), '', 'Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear);
     }
 
     public function displayEmail() {
@@ -284,14 +284,14 @@ class BIC_UserClient extends BimpObject {
 
     public function change_password($post) {
         $this->updateField('password', hash('sha256', $post));
-        mailSyn2('Changement de votre mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe a été changé, si vous n'êtes pas à l'origine de cette action veuillez contacter votre administrateur");
+        mailSyn2('Changement de votre mot de passe', $this->getData('email'), '', "Votre mot de passe a été changé, si vous n'êtes pas à l'origine de cette action veuillez contacter votre administrateur");
         $this->updateField('renew_required', 0);
     }
 
     public function actionReinit_password($data, &$success) {
         $passwords = $this->generatePassword();
         $this->updateField('renew_required', 1);
-        mailSyn2('Changement de mot de passe', $this->getData('email'), 'noreply@bimp.fr', "Votre mot de passe a été changé par votre administrateur <br /> Votre nouveau mot de passe est : $passwords->clear");
+        mailSyn2('Changement de mot de passe', $this->getData('email'), '', "Votre mot de passe a été changé par votre administrateur <br /> Votre nouveau mot de passe est : $passwords->clear");
         $this->updateField('password', $passwords->sha256);
         $success = 'Mot de passe réinitialisé';
         return array(

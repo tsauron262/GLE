@@ -159,10 +159,9 @@ forms:
                 input_name: pu_ht
                 content: 
                     callback: 
-                        method: displayLineData
+                        method: renderLineInput
                         params: 
                             - pu_ht
-                            - 1
                 display_if: 
                     field_name: type
                     show_values: 1
@@ -508,6 +507,7 @@ lists_cols:
                 method: displayLineData
                 params:
                     - pu_ht
+                    - 1
     pu_ht_remise: 
         label: PU HT Remisé
         value: 

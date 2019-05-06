@@ -892,8 +892,9 @@ class ObjectLine extends BimpObject
     
     public function isFieldEditable($field, $force_edit = false) {
         global $user;
-        if(in_array($field, array("pu_ht")))
-            return (isset($user->rights->bimpcommercial->priceVente));
+        if(in_array($field, array("pu_ht"))){
+            return $this->canEditPrixVente();
+        }
 //        
         return parent::isFieldEditable($field, $force_edit);
     }
@@ -3590,7 +3591,7 @@ class ObjectLine extends BimpObject
     public function canEditPrixAchat()
     {
         global $user;
-        if (!isset($user->rights->bimpcommercial->priceAchat) || (int) $user->rights->bimpcommercial->priceAchat) {
+        if (isset($user->rights->bimpcommercial->priceAchat) && (int) $user->rights->bimpcommercial->priceAchat) {
             return 1;
         }
         return 0;
@@ -3599,9 +3600,12 @@ class ObjectLine extends BimpObject
     public function canEditPrixVente()
     {
         global $user;
-        if (!isset($user->rights->bimpcommercial->priceVente) || (int) $user->rights->bimpcommercial->priceVente) {
+        if (isset($user->rights->bimpcommercial->priceVente) && (int) $user->rights->bimpcommercial->priceVente) {
             return 1;
         }
+        if($this->getChildObject("product"))
+            if($this->getChildObject("product")->getData("price") == 1)
+            return 1;
         return 0;
     }
 

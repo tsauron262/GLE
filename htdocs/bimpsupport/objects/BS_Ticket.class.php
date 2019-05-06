@@ -17,11 +17,13 @@ class BS_Ticket extends BimpObject
         3 => array('label' => 'Très urgent', 'classes' => array('danger'), 'icon' => 'hourglass-end'),
     );
     public static $impacts = array(
+        0 => array('label' => ''),
         1 => array('label' => 'Faible', 'classes' => array('info'), 'icon' => 'star-o'),
         2 => array('label' => 'Moyen', 'classes' => array('warning'), 'icon' => 'star-half-o'),
         3 => array('label' => 'Haut', 'classes' => array('danger'), 'icon' => 'star'),
     );
     public static $cover_types = array(
+        0 => array('label' => ''),
         1 => array('label' => 'Couvert', 'classes' => array('success'), 'icon' => 'fas_check'),
         2 => array('label' => 'Payant', 'classes' => array('warning'), 'icon' => 'fas_euro-sign'),
         3 => array('label' => 'Non couvert', 'classes' => array('danger'), 'icon' => 'fas_times'),

@@ -665,8 +665,15 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
 
     $mailOk = true;
 
-    if ($from == '')
-        $from = 'Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <admin@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr>';
+    if ($from == ''){
+        $from = 'Application BIMP-ERP ' . $conf->global->MAIN_INFO_SOCIETE_NOM . ' <';
+        if(isset($conf->global->MAIN_INFO_SOCIETE_MAIL) && $conf->global->MAIN_INFO_SOCIETE_MAIL != '')
+            $from = $conf->global->MAIN_INFO_SOCIETE_MAIL;
+        else
+            $from = 'admin@' . strtolower(str_replace(" ", "", $conf->global->MAIN_INFO_SOCIETE_NOM)) . '.fr';
+        
+        $from = '>';
+    }
 
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = "";

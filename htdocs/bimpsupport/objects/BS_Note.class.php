@@ -73,7 +73,10 @@ class BS_Note extends BimpObject
     }
     
     public function canEdit(){
-        return 1;
+        if(BimpTools::getContext() == 'public'){
+            return 1;
+        }
+        return $this->is_a_note_of_client() ? 0 : 1 ;
     }
     
     public function canDelete(){
@@ -117,7 +120,7 @@ class BS_Note extends BimpObject
                     $liste_destinataires = array_merge($liste_destinataires, $client->get_dest('admin'));
                     $liste_destinataires = array_merge($liste_destinataires, $client->get_dest('commerciaux'));
                     
-                    mailSyn2('BIMP-CLIENT : Note sur votre ticket', implode(', ', $liste_destinataires), 'noreply@bimp.fr', 'Une note à été créer sur votre ticket support : ' . $parent->getData('ticket_number'));
+                    mailSyn2('BIMP-CLIENT : Note sur votre ticket', implode(', ', $liste_destinataires), 'noreply@bimp.fr', 'Une note a été créée sur votre ticket support : ' . $parent->getData('ticket_number'));
                     
                 }
             }
@@ -125,9 +128,18 @@ class BS_Note extends BimpObject
         
     }
     
-    public function is_a_note_of_client() {
-        if($this->getData('id_user_client') > 0) return 0;
+    public function isFieldEditable($field) {
         
-        return 1;
+        if($field == 'content' && BimpTools::getContext() != "public") {
+            return $this->is_a_note_of_client() ? 0 : 1 ;
+        }
+        
+        return parent::isFieldEditable($field);
+    }
+
+    public function is_a_note_of_client() {
+        if($this->getData('id_user_client') > 0) return 1;
+        
+        return 0;
     }
 }

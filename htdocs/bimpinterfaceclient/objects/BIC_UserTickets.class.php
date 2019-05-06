@@ -44,6 +44,7 @@ class BIC_UserTickets extends BS_Ticket {
             $this->updateField('cover', 1);
             $this->updateField('id_user_resp', 0);
                 $liste_destinataires = Array($userClient->getData('email'));
+                $liste_destinataires = array_merge($liste_destinataires, Array('hotline@bimp.fr'));
                 $liste_destinataires = array_merge($liste_destinataires, $userClient->get_dest('admin'));
                 $liste_destinataires = array_merge($liste_destinataires, $userClient->get_dest('commerciaux'));
                 
@@ -56,7 +57,7 @@ class BIC_UserTickets extends BS_Ticket {
                         . 'Demandeur : ' . $userClient->getData('email') . '<br />'
                         . 'Contact dans la société : ' . $this->getData('contact_in_soc') . '<br />'
                         . 'Contrat : ' . $tmpContrat->getData('ref') . '<br />'
-                        . 'Prioritée : ' . $prio . '<br />'
+                        . 'Priorité : ' . $prio . '<br />'
                         . 'Impact : ' . $impact . '<br />'
                         );
                 $tmpContrat = null;

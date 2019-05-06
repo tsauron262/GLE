@@ -18,7 +18,7 @@ class public_indexController extends Bimp_user_client_controller {
         $html .= ($valide_contrat) ? '<b style="color:green">sous contrat <i class="fa fa-check" ></i></b>' : '<b style="color:red">hors contrat <i class="fa fa-times" ></i></b>';
         $html .= '</div>';
         $html .= '<br /><br /><br />';
-        $html .= '<h4>Mes contrats valide</h4>';
+        $html .= '<h4>Mes contrats en cours</h4>';
         if ($valide_contrat) {
             $html .= $this->display_list_card($valide_contrat, true);
         }

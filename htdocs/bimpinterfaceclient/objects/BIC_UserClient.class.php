@@ -341,8 +341,7 @@ class BIC_UserClient extends BimpObject {
                 $sujet = "Mot de passe BIMP ERP Interface Client";
                 $message = 'Bonjour,<br /> Voici votre accès à votre espace client <br />'
                         . '<a href="'.$_SERVER['SERVER_NAME']. DOL_URL_ROOT . '/bimpinterfaceclient/client.php">Espace client BIMP ERP</a><br />Identifiant : ' . $this->getData('email') . '<br />Mot de passe (Généré automatiquement) : ' . $mot_de_passe->clear;
-                
-                mailSyn2($sujet, $this->getData('email'), 'admin@bimp.fr', $message);
+                mailSyn2($sujet, $this->getData('email'), '', $message);
             }
         }
     }

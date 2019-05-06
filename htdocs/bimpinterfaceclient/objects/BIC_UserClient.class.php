@@ -94,7 +94,7 @@ class BIC_UserClient extends BimpObject {
             }
         }
 
-        if ($this->id == $userClient->id) {
+        if (0 &&$this->id == $userClient->id) {
             $buttons[] = array(
                 'label' => 'Télécharger mes données personnelles',
                 'icon' => 'fas_cloud-download-alt',

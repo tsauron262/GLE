@@ -21,7 +21,7 @@ class userController extends BimpController {
         $soc = new Societe($db);
         $soc->fetch($socid);
         $head = societe_prepare_head($soc);
-        dol_fiche_head($head, 'user_client', $langs->trans("SAV"));
+        dol_fiche_head($head, 'client_user', $langs->trans("SAV"));
         
         
         $linkback = '<a href="'.DOL_URL_ROOT.'/societe/list.php?restore_lastsearch_values=1">'.$langs->trans("BackToList").'</a>';

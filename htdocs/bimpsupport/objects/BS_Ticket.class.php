@@ -12,6 +12,7 @@ class BS_Ticket extends BimpObject
     const BS_TICKET_CLOT = 999;
 
     public static $priorities = array(
+        0 => array('label' => ''),
         1 => array('label' => 'Non urgent', 'classes' => array('success'), 'icon' => 'hourglass-start'),
         2 => array('label' => 'Urgent', 'classes' => array('warning'), 'icon' => 'hourglass-half'),
         3 => array('label' => 'Très urgent', 'classes' => array('danger'), 'icon' => 'hourglass-end'),
@@ -23,7 +24,6 @@ class BS_Ticket extends BimpObject
         3 => array('label' => 'Haut', 'classes' => array('danger'), 'icon' => 'star'),
     );
     public static $cover_types = array(
-        0 => array('label' => ''),
         1 => array('label' => 'Couvert', 'classes' => array('success'), 'icon' => 'fas_check'),
         2 => array('label' => 'Payant', 'classes' => array('warning'), 'icon' => 'fas_euro-sign'),
         3 => array('label' => 'Non couvert', 'classes' => array('danger'), 'icon' => 'fas_times'),

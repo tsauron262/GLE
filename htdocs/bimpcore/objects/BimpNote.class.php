@@ -106,7 +106,7 @@ class BimpNote extends BimpObject
         global $user;
         $listIdGr = self::getGroupIds($user->id);
         $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef FROM `".MAIN_DB_PREFIX."bimpcore_note` "
-                . "WHERE ";
+                . "WHERE auto = 0 AND ";
         $where = "(type_dest = 1 AND fk_user_dest = ".$user->id.") "
                 . "         OR (type_dest = 2 AND fk_group_dest IN ('".implode("','", $listIdGr)."'))"
                 . "         ";
@@ -118,7 +118,7 @@ class BimpNote extends BimpObject
         $reqFin.= " LIMIT 0,".$limit;
             $tabFils = array();
             $tabNoDoublons = array();
-        $tabReq = array($reqDeb."(".$where.") AND viewed = 0 ".$reqFin, $reqDeb."(".$where." OR (type_author = 1 AND user_create = ".$user->id.") AND auto = 0)".$reqFin);
+        $tabReq = array($reqDeb."(".$where.") AND viewed = 0 ".$reqFin, $reqDeb."(".$where." OR (type_author = 1 AND user_create = ".$user->id."))".$reqFin);
         foreach($tabReq as $rang => $req){
             $sql = self::getBdb()->db->query($req);
             while($ln = self::getBdb()->db->fetch_object($sql)){

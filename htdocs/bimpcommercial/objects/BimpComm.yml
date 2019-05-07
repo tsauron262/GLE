@@ -596,7 +596,6 @@ views:
                             method: renderNotesList
                             params:
                                 - 1
-                                - message
                             
     full: 
         objects_change_reload: Bimp_File

@@ -51,7 +51,7 @@ class BIC_UserTickets extends BS_Ticket {
                 $prio = 'Non Urgent'; $prio = ($this->getData('priorite') == 2) ? 'Urgent' : $prio; $prio = ($this->getData('priorite') == 3) ? 'Très Urgent' : $prio;
                 $impact = 'Faible'; $impact = ($this->getData('priorite') == 2) ? 'Moyen' : $impact; $impact = ($this->getData('priorite') == 3) ? 'Haut' : $impact;
                 $tmpContrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
-                mailSyn2('BIMP-CLIENT : Création Ticket Support N°' . $this->getData('ticket_number'), implode(', ', $liste_destinataires), 'noreply@bimp.fr',
+                mailSyn2('BIMP-CLIENT : Création Ticket Support N°' . $this->getData('ticket_number'), implode(', ', $liste_destinataires), '',
                         '<h3>Ticket support numéro : '.$this->getData('ticket_number').'</h3>'
                         . 'Sujet du ticket : ' . $this->getData('sujet') . '<br />'
                         . 'Demandeur : ' . $userClient->getData('email') . '<br />'

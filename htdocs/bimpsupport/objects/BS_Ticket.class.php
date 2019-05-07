@@ -12,11 +12,13 @@ class BS_Ticket extends BimpObject
     const BS_TICKET_CLOT = 999;
 
     public static $priorities = array(
+        0 => array('label' => ''),
         1 => array('label' => 'Non urgent', 'classes' => array('success'), 'icon' => 'hourglass-start'),
         2 => array('label' => 'Urgent', 'classes' => array('warning'), 'icon' => 'hourglass-half'),
         3 => array('label' => 'Très urgent', 'classes' => array('danger'), 'icon' => 'hourglass-end'),
     );
     public static $impacts = array(
+        0 => array('label' => ''),
         1 => array('label' => 'Faible', 'classes' => array('info'), 'icon' => 'star-o'),
         2 => array('label' => 'Moyen', 'classes' => array('warning'), 'icon' => 'star-half-o'),
         3 => array('label' => 'Haut', 'classes' => array('danger'), 'icon' => 'star'),

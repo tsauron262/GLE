@@ -28,9 +28,15 @@ class FixeTabs_bimpmsg extends FixeTabs_module {
             if(!$fil['lu']){
                 $content .=  " (non lu)";
                 $nonLu++;
+                $notes->fetch($fil['idNoteRef']);
+            }
+            else {
+                global $db;
+                $sql = $db->query('SELECT MAX(id) max FROM `llx_bimpcore_note` WHERE `obj_type` = "bimp_object" AND `obj_module` = "'.$fil['obj']->module.'" AND `obj_name` = "'.$fil['obj']->object_name.'" AND `id_obj` = '.$fil['obj']->id);
+                $ln = $db->fetch_object($sql);
+                $notes->fetch($ln->max);
             }
             $content .= "</span>";
-            $notes->fetch($fil['idNoteRef']);
             $content .= $notes->displayChatmsg("petit", false);
             $content .= "</div>";
             

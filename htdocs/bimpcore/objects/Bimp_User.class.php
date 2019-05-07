@@ -18,7 +18,7 @@ class Bimp_User extends BimpObject
     public function getInstanceName()
     {
         if ($this->isLoaded()) {
-            return $this->getData('lastname') . ' ' . $this->getData('firstname');
+            return  dolGetFirstLastname($this->getData('firstname'), $this->getData('lastname'));
         }
 
         return ' ';

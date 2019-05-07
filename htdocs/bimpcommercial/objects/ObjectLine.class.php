@@ -889,11 +889,14 @@ class ObjectLine extends BimpObject
 
         return 3;
     }
-    
-    public function isFieldEditable($field, $force_edit = false) {
+
+    public function isFieldEditable($field, $force_edit = false)
+    {
         global $user;
-        if(in_array($field, array("pu_ht")))
-            return (isset($user->rights->bimpcommercial->priceVente));
+
+        if (in_array($field, array("pu_ht"))) {
+            return (int) (isset($user->rights->bimpcommercial->priceVente));
+        }
 //        
         return parent::isFieldEditable($field, $force_edit);
     }

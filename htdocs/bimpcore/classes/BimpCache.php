@@ -43,9 +43,10 @@ class BimpCache
         if ((string) $cache_key) {
             return (int) isset(self::$cache[$cache_key]);
         }
-        
+
         return 0;
     }
+
     // Objets: 
 
     public static function getBimpObjectInstance($module, $object_name, $id_object, $parent = null)
@@ -848,6 +849,40 @@ class BimpCache
                             self::$cache[$cache_key][(int) $r['rowid']] = $r['code_fournisseur'] . ' - ' . $r['nom'];
                         }
                     }
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty, 0, $empty_label);
+    }
+
+    public static function getProductCategoriesArray($id_product, $include_empty = false, $empty_label = '')
+    {
+        $cache_key = 'product_' . $id_product . '_categories_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            $sql = BimpTools::getSqlSelect(array(
+                        'a.fk_categorie',
+                        'c.label'
+            ));
+            $sql .= BimpTools::getSqlFrom('categorie_product', array(
+                        'c' => array(
+                            'table' => 'categorie',
+                            'alias' => 'c',
+                            'on'    => 'a.fk_categorie = c.rowid'
+                        )
+            ));
+            $sql .= BimpTools::getSqlWhere(array(
+                        'a.fk_product' => (int) $id_product
+            ));
+
+            $rows = self::getBdb()->executeS($sql);
+
+            if (!is_null($rows) && count($rows)) {
+                foreach ($rows as $r) {
+                    $cache[$cache_key][(int) $r['fk_categorie']] = $r['label'];
                 }
             }
         }

@@ -7,7 +7,7 @@ function loadTabContent(url, tab_name) {
     
     var $tab = $tabs.find('#'+tab_name);
     
-    if (!$.isOk($yab)) {
+    if (!$.isOk($tab)) {
         return;
     }
 

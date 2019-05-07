@@ -99,6 +99,10 @@ fields:
             show_values: 2
         values:
             array: groups
+    auto:
+        label: Note Auto
+        type: boolean
+        default_value: 0
         
 forms: 
     default: 

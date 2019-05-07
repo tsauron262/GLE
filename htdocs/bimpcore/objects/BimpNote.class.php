@@ -118,7 +118,7 @@ class BimpNote extends BimpObject
         $reqFin.= " LIMIT 0,".$limit;
             $tabFils = array();
             $tabNoDoublons = array();
-        $tabReq = array($reqDeb."(".$where.") AND viewed = 0 ".$reqFin, $reqDeb.$where." OR (type_author = 1 AND user_create = ".$user->id.") ".$reqFin);
+        $tabReq = array($reqDeb."(".$where.") AND viewed = 0 ".$reqFin, $reqDeb."(".$where." OR (type_author = 1 AND user_create = ".$user->id.") AND auto = 0)".$reqFin);
         foreach($tabReq as $rang => $req){
             $sql = self::getBdb()->db->query($req);
             while($ln = self::getBdb()->db->fetch_object($sql)){

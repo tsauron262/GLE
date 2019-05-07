@@ -704,6 +704,29 @@ class BimpCache
         return self::getCacheArray($cache_key, $include_empty);
     }
 
+    // Group: 
+
+    public static function getGroupsArray($include_empty = 0)
+    {
+        global $conf, $langs;
+
+        $cache_key = 'groups';
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+
+            $rows = self::getBdb()->getRows('usergroup', '1', null, 'object', array('rowid', 'nom'), 'nom', 'asc');
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+
+                    self::$cache[$cache_key][$r->rowid] = $r->nom;
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
     public static function getUserCentresArray()
     {
 

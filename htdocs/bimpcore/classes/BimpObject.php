@@ -3885,12 +3885,13 @@ class BimpObject extends BimpCache
     {
         return self::getObjectNotes($this);
     }
-
-    public function renderNotesList($filter_by_user = true)
+    
+    public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "")
     {
         if ($this->isLoaded()) {
             $note = BimpObject::getInstance('bimpcore', 'BimpNote');
-            $list = new BC_ListTable($note);
+            $list = new BC_ListTable($note, $list_model);
+            $list->addIdentifierSuffix($suffixe);
             $list->addFieldFilterValue('obj_type', 'bimp_object');
             $list->addFieldFilterValue('obj_module', $this->module);
             $list->addFieldFilterValue('obj_name', $this->object_name);

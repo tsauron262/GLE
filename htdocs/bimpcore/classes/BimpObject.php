@@ -3853,7 +3853,7 @@ class BimpObject extends BimpCache
 
     // Gestion des notes:
 
-    public function addNote($content, $visibility = null, $viewed = 0)
+    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1)
     {
         if (!$this->isLoaded()) {
             return array('ID ' . $this->getLabel('of_the') . ' absent');
@@ -3871,7 +3871,8 @@ class BimpObject extends BimpCache
             'id_obj'     => (int) $this->id,
             'visibility' => (int) $visibility,
             'content'    => $content,
-            'viewed'     => $viewed
+            'viewed'     => $viewed,
+            'auto'     => $auto
         ));
 
         if (!count($errors)) {

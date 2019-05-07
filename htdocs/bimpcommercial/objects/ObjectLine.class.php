@@ -3604,7 +3604,7 @@ class ObjectLine extends BimpObject
             return 1;
         }
         if($this->getChildObject("product"))
-            if($this->getChildObject("product")->getData("price") == 1)
+            if($this->getChildObject("product")->getData("price") == 1 || $this->getChildObject("product")->getData("price") == 0)
             return 1;
         return 0;
     }

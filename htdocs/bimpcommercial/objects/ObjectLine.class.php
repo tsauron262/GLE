@@ -3600,12 +3600,12 @@ class ObjectLine extends BimpObject
     public function canEditPrixVente()
     {
         global $user;
-        if (isset($user->rights->bimpcommercial->priceVente) && (int) $user->rights->bimpcommercial->priceVente) {
+        if (isset($user->rights->bimpcommercial->priceVente) && (int) $user->rights->bimpcommercial->priceVente == 1) {
             return 1;
         }
-        if($this->getChildObject("product"))
+        if($this->getChildObject("product") && $this->getChildObject("product")->id > 0)
             if($this->getChildObject("product")->getData("price") == 1 || $this->getChildObject("product")->getData("price") == 0)
-            return 1;
+                return 1;
         return 0;
     }
 

@@ -111,6 +111,9 @@ forms:
             - field: id_societe
             - field: email
             - field: visibility
+            - field: type_dest
+            - field: fk_user_dest
+            - field: fk_group_dest
             - field: content
     msg: 
         rows: 

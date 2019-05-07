@@ -3,8 +3,8 @@ common_fields: 1
 icon: fas_sticky-note
 
 labels: 
-    name: note
-    is_female: 1
+    name: message
+    is_female: 0
     
 objects:
     user_group:
@@ -156,6 +156,8 @@ lists:
         update_btn: 1
         delete_btn: 1
         add_form_name: default
+        extra_btn: 
+            callback: getListExtraBtn
         cols:
             date_create:
                 label: Date

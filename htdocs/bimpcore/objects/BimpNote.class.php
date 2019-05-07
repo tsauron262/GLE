@@ -105,7 +105,7 @@ class BimpNote extends BimpObject
     public static function getMyConversations($notViewedInFirst = true, $limit=10){
         global $user;
         $listIdGr = self::getGroupIds($user->id);
-        $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create FROM `".MAIN_DB_PREFIX."bimpcore_note` "
+        $reqDeb = "SELECT `obj_type`,`obj_module`,`obj_name`,`id_obj`, MIN(viewed) as mviewed, MAX(date_create) as mdate_create, MAX(id) as idNoteRef FROM `".MAIN_DB_PREFIX."bimpcore_note` "
                 . "WHERE ";
         $where = "(type_dest = 1 AND fk_user_dest = ".$user->id.") "
                 . "         OR (type_dest = 2 AND fk_group_dest IN ('".implode("','", $listIdGr)."'))"
@@ -117,13 +117,18 @@ class BimpNote extends BimpObject
             $reqFin .= " ORDER by mdate_create DESC";
         $reqFin.= " LIMIT 0,".$limit;
             $tabFils = array();
+            $tabNoDoublons = array();
         $tabReq = array($reqDeb."(".$where.") AND viewed = 0 ".$reqFin, $reqDeb.$where." OR (type_author = 1 AND user_create = ".$user->id.") ".$reqFin);
         foreach($tabReq as $rang => $req){
             $sql = self::getBdb()->db->query($req);
             while($ln = self::getBdb()->db->fetch_object($sql)){
-                if($ln->obj_type == "bimp_object"){
-                    $tabFils[] = array("lu"=>$rang  , "obj"=>BimpObject::getInstance($ln->obj_module, $ln->obj_name, $ln->id_obj));
+                $hash = $ln->obj_module.$ln->obj_name.$ln->id_obj;
+                if(!isset($tabNoDoublons[$hash])){
+                    $tabNoDoublons[$hash] = true;
+                    if($ln->obj_type == "bimp_object"){
+                        $tabFils[] = array("lu"=>$rang  , "obj"=>BimpObject::getInstance($ln->obj_module, $ln->obj_name, $ln->id_obj), "idNoteRef"=>$ln->idNoteRef);
 
+                    }
                 }
             }
         }
@@ -163,9 +168,24 @@ class BimpNote extends BimpObject
     
     public function canEdit() {
         global $user;
-        if($this->getData("user_create") == $user->id)
+        if($this->getData("user_create") == $user->id && !$this->getData("viewed"))
             return 1;
         return 0;
+    }
+    
+    
+    public function getListExtraBtn()
+    {
+        global $user;
+        $buttons = array();
+        if ($this->isLoaded()) {
+            if($this->getData('user_create') != $user->id)
+                $buttons[] = array(
+                    'label'   => 'Attribuer un équipement',
+                    'icon'    => 'far fa-paper-plane',
+                    'onclick' => $this->getJsRepondre());
+        }
+        return $buttons;
     }
 
     // Affichage: 
@@ -202,81 +222,23 @@ class BimpNote extends BimpObject
 //        return parent::displayData($field, $display_name, $display_input_value, $no_html);
 //    }
     
+    public function getJsRepondre(){
+        return $this->getJsActionOnclick('repondre', array("type_dest"=>1, "fk_user_dest"=>$this->getData("user_create"), "content"=>"", "id"=>""), array('form_name' => 'rep'));
+    }
     
-    public function displayChatmsg(){
+    public function displayChatmsg($style, $checkview = true){
         global $user;
-        $html = "<style>
-/*.BimpNote_list_table_container {*/
-    .msg_cotainer {
-        /* margin-top: auto; */
-        /* margin-bottom: auto; */
-        /* margin-left: 10px; */
-        border-radius: 25px;
-        background-color: #E6E1E0;
-        padding: 10px;
-        position: relative;
-        margin-bottom: 1.5rem!important;
-        min-width: 150px;
-        max-width: 65%;
-        text-align: center;
-
-        font-size: 1.3em;
-        line-height: normal;
-    }
-    .justify-content-end .msg_cotainer {
-        background-color: #78e08f;
-    }
-    .justify-content-start .msg_cotainer {
-        background-color: #82ccdd;
-    }
-
-    .justify-content-end {
-        -ms-flex-pack: end!important;
-        justify-content: flex-end!important;
-    }
-    .d-flex {
-        display: -ms-flexbox!important;
-        display: flex!important;
-    }
-    .msg_time {
-        position: absolute;
-        left: 25px;
-        bottom: -15px;
-        color: rgba(0,0,0,0.5);
-        font-size: 10px;
-    }
-    .justify-content-end .msg_time{
-        left: auto;
-        right: 25px;
-    }
-    .img-circle{
-        margin: 5px;
-    }
-    .nonLu{
-        opacity: 0.4;
-    }
-    .nonLu.my{
-        opacity: 1; 
-      animation: colorblink 2s infinite;
-    }
-/*}*/
-@keyframes colorblink { 
-    0% { }
-    50% { 
-        opacity: 0; 
-    } 
-}   
-</style>";
+        $html = "";
         
         
         $author = $this->displayAuthor(false,true);
-        $html .= '<div class="d-flex justify-content-'.($this->i_am_dest()?"start" : ($this->i_am_author() ?"end" : "")).' mb-4">
+        $html .= '<div class="d-flex justify-content-'.($this->i_am_dest()?"start" : ($this->i_am_author() ?"end" : "")).($style == "petit"? ' petit' : '').' mb-4">
             <span data-toggle="tooltip" data-placement="top" title="'.$author.'" class="chat-img pull-left">
-                <img src="https://placehold.it/55/'.($this->getData('type_author') == self::BN_AUTHOR_USER? '55C1E7' : '5500E7').'/fff&amp;text='.$this->getInitiale($author).'" alt="User Avatar" class="img-circle">
+                <img src="https://placehold.it/'.($style == "petit"? '35' : '55').'/'.($this->getData('type_author') == self::BN_AUTHOR_USER? '55C1E7' : '5500E7').'/fff&amp;text='.$this->getInitiale($author).'" alt="User Avatar" class="img-circle">
             </span>';
         $html .= '<div class="msg_cotainer">'.$this->getData("content");
-        if($this->getData('user_create') != $user->id)
-            $html .= '<span class="rowButton bs-popover"><i class="fas fa-share link" onclick="'.$this->getJsActionOnclick('repondre', array("type_dest"=>1, "fk_user_dest"=>$this->getData("user_create"), "content"=>"", "id"=>""), array('form_name' => 'rep')).'"></i></span>';
+        if($style != "petit" && $this->getData('user_create') != $user->id)
+            $html .= '<span class="rowButton bs-popover"><i class="fas fa-share link" onclick="'.$this->getJsRepondre().'"></i></span>';
         
         $html .= '<span class="msg_time">'. dol_print_date($this->getData("date_create"), "%d/%m/%y %H:%M:%S").'</span>
                                                                 </div>';
@@ -284,7 +246,7 @@ class BimpNote extends BimpObject
             $dest = $this->displayDestinataire(false,true);
             if($dest != "")
                 $html .= '    <span data-toggle="tooltip" data-placement="top" title="'.$dest.'" class="chat-img pull-left '.($this->getData("viewed")? "" : "nonLu").($this->i_am_dest()? " my" : "").'">
-                                    <img src="https://placehold.it/45/'.($this->getData('type_dest') == self::BN_DEST_USER? '55C1E7' : '5500E7').'/fff&amp;text='.$this->getInitiale($dest).'" alt="User Avatar" class="img-circle">
+                                    <img src="https://placehold.it/'.($style == "petit"? '28' : '45').'/'.($this->getData('type_dest') == self::BN_DEST_USER? '55C1E7' : '5500E7').'/fff&amp;text='.$this->getInitiale($dest).'" alt="User Avatar" class="img-circle">
                                 </span>';
         }
         $html .= "";
@@ -292,10 +254,16 @@ class BimpNote extends BimpObject
 	$html .= '</div>';
         
         
+        if($checkview){
+            $this->i_view();
+        }
+        return $html;
+    }
+    
+    public function i_view(){
         if(!$this->getData("viewed") && $this->i_am_dest()){
             $this->updateField('viewed', 1);
         }
-        return $html;
     }
     
     public function getInitiale($str){

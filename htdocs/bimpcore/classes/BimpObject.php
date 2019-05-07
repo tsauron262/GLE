@@ -3342,7 +3342,7 @@ class BimpObject extends BimpCache
                     foreach ($bimpObjectFields as $field_name => $value) {
                         $fields[] = $field_name;
                     }
-                    
+
                     $up_result = $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $this->id);
 
                     if ($up_result <= 0) {
@@ -3886,7 +3886,7 @@ class BimpObject extends BimpCache
         return self::getObjectNotes($this);
     }
 
-    public function renderNotesList($filter_by_user = true)
+    public function renderNotesList($filter_by_user = true, $list_model = "")
     {
         if ($this->isLoaded()) {
             $note = BimpObject::getInstance('bimpcore', 'BimpNote');

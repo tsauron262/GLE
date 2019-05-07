@@ -353,3 +353,25 @@ function loadObjectCard($container, module, object_name, id_object, card_name, s
         }
     });
 }
+
+function loadModalObjectNotes($button, module, object_name, id_object, list_model, filter_by_user) {
+    if ($button.hasClass('disabled')) {
+        return;
+    }
+    
+    if (typeof (list_model) === 'undefined') {
+        list_model = '';
+    }
+    
+    if (typeof (filter_by_user) === 'undefined') {
+        filter_by_user = 1;
+    }
+    
+    bimpModal.loadAjaxContent($button, 'loadObjectNotes', {
+        module: module,
+        object_name: object_name,
+        id_object: id_object,
+        list_model: list_model,
+        filter_by_user: filter_by_user
+    });
+}

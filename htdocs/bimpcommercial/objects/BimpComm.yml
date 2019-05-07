@@ -589,6 +589,14 @@ views:
                             - type: fields_table
                               fields_table: 
                                   name: notes
+            - cols:
+                  - type: custom
+                    custom: 
+                        callback: 
+                            method: renderNotesList
+                            params:
+                                - 1
+                                - message
                             
     full: 
         objects_change_reload: Bimp_File

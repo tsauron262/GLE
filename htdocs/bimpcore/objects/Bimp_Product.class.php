@@ -227,6 +227,26 @@ class Bimp_Product extends BimpObject
         
     }
 
+    public function getCategoriesArray()
+    {
+        if ($this->isLoaded()) {
+            return self::getProductCategoriesArray((int) $this->id);
+        }
+        
+        return array();
+    }
+
+    public function getCategoriesList()
+    {
+        $categories = array();
+        
+        foreach ($this->getCategoriesArray() as $id_category => $label) {
+            $categories[] = (int) $id_category;
+        }
+        
+        return $categories;
+    }
+
     // traitements: 
 
     public function fetchStocks()

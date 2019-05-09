@@ -12,9 +12,8 @@ class BContract_echeancier extends BimpObject {
         //$line = $this->db->getRow('contrat_next_facture', 'id_contrat = ' . $this->id); // TODO à voir pour le 
 
         $parent = $this->getParentInstance();
-        $this->calc_period_echeancier();
-        //echo 'test = '. $this->datetime_prochain;
         $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
+        $this->calc_period_echeancier();
         $nb_period_restante = $nb_period - $this->nb_facture;
         $stop_echeancier = ($nb_period_restante == 0) ? true : false;
         $show_echeancier = ($parent->getData('statut') > 0) ? true : false;
@@ -71,6 +70,7 @@ class BContract_echeancier extends BimpObject {
         } else {
             $html .= BimpRender::renderAlerts("Vous devez valider le contrat pour afficher l\'échéancier");
         }
+
         return $html;
     }
 
@@ -110,9 +110,6 @@ class BContract_echeancier extends BimpObject {
         $list_fact = $this->get_total_facture();
         for ($i = 0; $i < $nb_period; $i++) {
             $this->tab_echeancier[$i] = array('date_debut' => $date_debut->format('Y-m-d'), 'date_fin' => $date_fin->format('Y-m-t'), 'montant_ttc' => $montant_facturer_ttc);
-            if ($i == $this->nb_facture + 1) {
-                $this->datetime_prochain = $date_debut->format('Y-m-d');
-            }
             $date_debut->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
             $date_fin->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
 
@@ -122,6 +119,18 @@ class BContract_echeancier extends BimpObject {
                 $this->tab_echeancier[$i]['facture'] = 0;
             }
         }
+    }
+
+    public function calc_next_date() {
+        $parent = $this->getParentInstance();
+        $date = $this->getData('next_facture_date');
+        $periodicity = $parent->getData('periodicity');
+        $nextdate = new DateTime("$date");
+        $nextdate->getTimestamp();
+        $nextdate->add(new DateInterval("P" . $periodicity . "M"));
+        $newdate = $nextdate->format('Y-m-d');
+
+        return $newdate;
     }
 
     public function updateLine($id_contrat = null) {
@@ -135,11 +144,12 @@ class BContract_echeancier extends BimpObject {
             $ttc += $line->total_ttc;
         }
         if ($lines) {
-//            $updateData = Array();
-//            $bimp->update('bcontract_prelevement', $data);
-            // La ligne existe -> à updater
             $parent = $this->getParentInstance();
-            die('on crée pas');
+            $updateData = Array(
+                'next_facture_date' => $this->calc_next_date(),
+                'next_facture_amount' => $this->getData('next_facture_amount')
+            );
+            $bimp->update('bcontract_prelevement', $updateData, 'id_contrat = ' . $parent->id);
         } else {
             if (!is_null($id_contrat)) {
                 $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
@@ -165,6 +175,7 @@ class BContract_echeancier extends BimpObject {
 
     public function actionCreate_facture($data, &$success) {
         global $user, $db;
+        $bimp = new BimpDb($db);
         $success = '';
 
         BimpTools::loadDolClass('compta/facture', 'facture');
@@ -189,7 +200,7 @@ class BContract_echeancier extends BimpObject {
         } else {
             return Array('errors' => 'error facture');
         }
-
+        $this->updateLine($parent->id);
 
         $success = 'Facture créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
     }

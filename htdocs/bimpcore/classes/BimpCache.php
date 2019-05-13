@@ -712,8 +712,6 @@ class BimpCache
 
     public static function getGroupsArray($include_empty = 1)
     {
-        global $conf, $langs;
-
         $cache_key = 'groups';
         if (!isset(self::$cache[$cache_key])) {
             if($include_empty)
@@ -732,6 +730,18 @@ class BimpCache
         }
 
         return self::getCacheArray($cache_key, $include_empty);
+    }
+    
+    public static function getGroupIds($idUser){
+        $cache_key = 'groupsIduser'.$idUser;
+        if (!isset(self::$cache[$cache_key])) {
+            require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
+            $userGroup = new UserGroup(self::getBdb()->db);
+            $listIdGr = array();
+            foreach($userGroup->listGroupsForUser($idUser,false) as $obj)
+                    self::$cache[$cache_key][] = $obj->id;
+        }
+        return self::getCacheArray($cache_key);
     }
 
     public static function getUserCentresArray()

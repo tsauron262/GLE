@@ -26,6 +26,7 @@ fields:
             field_name: id_entrepot
             hide_values: 0,
         depends_on: id_entrepot
+        keep_new_value: 1
     type: 
         label: Type
         values: 

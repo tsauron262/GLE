@@ -174,7 +174,7 @@ function saveObjectfromFieldsTable(fields_table_id, $button) {
     var $resultContainer = $fieldsTable.find('#' + fields_table_id + '_result');
 
     var data = getInputsValues($fieldsTable);
-    
+
     console.table(data);
 
     data['module'] = $fieldsTable.data('module');
@@ -258,7 +258,13 @@ function checkFieldsTableModifications($fieldsTable) {
                 var $input = $(this).find('[name="' + field_name + '"]');
                 if ($input.length) {
                     var $row = $(this).findParentByTag('tr');
-                    if ($input.val() != $(this).data('initial_value')) {
+                    var initial_value = $(this).data('initial_value');
+
+                    if (typeof (initial_value) === 'string' && initial_value) {
+                        initial_value = bimp_htmlDecode(initial_value);
+                    }
+
+                    if ($input.val() != initial_value) {
                         $row.addClass('modified');
                         hasModifications = true;
                     } else {
@@ -302,7 +308,14 @@ function cancelFieldsTableModifications(fields_table_id, $button) {
         var field_name = $(this).data('field_name');
         if (field_name) {
             var $input = $(this).find('[name="' + field_name + '"]');
+
+
             var initial_value = $(this).data('initial_value');
+
+            if (typeof (initial_value) === 'string' && initial_value) {
+                initial_value = bimp_htmlDecode(initial_value);
+            }
+
             if ($input.length) {
                 if ($input.val() != initial_value) {
                     if ($input.hasClass('datepicker_value')) {

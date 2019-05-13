@@ -1,6 +1,7 @@
 // Notifications:
 var bimp_msg_enable = true;
 var ctrl_down = false;
+var bimp_decode_textarea = null;
 
 function bimp_msg(msg, className, $container) {
     if (!bimp_msg_enable) {
@@ -754,6 +755,15 @@ function bimp_reloadPage() {
     }
 
     window.location = url;
+}
+
+function bimp_htmlDecode(html) {
+    if (!bimp_decode_textarea) {
+        bimp_decode_textarea = document.createElement('textarea');
+    }
+
+    bimp_decode_textarea.innerHTML = html;
+    return bimp_decode_textarea.value;
 }
 
 // Ajouts jQuery:

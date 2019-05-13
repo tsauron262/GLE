@@ -554,7 +554,7 @@ class BC_Input extends BimpComponent
             }
         }
 
-        $html .= BimpInput::renderInputContainer($this->input_name, htmlentities($this->value), $content, $this->name_prefix, $required, (int) $this->params['multiple'], implode(' ', $this->extraClasses), $extra_data);
+        $html .= BimpInput::renderInputContainer($this->input_name, $this->value, $content, $this->name_prefix, $required, (int) $this->params['multiple'], implode(' ', $this->extraClasses), $extra_data);
 
         return $html;
     }

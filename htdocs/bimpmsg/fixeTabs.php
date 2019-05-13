@@ -20,8 +20,7 @@ class FixeTabs_bimpmsg extends FixeTabs_module {
             if($fil['obj']->id > 0){
                 $i++;
                 $content .= "<br/>";
-                $content .= "<div class='lnMsg' onclick='loadModalObjectNotes($(this), \"".$fil['obj']->module."\", \"".$fil['obj']->object_name."\", \"".$fil['obj']->id."\", \"chat\", true);'>";
-                $content .= "<span class='titreFilMsg'>";
+                $content .= "<div class='lnMsg'><span class='titreFilMsg'>";
                 if(method_exists($fil['obj'], "getNomUrl"))
                     $content .= $fil['obj']->getNomUrl();
                 else
@@ -50,8 +49,9 @@ class FixeTabs_bimpmsg extends FixeTabs_module {
                         if($soc && $soc->isLoaded())
                             $content .= " - ".$soc->getNomUrl(1);
                 }
+                $content .= "<div onclick='loadModalObjectNotes($(this), \"".$fil['obj']->module."\", \"".$fil['obj']->object_name."\", \"".$fil['obj']->id."\", \"chat\", true);'>";
                 $content .= $notes->displayChatmsg("petit", false);
-                $content .= "</div>";
+                $content .= "</div></div>";
 
 
                 //echo $fil['obj']->renderNotesList(true, "chat", $i);

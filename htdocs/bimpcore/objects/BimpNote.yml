@@ -85,6 +85,7 @@ fields:
         object: user
         input: 
             type: search_user
+            include_empty: 1
         display_if: 
             field_name: type_dest
             show_values: 1
@@ -94,6 +95,7 @@ fields:
         object: user_group
         input: 
             type: search_group
+            include_empty: 1
         display_if: 
             field_name: type_dest
             show_values: 2

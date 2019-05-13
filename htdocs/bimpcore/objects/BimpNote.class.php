@@ -93,15 +93,6 @@ class BimpNote extends BimpObject
         return $filters;
     }
     
-    public static function getGroupIds($idUser){
-        require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
-        $userGroup = new UserGroup(self::getBdb()->db);
-        $listIdGr = array();
-        foreach($userGroup->listGroupsForUser($idUser,false) as $obj)
-                $listIdGr[] = $obj->id;
-        return $listIdGr;
-    }
-    
     public static function getMyConversations($notViewedInFirst = true, $limit=10){
         global $user;
         $listIdGr = self::getGroupIds($user->id);

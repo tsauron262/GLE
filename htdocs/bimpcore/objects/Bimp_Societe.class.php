@@ -155,6 +155,10 @@ class Bimp_Societe extends BimpObject
         }
         return '';
     }
+    
+    public function getNomUrl($withpicto = true, $ref_only = true, $page_link = false, $modal_view = '') {
+        return $this->dol_object->getNomUrl(1);
+    }
 
     public function displayJuridicalStatus()
     {

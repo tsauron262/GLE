@@ -477,6 +477,12 @@ class BimpInput
                 }
                 $options['options'] = BimpCache::getUsersArray($options['include_empty']);
                 return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
+            case 'search_group':
+                if (!isset($options['include_empty'])) {
+                    $options['include_empty'] = 0;
+                }
+                $options['options'] = BimpCache::getgroupsArray($options['include_empty']);
+                return self::renderInput('select', $field_name, $value, $options, $form, $option, $input_id);
 
             case 'search_contact':
                 $html .= $form->selectcontacts(0, (int) $value, $field_name);

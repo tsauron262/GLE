@@ -1,0 +1,90 @@
+table: bimpmsg_fil
+controller: msg
+
+icon: fas_tasks
+header_list_name: default
+header_btn:
+    callback: getButtons
+list_page_url: 
+    controller: index
+        
+labels:
+    name: Fil de discusion
+    name_plur: Fils de discusion
+    is_female: 0    
+
+objects: 
+    user_author:
+        extends: user
+        instance:
+            id_object:
+                fiels_value: fk_author
+    notes:
+        extends: note
+        label: Mesg
+                    
+fields:            
+    fk_author:
+        label: Auteur
+        type: id_object
+        object: user_author
+        input:
+            type: search_user
+            include_empty: 1
+            
+lists:
+    default:
+        checkboxes: 1
+        bulk_actions:
+            - label: supprimer les tâches sélectionnées
+              icon: fas_trash-alt
+              onclick: deleteSelectedObjects('list_id', $(this))
+        sort_field: id
+        sort_way: desc
+        n: 10
+        add_form_name: default
+        delete_btn: 1
+        page_btn: 1
+        edit_btn: 1
+        modal_view: default
+        edit_form: default
+        update_btn: 1
+        cols:
+            id:
+                label: ID
+                field: id
+            fk_author:
+                field: fk_author
+                
+                
+                
+views:
+    default: 
+        title: nom
+        edit_form: default
+        delete_btn: 1
+        rows:    
+            - cols: 
+                  - type: fields_table
+                    col_lg: 12
+                    col_md: 12
+                    col_sm: 12
+                    fields_table:
+                        name: default
+            - cols:
+                  - type: custom
+                    custom: 
+                        callback: 
+                            method: renderNotesList
+                            params:
+                                - 1
+                                - message
+                        
+                        
+fields_tables:
+    default: 
+        footer_extra_btn: 
+            callback: getInfosExtraBtn
+        icon: fas_tasks
+        rows: 
+            - field: fk_author

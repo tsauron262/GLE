@@ -221,9 +221,18 @@ class BC_Display extends BimpComponent
                                     break;
 
                                 case 'nom_url':
-                                    $html .= BimpObject::getInstanceNomUrl($instance);
-                                    $html .= BimpRender::renderObjectIcons($instance, (int) $this->params['external_link'], $this->params['modal_view']);
-                                    break;
+                                    if (!$this->no_html){
+                                        $html .= BimpObject::getInstanceNomUrl($instance);
+                                        $html .= BimpRender::renderObjectIcons($instance, (int) $this->params['external_link'], $this->params['modal_view']);
+                                        break;
+                                    }
+                                    else{
+                                        if(method_exists($instance, "getFullName"))
+                                            $html .= $instance->getFullName();
+                                        elseif(method_exists($instance, "getName"))
+                                            $html .= $instance->getName();
+                                        break;
+                                    }
                             }
                             self::$cache[$cache_key] = $html;
                         } elseif ((int) $this->value) {

@@ -53,7 +53,7 @@ class BL_CommandeFournReception extends BimpObject
     public function isCreatable($force_create = false)
     {
         $commande = $this->getParentInstance();
-        if (BimpObject::objectLoaded($commande) && !((int) $commande->isBilled())) {
+        if (BimpObject::objectLoaded($commande)) {
             return 1;
         }
 

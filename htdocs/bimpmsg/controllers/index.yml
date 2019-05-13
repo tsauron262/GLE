@@ -1,0 +1,13 @@
+bootstrap: 1
+title: Bimp Message
+
+objects:
+    msg:
+        instance:
+            bimp_object: BIMPMsg_fil
+    
+sections:
+     - type: list
+       list: 
+           panel: 1
+           object: msg

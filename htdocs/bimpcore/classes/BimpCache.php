@@ -672,7 +672,10 @@ class BimpCache
             $cache_key .= '_active_only';
         }
         if (!isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = array();
+            if($include_empty)
+                self::$cache[$cache_key] = array(""=>"");
+            else
+                self::$cache[$cache_key] = array();
 
             if ($active_only) {
                 $where = '`statut` != 0';
@@ -698,6 +701,32 @@ class BimpCache
                         $fullNameMode = 0;
                     }
                     self::$cache[$cache_key][$r->rowid] = $userstatic->getFullName($langs, $fullNameMode, -1);
+                }
+            }
+        }
+
+        return self::getCacheArray($cache_key, $include_empty);
+    }
+
+    // Group: 
+
+    public static function getGroupsArray($include_empty = 1)
+    {
+        global $conf, $langs;
+
+        $cache_key = 'groups';
+        if (!isset(self::$cache[$cache_key])) {
+            if($include_empty)
+                self::$cache[$cache_key] = array(""=>"");
+            else
+                self::$cache[$cache_key] = array();
+
+
+            $rows = self::getBdb()->getRows('usergroup', '1', null, 'object', array('rowid', 'nom'), 'nom', 'asc');
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+
+                    self::$cache[$cache_key][$r->rowid] = $r->nom;
                 }
             }
         }

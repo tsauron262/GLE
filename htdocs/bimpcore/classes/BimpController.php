@@ -1280,7 +1280,7 @@ class BimpController
         $object_name = BimpTools::getValue('object_name');
         $id_object = (int) BimpTools::getValue('id_object');
         $filter_by_user = (int) BimpTools::getValue('filter_by_user', 1);
-        $list_model = BimpTools::getValue('list_model');
+        $list_model = BimpTools::getValue('list_model', 'default');
 
         if (is_null($object_name) || !$object_name) {
             $errors[] = 'Type d\'objet absent';
@@ -1292,7 +1292,8 @@ class BimpController
 
         if (!count($errors)) {
             $object = BimpCache::getBimpObjectInstance($module, $object_name, $id_object);
-            $html = $object->renderNotesList($filter_by_user, $list_model);
+            $html = $object->renderHeader();
+            $html .= $object->renderNotesList($filter_by_user, $list_model);
         }
 
         die(json_encode(array(

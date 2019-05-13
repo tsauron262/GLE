@@ -373,5 +373,11 @@ function loadModalObjectNotes($button, module, object_name, id_object, list_mode
         id_object: id_object,
         list_model: list_model,
         filter_by_user: filter_by_user
+    }, "Messages", 'Chargement', function (result, bimpAjax) {
+        setCommonEvents(bimpAjax.$resultContainer);
+        setInputsEvents(bimpAjax.$resultContainer);
+        bimpAjax.$resultContainer.find('.object_list').each(function () {
+            onListLoaded($(this));
+        });
     });
 }

@@ -3853,7 +3853,7 @@ class BimpObject extends BimpCache
 
     // Gestion des notes:
 
-    public function addNote($content, $visibility = null, $viewed = 0)
+    public function addNote($content, $visibility = null, $viewed = 0, $auto = 1)
     {
         if (!$this->isLoaded()) {
             return array('ID ' . $this->getLabel('of_the') . ' absent');
@@ -3871,7 +3871,8 @@ class BimpObject extends BimpCache
             'id_obj'     => (int) $this->id,
             'visibility' => (int) $visibility,
             'content'    => $content,
-            'viewed'     => $viewed
+            'viewed'     => $viewed,
+            'auto'     => $auto
         ));
 
         if (!count($errors)) {
@@ -3885,12 +3886,13 @@ class BimpObject extends BimpCache
     {
         return self::getObjectNotes($this);
     }
-
-    public function renderNotesList($filter_by_user = true, $list_model = "")
+    
+    public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "")
     {
         if ($this->isLoaded()) {
             $note = BimpObject::getInstance('bimpcore', 'BimpNote');
-            $list = new BC_ListTable($note);
+            $list = new BC_ListTable($note, $list_model);
+            $list->addIdentifierSuffix($suffixe);
             $list->addFieldFilterValue('obj_type', 'bimp_object');
             $list->addFieldFilterValue('obj_module', $this->module);
             $list->addFieldFilterValue('obj_name', $this->object_name);

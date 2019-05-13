@@ -4,7 +4,7 @@ class FixeTabs
 
     public $errors = array();
     protected $tabs = array();
-    public $modules = array("bimptask", "bimpsupport");
+    public $modules = array("bimptask", "bimpsupport", "bimpmsg");
     public $objs = array();
 
     public function __construct() {
@@ -19,7 +19,7 @@ class FixeTabs
                     $this->objs[] = $obj;
             }
             else
-                dol_syslog ("Class introuvable ".$file,3);
+                dol_syslog ("Fichier introuvable ".$file,3);
         }
     }
     

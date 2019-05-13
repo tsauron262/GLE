@@ -91,6 +91,7 @@ lists:
                 label: Visibilité
                 field: visibility
                 edit: 1
+                default_value: 1
             contenu:
                 label: Contenu
                 field: content
@@ -119,8 +120,6 @@ lists:
     
 forms:
     addClientNote:
-        title: Ajouter un note au ticket support
+        title: Ajouter une note au ticket support
         rows:
-            - field: visibility
-              edit: 0
             - field: content

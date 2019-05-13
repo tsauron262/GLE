@@ -167,7 +167,15 @@ class securLogSms {
     }
 
     function createSendCode() {
-        global $user;
+        global $user, $langs;
+        if (!is_object($langs)) { // This can occurs when calling page with NOREQUIRETRAN defined, however we need langs for error messages.
+            include_once DOL_DOCUMENT_ROOT . '/core/class/translate.class.php';
+            $langs = new Translate("", $conf);
+            $langcode = (GETPOST('lang', 'aZ09', 1) ? GETPOST('lang', 'aZ09', 1) : (empty($conf->global->MAIN_LANG_DEFAULT) ? 'auto' : $conf->global->MAIN_LANG_DEFAULT));
+            if (defined('MAIN_LANG_DEFAULT'))
+                $langcode = constant('MAIN_LANG_DEFAULT');
+            $langs->setDefaultLang($langcode);
+        }
         $okSms = $okMail = false;
         $code = rand(0, 9) . rand(0, 9) . rand(0, 9) . rand(0, 9);
         $this->user->array_options['options_code_sms'] = $code;

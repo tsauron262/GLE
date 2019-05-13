@@ -43,22 +43,21 @@ class BIC_UserTickets extends BS_Ticket {
             $this->updateField('priorite_demande_client', BimpTools::getValue('priorite'));
             $this->updateField('cover', 1);
             $this->updateField('id_user_resp', 0);
-                $liste_destinataires = $userClient->getData('email');
-                $liste_destinataires .= $userClient->get_dest('admin');
-                $commerciaux = BimpTools::getCommercialArray($userClient->getData('attached_societe'));
-                foreach ($commerciaux as $id_commercial) {
-                    $liste_destinataires .= ', ' . $id_commercial->email;
-                }
+                $liste_destinataires = Array($userClient->getData('email'));
+                $liste_destinataires = array_merge($liste_destinataires, Array('hotline@bimp.fr'));
+                $liste_destinataires = array_merge($liste_destinataires, $userClient->get_dest('admin'));
+                $liste_destinataires = array_merge($liste_destinataires, $userClient->get_dest('commerciaux'));
+                
                 $prio = 'Non Urgent'; $prio = ($this->getData('priorite') == 2) ? 'Urgent' : $prio; $prio = ($this->getData('priorite') == 3) ? 'Très Urgent' : $prio;
                 $impact = 'Faible'; $impact = ($this->getData('priorite') == 2) ? 'Moyen' : $impact; $impact = ($this->getData('priorite') == 3) ? 'Haut' : $impact;
                 $tmpContrat = $this->getInstance('bimpcontract', 'BContract_contrat', $this->getData('id_contrat'));
-                mailSyn2('BIMP-CLIENT : Création Ticket Support N°' . $this->getData('ticket_number'), $liste_destinataires, 'noreply@bimp.fr',
+                mailSyn2('BIMP-CLIENT : Création Ticket Support N°' . $this->getData('ticket_number'), implode(', ', $liste_destinataires), 'noreply@bimp.fr',
                         '<h3>Ticket support numéro : '.$this->getData('ticket_number').'</h3>'
                         . 'Sujet du ticket : ' . $this->getData('sujet') . '<br />'
                         . 'Demandeur : ' . $userClient->getData('email') . '<br />'
                         . 'Contact dans la société : ' . $this->getData('contact_in_soc') . '<br />'
                         . 'Contrat : ' . $tmpContrat->getData('ref') . '<br />'
-                        . 'Prioritée : ' . $prio . '<br />'
+                        . 'Priorité : ' . $prio . '<br />'
                         . 'Impact : ' . $impact . '<br />'
                         );
                 $tmpContrat = null;

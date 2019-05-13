@@ -138,7 +138,7 @@
             echo DOL_URL_ROOT . '/viewimage.php?cache=1&modulepart=mycompany&file=' . $mysoc->logo
             ?>" style="width: 70%"> 
             <span>
-                <h4>Le changement de votre mot de passe requis</h4>
+                <h4>Le changement de votre mot de passe est requis</h4>
                 <div id="erp_bimp">
                     <label for="password">Nouveau mot de passe</label>
                     <br />

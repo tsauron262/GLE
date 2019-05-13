@@ -72,7 +72,19 @@ function llxHeader() { }
  */
 function llxFooter() { }
 
-require 'main.inc.php';	// Load $user and permissions
+/* moddrsi*/
+define("NO_REDIRECT_LOGIN", 1);
+require_once './bimpcore/main.php';
+require_once DOL_DOCUMENT_ROOT . '/bimpcore/Bimp_Lib.php';
+if(BimpTools::getContext() == "public" && BimpTools::getValue("modulepart") == "bimpcore"){
+    $userC = BimpObject::getInstance("bimpinterfaceclient", "BIC_UserClient");
+    if(method_exists($userC, "init"))
+        $userC->init();
+}
+
+require_once 'main.inc.php';	// Load $user and permissions
+
+/*fmoddrsi*/
 require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 $encoding = '';

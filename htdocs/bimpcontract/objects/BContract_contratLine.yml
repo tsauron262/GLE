@@ -4,10 +4,12 @@ table: contratdet
 parent_id_property: fk_contrat
 parent_object: BContract_contrat
 
+primary: rowid
+
 labels: 
     name: ligne du contrat
     name_plur: lignes du contrat
-    is_female: 0
+    is_female: 1
 
 objects:
     produit:
@@ -24,6 +26,19 @@ fields:
         label: Produit
         type: id_object
         object: produit
+    qty:
+        label: Qté
+        type: qty
+    price_ht:
+        label: P.U HT
+        type: money
+    tva_tx: 
+        label: Taux de TVA
+        type: percent
+        default_value: 20
+    total_ttc: 
+        label: Total TTC
+        type: money
         
 lists: 
     default: 
@@ -32,14 +47,21 @@ lists:
         sort_field: tms
         sort_way: desc
         n: 20
-        add_object_row: 1
-#        add_form_name: create_contrat
-#        add_btn_label: Créer un nouveau contrat
-        edit_btn: 1
+        add_object_row: 0
+        update_btn: 1
+        edit_btn: 0
         edit_form: default
-        delete_btn: 0
-#        modal_view: fiche_contrat
+        delete_btn: 1
         page_btn: 1
         cols: 
             fk_product:
                 field: fk_product
+            qty:
+                field: qty
+            tva_tx:
+                field: tva_tx
+            price_ht:
+                field: price_ht
+            total_ttc:
+                field: total_ttc
+            

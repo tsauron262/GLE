@@ -216,16 +216,13 @@ fields:
         type: int
         values: 
             array: impacts
-        show:
-            callback: it_is_a_customer_request
-  
+
     priorite_demande_client:
-        label: Prioritée lors de la demande client
+        label: Priorité lors de la demande client
         type: int
         values:
             array: priorities
-        show:
-            callback: it_is_a_customer_request
+
     contact_in_soc:
         label: Contact dans la société
         type: string
@@ -263,6 +260,7 @@ fields:
     sujet:
         label: Sujet ticket
         type: html
+        required: 1
         
 forms: 
     default:
@@ -371,7 +369,8 @@ forms:
         rows:
             - field: status
               edit: 0
-            - field: priorite
+            - field: priorite_demande_client
+            - field: impact_demande_client
             - field: sujet
               
                                                 
@@ -396,14 +395,12 @@ fields_tables:
             - field: impact
               edit: 1
             - field: cover
-              edit: 
-                  callback: it_is_not_a_customer_requets
+              edit: 1
             - field: status
               edit:
                   callback: it_is_pris_en_charge
             - field: sujet
-              edit:
-                  callback: it_is_not_a_customer_requets
+              edit: 0
               
     objects:
         title: Elements liés
@@ -431,7 +428,8 @@ fields_tables:
         rows:
             - field: sujet
             - field: status
-            - field: priorite
+            - field: priorite_demande_client
+            - field: impact_demande_client
             - field: id_contrat
             - field: id_user_client
               

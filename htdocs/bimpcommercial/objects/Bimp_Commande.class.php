@@ -5,7 +5,7 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcommercial/objects/BimpComm.class.php';
 class Bimp_Commande extends BimpComm
 {
 
-    public $redirectMode = 4;//5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande';
     public static $email_type = 'order_send';
     public static $status_list = array(
@@ -34,7 +34,7 @@ class Bimp_Commande extends BimpComm
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
         2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
     );
-    public static $logistique_active_status = array(1, 2, 3);
+    public static $logistique_activse_status = array(1, 2, 3);
 
     // Gestion des droits et autorisations: 
 
@@ -1611,7 +1611,14 @@ class Bimp_Commande extends BimpComm
                 $this->dol_object->generateDocument($this->getModelPdf(), $langs);
             }
         } else {
-            $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
+            if (!$this->getData('validComm') || !(int) $this->getData('validFin')) {
+                $comm_errors = BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings);
+                if (count($comm_errors)) {
+                    $errors = array_merge($errors, $comm_errors);
+                }
+            } else {
+                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
+            }
         }
 
         return array(

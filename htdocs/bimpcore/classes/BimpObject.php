@@ -4210,6 +4210,12 @@ class BimpObject extends BimpCache
         return $list->renderHtml();
     }
 
+    public function renderStatsList($list_name = 'default', $title = null, $icon = null)
+    {
+        $list = new BC_StatsList($this, $list_name, null, $title, $icon);
+        return $list->renderHtml();
+    }
+    
     public function renderForm($form_name = 'default', $panel = false, $level = 1)
     {
         $form = new BC_Form($this, null, $form_name, $level, !$panel);

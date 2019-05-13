@@ -1,29 +1,29 @@
 <?php
 
-class BC_StatList extends BC_List
+class BC_StatsList extends BC_List
 {
 
     public $component_name = 'Liste statitique';
-    public static $type = 'list_stats';
+    public static $type = 'stats_list';
 
     public function __construct(BimpObject $object, $name = 'default', $id_parent = null, $title = null, $icon = null)
     {
         $this->params_def['group_by'] = array('data_type' => 'array', 'default' => array(), 'request' => true, 'json' => true);
-        $this->params_def['group_by_options'] = array('type' => 'definitions', 'defs_type' => 'group_by_option', 'default' => array(), 'multiple' => 1);
+        $this->params_def['group_by_options'] = array('data_type' => 'array', 'compile' => true, 'default' => array());
 
         $path = null;
 
         if (!is_null($object)) {
             if (!$name || $name === 'default') {
-                if ($object->config->isDefined('list_stats')) {
-                    $path = 'list_custom';
+                if ($object->config->isDefined('stats_list')) {
+                    $path = 'stats_list';
                     $name = '';
                 } elseif ($object->config->isDefined('list_customs/default')) {
-                    $path = 'list_customs';
+                    $path = 'stats_lists';
                     $name = 'default';
                 }
             } else {
-                $path = 'list_customs';
+                $path = 'stats_lists';
             }
         }
 
@@ -52,6 +52,8 @@ class BC_StatList extends BC_List
             $html .= '<div class="objectlistCustomContainer col-xs-12 col-sm-12 col-md-10 col-lg-10">';
         }
 
+        $html .= $this->renderGroupByOptions();
+
         $html .= '<div id="' . $this->identifier . '_ajax_content" class="list_custom_ajax_content">';
         $html .= $this->renderListContent();
         $html .= '</div>';
@@ -69,14 +71,42 @@ class BC_StatList extends BC_List
     {
         $html = '';
 
-        if (is_null($this->items)) {
-            $this->fetchItems();
-        }
+//        if (is_null($this->items)) {
+//            $this->fetchItems();
+//        }
 
-        if (method_exists($this->object, $this->params['content_callback'])) {
-            $html .= $this->object->{$this->params['content_callback']}($this->items);
-        } else {
-            $html .= BimpRender::renderAlerts('Erreur de configuration: aucun contenu défini pour cette section');
+        $html .= 'ICI LIST';
+        
+        return $html;
+    }
+
+    public function renderGroupByOptions()
+    {
+        $html = '';
+
+        if (!empty($this->params['group_by_options'])) {
+            $group_by_options = array();
+
+            foreach ($this->params['group_by_options'] as $groupByOption) {
+                if (is_string($groupByOption)) {
+                    if ($this->object->field_exists($groupByOption)) {
+                        $label = $this->object->getConf('fields/' . $groupByOption . '/label', $groupByOption);
+                        $group_by_options[$groupByOption] = $label;
+                    }
+                }
+            }
+
+            $html .= '<div id="' . $this->identifier . '_group_by_optons" class="stats_list_group_by_options">';
+
+            $html .= '<h3>Grouper les résultats par: </h3>';
+
+            $input = BimpInput::renderInput('', 'group_by_add_value', $this->params['group_by'], array(
+                        'options' => $group_by_options
+            ));
+            $content = BimpInput::renderMultipleValuesInput($this, 'group_by', $input, $this->params['group_by'], '', 0, 1, 1);
+            $html .= BimpInput::renderInputContainer('cols', '', $content, '', 0, 1, '', array('values_field' => 'group_by'));
+
+            $html .= '</div>';
         }
 
         return $html;

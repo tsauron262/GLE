@@ -10,6 +10,7 @@ include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 class synopsisHook {//FA1506-0369
 
     static $timeDeb = 0;
+    static $timeDebRel = 0;
     private static $MAX_TIME_LOG = 5;
     private static $MAX_REQ_LOG = 1000;
     private static $reload = false;
@@ -177,6 +178,7 @@ class synopsisHook {//FA1506-0369
     static function getHeader() {
         global $db, $langs, $isMobile, $conf, $user;
         self::$timeDeb = microtime(true);
+        self::$timeDebRel = microtime(true);
         
         
         $admin = false;
@@ -270,6 +272,16 @@ class synopsisHook {//FA1506-0369
 
         return $return;
     }
+    
+    static function getTime($relatif = false){
+        if($relatif){
+            $return = (microtime(true) - self::$timeDebRel);
+            self::$timeDebRel = microtime(true);
+        }
+        else
+            $return = (microtime(true) - self::$timeDeb);
+        return $return;
+    }
 
     static function footer() {
         global $conf, $db, $logLongTime, $user;
@@ -290,7 +302,7 @@ class synopsisHook {//FA1506-0369
 
         $nbReq = $db->countReq;
 
-        $time = (microtime(true) - self::$timeDeb);
+        $time = self::getTime();
         if ($time > self::$MAX_TIME_LOG && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages lente " . $time . " s", 4, 0, "_time");
         if ($nbReq > self::$MAX_REQ_LOG && (!isset($logLongTime) || $logLongTime))

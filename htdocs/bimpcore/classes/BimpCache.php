@@ -672,7 +672,10 @@ class BimpCache
             $cache_key .= '_active_only';
         }
         if (!isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = array();
+            if($include_empty)
+                self::$cache[$cache_key] = array(""=>"");
+            else
+                self::$cache[$cache_key] = array();
 
             if ($active_only) {
                 $where = '`statut` != 0';
@@ -707,13 +710,16 @@ class BimpCache
 
     // Group: 
 
-    public static function getGroupsArray($include_empty = 0)
+    public static function getGroupsArray($include_empty = 1)
     {
         global $conf, $langs;
 
         $cache_key = 'groups';
         if (!isset(self::$cache[$cache_key])) {
-            self::$cache[$cache_key] = array();
+            if($include_empty)
+                self::$cache[$cache_key] = array(""=>"");
+            else
+                self::$cache[$cache_key] = array();
 
 
             $rows = self::getBdb()->getRows('usergroup', '1', null, 'object', array('rowid', 'nom'), 'nom', 'asc');

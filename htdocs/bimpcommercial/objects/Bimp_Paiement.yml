@@ -49,7 +49,7 @@ forms:
                   societe_type: customer
               required: 1
               value: 
-                  callback: getClient
+                  request_field: id_client
             - custom: 1
               label: Caisse
               data_type: id_object
@@ -96,7 +96,7 @@ forms:
               input: 
                   type: select_remises
                   id_client: 
-                      callback: getClient
+                      request_field: id_client
                   multiple: 1
               display_if: 
                   field_name: id_client

@@ -111,3 +111,17 @@ fields:
         type: items_list
         items_data_type: id_object
         object: category
+     
+filters_panels: 
+    default: 
+        filters: 
+            dates: 
+                field: date
+            entrepot: 
+                field: id_entrepot
+        
+stats_lists: 
+    default: 
+        filters_panel: default
+        
+        

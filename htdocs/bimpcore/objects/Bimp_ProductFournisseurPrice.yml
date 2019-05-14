@@ -76,6 +76,28 @@ fields:
             type: hidden
 
     
-        
-    
-        
+lists: 
+    default: 
+        title: Liste des fournisseurs du produit
+        icon: fas_box
+        sort_field: id
+        sort_way: desc
+        n: 50
+        page_btn: 1
+        edit_btn: 1
+        edit_form: light
+        add_form_name: light
+        cols: 
+            - field: fk_soc
+              display: nom_url
+            - field: ref_fourn
+            - field: quantity
+            - field: tva_tx
+            - field: price
+            - field: remise_percent
+            
+            
+fields_tables:
+    prices_buy:
+        title: Prix d'achat
+        rows:

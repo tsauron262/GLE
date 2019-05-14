@@ -1117,10 +1117,10 @@ class BimpObject extends BimpCache
 
             if (!$this->canSetStatus($new_status)) {
                 $errors[] = 'Vous n\'avez pas la permission de passer ' . $this->getLabel('this') . ' au statut "' . $status_label . '"';
-            } else {
+            } elseif ($this->isNewStatusAllowed($new_status, $errors)) {
                 $error_msg = 'Impossible de passer ' . $object_label;
                 $error_msg .= ' au statut "' . $status_label . '"';
-
+                
                 if (!$this->isLoaded()) {
                     $errors[] = $error_msg . ' ID ' . $this->getLabel('of_the') . ' absent';
                 } else {
@@ -3584,7 +3584,7 @@ class BimpObject extends BimpCache
         return 1;
     }
 
-    public function isNewStatusAllowed($new_status)
+    public function isNewStatusAllowed($new_status, &$errors = array())
     {
         return 1;
     }
@@ -4212,6 +4212,12 @@ class BimpObject extends BimpCache
         return $list->renderHtml();
     }
 
+    public function renderStatsList($list_name = 'default', $title = null, $icon = null)
+    {
+        $list = new BC_StatsList($this, $list_name, null, $title, $icon);
+        return $list->renderHtml();
+    }
+    
     public function renderForm($form_name = 'default', $panel = false, $level = 1)
     {
         $form = new BC_Form($this, null, $form_name, $level, !$panel);

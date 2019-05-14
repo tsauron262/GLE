@@ -69,5 +69,9 @@ class BimpConfigDefinitions
         'icon'    => array('required' => true),
         'onclick' => array('default' => '')
     );
+    
+    public static $group_by_option = array(
+        'field' => array('default' => '')
+    );
 
 }

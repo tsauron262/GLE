@@ -1228,10 +1228,15 @@ class BimpInput
         if (is_null($value)) {
             $value = '';
         }
+        
         if (is_array($value)) {
             $value = implode(',', $value);
         }
 
+        if (is_string($value)) {
+            $value = htmlentities($value);
+        }
+        
         $html .= '<div class="inputContainer ' . $field_prefix . $input_name . '_inputContainer ' . $extra_class . '"';
         $html .= ' data-field_name="' . $field_prefix . $input_name . '"';
         $html .= ' data-initial_value="' . htmlentities($value) . '"';

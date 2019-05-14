@@ -16,10 +16,10 @@ class BimpStruct
         }
 
         switch ($type) {
-            case 'page': 
-                $html = self::renderObjectPage($config, $path.'/page', $parent_component);
+            case 'page':
+                $html = self::renderObjectPage($config, $path . '/page', $parent_component);
                 break;
-                
+
             case 'object_header':
 //                if ($config->isDefined($path . '/object_header')) {
                 $html = self::renderObjectHeader($config, $path . '/object_header', $parent_component);
@@ -44,15 +44,22 @@ class BimpStruct
                 }
                 break;
 
-            case 'list_custom': 
+            case 'list_custom':
                 if ($config->isDefined($path . '/list_custom')) {
                     $html = self::renderListCustom($config, $path . '/list_custom', $parent_component);
                 } else {
                     // logError
                 }
                 break;
-            
-            
+
+            case 'stats_list':
+                if ($config->isDefined($path . '/stats_list')) {
+                    $html = self::renderStatsList($config, $path . '/stats_list', $parent_component);
+                } else {
+                    // logError
+                }
+                break;
+
             case 'form':
                 if ($config->isDefined($path . '/form')) {
                     $html = self::renderForm($config, $path . '/form', $parent_component);
@@ -141,26 +148,26 @@ class BimpStruct
         $config->setCurrentPath($prev_path);
         return $html;
     }
-    
+
     public static function renderObjectPage(BimpConfig $config, $path, &$parent_component = null)
     {
         $html = '';
-        
+
         if ($config->isDefined($path . '/object')) {
             $object = $config->getObject($path . '/object');
         } else {
             $object = $config->instance;
         }
-        
+
         if (is_null($object) || !is_a($object, 'BimpObject')) {
             $html .= BimpRender::renderAlerts('Objet non trouvé');
         } else {
-            $name = $config->get($path.'/name', 'default');
+            $name = $config->get($path . '/name', 'default');
             $page = new BC_Page($object, $name, false);
-            
+
             $html .= $page->renderHtml();
         }
-        
+
         return $html;
     }
 
@@ -241,7 +248,7 @@ class BimpStruct
         $config->setCurrentPath($prev_path);
         return $html;
     }
-    
+
     public static function renderListCustom(BimpConfig $config, $path, &$parent_component = null)
     {
         $html = '';
@@ -260,7 +267,33 @@ class BimpStruct
             $name = $config->getFromCurrentPath('name', 'default');
             $title = $config->getFromCurrentPath('title', null);
             $icon = $config->getFromCurrentPath('icon', null);
-            
+
+            $html = $object->renderListCustom($name, $title, $icon);
+        }
+
+        $config->setCurrentPath($prev_path);
+        return $html;
+    }
+
+    public static function renderStatsList(BimpConfig $config, $path, &$parent_component = null)
+    {
+        $html = '';
+        $prev_path = $config->current_path;
+        $config->setCurrentPath($path);
+
+        $object = $config->getObject($path . '/object');
+
+        if (is_null($object)) {
+            if (is_a($config->instance, 'BimpObject')) {
+                $object = $config->instance;
+            }
+        }
+
+        if (!is_null($object)) {
+            $name = $config->getFromCurrentPath('name', 'default');
+            $title = $config->getFromCurrentPath('title', null);
+            $icon = $config->getFromCurrentPath('icon', null);
+
             $html = $object->renderListCustom($name, $title, $icon);
         }
 

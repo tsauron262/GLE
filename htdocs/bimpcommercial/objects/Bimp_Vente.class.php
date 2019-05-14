@@ -116,7 +116,7 @@ class Bimp_Vente extends BimpObject
                 return $join_alias . '.' . self::$facture_extrafields[$field];
             }
         } elseif ($field === 'categories') {
-            
+            // todo...
         }
 
         return '';

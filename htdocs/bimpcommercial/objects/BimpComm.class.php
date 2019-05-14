@@ -125,13 +125,13 @@ class BimpComm extends BimpDolObject
                 ))
             );
         }
-        
-        
+
+
         $note = BimpObject::getInstance("bimpcore", "BimpNote");
         $buttons[] = array(
             'label'   => 'Message logistique ',
             'icon'    => 'far fa-paper-plane',
-            'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest"=>$note::BN_DEST_GROUP, "fk_group_dest"=>$note::BN_GROUPID_LOGISTIQUE, "content"=>""), array('form_name' => 'rep'))
+            'onclick' => $note->getJsActionOnclick('repondre', array("obj_type" => "bimp_object", "obj_module" => $this->module, "obj_name" => $this->object_name, "id_obj" => $this->id, "type_dest" => $note::BN_DEST_GROUP, "fk_group_dest" => $note::BN_GROUPID_LOGISTIQUE, "content" => ""), array('form_name' => 'rep'))
         );
 
         return $buttons;
@@ -583,10 +583,10 @@ class BimpComm extends BimpDolObject
                 if ($product->fetch_product_fournisseur_price($line->fk_fournprice))
                     $line->pa_ht = $product->fourn_unitprice * (1 - $product->fourn_remise_percent / 100);
             }
-            if($bimp_line->getData("remise_pa") > 0){
+            if ($bimp_line->getData("remise_pa") > 0) {
                 $line->pa_ht = $line->pa_ht * (100 - $bimp_line->getData("remise_pa")) / 100;
             }
-            
+
             // si prix d'achat non renseigné et devrait l'être, alors prix achat = prix vente
             if ((!isset($line->pa_ht) || $line->pa_ht == 0) && $line->subprice > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)) {
                 $line->pa_ht = $line->subprice * (1 - ($line->remise_percent / 100));
@@ -1634,13 +1634,13 @@ class BimpComm extends BimpDolObject
             }
 
             // Création des lignes absentes de l'objet bimp: 
-            $objectLine = BimpObject::getInstance($bimp_line->module, $bimp_line->object_name);
-            $objectLine->parent = $this;
             $bimp_line->reset();
             $i = 0;
             foreach ($dol_lines as $id_dol_line => $dol_line) {
                 $i++;
-                if (!array_key_exists($id_dol_line, $bimp_lines) && method_exists($objectLine, 'createFromDolLine')) {
+                if (!array_key_exists($id_dol_line, $bimp_lines) && method_exists($bimp_line, 'createFromDolLine')) {
+                    $objectLine = BimpObject::getInstance($bimp_line->module, $bimp_line->object_name);
+                    $objectLine->parent = $this;
                     $line_errors = $objectLine->createFromDolLine((int) $this->id, $dol_line, $warnings);
                     if (count($line_errors)) {
                         $errors[] = BimpTools::getMsgFromArray($line_errors, 'Des erreurs sont survenues lors de la récupération des données pour la ligne n° ' . $i);

@@ -275,6 +275,42 @@ class BC_Field extends BimpComponent
         return self::renderDisplayifDataStatic($this->params['display_if'], $this->name_prefix);
     }
 
+    public function checkDisplayIf()
+    {
+        if (isset($this->params['display_if']['field_name'])) {
+            $field = $this->params['display_if']['field_name'];
+            if ($field && $this->object->field_exists($field)) {
+                $field_value = $this->object->getData($field);
+
+                if (isset($this->params['display_if']['show_values'])) {
+                    $show_values = $this->params['display_if']['show_values'];
+                    if (!is_array($show_values)) {
+                        $show_values = explode(',', $show_values);
+                    }
+                    
+                    if (!in_array($field_value, $show_values)) {
+                        return 0;
+                    }
+                }
+                
+                if (isset($this->params['display_if']['hide_values'])) {
+                    $hide_values = $this->params['display_if']['hide_values'];
+                    if (!is_array($hide_values)) {
+                        $hide_values = explode(',', $hide_values);
+                    }
+                    
+                    if (in_array($field_value, $hide_values)) {
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        // todo : ajouter display_if/fields_names
+        
+        return 1;
+    }
+
     public static function renderDisplayifDataStatic($params, $name_prefix = '')
     {
         $html = '';

@@ -108,7 +108,7 @@ class Bimp_CommandeLine extends ObjectLine
             $onclick .= $commande->id . ', ' . (int) $id_client_facture . ', ';
             $onclick .= (($id_client_facture === (int) $commande->getData('fk_soc')) ? (int) $commande->dol_object->contactid : 0) . ', ';
             $onclick .= (int) $commande->getData('fk_cond_reglement') . ')';
-            
+
             $actions[] = array(
                 'label'   => 'Quantités facture',
                 'icon'    => 'fas_file-invoice-dollar',
@@ -389,6 +389,12 @@ class Bimp_CommandeLine extends ObjectLine
 
     public function getShipmentData($id_shipment)
     {
+        // *** Shipment Data *** 
+        // qty: float
+        // group: bool
+        // shipped: bool
+        // equipments: array (liste id_equipment) 
+
         $shipments = $this->getData('shipments');
 
         if (isset($shipments[(int) $id_shipment])) {
@@ -428,35 +434,52 @@ class Bimp_CommandeLine extends ObjectLine
     public function getReadyToShipQty($id_shipment)
     {
         if ((int) $this->getData('type') === self::LINE_PRODUCT) {
+            $commande = $this->getParentInstance();
+
+            if (!BimpObject::objectLoaded($commande)) {
+                return 0;
+            }
+
+            $qty = 0;
+
             if ($this->isProductSerialisable()) {
                 $shipments = $this->getData('shipments');
                 if (is_array($shipments) && isset($shipments[(int) $id_shipment]['equipments']) && is_array($shipments[(int) $id_shipment]['equipments'])) {
-                    return count($shipments[(int) $id_shipment]['equipments']);
+
+                    foreach ($shipments[(int) $id_shipment]['equipments'] as $id_equipment) {
+                        BimpObject::loadClass('bimpreservation', 'BR_Reservation');
+                        $reservation = BimpCache::findBimpObjectInstance('bimpreservation', 'BR_Reservation', array(
+                                    'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                                    'id_commande_client'      => (int) $commande->id,
+                                    'id_commande_client_line' => $this->id,
+                                    'status'                  => 200,
+                                    'id_equipment'            => (int) $id_equipment
+                        ));
+
+                        if (BimpObject::objectLoaded($reservation)) {
+                            $qty++;
+                        }
+                    }
                 }
-                return 0;
             } else {
                 $product = $this->getProduct();
-
                 if ($product->getData('fk_product_type') === 0) {
                     $reservation = BimpObject::getInstance('bimpreservation', 'BR_Reservation');
-                    $commande = $this->getParentInstance();
-                    if (BimpObject::objectLoaded($commande)) {
-                        $rows = $reservation->getList(array(
-                            'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
-                            'id_commande_client'      => (int) $commande->id,
-                            'id_commande_client_line' => $this->id,
-                            'status'                  => 200
-                                ), null, null, 'id', 'asc', 'array', array('qty'));
-                        if (!is_null($rows)) {
-                            $qty = 0;
-                            foreach ($rows as $r) {
-                                $qty += (int) $r['qty'];
-                            }
-                            return $qty;
+                    $rows = $reservation->getList(array(
+                        'type'                    => BR_Reservation::BR_RESERVATION_COMMANDE,
+                        'id_commande_client'      => (int) $commande->id,
+                        'id_commande_client_line' => $this->id,
+                        'status'                  => 200
+                            ), null, null, 'id', 'asc', 'array', array('qty'));
+                    if (!is_null($rows)) {
+                        foreach ($rows as $r) {
+                            $qty += (int) $r['qty'];
                         }
                     }
                 }
             }
+
+            return $qty;
         }
 
         return (float) $this->getShippedQty($id_shipment);
@@ -2043,6 +2066,30 @@ class Bimp_CommandeLine extends ObjectLine
             $errors = array_merge($errors, $warnings);
         }
 
+        return $errors;
+    }
+
+    public function removeEquipmentFromShipment($id_equipment)
+    {
+        $errors = array();
+
+        $shipments = $this->getData('shipments');
+
+        foreach ($shipments as $id_shipment => $shipment_data) {
+            if (isset($shipment_data['equipments']) && in_array((int) $id_equipment, $shipment_data['equipments'])) {
+                $shipment = BimpCache::getBimpObjectInstance('bimplogistique', 'BL_CommandeShipment', (int) $id_shipment);
+                if (in_array((int) $shipment->getData('status'), array(BL_CommandeShipment::BLCS_BROUILLON, BL_CommandeShipment::BLCS_ANNULEE))) {
+                    $shipments[(int) $id_shipment]['equipments'] = BimpTools::unsetArrayValue($shipment_data['equipments'], (int) $id_equipment);
+                    $this->updateField('shipments', $shipments);
+                } else {
+                    $equipment = BimpCache::getBimpObjectInstance('bimpequipment', 'Equipment', (int) $id_equipment);
+                    $msg = 'L\'équipement "' . $equipment->getData('serial') . '" ne peut pas être retiré de l\'expédition n°';
+                    $msg .= $shipment->getData('num_livraison') . ' car celle-ci a le statut "' . BL_CommandeShipment::$status_list[$shipment->getData('status')]['label'] . '"';
+                    $errors[] = $msg;
+                }
+            }
+        }
+        
         return $errors;
     }
 

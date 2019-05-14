@@ -173,7 +173,16 @@ function onReserveEquipmentsFormLoaded($form) {
     if (!parseInt($form.data('reserve_equipment_events_init'))) {
         var $input = $form.find('[name="search_serial"]');
         if ($input.length) {
-            $input.focus();
+
+            $input.focus(function () {
+                var $container = $(this).findParentByClass('addValueInputContainer');
+                if ($.isOk($container)) {
+                    var $select = $container.find('[name="equipments_add_value"]');
+                    if ($select.length) {
+                        $select.val('').change();
+                    }
+                }
+            });
             $input.keyup(function (e) {
                 if (e.key === 'Enter' || e.key === 'Tab') {
                     e.preventDefault();
@@ -182,25 +191,39 @@ function onReserveEquipmentsFormLoaded($form) {
                     if (serial) {
                         var $container = $(this).findParentByClass('addValueInputContainer');
                         if ($.isOk($container)) {
-                            var $select = $container.find('[name="equipments_add_value"]');
-                            if ($select.length) {
-                                var done = false;
-                                $select.find('option').each(function () {
-                                    if (serial === $(this).text()) {
-                                        $input.val('');
-                                        $select.val($(this).attr('value')).change();
-                                        $container.find('.addValueBtn').click();
-                                        done = true;
-                                    }
-                                });
-                                if (!done) {
-                                    bimp_msg('Ce numéro de série n\'a pas été trouvé parmi les équipements disponibles', 'warning');
-                                }
-                            }
+                            $container.find('.addValueBtn').click();
                         }
                     }
                 }
             });
+            
+            var $container = $input.findParentByClass('addValueInputContainer');
+            if ($.isOk($container)) {
+                var $btn = $container.find('.addValueBtn');
+                $btn.removeAttr('onclick').click(function () {
+                    var serial = $input.val();
+                    if (serial) {
+                        var $select = $container.find('[name="equipments_add_value"]');
+                        if ($select.length) {
+                            var done = false;
+                            $select.find('option').each(function () {
+                                if (serial === $(this).text()) {
+                                    $input.val('');
+                                    $select.val($(this).attr('value')).change();
+                                    done = true;
+                                }
+                            });
+                            if (!done) {
+                                bimp_msg('Le numéro de série saisi n\'a pas été trouvé parmi les équipements disponibles', 'warning');
+                                return;
+                            }
+                        }
+                    }
+                    addMultipleInputCurrentValue($btn, 'equipments_add_value', 'equipments_add_value', false);
+                });
+            }
+
+            $input.focus();
         }
         $form.data('reserve_equipment_events_init', 1);
     }

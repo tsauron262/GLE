@@ -17,6 +17,39 @@ class BimpTools
     );
     private static $context = "";
 
+    public static function getCommercialArray($socid)
+    {
+        // Cette fonction n'a rien à faire ici, daplacée dans BimpCache, deplus quelques erreurs dans le code: une même instance est affecté à chaque entrée du tableau.
+        // Donc: toutes les entrées du tableau contiendront le dernier user qui aura été fetché. 
+        
+        return BimpCache::getSocieteCommerciauxObjectsList($socid);
+        
+//        global $db;
+//        $conf;
+//        require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
+//        $bimp = new BimpDb($db);
+//        $return = Array();
+//        $comm_list = $bimp->getRows('societe_commerciaux', 'fk_soc = ' . $socid);
+//        $need_default = true;
+//        $instance = new User($db);
+//        if (count($comm_list) > 0) {
+//            foreach ($comm_list as $comm) {
+//                $instance->fetch($comm->fk_user);
+//                if ($instance->statut == 1) {
+//                    $return[$comm->fk_user] = $instance;
+//                    $need_default = false;
+//                }
+//            }
+//        }
+//        if ($need_default) {
+//            $default_id_commercial = BimpCore::getConf('default_id_commercial');
+//            $instance->fetch($default_id_commercial);
+//            $return[$default_id_commercial] = $instance;
+//        }
+//        $instance = null;
+//        return $return;
+    }
+    
     // Gestion GET / POST
 
     public static function isSubmit($key)
@@ -42,32 +75,6 @@ class BimpTools
             }
         }
         return 1;
-    }
-    
-    public static function getCommercialArray($socid) {
-        global $db; $conf;
-        require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
-        $bimp = new BimpDb($db);
-        $return = Array();
-        $comm_list = $bimp->getRows('societe_commerciaux', 'fk_soc = ' . $socid);
-        $need_default = true;
-        $instance = new User($db);
-        if(count($comm_list) > 0) {
-            foreach ($comm_list as $comm) {
-                $instance->fetch($comm->fk_user);
-                if($instance->statut == 1) {
-                    $return[$comm->fk_user] = $instance;
-                    $need_default = false;
-                }
-            }
-        }
-        if($need_default) {
-            $default_id_commercial = BimpCore::getConf('default_id_commercial');
-            $instance->fetch($default_id_commercial);
-            $return[$default_id_commercial] = $instance;
-        }
-        $instance = null;
-        return $return;
     }
 
     public static function getValue($key, $default_value = null, $decode = true)
@@ -370,21 +377,21 @@ class BimpTools
             }
         }
     }
-    
+
     public static function getObjectFilePath($object, $full_path = false)
     {
         if (is_object($object)) {
             $refl = new ReflectionClass($object);
             $file = $refl->getFileName();
-            
+
             if (!$full_path) {
                 $file = preg_replace('/^.*htdocs\/(.*)$/', '$1', $file);
             }
-            
+
             unset($refl);
             return $file;
         }
-        
+
         return '';
     }
 
@@ -1431,31 +1438,8 @@ class BimpTools
         return (float) round($amout_tax_ex * $rate, $precision);
     }
 
-    // Divers:
-
-    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false)
-    {
-        $html = '';
-
-        if ($with_styles) {
-            $html .= '<span style="';
-            if ((float) $value != 0) {
-                $html .= 'font-weight: bold;';
-            }
-            if ((float) $value < 0) {
-                $html .= 'color: #A00000;';
-            }
-            $html .= '">';
-        }
-
-        $html .= str_replace('.', $separator, '' . (round((float) $value, $decimals)));
-
-        if ($with_styles) {
-            $html .= '</span>';
-        }
-        return $html;
-    }
-
+    // Traitements sur des strings: 
+     
     public static function ucfirst($str)
     {
         if (preg_match('/^[éèêëàâäïîöôùûüŷÿ].*/', $str)) {
@@ -1487,6 +1471,104 @@ class BimpTools
         }
 
         return lcfirst($str);
+    }
+    
+    public static function replaceBr($text, $replacement = "\n")
+    {
+        return preg_replace("/<[ \/]*br[ \/]*>/", $replacement, $text);
+    }
+
+    public static function cleanString($string)
+    {
+        $string = str_replace("\xc2\xa0", ' ', $string);
+        $string = str_replace("  ", " ", $string);
+
+        return $string;
+    }
+    
+    // Traitements sur des array: 
+    
+    public static function getMsgFromArray($msgs, $title = '')
+    {
+        $msg = '';
+        if ($title) {
+            $msg .= $title . ' : <br/>';
+        }
+
+        if (is_array($msgs)) {
+//            $msg .= '<div style="padding-left: 15px">';
+            $msg .= '<ul>';
+//            $fl = true;
+            foreach ($msgs as $m) {
+//                if (!$fl) {
+//                    $msg .= '<br/>';
+//                } else {
+//                    $fl = false;
+//                }
+//                $msg .= ' - ' . $m;
+                $msg .= '<li>' . $m . '</li>';
+            }
+            $msg .= '</ul>';
+//            $msg .= '</div>';
+        } else {
+            $msg .= '&nbsp;&nbsp;&nbsp;&nbsp;- ' . $msgs;
+        }
+
+        return $msg;
+    }
+    
+    public static function unsetArrayValue($array, $value)
+    {
+        if (is_array($array)) {
+            foreach ($array as $key => $val) {
+                if ($val == $value) {
+                    unset($array[$key]);
+                }
+            }
+        }
+        
+        return $array;
+    }
+    
+    // Divers:
+
+    public static function getContext()
+    {
+        if (self::$context != "")
+            return self::$context;
+
+        if (isset($_REQUEST['context'])) {
+            self::setContext($_REQUEST['context']);
+        }
+
+        if (isset($_SESSION['context'])) {
+            return $_SESSION['context'];
+        }
+
+        return "";
+    }
+
+    public static function displayFloatValue($value, $decimals = 2, $separator = ',', $with_styles = false)
+    {
+        $html = '';
+
+        if ($with_styles) {
+            $html .= '<span style="';
+            if ((float) $value != 0) {
+                $html .= 'font-weight: bold;';
+            }
+            if ((float) $value < 0) {
+                $html .= 'color: #A00000;';
+            }
+            $html .= '">';
+        }
+
+        $html .= str_replace('.', $separator, '' . (round((float) $value, $decimals)));
+
+        if ($with_styles) {
+            $html .= '</span>';
+        }
+        return $html;
     }
 
     public static function getAlertColor($class)
@@ -1566,48 +1648,6 @@ class BimpTools
         }
 
         return $url;
-    }
-
-    public static function getMsgFromArray($msgs, $title = '')
-    {
-        $msg = '';
-        if ($title) {
-            $msg .= $title . ' : <br/>';
-        }
-
-        if (is_array($msgs)) {
-//            $msg .= '<div style="padding-left: 15px">';
-            $msg .= '<ul>';
-//            $fl = true;
-            foreach ($msgs as $m) {
-//                if (!$fl) {
-//                    $msg .= '<br/>';
-//                } else {
-//                    $fl = false;
-//                }
-//                $msg .= ' - ' . $m;
-                $msg .= '<li>' . $m . '</li>';
-            }
-            $msg .= '</ul>';
-//            $msg .= '</div>';
-        } else {
-            $msg .= '&nbsp;&nbsp;&nbsp;&nbsp;- ' . $msgs;
-        }
-
-        return $msg;
-    }
-
-    public static function replaceBr($text, $replacement = "\n")
-    {
-        return preg_replace("/<[ \/]*br[ \/]*>/", $replacement, $text);
-    }
-    
-    public static function cleanString($string)
-    {
-        $string = str_replace("\xc2\xa0", ' ', $string);
-        $string = str_replace("  ", " ", $string);
-        
-        return $string;
     }
 
     // Gestion des couleurs: 
@@ -1735,21 +1775,5 @@ class BimpTools
     {
         self::$context = $context;
         $_SESSION['context'] = $context;
-    }
-
-    public static function getContext()
-    {
-        if (self::$context != "")
-            return self::$context;
-
-        if (isset($_REQUEST['context'])) {
-            self::setContext($_REQUEST['context']);
-        }
-
-        if (isset($_SESSION['context'])) {
-            return $_SESSION['context'];
-        }
-
-        return "";
     }
 }

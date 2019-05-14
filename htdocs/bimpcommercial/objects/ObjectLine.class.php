@@ -699,6 +699,10 @@ class ObjectLine extends BimpObject
             }
         }
 
+        if (isset($this->{$field}) && !is_null($this->{$field})) {
+            return $this->{$field};
+        }
+
         switch ($field) {
             case 'remisable':
                 return (int) $this->getData('remisable');
@@ -893,7 +897,7 @@ class ObjectLine extends BimpObject
     public function isFieldEditable($field, $force_edit = false)
     {
         global $user;
-        if(in_array($field, array("pu_ht"))){
+        if (in_array($field, array("pu_ht"))) {
             return $this->canEditPrixVente();
         }
 //        
@@ -1279,6 +1283,7 @@ class ObjectLine extends BimpObject
                     }
                     $errors[] = $msg;
                 } else {
+                    $parent_status = (int) $parent->getData('fk_statut');
                     $this->parent->set("fk_statut", 0);
                     $this->fetch($id, $this->parent);
 
@@ -1302,6 +1307,8 @@ class ObjectLine extends BimpObject
                     if ($this->equipment_required) {
                         $this->createEquipmentsLines();
                     }
+
+                    $this->parent->set("fk_statut", $parent_status);
                 }
             }
         }
@@ -3604,8 +3611,8 @@ class ObjectLine extends BimpObject
         if (isset($user->rights->bimpcommercial->priceVente) && (int) $user->rights->bimpcommercial->priceVente == 1) {
             return 1;
         }
-        if($this->getChildObject("product") && $this->getChildObject("product")->id > 0)
-            if($this->getChildObject("product")->getData("price") == 1 || $this->getChildObject("product")->getData("price") == 0)
+        if ($this->getChildObject("product") && $this->getChildObject("product")->id > 0)
+            if ($this->getChildObject("product")->getData("price") == 1 || $this->getChildObject("product")->getData("price") == 0)
                 return 1;
         return 0;
     }

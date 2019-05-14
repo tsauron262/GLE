@@ -34,7 +34,7 @@ class Bimp_Commande extends BimpComm
         1 => array('label' => 'Facturée partiellement', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('warning')),
         2 => array('label' => 'Facturée', 'icon' => 'fas_file-invoice-dollar', 'classes' => array('success'))
     );
-    public static $logistique_activse_status = array(1, 2, 3);
+    public static $logistique_active_status = array(1, 2, 3);
 
     // Gestion des droits et autorisations: 
 
@@ -1784,7 +1784,7 @@ class Bimp_Commande extends BimpComm
     {
         $errors = array();
         $warnings = array();
-        $success = 'Tous les nouveaux statuts ont été enregistrés avec succès';
+        $success = '';
 
         $reservations = isset($data['reservations']) ? $data['reservations'] : array();
         $status = isset($data['status']) ? (int) $data['status'] : null;
@@ -1794,6 +1794,7 @@ class Bimp_Commande extends BimpComm
         } elseif (is_null($status)) {
             $errors[] = 'Nouveau statut non spécifié';
         } else {
+            $n_success = 0;
             foreach ($reservations as $id_reservation) {
                 $reservation = BimpCache::getBimpObjectInstance('bimpreservation', 'BR_Reservation', (int) $id_reservation);
                 if (!BimpObject::objectLoaded($reservation)) {
@@ -1804,15 +1805,41 @@ class Bimp_Commande extends BimpComm
                     if (!BimpObject::objectLoaded($line)) {
                         $warnings[] = 'La réservation d\'ID ' . $id_reservation . ' n\'est pas associée à une ligne de commande valide';
                     } else {
-                        $res_errors = $reservation->setNewStatus($status);
-
-                        if (count($res_errors)) {
+                        if ((int) $reservation->getData('status') >= 300) {
                             $title = 'Ligne n° ' . $line->getData('position') . ': ';
                             $title .= 'statut "' . BR_Reservation::$status_list[(int) $reservation->getData('status')]['label'] . '"';
-                            $warnings[] = BimpTools::getMsgFromArray($res_errors, $title);
+                            $warnings[] = $title . ': ce statut n\'est plus modifiable';
+                        } else {
+                            $res_errors = array();
+
+                            if (!count($res_errors)) {
+                                $res_errors = $reservation->setNewStatus($status);
+                            }
+
+                            if (count($res_errors)) {
+                                $title = 'Ligne n° ' . $line->getData('position') . ': ';
+                                $title .= 'statut "' . BR_Reservation::$status_list[(int) $reservation->getData('status')]['label'] . '"';
+                                $warnings[] = BimpTools::getMsgFromArray($res_errors, $title);
+                            } else {
+                                $n_success++;
+                            }
                         }
                     }
                 }
+            }
+            if ($n_success > 0) {
+                if ($n_success === count($reservations)) {
+                    $success = 'Tous les nouveaux statuts ont été enregistrés avec succès';
+                } else {
+                    if ($n_success > 1) {
+                        $success = $n_success . ' statuts ont été mis à jour avec succès';
+                    } else {
+                        $success = '1 statut a été mis à jour avec succès';
+                    }
+                }
+            } else {
+                $errors = $warnings;
+                $warnings = array();
             }
         }
 

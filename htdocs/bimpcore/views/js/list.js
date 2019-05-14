@@ -760,6 +760,11 @@ function cancelObjectRowModifications(list_id, id_object, $button) {
         var field_name = $(this).data('field_name');
         var $input = $(this).find('[name="' + field_name + '"]');
         var initial_value = $(this).data('initial_value');
+
+        if (typeof (initial_value) === 'string' && initial_value) {
+            initial_value = bimp_htmlDecode(initial_value);
+        }
+
         if ($input.length) {
             $input.val(initial_value).change();
         }
@@ -796,6 +801,11 @@ function checkRowModifications($row) {
             if (field_name) {
                 var $input = $(this).find('[name="' + field_name + '"]');
                 var initial_value = $(this).data('initial_value');
+
+                if (typeof (initial_value) === 'string') {
+                    initial_value = bimp_htmlDecode(initial_value);
+                }
+
                 if ($input.length) {
                     if (initial_value != $input.val()) {
                         $input.addClass('modified');
@@ -968,7 +978,7 @@ function checkListWidth($list) {
         }
 
         var panel_width = $panelBody.width();
-        
+
         if (width > panel_width) {
             offset = Math.round(panel_width - width);
         }

@@ -115,7 +115,7 @@ class BS_Inter extends BimpObject
             if (is_null($timer)) {
                 $timer = BimpObject::getInstance('bimpcore', 'BimpTimer');
             }
-            
+
             if (!$timer->setObject($this, 'timer')) {
                 return BimpRender::renderAlerts('Echec de la création du timer');
             }

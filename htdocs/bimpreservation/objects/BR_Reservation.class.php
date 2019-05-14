@@ -42,7 +42,16 @@ class BR_Reservation extends BimpObject
     );
     protected $brOrderLine = null;
 
-    // Getters: 
+    // Gestion des droits users: 
+
+    public function canDelete()
+    {
+//        global $user;
+//        return (int) $user->admin;
+        return 0;
+    }
+
+    // Getters booléens: 
 
     public function isEquipment()
     {
@@ -98,6 +107,59 @@ class BR_Reservation extends BimpObject
         return 0;
     }
 
+    public function isNewStatusAllowed($new_status, &$errors = array())
+    {
+        $new_status = (int) $new_status;
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID de la réservation absent';
+            return 0;
+        }
+
+        if (!array_key_exists($new_status, self::$status_list)) {
+            $errors[] = 'Le satut d\'ID ' . $new_status . ' n\'existe pas';
+            return 0;
+        }
+
+        $type = (int) $this->getData('type');
+
+        $error_label = 'Impossible de passer la réservation au statut "' . self::$status_list[$new_status]['label'] . '"';
+
+        switch ($type) {
+            case self::BR_RESERVATION_COMMANDE:
+                if (!in_array($new_status, self::$commande_status)) {
+                    $errors[] = $error_label . '. La réservation doit être liée à une commande client';
+                    return 0;
+                }
+                break;
+
+            case self::BR_RESERVATION_TRANSFERT:
+                if (!in_array($new_status, self::$transfert_status)) {
+                    $errors[] = $error_label . '. La réservation doit être liée à un transfert';
+                    return 0;
+                }
+                break;
+
+            case self::BR_RESERVATION_TEMPORAIRE:
+                if (!in_array($new_status, self::$transfert_status)) {
+                    $errors[] = $error_label . '. La réservation doit être de type temporaire';
+                    return 0;
+                }
+                break;
+
+            case self::BR_RESERVATION_SAV:
+                if (!in_array($new_status, self::$sav_status)) {
+                    $errors[] = $error_label . '. La réservation doit être liée à un SAV';
+                    return 0;
+                }
+                break;
+        }
+
+        return 1;
+    }
+
+    // getters array: 
+
     public function getAvoirsArray()
     {
         $avoirs = array(
@@ -122,20 +184,6 @@ class BR_Reservation extends BimpObject
         krsort($avoirs);
 
         return $avoirs;
-    }
-
-    public function getEquipmentFormTitle()
-    {
-        $equipment = $this->getChildObject('equipment');
-        if (!is_null($equipment) && $equipment->isLoaded()) {
-            if ($this->isLoaded()) {
-                return 'Edition de la réservation ' . $this->id . ' pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')';
-            } else {
-                return 'Ajout d\'une réservation pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')';
-            }
-        }
-
-        return 'Erreur: aucun équipement spécifié';
     }
 
     public function getCommandeClientLinesArray()
@@ -192,20 +240,42 @@ class BR_Reservation extends BimpObject
         return $lines;
     }
 
-    public function getIdCommandeforShipment()
+    public function getStatusListArray()
     {
-        $id_commande_client = (int) $this->getData('id_commande_client');
+        $type = (int) $this->getData('type');
+        $status = array();
 
-        if (!$id_commande_client) {
-            if (BimpTools::isSubmit('extra_data')) {
-                $extra_data = BimpTools::getValue('extra_data', array());
-                if (isset($extra_data['id_commande_client'])) {
-                    $id_commande_client = (int) $extra_data['id_commande_client'];
+        switch ($type) {
+            case self::BR_RESERVATION_COMMANDE:
+                foreach (self::$commande_status as $key) {
+                    $status[$key] = self::$status_list[$key];
                 }
-            }
+                break;
+
+            case self::BR_RESERVATION_TRANSFERT:
+                foreach (self::$transfert_status as $key) {
+                    $status[$key] = self::$status_list[$key];
+                }
+                break;
+
+            case self::BR_RESERVATION_TEMPORAIRE:
+                foreach (self::$temp_status as $key) {
+                    $status[$key] = self::$status_list[$key];
+                }
+                break;
+
+            case self::BR_RESERVATION_SAV:
+                foreach (self::$sav_status as $key) {
+                    $status[$key] = self::$status_list[$key];
+                }
+                break;
+
+            default:
+                $status = self::$status_list;
+                break;
         }
 
-        return (int) $id_commande_client;
+        return $status;
     }
 
     public function getShipmentsArray()
@@ -236,6 +306,22 @@ class BR_Reservation extends BimpObject
         }
 
         return $shipments;
+    }
+
+    // Getters params: 
+
+    public function getEquipmentFormTitle()
+    {
+        $equipment = $this->getChildObject('equipment');
+        if (!is_null($equipment) && $equipment->isLoaded()) {
+            if ($this->isLoaded()) {
+                return 'Edition de la réservation ' . $this->id . ' pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')';
+            } else {
+                return 'Ajout d\'une réservation pour l\'équipement ' . $equipment->id . ' (serial: ' . $equipment->getData('serial') . ')';
+            }
+        }
+
+        return 'Erreur: aucun équipement spécifié';
     }
 
     public function getListExtraBtn()
@@ -552,42 +638,22 @@ class BR_Reservation extends BimpObject
         );
     }
 
-    public function getStatusListArray()
+    // Getters valeurs: 
+
+    public function getIdCommandeforShipment()
     {
-        $type = (int) $this->getData('type');
-        $status = array();
+        $id_commande_client = (int) $this->getData('id_commande_client');
 
-        switch ($type) {
-            case self::BR_RESERVATION_COMMANDE:
-                foreach (self::$commande_status as $key) {
-                    $status[$key] = self::$status_list[$key];
+        if (!$id_commande_client) {
+            if (BimpTools::isSubmit('extra_data')) {
+                $extra_data = BimpTools::getValue('extra_data', array());
+                if (isset($extra_data['id_commande_client'])) {
+                    $id_commande_client = (int) $extra_data['id_commande_client'];
                 }
-                break;
-
-            case self::BR_RESERVATION_TRANSFERT:
-                foreach (self::$transfert_status as $key) {
-                    $status[$key] = self::$status_list[$key];
-                }
-                break;
-
-            case self::BR_RESERVATION_TEMPORAIRE:
-                foreach (self::$temp_status as $key) {
-                    $status[$key] = self::$status_list[$key];
-                }
-                break;
-
-            case self::BR_RESERVATION_SAV:
-                foreach (self::$sav_status as $key) {
-                    $status[$key] = self::$status_list[$key];
-                }
-                break;
-
-            default:
-                $status = self::$status_list;
-                break;
+            }
         }
 
-        return $status;
+        return (int) $id_commande_client;
     }
 
     public function getBrOrderLine()
@@ -987,10 +1053,27 @@ class BR_Reservation extends BimpObject
         }
 
         $errors = array();
+
+        if (!$this->isNewStatusAllowed($status, $errors)) {
+            return $errors;
+        }
+
         $ref = $this->getData('ref');
 
         if (!$ref) {
             return array('Référence de la réservation absente');
+        }
+
+        if ((int) $this->getData('id_equipment') && (int) $this->getData('type') === self::BR_RESERVATION_COMMANDE && $status < 200) {
+            $line = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeLine', (int) $this->getData('id_commande_client_line'));
+            if (BimpObject::objectLoaded($line)) {
+                $line_errors = $line->removeEquipmentFromShipment((int) $this->getData('id_equipment'));
+
+                if (count($line_errors)) {
+                    $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position') . ', statut "' . self::$status_list[(int) $this->getData('status')]['label'] . '"');
+                    return $errors;
+                }
+            }
         }
 
         $this->set('status', $status);
@@ -1246,7 +1329,7 @@ class BR_Reservation extends BimpObject
 
         if (!isset($data['status'])) {
             $errors[] = 'Nouveau statut absent';
-        } else {
+        } elseif ($this->isNewStatusAllowed((int) $data['status'], $errors)) {
             if (isset($data['equipments'])) {
                 if (!count($data['equipments'])) {
                     $errors[] = 'Aucun équipement sélectionné';
@@ -1824,14 +1907,5 @@ class BR_Reservation extends BimpObject
         }
 
         return $serials;
-    }
-
-    // Gestion des droits: 
-
-    public function canDelete()
-    {
-//        global $user;
-//        return (int) $user->admin;
-        return 0;
     }
 }

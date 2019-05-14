@@ -84,6 +84,10 @@ fields:
         dol_extra_field: 1
         values: 
             array: centres
+        display_if: 
+            field_name: ef_type
+            show_values: S
+        default_value: ''
     total: 
         label: Total HT
         dol_prop: total_ht
@@ -95,6 +99,7 @@ fields:
         dol_prop: user_author
     fk_user_valid: 
         dol_prop: user_valid
+        
         
     ref: unset
     fk_availability: unset
@@ -215,11 +220,14 @@ forms:
               show: 
                   callback: isNotLoaded
             
+            - field: ef_type
             - field: entrepot
               show: 
                   callback: isEditable
-                  
-            - field: ef_type
+            
+            - field: centre
+              show: 
+                  callback: isEditable
             
             - field: libelle
             
@@ -298,6 +306,7 @@ fields_tables:
             - field: libelle
               edit: 1
             - field: fk_statut
+            - field: centre
             - field: entrepot
               display: nom_url
             - field: ef_type
@@ -369,6 +378,8 @@ lists_cols:
         field: facnumber
     type: 
         field: type
+    centre: 
+        field: centre
     paid: 
         label: Payée
         value: 

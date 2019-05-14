@@ -1370,6 +1370,10 @@ function resetInputValue($container) {
     var initial_value = $container.data('initial_value');
 
     if (typeof (initial_value) !== 'undefined') {
+        if (typeof(initial_value) === 'string' && initial_value) {
+            initial_value = bimp_htmlDecode(initial_value); 
+        }
+        
         var $input = $container.find('[name="' + input_name + '"]');
         if ($input.length) {
             $input.val(initial_value);

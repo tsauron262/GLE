@@ -655,6 +655,41 @@ class BimpCache
         return self::$cache[$cache_key];
     }
 
+    public static function getSocieteCommerciauxObjectsList($id_societe)
+    {
+        $cache_key = 'societe_' . $id_societe . '_commerciaux_array';
+
+        if (!isset(self::$cache[$cache_key])) {
+            self::$cache[$cache_key] = array();
+
+            global $db;
+            $rows = self::getBdb()->getRows('societe_commerciaux', 'fk_soc = ' . $id_societe);
+
+            if (!is_null($rows)) {
+                foreach ($rows as $r) {
+                    $instance = new User($db);
+                    if ($instance->fetch($r->fk_user) > 0) {
+                        if ($instance->statut == 1) {
+                            self::$cache[$cache_key][$comm->fk_user] = $instance;
+                        }
+                    }
+                }
+            }
+
+            if (empty(self::$cache[$cache_key])) {
+                $default_id_commercial = (int) BimpCore::getConf('default_id_commercial');
+                if ($default_id_commercial) {
+                    $instance = new User($db);
+                    if ($instance->fetch($default_id_commercial) > 0) {
+                        self::$cache[$cache_key][$default_id_commercial] = $instance;
+                    }
+                }
+            }
+        }
+
+        return self::$cache[$cache_key];
+    }
+
     // User: 
 
     public static function getUsersArray($include_empty = 0)
@@ -672,8 +707,8 @@ class BimpCache
             $cache_key .= '_active_only';
         }
         if (!isset(self::$cache[$cache_key])) {
-            if($include_empty)
-                self::$cache[$cache_key] = array(""=>"");
+            if ($include_empty)
+                self::$cache[$cache_key] = array("" => "");
             else
                 self::$cache[$cache_key] = array();
 
@@ -712,12 +747,10 @@ class BimpCache
 
     public static function getGroupsArray($include_empty = 1)
     {
-        global $conf, $langs;
-
         $cache_key = 'groups';
         if (!isset(self::$cache[$cache_key])) {
-            if($include_empty)
-                self::$cache[$cache_key] = array(""=>"");
+            if ($include_empty)
+                self::$cache[$cache_key] = array("" => "");
             else
                 self::$cache[$cache_key] = array();
 
@@ -732,6 +765,18 @@ class BimpCache
         }
 
         return self::getCacheArray($cache_key, $include_empty);
+    }
+    
+    public static function getGroupIds($idUser){
+        $cache_key = 'groupsIduser'.$idUser;
+        if (!isset(self::$cache[$cache_key])) {
+            require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
+            $userGroup = new UserGroup(self::getBdb()->db);
+            $listIdGr = array();
+            foreach($userGroup->listGroupsForUser($idUser,false) as $obj)
+                    self::$cache[$cache_key][] = $obj->id;
+        }
+        return self::getCacheArray($cache_key);
     }
 
     public static function getUserCentresArray()
@@ -1026,7 +1071,7 @@ class BimpCache
             }
         }
 
-        return self::$cache['centres_array'];
+        return self::getCacheArray('centres_array', true, '', '');
     }
 
     public static function getEntrepotsArray($include_empty = false)

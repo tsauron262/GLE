@@ -17,6 +17,21 @@ class Bimp_Product extends BimpObject
         0  => 'Product',
         1  => 'Service'
     );
+    
+    public function renderListeFournisseur() {
+        $html = '';
+
+        $html .= '<div class="page_content container-fluid">';
+        $instance = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
+        
+        $list = new BC_ListTable($instance, 'default', 1, null, '', 'plus');
+        $list->addFieldFilterValue('fk_product', $this->id);
+
+        $html .= $list->renderHtml();
+        $html .= '</div>';
+
+        return $html;
+    }
 
     public function isSerialisable()
     {

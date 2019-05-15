@@ -694,7 +694,8 @@ class BimpDocumentPDF extends BimpModelPDF
                     $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
                     $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                     $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
-                    $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * $row['qte'], "");
+                    if($row['pu_remise'] > 0)
+                        $row['pu_remise'] = BimpTools::displayMoneyValue($row['pu_remise'] * $row['qte'], "");
                     $row['qte'] = 1;
                 }
             }
@@ -715,7 +716,7 @@ class BimpDocumentPDF extends BimpModelPDF
             $table->rows[] = $row;
         }
 
-        if (!$this->hideReduc && $remise_globale) {
+        if (/*!$this->hideReduc && */$remise_globale) {
             $remise_infos = $this->bimpCommObject->getRemisesInfos();
 
             $remise_label = $this->bimpCommObject->getData('remise_globale_label');

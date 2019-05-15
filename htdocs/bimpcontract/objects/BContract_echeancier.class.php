@@ -13,11 +13,12 @@ class BContract_echeancier extends BimpObject {
         global $db;
         $facture = BimpTools::loadDolClass('compta/facture', 'facture');
         $facture = new Facture($db);
-
+        
         //$line = $this->db->getRow('contrat_next_facture', 'id_contrat = ' . $this->id); // TODO à voir pour le 
         $parent = $this->getParentInstance();
         $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
         $this->calc_period_echeancier();
+        $this->getNbFacture();
         $nb_period_restante = $nb_period - $this->nb_facture;
         $stop_echeancier = ($nb_period_restante == 0) ? true : false;
         
@@ -178,13 +179,18 @@ class BContract_echeancier extends BimpObject {
         return $montantFacture;
     }
 
-    public function calc_next_date() {
+    public function calc_next_date($sub = false) {
         $parent = $this->getParentInstance();
         $date = $this->getData('next_facture_date');
         $periodicity = $parent->getData('periodicity');
         $nextdate = new DateTime("$date");
         $nextdate->getTimestamp();
         $nextdate->add(new DateInterval("P" . $periodicity . "M"));
+        
+        if($sub) {
+            $nextdate->sub(new DateInterval("P1D"));
+        }
+        
         $newdate = $nextdate->format('Y-m-d');
         return $newdate;
     }
@@ -232,12 +238,19 @@ class BContract_echeancier extends BimpObject {
         }
     }
 
-    public function calc_end_date_periode_facturation($start, $periodicity) {
-        $date = '';
-
-        return $date;
+    public function getNbFacture() {
+        $return = 0;
+        if(!$this->tab_echeancier) {
+            $this->calc_period_echeancier();
+        }
+        foreach($this->tab_echeancier as $periode) {
+            if($periode['facture'] > 0) {
+                $return++;
+            }
+        } 
+        return $return + 1;
     }
-
+    
     public function actionCreate_facture($data, &$success) {
         global $user, $db;
         $bimp = new BimpDb($db);
@@ -250,23 +263,31 @@ class BContract_echeancier extends BimpObject {
         $date_debut = $parent->getData('date_start');
         $period = $this->getData('periodicity');
 
-        $this->calc_end_date_periode_facturation($date_debut, $period);
-
         $facture->date = $this->getData('next_facture_date');
+        
+       
+        $facture->cond_reglement_id = 2;
+        $facture->cond_reglement_code = 'RECEP';
+        $now=dol_now();
+		$arraynow=dol_getdate($now);
+		$nownotime=dol_mktime(0, 0, 0, $arraynow['mon'], $arraynow['mday'], $arraynow['year']);
+                 $facture->date_lim_reglement = $nownotime+ 3600 * 24 *30;
+        $facture->date_lim_reglement=$this->calculate_date_lim_reglement();
+		$facture->mode_reglement_id   = 0;		// Not forced to show payment mode CHQ + VIR
+		$facture->mode_reglement_code = '';	// Not forced to show payment mode CHQ + VIR
         $facture->socid = $parent->getData('fk_soc');
         $facture->array_options['options_type'] = "C";
         $facture->array_options['options_entrepot'] = 50;
-        $facture->array_options['options_libelle'] = "Facturation contrat " . $parent->getData('ref');
-        if ($facture->create($user, 0) > 0) {
+        $facture->array_options['options_libelle'] = "Facture N°".$this->getNbFacture()." du contrat " . $parent->getData('ref');
+        if ($facture->create($user) > 0) {
             $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
-
-            $facture->addline("prélèvement", number_format($this->get_total_contrat() / $nb_period, 2, '.', ''), 1, 20);
+            $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) ."</b>", number_format($this->get_total_contrat() / $nb_period, 2, '.', ''), 1, 20);
             addElementElement('contrat', 'facture', $parent->id, $facture->id);
         } else {
             return Array('errors' => 'error facture');
         }
         $this->updateLine($parent->id);
-
+        
         $success = 'Facture créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
     }
 

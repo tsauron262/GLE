@@ -694,6 +694,7 @@ class BimpDocumentPDF extends BimpModelPDF
                     $row['pu_ht'] = price(str_replace(",", ".", $row['pu_ht']) * $row['qte']);
                     $product->array_options['options_deee'] = $product->array_options['options_deee'] * $row['qte'];
                     $product->array_options['options_rpcp'] = $product->array_options['options_rpcp'] * $row['qte'];
+                    $row['pu_remise'] = $row['pu_remise'] * $row['qte'];
                     $row['qte'] = 1;
                 }
             }

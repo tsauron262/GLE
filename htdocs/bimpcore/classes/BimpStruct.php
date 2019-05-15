@@ -294,7 +294,7 @@ class BimpStruct
             $title = $config->getFromCurrentPath('title', null);
             $icon = $config->getFromCurrentPath('icon', null);
 
-            $html = $object->renderListCustom($name, $title, $icon);
+            $html = $object->renderStatsList($name, $title, $icon);
         }
 
         $config->setCurrentPath($prev_path);

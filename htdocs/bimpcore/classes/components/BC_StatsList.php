@@ -27,7 +27,18 @@ class BC_StatsList extends BC_List
             }
         }
 
-        parent::__construct($object, '', $name, $id_parent, $title, $icon);
+        if (is_null($title)) {
+            $title = 'Statistiques des ' . $object->getLabel('name_plur');
+        }
+
+        if (is_null($icon)) {
+            $icon = 'fas_chart-bar';
+        }
+
+        parent::__construct($object, '', $name, 1, $id_parent, $title, $icon);
+
+        $this->params['filters_panel_open'] = 1;
+        $this->params['n'] = 0;
     }
 
     public function renderHtmlContent()
@@ -44,21 +55,28 @@ class BC_StatsList extends BC_List
 
         $html .= $this->renderListParamsInputs();
 
+        $left_content = $this->renderGroupByOptions();
+
         if (!is_null($this->params['filters_panel'])) {
-            $html .= '<div class="row">';
-            $html .= '<div class="listFiltersPanelContainer col-xs-12 col-sm-12 col-md-2 col-lg-2"' . (!(int) $this->params['filters_panel_open'] ? ' style="display: none"' : '') . '>';
-            $html .= $this->renderFiltersPanel();
-            $html .= '</div>';
-            $html .= '<div class="objectlistCustomContainer col-xs-12 col-sm-12 col-md-10 col-lg-10">';
+            $left_content .= '<div class="listFiltersPanelContainer">';
+            $left_content .= $this->renderFiltersPanel();
+            $left_content .= '</div>';
         }
 
-        $html .= $this->renderGroupByOptions();
+        if ($left_content) {
+            $html .= '<div class="row">';
+            $html .= '<div class="col-xs-12 col-sm-12 col-md-2 col-lg-2">';
+            $html .= $left_content;
+            $html .= '</div>';
 
-        $html .= '<div id="' . $this->identifier . '_ajax_content" class="list_custom_ajax_content">';
-        $html .= $this->renderListContent();
+            $html .= '<div class="col-xs-12 col-sm-12 col-md-10 col-lg-10">';
+        }
+
+        $html .= '<div id="' . $this->identifier . '_ajax_content" class="stats_list_ajax_content">';
+//        $html .= $this->renderListContent();
         $html .= '</div>';
 
-        if (!is_null($this->params['filters_panel'])) {
+        if ($left_content) {
             $html .= '</div></div>';
         }
 
@@ -71,19 +89,17 @@ class BC_StatsList extends BC_List
     {
         $html = '';
 
-//        if (is_null($this->items)) {
-//            $this->fetchItems();
-//        }
+        if (is_null($this->items)) {
+            $this->fetchItems();
+        }
 
-        $html .= 'ICI LIST';
-        
+        $html .= 'Nb lignes factures: ' . count($this->items);
+
         return $html;
     }
 
     public function renderGroupByOptions()
     {
-        $html = '';
-
         if (!empty($this->params['group_by_options'])) {
             $group_by_options = array();
 
@@ -96,19 +112,25 @@ class BC_StatsList extends BC_List
                 }
             }
 
-            $html .= '<div id="' . $this->identifier . '_group_by_optons" class="stats_list_group_by_options">';
+            if (count($group_by_options)) {
 
-            $html .= '<h3>Grouper les résultats par: </h3>';
+                $panel_content = '<div id="' . $this->identifier . '_group_by_optons" class="stats_list_group_by_options">';
 
-            $input = BimpInput::renderInput('', 'group_by_add_value', $this->params['group_by'], array(
-                        'options' => $group_by_options
-            ));
-            $content = BimpInput::renderMultipleValuesInput($this, 'group_by', $input, $this->params['group_by'], '', 0, 1, 1);
-            $html .= BimpInput::renderInputContainer('cols', '', $content, '', 0, 1, '', array('values_field' => 'group_by'));
+                $input = BimpInput::renderInput('select', 'group_by_add_value', $this->params['group_by'], array(
+                            'options' => $group_by_options
+                ));
+                $content = BimpInput::renderMultipleValuesInput($this->object, 'group_by', $input, $this->params['group_by'], '', 0, 1, 1);
+                $panel_content .= BimpInput::renderInputContainer('group_by', '', $content, '', 0, 1, '', array('values_field' => 'group_by'));
 
-            $html .= '</div>';
+                $panel_content .= '</div>';
+
+                return BimpRender::renderPanel('Grouper les résulats par: ', $panel_content, '', array(
+                            'type' => 'secondary',
+                            'icon' => 'fas_object-group'
+                ));
+            }
         }
 
-        return $html;
+        return '';
     }
 }

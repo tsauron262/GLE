@@ -21,6 +21,7 @@ class BimpCore
             '/bimpcore/views/js/view.js',
             '/bimpcore/views/js/viewsList.js',
             '/bimpcore/views/js/listCustom.js',
+            '/bimpcore/views/js/statsList.js',
             '/bimpcore/views/js/page.js',
             '/bimpcore/views/js/table2csv.js'
 

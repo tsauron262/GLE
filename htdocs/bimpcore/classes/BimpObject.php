@@ -3275,7 +3275,21 @@ class BimpObject extends BimpCache
                         $fields[] = $field_name;
                     }
 
-                    $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $result);
+                    $data = $this->getDbData($fields);
+
+                    if (!empty($data)) {
+                        $up_result = $this->db->update($this->getTable(), $data, '`' . $this->getPrimary() . '` = ' . (int) $result);
+
+                        if ($up_result <= 0) {
+                            $msg = 'Echec de l\'insertion des champs additionnels';
+                            $sql_errors = $this->db->db->lasterror;
+                            if ($sql_errors) {
+                                $msg .= ' - Erreur SQL: ' . $sql_errors;
+                            }
+
+                            $errors[] = $msg;
+                        }
+                    }
                 }
             }
 
@@ -3343,16 +3357,20 @@ class BimpObject extends BimpCache
                         $fields[] = $field_name;
                     }
 
-                    $up_result = $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $this->id);
+                    $data = $this->getDbData($fields);
 
-                    if ($up_result <= 0) {
-                        $msg = 'Echec de la mise à jour des champs additionnels';
-                        $sql_errors = $this->db->db->lasterror;
-                        if ($sql_errors) {
-                            $msg .= ' - Erreur SQL: ' . $sql_errors;
+                    if (!empty($data)) {
+                        $up_result = $this->db->update($this->getTable(), $this->getDbData($fields), '`' . $this->getPrimary() . '` = ' . (int) $this->id);
+
+                        if ($up_result <= 0) {
+                            $msg = 'Echec de la mise à jour des champs additionnels';
+                            $sql_errors = $this->db->db->lasterror;
+                            if ($sql_errors) {
+                                $msg .= ' - Erreur SQL: ' . $sql_errors;
+                            }
+
+                            $errors[] = $msg;
                         }
-
-                        $errors[] = $msg;
                     }
                 }
             }
@@ -3872,7 +3890,7 @@ class BimpObject extends BimpCache
             'visibility' => (int) $visibility,
             'content'    => $content,
             'viewed'     => $viewed,
-            'auto'     => $auto
+            'auto'       => $auto
         ));
 
         if (!count($errors)) {
@@ -3886,7 +3904,7 @@ class BimpObject extends BimpCache
     {
         return self::getObjectNotes($this);
     }
-    
+
     public function renderNotesList($filter_by_user = true, $list_model = "default", $suffixe = "")
     {
         if ($this->isLoaded()) {
@@ -4217,7 +4235,7 @@ class BimpObject extends BimpCache
         $list = new BC_StatsList($this, $list_name, null, $title, $icon);
         return $list->renderHtml();
     }
-    
+
     public function renderForm($form_name = 'default', $panel = false, $level = 1)
     {
         $form = new BC_Form($this, null, $form_name, $level, !$panel);

@@ -1,0 +1,53 @@
+boostrap: 1
+
+objects:
+    produit:
+        instance:
+            bimp_object: Bimp_Product
+            id_object:
+                request: id
+
+sections:
+    - type: object_header
+      object_header: 
+          object: produit
+    - type: nav_tabs
+      nav_tabs:
+          - id: fiche
+            title: Fiche
+            struct:
+                type: view
+                view:
+                    object: produit
+                    name: fiche
+          - id: prix
+            title: Prix (Vente/Achat)
+            struct:
+                type: view
+                view:
+                    object: produit
+                    name: product_price
+          - id: stats
+            title: Statistiques
+            show: 0
+          - id: object_referent
+            title: Objets référents
+            show: 0
+          - id: stock
+            title: Stock
+            show: 0
+          - id: Categoriser
+            title: Catégoriser
+            show: 0
+          - id: notes
+            title: Notes
+          - id: fichier
+            title: Fihiers joints
+    - type: buttons
+      buttons:
+          - label: Retour à la liste des produits
+            url: 
+                controller: index
+            icon_before: chevron-left
+            classes: 
+                array: btn,btn-primary

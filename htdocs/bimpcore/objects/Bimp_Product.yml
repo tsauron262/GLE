@@ -5,10 +5,12 @@ dol_object:
 table: product
 primary: rowid
 icon: fas_box
-
+controller: product
 labels: 
     name: produit
-    
+
+force_extrafields_update: 1
+
 fields: 
     ref: 
         label: Réf.
@@ -66,7 +68,7 @@ fields:
         label: Code TVA par défaut
     tva_tx: 
         label: Taux de TVA
-        type: float
+        type: percent
     recuperableonly: 
         label: TVA récupérable seulement
         dol_prop: tva_npr
@@ -148,6 +150,21 @@ fields:
         default_value: 0
         
         
+    accountancy_code_sell:
+        label: Code comptable (Vente)
+        type: string
+    accountancy_code_buy:
+        label: Code comptable (Achat)
+        type: string
+    
+    deee:
+        label: Eco-Taxe
+        type: money
+        dol_extra_field: 1
+    rpcp:
+        label: Copie privée
+        type: money
+        dol_extra_field: 1
 #    Champs non gérés
 #    ref_ext
 #    localtax1_tx
@@ -185,20 +202,39 @@ fields_tables:
         rows:  
             - field: ref
             - field: label
+            - field: description
+            - field: fk_product_type
             - field: type2
             - field: barcode
             - field: customcode
-            - field: description
+            - field: accountancy_code_buy
+            - field: accountancy_code_sell
             - field: note
             
     prices: 
-        title: Prix
+        title: Prix de vente
         icon: euro
         rows:  
+            - field: price
+              label: Prix HT
+            - field: tva_tx
+            - field: deee
+            - field: rpcp
             - field: price_ttc
             - field: price_min_ttc
             - field: cost_price
+    
+    prices_buy: 
+        title: Prix d'achat
+        icon: euro
+        rows:  
+            - field: price
+              label: Prix HT
             - field: tva_tx
+            - field: price_ttc
+            - field: price_min_ttc
+            - field: cost_price
+            
         
     status: 
         title: statut
@@ -209,6 +245,25 @@ fields_tables:
             - field: tosell
             - field: tobuy
             - field: stock
+    
+    infos_complementaires:
+        title: Informations complémentaires
+        icon: plus
+        rows:
+            - field: url
+            - field: stock
+            - field: fk_country
+            - field: weight_units
+            - field: weight
+            - field: length_units
+            - field: length
+            - field: width_units
+            - field: width
+            - field: surface_units
+            - field: surface
+            - field: volume_units
+            - field: volume
+            
         
     measures: 
         title: Mesures
@@ -236,6 +291,50 @@ views:
                   col_sm: 12
                   fields_table: 
                       name: status
+    
+    fiche:
+        rows:
+            - cols: 
+                - type: fields_table
+                  col_lg: 7
+                  col_md: 7
+                  fields_table: 
+                      name: infos
+                - type: fields_table
+                  col_lg: 5
+                  col_md: 5
+                  fields_table: 
+                      name: status
+                - type: fields_table
+                  col_lg: 7
+                  col_md: 7
+                  col_sm: 12
+                  fields_table: 
+                      name: infos_complementaires
+            
+    
+    product_price:
+        rows:
+            - cols:
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: prices
+                
+                - type: fields_table
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  fields_table: 
+                      name: prices_buy
+                - type: custom
+                  col_lg: 12
+                  col_md: 12
+                  custom:
+                      callback: renderListeFournisseur
+            
                       
 lists: 
     default: 

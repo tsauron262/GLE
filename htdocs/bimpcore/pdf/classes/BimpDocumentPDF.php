@@ -734,7 +734,7 @@ class BimpDocumentPDF extends BimpModelPDF
             );
             if (!$this->hideTtc)
                 $row['total_ttc'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ttc'], '');
-            else
+            elseif(!$this->hideReduc)
                 $row['pu_remise'] = BimpTools::displayMoneyValue(-$remise_infos['remise_globale_amount_ht'], '');
 
             $table->rows[] = $row;

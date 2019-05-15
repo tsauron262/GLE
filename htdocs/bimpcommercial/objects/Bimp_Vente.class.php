@@ -94,27 +94,23 @@ class Bimp_Vente extends BimpObject
     public function getExtraFieldFilterKey($field, &$joins, $main_alias = '')
     {
         if (array_key_exists($field, self::$facture_fields)) {
-            if ((int) $this->getData('fk_facture')) {
-                $join_alias = ($main_alias ? $main_alias . '_' : '') . 'facture';
-                $joins[$join_alias] = array(
-                    'table' => 'facture',
-                    'alias' => $join_alias,
-                    'on'    => $join_alias . '.rowid = ' . ($main_alias ? $main_alias : 'a') . '.fk_facture'
-                );
+            $join_alias = ($main_alias ? $main_alias . '_' : '') . 'facture';
+            $joins[$join_alias] = array(
+                'table' => 'facture',
+                'alias' => $join_alias,
+                'on'    => $join_alias . '.rowid = ' . ($main_alias ? $main_alias : 'a') . '.fk_facture'
+            );
 
-                return $join_alias . '.' . self::$facture_fields[$field];
-            }
+            return $join_alias . '.' . self::$facture_fields[$field];
         } elseif (array_key_exists($field, self::$facture_extrafields)) {
-            if ((int) $this->getData('fk_facture')) {
-                $join_alias = ($main_alias ? $main_alias . '_' : '') . 'factureef';
-                $joins[$join_alias] = array(
-                    'table' => 'facture_extrafields',
-                    'alias' => $join_alias,
-                    'on'    => $join_alias . '.fk_object = ' . ($main_alias ? $main_alias : 'a') . '.fk_facture'
-                );
+            $join_alias = ($main_alias ? $main_alias . '_' : '') . 'factureef';
+            $joins[$join_alias] = array(
+                'table' => 'facture_extrafields',
+                'alias' => $join_alias,
+                'on'    => $join_alias . '.fk_object = ' . ($main_alias ? $main_alias : 'a') . '.fk_facture'
+            );
 
-                return $join_alias . '.' . self::$facture_extrafields[$field];
-            }
+            return $join_alias . '.' . self::$facture_extrafields[$field];
         } elseif ($field === 'categories') {
             // todo...
         }

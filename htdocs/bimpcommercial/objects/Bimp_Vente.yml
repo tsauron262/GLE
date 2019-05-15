@@ -119,9 +119,20 @@ filters_panels:
                 field: date
             entrepot: 
                 field: id_entrepot
+            secteur: 
+                field: secteur
+            user: 
+                field: id_user
+            client: 
+                field: id_client
+            product: 
+                field: fk_product
         
 stats_lists: 
     default: 
         filters_panel: default
+        group_by_options: 
+            - id_entrepot
+            - secteur
         
         

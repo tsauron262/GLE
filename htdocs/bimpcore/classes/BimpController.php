@@ -1442,6 +1442,46 @@ class BimpController
         )));
     }
 
+    
+    protected function ajaxProcessLoadObjectStatsList()
+    {
+        $errors = array();
+        $html = '';
+        $filters_panel_html = '';
+
+        $id_parent = BimpTools::getValue('id_parent', null);
+        if (!$id_parent) {
+            $id_parent = null;
+        }
+
+        $module = BimpTools::getValue('module', $this->module);
+        $object_name = BimpTools::getValue('object_name');
+        $list_name = BimpTools::getValue('list_name', 'default');
+        $list_id = BimpTools::getValue('list_id', null);
+
+        if (is_null($object_name) || !$object_name) {
+            $errors[] = 'Type d\'objet absent';
+        }
+
+        if (!count($errors)) {
+            $object = BimpObject::getInstance($module, $object_name);
+            $list = new BC_StatsList($object, $list_name, $id_parent);
+            if (!is_null($list_id)) {
+                $list->identifier = $list_id;
+            }
+            $html = $list->renderListContent();
+            $filters_panel_html = $list->renderFiltersPanel();
+        }
+
+        die(json_encode(array(
+            'errors'             => $errors,
+            'html'               => $html,
+            'filters_panel_html' => $filters_panel_html,
+            'list_id'            => $list_id,
+            'request_id'         => BimpTools::getValue('request_id', 0)
+        )));
+    }
+    
     protected function ajaxProcessLoadObjectCard()
     {
         $errors = array();

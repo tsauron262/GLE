@@ -1,10 +1,11 @@
-function reloadObjectListCustom(list_id, callback) {
+function reloadObjectStatsList(list_id, callback) {
     var $list = $('#' + list_id);
 
     if (!$list.length) {
         return;
     }
 
+    var $result = $('#' + list_id + '_result');
     var $resultContainer = $('#' + list_id + '_ajax_content');
     var object_name = $list.data('object_name');
     var id_parent_object = parseInt($list.find('#' + object_name + '_id_parent').val());
@@ -68,7 +69,7 @@ function reloadObjectListCustom(list_id, callback) {
     // Envoi requête:
     var error_msg = 'Une erreur est sruvenue. La liste n\'a pas pu être rechargée';
 
-    BimpAjax('loadObjectListCustom', data, $resultContainer, {
+    BimpAjax('loadObjectStatsList', data, $resultContainer, {
         $list: $list,
         $resultContainer: $resultContainer,
         display_success: false,
@@ -90,7 +91,7 @@ function reloadObjectListCustom(list_id, callback) {
                     });
                 }
 
-                onListCustomRefeshed(bimpAjax.$list);
+                onStatsListRefreshed(bimpAjax.$list);
 
                 if (typeof (callback) === 'function') {
                     callback(true);
@@ -109,7 +110,7 @@ function reloadObjectListCustom(list_id, callback) {
     });
 }
 
-function onListCustomLoaded($list) {
+function onStatsListLoaded($list) {
     if (!$list.length) {
         return;
     }
@@ -118,7 +119,7 @@ function onListCustomLoaded($list) {
         $list.data('loaded_event_processed', 1);
 
         $list.find('input[name="param_n"]').change(function () {
-            reloadObjectListCustom($list.attr('id'));
+            reloadObjectStatsList($list.attr('id'));
         });
 
         setCommonEvents($('#' + $list.attr('id') + '_container'));
@@ -146,29 +147,29 @@ function onListCustomLoaded($list) {
                 $('body').on('objectChange', function (e) {
 //                    bimp_msg($list.attr('id') + ' => ' + e.module + ', ' + module + ', ' + e.object_name + ', ' + object_name);
                     if ((e.module === module) && (e.object_name === object_name)) {
-                        reloadObjectListCustom($list.attr('id'));
+                        reloadObjectStatsList($list.attr('id'));
                     } else if (objects && objects.length) {
                         for (var i in objects) {
                             if (e.object_name === objects[i]) {
-                                reloadObjectListCustom($list.attr('id'));
+                                reloadObjectStatsList($list.attr('id'));
                             }
                         }
                     }
                 });
                 $('body').on('objectDelete', function (e) {
                     if ((e.module === module) && (e.object_name === object_name)) {
-                        reloadObjectListCustom($list.attr('id'));
+                        reloadObjectStatsList($list.attr('id'));
                     } else if (objects.length) {
                         for (var i in objects) {
                             if (e.object_name === objects[i]) {
-                                reloadObjectListCustom($list.attr('id'));
+                                reloadObjectStatsList($list.attr('id'));
                             }
                         }
                     }
                 });
                 $('body').on('listFiltersChange', function (e) {
                     if (e.$filters.data('list_identifier') === $list.attr('id')) {
-                        reloadObjectListCustom($list.attr('id'));
+                        reloadObjectStatsList($list.attr('id'));
                     }
                 });
                 $('body').data($list.attr('id') + '_object_events_init', 1);
@@ -183,7 +184,7 @@ function onListCustomLoaded($list) {
     }
 }
 
-function onListCustomRefeshed($list) {
+function onStatsListRefreshed($list) {
     setCommonEvents($list);
     setInputsEvents($list);
 
@@ -194,20 +195,20 @@ function onListCustomRefeshed($list) {
         });
     }
 
-    $list.trigger('listCustomRefresh');
+    $list.trigger('statsListRefresh');
 }
 
 $(document).ready(function () {
     $('body').on('bimp_ready', function () {
-        $('.object_list_custom').each(function () {
-            onListCustomLoaded($(this));
+        $('.object_stats_list').each(function () {
+            onStatsListLoaded($(this));
         });
     });
 
     $('body').on('controllerTabLoaded', function (e) {
         if (e.$container.length) {
-            e.$container.find('.object_list_custom').each(function () {
-                onListCustomLoaded($(this));
+            e.$container.find('.object_stats_list').each(function () {
+                onStatsListLoaded($(this));
             });
         }
     });

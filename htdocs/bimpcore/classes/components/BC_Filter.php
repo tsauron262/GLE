@@ -30,6 +30,8 @@ class BC_Filter extends BimpComponent
         if (isset($params['field']) && (string) $params['field']) {
             $field = new BC_Field($object, $params['field']);
             $this->field = $field;
+            $this->field->params['editable'] = 1;
+            $this->field->params['viewable'] = 1;
         } else {
             // todo: custom... 
         }
@@ -157,8 +159,15 @@ class BC_Filter extends BimpComponent
     public function getSqlFilters(&$filters = array(), &$joins = array())
     {
         $errors = array();
-
         $or_field = array();
+        $filter_key = '';
+
+        if ($this->field->params['extra']) {
+            $filter_key = $this->object->getExtraFieldFilterKey($this->field->name, $joins);
+        } else {
+            $filter_key = $this->field->name;
+        }
+
         switch ($this->params['type']) {
             case 'value':
                 foreach ($this->values as $value) {
@@ -213,14 +222,14 @@ class BC_Filter extends BimpComponent
                 break;
 
             case 'check_list':
-                $filters[$this->field->name] = array(
+                $filters[$filter_key] = array(
                     'in' => $this->values
                 );
                 break;
         }
 
         if (!empty($or_field)) {
-            $filters[$this->field->name] = array(
+            $filters[$filter_key] = array(
                 'or_field' => $or_field
             );
         }

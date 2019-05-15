@@ -227,8 +227,17 @@ class BContract_contrat extends BimpDolObject {
         
         // TODO a viré (voir pour objet)
         $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
-        $instance->find(Array('id_contrat' => $this->id));
-        return $instance->display();
+        if($instance->find(Array('id_contrat' => $this->id))) {
+            return $instance->display();
+        } elseif($this->getData('statut') < self::CONTRAT_STATUS_VALIDE) {
+            return $instance->display("Le contrat doit être valider pour générer l'échéancier");
+        } elseif(!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
+            return $instance->display("Un des champs : Durée en mois, Date de début, Périodicitée est obligatoire pour la génération de l'échéancier");
+        } else {
+            $instance->updateLine($this->id);
+            return $instance->display();
+        }
+        
     }
     
 }

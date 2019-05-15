@@ -4,21 +4,23 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpInput.php';
 
 class BContract_echeancier extends BimpObject {
 
-    public function display() {
+    public function display($display_error = '') {
+        
+        if($display_error) {
+            return BimpRender::renderAlerts($display_error);
+        }
+        
         global $db;
         $facture = BimpTools::loadDolClass('compta/facture', 'facture');
         $facture = new Facture($db);
 
         //$line = $this->db->getRow('contrat_next_facture', 'id_contrat = ' . $this->id); // TODO à voir pour le 
-
         $parent = $this->getParentInstance();
         $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
         $this->calc_period_echeancier();
         $nb_period_restante = $nb_period - $this->nb_facture;
         $stop_echeancier = ($nb_period_restante == 0) ? true : false;
-        $show_echeancier = ($parent->getData('statut') > 0) ? true : false;
-
-        if ($show_echeancier) {
+        
             $html = '';
             $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">'
                     . '<thead>'
@@ -80,9 +82,6 @@ class BContract_echeancier extends BimpObject {
                         ))
                         . '"><br /><br />';
             }
-        } else {
-            $html .= BimpRender::renderAlerts("Vous devez valider le contrat pour afficher l\'échéancier");
-        }
 
         return $html;
     }

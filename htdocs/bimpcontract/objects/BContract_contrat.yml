@@ -343,6 +343,7 @@ views:
                                children: files
                                
     echeancier:
+        objects_change_reload: BContract_echeancier
         title: Echéancier prévisionnel
         panel: 1
         rows:

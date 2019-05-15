@@ -278,7 +278,7 @@ class BContract_echeancier extends BimpObject {
 		$arraynow=dol_getdate($now);
 		$nownotime=dol_mktime(0, 0, 0, $arraynow['mon'], $arraynow['mday'], $arraynow['year']);
                  $facture->date_lim_reglement = $nownotime+ 3600 * 24 *30;
-        $facture->date_lim_reglement=$this->calculate_date_lim_reglement();
+        $facture->date_lim_reglement=$facture->calculate_date_lim_reglement();
 		$facture->mode_reglement_id   = 0;		// Not forced to show payment mode CHQ + VIR
 		$facture->mode_reglement_code = '';	// Not forced to show payment mode CHQ + VIR
         $facture->socid = $parent->getData('fk_soc');
@@ -294,7 +294,7 @@ class BContract_echeancier extends BimpObject {
         }
         $this->updateLine($parent->id);
         
-        $success = 'Facture créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
+        $success = 'Facture créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';   
     }
 
     public function cron_create_facture() {

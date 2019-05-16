@@ -3452,7 +3452,8 @@ class BimpObject extends BimpCache
         if (method_exists($this, 'getDolObjectDeleteParams')) {
             $params = $this->getDolObjectDeleteParams();
         } else {
-            $params = array($this->id);
+            global $user;
+            $params = array($user);
         }
 
         $result = call_user_func_array(array($this->dol_object, 'delete'), $params);

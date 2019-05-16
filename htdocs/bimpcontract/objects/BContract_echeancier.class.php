@@ -10,7 +10,8 @@ class BContract_echeancier extends BimpObject {
     }
     
     public function display($display_error = '') {
-
+        global $db;
+        $bimp = new BimpDb($db);
         if ($display_error) {
             return BimpRender::renderAlerts($display_error);
         } else {
@@ -30,6 +31,7 @@ class BContract_echeancier extends BimpObject {
         $stop_echeancier = ($nb_period_restante == 0) ? true : false;
 
         $html = '';
+        $html .= ($stop_echeancier) ? BimpRender::renderAlerts('Toutes les factures de l\'échéancier ont étés générées', 'info', false) : '';
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">'
                 . '<thead>'
                 . '<tr class="headerRow">'
@@ -79,7 +81,12 @@ class BContract_echeancier extends BimpObject {
         } // 
         $html .= '</tbody>' . '</table>';
         $html .= $this->display_info();
-        
+        if (!$stop_echeancier) {
+        if($this->getData('next_facture_date') == '0000-00-00 00:00:00') {
+            $last_facture = $this->get_last_facture();
+            $udpadeArray = Array('next_facture_date' => $last_facture['date_debut'], 'next_facture_amount' => $last_facture['montant_ht']);
+            $bimp->update('bcontract_prelevement', $udpadeArray, 'id_contrat = ' . $parent->id);
+        }
         $html .= "<table style='width:30%;' class='border' border='1'>"
                 . "<tr><th style='background-color:#ed7c1c;color:white;text-align:center'>Date prochaine facture</th>"
                 . "<td style='text-align:center'><b>" . dol_print_date($this->getData('next_facture_date')) . "</b></td></tr>"
@@ -87,14 +94,20 @@ class BContract_echeancier extends BimpObject {
                 . "<td style='text-align:center'><b>" . price($this->calc_next_facture_amount_ht()) . " € HT / ". price($this->calc_next_facture_amount_ttc()) . " € TTC </b></td></tr>"
                 . "</table><br />";
 
-        if (!$stop_echeancier) {
+        
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}'; // TODO 
-            $html .= '<br /><input class="btn btn-primary saveButton" value="Créer une facture" onclick="' .
+            if($this->getData('validate') == 0){
+                $html .= '<br /><input class="btn btn-primary saveButton" value="Créer une facture" onclick="' .
                     $this->getJsActionOnclick("create_facture", array(), array(
                         "success_callback" => $callback
                     ))
                     . '"><br /><br />';
+            }
+        } else {
+            $updateData = Array('next_facture_date' => null, 'next_facture_amount' => null);
+            $bimp->update('bcontract_prelevement', $updateData, 'id_contrat = ' . $parent->id);
         }
+        
 
         $tmp_id_facture = 0;
         foreach ($this->tab_echeancier as $tab => $attr) {
@@ -139,28 +152,6 @@ class BContract_echeancier extends BimpObject {
                 . "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Déjà payer</th> <td style='text-align:center'><b>" . price($tab_total_fact['info']['deja_payer_ht']) . " € </b></td> <td style='text-align:center'><b> " . price($tab_total_fact['info']['deja_payer_ttc']) . " €</b></td> </tr>"
                 . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b> " . price($tab_total_fact['info']['reste_a_payer_ht']) . " € </b></td> <td style='text-align:center'><b> " . price($tab_total_fact['info']['reste_a_payer_ttc']) . " €</b></td> </tr>"
                 . "</table>";
-
-        return $html;
-    }
-
-    public function display_info_echeancier() {
-        $parent = $this->getParentInstance();
-        $total_ttc = $parent->getData('total');
-
-        $html = '';
-        $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">'
-                . '<thead>'
-                . '<tr class="headerRow">'
-                . '<th class="th_checkboxes" width="40px" style="text-align: center">Total du contrat</th>'
-                . '<th class="th_checkboxes" width="40px" style="text-align: center">Total facturé</th>'
-                . '</tr></thead>'
-                . '<tbody class="listRows">'
-                . '<tr class="objectListItemRow" >'
-                . '<th style="text-align:center">' . $total_ttc . '</th>'
-                . '<th style="text-align:center">' . $total_ttc . '</th>'
-                . '</tr>'
-                . '</tbody>' . '</table>';
-
 
         return $html;
     }
@@ -227,46 +218,44 @@ class BContract_echeancier extends BimpObject {
     }
 
     public function updateLine($id_contrat = null, $new_date = null) {
-//      A changer quand j'aurais fait les lignes en enfant
-        //die($id_parent . ' <=');
         global $db;
         $parent = $this->getParentInstance();
         $bimp = new BimpDb($db);
         $lines = $bimp->getRows('bcontract_prelevement', 'id_contrat = ' . $id_contrat);
         $linesContrat = $bimp->getRows('contratdet', 'fk_contrat = ' . $id_contrat);
-
-        if ($parent->getData('statut') > 0 && $parent->getInitData('statut') > 0) {
+        
+            if ($parent->getData('statut') > 0 && $parent->getInitData('statut') > 0) {
             $updateDate = $this->calc_next_date();
-        }
-
-
-        if (!is_null($new_date)) {
-            $updateDate = $new_date;
-        }
-
-        foreach ($linesContrat as $line) {
-            $ttc += $line->total_ttc;
-        }
-        if ($lines) {
-            $parent = $this->getParentInstance();
-            $updateData = Array(
-                'next_facture_date' => $updateDate,
-                'next_facture_amount' => $this->calc_next_facture_amount_ht()
-            );
-            $bimp->update('bcontract_prelevement', $updateData, 'id_contrat = ' . $parent->id);
-        } else {
-            if (!is_null($id_contrat)) {
-                $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
-                $insertData = Array(
-                    'id_contrat' => $instance->id,
-                    'next_facture_date' => $instance->getData('date_start'),
-                    'next_facture_amount' => $this->calc_next_facture_amount(),
-                    'validate' => 0
-                );
-                $bimp->insert('bcontract_prelevement', $insertData);
-                return true;
             }
-        }
+
+
+            if (!is_null($new_date)) {
+                $updateDate = $new_date;
+            }
+
+            foreach ($linesContrat as $line) {
+                $ttc += $line->total_ttc;
+            }
+            if ($lines) {
+                $parent = $this->getParentInstance();
+                $updateData = Array(
+                    'next_facture_date' => $updateDate,
+                    'next_facture_amount' => $this->calc_next_facture_amount_ht()
+                );
+                $bimp->update('bcontract_prelevement', $updateData, 'id_contrat = ' . $parent->id);
+            } else {
+                if (!is_null($id_contrat)) {
+                    $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
+                    $insertData = Array(
+                        'id_contrat' => $instance->id,
+                        'next_facture_date' => $instance->getData('date_start'),
+                        'next_facture_amount' => $this->calc_next_facture_amount_ht(),
+                        'validate' => 0
+                    );
+                    $bimp->insert('bcontract_prelevement', $insertData);
+                    return true;
+                }
+            }
     }
 
     public function getNbFacture() {
@@ -373,23 +362,7 @@ class BContract_echeancier extends BimpObject {
 
     //get last facture id/object to get date last fact
     public function get_last_facture() {
-        global $db;
-
-        $parent = $this->getParentInstance();
-        $bimp = new BimpDb($db);
-        $factid = $bimp->getRows('element_element', 'sourcetype = "contrat" AND targettype="facture" AND fk_source=' . $parent->id . ' ORDER BY rowid ASC');
-        $tab = Array();
-        foreach ($factid as $line) {
-            $facture = new Facture($db);
-            $facture->fetch($line->fk_target);
-            $tab[]['id_facture'] = $line->fk_target;
-            $tab[$line->fk_target]['facture'] = $facture;
-        }
-        $last_id_fact = (end($tab));
-        $date_last_facture = $last_id_fact['facture']->date;
-        $date_format = date('Y-m-d', $date_last_facture);
-
-        return $date_format;
+        return(end($this->tab_echeancier));
     }
 
 }

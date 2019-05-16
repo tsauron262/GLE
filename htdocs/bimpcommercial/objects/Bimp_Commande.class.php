@@ -1162,7 +1162,7 @@ class Bimp_Commande extends BimpComm
         ));
 
         $html .= '<button class="btn btn-default" onclick="' . $onclick . '">';
-        $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture';
+        $html .= BimpRender::renderIcon('fas_file-invoice-dollar', 'iconLeft') . 'Nouvelle facture anticipée';
         $html .= '</button>';
 
         // Ajout ligne: 
@@ -1336,6 +1336,7 @@ class Bimp_Commande extends BimpComm
         }
 
         $facture = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $id_facture);
+        $facture->checkLines();
 
         if (!BimpObject::objectLoaded($facture)) {
             $errors[] = 'La facture d\'ID ' . $id_facture . ' n\'existe pas';

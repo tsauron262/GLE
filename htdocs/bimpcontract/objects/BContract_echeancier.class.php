@@ -20,7 +20,7 @@ class BContract_echeancier extends BimpObject {
         global $db;
         $facture = BimpTools::loadDolClass('compta/facture', 'facture');
         $facture = new Facture($db);
-        
+
         //$line = $this->db->getRow('contrat_next_facture', 'id_contrat = ' . $this->id); // TODO à voir pour le 
         $parent = $this->getParentInstance();
         $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
@@ -77,34 +77,16 @@ class BContract_echeancier extends BimpObject {
                     . '</td>'
                     . '</tr>';
         } // 
-        $html .= '</tbody>' . '</table>'
-                . "<br/><table style='width:70%;' class='border'>"
-                . "<tr>"
-                . "<th style='background-color:#ed7c1c;color:white;text-align:center'>Total contrat HT</th>"
-                . "<td style='text-align:center'><b>" . price($this->get_total_contrat('ht')) . " € </b> </td>"
-                . "<th style='background-color:#ed7c1c;color:white;text-align:center'>Total contrat TTC</th>"
-                . "<td style='text-align:center'><b>" . price($this->get_total_contrat('ttc')) . " € </b> </td>";
-        $tab_total_fact = $this->get_total_facture();
-        foreach ($tab_total_fact['info'] as $line) {
-            //echo 'info = ' . $line;
-        }
-        $html .= "<th style='background-color:#ed7c1c;color:white;text-align:center'>Déjà payer HT</th>"
-                . "<td style='text-align:center'><b>" . price($tab_total_fact['info']['deja_payer_ht']) . " € </b></td>"
-                . "<th style='background-color:#ed7c1c;color:white;text-align:center'>Déjà payer TTC</th>"
-                . "<td style='text-align:center'><b>" . price($tab_total_fact['info']['deja_payer_ttc']) . " € </b> </td>"
-                . "<th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer HT</th>"
-                . "<td style='text-align:center'><b>" . price($tab_total_fact['info']['reste_a_payer_ht']) . " € </b> </td>"
-                . "<th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer TTC</th>"
-                . "<td style='text-align:center'><b>" . price($tab_total_fact['info']['reste_a_payer_ttc']) . " € </b> </td></tr>"
-                . "</table>"
-                . "<br /><table style='width:70%;' class='border'>"
+        $html .= '</tbody>' . '</table>';
+        $html .= $this->display_info();
+        
+        $html .= "<table style='width:30%;' class='border' border='1'>"
                 . "<tr><th style='background-color:#ed7c1c;color:white;text-align:center'>Date prochaine facture</th>"
-                . "<td style='text-align:center'><b>" . dol_print_date($this->getData('next_facture_date')) . "</b></td>"
-                . "<th style='background-color:#ed7c1c;color:white;text-align:center'>Montant prochaine facture</th>"
-                . "<td style='text-align:center'><b>" . price($this->calc_next_facture_amount()) . " € </b></td></tr>"
-                . "</table>";
+                . "<td style='text-align:center'><b>" . dol_print_date($this->getData('next_facture_date')) . "</b></td></tr>"
+                . "<tr><th style='background-color:#ed7c1c;color:white;text-align:center'>Montant prochaine facture</th>"
+                . "<td style='text-align:center'><b>" . price($this->calc_next_facture_amount_ht()) . " € HT / ". price($this->calc_next_facture_amount_ttc()) . " € TTC </b></td></tr>"
+                . "</table><br />";
 
-        $html .= "</table>";
         if (!$stop_echeancier) {
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}'; // TODO 
             $html .= '<br /><input class="btn btn-primary saveButton" value="Créer une facture" onclick="' .
@@ -142,6 +124,22 @@ class BContract_echeancier extends BimpObject {
 
 //        echo '<pre>';
 //        print_r($this->tab_echeancier);
+        return $html;
+    }
+
+    public function display_info() {
+        $tab_total_fact = $this->get_total_facture();
+        foreach ($tab_total_fact['info'] as $line) {
+            //echo 'info = ' . $line;
+        }
+        $html .= "<br/>"
+                . "<table style='width:50%;float:right' class='border' border='1'>"
+                . "<tr> <th style='border: 1px solid Transparent!important;'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>TTC</th> </tr>"
+                . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Total contrat</th> <td style='text-align:center'><b>" . price($this->get_total_contrat('ht')) . " €</b></td> <td style='text-align:center'><b> " . price($this->get_total_contrat('ttc')) . " €</b></td> </tr>"
+                . "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Déjà payer</th> <td style='text-align:center'><b>" . price($tab_total_fact['info']['deja_payer_ht']) . " € </b></td> <td style='text-align:center'><b> " . price($tab_total_fact['info']['deja_payer_ttc']) . " €</b></td> </tr>"
+                . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b> " . price($tab_total_fact['info']['reste_a_payer_ht']) . " € </b></td> <td style='text-align:center'><b> " . price($tab_total_fact['info']['reste_a_payer_ttc']) . " €</b></td> </tr>"
+                . "</table>";
+
         return $html;
     }
 
@@ -194,11 +192,20 @@ class BContract_echeancier extends BimpObject {
         }
     }
 
-    public function calc_next_facture_amount() {
+    public function calc_next_facture_amount_ht() {
         $parent = $this->getParentInstance();
         $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $parent->id);
         $nb_period = $instance->getData('duree_mois') / $instance->getData('periodicity');
-        $montantFacture = number_format($this->get_total_contrat() / $nb_period, 2, '.', '');
+        $montantFacture = number_format($this->get_total_contrat('ht') / $nb_period, 2, '.', '');
+
+        return $montantFacture;
+    }
+    
+    public function calc_next_facture_amount_ttc() {
+        $parent = $this->getParentInstance();
+        $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $parent->id);
+        $nb_period = $instance->getData('duree_mois') / $instance->getData('periodicity');
+        $montantFacture = number_format($this->get_total_contrat('ttc') / $nb_period, 2, '.', '');
 
         return $montantFacture;
     }
@@ -210,11 +217,11 @@ class BContract_echeancier extends BimpObject {
         $nextdate = new DateTime("$date");
         $nextdate->getTimestamp();
         $nextdate->add(new DateInterval("P" . $periodicity . "M"));
-        
-        if($sub) {
+
+        if ($sub) {
             $nextdate->sub(new DateInterval("P1D"));
         }
-        
+
         $newdate = $nextdate->format('Y-m-d');
         return $newdate;
     }
@@ -244,7 +251,7 @@ class BContract_echeancier extends BimpObject {
             $parent = $this->getParentInstance();
             $updateData = Array(
                 'next_facture_date' => $updateDate,
-                'next_facture_amount' => $this->calc_next_facture_amount()
+                'next_facture_amount' => $this->calc_next_facture_amount_ht()
             );
             $bimp->update('bcontract_prelevement', $updateData, 'id_contrat = ' . $parent->id);
         } else {
@@ -264,17 +271,17 @@ class BContract_echeancier extends BimpObject {
 
     public function getNbFacture() {
         $return = 0;
-        if(!$this->tab_echeancier) {
+        if (!$this->tab_echeancier) {
             $this->calc_period_echeancier();
         }
-        foreach($this->tab_echeancier as $periode) {
-            if($periode['facture'] > 0) {
+        foreach ($this->tab_echeancier as $periode) {
+            if ($periode['facture'] > 0) {
                 $return++;
             }
-        } 
+        }
         return $return + 1;
     }
-    
+
     public function actionCreate_facture($data, &$success) {
         global $user, $db;
         $bimp = new BimpDb($db);
@@ -288,8 +295,8 @@ class BContract_echeancier extends BimpObject {
         $period = $this->getData('periodicity');
 
         $facture->date = $this->getData('next_facture_date');
-        
-       
+
+
         $facture->cond_reglement_id = 2;
         $facture->cond_reglement_code = 'RECEP';
         $now=dol_now();
@@ -302,10 +309,10 @@ class BContract_echeancier extends BimpObject {
         $facture->socid = $parent->getData('fk_soc');
         $facture->array_options['options_type'] = "C";
         $facture->array_options['options_entrepot'] = 50;
-        $facture->array_options['options_libelle'] = "Facture N°".$this->getNbFacture()." du contrat " . $parent->getData('ref');
+        $facture->array_options['options_libelle'] = "Facture N°" . $this->getNbFacture() . " du contrat " . $parent->getData('ref');
         if ($facture->create($user) > 0) {
             $nb_period = $parent->getData('duree_mois') / $parent->getData('periodicity');
-            $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) ."</b>", number_format($this->get_total_contrat() / $nb_period, 2, '.', ''), 1, 20);
+            $facture->addline("Période de facturation : Du <b>" . dol_print_date($facture->date) . "</b> au <b>" . dol_print_date($this->calc_next_date(true)) . "</b>", number_format($this->get_total_contrat() / $nb_period, 2, '.', ''), 1, 20);
             addElementElement('contrat', 'facture', $parent->id, $facture->id);
         } else {
             return Array('errors' => 'error facture');

@@ -236,8 +236,8 @@ class BContract_contrat extends BimpDolObject {
         } else {
             $instance->updateLine($this->id);
             return $instance->display();
-        }
+        } 
         
     }
-    
+
 }

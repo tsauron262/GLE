@@ -2297,7 +2297,6 @@ class BimpComm extends BimpDolObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
-        echo 'ici';  exit;
         $origin = BimpTools::getValue('origin', '');
         $origin_id = BimpTools::getValue('origin_id', 0);
         $origin_object = null;

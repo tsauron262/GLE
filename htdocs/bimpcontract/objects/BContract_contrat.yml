@@ -148,29 +148,33 @@ fields:
         dol_extra_field: 1
         required: 1
         
-#    fk_commercial_signature:
-#        label: Commercial signataire
-#        required: 1
-#        input: 
-#            type: search_user
-#            #societe_type: customer
-#            help: Choisir le commercial responssable de la signature du contrat
-#            card: default 
-#            value: 
-#                callback:
-#                    method: getData
-#                    params:
-#                        - id
-#    
-#    fk_commercial_suivi:
-#        label: Commercial suivi
-#        required: 1
-#        input: 
-#            type: search_user
-#            #societe_type: customer
-#            help: Choisir le commercial responssable du suivi du contrat
-#            card: default 
-#            value: 1
+    fk_commercial_signature:
+        label: Commercial signataire
+        dol_prop: commercial_signature_id
+        required: 1
+        input: 
+            type: search_user
+            help: Choisir le commercial responssable de la signature du contrat
+            card: default 
+        default_value: 
+           prop:
+               name: id
+               object:
+                   global: user
+    
+    fk_commercial_suivi:
+        label: Commercial suivi
+        dol_prop: commercial_suivi_id
+        required: 1
+        input: 
+            type: search_user
+            help: Choisir le commercial responssable du suivi du contrat
+            card: default 
+        default_value: 
+           prop:
+               name: id
+               object:
+                   global: user
         
 fields_tables:
     infos:
@@ -281,6 +285,82 @@ forms:
             - field: fk_soc
             - field: fk_commercial_signature
             - field: fk_commercial_suivi
+            
+    contact:
+        title: Ajouter un contact
+        rows: 
+            - custom: 1
+              label: Type
+              input_name: type
+              input: 
+                  type: select
+                  options: 
+                      1: Contact tiers
+                      2: Utilisateur
+            - custom: 1
+              label: Tiers
+              input_name: id_client
+              input: 
+                  type: search_societe
+                  societe_type: customer
+              value: 
+                  field_value: fk_soc
+              display_if: 
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Contact
+              input_name: id_contact
+              data_type: id_object
+              object: contact
+              create_form: default
+              create_form_values:
+                  fields: 
+                      fk_soc: 
+                          callback: getAddContactIdClient
+              value: 
+                  request: fields/id_contact
+              input: 
+                  type: select
+                  options: 
+                      array: clientContacts
+              display_if: 
+                  field_name: type
+                  show_values: 1
+              depends_on: id_client
+            - custom: 1
+              label: Utilisateur
+              input_name: id_user
+              input: 
+                  type: search_user
+              value: 
+                  prop:
+                      object: 
+                          global: user
+                      name: id
+              display_if: 
+                  field_name: type
+                  show_values: 2
+            - custom: 1
+              label: Type de contact
+              input_name: tiers_type_contact
+              input: 
+                  type: select
+                  options: 
+                      array: externalContactTypes
+              display_if: 
+                  field_name: type
+                  show_values: 1
+            - custom: 1
+              label: Type de contact
+              input_name: user_type_contact
+              input: 
+                  type: select
+                  options: 
+                      array: internalContactTypes
+              display_if: 
+                  field_name: type
+                  show_values: 2 
             
         
 views:

@@ -2297,6 +2297,7 @@ class BimpComm extends BimpDolObject
 
     public function create(&$warnings = array(), $force_create = false)
     {
+        echo 'ici';  exit;
         $origin = BimpTools::getValue('origin', '');
         $origin_id = BimpTools::getValue('origin_id', 0);
         $origin_object = null;
@@ -2330,6 +2331,11 @@ class BimpComm extends BimpDolObject
         $errors = parent::create($warnings, $force_create);
 
         if (!count($errors)) {
+            if (method_exists($this->dol_object, 'fetch_lines')) {
+                $this->dol_object->fetch_lines();
+            }
+            $this->checkLines(); // Des lignes ont pu être créées via un trigger.
+
             if ($origin && $origin_id) {
                 $warnings = array_merge($warnings, $this->createLinesFromOrigin($origin_object));
                 if ($this->field_exists('remise_globale') && $origin_object->field_exists('remise_globale')) {

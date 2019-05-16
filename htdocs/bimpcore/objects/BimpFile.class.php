@@ -13,6 +13,7 @@ class BimpFile extends BimpObject
     );
     
     // CAN CONTEXTE CLIENT
+    
     public function canClientView(){
         global $userClient;
         if(isset($userClient)){
@@ -432,6 +433,15 @@ class BimpFile extends BimpObject
         return parent::getList($filters, $n, $p, $order_by, $order_way, $return, $return_fields, $joins);
     }
 
+    public function validate()
+    {
+        $name = $this->getData('file_name');
+        $name = BimpTools::cleanStringForUrl($name);
+        $this->set('file_name', $name);
+        
+        return parent::validate();
+    }
+    
     public function create(&$warnings = array(), $force_create = false)
     {
         $errors = array();

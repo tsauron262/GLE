@@ -1120,7 +1120,7 @@ class BimpObject extends BimpCache
             } elseif ($this->isNewStatusAllowed($new_status, $errors)) {
                 $error_msg = 'Impossible de passer ' . $object_label;
                 $error_msg .= ' au statut "' . $status_label . '"';
-                
+
                 if (!$this->isLoaded()) {
                     $errors[] = $error_msg . ' ID ' . $this->getLabel('of_the') . ' absent';
                 } else {
@@ -3867,6 +3867,67 @@ class BimpObject extends BimpCache
             }
         }
         return 1;
+    }
+
+    public function resetChildrenPositions($children_name)
+    {
+        if ($this->isLoaded()) {
+            if ($this->config->isDefined('objects/' . $children_name . '/instance/bimp_object')) {
+                if ($this->getConf('objects/' . $children_name . '/relation', 'none') === 'hasMany') {
+                    $instance_def = $this->getConf('objects/' . $children_name . '/instance/bimp_object', '', false, 'any');
+                    if (empty($instance_def)) {
+                        return;
+                    }
+                    $module = '';
+                    $object_name = '';
+
+                    if (is_string($instance_def)) {
+                        $module = $this->module;
+                        $object_name = $instance_def;
+                    } else {
+                        if (isset($instance_def['module'])) {
+                            $module = $instance_def['module'];
+                        }
+                        if (isset($instance_def['name'])) {
+                            $object_name = $instance_def['name'];
+                        }
+
+                        if ($module && $object_name) {
+                            $instance = BimpObject::getInstance($module, $object_name);
+
+                            if (!$this->isChild($instance)) {
+                                return;
+                            }
+
+                            if ($instance->params['positions']) {
+                                $parent_id_prop = $instance->getParentIdProperty();
+
+                                if (!(string) $parent_id_prop) {
+                                    return;
+                                }
+
+                                $table = $instance->getTable();
+                                $primary = $instance->getPrimary();
+
+                                $items = $instance->getList(array(
+                                    $parent_id_prop => (int) $this->id
+                                        ), null, null, 'position', 'asc', 'array', array($primary, 'position'));
+
+                                $i = 1;
+                                foreach ($items as $item) {
+                                    if ((int) $item['position'] !== (int) $i) {
+                                        $this->db->update($table, array(
+                                            'position' => (int) $i
+                                                ), '`' . $primary . '` = ' . (int) $item[$primary]);
+                                    }
+                                    $i++;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // Gestion des notes:

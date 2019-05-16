@@ -55,6 +55,12 @@ fields:
     total_ttc: 
         label: Total TTC
         type: money
+    remise_percent:
+        label: Remise
+        type: percent
+    remise:
+        label: Total remise
+        type: money
 
 lists: 
     default: 
@@ -63,6 +69,7 @@ lists:
         sort_field: tms
         sort_way: desc
         n: 20
+        checkbox: 1
         add_object_row: 0
         update_btn: 1
         edit_btn: 0
@@ -77,6 +84,10 @@ lists:
                 field: qty
             tva_tx:
                 field: tva_tx
+            remise_percent:
+                field: remise_percent
+            remise:
+                field: remise
             price_ht:
                 field: price_ht
             total_ttc:

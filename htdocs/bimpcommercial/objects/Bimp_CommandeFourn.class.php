@@ -6,7 +6,7 @@ require_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.product.class.php';
 class Bimp_CommandeFourn extends BimpComm
 {
 
-    public $redirectMode = 4;//5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
+    public $redirectMode = 4; //5;//1 btn dans les deux cas   2// btn old vers new   3//btn new vers old   //4 auto old vers new //5 auto new vers old
     public static $dol_module = 'commande_fournisseur';
     public static $email_type = 'order_supplier_send';
     public static $external_contact_type_required = false;
@@ -589,8 +589,7 @@ class Bimp_CommandeFourn extends BimpComm
                     'label'   => 'Cloner',
                     'icon'    => 'fas_copy',
                     'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
-                        'confirm_msg' => 'Etes-vous sûr de vouloir cloner ' . $this->getLabel('this')
-//                        'form_name' => 'duplicate_propal'
+                        'form_name' => 'duplicate_commande_fourn'
                     ))
                 );
             }

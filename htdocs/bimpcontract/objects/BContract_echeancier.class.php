@@ -3,11 +3,18 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpInput.php';
 
 class BContract_echeancier extends BimpObject {
-
+    
+    public function canViewObject($object) {
+        if(is_object($object)) return true;
+        return false;
+    }
+    
     public function display($display_error = '') {
 
         if ($display_error) {
             return BimpRender::renderAlerts($display_error);
+        } else {
+            
         }
 
         global $db;
@@ -31,6 +38,7 @@ class BContract_echeancier extends BimpObject {
                 . '<th class="th_checkboxes" width="40px" style="text-align: center">Montant TTC</th>'
                 . '<th class="th_checkboxes" width="40px" style="text-align: center">Facture</th>'
                 . '<th class="th_checkboxes" width="40px" style="text-align: center">&Eacute;tat de paiement</th>'
+                . '<th class="th_checkboxes" width="40px" style="text-align: center">Action facture</th>'
                 . '</tr></thead>'
                 . '<tbody class="listRows">';
         foreach ($this->tab_echeancier as $lignes) {
@@ -51,12 +59,22 @@ class BContract_echeancier extends BimpObject {
             } else {
                 $paye = '<i class="fa fa-refresh" style="color:orange" > <b>En attente de facturation</b></i>';
             }
-
+            
+            // Construction actionButton
+            $actionsButtons = '';
+            $actionsButtons .= ($this->canViewObject($facture)) ? '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Vue rapide de la facture" onclick="loadModalView(\'bimpcommercial\', \'Bimp_facture\', '.$facture->id.', \'default\', $(this), \'Facture ' . $facture->ref . '\')"><i class="far fa5-eye"  ></i></span>' : '';
+            $actionsButtons .= (is_object($facture) && $facture->statut == 0 && $this->getData('validate') == 0) ? '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Supprimer la facture" onclick="")"><i class="fa fa-times" ></i></span>' : '';
+            $actionsButtons .= (is_object($facture) && $facture->statut == 0 && $this->getData('validate') == 0 ) ?  '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Valider la facture" onclick="")"><i class="fa fa-check" ></i></span>' : '';
+            $actionsButtons .= (!$this->canViewObject($facture)) ? '<span style="cursor: not-allowed" class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Pas de facture à voir" onclick="")"><i class="far fa-eye-slash"></i></span>' : '';
+            
             $html .= '</td>'
                     . '<td style="text-align:center">' . price($lignes['montant_ht']) . ' € </td>'
                     . '<td style="text-align:center">' . price($lignes['montant_ttc']) . ' € </td>'
                     . '<td style="text-align:center">' . (is_object($facture) ? $facture->getNomUrl(1) : "<b style='color:grey'>Pas encore de facture</b>") . '</td>'
                     . '<td style="text-align:center">' . $paye . '</td>'
+                    . '<td style="text-align:center; margin-right:10%">'
+                    . $actionsButtons
+                    . '</td>'
                     . '</tr>';
         } // 
         $html .= '</tbody>' . '</table>'

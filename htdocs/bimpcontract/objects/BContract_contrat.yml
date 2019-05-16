@@ -368,15 +368,3 @@ views:
                 - type: list
                   list:
                       children: lines
-
-    info_echeancier:
-        object: BContract_echeancier
-        title: Informations échéancier
-        panel: 1
-        rows: 
-            - cols:
-                - type: custom
-                  col_lg: 18
-                  col_md: 12
-                  custom:
-                      callback: information_echeancier

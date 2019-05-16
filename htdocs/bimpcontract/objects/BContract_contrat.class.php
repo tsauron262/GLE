@@ -239,5 +239,214 @@ class BContract_contrat extends BimpDolObject {
         } 
         
     }
+    
+    public function renderContacts()
+    {
+        $html = '';
+
+        $html .= '<table class="bimp_list_table">';
+
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>Nature</th>';
+        $html .= '<th>Tiers</th>';
+        $html .= '<th>Utilisateur / Contact</th>';
+        $html .= '<th>Type de contact</th>';
+        $html .= '<th></th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
+        $html .= '<tbody id="' . $list_id . '">';
+        $html .= $this->renderContactsList();
+
+        $html .= '</tbody>';
+
+        $html .= '</table>';
+
+        return BimpRender::renderPanel('Liste des contacts', $html, '', array(
+                    'type'           => 'secondary',
+                    'icon'           => 'user-circle',
+                    'header_buttons' => array(
+                        array(
+                            'label'       => 'Ajouter un contact',
+                            'icon_before' => 'plus-circle',
+                            'classes'     => array('btn', 'btn-default'),
+                            'attr'        => array(
+                                'onclick' => $this->getJsActionOnclick('addContact', array('id_client' => (int) $this->getData('fk_soc')), array(
+                                    'form_name'        => 'contact',
+                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
+                                ))
+                            )
+                        )
+                    )
+        ));
+    }
+
+    public function renderContactsList()
+    {
+        $html = '';
+
+        $list = array();
+
+        if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
+            $list_int = $this->dol_object->liste_contact(-1, 'internal');
+            $list_ext = $this->dol_object->liste_contact(-1, 'external');
+            $list = array_merge($list_int, $list_ext);
+        }
+
+        if (count($list)) {
+            global $conf;
+            BimpTools::loadDolClass('societe');
+            BimpTools::loadDolClass('contact');
+
+            $soc = new Societe($this->db->db);
+            $user = new User($this->db->db);
+            $contact = new Contact($this->db->db);
+
+            $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
+
+            foreach ($list as $item) {
+                $html .= '<tr>';
+                switch ($item['source']) {
+                    case 'internal':
+                        $user->id = $item['id'];
+                        $user->lastname = $item['lastname'];
+                        $user->firstname = $item['firstname'];
+                        $user->photo = $item['photo'];
+                        $user->login = $item['login'];
+
+                        $html .= '<td>Utilisateur</td>';
+                        $html .= '<td>' . $conf->global->MAIN_INFO_SOCIETE_NOM . '</td>';
+                        $html .= '<td>' . $user->getNomUrl(-1) . BimpRender::renderObjectIcons($user) . '</td>';
+                        break;
+
+                    case 'external':
+                        $soc->fetch((int) $item['socid']);
+                        $contact->id = $item['id'];
+                        $contact->lastname = $item['lastname'];
+                        $contact->firstname = $item['firstname'];
+
+                        $html .= '<td>Contact tiers</td>';
+                        $html .= '<td>' . $soc->getNomUrl(1) . BimpRender::renderObjectIcons($soc) . '</td>';
+                        $html .= '<td>' . $contact->getNomUrl(1) . BimpRender::renderObjectIcons($contact) . '</td>';
+                        break;
+                }
+                $html .= '<td>' . $item['libelle'] . '</td>';
+                $html .= '<td style="text-align: right">';
+                $html .= BimpRender::renderRowButton('Supprimer le contact', 'trash', $this->getJsActionOnclick('removeContact', array('id_contact' => (int) $item['rowid']), array(
+                                    'confirm_msg'      => 'Etes-vous sûr de vouloir supprimer ce contact?',
+                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
+                )));
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+        } else {
+            $html .= '<tr>';
+            $html .= '<td colspan="5">';
+            $html .= BimpRender::renderAlerts('Aucun contact enregistré', 'info');
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+
+        return $html;
+    }
+    
+    public function actionAddContact($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Ajout du contact effectué avec succès';
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+        } else {
+            if (!isset($data['type']) || !(int) $data['type']) {
+                $errors[] = 'Nature du contact absent';
+            } else {
+                switch ((int) $data['type']) {
+                    case 1:
+                        $id_contact = isset($data['id_contact']) ? (int) $data['id_contact'] : 0;
+                        $type_contact = isset($data['tiers_type_contact']) ? (int) $data['tiers_type_contact'] : 0;
+                        if (!$id_contact) {
+                            $errors[] = 'Contact non spécifié';
+                        }
+                        if (!$type_contact && static::$external_contact_type_required) {
+                            $errors[] = 'Type de contact non spécifié';
+                        }
+
+                        if (!count($errors)) {
+                            if ($this->dol_object->add_contact($id_contact, $type_contact, 'external') <= 0) {
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            }
+                        }
+                        break;
+
+                    case 2:
+                        $id_user = isset($data['id_user']) ? (int) $data['id_user'] : 0;
+                        $type_contact = isset($data['user_type_contact']) ? (int) $data['user_type_contact'] : 0;
+                        if (!$id_user) {
+                            $errors[] = 'Utilisateur non spécifié';
+                        }
+                        if (!$type_contact && static::$internal_contact_type_required) {
+                            $errors[] = 'Type de contact non spécifié';
+                        }
+                        if (!count($errors)) {
+                            if ($this->dol_object->add_contact($id_user, $type_contact, 'internal') <= 0) {
+                                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de l\'ajout du contact');
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+
+        return array(
+            'errors'            => $errors,
+            'warnings'          => $warnings,
+            'contact_list_html' => $this->renderContactsList()
+        );
+    }
+    
+    public function actionRemoveContact($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = 'Suppression du contact effectué avec succès';
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the') . ' absent';
+        } else {
+            if (!isset($data['id_contact']) || !(int) $data['id_contact']) {
+                $errors[] = 'Contact à supprimer non spécifié';
+            } else {
+                if ($this->dol_object->delete_contact((int) $data['id_contact']) <= 0) {
+                    $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object), 'Echec de la suppression du contact');
+                }
+            }
+        }
+
+        return array(
+            'errors'            => $errors,
+            'warnings'          => $warnings,
+            'contact_list_html' => $this->renderContactsList()
+        );
+    }
+    
+    public function getAddContactIdClient()
+    {
+        $id_client = (int) BimpTools::getPostFieldValue('id_client');
+        if (!$id_client) {
+            $id_client = (int) $this->getData('fk_soc');
+        }
+
+        return $id_client;
+    }
+    
+    public function getClientContactsArray()
+    {
+        $id_client = $this->getAddContactIdClient();
+        return self::getSocieteContactsArray($id_client, false);
+    }
 
 }

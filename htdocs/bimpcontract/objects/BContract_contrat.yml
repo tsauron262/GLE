@@ -16,6 +16,14 @@ dol_object:
             file: contrat
 
 objects:
+    client:
+        instance:
+            dol_object:
+                module: societe
+                file: societe
+            id_object:
+                field_value: fk_soc
+    
     lines:
         instance:
             bimp_object: BContract_contratLine
@@ -209,9 +217,6 @@ fields_tables:
         rows: 
             - field: fk_soc
               display: card
-            - label: Remises client
-              value: 
-                  callback: displayRemisesClient
     
    
               
@@ -343,6 +348,7 @@ views:
                                children: files
                                
     echeancier:
+        objects_change_reload: BContract_echeancier
         title: Echéancier prévisionnel
         panel: 1
         rows:

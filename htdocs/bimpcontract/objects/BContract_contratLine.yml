@@ -23,12 +23,28 @@ objects:
 
 fields:
     fk_product:
-        label: Produit
+        label: produit
         type: id_object
         object: produit
+        required: 1
+        input: 
+            type: search_product
+            #societe_type: customer
+            help: Entrez le nom ou la référence d'un client pour effectuer une recherche
+            card: default
+        search:
+            input: 
+                type: search_product
+                societe_type: customer    
+        create_form: light
+#    fk_product:
+#        label: Produit
+#        type: id_object
+#        object: produit
     qty:
         label: Qté
         type: qty
+        default_value: 1
     price_ht:
         label: P.U HT
         type: money
@@ -39,7 +55,7 @@ fields:
     total_ttc: 
         label: Total TTC
         type: money
-        
+
 lists: 
     default: 
         title: Lignes du contrat
@@ -51,6 +67,7 @@ lists:
         update_btn: 1
         edit_btn: 0
         edit_form: default
+        add_form_name: add
         delete_btn: 1
         page_btn: 1
         cols: 
@@ -64,4 +81,10 @@ lists:
                 field: price_ht
             total_ttc:
                 field: total_ttc
-            
+
+forms:
+    add:
+        rows:
+            - field: fk_product
+            - field: qty
+              

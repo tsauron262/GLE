@@ -7,7 +7,7 @@ objects:
             bimp_object: BContract_contrat
             id_object:
                 request: id
-        
+
 
 sections:
     - type: object_header
@@ -33,6 +33,12 @@ sections:
                     name: lines
           - id: contact_adresse_contrat
             title: Contact / Adresse
+            struct: 
+                type: custom
+                custom: 
+                    callback: 
+                        method: renderContacts
+                        object: contrat
           - id: fichier_contrat
             title: Fichiers
             struct: 
@@ -41,8 +47,6 @@ sections:
                     panel: 1
                     name: file
                     object: contrat
-          - id: suivi
-            title: Suivi
           - id: echeancier
             title: Echéancier
             struct:

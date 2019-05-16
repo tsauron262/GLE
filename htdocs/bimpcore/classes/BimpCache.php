@@ -745,7 +745,7 @@ class BimpCache
 
     // Group: 
 
-    public static function getGroupsArray($include_empty = 1)
+    public static function getUserGroupsArray($include_empty = 1)
     {
         $cache_key = 'groups';
         if (!isset(self::$cache[$cache_key])) {

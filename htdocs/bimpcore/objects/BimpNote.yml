@@ -100,7 +100,7 @@ fields:
             field_name: type_dest
             show_values: 2
         values:
-            array: groups
+            array: userGroups
     auto:
         label: Note Auto
         type: boolean

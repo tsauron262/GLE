@@ -63,10 +63,11 @@ class BContract_echeancier extends BimpObject {
             }
 
             // Construction actionButton
+            $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
             $actionsButtons = '';
             $actionsButtons .= ($this->canViewObject($facture)) ? '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Vue rapide de la facture" onclick="loadModalView(\'bimpcommercial\', \'Bimp_facture\', ' . $facture->id . ', \'default\', $(this), \'Facture ' . $facture->ref . '\')"><i class="far fa5-eye"  ></i></span>' : '';
             $actionsButtons .= (is_object($facture) && $facture->statut == 0 && $this->getData('validate') == 0) ? '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Supprimer la facture" onclick="")"><i class="fa fa-times" ></i></span>' : '';
-            $actionsButtons .= (is_object($facture) && $facture->statut == 0 && $this->getData('validate') == 0 ) ? '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Valider la facture" onclick="")"><i class="fa fa-check" ></i></span>' : '';
+            $actionsButtons .= (is_object($facture) && $facture->statut == 0 && $this->getData('validate') == 0 ) ? '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Valider la facture" onclick="' . $this->getJsActionOnclick("validate_facture", array(), array("success_callback" => $callback)) . '")"><i class="fa fa-check" ></i></span>' : '';
             $actionsButtons .= (!$this->canViewObject($facture)) ? '<span style="cursor: not-allowed" class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Pas de facture à voir" onclick="")"><i class="far fa-eye-slash"></i></span>' : '';
 
             $html .= '</td>'
@@ -269,6 +270,35 @@ class BContract_echeancier extends BimpObject {
             }
         }
         return $return + 1;
+    }
+
+    public function actionDelete_facture($data, &$success) {
+        
+        global $user, $db;
+        $bimp = new BimpDb($db);
+        $success = '';
+
+        BimpTools::loadDolClass('compta/facture', 'facture');
+        $facture = new Facture($db);
+        $parent = $this->getParentInstance();
+
+        $success = 'Facture ' . $facture->id . 'supprimer avec succès';
+    }
+
+    public function actionValidate_facture($data, &$success) {
+        global $user, $db;
+        $bimp = new BimpDb($db);
+        BimpTools::loadDolClass('compta/facture', 'facture');
+        $facture = new Facture($db);
+        $success = '';
+
+        foreach($this->get_total_facture() as $lines){
+            $facture->fetch($lines['id_facture']);
+        }
+        
+        $facture->validate($user, 0);
+
+        $success = 'Facture ' . $lines['id_facture'] . 'valider avec succès';
     }
 
     public function actionCreate_facture($data, &$success) {

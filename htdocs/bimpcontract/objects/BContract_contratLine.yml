@@ -27,13 +27,18 @@ objects:
             id_object:
                 field_value:
                     fk_product
-
+    
 fields:
+    rowid:
+        label: N°
+        type: int
     description:
         label: Description de la ligne
-        type: html
+        type: string
+        required: 1
     fk_contrat:
         label: Contrat
+        type: int
     fk_product:
         label: produit
         type: id_object
@@ -70,10 +75,10 @@ fields:
     remise_percent:
         label: Remise
         type: percent
+        default_value: 0
     remise:
         label: Total remise
         type: money
-        default_value: 0
 
 lists: 
     default: 
@@ -85,7 +90,7 @@ lists:
         checkbox: 1
         add_object_row: 0
         update_btn: 1
-        edit_btn: 0
+        edit_btn: 1
         edit_form: default
         add_form_name: add
         delete_btn: 1
@@ -110,11 +115,23 @@ lists:
                 field: total_ttc
 
 forms:
+    default:
+        rows:
+            - field: rowid
+              edit: 0
+              show: 0
+            - field: description
+            - field: fk_product
+              edit: 0
+            - field: tva_tx
+            - field: qty
+            - field: remise_percent
+            
     add:
         rows:
             - field: description
             - field: fk_product
             - field: qty
-            - field: remise
+            - field: remise_percent
             - field: tva_tx
               

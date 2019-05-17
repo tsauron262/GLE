@@ -86,7 +86,6 @@ fields:
     datec:
         label: Date du contrat
         type: date
-        dol_prop: date_contrat
     statut:
         label: Statut
         type: int
@@ -187,6 +186,8 @@ fields_tables:
               edit: 0
             - field: objet_contrat
               edit: 0
+            - field: datec
+              edit: 0
             - field: date_start
               edit: 0
             - field: duree_mois
@@ -273,6 +274,9 @@ forms:
     
     add_contrat:
         rows:
+            - field: datec
+              edit: 0
+              show: 0
             - field: objet_contrat
             - field: fk_soc
             - field: date_start

@@ -71,6 +71,7 @@ fields:
         label: Client
         type: id_object
         object: client
+        dol_prop: socid
         required: 1
         input: 
             type: search_societe
@@ -98,10 +99,13 @@ fields:
         label: Date de début
         type: date
         dol_extra_field: 1
+        required: 1
     duree_mois:
         label: Durée en mois
         type: qty
         dol_extra_field: 1
+        default_value: 12
+        required: 1
     periodicity:
         label: Périodicité de facturation
         type: int
@@ -112,10 +116,11 @@ fields:
         label: Delais d'intervention
         type: int
         dol_extra_field: 1
+        require: 1
         values:
             array: gti
     syntec:
-        label: Indice SYNTEC appliqué si renouvellement
+        label: Indice SYNTEC (appliqué si renouvellement)
         type: float
         dol_extra_field: 1
     tacite:
@@ -134,14 +139,11 @@ fields:
         label: Mode de règlement
         type: int
         dol_extra_field: 1
+        default_value: 
+            callback: getModeReglementClient
         values:
             array: mode_reglement
-    
-    objet_contrat:
-        label: Objet du contrat
-        type: string
-        dol_extra_field: 1
-    
+
     objet_contrat:
         label: Objet du contrat
         type: string
@@ -258,16 +260,6 @@ forms:
             - field: ref
               edit: 0
             - field: objet_contrat
-#            - custom: 1
-#              input_name: id_user_commercial
-#              label: Commercial suivi contrat
-#              input: 
-#                  type: search_user
-#              value: 
-#                  prop: 
-#                      object: 
-#                          global: user
-#                      name: id
             - field: fk_soc
               edit: 0
             - field: date_start
@@ -283,8 +275,17 @@ forms:
         rows:
             - field: objet_contrat
             - field: fk_soc
+            - field: date_start
+            - field: duree_mois
+            - field: periodicity
+            - field: gti
+            - field: tacite
+            - field: syntec
+            - field: denounce
+            - field: moderegl
             - field: fk_commercial_signature
             - field: fk_commercial_suivi
+            
             
     contact:
         title: Ajouter un contact

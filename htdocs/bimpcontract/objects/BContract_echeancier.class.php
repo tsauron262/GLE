@@ -15,8 +15,6 @@ class BContract_echeancier extends BimpObject {
         $bimp = new BimpDb($db);
         if ($display_error) {
             return BimpRender::renderAlerts($display_error);
-        } else {
-            
         }
 
         global $db;

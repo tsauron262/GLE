@@ -96,6 +96,14 @@ class BContract_contrat extends BimpDolObject {
         return parent::__construct($module, $object_name);
     }
     
+    public function getModeReglementClient() {
+        global $db;
+        BimpTools::loadDolClass('societe');
+        $client = new Societe($db);
+        $client->fetch($this->getData('fk_soc'));
+        return $client->mode_reglement_id;
+    }
+    
     public function displayRef() {
         return $this->getData('ref') . ' - ' . $this->getData('objet_contrat');
     }

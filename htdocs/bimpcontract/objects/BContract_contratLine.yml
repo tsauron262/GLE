@@ -29,6 +29,11 @@ objects:
                     fk_product
 
 fields:
+    description:
+        label: Description de la ligne
+        type: html
+    fk_contrat:
+        label: Contrat
     fk_product:
         label: produit
         type: id_object
@@ -85,8 +90,11 @@ lists:
         delete_btn: 1
         page_btn: 1
         cols: 
+            description:
+                field: description
             fk_product:
                 field: fk_product
+                display: nom_url
             qty:
                 field: qty
             tva_tx:
@@ -103,6 +111,7 @@ lists:
 forms:
     add:
         rows:
+            - field: description
             - field: fk_product
             - field: qty
               

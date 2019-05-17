@@ -4,6 +4,13 @@ table: contratdet
 parent_id_property: fk_contrat
 parent_object: BContract_contrat
 
+dol_object: 
+    instance: 
+        dol_object: 
+            module: contrat
+            file: contrat
+            class: ContratLigne
+
 primary: rowid
 
 labels: 
@@ -30,7 +37,7 @@ fields:
         input: 
             type: search_product
             #societe_type: customer
-            help: Entrez le nom ou la référence d'un client pour effectuer une recherche
+            help: Entrez le nom ou la référence d'un produit pour effectuer une recherche
             card: default
         search:
             input: 

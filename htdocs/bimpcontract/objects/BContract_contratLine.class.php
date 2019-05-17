@@ -22,5 +22,21 @@ class BContract_contratLine extends BimpObject {
          
          return 1;
      }
+     
+     public function canCreate() {
+         $contrat = $this->getParentInstance();
+         if($contrat->getData('statut') > 0) {
+             return 0;
+         }
+         return 1;
+     }
+     
+     public function canDelete() {
+         return $this->canCreate();
+     }
+     
+     public function canEdit() {
+         return $this->canCreate();
+     }
     
 }

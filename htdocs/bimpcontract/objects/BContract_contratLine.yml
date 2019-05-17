@@ -73,6 +73,7 @@ fields:
     remise:
         label: Total remise
         type: money
+        default_value: 0
 
 lists: 
     default: 
@@ -114,4 +115,6 @@ forms:
             - field: description
             - field: fk_product
             - field: qty
+            - field: remise
+            - field: tva_tx
               

@@ -98,11 +98,22 @@ class BContract_echeancier extends BimpObject {
 
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}'; // TODO 
             if ($this->getData('validate') == 0) {
-                $html .= '<br /><input class="btn btn-primary saveButton" value="Créer une facture" onclick="' .
+                $showCreate = true;
+                foreach($this->tab_echeancier as $facture => $attr) { // TODO a voir lundi pour mettre dans tab echeancier statut facture
+                    if ($attr['facture'] > 0) {
+                        if($attr['statut'] == 0) {
+                            $showCreate = false;
+                            break;
+                        }
+                    }
+                }
+                if($showCreate){
+                    $html .= '<br /><input class="btn btn-primary saveButton" value="Créer une facture" onclick="' .
                         $this->getJsActionOnclick("create_facture", array(), array(
                             "success_callback" => $callback
                         ))
                         . '"><br /><br />';
+                }
             }
         } else {
             $updateData = Array('next_facture_date' => null, 'next_facture_amount' => null);
@@ -172,11 +183,13 @@ class BContract_echeancier extends BimpObject {
 
         $list_fact = $this->get_total_facture();
         for ($i = 0; $i < $nb_period; $i++) {
+            $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $list_fact[$i]['id_facture']);
             $this->tab_echeancier[$i] = array('date_debut' => $date_debut->format('Y-m-d'), 'date_fin' => $date_fin->format('Y-m-t'), 'montant_ht' => $montant_facturer_ht, 'montant_ttc' => $montant_facturer_ttc);
             $date_debut->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
             $date_fin->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
 
             if (array_key_exists($i, $list_fact)) {
+                $this->tab_echeancier[$i]['statut'] = $facture->getData('fk_statut');
                 $this->tab_echeancier[$i]['facture'] = $list_fact[$i]['id_facture'];
             } else {
                 $this->tab_echeancier[$i]['facture'] = 0;

@@ -19,7 +19,7 @@ fields:
         object: contrat
     next_facture_date:
         label: Date de la prochaine facture
-        type: date
+        type: datetime
     next_facture_amount:
         label: Montant de la prochaine facture
         type: money

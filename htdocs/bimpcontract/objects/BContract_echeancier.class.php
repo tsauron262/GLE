@@ -31,7 +31,7 @@ class BContract_echeancier extends BimpObject {
         $verif_statut = ($parent->getData('statut') > 1) ? true : false;
 
         $html = '';
-        $html .= ($stop_echeancier) ? BimpRender::renderAlerts('Toutes les factures de l\'échéancier ont étés générées', 'info', false) : '';
+        $html .= ($stop_echeancier) ? BimpRender::renderAlerts('Toutes les factures de l\'échéancier ont été générées', 'info', false) : '';
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">'
                 . '<thead>'
                 . '<tr class="headerRow">'
@@ -159,7 +159,7 @@ class BContract_echeancier extends BimpObject {
         }
         $html .= "<br/>"
                 . "<table style='width:50%;float:right' class='border' border='1'>"
-                . "<tr> <th style='border: 1px solid Transparent!important;'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>TTC</th> </tr>"
+                . "<tr> <th style='border: 1px solid Transparent!important;'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant TTC</th> </tr>"
                 . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Total contrat</th> <td style='text-align:center'><b>" . price($this->get_total_contrat('ht')) . " €</b></td> <td style='text-align:center'><b> " . price($this->get_total_contrat('ttc')) . " €</b></td> </tr>"
                 . "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Déjà payer</th> <td style='text-align:center'><b>" . price($tab_total_fact['info']['deja_payer_ht']) . " € </b></td> <td style='text-align:center'><b> " . price($tab_total_fact['info']['deja_payer_ttc']) . " €</b></td> </tr>"
                 . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b> " . price($tab_total_fact['info']['reste_a_payer_ht']) . " € </b></td> <td style='text-align:center'><b> " . price($tab_total_fact['info']['reste_a_payer_ttc']) . " €</b></td> </tr>"

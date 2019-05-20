@@ -553,6 +553,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->Close();
                 $this->file = $file;
                 $pdf->Output($file, 'f');
+                $this->result["fullpath"] = $file;
                 return 1;
             } else {
                 $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);

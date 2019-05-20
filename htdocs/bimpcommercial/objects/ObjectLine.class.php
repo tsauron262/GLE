@@ -25,7 +25,7 @@ class ObjectLine extends BimpObject
     public static $product_line_data = array(
         'id_product'     => array('label' => 'Produit / Service', 'type' => 'int', 'required' => 1),
         'id_fourn_price' => array('label' => 'Prix d\'achat fournisseur', 'type' => 'int'),
-        'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => ''),
+        'desc'           => array('label' => 'Description', 'type' => 'html', 'required' => 0, 'default' => null),
         'qty'            => array('label' => 'Quantité', 'type' => 'float', 'required' => 1, 'default' => 1),
         'pu_ht'          => array('label' => 'PU HT', 'type' => 'float', 'required' => 0, 'default' => null),
         'tva_tx'         => array('label' => 'Taux TVA', 'type' => 'float', 'required' => 0, 'default' => null),
@@ -109,6 +109,16 @@ class ObjectLine extends BimpObject
         }
 
         return 0;
+    }
+
+    public function isFieldEditable($field, $force_edit = false)
+    {
+        global $user;
+        if (in_array($field, array("pu_ht"))) {
+            return $this->canEditPrixVente();
+        }
+//        
+        return parent::isFieldEditable($field, $force_edit);
     }
 
     public function isRemisable()
@@ -675,7 +685,7 @@ class ObjectLine extends BimpObject
 
                 case 'desc':
                     $desc = $this->desc;
-                    if ($id_product && ((is_null($desc) || !(string) $desc || (int) $this->id_product !== $id_product))) {
+                    if ($id_product && ((is_null($desc) || (int) $this->id_product !== $id_product))) {
                         $desc = (string) $product->dol_object->description;
                         $product_label = (string) $product->getData('label');
 
@@ -892,16 +902,6 @@ class ObjectLine extends BimpObject
         }
 
         return 3;
-    }
-
-    public function isFieldEditable($field, $force_edit = false)
-    {
-        global $user;
-        if (in_array($field, array("pu_ht"))) {
-            return $this->canEditPrixVente();
-        }
-//        
-        return parent::isFieldEditable($field, $force_edit);
     }
 
     // Affichages: 

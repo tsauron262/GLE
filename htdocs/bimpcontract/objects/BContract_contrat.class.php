@@ -148,12 +148,18 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function actionValidation($data, &$success) {
+        global $user;
+        if($this->dol_object->validate($user) <= 0) {
+            $this->updateField('statut', self::CONTRAT_STATUS_VALIDE);
+            
+        }
         $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
         $instance->find(Array('id_contrat' => $this->id));
         if($instance->updateLine($this->id, $this->getData('date_start') )) {
-            $success = 'Contrat validé et échéancier créer';
-            $this->updateField('statut', self::CONTRAT_STATUS_VALIDE);
+            $success .= 'Contrat et échéancier créer avec succes';
         }
+        
+        
     }
     
     public function canEdit(){
@@ -452,7 +458,9 @@ class BContract_contrat extends BimpDolObject {
     
     public function actionGeneratePdf($data, &$success)
     {   
-        return parent::actionGeneratePdf($data, $success, array(), $wanings);
+        global $langs;
+        $success = "PDF généré avec Succes";
+        $this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
     }
     
     public function getActionsButtons()
@@ -461,14 +469,12 @@ class BContract_contrat extends BimpDolObject {
         $langs->load('propal');
 
         $buttons = Array();
-
-        if ($this->isLoaded()) {
-            $buttons[] = array(
+         $buttons[] = array(
                 'label'   => 'Générer le PDF',
                 'icon'    => 'fas_sync',
                 'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
             );
-
+        if ($this->isLoaded()) {
             $status = $this->getData('statut');
             
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
@@ -643,7 +649,6 @@ class BContract_contrat extends BimpDolObject {
 
         if ($this->isLoaded()) {
             global $conf;
-
             $dir = $conf->contrat->dir_output. '/' . dol_sanitizeFileName($this->getRef());
 
             if (!function_exists('dol_dir_list')) {
@@ -727,5 +732,44 @@ class BContract_contrat extends BimpDolObject {
 
         return $html;
     }
+    
+    public function getModelPdf()
+    {
+        return $this->getData('model_pdf');
+    }
+    
+    public function getModelsPdfArray()
+    {
+        if (!class_exists('ModelePDFContract')) {
+            require_once DOL_DOCUMENT_ROOT . '/core/modules/contract/modules_contract.php';
+        }
+
+        return ModelePDFContract::liste_modeles($this->db->db);
+    }
+    
+//     public function displayPDFButton($display_generate = true, $with_ref = true)
+//    {
+//        $html = '';
+//        $ref = dol_sanitizeFileName($this->getRef());
+//
+//        if ($ref) {
+//            if ($display_generate) {
+//                $models = $this->getModelsPdfArray();
+//                if (count($models)) {
+//                    $html .= '<div class="' . static::$dol_module . 'PdfGenerateContainer" style="' . ($file_url ? 'margin-top: 15px; display: none;' : '') . '">';
+//                    $html .= BimpInput::renderInput('select', static::$dol_module . '_model_pdf', $this->getModelPdf(), array(
+//                                'options' => $models
+//                    ));
+//                    $onclick = 'var model = $(this).parent(\'.' . static::$dol_module . 'PdfGenerateContainer\').find(\'[name=' . static::$dol_module . '_model_pdf]\').val();setObjectAction($(this), ' . $this->getJsObjectData() . ', \'generatePdf\', {model: model}, null, null, null, null);';
+//                    $html .= '<button type="button" onclick="' . $onclick . '" class="btn btn-default">';
+//                    $html .= '<i class="fas fa5-sync iconLeft"></i>Générer';
+//                    $html .= '</button>';
+//                    $html .= '</div>';
+//                }
+//            }
+//        }
+//
+//        return $html;
+//    }
 
 }

@@ -54,3 +54,18 @@ lists:
                 field: validate
                 edit: 1
                       
+views:
+    fiche_contrat:
+        title: echeancier
+        rows:
+            - cols: 
+                - type: rows
+                  col_lg: 12
+                  col_md: 12
+                  rows:                        
+                      - cols: 
+                          - type: view
+                            col_lg: 12
+                            view: 
+                                name: echeancier
+                                object: contrat

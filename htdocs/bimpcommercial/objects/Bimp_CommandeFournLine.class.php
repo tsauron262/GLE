@@ -365,6 +365,12 @@ class Bimp_CommandeFournLine extends FournObjectLine
                 ))
             );
         }
+        
+        $product = $this->getProduct();
+        
+        if (BimpObject::objectLoaded($product)) {
+            $buttons = array_merge($buttons, $product->getListsButtons((int) ceil($this->qty)));
+        }
 
         return $buttons;
     }

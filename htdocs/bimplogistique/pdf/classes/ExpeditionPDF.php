@@ -4,9 +4,6 @@ require_once DOL_DOCUMENT_ROOT . '/bimpcore/pdf/classes/BimpEtiquettePDF.php';
 
 class ExpeditionPDF extends BimpEtiquettePDF
 {
-
-    public $qty_etiquettes = 1;
-
     public function __construct($db)
     {
         parent::__construct($db);
@@ -14,7 +11,7 @@ class ExpeditionPDF extends BimpEtiquettePDF
         $this->prefName = "Etiquette_Expedition_";
     }
 
-    protected function renderContent()
+    protected function getContentHtml()
     {
         $html = '';
 
@@ -76,12 +73,7 @@ class ExpeditionPDF extends BimpEtiquettePDF
                 }
             }
         }
-
-        $this->writeContent(str_replace('etiquette_number', 1, $html));
-
-        for ($i = 2; $i <= $this->qty_etiquettes; $i++) {
-            $this->pdf->newPage();
-            $this->writeContent(str_replace('etiquette_number', $i, $html));
-        }
+        
+        return $html;
     }
 }

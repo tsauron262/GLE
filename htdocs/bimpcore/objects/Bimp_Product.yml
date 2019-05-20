@@ -194,6 +194,27 @@ forms:
             - field: tobuy
             - field: description
             - field: note
+            
+    etiquettes: 
+        title: Générer des etiquettes
+        icon: fas_sticky-note
+        rows: 
+            - custom: 1
+              label: Type d'étiquette à générer
+              input_name: type
+              input: 
+                  type: select
+                  options: 
+                      stock: Stock
+                      magasin: Magasin
+            - custom: 1
+              label: Nombre
+              input_name: qty
+              data_type: int
+              input: 
+                  type: qty
+              decimals: 0
+              min: 1
 
 fields_tables: 
     infos: 

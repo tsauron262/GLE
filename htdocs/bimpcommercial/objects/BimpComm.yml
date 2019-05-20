@@ -553,7 +553,7 @@ lists:
             
 views: 
     default: 
-        objects_change_reload: Bimp_File
+        objects_change_reload: BimpFile,BimpNote
         delete_btn: 1
         edit_form: default
         footer_extra_btn: 

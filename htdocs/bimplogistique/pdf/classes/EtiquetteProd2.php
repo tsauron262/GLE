@@ -12,7 +12,7 @@ class EtiquetteProd2 extends BimpEtiquettePDF {
         $this->prefName = "Etiquette_Magasin_";
     }
 
-    protected function renderContent() {
+    public function writeContent($content = '') {
         $debug = false;
 //        $html = "";
         $label = $this->object->label;

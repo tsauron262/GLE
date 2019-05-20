@@ -89,6 +89,8 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_REGLEMENT_AMERICAN_EXPRESS => 'American Express'
     );
     
+    public static $dol_module = 'contract';
+
     function __construct($module, $object_name) {
         if(BimpTools::getContext() == 'public') {
             $this->redirectMode = 4;
@@ -144,21 +146,6 @@ class BContract_contrat extends BimpDolObject {
         }
         
     }
-
-    public function getActionsButtons() {
-        $buttons = array();
-        $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-        if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
-            $buttons[] = array(
-                'label' => 'Valider le contrat',
-                'icon' => 'fas_check',
-                'onclick' => $this->getJsActionOnclick('validation', array(), array(
-                    'success_callback' => $callback
-                ))
-            );
-        }
-        return $buttons;
-    }
     
     public function actionValidation($data, &$success) {
         $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
@@ -170,9 +157,9 @@ class BContract_contrat extends BimpDolObject {
     }
     
     public function canEdit(){
-        if($this->getData("statut") != self::CONTRAT_STATUS_CLOS)
-            return true;
-        return false;
+        if($this->getData("statut") == self::CONTRAT_STATUS_CLOS || $this->getData('statut') == self::CONTRAT_STATUS_VALIDE)
+            return 0;
+        return 1;
     }
 
     public function canClientView() {
@@ -229,6 +216,10 @@ class BContract_contrat extends BimpDolObject {
 
     public function getName() {
         return $this->getData('objet_contrat');
+    }
+    
+    public function canDelete() {
+        return $this->canEdit();
     }
     
     public function renderEcheancier() {
@@ -441,6 +432,8 @@ class BContract_contrat extends BimpDolObject {
         );
     }
     
+    
+    
     public function getAddContactIdClient()
     {
         $id_client = (int) BimpTools::getPostFieldValue('id_client');
@@ -455,6 +448,284 @@ class BContract_contrat extends BimpDolObject {
     {
         $id_client = $this->getAddContactIdClient();
         return self::getSocieteContactsArray($id_client, false);
+    }
+    
+    public function actionGeneratePdf($data, &$success)
+    {   
+        return parent::actionGeneratePdf($data, $success, array(), $wanings);
+    }
+    
+    public function getActionsButtons()
+    {
+        global $conf, $langs, $user;
+        $langs->load('propal');
+
+        $buttons = Array();
+
+        if ($this->isLoaded()) {
+            $buttons[] = array(
+                'label'   => 'Générer le PDF',
+                'icon'    => 'fas_sync',
+                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
+            );
+
+            $status = $this->getData('statut');
+            
+            $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+            if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
+                $buttons[] = array(
+                    'label' => 'Valider le contrat',
+                    'icon' => 'fas_check',
+                    'onclick' => $this->getJsActionOnclick('validation', array(), array(
+                        'success_callback' => $callback
+                    ))
+                );
+            }
+            if (!is_null($status)) {
+                $status = (int) $status;
+                $soc = $this->getChildObject('client');
+                // Cloner: 
+                if ($this->can("create")) {
+                    $buttons[] = array(
+                        'label'   => 'Cloner',
+                        'icon'    => 'copy',
+                        'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+                            'form_name' => 'duplicate_contrat'
+                        ))
+                    );
+                }
+            }
+        }
+
+        return $buttons;
+    }
+    
+    
+    
+    
+    /**********/
+   /* RENDER */
+  /**********/
+    
+    public function renderLinkedObjectsTable()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            $objects = array();
+
+            if ($this->isDolObject()) {
+                $propal_instance = null;
+                $facture_instance = null;
+                $commande_instance = null;
+                $commande_fourn_instance = null;
+                foreach (BimpTools::getDolObjectLinkedObjectsList($this->dol_object, $this->db) as $item) {
+                    switch ($item['type']) {
+                        case 'propal':
+                            $propal_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', (int) $item['id_object']);
+                            if ($propal_instance->isLoaded()) {
+                                $icon = $propal_instance->params['icon'];
+                                $objects[] = array(
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($propal_instance->getLabel()),
+                                    'ref'      => $propal_instance->getNomUrl(0, true, true, 'full'),
+                                    'date'     => $propal_instance->displayData('datep'),
+                                    'total_ht' => $propal_instance->displayData('total_ht'),
+                                    'status'   => $propal_instance->displayData('fk_statut')
+                                );
+                            }
+                            break;
+
+                        case 'facture':
+                            $facture_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', (int) $item['id_object']);
+                            if ($facture_instance->isLoaded()) {
+                                $icon = $facture_instance->params['icon'];
+                                $objects[] = array(
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($facture_instance->getLabel()),
+                                    'ref'      => $facture_instance->getNomUrl(0, true, true, 'full'),
+                                    'date'     => $facture_instance->displayData('datef'),
+                                    'total_ht' => $facture_instance->displayData('total'),
+                                    'status'   => $facture_instance->displayData('fk_statut')
+                                );
+                            }
+                            break;
+
+                        case 'commande':
+                            $commande_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', (int) $item['id_object']);
+                            if ($commande_instance->isLoaded()) {
+                                $icon = $commande_instance->params['icon'];
+                                $objects[] = array(
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_instance->getLabel()),
+                                    'ref'      => $commande_instance->getNomUrl(0, true, true, 'full'),
+                                    'date'     => $commande_instance->displayData('date_commande'),
+                                    'total_ht' => $commande_instance->displayData('total_ht'),
+                                    'status'   => $commande_instance->displayData('fk_statut')
+                                );
+                            }
+                            break;
+
+                        case 'order_supplier':
+                            $commande_fourn_instance = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_CommandeFourn', (int) $item['id_object']);
+                            if ($commande_fourn_instance->isLoaded()) {
+                                $icon = $commande_fourn_instance->params['icon'];
+                                $objects[] = array(
+                                    'type'     => BimpRender::renderIcon($icon, 'iconLeft') . BimpTools::ucfirst($commande_fourn_instance->getLabel()),
+                                    'ref'      => $commande_fourn_instance->getNomUrl(0, true, true, 'full'),
+                                    'date'     => $commande_fourn_instance->displayData('date_commande'),
+                                    'total_ht' => $commande_fourn_instance->displayData('total_ht'),
+                                    'status'   => $commande_fourn_instance->displayData('fk_statut')
+                                );
+                            }
+                            break;
+
+                        case 'invoice_supplier':
+                            $facture_fourn_instance = BimpCache::getDolObjectInstance((int) $item['id_object'], 'fourn', 'fournisseur.facture', 'FactureFournisseur');
+                            BimpObject::loadClass('bimpcommercial', 'Bimp_Facture');
+                            if (BimpObject::objectLoaded($facture_fourn_instance)) {
+                                $date_facture = new DateTime(BimpTools::getDateFromDolDate($facture_fourn_instance->date));
+                                $objects[] = array(
+                                    'type'     => 'Facture fournisseur',
+                                    'ref'      => BimpObject::getInstanceNomUrlWithIcons($facture_fourn_instance),
+                                    'date'     => $date_facture->format('d / m / Y'),
+                                    'total_ht' => BimpTools::displayMoneyValue((float) $facture_fourn_instance->total_ht, 'EUR'),
+                                    'status'   => Bimp_Facture::$status_list[(int) $facture_fourn_instance->statut]['label']
+                                );
+                            }
+                            break;
+                    }
+                }
+            }
+
+            $html .= '<table class="bimp_list_table">';
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th>Type</th>';
+            $html .= '<th>Réf.</th>';
+            $html .= '<th>Date</th>';
+            $html .= '<th>Montant HT</th>';
+            $html .= '<th>Statut</th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+
+            $html .= '<tbody>';
+
+            if (count($objects)) {
+                foreach ($objects as $data) {
+                    $html .= '<tr>';
+                    $html .= '<td><strong>' . $data['type'] . '</strong></td>';
+                    $html .= '<td>' . $data['ref'] . '</td>';
+                    $html .= '<td>' . $data['date'] . '</td>';
+                    $html .= '<td>' . $data['total_ht'] . '</td>';
+                    $html .= '<td>' . $data['status'] . '</td>';;
+                    $html .= '</tr>';
+                }
+            } else {
+                $html .= '<tr>';
+                $html .= '<td colspan="5">' . BimpRender::renderAlerts('Aucun objet lié', 'info') . '</td>';
+                $html .= '</tr>';
+            }
+
+            $html .= '</tbody>';
+            $html .= '</table>';
+
+            $html = BimpRender::renderPanel('Objets liés', $html, '', array(
+                        'foldable' => true,
+                        'type'     => 'secondary',
+                        'icon'     => 'fas_link',
+            ));
+        }
+
+        return $html;
+    }
+ 
+    public function renderFilesTable()
+    {
+        $html = '';
+
+        if ($this->isLoaded()) {
+            global $conf;
+
+            $dir = $conf->contrat->dir_output. '/' . dol_sanitizeFileName($this->getRef());
+
+            if (!function_exists('dol_dir_list')) {
+                require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+            }
+
+            $files_list = dol_dir_list($dir, 'files', 0, '', '(\.meta|_preview.*.*\.png)$', 'date', SORT_DESC);
+
+            $html .= '<table class="bimp_list_table">';
+
+            $html .= '<thead>';
+            $html .= '<tr>';
+            $html .= '<th>Fichier</th>';
+            $html .= '<th>Taille</th>';
+            $html .= '<th>Date</th>';
+            $html .= '<th></th>';
+            $html .= '</tr>';
+            $html .= '</thead>';
+
+            $html .= '<tbody>';
+
+
+            if (count($files_list)) {
+                $url = DOL_URL_ROOT . '/document.php?modulepart=' . static::$dol_module . '&file=' . dol_sanitizeFileName($this->getRef()) . urlencode('/');
+                foreach ($files_list as $file) {
+                    $html .= '<tr>';
+
+                    $html .= '<td><a class="btn btn-default" href="' . $url . $file['name'] . '" target="_blank">';
+                    $html .= '<i class="' . BimpRender::renderIconClass(BimpTools::getFileIcon($file['name'])) . ' iconLeft"></i>';
+                    $html .= $file['name'] . '</a></td>';
+
+                    $html .= '<td>';
+                    if (isset($file['size']) && $file['size']) {
+                        $html .= $file['size'];
+                    } else {
+                        $html .= 'taille inconnue';
+                    }
+                    $html .= '</td>';
+
+                    $html .= '<td>';
+                    if ((int) $file['date']) {
+                        $html .= date('d / m / Y H:i:s', $file['date']);
+                    }
+                    $html .= '</td>';
+
+
+                    $html .= '<td class="buttons">';
+                    $html .= BimpRender::renderRowButton('Aperçu', 'search', '', 'documentpreview', array(
+                                'attr' => array(
+                                    'target' => '_blank',
+                                    'mime'   => dol_mimetype($file['name'], '', 0),
+                                    'href'   => $url . $file['name'] . '&attachment=0'
+                                )
+                                    ), 'a');
+
+                    $onclick = $this->getJsActionOnclick('deleteFile', array('file' => htmlentities($file['fullname'])), array(
+                        'confirm_msg'      => 'Veuillez confirmer la suppression de ce fichier',
+                        'success_callback' => 'function() {bimp_reloadPage();}'
+                    ));
+                    $html .= BimpRender::renderRowButton('Supprimer', 'trash', $onclick);
+                    $html .= '</td>';
+                    $html .= '</tr>';
+                }
+            } else {
+                $html .= '<tr>';
+                $html .= '<td colspan="4">';
+                $html .= BimpRender::renderAlerts('Aucun fichier', 'info', false);
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+
+            $html .= '</tbody>';
+            $html .= '</table>';
+
+            $html = BimpRender::renderPanel('Documents PDF ' . $this->getLabel('of_the'), $html, '', array(
+                        'icon'     => 'fas_file',
+                        'type'     => 'secondary',
+                        'foldable' => true
+            ));
+        }
+
+        return $html;
     }
 
 }

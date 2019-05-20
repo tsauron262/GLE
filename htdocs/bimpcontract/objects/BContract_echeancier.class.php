@@ -351,7 +351,7 @@ class BContract_echeancier extends BimpObject {
         }
         $this->updateLine($parent->id);
 
-        $success = 'Facture créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
+        $success = 'Facture ' . $facture->id . ' créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
     }
 
     public function cron_create_facture() {

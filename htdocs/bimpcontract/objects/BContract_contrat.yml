@@ -224,7 +224,9 @@ fields_tables:
         rows: 
             - field: fk_soc
               display: card
-    
+            - label: Fichier PDF
+              value: 
+                  callback: displayPDFButton
    
               
                               
@@ -397,7 +399,22 @@ views:
                             col_lg: 12
                             fields_table:
                                 name: client
-    
+            - cols: 
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  custom:
+                      callback:
+                            method: renderLinkedObjectsTable
+
+                - type: custom
+                  col_lg: 6
+                  col_md: 6
+                  col_sm: 12
+                  custom: 
+                    callback:
+                        method: renderFilesTable
     interface_client:
         title:
             callback: displayRef

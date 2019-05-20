@@ -91,13 +91,16 @@ class BContract_contrat extends BimpDolObject {
     
     public static $dol_module = 'contract';
 
+    
     function __construct($module, $object_name) {
         if(BimpTools::getContext() == 'public') {
             $this->redirectMode = 4;
         }
         return parent::__construct($module, $object_name);
     }
-    
+
+
+    /* GETTERS */  
     public function getModeReglementClient() {
         global $db;
         BimpTools::loadDolClass('societe');
@@ -106,16 +109,6 @@ class BContract_contrat extends BimpDolObject {
         return $client->mode_reglement_id;
     }
     
-    public function displayRef() {
-        return $this->getData('ref') . ' - ' . $this->getData('objet_contrat');
-    }
-
-    public function displayEndDate() {
-        $fin = $this->getEndDate();
-        if($fin > 0)
-            return $fin->format('d/m/Y');
-    }
-
     public function getEndDate() {
         $debut = new DateTime();
         $fin = new DateTime();
@@ -131,37 +124,100 @@ class BContract_contrat extends BimpDolObject {
         return '';
     }
     
-    public function fetch($id, $parent = null) {
-        $return = parent::fetch($id, $parent);
-        $this->autoClose();
-        return $return;
+    public function displayRef() {
+        return $this->getData('ref') . ' - ' . $this->getData('objet_contrat');
+    }
+
+    public function displayEndDate() {
+        $fin = $this->getEndDate();
+        if($fin > 0)
+            return $fin->format('d/m/Y');
     }
     
-    public function autoClose(){//passer les contrat au statut clos quand toutes les enssiéne ligne sont close
-        if($this->id > 0 && $this->getData("statut") == 1 && $this->getEndDate() < new DateTime()){
-            $sql = $this->db->db->query("SELECT * FROM `llx_contratdet` WHERE statut != 5 AND `fk_contrat` = ".$this->id);
-            if($this->db->db->num_rows($sql) == 0){
-                $this->updateField("statut", 2);
+    public function getName() {
+        return $this->getData('objet_contrat');
+    }
+    
+    public function getAddContactIdClient()
+    {
+        $id_client = (int) BimpTools::getPostFieldValue('id_client');
+        if (!$id_client) {
+            $id_client = (int) $this->getData('fk_soc');
+        }
+
+        return $id_client;
+    }
+    
+    public function getClientContactsArray()
+    {
+        $id_client = $this->getAddContactIdClient();
+        return self::getSocieteContactsArray($id_client, false);
+    }
+    
+    public function getActionsButtons()
+    {
+        global $conf, $langs, $user;
+        $langs->load('propal');
+
+        $buttons = Array();
+         $buttons[] = array(
+                'label'   => 'Générer le PDF',
+                'icon'    => 'fas_sync',
+                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
+            );
+        if ($this->isLoaded()) {
+            $status = $this->getData('statut');
+            
+            $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
+            if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
+                $buttons[] = array(
+                    'label' => 'Valider le contrat',
+                    'icon' => 'fas_check',
+                    'onclick' => $this->getJsActionOnclick('validation', array(), array(
+                        'success_callback' => $callback
+                    ))
+                );
+            }
+            if (!is_null($status)) {
+                $status = (int) $status;
+                $soc = $this->getChildObject('client');
+                // Cloner: 
+                if ($this->can("create")) {
+                    $buttons[] = array(
+                        'label'   => 'Cloner',
+                        'icon'    => 'copy',
+                        'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+                            'form_name' => 'duplicate_contrat'
+                        ))
+                    );
+                }
             }
         }
-        
+
+        return $buttons;
     }
     
-    public function actionValidation($data, &$success) {
-        global $user;
-        if($this->dol_object->validate($user) <= 0) {
-            $this->updateField('statut', self::CONTRAT_STATUS_VALIDE);
-            
-        }
-        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
-        $instance->find(Array('id_contrat' => $this->id));
-        if($instance->updateLine($this->id, $this->getData('date_start') )) {
-            $success .= 'Contrat et échéancier créer avec succes';
-        }
-        
-        
+    /* DISPLAY */
+    public function display_card() {
+        $card = "";
+
+        $card .= '<div class="col-md-4">';
+        $card .= '<div class="card">';
+        $card .= '<div class="header">';
+        $card .= '<h4 class="title">' . $this->getRef() . '</h4>';
+        $card .= '<p class="category">';
+        $card .= ($this->isValide()) ? 'Contrat en cours de vadité' : 'Contrat échu';
+        $card .= '</p>';
+        $card .= '</div>';
+        $card .= '<div class="content"><div class="footer"><div class="legend">';
+        $card .= ($this->isValide()) ? '<i class="fa fa-plus text-success"></i> <a href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets">Créer un ticket support</a>' : '';
+        $card .= '<i class="fa fa-eye text-info"></i><a href="?fc=contrat_ticket&id='.$this->getData('id').'">Voir le contrat</a></div><hr><div class="stats"></div></div></div>';
+        $card .= '</div></div>';
+
+        return $card;
     }
     
+    /* RIGHTS */
     public function canEdit(){
         if($this->getData("statut") == self::CONTRAT_STATUS_CLOS || $this->getData('statut') == self::CONTRAT_STATUS_VALIDE)
             return 0;
@@ -181,180 +237,25 @@ class BContract_contrat extends BimpDolObject {
         }
         return false;
     }
-
-    public function isValide() {
-        if ($this->getData('date_start') && $this->getData('duree_mois')) { // On est dans les nouveaux contrats
-            $aujourdhui = strtotime(date('Y-m-d'));
-            $fin = $this->getEndDate();
-            $fin = $fin->getTimestamp();
-            if ($fin - $aujourdhui > 0) {
-                return true;
-            }
-        } else { // On est dans les anciens contrats
-            $lines = $this->dol_object->lines; // Changera quand l'objet BContract_contratLine sera OP
-            foreach ($lines as $line) {
-                if ($line->statut == 4) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    public function display_card() {
-        $card = "";
-
-        $card .= '<div class="col-md-4">';
-        $card .= '<div class="card">';
-        $card .= '<div class="header">';
-        $card .= '<h4 class="title">' . $this->getRef() . '</h4>';
-        $card .= '<p class="category">';
-        $card .= ($this->isValide()) ? 'Contrat en cours de vadité' : 'Contrat échu';
-        $card .= '</p>';
-        $card .= '</div>';
-        $card .= '<div class="content"><div class="footer"><div class="legend">';
-        $card .= ($this->isValide()) ? '<i class="fa fa-plus text-success"></i> <a href="?fc=contrat_ticket&id=' . $this->getData('id') . '&navtab-maintabs=tickets">Créer un ticket support</a>' : '';
-        $card .= '<i class="fa fa-eye text-info"></i><a href="?fc=contrat_ticket&id='.$this->getData('id').'">Voir le contrat</a></div><hr><div class="stats"></div></div></div>';
-        $card .= '</div></div>';
-
-        return $card;
-    }
-
-    public function getName() {
-        return $this->getData('objet_contrat');
-    }
     
-    public function canDelete() {
+     public function canDelete() {
         return $this->canEdit();
     }
     
-    public function renderEcheancier() {
-        
-        // TODO a viré (voir pour objet)
+    /* ACTIONS */
+    public function actionValidation($data, &$success) {
+        global $user;
+        if($this->dol_object->validate($user) <= 0) {
+            $this->updateField('statut', self::CONTRAT_STATUS_VALIDE);
+            
+        }
         $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
-        if($instance->find(Array('id_contrat' => $this->id))) {
-            return $instance->display();
-        } elseif($this->getData('statut') < self::CONTRAT_STATUS_VALIDE) {
-            return $instance->display("Le contrat doit être valider pour générer l'échéancier");
-        } elseif(!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
-            return $instance->display("Un des champs : Durée en mois, Date de début, Périodicitée est obligatoire pour la génération de l'échéancier");
-        } else {
-            $instance->updateLine($this->id);
-            return $instance->display();
-        } 
+        $instance->find(Array('id_contrat' => $this->id));
+        if($instance->updateLine($this->id, $this->getData('date_start') )) {
+            $success .= 'Contrat et échéancier créer avec succes';
+        }
         
-    }
-    
-    public function renderContacts()
-    {
-        $html = '';
-
-        $html .= '<table class="bimp_list_table">';
-
-        $html .= '<thead>';
-        $html .= '<tr>';
-        $html .= '<th>Nature</th>';
-        $html .= '<th>Tiers</th>';
-        $html .= '<th>Utilisateur / Contact</th>';
-        $html .= '<th>Type de contact</th>';
-        $html .= '<th></th>';
-        $html .= '</tr>';
-        $html .= '</thead>';
-
-        $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
-        $html .= '<tbody id="' . $list_id . '">';
-        $html .= $this->renderContactsList();
-
-        $html .= '</tbody>';
-
-        $html .= '</table>';
-
-        return BimpRender::renderPanel('Liste des contacts', $html, '', array(
-                    'type'           => 'secondary',
-                    'icon'           => 'user-circle',
-                    'header_buttons' => array(
-                        array(
-                            'label'       => 'Ajouter un contact',
-                            'icon_before' => 'plus-circle',
-                            'classes'     => array('btn', 'btn-default'),
-                            'attr'        => array(
-                                'onclick' => $this->getJsActionOnclick('addContact', array('id_client' => (int) $this->getData('fk_soc')), array(
-                                    'form_name'        => 'contact',
-                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
-                                ))
-                            )
-                        )
-                    )
-        ));
-    }
-
-    public function renderContactsList()
-    {
-        $html = '';
-
-        $list = array();
-
-        if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
-            $list_int = $this->dol_object->liste_contact(-1, 'internal');
-            $list_ext = $this->dol_object->liste_contact(-1, 'external');
-            $list = array_merge($list_int, $list_ext);
-        }
-
-        if (count($list)) {
-            global $conf;
-            BimpTools::loadDolClass('societe');
-            BimpTools::loadDolClass('contact');
-
-            $soc = new Societe($this->db->db);
-            $user = new User($this->db->db);
-            $contact = new Contact($this->db->db);
-
-            $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
-
-            foreach ($list as $item) {
-                $html .= '<tr>';
-                switch ($item['source']) {
-                    case 'internal':
-                        $user->id = $item['id'];
-                        $user->lastname = $item['lastname'];
-                        $user->firstname = $item['firstname'];
-                        $user->photo = $item['photo'];
-                        $user->login = $item['login'];
-
-                        $html .= '<td>Utilisateur</td>';
-                        $html .= '<td>' . $conf->global->MAIN_INFO_SOCIETE_NOM . '</td>';
-                        $html .= '<td>' . $user->getNomUrl(-1) . BimpRender::renderObjectIcons($user) . '</td>';
-                        break;
-
-                    case 'external':
-                        $soc->fetch((int) $item['socid']);
-                        $contact->id = $item['id'];
-                        $contact->lastname = $item['lastname'];
-                        $contact->firstname = $item['firstname'];
-
-                        $html .= '<td>Contact tiers</td>';
-                        $html .= '<td>' . $soc->getNomUrl(1) . BimpRender::renderObjectIcons($soc) . '</td>';
-                        $html .= '<td>' . $contact->getNomUrl(1) . BimpRender::renderObjectIcons($contact) . '</td>';
-                        break;
-                }
-                $html .= '<td>' . $item['libelle'] . '</td>';
-                $html .= '<td style="text-align: right">';
-                $html .= BimpRender::renderRowButton('Supprimer le contact', 'trash', $this->getJsActionOnclick('removeContact', array('id_contact' => (int) $item['rowid']), array(
-                                    'confirm_msg'      => 'Etes-vous sûr de vouloir supprimer ce contact?',
-                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
-                )));
-                $html .= '</td>';
-                $html .= '</tr>';
-            }
-        } else {
-            $html .= '<tr>';
-            $html .= '<td colspan="5">';
-            $html .= BimpRender::renderAlerts('Aucun contact enregistré', 'info');
-            $html .= '</td>';
-            $html .= '</tr>';
-        }
-
-        return $html;
+        
     }
     
     public function actionAddContact($data, &$success)
@@ -437,25 +338,7 @@ class BContract_contrat extends BimpDolObject {
             'contact_list_html' => $this->renderContactsList()
         );
     }
-    
-    
-    
-    public function getAddContactIdClient()
-    {
-        $id_client = (int) BimpTools::getPostFieldValue('id_client');
-        if (!$id_client) {
-            $id_client = (int) $this->getData('fk_soc');
-        }
 
-        return $id_client;
-    }
-    
-    public function getClientContactsArray()
-    {
-        $id_client = $this->getAddContactIdClient();
-        return self::getSocieteContactsArray($id_client, false);
-    }
-    
     public function actionGeneratePdf($data, &$success)
     {   
         global $langs;
@@ -463,52 +346,43 @@ class BContract_contrat extends BimpDolObject {
         $this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
     }
     
-    public function getActionsButtons()
-    {
-        global $conf, $langs, $user;
-        $langs->load('propal');
-
-        $buttons = Array();
-         $buttons[] = array(
-                'label'   => 'Générer le PDF',
-                'icon'    => 'fas_sync',
-                'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
-            );
-        if ($this->isLoaded()) {
-            $status = $this->getData('statut');
-            
-            $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
-            if ($this->getData('statut') == self::CONTRAT_STATUS_BROUILLON) {
-                $buttons[] = array(
-                    'label' => 'Valider le contrat',
-                    'icon' => 'fas_check',
-                    'onclick' => $this->getJsActionOnclick('validation', array(), array(
-                        'success_callback' => $callback
-                    ))
-                );
+    /* OTHERS FUNCTIONS */
+    
+    public function fetch($id, $parent = null) {
+        $return = parent::fetch($id, $parent);
+        $this->autoClose();
+        return $return;
+    }
+    
+    public function autoClose(){//passer les contrat au statut clos quand toutes les enssiéne ligne sont close
+        if($this->id > 0 && $this->getData("statut") == 1 && $this->getEndDate() < new DateTime()){
+            $sql = $this->db->db->query("SELECT * FROM `llx_contratdet` WHERE statut != 5 AND `fk_contrat` = ".$this->id);
+            if($this->db->db->num_rows($sql) == 0){
+                $this->updateField("statut", 2);
             }
-            if (!is_null($status)) {
-                $status = (int) $status;
-                $soc = $this->getChildObject('client');
-                // Cloner: 
-                if ($this->can("create")) {
-                    $buttons[] = array(
-                        'label'   => 'Cloner',
-                        'icon'    => 'copy',
-                        'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
-                            'form_name' => 'duplicate_contrat'
-                        ))
-                    );
+        }
+        
+    }
+
+    public function isValide() {
+        if ($this->getData('date_start') && $this->getData('duree_mois')) { // On est dans les nouveaux contrats
+            $aujourdhui = strtotime(date('Y-m-d'));
+            $fin = $this->getEndDate();
+            $fin = $fin->getTimestamp();
+            if ($fin - $aujourdhui > 0) {
+                return true;
+            }
+        } else { // On est dans les anciens contrats
+            $lines = $this->dol_object->lines; // Changera quand l'objet BContract_contratLine sera OP
+            foreach ($lines as $line) {
+                if ($line->statut == 4) {
+                    return true;
                 }
             }
         }
-
-        return $buttons;
+        return false;
     }
-    
-    
-    
-    
+
     /**********/
    /* RENDER */
   /**********/
@@ -733,43 +607,133 @@ class BContract_contrat extends BimpDolObject {
         return $html;
     }
     
-    public function getModelPdf()
-    {
-        return $this->getData('model_pdf');
+    public function renderEcheancier() {
+        
+        // TODO a viré (voir pour objet)
+        $instance = $this->getInstance('bimpcontract', 'BContract_echeancier');
+        if($instance->find(Array('id_contrat' => $this->id))) {
+            return $instance->display();
+        } elseif($this->getData('statut') < self::CONTRAT_STATUS_VALIDE) {
+            return $instance->display("Le contrat doit être valider pour générer l'échéancier");
+        } elseif(!$this->getData('date_start') || !$this->getData('periodicity') || !$this->getData('duree_mois')) {
+            return $instance->display("Un des champs : Durée en mois, Date de début, Périodicitée est obligatoire pour la génération de l'échéancier");
+        } else {
+            $instance->updateLine($this->id);
+            return $instance->display();
+        } 
+        
     }
     
-    public function getModelsPdfArray()
+    public function renderContacts()
     {
-        if (!class_exists('ModelePDFContract')) {
-            require_once DOL_DOCUMENT_ROOT . '/core/modules/contract/modules_contract.php';
+        $html = '';
+
+        $html .= '<table class="bimp_list_table">';
+
+        $html .= '<thead>';
+        $html .= '<tr>';
+        $html .= '<th>Nature</th>';
+        $html .= '<th>Tiers</th>';
+        $html .= '<th>Utilisateur / Contact</th>';
+        $html .= '<th>Type de contact</th>';
+        $html .= '<th></th>';
+        $html .= '</tr>';
+        $html .= '</thead>';
+
+        $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
+        $html .= '<tbody id="' . $list_id . '">';
+        $html .= $this->renderContactsList();
+
+        $html .= '</tbody>';
+
+        $html .= '</table>';
+
+        return BimpRender::renderPanel('Liste des contacts', $html, '', array(
+                    'type'           => 'secondary',
+                    'icon'           => 'user-circle',
+                    'header_buttons' => array(
+                        array(
+                            'label'       => 'Ajouter un contact',
+                            'icon_before' => 'plus-circle',
+                            'classes'     => array('btn', 'btn-default'),
+                            'attr'        => array(
+                                'onclick' => $this->getJsActionOnclick('addContact', array('id_client' => (int) $this->getData('fk_soc')), array(
+                                    'form_name'        => 'contact',
+                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
+                                ))
+                            )
+                        )
+                    )
+        ));
+    }
+
+    public function renderContactsList()
+    {
+        $html = '';
+
+        $list = array();
+
+        if ($this->isLoaded() && method_exists($this->dol_object, 'liste_contact')) {
+            $list_int = $this->dol_object->liste_contact(-1, 'internal');
+            $list_ext = $this->dol_object->liste_contact(-1, 'external');
+            $list = array_merge($list_int, $list_ext);
         }
 
-        return ModelePDFContract::liste_modeles($this->db->db);
+        if (count($list)) {
+            global $conf;
+            BimpTools::loadDolClass('societe');
+            BimpTools::loadDolClass('contact');
+
+            $soc = new Societe($this->db->db);
+            $user = new User($this->db->db);
+            $contact = new Contact($this->db->db);
+
+            $list_id = $this->object_name . ((int) $this->id ? '_' . $this->id : '') . '_contacts_list';
+
+            foreach ($list as $item) {
+                $html .= '<tr>';
+                switch ($item['source']) {
+                    case 'internal':
+                        $user->id = $item['id'];
+                        $user->lastname = $item['lastname'];
+                        $user->firstname = $item['firstname'];
+                        $user->photo = $item['photo'];
+                        $user->login = $item['login'];
+
+                        $html .= '<td>Utilisateur</td>';
+                        $html .= '<td>' . $conf->global->MAIN_INFO_SOCIETE_NOM . '</td>';
+                        $html .= '<td>' . $user->getNomUrl(-1) . BimpRender::renderObjectIcons($user) . '</td>';
+                        break;
+
+                    case 'external':
+                        $soc->fetch((int) $item['socid']);
+                        $contact->id = $item['id'];
+                        $contact->lastname = $item['lastname'];
+                        $contact->firstname = $item['firstname'];
+
+                        $html .= '<td>Contact tiers</td>';
+                        $html .= '<td>' . $soc->getNomUrl(1) . BimpRender::renderObjectIcons($soc) . '</td>';
+                        $html .= '<td>' . $contact->getNomUrl(1) . BimpRender::renderObjectIcons($contact) . '</td>';
+                        break;
+                }
+                $html .= '<td>' . $item['libelle'] . '</td>';
+                $html .= '<td style="text-align: right">';
+                $html .= BimpRender::renderRowButton('Supprimer le contact', 'trash', $this->getJsActionOnclick('removeContact', array('id_contact' => (int) $item['rowid']), array(
+                                    'confirm_msg'      => 'Etes-vous sûr de vouloir supprimer ce contact?',
+                                    'success_callback' => 'function(result) {if (result.contact_list_html) {$(\'#' . $list_id . '\').html(result.contact_list_html);}}'
+                )));
+                $html .= '</td>';
+                $html .= '</tr>';
+            }
+        } else {
+            $html .= '<tr>';
+            $html .= '<td colspan="5">';
+            $html .= BimpRender::renderAlerts('Aucun contact enregistré', 'info');
+            $html .= '</td>';
+            $html .= '</tr>';
+        }
+
+        return $html;
     }
     
-//     public function displayPDFButton($display_generate = true, $with_ref = true)
-//    {
-//        $html = '';
-//        $ref = dol_sanitizeFileName($this->getRef());
-//
-//        if ($ref) {
-//            if ($display_generate) {
-//                $models = $this->getModelsPdfArray();
-//                if (count($models)) {
-//                    $html .= '<div class="' . static::$dol_module . 'PdfGenerateContainer" style="' . ($file_url ? 'margin-top: 15px; display: none;' : '') . '">';
-//                    $html .= BimpInput::renderInput('select', static::$dol_module . '_model_pdf', $this->getModelPdf(), array(
-//                                'options' => $models
-//                    ));
-//                    $onclick = 'var model = $(this).parent(\'.' . static::$dol_module . 'PdfGenerateContainer\').find(\'[name=' . static::$dol_module . '_model_pdf]\').val();setObjectAction($(this), ' . $this->getJsObjectData() . ', \'generatePdf\', {model: model}, null, null, null, null);';
-//                    $html .= '<button type="button" onclick="' . $onclick . '" class="btn btn-default">';
-//                    $html .= '<i class="fas fa5-sync iconLeft"></i>Générer';
-//                    $html .= '</button>';
-//                    $html .= '</div>';
-//                }
-//            }
-//        }
-//
-//        return $html;
-//    }
-
 }

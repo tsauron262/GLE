@@ -48,6 +48,7 @@ sections:
                     name: file
                     object: contrat
           - id: echeancier
+            objects_change_reload: BContract_echeancier, BContract_contrat
             title: Echéancier
             struct:
                 type: view

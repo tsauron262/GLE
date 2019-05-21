@@ -106,7 +106,7 @@ class BC_Input extends BimpComponent
             'country_field' => array('default' => '')
         ),
         'select_remises'              => array(
-            'id_client'     => array('data_type' => 'int', 'required' => 1),
+            'id_client'     => array('data_type' => 'int', 'default' => 0),
             'extra_filters' => array('default' => '')
         ),
         'select_remises_fourn'        => array(

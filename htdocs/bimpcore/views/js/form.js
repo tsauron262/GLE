@@ -605,7 +605,7 @@ function reloadObjectInput(form_id, input_name, fields, keep_new_value) {
         if ($container.length) {
             is_object = 1;
         } else {
-            bimp_msg('Erreur: champ "' + input_name + '" non trouvé');
+            bimp_msg('Erreur: champ "' + input_name + '" non trouvé', 'warning');
         }
     }
 

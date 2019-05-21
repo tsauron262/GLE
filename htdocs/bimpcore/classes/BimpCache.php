@@ -766,15 +766,16 @@ class BimpCache
 
         return self::getCacheArray($cache_key, $include_empty);
     }
-    
-    public static function getGroupIds($idUser){
-        $cache_key = 'groupsIduser'.$idUser;
+
+    public static function getGroupIds($idUser)
+    {
+        $cache_key = 'groupsIduser' . $idUser;
         if (!isset(self::$cache[$cache_key])) {
-            require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
             $userGroup = new UserGroup(self::getBdb()->db);
             $listIdGr = array();
-            foreach($userGroup->listGroupsForUser($idUser,false) as $obj)
-                    self::$cache[$cache_key][] = $obj->id;
+            foreach ($userGroup->listGroupsForUser($idUser, false) as $obj)
+                self::$cache[$cache_key][] = $obj->id;
         }
         return self::getCacheArray($cache_key);
     }

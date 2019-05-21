@@ -288,7 +288,9 @@ class Bimp_Propal extends BimpComm
                     $buttons[] = array(
                         'label'   => 'Cloner',
                         'icon'    => 'copy',
-                        'onclick' => $this->getJsActionOnclick('duplicate', array(), array(
+                        'onclick' => $this->getJsActionOnclick('duplicate', array(
+                            'datep' => date('Y-m-d')
+                        ), array(
                             'form_name' => 'duplicate_propal'
                         ))
                     );

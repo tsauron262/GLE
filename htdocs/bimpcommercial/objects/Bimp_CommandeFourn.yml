@@ -111,11 +111,9 @@ fields:
     date_commande: 
         label: Date de la commande
         type: date
-        input: 
-            display_now: 1
     date_livraison: 
         label: Date prévue de livraison
-        type: datetime
+        type: date
     fk_user_approve: 
         label: Approuvée par
         dol_prop: user_approve_id
@@ -219,6 +217,17 @@ forms:
               input_name: comments
               input: 
                   type: text
+                  
+    duplicate_commande_fourn: 
+        title: Cloner
+        rows: 
+#            - field: entrepot
+#            - field: ef_type
+            - field: fk_soc
+            - field: ref_supplier
+            - field: libellle
+            - field: date_livraison
+        
             
 fields_tables: 
     infos: 

@@ -649,6 +649,11 @@ lists:
             callback: isDeletable
         extra_btn: 
             callback: getListExtraBtn
+        header_buttons:
+            callback: 
+                method: getLinesListHeaderExtraBtn
+                object: 
+                    callback: getParentInstance
         cols:
             position: 
             desc:

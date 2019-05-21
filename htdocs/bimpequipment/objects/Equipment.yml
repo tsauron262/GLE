@@ -372,6 +372,7 @@ forms:
             - field: warranty_type
             - field: date_warranty_end
             - object: places
+            
 list:
     checkboxes: 1
     bulk_actions: 

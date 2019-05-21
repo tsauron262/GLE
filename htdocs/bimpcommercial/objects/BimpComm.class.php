@@ -158,6 +158,22 @@ class BimpComm extends BimpDolObject
         return $buttons;
     }
 
+    public function getLinesListHeaderExtraBtn()
+    {
+        $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
+        
+        return array(
+            array(
+                'label'       => 'Créer un produit',
+                'icon_before' => 'fas_box',
+                'classes'     => array('btn', 'btn-default'),
+                'attr'        => array(
+                    'onclick' => $product->getJsLoadModalForm('default', 'Nouveau produit')
+                )
+            )
+        );
+    }
+
     public function getRequestSelectRemisesFilters()
     {
         $filter = '';

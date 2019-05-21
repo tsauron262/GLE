@@ -15,7 +15,7 @@ class EtiquetteProd1 extends BimpEtiquettePDF {
         $this->prefName = "Etiquette_Stock_";
     }
 
-    protected function renderContent() {
+    public function writeContent($content = '') {
         $debug = false;
 //        $html = "";
         

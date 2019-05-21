@@ -1016,7 +1016,13 @@ class BimpInput
 
             $sql = 'SELECT ';
             $i = 1;
+            $fl = true;
             foreach ($field_return_label as $field_name) {
+                if (!$fl) {
+                    $sql .= ', ';
+                } else {
+                    $fl = false;
+                }
                 $sql .= $field_name . ' as label_' . $i;
                 $i++;
             }

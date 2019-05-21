@@ -9,6 +9,7 @@ class BimpComm extends BimpDolObject
     public static $external_contact_type_required = true;
     public static $internal_contact_type_required = true;
     public $remise_globale_line_rate = null;
+    public $lines_locked = 0;
     public static $pdf_periodicities = array(
         0  => 'Aucune',
         1  => 'Mensuelle',
@@ -754,6 +755,7 @@ class BimpComm extends BimpDolObject
             $remise_globale_lines_rate = (float) $this->getRemiseGlobaleLineRate(true);
 
             foreach ($lines as $line) {
+                $line->parent = $this;
                 $line->calcRemise($remise_globale_lines_rate);
             }
         }
@@ -1598,6 +1600,10 @@ class BimpComm extends BimpDolObject
     {
         $errors = array();
 
+        if ($this->lines_locked) {
+            return array();
+        }
+
         if (($this->isLoaded())) {
             $dol_lines = array();
             $bimp_lines = array();
@@ -1819,6 +1825,16 @@ class BimpComm extends BimpDolObject
             }
 
             $lines_new[(int) $line->id] = (int) $line_instance->id;
+
+            // Attribution des équipements si nécessaire: 
+            if ($line->equipment_required && $line_instance->equipment_required && $line->isProductSerialisable()) {
+                $equipmentlines = $line->getEquipmentLines();
+
+                foreach ($equipmentlines as $equipmentLine) {
+                    $data = $equipmentLine->getDataArray();
+                    $line_instance->attributeEquipment($data['id_equipment'], $data['pu_ht'], $data['tva_tx'], $data['id_fourn_price']);
+                }
+            }
 
             // Création des remises pour la ligne en cours:
             $remises = $line->getRemises();

@@ -3,19 +3,18 @@
 require_once DOL_DOCUMENT_ROOT . '/bimpcore/classes/BimpInput.php';
 
 class BContract_echeancier extends BimpObject {
-    
+
     public function canViewObject($object) {
-        if(is_object($object)) return true;
+        if (is_object($object))
+            return true;
         return false;
     }
-    
+
     public function display($display_error = '') {
         global $db;
         $bimp = new BimpDb($db);
         if ($display_error) {
             return BimpRender::renderAlerts($display_error);
-        } else {
-            
         }
 
         global $db;
@@ -29,9 +28,10 @@ class BContract_echeancier extends BimpObject {
         $this->getNbFacture();
         $nb_period_restante = $nb_period - $this->nb_facture;
         $stop_echeancier = ($nb_period_restante == 0) ? true : false;
+        $verif_statut = ($parent->getData('statut') > 1) ? true : false;
 
         $html = '';
-        $html .= ($stop_echeancier) ? BimpRender::renderAlerts('Toutes les factures de l\'échéancier ont étés générées', 'info', false) : '';
+        $html .= ($stop_echeancier) ? BimpRender::renderAlerts('Toutes les factures de l\'échéancier ont été générées', 'info', false) : '';
         $html .= '<table class="noborder objectlistTable" style="border: none; min-width: 480px">'
                 . '<thead>'
                 . '<tr class="headerRow">'
@@ -61,14 +61,15 @@ class BContract_echeancier extends BimpObject {
             } else {
                 $paye = '<i class="fa fa-refresh" style="color:orange" > <b>En attente de facturation</b></i>';
             }
-            
+
             // Construction actionButton
+            $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}';
             $actionsButtons = '';
-            $actionsButtons .= ($this->canViewObject($facture)) ? '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Vue rapide de la facture" onclick="loadModalView(\'bimpcommercial\', \'Bimp_facture\', '.$facture->id.', \'default\', $(this), \'Facture ' . $facture->ref . '\')"><i class="far fa5-eye"  ></i></span>' : '';
-            $actionsButtons .= (is_object($facture) && $facture->statut == 0 && $this->getData('validate') == 0) ? '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Supprimer la facture" onclick="")"><i class="fa fa-times" ></i></span>' : '';
-            $actionsButtons .= (is_object($facture) && $facture->statut == 0 && $this->getData('validate') == 0 ) ?  '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Valider la facture" onclick="")"><i class="fa fa-check" ></i></span>' : '';
+            $actionsButtons .= ($this->canViewObject($facture)) ? '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Vue rapide de la facture" onclick="loadModalView(\'bimpcommercial\', \'Bimp_facture\', ' . $facture->id . ', \'default\', $(this), \'Facture ' . $facture->ref . '\')"><i class="far fa5-eye"  ></i></span>' : '';
+            $actionsButtons .= (is_object($facture) && $facture->statut == 0 && $this->getData('validate') == 0) ? '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Supprimer la facture" onclick="' . $this->getJsActionOnclick("delete_facture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-times" ></i></span>' : '';
+            $actionsButtons .= (is_object($facture) && $facture->statut == 0 && $this->getData('validate') == 0 ) ? '<span class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Valider la facture" onclick="' . $this->getJsActionOnclick("validate_facture", array('id_facture' => $facture->id), array("success_callback" => $callback)) . '")"><i class="fa fa-check" ></i></span>' : '';
             $actionsButtons .= (!$this->canViewObject($facture)) ? '<span style="cursor: not-allowed" class="rowButton bs-popover" data-trigger="hover" data-placement="top"  data-content="Pas de facture à voir" onclick="")"><i class="far fa-eye-slash"></i></span>' : '';
-            
+
             $html .= '</td>'
                     . '<td style="text-align:center">' . price($lignes['montant_ht']) . ' € </td>'
                     . '<td style="text-align:center">' . price($lignes['montant_ttc']) . ' € </td>'
@@ -78,36 +79,47 @@ class BContract_echeancier extends BimpObject {
                     . $actionsButtons
                     . '</td>'
                     . '</tr>';
-        } // 
+        }
         $html .= '</tbody>' . '</table>';
         $html .= $this->display_info();
-        if (!$stop_echeancier) {
-        if($this->getData('next_facture_date') == '0000-00-00 00:00:00') {
-            $last_facture = $this->get_last_facture();
-            $udpadeArray = Array('next_facture_date' => $last_facture['date_debut'], 'next_facture_amount' => $last_facture['montant_ht']);
-            $bimp->update('bcontract_prelevement', $udpadeArray, 'id_contrat = ' . $parent->id);
-        }
-        $html .= "<table style='width:30%;' class='border' border='1'>"
-                . "<tr><th style='background-color:#ed7c1c;color:white;text-align:center'>Date prochaine facture</th>"
-                . "<td style='text-align:center'><b>" . dol_print_date($this->getData('next_facture_date')) . "</b></td></tr>"
-                . "<tr><th style='background-color:#ed7c1c;color:white;text-align:center'>Montant prochaine facture</th>"
-                . "<td style='text-align:center'><b>" . price($this->calc_next_facture_amount_ht()) . " € HT / ". price($this->calc_next_facture_amount_ttc()) . " € TTC </b></td></tr>"
-                . "</table><br />";
+        if (!$stop_echeancier && !$verif_statut) {
+            if ($this->getData('next_facture_date') == '0000-00-00 00:00:00') {
+                $last_facture = $this->get_last_facture();
+                $udpadeArray = Array('next_facture_date' => $last_facture['date_debut'], 'next_facture_amount' => $last_facture['montant_ht']);
+                $bimp->update('bcontract_prelevement', $udpadeArray, 'id_contrat = ' . $parent->id);
+            }
+            $html .= "<table style='width:30%;' class='border' border='1'>"
+                    . "<tr><th style='background-color:#ed7c1c;color:white;text-align:center'>Date prochaine facture</th>"
+                    . "<td style='text-align:center'><b>" . dol_print_date($this->getData('next_facture_date')) . "</b></td></tr>"
+                    . "<tr><th style='background-color:#ed7c1c;color:white;text-align:center'>Montant prochaine facture</th>"
+                    . "<td style='text-align:center'><b>" . price($this->calc_next_facture_amount_ht()) . " € HT / " . price($this->calc_next_facture_amount_ttc()) . " € TTC </b></td></tr>"
+                    . "</table><br />";
 
-        
+
             $callback = 'function(result) {if (typeof (result.file_url) !== \'undefined\' && result.file_url) {window.open(result.file_url)}}'; // TODO 
-            if($this->getData('validate') == 0){
-                $html .= '<br /><input class="btn btn-primary saveButton" value="Créer une facture" onclick="' .
-                    $this->getJsActionOnclick("create_facture", array(), array(
-                        "success_callback" => $callback
-                    ))
-                    . '"><br /><br />';
+            if ($this->getData('validate') == 0) {
+                $showCreate = true;
+                foreach($this->tab_echeancier as $facture => $attr) { // TODO a voir lundi pour mettre dans tab echeancier statut facture
+                    if ($attr['facture'] > 0) {
+                        if($attr['statut'] == 0) {
+                            $showCreate = false;
+                            break;
+                        }
+                    }
+                }
+                if($showCreate){
+                    $html .= '<br /><input class="btn btn-primary saveButton" value="Créer une facture" onclick="' .
+                        $this->getJsActionOnclick("create_facture", array(), array(
+                            "success_callback" => $callback
+                        ))
+                        . '"><br /><br />';
+                }
             }
         } else {
             $updateData = Array('next_facture_date' => null, 'next_facture_amount' => null);
             $bimp->update('bcontract_prelevement', $updateData, 'id_contrat = ' . $parent->id);
         }
-        
+
 
         $tmp_id_facture = 0;
         foreach ($this->tab_echeancier as $tab => $attr) {
@@ -147,7 +159,7 @@ class BContract_echeancier extends BimpObject {
         }
         $html .= "<br/>"
                 . "<table style='width:50%;float:right' class='border' border='1'>"
-                . "<tr> <th style='border: 1px solid Transparent!important;'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>TTC</th> </tr>"
+                . "<tr> <th style='border: 1px solid Transparent!important;'></th>  <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant HT</th> <th style='background-color:#ed7c1c;color:white;text-align:center'>Montant TTC</th> </tr>"
                 . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Total contrat</th> <td style='text-align:center'><b>" . price($this->get_total_contrat('ht')) . " €</b></td> <td style='text-align:center'><b> " . price($this->get_total_contrat('ttc')) . " €</b></td> </tr>"
                 . "<tr > <th  style='background-color:#ed7c1c;color:white;text-align:center'>Déjà payer</th> <td style='text-align:center'><b>" . price($tab_total_fact['info']['deja_payer_ht']) . " € </b></td> <td style='text-align:center'><b> " . price($tab_total_fact['info']['deja_payer_ttc']) . " €</b></td> </tr>"
                 . "<tr> <th style='background-color:#ed7c1c;color:white;text-align:center'>Reste à payer</th> <td style='text-align:center'><b> " . price($tab_total_fact['info']['reste_a_payer_ht']) . " € </b></td> <td style='text-align:center'><b> " . price($tab_total_fact['info']['reste_a_payer_ttc']) . " €</b></td> </tr>"
@@ -171,11 +183,13 @@ class BContract_echeancier extends BimpObject {
 
         $list_fact = $this->get_total_facture();
         for ($i = 0; $i < $nb_period; $i++) {
+            $facture = $this->getInstance('bimpcommercial', 'Bimp_Facture', $list_fact[$i]['id_facture']);
             $this->tab_echeancier[$i] = array('date_debut' => $date_debut->format('Y-m-d'), 'date_fin' => $date_fin->format('Y-m-t'), 'montant_ht' => $montant_facturer_ht, 'montant_ttc' => $montant_facturer_ttc);
             $date_debut->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
             $date_fin->add(new DateInterval("P" . $parent->getData('periodicity') . "M"));
 
             if (array_key_exists($i, $list_fact)) {
+                $this->tab_echeancier[$i]['statut'] = $facture->getData('fk_statut');
                 $this->tab_echeancier[$i]['facture'] = $list_fact[$i]['id_facture'];
             } else {
                 $this->tab_echeancier[$i]['facture'] = 0;
@@ -191,7 +205,7 @@ class BContract_echeancier extends BimpObject {
 
         return $montantFacture;
     }
-    
+
     public function calc_next_facture_amount_ttc() {
         $parent = $this->getParentInstance();
         $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $parent->id);
@@ -223,39 +237,39 @@ class BContract_echeancier extends BimpObject {
         $bimp = new BimpDb($db);
         $lines = $bimp->getRows('bcontract_prelevement', 'id_contrat = ' . $id_contrat);
         $linesContrat = $bimp->getRows('contratdet', 'fk_contrat = ' . $id_contrat);
-        
-            if ($parent->getData('statut') > 0 && $parent->getInitData('statut') > 0) {
+
+        if ($parent->getData('statut') > 0 && $parent->getInitData('statut') > 0) {
             $updateDate = $this->calc_next_date();
-            }
+        }
 
 
-            if (!is_null($new_date)) {
-                $updateDate = $new_date;
-            }
+        if (!is_null($new_date)) {
+            $updateDate = $new_date;
+        }
 
-            foreach ($linesContrat as $line) {
-                $ttc += $line->total_ttc;
-            }
-            if ($lines) {
-                $parent = $this->getParentInstance();
-                $updateData = Array(
-                    'next_facture_date' => $updateDate,
-                    'next_facture_amount' => $this->calc_next_facture_amount_ht()
+        foreach ($linesContrat as $line) {
+            $ttc += $line->total_ttc;
+        }
+        if ($lines) {
+            $parent = $this->getParentInstance();
+            $updateData = Array(
+                'next_facture_date' => $updateDate,
+                'next_facture_amount' => $this->calc_next_facture_amount_ht()
+            );
+            $bimp->update('bcontract_prelevement', $updateData, 'id_contrat = ' . $parent->id);
+        } else {
+            if (!is_null($id_contrat)) {
+                $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
+                $insertData = Array(
+                    'id_contrat' => $instance->id,
+                    'next_facture_date' => $instance->getData('date_start'),
+                    'next_facture_amount' => $this->calc_next_facture_amount_ht(),
+                    'validate' => 0
                 );
-                $bimp->update('bcontract_prelevement', $updateData, 'id_contrat = ' . $parent->id);
-            } else {
-                if (!is_null($id_contrat)) {
-                    $instance = $this->getInstance('bimpcontract', 'BContract_contrat', $id_contrat);
-                    $insertData = Array(
-                        'id_contrat' => $instance->id,
-                        'next_facture_date' => $instance->getData('date_start'),
-                        'next_facture_amount' => $this->calc_next_facture_amount_ht(),
-                        'validate' => 0
-                    );
-                    $bimp->insert('bcontract_prelevement', $insertData);
-                    return true;
-                }
+                $bimp->insert('bcontract_prelevement', $insertData);
+                return true;
             }
+        }
     }
 
     public function getNbFacture() {
@@ -269,6 +283,35 @@ class BContract_echeancier extends BimpObject {
             }
         }
         return $return + 1;
+    }
+
+    public function actionDelete_facture($data, &$success) {
+        global $user, $db;
+        $bimp = new BimpDb($db);
+
+        BimpTools::loadDolClass('compta/facture', 'facture');
+        $facture = new Facture($db);
+        $facture->fetch($data['id_facture']);
+        $success = '';
+        
+        $facture->delete($user, 0);
+        
+        $success = 'Facture ' . $data['id_facture'] . ' supprimer avec succès';
+    }
+
+    public function actionValidate_facture($data, &$success) {
+        global $user, $db;
+        $bimp = new BimpDb($db);
+        
+        BimpTools::loadDolClass('compta/facture', 'facture');
+        $facture = new Facture($db);
+        $facture->fetch($data['id_facture']);
+        $success = '';
+        
+        $facture->validate($user, 0);
+        
+        $success = 'Facture ' . $data['id_facture'] . ' valider avec succès';
+
     }
 
     public function actionCreate_facture($data, &$success) {
@@ -288,13 +331,13 @@ class BContract_echeancier extends BimpObject {
 
         $facture->cond_reglement_id = 2;
         $facture->cond_reglement_code = 'RECEP';
-        $now=dol_now();
-		$arraynow=dol_getdate($now);
-		$nownotime=dol_mktime(0, 0, 0, $arraynow['mon'], $arraynow['mday'], $arraynow['year']);
-                 $facture->date_lim_reglement = $nownotime+ 3600 * 24 *30;
-        $facture->date_lim_reglement=$facture->calculate_date_lim_reglement();
-		$facture->mode_reglement_id   = 0;		// Not forced to show payment mode CHQ + VIR
-		$facture->mode_reglement_code = '';	// Not forced to show payment mode CHQ + VIR
+        $now = dol_now();
+        $arraynow = dol_getdate($now);
+        $nownotime = dol_mktime(0, 0, 0, $arraynow['mon'], $arraynow['mday'], $arraynow['year']);
+        $facture->date_lim_reglement = $nownotime + 3600 * 24 * 30;
+        $facture->date_lim_reglement = $facture->calculate_date_lim_reglement();
+        $facture->mode_reglement_id = 0;  // Not forced to show payment mode CHQ + VIR
+        $facture->mode_reglement_code = ''; // Not forced to show payment mode CHQ + VIR
         $facture->socid = $parent->getData('fk_soc');
         $facture->array_options['options_type'] = "C";
         $facture->array_options['options_entrepot'] = 50;
@@ -307,8 +350,8 @@ class BContract_echeancier extends BimpObject {
             return Array('errors' => 'error facture');
         }
         $this->updateLine($parent->id);
-        
-        $success = 'Facture créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';   
+
+        $success = 'Facture ' . $facture->id . ' créer avec succès d\'un montant de ' . price($this->getData('next_facture_amount')) . ' €';
     }
 
     public function cron_create_facture() {

@@ -37,6 +37,15 @@ objects:
                 module: bimpcommercial
                 name: ObjectLineRemise
                 
+    equipment: 
+        relation: none
+        delete: 0
+        instance: 
+            bimp_object: 
+                module: bimpequipment
+                name: Equipment
+            id_object: unset
+            
 fields: 
     id_obj: 
         label: Objet parent
@@ -368,7 +377,16 @@ forms:
             - custom: 1
               label: Equipement
               input_name: id_equipment
-              data_type: int
+              data_type: id_object
+              object: equipment
+              create_form: light_place
+              create_form_values: 
+                  fields: 
+                      id_product: 
+                          prop: id_product
+                  objects: 
+                      places: 
+                          callback: getNewEquipmentDefaultPlaceValues
               input: 
                   type: search_list
                   search_list:
@@ -386,12 +404,10 @@ forms:
                   callback: 
                       method: renderLineInput
                       params: 
-                          - pu_ht
-                          - 1
+                          0: pu_ht
+                          1:
+                              callback: isParentEditable
               depends_on: id_equipment
-              show: 
-                  callback: isParentEditable
-              
             - custom: 1
               label: Taux de TVA
               value: 
@@ -401,11 +417,11 @@ forms:
                   callback: 
                       method: renderLineInput
                       params: 
-                          - tva_tx
-                          - 1
+                          0: tva_tx
+                          1: 
+                              callback: isParentEditable
+                              
               depends_on: id_equipment
-              show: 
-                  callback: isParentEditable
             - custom: 1
               label: Prix d'achat
               input_name: id_fourn_price
@@ -414,11 +430,10 @@ forms:
                   callback: 
                       method: renderLineInput
                       params: 
-                          - id_fourn_price
-                          - 1
+                          0: id_fourn_price
+                          1:
+                              callback: isParentEditable
               depends_on: id_equipment
-              show: 
-                  callback: isParentEditable
                   
     line_forced: 
         extends: default

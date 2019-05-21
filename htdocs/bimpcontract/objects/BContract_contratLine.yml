@@ -4,6 +4,13 @@ table: contratdet
 parent_id_property: fk_contrat
 parent_object: BContract_contrat
 
+dol_object: 
+    instance: 
+        dol_object: 
+            module: contrat
+            file: contrat
+            class: ContratLigne
+
 primary: rowid
 
 labels: 
@@ -20,8 +27,18 @@ objects:
             id_object:
                 field_value:
                     fk_product
-
+    
 fields:
+    rowid:
+        label: N°
+        type: int
+    description:
+        label: Description de la ligne
+        type: string
+        required: 1
+    fk_contrat:
+        label: Contrat
+        type: int
     fk_product:
         label: produit
         type: id_object
@@ -30,7 +47,7 @@ fields:
         input: 
             type: search_product
             #societe_type: customer
-            help: Entrez le nom ou la référence d'un client pour effectuer une recherche
+            help: Entrez le nom ou la référence d'un produit pour effectuer une recherche
             card: default
         search:
             input: 
@@ -58,6 +75,7 @@ fields:
     remise_percent:
         label: Remise
         type: percent
+        default_value: 0
     remise:
         label: Total remise
         type: money
@@ -72,14 +90,17 @@ lists:
         checkbox: 1
         add_object_row: 0
         update_btn: 1
-        edit_btn: 0
+        edit_btn: 1
         edit_form: default
         add_form_name: add
         delete_btn: 1
         page_btn: 1
         cols: 
+            description:
+                field: description
             fk_product:
                 field: fk_product
+                display: nom_url
             qty:
                 field: qty
             tva_tx:
@@ -94,8 +115,23 @@ lists:
                 field: total_ttc
 
 forms:
+    default:
+        rows:
+            - field: rowid
+              edit: 0
+              show: 0
+            - field: description
+            - field: fk_product
+              edit: 0
+            - field: tva_tx
+            - field: qty
+            - field: remise_percent
+            
     add:
         rows:
+            - field: description
             - field: fk_product
             - field: qty
+            - field: remise_percent
+            - field: tva_tx
               

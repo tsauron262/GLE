@@ -4,7 +4,7 @@ class BimpCache
 {
 
     public static $bdb = null;
-    protected static $cache = array();
+    public static $cache = array();
 
     public static function getBdb()
     {

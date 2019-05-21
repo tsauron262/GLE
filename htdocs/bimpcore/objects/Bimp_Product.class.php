@@ -17,21 +17,6 @@ class Bimp_Product extends BimpObject
         0  => 'Product',
         1  => 'Service'
     );
-    
-    public function renderListeFournisseur() {
-        $html = '';
-
-        $html .= '<div class="page_content container-fluid">';
-        $instance = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
-        
-        $list = new BC_ListTable($instance, 'default', 1, null, '', 'plus');
-        $list->addFieldFilterValue('fk_product', $this->id);
-
-        $html .= $list->renderHtml();
-        $html .= '</div>';
-
-        return $html;
-    }
 
     // Getters booléens
 
@@ -47,6 +32,16 @@ class Bimp_Product extends BimpObject
     public function isNotSerialisable()
     {
         return (int) !$this->isSerialisable();
+    }
+
+    public function isActionAllowed($action, &$errors = array())
+    {
+        switch ($action) {
+            case 'generateEtiquettes':
+                return 1;
+        }
+
+        return (int) parent::isActionAllowed($action, $errors);
     }
 
     // Getters: 
@@ -247,22 +242,40 @@ class Bimp_Product extends BimpObject
         if ($this->isLoaded()) {
             return self::getProductCategoriesArray((int) $this->id);
         }
-        
+
         return array();
     }
 
     public function getCategoriesList()
     {
         $categories = array();
-        
+
         foreach ($this->getCategoriesArray() as $id_category => $label) {
             $categories[] = (int) $id_category;
         }
-        
+
         return $categories;
     }
 
-    // traitements: 
+    public function getListsButtons($line_qty = 1)
+    {
+        $buttons = array();
+        if ($this->isActionAllowed('generateEtiquettes')) {
+            $buttons[] = array(
+                'label'   => 'Générer des étiquettes',
+                'icon'    => 'fas_sticky-note',
+                'onclick' => $this->getJsActionOnclick('generateEtiquettes', array(
+                    'qty' => (int) $line_qty
+                        ), array(
+                    'form_name' => 'etiquettes'
+                ))
+            );
+        }
+
+        return $buttons;
+    }
+
+    // Traitements: 
 
     public function fetchStocks()
     {
@@ -352,5 +365,53 @@ class Bimp_Product extends BimpObject
         $html .= '</div>';
 
         return $html;
+    }
+
+    public function renderListeFournisseur()
+    {
+        $html = '';
+
+        $html .= '<div class="page_content container-fluid">';
+        $instance = BimpObject::getInstance('bimpcore', 'Bimp_ProductFournisseurPrice');
+
+        $list = new BC_ListTable($instance, 'default', 1, null, '', 'plus');
+        $list->addFieldFilterValue('fk_product', $this->id);
+
+        $html .= $list->renderHtml();
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    // Actions: 
+    public function actionGenerateEtiquettes($data, &$success)
+    {
+        $errors = array();
+        $warnings = array();
+        $success = '';
+        $success_callback = '';
+
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID du produit absent';
+        } else {
+            $type = isset($data['type']) ? (string) $data['type'] : '';
+
+            if (!$type) {
+                $errors[] = 'Type d\'étiquette à générer absent';
+            } else {
+                $qty = isset($data['qty']) ? (int) $data['qty'] : 1;
+
+                $url = DOL_URL_ROOT . '/bimplogistique/etiquette_produit.php?id_product=' . $this->id . '&qty=' . $qty . '&type=' . $type;
+
+                $success_callback = 'window.open(\'' . $url . '\')';
+            }
+        }
+
+
+        return array(
+            'errors'   => $errors,
+            'warnings' => $warnings,
+            'success_callback' => $success_callback
+        );
     }
 }

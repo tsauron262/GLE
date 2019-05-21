@@ -391,7 +391,11 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                                                 bimpAjax.$parentFormSubmit.removeClass('disabled');
                                             }
                                             if (bimpAjax.result_input_name) {
+                                                var $resultInput = bimpAjax.$parentForm.find('[name="' + bimpAjax.result_input_name + '"]');
                                                 if (bimpAjax.reload_input) {
+                                                    if ($resultInput.length) {
+                                                        $resultInput.val(saveResult.id_object);
+                                                    }
                                                     var fields = getInputsValues(bimpAjax.$parentForm);
                                                     var $inputContainer = bimpAjax.$parentForm.find('.' + bimpAjax.result_input_name + '_inputContainer');
                                                     if ($inputContainer.data('multiple') || $inputContainer.find('.check_list_container').length) {
@@ -399,9 +403,8 @@ function loadObjectFormFromForm(title, result_input_name, parent_form_id, module
                                                     } else {
                                                         fields[bimpAjax.result_input_name] = saveResult.id_object;
                                                     }
-                                                    reloadObjectInput(bimpAjax.$parentForm.attr('id'), bimpAjax.result_input_name, fields);
+                                                    reloadObjectInput(bimpAjax.$parentForm.attr('id'), bimpAjax.result_input_name, fields, 1);
                                                 } else {
-                                                    var $resultInput = bimpAjax.$parentForm.find('[name="' + bimpAjax.result_input_name + '"]');
                                                     if ($resultInput.length) {
                                                         $resultInput.val(saveResult.id_object).change();
                                                     }
@@ -1370,10 +1373,10 @@ function resetInputValue($container) {
     var initial_value = $container.data('initial_value');
 
     if (typeof (initial_value) !== 'undefined') {
-        if (typeof(initial_value) === 'string' && initial_value) {
-            initial_value = bimp_htmlDecode(initial_value); 
+        if (typeof (initial_value) === 'string' && initial_value) {
+            initial_value = bimp_htmlDecode(initial_value);
         }
-        
+
         var $input = $container.find('[name="' + input_name + '"]');
         if ($input.length) {
             $input.val(initial_value);
@@ -2084,7 +2087,7 @@ function setInputsEvents($container) {
                     checkInputAutoExpand(this);
                 }
             });
-            $(this).change(function() {
+            $(this).change(function () {
                 var val = $(this).val();
                 val = val.replace("\t", "\n");
                 $(this).val(val);

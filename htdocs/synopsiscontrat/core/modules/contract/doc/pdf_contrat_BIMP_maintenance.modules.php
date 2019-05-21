@@ -125,6 +125,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     }
 
     public function display_lines($pdf, $lines, $dernier_id = 0) {
+        global $db;
         $pdf->SetFont(''/* 'Arial' */, '', 7);
         $pdf->setColor('fill', 242, 242, 242);
         $pdf->SetTextColor(0, 0, 0);
@@ -132,7 +133,10 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
         $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 13;
         foreach ($lines as $line) {
             if ($line->id > $dernier_id) {
-                $pdf->Cell($W * 5, 6, (strlen($line->description) > 40) ? substr($line->description, 0, 40) . " ..." : $line->description, 1, null, 'L', true);
+                BimpTools::loadDolClass('product');
+                $p = new Product($db);
+                $p->fetch($line->fk_product);
+                $pdf->Cell($W * 5, 6, (strlen($p->label) > 40) ? substr($p->label, 0, 40) . " ..." : $p->label, 1, null, 'L', true);
                 $pdf->Cell($W, 6, number_format($line->tva_tx, 0, '', '') . "%", 1, null, 'C', true);
                 $pdf->Cell($W * 2, 6, number_format($line->price_ht, 2, '.', '') . "€", 1, null, 'C', true);
                 $pdf->Cell($W, 6, $line->qty, 1, null, 'C', true);
@@ -232,6 +236,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
     }
 
     public function display_content_contrat($pdf, $contrat) {
+        global $db;
         $services = BimpObject::getInstance('bimpcontract', 'BContract_Productservices'); // Appel de l'objet
         $list_services = (object) $services->getList(array('use_in_contract' => 1)); // Filtre des services activés
         // Remise en forme de l'array pour traitement
@@ -242,6 +247,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
 
         $nombre_lignes = (int) count($contrat->lines);
         foreach ($contrat->lines as $line) {
+            BimpTools::loadDolClass('product');
+            $p = new Product($db);
+            $p->fetch($line->fk_product);
             $current_ligne++;
             $need = 10 + 60 + ((int) count($content_service)); // En tete + Marge du bas + nombre de ligne contenu dans le service
 
@@ -265,7 +273,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             $pdf->setDrawColor(255, 255, 255);
             $pdf->setColor('fill', 255, 255, 255);
             $pdf->setTextColor(0, 0, 0);
-            $affichage = str_replace("\n", ' ', $line->description);
+            $affichage = str_replace("\n", ' ', $p->label);
             $pdf->Cell($W * 9, 7, $affichage, 1, null, 'L', true);
             $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 7, "", 0, 'L');
             $pdf->setDrawColor(255, 255, 255);
@@ -395,7 +403,20 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $W = ($this->page_largeur - $this->marge_droite - $this->marge_gauche) / 2;
                 $pdf->SetDrawColor(236, 147, 0);
                 $pdf->Cell($W, 4, "BIMP GROUPE OLYS", "R", null, 'C', true);
-                $pdf->Cell($W, 4, $client->nom, "L", null, 'C', true);
+                $pdf->Cell($W, 4, $client->nom . "\n", "L", null, 'C', true);
+                
+                $pdf->SetFont('', '', 9);
+                // Si il y a un contact 'Contact client suivi contrat';
+                $bimp = new BimpDb($this->db);
+                if($id_contact = $bimp->getValue('element_contact', 'fk_socpeople', 'element_id = ' . $contrat->id . ' AND fk_c_type_contact = 21')) {
+                    BimpTools::loadDolClass('contact');
+                    $contact = new Contact($this->db);
+                    $contact->fetch($id_contact);
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
+                    $pdf->Cell($W, 4, "", "R", null, 'C', true);
+                    $pdf->Cell($W, 4, "Contact : " . $contact->lastname . " " . $contact->firstname, "L", null, 'C', true);
+                }
+                
                 $pdf->SetFont('', '', 7);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, "51,ter Rue de Saint Cyr", "R", null, 'C', true);

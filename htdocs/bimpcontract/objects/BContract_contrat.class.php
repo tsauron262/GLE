@@ -161,9 +161,14 @@ class BContract_contrat extends BimpDolObject {
 
         $buttons = Array();
          $buttons[] = array(
-                'label'   => 'Générer le PDF',
+                'label'   => 'Générer le PDF du contrat',
                 'icon'    => 'fas_sync',
                 'onclick' => $this->getJsActionOnclick('generatePdf', array(), array())
+            );
+         $buttons[] = array(
+                'label'   => 'Générer le PDF du courrier',
+                'icon'    => 'fas_sync',
+                'onclick' => $this->getJsActionOnclick('generatePdfCourrier', array(), array())
             );
         if ($this->isLoaded()) {
             $status = $this->getData('statut');
@@ -342,8 +347,15 @@ class BContract_contrat extends BimpDolObject {
     public function actionGeneratePdf($data, &$success)
     {   
         global $langs;
-        $success = "PDF généré avec Succes";
+        $success = "PDF contrat généré avec Succes";
         $this->dol_object->generateDocument('contrat_BIMP_maintenance', $langs);
+    }
+    
+    public function actionGeneratePdfCourrier($data, &$success)
+    {   
+        global $langs;
+        $success = "PDF courrier généré avec Succes";
+        $this->dol_object->generateDocument('contrat_courrier_BIMP_renvois', $langs);
     }
     
     /* OTHERS FUNCTIONS */

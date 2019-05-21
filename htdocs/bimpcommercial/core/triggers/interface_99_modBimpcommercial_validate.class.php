@@ -31,14 +31,15 @@ class Interfacevalidate extends DolibarrTriggers
     {
         global $conf, $user;
 
-        if ($action == 'ORDER_VALIDATE') {
-            
-        }
-
         if ($action == 'PROPAL_VALIDATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Propal', $object->id);
-            $bimp_object->dol_object->statut = 0;
-            $bimp_object->checkLines();
+
+            if (!(int) $bimp_object->lines_locked) {
+                $prev_statut = $bimp_object->dol_object->statut;
+                $bimp_object->dol_object->statut = 0;
+                $bimp_object->checkLines();
+                $bimp_object->dol_object->statut = $prev_statut;
+            }
         }
 
         if ($action == 'BILL_VALIDATE') {
@@ -47,14 +48,14 @@ class Interfacevalidate extends DolibarrTriggers
                 $bimp_object->onValidate();
             }
         }
-        
+
         if ($action == 'BILL_SUPPLIER_CREATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_FactureFourn', $object->id);
             if (BimpObject::objectLoaded($bimp_object)) {
                 $bimp_object->onCreate();
             }
         }
-        
+
         if ($action == 'BILL_DELETE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
             if (BimpObject::objectLoaded($bimp_object)) {

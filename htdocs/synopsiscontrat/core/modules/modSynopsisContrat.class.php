@@ -223,7 +223,8 @@ class modSynopsisContrat extends DolibarrModules {
 )");
 //    $this->dirs[0] = $conf->chrono->dir_output;
 $tabModel = array(
-  "contrat_BIMP" => "Modèle BIMP", 
+  "contrat_BIMP" => "Modèle BIMP",
+  "contrat_courrier_BIMP_renvois" => "BIMP Courrier Renvois de contrat",
   "contrat_courrierBIMPfinapro" => "BIMP Contrat - Financement", 
   "contrat_courrierBIMPavenant" => "BIMP Courrier - Avenant", 
   "contrat_courrierBIMPconfirmation" => "BIMP Courrier - Confirmation", 

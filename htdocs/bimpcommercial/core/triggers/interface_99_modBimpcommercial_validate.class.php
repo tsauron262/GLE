@@ -40,13 +40,39 @@ class Interfacevalidate extends DolibarrTriggers
                 $bimp_object->checkLines();
                 $bimp_object->dol_object->statut = $prev_statut;
             }
+
+            return 1;
+        }
+
+        if ($action == 'ORDER_VALIDATE') {
+            $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Commande', $object->id);
+
+            if (BimpObject::objectLoaded($bimp_object)) {
+                // Véfication de la validité des lignes: 
+                $errors = array();
+                if (!$bimp_object->areLinesValid($errors)) {
+                    $object->errors = array_merge($object->errors, $errors);
+                    return -1;
+                }
+            }
+
+            return 1;
         }
 
         if ($action == 'BILL_VALIDATE') {
             $bimp_object = BimpCache::getBimpObjectInstance('bimpcommercial', 'Bimp_Facture', $object->id);
             if (BimpObject::objectLoaded($bimp_object)) {
+                // Véfication de la validité des lignes: 
+                $errors = array();
+                if (!$bimp_object->areLinesValid($errors)) {
+                    $object->errors = array_merge($object->errors, $errors);
+                    return -1;
+                }
+
                 $bimp_object->onValidate();
             }
+
+            return 1;
         }
 
         if ($action == 'BILL_SUPPLIER_CREATE') {
@@ -54,6 +80,8 @@ class Interfacevalidate extends DolibarrTriggers
             if (BimpObject::objectLoaded($bimp_object)) {
                 $bimp_object->onCreate();
             }
+
+            return 1;
         }
 
         if ($action == 'BILL_DELETE') {
@@ -61,6 +89,8 @@ class Interfacevalidate extends DolibarrTriggers
             if (BimpObject::objectLoaded($bimp_object)) {
                 $bimp_object->onDelete();
             }
+
+            return 1;
         }
 
         return 0;

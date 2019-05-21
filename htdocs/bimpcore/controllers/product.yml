@@ -42,7 +42,7 @@ sections:
           - id: notes
             title: Notes
           - id: fichier
-            title: Fihiers joints
+            title: Fichiers joints
     - type: buttons
       buttons:
           - label: Retour à la liste des produits

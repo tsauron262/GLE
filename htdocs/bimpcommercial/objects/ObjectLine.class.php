@@ -251,6 +251,32 @@ class ObjectLine extends BimpObject
         return parent::isChild($instance);
     }
 
+    public function isValid(&$errors = array())
+    {
+        if (!$this->isLoaded()) {
+            $errors[] = 'ID ' . $this->getLabel('of_the');
+            return 0;
+        }
+
+        if ((int) $this->getData('type') === self::LINE_PRODUCT) {
+            $product = $this->getProduct();
+
+            if (!BimpObject::objectLoaded($product)) {
+                $errors[] = 'Produit absent';
+                return 0;
+            }
+
+            if ($product->dol_field_exists('validate')) {
+                if (!(int) $product->getData('validate')) {
+                    $errors[] = 'Le produit "' . $product->getRef() . ' - ' . $product->getData('label') . '" n\'est pas validé';
+                    return 0;
+                }
+            }
+        }
+
+        return 1;
+    }
+
     public function hasEquipmentToAttribute()
     {
         if ($this->isLoaded()) {

@@ -46,6 +46,21 @@ class BimpComm extends BimpDolObject
         return 1;
     }
 
+    public function areLinesValid(&$errors = array())
+    {
+        $result = 1;
+        foreach ($this->getLines() as $line) {
+            $line_errors = array();
+
+            if (!$line->isValid($line_errors)) {
+                $errors[] = BimpTools::getMsgFromArray($line_errors, 'Ligne n°' . $line->getData('position'));
+                $result = 0;
+            }
+        }
+
+        return $result;
+    }
+
     public function hasRemiseGlobale()
     {
         if ($this->field_exists('remise_globale') && (float) $this->getData('remise_globale')) {
@@ -161,14 +176,14 @@ class BimpComm extends BimpDolObject
     public function getLinesListHeaderExtraBtn()
     {
         $product = BimpObject::getInstance('bimpcore', 'Bimp_Product');
-        
+
         return array(
             array(
                 'label'       => 'Créer un produit',
                 'icon_before' => 'fas_box',
                 'classes'     => array('btn', 'btn-default'),
                 'attr'        => array(
-                    'onclick' => $product->getJsLoadModalForm('default', 'Nouveau produit')
+                    'onclick' => $product->getJsLoadModalForm('light', 'Nouveau produit')
                 )
             )
         );
@@ -1944,6 +1959,7 @@ class BimpComm extends BimpDolObject
         global $conf, $langs, $user;
 
         $result = $this->dol_object->valid($user);
+        
         if ($result > 0) {
             if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
                 $this->fetch($this->id);

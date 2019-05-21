@@ -4656,8 +4656,6 @@ class BimpObject extends BimpCache
 
         if (count($values)) {
             $data .= 'param_values: ' . json_encode($values) . ', ';
-        } else {
-            $data .= 'null, ';
         }
 
         $data .= 'force_edit: ' . $force_edit;

@@ -13,9 +13,13 @@ class Bimp_Product extends BimpObject
         5 => 'Logiciel'
     );
     public static $product_type = array(
-        "" => '',
-        0  => 'Product',
-        1  => 'Service'
+//        "" => '',
+        0  => array('label' => 'Produit', 'icon' => 'fas_box'),
+        1  => array('label' => 'Service', 'icon' => 'fas_hand-holding')
+    );
+    public static $price_base_types = array(
+        'HT' => 'HT',
+        'TTC' => 'TTC'
     );
 
     // Getters booléens

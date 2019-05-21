@@ -327,7 +327,17 @@ class modBimpCommercial extends DolibarrModules
 		//$this->_load_tables('/bimpcommercial/sql/');
                 
                 $extrafields = new ExtraFields($this->db);
-                $extrafields->addExtraField('crt', 'Remise CRT', 'int', 1, 10, 'product');
+                $extrafields->addExtraField('crt', 'Remise CRT', 'varchar', 1, 10, 'product');
+                $extrafields->addExtraField('ref_constructeur', 'Réf. constructeur', 'int', 1, 255, 'product');
+                $extrafields->addExtraField('pa_prevu', 'Prix d\'achat HT prévu', 'decimal', 1, '24,8', 'product', 0, 0, 0);
+                $extrafields->addExtraField('infos_pa', 'Informations prix d\'achat', 'text', 1, 2000, 'product');
+                
+                // Nécessaire pour valider tous les produits actuels seulement si le champ validate n\'existe pas déjà (Etant donné qu'on défini la valeur par défaut à 0): 
+                if (!$this->db->num_rows($this->db->query('SELECT `rowid` FROM '.MAIN_DB_PREFIX.'extrafields WHERE elementtype = \'product\' AND `name` = \'validate\''))) {
+                    $extrafields->addExtraField('validate', 'Validé', 'boolean', 1, 1, 'product', 0, 0, 0);
+                    
+                    $this->db->query('UPDATE ' . MAIN_DB_PREFIX . 'product_extrafields SET `validate` = 1 WHERE 1');
+                }
 
 		return $this->_init($sql, $options);
 	}

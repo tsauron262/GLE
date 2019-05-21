@@ -1614,13 +1614,21 @@ class Bimp_Commande extends BimpComm
                 $this->dol_object->generateDocument($this->getModelPdf(), $langs);
             }
         } else {
-            if (!$this->getData('validComm') || !(int) $this->getData('validFin')) {
-                $comm_errors = BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings);
-                if (count($comm_errors)) {
-                    $errors = array_merge($errors, $comm_errors);
+            $comm_errors = BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings);
+
+            if (!count($comm_errors)) {
+                if (!(int) $this->getData('validComm')) {
+                    $comm_errors[] = 'Commande en attente de validation commerciale';
                 }
+                if (!(int) $this->getData('validFin')) {
+                    $comm_errors[] = 'Commande en attente de validation financière';
+                }
+            }
+
+            if (!count($comm_errors)) {
+                $errors[] = 'Echec de la validation pour une raison inconnue';
             } else {
-                $errors[] = BimpTools::getMsgFromArray(BimpTools::getErrorsFromDolObject($this->dol_object, null, null, $warnings), 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
+                $errors[] = BimpTools::getMsgFromArray($comm_errors, 'Des erreurs sont survenues lors de la validation ' . $this->getLabel('of_the'));
             }
         }
 

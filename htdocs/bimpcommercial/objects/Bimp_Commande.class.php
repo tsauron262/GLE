@@ -1960,13 +1960,6 @@ class Bimp_Commande extends BimpComm
     {
         $errors = array();
 
-        if (is_null($this->data['fk_user_author']) || !(int) $this->data['fk_user_author']) {
-            global $user;
-            if (BimpObject::objectLoaded($user)) {
-                $this->data['fk_user_author'] = (int) $user->id;
-            }
-        }
-
         // Fermeture de la propale si nécessaire
         if ((int) BimpTools::getValue('close_propal', 0)) {
             $origin = BimpTools::getValue('origin', '');

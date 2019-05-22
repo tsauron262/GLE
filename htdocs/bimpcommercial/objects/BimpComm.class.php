@@ -1959,7 +1959,7 @@ class BimpComm extends BimpDolObject
         global $conf, $langs, $user;
 
         $result = $this->dol_object->valid($user);
-        
+
         if ($result > 0) {
             if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) {
                 $this->fetch($this->id);
@@ -2348,6 +2348,15 @@ class BimpComm extends BimpDolObject
         $origin = BimpTools::getValue('origin', '');
         $origin_id = BimpTools::getValue('origin_id', 0);
         $origin_object = null;
+
+        if ($this->field_exists('fk_user_author')) {
+            if (is_null($this->data['fk_user_author']) || !(int) $this->data['fk_user_author']) {
+                global $user;
+                if (BimpObject::objectLoaded($user)) {
+                    $this->data['fk_user_author'] = (int) $user->id;
+                }
+            }
+        }
 
         if ($origin && $origin_id) {
             $origin_object = self::getInstanceByType($origin, $origin_id);

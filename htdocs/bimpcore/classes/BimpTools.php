@@ -1489,13 +1489,13 @@ class BimpTools
     public static function cleanStringForUrl($text, $separator = '_', $charset = 'utf-8')
     {
         $text = mb_convert_encoding($text, 'HTML-ENTITIES', $charset);
-        $text = strtolower(trim($text));
+//        $text = strtolower(trim($text));
 
         // On vire les accents
         $text = preg_replace(array('/ß/', '/&(..)lig;/', '/&([aouAOU])uml;/', '/&(.)[^;]*;/'), array('ss', "$1", "$1" . 'e', "$1"), $text);
 
         // on vire tout ce qui n'est pas alphanumérique
-        $text_clear = preg_replace('/[^a-zA-Z0-9_\-]/', ' ', trim($text)); // ^a-zA-Z0-9_-
+        $text_clear = preg_replace('/[^a-zA-Z0-9_\-\(\)]/', ' ', trim($text)); // ^a-zA-Z0-9_-
         
         // Nettoyage pour un espace maxi entre les mots
         $array = explode(' ', $text_clear);

@@ -315,11 +315,16 @@ class BimpFile extends BimpObject
 
                     $path_info = pathinfo($file_dir . '/' . $f);
 
+                    $file_name = BimpTools::cleanStringForUrl($path_info['filename']);
+                    if ($file_name !== $path_info['filename']) {
+                        BimpTools::renameFile($file_dir, $f, $file_name . '.' . $path_info['extension']);
+                    }
+
                     if (!count($this->validateArray(array(
                                         'parent_module'      => $module,
                                         'parent_object_name' => $object_name,
                                         'id_parent'          => $id_object,
-                                        'file_name'          => $path_info['filename'],
+                                        'file_name'          => $file_name,
                                         'file_ext'           => $path_info['extension'],
                                         'file_size'          => filesize($file_dir . '/' . $f)
                             )))) {
@@ -457,30 +462,35 @@ class BimpFile extends BimpObject
             $name = (string) $this->getData('file_name');
 
             if (!$name) {
-                $name = pathinfo($_FILES['file']['name'], PATHINFO_FILENAME);
+                $name = BimpTools::cleanStringForUrl(pathinfo($_FILES['file']['name'], PATHINFO_FILENAME));
 
                 if (!$name) {
                     $errors[] = 'Nom du fichier invalide';
                 }
-                $this->set('file_name', $name);
+            } else {
+                $name = BimpTools::cleanStringForUrl($name);
             }
+            
+            $this->set('file_name', $name);
 
-            $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
-
-            if (!(string) $ext) {
-                $errors[] = 'Extension du fichier absente. Veuillez renommer le fichier à envoyer avec une extension valide';
-            }
             if (!count($errors)) {
-                $this->set('file_ext', $ext);
-                $this->set('file_size', $_FILES['file']['size']);
-                $errors = $this->uploadFile();
+                $ext = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
 
-                if (!count($errors)) {
-                    $errors = parent::create($warnings, $force_create);
+                if (!(string) $ext) {
+                    $errors[] = 'Extension du fichier absente. Veuillez renommer le fichier à envoyer avec une extension valide';
                 }
+                if (!count($errors)) {
+                    $this->set('file_ext', $ext);
+                    $this->set('file_size', $_FILES['file']['size']);
+                    $errors = $this->uploadFile();
 
-                if (count($errors) && !$this->dontRemove) {
-                    $this->removeFile();
+                    if (!count($errors)) {
+                        $errors = parent::create($warnings, $force_create);
+                    }
+
+                    if (count($errors) && !$this->dontRemove) {
+                        $this->removeFile();
+                    }
                 }
             }
         }

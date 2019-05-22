@@ -3155,9 +3155,9 @@ class ObjectLine extends BimpObject
         if (!count($errors)) {
             switch ($this->getData('type')) {
                 case self::LINE_TEXT:
-                    if (is_null($this->desc) || !$this->desc) {
-                        $errors[] = 'Description obligatoire';
-                    }
+//                    if (is_null($this->desc) || !$this->desc) {
+//                        $errors[] = 'Description obligatoire';
+//                    }
                     $this->id_product = null;
                     $this->id_fourn_price = null;
                     $this->tva_tx = null;

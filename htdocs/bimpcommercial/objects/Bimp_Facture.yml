@@ -100,7 +100,6 @@ fields:
     fk_user_valid: 
         dol_prop: user_valid
         
-        
     ref: unset
     fk_availability: unset
     fk_input_reason: unset
@@ -430,6 +429,7 @@ lists:
         extends: default
         cols: 
             soc: unset
+            
 cards: 
     default: 
         title: 

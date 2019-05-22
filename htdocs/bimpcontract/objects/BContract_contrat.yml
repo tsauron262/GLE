@@ -86,6 +86,9 @@ fields:
     datec:
         label: Date du contrat
         type: date
+    date_contrat:
+        label: Date de signature
+        type: date
     statut:
         label: Statut
         type: int
@@ -95,7 +98,7 @@ fields:
             
     # Extrafields
     date_start:
-        label: Date de début
+        label: Date d'effet du contrat
         type: date
         dol_extra_field: 1
         required: 1
@@ -119,21 +122,29 @@ fields:
         values:
             array: gti
     syntec:
-        label: Indice SYNTEC (appliqué si renouvellement)
+        label: Indice SYNTEC en vigueur à la signature
         type: float
         dol_extra_field: 1
+        input:
+            help: 
+                callback: getSyntecSite
+        display_if:
+            field_name: use_syntec
+            show_values: 1
     tacite:
         label: Renouvellement
         type: int
         dol_extra_field: 1
         values:
             array: renouvellement
+        default_value: 12
     denounce:
         label: Contrat dénoncé
         type: int
         dol_extra_field: 1
         values:
             array: denounce
+        default_value: 0
     moderegl:
         label: Mode de règlement
         type: int
@@ -188,11 +199,13 @@ fields_tables:
               edit: 0
             - field: datec
               edit: 0
+            - field: date_contrat
+              edit: 0
             - field: date_start
               edit: 0
             - field: duree_mois
               edit: 0
-            - label: Date de fin
+            - label: Date de fin du contrat
               value: 
                   callback:
                       method: displayEndDate
@@ -256,6 +269,8 @@ lists:
                 display: nom_url
             datec:
                 field: datec
+            date_contrat:
+                field: date_contrat
 
 forms:
     edit_contrat:
@@ -286,8 +301,15 @@ forms:
             - field: periodicity
             - field: gti
             - field: tacite
+            - custom: 1
+              label: Utiliser l'indice SYNTEC
+              input_name: use_syntec
+              input: 
+                  type: toggle
             - field: syntec
+              
             - field: denounce
+              edit: 0
             - field: moderegl
             - field: fk_commercial_signature
             - field: fk_commercial_suivi

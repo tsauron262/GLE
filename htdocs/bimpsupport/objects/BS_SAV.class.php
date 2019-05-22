@@ -2960,12 +2960,12 @@ class BS_SAV extends BimpObject
         $caisse = null;
         $payment_set = (isset($data['paid']) && (float) $data['paid'] && (isset($data['mode_paiement']) && (int) $data['mode_paiement'] > 0 && (int) $data['mode_paiement'] != 56));
 
-        $prets = $this->getChildrenObjects('prets');
-        foreach ($prets as $pret) {
-            if (!(int) $pret->getData('returned')) {
-                $errors[] = 'Le prêt "' . $pret->getData('ref') . '" n\'est pas restitué';
-            }
-        }
+//        $prets = $this->getChildrenObjects('prets');
+//        foreach ($prets as $pret) {
+//            if (!(int) $pret->getData('returned')) {
+//                $errors[] = 'Le prêt "' . $pret->getData('ref') . '" n\'est pas restitué';
+//            }
+//        }
 
         if (count($errors)) {
             return array(BimpTools::getMsgFromArray($errors, 'Il n\'est pas possible de fermer ce SAV:'));

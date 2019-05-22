@@ -231,7 +231,7 @@ class BimpNote extends BimpObject
         if($style != "petit" && $this->getData('user_create') != $user->id)
             $html .= '<span class="rowButton bs-popover"><i class="fas fa-share link" onclick="'.$this->getJsRepondre().'"></i></span>';
         
-        $html .= '<span class="msg_time">'. dol_print_date($this->getData("date_create"), "%d/%m/%y %H:%M:%S").'</span>
+        $html .= '<span class="msg_time">'. dol_print_date($this->db->db->jdate($this->getData("date_create")), "%d/%m/%y %H:%M:%S").'</span>
                                                                 </div>';
         if($this->getData('type_dest') != self::BN_DEST_NO){
             $dest = $this->displayDestinataire(false,true);

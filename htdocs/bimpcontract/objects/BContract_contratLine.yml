@@ -12,7 +12,7 @@ dol_object:
             class: ContratLigne
 
 primary: rowid
-
+force_extrafields_update: 1
 labels: 
     name: ligne du contrat
     name_plur: lignes du contrat
@@ -27,7 +27,7 @@ objects:
             id_object:
                 field_value:
                     fk_product
-    
+
 fields:
     rowid:
         label: N°
@@ -46,20 +46,14 @@ fields:
         required: 1
         input: 
             type: search_product
-            #societe_type: customer
             help: Entrez le nom ou la référence d'un produit pour effectuer une recherche
             card: default
         search:
             input: 
                 type: search_product
                 societe_type: customer    
-        create_form: light
-#    fk_product:
-#        label: Produit
-#        type: id_object
-#        object: produit
     qty:
-        label: Qté
+        label: Qté service
         type: qty
         default_value: 1
     price_ht:
@@ -79,6 +73,20 @@ fields:
     remise:
         label: Total remise
         type: money
+    # Extrafields
+    serials:
+        label: Numéros de série
+        dol_extra_field: 1
+        type: text
+        input:
+            help: Merci de déparer les numéros de série par une virgule (,)
+    nb_materiel:
+        label: Qté matériel
+        dol_extra_field: 1
+        default_value:
+            callback: getNbMateriel
+        type: qty
+        required: 1
 
 lists: 
     default: 
@@ -113,7 +121,10 @@ lists:
                 field: price_ht
             total_ttc:
                 field: total_ttc
-
+            nb_materiel:
+                field: nb_materiel
+            serials:
+                field: serials
 forms:
     default:
         rows:
@@ -132,6 +143,13 @@ forms:
             - field: description
             - field: fk_product
             - field: qty
+            - custom: 1
+              input:
+                  type: qty
+              label: Nb matériel
+              required: 1
+              input_name: nb_materiel
+            - field: serials
             - field: remise_percent
             - field: tva_tx
               

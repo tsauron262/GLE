@@ -363,6 +363,10 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
             }
 
             if (file_exists($dir)) {
+                $nb_exemplaire = 2;
+                $current_exemplaire = 1;
+                
+                
                 $client = new Societe($this->db);
                 $BimpDb = new BimpDb($this->db);
                 $produit = new Product($this->db);
@@ -374,9 +378,12 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(true);
                 }
-
+                
                 $pdf->Open();
-                $pdf->AddPage();
+                
+                while($current_exemplaire <= $nb_exemplaire){
+                    
+                    $pdf->AddPage();
                 $pdf->SetTitle($contrat->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("Contract"));
                 $pdf->SetCreator("BIMP-ERP " . DOL_VERSION);
@@ -391,9 +398,17 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->SetFont('', 'B', 14);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "Contrat de prestation de service et maintenance informatique", 0, 'C');
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 3, "N° " . $propref, 0, 'C');
+                $pdf->SetFont('', 'B', 8);
+                $pdf->SetTextColor(255,140,115);
+                if($current_exemplaire == 1)
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à nous retourner signé", 0, 'C');
+                if($current_exemplaire == 2)
+                    $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "Exemplaire à conserver", 0, 'C');
+                $pdf->SetTextColor(0,0,0);
                 $pdf->SetFont('', 'B', 11);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 1, "", 0, 'C');
-
+                
+                $current_exemplaire++;
                 // Titre partie
                 $this->titre_partie($pdf, 'Entre les parties');
 
@@ -432,7 +447,7 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 $pdf->Cell($W, 4, "Email : " . $client->email, "L", null, 'C', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, "", "R", null, 'C', true);
-                $pdf->Cell($W, 4, "SIRET : " . $client->siret, "L", null, 'C', true);
+                $pdf->Cell($W, 4, "SIREN : " . $client->idprof1, "L", null, 'C', true);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche), 4, '', 0, 'C');
                 $pdf->Cell($W, 4, "", "R", null, 'C', true);
                 $pdf->Cell($W, 4, "Code client : " . $client->code_client, "L", null, 'C', true);
@@ -568,6 +583,9 @@ class pdf_contrat_BIMP_maintenance extends ModeleSynopsiscontrat {
                 require_once DOL_DOCUMENT_ROOT . '/synopsiscontrat/core/modules/contract/doc/annexe.class.php';
                 $classAnnexe = new annexe($pdf, $this, $outputlangs, ($new_page ? 1 : 0));
                 $classAnnexe->getAnnexeContrat($contrat);
+                }
+                
+                
 
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();

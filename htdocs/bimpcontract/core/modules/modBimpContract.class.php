@@ -75,9 +75,11 @@ class modBimpContract extends DolibarrModules {
         }
         
         $extrafields = new ExtraFields($this->db);
-        $extrafields->addExtraField('service_content', 'Services Compris', 'chkbxlst', 103, null, 'product', 0, 0, "", 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::active=1";N;}}', 1, "", 1, 1, "", "", "", 1);
+        //$extrafields->addExtraField('service_content', 'Services Compris', 'chkbxlst', 103, null, 'product', 0, 0, "", 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::active=1";N;}}', 1, "", 1, 1, "", "", "", 1);
         $extrafields->addExtraField('objet_contrat', 'Objet du contrat', 'varchar', 104, 100, 'contrat');
-//$extrafields->update('service_content', 'Services Compris', 'chkbxlst', null, 'product', 0, 0, 103, 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::use_in_contract=1";N;}}', 1, '', 1);
+        $extrafields->addExtraField('nb_materiel', 'Nombre de machines couvertes', 'int', 105, 100, 'contratdet');
+        $extrafields->addExtraField('serials', 'Numéros de série', 'text', 106, 100, 'contratdet');
+        //$extrafields->update('service_content', 'Services Compris', 'chkbxlst', null, 'product', 0, 0, 103, 'a:1:{s:7:"options";a:1:{s:44:"bcontract_productservices:titre:id::use_in_contract=1";N;}}', 1, '', 1);
         return $this->_init($sql, $options);
     }
 

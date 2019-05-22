@@ -9,13 +9,13 @@ class BContract_contrat extends BimpDolObject {
     CONST CONTRAT_STATUS_BROUILLON = 0;
     CONST CONTRAT_STATUS_VALIDE = 1;
     CONST CONTRAT_STATUS_CLOS = 2;
+    CONST CONTRAT_STATUS_SIGNED = 10;
     // Les périodicitées
     CONST CONTRAT_PERIOD_MENSUELLE = 1;
     CONST CONTRAT_PERIOD_TRIMESTRIELLE = 3;
     CONST CONTRAT_PERIOD_SEMESTRIELLE = 6;
     CONST CONTRAT_PERIOD_ANNUELLE = 12;
     // Les délais d'intervention
-    CONST CONTRAT_DELAIS_2_HEURES = 2;
     CONST CONTRAT_DELAIS_4_HEURES = 4;
     CONST CONTRAT_DELAIS_8_HEURES = 8;
     CONST CONTRAT_DELAIS_16_HEURES = 16;
@@ -61,7 +61,6 @@ class BContract_contrat extends BimpDolObject {
         self::CONTRAT_PERIOD_ANNUELLE => 'Annuelle'
     );
     public static $gti = Array(
-        self::CONTRAT_DELAIS_2_HEURES => '2 heures ouvrées',
         self::CONTRAT_DELAIS_4_HEURES => '4 heures ouvrées',
         self::CONTRAT_DELAIS_8_HEURES => '8 heures ouvrées',
         self::CONTRAT_DELAIS_16_HEURES => '16 heures ouvrées'
@@ -157,7 +156,6 @@ class BContract_contrat extends BimpDolObject {
     public function getActionsButtons()
     {
         global $conf, $langs, $user;
-        $langs->load('propal');
 
         $buttons = Array();
          $buttons[] = array(
@@ -183,6 +181,17 @@ class BContract_contrat extends BimpDolObject {
                     ))
                 );
             }
+            
+            if($status == self::CONTRAT_STATUS_VALIDE && is_null($this->getData('date_contrat'))) {
+                 $buttons[] = array(
+                    'label' => 'Contrat signé',
+                    'icon' => 'fas_signature',
+                    'onclick' => $this->getJsActionOnclick('signed', array(), array(
+                        'success_callback' => $callback
+                    ))
+                );
+            }
+            
             if (!is_null($status)) {
                 $status = (int) $status;
                 $soc = $this->getChildObject('client');
@@ -200,6 +209,10 @@ class BContract_contrat extends BimpDolObject {
         }
 
         return $buttons;
+    }
+    
+    public function getSyntecSite() {
+       return "Pour connaitre l'indice syntec en vigueur, veuillez vous rendre sur le site internet <a href='https://www.syntec.fr' target='_blank'>https://www.syntec.fr</a>";
     }
     
     /* DISPLAY */
@@ -248,6 +261,12 @@ class BContract_contrat extends BimpDolObject {
     }
     
     /* ACTIONS */
+    
+    public function actionSigned($data, &$success) {
+        $success = 'Contrat signé avec succes';
+        $this->updateField('date_contrat', date('Y-m-d HH:ii:ss'));
+    }
+    
     public function actionValidation($data, &$success) {
         global $user;
         if($this->dol_object->validate($user) <= 0) {
@@ -359,6 +378,14 @@ class BContract_contrat extends BimpDolObject {
     }
     
     /* OTHERS FUNCTIONS */
+    
+    public function create(&$warnings = array(), $force_create = false) {
+        
+        if(BimpTools::getValue('use_syntec') && !BimpTools::getValue('syntec')) {
+            return 'Vous devez rensseigner un indice syntec';
+        }
+        return parent::create($warnings, $force_create);
+    }
     
     public function fetch($id, $parent = null) {
         $return = parent::fetch($id, $parent);
@@ -746,6 +773,15 @@ class BContract_contrat extends BimpDolObject {
         }
 
         return $html;
+    }
+    
+     public function renderHeaderStatusExtra() {
+
+        $extra = '';
+        if (!is_null($this->getData('date_contrat'))) {
+            $extra .= '<br/><span class="important">' . BimpRender::renderIcon('fas_signature', 'iconLeft') . 'Contrat signé</span>';
+        }
+        return $extra;
     }
     
 }

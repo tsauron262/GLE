@@ -47,7 +47,8 @@ class BimpDocumentPDF extends BimpModelPDF
 
                 if (isset($this->object->array_options['options_pdf_hide_price'])) {
                     $this->hidePrice = true;
-                    $this->hideTotal = true;
+                    if($this->typeObject != 'invoice')
+                        $this->hideTotal = true;
                 }
                 if (isset($this->object->array_options['options_pdf_hide_reduc'])) {
                     $this->hideReduc = (int) $this->object->array_options['options_pdf_hide_reduc'];

@@ -1828,6 +1828,11 @@ class BimpComm extends BimpDolObject
                 'editable'  => $line->getData('Editable'),
                 'remisable' => $line->getData('remisable')
             ));
+
+            if ($line->getData('linked_object_name')) {
+                $line_instance->set('deletable', 1);
+            }
+
             $line_instance->desc = $line->desc;
             $line_instance->tva_tx = $line->tva_tx;
             $line_instance->id_product = $line->id_product;

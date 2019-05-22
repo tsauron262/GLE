@@ -108,11 +108,13 @@ fields:
         label: En vente
         dol_prop: status
         type: bool
+        default_value: 1
         
     tobuy: 
         label: En achat
         dol_prop: status_buy
         type: bool
+        default_value: 1
         
     customcode: 
         label: Code douane
